@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup, find_packages
+from dist import setup, find_packages
 
 
 with open('README.rst') as f:
@@ -10,14 +10,17 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='sample',
+    name='PyNWB',
     version='0.0.1',
-    description='Sample package for Python-Guide.org',
+    description='Package for working with Neurodata stored in the NWB format',
     long_description=readme,
-    author='Kenneth Reitz',
-    author_email='me@kennethreitz.com',
-    url='https://github.com/kennethreitz/samplemod',
+    author='Andrew Tritt',
+    author_email='ajtritt@lbl.gov',
+    url='https://bitbucket.org/lblneuro/pynwb',
     license=license,
-    packages=find_packages(exclude=('tests', 'docs'))
+    #packages=find_packages(exclude=('tests', 'docs'))
+    packages=['pynwb'],
+    package_dir={'pynwb':'src/pynwb'},
+    data_files=[('schema', ['schema/*.json'])]
 )
 
