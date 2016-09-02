@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from dist import setup, find_packages
+from setuptools import setup, find_packages
 
 
 with open('README.rst') as f:
@@ -24,3 +24,10 @@ setup(
     data_files=[('schema', ['schema/*.json'])]
 )
 
+'''
+Do some stuff here to retrieve (download from centralized location, or parse
+from a location in the repo directory) the schema. Once retrieved write to 
+to Python code somewhere. This could be pickling it, or writing it to a 
+Python file as an ecoded string. This way, modifying the schema will require
+rebuilding the package, and the schema will be hardcoded.
+'''
