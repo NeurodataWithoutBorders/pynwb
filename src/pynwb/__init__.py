@@ -1,6 +1,9 @@
 '''This ackage will contain functions, classes, and objects
 for reading and writing data in NWB format
 '''
+
+from .core import NWBFile
+
 import data
 
 def open(*args, **kwargs):

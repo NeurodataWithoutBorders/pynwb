@@ -2,55 +2,39 @@
 the NWB format schema.
 '''
 
+from .h5tools import h5_scalar, sync_files
+from .nwbtools import find_timeseries 
+
 # A dictionary for storing the format schema
 # We will initialize this in __init__
 __schema__ = {}
-
-class ImmutableGroup(h5py.Group):
-    def __setitem__(self, args, val):
-        raise NotImplementedError('__setitem__')
-
-class ImmutableDataset(h5py.Dataset):
-    def __setitem__(self, args, val):
-        raise NotImplementedError('__setitem__')
-
-def h5_scalar(func):
-    def inner():
-        return func().value
-    return inner
-
-def get_timeseries_name(group):
-    return group.name.split('/')[-1]
-
-def __is_timeseries__(group):
-    return 'ancestry' in group.attrs
-
-def find_timeseries(f):
-    def __find_timeseries__(d, group):
-        if __is_timeseries__(group):
-            d[get_timeseries_name(group)] = group
-        else:
-            for key in group.keys():
-                if isinstance(group[key], h5py.Group):
-                    __find_timeseries__(d,group[key])
-    ret = dict()
-    find_timeseries(ret, f)
-    return ret
     
-    
-class NWBFile(ImmutableGroup, h5py.File):
-    '''This class serves as a wrapper for an h5py.File object
+#class NeurodataFile(ImmutableGroup, h5py.File):
+class NeurodataFile(h5py.File):
+    """This class serves as a wrapper for an h5py.File object
     that enforces NWB specifications at the top-level. For, example
     this is where we enforce the existence of the group "general"
-    '''
-    def __init__(self, path):
+    """
+    
+    def __init__(self, path, mode='r', master=None):
         """Open a new NWBFile for reading
 
         :param path: The path to the NWB file to open
         :type path: str.
-        :raises: NwbParseError
+        :param mode: The mode to open the file in
+        :type path: str.
+        :param master: The master file to create a subfile to. Use this for 
+                       'appending' to existing files. This is useful for 
+                       adding analysis results to raw data files
+        :type master: NeurodataFile.
+
+
+        :raises: NWBParseError
         """
-        super(filename, 'r')
+
+        super(filename, mode)
+        if master:
+            master.add_data_file(self)
         # TODO: This is just a placeholder to convey what we want to do here
         # When validation code is established, the actual function name and use
         # needs to be added
@@ -58,12 +42,40 @@ class NWBFile(ImmutableGroup, h5py.File):
             raise NWBSyntaxError()
         self._create_date = [datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S") for date_str in self['file_create_date']]
         self._start_time = datetime.strptime(self['session_start_time'], "%Y-%m-%dT%H:%M:%S")
-         
-        self._timeseries = find_timeseris(self)
-        # TODO: Do some stuff to add all the TimeSeries datasets
-        # for easy access
-            
+        self._timeseries = dict()
+        
 
+    def add_data_file(self, child):
+        """Connect child to self via appropriate links. 
+        Use this to add a new file to a collection of NWB files 
+        """
+        sync_files(self, child)
+        
+
+
+    def add_timeseries(self, timeseries):
+        pass
+
+
+    def create_raw_timeseries(*args, **kwargs):
+        """
+            timeseries_type, comments, attributes
+        """
+        ts_type = args[0]
+        name = args[1]
+        data = args[2]
+        comments = args[3]
+        validator = getattr(nwbtools.validators, ts_type)
+        object_specs = list()
+        attributes = dict()
+        # do some stuff to build the dict needed for writing with h5tools.write_group
+        group = self.create_group(name)
+        missing_specs = validator.validate(object_specs, attributes)
+        if not len(missing_specs):
+            h5tools.write_group(group, object_specs, attributes)
+
+    def create_analysis_result(*args, **kwargs):
+        pass
         
     @property
     @h5_scalar
@@ -98,15 +110,39 @@ class NWBFile(ImmutableGroup, h5py.File):
         """
         return self._start_time
     
-    def get_timeseries(self, name):
+    def fetch_timeseries(self, *args, **kwargs):
         '''Return the TimeSeries objects corresponding to the given name
         
+        :param name: the name of the 
         
         '''
-        return self._timeseries[name]
+        if name in self._timeseries:
+            if len(self._timeseries[name]):
+            return self._timeseries[name]
+        else:
+            result = self.visit
+            
+            #
+            return None
     
     def close(self):
         '''Validate that this HDF5 file is a valid NWB file, and then close'''
         super().close()
+
+class TimeSeries(ImmutableGroup):
+
+    def __init__(self, ):
+        pass
+    
+    @property
+    @h5_scalar
+    def comments(self):
+        return self['comments']
+    
+    
+for prop in ('comments', 'description', 'help', 'source'):
+    setattr(TimeSeries, prop, property(h5_scalar(lambda self: self[prop])))
     
 
+
+    
