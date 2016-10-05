@@ -42,6 +42,7 @@ import traceback
 import h5py
 import copy
 import numpy as np
+import h5tools
 from . import nwbts
 from . import nwbep
 from . import nwbmo
@@ -248,6 +249,7 @@ class NWB(object):
     }
     def __init__(self, **vargs):
         self.__read_arguments__(**vargs)
+        self.h5_builder = GroupBuilder()
         self.file_pointer = None
         # make a list to keep track of all time series
         self.ts_list = []
@@ -392,10 +394,11 @@ class NWB(object):
         fp.create_dataset("identifier", data=self.file_identifier)
         fp.create_dataset("session_description", data=self.session_description)
         cur_time = time.ctime()
-        dt = h5py.special_dtype(vlen=bytes)
         fp.create_dataset("file_create_date", data=[np.string_(cur_time)], maxshape=(None,), chunks=True, dtype=dt)
+        dt = h5py.special_dtype(vlen=bytes)
         fp.create_dataset("session_start_time", data=np.string_(self.start_time))
         # create file skeleton
+        
         hgen = fp.create_group("general")
         self.hgen = hgen
         self.hgen_dev = hgen.create_group("devices")
@@ -413,6 +416,28 @@ class NWB(object):
         fp.create_group("processing")
         #
         fp.create_group("analysis")
+
+        self.h5_builder = GroupBuilder({
+            'general': GroupBuilder({
+                'devices': GroupBuilder()
+                }
+            ),
+            'acquisition': GroupBuilder({
+                'timeseries': GroupBuilder(),
+                'images': GroupBuilder()
+                }
+            ),
+            'epochs': GroupBuilder(),
+            'processing': GroupBuilder(),
+            'analysis': GroupBuilder(),
+            }, {
+            "nwb_version", DatasetBuilder(FILE_VERSION_STR),
+            "identifier", DatasetBuilder(self.file_identifier),
+            "session_description", DatasetBuilder(self.session_description),
+            "file_create_date", DatasetBuilder([np.string_(time.ctime())], maxshape=(None,), chunks=True, dtype=h5py.special_dtype(vlen=bytes)),
+            "session_start_time", DatasetBuilder(self.start_time)
+            }
+        )
 
 
     # internal function to open existing file for writing
@@ -519,12 +544,12 @@ class NWB(object):
     #   so that a summary of all links can be produced when the file
     #   closes
     def record_timeseries_data_link(self, src, dest):
-        # make copies of values using shorter names to keep line length down
-        label_map = self.ts_data_link_map
-        label_lists = self.ts_data_link_lists
-        cnt = self.ts_data_link_cnt
         # call storage method for ts::data[]
-        n = self.store_timeseries_link(src, dest, label_map, label_lists, cnt)
+        n = self.store_timeseries_link(src, 
+                                       dest,
+                                       self.ts_data_link_map,
+                                       self.ts_data_link_lists,
+                                       self.ts_data_link_cnt)
         # update label counter
         self.ts_data_link_cnt = n
 
@@ -532,12 +557,12 @@ class NWB(object):
     #   so that a summary of all links can be produced when the file
     #   closes
     def record_timeseries_time_link(self, src, dest):
-        # make copies of values using shorter names to keep line length down
-        label_map = self.ts_time_link_map
-        label_lists = self.ts_time_link_lists
-        cnt = self.ts_time_link_cnt
         # call storage method for ts::timestamps[]
-        n = self.store_timeseries_link(src, dest, label_map, label_lists, cnt)
+        n = self.store_timeseries_link(src,
+                                       dest,
+                                       self.ts_time_link_map,
+                                       self.ts_time_link_lists,
+                                       self.ts_time_link_cnt)
         # update label counter
         self.ts_time_link_cnt = n
 
@@ -728,6 +753,9 @@ class NWB(object):
             Returns:
                 TimeSeries object
         """
+        # BEGIN: AJTRITT code
+        self.timeseries[modality][name] = GroupBuilder()
+        # END: AJTRITT code
         # find time series by name
         # recursively examine spec and create dict of required fields
         ts_defn, ancestry = self.create_timeseries_definition(ts_type, [], None)
@@ -889,15 +917,15 @@ class NWB(object):
                 *nothing*
         """
         fp = self.file_pointer
-        img_grp = fp["acquisition/images"]
+        img_grp = fp["acquisition"]["images"]
         if name in img_grp:
             self.fatal_error("Reference image %s alreayd exists" % name)
         if dtype is None:
-            img = img_grp.create_dataset(name, data=stream)
+            img = img_grp.add_dataset(name, stream)
         else:
-            img = img_grp.create_dataset(name, data=stream, dtype=dtype)
-        img.attrs["format"] = np.string_(fmt)
-        img.attrs["description"] = np.string_(desc)
+            img = img_grp.add_dataset(name, stream, dtype=dtype)
+        img.set_attribute("format", np.string_(fmt))
+        img.set_attribute("description", np.string_(desc))
         
 
     ####################################################################
