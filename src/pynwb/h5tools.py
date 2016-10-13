@@ -40,6 +40,9 @@ def write_group(parent, name, subgroups, datasets, attributes, links):
     links_to_create = dict()
     if subgroups:
         for subgroup_name, subgroup_spec in subgroups.iteritems():
+            # do not create an empty group without attributes or links
+            if subgroup_spec.is_empty():
+                continue
             tmp_links = write_group(group,
                             subgroup_name,
                             subgroup_spec.get('groups'),
@@ -126,69 +129,175 @@ def __list_fill__(dset, data):
 
 class GroupBuilder(dict):
     def __init__(self, groups=dict(), datasets=dict(), attributes=dict(), links=dict()):
-        self.groups = groups
-        self.datasets = datasets
-        self.attributes = attributes
-        self.links = links
+        """Create a GroupBuilder object
+            Arguments:
+                *groups* (string)      a dictionary of subgroups to create in this group
+                *datasets* (string)      a dictionary of datasets to create in this group
+                *attributes* (string)      a dictionary of attributes to assign to this group
+                *links* (string)      a dictionary of links to create in this group
+        """
+        super().__init__()
+        super()['groups'] = groups
+        super()['datasets'] = datasets
+        super()['attributes'] = attributes
+        super()['links'] = links
+        self.obj_type = dict()
     
     def add_dataset(self, name, data, **kwargs):
-        self.datasets[name] = DatasetBuilder(data, **kwargs)
-        return self.datasets[name]
+        """Add a dataset to this group
+            Returns:
+                the DatasetBuilder object for the dataset
+        """
+        super()['datasets'][name] = DatasetBuilder(data, **kwargs)
+        self.obj_type[name] = 'datasets'
+        return super()['datasets'][name]
     
     def add_group(self, name, builder=GroupBuilder()):
-        self.groups[name] = builder
+        """Add a subgroup to this group
+            Returns:
+                the GroupBuilder object for the subgroup
+        """
+        super()['groups'][name] = builder
+        self.obj_type[name] = 'group'
+        return super()['groups'][name]
 
     def add_hard_link(self, name, path):
-        self.links[name] = LinkBuilder(HARD_LINK, path)
+        """Add an hard link in this group.
+
+            Arguments:
+                *name* (string)      name of the link
+                *path* (string)      absolute path to the object to link to
+
+            Returns:
+                the LinkBuilder object for the hard link
+        """
+        super()['links'][name] = LinkBuilder(HARD_LINK, path)
+        self.obj_type[name] = 'links'
+        return super()['links'][name]
     
-    def add_soft(self, name, path):
-        self.links[name] = LinkBuilder(SOFT_LINK, path)
+    def add_soft_link(self, name, path):
+        """Add an soft link in this group.
+
+            Arguments:
+                *name* (string)      name of the link
+                *path* (string)      absolute path to the object to link to
+
+            Returns:
+                the LinkBuilder object for the soft link
+        """
+        super()['links'][name] = LinkBuilder(SOFT_LINK, path)
+        self.obj_type[name] = 'links'
+        return super()['links'][name]
     
     def add_external_link(self, name, file_path, path):
-        self.links[name] = LinkBuilder(EXTERNAL_LINK, path, file_path)
+        """Add an external link in this group.
+
+            Arguments:
+                *name* (string)      name of the link
+                *file_path* (string) path of the file that contains
+                                     the object to link to
+                *path* (string)      absolute path to the object to link to
+
+            Returns:
+                the LinkBuilder object for the external link
+        """
+        super()['links'][name] = LinkBuilder(EXTERNAL_LINK, path, file_path)
+        self.obj_type[name] = 'links'
+        return super()['links'][name]
     
     def set_attribute(self, name, value):
-        self.attributes[name] = value
+        """Set an attribute for this group.
+        """
+        super()['attributes'][name] = value
+        self.obj_type[name] = 'attributes'
+
+    def is_empty(self):
+        """Returns true if there are no datasets, attributes, links or 
+           subgroups that contain datasets, attributes or links. False otherwise.
+        """
+        if any(map(lambda k: len(super()[k]), ('datasets', 'attributes', 'links'))):
+            return False
+        elif len(super()['groups']):
+            return all(g.is_empty() for g in super()['groups'])
+        else:
+            return True
 
     def __get_item__(self, key):
-        for d in (self.groups, self.datasets, self.attributes, self.links):
-            if key in d:
-                return d.__get_item__(key)
-        raise KeyError(key)
+        """Like dict.__get_item__, but looks in groups,
+           datasets, attributes, and links sub-dictionaries.
+        """
+        try:
+            key_ar = _posixpath.normpath(key).split('/')
+            return self.__get_rec__(key_ar)
+        except KeyError:
+            raise KeyError(key)
+
+    def get(self, key, default=None):
+        """Like dict.get, but looks in groups,
+           datasets, attributes, and links sub-dictionaries.
+        """
+        try:
+            key_ar = _posixpath.normpath(key).split('/')
+            return self.__get_rec__(key_ar)
+        except KeyError:
+            return default
+
+    def __get_rec__(self, key_ar):
+        # recursive helper for __get_item__
+        if len(key_ar) == 1:
+            return super()[self.obj_type[key_ar[0]]]
+        else:
+            if key_ar[0] in super()['groups']:
+                return super()['groups'][key_ar[0]].__get_rec__(key_ar[1:])
+        raise KeyError(key_ar[0])
+                
 
     def __setitem__(self, args, val):
         raise NotImplementedError('__setitem__')
 
-    def get(self, key):
-        return self.groups.get(key, 
-                               self.datasets.get(key, 
-                               self.attributes.get(key,
-                               self.links.get(key))))
-
     def items(self):
-        return _itertools.chain(self.groups.items(), 
-                                self.datasets.items(), 
-                                self.attributes.items(),
-                                self.links.items())
+        """Like dict.items, but iterates over key-value pairs in groups,
+           datasets, attributes, and links sub-dictionaries.
+        """
+        return _itertools.chain(super()['groups'].items(), 
+                                super()['datasets'].items(), 
+                                super()['attributes'].items(),
+                                super()['links'].items())
 
     def keys(self):
-        return _itertools.chain(self.groups.keys(), 
-                                self.datasets.keys(), 
-                                self.attributes.keys(),
-                                self.links.keys())
+        """Like dict.keys, but iterates over keys in groups, datasets, 
+           attributes, and links sub-dictionaries.
+        """
+        return _itertools.chain(super()['groups'].keys(), 
+                                super()['datasets'].keys(), 
+                                super()['attributes'].keys(),
+                                super()['links'].keys())
 
     def values(self):
-        return _itertools.chain(self.groups.values(), 
-                                self.datasets.values(), 
-                                self.attributes.values(),
-                                self.links.keys())
+        """Like dict.values, but iterates over values in groups, datasets, 
+           attributes, and links sub-dictionaries.
+        """
+        return _itertools.chain(super()['groups'].values(), 
+                                super()['datasets'].values(), 
+                                super()['attributes'].values(),
+                                super()['links'].values())
 
 class LinkBuilder(dict):
     def __init__(self, link_type, path, file_path=None):
-        super()
+        super().__init__()
         self['link_type'] = link_type
         self['path'] = path
         self['file_path'] = file_path
+        if file_path:
+            setattr(self, 'file_path', property(lambda self: self['file_path'])
+
+    @property
+    def link_type(self):
+        return self['link_type']
+
+    @property
+    def path(self):
+        return self['path']
 
 class DatasetBuilder(dict):
     def __init__(self, data, **kwargs):
