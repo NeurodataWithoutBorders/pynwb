@@ -118,17 +118,39 @@ class GroupBuilderIsEmptyTests(unittest.TestCase):
 class GroupBuilderGetterTests(unittest.TestCase):
 
     def setUp(self):
-        setattr(self, 'subgroup1', GroupBuilder())
-        setattr(self, 'group1', GroupBuilder({'subgroup1':GroupBuilder()}))
-        setattr(self, 'dataset1', DatasetBuider(list(range(10))))
-        setattr(self, 'int_attr', 1)
-        setattr(self, 'str_attr', "my_str")
-        setattr(self, 'gb', GroupBuilder({'group1': self.group1},
-                                         {'dataset1': self.dataset1},
-                                         {'int_attr': self.int_attr, 'str_attr': self.str_attr}))
+        attrs = {
+            'subgroup1': GroupBuilder(),
+            'group1': GroupBuilder({'subgroup1':GroupBuilder()}),
+            'dataset1', DatasetBuider(list(range(10))),
+            'soft_link1': LinkBuilder(SOFT_LINK, "/soft/path/to/target"),
+            'hard_link1': LinkBuilder(HARD_LINK, "/hard/path/to/target"),
+            'external_link1': LinkBuilder(EXTERNAL_LINK, 
+                                          "/hard/path/to/target",
+                                          "test.h5"),
+            'int_attr': 1,
+            'str_attr': "my_str",
+            'gb': GroupBuilder({'group1': self.group1},
+                               {'dataset1': self.dataset1},
+                               {'int_attr': self.int_attr, 
+                                'str_attr': self.str_attr}),
+                               {'soft_link1': self.soft_link1, 
+                                'hard_link1': self.hard_link1,
+                                'external_link1': self.external_link1})
+        }
+        for key, value in attrs.items():
+            setattr(self, key, value)
 
     def tearDown(self):
-        for attr in ('subgroup1', 'group1', 'dataset1', 'int_attr', 'str_attr', 'gb'): 
+        attrs = ('subgroup1',
+                 'group1',
+                 'dataset1',
+                 'int_attr',
+                 'str_attr',
+                 'soft_link1',
+                 'hard_link1',
+                 'external_link1',
+                 'gb')
+        for attr in attrs: 
             delattr(self, attr)
 
     def test_get_item_group(self):
@@ -156,6 +178,18 @@ class GroupBuilderGetterTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.gb['invalid_key']
 
+    def test_get_item_soft_link(self):
+        """Test __get_item__ for soft links"""
+        self.assertIs(self.gb['soft_link1'], self.soft_link1)
+
+    def test_get_item_hard_link(self):
+        """Test __get_item__ for hard links"""
+        self.assertIs(self.gb['hard_link1'], self.hard_link1)
+
+    def test_get_item_external_link(self):
+        """Test __get_item__ for external links"""
+        self.assertIs(self.gb['external_link1'], self.external_link1)
+
     def test_get_group(self):
         """Test get() for groups"""
         self.assertIs(self.gb.get('group1'), self.group1)
@@ -175,6 +209,18 @@ class GroupBuilderGetterTests(unittest.TestCase):
     def test_get_attr2(self):
         """Test get() for attributes"""
         self.assertEquals(self.gb.get('str_attr'), self.str_attr)
+
+    def test_get_item_soft_link(self):
+        """Test get() for soft links"""
+        self.assertIs(self.gb.get('soft_link1'), self.soft_link1)
+
+    def test_get_item_hard_link(self):
+        """Test get() for hard links"""
+        self.assertIs(self.gb.get('hard_link1'), self.hard_link1)
+
+    def test_get_item_external_link(self):
+        """Test get() for external links"""
+        self.assertIs(self.gb.get('external_link1'), self.external_link1)
 
     def test_get_invalid_key(self):
         """Test get() for invalid key"""
