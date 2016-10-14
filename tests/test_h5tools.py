@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 
-from .context import sample
-
+#from .context import pynwb
+from context import pynwb
 import unittest
+
 from pynwb.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
+
 import h5py
 import os
 import tempfile
 import numpy as np
+import json
 
 class H5IOTest(unittest.TestCase):
     """Tests for h5tools IO tools"""
@@ -78,43 +81,11 @@ class GroupBuilderSetterTests(unittest.TestCase):
         self.assertIsInstance(el, LinkBuilder)
         self.assertEqual(el['link_type'], EXTERNAL_LINK)
 
-    @unittest.expectedFailure
+    #@unittest.expectedFailure
     def test_set_attribute(self):
         self.gb.set_attribute('key', 'value')
-        self.assertEqual('key' in self.gb, True)
-        self.assertEqual(self.gb['key'], 'value')
-
-class GroupBuilderIsEmptyTests(unittest.TestCase):
-
-    def test_is_empty_true(self):
-        """Test empty when group has nothing in it"""
-        gb = GroupBuilder()
-        self.assertEqual(gb.is_empty(), True)
-
-    def test_is_empty_true_group(self):
-        """Test is_empty() when group has an empty subgroup"""
-        gb = GroupBuilder({'my_subgroup': GroupBuilder()})
-        self.assertEqual(gb.is_empty(), True)
-
-    def test_is_empty_false_dataset(self):
-        """Test is_empty() when group has a dataset"""
-        gb = GroupBuilder(datasets={'my_dataset': GroupBuilder()})
-        self.assertEqual(gb.is_empty(), False)
-
-    def test_is_empty_false_group_dataset(self):
-        """Test is_empty() when group has a subgroup with a dataset"""
-        gb = GroupBuilder({'my_subgroup': GroupBuilder(datasets={'my_dataset': GroupBuilder()})})
-        self.assertEqual(gb.is_empty(), False)
-
-    def test_is_empty_false_attribute(self):
-        """Test is_empty() when group has an attribute"""
-        gb = GroupBuilder(attributes={'my_attr': 'attr_value'})
-        self.assertEqual(gb.is_empty(), False)
-
-    def test_is_empty_false_group_attribute(self):
-        """Test is_empty() when group has subgroup with an attribute"""
-        gb = GroupBuilder({'my_subgroup': GroupBuilder(attributes={'my_attr': 'attr_value'})})
-        self.assertEqual(gb.is_empty(), False)
+        self.assertEqual('key' in self.gb.obj_type, True)
+        self.assertEqual(dict.__getitem__(self.gb, 'attributes')['key'], 'value')
 
 class GroupBuilderGetterTests(unittest.TestCase):
 
@@ -135,25 +106,15 @@ class GroupBuilderGetterTests(unittest.TestCase):
         
         setattr(self, 'group1', GroupBuilder({'subgroup1':self.subgroup1}))
         setattr(self, 'gb', GroupBuilder({'group1': self.group1},
-                               {'dataset1': self.dataset1},
-                               {'int_attr': self.int_attr, 
-                                'str_attr': self.str_attr},
-                               {'soft_link1': self.soft_link1, 
-                                'hard_link1': self.hard_link1,
-                                'external_link1': self.external_link1}))
+                                         {'dataset1': self.dataset1},
+                                         {'int_attr': self.int_attr, 
+                                          'str_attr': self.str_attr},
+                                         {'soft_link1': self.soft_link1, 
+                                          'hard_link1': self.hard_link1,
+                                          'external_link1': self.external_link1}))
 
     def tearDown(self):
-        attrs = ('subgroup1',
-                 'group1',
-                 'dataset1',
-                 'int_attr',
-                 'str_attr',
-                 'soft_link1',
-                 'hard_link1',
-                 'external_link1',
-                 'gb')
-        for attr in attrs: 
-            delattr(self, attr)
+        pass
 
     def test_get_item_group(self):
         """Test __get_item__ for groups"""
@@ -169,11 +130,11 @@ class GroupBuilderGetterTests(unittest.TestCase):
 
     def test_get_item_attr1(self):
         """Test __get_item__ for attributes"""
-        self.assertEquals(self.gb['int_attr'], self.int_attr)
+        self.assertEqual(self.gb['int_attr'], self.int_attr)
 
     def test_get_item_attr2(self):
         """Test __get_item__ for attributes"""
-        self.assertEquals(self.gb['str_attr'], self.str_attr)
+        self.assertEqual(self.gb['str_attr'], self.str_attr)
 
     def test_get_item_invalid_key(self):
         """Test __get_item__ for invalid key"""
@@ -206,11 +167,11 @@ class GroupBuilderGetterTests(unittest.TestCase):
 
     def test_get_attr1(self):
         """Test get() for attributes"""
-        self.assertEquals(self.gb.get('int_attr'), self.int_attr)
+        self.assertEqual(self.gb.get('int_attr'), self.int_attr)
 
     def test_get_attr2(self):
         """Test get() for attributes"""
-        self.assertEquals(self.gb.get('str_attr'), self.str_attr)
+        self.assertEqual(self.gb.get('str_attr'), self.str_attr)
 
     def test_get_item_soft_link(self):
         """Test get() for soft links"""
@@ -228,23 +189,23 @@ class GroupBuilderGetterTests(unittest.TestCase):
         """Test get() for invalid key"""
         self.assertIs(self.gb.get('invalid_key'), None)
 
-    @unittest.expectedFailure
     def test_items(self):
         """Test items()"""
-        items = {
+        items = (
             ('group1', self.group1),
             ('dataset1', self.dataset1),
             ('int_attr', self.int_attr),
             ('str_attr', self.str_attr),
             ('soft_link1', self.soft_link1),
             ('hard_link1', self.hard_link1),
-            ('external_link1', self.external_link1),
-        }
-        self.assertSetEqual(items, set(self.gb.items()))
+            ('external_link1', self.external_link1)
+        )
+        #self.assertSetEqual(items, set(self.gb.items()))
+        self.assertCountEqual(items, self.gb.items())
 
     def test_keys(self):
         """Test keys()"""
-        keys = {
+        keys = (
             'group1',
             'dataset1',
             'int_attr',
@@ -252,13 +213,12 @@ class GroupBuilderGetterTests(unittest.TestCase):
             'soft_link1',
             'hard_link1',
             'external_link1',
-        }
-        self.assertSetEqual(keys, set(self.gb.keys()))
+        )
+        self.assertCountEqual(keys, self.gb.keys())
 
-    @unittest.expectedFailure
     def test_values(self):
         """Test values()"""
-        values = {
+        values = (
             self.group1,
             self.dataset1,
             self.int_attr,
@@ -266,8 +226,87 @@ class GroupBuilderGetterTests(unittest.TestCase):
             self.soft_link1,
             self.hard_link1,
             self.external_link1,
+        )
+        self.assertCountEqual(values, self.gb.values())
+
+    def test_write(self):
+        """Test for base dictionary functionality preservation"""
+        builder_json = '''
+            {
+            "group1": {
+                "subgroup1": {
+        
+                }
+            },
+            "dataset1": {
+                "attributes": {},
+                "data": [
+                    0,
+                    1,
+                    2,
+                    3,
+                    4,
+                    5,
+                    6,
+                    7,
+                    8,
+                    9
+                ]
+            },
+            "int_attr": 1,
+            "str_attr": "my_str",
+            "soft_link1": {
+                "link_type": 0,
+                "path": "/soft/path/to/target",
+                "file_path": null
+            },
+            "hard_link1": {
+                "link_type": 1,
+                "path": "/hard/path/to/target",
+                "file_path": null
+            },
+            "external_link1": {
+                "link_type": 3,
+                "path": "/hard/path/to/target",
+                "file_path": "test.h5"
+            }
         }
-        self.assertSetEqual(values, set(self.gb.values()))
+        '''
+
+        self.assertDictEqual(json.loads(builder_json), json.loads(json.dumps(self.gb)))
+    
+
+class GroupBuilderIsEmptyTests(unittest.TestCase):
+
+    def test_is_empty_true(self):
+        """Test empty when group has nothing in it"""
+        gb = GroupBuilder()
+        self.assertEqual(gb.is_empty(), True)
+
+    def test_is_empty_true_group(self):
+        """Test is_empty() when group has an empty subgroup"""
+        gb = GroupBuilder({'my_subgroup': GroupBuilder()})
+        self.assertEqual(gb.is_empty(), True)
+
+    def test_is_empty_false_dataset(self):
+        """Test is_empty() when group has a dataset"""
+        gb = GroupBuilder(datasets={'my_dataset': GroupBuilder()})
+        self.assertEqual(gb.is_empty(), False)
+
+    def test_is_empty_false_group_dataset(self):
+        """Test is_empty() when group has a subgroup with a dataset"""
+        gb = GroupBuilder({'my_subgroup': GroupBuilder(datasets={'my_dataset': GroupBuilder()})})
+        self.assertEqual(gb.is_empty(), False)
+
+    def test_is_empty_false_attribute(self):
+        """Test is_empty() when group has an attribute"""
+        gb = GroupBuilder(attributes={'my_attr': 'attr_value'})
+        self.assertEqual(gb.is_empty(), False)
+
+    def test_is_empty_false_group_attribute(self):
+        """Test is_empty() when group has subgroup with an attribute"""
+        gb = GroupBuilder({'my_subgroup': GroupBuilder(attributes={'my_attr': 'attr_value'})})
+        self.assertEqual(gb.is_empty(), False)
 
 if __name__ == '__main__':
     unittest.main()
