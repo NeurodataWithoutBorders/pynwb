@@ -142,7 +142,3 @@ class TimeSeries(ImmutableGroup):
     
 for prop in ('comments', 'description', 'help', 'source'):
     setattr(TimeSeries, prop, property(h5_scalar(lambda self: self[prop])))
-    
-
-
-    
