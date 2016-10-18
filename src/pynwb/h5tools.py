@@ -271,6 +271,9 @@ class GroupBuilder(dict):
     def __setitem__(self, args, val):
         raise NotImplementedError('__setitem__')
 
+    def __contains__(self, item):
+        return self.obj_type.__contains__(item)
+
     def items(self):
         """Like dict.items, but iterates over key-value pairs in groups,
            datasets, attributes, and links sub-dictionaries.
