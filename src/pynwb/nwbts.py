@@ -38,22 +38,30 @@ import traceback
 import copy
 from . import nwbmo
 
+
+MOD_ACQUISITION = "acquisition"
+MOD_STIMULUS = "stimulus"
+MOD_TEMPLATE = "template"
+MOD_OTHER = "other"
+
+__modality_location__
+
 class TimeSeries(object):
     """ Standard TimeSeries constructor
 
         All time series are created by calls to  NWB.create_timeseries(). 
         They should not not be instantiated directly
     """
-    def __init__(self, name, modality, spec, nwb):
-        self.name = name
-        # make a local copy of the specification, one that can be modified
-        self.h5_builder = GroupBuilder()
-        self.spec = copy.deepcopy(spec)
+    _default_conversion = 1.0
+    _default_resolution = np.nan
+    #def __init__(self, name, modality, spec, nwb):
+        ## make a local copy of the specification, one that can be modified
+        #self.spec = copy.deepcopy(spec)
         # file handling
-        self.nwb = nwb
-        self.finalized = False
-        # AJTRITT: Move modality into NWB class. 
-        #          NWB class will decide where to store this TimeSeries object
+        #self.nwb = nwb
+        #self.finalized = False
+        ## AJTRITT: Move modality into NWB class. 
+        ##          NWB class will decide where to store this TimeSeries object
         # # check modality and set path
         # if modality == "acquisition":
         #     self.path = "/acquisition/timeseries/"
@@ -70,10 +78,41 @@ class TimeSeries(object):
         #     full_path = self.path + self.name
         #     if full_path in self.nwb.file_pointer:
         #         self.fatal_error("Group '%s' already exists" % full_path)
-        self.time_tgt_path = None
-        self.data_tgt_path = None
-        self.data_tgt_path_soft = None
-        self.serial_num = -1
+        # self.time_tgt_path = None
+        # self.data_tgt_path = None
+        # self.data_tgt_path_soft = None
+        # self.serial_num = -1
+
+    _ancestry = 'TimeSeries'
+
+    def __init__(self, name):
+        self._name = name
+        self.data_link = set()
+        self.timestamps_link = set()
+        self._data = None
+        self._timeseries = None
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def ancestry(self):
+        return self._ancestry
+
+    @property
+    def data(self):
+        if isinstance(self._data, TimeSeries):
+            return self._data.data
+        else:
+            return self._data
+
+    @property
+    def timestamps(self):
+        if isinstance(self._timestamps, TimeSeries):
+            return self._timestamps.timestamps
+        else:
+            return self._timestamps
 
     # internal function
     def fatal_error(self, msg):
@@ -95,6 +134,7 @@ class TimeSeries(object):
     # don't allow setting attributes on values, not for now at least
     # it's not legal to add attributes to fields that are in the spec as
     #   there is no way to mark them as custom
+    @deprecated
     def set_value(self, key, value, dtype=None):
         """ Set key-value pair, with optional attributes (in dtype)
 
@@ -114,64 +154,11 @@ class TimeSeries(object):
         name = "TimeSeries %s" % self.name
         self.nwb.set_value_internal(key, value, self.spec, name, dtype)
 
-    # add a link to another NWB object
-    def set_value_as_link(self, key, value):
-        """ Create a link to another NWB object
-
-            Arguments:
-                *key* (text) Name of link as it will appear in *TimeSeries*
-
-                *value* (text, TimeSeries or Interface) The object to
-                be linked to, or the path to that object
-
-            Returns:
-                *nothing*
-        """
-        if self.finalized:
-            self.fatal_error("Added value after finalization")
-        # check type
-        path = ""
-        if isinstance(value, TimeSeries):
-            path = value.full_path()
-        elif isinstance(value, nwbmo.Interface):
-            path = value.full_path()
-        elif isinstance(value, str):
-            path = value
-        else:
-            self.fatal_error("Unrecognized type for setting up link -- found %s" % type(value))
-        # hack alert -- need to establish the definition for the field
-        # this is already done in set_value, but that also sets the "_value"
-        #   field. create the definition and then delete "_value" so the link
-        #   can be established
-        self.set_value(key, "dummy")
-        del self.spec[key]["_value"]
-        self.spec[key]["_value_hardlink"] = path
-        self.set_value(key + "_path", path)
-
-    # add a link to another NWB object
-    def set_value_as_remote_link(self, key, target_file, dataset_path):
-        """ Create a link to an NWB object in another file
-        """
-        assert False, "FINISH AND TEST FIRST"
-        if self.finalized:
-            self.fatal_error("Added value after finalization")
-        # check type
-        if not isinstance(target_file, str):
-            self.fatal_error("File name must be string, received %s", type(target_file))
-        if not isinstance(dataset_path, str):
-            self.fatal_error("Dataset path must be string, received %s", type(dataset_path))
-        # TODO set _value_softlink fields
-        self.set_value(key, "????")
-        extern_fields = self.spec["_attributes"]["extern_fields"]
-        if "_value" not in extern_fields:
-            extern_fields["_value"] = []
-        extern_fields["_value"].append(key)
-        self.set_value(key + "_link", target_file + "::" + dataset_path)
-
     # internal function used for setting data[] and timestamps[]
     # this method doesn't include necessary logic to manage attributes
     #   and prevent the user from adding custom attributes to
     #   standard fields, or to alter required 'custom' attribute
+    @deprecated
     def set_value_with_attributes_internal(self, key, value, dtype, **attrs):
         if self.finalized:
             self.fatal_error("Added value after finalization")
@@ -183,21 +170,13 @@ class TimeSeries(object):
         """ Convenience function to set the description field of the
             *TimeSeries*
         """
-        self.h5_builder.set_attribute('description', value)
-
-        if self.finalized:
-            self.fatal_error("Added value after finalization")
-        self.spec["_attributes"]["description"]["_value"] = str(value)
+        self.description = value
 
     def set_comments(self, value):
         """ Convenience function to set the comments field of the
             *TimeSeries*
         """
-        self.h5_builder.set_attribute('comments', value)
-
-        if self.finalized:
-            self.fatal_error("Added value after finalization")
-        self.spec["_attributes"]["comments"]["_value"] = str(value)
+        self.comments = comments
 
     # for backward compatibility to screwy scripts, and to be nice
     #   in event of typo
@@ -208,47 +187,10 @@ class TimeSeries(object):
         """ Convenience function to set the source field of the
             *TimeSeries*
         """
-        self.h5_builder.set_attribute('source', value)
+        self.source = value
 
-        if self.finalized:
-            self.fatal_error("Added value after finalization")
-        self.spec["_attributes"]["source"]["_value"] = str(value)
-
-    def set_time(self, timearray):
-        ''' Store timestamps for the time series. 
-   
-           Arguments:
-               *timearray* (double array) Timestamps for each element in *data*
-   
-           Returns:
-               *nothing*
-        '''
-        self.h5_builder.add_dataset("timestamps", 
-                                    timearray,
-                                    attributes={"interval": 1, 
-                                                "unit": "Seconds"})
-        
-        # t_interval should have default value set to 1 in spec file
-        self.set_value("timestamps", timearray)
-
-    def set_time_by_rate(self, time_zero, rate):
-        '''Store time by start time and sampling rate only
-   
-           Arguments:
-               *time_zero* (double) Time of data[] start. For template stimuli, this should be zero
-               *rate* (float) Cycles per second (Hz)
-   
-           Returns:
-               *nothing*
-        '''
-        self.h5_builder.add_dataset("starting_time",
-                                    time_zero, 
-                                    attributes={"rate": rate})
-        
-        attrs = {}
-        attrs["rate"] = rate
-        self.set_value_with_attributes_internal("starting_time", time_zero, None, **attrs)
-
+    #TODO: add this functionality to validation code
+    @deprecated
     def ignore_time(self):
         """ In some cases (eg, template stimuli) there is no time 
             data available. Rather than store invalid data, it's better
@@ -268,7 +210,7 @@ class TimeSeries(object):
         self.spec["num_samples"]["_include"] = "standard"
 
     # if default value used, value taken from specification file
-    def set_data(self, data, unit=None, conversion=None, resolution=None, dtype=None):
+    def set_data(self, data, unit, conversion=None, resolution=None, dtype=None):
         '''Defines the data stored in the TimeSeries. Type of data 
            depends on which class of TimeSeries is being used
 
@@ -284,12 +226,9 @@ class TimeSeries(object):
            Returns:
                *nothing*
         '''
-        attrs = {
-            "unit": unit, 
-            "conversion": conversion,
-            "resolution": resolution
-        }
-        self.h5_builder.add_dataset("data", data, attributes=attrs)
+        self.unit = unit
+        self.conversion = conversion if conversion else _default_conversion,
+        self.resolution = resolution if resolution else _default_resolution,
 
         attrs = {}
         if unit is not None:
@@ -299,6 +238,28 @@ class TimeSeries(object):
         if resolution is not None:
             attrs["resolution"] = float(resolution)
         self.set_value_with_attributes_internal("data", data, dtype, **attrs)
+
+    def link_data(self, ts):
+        '''Links the *data* dataset in this TimeSeries to that
+           stored in another TimeSeries. This is useful when multiple time
+           series represent the same data.
+           This works by making an HDF5 hard link to the data array
+           in the sibling time series
+   
+           Arguments:
+               *sibling* (text) Full HDF5 path to TimeSeries containing source data[] array, or a python TimeSeries object
+   
+           Returns:
+               *nothing*
+        '''
+        target_ts = ts
+        while True:
+            if isinstance(target_ts.timestamps, TimeSeries):
+                target_ts = target_ts.timestamps
+                continue
+            break
+        self.data = ts
+        target_ts.data_link.add(self)
 
     def ignore_data(self):
         """ In some cases (eg, externally stored image files) there is no 
@@ -318,11 +279,40 @@ class TimeSeries(object):
 
     ####################################################################
     ####################################################################
-    # linking code
+
+    def set_time(self, timearray):
+        ''' Store timestamps for the time series. 
+   
+           Arguments:
+               *timearray* (double array) Timestamps for each element in *data*
+   
+           Returns:
+               *nothing*
+        '''
+        self.timestamps = timearray
+        self.interval = 1
+        self.unit = "Seconds"
+        
+        # t_interval should have default value set to 1 in spec file
+        self.set_value("timestamps", timearray)
+
+    def set_time_by_rate(self, time_zero, rate):
+        '''Store time by start time and sampling rate only
+   
+           Arguments:
+               *time_zero* (double) Time of data[] start. For template stimuli, this should be zero
+               *rate* (float) Cycles per second (Hz)
+   
+           Returns:
+               *nothing*
+        '''
+        self.starting_time = time_zero
+        self.rate = rate
+        self.unit = "Seconds"
 
     # takes the path to the sibling time series to create a hard link
     #   to its timestamp array
-    def set_time_as_link(self, sibling):
+    def link_time(self, ts):
         '''Links the *timestamps* dataset in this TimeSeries to that
            stored in another TimeSeries. This is useful when multiple time
            series have data that is recorded on the same clock.
@@ -335,112 +325,144 @@ class TimeSeries(object):
            Returns:
                *nothing*
         '''
-        self.h5_builder.add_soft_link('timestamps', sibling)
-
-        if self.finalized:
-            self.fatal_error("Added value after finalization")
-        # it's possible that this TimeSeries path isn't set at the 
-        #   time of the link (eg, if the TimeSeries is part of a
-        #   module) so we can't register the path w/ the kernel yet.
-        #   store link info for finalization, when path is known
-        self.time_tgt_path = self.create_hardlink("timestamps", sibling)
-
-
-    def set_data_as_link(self, sibling):
-        '''Links the *data* dataset in this TimeSeries to that
-           stored in another TimeSeries. This is useful when multiple time
-           series represent the same data.
-           This works by making an HDF5 hard link to the data array
-           in the sibling time series
-   
-           Arguments:
-               *sibling* (text) Full HDF5 path to TimeSeries containing source data[] array, or a python TimeSeries object
-   
-           Returns:
-               *nothing*
-        '''
-        self.h5_builder.add_soft_link('data', sibling)
-
-        if self.finalized:
-            self.fatal_error("Added value after finalization")
-        # it's possible that this TimeSeries path isn't set at the 
-        #   time of the link (eg, if the TimeSeries is part of a
-        #   module) so we can't register the path w/ the kernel yet.
-        #   store link info for finalization, when path is known
-        self.data_tgt_path = self.create_hardlink("data", sibling)
-
-    def set_data_as_remote_link(self, file_path, dataset_path):
-        '''Links the *data* dataset in this TimeSeries to data stored
-           in an external file, using and HDF5 soft-link.
-           The dataset in the external file must contain attributes required 
-           for the TimeSeries::data[] element.
-   
-           Arguments:
-               *file_path* (text) File-system path to remote HDF5 file
-
-               *dataset_path* (text) Full path within remote HDF5 file to dataset
-   
-           Returns:
-               *nothing*
-        '''
-        self.h5_builder.add_external_link('data', file_path, dataset_path)
-
-        if self.finalized:
-            self.fatal_error("Added value after finalization")
-        self.create_softlink("data", file_path, dataset_path)
-        # it's possible that this TimeSeries path isn't set at the 
-        #   time of the link (eg, if the TimeSeries is part of a
-        #   module) so we can't register the path w/ the kernel yet.
-        #   store link info for finalization, when path is known
-        self.data_tgt_path_soft = file_path + "://" + dataset_path
-        #self.nwb.record_timeseries_data_soft_link(self.full_path(), file_path+"://"+dataset_path)
-        extern_fields = self.spec["_attributes"]["extern_fields"]
-        if "_value" not in extern_fields:
-            extern_fields["_value"] = []
-        extern_fields["_value"].append("data")
-
-
-    # internal function
-    # creates link to similarly named field between two groups
-    def create_hardlink(self, field, target):
-        # type safety -- make sure sibling is class if not string
-        if self.finalized:
-            self.fatal_error("Added value after finalization")
-        if isinstance(target, str):
-            sib_path = target
-        elif isinstance(target, TimeSeries):
-            sib_path = target.full_path()
-        elif isinstance(target, nwbmo.Module):
-            sib_path = target.full_path()
+        target_ts = ts
+        while True:
+            if isinstance(target_ts.timestamps, TimeSeries):
+                target_ts = target_ts.timestamps
+                continue
+            break
+        self.timestamps = target_ts
+        target_ts.timestamps_link.add(self)
+#
+#        if self.finalized:
+#            self.fatal_error("Added value after finalization")
+#        # it's possible that this TimeSeries path isn't set at the 
+#        #   time of the link (eg, if the TimeSeries is part of a
+#        #   module) so we can't register the path w/ the kernel yet.
+#        #   store link info for finalization, when path is known
+#        self.time_tgt_path = self.create_hardlink("timestamps", sibling)
+#
+    def build_hdf5(self):
+        builder = GroupBuilder()
+        builder.set_attribute('description', self.description)
+        builder.set_attribute('source', self.source)
+        builder.set_attribute('comments', self.comments)
+        if isinstance(self._data, TimeSeries):
+            if self._data.file_name != self.file_name:
+                #TODO: figure out how to compute dataset_path
+                builder.add_external_link('data', self._data.file_name, dataset_path)
+            else:
+                #TODO: figure out how to compute dataset_path
+                builder.add_soft_link('data', dataset_path)
         else:
-            self.fatal_error("Unrecognized link-to object. Expected str or TimeSeries, found %s" % type(target))
-        # define link. throw error if value was already set
-        if "_value" in self.spec[field]:
-            self.fatal_error("cannot specify a link after setting value")
-        elif "_value_softlink" in self.spec[field]:
-            self.fatal_error("cannot specify both hard and soft links")
-        self.spec[field]["_value_hardlink"] = sib_path + "/" + field
-        # return path string
-        return sib_path
-
-
-    # internal function
-    # creates link to similarly named field between two groups
-    def create_softlink(self, field, file_path, dataset_path):
-        if self.finalized:
-            self.fatal_error("Added value after finalization")
-        if "_value" in self.spec[field]:
-            self.fatal_error("cannot specify a data link after set_data()")
-        elif "_value_hardlink" in self.spec[field]:
-            self.fatal_error("cannot specify both hard and soft links")
-        self.spec[field]["_value_softlink"] = dataset_path
-        self.spec[field]["_value_softlink_file"] = file_path
-
+            data_attrs = {
+                "unit": unit, 
+                "conversion": conversion if conversion else _default_conversion,
+                "resolution": resolution if resolution else _default_resolution,
+            }
+            builder.add_dataset("data", self._data, attributes=data_attrs)
+        
+        if self.starting_time:
+            builder.add_dataset("starting_time",
+                                        self.starting_time, 
+                                        attributes={"rate": self.rate, 
+                                                    "unit": "Seconds"})
+        else:
+            if isinstance(self._timestamps, TimeSeries):
+                if self._timestamps.file_name != self.file_name:
+                    #TODO: figure out how to compute timestamps_path
+                    builder.add_external_link('data', self._data.file_name, timestamps_path)
+                else:
+                    #TODO: figure out how to compute timestamps_path
+                    builder.add_soft_link('timestamps', timestamps_path)
+            else:
+                ts_attrs = {"interval": 1, "unit": "Seconds"}
+                builder.add_dataset("timestamps", self._timestamps, attributes=ts_attrs)
+        return builder
+        
+#        if self.finalized:
+#            self.fatal_error("Added value after finalization")
+#        # it's possible that this TimeSeries path isn't set at the 
+#        #   time of the link (eg, if the TimeSeries is part of a
+#        #   module) so we can't register the path w/ the kernel yet.
+#        #   store link info for finalization, when path is known
+#        self.data_tgt_path = self.create_hardlink("data", sibling)
+#
+#    @deprecated
+#    def set_data_as_remote_link(self, file_path, dataset_path):
+#        '''Links the *data* dataset in this TimeSeries to data stored
+#           in an external file, using and HDF5 soft-link.
+#           The dataset in the external file must contain attributes required 
+#           for the TimeSeries::data[] element.
+#   
+#           Arguments:
+#               *file_path* (text) File-system path to remote HDF5 file
+#
+#               *dataset_path* (text) Full path within remote HDF5 file to dataset
+#   
+#           Returns:
+#               *nothing*
+#        '''
+#
+#        if self.finalized:
+#            self.fatal_error("Added value after finalization")
+#        self.create_softlink("data", file_path, dataset_path)
+#        # it's possible that this TimeSeries path isn't set at the 
+#        #   time of the link (eg, if the TimeSeries is part of a
+#        #   module) so we can't register the path w/ the kernel yet.
+#        #   store link info for finalization, when path is known
+#        self.data_tgt_path_soft = file_path + "://" + dataset_path
+#        #self.nwb.record_timeseries_data_soft_link(self.full_path(), file_path+"://"+dataset_path)
+#        extern_fields = self.spec["_attributes"]["extern_fields"]
+#        if "_value" not in extern_fields:
+#            extern_fields["_value"] = []
+#        extern_fields["_value"].append("data")
+#
+#
+#    # internal function
+#    # creates link to similarly named field between two groups
+#    @deprecated
+#    def create_hardlink(self, field, target):
+#        # type safety -- make sure sibling is class if not string
+#        if self.finalized:
+#            self.fatal_error("Added value after finalization")
+#        if isinstance(target, str):
+#            sib_path = target
+#        elif isinstance(target, TimeSeries):
+#            sib_path = target.full_path()
+#        elif isinstance(target, nwbmo.Module):
+#            sib_path = target.full_path()
+#        else:
+#            self.fatal_error("Unrecognized link-to object. Expected str or TimeSeries, found %s" % type(target))
+#        # define link. throw error if value was already set
+#        if "_value" in self.spec[field]:
+#            self.fatal_error("cannot specify a link after setting value")
+#        elif "_value_softlink" in self.spec[field]:
+#            self.fatal_error("cannot specify both hard and soft links")
+#        self.spec[field]["_value_hardlink"] = sib_path + "/" + field
+#        # return path string
+#        return sib_path
+#
+#
+#    # internal function
+#    # creates link to similarly named field between two groups
+#    @deprecated
+#    def create_softlink(self, field, file_path, dataset_path):
+#        if self.finalized:
+#            self.fatal_error("Added value after finalization")
+#        if "_value" in self.spec[field]:
+#            self.fatal_error("cannot specify a data link after set_data()")
+#        elif "_value_hardlink" in self.spec[field]:
+#            self.fatal_error("cannot specify both hard and soft links")
+#        self.spec[field]["_value_softlink"] = dataset_path
+#        self.spec[field]["_value_softlink_file"] = file_path
+#
 
     ####################################################################
     ####################################################################
     # file writing and path management
 
+    @deprecated
     def set_path(self, path):
         """ Sets the path for where the *TimeSeries* is created. This
             is only necessary for *TimeSeries* that were not created
@@ -457,6 +479,7 @@ class TimeSeries(object):
         if full_path in self.nwb.file_pointer:
             self.fatal_error("group '%s' already exists" % full_path)
 
+    @deprecated
     def full_path(self):
         """ Returns the HDF5 path to this *TimeSeries*
 
@@ -468,8 +491,9 @@ class TimeSeries(object):
         """
         return self.path + self.name
 
+    @deprecated
     def finalize(self):
-        """ Finish the *TimeSeries* and write pending changes to disk
+        """ Finish the *TimSeries* and write pending changes to disk
 
             Arguments:
                 *none*
@@ -627,6 +651,7 @@ class TimeSeries(object):
         self.finalized = True
 
 
+
 class AnnotationSeries(TimeSeries):
     ''' Stores text-based records about the experiment. To use the
         AnnotationSeries, add records individually through 
@@ -637,10 +662,18 @@ class AnnotationSeries(TimeSeries):
         All time series are created by calls to  NWB.create_timeseries(). 
         They should not not be instantiated directly
     ''' 
+
+    _ancestry = "TimeSeries,AnnotationSeries"
+    
     def __init__(self, name, modality, spec, nwb):
         super(AnnotationSeries, self).__init__(name, modality, spec, nwb)
-        self.annot_str = []
-        self.annot_time = []
+
+        self.builder.set_attribute("help", "Time-stamped annotations about an experiment")
+        self.set_data(list())
+        self.set_time(list())
+        
+        #self.annot_str = []
+        #self.annot_time = []
 
     def add_annotation(self, what, when):
         '''Convennece function to add annotations individually
@@ -653,33 +686,39 @@ class AnnotationSeries(TimeSeries):
         Returns:
             *nothing*
         '''
-        self.annot_str.append(str(what))
-        self.annot_time.append(float(when))
+        self.builder['data'].append(str(what))
+        self.builder['timestamps'].append(str(what))
 
-    def finalize(self):
-        '''Extends superclass call by pushing annotations onto 
-        the data[] and timestamps[] fields
+        #self.annot_str.append(str(what))
+        #self.annot_time.append(float(when))
 
-        Arguments:
-            *none*
+    def set_data(self, data):
+        super().set_data(data, "n/a", conversion=np.nan, resolution=np.nan)
 
-        Returns:
-            *nothing*
-        '''
-        if self.finalized:
-            return
-        if len(self.annot_str) > 0:
-            if "_value" in self.spec["data"]:
-                print("AnnotationSeries error -- can only call set_data() or add_annotation(), not both")
-                print("AnnotationSeries name: " + self.name)
-                sys.exit(1)
-            if "_value" in self.spec["timestamps"]:
-                print("AnnotationSeries error -- can only call set_time() or add_annotation(), not both")
-                print("AnnotationSeries name: " + self.name)
-                sys.exit(1)
-            self.spec["data"]["_value"] = self.annot_str
-            self.spec["timestamps"]["_value"] = self.annot_time
-        super(AnnotationSeries, self).finalize()
+    #def finalize(self):
+    #    '''Extends superclass call by pushing annotations onto 
+    #    the data[] and timestamps[] fields
+
+    #    Arguments:
+    #        *none*
+
+    #    Returns:
+    #        *nothing*
+    #    '''
+    #    if self.finalized:
+    #        return
+    #    if len(self.annot_str) > 0:
+    #        if "_value" in self.spec["data"]:
+    #            print("AnnotationSeries error -- can only call set_data() or add_annotation(), not both")
+    #            print("AnnotationSeries name: " + self.name)
+    #            sys.exit(1)
+    #        if "_value" in self.spec["timestamps"]:
+    #            print("AnnotationSeries error -- can only call set_time() or add_annotation(), not both")
+    #            print("AnnotationSeries name: " + self.name)
+    #            sys.exit(1)
+    #        self.spec["data"]["_value"] = self.annot_str
+    #        self.spec["timestamps"]["_value"] = self.annot_time
+    #    super(AnnotationSeries, self).finalize()
 
 class AbstractFeatureSeries(TimeSeries):
     """ Represents the salient features of a data stream. Typically this
@@ -693,6 +732,8 @@ class AbstractFeatureSeries(TimeSeries):
         They should not not be instantiated directly
     """
 
+    _ancestry = "TimeSeries,AbstractFeatureSeries"
+
     def set_features(self, names, units):
         """ Convenience function for setting feature values. Has logic to
             ensure arrays have equal length (ie, sanity check)
@@ -705,15 +746,143 @@ class AbstractFeatureSeries(TimeSeries):
             Returns:
                 *nothing*
         """
-        # sanlty checks
-        # make sure both are arrays, not strings
-        if isinstance(names, str):
-            names = [ str(names) ]
-        if isinstance(units, str):
-            units = [ str(units) ]
-        # make sure arrays are of same length
-        if len(names) != len(units):
-            self.fatal_error("name and unit vectors must have equal length")
-        self.set_value("features", names)
-        self.set_value("feature_units", units)
+        self.features = names
+        self.units = units
+        
+    def build_hdf5(self):
+        builder = super().build_hdf5()
+        builder.add_dataset('features', self.features)
+        builder.add_dataset('feature_units', self.units)
+        return builder
+    
+        ## sanlty checks
+        ## make sure both are arrays, not strings
+        #if isinstance(names, str):
+        #    names = [ str(names) ]
+        #if isinstance(units, str):
+        #    units = [ str(units) ]
+        ## make sure arrays are of same length
+        #if len(names) != len(units):
+        #    self.fatal_error("name and unit vectors must have equal length")
+        #self.set_value("features", names)
+        #self.set_value("feature_units", units)
 
+class ElectricalSeries(TimeSeries):
+
+    _ancestry = "TimeSeries,ElectricalSeries"
+    _help = "Stores acquired voltage data from extracellular recordings"
+
+    def __init__(self, name, electrodes=None):
+        """ Create a new ElectricalSeries dataset
+            
+            Arguments:
+                *names* (int array) The electrode indices
+        """
+        super().__init__(name)
+        if electrodes:
+            self.set_electrodes(electrodes)
+    
+    def set_data(self, data, conversion=None, resolution=None):
+        """
+            Arguments:
+                *conversion* (float)  Scalar to multiply each datapoint by to
+                                      convert to volts
+
+                *resolution* (float)  Scalar to multiply each datapoint by to
+                                      convert to volts
+        """
+        super().set_data(data, "volt", conversion=conversion, resolution=resolution)
+
+    def set_electrodes(self, electrodes):
+        """ Specify the electrodes that this corresponds to in the electrode
+            map.
+            
+            Arguments:
+                *names* (int array) The electrode indices
+        """
+        self.electrodes = electrodes
+    
+    def build_hdf5(self):
+        builder = super().build_hdf5()
+        builder.add_dataset("electrode_idx", self.electrodes)
+        return builder
+
+
+class SpikeSeries(ElectricalSeries):
+
+    _ancestry = "TimeSeries,ElectricalSeries,SpikeSeries"
+
+    _help = "Snapshots of spike events from data."
+
+    def __init__(self, name, electrodes=None):
+        super().__init__(name, electrodes)
+        super().set_data(list())
+        
+    def add_spike(event_data):
+        self.builder['data'].append(event_data)
+    
+class ImageSeries(TimeSeries):
+    pass
+
+class ImageMaskSeries(ImageSeries):
+    pass
+
+class OpticalSeries(ImageSeries):
+    pass
+
+class TwoPhotonSeries(ImageSeries):
+    pass
+
+class IndexSeries(TimeSeries):
+    pass
+
+class IntervalSeries(TimeSeries):
+    pass
+
+class OptogeneticSeries(TimeSeries):
+    def set_data(self, data, conversion=None, resolution=None):
+        super().set_data(data, "watt", conversion=conversion, resolution=resolution)
+
+class PatchClampSeries(TimeSeries):
+    pass
+
+class CurrentClampSeries(PatchClampSeries):
+    pass
+
+class IZeroClampSeries(CurrentClampSeries):
+    pass
+
+class CurrentClampStimulusSeries(PatchClampSeries):
+    pass
+
+class VoltageClampSeries(PatchClampSeries):
+    pass
+
+class VoltageClampStimulusSeries(PatchClampSeries):
+    pass
+
+class RoiResponseSeries(TimeSeries):
+    pass
+
+class SpatialSeries(TimeSeries):
+
+    _ancestry = "TimeSeries,SpatialSeries"
+    
+    _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
+
+    def __init__(self, name, reference_frame=None):
+        """Create a SpatialSeries TimeSeries dataset
+            Arguments:
+                *reference_frame* (string) Description defining what exactly 'straight-ahead' means.
+        """
+        super().__init__(name)
+        self.reference_frame = reference_frame
+
+    def set_data(self, data, conversion=None, resolution=None):
+        super().set_data(data, "meter", conversion=conversion, resolution=resolution)
+
+    def build_hdf5(self):
+        builder = super().build_hdf5()
+        builder.add_dataset("reference_frame", self.reference_frame)
+
+    
