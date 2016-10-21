@@ -59,15 +59,11 @@ def __get_type__(data):
 
 def write_dataset(parent, name, data, attributes):
     if hasattr(data, '__len__'):
-        data_shape = __get_shape__(data)
-        data_dtype = __get_type__(data)
-        dset = parent.require_dataset(name, shape=data_shape, dtype=data_dtype)
-        __list_fill__(dset, data)
+        __list_fill__(parent, name, data)
     else:
         chunk_size = 100
         #TODO: do something to figure out appropriate chunk_size
-        #TODO: do something to figure out dtype and shape, and create Dataset
-        __iter_fill__(dset, chunk_size, data)
+        __iter_fill__(parent, name, data, chunk_size)
     set_attributes(dest, attributes)
     
 def __extend_dataset__(dset):
@@ -80,13 +76,23 @@ def __trim_dataset__(dset, length):
     new_shape[0] = length
     dset.resize(new_shape)
 
-def __iter_fill__(dset, chunk_size, data_iter):
-    args = [iter(data_iter)] * chunk_size
-    chunks = _itertools.zip_longest(*args, fillvalue=None)
+def __iter_fill__(parent, name, data, chunk_size):
+    #data_shape = list(__get_shape__(data))
+    #data_shape[0] = None
+    #data_shape = tuple(data_shape)
+    data_iter = iter(data)
+    curr_chunk = [next(data_iter) for i in range(chunk_size)]
+
+    data_shape = __get_shape__(curr_chunk)
+    data_dtype = __get_type__(curr_chunk)
+    max_shape = list(data_shape)
+    max_shape[0] = None
+    dset = parent.require_dataset(name, shape=data_shape, dtype=data_dtype, maxshape=max_shape)
+
     idx = 0
-    curr_chunk = next(chunks)
     more_data = True
-    n_dpts = 0
+    args = [data_iter] * chunk_size
+    chunks = _itertools.zip_longest(*args, fillvalue=None)
     while more_data:
         try:
             next_chunk = next(chunks)
@@ -96,12 +102,14 @@ def __iter_fill__(dset, chunk_size, data_iter):
         if idx >= dset.shape[0] or idx+len(curr_chunk) > dset.shape[0]:
             __extend_dataset__(dset)
         dset[idx:idx+len(curr_chunk),] = curr_chunk
-        n_dpts += len(curr_chunk)
         curr_chunk = next_chunk
         idx += chunk_size
-    return n_dpts
+    return dset
 
-def __list_fill__(dset, data):
+def __list_fill__(parent, name, data):
+    data_shape = __get_shape__(data)
+    data_dtype = __get_type__(data)
+    dset = parent.require_dataset(name, shape=data_shape, dtype=data_dtype)
     if len(data) > dset.shape[0]:
         new_shape = list(dset.shape)
         new_shape[0] = len(data)

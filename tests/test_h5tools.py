@@ -25,23 +25,19 @@ class H5IOTest(unittest.TestCase):
         os.remove(self.test_file_path)
         
     def test_iter_fill_divisible_chunks_data_fit(self):
-        my_dset = self.f.require_dataset('test_dataset', shape=(100,), dtype=np.int64, maxshape=(None,))
-        __iter_fill__(my_dset, 25, range(100))
+        my_dset = __iter_fill__(self.f, 'test_dataset', range(100), 25)
         self.assertEqual(my_dset[99], 99)
 
     def test_iter_fill_divisible_chunks_data_nofit(self):
-        my_dset = self.f.require_dataset('test_dataset', shape=(100,), dtype=np.int64, maxshape=(None,))
-        __iter_fill__(my_dset, 25, range(200))
+        my_dset = __iter_fill__(self.f, 'test_dataset', range(200), 25)
         self.assertEqual(my_dset[199], 199)
 
     def test_iter_fill_nondivisible_chunks_data_fit(self):
-        my_dset = self.f.require_dataset('test_dataset', shape=(100,), dtype=np.int64, maxshape=(None,))
-        __iter_fill__(my_dset, 30, range(100))
+        my_dset = __iter_fill__(self.f, 'test_dataset', range(100), 30)
         self.assertEqual(my_dset[99], 99)
 
     def test_iter_fill_nondivisible_chunks_data_nofit(self):
-        my_dset = self.f.require_dataset('test_dataset', shape=(100,), dtype=np.int64, maxshape=(None,))
-        __iter_fill__(my_dset, 30, range(200))
+        my_dset = __iter_fill__(self.f, 'test_dataset', range(200), 30)
         self.assertEqual(my_dset[199], 199)
 
 class GroupBuilderSetterTests(unittest.TestCase):
