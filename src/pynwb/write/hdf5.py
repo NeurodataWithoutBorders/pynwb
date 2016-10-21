@@ -1,9 +1,33 @@
+from .. import nwbts
+from .. import h5tools
 
+import h5py as _h5py
 
 class Hdf5Writer(object):
-    def __init__(self,):
-        pass
+    def __init__(self):
+        self.__renderer = NwbFileRenderer()
 
+    def write(self, nwb_container, file_path):
+        f = _h5py.File(file_path, 'w')
+        builder = self.__renderer.render(nwb_container)
+        links = dict()
+        for name, grp_builder in builder.groups.items():
+            tmp_links = h5tools.write_group(f, name, 
+                                grp_builder.groups,
+                                grp_builder.datasets,
+                                grp_builder.attributes,
+                                grp_builder.links)
+            links.update(tmp_links)
+            
+        for link_name, link_builder in links.items():
+            if isinstance(link_builder, h5tools.ExternalLinkBuilder)
+                f[link_name] = h5py.ExternalLink(link_builder.file_path, link_builder.path)
+            elif link_builder.hard:
+                f[link_name] = f[link_builder.path]
+            else:
+                f[link_name] = h5py.SoftLink(link_builder.path)
+        f.close()
+        
 class Hdf5ContainerRenderer(object):
 
     def __init__(self):
@@ -55,14 +79,13 @@ class Hdf5ContainerRenderer(object):
 class NwbFileRenderer(Hdf5ContainerRenderer):
 
     __ts_location = {
-        TS_MOD_ACQUISITION: "acquisition/timeseries",
-        TS_MOD_STIMULUS:    "stimulus/presentation",
-        TS_MOD_TEMPLATE:    "stimulus/templates",
-        TS_MOD_OTHER:       ""
+        nwbts.TS_MOD_ACQUISITION: "acquisition/timeseries",
+        nwbts.TS_MOD_STIMULUS:    "stimulus/presentation",
+        nwbts.TS_MOD_TEMPLATE:    "stimulus/templates",
+        nwbts.TS_MOD_OTHER:       ""
     }
             
     def __init__(self, path):
-        self._file_path = file_path
         self._timeseries_renderer = TimeSeriesHdf5Renderer()
 
     @Hdf5ContainerRenderer.conainer_type(nwbts.TimeSeries)
