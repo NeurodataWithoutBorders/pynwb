@@ -59,18 +59,18 @@ class Hdf5ContainerRenderer(object):
     
     def render(self, item):
         self._builder = GroupBuilder()
-        self.__render_item_aux(item.__class__, item)
+        self.__render_aux(item.__class__, item)
         self.rendered[item] = self._builder
         return self._builder
 
     def get_rendered(self, item):
         return self.rendered.get(item, None)
 
-    def __render_item_aux(self, container_cls, item):
+    def __render_aux(self, container_cls, item):
         if container_cls is object:
             return
         for bs_cls in container_type.__bases__:
-            self.__render_item_aux(bs_cls, item)
+            self.__render_aux(bs_cls, item)
         if container_cls in self.operations:
             func = self.operations[container_cls]
             func(item)
