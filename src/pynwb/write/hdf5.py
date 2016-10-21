@@ -3,6 +3,7 @@ from .. import h5tools
 
 import h5py as _h5py
 
+
 class Hdf5Writer(object):
     def __init__(self):
         self.__renderer = NwbFileRenderer()
@@ -27,8 +28,16 @@ class Hdf5Writer(object):
             else:
                 f[link_name] = h5py.SoftLink(link_builder.path)
         f.close()
-        
+
 class Hdf5ContainerRenderer(object):
+
+    _ts_locations = {
+        nwbts.TS_MOD_ACQUISITION: "acquisition/timeseries",
+        nwbts.TS_MOD_STIMULUS:    "stimulus/presentation",
+        nwbts.TS_MOD_TEMPLATE:    "stimulus/templates",
+        nwbts.TS_MOD_OTHER:       ""
+    }
+            
 
     def __init__(self):
         pass
@@ -67,24 +76,42 @@ class Hdf5ContainerRenderer(object):
             func(item)
 
     @staticmethod
-    def _get_container_hierarchy(container):
-        hierarchy = list()
-        curr = container
-        while curr:
-            hierarchy.append(curr):
-            curr = container.parent
-        return tuple(reversed(hierarchy))
+    def __relative_location(parent, child):
+        if isinstance(child, nwb.NWBFile):
+            return ""
+        if isinstance(parent, nwb.NWBFile):
+            if isinstance(child, nwbts.TimeSeries):
+                mod = parent.get_modality(child)
+                return _posixpath.join(_ts_locations[mod], child.name)
+            elif isinstance(child, nwbts.Module):
+                return _posixpath.join('processing', child.name)
+        elif isinstance(parent, nwbmo.Module):
+            if isinstance(child, nwbmo.Interface):
+                return child.name
+        elif isinstance(parent, nwbmo.Interface):
+            if isinstance(child, nwbmo.TimeSeries):
+                return child.name
+        raise Exception('No known location for %s in %s' % (str(type(child)), str(type(parent))))
 
+    @staticmethod
+    def get_container_location(container):
+        location = list()
+        curr = container
+        top_container = curr
+        while curr.parent:
+            location.append(__relative_location(curr.parent, curr))
+            top_container = curr
+            curr = curr.parent
+
+        if not isinstance(top_container, nwb.NWBFile):
+            raise Exception('highest container not a file: %s (%s) --> ... --> %s (%s)' % (None, None, None, None))
+        
+        container_source = top_container.container_source
+        container_path = _posixpath.join(*reversed(location))
+        return (container_source, container_path)
 
 class NwbFileRenderer(Hdf5ContainerRenderer):
 
-    __ts_location = {
-        nwbts.TS_MOD_ACQUISITION: "acquisition/timeseries",
-        nwbts.TS_MOD_STIMULUS:    "stimulus/presentation",
-        nwbts.TS_MOD_TEMPLATE:    "stimulus/templates",
-        nwbts.TS_MOD_OTHER:       ""
-    }
-            
     def __init__(self, path):
         self._timeseries_renderer = TimeSeriesHdf5Renderer()
 
@@ -113,7 +140,7 @@ class NwbFileRenderer(Hdf5ContainerRenderer):
                 }
             )
         )
-        self.builder.add_grop('epochs': GroupBuilder())
+        self.builder.add_group('epochs': GroupBuilder())
         self.builder.add_group('processing': GroupBuilder())
         self.builder.add_group('analysis': GroupBuilder())
 
@@ -124,7 +151,7 @@ class NwbFileRenderer(Hdf5ContainerRenderer):
         self.builder.add_dataset("session_start_time", DatasetBuilder(self.start_time))
 
         for modality, ts_containers in container.timeseries.items():
-            subgroup_builder = self.builder[__ts_location[modality]]
+            subgroup_builder = self.builder[_ts_locations[modality]]
             for name, ts_container in ts_containers:
                 ts_group_builder = self._timeseries_renderer.render_item(ts_container)
                 subgroup_builder.add_group(name, ts_group_builder)
@@ -134,21 +161,8 @@ class NwbFileRenderer(Hdf5ContainerRenderer):
             mod_group_builder = self._module_renderer.render_item(module_container)
             processing_builder.add_group(name, mod_group_builder)
 
-        
-    
-
 class TimeSeriesHdf5Renderer(Hdf5ContainerRenderer):
     
-    @staticmethod
-    def __get_container_location(container):
-        #TODO finish this method
-        container = _get_container_hierarchy(container)
-        ref_hier = _get_container_hierarchy(container.data)
-        
-        if not isinstance(ref_hier[0], nwb.NWBFile):
-            raise Exception('highest container not a file: %s (%s) --> ... --> %s (%s)' % (None, None, None, None))
-        pass
-
     @Hdf5ContainerRenderer.conainer_type(nwbts.TimeSeries)
     def time_series(self, container):
         # set top-level metadata
@@ -158,25 +172,27 @@ class TimeSeriesHdf5Renderer(Hdf5ContainerRenderer):
         self.builder.set_attribute('source', container.source)
         self.builder.set_attribute('comments', container.comments)
 
-        # set data
+        #BEGIN Set data
         if isinstance(container._data, TimeSeries):
-            #TODO: figure out how to compute dataset_path
-            (container_file, container_path) = __get_container_location(container)
-            (reference_file, reference_path) = __get_container_location(reference)
-            
+            # If data points to another TimeSeries object, then we are linking
+            (container_file, container_path) = get_container_location(container)
+            (reference_file, reference_path) = get_container_location(container._data)
+            data_path = _posixpath.join(reference_path, 'data')
             if container_file != reference_file: 
-                self.builder.add_external_link('data', reference_file, reference_path)
+                self.builder.add_external_link('data', reference_file, data_path)
             else:
-                #TODO: figure out how to compute dataset_path
-                self.builder.add_soft_link('data', reference_path)
+                self.builder.add_soft_link('data', data_path)
         else:
+            # else data will be written to file
             data_attrs = {
                 "unit": unit, 
                 "conversion": conversion if conversion else _default_conversion,
                 "resolution": resolution if resolution else _default_resolution,
             }
             self.builder.add_dataset("data", container._data, attributes=data_attrs)
+        #END Set data
         
+        #BEGIN Set timestamps
         if container.starting_time:
             self.builder.add_dataset("starting_time",
                                         container.starting_time, 
@@ -184,15 +200,17 @@ class TimeSeriesHdf5Renderer(Hdf5ContainerRenderer):
                                                     "unit": "Seconds"})
         else:
             if isinstance(container._timestamps, TimeSeries):
-                if container._timestamps.file_name != container.file_name:
-                    #TODO: figure out how to compute timestamps_path
-                    self.builder.add_external_link('data', container._data.file_name, timestamps_path)
+                (container_file, container_path) = get_container_location(container)
+                (reference_file, reference_path) = get_container_location(container._timeseries)
+                timestamps_path = _posixpath.join(reference_path, 'timestamps')
+                if container_file != reference_file:
+                    self.builder.add_external_link('data', reference_file, timestamps_path)
                 else:
-                    #TODO: figure out how to compute timestamps_path
                     self.builder.add_soft_link('timestamps', timestamps_path)
             else:
                 ts_attrs = {"interval": 1, "unit": "Seconds"}
                 self.builder.add_dataset("timestamps", container._timestamps, attributes=ts_attrs)
+        #END Set timestamps
 
     @Hdf5ContainerRenderer.container_type(nwbts.TimeSeries)
     def abstract_feature_series(self, container):
