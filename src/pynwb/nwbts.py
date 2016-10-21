@@ -342,44 +342,6 @@ class TimeSeries(object):
 #        #   store link info for finalization, when path is known
 #        self.time_tgt_path = self.create_hardlink("timestamps", sibling)
 #
-    def build_hdf5(self):
-        builder = GroupBuilder()
-        builder.set_attribute('description', self.description)
-        builder.set_attribute('source', self.source)
-        builder.set_attribute('comments', self.comments)
-        if isinstance(self._data, TimeSeries):
-            if self._data.file_name != self.file_name:
-                #TODO: figure out how to compute dataset_path
-                builder.add_external_link('data', self._data.file_name, dataset_path)
-            else:
-                #TODO: figure out how to compute dataset_path
-                builder.add_soft_link('data', dataset_path)
-        else:
-            data_attrs = {
-                "unit": unit, 
-                "conversion": conversion if conversion else _default_conversion,
-                "resolution": resolution if resolution else _default_resolution,
-            }
-            builder.add_dataset("data", self._data, attributes=data_attrs)
-        
-        if self.starting_time:
-            builder.add_dataset("starting_time",
-                                        self.starting_time, 
-                                        attributes={"rate": self.rate, 
-                                                    "unit": "Seconds"})
-        else:
-            if isinstance(self._timestamps, TimeSeries):
-                if self._timestamps.file_name != self.file_name:
-                    #TODO: figure out how to compute timestamps_path
-                    builder.add_external_link('data', self._data.file_name, timestamps_path)
-                else:
-                    #TODO: figure out how to compute timestamps_path
-                    builder.add_soft_link('timestamps', timestamps_path)
-            else:
-                ts_attrs = {"interval": 1, "unit": "Seconds"}
-                builder.add_dataset("timestamps", self._timestamps, attributes=ts_attrs)
-        return builder
-        
 #        if self.finalized:
 #            self.fatal_error("Added value after finalization")
 #        # it's possible that this TimeSeries path isn't set at the 
@@ -749,12 +711,6 @@ class AbstractFeatureSeries(TimeSeries):
         self.features = names
         self.units = units
         
-    def build_hdf5(self):
-        builder = super().build_hdf5()
-        builder.add_dataset('features', self.features)
-        builder.add_dataset('feature_units', self.units)
-        return builder
-    
         ## sanlty checks
         ## make sure both are arrays, not strings
         #if isinstance(names, str):
@@ -802,13 +758,8 @@ class ElectricalSeries(TimeSeries):
         """
         self.electrodes = electrodes
     
-    def build_hdf5(self):
-        builder = super().build_hdf5()
-        builder.add_dataset("electrode_idx", self.electrodes)
-        return builder
 
-
-class SpikeSeries(ElectricalSeries):
+class SpikeEventSeries(ElectricalSeries):
 
     _ancestry = "TimeSeries,ElectricalSeries,SpikeSeries"
 
@@ -818,8 +769,13 @@ class SpikeSeries(ElectricalSeries):
         super().__init__(name, electrodes)
         super().set_data(list())
         
-    def add_spike(event_data):
-        self.builder['data'].append(event_data)
+    def add_spike_event(event_data):
+        self._data.append(event_data)
+
+    #def add_spike_event(event_data, timepoint=None):
+    #    self._data.append(event_data)
+    #    if timepoint:
+    #        self._timestamps.append(timepoint)
     
 class ImageSeries(TimeSeries):
     pass
@@ -881,8 +837,3 @@ class SpatialSeries(TimeSeries):
     def set_data(self, data, conversion=None, resolution=None):
         super().set_data(data, "meter", conversion=conversion, resolution=resolution)
 
-    def build_hdf5(self):
-        builder = super().build_hdf5()
-        builder.add_dataset("reference_frame", self.reference_frame)
-
-    
