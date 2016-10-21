@@ -47,6 +47,8 @@ from . import nwbts
 from . import nwbep
 from . import nwbmo
 
+from . import container
+
 VERS_MAJOR = 1
 VERS_MINOR = 0
 VERS_PATCH = 5
@@ -184,13 +186,19 @@ def check_finalization():
             print("    object '"+v+"' was not finalized")
     if err:
         sys.exit(1)
+
+
+TS_MOD_ACQUISITION = 'acquisition'
+TS_MOD_STIMULUS = 'stimulus'
+TS_MOD_TEMPLATE = 'template'
+TS_MOD_OTHER = 'other'
     
 
 # TODO some functionality will be broken on append operations. in particular
 #   when an attribute stores a list of links, that list will not be
 #   properly updated if new links are created during append  FIXME
 
-class NWB(object):
+class NWB(container.Container):
     """ Represents an NWB file. Calling the NWB constructor creates the file.
         The following arguments are recognized:
 
@@ -250,16 +258,42 @@ class NWB(object):
 
 
     def __init__(self, **vargs):
+        super().__init__()
         self.__read_arguments__(**vargs)
 
-        self.timeseries = {
+        self.__timeseries = {
             TS_MOD_ACQUISITION: dict(),
             TS_MOD_STIMULUS: dict(),
             TS_MOD_TEMPLATE: dict(),
             TS_MOD_OTHER: dict(),
         }
 
+        self.__modalities = dict()
+
         self.modules = dict()
+
+    @property
+    def acquisition_timeseries(self):
+        return self.__timeseries[TS_MOD_ACQUISITION]
+
+    @property
+    def stimulus_timeseries(self):
+        return self.__timeseries[TS_MOD_STIMULUS]
+
+    @property
+    def template_timeseries(self):
+        return self.__timeseries[TS_MOD_TEMPLATE]
+
+    @property
+    def other_timeseries(self):
+        return self.__timeseries[TS_MOD_OTHER]
+
+    @property
+    def timeseries(self):
+        return self.__timeseries
+
+    def get_timeseries_modality(self, ts):
+        return self.__modalities[ts]
 
     # internal API function to process constructor arguments
     def __read_arguments__(self, **vargs):
@@ -342,7 +376,7 @@ class NWB(object):
         epo.serial_num = register_creation("Epoch -- " + name)
         return epo
 
-    def create_timeseries(self, name, ts_type="TimeSeries", modality="other"):
+    def create_timeseries(self, name, ts_type="TimeSeries", modality=TS_MOD_OTHER):
         """ Creates a new TimeSeries object. Timeseries are used to
             store and associate data or events with the time the
             data/events occur.
@@ -439,9 +473,11 @@ class NWB(object):
             raise ValueError("%s is an invalid TimeSeries type" % ts_type)
         if modality not in TS_LOCATION:
             raise ValueError("%s is not a valid TimeSeries modality" % modality)
-        self.timeseries[modality][name] = ts_class(name)
+        ts = ts_class(name, parent=self)
+        self.__timeseries[modality][name] = ts
+        self.__modalities[ts] = modality
 
-        return self.timeseries[modality]
+        return self.__timeseries[modality][name]
         #self.builder[TS_LOCATION[modality]][name] = ts_class(name)
         #return self.builder[TS_LOCATION[modality]][name]
         # END: AJTRITT code
