@@ -38,15 +38,10 @@ import traceback
 import copy
 from . import nwbmo
 
+from . import container
 
-MOD_ACQUISITION = "acquisition"
-MOD_STIMULUS = "stimulus"
-MOD_TEMPLATE = "template"
-MOD_OTHER = "other"
 
-__modality_location__
-
-class TimeSeries(object):
+class TimeSeries(container.Container):
     """ Standard TimeSeries constructor
 
         All time series are created by calls to  NWB.create_timeseries(). 
@@ -85,12 +80,13 @@ class TimeSeries(object):
 
     _ancestry = 'TimeSeries'
 
-    def __init__(self, name):
+    def __init__(self, name, parent=None):
+        super().__init__(parent=parent)
         self._name = name
         self.data_link = set()
         self.timestamps_link = set()
         self._data = None
-        self._timeseries = None
+        self._timestamps = None
 
     @property
     def name(self):
