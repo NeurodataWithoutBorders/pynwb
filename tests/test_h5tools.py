@@ -4,7 +4,7 @@
 from context import pynwb
 import unittest
 
-from pynwb.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
+from pynwb.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
 
 import h5py
 import os
@@ -69,17 +69,16 @@ class GroupBuilderSetterTests(unittest.TestCase):
     def test_add_softlink(self):
         sl = self.gb.add_soft_link('my_softlink', '/path/to/target')
         self.assertIsInstance(sl, LinkBuilder)
-        self.assertEqual(sl['link_type'], SOFT_LINK)
+        self.assertFalse(sl.hard)
 
     def test_add_hardlink(self):
         hl = self.gb.add_hard_link('my_hardlink', '/path/to/target')
         self.assertIsInstance(hl, LinkBuilder)
-        self.assertEqual(hl['link_type'], HARD_LINK)
-    
+        self.assertTrue(hl.hard)
+
     def test_add_external_link(self):
         el = self.gb.add_external_link('my_externallink', '/path/to/target', 'external.h5')
-        self.assertIsInstance(el, LinkBuilder)
-        self.assertEqual(el['link_type'], EXTERNAL_LINK)
+        self.assertIsInstance(el, ExternalLinkBuilder)
 
     #@unittest.expectedFailure
     def test_set_attribute(self):
@@ -93,11 +92,10 @@ class GroupBuilderGetterTests(unittest.TestCase):
         attrs = {
             'subgroup1': GroupBuilder(),
             'dataset1': DatasetBuilder(list(range(10))),
-            'soft_link1': LinkBuilder(SOFT_LINK, "/soft/path/to/target"),
-            'hard_link1': LinkBuilder(HARD_LINK, "/hard/path/to/target"),
-            'external_link1': LinkBuilder(EXTERNAL_LINK, 
-                                          "/hard/path/to/target",
-                                          "test.h5"),
+            'soft_link1': LinkBuilder("/soft/path/to/target"),
+            'hard_link1': LinkBuilder("/hard/path/to/target", True),
+            'external_link1': ExternalLinkBuilder("/hard/path/to/target",
+                                                  "test.h5"),
             'int_attr': 1,
             'str_attr': "my_str",
         }
@@ -231,6 +229,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
 
     def test_write(self):
         """Test for base dictionary functionality preservation"""
+        self.maxDiff = None
         builder_json = '''
             {
             "group1": {
@@ -256,19 +255,17 @@ class GroupBuilderGetterTests(unittest.TestCase):
             "int_attr": 1,
             "str_attr": "my_str",
             "soft_link1": {
-                "link_type": 0,
                 "path": "/soft/path/to/target",
-                "file_path": null
+                "hard": false
             },
             "hard_link1": {
-                "link_type": 1,
                 "path": "/hard/path/to/target",
-                "file_path": null
+                "hard": true
             },
             "external_link1": {
-                "link_type": 3,
                 "path": "/hard/path/to/target",
-                "file_path": "test.h5"
+                "file_path": "test.h5",
+                "hard": false
             }
         }
         '''
