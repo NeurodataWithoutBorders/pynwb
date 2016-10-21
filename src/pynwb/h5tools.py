@@ -5,38 +5,12 @@ __all__ = [
 ]
 
 import itertools as _itertools
-import h5py as _h5py
 import posixpath as _posixpath
+import copy as _copy
 
 SOFT_LINK = 0
 HARD_LINK = 1
-EXTERNAL_LINK = 3
-
-#def h5_scalar(func):
-#    def inner():
-#        return func().value
-#    return inner
-#
-#def sync_files(file1, file2):
-#    """Create links to datasets and necessary groups
-#    between file1 and file2
-#    
-#    When complete, any dataset in file1 should be linked to
-#    from file2.
-#    
-#    :param file1, file2: The files to sync
-#    :type file1, file2: h5py.File
-#    
-#    """
-#    pass
-#
-#class ImmutableGroup(_h5py.Group):
-#    def __setitem__(self, args, val):
-#        raise NotImplementedError('__setitem__')
-#
-#class ImmutableDataset(_h5py.Dataset):
-#    def __setitem__(self, args, val):
-#        raise NotImplementedError('__setitem__')
+EXTERNAL_LINK = 2
 
 def set_attributes(obj, attributes):
     for key, value in attributes.iteritems():
@@ -44,18 +18,18 @@ def set_attributes(obj, attributes):
 
 def write_group(parent, name, subgroups, datasets, attributes, links):
     group = parent.create_group(name)
-    links_to_create = dict()
+    links_to_create = _copy.deepcopy(links)
     if subgroups:
-        for subgroup_name, subgroup_spec in subgroups.iteritems():
+        for subgroup_name, subgroup_builder in subgroups.iteritems():
             # do not create an empty group without attributes or links
-            if subgroup_spec.is_empty():
+            if subgroup_builder.is_empty():
                 continue
             tmp_links = write_group(group,
                             subgroup_name,
-                            subgroup_spec.get('groups'),
-                            subgroup_spec.get('datasets'),
-                            subgroup_spec.get('attributes'),
-                            subgroup_spec.get('links'))
+                            subgroup_builder.groups,
+                            subgroup_builder.datasets,
+                            subgroup_builder.attributes,
+                            subgroup_builder.links)
             for link_name, target in tmp_links.items():
                 if link_name[0] != '/':
                     link_name = _posixpath.join(name, link_name)
@@ -66,6 +40,7 @@ def write_group(parent, name, subgroups, datasets, attributes, links):
                           dset_name,
                           dset_spec.get('data'),
                           dset_spec.get('attributes'))
+
     set_attributes(group, attributes)
     return links_to_create
 
@@ -157,7 +132,23 @@ class GroupBuilder(dict):
             self.obj_type[key] = 'attributes'
         for key in links.keys():
             self.obj_type[key] = 'links'
+
+    @property
+    def groups(self):
+        return super().__getitem__('groups')
     
+    @property
+    def datasets(self):
+        return super().__getitem__('datasets')
+
+    @property
+    def attributes(self):
+        return super().__getitem__('attributes')
+
+    @property
+    def links(self):
+        return super().__getitem__('links')
+
     def add_dataset(self, name, data, **kwargs):
         """Add a dataset to this group
             Returns:
@@ -186,7 +177,7 @@ class GroupBuilder(dict):
             Returns:
                 the LinkBuilder object for the hard link
         """
-        super().__getitem__('links')[name] = LinkBuilder(HARD_LINK, path)
+        super().__getitem__('links')[name] = LinkBuilder(path, hard=True)
         self.obj_type[name] = 'links'
         return super().__getitem__('links')[name]
     
@@ -200,7 +191,7 @@ class GroupBuilder(dict):
             Returns:
                 the LinkBuilder object for the soft link
         """
-        super().__getitem__('links')[name] = LinkBuilder(SOFT_LINK, path)
+        super().__getitem__('links')[name] = LinkBuilder(path)
         self.obj_type[name] = 'links'
         return super().__getitem__('links')[name]
     
@@ -216,7 +207,7 @@ class GroupBuilder(dict):
             Returns:
                 the LinkBuilder object for the external link
         """
-        super().__getitem__('links')[name] = LinkBuilder(EXTERNAL_LINK, path, file_path)
+        super().__getitem__('links')[name] = ExternalLinkBuilder(path, file_path)
         self.obj_type[name] = 'links'
         return super().__getitem__('links')[name]
     
@@ -244,7 +235,7 @@ class GroupBuilder(dict):
         """
         try:
             key_ar = _posixpath.normpath(key).split('/')
-            return self.__get_rec__(key_ar)
+            return self.__get_rec(key_ar)
         except KeyError:
             raise KeyError(key)
 
@@ -254,17 +245,17 @@ class GroupBuilder(dict):
         """
         try:
             key_ar = _posixpath.normpath(key).split('/')
-            return self.__get_rec__(key_ar)
+            return self.__get_rec(key_ar)
         except KeyError:
             return default
 
-    def __get_rec__(self, key_ar):
+    def __get_rec(self, key_ar):
         # recursive helper for __getitem__
         if len(key_ar) == 1:
             return super().__getitem__(self.obj_type[key_ar[0]])[key_ar[0]]
         else:
             if key_ar[0] in super().__getitem__('groups'):
-                return super().__getitem__('groups')[key_ar[0]].__get_rec__(key_ar[1:])
+                return super().__getitem__('groups')[key_ar[0]].__get_rec(key_ar[1:])
         raise KeyError(key_ar[0])
                 
 
@@ -302,21 +293,28 @@ class GroupBuilder(dict):
                                 super().__getitem__('links').values())
 
 class LinkBuilder(dict):
-    def __init__(self, link_type, path, file_path=None):
+    def __init__(self, path, hard=False):
         super().__init__()
-        self['link_type'] = link_type
         self['path'] = path
-        self['file_path'] = file_path
-        if file_path:
-            setattr(self, 'file_path', property(lambda self: self['file_path']))
+        self['hard'] = hard
 
     @property
-    def link_type(self):
-        return self['link_type']
+    def hard(self):
+        return self['hard']
 
     @property
     def path(self):
         return self['path']
+
+
+class ExternalLinkBuilder(LinkBuilder):
+    def __init__(self, path, file_path):
+        super().__init__(path, hard=False)
+        self['file_path'] = file_path
+
+    @property
+    def file_path(self):
+        return self['file_path']
 
 class DatasetBuilder(dict):
     def __init__(self, data, **kwargs):
