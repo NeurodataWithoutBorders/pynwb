@@ -46,6 +46,7 @@ import h5tools
 from . import nwbts
 from . import nwbep
 from . import nwbmo
+from . import electrode
 
 from . import container
 
@@ -271,6 +272,8 @@ class NWB(container.Container):
         self.__modalities = dict()
 
         self.modules = dict()
+        self.epochs = dict()
+        self.electrodes = dict()
 
     @property
     def acquisition_timeseries(self):
@@ -370,13 +373,67 @@ class NWB(container.Container):
             Returns:
                 Epoch object
         """
-        spec = self.spec["Epoch"]
-        epo = nwbep.Epoch(name, self, start, stop, spec)
-        self.epoch_list.append(epo)
-        epo.serial_num = register_creation("Epoch -- " + name)
-        return epo
+        epoch = Epoch(name, start, stop)
+        self.epochs[name] = epoch
+        return epoch
 
-    def create_timeseries(self, name, ts_type="TimeSeries", modality=TS_MOD_OTHER):
+        #spec = self.spec["Epoch"]
+        #epo = nwbep.Epoch(name, self, start, stop, spec)
+        #self.epoch_list.append(epo)
+        #epo.serial_num = register_creation("Epoch -- " + name)
+        #return epo
+
+    def get_epoch(self, name):
+        return self.__get_epoch(name)
+
+    def set_epoch_timeseries(self, epoch, timeseries):
+        """Add one or more TimSeries datasets to one or more Epochs
+
+           Arguments
+            *epoch*        the name of an epoch or an Epoch object or a list of 
+                           names of epochs or Epoch objects
+
+            *timeseries*   the name of a timeseries or an TimeSeries object or a list of 
+                           names of timeseries or TimeSeries objects
+        """
+        if isinstance(epochs, list):
+            ep_objs = [self.__get_epoch(ep) for ep in epochs]
+        else:
+            ep_objs = [self.__get_epoch(epochs)]
+
+        if isinstance(timeseries, list):
+            ts_objs = [self.__get_timeseries(ts) for ts in timeseries]
+        else:
+            ts_objs = [self.__get_timeseries(timeseries)]
+
+        for ep in ep_objs:
+            for ts in ts_objs:
+                ep.add_timeseries(ts)
+
+    def __get_epoch(self, epoch):
+        if isinstance(epoch, nwbep.Epoch):
+            ep = epoch
+        elif isinstance(epoch, str): 
+            ep = self.epochs.get(epoch)
+            if not ep:
+                raise KeyError(epoch)
+        else:
+            raise TypeError(type(epoch))
+        return ep
+
+    def __get_timeseries(self, timeseries):
+        if isinstance(timeseries, nwbts.TimeSeries)
+            ts = timeseries 
+        elif isinstance(timeseries, str): 
+            mod = self.modality.get(timeseries)
+            if not mod:
+                raise KeyError(timeseries)
+            ts = self.__timeseries[mod][timeseries]
+        else:
+            raise TypeError(type(timeseries))
+        return ts
+
+    def create_timeseries(self, name, ts_type="TimeSeries", modality=TS_MOD_OTHER, epoch=None):
         """ Creates a new TimeSeries object. Timeseries are used to
             store and associate data or events with the time the
             data/events occur.
@@ -475,14 +532,24 @@ class NWB(container.Container):
             raise ValueError("%s is not a valid TimeSeries modality" % modality)
         ts = ts_class(name, parent=self)
         self.__timeseries[modality][name] = ts
-        self.__modalities[ts] = modality
 
+        self.add_timeseries(ts, modality=modality, epoch=epoch)
         return self.__timeseries[modality][name]
         #self.builder[TS_LOCATION[modality]][name] = ts_class(name)
         #return self.builder[TS_LOCATION[modality]][name]
         # END: AJTRITT code
         # find time series by name
         # recursively examine spec and create dict of required fields
+
+    def link_timeseries(self, ts):
+        pass
+
+    def add_timeseries(self, ts, modality=TS_MOD_OTHER, epoch=None):
+        self.__modalities[ts.name] = modality
+        self.__timeseries[modality] = ts
+        ts.set_parent(self)
+        if epoch:
+            self.set_epoch_timeseries(epoch, ts)
 
     def create_module(self, name):
         """ Creates a Module object of the specified name. Interfaces can
@@ -612,3 +679,13 @@ class NWB(container.Container):
         img.set_attribute("format", np.string_(fmt))
         img.set_attribute("description", np.string_(desc))
         
+    def create_electrode_group(self, name, coord, desc, dev, loc):
+        elec_grp = ephys.ElectrodeGroup(name, coord, desc, dev, loc, parent=self)
+        self.electrodes[name] = elec_grp
+        return elec_grp
+
+    def set_electrode_group(self, name, elec_grp):
+        self.electrodes[name] = elec_grp
+
+    def get_electrode_group(self, name):
+        return self.electrodes.get(name)
