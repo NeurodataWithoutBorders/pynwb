@@ -6,7 +6,7 @@ import h5py as _h5py
 
 class Hdf5Writer(object):
     def __init__(self):
-        self.__renderer = NwbFileRenderer()
+        self.__renderer = NwbFileHdf5Renderer()
 
     def write(self, nwb_container, file_path):
         f = _h5py.File(file_path, 'w')
@@ -110,12 +110,12 @@ class Hdf5ContainerRenderer(object):
         container_path = _posixpath.join(*reversed(location))
         return (container_source, container_path)
 
-class NwbFileRenderer(Hdf5ContainerRenderer):
+class NwbFileHdf5Renderer(Hdf5ContainerRenderer):
 
     def __init__(self, path):
         self._timeseries_renderer = TimeSeriesHdf5Renderer()
 
-    @Hdf5ContainerRenderer.conainer_type(nwbts.TimeSeries)
+    @Hdf5ContainerRenderer.conainer_type(nwb.NWB)
     def nwb_file(self, container):
         self.builder.add_group('general', GroupBuilder({
                 'devices': GroupBuilder(),
@@ -230,4 +230,3 @@ class TimeSeriesHdf5Renderer(Hdf5ContainerRenderer):
 class InterfaceHdf5Renderer(Hdf5ContainerRenderer):
     pass
 
-    
