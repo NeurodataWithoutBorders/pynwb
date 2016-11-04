@@ -223,6 +223,9 @@ class Module(object):
 
 
 class Interface(object):
+
+    iface_type = "Interface"
+
     """ Interfaces represent particular processing tasks and they publish
         (ie, make available) specific types of data. Each is required
         to supply a minimum of specifically named data, but all can store 
@@ -489,6 +492,9 @@ class Interface(object):
 ########################################################################
 
 class UnitTimes(Interface):
+
+    iface_type = "UnitTimes"
+
     def __init__(self, name, module, spec):
         super(UnitTimes, self).__init__(name, module, spec)
         self.unit_list = []
@@ -561,6 +567,9 @@ class UnitTimes(Interface):
 ########################################################################
 
 class Clustering(Interface):
+
+    iface_type = "Clustering"
+
     def set_clusters(self, times, num, peak_over_rms):
         """ Conveninece function to set interface values. Includes
             sanity checks for array lengths
@@ -592,6 +601,16 @@ class Clustering(Interface):
         self.set_value("num", num)
         self.set_value("peak_over_rms", peak_over_rms)
 
+    
+    #BEGIN: AJTRITT code
+    def add_event(self, cluster_num, time):
+        self.nums.append(cluster_num)
+        self.times.append(time)
+
+    def add_cluster(self, cluster_num, peak_over_rms):
+        self.peak_over_rms[cluster_num] = peak_over_rms
+    #END: AJTRITT code
+
     def finalize(self):
         if self.finalized:
             return
@@ -617,6 +636,9 @@ class Clustering(Interface):
 ########################################################################
 
 class ImageSegmentation(Interface):
+
+    iface_type = "ImageSegmentation"
+
     def __init__(self, name, module, spec):
         super(ImageSegmentation, self).__init__(name, module, spec)
         # make a table to store what ROIs are added to which planes
@@ -765,6 +787,9 @@ class ImageSegmentation(Interface):
 ########################################################################
 
 class MotionCorrection(Interface):
+
+    iface_type = "MotionCorrection"
+
     def add_corrected_image(self, name, orig, xy_translation, corrected):
         """ Adds a motion-corrected image to the module, including
             the original image stack, the x,y delta necessary to
@@ -841,6 +866,9 @@ class MotionCorrection(Interface):
 ########################################################################
 
 class ImagingRetinotopy(Interface):
+
+    iface_type = "ImagingRetinotopy"
+
     def __init__(self, name, module, spec):
         super(ImagingRetinotopy, self).__init__(name, module, spec)
         # make a table to store what ROIs are added to which planes
