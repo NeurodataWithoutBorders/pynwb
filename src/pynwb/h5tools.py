@@ -172,7 +172,7 @@ class GroupBuilder(dict):
                 the GroupBuilder object for the subgroup
         """
         super().__getitem__('groups')[name] = builder if builder else GroupBuilder()
-        self.obj_type[name] = 'group'
+        self.obj_type[name] = 'groups'
         return super().__getitem__('groups')[name]
 
     def add_hard_link(self, name, path):
@@ -224,6 +224,28 @@ class GroupBuilder(dict):
         """
         super().__getitem__('attributes')[name] = value
         self.obj_type[name] = 'attributes'
+
+    #TODO: write unittests for this method
+    def deep_update(self, builder):
+        # merge subgroups
+        groups = super(GroupBuilder, builder).__getitem__('groups')
+        self_groups = super().__getitem__('groups')
+        for name, subgroup in groups.items():
+            if name in self_groups:
+                groups[name].update(subgroup)
+            else:
+                self.add_group(name, subgroup)
+        # merge datasets
+        for name, dataset in super(GroupBuilder, builder).__getitem__('datasets').items():
+            super().__getitem__('datasets')[name] = dataset
+            self.obj_type[name] = 'datasets'
+        # merge attributes
+        for name, value in super(GroupBuilder, builder).__getitem__('attributes').items():
+            self.set_attribute(name, value)
+        # merge links
+        for name, link in super(GroupBuilder, builder).__getitem__('links').items():
+            super().__getitem__('links')[name] = link
+            self.obj_type[name] = 'links'
 
     def is_empty(self):
         """Returns true if there are no datasets, attributes, links or 
