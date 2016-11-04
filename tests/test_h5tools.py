@@ -61,26 +61,31 @@ class GroupBuilderSetterTests(unittest.TestCase):
     def test_add_group(self):
         gp = self.gb.add_group('my_subgroup')
         self.assertIsInstance(gp, GroupBuilder)
+        self.assertIs(self.gb['my_subgroup'], gp)
 
     def test_add_softlink(self):
         sl = self.gb.add_soft_link('my_softlink', '/path/to/target')
         self.assertIsInstance(sl, LinkBuilder)
         self.assertFalse(sl.hard)
+        self.assertIs(self.gb['my_softlink'], sl)
 
     def test_add_hardlink(self):
         hl = self.gb.add_hard_link('my_hardlink', '/path/to/target')
         self.assertIsInstance(hl, LinkBuilder)
         self.assertTrue(hl.hard)
+        self.assertIs(self.gb['my_hardlink'], hl)
 
     def test_add_external_link(self):
         el = self.gb.add_external_link('my_externallink', '/path/to/target', 'external.h5')
         self.assertIsInstance(el, ExternalLinkBuilder)
+        self.assertIs(self.gb['my_externallink'], el)
 
     #@unittest.expectedFailure
     def test_set_attribute(self):
         self.gb.set_attribute('key', 'value')
-        self.assertEqual('key' in self.gb.obj_type, True)
-        self.assertEqual(dict.__getitem__(self.gb, 'attributes')['key'], 'value')
+        self.assertIn('key', self.gb.obj_type)
+        #self.assertEqual(dict.__getitem__(self.gb, 'attributes')['key'], 'value')
+        self.assertEqual(self.gb['key'], 'value')
 
 class GroupBuilderGetterTests(unittest.TestCase):
 
@@ -215,8 +220,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
         values = (
             self.group1,
             self.dataset1,
-            self.int_attr,
-            self.str_attr,
+            self.int_attr, self.str_attr,
             self.soft_link1,
             self.hard_link1,
             self.external_link1,
@@ -301,5 +305,70 @@ class GroupBuilderIsEmptyTests(unittest.TestCase):
         gb = GroupBuilder({'my_subgroup': GroupBuilder(attributes={'my_attr': 'attr_value'})})
         self.assertEqual(gb.is_empty(), False)
 
+class GroupBuilderDeepUpdateTests(unittest.TestCase):
+
+    def test_mutually_exclusive_subgroups(self):
+        gb1 = GroupBuilder({'subgroup1': GroupBuilder()})
+        gb2 = GroupBuilder({'subgroup2': GroupBuilder()})
+        gb1.deep_update(gb2)
+        self.assertIn('subgroup2', gb1)
+        gb1sg = gb1['subgroup2']
+        gb2sg = gb2['subgroup2']
+        self.assertIs(gb1sg, gb2sg)
+
+    def test_mutually_exclusive_datasets(self):
+        gb1 = GroupBuilder(datasets={'dataset1': DatasetBuilder([1,2,3])})
+        gb2 = GroupBuilder(datasets={'dataset2': DatasetBuilder([4,5,6])})
+        gb1.deep_update(gb2)
+        self.assertIn('dataset2', gb1)
+        self.assertIs(gb1['dataset2'], gb2['dataset2'])
+
+    def test_mutually_exclusive_attributes(self):
+        gb1 = GroupBuilder(attributes={'attr1': 'my_attribute1'})
+        gb2 = GroupBuilder(attributes={'attr2': 'my_attribute2'})
+        gb1.deep_update(gb2)
+        self.assertIn('attr2', gb2)
+        self.assertEqual(gb2['attr2'], 'my_attribute2')
+
+    def test_mutually_exclusive_links(self):
+        gb1 = GroupBuilder(links={'link1': LinkBuilder('/path/to/link1')})
+        gb2 = GroupBuilder(links={'link2': LinkBuilder('/path/to/link2')})
+        gb1.deep_update(gb2)
+        self.assertIn('link2', gb2)
+        self.assertEqual(gb1['link2'], gb2['link2'])
+
+    def test_intersecting_subgroups(self):
+        subgroup2 = GroupBuilder()
+        gb1 = GroupBuilder({'subgroup1': GroupBuilder(), 'subgroup2': subgroup2})
+        gb2 = GroupBuilder({'subgroup2': GroupBuilder(), 'subgroup3': GroupBuilder()})
+        gb1.deep_update(gb2)
+        self.assertIn('subgroup3', gb1)
+        self.assertIs(gb1['subgroup3'], gb2['subgroup3'])
+        self.assertIs(gb1['subgroup2'], subgroup2)
+
+    def test_intersecting_datasets(self):
+        gb1 = GroupBuilder(datasets={'dataset2': DatasetBuilder([1,2,3])})
+        gb2 = GroupBuilder(datasets={'dataset2': DatasetBuilder([4,5,6])})
+        gb1.deep_update(gb2)
+        self.assertIn('dataset2', gb1)
+        self.assertIs(gb1['dataset2'], gb2['dataset2'])
+
+    def test_intersecting_attributes(self):
+        gb1 = GroupBuilder(attributes={'attr2':'my_attribute1'})
+        gb2 = GroupBuilder(attributes={'attr2':'my_attribute2'})
+        gb1.deep_update(gb2)
+        self.assertIn('attr2', gb2)
+        self.assertEqual(gb2['attr2'], 'my_attribute2')
+
+    def test_intersecting_links(self):
+        gb1 = GroupBuilder(links={'link2': LinkBuilder('/path/to/link1')})
+        gb2 = GroupBuilder(links={'link2': LinkBuilder('/path/to/link2')})
+        gb1.deep_update(gb2)
+        self.assertIn('link2', gb2)
+        self.assertEqual(gb1['link2'], gb2['link2'])
+
+
+
 if __name__ == '__main__':
     unittest.main()
+
