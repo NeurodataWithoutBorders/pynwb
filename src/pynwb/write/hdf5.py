@@ -53,27 +53,37 @@ class Hdf5ContainerRenderer(object):
             return func
         return _dec
 
-    @property
-    def builder(self):
-        return self._builder
-    
     def render(self, item):
-        self._builder = GroupBuilder()
-        self.__render_aux(item.__class__, item)
-        self.rendered[item] = self._builder
-        return self._builder
+        """Create GroupBuilder for given item
+            Arguments:
+                *item* the Container to render
+            Returns:
+                A GroupBuilder containing the specifications for 
+                how to render item to HDF5. If no function
+                has been registered specifying how to render the
+                Container type, an empty GroupBuilder is returned
+                
+        """
+        builder = self.__render_aux(item.__class__, item)
+        self.rendered[item] = builder
+        return builder
 
     def get_rendered(self, item):
         return self.rendered.get(item, None)
 
     def __render_aux(self, container_cls, item):
+        builder = GroupBuilder()
         if container_cls is object:
-            return
-        for bs_cls in container_type.__bases__:
-            self.__render_aux(bs_cls, item)
+            return builder
+        # populate builder with parent class operations
+        for bs_cls in container_cls.__bases__:
+            builder.deep_update(self.__render_aux(bs_cls, item))
+        # populate builder with this class' operation
         if container_cls in self.operations:
             func = self.operations[container_cls]
-            func(item)
+            builder.deep_update(func(item))
+        return builder
+        
 
     @staticmethod
     def __relative_location(parent, child):
@@ -111,122 +121,167 @@ class Hdf5ContainerRenderer(object):
         return (container_source, container_path)
 
 class NwbFileHdf5Renderer(Hdf5ContainerRenderer):
+    pass
 
-    def __init__(self, path):
-        self._timeseries_renderer = TimeSeriesHdf5Renderer()
-
-    @Hdf5ContainerRenderer.conainer_type(nwb.NWB)
-    def nwb_file(self, container):
-        self.builder.add_group('general', GroupBuilder({
-                'devices': GroupBuilder(),
-                'extracellular_ephys': GroupBuilder(),
-                'intracellular_ephys': GroupBuilder(),
-                'optogenetics': GroupBuilder(),
-                'optophysiology': GroupBuilder(),
-                'specifications': GroupBuilder(),
-                'subject': GroupBuilder()
-                }
-            )
+@NwbFileHdf5Renderer.conainer_type(nwb.NWB)
+def __nwb_file(container):
+    builder = GroupBulder()
+    builder.add_group('general', GroupBuilder({
+            'devices': GroupBuilder(),
+            'extracellular_ephys': GroupBuilder(),
+            'intracellular_ephys': GroupBuilder(),
+            'optogenetics': GroupBuilder(),
+            'optophysiology': GroupBuilder(),
+            'specifications': GroupBuilder(),
+            'subject': GroupBuilder()
+            }
         )
-        self.builder.add_group('stimulus', GroupBuilder({
-                'template': GroupBuilder(),
-                'presentation': GroupBuilder()
-                }
-            )
+    )
+    builder.add_group('stimulus', GroupBuilder({
+            'template': GroupBuilder(),
+            'presentation': GroupBuilder()
+            }
         )
-        self.builder.add_group('acquisition', GroupBuilder({
-                'timeseries': GroupBuilder(),
-                'images': GroupBuilder()
-                }
-            )
+    )
+    builder.add_group('acquisition', GroupBuilder({
+            'timeseries': GroupBuilder(),
+            'images': GroupBuilder()
+            }
         )
-        self.builder.add_group('epochs': GroupBuilder())
-        self.builder.add_group('processing': GroupBuilder())
-        self.builder.add_group('analysis': GroupBuilder())
+    )
+    builder.add_group('epochs': GroupBuilder())
+    builder.add_group('processing': GroupBuilder())
+    builder.add_group('analysis': GroupBuilder())
 
-        self.builder.add_dataset("nwb_version", DatasetBuilder(FILE_VERSION_STR))
-        self.builder.add_dataset("identifier", DatasetBuilder(self.file_identifier))
-        self.builder.add_dataset("session_description", DatasetBuilder(self.session_description))
-        self.builder.add_dataset("file_create_date", DatasetBuilder([np.string_(time.ctime())], maxshape=(None,), chunks=True, dtype=h5py.special_dtype(vlen=bytes)))
-        self.builder.add_dataset("session_start_time", DatasetBuilder(self.start_time))
+    builder.add_dataset("nwb_version", DatasetBuilder(FILE_VERSION_STR))
+    builder.add_dataset("identifier", DatasetBuilder(container.file_identifier))
+    builder.add_dataset("session_description", DatasetBuilder(container.session_description))
+    builder.add_dataset("file_create_date", DatasetBuilder([np.string_(time.ctime())], maxshape=(None,), chunks=True, dtype=h5py.special_dtype(vlen=bytes)))
+    builder.add_dataset("session_start_time", DatasetBuilder(container.start_time))
 
-        for modality, ts_containers in container.timeseries.items():
-            subgroup_builder = self.builder[_ts_locations[modality]]
-            for name, ts_container in ts_containers:
-                ts_group_builder = self._timeseries_renderer.render_item(ts_container)
-                subgroup_builder.add_group(name, ts_group_builder)
+    for modality, ts_containers in container.timeseries.items():
+        subgroup_builder = builder[_ts_locations[modality]]
+        for module, ts_container in container.timeseries.items():
+            ts_group_builder = TimeSeriesHdf5Renderer.render_item(ts_container)
+            subgroup_builder.add_group(ts_container.name, ts_group_builder)
 
-        processing_builder = builder['processing']
-        for name, module_container in self.modules.items():
-            mod_group_builder = self._module_renderer.render_item(module_container)
-            processing_builder.add_group(name, mod_group_builder)
+    processing_builder = builder['processing']
+    for name, module_container in container.modules.items():
+        mod_group_builder = ModuleHdf5Renderer.render_item(module_container)
+        processing_builder.add_group(name, mod_group_builder)
+
+    return builder
 
 class TimeSeriesHdf5Renderer(Hdf5ContainerRenderer):
+    pass
     
-    @Hdf5ContainerRenderer.conainer_type(nwbts.TimeSeries)
-    def time_series(self, container):
-        # set top-level metadata
-        self.builder.set_attribute('ancestry', container.ancestry)
-        self.builder.set_attribute('help', container.help)
-        self.builder.set_attribute('description', container.description)
-        self.builder.set_attribute('source', container.source)
-        self.builder.set_attribute('comments', container.comments)
+@TimeSeriesHdf5Renderer.container_type(nwbts.TimeSeries)
+def __time_series(container):
+    builder = GroupBuilder()
+    # set top-level metadata
+    builder.set_attribute('ancestry', container.ancestry)
+    builder.set_attribute('help', container.help)
+    builder.set_attribute('description', container.description)
+    builder.set_attribute('source', container.source)
+    builder.set_attribute('comments', container.comments)
+    builder.set_attribute('neurodata_type', "TimeSeries")
 
-        #BEGIN Set data
-        if isinstance(container._data, TimeSeries):
-            # If data points to another TimeSeries object, then we are linking
-            (container_file, container_path) = get_container_location(container)
-            (reference_file, reference_path) = get_container_location(container._data)
-            data_path = _posixpath.join(reference_path, 'data')
-            if container_file != reference_file: 
-                self.builder.add_external_link('data', reference_file, data_path)
-            else:
-                self.builder.add_soft_link('data', data_path)
+    #BEGIN Set data
+    if isinstance(container._data, TimeSeries):
+        # If data points to another TimeSeries object, then we are linking
+        (container_file, container_path) = Hdf5ContainerRenderer.get_container_location(container)
+        (reference_file, reference_path) = Hdf5ContainerRenderer.get_container_location(container._data)
+        data_path = _posixpath.join(reference_path, 'data')
+        if container_file != reference_file: 
+            builder.add_external_link('data', reference_file, data_path)
         else:
-            # else data will be written to file
-            data_attrs = {
-                "unit": unit, 
-                "conversion": conversion if conversion else _default_conversion,
-                "resolution": resolution if resolution else _default_resolution,
-            }
-            self.builder.add_dataset("data", container._data, attributes=data_attrs)
-        #END Set data
-        
-        #BEGIN Set timestamps
-        if container.starting_time:
-            self.builder.add_dataset("starting_time",
-                                        container.starting_time, 
-                                        attributes={"rate": container.rate, 
-                                                    "unit": "Seconds"})
-        else:
-            if isinstance(container._timestamps, TimeSeries):
-                (container_file, container_path) = get_container_location(container)
-                (reference_file, reference_path) = get_container_location(container._timeseries)
-                timestamps_path = _posixpath.join(reference_path, 'timestamps')
-                if container_file != reference_file:
-                    self.builder.add_external_link('data', reference_file, timestamps_path)
-                else:
-                    self.builder.add_soft_link('timestamps', timestamps_path)
+            builder.add_soft_link('data', data_path)
+    else:
+        # else data will be written to file
+        data_attrs = {
+            "unit": unit, 
+            "conversion": conversion if conversion else _default_conversion,
+            "resolution": resolution if resolution else _default_resolution,
+        }
+        builder.add_dataset("data", container._data, attributes=data_attrs)
+    #END Set data
+    
+    #BEGIN Set timestamps
+    if container.starting_time:
+        builder.add_dataset("starting_time",
+                                    container.starting_time, 
+                                    attributes={"rate": container.rate, 
+                                                "unit": "Seconds"})
+    else:
+        if isinstance(container._timestamps, TimeSeries):
+            (container_file, container_path) = Hdf5ContainerRenderer.get_container_location(container)
+            (reference_file, reference_path) = Hdf5ContainerRenderer.get_container_location(container._timeseries)
+            timestamps_path = _posixpath.join(reference_path, 'timestamps')
+            if container_file != reference_file:
+                builder.add_external_link('data', reference_file, timestamps_path)
             else:
-                ts_attrs = {"interval": 1, "unit": "Seconds"}
-                self.builder.add_dataset("timestamps", container._timestamps, attributes=ts_attrs)
-        #END Set timestamps
+                builder.add_soft_link('timestamps', timestamps_path)
+        else:
+            ts_attrs = {"interval": 1, "unit": "Seconds"}
+            builder.add_dataset("timestamps", container._timestamps, attributes=ts_attrs)
+    #END Set timestamps
+    return builder
 
-    @Hdf5ContainerRenderer.container_type(nwbts.TimeSeries)
-    def abstract_feature_series(self, container):
-        self.builder.add_dataset('features', container.features)
-        self.builder.add_dataset('feature_units', container.units)
+@TimeSeriesHdf5Renderer.container_type(nwbts.TimeSeries)
+def __abstract_feature_series(self, container):
+    builder = GroupBuilder()
+    builder.add_dataset('features', container.features)
+    builder.add_dataset('feature_units', container.units)
+    return builder
 
-    @Hdf5ContainerRenderer.container_type(nwbts.ElectricalSeries)
-    def electrical_series(self, container):
-        self.builder.add_dataset("electrode_idx", container.electrodes)
+@TimeSeriesHdf5Renderer.container_type(nwbts.ElectricalSeries)
+def __electrical_series(container):
+    builder = GroupBuilder()
+    builder.add_dataset("electrode_idx", container.electrodes)
+    return builder
 
-    @Hdf5ContainerRenderer.container_type(nwbts.SpatialSeries)
-    def spatial_series(self, container):
-        self.builder.add_dataset("reference_frame", container.reference_frame)
+@TimeSeriesHdf5Renderer.container_type(nwbts.SpatialSeries)
+def __spatial_series(container):
+    builder = GroupBuilder()
+    builder.add_dataset("reference_frame", container.reference_frame)
+    return builder
     
 
+class ModuleHdf5Renderer(Hdf5ContainerRenderer):
+    pass
+
+@ModuleHdf5Renderer(nwbmo.Module)
+def __module(container):
+    builder = GroupBuilder()
+    for name, interface in container.interfaces.items():
+        interface_builder = InterfaceHdf5Renderer.render_item(interface):
+        builder.add_group(interface.iface_type, interface_builder)
+    return builder
+    
 
 class InterfaceHdf5Renderer(Hdf5ContainerRenderer):
     pass
+
+@InterfaceHdf5Renderer.container_type(nwbmo.Interface)
+def __interface(container):
+    builder = GroupBuilder()
+    builder.set_attribute('help', container.help)
+    builder.set_attribute('neurodata_type', "Interface")
+    #TODO: Figure out how to appropriately set source
+    builder.set_attribute('source', container.source)
+    return builder
+
+@InterfaceHdf5Renderer.container_type(nwbmo.Clustering)
+def __clustering(container):
+    builder = GroupBuilder()
+    cluster_nums = list(sorted(container.peak_over_rms.keys()))
+    peak_over_rms = [container.peak_over_rms[n] for n in cluster_nums]
+    builder.add_dataset('cluster_nums', cluster_nums)
+    builder.add_dataset('peak_over_rms', peak_over_rms)
+    #TODO: verify this works after finishing Clustering interface
+    builder.add_dataset('num', container.num)
+    builder.add_dataset('times', container.times)
+    return builder
+    
+
 
