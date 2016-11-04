@@ -118,6 +118,11 @@ def __list_fill__(parent, name, data):
     
 
 class GroupBuilder(dict):
+    __link = 'links'
+    __group = 'groups'
+    __dataset = 'datasets'
+    __attribute = 'attributes'
+
     def __init__(self, groups=dict(), datasets=dict(), attributes=dict(), links=dict()):
         """Create a GroupBuilder object
             Arguments:
@@ -127,53 +132,53 @@ class GroupBuilder(dict):
                 *links* (string)      a dictionary of links to create in this group
         """
         super().__init__()
-        super().__setitem__('groups', groups)
-        super().__setitem__('datasets', datasets)
-        super().__setitem__('attributes', attributes)
-        super().__setitem__('links', links)
+        super().__setitem__(GroupBuilder.__group, groups)
+        super().__setitem__(GroupBuilder.__dataset, datasets)
+        super().__setitem__(GroupBuilder.__attribute, attributes)
+        super().__setitem__(GroupBuilder.__link, links)
         self.obj_type = dict()
         for key in groups.keys():
-            self.obj_type[key] = 'groups'
+            self.obj_type[key] = GroupBuilder.__group
         for key in datasets.keys():
-            self.obj_type[key] = 'datasets'
+            self.obj_type[key] = GroupBuilder.__dataset
         for key in attributes.keys():
-            self.obj_type[key] = 'attributes'
+            self.obj_type[key] = GroupBuilder.__attribute
         for key in links.keys():
-            self.obj_type[key] = 'links'
+            self.obj_type[key] = GroupBuilder.__link
 
     @property
     def groups(self):
-        return super().__getitem__('groups')
+        return super().__getitem__(GroupBuilder.__group)
     
     @property
     def datasets(self):
-        return super().__getitem__('datasets')
+        return super().__getitem__(GroupBuilder.__dataset)
 
     @property
     def attributes(self):
-        return super().__getitem__('attributes')
+        return super().__getitem__(GroupBuilder.__attribute)
 
     @property
     def links(self):
-        return super().__getitem__('links')
+        return super().__getitem__(GroupBuilder.__link)
 
     def add_dataset(self, name, data, **kwargs):
         """Add a dataset to this group
             Returns:
                 the DatasetBuilder object for the dataset
         """
-        super().__getitem__('datasets')[name] = DatasetBuilder(data, **kwargs)
-        self.obj_type[name] = 'datasets'
-        return super().__getitem__('datasets')[name]
+        super().__getitem__(GroupBuilder.__dataset)[name] = DatasetBuilder(data, **kwargs)
+        self.obj_type[name] = GroupBuilder.__dataset
+        return super().__getitem__(GroupBuilder.__dataset)[name]
     
     def add_group(self, name, builder=None):
         """Add a subgroup to this group
             Returns:
                 the GroupBuilder object for the subgroup
         """
-        super().__getitem__('groups')[name] = builder if builder else GroupBuilder()
-        self.obj_type[name] = 'groups'
-        return super().__getitem__('groups')[name]
+        super().__getitem__(GroupBuilder.__group)[name] = builder if builder else GroupBuilder()
+        self.obj_type[name] = GroupBuilder.__group
+        return super().__getitem__(GroupBuilder.__group)[name]
 
     def add_hard_link(self, name, path):
         """Add an hard link in this group.
@@ -185,9 +190,9 @@ class GroupBuilder(dict):
             Returns:
                 the LinkBuilder object for the hard link
         """
-        super().__getitem__('links')[name] = LinkBuilder(path, hard=True)
-        self.obj_type[name] = 'links'
-        return super().__getitem__('links')[name]
+        super().__getitem__(GroupBuilder.__link)[name] = LinkBuilder(path, hard=True)
+        self.obj_type[name] = GroupBuilder.__link
+        return super().__getitem__(GroupBuilder.__link)[name]
     
     def add_soft_link(self, name, path):
         """Add an soft link in this group.
@@ -199,9 +204,9 @@ class GroupBuilder(dict):
             Returns:
                 the LinkBuilder object for the soft link
         """
-        super().__getitem__('links')[name] = LinkBuilder(path)
-        self.obj_type[name] = 'links'
-        return super().__getitem__('links')[name]
+        super().__getitem__(GroupBuilder.__link)[name] = LinkBuilder(path)
+        self.obj_type[name] = GroupBuilder.__link
+        return super().__getitem__(GroupBuilder.__link)[name]
     
     def add_external_link(self, name, file_path, path):
         """Add an external link in this group.
@@ -215,47 +220,48 @@ class GroupBuilder(dict):
             Returns:
                 the LinkBuilder object for the external link
         """
-        super().__getitem__('links')[name] = ExternalLinkBuilder(path, file_path)
-        self.obj_type[name] = 'links'
-        return super().__getitem__('links')[name]
+        super().__getitem__(GroupBuilder.__link)[name] = ExternalLinkBuilder(path, file_path)
+        self.obj_type[name] = GroupBuilder.__link
+        return super().__getitem__(GroupBuilder.__link)[name]
     
     def set_attribute(self, name, value):
         """Set an attribute for this group.
         """
-        super().__getitem__('attributes')[name] = value
-        self.obj_type[name] = 'attributes'
+        super().__getitem__(GroupBuilder.__attribute)[name] = value
+        self.obj_type[name] = GroupBuilder.__attribute
 
     #TODO: write unittests for this method
     def deep_update(self, builder):
         # merge subgroups
-        groups = super(GroupBuilder, builder).__getitem__('groups')
-        self_groups = super().__getitem__('groups')
+        groups = super(GroupBuilder, builder).__getitem__(GroupBuilder.__group)
+        self_groups = super().__getitem__(GroupBuilder.__group)
         for name, subgroup in groups.items():
             if name in self_groups:
                 groups[name].update(subgroup)
             else:
                 self.add_group(name, subgroup)
         # merge datasets
-        for name, dataset in super(GroupBuilder, builder).__getitem__('datasets').items():
-            super().__getitem__('datasets')[name] = dataset
-            self.obj_type[name] = 'datasets'
+        for name, dataset in super(GroupBuilder, builder).__getitem__(GroupBuilder.__dataset).items():
+            super().__getitem__(GroupBuilder.__dataset)[name] = dataset
+            self.obj_type[name] = GroupBuilder.__dataset
         # merge attributes
-        for name, value in super(GroupBuilder, builder).__getitem__('attributes').items():
+        for name, value in super(GroupBuilder, builder).__getitem__(GroupBuilder.__attribute).items():
             self.set_attribute(name, value)
         # merge links
-        for name, link in super(GroupBuilder, builder).__getitem__('links').items():
-            super().__getitem__('links')[name] = link
-            self.obj_type[name] = 'links'
+        for name, link in super(GroupBuilder, builder).__getitem__(GroupBuilder.__link).items():
+            super().__getitem__(GroupBuilder.__link)[name] = link
+            self.obj_type[name] = GroupBuilder.__link
 
     def is_empty(self):
         """Returns true if there are no datasets, attributes, links or 
            subgroups that contain datasets, attributes or links. False otherwise.
         """
-        if len(super().__getitem__('datasets')) or len(super().__getitem__('attributes')) or len(super().__getitem__('links')):
-        #if any(map(lambda k: len(super(dict, self).__getitem__(k)), ('datasets', 'attributes', 'links'))):
+        if (len(super().__getitem__(GroupBuilder.__dataset)) or 
+            len(super().__getitem__(GroupBuilder.__attribute)) or 
+            len(super().__getitem__(GroupBuilder.__link))):
             return False
-        elif len(super().__getitem__('groups')):
-            return all(g.is_empty() for g in super().__getitem__('groups').values())
+        elif len(super().__getitem__(GroupBuilder.__group)):
+            return all(g.is_empty() for g in super().__getitem__(GroupBuilder.__group).values())
         else:
             return True
 
@@ -284,8 +290,8 @@ class GroupBuilder(dict):
         if len(key_ar) == 1:
             return super().__getitem__(self.obj_type[key_ar[0]])[key_ar[0]]
         else:
-            if key_ar[0] in super().__getitem__('groups'):
-                return super().__getitem__('groups')[key_ar[0]].__get_rec(key_ar[1:])
+            if key_ar[0] in super().__getitem__(GroupBuilder.__group):
+                return super().__getitem__(GroupBuilder.__group)[key_ar[0]].__get_rec(key_ar[1:])
         raise KeyError(key_ar[0])
                 
 
@@ -299,28 +305,28 @@ class GroupBuilder(dict):
         """Like dict.items, but iterates over key-value pairs in groups,
            datasets, attributes, and links sub-dictionaries.
         """
-        return _itertools.chain(super().__getitem__('groups').items(), 
-                                super().__getitem__('datasets').items(), 
-                                super().__getitem__('attributes').items(),
-                                super().__getitem__('links').items())
+        return _itertools.chain(super().__getitem__(GroupBuilder.__group).items(), 
+                                super().__getitem__(GroupBuilder.__dataset).items(), 
+                                super().__getitem__(GroupBuilder.__attribute).items(),
+                                super().__getitem__(GroupBuilder.__link).items())
 
     def keys(self):
         """Like dict.keys, but iterates over keys in groups, datasets, 
            attributes, and links sub-dictionaries.
         """
-        return _itertools.chain(super().__getitem__('groups').keys(), 
-                                super().__getitem__('datasets').keys(), 
-                                super().__getitem__('attributes').keys(),
-                                super().__getitem__('links').keys())
+        return _itertools.chain(super().__getitem__(GroupBuilder.__group).keys(), 
+                                super().__getitem__(GroupBuilder.__dataset).keys(), 
+                                super().__getitem__(GroupBuilder.__attribute).keys(),
+                                super().__getitem__(GroupBuilder.__link).keys())
 
     def values(self):
         """Like dict.values, but iterates over values in groups, datasets, 
            attributes, and links sub-dictionaries.
         """
-        return _itertools.chain(super().__getitem__('groups').values(), 
-                                super().__getitem__('datasets').values(), 
-                                super().__getitem__('attributes').values(),
-                                super().__getitem__('links').values())
+        return _itertools.chain(super().__getitem__(GroupBuilder.__group).values(), 
+                                super().__getitem__(GroupBuilder.__dataset).values(), 
+                                super().__getitem__(GroupBuilder.__attribute).values(),
+                                super().__getitem__(GroupBuilder.__link).values())
 
 class LinkBuilder(dict):
     def __init__(self, path, hard=False):
