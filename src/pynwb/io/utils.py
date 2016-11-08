@@ -40,9 +40,10 @@ class BaseObjectHandler(object, metaclass=ExtenderMeta):
 
     @classmethod
     @abstractmethod
-    def get_object_property(cls, obj):
-        """Defines how message status gets extracted. This
-           must be implemented in extending classes.
+    def get_object_properties(cls, obj):
+        """Defines how message properties gets extracted. This
+           must be implemented in extending classes, and it
+           must return a list of properties.
         """
         ...
 
@@ -54,31 +55,35 @@ class BaseObjectHandler(object, metaclass=ExtenderMeta):
         return obj
 
     def process(self, obj):
-        ret = None
-        status = self.get_object_property(obj)
-        if status in self.procedures:
-            func = self.procedures[status]
-            ret =  func(self.get_object_representation(obj))
+        properties = self.get_object_properties(obj)
+        ret = list()
+        for prop in properties:
+            val = None
+            if prop in self.procedures:
+                func = self.procedures[prop]
+                val = func(self.get_object_representation(obj))
+            ret.append(val)
         return ret
 
     @classmethod
-    def procedure(cls, status):
+    def procedure(cls, prop):
         """Decorator for adding procedures within definition
            of derived classes.
         """
         def _dec(func):
             func2 = staticmethod(func)
-            setattr(func2, MyBaseClass.__property, status)
+            setattr(func2, MyBaseClass.__property, prop)
             return func2
         return _dec
 
     @classmethod
-    def procedure_ext(cls, status):
+    def procedure_ext(cls, prop):
         """Decorator for adding additional procedures to 
            class procedures from outside class definition.
         """
         def _dec(func):
-            cls.procedures[status] = func
+            cls.procedures[prop] = func
             setattr(cls, func.__name__, func)
             return func
         return _dec
+
