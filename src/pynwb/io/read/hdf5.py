@@ -1,32 +1,4 @@
 
-class ObjectDigester(object):
-
-    @classmethod
-    def container_type(cls, container_type):
-        if not hasattr(cls, 'operations'):
-            setattr(cls, 'operations', dict())
-            setattr(cls, 'results', dict())
-
-        def _dec(func):
-            cls.operations[container_type] = func
-            return func
-        return _dec
-
-    def digest(self, item):
-        self._builder = GroupBuilder()
-        self.__digest_aux(self.transform(item.__class__), item)
-        self.rendered[item] = self._builder
-        return self._builder
-
-    def __digest_aux(self, value, item):
-        if container_cls is object:
-            return
-        for bs_cls in container_type.__bases__:
-            self.__render_aux(bs_cls, item)
-        if value in self.operations:
-            func = self.operations[value]
-            func(item)
-
 class GroupParser(object):
 
     @classmethod
