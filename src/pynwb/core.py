@@ -3,31 +3,72 @@ import copy as _copy
 import abc 
 
 def __type_okay(value, argtype):
-    return True
+    if value is None:
+        return False
+    if isinstance(argtype, str):
+        return argtype in [cls.__name__ for cls in value.__class__.__mro__]
+    elif isinstance(argtype, type):
+        return isinstance(value, argtype)
+    elif isinstance(argtype, tuple) or isinstance(argtype, list):
+        return any(__type_okay(value, i) for i in argtype)
+    else:
+        raise ValueError("argtype must be a type, str, list, or tuple")
+
+def __format_type(argtype):
+    if isinstance(argtype, str):
+        return argtype
+    elif isinstance(argtype, type):
+        return argtype.__name__
+    elif isinstance(argtype, tuple) or isinstance(argtype, list):
+        types = [__format_type(i) for i in argtype]
+        if len(types) > 1:
+            return "%s or %s" % (", ".join(types[:-1]), types[-1])
+        else:
+            return types[0]
+    else:
+        raise ValueError("argtype must be a type, str, list, or tuple")
 
 def __parse_args(validator, args, kwargs, enforce_type=True):
     ret = dict()
     errors = list()
-    argi = 0
+    argsi = 0
     for arg in validator:
         argname = arg['name']
         # check if this is a positional argument or not
+        #
+        # this is a keyword arg
         if 'default' in arg:
-            # this is a key-value arg
+            skip_enforce_type = False
             if argname in kwargs:
                 ret[argname] = kwargs[argname]
-            elif len(args) > argi:
-                ret[argname] = args[argi]
-                argi += 1
+            elif len(args) > argsi:
+                ret[argname] = args[argsi]
+                argsi += 1
             else:
                 ret[argname] = arg['default']
+                # if default is None, skip the argument check
+                # Note: this line effectively only allows NoneType for defaults
+                skip_enforce_type = arg['default'] is None
+            if not skip_enforce_type and enforce_type:
+                argval = ret[argname]
+                if not __type_okay(argval, arg['type']):
+                    fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
+                    errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+        # this is a positional arg
         else:
-            # this is a positional arg
-            ret[argname] = args[argi]
-            argi += 1
-        if not __type_okay(ret[argname], arg['type']):
-            errors.append(argname)
-    
+            # check to make sure all positional
+            # arguments were passed
+            if argsi >= len(args):
+                errors.append("missing argument '%s'" % argname) 
+                continue
+            else:
+                ret[argname] = args[argsi]
+                if enforce_type:
+                    argval = ret[argname]
+                    if not __type_okay(argval, arg['type']):
+                        fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
+                        errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+            argsi += 1
     return {'args': ret, 'errors': errors}
 
 def __sort_args(validator):
@@ -43,7 +84,7 @@ def __sort_args(validator):
 docval_attr_name = 'docval'
 
 def docval(*validator, **options):
-    enforce_type = options.pop('enforce_type', False)
+    enforce_type = options.pop('enforce_type', True)
     validator = __sort_args(validator)
     def dec(func):
         _docval = _copy.copy(options)
@@ -53,8 +94,7 @@ def docval(*validator, **options):
             parsed = __parse_args(validator, args[1:], kwargs, enforce_type=enforce_type)
             parse_err = parsed.get('errors')
             if parse_err:
-                # TODO: handle parse errors
-                pass
+                raise TypeError(', '.join(parse_err))
             return func(self, **parsed['args'])
         setattr(func_call, docval_attr_name, _docval)
         return func_call
@@ -83,11 +123,30 @@ def docstring(func):
     sig += "%s\n\n" % func.__doc__
     sig += "\n".join(map(__sphinx_args, func.docval['args']))
 
+def properties(*props):
+    """A decorator for automatically setting read-only
+       properties for classes
+    """
+    # we need to use this function to force arg to get
+    # passed into the getter by value
+    def get_getter(arg):
+        argname = "_%s" % arg
+        def _func(self):
+            return getattr(self, argname)
+        return _func
+
+    def outer(cls):
+        classdict = dict(cls.__dict__)
+        for arg in props:
+            getter = get_getter(arg)
+            classdict[arg] = property(getter)
+        return type(cls.__name__, cls.__bases__, classdict)
+    return outer
+
 class Container(object):
     
     @docval({'name': 'parent', 'type': 'Container', 'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None},
-            enforce_type=False)
+            {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         parent, container_source = getargs('parent', 'container_source', **kwargs)
         self.__fields = list()
