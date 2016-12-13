@@ -1,5 +1,5 @@
-from .core import properties, docval, getargs
-from .container import Container
+from ..core import docval, getargs
+from .container import properties, Container
 
 
 

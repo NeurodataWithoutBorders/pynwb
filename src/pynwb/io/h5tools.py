@@ -188,7 +188,10 @@ class GroupBuilder(dict):
         #if attributes:
         #    for k, v in attributes.items():
         #        builder.set_attribute(k, v)
-        builder = DatasetBuilder(data, attribtues)
+        if isinstance(data, DatasetBuilder):
+            builder = data
+        else:
+            builder = DatasetBuilder(data, attributes)
         super().__getitem__(GroupBuilder.__dataset)[name] = builder
         self.obj_type[name] = GroupBuilder.__dataset
         return builder
@@ -267,15 +270,17 @@ class GroupBuilder(dict):
         self_groups = super().__getitem__(GroupBuilder.__group)
         for name, subgroup in groups.items():
             if name in self_groups:
-                self_groups[name].update(subgroup)
+                self_groups[name].deep_update(subgroup)
             else:
                 self.add_group(name, subgroup)
         # merge datasets
         datasets = super(GroupBuilder, builder).__getitem__(GroupBuilder.__dataset)
         self_datasets = super().__getitem__(GroupBuilder.__dataset)
         for name, dataset in datasets.items():
+            #self.add_dataset(name, dataset)
             if name in self_datasets:
                 self_datasets[name].deep_update(dataset)
+                #super().__getitem__(GroupBuilder.__dataset)[name] = dataset
             else:
                 #self.add_dataset(name, dataset.data, attributes=copy.copy(dataset.attributes)) #TODO: figure out if we want to do this copying, rather than just pointing to the argument
                 self.add_dataset(name, dataset.data, attributes=dataset.attributes)
@@ -391,7 +396,7 @@ class DatasetBuilder(dict):
     def __init__(self, data=None, attributes=dict()):
         super(DatasetBuilder, self).__init__()
         self['data'] = data   
-        self['attributes'] = dict()
+        self['attributes'] = attributes
 
     @property
     def data(self):
@@ -412,7 +417,8 @@ class DatasetBuilder(dict):
         self._inspector = callable_func
 
     def deep_update(self, dataset):
-        self['data'] = dataset.data #TODO: figure out if we want to add a check for overwrite
+        if dataset.data:
+            self['data'] = dataset.data #TODO: figure out if we want to add a check for overwrite
         self['attributes'].update(dataset.attributes)
     
     # XXX: leave this here for now, we might want it later

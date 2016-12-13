@@ -1,7 +1,8 @@
-from .core import docval, getargs
+from ..core import docval, getargs
 
 
-class NwbContainer(object):
+#class NwbContainer(object):
+class Container(object):
     
     @docval({'name': 'parent', 'type': 'Container', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
@@ -37,7 +38,8 @@ class NwbContainer(object):
         self.__parent = parent_container
         parent_container.__subcontainers.append(self)
 
-def nwb_properties(*args, **kwargs):
+#def nwb_properties(*args, **kwargs):
+def properties(*args, **kwargs):
     def get_func(arg):
         def _func(self):
             return self.fields.get(arg)

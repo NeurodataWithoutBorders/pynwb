@@ -1,4 +1,4 @@
-from pkg_resources import resource_string as _resource_string
+from pkg_resources import resource_stream as _resource_stream
 from pickle import loads as _loads
 from .core import get_timeseries, TimeSeriesValidator
 

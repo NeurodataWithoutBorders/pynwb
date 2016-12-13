@@ -37,17 +37,16 @@ import copy
 import numpy as np
 import bisect
 
-from .core import properties
-from .container import Container
+from ..core import docval, getargs
+from .container import Container, properties
 from .timeseries import TimeSeries
 
 __std_fields = ('name',
                 'description',
                 'start_time',
                 'stop_time',
-                'neurodata_type',
                 'tags')
-@properties(*__std_fields)
+@properties(*__std_fields, neurodata_type='Epoch')
 class Epoch(Container):
     """ Epoch object
         Epochs represent specific experimental intervals and store
@@ -60,7 +59,7 @@ class Epoch(Container):
         not be instantiated directly
     """
 
-    _neurodata_type = 'Epoch'
+    #_neurodata_type = 'Epoch'
 
     def __init__(self, name, start, stop, description=None, parent=None):
         super(Epoch, self).__init__(parent=parent)
@@ -72,13 +71,13 @@ class Epoch(Container):
         # dict to keep track of which time series are linked to this epoch
         self._timeseries = dict()
         # start and stop time (in seconds)
-        self._start_time = start
-        self._stop_time = stop
+        self.start_time = start
+        self.stop_time = stop
         # name of epoch
-        self._name = name
-        self._description = description
+        self.name = name
+        self.description = description
 
-        self._tags = set()
+        self.tags = set()
 
 
         # make a copy of the epoch specification
@@ -112,7 +111,7 @@ class Epoch(Container):
             Returns:
                 *nothing*
         """
-        self._description = desc
+        self.description = desc
         #self.set_value("description", desc)
 
 #    def set_value(self, key, value, **attrs):
@@ -146,7 +145,7 @@ class Epoch(Container):
             Returns:
                 *nothing*
         """
-        self._tags.add(tag)
+        self.tags.add(tag)
 
     # limit intervals to time boundary of epoch, but don't perform 
     #   additional logic (ie, if user supplies overlapping intervals,
@@ -353,8 +352,8 @@ __epoch_timseries_fields = ('name',
 class EpochTimeSeries(Container):
     def __init__(self, ts, start_time, stop_time, name=None, parent=None):
         super(EpochTimeSeries, self).__init__(parent)
-        self._name = name if name else ts.name
-        self._timeseries = ts
+        self.name = name if name else ts.name
+        self.timeseries = ts
         #TODO: do something to compute count and idx_start from start_time
         # and stop_time
         if ts.starting_time:
@@ -374,8 +373,8 @@ class EpochTimeSeries(Container):
             stop_idx = bisect.bisect_left(timestamps, stop_time)
             #TODO: check to see if this should be inclusive or exclusive
             # assume exclusive for now - AJT 10/24/16
-        self._count = stop_idx - start_idx
-        self._idx_start = start_idx
+        self.count = stop_idx - start_idx
+        self.idx_start = start_idx
         
 
     

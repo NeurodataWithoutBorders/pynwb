@@ -23,7 +23,7 @@ class Hdf5Writer(object):
             links.update(tmp_links)
             
         for link_name, link_builder in links.items():
-            if isinstance(link_builder, h5tools.ExternalLinkBuilder)
+            if isinstance(link_builder, h5tools.ExternalLinkBuilder):
                 f[link_name] = h5py.ExternalLink(link_builder.file_path, link_builder.path)
             elif link_builder.hard:
                 f[link_name] = f[link_builder.path]

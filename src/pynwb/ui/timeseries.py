@@ -39,8 +39,8 @@ import copy
 import numpy as np
 from collections import Iterable
 
-from .core import properties, docval, getargs
-from .container import Container 
+from ..core import docval, getargs
+from .container import Container, properties
 
 #### possibly useful code later:
 
@@ -128,7 +128,6 @@ class TimeSeries(Container):
         self.timestamps_link = set()
         self.data = None
         self.timestamps = None
-        self.time_unit = None
         self.interval = None
     
     @property
