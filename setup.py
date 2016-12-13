@@ -25,18 +25,18 @@ with open('LICENSE') as f:
 schema_path = 'schema/schema.pkl'
 
 setup_args = {
-    name='PyNWB',
-    version='0.0.1',
-    description='Package for working with Neurodata stored in the NWB format',
-    long_description=readme,
-    author='Andrew Tritt',
-    author_email='ajtritt@lbl.gov',
-    url='https://bitbucket.org/lblneuro/pynwb',
-    license=license,
-    #packages=find_packages(exclude=('tests', 'docs'))
-    packages=['pynwb'],
-    package_dir={'pynwb':'src/pynwb'},
-    package_data={'pynwb':[schema_path]}
+    'name': 'PyNWB',
+    'version': '0.0.1',
+    'description': 'Package for working with Neurodata stored in the NWB format',
+    'long_description': readme,
+    'author': 'Andrew Tritt',
+    'author_email': 'ajtritt@lbl.gov',
+    'url': 'https://bitbucket.org/lblneuro/pynwb',
+    'license': license,
+    #'packages': find_packages(exclude=('tests', 'docs'))
+    'packages': ['pynwb'],
+    'package_dir': {'pynwb':'src/pynwb'},
+    'package_data': {'pynwb':[schema_path]}
 }
 
 if __name__ == '__main__':
