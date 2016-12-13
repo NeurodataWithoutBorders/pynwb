@@ -57,13 +57,13 @@ def __get_type__(data):
     else:
         return __get_type__(data[0])
 
-def write_dataset(parent, name, data, attributes):
+def write_dataset(parent, name, data, attributes, function=None):
     if hasattr(data, '__len__'):
         __list_fill__(parent, name, data)
     else:
         chunk_size = 100
         #TODO: do something to figure out appropriate chunk_size
-        __iter_fill__(parent, name, data, chunk_size)
+        __iter_fill__(parent, name, data, chunk_size, function=None)
     set_attributes(dest, attributes)
     
 def __extend_dataset__(dset):
@@ -76,7 +76,7 @@ def __trim_dataset__(dset, length):
     new_shape[0] = length
     dset.resize(new_shape)
 
-def __iter_fill__(parent, name, data, chunk_size):
+def __iter_fill__(parent, name, data, chunk_size, function=None):
     #data_shape = list(__get_shape__(data))
     #data_shape[0] = None
     #data_shape = tuple(data_shape)
@@ -93,6 +93,15 @@ def __iter_fill__(parent, name, data, chunk_size):
     more_data = True
     args = [data_iter] * chunk_size
     chunks = _itertools.zip_longest(*args, fillvalue=None)
+
+    if function:
+        def proc_chunk(chunk):
+            dset[idx:idx+len(chunk),] = chunk
+            function(chunk)
+    else:
+        def proc_chunk(chunk):
+            dset[idx:idx+len(chunk),] = chunk
+            
     while more_data:
         try:
             next_chunk = next(chunks)
@@ -101,7 +110,8 @@ def __iter_fill__(parent, name, data, chunk_size):
             more_data = False
         if idx >= dset.shape[0] or idx+len(curr_chunk) > dset.shape[0]:
             __extend_dataset__(dset)
-        dset[idx:idx+len(curr_chunk),] = curr_chunk
+        #dset[idx:idx+len(curr_chunk),] = curr_chunk
+        proc_chunk(curr_chunk)
         curr_chunk = next_chunk
         idx += chunk_size
     return dset
@@ -162,23 +172,42 @@ class GroupBuilder(dict):
     def links(self):
         return super().__getitem__(GroupBuilder.__link)
 
-    def add_dataset(self, name, data, **kwargs):
+    def add_dataset(self, name, data=None, attributes=dict()):
         """Add a dataset to this group
             Returns:
                 the DatasetBuilder object for the dataset
         """
-        super().__getitem__(GroupBuilder.__dataset)[name] = DatasetBuilder(data, **kwargs)
+        #if name in self.obj_type:
+        #    obj_type = self.obj_type[name]
+        #    if obj_type != GroupBuilder.__dataset:
+        #        raise KeyError("'%s' already exists as %s" % (name, obj_type))
+        #    builder = super().__getitem__(GroupBuilder.__dataset)[name]
+        #else:
+        #if data:
+        #    builder.data = data
+        #if attributes:
+        #    for k, v in attributes.items():
+        #        builder.set_attribute(k, v)
+        builder = DatasetBuilder(data, attribtues)
+        super().__getitem__(GroupBuilder.__dataset)[name] = builder
         self.obj_type[name] = GroupBuilder.__dataset
-        return super().__getitem__(GroupBuilder.__dataset)[name]
+        return builder
     
     def add_group(self, name, builder=None):
         """Add a subgroup to this group
             Returns:
                 the GroupBuilder object for the subgroup
         """
-        super().__getitem__(GroupBuilder.__group)[name] = builder if builder else GroupBuilder()
+        if name in self.obj_type:
+            if obj_type != GroupBuilder.__group:
+                raise KeyError("'%s' already exists as %s" % (name, obj_type))
+        if not builder:
+            tmp = GroupBuilder()
+        else:
+            tmp = builder
+        super().__getitem__(GroupBuilder.__group)[name] = tmp
         self.obj_type[name] = GroupBuilder.__group
-        return super().__getitem__(GroupBuilder.__group)[name]
+        return tmp
 
     def add_hard_link(self, name, path):
         """Add an hard link in this group.
@@ -232,18 +261,24 @@ class GroupBuilder(dict):
 
     #TODO: write unittests for this method
     def deep_update(self, builder):
+        """ recursively update groups"""
         # merge subgroups
         groups = super(GroupBuilder, builder).__getitem__(GroupBuilder.__group)
         self_groups = super().__getitem__(GroupBuilder.__group)
         for name, subgroup in groups.items():
             if name in self_groups:
-                groups[name].update(subgroup)
+                self_groups[name].update(subgroup)
             else:
                 self.add_group(name, subgroup)
         # merge datasets
-        for name, dataset in super(GroupBuilder, builder).__getitem__(GroupBuilder.__dataset).items():
-            super().__getitem__(GroupBuilder.__dataset)[name] = dataset
-            self.obj_type[name] = GroupBuilder.__dataset
+        datasets = super(GroupBuilder, builder).__getitem__(GroupBuilder.__dataset)
+        self_datasets = super().__getitem__(GroupBuilder.__dataset)
+        for name, dataset in datasets.items():
+            if name in self_datasets:
+                self_datasets[name].deep_update(dataset)
+            else:
+                #self.add_dataset(name, dataset.data, attributes=copy.copy(dataset.attributes)) #TODO: figure out if we want to do this copying, rather than just pointing to the argument
+                self.add_dataset(name, dataset.data, attributes=dataset.attributes)
         # merge attributes
         for name, value in super(GroupBuilder, builder).__getitem__(GroupBuilder.__attribute).items():
             self.set_attribute(name, value)
@@ -353,15 +388,32 @@ class ExternalLinkBuilder(LinkBuilder):
         return self['file_path']
 
 class DatasetBuilder(dict):
-    def __init__(self, data, **kwargs):
-        super()
+    def __init__(self, data=None, attributes=dict()):
+        super(DatasetBuilder, self).__init__()
         self['data'] = data   
-        self['attributes'] = kwargs.pop('attributes', dict())
-        for key, value in kwargs.items():
-            self[key] = value
+        self['attributes'] = dict()
+
+    @property
+    def data(self):
+        return self['data']
+
+    @data.setter
+    def data(self, val):
+        self['data'] = val
+
+    @property
+    def attributes(self):
+        return self['attributes']
 
     def set_attribute(self, name, value):
         self['attributes'][name] = value
+
+    def add_iter_inspector(self, callable_func):
+        self._inspector = callable_func
+
+    def deep_update(self, dataset):
+        self['data'] = dataset.data #TODO: figure out if we want to add a check for overwrite
+        self['attributes'].update(dataset.attributes)
     
     # XXX: leave this here for now, we might want it later
     #def __setitem__(self, args, val):
