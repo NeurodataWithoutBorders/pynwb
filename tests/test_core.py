@@ -4,6 +4,7 @@ import unittest
 
 
 from pynwb.core import *
+from pynwb.ui.container import Container
 
 
 class MyTestClass(Container):
@@ -163,30 +164,3 @@ class TestDocValidator(unittest.TestCase):
             kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', None, arg6=True)
         msg = "incorrect type for 'arg5' (got 'NoneType', expected 'int')"
         self.assertEqual(cm.exception.args[0], msg)
-
-class TestContainer(unittest.TestCase):
-
-    def test_constructor(self):
-        """Test that constructor properly sets parent
-           and subcontainers called with parent
-        """
-        parent_obj = MyTestClass()
-        child_obj = MyTestSubclass(parent=parent_obj)
-        self.assertIs(child_obj.parent, parent_obj)
-    
-    def test_set_parent_parent(self):
-        """Test that parent setter  properly sets parent
-        """
-        parent_obj = MyTestClass()
-        child_obj = MyTestSubclass()
-        child_obj.parent = parent_obj
-        self.assertIs(child_obj.parent, parent_obj)
-    
-    def test_set_parent_subcontainer(self):
-        """Test that parent setter properly sets parent subcontainers
-        """
-        parent_obj = MyTestClass()
-        child_obj = MyTestSubclass()
-        child_obj.parent = parent_obj
-        self.assertListEqual(parent_obj.subcontainers, [child_obj])
-    

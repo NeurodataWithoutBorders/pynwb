@@ -1,7 +1,7 @@
 import unittest
 from context import pynwb
 
-from pynwb.ephys import *
+from pynwb.ui.ephys import *
 
 class TestElectrodeGroupConstructor(unittest.TestCase):
 
@@ -17,7 +17,6 @@ class TestElectrodeGroupConstructor(unittest.TestCase):
                                  self.desc,
                                  self.dev,
                                  self.loc)
-
 
     def test_impedance(self):
         self.assertEqual(self.eg.impedance, -1)

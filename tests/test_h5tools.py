@@ -4,7 +4,7 @@
 from context import pynwb
 import unittest
 
-from pynwb.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
+from pynwb.io.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
 
 import h5py
 import os
