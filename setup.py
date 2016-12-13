@@ -1,18 +1,25 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-from urllib.request import urlopen
+from urllib.request import urlretrieve
 import json
 import pickle
+import os
 
 
+schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
+print(schema_dir)
+if not os.path.exists(schema_dir):
+    os.makedirs(schema_dir)
+schema_path = '%s/spec.json' % schema_dir
 def get_schema():
     '''Here, we will do something to access a URL stored in the pynwb repo.
     This URL will contain the source of the schema.  
     '''
     # we should look this up in a config file somewhere
     url = "https://bitbucket.org/lblneuro/nwb-schema/downloads/nwb_1.0.4_beta.json"
-    schema = urlopen(url)
+    dest = schema_path
+    schema = urlretrieve(url, dest)
     return schema
 
 with open('README.rst') as f:
@@ -22,7 +29,6 @@ with open('LICENSE') as f:
     license = f.read()
 
     
-schema_path = 'schema/schema.pkl'
 
 setup_args = {
     'name': 'PyNWB',
@@ -47,10 +53,7 @@ if __name__ == '__main__':
     Python file as an ecoded string. This way, modifying the schema will require
     rebuilding the package, and the schema will be hardcoded.
     '''
-    schema = get_schema()
-    with open(schema_path,'w') as schema_out:
-        pickle.dump(schema, schema_out)
-
+    get_schema()
     setup(**setup_args)
 
 
