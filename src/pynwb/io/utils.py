@@ -1,26 +1,6 @@
 import abc as _abc
 
-class ExtenderMeta(_abc.ABCMeta):
-    """A metaclass that will extend the base class initialization
-       routine by executing additional functions defined in 
-       classes that use this metaclass
-        
-       In general, you should not use this class, unless your name is
-       Andrew James Tritt.
-    """
-
-    __postinit = '__postinit'
-    def post_init(func):
-        print("setting __post_definition__ in %s" % str(func))
-        setattr(func, MyMeta.__postinit, True)
-        return classmethod(func)
-
-    def __init__(cls, name, bases, classdict):
-        super(MyMeta, cls).__init__(name, bases, classdict)
-        it = (getattr(cls, n) for n in dir(cls))
-        it = (a for a in it if hasattr(a, MyMeta.__postinit))
-        for func in it:
-            func()
+from pynwb.core import ExtenderMeta
 
 class BaseObjectHandler(object, metaclass=ExtenderMeta):
 
@@ -28,14 +8,14 @@ class BaseObjectHandler(object, metaclass=ExtenderMeta):
     @ExtenderMeta.post_init
     def __gather_procedures(cls):
         cls.procedures = dict()
-        for name, func in filter(lambda tup: hasattr(tup[1], cls.__property), cls.__dict__.items()):
+        for name, func in filter(lambda tup: hasattr(tup[1], __property), cls.__dict__.items()):
             # NOTE: We need to get the original functions from the class dict since
             # the attributes added to cls after calling type will be processed. 
             # i.e. staticmethod objects lose their attributes in the binding process
             # But, we need to get the function after it's been bound, since
             # staticmethod objects are not callable (after staticmethods are processed
             # by type, they are bound to the class as a function)
-            cls.procedures[getattr(func, cls.__property)] = getattr(cls, name)
+            cls.procedures[getattr(func, __property)] = getattr(cls, name)
     
 
     @classmethod
@@ -72,7 +52,7 @@ class BaseObjectHandler(object, metaclass=ExtenderMeta):
         """
         def _dec(func):
             func2 = staticmethod(func)
-            setattr(func2, MyBaseClass.__property, prop)
+            setattr(func2, __property, prop)
             return func2
         return _dec
 
