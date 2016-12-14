@@ -1,5 +1,7 @@
-from .. import nwbts
+from pynwb.ui import timeseries
+from pynwb.ui import module
 from .. import h5tools
+from ..utils import BaseObjectHandler
 
 import h5py as _h5py
 
@@ -34,10 +36,10 @@ class Hdf5Writer(object):
 class Hdf5ContainerRenderer(BaseObjectHandler):
 
     _ts_locations = {
-        nwbts.TS_MOD_ACQUISITION: "acquisition/timeseries",
-        nwbts.TS_MOD_STIMULUS:    "stimulus/presentation",
-        nwbts.TS_MOD_TEMPLATE:    "stimulus/templates",
-        nwbts.TS_MOD_OTHER:       ""
+        timeseries.TS_MOD_ACQUISITION: "acquisition/timeseries",
+        timeseries.TS_MOD_STIMULUS:    "stimulus/presentation",
+        timeseries.TS_MOD_TEMPLATE:    "stimulus/templates",
+        timeseries.TS_MOD_OTHER:       ""
     }
 
     def __init__(self):
@@ -64,10 +66,10 @@ class Hdf5ContainerRenderer(BaseObjectHandler):
         if isinstance(child, nwb.NWBFile):
             return ""
         if isinstance(parent, nwb.NWBFile):
-            if isinstance(child, nwbts.TimeSeries):
+            if isinstance(child, timeseries.TimeSeries):
                 mod = parent.get_modality(child)
                 return _posixpath.join(_ts_locations[mod], child.name)
-            elif isinstance(child, nwbts.Module):
+            elif isinstance(child, module.Module):
                 return _posixpath.join('processing', child.name)
         elif isinstance(parent, nwbmo.Module):
             if isinstance(child, nwbmo.Interface):
@@ -129,9 +131,9 @@ class NwbFileHdf5Renderer(Hdf5ContainerRenderer):
                 }
             )
         )
-        builder.add_group('epochs': GroupBuilder())
-        builder.add_group('processing': GroupBuilder())
-        builder.add_group('analysis': GroupBuilder())
+        builder.add_group('epochs', GroupBuilder())
+        builder.add_group('processing', GroupBuilder())
+        builder.add_group('analysis', GroupBuilder())
     
         builder.add_dataset("nwb_version", DatasetBuilder(FILE_VERSION_STR))
         builder.add_dataset("identifier", DatasetBuilder(container.file_identifier))
@@ -210,7 +212,7 @@ def render_container(container, attr_map):
 
 class TimeSeriesHdf5Renderer(Hdf5ContainerRenderer):
     
-    @Hdf5ContainerRenderer.procedure(nwbts.TimeSeries)
+    @Hdf5ContainerRenderer.procedure(timeseries.TimeSeries)
     def time_series(container):
         builder = GroupBuilder()
         # set top-level metadata
@@ -262,20 +264,20 @@ class TimeSeriesHdf5Renderer(Hdf5ContainerRenderer):
         #END Set timestamps
         return builder
     
-    @Hdf5ContainerRenderer.procedure(nwbts.TimeSeries)
+    @Hdf5ContainerRenderer.procedure(timeseries.TimeSeries)
     def abstract_feature_series(container):
         builder = GroupBuilder()
         builder.add_dataset('features', container.features)
         builder.add_dataset('feature_units', container.units)
         return builder
     
-    @Hdf5ContainerRenderer.procedure(nwbts.ElectricalSeries)
+    @Hdf5ContainerRenderer.procedure(timeseries.ElectricalSeries)
     def electrical_series(container):
         builder = GroupBuilder()
         builder.add_dataset("electrode_idx", container.electrodes)
         return builder
     
-    @Hdf5ContainerRenderer.procedure(nwbts.SpatialSeries)
+    @Hdf5ContainerRenderer.procedure(timeseries.SpatialSeries)
     def spatial_series(container):
         builder = GroupBuilder()
         builder.add_dataset("reference_frame", container.reference_frame)
@@ -289,7 +291,7 @@ class ModuleHdf5Renderer(Hdf5ContainerRenderer):
         builder = GroupBuilder()
         iface_renderer = InterfaceHdf5Renderer()
         for name, interface in container.interfaces.items():
-            interface_builder = iface_renderer.process(interface):
+            interface_builder = iface_renderer.process(interface)
             builder.add_group(interface.iface_type, interface_builder)
         return builder
     
