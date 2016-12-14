@@ -1,2 +1,2 @@
 
-from hdf5 import Hdf5Writer
+from .hdf5 import Hdf5Writer

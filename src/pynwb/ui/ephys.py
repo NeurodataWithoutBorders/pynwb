@@ -1,5 +1,7 @@
-from ..core import docval, getargs
-from .container import properties, Container
+from pynwb.core import docval, getargs
+from pynwb.ui.container import properties, Container
+#from pynwb.ui.module import Interface
+from pynwb.ui.iface import Interface
 
 
 
@@ -13,8 +15,8 @@ __std_fields = ('name',
 @properties(*__std_fields)
 class ElectrodeGroup(Container):
 
-    @docval(*Container.__init__.docval['args'],
-            {'name': 'name', 'type': (str, int), 'doc': 'the name of this electrode'},
+    #@docval(*Container.__init__.docval['args'],
+    @docval({'name': 'name', 'type': (str, int), 'doc': 'the name of this electrode'},
             {'name': 'coord', 'type': tuple, 'doc': 'the x,y,z coordinates of this electrode'},
             {'name': 'desc', 'type': str, 'doc': 'a description for this electrode'},
             {'name': 'dev', 'type': str, 'doc': 'the device this electrode was recorded from on'},
@@ -169,7 +171,7 @@ class LFP(Interface):
         self._lfp_data = lfp_ts
         self._lfp_data.parent = self
 
-__filt_ephys_std_fields = ('ephys_data')
+__filter_ephys_std_fields = ('ephys_data',)
 @properties(*__filter_ephys_std_fields)
 class FilteredEphys(Interface):
 
@@ -212,7 +214,7 @@ class FeatureExtraction(Interface):
     def add_event_feature(self, time, features):
         if len(features) != len(self._electrodes):
             raise ValueError("incorrent dimensions: features -  must have one value per channel. Got %d, expected %d" % (len(features), len(self._electrodes)))
-        if len(features[0] != len(self._description):
+        if len(features[0]) != len(self._description):
             raise ValueError("incorrent dimensions: features -  must have one value per feature. Got %d, expected %d" % (len(features[0]), len(self._description)))
         self._features.append(features)
         self._event_times.append(time)

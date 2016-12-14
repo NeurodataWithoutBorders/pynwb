@@ -1,21 +1,21 @@
-import abc as _abc
+from abc import abstractmethod
 
 from pynwb.core import ExtenderMeta
 
 class BaseObjectHandler(object, metaclass=ExtenderMeta):
 
-    __property = "__item_property__"
+    _property = "__item_property__"
     @ExtenderMeta.post_init
     def __gather_procedures(cls):
         cls.procedures = dict()
-        for name, func in filter(lambda tup: hasattr(tup[1], __property), cls.__dict__.items()):
+        for name, func in filter(lambda tup: hasattr(tup[1], cls._property), cls.__dict__.items()):
             # NOTE: We need to get the original functions from the class dict since
             # the attributes added to cls after calling type will be processed. 
             # i.e. staticmethod objects lose their attributes in the binding process
             # But, we need to get the function after it's been bound, since
             # staticmethod objects are not callable (after staticmethods are processed
             # by type, they are bound to the class as a function)
-            cls.procedures[getattr(func, __property)] = getattr(cls, name)
+            cls.procedures[getattr(func, cls._property)] = getattr(cls, name)
     
 
     @classmethod
@@ -52,7 +52,7 @@ class BaseObjectHandler(object, metaclass=ExtenderMeta):
         """
         def _dec(func):
             func2 = staticmethod(func)
-            setattr(func2, __property, prop)
+            setattr(func2, cls._property, prop)
             return func2
         return _dec
 

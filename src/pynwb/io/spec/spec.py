@@ -1,5 +1,6 @@
 import abc
 from itertools import chain
+from pynwb.core import docval
 
 class SpecCatalog(object):
     __specs = dict()
@@ -57,7 +58,7 @@ class Spec(dict, metaclass=abc.ABCMeta):
     def set_parent(self, spec):
         self._parent = spec
 
-__attr_args = [
+_attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': True},
@@ -69,7 +70,7 @@ class AttributeSpec(Spec):
     """ Specification for attributes
     """
     
-    @docval(*__attr_args)
+    @docval(*_attr_args)
     def __init__(self, **kwargs):
         name, dtype, doc, required, parent, required, const = getargs('name', 'dtype', 'doc', 'required', 'parent', 'required', 'const', **kwargs)
         super().__init__(name, doc=doc, required=required, parent=parent)
@@ -81,7 +82,7 @@ class AttributeSpec(Spec):
         """Verify this attribute
         """
         err = dict()
-        if any(t.__name__ == self['type'] for t in type(value).__mro__)
+        if any(t.__name__ == self['type'] for t in type(value).__mro__):
             err['name'] = self['name']
             err['type'] = 'attribute'
             err['reason'] = 'incorrect type' 
@@ -90,7 +91,7 @@ class AttributeSpec(Spec):
         else:
             return list()
 
-__attrbl_args = [
+_attrbl_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': '*'},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
@@ -99,10 +100,10 @@ __attrbl_args = [
         {'name': 'nwb_type', 'type': bool, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'extends', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
 ]
-class AttributableSpec(Spec)
+class AttributableSpec(Spec):
     """ A specification for any object that can hold attributes.
     """
-    @docval(*__attrbl_args)
+    @docval(*_attrbl_args)
     def __init__(self, **kwargs):
         name, doc, parent, required, attributes, linkable, nwb_type = getargs('name', 'doc', 'parent', 'required', 'attributes', 'linkable', 'nwb_type', **kwargs)
         super().__init__(name, doc=doc, required=required, parent=parent)
@@ -126,7 +127,7 @@ class AttributableSpec(Spec)
     def linkable(self):
         return self['linkable']
 
-    @docval(*__attr_args)
+    @docval(*_attr_args)
     def add_attribute(self, **kwargs):
         """ Add an attribute to this object
         """
@@ -158,7 +159,7 @@ class AttributableSpec(Spec)
                                'reason': 'missing'})
         return errors
 
-__dset_args = [
+_dset_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': '*'},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
@@ -170,7 +171,7 @@ class DatasetSpec(AttributableSpec):
     """ Specification for datasets
     """
 
-    @docval(*__dset_args)
+    @docval(*_dset_args)
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self['dimensions'] = dimensions
@@ -188,13 +189,13 @@ class DatasetSpec(AttributableSpec):
         # verify attributes
         errors = super(DatasetSpec, self).verify(dataset_builder)
         err = {'name': self['name'], 'type': 'dataset'}
-        if self.__check_dim(self['dimensions'], dataset_builder.data)
+        if self.__check_dim(self['dimensions'], dataset_builder.data):
             err['reason'] = 'incorrect dimensions'
         if 'reason' in err:
             errors.append(err)
         return errors
 
-__group_args = [
+_group_args = [
         {'name': 'name', 'type': str, 'doc': 'the name of this group', 'default': '*'},
         {'name': 'groups', 'type': list, 'doc': 'the subgroups in this group', 'default': list()},
         {'name': 'datasets', 'type': list, 'doc': 'the datasets in this group', 'default': list()},
@@ -209,7 +210,7 @@ class GroupSpec(AttributableSpec):
     """ Specification for groups
     """
     
-    @docval(*__group_args)
+    @docval(*_group_args)
     def __init__(self, **kwargs):
         super(GroupSpec, self).__init__(**kwargs)
         self['groups'] = getargs('groups', kwargs)
@@ -229,7 +230,7 @@ class GroupSpec(AttributableSpec):
     def links(self):
         return self['links']
 
-    @docval(*__group_args)
+    @docval(*_group_args)
     def add_group(self, **kwargs):
         """ Add a group to this group spec
         """
@@ -242,7 +243,7 @@ class GroupSpec(AttributableSpec):
         self['groups'].append(spec)
         return spec
     
-    @docval(*__dset_args)
+    @docval(*_dset_args)
     def add_dataset(self, **kwargs):
         """ Add a dataset to this group spec
         """
@@ -266,7 +267,7 @@ class GroupSpec(AttributableSpec):
                     err['name'] = "%s/%s" % (self['name'], err['name'])
                     errors.append(error)
             else:
-                errors.append({'name': "%s/%s" % (self['name'] dset_spec['name']), 
+                errors.append({'name': "%s/%s" % (self['name'], dset_spec['name']),
                                'type': 'dataset', 
                                'reason': 'missing'})
         # verify groups
@@ -277,7 +278,7 @@ class GroupSpec(AttributableSpec):
                     err['name'] = "%s/%s" % (self['name'], err['name'])
                     errors.append(error)
             else:
-                errors.append({'name': "%s/%s" % (self['name'] group_spec['name']), 
+                errors.append({'name': "%s/%s" % (self['name'], group_spec['name']), 
                                'type': 'group',
                                'reason': 'missing'})
         return errors

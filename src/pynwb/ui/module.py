@@ -37,9 +37,9 @@ import copy
 import math
 import numpy as np
 
-from .analysis import ephys as _ephys
+from .import ephys as _ephys
 
-from .container import Container
+from .container import properties, Container
 
 class Module(Container):
     """ Processing module. This is a container for one or more interfaces
@@ -101,170 +101,164 @@ class Module(Container):
         return iface
 
         
-    def create_interface(self, iface_type):
-        """ Creates an interface within the module. 
-            Each module can have multiple interfaces.
-            Standard interface options are:
-
-                BehavioralEpochs -- general container for storing and
-                publishing intervals (IntervalSeries)
-
-                BehavioralEvents -- general container for storing and
-                publishing event series (TimeSeries)
-
-                BehavioralTimeSeries -- general container for storing and
-                publishing time series (TimeSeries)
-
-                Clustering -- clustered spike data, whether from
-                automatic clustering tools or as a result of manual
-                sorting
-
-                ClusterWaveform -- mean event waveform of clustered data
-
-                CompassDirection -- publishes 1+ SpatialSeries storing
-                direction in degrees (or radians) 
-
-                DfOverF -- publishes 1+ RoiResponseSeries showing
-                dF/F in observed ROIs
-
-                EventDetection -- information about detected events
-
-                EventWaveform -- publishes 1+ SpikeEventSeries
-                of extracellularly recorded spike events
-
-                EyeTracking -- publishes 1+ SpatialSeries storing 
-                direction of gaze
-
-                FeatureExtraction -- salient features of events
-
-                FilteredEphys -- publishes 1+ ElectricalSeries storing
-                data from digital filtering
-
-                Fluorescence -- publishes 1+ RoiResponseSeries showing
-                fluorescence of observed ROIs
-
-                ImageSegmentation -- publishes groups of pixels that
-                represent regions of interest in an image
-
-                LFP -- a special case of FilteredEphys, filtered and
-                downsampled for LFP signal
-
-                MotionCorrection -- publishes image stacks whos frames
-                have been corrected to account for motion
-
-                Position -- publishes 1+ SpatialSeries storing physical
-                position. This can be along x, xy or xyz axes
-
-                PupilTracking -- publishes 1+ standard *TimeSeries* 
-                that stores pupil size
-
-                UnitTimes -- published data about the time(s) spikes
-                were detected in an observed unit
-        """
-        iface_class = getattr(sys.modules[__name__], iface_type, None)
-        
-        self.interfaces[name] = iface_class(if_spec)
-
-        if iface_type not in self.nwb.spec["Interface"]:
-            self.nwb.fatal_error("unrecognized interface: " + iface_type)
-        if_spec = self.create_interface_definition(iface_type)
-        if iface_type == "ImageSegmentation":
-            iface = ImageSegmentation(iface_type, self, if_spec)
-        elif iface_type == "Clustering":
-            iface = Clustering(iface_type, self, if_spec)
-        elif iface_type == "ImagingRetinotopy":
-            iface = ImagingRetinotopy(iface_type, self, if_spec)
-        elif iface_type == "UnitTimes":
-            iface = UnitTimes(iface_type, self, if_spec)
-        elif iface_type == "MotionCorrection":
-            iface = MotionCorrection(iface_type, self, if_spec)
-        else:
-            iface = Interface(iface_type, self, if_spec)
-        self.ifaces[iface_type] = iface
-        from . import nwb as nwblib
-        iface.serial_num = nwblib.register_creation("Interface -- " + iface_type)
-        return iface
-
-    # internal function
-    # read spec to create time series definition. do it recursively 
-    #   if time series are subclassed
-    def create_interface_definition(self, if_type):
-        super_spec = copy.deepcopy(self.nwb.spec["Interface"]["SuperInterface"])
-        if_spec = self.nwb.spec["Interface"][if_type]
-        from . import nwb as nwblib
-        return nwblib.recursive_dictionary_merge(super_spec, if_spec)
-
-    def set_description(self, desc):
-        """ Set description field in module
-
-            Arguments:
-                *desc* (text) Description of module
-
-            Returns:
-                *nothing*
-        """
-        self.set_value("description", desc)
-
-    def set_value(self, key, value, **attrs):
-        """Adds a custom key-value pair (ie, dataset) to the root of 
-           the module.
-   
-           Arguments:
-               *key* (string) A unique identifier within the TimeSeries
-
-               *value* (any) The value associated with this key
-
-               *attrs* (dict) Dictionary of key-value pairs to be
-               stored as attributes
-   
-           Returns:
-               *nothing*
-        """
-        if self.finalized:
-            self.nwb.fatal_error("Added value to module after finalization")
-        self.spec[key] = copy.deepcopy(self.spec["[]"])
-        dtype = self.spec[key]["_datatype"]
-        name = "module " + self.name
-        self.nwb.set_value_internal(key, value, self.spec, name, dtype, **attrs)
-
-    def finalize(self):
-        """ Completes the module and writes changes to disk.
-
-            Arguments: 
-                *none*
-
-            Returns:
-                *nothing*
-        """
-        if self.finalized:
-            return
-        self.finalized = True
-        # finalize interfaces
-        iface_names = []
-        for k, v in self.ifaces.items():
-            v.finalize()
-            iface_names.append(v.name)
-        iface_names.sort()
-        self.spec["_attributes"]["interfaces"]["_value"] = iface_names
-        # write own data
-        grp = self.nwb.file_pointer["processing/" + self.name]
-        self.nwb.write_datasets(grp, "", self.spec)
-        from . import nwb as nwblib
-        nwblib.register_finalization(self.name, self.serial_num)
+#    def create_interface(self, iface_type):
+#        """ Creates an interface within the module. 
+#            Each module can have multiple interfaces.
+#            Standard interface options are:
+#
+#                BehavioralEpochs -- general container for storing and
+#                publishing intervals (IntervalSeries)
+#
+#                BehavioralEvents -- general container for storing and
+#                publishing event series (TimeSeries)
+#
+#                BehavioralTimeSeries -- general container for storing and
+#                publishing time series (TimeSeries)
+#
+#                Clustering -- clustered spike data, whether from
+#                automatic clustering tools or as a result of manual
+#                sorting
+#
+#                ClusterWaveform -- mean event waveform of clustered data
+#
+#                CompassDirection -- publishes 1+ SpatialSeries storing
+#                direction in degrees (or radians) 
+#
+#                DfOverF -- publishes 1+ RoiResponseSeries showing
+#                dF/F in observed ROIs
+#
+#                EventDetection -- information about detected events
+#
+#                EventWaveform -- publishes 1+ SpikeEventSeries
+#                of extracellularly recorded spike events
+#
+#                EyeTracking -- publishes 1+ SpatialSeries storing 
+#                direction of gaze
+#
+#                FeatureExtraction -- salient features of events
+#
+#                FilteredEphys -- publishes 1+ ElectricalSeries storing
+#                data from digital filtering
+#
+#                Fluorescence -- publishes 1+ RoiResponseSeries showing
+#                fluorescence of observed ROIs
+#
+#                ImageSegmentation -- publishes groups of pixels that
+#                represent regions of interest in an image
+#
+#                LFP -- a special case of FilteredEphys, filtered and
+#                downsampled for LFP signal
+#
+#                MotionCorrection -- publishes image stacks whos frames
+#                have been corrected to account for motion
+#
+#                Position -- publishes 1+ SpatialSeries storing physical
+#                position. This can be along x, xy or xyz axes
+#
+#                PupilTracking -- publishes 1+ standard *TimeSeries* 
+#                that stores pupil size
+#
+#                UnitTimes -- published data about the time(s) spikes
+#                were detected in an observed unit
+#        """
+#        iface_class = getattr(sys.modules[__name__], iface_type, None)
+#        
+#        self.interfaces[name] = iface_class(if_spec)
+#
+#        if iface_type not in self.nwb.spec["Interface"]:
+#            self.nwb.fatal_error("unrecognized interface: " + iface_type)
+#        if_spec = self.create_interface_definition(iface_type)
+#        if iface_type == "ImageSegmentation":
+#            iface = ImageSegmentation(iface_type, self, if_spec)
+#        elif iface_type == "Clustering":
+#            iface = Clustering(iface_type, self, if_spec)
+#        elif iface_type == "ImagingRetinotopy":
+#            iface = ImagingRetinotopy(iface_type, self, if_spec)
+#        elif iface_type == "UnitTimes":
+#            iface = UnitTimes(iface_type, self, if_spec)
+#        elif iface_type == "MotionCorrection":
+#            iface = MotionCorrection(iface_type, self, if_spec)
+#        else:
+#            iface = Interface(iface_type, self, if_spec)
+#        self.ifaces[iface_type] = iface
+#        from . import nwb as nwblib
+#        iface.serial_num = nwblib.register_creation("Interface -- " + iface_type)
+#        return iface
+#
+#    # internal function
+#    # read spec to create time series definition. do it recursively 
+#    #   if time series are subclassed
+#    def create_interface_definition(self, if_type):
+#        super_spec = copy.deepcopy(self.nwb.spec["Interface"]["SuperInterface"])
+#        if_spec = self.nwb.spec["Interface"][if_type]
+#        from . import nwb as nwblib
+#        return nwblib.recursive_dictionary_merge(super_spec, if_spec)
+#
+#    def set_description(self, desc):
+#        """ Set description field in module
+#
+#            Arguments:
+#                *desc* (text) Description of module
+#
+#            Returns:
+#                *nothing*
+#        """
+#        self.set_value("description", desc)
+#
+#    def set_value(self, key, value, **attrs):
+#        """Adds a custom key-value pair (ie, dataset) to the root of 
+#           the module.
+#   
+#           Arguments:
+#               *key* (string) A unique identifier within the TimeSeries
+#
+#               *value* (any) The value associated with this key
+#
+#               *attrs* (dict) Dictionary of key-value pairs to be
+#               stored as attributes
+#   
+#           Returns:
+#               *nothing*
+#        """
+#        if self.finalized:
+#            self.nwb.fatal_error("Added value to module after finalization")
+#        self.spec[key] = copy.deepcopy(self.spec["[]"])
+#        dtype = self.spec[key]["_datatype"]
+#        name = "module " + self.name
+#        self.nwb.set_value_internal(key, value, self.spec, name, dtype, **attrs)
+#
+#    def finalize(self):
+#        """ Completes the module and writes changes to disk.
+#
+#            Arguments: 
+#                *none*
+#
+#            Returns:
+#                *nothing*
+#        """
+#        if self.finalized:
+#            return
+#        self.finalized = True
+#        # finalize interfaces
+#        iface_names = []
+#        for k, v in self.ifaces.items():
+#            v.finalize()
+#            iface_names.append(v.name)
+#        iface_names.sort()
+#        self.spec["_attributes"]["interfaces"]["_value"] = iface_names
+#        # write own data
+#        grp = self.nwb.file_pointer["processing/" + self.name]
+#        self.nwb.write_datasets(grp, "", self.spec)
+#        from . import nwb as nwblib
+#        nwblib.register_finalization(self.name, self.serial_num)
 
 
 __interface_std_fields = ("help_statement",
                           "neurodata_type",
                           "source",
                           "interface")
+@properties(*__interface_std_fields)
 class Interface(Container):
-
-    _neurodata_type = "Interface"
-
-    _interface = "Interface"
-
-    _help_statement = None
-
     """ Interfaces represent particular processing tasks and they publish
         (ie, make available) specific types of data. Each is required
         to supply a minimum of specifically named data, but all can store 
@@ -273,6 +267,13 @@ class Interface(Container):
         Interfaces should be created through Module.create_interface().
         They should not be created directly
     """
+
+    _neurodata_type = "Interface"
+
+    _interface = "Interface"
+
+    _help_statement = None
+
     def __init__(self, source=None):
         #Arguments:
         #    *name* (text) name of interface (may be class name)

@@ -47,11 +47,11 @@ import types
 
 
 from . import timeseries as _timeseries
-from . import epoch as _epoch
-from . import modeule as _module
-from . import ephys as _ephys
+from .module import Module
+from .epoch import Epoch
+from .ephys import ElectrodeGroup
 
-from .core import properties, docval
+from ..core import properties, docval
 from .container import Container
 
 VERS_MAJOR = 1
@@ -275,14 +275,14 @@ class NWB(Container):
             Returns:
                 Epoch object
         """
-        epoch = _epoch.Epoch(name, start, stop)
+        epoch = Epoch(name, start, stop)
         self.epochs[name] = epoch
         return epoch
 
     def get_epoch(self, name):
         return self.__get_epoch(name)
 
-    @docval({'name': 'epoch', 'type': (str, _epoch.Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
+    @docval({'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
             {'name': 'timeseries', 'type': (str, _timeseries.TimeSeries), 'doc': 'the name of a timeseries or a TimeSeries object or a list of names of timeseries or TimeSeries objects'})
     def set_epoch_timeseries(self, **kwargs):
         """Add one or more TimSeries datasets to one or more Epochs
@@ -303,7 +303,7 @@ class NWB(Container):
                 ep.add_timeseries(ts)
 
     def __get_epoch(self, epoch):
-        if isinstance(epoch, _epoch.Epoch):
+        if isinstance(epoch, Epoch):
             ep = epoch
         elif isinstance(epoch, str): 
             ep = self.epochs.get(epoch)
@@ -327,7 +327,7 @@ class NWB(Container):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the timeseries dataset'},
             {'name': 'ts_type', 'type': type, 'doc': 'the type of timeseries to be created. See :py:meth:`~pynwb.timeseries.TimeSeries` subclasses for options' },
-            {'name': 'epoch', 'type': (str, _epoch.Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
+            {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
             returns="the TimeSeries object")
     def create_timeseries(self, **kwargs):
         """ Creates a new TimeSeries object. Timeseries are used to
@@ -350,7 +350,7 @@ class NWB(Container):
 
     @docval({'name': 'ts', 'type': _timeseries.TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'modality', 'type': str, 'doc': 'the modality of this timeseries', 'default': TS_MOD_OTHER},
-            {'name': 'epoch', 'type': (str, _epoch.Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
+            {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
     def add_timeseries(self, **kwargs):
         ts, modality, epoch = getargs('ts', 'modality', 'epoch', **kwargs)
@@ -480,7 +480,7 @@ class NWB(Container):
             {'name': 'desc',  'type': str,   'doc': 'a description of the probe/shank/tetrode'},
             {'name': 'dev',   'type': str,   'doc': 'name of the device this probe/shank/tetrode is from'},
             {'name': 'loc',   'type': str,   'doc': 'description of electrode location'},
-            returns='the electrode group', rtype=ephys.ElectrodeGroup)
+            returns='the electrode group', rtype=ElectrodeGroup)
     def create_electrode_group(self, **kwargs):
         """Add an electrode group (e.g. a probe, shank, tetrode). 
         """
@@ -497,7 +497,7 @@ class NWB(Container):
         return self.electrodes.get(name)
 
     @docval({'name': 'processing_name',  'type': str,   'doc': 'the processing analysis name'},
-            returns="a processing module", rtype=nwbmo.Module)
+            returns="a processing module", rtype=Module)
     def create_processing_module(self, **kwargs):
         """ Creates a Module object of the specified name. Interfaces can
             be created by the module and will be stored inside it

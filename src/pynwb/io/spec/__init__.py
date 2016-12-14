@@ -5,7 +5,7 @@ from . import spec
 from .spec import Spec, AttributeSpec, AttributableSpec, DatasetSpec, GroupSpec, SpecCatalog
 from .map import TypeMap, Condition, AttrMap
 
-__all__ ['Spec',
+__all__ = ['Spec',
          'AttributeSpec',
          'AttributableSpec',
          'DatasetSpec',
@@ -65,7 +65,6 @@ def __load_spec(spec):
         ret['required'] = True
         if name == '?':
             ret['required'] = False
-            name.
         ret['const'] = d.get('const', None)
         ret['dtype'] = d.get('data_type', None)
         ret['default'] = d.get('value', None)
@@ -157,7 +156,7 @@ def __map_types():
         existing = TypeMap.get_map(reg_type)
         if existing:
             continue
-        TypMap.register_map(reg_type, AttrMap(SpecCatalog.get_spec(reg_type))
+        TypMap.register_map(reg_type, AttrMap(SpecCatalog.get_spec(reg_type)))
 
 __load_spec(json.load(pkg_resources.resource_stream(__name__, 'spec.json')))
 __map_types()

@@ -36,7 +36,7 @@ class AttributeValidator(object):
             #TODO This will probably need to be more sophisticated
             
             reasons.append('incorrect shape')
-        if not isinstance(get_value(spec['value']), self.data_type)
+        if not isinstance(get_value(spec['value']), self.data_type):
             reasons.append('incorrect data type')
             
         return tuple(reasons)
@@ -92,7 +92,7 @@ class DatasetValidator(AttributesValidator):
         if get_shape(data) != self.dimensions:
             #TODO This will probably need to be more sophisticated
             reasons.append('incorrect shape')
-        if not isinstance(get_value(data), self.data_type)
+        if not isinstance(get_value(data), self.data_type):
             #TODO copied and pasted from AttributeValidator.validate 
             # will probably need to tailor to datasets needs
             reasons.append('incorrect data type')
@@ -114,7 +114,7 @@ class AttributeValidator(object):
             #TODO This will probably need to be more sophisticated
             
             reasons.append('incorrect shape')
-        if not isinstance(get_value(spec['value']), self.data_type)
+        if not isinstance(get_value(spec['value']), self.data_type):
             reasons.append('incorrect data type')
             
         return tuple(reasons)

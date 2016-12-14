@@ -1,3 +1,5 @@
+from pynwb.core import docval, getargs
+from pynwb.io.spec import AttributableSpec, Spec
 
 class TypeMap(object):
     __maps = dict()
@@ -35,7 +37,7 @@ class Condition(object):
 
     def __str__(self):
         tmp = [("key", self._key),
-               ("value": self._value)]
+               ("value", self._value)]
         if self._condition:
             tmp.append(('condition', str(self._condition)))
         return '{' + ", ".join(lambda x: '"%s": "%s"' % x, tmp) + '}'
