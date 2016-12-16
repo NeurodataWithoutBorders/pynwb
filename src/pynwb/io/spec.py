@@ -7,13 +7,15 @@ class SpecCatalog(object):
 
     @classmethod
     def register_spec(cls, obj_type, spec):
-        cls.__specs[obj_type.__name__] = spec
+        type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
+        cls.__specs[type_name] = spec
 
     @classmethod
     def get_spec(cls, obj_type):
-        type_name = obj_type.__name__
+        type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
         return cls.__specs.get(type_name, None)
 
+    @classmethod
     def get_registered_types(cls):
         return tuple(cls.__specs.keys())
 
@@ -64,7 +66,7 @@ _attr_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': True},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required', 'default': True},
         {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
-        {'name': 'const', 'type': None, 'doc': 'whether or not this attribute is a constant', 'default': True}
+        {'name': 'value', 'type': None, 'doc': 'whether or not this attribute is a constant', 'default': None}
 ]
 class AttributeSpec(Spec):
     """ Specification for attributes
@@ -72,14 +74,14 @@ class AttributeSpec(Spec):
     
     @docval(*_attr_args)
     def __init__(self, **kwargs):
-        name, dtype, doc, required, parent, required, const = getargs('name', 'dtype', 'doc', 'required', 'parent', 'required', 'const', **kwargs)
+        name, dtype, doc, required, parent, required, value = getargs('name', 'dtype', 'doc', 'required', 'parent', 'required', 'value', **kwargs)
         super().__init__(name, doc=doc, required=required, parent=parent)
         if isinstance(dtype, type):
             self['type'] = dtype.__name__
         
 
     def verify(self, value):
-        """Verify this attribute
+        """Verify value (from an object) against this attribute specification
         """
         err = dict()
         if any(t.__name__ == self['type'] for t in type(value).__mro__):
@@ -100,7 +102,7 @@ _attrbl_args = [
         {'name': 'nwb_type', 'type': bool, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'extends', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
 ]
-class AttributableSpec(Spec):
+class BaseStorageSpec(Spec):
     """ A specification for any object that can hold attributes.
     """
     @docval(*_attrbl_args)
@@ -119,6 +121,7 @@ class AttributableSpec(Spec):
     def attributes(self):
         return self['attributes']
 
+    # TODO: figure this out 12/15/16
     @property
     def get_attribute(self, name):
         return self['attributes'].get(name, None)
@@ -167,7 +170,7 @@ _dset_args = [
         {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
         {'name': 'nwb_type', 'type': bool, 'doc': 'the NWB type this specification represents', 'default': None},
 ]
-class DatasetSpec(AttributableSpec):
+class DatasetSpec(BaseStorageSpec):
     """ Specification for datasets
     """
 
@@ -206,7 +209,7 @@ _group_args = [
         {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
         {'name': 'nwb_type', 'type': bool, 'doc': 'the NWB type this specification represents', 'default': None},
 ]
-class GroupSpec(AttributableSpec):
+class GroupSpec(BaseStorageSpec):
     """ Specification for groups
     """
     

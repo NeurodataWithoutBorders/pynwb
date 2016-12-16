@@ -1,5 +1,5 @@
 from pynwb.core import docval, getargs
-from pynwb.io.spec import AttributableSpec, Spec
+from pynwb.io.spec import BaseStorageSpec, Spec
 
 class TypeMap(object):
     __maps = dict()
@@ -60,7 +60,7 @@ class Condition(object):
 
 class AttrMap(object):
     
-    @docval({'name': 'spec', 'type': AttributableSpec, 'doc': 'The specification for mapping objects to builders'})
+    @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'The specification for mapping objects to builders'})
     def __init__(self, **kwargs):
         """ Create a map from Container attributes to NWB specifications
         """
@@ -89,10 +89,11 @@ class AttrMap(object):
 
     @docval({"name": "attr_name", "type": str, "doc": "The name of the object to map"},
             {"name": "spec", "type": (Condition, Spec), "doc": "The condition specifying the location within this map, or the spec"})
-    def map_attr(self, attr_name, spec):
+    def map_attr(self, **kwargs):
         """Map an attribute to spec. Use this to override default
            behavior
         """
+        attr_name, spec = getargs()
         tmp = spec
         if isinstance(spec, Condition):
             tmp = spec.find(self._spec)
