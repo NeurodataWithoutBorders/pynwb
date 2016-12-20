@@ -1,12 +1,9 @@
-
-from context import pynwb
+import unittest
 
 from pynwb.ui.timeseries import TimeSeries
-from pynwb.ui.container import Container
+from pynwb.ui.container import NwbContainer
 
 import numpy as np
-
-import unittest
 
 class TimeSeriesConstructor(unittest.TestCase):
 
@@ -24,7 +21,7 @@ class TimeSeriesConstructor(unittest.TestCase):
         self.assertSetEqual(ts.timestamps_link, set())
 
     def test_init_no_parent(self):
-        parent = Container()
+        parent = NwbContainer()
         ts = TimeSeries('test_ts', 'a hypothetical source', parent=parent)
         self.assertEqual(ts.name, 'test_ts')
         self.assertIs(ts.parent, parent)

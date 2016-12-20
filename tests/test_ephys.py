@@ -1,5 +1,4 @@
 import unittest
-from context import pynwb
 
 from pynwb.ui.ephys import *
 

@@ -1,13 +1,9 @@
-
-from context import pynwb
 import unittest
 
-
 from pynwb.core import *
-from pynwb.ui.container import Container
+from pynwb.ui.container import NwbContainer
 
-
-class MyTestClass(Container):
+class MyTestClass(NwbContainer):
 
     @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'})
     def basic_add(self, **kwargs):

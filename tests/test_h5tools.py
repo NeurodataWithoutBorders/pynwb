@@ -1,7 +1,3 @@
-# -*- coding: utf-8 -*-
-
-#from .context import pynwb
-from context import pynwb
 import unittest
 
 from pynwb.io.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK

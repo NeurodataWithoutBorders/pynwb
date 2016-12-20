@@ -1,13 +1,9 @@
-
-from context import pynwb
+import unittest
 
 from pynwb.ui.epoch import Epoch, EpochTimeSeries
 from pynwb.ui.timeseries import TimeSeries
 
 import numpy as np
-
-import unittest
-
 
 class EpochTimeSeriesConstructor(unittest.TestCase):
 
