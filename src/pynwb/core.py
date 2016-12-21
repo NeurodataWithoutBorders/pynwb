@@ -86,13 +86,13 @@ docval_attr_name = 'docval'
 
 def docval(*validator, **options):
     enforce_type = options.pop('enforce_type', True)
-    validator = __sort_args(validator)
+    val_copy = __sort_args(_copy.deepcopy(validator))
     def dec(func):
         _docval = _copy.copy(options)
-        _docval['args'] = validator
+        _docval['args'] = val_copy
         def func_call(*args, **kwargs):
             self = args[0]
-            parsed = __parse_args(validator, args[1:], kwargs, enforce_type=enforce_type)
+            parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type)
             parse_err = parsed.get('errors')
             if parse_err:
                 raise TypeError(', '.join(parse_err))
@@ -102,8 +102,7 @@ def docval(*validator, **options):
     return dec
 
 def getargs(*args, **kwargs):
-    for arg in args:
-        yield kwargs[arg]
+    return [ kwargs.get(arg) for arg in args ]
 
 def huread_doc(func):
     pass
