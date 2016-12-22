@@ -45,8 +45,8 @@ source_suffix = '.rst'
 master_doc = 'source/index'
 
 # General information about the project.
-project = u'sample'
-copyright = u'2017, Andrew Tritt'
+project = u'PyNWB'
+copyright = u'2017, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
