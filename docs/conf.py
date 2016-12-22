@@ -18,8 +18,10 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-src_dir = "%s/../build/lib/" % os.path.dirname(__file__)
+src_dir = "%s/../src/" % os.path.dirname(__file__)
 sys.path.append(src_dir)
+autoclass_content = 'both'
+autodoc_docstring_signature = True
 
 # -- General configuration -----------------------------------------------------
 
@@ -67,7 +69,7 @@ release = 'v0.0.1'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', 'test.py']
 
 # The reST default role (used for this markup: `text`) to use for all documents.
 #default_role = None
@@ -94,7 +96,8 @@ pygments_style = 'sphinx'
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+#html_theme = 'default'
+html_theme = "sphinxdoc"
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -185,10 +188,10 @@ latex_elements = {
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
-latex_documents = [
-  ('index', 'sample.tex', u'sample Documentation',
-   u'Kenneth Reitz', 'manual'),
-]
+#latex_documents = [
+#  ('index', 'sample.tex', u'sample Documentation',
+#   u'Kenneth Reitz', 'manual'),
+#]
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
@@ -215,25 +218,25 @@ latex_documents = [
 
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
-man_pages = [
-    ('index', 'sample', u'sample Documentation',
-     [u'Kenneth Reitz'], 1)
-]
-
-# If true, show URL addresses after external links.
-#man_show_urls = False
-
-
-# -- Options for Texinfo output ------------------------------------------------
-
-# Grouping the document tree into Texinfo files. List of tuples
-# (source start file, target name, title, author,
-#  dir menu entry, description, category)
-texinfo_documents = [
-  ('index', 'sample', u'sample Documentation',
-   u'Kenneth Reitz', 'sample', 'One line description of project.',
-   'Miscellaneous'),
-]
+#man_pages = [
+#    ('index', 'sample', u'sample Documentation',
+#     [u'Kenneth Reitz'], 1)
+#]
+#
+## If true, show URL addresses after external links.
+##man_show_urls = False
+#
+#
+## -- Options for Texinfo output ------------------------------------------------
+#
+## Grouping the document tree into Texinfo files. List of tuples
+## (source start file, target name, title, author,
+##  dir menu entry, description, category)
+#texinfo_documents = [
+#  ('index', 'sample', u'sample Documentation',
+#   u'Kenneth Reitz', 'sample', 'One line description of project.',
+#   'Miscellaneous'),
+#]
 
 # Documents to append as an appendix to all manuals.
 #texinfo_appendices = []
