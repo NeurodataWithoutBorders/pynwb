@@ -1,38 +1,36 @@
-"""
-Copyright (c) 2015 Allen Institute, California Institute of Technology, 
-New York University School of Medicine, the Howard Hughes Medical 
-Institute, University of California, Berkeley, GE, the Kavli Foundation 
-and the International Neuroinformatics Coordinating Facility. 
-All rights reserved.
-    
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the following 
-conditions are met:
-    
-1.  Redistributions of source code must retain the above copyright 
-    notice, this list of conditions and the following disclaimer.
-    
-2.  Redistributions in binary form must reproduce the above copyright 
-    notice, this list of conditions and the following disclaimer in 
-    the documentation and/or other materials provided with the distribution.
-    
-3.  Neither the name of the copyright holder nor the names of its 
-    contributors may be used to endorse or promote products derived 
-    from this software without specific prior written permission.
-    
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# Copyright (c) 2015 Allen Institute, California Institute of Technology, 
+# New York University School of Medicine, the Howard Hughes Medical 
+# Institute, University of California, Berkeley, GE, the Kavli Foundation 
+# and the International Neuroinformatics Coordinating Facility. 
+# All rights reserved.
+#     
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following 
+# conditions are met:
+#     
+# 1.  Redistributions of source code must retain the above copyright 
+#     notice, this list of conditions and the following disclaimer.
+#     
+# 2.  Redistributions in binary form must reproduce the above copyright 
+#     notice, this list of conditions and the following disclaimer in 
+#     the documentation and/or other materials provided with the distribution.
+#     
+# 3.  Neither the name of the copyright holder nor the names of its 
+#     contributors may be used to endorse or promote products derived 
+#     from this software without specific prior written permission.
+#     
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# POSSIBILITY OF SUCH DAMAGE.
 import sys
 import os.path
 import shutil
@@ -45,14 +43,13 @@ import numpy as np
 import types
 
 
-
 from . import timeseries as _timeseries
 from .module import Module
 from .epoch import Epoch
 from .ephys import ElectrodeGroup
 
-from ..core import properties, docval
-from .container import Container
+from ..core import docval
+from .container import nwbproperties, NwbContainer
 
 VERS_MAJOR = 1
 VERS_MINOR = 0
@@ -95,17 +92,12 @@ def register_creation(name):
     serial_number += 1
     return num
 
-TS_MOD_ACQUISITION = 'acquisition'
-TS_MOD_STIMULUS = 'stimulus'
-TS_MOD_TEMPLATE = 'template'
-TS_MOD_OTHER = 'other'
-    
 
 # TODO some functionality will be broken on append operations. in particular
 #   when an attribute stores a list of links, that list will not be
 #   properly updated if new links are created during append  FIXME
 
-class NWB(Container):
+class NWBFile(NwbContainer):
     """ Represents an NWB file. Calling the NWB constructor creates the file.
         The following arguments are recognized:
 
@@ -170,41 +162,37 @@ class NWB(Container):
         self._filename = getargs('file_name', **vargs)
         self.__read_arguments__(**vargs)
 
-        self.__timeseries = {
-            TS_MOD_ACQUISITION: dict(),
-            TS_MOD_STIMULUS: dict(),
-            TS_MOD_TEMPLATE: dict(),
-            TS_MOD_OTHER: dict(),
-        }
-
-        self.__modalities = dict()
+        self.__rawdata = dict()
+        self.__stimulus = dict()
+        self.__stimulus_template = dict()
 
         self.modules = dict()
         self.epochs = dict()
         self.electrodes = dict()
 
     @property
-    def acquisition_timeseries(self):
-        return self.__timeseries[TS_MOD_ACQUISITION]
+    def rawdata(self):
+        return tuple(self.__rawdata.values())
 
     @property
-    def stimulus_timeseries(self):
-        return self.__timeseries[TS_MOD_STIMULUS]
+    def stimulus(self):
+        return tuple(self.__stimulus.values())
 
     @property
-    def template_timeseries(self):
-        return self.__timeseries[TS_MOD_TEMPLATE]
+    def stimulus_template(self):
+        return tuple(self.__stimulus_template.values())
 
-    @property
-    def other_timeseries(self):
-        return self.__timeseries[TS_MOD_OTHER]
+    def is_rawdata(self, ts):
+        return self.__exists(ts, self.__rawdata)
 
-    @property
-    def timeseries(self):
-        return self.__timeseries
+    def is_stimulus(self, ts):
+        return self.__exists(ts, self.__stimulus)
 
-    def get_timeseries_modality(self, ts):
-        return self.__modalities[ts]
+    def is_stimulus_template(self, ts):
+        return self.__exists(ts, self.__stimulus_template)
+
+    def __exists(self, ts, d):
+        return ts.name in d
 
     # internal API function to process constructor arguments
     def __read_arguments__(self, **vargs):
@@ -349,13 +337,28 @@ class NWB(Container):
         pass
 
     @docval({'name': 'ts', 'type': _timeseries.TimeSeries, 'doc': 'the  TimeSeries object to add'},
-            {'name': 'modality', 'type': str, 'doc': 'the modality of this timeseries', 'default': TS_MOD_OTHER},
             {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
-    def add_timeseries(self, **kwargs):
-        ts, modality, epoch = getargs('ts', 'modality', 'epoch', **kwargs)
-        self.__modalities[ts.name] = modality
-        self.__timeseries[modality] = ts
+    def add_raw_data(self, **kwargs):
+        ts, epoch = getargs('ts', 'epoch', **kwargs)
+        self.__set_timeseries(self.__rawdata, ts, epoch)
+
+    @docval({'name': 'ts', 'type': _timeseries.TimeSeries, 'doc': 'the  TimeSeries object to add'},
+            {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
+            returns="the TimeSeries object")
+    def add_stimulus(self, **kwargs):
+        ts, epoch = getargs('ts', 'epoch', **kwargs)
+        self.__set_timeseries(self.__stimulus, ts, epoch)
+
+    @docval({'name': 'ts', 'type': _timeseries.TimeSeries, 'doc': 'the  TimeSeries object to add'},
+            {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
+            returns="the TimeSeries object")
+    def add_stimulus_template(self, **kwargs):
+        ts, epoch = getargs('ts', 'epoch', **kwargs)
+        self.__set_timeseries(self.__stimulus_template, ts, epoch)
+
+    def __set_timeseries(self, ts_dict, ts, epoch=None):
+        ts_dict[ts.name] = ts
         ts.set_parent(self)
         if epoch:
             self.set_epoch_timeseries(epoch, ts)

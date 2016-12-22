@@ -1,9 +1,10 @@
 from pynwb.ui.timeseries import TimeSeries, ElectricalSeries, SpatialSeries
-from pynwb.ui.module import Module
+from pynwb.ui.module import Module, Clustering
+from pynwb.ui.iface import Interface
 from pynwb.ui.file import NWBFile
-from .. import h5tools
-from ..utils import BaseObjectHandler
-from .spec import TypeMap
+from . import h5tools
+from .utils import BaseObjectHandler
+from .map import TypeMap
 
 import h5py as _h5py
 
@@ -124,11 +125,11 @@ class Hdf5ContainerRenderer(BaseObjectHandler):
                 return _posixpath.join(relpath, child.name)
             elif isinstance(child, Module):
                 return _posixpath.join('processing', child.name)
-        elif isinstance(parent, nwbmo.Module):
-            if isinstance(child, nwbmo.Interface):
+        elif isinstance(parent, Module):
+            if isinstance(child, Interface):
                 return child.name
-        elif isinstance(parent, nwbmo.Interface):
-            if isinstance(child, nwbmo.TimeSeries):
+        elif isinstance(parent, Interface):
+            if isinstance(child, TimeSeries):
                 return child.name
         raise Exception('No known location for %s in %s' % (str(type(child)), str(type(parent))))
 
@@ -339,7 +340,7 @@ class TimeSeriesHdf5Renderer(Hdf5ContainerRenderer):
 
 class ModuleHdf5Renderer(Hdf5ContainerRenderer):
 
-    @Hdf5ContainerRenderer.procedure(nwbmo.Module)
+    @Hdf5ContainerRenderer.procedure(Module)
     def module(container):
         builder = GroupBuilder()
         iface_renderer = InterfaceHdf5Renderer()
@@ -351,7 +352,7 @@ class ModuleHdf5Renderer(Hdf5ContainerRenderer):
 
 class InterfaceHdf5Renderer(Hdf5ContainerRenderer):
 
-    @Hdf5ContainerRenderer.procedure(nwbmo.Interface)
+    @Hdf5ContainerRenderer.procedure(Interface)
     def interface(container):
         builder = GroupBuilder()
         builder.set_attribute('help', container.help)
@@ -360,7 +361,7 @@ class InterfaceHdf5Renderer(Hdf5ContainerRenderer):
         builder.set_attribute('source', container.source)
         return builder
     
-    @Hdf5ContainerRenderer.procedure(nwbmo.Clustering)
+    @Hdf5ContainerRenderer.procedure(Clustering)
     def clustering(container):
         builder = GroupBuilder()
         cluster_nums = list(sorted(container.peak_over_rms.keys()))

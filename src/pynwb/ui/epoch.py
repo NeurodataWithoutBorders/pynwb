@@ -1,44 +1,42 @@
-"""
-Copyright (c) 2015 Allen Institute, California Institute of Technology, 
-New York University School of Medicine, the Howard Hughes Medical 
-Institute, University of California, Berkeley, GE, the Kavli Foundation 
-and the International Neuroinformatics Coordinating Facility. 
-All rights reserved.
-    
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the following 
-conditions are met:
-    
-1.  Redistributions of source code must retain the above copyright 
-    notice, this list of conditions and the following disclaimer.
-    
-2.  Redistributions in binary form must reproduce the above copyright 
-    notice, this list of conditions and the following disclaimer in 
-    the documentation and/or other materials provided with the distribution.
-    
-3.  Neither the name of the copyright holder nor the names of its 
-    contributors may be used to endorse or promote products derived 
-    from this software without specific prior written permission.
-    
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# Copyright (c) 2015 Allen Institute, California Institute of Technology, 
+# New York University School of Medicine, the Howard Hughes Medical 
+# Institute, University of California, Berkeley, GE, the Kavli Foundation 
+# and the International Neuroinformatics Coordinating Facility. 
+# All rights reserved.
+#     
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following 
+# conditions are met:
+#     
+# 1.  Redistributions of source code must retain the above copyright 
+#     notice, this list of conditions and the following disclaimer.
+#     
+# 2.  Redistributions in binary form must reproduce the above copyright 
+#     notice, this list of conditions and the following disclaimer in 
+#     the documentation and/or other materials provided with the distribution.
+#     
+# 3.  Neither the name of the copyright holder nor the names of its 
+#     contributors may be used to endorse or promote products derived 
+#     from this software without specific prior written permission.
+#     
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# POSSIBILITY OF SUCH DAMAGE.
 import copy
 import numpy as np
 import bisect
 
 from ..core import docval, getargs
-from .container import Container, properties
+from .container import NwbContainer, nwbproperties
 from .timeseries import TimeSeries
 
 __std_fields = ('name',
@@ -46,8 +44,8 @@ __std_fields = ('name',
                 'start_time',
                 'stop_time',
                 'tags')
-@properties(*__std_fields, neurodata_type='Epoch')
-class Epoch(Container):
+@nwbproperties(*__std_fields, neurodata_type='Epoch')
+class Epoch(NwbContainer):
     """ Epoch object
         Epochs represent specific experimental intervals and store
         references to desired time series that overlap with the interval.
@@ -348,8 +346,8 @@ __epoch_timseries_fields = ('name',
                             'count',
                             'idx_start',
                             'timeseries')    
-@properties(*__epoch_timseries_fields)
-class EpochTimeSeries(Container):
+@nwbproperties(*__epoch_timseries_fields)
+class EpochTimeSeries(NwbContainer):
     def __init__(self, ts, start_time, stop_time, name=None, parent=None):
         super(EpochTimeSeries, self).__init__(parent)
         self.name = name if name else ts.name

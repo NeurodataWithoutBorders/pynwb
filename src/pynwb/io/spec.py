@@ -1,6 +1,9 @@
 import abc
 from itertools import chain
-from pynwb.core import docval
+from pynwb.core import docval, getargs
+
+import json
+import copy
 
 class SpecCatalog(object):
     __specs = dict()
@@ -44,6 +47,7 @@ class Spec(dict, metaclass=abc.ABCMeta):
         self['name'] = name
         self['doc'] = doc
         self['required'] = required
+        self._parent = parent
 
     @abc.abstractmethod
     def verify(self):
@@ -58,15 +62,16 @@ class Spec(dict, metaclass=abc.ABCMeta):
         return self._parent
 
     def set_parent(self, spec):
-        self._parent = spec
+        #self._parent = spec
+        pass
 
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
-        {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': True},
+        {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required', 'default': True},
         {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
-        {'name': 'value', 'type': None, 'doc': 'whether or not this attribute is a constant', 'default': None}
+        {'name': 'value', 'type': None, 'doc': 'a constant value for this attribute', 'default': None}
 ]
 class AttributeSpec(Spec):
     """ Specification for attributes
@@ -78,6 +83,8 @@ class AttributeSpec(Spec):
         super().__init__(name, doc=doc, required=required, parent=parent)
         if isinstance(dtype, type):
             self['type'] = dtype.__name__
+        else:
+            self['type'] = dtype
         
 
     def verify(self, value):
@@ -97,23 +104,23 @@ _attrbl_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': '*'},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
-        {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': True},
+        {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
-        {'name': 'nwb_type', 'type': bool, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'nwb_type', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'extends', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
 ]
 class BaseStorageSpec(Spec):
     """ A specification for any object that can hold attributes.
     """
-    @docval(*_attrbl_args)
+    @docval(*copy.deepcopy(_attrbl_args))
     def __init__(self, **kwargs):
         name, doc, parent, required, attributes, linkable, nwb_type = getargs('name', 'doc', 'parent', 'required', 'attributes', 'linkable', 'nwb_type', **kwargs)
         super().__init__(name, doc=doc, required=required, parent=parent)
         self['attributes'] = attributes
         self['linkable'] = linkable
         if nwb_type:
-            self['type'] = nwb_type
-        extends = getargs('extends', **kwargs)
+            self['nwb_type'] = nwb_type
+        extends, = getargs('extends', **kwargs)
         if extends:
             self['extends'] = extends
 
@@ -130,7 +137,7 @@ class BaseStorageSpec(Spec):
     def linkable(self):
         return self['linkable']
 
-    @docval(*_attr_args)
+    @docval(*copy.deepcopy(_attr_args))
     def add_attribute(self, **kwargs):
         """ Add an attribute to this object
         """
@@ -141,6 +148,13 @@ class BaseStorageSpec(Spec):
             spec = AttributeSpec(name, **kwargs)
         attr.set_parent(self)
         self['attributes'].append(attr)
+        return spec
+
+    @docval({'name': 'spec', 'type': 'AttributeSpec', 'doc': 'the specification for the attribute to add'})
+    def set_attribute(self, **kwargs):
+        spec = kwargs.get('spec')
+        spec.set_parent(self)
+        self['attributes'].append(spec)
         return spec
 
     def verify(self, builder):
@@ -163,21 +177,25 @@ class BaseStorageSpec(Spec):
         return errors
 
 _dset_args = [
+        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': '*'},
+        {'name': 'dimensions', 'type': tuple, 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
-        {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': True},
+        {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
-        {'name': 'nwb_type', 'type': bool, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'nwb_type', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
 ]
 class DatasetSpec(BaseStorageSpec):
     """ Specification for datasets
     """
 
-    @docval(*_dset_args)
+    @docval(*copy.deepcopy(_dset_args))
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+        dimensions, dtype = getargs('dimensions', 'dtype', **kwargs)
         self['dimensions'] = dimensions
+        self['type'] = dtype
 
     @property
     def dimensions(self):
@@ -205,21 +223,26 @@ _group_args = [
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'links', 'type': list, 'doc': 'the links in this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
-        {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': True},
+        {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
-        {'name': 'nwb_type', 'type': bool, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'nwb_type', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
 ]
 class GroupSpec(BaseStorageSpec):
     """ Specification for groups
     """
     
-    @docval(*_group_args)
+    @docval(*copy.deepcopy(_group_args))
     def __init__(self, **kwargs):
+        #s = 'GroupSpec.__int__ keys:'
+        #for k, v in kwargs.items():
+        #    s = "%s\n                       %s: (%d) %s" % (s, str(k), id(v), str(v))
+        #print(s)
+        #print('GroupSpec.__int__ keys: %s' % ", ".join(kwargs.keys()))
         super(GroupSpec, self).__init__(**kwargs)
-        self['groups'] = getargs('groups', kwargs)
-        self['datasets'] = getargs('datasets', kwargs)
-        self['links'] = getargs('links', kwargs)
-        self['nwb_type'] = getargs('nwb_type', kwargs)
+        groups, datasets, links, nwb_type = getargs('groups', 'datasets', 'links', 'nwb_type', **kwargs)
+        self['groups'] = groups
+        self['datasets'] = datasets
+        self['links'] = links
     
     @property
     def groups(self):
@@ -233,28 +256,37 @@ class GroupSpec(BaseStorageSpec):
     def links(self):
         return self['links']
 
-    @docval(*_group_args)
+    #@docval(*_group_args)
+    @docval(*copy.deepcopy(_group_args))
     def add_group(self, **kwargs):
         """ Add a group to this group spec
         """
         name = kwargs.pop('name')
-        if isinstance(name, GroupSpec):
-            spec = copy.deepcopy(name)
-        else:
-            spec = GroupSpec(name, **kwargs)
+        spec = GroupSpec(name, **kwargs)
         spec.set_parent(self)
         self['groups'].append(spec)
         return spec
     
-    @docval(*_dset_args)
+    @docval(*copy.deepcopy(_dset_args))
     def add_dataset(self, **kwargs):
         """ Add a dataset to this group spec
         """
         name = kwargs.pop('name')
-        if isinstance(name, DatasetSpec):
-            spec = copy.deepcopy(name)
-        else:
-            spec = DatasetSpec(name, **kwargs)
+        spec = DatasetSpec(name, **kwargs)
+        spec.set_parent(self)
+        self['datasets'].append(spec)
+        return spec
+
+    @docval({'name': 'spec', 'type': 'GroupSpec', 'doc': 'the specification for the subgroup'})
+    def set_group(self, **kwargs):
+        spec, = getargs('spec', **kwargs)
+        spec.set_parent(self)
+        self['groups'].append(spec)
+        return spec
+
+    @docval({'name': 'spec', 'type': 'DatasetSpec', 'doc': 'the specification for the dataset'})
+    def set_dataset(self, **kwargs):
+        spec, = getargs('spec', **kwargs)
         spec.set_parent(self)
         self['datasets'].append(spec)
         return spec

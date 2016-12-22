@@ -87,6 +87,17 @@ docval_attr_name = 'docval'
 def docval(*validator, **options):
     enforce_type = options.pop('enforce_type', True)
     val_copy = __sort_args(_copy.deepcopy(validator))
+    def to_str(argtype):
+        if isinstance(argtype, type):
+            return argtype.__name__
+        return  argtype
+
+    for arg in val_copy:
+        if isinstance(arg['type'], tuple) or isinstance(arg['type'], list):
+            arg['type'] = " or ".join(map(to_str, arg['type']))
+        else:
+            arg['type'] = to_str(arg['type'])
+
     def dec(func):
         _docval = _copy.copy(options)
         _docval['args'] = val_copy
@@ -97,6 +108,8 @@ def docval(*validator, **options):
             if parse_err:
                 raise TypeError(', '.join(parse_err))
             return func(self, **parsed['args'])
+        sphinxy_docstring = sphinxdoc(func, _docval['args'])
+        setattr(func_call, '__doc__', sphinxy_docstring)
         setattr(func_call, docval_attr_name, _docval)
         return func_call
     return dec
@@ -107,24 +120,24 @@ def getargs(*args, **kwargs):
 def huread_doc(func):
     pass
 
-def sphinxdoc(func):
-    def __sphinx_args(validator):
-        tmp = copy.copy(validator)
-        if isinstance(tmp['type'], type):
-            tmp['type'] = tmp['type'].__name__
+def sphinxdoc(func, validator):
+    def __sphinx_arg(arg_validator):
         tmpl = (":param {name}: {doc}\n"
                 ":type  {name}: {type}")
-    return tmpl.format(**validator)
+        return tmpl.format(**arg_validator)
+
+    def __sig_arg(argval):
+        if 'default' in argval:
+            return "%s=%s" % (argval['name'], str(argval['default']))
+        else:
+            return argval['name']
     
-    if hasattr(func, 'validator'):
-        validator = func.validator
-    else:
-        return None
-    pos = list()
-    kw = list()
-    sig =  ".. py:function:: %s(%s)\n\n" % (func.__name__, ", ".join(x['name'] for x in validator)) 
-    sig += "%s\n\n" % func.__doc__
-    sig += "\n".join(map(__sphinx_args, func.docval['args']))
+    sig =  ".. py:function:: %s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator))) 
+    if func.__doc__:
+        sig += "%s\n\n" % func.__doc__
+    sig += "\n".join(map(__sphinx_arg, validator))
+    return sig
+    #return "craptastic"
 
 def properties(*props):
     """A decorator for automatically setting read-only

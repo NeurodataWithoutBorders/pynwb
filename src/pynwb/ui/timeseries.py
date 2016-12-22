@@ -1,38 +1,36 @@
-"""
-Copyright (c) 2015 Allen Institute, California Institute of Technology, 
-New York University School of Medicine, the Howard Hughes Medical 
-Institute, University of California, Berkeley, GE, the Kavli Foundation 
-and the International Neuroinformatics Coordinating Facility. 
-All rights reserved.
-    
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the following 
-conditions are met:
-    
-1.  Redistributions of source code must retain the above copyright 
-    notice, this list of conditions and the following disclaimer.
-    
-2.  Redistributions in binary form must reproduce the above copyright 
-    notice, this list of conditions and the following disclaimer in 
-    the documentation and/or other materials provided with the distribution.
-    
-3.  Neither the name of the copyright holder nor the names of its 
-    contributors may be used to endorse or promote products derived 
-    from this software without specific prior written permission.
-    
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
-FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
-INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-POSSIBILITY OF SUCH DAMAGE.
-"""
+# Copyright (c) 2015 Allen Institute, California Institute of Technology, 
+# New York University School of Medicine, the Howard Hughes Medical 
+# Institute, University of California, Berkeley, GE, the Kavli Foundation 
+# and the International Neuroinformatics Coordinating Facility. 
+# All rights reserved.
+#     
+# Redistribution and use in source and binary forms, with or without 
+# modification, are permitted provided that the following 
+# conditions are met:
+#     
+# 1.  Redistributions of source code must retain the above copyright 
+#     notice, this list of conditions and the following disclaimer.
+#     
+# 2.  Redistributions in binary form must reproduce the above copyright 
+#     notice, this list of conditions and the following disclaimer in 
+#     the documentation and/or other materials provided with the distribution.
+#     
+# 3.  Neither the name of the copyright holder nor the names of its 
+#     contributors may be used to endorse or promote products derived 
+#     from this software without specific prior written permission.
+#     
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+# POSSIBILITY OF SUCH DAMAGE.
 import sys
 import traceback
 import copy
@@ -40,7 +38,7 @@ import numpy as np
 from collections import Iterable
 
 from ..core import docval, getargs
-from .container import Container, properties
+from .container import NwbContainer, nwbproperties
 
 #### possibly useful code later:
 
@@ -64,8 +62,8 @@ __std_fields = ("name",
 __std_static_fields = {'ancestry': 'TimeSeries',
                        'neurodata_type': 'TimeSeries',
                        'help': 'General purpose TimeSeries'}
-@properties(*__std_fields, **__std_static_fields)
-class TimeSeries(Container):
+@nwbproperties(*__std_fields, **__std_static_fields)
+class TimeSeries(NwbContainer):
     """ Standard TimeSeries constructor
 
         All time series are created by calls to  NWB.create_timeseries(). 
@@ -95,7 +93,7 @@ class TimeSeries(Container):
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
-            {'name': 'parent', 'type': 'Container', 'doc': 'The parent Container for this Container', 'default': None},
+            {'name': 'parent', 'type': 'NwbContainer', 'doc': 'The parent NwbContainer for this NwbContainer', 'default': None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
             )
@@ -174,8 +172,9 @@ class TimeSeries(Container):
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution})
     def set_data(self, **kwargs):
-        '''Defines the data stored in the TimeSeries. Type of data 
-           depends on which class of TimeSeries is being used
+        '''
+        Defines the data stored in the TimeSeries. Type of data 
+        depends on which class of TimeSeries is being used
         '''
         data, unit, conversion, resolution = getargs("data", "unit", "conversion", "resolution", **kwargs)
         self.unit = unit

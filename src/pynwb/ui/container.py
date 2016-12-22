@@ -1,10 +1,9 @@
 from ..core import docval, getargs
 
 
-#class NwbContainer(object):
-class Container(object):
+class NwbContainer(object):
     
-    @docval({'name': 'parent', 'type': 'Container', 'doc': 'the parent Container for this Container', 'default': None},
+    @docval({'name': 'parent', 'type': 'NwbContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         parent, container_source = getargs('parent', 'container_source', **kwargs)
@@ -38,8 +37,11 @@ class Container(object):
         self.__parent = parent_container
         parent_container.__subcontainers.append(self)
 
-#def nwb_properties(*args, **kwargs):
-def properties(*args, **kwargs):
+def nwbproperties(*args, **kwargs):
+    '''Create settable and gettable properties that can be exported to NWB files
+       
+       Decorate Containers with this. 
+    '''
     def get_func(arg):
         def _func(self):
             return self.fields.get(arg)
@@ -70,7 +72,15 @@ def properties(*args, **kwargs):
 
         nwb_fields = tuple(nwb_fields)
         #classdict['nwb_fields'] = classmethod(lambda cls: nwb_fields)
-        classdict['nwb_fields'] = nwb_fields
+        classdict['__nwb_fields__'] = nwb_fields
         return type(cls.__name__, cls.__bases__, classdict)
     return inner
 
+class nwbproperty(property):
+    '''Create a gettable property that can be exported to NWB files
+
+        Use this like you would use property
+    '''
+    def __init__(self, getter):
+        super(customproperty, self).__init__(getter)
+        self.nwb_field = True

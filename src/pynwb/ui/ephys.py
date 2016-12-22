@@ -1,5 +1,5 @@
 from pynwb.core import docval, getargs
-from pynwb.ui.container import properties, Container
+from pynwb.ui.container import nwbproperties, NwbContainer
 #from pynwb.ui.module import Interface
 from pynwb.ui.iface import Interface
 
@@ -12,10 +12,9 @@ __std_fields = ('name',
                 'location',
                 'physical_location',
                 'impedance')
-@properties(*__std_fields)
-class ElectrodeGroup(Container):
+@nwbproperties(*__std_fields)
+class ElectrodeGroup(NwbContainer):
 
-    #@docval(*Container.__init__.docval['args'],
     @docval({'name': 'name', 'type': (str, int), 'doc': 'the name of this electrode'},
             {'name': 'coord', 'type': tuple, 'doc': 'the x,y,z coordinates of this electrode'},
             {'name': 'desc', 'type': str, 'doc': 'a description for this electrode'},
@@ -36,7 +35,7 @@ __event_detection_std_fields = ('detection_method',
                                 'source_indices',
                                 'event_times',
                                 'voltage_data')
-@properties(*__event_detection_std_fields)
+@nwbproperties(*__event_detection_std_fields)
 class EventDetection(Interface):
 
     _help_statement = ("Description of how events were detected, such as voltage "
@@ -57,8 +56,8 @@ class EventDetection(Interface):
         self._source_indices.append(idx)
         self._event_time.append(time)
 
-__event_waveform_std_fields = ('spike_data')
-@properties(*__event_waveform_std_fields)                               
+__event_waveform_std_fields = ('spike_data',)
+@nwbproperties(*__event_waveform_std_fields)                               
 class EventWaveform(Interface):
     """Spike data for spike events
     """
@@ -75,7 +74,7 @@ class EventWaveform(Interface):
 
 __clustering_std_fields = ('cluster_times',
                            'cluster_ids')
-@properties(*__clustering_std_fields)
+@nwbproperties(*__clustering_std_fields)
 class Clustering(Interface):
     """Specifies cluster event times and cluster
        metric for maximum ratio of waveform peak to
@@ -128,7 +127,7 @@ class Clustering(Interface):
 __cluster_waveform_std_fields = ('filtering',
                                  'wf_mean',
                                  'wf_sd')
-@properties(*__cluster_waveform_std_fields)
+@nwbproperties(*__cluster_waveform_std_fields)
 class ClusterWaveform(Interface):
     """Describe cluster waveforms by mean and standard deviation
        for at each sample.
@@ -151,8 +150,8 @@ class ClusterWaveform(Interface):
         self.wf_means.append(sample_means)
         self.wf_sds.append(sample_sds)
 
-__lfp_std_fields = ('lfp_data')
-@properties(*__lfp_std_fields)
+__lfp_std_fields = ('lfp_data',)
+@nwbproperties(*__lfp_std_fields)
 class LFP(Interface):
 
     _help_statement =("LFP data from one or more channels. Filter properties "
@@ -172,7 +171,7 @@ class LFP(Interface):
         self._lfp_data.parent = self
 
 __filter_ephys_std_fields = ('ephys_data',)
-@properties(*__filter_ephys_std_fields)
+@nwbproperties(*__filter_ephys_std_fields)
 class FilteredEphys(Interface):
 
     _help_statement = ("Ephys data from one or more channels that is subjected to filtering, such as "
@@ -196,7 +195,7 @@ __feat_extr_std_fields = ('description',
                           'electrodes',
                           'event_times',
                           'features')
-@properties(*__filter_ephys_std_fields)
+@nwbproperties(*__filter_ephys_std_fields)
 class FeatureExtraction(Interface):
 
 
