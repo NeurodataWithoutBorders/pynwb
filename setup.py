@@ -8,7 +8,6 @@ import os
 
 
 schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
-print(schema_dir)
 if not os.path.exists(schema_dir):
     os.makedirs(schema_dir)
 schema_path = '%s/spec.json' % schema_dir
@@ -29,9 +28,10 @@ with open('LICENSE') as f:
     license = f.read()
 
     
+pkgs = find_packages(where='src', exclude=('tests', 'docs'))
 
 setup_args = {
-    'name': 'PyNWB',
+    'name': 'pynwb',
     'version': '0.0.1',
     'description': 'Package for working with Neurodata stored in the NWB format',
     'long_description': readme,
@@ -39,8 +39,8 @@ setup_args = {
     'author_email': 'ajtritt@lbl.gov',
     'url': 'https://bitbucket.org/lblneuro/pynwb',
     'license': license,
-    #'packages': find_packages(exclude=('tests', 'docs'))
-    'packages': ['pynwb'],
+    'packages': pkgs,
+    #'packages': ['pynwb'],
     'package_dir': {'pynwb':'src/pynwb'},
     'package_data': {'pynwb':[schema_path]}
 }
@@ -53,6 +53,7 @@ if __name__ == '__main__':
     Python file as an ecoded string. This way, modifying the schema will require
     rebuilding the package, and the schema will be hardcoded.
     '''
+
     get_schema()
     setup(**setup_args)
 
