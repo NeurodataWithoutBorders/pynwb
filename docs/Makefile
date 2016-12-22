@@ -2,10 +2,14 @@
 #
 
 # You can set these variables from the command line.
-SPHINXOPTS    =
-SPHINXBUILD   = sphinx-build
-PAPER         =
-BUILDDIR      = _build
+SPHINXOPTS     =
+SPHINXBUILD    = sphinx-build
+SPHINXAPIDOC   = sphinx-apidoc
+PAPER          =
+BUILDDIR       = _build
+SRCDIR         = ../src
+RSTDIR         = source
+PKGNAME        = pynwb
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -37,9 +41,10 @@ help:
 	@echo "  changes    to make an overview of all changed/added/deprecated items"
 	@echo "  linkcheck  to check all external links for integrity"
 	@echo "  doctest    to run all doctests embedded in the documentation (if enabled)"
+	@echo "  apidoc     to to build RST from source code"
 
 clean:
-	-rm -rf $(BUILDDIR)/*
+	-rm -rf $(BUILDDIR)/* $(RSTDIR)/$(PKGNAME)* $(RSTDIR)/modules.rst
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
@@ -151,3 +156,8 @@ doctest:
 	$(SPHINXBUILD) -b doctest $(ALLSPHINXOPTS) $(BUILDDIR)/doctest
 	@echo "Testing of doctests in the sources finished, look at the " \
 	      "results in $(BUILDDIR)/doctest/output.txt."
+
+apidoc:
+	$(SPHINXAPIDOC) -o $(RSTDIR)  $(SRCDIR)
+	@echo "Build rst docs from source code."
+
