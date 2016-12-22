@@ -94,7 +94,7 @@ class GroupSpecTests(unittest.TestCase):
         ]
 
     def test_constructor(self):
-        spec = GroupSpec('root',
+        spec = GroupSpec('root_constructor',
                          datasets=self.datasets,
                          attributes=self.attributes,
                          linkable=False)
@@ -106,7 +106,7 @@ class GroupSpecTests(unittest.TestCase):
         json.dumps(spec)
                              
     def test_constructor_nwbtype(self):
-        spec = GroupSpec('root',
+        spec = GroupSpec('root_constructor_nwbtype',
                          datasets=self.datasets,
                          attributes=self.attributes,
                          linkable=False,
@@ -122,20 +122,13 @@ class GroupSpecTests(unittest.TestCase):
         spec = GroupSpec('root_test_set_dataset',
                          linkable=False,
                          nwb_type='EphysData')
-        print("root test_set_dataset spec (%d): %s" % (id(spec), json.dumps(spec, indent=2)))
-        spec.set_dataset(self.datasets[0])
-        spec.set_dataset(self.datasets[1])
-        self.assertListEqual(spec['datasets'], self.datasets)
         json.dumps(spec)
 
     def test_set_group(self):
         spec_ABCD = GroupSpec('root_test_set_group',
                          linkable=False,
                          nwb_type='EphysData')
-        print("root test_set_group spec (%d): %s" % (id(spec_ABCD), json.dumps(spec_ABCD, indent=2)))
-        #print("subgroup1 spec: %s" % json.dumps(self.subgroups[0], indent=2))
-        #print("subgroup2 spec: %s" % json.dumps(self.subgroups[1], indent=2))
-        #spec_ABCD.set_group(self.subgroups[0])
-        #spec_ABCD.set_group(self.subgroups[1])
-        #self.assertListEqual(spec_ABCD['groups'], self.subgroups)
+        spec_ABCD.set_group(self.subgroups[0])
+        spec_ABCD.set_group(self.subgroups[1])
+        self.assertListEqual(spec_ABCD['groups'], self.subgroups)
         json.dumps(spec_ABCD)
