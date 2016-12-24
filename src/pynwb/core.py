@@ -11,8 +11,10 @@ def __type_okay(value, argtype, allow_none=False):
         return isinstance(value, argtype)
     elif isinstance(argtype, tuple) or isinstance(argtype, list):
         return any(__type_okay(value, i) for i in argtype)
+    elif argtype is None:
+        return True
     else:
-        raise ValueError("argtype must be a type, str, list, or tuple")
+        raise ValueError("argtype must be a type, a str, a list, a tuple, or None")
 
 def __format_type(argtype):
     if isinstance(argtype, str):
@@ -25,6 +27,8 @@ def __format_type(argtype):
             return "%s or %s" % (", ".join(types[:-1]), types[-1])
         else:
             return types[0]
+    elif argtype is None:
+        return "NoneType"
     else:
         raise ValueError("argtype must be a type, str, list, or tuple")
 
@@ -32,6 +36,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True):
     ret = dict()
     errors = list()
     argsi = 0
+    #print("args = %s, kwargs = %s" % (args, kwargs))
     for arg in validator:
         argname = arg['name']
         # check if this is a positional argument or not
@@ -57,11 +62,11 @@ def __parse_args(validator, args, kwargs, enforce_type=True):
                     errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
         # this is a positional arg
         else:
+            #print('parsing %s' % argname)
             # check to make sure all positional
             # arguments were passed
             if argsi >= len(args):
                 errors.append("missing argument '%s'" % argname) 
-                continue
             else:
                 ret[argname] = args[argsi]
                 if enforce_type:
@@ -87,17 +92,6 @@ docval_attr_name = 'docval'
 def docval(*validator, **options):
     enforce_type = options.pop('enforce_type', True)
     val_copy = __sort_args(_copy.deepcopy(validator))
-    def to_str(argtype):
-        if isinstance(argtype, type):
-            return argtype.__name__
-        return  argtype
-
-    for arg in val_copy:
-        if isinstance(arg['type'], tuple) or isinstance(arg['type'], list):
-            arg['type'] = " or ".join(map(to_str, arg['type']))
-        else:
-            arg['type'] = to_str(arg['type'])
-
     def dec(func):
         _docval = _copy.copy(options)
         _docval['args'] = val_copy
@@ -117,14 +111,33 @@ def docval(*validator, **options):
 def getargs(*args, **kwargs):
     return [ kwargs.get(arg) for arg in args ]
 
+def popargs(*args):
+    if not isinstance(args[-1], dict):
+        raise ValueError('last argument must be dict')
+    kwargs = args[-1]
+    return [kwargs.get(arg) for arg in args[:-1]]
+
 def huread_doc(func):
     pass
 
 def sphinxdoc(func, validator):
-    def __sphinx_arg(arg_validator):
+    def to_str(argtype):
+        if isinstance(argtype, type):
+            return argtype.__name__
+        return  argtype
+
+    def __sphinx_arg(arg):
+        fmt = dict()
+        fmt['name'] = arg.get('name')
+        fmt['doc'] = arg.get('doc')
+        if isinstance(arg['type'], tuple) or isinstance(arg['type'], list):
+            fmt['type'] = " or ".join(map(to_str, arg['type']))
+        else:
+            fmt['type'] = to_str(arg['type'])
+        
         tmpl = (":param {name}: {doc}\n"
                 ":type  {name}: {type}")
-        return tmpl.format(**arg_validator)
+        return tmpl.format(**fmt)
 
     def __sig_arg(argval):
         if 'default' in argval:
