@@ -7,20 +7,23 @@ __all__ = [
 import itertools as _itertools
 import posixpath as _posixpath
 import copy as _copy
+from collections import Iterable
+import numpy as np
+from ..core import docval, getargs
 
 SOFT_LINK = 0
 HARD_LINK = 1
 EXTERNAL_LINK = 2
 
 def set_attributes(obj, attributes):
-    for key, value in attributes.iteritems():
+    for key, value in attributes.items():
         obj.attrs[key] = value
 
 def write_group(parent, name, subgroups, datasets, attributes, links):
     group = parent.create_group(name)
     links_to_create = _copy.deepcopy(links)
     if subgroups:
-        for subgroup_name, subgroup_builder in subgroups.iteritems():
+        for subgroup_name, subgroup_builder in subgroups.items():
             # do not create an empty group without attributes or links
             if subgroup_builder.is_empty():
                 continue
@@ -35,7 +38,7 @@ def write_group(parent, name, subgroups, datasets, attributes, links):
                     link_name = _posixpath.join(name, link_name)
                 links_to_create[link_name] = target
     if datasets:
-        for dset_name, dset_spec in datasets.iteritems():
+        for dset_name, dset_spec in datasets.items():
             write_dataset(group,
                           dset_name,
                           dset_spec.get('data'),
@@ -58,12 +61,12 @@ def __get_type__(data):
         return __get_type__(data[0])
 
 def write_dataset(parent, name, data, attributes, function=None):
-    if hasattr(data, '__len__'):
-        __list_fill__(parent, name, data)
-    else:
+    if isinstance(data, Iterable):
         chunk_size = 100
         #TODO: do something to figure out appropriate chunk_size
         __iter_fill__(parent, name, data, chunk_size, function=None)
+    else:
+        __list_fill__(parent, name, data)
     set_attributes(dest, attributes)
     
 def __extend_dataset__(dset):
@@ -133,28 +136,32 @@ class GroupBuilder(dict):
     __dataset = 'datasets'
     __attribute = 'attributes'
 
+    @docval({'name':'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this group', 'default': dict()},
+            {'name':'datasets', 'type': dict, 'doc': 'a dictionary of datasets to create in this group', 'default': dict()},
+            {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this group', 'default': dict()},
+            {'name':'links', 'type': dict, 'doc': 'a dictionary of links to create in this group', 'default': dict()})
     def __init__(self, groups=dict(), datasets=dict(), attributes=dict(), links=dict()):
         """Create a GroupBuilder object
             Arguments:
-                *groups* (string)      a dictionary of subgroups to create in this group
+                *groups* (string)      
                 *datasets* (string)      a dictionary of datasets to create in this group
                 *attributes* (string)      a dictionary of attributes to assign to this group
                 *links* (string)      a dictionary of links to create in this group
         """
         super().__init__()
-        super().__setitem__(GroupBuilder.__group, groups)
-        super().__setitem__(GroupBuilder.__dataset, datasets)
-        super().__setitem__(GroupBuilder.__attribute, attributes)
-        super().__setitem__(GroupBuilder.__link, links)
+        super().__setitem__(GroupBuilder.__group, dict())
+        super().__setitem__(GroupBuilder.__dataset, dict())
+        super().__setitem__(GroupBuilder.__attribute, dict())
+        super().__setitem__(GroupBuilder.__link, dict())
         self.obj_type = dict()
-        for key in groups.keys():
-            self.obj_type[key] = GroupBuilder.__group
-        for key in datasets.keys():
-            self.obj_type[key] = GroupBuilder.__dataset
-        for key in attributes.keys():
-            self.obj_type[key] = GroupBuilder.__attribute
-        for key in links.keys():
-            self.obj_type[key] = GroupBuilder.__link
+        for name, group in groups.items():
+            self.set_group(name, group)
+        for name, dataset in datasets.items():
+            self.set_dataset(name, dataset)
+        for name, link in links.items():
+            self.set_link(name, link)
+        for name, val in attributes.items():
+            self.set_attribute(name, val)
 
     @property
     def groups(self):
@@ -172,93 +179,104 @@ class GroupBuilder(dict):
     def links(self):
         return super().__getitem__(GroupBuilder.__link)
 
-    def add_dataset(self, name, data=None, attributes=dict()):
-        """Add a dataset to this group
-            Returns:
-                the DatasetBuilder object for the dataset
+    def __set_builder(self, name, builder, obj_type):
+        if name in self.obj_type:
+            if self.obj_type[name] != obj_type:
+                raise KeyError("'%s' already exists as %s" % (name, self.obj_type[name]))
+        super().__getitem__(obj_type)[name] = builder
+        self.obj_type[name] = obj_type
+
+    @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
+            {'name':'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
+            {'name':'dtype', 'type': type, 'doc': 'the datatype of this dataset', 'default': None},
+            {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
+            {'name':'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
+            {'name':'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False},
+            returns='the DatasetBuilder object for the dataset', rtype='DatasetBuilder')
+    def add_dataset(self, **kwargs):
         """
-        #if name in self.obj_type:
-        #    obj_type = self.obj_type[name]
-        #    if obj_type != GroupBuilder.__dataset:
-        #        raise KeyError("'%s' already exists as %s" % (name, obj_type))
-        #    builder = super().__getitem__(GroupBuilder.__dataset)[name]
-        #else:
-        #if data:
-        #    builder.data = data
-        #if attributes:
-        #    for k, v in attributes.items():
-        #        builder.set_attribute(k, v)
-        if isinstance(data, DatasetBuilder):
-            builder = data
-        else:
-            builder = DatasetBuilder(data, attributes)
-        super().__getitem__(GroupBuilder.__dataset)[name] = builder
-        self.obj_type[name] = GroupBuilder.__dataset
+        Create a dataset and add it to this group
+        """
+        name = kwargs.pop('name')
+        builder = DatasetBuilder(**kwargs)
+        self.set_dataset(name, builder)
         return builder
     
-    def add_group(self, name, builder=None):
-        """Add a subgroup to this group
-            Returns:
-                the GroupBuilder object for the subgroup
+    @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
+            {'name':'builder', 'type': 'DatasetBuilder', 'doc': 'the GroupBuilder that represents this dataset'})
+    def set_dataset(self, **kwargs):
         """
-        if name in self.obj_type:
-            if obj_type != GroupBuilder.__group:
-                raise KeyError("'%s' already exists as %s" % (name, obj_type))
-        if not builder:
-            tmp = GroupBuilder()
-        else:
-            tmp = builder
-        super().__getitem__(GroupBuilder.__group)[name] = tmp
-        self.obj_type[name] = GroupBuilder.__group
-        return tmp
-
-    def add_hard_link(self, name, path):
-        """Add an hard link in this group.
-
-            Arguments:
-                *name* (string)      name of the link
-                *path* (string)      absolute path to the object to link to
-
-            Returns:
-                the LinkBuilder object for the hard link
+        Add a dataset to this group
         """
-        super().__getitem__(GroupBuilder.__link)[name] = LinkBuilder(path, hard=True)
-        self.obj_type[name] = GroupBuilder.__link
-        return super().__getitem__(GroupBuilder.__link)[name]
+        name, builder, = getargs('name', 'builder', **kwargs)
+        self.__set_builder(name, builder, GroupBuilder.__dataset)
+
+    @docval({'name':'name', 'type': str, 'doc': 'the name of this subgroup'},
+            {'name':'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this subgroup', 'default': dict()},
+            {'name':'datasets', 'type': dict, 'doc': 'a dictionary of datasets to create in this subgroup', 'default': dict()},
+            {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this subgroup', 'default': dict()},
+            {'name':'links', 'type': dict, 'doc': 'a dictionary of links to create in this subgroup', 'default': dict()},
+            returns='the GroupBuilder object for the subgroup', rtype='GroupBuilder')
+    def add_group(self, **kwargs):
+        """
+        Add a subgroup with the given data to this group
+        """
+        name = kwargs.pop('name')
+        builder = GroupBuilder(**kwargs)
+        print('%d - adding %d' % (id(self), id(builder)))
+        self.set_group(name, builder)
+        return builder
+
+    @docval({'name':'name', 'type': str, 'doc': 'the name of this subgroup'},
+            {'name':'builder', 'type': 'GroupBuilder', 'doc': 'the GroupBuilder that represents this subgroup'})
+    def set_group(self, **kwargs):
+        """
+        Add a subgroup to this group
+        """
+        name, builder, = getargs('name', 'builder', **kwargs)
+        self.__set_builder(name, builder, GroupBuilder.__group)
+
+    @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
+            {'name':'path', 'type': str, 'doc': 'the path within this HDF5 file'},
+            returns='the builder object for the soft link', rtype='LinkBuilder')
+    def add_link(self, **kwargs):
+        """
+        Create a soft link and add it to this group.
+        """
+        name, path = getargs('name', 'path', **kwargs)
+        builder = LinkBuilder(path)
+        self.set_link(name, builder)
+        return builder
     
-    def add_soft_link(self, name, path):
-        """Add an soft link in this group.
-
-            Arguments:
-                *name* (string)      name of the link
-                *path* (string)      absolute path to the object to link to
-
-            Returns:
-                the LinkBuilder object for the soft link
+    @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
+            {'name':'file_path', 'type': str, 'doc': 'the file path of this external link'},
+            {'name':'path', 'type': str, 'doc': 'the absolute path within the external HDF5 file'},
+            returns='the builder object for the external link', rtype='ExternalLinkBuilder')
+    def add_external_link(self, **kwargs):
         """
-        super().__getitem__(GroupBuilder.__link)[name] = LinkBuilder(path)
-        self.obj_type[name] = GroupBuilder.__link
-        return super().__getitem__(GroupBuilder.__link)[name]
+        Create an external link and add it to this group.
+        """
+        name, file_path, path = getargs('name', 'file_path', 'path', **kwargs)
+        builder = ExternalLinkBuilder(path, file_path)
+        self.set_link(name, builder)
+        return builder
     
-    def add_external_link(self, name, file_path, path):
-        """Add an external link in this group.
-
-            Arguments:
-                *name* (string)      name of the link
-                *file_path* (string) path of the file that contains
-                                     the object to link to
-                *path* (string)      absolute path to the object to link to
-
-            Returns:
-                the LinkBuilder object for the external link
+    @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
+            {'name':'builder', 'type': 'LinkBuilder', 'doc': 'the LinkBuilder that represents this link'})
+    def set_link(self, **kwargs):
         """
-        super().__getitem__(GroupBuilder.__link)[name] = ExternalLinkBuilder(path, file_path)
-        self.obj_type[name] = GroupBuilder.__link
-        return super().__getitem__(GroupBuilder.__link)[name]
+        Add a link to this group
+        """
+        name, builder = getargs('name', 'builder', **kwargs)
+        self.__set_builder(name, builder, GroupBuilder.__link)
     
-    def set_attribute(self, name, value):
-        """Set an attribute for this group.
+    @docval({'name':'name', 'type': str, 'doc': 'the name of the attribute'},
+            {'name':'value', 'type': None, 'doc': 'the attribute value'})
+    def set_attribute(self, **kwargs):
         """
+        Set an attribute for this group.
+        """
+        name, value = getargs('name', 'value', **kwargs)
         super().__getitem__(GroupBuilder.__attribute)[name] = value
         self.obj_type[name] = GroupBuilder.__attribute
 
@@ -270,9 +288,10 @@ class GroupBuilder(dict):
         self_groups = super().__getitem__(GroupBuilder.__group)
         for name, subgroup in groups.items():
             if name in self_groups:
+                print('merging %s in' % name)
                 self_groups[name].deep_update(subgroup)
             else:
-                self.add_group(name, subgroup)
+                self.set_group(name, subgroup)
         # merge datasets
         datasets = super(GroupBuilder, builder).__getitem__(GroupBuilder.__dataset)
         self_datasets = super().__getitem__(GroupBuilder.__dataset)
@@ -283,14 +302,13 @@ class GroupBuilder(dict):
                 #super().__getitem__(GroupBuilder.__dataset)[name] = dataset
             else:
                 #self.add_dataset(name, dataset.data, attributes=copy.copy(dataset.attributes)) #TODO: figure out if we want to do this copying, rather than just pointing to the argument
-                self.add_dataset(name, dataset.data, attributes=dataset.attributes)
+                self.set_dataset(name, dataset)
         # merge attributes
         for name, value in super(GroupBuilder, builder).__getitem__(GroupBuilder.__attribute).items():
             self.set_attribute(name, value)
         # merge links
         for name, link in super(GroupBuilder, builder).__getitem__(GroupBuilder.__link).items():
-            super().__getitem__(GroupBuilder.__link)[name] = link
-            self.obj_type[name] = GroupBuilder.__link
+            self.set_link(name, link)
 
     def is_empty(self):
         """Returns true if there are no datasets, attributes, links or 
@@ -393,10 +411,22 @@ class ExternalLinkBuilder(LinkBuilder):
         return self['file_path']
 
 class DatasetBuilder(dict):
-    def __init__(self, data=None, attributes=dict()):
+    @docval({'name':'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
+            {'name':'dtype', 'type': (type, np.dtype), 'doc': 'the datatype of this dataset', 'default': None},
+            {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
+            {'name':'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
+            {'name':'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False})
+    def __init__(self, **kwargs):
+        '''
+        Create a Builder object for a dataset
+        '''
         super(DatasetBuilder, self).__init__()
+        data, dtype, attributes, maxshape, chunks = getargs('data', 'dtype', 'attributes', 'maxshape', 'chunks', **kwargs)
         self['data'] = data   
-        self['attributes'] = attributes
+        self['attributes'] = _copy.deepcopy(attributes)
+        self.chunks = chunks
+        self.maxshape = maxshape
+        self.dtype = dtype
 
     @property
     def data(self):
