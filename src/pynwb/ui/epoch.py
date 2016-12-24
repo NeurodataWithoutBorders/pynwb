@@ -53,19 +53,20 @@ class Epoch(NwbContainer):
         index in the time series that overlaps with the interval, and the
         duration of that overlap.
 
-        Epochs should be created through NWB.create_epoch(). They should
+        Epochs should be created through NWBFile.create_epoch(). They should
         not be instantiated directly
     """
 
     #_neurodata_type = 'Epoch'
 
-    def __init__(self, name, start, stop, description=None, parent=None):
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the epoch, as it will appear in the file'},
+            {'name': 'start', 'type': float, 'doc': 'the starting time of the epoch'},
+            {'name': 'stop', 'type': float, 'doc': 'the ending time of the epoch'},
+            {'name': 'description', 'type': str, 'doc': 'a description of this epoch', 'default': None},
+            {'name': 'parent', 'type': 'NwbContainer', 'doc': 'The parent NwbContainer for this NwbContainer', 'default': None})
+    def __init__(self, **kwargs):
+        name, start, stop, description, parent = getargs('name', 'start', 'stop', 'description', 'parent', **kwargs)
         super(Epoch, self).__init__(parent=parent)
-        #**Constructor arguments:**
-        #    **name** (text) Name of epoch (must be unique among epochs)
-        #    **nwb** NWB object (class)
-        #    **start** (float) Start time of epoch, in seconds
-        #    **stop** (float) Stop time of epoch, in seconds
         # dict to keep track of which time series are linked to this epoch
         self._timeseries = dict()
         # start and stop time (in seconds)
@@ -77,26 +78,9 @@ class Epoch(NwbContainer):
 
         self.tags = set()
 
-
-        # make a copy of the epoch specification
-        #self.spec = copy.deepcopy(spec)
-        ## reference to nwb 'kernel'
-        #self.nwb = nwb
-        ## intervals that are for ignoring data (eg, due noise)
-        ##self.spec["ignore_intervals"]["_value"] = []
-        ## list of tags associated with epoch
-        #self.spec["_attributes"]["tags"]["_value"] = []
-        #self.spec["_attributes"]["links"]["_value"] = []
-        ## go ahead and create epoch folder now
-        #if self.name in nwb.file_pointer["epochs"]:
-        #    nwb.fatal_error("Epoch %s already exists" % self.name)
-        #nwb.file_pointer["epochs"].create_group(self.name)
-        #self.serial_num = -1
-        #self.finalized = False
-
     @property
     def timeseries(self):
-        return self._timeseries
+        return tuple(self._timeseries.values())
 
 
     def set_description(self, desc):
@@ -110,25 +94,6 @@ class Epoch(NwbContainer):
                 *nothing*
         """
         self.description = desc
-        #self.set_value("description", desc)
-
-#    def set_value(self, key, value, **attrs):
-#        """Adds an annotating key-value pair (ie, dataset) to the epoch.
-#   
-#           Arguments:
-#               *key* (text) A unique identifier within the TimeSeries
-#
-#               *value* (any) The value associated with this key
-#   
-#           Returns:
-#               *nothing*
-#        """
-#        if self.finalized:
-#            self.nwb.fatal_error("Added value to epoch after finalization")
-#        self.spec[key] = copy.deepcopy(self.spec["[]"])
-#        dtype = self.spec[key]["_datatype"]
-#        name = "epoch " + self.name
-#        self.nwb.set_value_internal(key, value, self.spec, name, dtype, **attrs)
 
     def add_tag(self, tag):
         """ Append string annotation to epoch. This will be stored in 
@@ -348,8 +313,9 @@ __epoch_timseries_fields = ('name',
                             'timeseries')    
 @nwbproperties(*__epoch_timseries_fields)
 class EpochTimeSeries(NwbContainer):
+    #@docval({'name': 'name', 'type': str, 'doc':''})
     def __init__(self, ts, start_time, stop_time, name=None, parent=None):
-        super(EpochTimeSeries, self).__init__(parent)
+        super(EpochTimeSeries, self).__init__(parent=parent)
         self.name = name if name else ts.name
         self.timeseries = ts
         #TODO: do something to compute count and idx_start from start_time

@@ -41,14 +41,15 @@ import h5py
 import copy
 import numpy as np
 import types
+from datetime import datetime
 
 
-from . import timeseries as _timeseries
+from .timeseries import TimeSeries, ElectricalSeries
 from .module import Module
 from .epoch import Epoch
 from .ephys import ElectrodeGroup
 
-from ..core import docval
+from ..core import docval, getargs
 from .container import nwbproperties, NwbContainer
 
 VERS_MAJOR = 1
@@ -155,12 +156,18 @@ class NWBFile(NwbContainer):
                 "byte": 'uint8'
     }
 
+    __nwb_version = '1.0.4'
 
-    @docval({'name': 'file_name', 'type': str, 'doc': 'path to NWB file'})
+
+    @docval({'name': 'file_name', 'type': str, 'doc': 'path to NWB file'},
+            {'name': 'description', 'type': str, 'doc': 'a description of the session where this data was generated'})
     def __init__(self, **vargs):
         super().__init__()
-        self._filename = getargs('file_name', **vargs)
-        self.__read_arguments__(**vargs)
+        self.__filename, = getargs('file_name', **vargs)
+        self.__start_time = datetime.utcnow()
+        self.__file_id = '%s %s' % (self.__filename, self.__start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        #self.__read_arguments__(**vargs)
+        self.__description = getargs('description', **vargs)
 
         self.__rawdata = dict()
         self.__stimulus = dict()
@@ -169,6 +176,26 @@ class NWBFile(NwbContainer):
         self.modules = dict()
         self.epochs = dict()
         self.electrodes = dict()
+
+    @property
+    def nwb_version(self):
+        return self.__nwb_version
+
+    @property
+    def start_time(self):
+        return self.__start_time
+
+    @property
+    def filename(self):
+        return self.__filename
+
+    @property
+    def session_description(self):
+        return self.__description
+
+    @property
+    def file_id(self):
+        return self.__file_id
 
     @property
     def rawdata(self):
@@ -245,7 +272,11 @@ class NWBFile(NwbContainer):
             print(err_str)
             sys.exit(1)
 
-    def create_epoch(self, name, start, stop):
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the epoch, as it will appear in the file'},
+            {'name': 'start', 'type': float, 'doc': 'the starting time of the epoch'},
+            {'name': 'stop', 'type': float, 'doc': 'the ending time of the epoch'},
+            {'name': 'description', 'type': str, 'doc': 'a description of this epoch', 'default': None})
+    def create_epoch(self, **kwargs):
         """ Creates a new Epoch object. Epochs are used to track intervals
             in an experiment, such as exposure to a certain type of stimuli
             (an interval where orientation gratings are shown, or of 
@@ -263,23 +294,24 @@ class NWBFile(NwbContainer):
             Returns:
                 Epoch object
         """
-        epoch = Epoch(name, start, stop)
+        name, start, stop, description = getargs('name', 'start', 'stop', 'description', **kwargs)
+        epoch = Epoch(name, start, stop, description=description, parent=self)
         self.epochs[name] = epoch
         return epoch
 
     def get_epoch(self, name):
         return self.__get_epoch(name)
 
-    @docval({'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
-            {'name': 'timeseries', 'type': (str, _timeseries.TimeSeries), 'doc': 'the name of a timeseries or a TimeSeries object or a list of names of timeseries or TimeSeries objects'})
+    @docval({'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
+            {'name': 'timeseries', 'type': (str, TimeSeries, list, tuple), 'doc': 'the name of a timeseries or a TimeSeries object or a list of names of timeseries or TimeSeries objects'})
     def set_epoch_timeseries(self, **kwargs):
         """Add one or more TimSeries datasets to one or more Epochs
         """
         epoch, timeseries = getargs('epoch', 'timeseries', **kwargs)
-        if isinstance(epochs, list):
-            ep_objs = [self.__get_epoch(ep) for ep in epochs]
+        if isinstance(epoch, list):
+            ep_objs = [self.__get_epoch(ep) for ep in epoch]
         else:
-            ep_objs = [self.__get_epoch(epochs)]
+            ep_objs = [self.__get_epoch(epoch)]
 
         if isinstance(timeseries, list):
             ts_objs = [self.__get_timeseries(ts) for ts in timeseries]
@@ -302,7 +334,7 @@ class NWBFile(NwbContainer):
         return ep
 
     def __get_timeseries(self, timeseries):
-        if isinstance(timeseries, _timeseries.TimeSeries):
+        if isinstance(timeseries, TimeSeries):
             ts = timeseries 
         elif isinstance(timeseries, str): 
             mod = self.modality.get(timeseries)
@@ -336,21 +368,21 @@ class NWBFile(NwbContainer):
     def link_timeseries(self, ts):
         pass
 
-    @docval({'name': 'ts', 'type': _timeseries.TimeSeries, 'doc': 'the  TimeSeries object to add'},
-            {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
+    @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
+            {'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
     def add_raw_data(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', **kwargs)
         self.__set_timeseries(self.__rawdata, ts, epoch)
 
-    @docval({'name': 'ts', 'type': _timeseries.TimeSeries, 'doc': 'the  TimeSeries object to add'},
+    @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
     def add_stimulus(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', **kwargs)
         self.__set_timeseries(self.__stimulus, ts, epoch)
 
-    @docval({'name': 'ts', 'type': _timeseries.TimeSeries, 'doc': 'the  TimeSeries object to add'},
+    @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
     def add_stimulus_template(self, **kwargs):
@@ -359,7 +391,7 @@ class NWBFile(NwbContainer):
 
     def __set_timeseries(self, ts_dict, ts, epoch=None):
         ts_dict[ts.name] = ts
-        ts.set_parent(self)
+        ts.parent = self
         if epoch:
             self.set_epoch_timeseries(epoch, ts)
     
@@ -478,18 +510,18 @@ class NWBFile(NwbContainer):
         img.set_attribute("description", np.string_(desc))
         
 
-    @docval({'name': 'name',  'type': str,   'doc': 'the name of the electrode group'},
-            {'name': 'coord', 'type': tuple, 'doc': 'the xyz-coordinates of this electrode group'},
-            {'name': 'desc',  'type': str,   'doc': 'a description of the probe/shank/tetrode'},
-            {'name': 'dev',   'type': str,   'doc': 'name of the device this probe/shank/tetrode is from'},
-            {'name': 'loc',   'type': str,   'doc': 'description of electrode location'},
+    @docval({'name': 'name', 'type': (str, int), 'doc': 'the name of this electrode'},
+            {'name': 'coord', 'type': tuple, 'doc': 'the x,y,z coordinates of this electrode'},
+            {'name': 'desc', 'type': str, 'doc': 'a description for this electrode'},
+            {'name': 'dev', 'type': str, 'doc': 'the device this electrode was recorded from on'},
+            {'name': 'loc', 'type': str, 'doc': 'a description of the location of this electrode'},
+            {'name': 'imp', 'type': float, 'doc': 'the impedance of this electrode', 'default': -1.0},
             returns='the electrode group', rtype=ElectrodeGroup)
     def create_electrode_group(self, **kwargs):
         """Add an electrode group (e.g. a probe, shank, tetrode). 
         """
-        name, coord, desc, dev, loc = getargs('name', 'coord', 'desc', 'dev', 'loc', **kwargs)
-        elec_grp = ephys.ElectrodeGroup(name, coord, desc, dev, loc)
-        elec_grp.parent = self
+        name, coord, desc, dev, loc, imp = getargs('name', 'coord', 'desc', 'dev', 'loc', 'imp', **kwargs)
+        elec_grp = ElectrodeGroup(name, coord, desc, dev, loc, imp=imp, parent=self)
         self.electrodes[name] = elec_grp
         return elec_grp
 
@@ -514,10 +546,10 @@ class NWBFile(NwbContainer):
             {'name': 'elec_ids',  'type': str, 'doc': 'the ID of the electrode each channel belongs to'},
             {'name': 'timestamps', 'type': (np.ndarray, list, types.GeneratorType), 'doc': 'the timestamps for this dataset', 'default': None},
             {'name': 'start_rate', 'type': (tuple, list), 'doc': 'tuple containing start time and sample rate', 'default': None},
-            returns="a processing module", rtype=_timeseries.ElectricalSeries)
+            returns="a processing module", rtype=ElectricalSeries)
     def add_ephys_data(self, **kwargs):
         name, data, elec_id, timestamps, start_rate = getargs("name", "data", "elec_id", "timestamps", "start_rate", **kwargs)
-        ts = _timeseries.ElectricalSeries(name, electrodes=elec_id)
+        ts = ElectricalSeries(name, electrodes=elec_id)
         ts.set_data(data)
         if timestamps:
             ts.set_timestamps(timestamps)

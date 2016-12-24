@@ -37,10 +37,13 @@ import copy
 import numpy as np
 from collections import Iterable
 
-from ..core import docval, getargs
+from ..core import docval, getargs, popargs
 from .container import NwbContainer, nwbproperties
 
 #### possibly useful code later:
+
+_default_conversion = 1.0
+_default_resolution = np.nan
 
 __std_fields = ("name",
                 "comments",
@@ -69,8 +72,6 @@ class TimeSeries(NwbContainer):
         All time series are created by calls to  NWB.create_timeseries(). 
         They should not not be instantiated directly
     """
-    _default_conversion = 1.0
-    _default_resolution = np.nan
         # if modality == "acquisition":
         #     self.path = "/acquisition/timeseries/"
         # elif modality == "stimulus":
@@ -84,11 +85,11 @@ class TimeSeries(NwbContainer):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': Iterable, 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': None},
+            {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': None},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
-            {'name': 'timestamps', 'type': Iterable, 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
@@ -124,8 +125,6 @@ class TimeSeries(NwbContainer):
             
         self.data_link = set()
         self.timestamps_link = set()
-        self.data = None
-        self.timestamps = None
         self.interval = None
     
     @property
@@ -167,7 +166,7 @@ class TimeSeries(NwbContainer):
         self.set_comments(value)
 
     # if default value used, value taken from specification file
-    @docval({'name': 'data', 'type': Iterable, 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+    @docval({'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution})
@@ -216,7 +215,7 @@ class TimeSeries(NwbContainer):
     ####################################################################
     ####################################################################
 
-    @docval({'name': 'timestamps', 'type': Iterable, 'doc': 'Timestamps for samples stored in data'})
+    @docval({'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data'})
     def set_time(self, **kwargs):
         ''' Store timestamps for the time series. 
         '''
@@ -343,13 +342,32 @@ class ElectricalSeries(TimeSeries):
     _ancestry = "TimeSeries,ElectricalSeries"
     _help = "Stores acquired voltage data from extracellular recordings"
 
-    def __init__(self, name, electrodes=None):
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'electrodes', 'type': (list, tuple), 'doc': 'the electrode group for each channel'},
+            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                                                   'contained here. It can also be the name of a device, for stimulus or '
+                                                   'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': None},
+            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
+            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
+            {'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
+            {'name': 'parent', 'type': 'NwbContainer', 'doc': 'The parent NwbContainer for this NwbContainer', 'default': None},
+            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
+            )
+    def __init__(self, **kwargs):
         """ Create a new ElectricalSeries dataset
             
             Arguments:
                 *names* (int array) The electrode indices
         """
-        super().__init__(name)
+        name, electrodes, source = popargs('name', 'electrodes', 'source', kwargs)
+        super().__init__(name, source, **kwargs)
         if electrodes:
             self.set_electrodes(electrodes)
     
