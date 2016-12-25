@@ -163,7 +163,7 @@ class NWBFile(NwbContainer):
             {'name': 'description', 'type': str, 'doc': 'a description of the session where this data was generated'})
     def __init__(self, **vargs):
         super().__init__()
-        self.__filename, = getargs('file_name', **vargs)
+        self.__filename = getargs('file_name', **vargs)
         self.__start_time = datetime.utcnow()
         self.__file_id = '%s %s' % (self.__filename, self.__start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
         #self.__read_arguments__(**vargs)

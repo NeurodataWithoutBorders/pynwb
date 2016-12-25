@@ -9,6 +9,8 @@ import posixpath as _posixpath
 import copy as _copy
 from collections import Iterable
 import numpy as np
+import h5py as _h5py
+
 from ..core import docval, getargs
 
 SOFT_LINK = 0
@@ -23,51 +25,69 @@ def write_group(parent, name, subgroups, datasets, attributes, links):
     group = parent.create_group(name)
     links_to_create = _copy.deepcopy(links)
     if subgroups:
-        for subgroup_name, subgroup_builder in subgroups.items():
+        for subgroup_name, builder in subgroups.items():
             # do not create an empty group without attributes or links
-            if subgroup_builder.is_empty():
+            if builder.is_empty():
                 continue
             tmp_links = write_group(group,
                             subgroup_name,
-                            subgroup_builder.groups,
-                            subgroup_builder.datasets,
-                            subgroup_builder.attributes,
-                            subgroup_builder.links)
-            for link_name, target in tmp_links.items():
-                if link_name[0] != '/':
-                    link_name = _posixpath.join(name, link_name)
-                links_to_create[link_name] = target
+                            builder.groups,
+                            builder.datasets,
+                            builder.attributes,
+                            builder.links)
+            #for link_name, target in tmp_links.items():
+            #    if link_name[0] != '/':
+            #        link_name = _posixpath.join(name, link_name)
+            #    links_to_create[link_name] = target
+            links_to_create.update(tmp_links)
     if datasets:
-        for dset_name, dset_spec in datasets.items():
+        for dset_name, builder in datasets.items():
             write_dataset(group,
                           dset_name,
-                          dset_spec.get('data'),
-                          dset_spec.get('attributes'))
+                          builder.get('data'),
+                          builder.get('attributes'))
 
     set_attributes(group, attributes)
-    return links_to_create
 
-def __get_shape__(data):
+    return {_posixpath.join(name, k) if k[0] != '/' else k: v 
+            for k, v in links_to_create.items()}
+
+
+
+def __get_shape_helper(data):
     shape = list()
     if hasattr(data, '__len__'):
         shape.append(len(data))
-        shape.extend(__get_shape__(data[0]))
+        shape.extend(__get_shape_helper(data[0]))
     return tuple(shape)
 
+def __get_shape__(data):
+    if hasattr(data, '__len__') and not isinstance(data, str):
+        return __get_shape_helper(data)
+    else:
+        return None
+
 def __get_type__(data):
-    if not hasattr(data, '__len__'):
+    if isinstance(data, str):
+        return _h5py.special_dtype(vlen=bytes)
+    elif not hasattr(data, '__len__'):
         return type(data)
     else:
         return __get_type__(data[0])
 
 def write_dataset(parent, name, data, attributes, function=None):
-    if isinstance(data, Iterable):
+    dset = None
+    if isinstance(data, str):
+        dset = __scalar_fill__(parent, name, data)
+    elif hasattr(data, '__len__'):
+        dset = __list_fill__(parent, name, data)
+    elif isinstance(data, Iterable):
         chunk_size = 100
         #TODO: do something to figure out appropriate chunk_size
-        __iter_fill__(parent, name, data, chunk_size, function=None)
+        dset = __iter_fill__(parent, name, data, chunk_size, function=None)
     else:
-        __list_fill__(parent, name, data)
-    set_attributes(dest, attributes)
+        dset = __scalar_fill__(parent, name, data)
+    set_attributes(dset, attributes)
     
 def __extend_dataset__(dset):
     new_shape = list(dset.shape)
@@ -78,6 +98,11 @@ def __trim_dataset__(dset, length):
     new_shape = list(dset.shape)
     new_shape[0] = length
     dset.resize(new_shape)
+
+def __scalar_fill__(parent, name, data):
+    dtype = __get_type__(data)
+    dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype)
+    return dset
 
 def __iter_fill__(parent, name, data, chunk_size, function=None):
     #data_shape = list(__get_shape__(data))
@@ -90,7 +115,7 @@ def __iter_fill__(parent, name, data, chunk_size, function=None):
     data_dtype = __get_type__(curr_chunk)
     max_shape = list(data_shape)
     max_shape[0] = None
-    dset = parent.require_dataset(name, shape=data_shape, dtype=data_dtype, maxshape=max_shape)
+    dset = parent.create_dataset(name, shape=data_shape, dtype=data_dtype, maxshape=max_shape)
 
     idx = 0
     more_data = True
@@ -122,12 +147,13 @@ def __iter_fill__(parent, name, data, chunk_size, function=None):
 def __list_fill__(parent, name, data):
     data_shape = __get_shape__(data)
     data_dtype = __get_type__(data)
-    dset = parent.require_dataset(name, shape=data_shape, dtype=data_dtype)
+    dset = parent.create_dataset(name, shape=data_shape, dtype=data_dtype)
     if len(data) > dset.shape[0]:
         new_shape = list(dset.shape)
         new_shape[0] = len(data)
         dset.resize(new_shape)
     dset[:] = data
+    return dset
     
 
 class GroupBuilder(dict):
@@ -223,7 +249,6 @@ class GroupBuilder(dict):
         """
         name = kwargs.pop('name')
         builder = GroupBuilder(**kwargs)
-        print('%d - adding %d' % (id(self), id(builder)))
         self.set_group(name, builder)
         return builder
 
@@ -288,7 +313,6 @@ class GroupBuilder(dict):
         self_groups = super().__getitem__(GroupBuilder.__group)
         for name, subgroup in groups.items():
             if name in self_groups:
-                print('merging %s in' % name)
                 self_groups[name].deep_update(subgroup)
             else:
                 self.set_group(name, subgroup)

@@ -109,12 +109,18 @@ def docval(*validator, **options):
     return dec
 
 def getargs(*args, **kwargs):
+    if len(args) == 1:
+        return kwargs.get(args[0])
     return [ kwargs.get(arg) for arg in args ]
 
 def popargs(*args):
     if not isinstance(args[-1], dict):
         raise ValueError('last argument must be dict')
     kwargs = args[-1]
+    if not args:
+        raise ValueError('must provide keyword to pop')
+    if len(args) == 1:
+        return kwargs.pop(args[0])
     return [kwargs.get(arg) for arg in args[:-1]]
 
 def huread_doc(func):

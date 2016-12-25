@@ -155,7 +155,8 @@ class HDF5ContainerRenderer(BaseObjectHandler):
             raise Exception('highest container not a file: %s (%s) --> ... --> %s (%s)' % (container, type(container), top_container, type(top_container)))
         
         container_source = top_container.container_source
-        container_path = posixpath.join(*reversed(location))
+        container_path = '/%s' % posixpath.join(*reversed(location))
+        #container_path = posixpath.join(*reversed(location))
         return (container_source, container_path)
 
 class TimeFinder(object):
@@ -181,7 +182,6 @@ class NWBFileHDF5Renderer(HDF5ContainerRenderer):
                 }
             )
         )
-        print(json.dumps(builder, indent=4))
         builder.set_group('stimulus', GroupBuilder({
                 'template': GroupBuilder(),
                 'presentation': GroupBuilder()
