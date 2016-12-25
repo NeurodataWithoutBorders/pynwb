@@ -5,10 +5,17 @@ from pynwb.io.write import HDF5Writer
 #from pynwb.ui.ephys import ElectrodeGroup
 
 import numpy as np
+import os
 
 data_len = 1000
+filename = 'test.nwb'
 
-f = NWBFile('test.nwb', 'my first synthetic recording')
+
+if os.path.exists(filename):
+    print('removing %s' % filename)
+    os.remove(filename)
+
+f = NWBFile(filename, 'my first synthetic recording')
 
 rate = 10.0
 data = np.fromiter(range(data_len), dtype=np.float)
