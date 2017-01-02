@@ -19,6 +19,13 @@ EXTERNAL_LINK = 2
 
 def set_attributes(obj, attributes):
     for key, value in attributes.items():
+        if any(isinstance(value, t) for t in (set, list, tuple)):
+            tmp = tuple(value)
+            if len(tmp):
+                if isinstance(tmp[0], str):
+                    max_len = max(len(s) for s in tmp)
+                    dt = '|S%d' % max_len
+                    value = np.array(tmp, dtype=dt) 
         obj.attrs[key] = value
 
 def write_group(parent, name, subgroups, datasets, attributes, links):
@@ -27,8 +34,8 @@ def write_group(parent, name, subgroups, datasets, attributes, links):
     if subgroups:
         for subgroup_name, builder in subgroups.items():
             # do not create an empty group without attributes or links
-            if builder.is_empty():
-                continue
+            #if builder.is_empty():
+            #    continue
             tmp_links = write_group(group,
                             subgroup_name,
                             builder.groups,
@@ -58,22 +65,23 @@ def __get_shape_helper(data):
     shape = list()
     if hasattr(data, '__len__'):
         shape.append(len(data))
-        shape.extend(__get_shape_helper(data[0]))
+        if len(data) and not isinstance(data[0], str):
+            shape.extend(__get_shape_helper(data[0]))
     return tuple(shape)
 
-def __get_shape__(data):
+def __get_shape(data):
     if hasattr(data, '__len__') and not isinstance(data, str):
         return __get_shape_helper(data)
     else:
         return None
 
-def __get_type__(data):
+def __get_type(data):
     if isinstance(data, str):
         return _h5py.special_dtype(vlen=bytes)
     elif not hasattr(data, '__len__'):
         return type(data)
     else:
-        return __get_type__(data[0])
+        return __get_type(data[0])
 
 def write_dataset(parent, name, data, attributes, function=None):
     dset = None
@@ -100,19 +108,19 @@ def __trim_dataset__(dset, length):
     dset.resize(new_shape)
 
 def __scalar_fill__(parent, name, data):
-    dtype = __get_type__(data)
+    dtype = __get_type(data)
     dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype)
     return dset
 
 def __iter_fill__(parent, name, data, chunk_size, function=None):
-    #data_shape = list(__get_shape__(data))
+    #data_shape = list(__get_shape(data))
     #data_shape[0] = None
     #data_shape = tuple(data_shape)
     data_iter = iter(data)
     curr_chunk = [next(data_iter) for i in range(chunk_size)]
 
-    data_shape = __get_shape__(curr_chunk)
-    data_dtype = __get_type__(curr_chunk)
+    data_shape = __get_shape(curr_chunk)
+    data_dtype = __get_type(curr_chunk)
     max_shape = list(data_shape)
     max_shape[0] = None
     dset = parent.create_dataset(name, shape=data_shape, dtype=data_dtype, maxshape=max_shape)
@@ -145,8 +153,8 @@ def __iter_fill__(parent, name, data, chunk_size, function=None):
     return dset
 
 def __list_fill__(parent, name, data):
-    data_shape = __get_shape__(data)
-    data_dtype = __get_type__(data)
+    data_shape = __get_shape(data)
+    data_dtype = __get_type(data)
     dset = parent.create_dataset(name, shape=data_shape, dtype=data_dtype)
     if len(data) > dset.shape[0]:
         new_shape = list(dset.shape)
@@ -167,12 +175,8 @@ class GroupBuilder(dict):
             {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this group', 'default': dict()},
             {'name':'links', 'type': dict, 'doc': 'a dictionary of links to create in this group', 'default': dict()})
     def __init__(self, groups=dict(), datasets=dict(), attributes=dict(), links=dict()):
-        """Create a GroupBuilder object
-            Arguments:
-                *groups* (string)      
-                *datasets* (string)      a dictionary of datasets to create in this group
-                *attributes* (string)      a dictionary of attributes to assign to this group
-                *links* (string)      a dictionary of links to create in this group
+        """
+        Create a GroupBuilder object
         """
         super().__init__()
         super().__setitem__(GroupBuilder.__group, dict())
@@ -456,9 +460,9 @@ class DatasetBuilder(dict):
     def data(self):
         return self['data']
 
-    @data.setter
-    def data(self, val):
-        self['data'] = val
+    #@data.setter
+    #def data(self, val):
+    #    self['data'] = val
 
     @property
     def attributes(self):
