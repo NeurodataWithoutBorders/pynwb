@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup, find_packages
+from setuptools import setup
 from urllib.request import urlretrieve
 import json
 import pickle
@@ -28,7 +28,7 @@ with open('LICENSE') as f:
     license = f.read()
 
     
-pkgs = find_packages(where='src', exclude=('tests', 'docs'))
+pkgs=['pynwb', 'pynwb.io', 'pynwb.ui']
 
 setup_args = {
     'name': 'pynwb',
@@ -40,8 +40,7 @@ setup_args = {
     'url': 'https://bitbucket.org/lblneuro/pynwb',
     'license': license,
     'packages': pkgs,
-    #'packages': ['pynwb'],
-    'package_dir': {'pynwb':'src/pynwb'},
+    'package_dir': {'': 'src'},
     'package_data': {'pynwb':[schema_path]}
 }
 
