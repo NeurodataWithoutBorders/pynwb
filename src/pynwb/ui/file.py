@@ -50,7 +50,7 @@ from .epoch import Epoch
 from .ephys import ElectrodeGroup
 
 from ..core import docval, getargs
-from .container import nwbproperties, NwbContainer
+from .container import nwbproperties, NWBContainer
 
 VERS_MAJOR = 1
 VERS_MINOR = 0
@@ -98,47 +98,57 @@ def register_creation(name):
 #   when an attribute stores a list of links, that list will not be
 #   properly updated if new links are created during append  FIXME
 
-class NWBFile(NwbContainer):
-    """ Represents an NWB file. Calling the NWB constructor creates the file.
-        The following arguments are recognized:
-
-            **filename** (text -- mandatory) The name of the to-be-created 
-            file
-
-            **identifier** (text -- mandatory) A unique identifier for
-            the file, to differentiate it from all other files (even in
-            other labs). A suggested way to create the identifier is to
-            use a lab-specific string and send it to
-            nwb.create_identifier(string). This function returns the
-            supplied string appended by the present date
-
-            **description** (text -- mandatory) A one or two sentence
-            description of the experiment and what the data in the file
-            represents
-
-            *start_time* (text -- optional) This is the starting time of the 
-            experiment.  If this isn't provided, the start time of the 
-            experiment will default to the time that the file is created
-
-            *modify* (boolean -- optional) Opens the file in append mode
-            if the file exists. If the file exists and this flag (or
-            'overwrite') is not set, an error occurs (to prevent
-            accidentally overwriting or modifying an existing file)
-
-            *overwrite* (boolean -- optional) If the specified file exists,
-            it will be overwritten
-
-            *keep_original* (boolean -- optional) -- If true, a back-up copy 
-            of the original file will be kept, named '<filename>.prev'
-
-            *auto_compress* (boolean -- optional) Data is compressed
-            automatically through the API. Setting 'auto_compress=False'
-            disables this behavior
-
-            *custom_spec* (text -- optional) A json, yaml or toml file
-            used to customize the format specification (pyyaml or toml
-            must be installed to use those formats)
+@nwbproperties(
+    'experimenter',
+    'experiment_description',
+    'session_id',
+    'lab',
+    'institution'
+)
+class NWBFile(NWBContainer):
     """
+    A representation of an NWB file.
+    """
+#    """ Represents an NWB file. Calling the NWB constructor creates the file.
+#        The following arguments are recognized:
+#
+#            **filename** (text -- mandatory) The name of the to-be-created 
+#            file
+#
+#            **identifier** (text -- mandatory) A unique identifier for
+#            the file, to differentiate it from all other files (even in
+#            other labs). A suggested way to create the identifier is to
+#            use a lab-specific string and send it to
+#            nwb.create_identifier(string). This function returns the
+#            supplied string appended by the present date
+#
+#            **description** (text -- mandatory) A one or two sentence
+#            description of the experiment and what the data in the file
+#            represents
+#
+#            *start_time* (text -- optional) This is the starting time of the 
+#            experiment.  If this isn't provided, the start time of the 
+#            experiment will default to the time that the file is created
+#
+#            *modify* (boolean -- optional) Opens the file in append mode
+#            if the file exists. If the file exists and this flag (or
+#            'overwrite') is not set, an error occurs (to prevent
+#            accidentally overwriting or modifying an existing file)
+#
+#            *overwrite* (boolean -- optional) If the specified file exists,
+#            it will be overwritten
+#
+#            *keep_original* (boolean -- optional) -- If true, a back-up copy 
+#            of the original file will be kept, named '<filename>.prev'
+#
+#            *auto_compress* (boolean -- optional) Data is compressed
+#            automatically through the API. Setting 'auto_compress=False'
+#            disables this behavior
+#
+#            *custom_spec* (text -- optional) A json, yaml or toml file
+#            used to customize the format specification (pyyaml or toml
+#            must be installed to use those formats)
+#    """
     dtype_glossary = {
                 "float32": 'f4',
                 "float4": 'f4',
@@ -158,16 +168,20 @@ class NWBFile(NwbContainer):
 
     __nwb_version = '1.0.4'
 
-
     @docval({'name': 'file_name', 'type': str, 'doc': 'path to NWB file'},
-            {'name': 'description', 'type': str, 'doc': 'a description of the session where this data was generated'})
-    def __init__(self, **vargs):
-        super().__init__()
-        self.__filename = getargs('file_name', **vargs)
+            {'name': 'description', 'type': str, 'doc': 'a description of the session where this data was generated'},
+            {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
+            {'name': 'experiment_description', 'type': str, 'doc': 'general description of the experiment', 'default': None},
+            {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
+            {'name': 'institution', 'type': str, 'doc': 'institution(s) where experiment is performed', 'default': None},
+            {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None})
+    def __init__(self, **kwargs):
+        super(NWBFile, self).__init__()
+        self.__filename = getargs('file_name', **kwargs)
         self.__start_time = datetime.utcnow()
         self.__file_id = '%s %s' % (self.__filename, self.__start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
-        #self.__read_arguments__(**vargs)
-        self.__description = getargs('description', **vargs)
+        #self.__read_arguments__(**kwargs)
+        self.__description = getargs('description', **kwargs)
 
         self.__rawdata = dict()
         self.__stimulus = dict()
@@ -175,7 +189,18 @@ class NWBFile(NwbContainer):
 
         self.modules = dict()
         self.epochs = dict()
-        self.electrodes = dict()
+        self.__electrodes = dict()
+        self.__electrode_idx = dict()
+        
+        recommended = [
+            'experimenter',
+            'experiment_description',
+            'session_id',
+            'lab',
+            'institution'
+        ]
+        for attr in recommended:
+            setattr(self, attr, kwargs.get(attr, None))
 
     @property
     def nwb_version(self):
@@ -209,6 +234,10 @@ class NWBFile(NwbContainer):
     def stimulus_template(self):
         return tuple(self.__stimulus_template.values())
 
+    @property
+    def ec_electrodes(self):
+        return tuple(self.__electrodes.values())
+
     def is_rawdata(self, ts):
         return self.__exists(ts, self.__rawdata)
 
@@ -222,13 +251,13 @@ class NWBFile(NwbContainer):
         return ts.name in d
 
     # internal API function to process constructor arguments
-    def __read_arguments__(self, **vargs):
+    def __read_arguments__(self, **kwargs):
         err_str = ""
         # file name
-        if "filename" in vargs:
-            self.file_name = vargs["filename"]
-        elif "file_name" in vargs:
-            self.file_name = vargs["file_name"]
+        if "filename" in kwargs:
+            self.file_name = kwargs["filename"]
+        elif "file_name" in kwargs:
+            self.file_name = kwargs["file_name"]
         else:
             err_str += "    argument '%s' was not specified\n" % "filename"
         # see if file exists -- some arguments aren't required if so
@@ -237,33 +266,33 @@ class NWBFile(NwbContainer):
         else:
             self.file_exists = False
         # read start time
-        if "start_time" in vargs:
-            self.start_time = vargs["start_time"]
-            del vargs["start_time"]
-        elif "starting_time" in vargs:
-            self.start_time = vargs["starting_time"]
-            del vargs["starting_time"]
+        if "start_time" in kwargs:
+            self.start_time = kwargs["start_time"]
+            del kwargs["start_time"]
+        elif "starting_time" in kwargs:
+            self.start_time = kwargs["starting_time"]
+            del kwargs["starting_time"]
         else:
             self.start_time = time.ctime()
-        if "auto_compress" in vargs:
-            self.auto_compress = vargs["auto_compress"]
+        if "auto_compress" in kwargs:
+            self.auto_compress = kwargs["auto_compress"]
         else:
             self.auto_compress = True
         # allow user to specify custom json specification file
         # when the request to specify multiple files comes in, allow
         #   multiple files to be submitted as a dictionary or list
-        if "custom_spec" in vargs:
-            self.custom_spec = vargs["custom_spec"]
+        if "custom_spec" in kwargs:
+            self.custom_spec = kwargs["custom_spec"]
         else:
             self.custom_spec = []
         # read identifier
-        if "identifier" in vargs:
-            self.file_identifier = vargs["identifier"]
+        if "identifier" in kwargs:
+            self.file_identifier = kwargs["identifier"]
         elif not self.file_exists:
             err_str += "    argument '%s' was not specified\n" % "identifier"
         # read session description
-        if "description" in vargs:
-            self.session_description = vargs["description"]
+        if "description" in kwargs:
+            self.session_description = kwargs["description"]
         elif not self.file_exists:
             err_str += "    argument 'description' was not specified\n"
         # handle errors
@@ -275,6 +304,7 @@ class NWBFile(NwbContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the epoch, as it will appear in the file'},
             {'name': 'start', 'type': float, 'doc': 'the starting time of the epoch'},
             {'name': 'stop', 'type': float, 'doc': 'the ending time of the epoch'},
+            {'name': 'tags', 'type': (tuple, list), 'doc': 'tags for this epoch', 'default': list()},
             {'name': 'description', 'type': str, 'doc': 'a description of this epoch', 'default': None})
     def create_epoch(self, **kwargs):
         """ Creates a new Epoch object. Epochs are used to track intervals
@@ -294,8 +324,8 @@ class NWBFile(NwbContainer):
             Returns:
                 Epoch object
         """
-        name, start, stop, description = getargs('name', 'start', 'stop', 'description', **kwargs)
-        epoch = Epoch(name, start, stop, description=description, parent=self)
+        name, start, stop, tags, description = getargs('name', 'start', 'stop', 'tags', 'description', **kwargs)
+        epoch = Epoch(name, start, stop, description=description, tags=tags, parent=self)
         self.epochs[name] = epoch
         return epoch
 
@@ -522,14 +552,28 @@ class NWBFile(NwbContainer):
         """
         name, coord, desc, dev, loc, imp = getargs('name', 'coord', 'desc', 'dev', 'loc', 'imp', **kwargs)
         elec_grp = ElectrodeGroup(name, coord, desc, dev, loc, imp=imp, parent=self)
-        self.electrodes[name] = elec_grp
+        self.set_electrode_group(elec_grp)
         return elec_grp
 
-    def set_electrode_group(self, name, elec_grp):
-        self.electrodes[name] = elec_grp
+    @docval({'name': 'elec_grp', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'})
+    def set_electrode_group(self, **kwargs):
+        elec_grp = getargs('elec_grp', **kwargs)
+        elec_grp.parent = self
+        name = elec_grp.name
+        self.__electrodes[name] = elec_grp
+        self.__electrode_idx[name] = len(self.__electrode_idx)
+        return self.__electrode_idx[name]
 
+    @docval({'name': 'name', 'type': (ElectrodeGroup, str), 'doc': 'the name of the electrode group or the ElectrodeGroup object'})
+    def get_electrode_group_idx(self, **kwargs):
+        name = getargs('name', **kwargs)
+        if isinstance(name, ElectrodeGroup):
+            name = name.name
+        return self.__electrode_idx.get(name, None)
+
+    @docval({'name': 'name', 'type': (ElectrodeGroup, str), 'doc': 'the name of the electrode group'})
     def get_electrode_group(self, name):
-        return self.electrodes.get(name)
+        return self.__electrodes.get(name)
 
     @docval({'name': 'processing_name',  'type': str,   'doc': 'the processing analysis name'},
             returns="a processing module", rtype=Module)

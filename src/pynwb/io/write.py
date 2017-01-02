@@ -1,10 +1,11 @@
-from pynwb.ui.container import NwbContainer
+from pynwb.ui.container import NWBContainer
 from pynwb.ui.timeseries import TimeSeries, ElectricalSeries, SpatialSeries, AbstractFeatureSeries
 from pynwb.ui.epoch import Epoch, EpochTimeSeries
+from pynwb.ui.ephys import ElectrodeGroup
 from pynwb.ui.module import Module, Clustering
 from pynwb.ui.iface import Interface
 from pynwb.ui.file import NWBFile
-from .h5tools import GroupBuilder, DatasetBuilder, ExternalLinkBuilder, write_group
+from .h5tools import GroupBuilder, DatasetBuilder, ExternalLinkBuilder, write_group, write_dataset
 from .utils import BaseObjectHandler
 from .map import TypeMap
 
@@ -13,6 +14,7 @@ import numpy as np
 import time
 import posixpath
 import json
+from datetime import datetime
 
 def process_spec(builder, spec, value):
     if isinstance(spec, AttributeSpec):
@@ -84,6 +86,9 @@ class HDF5Writer(object):
                                     grp_builder.attributes,
                                     grp_builder.links)
             links.update(tmp_links)
+
+        for name, dset_builder in builder.datasets.items():
+            write_dataset(f, name, dset_builder.data, dset_builder.attributes)
             
         for link_name, link_builder in links.items():
             if isinstance(link_builder, ExternalLinkBuilder):
@@ -101,7 +106,7 @@ class HDF5ContainerRenderer(BaseObjectHandler):
 
     @classmethod
     def get_object_properties(cls, container):
-        exclude = (object, NwbContainer)
+        exclude = (object, NWBContainer)
         mro = reversed(container.__class__.__mro__[:-1])
         mro = filter(lambda x: x not in exclude, mro)
         return list(mro)
@@ -173,8 +178,6 @@ class NWBFileHDF5Renderer(HDF5ContainerRenderer):
         builder = GroupBuilder()
         builder.set_group('general', GroupBuilder({
                 'devices': GroupBuilder(),
-                'extracellular_ephys': GroupBuilder(),
-                'intracellular_ephys': GroupBuilder(),
                 'optogenetics': GroupBuilder(),
                 'optophysiology': GroupBuilder(),
                 'specifications': GroupBuilder(),
@@ -183,7 +186,7 @@ class NWBFileHDF5Renderer(HDF5ContainerRenderer):
             )
         )
         builder.set_group('stimulus', GroupBuilder({
-                'template': GroupBuilder(),
+                'templates': GroupBuilder(),
                 'presentation': GroupBuilder()
                 }
             )
@@ -198,50 +201,81 @@ class NWBFileHDF5Renderer(HDF5ContainerRenderer):
         builder.set_group('processing', GroupBuilder())
         builder.set_group('analysis', GroupBuilder())
     
-        builder.add_dataset("nwb_version", DatasetBuilder(container.nwb_version))
-        builder.add_dataset("identifier", DatasetBuilder(container.file_id))
-        builder.add_dataset("session_description", DatasetBuilder(container.session_description))
-        builder.add_dataset("file_create_date", DatasetBuilder([np.string_(time.ctime())], maxshape=(None,), chunks=True, dtype=h5py.special_dtype(vlen=bytes)))
-        builder.add_dataset("session_start_time", DatasetBuilder(container.start_time.strftime('%Y-%m-%dT%H:%M:%SZ')))
+        builder.add_dataset("nwb_version", container.nwb_version)
+        builder.add_dataset("identifier", container.file_id)
+        builder.add_dataset("session_description", container.session_description)
+        date_fmt = '%Y-%m-%dT%H:%M:%SZ'
+        builder.add_dataset("file_create_date", [datetime.now().strftime(date_fmt)])
+        builder.add_dataset("session_start_time", container.start_time.strftime(date_fmt))
+
+        recommended = [
+            'experimenter',
+            'experiment_description',
+            'session_id',
+            'lab',
+            'institution'
+        ]
+        general_grp = builder['general']
+        for attr in recommended:
+            val = getattr(container, attr, None)
+            if val is not None:
+                general_grp.add_dataset(attr, val)
+            else:
+                print('Could not find %s' % attr)
 
         epoch_renderer = EpochHDF5Renderer()
+        epoch_tags = set()
         epochs_group_builder = builder['epochs']
-        #finders = dict()
         for name, epoch_container in container.epochs.items():
+            epoch_tags.update(epoch_container.tags)
             epoch_builder = epoch_renderer.process(epoch_container)
             epochs_group_builder.set_group(name, epoch_builder)
-            #for epts_name, epts_container in epoch_container.timeseries.items():
-            #    if not (epts_container.count and epts_container.idx_start):
-            #        ts = epts_container.timeseries
-            #        #TODO: figure out how to compute this timeseries path
-            #        ts_path = HDF5ContainerRenderer.get_container_location(ts)
-            #        #tf = finders.setdefault(ts_path, TimeFinder())
-            #        #tf.add_interval(epoch_container.start_time, epoch_container.start_time)
+        #epochs_group_builder.add_dataset('tags', list(epoch_tags))
+        #epochs_group_builder.set_attribute('tags', np.array(epoch_tags, dtype='|S6'))
+        epochs_group_builder.set_attribute('tags', epoch_tags)
 
-        #for dset_path, time_finder in finders.items():
-        #    builder[dset_path].add_iter_inspect(time_finder)
-    
         ts_renderer = TimeSeriesHDF5Renderer()
+        subgroup_builder = builder['acquisition/timeseries']
         for ts_container in container.rawdata:
-            subgroup_builder = builder['acquisition/timeseries']
             ts_group_builder = ts_renderer.process(ts_container)
-            subgroup_builder.set_group(name, ts_group_builder)
+            subgroup_builder.set_group(ts_container.name, ts_group_builder)
     
+        subgroup_builder = builder['stimulus/presentation']
         for ts_container in container.stimulus:
-            subgroup_builder = builder['acquisition/stimulus']
             ts_group_builder = ts_renderer.process(ts_container)
-            subgroup_builder.set_group(name, ts_group_builder)
+            subgroup_builder.set_group(ts_container.name, ts_group_builder)
     
+        subgroup_builder = builder['stimulus/templates']
         for ts_container in container.stimulus_template:
-            subgroup_builder = builder['acquisition/stimulus_template']
             ts_group_builder = ts_renderer.process(ts_container)
-            subgroup_builder.set_group(name, ts_group_builder)
+            subgroup_builder.set_group(ts_container.name, ts_group_builder)
     
         module_renderer = ModuleHDF5Renderer()
         processing_builder = builder['processing']
         for name, module_container in container.modules.items():
             mod_group_builder = module_renderer.process(module_container)
             processing_builder.set_group(name, mod_group_builder)
+        
+        eg_renderer = ElectrodeGroupHDF5Renderer()
+        if len(container.ec_electrodes):
+            ec_builder = builder['general'].add_group('extracellular_ephys')
+            eg_dataset = list()
+            em_dataset = list()
+            imp_dataset = list()
+            for eg_container in container.ec_electrodes:
+                name = eg_container.name
+                eg_builder = eg_renderer.process(eg_container)
+                ec_builder.set_group(str(name), eg_builder)
+                eg_dataset.append(name)
+                em_dataset.append(eg_container.physical_location)
+                imp_dataset.append(str(eg_container.impedance))
+
+            ec_builder.add_dataset('electrode_group', eg_dataset)
+            ec_builder.add_dataset('electrode_map', em_dataset)
+            ec_builder.add_dataset('impedance', imp_dataset)
+            ec_builder.add_dataset('filtering', 'A description of the filtering used')
+        #ic_bulder = builder['general/extracellular_ephys']
+        
     
         return builder
 
@@ -288,7 +322,9 @@ class TimeSeriesHDF5Renderer(HDF5ContainerRenderer):
     def time_series(container):
         builder = GroupBuilder()
         # set top-level metadata
-        builder.set_attribute('ancestry', container.ancestry)
+        #print("setting container %s of type %s ancestry to %s" % (container.name, str(type(container)), container.ancestry))
+        anc = [t.__name__ for t in list(reversed(container.__class__.__mro__))[2:]]
+        builder.set_attribute('ancestry', anc)
         builder.set_attribute('help', container.help)
         builder.set_attribute('description', container.description)
         builder.set_attribute('source', container.source)
@@ -313,10 +349,11 @@ class TimeSeriesHDF5Renderer(HDF5ContainerRenderer):
                 "resolution": container.resolution,
             }
             builder.add_dataset("data", container.fields['data'], attributes=data_attrs)
+            builder.add_dataset("num_samples", len(container.fields['data']))
         #END Set data
         
         #BEGIN Set timestamps
-        if container.starting_time:
+        if container.starting_time is not None:
             builder.add_dataset("starting_time",
                                         container.starting_time, 
                                         attributes={"rate": container.rate, 
@@ -346,7 +383,8 @@ class TimeSeriesHDF5Renderer(HDF5ContainerRenderer):
     @HDF5ContainerRenderer.procedure(ElectricalSeries)
     def electrical_series(container):
         builder = GroupBuilder()
-        builder.add_dataset("electrode_idx", container.electrodes)
+        idx = [container.parent.get_electrode_group_idx(e) for e in container.electrodes]
+        builder.add_dataset("electrode_idx", idx)
         return builder
     
     @HDF5ContainerRenderer.procedure(SpatialSeries)
@@ -398,18 +436,27 @@ class EpochHDF5Renderer(HDF5ContainerRenderer):
         builder.add_dataset('start_time', container.start_time)
         builder.add_dataset('stop_time', container.stop_time)
         builder.add_dataset('description', container.description)
-        epts_proc = EpochTimeSeriesHDF5Renderer()
+        builder.add_dataset('tags', list(container.tags), dtype=str)
+        builder.set_attribute('neurodata_type', 'Epoch')
+        links = list()
         for epts in container.timeseries:
-            builder.set_group(epts.name, epts_proc.process(epts))
+            epts_builder = GroupBuilder()
+            epts_builder.add_dataset('count', epts.count)
+            epts_builder.add_dataset('idx_start', epts.idx_start)
+            ts_src, ts_path = HDF5ContainerRenderer.get_container_location(epts.timeseries)
+            epts_builder.add_link('timeseries', ts_path)
+            links.append("'%s' is '%s'" % (epts.name, ts_path))
+            builder.set_group(epts.name, epts_builder)
+        #builder.set_attribute('links', np.array(links, dtype='|S6'))
+        builder.set_attribute('links', links)
+            
         return builder
         
-class EpochTimeSeriesHDF5Renderer(HDF5ContainerRenderer):
-    @HDF5ContainerRenderer.procedure(EpochTimeSeries)
-    def epoch_timeseries(container):
+class ElectrodeGroupHDF5Renderer(HDF5ContainerRenderer):
+    @HDF5ContainerRenderer.procedure(ElectrodeGroup)
+    def electrode_group(container):
         builder = GroupBuilder()
-        builder.add_dataset('count', container.count)
-        builder.add_dataset('idx_start', container.idx_start)
-        ts_src, ts_path = HDF5ContainerRenderer.get_container_location(container.timeseries)
-        builder.add_link(container.timeseries.name, ts_path)
+        builder.add_dataset('description', container.description)
+        builder.add_dataset('device', container.device)
+        builder.add_dataset('location', container.location)
         return builder
-        

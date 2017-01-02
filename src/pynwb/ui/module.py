@@ -37,9 +37,9 @@ import numpy as np
 
 from .import ephys as _ephys
 
-from .container import nwbproperties, NwbContainer
+from .container import nwbproperties, NWBContainer
 
-class Module(NwbContainer):
+class Module(NWBContainer):
     """ Processing module. This is a container for one or more interfaces
         that provide data at intermediate levels of analysis
 
@@ -256,7 +256,7 @@ __interface_std_fields = ("help_statement",
                           "source",
                           "interface")
 @nwbproperties(*__interface_std_fields)
-class Interface(NwbContainer):
+class Interface(NWBContainer):
     """ Interfaces represent particular processing tasks and they publish
         (ie, make available) specific types of data. Each is required
         to supply a minimum of specifically named data, but all can store 

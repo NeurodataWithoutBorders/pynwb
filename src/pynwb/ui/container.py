@@ -1,9 +1,9 @@
 from ..core import docval, getargs
 
 
-class NwbContainer(object):
+class NWBContainer(object):
     
-    @docval({'name': 'parent', 'type': 'NwbContainer', 'doc': 'the parent Container for this Container', 'default': None},
+    @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         parent, container_source = getargs('parent', 'container_source', **kwargs)
@@ -42,18 +42,17 @@ def nwbproperties(*args, **kwargs):
        
        Decorate Containers with this. 
     '''
-    def get_func(arg):
-        def _func(self):
-            return self.fields.get(arg)
-        return _func
+    def get_func(prop_name):
+        def _getter_func(self):
+            return self.fields.get(prop_name)
+        return _getter_func
 
-    def set_func(arg):
-        def _func(self, val):
-            self.fields[arg] = val
-        return _func
+    def set_func(prop_name):
+        def _setter_func(self, val):
+            self.fields[prop_name] = val
+        return _setter_func
 
     def inner(cls):
-        #classdict = copy.copy(cls.__dict__)
         classdict = dict(cls.__dict__)
 
         nwb_fields = list()

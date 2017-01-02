@@ -1,5 +1,5 @@
 from pynwb.core import docval, getargs
-from pynwb.ui.container import nwbproperties, NwbContainer
+from pynwb.ui.container import nwbproperties, NWBContainer
 #from pynwb.ui.module import Interface
 from pynwb.ui.iface import Interface
 
@@ -13,7 +13,7 @@ __std_fields = ('name',
                 'physical_location',
                 'impedance')
 @nwbproperties(*__std_fields)
-class ElectrodeGroup(NwbContainer):
+class ElectrodeGroup(NWBContainer):
 
     @docval({'name': 'name', 'type': (str, int), 'doc': 'the name of this electrode'},
             {'name': 'coord', 'type': tuple, 'doc': 'the x,y,z coordinates of this electrode'},

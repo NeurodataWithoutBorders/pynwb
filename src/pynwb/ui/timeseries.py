@@ -38,9 +38,7 @@ import numpy as np
 from collections import Iterable
 
 from ..core import docval, getargs, popargs
-from .container import NwbContainer, nwbproperties
-
-#### possibly useful code later:
+from .container import NWBContainer, nwbproperties
 
 _default_conversion = 1.0
 _default_resolution = np.nan
@@ -66,7 +64,7 @@ __std_static_fields = {'ancestry': 'TimeSeries',
                        'neurodata_type': 'TimeSeries',
                        'help': 'General purpose TimeSeries'}
 @nwbproperties(*__std_fields, **__std_static_fields)
-class TimeSeries(NwbContainer):
+class TimeSeries(NWBContainer):
     """ Standard TimeSeries constructor
 
         All time series are created by calls to  NWB.create_timeseries(). 
@@ -94,7 +92,7 @@ class TimeSeries(NwbContainer):
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
-            {'name': 'parent', 'type': 'NwbContainer', 'doc': 'The parent NwbContainer for this NwbContainer', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
             )
@@ -115,10 +113,10 @@ class TimeSeries(NwbContainer):
         for key in keys:
             setattr(self, key, kwargs.get(key))
 
-        if 'timestamps' in kwargs:
+        if 'timestamps' in kwargs and len(kwargs['timestamps']) > 0:
             self.timestamps = kwargs.get('timestamps')
             self.timestamps_unit = 'Seconds'
-        elif 'starting_time' in kwargs:
+        elif 'starting_time' in kwargs and kwargs['starting_time'] is not None:
             self.starting_time = kwargs.get('starting_time')
             self.rate = kwargs.get('rate')
             self.rate_unit = self.__time_unit
@@ -136,10 +134,10 @@ class TimeSeries(NwbContainer):
 
     @property
     def timestamps(self):
-        if isinstance(self.timestamps, TimeSeries):
-            return self.timestamps.timestamps
+        if isinstance(self.fields['timestamps'], TimeSeries):
+            return self.fields['timestamps'].timestamps
         else:
-            return self.timestamps
+            return self.fields['timestamps']
 
     @property
     def time_unit(self):
@@ -337,26 +335,26 @@ class AbstractFeatureSeries(TimeSeries):
         self.features = names
         self.units = units
         
+@nwbproperties('electrodes', ancestry='TimeSeries,ElectricalSeries')
 class ElectricalSeries(TimeSeries):
 
     _ancestry = "TimeSeries,ElectricalSeries"
     _help = "Stores acquired voltage data from extracellular recordings"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'electrodes', 'type': (list, tuple), 'doc': 'the electrode group for each channel'},
+            {'name': 'electrodes', 'type': (list, tuple), 'doc': 'the names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to'},
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
             {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': None},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
+            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
             {'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
-            {'name': 'parent', 'type': 'NwbContainer', 'doc': 'The parent NwbContainer for this NwbContainer', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
             )
@@ -367,32 +365,30 @@ class ElectricalSeries(TimeSeries):
                 *names* (int array) The electrode indices
         """
         name, electrodes, source = popargs('name', 'electrodes', 'source', kwargs)
-        super().__init__(name, source, **kwargs)
+        super(ElectricalSeries, self).__init__(name, source, unit='volt', **kwargs)
         if electrodes:
             self.set_electrodes(electrodes)
     
-    def set_data(self, data, conversion=None, resolution=None):
+    @docval({'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': None},
+            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution})
+    def set_data(self, **kwargs):
         """
-            Arguments:
-                *conversion* (float)  Scalar to multiply each datapoint by to
-                                      convert to volts
-
-                *resolution* (float)  Scalar to multiply each datapoint by to
-                                      convert to volts
+        Set the data this ElectricalSeries contains
         """
+        data, conversion, resolution = getargs('data', 'conversion', 'resolution', **kwargs)
         super().set_data(data, "volt", conversion=conversion, resolution=resolution)
 
-    def set_electrode(self, idx, name, **metadata):
-        pass
-
-    def set_electrodes(self, electrodes):
+    @docval({'name': 'electrodes', 'type': (list, tuple), 'doc': 'the names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to'})
+    def set_electrodes(self, **kwargs):
         """ Specify the electrodes that this corresponds to in the electrode
             map.
             
             Arguments:
                 *names* (int array) The electrode indices
         """
-        self.electrodes = electrodes
+        electrodes = getargs('electrodes', **kwargs)
+        self.electrodes = tuple(electrodes)
 
 
 class SpikeEventSeries(ElectricalSeries):

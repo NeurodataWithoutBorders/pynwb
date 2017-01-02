@@ -36,7 +36,7 @@ import numpy as np
 import bisect
 
 from ..core import docval, getargs
-from .container import NwbContainer, nwbproperties
+from .container import NWBContainer, nwbproperties
 from .timeseries import TimeSeries
 
 __std_fields = ('name',
@@ -45,7 +45,7 @@ __std_fields = ('name',
                 'stop_time',
                 'tags')
 @nwbproperties(*__std_fields, neurodata_type='Epoch')
-class Epoch(NwbContainer):
+class Epoch(NWBContainer):
     """ Epoch object
         Epochs represent specific experimental intervals and store
         references to desired time series that overlap with the interval.
@@ -63,9 +63,10 @@ class Epoch(NwbContainer):
             {'name': 'start', 'type': float, 'doc': 'the starting time of the epoch'},
             {'name': 'stop', 'type': float, 'doc': 'the ending time of the epoch'},
             {'name': 'description', 'type': str, 'doc': 'a description of this epoch', 'default': None},
-            {'name': 'parent', 'type': 'NwbContainer', 'doc': 'The parent NwbContainer for this NwbContainer', 'default': None})
+            {'name': 'tags', 'type': (tuple, list), 'doc': 'tags for this epoch', 'default': list()},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, start, stop, description, parent = getargs('name', 'start', 'stop', 'description', 'parent', **kwargs)
+        name, start, stop, description, tags, parent = getargs('name', 'start', 'stop', 'description', 'tags', 'parent', **kwargs)
         super(Epoch, self).__init__(parent=parent)
         # dict to keep track of which time series are linked to this epoch
         self._timeseries = dict()
@@ -76,7 +77,7 @@ class Epoch(NwbContainer):
         self.name = name
         self.description = description
 
-        self.tags = set()
+        self.tags = {x for x in tags}
 
     @property
     def timeseries(self):
@@ -312,15 +313,20 @@ __epoch_timseries_fields = ('name',
                             'idx_start',
                             'timeseries')    
 @nwbproperties(*__epoch_timseries_fields)
-class EpochTimeSeries(NwbContainer):
-    #@docval({'name': 'name', 'type': str, 'doc':''})
-    def __init__(self, ts, start_time, stop_time, name=None, parent=None):
+class EpochTimeSeries(NWBContainer):
+    @docval({'name': 'ts', 'type': TimeSeries, 'doc':'the TimeSeries object'},
+            {'name': 'start_time', 'type': float, 'doc':'the start time of the epoch'},
+            {'name': 'stop_time', 'type': float, 'doc':'the stop time of the epoch'},
+            {'name': 'name', 'type': str, 'doc':'the name of this alignment', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    def __init__(self, **kwargs):
+        ts, start_time, stop_time, name, parent = getargs('ts', 'start_time', 'stop_time', 'name', 'parent', **kwargs)
         super(EpochTimeSeries, self).__init__(parent=parent)
         self.name = name if name else ts.name
         self.timeseries = ts
         #TODO: do something to compute count and idx_start from start_time
         # and stop_time
-        if ts.starting_time:
+        if ts.starting_time is not None and ts.rate:
             #n = ts.num_samples
             #t0 = ts.starting_time
             #rate = ts.rate
@@ -330,13 +336,15 @@ class EpochTimeSeries(NwbContainer):
             start_idx = int((start_time - ts.starting_time)*ts.rate)
             stop_idx = int((stop_time - ts.starting_time)*ts.rate)
             #END: AJTRITT
-        else:
+        elif len(ts.timestamps) > 0:
             timestamps = ts.timestamps
             #XXX This assume timestamps are sorted!
             start_idx = bisect.bisect_left(timestamps, start_time)
             stop_idx = bisect.bisect_left(timestamps, stop_time)
             #TODO: check to see if this should be inclusive or exclusive
             # assume exclusive for now - AJT 10/24/16
+        else:
+            raise ValueError("TimeSeries object must have timestamps or starting_time and rate")
         self.count = stop_idx - start_idx
         self.idx_start = start_idx
         

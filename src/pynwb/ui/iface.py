@@ -1,11 +1,11 @@
-from .container import NwbContainer, nwbproperties
+from .container import NWBContainer, nwbproperties
 
 __interface_std_fields = ("help_statement",
                           "neurodata_type",
                           "source",
                           "interface")
 @nwbproperties(*__interface_std_fields)
-class Interface(NwbContainer):
+class Interface(NWBContainer):
     """ Interfaces represent particular processing tasks and they publish
         (ie, make available) specific types of data. Each is required
         to supply a minimum of specifically named data, but all can store 
