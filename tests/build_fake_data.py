@@ -15,36 +15,46 @@ if os.path.exists(filename):
     print('removing %s' % filename)
     os.remove(filename)
 
-f = NWBFile(filename, 'my first synthetic recording')
+f = NWBFile(filename, 'my first synthetic recording',
+            experimenter='Dr. Bilbo Baggins',
+            lab='Bag End Labatory',
+            institution='University of Middle Earth at the Shire',
+            experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
+            session_id='LONELYMTN')
+
+# Create the electrode group this simulated data is generated from
+electrode_name = 'electrode1'
+f.create_electrode_group(electrode_name, (2.0,2.0,2.0), 'a lonely probe', 'trodes_rig123', 'the most desolate or brain regions')
+
+# Create the TimeSeries object for the eletrophysiology data
+description = "This is a test TimeSeries dataset, and has no scientific value"
+comments = "After a long journey there and back again, the treasures have been returned to their rightful owners."
 
 rate = 10.0
-data = np.fromiter(range(data_len), dtype=np.float)
+np.random.seed(1)
+data = np.random.rand(data_len)
 timestamps = np.arange(data_len) / rate
-description = "this is a test TimeSeries dataset, and has no scientific value"
-comments = "After shaving yaks for 6 months, this dataset came to life"
-unit="millivolts"
 
-
-
-etrd_grp_idx = 1
 ts = ElectricalSeries('test_timeseries',
-                      [etrd_grp_idx],
+                      [electrode_name],
                       'test_source',
                       data=data,  
                       timestamps=timestamps,
+                      # Alternatively, could specify starting_time and rate as follows
+                      #starting_time=timestamps[0],
+                      #rate=rate,
                       resolution=0.01,
-                      unit=unit,
-                      starting_time=timestamps[0],
-                      rate=rate,
                       comments=comments,
                       description=description)
 
-ep1 = f.create_epoch('epoch1', timestamps[100], timestamps[200], description="the first test epoch")
-ep2 = f.create_epoch('epoch1', timestamps[600], timestamps[700], description="the second test epoch")
+# Create experimental epochs
+epoch_tags = ('test_example',)
+ep1 = f.create_epoch('epoch1', timestamps[100], timestamps[200], tags=epoch_tags, description="the first test epoch")
+ep2 = f.create_epoch('epoch2', timestamps[600], timestamps[700], tags=epoch_tags, description="the second test epoch")
 
+# Add the time series data and include the epochs it is apart of
 f.add_raw_data(ts, [ep1, ep2])
 
-f.create_electrode_group(etrd_grp_idx, (2.0,2.0,2.0), 'a lonely probe', 'trodes_rig123', 'the most desolate or brain regions')
-
+# Write the NWB file
 writer = HDF5Writer()
 writer.write(f, f.filename)
