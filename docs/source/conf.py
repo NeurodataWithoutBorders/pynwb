@@ -18,8 +18,8 @@ import sys, os
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #sys.path.insert(0, os.path.abspath('.'))
 
-src_dir = "%s/../src/" % os.path.dirname(__file__)
-sys.path.append(src_dir)
+#src_dir = "%s/../src/" % os.path.dirname(__file__)
+#sys.path.append(os.path.abspath('../../src/'))
 autoclass_content = 'both'
 autodoc_docstring_signature = True
 
