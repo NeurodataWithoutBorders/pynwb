@@ -6,7 +6,7 @@
 Welcome to PyNWB's documentation!
 =================================
 
-Source index some Contents:
+PyNWB is a Python package for working with NWB files.
 
 .. toctree::
    :maxdepth: 2
