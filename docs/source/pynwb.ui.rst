@@ -12,7 +12,6 @@ Submodules
    pynwb.ui.file
    pynwb.ui.iface
    pynwb.ui.module
-   pynwb.ui.nwbtools
    pynwb.ui.timeseries
 
 Module contents
