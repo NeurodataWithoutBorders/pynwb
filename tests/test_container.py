@@ -1,8 +1,8 @@
 import unittest
 
-from pynwb.ui.container import NwbContainer
+from pynwb.ui.container import NWBContainer
 
-class MyTestClass(NwbContainer):
+class MyTestClass(NWBContainer):
 
     def basic_add(self, **kwargs):
         return kwargs
@@ -22,7 +22,7 @@ class MyTestSubclass(MyTestClass):
         return kwargs
 
 
-class TestNwbContainer(unittest.TestCase):
+class TestNWBContainer(unittest.TestCase):
 
     def test_constructor(self):
         """Test that constructor properly sets parent

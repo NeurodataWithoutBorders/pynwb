@@ -120,7 +120,7 @@ class BaseStorageSpec(Spec):
         self['linkable'] = linkable
         if nwb_type:
             self['nwb_type'] = nwb_type
-        extends, = getargs('extends', **kwargs)
+        extends = getargs('extends', **kwargs)
         if extends:
             self['extends'] = extends
 
@@ -279,7 +279,7 @@ class GroupSpec(BaseStorageSpec):
 
     @docval({'name': 'spec', 'type': 'GroupSpec', 'doc': 'the specification for the subgroup'})
     def set_group(self, **kwargs):
-        spec, = getargs('spec', **kwargs)
+        spec = getargs('spec', **kwargs)
         spec.set_parent(self)
         self['groups'].append(spec)
         return spec

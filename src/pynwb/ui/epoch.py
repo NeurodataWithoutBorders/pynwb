@@ -83,6 +83,15 @@ class Epoch(NWBContainer):
     def timeseries(self):
         return tuple(self._timeseries.values())
 
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'})
+    def get_timeseries(self, **kwargs):
+        name = getargs('name', **kwargs)
+        ts = self._timeseries.get(name)
+        if ts:
+            return ts
+        else:
+            raise KeyError("TimeSeries '%s' not found in Epoch '%s'" % (name, self.name))
+
 
     def set_description(self, desc):
         """ Convenience function to set the value of the 'description'

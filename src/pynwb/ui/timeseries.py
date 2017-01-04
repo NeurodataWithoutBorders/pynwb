@@ -113,10 +113,12 @@ class TimeSeries(NWBContainer):
         for key in keys:
             setattr(self, key, kwargs.get(key))
 
-        if 'timestamps' in kwargs and len(kwargs['timestamps']) > 0:
+#        if kwargs.get('timestamps') is not None and len(kwargs['timestamps']) > 0:
+        timestamps = kwargs.get('timestamps')
+        if timestamps is not None and len(timestamps) > 0:
             self.timestamps = kwargs.get('timestamps')
             self.timestamps_unit = 'Seconds'
-        elif 'starting_time' in kwargs and kwargs['starting_time'] is not None:
+        elif kwargs.get('starting_time'):
             self.starting_time = kwargs.get('starting_time')
             self.rate = kwargs.get('rate')
             self.rate_unit = self.__time_unit

@@ -60,11 +60,12 @@ class GroupBuilderSetterTests(unittest.TestCase):
         self.assertIs(self.gb['my_subgroup'], gp)
 
     def test_add_softlink(self):
-        sl = self.gb.add_soft_link('my_softlink', '/path/to/target')
+        sl = self.gb.add_link('my_softlink', '/path/to/target')
         self.assertIsInstance(sl, LinkBuilder)
         self.assertFalse(sl.hard)
         self.assertIs(self.gb['my_softlink'], sl)
 
+    @unittest.skip('add_hard_link no longer exists. Leave unit test in case we want to resurrect')
     def test_add_hardlink(self):
         hl = self.gb.add_hard_link('my_hardlink', '/path/to/target')
         self.assertIsInstance(hl, LinkBuilder)
@@ -287,12 +288,12 @@ class GroupBuilderIsEmptyTests(unittest.TestCase):
 
     def test_is_empty_false_dataset(self):
         """Test is_empty() when group has a dataset"""
-        gb = GroupBuilder(datasets={'my_dataset': GroupBuilder()})
+        gb = GroupBuilder(datasets={'my_dataset': DatasetBuilder()})
         self.assertEqual(gb.is_empty(), False)
 
     def test_is_empty_false_group_dataset(self):
         """Test is_empty() when group has a subgroup with a dataset"""
-        gb = GroupBuilder({'my_subgroup': GroupBuilder(datasets={'my_dataset': GroupBuilder()})})
+        gb = GroupBuilder({'my_subgroup': GroupBuilder(datasets={'my_dataset': DatasetBuilder()})})
         self.assertEqual(gb.is_empty(), False)
 
     def test_is_empty_false_attribute(self):

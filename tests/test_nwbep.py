@@ -47,5 +47,5 @@ class EpochSetters(unittest.TestCase):
         epoch_ts = self.epoch.add_timeseries(ts)
         self.assertEqual(epoch_ts.count, 100)
         self.assertEqual(epoch_ts.idx_start, 90)
-        self.assertIs(self.epoch.timeseries["test_ts"], epoch_ts)
+        self.assertIs(self.epoch.get_timeseries("test_ts"), epoch_ts)
 
