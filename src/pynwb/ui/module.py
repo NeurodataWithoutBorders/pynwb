@@ -35,9 +35,11 @@ import copy
 import math
 import numpy as np
 
-from .import ephys as _ephys
+from . import ephys as _ephys
 
 from .container import nwbproperties, NWBContainer
+
+from . import timeseries as _timeseries
 
 class Module(NWBContainer):
     """ Processing module. This is a container for one or more interfaces
@@ -73,7 +75,7 @@ class Module(NWBContainer):
         return "processing/" + self.name
 
     def __build_electrical_ts(self, data, electrode_indices, timestamps=None, start_rate=None, name='data'):
-        ts = nwbts.ElectricalSeries(name, electrodes=electrode_indices)
+        ts = _timeseries.ElectricalSeries(name, electrodes=electrode_indices)
         ts.set_data(data)
         if timestamps:
             ts.set_timestamps(timestamps)
@@ -306,7 +308,7 @@ class Interface(NWBContainer):
         return "processing/" + self.module.name + "/" + self.name
 
     def create_timeseries(self, name, ts_type="TimeSeries"):
-        ts_class = getattr(nwbts, ts_type, None)
+        ts_class = getattr(_timeseries, ts_type, None)
         if not ts_class:
             raise ValueError("%s is an invalid TimeSeries type" % ts_type)
         self.timeseries[name] = ts_class(name)
@@ -678,8 +680,7 @@ class MotionCorrection(Interface):
         """
         self.spec[name] = copy.deepcopy(self.spec["<>"])
         # create link to original object
-        from . import nwbts
-        if isinstance(orig, nwbts.TimeSeries):
+        if isinstance(orig, _timeseries.TimeSeries):
             if not orig.finalized:
                 self.nwb.fatal_error("Original timeseries must already be stored and finalized")
             orig_path = orig.full_path()
