@@ -151,7 +151,7 @@ def sphinxdoc(func, validator):
         else:
             return argval['name']
     
-    sig =  ".. py:function:: %s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator))) 
+    sig =  "%s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator))) 
     if func.__doc__:
         sig += "%s\n\n" % func.__doc__
     sig += "\n".join(map(__sphinx_arg, validator))
