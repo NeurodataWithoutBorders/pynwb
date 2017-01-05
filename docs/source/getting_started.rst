@@ -12,6 +12,9 @@ Prerequisites
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
 #. Python 3.x
+
+   * Before moving forward, make sure `setuptools <https://pypi.python.org/pypi/setuptools>`_ is installed with your version of Python.
+
 #. HDF5
 #. MPI
 
@@ -28,8 +31,9 @@ Execute the following commands should install PyNWB.
 
 .. code-block:: console
 
-    $ git clone git@bitbucket.org:lblneuro/pynwb.git
+    $ git clone https://bitbucket.org/lblneuro/pynwb.git
     $ cd pynwb
+    $ git checkout dev              # This will not be required in the long-term
     $ python setup.py build
     $ python setup.py install
 
