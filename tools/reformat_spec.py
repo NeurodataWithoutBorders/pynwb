@@ -3,9 +3,6 @@ import sys
 import json
 import yaml
 
-#pynwb_path = os.path.abspath('../')
-#print(pynwb_path)
-#sys.path.append(pynwb_path)
 import pynwb
 from pynwb.io.spec import Spec, AttributeSpec, BaseStorageSpec, DatasetSpec, GroupSpec, SpecCatalog
 
