@@ -10,7 +10,11 @@ PyNWB is a Python package for working with NWB files.
 
 .. toctree::
    :maxdepth: 2
-
+   :caption: Basics
+   
+   getting_started
+   overview
+   api_docs
 
 Indices and tables
 ==================
