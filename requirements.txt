@@ -1,4 +1,3 @@
-posixpath
 h5py
 numpy
 scipy
