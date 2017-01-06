@@ -15,7 +15,7 @@ data, and :ref:`modules_overview` are objects for storing and grouping analyses.
 NWBFile
 ---------------
 
-NWB files are represented in PyNWB with *NWBFile* objects. :py:class:`~pynwb.ui.file.NWBFile` objects provide functionality for creating :ref:`timeseries_overiew` datasets
+NWB files are represented in PyNWB with *NWBFile* objects. :py:class:`~pynwb.ui.file.NWBFile` objects provide functionality for creating :ref:`timeseries_overview` datasets
 and :ref:`modules_overview`, as well as functionality for storing experimental metadata and other metadata related to data provenance.
 
 .. _timeseries_overview:
