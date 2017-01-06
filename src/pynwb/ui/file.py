@@ -149,22 +149,22 @@ class NWBFile(NWBContainer):
 #            used to customize the format specification (pyyaml or toml
 #            must be installed to use those formats)
 #    """
-    dtype_glossary = {
-                "float32": 'f4',
-                "float4": 'f4',
-                "float64": 'f8',
-                "float8": 'f8',
-                "text": 'str',
-                "i8": 'int64',
-                "i4": 'int32',
-                "i2": 'int16',
-                "i1": 'int8',
-                "u8": 'uint64',
-                "u4": 'uint32',
-                "u2": 'uint16',
-                "u1": 'uint8',
-                "byte": 'uint8'
-    }
+    #dtype_glossary = {
+    #            "float32": 'f4',
+    #            "float4": 'f4',
+    #            "float64": 'f8',
+    #            "float8": 'f8',
+    #            "text": 'str',
+    #            "i8": 'int64',
+    #            "i4": 'int32',
+    #            "i2": 'int16',
+    #            "i1": 'int8',
+    #            "u8": 'uint64',
+    #            "u4": 'uint32',
+    #            "u2": 'uint16',
+    #            "u1": 'uint8',
+    #            "byte": 'uint8'
+    #}
 
     __nwb_version = '1.0.4'
 
@@ -307,22 +307,12 @@ class NWBFile(NWBContainer):
             {'name': 'tags', 'type': (tuple, list), 'doc': 'tags for this epoch', 'default': list()},
             {'name': 'description', 'type': str, 'doc': 'a description of this epoch', 'default': None})
     def create_epoch(self, **kwargs):
-        """ Creates a new Epoch object. Epochs are used to track intervals
-            in an experiment, such as exposure to a certain type of stimuli
-            (an interval where orientation gratings are shown, or of 
-            sparse noise) or a different paradigm (a rat exploring an 
-            enclosure versus sleeping between explorations)
-
-            Arguments:
-                *name* (text) The name of the epoch, as it will appear in
-                the file
-
-                *start* (float) The starting time of the epoch
-
-                *stop* (float) The ending time of the epoch
-
-            Returns:
-                Epoch object
+        """ 
+        Creates a new Epoch object. Epochs are used to track intervals
+        in an experiment, such as exposure to a certain type of stimuli
+        (an interval where orientation gratings are shown, or of 
+        sparse noise) or a different paradigm (a rat exploring an 
+        enclosure versus sleeping between explorations)
         """
         name, start, stop, tags, description = getargs('name', 'start', 'stop', 'tags', 'description', **kwargs)
         epoch = Epoch(name, start, stop, description=description, tags=tags, parent=self)
@@ -335,7 +325,8 @@ class NWBFile(NWBContainer):
     @docval({'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
             {'name': 'timeseries', 'type': (str, TimeSeries, list, tuple), 'doc': 'the name of a timeseries or a TimeSeries object or a list of names of timeseries or TimeSeries objects'})
     def set_epoch_timeseries(self, **kwargs):
-        """Add one or more TimSeries datasets to one or more Epochs
+        """
+        Add one or more TimSeries datasets to one or more Epochs
         """
         epoch, timeseries = getargs('epoch', 'timeseries', **kwargs)
         if isinstance(epoch, list):
@@ -401,7 +392,7 @@ class NWBFile(NWBContainer):
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
-    def add_raw_data(self, **kwargs):
+    def add_raw_timeseries(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', **kwargs)
         self.__set_timeseries(self.__rawdata, ts, epoch)
 
@@ -540,12 +531,12 @@ class NWBFile(NWBContainer):
         img.set_attribute("description", np.string_(desc))
         
 
-    @docval({'name': 'name', 'type': (str, int), 'doc': 'the name of this electrode'},
+    @docval({'name': 'name', 'type': (str, int), 'doc': 'a unique name or ID for this electrode'},
             {'name': 'coord', 'type': tuple, 'doc': 'the x,y,z coordinates of this electrode'},
             {'name': 'desc', 'type': str, 'doc': 'a description for this electrode'},
             {'name': 'dev', 'type': str, 'doc': 'the device this electrode was recorded from on'},
             {'name': 'loc', 'type': str, 'doc': 'a description of the location of this electrode'},
-            {'name': 'imp', 'type': float, 'doc': 'the impedance of this electrode', 'default': -1.0},
+            {'name': 'imp', 'type': (float, tuple), 'doc': 'the impedance of this electrode. A tuple can be provided to specify a range', 'default': -1.0},
             returns='the electrode group', rtype=ElectrodeGroup)
     def create_electrode_group(self, **kwargs):
         """Add an electrode group (e.g. a probe, shank, tetrode). 
