@@ -53,7 +53,7 @@ ep1 = f.create_epoch('epoch1', timestamps[100], timestamps[200], tags=epoch_tags
 ep2 = f.create_epoch('epoch2', timestamps[600], timestamps[700], tags=epoch_tags, description="the second test epoch")
 
 # Add the time series data and include the epochs it is apart of
-f.add_raw_data(ts, [ep1, ep2])
+f.add_raw_timeseries(ts, [ep1, ep2])
 
 # Write the NWB file
 writer = HDF5Writer()
