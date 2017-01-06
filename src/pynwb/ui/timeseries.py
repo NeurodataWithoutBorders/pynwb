@@ -475,8 +475,8 @@ class SpatialSeries(TimeSeries):
     def __init__(self, **kwargs):
         """Create a SpatialSeries TimeSeries dataset
         """
-        name, reference_frame = getargs('name', 'reference_frame', **kwargs)
-        super().__init__(name)
+        name, reference_frame, source = getargs('name', 'reference_frame', 'source', **kwargs)
+        super(SpatialSeries, self).__init__(name, source, unit='meters', **kwargs)
         self.reference_frame = reference_frame
 
     def set_data(self, data, conversion=_default_conversion, resolution=_default_resolution):
