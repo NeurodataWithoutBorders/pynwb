@@ -1,10 +1,11 @@
 from pynwb.ui.file import NWBFile
-from pynwb.ui.timeseries import ElectricalSeries
+from pynwb.ui.timeseries import ElectricalSeries, SpatialSeries
 from pynwb.io.write import HDF5Writer
 #from pynwb.ui.epoch import Epoch
 #from pynwb.ui.ephys import ElectrodeGroup
 
 import numpy as np
+import scipy.stats as sps
 import os
 
 data_len = 1000
@@ -27,33 +28,44 @@ electrode_name = 'electrode1'
 f.create_electrode_group(electrode_name, (2.0,2.0,2.0), 'a lonely probe', 'trodes_rig123', 'the most desolate or brain regions')
 
 # Create the TimeSeries object for the eletrophysiology data
-description = "This is a test TimeSeries dataset, and has no scientific value"
-comments = "After a long journey there and back again, the treasures have been returned to their rightful owners."
 
+# Make some fake data
 rate = 10.0
-np.random.seed(1)
-data = np.random.rand(data_len)
-timestamps = np.arange(data_len) / rate
+np.random.seed(1234)
+ephys_data = np.random.rand(data_len)
+ephys_timestamps = np.arange(data_len) / rate
+spatial_timestamps = ephys_timestamps[::10]
+spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T 
 
-ts = ElectricalSeries('test_timeseries',
-                      [electrode_name],
-                      'test_source',
-                      data=data,  
-                      timestamps=timestamps,
-                      # Alternatively, could specify starting_time and rate as follows
-                      #starting_time=timestamps[0],
-                      #rate=rate,
-                      resolution=0.01,
-                      comments=comments,
-                      description=description)
+ephys_ts = ElectricalSeries('test_timeseries',
+                            [electrode_name],
+                            'test_source',
+                            data=ephys_data,  
+                            timestamps=ephys_timestamps,
+                            # Alternatively, could specify starting_time and rate as follows
+                            #starting_time=timestamps[0],
+                            #rate=rate,
+                            resolution=0.001,
+                            comments="This data was randomly generated with numpy, using 1234 as the seed",
+                            description="Random numbers generated with numpy.randon.rand")
+
+spatial_ts = SpatialSeries('test_spatial_timeseries',
+                           'origin on x,y-plane',
+                           'a stumbling rat',
+                           data=spatial_data,
+                           timestamps=spatial_timestamps,
+                           resolution=0.1,
+                           comments="This data was generated with numpy, using 1234 as the seed",
+                           description="This 2D Brownian process generated with numpy.cumsum(scipy.stats.norm.rvs(size=(2,len(timestamps))), axis=-1).T")
 
 # Create experimental epochs
 epoch_tags = ('test_example',)
-ep1 = f.create_epoch('epoch1', timestamps[100], timestamps[200], tags=epoch_tags, description="the first test epoch")
-ep2 = f.create_epoch('epoch2', timestamps[600], timestamps[700], tags=epoch_tags, description="the second test epoch")
+ep1 = f.create_epoch('epoch1', ephys_timestamps[100], ephys_timestamps[200], tags=epoch_tags, description="the first test epoch")
+ep2 = f.create_epoch('epoch2', ephys_timestamps[600], ephys_timestamps[700], tags=epoch_tags, description="the second test epoch")
 
 # Add the time series data and include the epochs it is apart of
-f.add_raw_timeseries(ts, [ep1, ep2])
+f.add_raw_timeseries(ephys_ts, [ep1, ep2])
+f.add_raw_timeseries(spatial_ts, [ep1, ep2])
 
 # Write the NWB file
 writer = HDF5Writer()
