@@ -1,16 +1,25 @@
 .. _overview:
 
-===============
 Overview
 ===============
 
 PyNWB provides a high-level Python API for reading and writing NWB formatted HDF5 files. This section will provide
-a broad overview of the functionality provided for reading and writing neurophysiology into NWB files. 
+a broad overview of the functionality provided for reading and writing neurophysiology data into NWB files. 
 
-The NWB format is built around two concepts: *TimeSeries* and *Modules*. TimeSeries are objects for storing time series
-data, and Modules are objects for storing and grouping analyses. The following sections describe these classes in further detail.
 
+The NWB format is built around two concepts: *TimeSeries* and *Modules*. :ref:`timeseries_overview` are objects for storing time series
+data, and :ref:`modules_overview` are objects for storing and grouping analyses. The following sections describe these classes in further detail.
+
+.. _file_overview:
+
+NWBFile
 ---------------
+
+NWB files are represented in PyNWB with *NWBFile* objects. :py:class:`~pynwb.ui.file.NWBFile` objects provide functionality for creating :ref:`timeseries_overiew` datasets
+and :ref:`modules_overview`, as well as functionality for storing experimental metadata and other metadata related to data provenance.
+
+.. _timeseries_overview:
+
 TimeSeries
 ---------------
 
@@ -51,7 +60,9 @@ The following TimeSeries objects are provided by the API and NWB specification:
   * :py:class:`~pynwb.ui.timeseries.RoiResponseSeries`
   * :py:class:`~pynwb.ui.timeseries.SpatialSeries`
 
----------------
+
+.. _modules_overview:
+
 Modules
 ---------------
 
