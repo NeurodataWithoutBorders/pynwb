@@ -349,7 +349,7 @@ class NWBFile(NWBContainer):
         elif isinstance(epoch, str): 
             ep = self.epochs.get(epoch)
             if not ep:
-                raise KeyError(epoch)
+                raise KeyError("Epoch '%s' not found" % epoch)
         else:
             raise TypeError(type(epoch))
         return ep
@@ -358,33 +358,45 @@ class NWBFile(NWBContainer):
         if isinstance(timeseries, TimeSeries):
             ts = timeseries 
         elif isinstance(timeseries, str): 
-            mod = self.modality.get(timeseries)
-            if not mod:
-                raise KeyError(timeseries)
-            ts = self.__timeseries[mod][timeseries]
+            ts = self.__rawdata.get(timeseries, 
+                    self.__stimulus.get(timeseries, 
+                        self.__stimulus_template.get(timeseries, None)))
+            if not ts:
+                raise KeyError("TimeSeries '%s' not found" % timeseries)
         else:
             raise TypeError(type(timeseries))
         return ts
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the timeseries dataset'},
-            {'name': 'ts_type', 'type': type, 'doc': 'the type of timeseries to be created. See :py:meth:`~pynwb.timeseries.TimeSeries` subclasses for options' },
-            {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
-            returns="the TimeSeries object")
-    def create_timeseries(self, **kwargs):
+    #@docval({'name': 'name', 'type': str, 'doc': 'the name of the timeseries dataset'},
+    #        {'name': 'ts_type', 'type': type, 'doc': 'the type of timeseries to be created. See :py:meth:`~pynwb.timeseries.TimeSeries` subclasses for options' },
+    #        {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
+    #        returns="the TimeSeries object")
+
+    @docval({'name': 'type', 'type': (type, str), 'doc': 'the TimeSeries type'},
+            {'name': 'name', 'type': str, 'doc': 'the name of the time series dataset'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the time series data'},
+            {'name': 'const_args', 'type': (list, tuple), 'doc': 'additional positional arguments for TimeSeries constructor', 'default': tuple()},
+            {'name': 'const_kwargs', 'type': dict, 'doc': 'additional keyword arguments for TimeSeries constructor', 'default': dict()},
+    )
+    def create_raw_timeseries(self, **kwargs):
         """ Creates a new TimeSeries object. Timeseries are used to
             store and associate data or events with the time the
             data/events occur.
         """
-        name, ts_type, modality, epoch = getargs('name', 'ts_type', 'modality', 'epoch', **kwargs)
-        ts_class = getattr(_timeseries, ts_type, None)
-        if not ts_class:
-            raise ValueError("%s is an invalid TimeSeries type" % ts_type)
-        if modality not in TS_LOCATION:
-            raise ValueError("%s is not a valid TimeSeries modality" % modality)
-        ts = ts_class(name, parent=self)
-        self.__timeseries[modality][name] = ts
-        self.add_timeseries(ts, modality=modality, epoch=epoch)
-        return self.__timeseries[modality][name]
+        # TODO: Fill in this method
+        pass
+
+        # I think most of this code is useless now. AJTRITT
+        # name, ts_type, modality, epoch = getargs('name', 'ts_type', 'modality', 'epoch', **kwargs)
+        # ts_class = getattr(_timeseries, ts_type, None)
+        # if not ts_class:
+        #     raise ValueError("%s is an invalid TimeSeries type" % ts_type)
+        # if modality not in TS_LOCATION:
+        #     raise ValueError("%s is not a valid TimeSeries modality" % modality)
+        # ts = ts_class(name, parent=self)
+        # self.__timeseries[modality][name] = ts
+        # self.add_timeseries(ts, modality=modality, epoch=epoch)
+        # return self.__timeseries[modality][name]
 
     def link_timeseries(self, ts):
         pass
