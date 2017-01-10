@@ -83,19 +83,23 @@ class TimeSeries(NWBContainer):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': None},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
+            {'name': 'data', 'type': (list, np.ndarray, 'TimeSeries'), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
-            {'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            # Optional arguments:
+            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
+
+            ## time related data is optional, but one is required -- this will have to be enforced in the constructor
+            {'name': 'timestamps', 'type': (list, np.ndarray, 'TimeSeries'), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            )
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
+    )
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
@@ -113,26 +117,36 @@ class TimeSeries(NWBContainer):
         for key in keys:
             setattr(self, key, kwargs.get(key))
 
-#        if kwargs.get('timestamps') is not None and len(kwargs['timestamps']) > 0:
+        data = getargs('data', **kwargs)
+        self.data = data
+        if isinstance(data, TimeSeries):
+            data.data_link.add(self)
+
         timestamps = kwargs.get('timestamps')
-        if timestamps is not None and len(timestamps) > 0:
-            self.timestamps = kwargs.get('timestamps')
+        starting_time = kwargs.get('starting_time')
+        rate = kwargs.get('rate')
+        if timestamps is not None: 
+            self.timestamps = timestamps
             self.timestamps_unit = 'Seconds'
-        elif kwargs.get('starting_time'):
-            self.starting_time = kwargs.get('starting_time')
-            self.rate = kwargs.get('rate')
-            self.rate_unit = self.__time_unit
+            self.interval = 1
+            if isinstance(timestamps, TimeSeries):
+                timestamps.timestamps_link.add(self)
+        elif starting_time is not None and rate is not None:
+            self.starting_time = starting_time
+            self.rate = rate
+            self.rate_unit = 'Seconds'
+        else:
+            raise TypeError("either 'timestamps' or 'starting_time' and 'rate' must be specified") from None
             
         self.data_link = set()
         self.timestamps_link = set()
-        self.interval = None
     
     @property
     def data(self):
-        if isinstance(self.data, TimeSeries):
-            return self.data.data
+        if isinstance(self.fields['data'], TimeSeries):
+            return self.fields['data'].data
         else:
-            return self.data
+            return self.fields['data']
 
     @property
     def timestamps(self):
@@ -146,6 +160,7 @@ class TimeSeries(NWBContainer):
         return self.__time_unit
 
     # have special calls for those that are common to all time series
+    
     @docval({'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset'})
     def set_description(self, **kwargs):
         """ Convenience function to set the description field of the
@@ -160,41 +175,36 @@ class TimeSeries(NWBContainer):
         """
         self.comments = kwargs['comments']
 
-    # for backward compatibility to screwy scripts, and to be nice
-    #   in event of typo
-    def set_comment(self, value):
-        self.set_comments(value)
-
     # if default value used, value taken from specification file
-    @docval({'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution})
-    def set_data(self, **kwargs):
-        '''
-        Defines the data stored in the TimeSeries. Type of data 
-        depends on which class of TimeSeries is being used
-        '''
-        data, unit, conversion, resolution = getargs("data", "unit", "conversion", "resolution", **kwargs)
-        self.unit = unit
-        self.conversion = conversion
-        self.resolution = resolution
-        self.data = data
+    # @docval({'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+    #         {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
+    #         {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
+    #         {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution})
+    # def set_data(self, **kwargs):
+    #     '''
+    #     Defines the data stored in the TimeSeries. Type of data 
+    #     depends on which class of TimeSeries is being used
+    #     '''
+    #     data, unit, conversion, resolution = getargs("data", "unit", "conversion", "resolution", **kwargs)
+    #     self.unit = unit
+    #     self.conversion = conversion
+    #     self.resolution = resolution
+    #     self.data = data
 
-    @docval({'name': 'ts', 'type': 'TimeSeries', 'doc': 'The TimeSeries object to use the data of'})
-    def share_data(self, **kwargs):
-        '''Links the *data* dataset in this TimeSeries to that
-           stored in another TimeSeries. This is useful when multiple time
-           series represent the same data.
-        '''
-        target_ts = kwargs['ts']
-        while True:
-            if isinstance(target_ts.timestamps, TimeSeries):
-                target_ts = target_ts.timestamps
-                continue
-            break
-        self.data = ts
-        target_ts.data_link.add(self)
+    #@docval({'name': 'ts', 'type': 'TimeSeries', 'doc': 'The TimeSeries object to use the data of'})
+    #def share_data(self, **kwargs):
+    #    '''Links the *data* dataset in this TimeSeries to that
+    #       stored in another TimeSeries. This is useful when multiple time
+    #       series represent the same data.
+    #    '''
+    #    target_ts = kwargs['ts']
+    #    while True:
+    #        if isinstance(target_ts.timestamps, TimeSeries):
+    #            target_ts = target_ts.timestamps
+    #            continue
+    #        break
+    #    self.data = ts
+    #    target_ts.data_link.add(self)
 #
 #    def ignore_data(self):
 #        """ In some cases (eg, externally stored image files) there is no 
@@ -215,127 +225,146 @@ class TimeSeries(NWBContainer):
     ####################################################################
     ####################################################################
 
-    @docval({'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data'})
-    def set_time(self, **kwargs):
-        ''' Store timestamps for the time series. 
-        '''
-        self.timestamps = kwargs['timestamps']
-        self.interval = 1
-        self.timestamps_unit = self.__time_unit
+    #@docval({'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data'})
+    #def set_time(self, **kwargs):
+    #    ''' Store timestamps for the time series. 
+    #    '''
+    #    self.timestamps = kwargs['timestamps']
+    #    self.interval = 1
+    #    self.timestamps_unit = self.__time_unit
         
-    @docval({'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample'},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz'})
-    def set_time_by_rate(self, **kwargs):
-        '''Store time by start time and sampling rate only
+    #@docval({'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample'},
+    #        {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz'})
+    #def set_time_by_rate(self, **kwargs):
+    #    '''Store time by start time and sampling rate only
    
-           Arguments:
-               *time_zero* (double) Time of data[] start. For template stimuli, this should be zero
-               *rate* (float) Cycles per second (Hz)
+    #       Arguments:
+    #           *time_zero* (double) Time of data[] start. For template stimuli, this should be zero
+    #           *rate* (float) Cycles per second (Hz)
    
-           Returns:
-               *nothing*
-        '''
-        starting_time, rate = getargs('starting_time', 'rate', **kwargs)
-        self.starting_time = starting_time
-        self.rate = rate
-        self.starting_time_unit = self.__time_unit
+    #       Returns:
+    #           *nothing*
+    #    '''
+    #    starting_time, rate = getargs('starting_time', 'rate', **kwargs)
+    #    self.starting_time = starting_time
+    #    self.rate = rate
+    #    self.starting_time_unit = self.__time_unit
 
-    @docval({'name': 'ts', 'type': 'TimeSeries', 'doc': 'The TimeSeries object to use the timestamps of'})
-    def share_timestamps(self, **kwargs):
-        '''Links the *timestamps* dataset in this TimeSeries to that
-           stored in another TimeSeries. This is useful when multiple time
-           series have data that is recorded on the same clock.
-           This works by making an HDF5 hard link to the timestamps array
-           in the sibling time series
+    #@docval({'name': 'ts', 'type': 'TimeSeries', 'doc': 'The TimeSeries object to use the timestamps of'})
+    #def share_timestamps(self, **kwargs):
+    #    '''Links the *timestamps* dataset in this TimeSeries to that
+    #       stored in another TimeSeries. This is useful when multiple time
+    #       series have data that is recorded on the same clock.
+    #       This works by making an HDF5 hard link to the timestamps array
+    #       in the sibling time series
    
-           Arguments:
-               *sibling* (text) Full HDF5 path to TimeSeries containing source timestamps array, or a python TimeSeries object
+    #       Arguments:
+    #           *sibling* (text) Full HDF5 path to TimeSeries containing source timestamps array, or a python TimeSeries object
    
-           Returns:
-               *nothing*
-        '''
-        target_ts = kwargs['ts']
-        while True:
-            if isinstance(target_ts.timestamps, TimeSeries):
-                target_ts = target_ts.timestamps
-                continue
-            break
-        self.timestamps = target_ts
-        target_ts.timestamps_link.add(self)
+    #       Returns:
+    #           *nothing*
+    #    '''
+    #    target_ts = kwargs['ts']
+    #    while True:
+    #        if isinstance(target_ts.timestamps, TimeSeries):
+    #            target_ts = target_ts.timestamps
+    #            continue
+    #        break
+    #    self.timestamps = target_ts
+    #    target_ts.timestamps_link.add(self)
 
 class AnnotationSeries(TimeSeries):
-    ''' Stores text-based records about the experiment. To use the
-        AnnotationSeries, add records individually through 
-        add_annotation() and then call finalize(). Alternatively, if 
-        all annotations are already stored in a list, use set_data()
-        and set_timestamps()
+    ''' 
+    Stores text-based records about the experiment. To use the
+    AnnotationSeries, add records individually through 
+    add_annotation() and then call finalize(). Alternatively, if 
+    all annotations are already stored in a list, use set_data()
+    and set_timestamps()
 
-        All time series are created by calls to  NWB.create_timeseries(). 
-        They should not not be instantiated directly
+    All time series are created by calls to  NWB.create_timeseries(). 
+    They should not not be instantiated directly
     ''' 
 
     _ancestry = "TimeSeries,AnnotationSeries"
     
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                                                   'contained here. It can also be the name of a device, for stimulus or '
+                                                   'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': list()},
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
+
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
+    )
     def __init__(self, name, modality, spec, nwb):
-        super(AnnotationSeries, self).__init__(name, modality, spec, nwb)
+        name, source, data, timestamps = getargs('name', 'source', 'data', 'timestamps', **kwargs)
+        super(AnnotationSeries, self).__init__(name, source, data, 'n/a', resolution=np.nan, conversion=np.nan, timestamps=timestamps)
 
-        self.builder.set_attribute("help", "Time-stamped annotations about an experiment")
-        self.set_data(list())
-        self.set_time(list())
-        
-        #self.annot_str = []
-        #self.annot_time = []
 
-    def add_annotation(self, what, when):
-        '''Convennece function to add annotations individually
-
-        Arguments:
-            *what* (text) Annotation
-
-            *when* (double) Timestamp for annotation
-
-        Returns:
-            *nothing*
+    @docval({'name': 'time', 'type': float, 'doc': 'The time for the anotation'},
+            {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
+    def add_annotation(self, **kwargs):
         '''
-        self.builder['data'].append(str(what))
-        self.builder['timestamps'].append(str(what))
+        Add an annotation
+        '''
+        time, annotation = getargs('time', 'annotation', **kwargs)
+        self.fields['timestamps'].append(time)
+        self.fields['data'].append(annotation)
 
-        self._data.append(str(what))
-        self._timestamps.append(when)
-        #self.annot_str.append(str(what))
-        #self.annot_time.append(float(when))
 
-    def set_data(self, data):
-        super().set_data(data, "n/a", conversion=np.nan, resolution=np.nan)
-
+@nwbproperties('feature_units', 'features')
 class AbstractFeatureSeries(TimeSeries):
-    """ Represents the salient features of a data stream. Typically this
-        will be used for things like a visual grating stimulus, where
-        the bulk of data (each frame sent to the graphics card) is bulky
-        and not of high value, while the salient characteristics (eg,
-        orientation, spatial frequency, contrast, etc) are what important
-        and are what are used for analysis
+    """ 
+    Represents the salient features of a data stream. Typically this
+    will be used for things like a visual grating stimulus, where
+    the bulk of data (each frame sent to the graphics card) is bulky
+    and not of high value, while the salient characteristics (eg,
+    orientation, spatial frequency, contrast, etc) are what important
+    and are what are used for analysis
 
-        All time series are created by calls to  NWB.create_timeseries(). 
-        They should not not be instantiated directly
+    All time series are created by calls to  NWB.create_timeseries(). 
+    They should not not be instantiated directly
     """
 
     _ancestry = "TimeSeries,AbstractFeatureSeries"
 
-    def set_features(self, names, units):
-        """ Convenience function for setting feature values. Has logic to
-            ensure arrays have equal length (ie, sanity check)
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                                                   'contained here. It can also be the name of a device, for stimulus or '
+                                                   'acquisition data')},
+            {'name': 'feature_units', 'type': str, 'doc': 'The unit of each feature'},
+            {'name': 'features', 'type': str, 'doc': 'Description of each feature'},
 
-            Arguments:
-                *names* (text array) Description of abstract features
+            {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': list()},
+            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
+            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
 
-                *units* (text array) Units for each of the abstract features
+            {'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
-            Returns:
-                *nothing*
-        """
-        self.features = names
-        self.units = units
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
+            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
+    )
+    def __init__(self, **kwargs):
+        
+        name, source, data = getargs('name', 'source', 'data', **kwargs)
+        super(AbstractFeatureSeries, self).__init__(name, source, data, "see 'feature_units'", **kwargs)
+        self.features = getargs('features', **kwargs)
+        self.feature_units = getargs('feature_units', **kwargs)
+
+    @docval({'name': 'time', 'type': float, 'doc': 'the time point of this feature'},
+            {'name': 'features', 'type': (list, np.ndarray), 'doc': 'the feature values for this time point'})
+    def add_features(self, **kwargs):
+        time, features = getargs('time', 'features', **kwargs)
+        self.timestamps.append(time)
+        self.data.append(features)
+
         
 @nwbproperties('electrodes', ancestry='TimeSeries,ElectricalSeries')
 class ElectricalSeries(TimeSeries):
@@ -344,52 +373,32 @@ class ElectricalSeries(TimeSeries):
     _help = "Stores acquired voltage data from extracellular recordings"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'electrodes', 'type': (list, tuple), 'doc': 'the names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to'},
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': None},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+
+            {'name': 'electrodes', 'type': (list, tuple), 'doc': 'the names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to'},
+
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-            {'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            )
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
+    )
     def __init__(self, **kwargs):
-        """ Create a new ElectricalSeries dataset
-            
-            Arguments:
-                *names* (int array) The electrode indices
+        """ 
+        Create a new ElectricalSeries dataset
         """
-        name, electrodes, source = popargs('name', 'electrodes', 'source', kwargs)
-        super(ElectricalSeries, self).__init__(name, source, unit='volt', **kwargs)
-        if electrodes:
-            self.set_electrodes(electrodes)
-    
-    @docval({'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': None},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution})
-    def set_data(self, **kwargs):
-        """
-        Set the data this ElectricalSeries contains
-        """
-        data, conversion, resolution = getargs('data', 'conversion', 'resolution', **kwargs)
-        super().set_data(data, "volt", conversion=conversion, resolution=resolution)
-
-    @docval({'name': 'electrodes', 'type': (list, tuple), 'doc': 'the names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to'})
-    def set_electrodes(self, **kwargs):
-        """ Specify the electrodes that this corresponds to in the electrode
-            map.
-            
-            Arguments:
-                *names* (int array) The electrode indices
-        """
-        electrodes = getargs('electrodes', **kwargs)
+        name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', **kwargs)
+        super(ElectricalSeries, self).__init__(name, source, data, 'volt', **kwargs)
         self.electrodes = tuple(electrodes)
 
 
@@ -399,12 +408,30 @@ class SpikeEventSeries(ElectricalSeries):
 
     _help = "Snapshots of spike events from data."
 
-    def __init__(self, name, electrodes=None):
-        super().__init__(name, electrodes)
-        super().set_data(list())
-        
-    def add_spike_event(event_data):
-        self._data.append(event_data)
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                                                   'contained here. It can also be the name of a device, for stimulus or '
+                                                   'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+
+            {'name': 'electrodes', 'type': (list, tuple), 'doc': 'the names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to'},
+
+            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
+            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
+            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
+    )
+    def __init__(self, **kwargs):
+        name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', **kwargs)
+        super(SpikeEventSeries, self).__init__(name, source, electrodes, data, **kwargs)
 
 class ImageSeries(TimeSeries):
     pass
@@ -456,16 +483,20 @@ class SpatialSeries(TimeSeries):
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
             {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': None},
+
+            {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
+
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
+
             {'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
@@ -473,12 +504,9 @@ class SpatialSeries(TimeSeries):
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
             )
     def __init__(self, **kwargs):
-        """Create a SpatialSeries TimeSeries dataset
         """
-        name, reference_frame, source = getargs('name', 'reference_frame', 'source', **kwargs)
-        super(SpatialSeries, self).__init__(name, source, unit='meters', **kwargs)
+        Create a SpatialSeries TimeSeries dataset
+        """
+        name, source, data, reference_frame = getargs('name', 'source', 'data', 'reference_frame', **kwargs)
+        super(SpatialSeries, self).__init__(name, source, data, 'meters', **kwargs)
         self.reference_frame = reference_frame
-
-    def set_data(self, data, conversion=_default_conversion, resolution=_default_resolution):
-        super().set_data(data, "meter", conversion=conversion, resolution=resolution)
-
