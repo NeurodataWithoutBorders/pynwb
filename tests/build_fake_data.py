@@ -24,7 +24,7 @@ f = NWBFile(filename, 'my first synthetic recording',
             session_id='LONELYMTN')
 
 # Create the electrode group this simulated data is generated from
-electrode_name = 'electrode1'
+electrode_name = 'tetrode1'
 f.create_electrode_group(electrode_name, (2.0,2.0,2.0), 'a lonely probe', 'trodes_rig123', 'the most desolate or brain regions')
 
 # Create the TimeSeries object for the eletrophysiology data
@@ -43,7 +43,7 @@ ephys_ts = ElectricalSeries('test_timeseries',
                             [electrode_name],
                             timestamps=ephys_timestamps,
                             # Alternatively, could specify starting_time and rate as follows
-                            #starting_time=timestamps[0],
+                            #starting_time=ephys_timestamps[0],
                             #rate=rate,
                             resolution=0.001,
                             comments="This data was randomly generated with numpy, using 1234 as the seed",
