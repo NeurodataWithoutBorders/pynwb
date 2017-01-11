@@ -38,9 +38,9 @@ spatial_timestamps = ephys_timestamps[::10]
 spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T 
 
 ephys_ts = ElectricalSeries('test_timeseries',
-                            [electrode_name],
                             'test_source',
-                            data=ephys_data,  
+                            ephys_data,
+                            [electrode_name],
                             timestamps=ephys_timestamps,
                             # Alternatively, could specify starting_time and rate as follows
                             #starting_time=timestamps[0],
@@ -50,9 +50,9 @@ ephys_ts = ElectricalSeries('test_timeseries',
                             description="Random numbers generated with numpy.randon.rand")
 
 spatial_ts = SpatialSeries('test_spatial_timeseries',
-                           'origin on x,y-plane',
                            'a stumbling rat',
-                           data=spatial_data,
+                           spatial_data,
+                           'origin on x,y-plane',
                            timestamps=spatial_timestamps,
                            resolution=0.1,
                            comments="This data was generated with numpy, using 1234 as the seed",
