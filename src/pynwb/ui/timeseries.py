@@ -397,7 +397,7 @@ class ElectricalSeries(TimeSeries):
         """ 
         Create a new ElectricalSeries dataset
         """
-        name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', **kwargs)
+        name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', kwargs)
         super(ElectricalSeries, self).__init__(name, source, data, 'volt', **kwargs)
         self.electrodes = tuple(electrodes)
 
@@ -430,7 +430,7 @@ class SpikeEventSeries(ElectricalSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', **kwargs)
+        name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', kwargs)
         super(SpikeEventSeries, self).__init__(name, source, electrodes, data, **kwargs)
 
 class ImageSeries(TimeSeries):
@@ -486,8 +486,7 @@ class SpatialSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': None},
-
+            {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
 
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
