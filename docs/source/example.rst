@@ -8,12 +8,13 @@ clarity, we define them here.
 
 .. code-block:: python
 
-    electrode_name = 'electrode1'
-    description = "This is a test TimeSeries dataset, and has no scientific value"
-    comments = "After a long journey there and back again, the treasures have been returned to their rightful owners."
+    electrode_name = 'tetrode1'
     rate = 10.0
-    data = numpy.random.rand(data_len)
-    timestamps = numpy.arange(data_len) / rate
+    np.random.seed(1234)
+    ephys_data = np.random.rand(data_len)
+    ephys_timestamps = np.arange(data_len) / rate
+    spatial_timestamps = ephys_timestamps[::10]
+    spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T 
 
 Creating and Writing NWB files
 -----------------------------------------------------
@@ -58,7 +59,6 @@ an electrode group, you can use the :py:class:`~pynwb.ui.file.NWBFile` instance 
 
 .. code-block:: python
 
-    electrode_name = 'tetrode1'
     f.create_electrode_group(electrode_name, (2.0,2.0,2.0), 'a lonely probe', 'trodes_rig123', 'the most desolate of brain regions')
 
 Creating TimeSeries
@@ -66,21 +66,30 @@ Creating TimeSeries
 
 TimeSeries objects can be created in two ways. The first way is by instantiating :ref:`timeseries_overview` objects directly and then adding them to
 the :ref:`file_overview` using the instance method :py:func:`~pynwb.ui.file.NWBFile.add_raw_timeseries`. The second way is by calling the :py:class:`~pynwb.ui.file.NWBFile` 
-instance method :py:func:`~pynwb.ui.file.NWBFile.create_timeseries`. This first example will demonstrate instatiating :ref:`timeseries_overview` objects
-directly, and adding them with :py:func:`~pynwb.ui.file.NWBFile.add_raw_timeseries`.
+instance method :py:func:`~pynwb.ui.file.NWBFile.create_timeseries`. This first example will demonstrate instatiating two different
+types of :ref:`timeseries_overview` objects directly, and adding them with :py:func:`~pynwb.ui.file.NWBFile.add_raw_timeseries`.
 
 .. code-block:: python
 
-    ts = ElectricalSeries('test_timeseries',
-                          [electrode_name],
-                          'test_source',
-                          data=data,  
-                          timestamps=timestamps,
-                          # Alternatively, could specify starting_time and rate as follows
-                          #starting_time=timestamps[0],
-                          #rate=rate,
-                          resolution=0.01,
-                          comments=comments,
-                          description=description)
+    ephys_ts = ElectricalSeries('test_timeseries',
+                                'test_source',
+                                ephys_data,
+                                [electrode_name],
+                                timestamps=ephys_timestamps,
+                                # Alternatively, could specify starting_time and rate as follows
+                                #starting_time=ephys_timestamps[0],
+                                #rate=rate,
+                                resolution=0.001,
+                                comments="This data was randomly generated with numpy, using 1234 as the seed",
+                                description="Random numbers generated with numpy.randon.rand")
     f.add_raw_timeseries(ts, [ep1, ep2])
 
+    spatial_ts = SpatialSeries('test_spatial_timeseries',
+                               'a stumbling rat',
+                               spatial_data,
+                               'origin on x,y-plane',
+                               timestamps=spatial_timestamps,
+                               resolution=0.1,
+                               comments="This data was generated with numpy, using 1234 as the seed",
+                               description="This 2D Brownian process generated with numpy.cumsum(scipy.stats.norm.rvs(size=(2,len(timestamps))), axis=-1).T")
+    f.add_raw_timeseries(spatial_ts, [ep1, ep2])
