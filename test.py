@@ -1,2 +1,2 @@
 import unittest
-unittest.TextTestRunner().run(unittest.defaultTestLoader.discover("tests"))
+unittest.TextTestRunner().run(unittest.defaultTestLoader.discover("tests/unit"))
