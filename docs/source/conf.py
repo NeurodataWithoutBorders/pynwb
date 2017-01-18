@@ -21,6 +21,8 @@ import sphinx_rtd_theme
 
 autoclass_content = 'both'
 autodoc_docstring_signature = True
+autodoc_member_order = 'bysource'
+add_function_parentheses = False
 
 # -- General configuration -----------------------------------------------------
 
