@@ -57,8 +57,8 @@ def nwbproperties(*args, **kwargs):
 
         nwb_fields = list()
         for bs in cls.__bases__:
-            if hasattr(bs, 'nwb_fields'):
-                nwb_fields.extend(getattr(bs, 'nwb_fields'))
+            if hasattr(bs, '__nwbfields__'):
+                nwb_fields.extend(getattr(bs, '__nwbfields__'))
         for arg in args:
             getter = get_func(arg)
             setter = set_func(arg)
@@ -71,15 +71,6 @@ def nwbproperties(*args, **kwargs):
 
         nwb_fields = tuple(nwb_fields)
         #classdict['nwb_fields'] = classmethod(lambda cls: nwb_fields)
-        classdict['__nwb_fields__'] = nwb_fields
+        classdict['__nwbfields__'] = nwb_fields
         return type(cls.__name__, cls.__bases__, classdict)
     return inner
-
-class nwbproperty(property):
-    '''Create a gettable property that can be exported to NWB files
-
-        Use this like you would use property
-    '''
-    def __init__(self, getter):
-        super(customproperty, self).__init__(getter)
-        self.nwb_field = True
