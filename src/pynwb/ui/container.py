@@ -2,6 +2,11 @@ from ..core import docval, getargs
 
 
 class NWBContainer(object):
+    '''The base class to any NWB types.
+    
+    The purpose of this class is to provide a mechanism for representing hierarchical
+    relationships in neurodata.
+    '''
     
     @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
@@ -16,6 +21,8 @@ class NWBContainer(object):
 
     @property
     def container_source(self):
+        '''The source of this Container e.g. file name or table
+        '''
         return self.__container_source
     
     @property
@@ -40,7 +47,7 @@ class NWBContainer(object):
 def nwbproperties(*args, **kwargs):
     '''Create settable and gettable properties that can be exported to NWB files
        
-       Decorate Containers with this. 
+       Decorate NWBContainers with this.
     '''
     def get_func(prop_name):
         def _getter_func(self):
