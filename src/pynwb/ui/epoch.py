@@ -66,7 +66,7 @@ class Epoch(NWBContainer):
             {'name': 'tags', 'type': (tuple, list), 'doc': 'tags for this epoch', 'default': list()},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, start, stop, description, tags, parent = getargs('name', 'start', 'stop', 'description', 'tags', 'parent', **kwargs)
+        name, start, stop, description, tags, parent = getargs('name', 'start', 'stop', 'description', 'tags', 'parent', kwargs)
         super(Epoch, self).__init__(parent=parent)
         # dict to keep track of which time series are linked to this epoch
         self._timeseries = dict()
@@ -85,7 +85,7 @@ class Epoch(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'})
     def get_timeseries(self, **kwargs):
-        name = getargs('name', **kwargs)
+        name = getargs('name', kwargs)
         ts = self._timeseries.get(name)
         if ts:
             return ts
@@ -329,7 +329,7 @@ class EpochTimeSeries(NWBContainer):
             {'name': 'name', 'type': str, 'doc':'the name of this alignment', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        ts, start_time, stop_time, name, parent = getargs('ts', 'start_time', 'stop_time', 'name', 'parent', **kwargs)
+        ts, start_time, stop_time, name, parent = getargs('ts', 'start_time', 'stop_time', 'name', 'parent', kwargs)
         super(EpochTimeSeries, self).__init__(parent=parent)
         self.name = name if name else ts.name
         self.timeseries = ts

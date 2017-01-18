@@ -22,7 +22,7 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'loc', 'type': str, 'doc': 'a description of the location of this electrode'},
             {'name': 'imp', 'type': float, 'doc': 'the impedance of this electrode', 'default': -1.0})
     def __init__(self, **kwargs):
-        name, coord, desc, dev, loc, imp, parent = getargs("name", "coord", "desc", "dev", "loc", "imp", "parent", **kwargs)
+        name, coord, desc, dev, loc, imp, parent = getargs("name", "coord", "desc", "dev", "loc", "imp", "parent", kwargs)
         super(ElectrodeGroup, self).__init__(parent=parent)
         self.name = name
         self.physical_location = coord

@@ -117,7 +117,7 @@ class TimeSeries(NWBContainer):
         for key in keys:
             setattr(self, key, kwargs.get(key))
 
-        data = getargs('data', **kwargs)
+        data = getargs('data', kwargs)
         self.data = data
         if isinstance(data, TimeSeries):
             data.data_link.add(self)
@@ -299,7 +299,7 @@ class AnnotationSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, name, modality, spec, nwb):
-        name, source, data, timestamps = getargs('name', 'source', 'data', 'timestamps', **kwargs)
+        name, source, data, timestamps = getargs('name', 'source', 'data', 'timestamps', kwargs)
         super(AnnotationSeries, self).__init__(name, source, data, 'n/a', resolution=np.nan, conversion=np.nan, timestamps=timestamps)
 
 
@@ -309,7 +309,7 @@ class AnnotationSeries(TimeSeries):
         '''
         Add an annotation
         '''
-        time, annotation = getargs('time', 'annotation', **kwargs)
+        time, annotation = getargs('time', 'annotation', kwargs)
         self.fields['timestamps'].append(time)
         self.fields['data'].append(annotation)
 
@@ -353,15 +353,15 @@ class AbstractFeatureSeries(TimeSeries):
     )
     def __init__(self, **kwargs):
         
-        name, source, data = getargs('name', 'source', 'data', **kwargs)
+        name, source, data = getargs('name', 'source', 'data', kwargs)
         super(AbstractFeatureSeries, self).__init__(name, source, data, "see 'feature_units'", **kwargs)
-        self.features = getargs('features', **kwargs)
-        self.feature_units = getargs('feature_units', **kwargs)
+        self.features = getargs('features', kwargs)
+        self.feature_units = getargs('feature_units', kwargs)
 
     @docval({'name': 'time', 'type': float, 'doc': 'the time point of this feature'},
             {'name': 'features', 'type': (list, np.ndarray), 'doc': 'the feature values for this time point'})
     def add_features(self, **kwargs):
-        time, features = getargs('time', 'features', **kwargs)
+        time, features = getargs('time', 'features', kwargs)
         self.timestamps.append(time)
         self.data.append(features)
 
@@ -506,6 +506,6 @@ class SpatialSeries(TimeSeries):
         """
         Create a SpatialSeries TimeSeries dataset
         """
-        name, source, data, reference_frame = getargs('name', 'source', 'data', 'reference_frame', **kwargs)
+        name, source, data, reference_frame = getargs('name', 'source', 'data', 'reference_frame', kwargs)
         super(SpatialSeries, self).__init__(name, source, data, 'meters', **kwargs)
         self.reference_frame = reference_frame

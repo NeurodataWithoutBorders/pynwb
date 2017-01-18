@@ -89,8 +89,75 @@ def __sort_args(validator):
 
 docval_attr_name = 'docval'
 
+#class Arg(object):
+#
+#    def __init__(self, *args):
+#        '''
+#        '''
+#        self._name = args[0]
+#        self._argtype = args[1]
+#        self._doc = args[2]
+#        if len(args) == 4:
+#            self._optional = True
+#            self._default = args[3]
+#
+#    @property
+#    def name(self):
+#        return self._name
+#
+#    @property
+#    def argtype(self):
+#        return self._argtype
+#
+#    @property
+#    def doc(self):
+#        return self._doc
+#
+#    @property
+#    def default(self):
+#        return self._default
+#
+#    @property
+#    def optional(self):
+#        return self._optional
+#    
+    
+
 def docval(*validator, **options):
+    '''A decorator for documenting and enforcing type for instance method arguments.
+
+    This decorator takes a list of dictionaries that specify the method parameters. These
+    dictionaries are used for enforcing type and building a Sphinx docstring. 
+    
+    The first arguments are dictionaries that specify the positional 
+    arguments and keyword arguments of the decorated function. These dictionaries
+    must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a 
+    positional argument. To define a keyword argument, specify a default value
+    using the key ``'default'``. 
+
+    The decorated method must take ``self`` and ``**kwargs`` as arguments.
+
+    When using this decorator, the functions :py:func:`~pynwb.core.getargs` and 
+    :py:func:`~pynwb.core.popargs` can be used for easily extracting arguments from 
+    kwargs.
+
+    The following code example demonstrates the use of this decorator:
+    
+    .. code-block:: python
+
+       @docval({'name': 'arg1':,   'type': str,           'doc': 'this is the first positional argument'},
+               {'name': 'arg2':,   'type': int,           'doc': 'this is the second positional argument'},
+               {'name': 'kwarg1':, 'type': (list, tuple), 'doc': 'this is a keyword argument', 'default': list()})
+       def foo(self, **kwargs):
+           arg1, arg2, kwarg1 = getargs('arg1', 'arg2', 'kwarg1', **kwargs)
+           ...
+
+    :param validator: :py:func:`dict` objects specifying the method parameters
+    :param options: additional options for documenting and validating method parameters
+    '''
     enforce_type = options.pop('enforce_type', True)
+    returns = options.pop('returns', None)
+    rtype = options.pop('rtype', None)
     val_copy = __sort_args(_copy.deepcopy(validator))
     def dec(func):
         _docval = _copy.copy(options)
@@ -102,31 +169,19 @@ def docval(*validator, **options):
             if parse_err:
                 raise TypeError(', '.join(parse_err))
             return func(self, **parsed['args'])
-        sphinxy_docstring = sphinxdoc(func, _docval['args'])
+        sphinxy_docstring = __sphinxdoc(func, _docval['args'])
+        if returns:
+            print("found returns")
+            sphinxy_docstring += "\n:returns: %s" % returns
+        if rtype:
+            print("found rtype")
+            sphinxy_docstring += "\n:rtype: %s" % rtype
         setattr(func_call, '__doc__', sphinxy_docstring)
         setattr(func_call, docval_attr_name, _docval)
         return func_call
     return dec
 
-def getargs(*args, **kwargs):
-    if len(args) == 1:
-        return kwargs.get(args[0])
-    return [ kwargs.get(arg) for arg in args ]
-
-def popargs(*args):
-    if not isinstance(args[-1], dict):
-        raise ValueError('last argument must be dict')
-    kwargs = args[-1]
-    if not args:
-        raise ValueError('must provide keyword to pop')
-    if len(args) == 1:
-        return kwargs.pop(args[0])
-    return [kwargs.get(arg) for arg in args[:-1]]
-
-def huread_doc(func):
-    pass
-
-def sphinxdoc(func, validator):
+def __sphinxdoc(func, validator):
     def to_str(argtype):
         if isinstance(argtype, type):
             return argtype.__name__
@@ -156,27 +211,54 @@ def sphinxdoc(func, validator):
         sig += "%s\n\n" % func.__doc__
     sig += "\n".join(map(__sphinx_arg, validator))
     return sig
-    #return "craptastic"
 
-def properties(*props):
-    """A decorator for automatically setting read-only
-       properties for classes
-    """
-    # we need to use this function to force arg to get
-    # passed into the getter by value
-    def get_getter(arg):
-        argname = "_%s" % arg
-        def _func(self):
-            return getattr(self, argname)
-        return _func
+def getargs(*argnames):
+    '''getargs(*argnames, argdict)
+    Convenience function to retrieve arguments from a dictionary in batch
+    '''
+    if not isinstance(argnames[-1], dict):
+        raise ValueError('last argument must be dict')
+    kwargs = argnames[-1]
+    if not argnames:
+        raise ValueError('must provide keyword to get')
+    if len(argnames) == 2:
+        return kwargs.get(argnames[0])
+    return [kwargs.get(arg) for arg in argnames[:-1]]
+    #return [ kwargs.get(arg) for arg in argnames ]
 
-    def outer(cls):
-        classdict = dict(cls.__dict__)
-        for arg in props:
-            getter = get_getter(arg)
-            classdict[arg] = property(getter)
-        return type(cls.__name__, cls.__bases__, classdict)
-    return outer
+def popargs(*argnames):
+    '''popargs(*argnames, argdict)
+    Convenience function to retrieve and remove arguments from a dictionary in batch
+    '''
+    if not isinstance(argnames[-1], dict):
+        raise ValueError('last argument must be dict')
+    kwargs = argnames[-1]
+    if not argnames:
+        raise ValueError('must provide keyword to pop')
+    if len(argnames) == 2:
+        return kwargs.pop(argnames[0])
+    return [kwargs.get(arg) for arg in argnames[:-1]]
+
+
+#def properties(*props):
+#    """A decorator for automatically setting read-only
+#       properties for classes
+#    """
+#    # we need to use this function to force arg to get
+#    # passed into the getter by value
+#    def get_getter(arg):
+#        argname = "_%s" % arg
+#        def _func(self):
+#            return getattr(self, argname)
+#        return _func
+#
+#    def outer(cls):
+#        classdict = dict(cls.__dict__)
+#        for arg in props:
+#            getter = get_getter(arg)
+#            classdict[arg] = property(getter)
+#        return type(cls.__name__, cls.__bases__, classdict)
+#    return outer
 
     
     #@ExtenderMeta.pre_init
@@ -216,8 +298,7 @@ class ExtenderMeta(abc.ABCMeta):
        routine by executing additional functions defined in 
        classes that use this metaclass
         
-       In general, you should not use this class, unless your name is
-       Andrew James Tritt.
+       In general, this class should only be used by core developers.
     """
 
     #__preinit = '__preinit'
@@ -229,6 +310,12 @@ class ExtenderMeta(abc.ABCMeta):
     __postinit = '__postinit'
     @classmethod
     def post_init(cls, func):
+        '''A decorator for defining a routine to run after creation of a type object.
+
+        An example use of this method would be to define a classmethod that gathers
+        any defined methods or attributes after the base Python type construction (i.e. after
+        :py:func:`type` has been called)
+        '''
         setattr(func, cls.__postinit, True)
         return classmethod(func)
 

@@ -79,7 +79,7 @@ class AttributeSpec(Spec):
     
     @docval(*_attr_args)
     def __init__(self, **kwargs):
-        name, dtype, doc, required, parent, required, value = getargs('name', 'dtype', 'doc', 'required', 'parent', 'required', 'value', **kwargs)
+        name, dtype, doc, required, parent, required, value = getargs('name', 'dtype', 'doc', 'required', 'parent', 'required', 'value', kwargs)
         super().__init__(name, doc=doc, required=required, parent=parent)
         if isinstance(dtype, type):
             self['type'] = dtype.__name__
@@ -114,13 +114,13 @@ class BaseStorageSpec(Spec):
     """
     @docval(*copy.deepcopy(_attrbl_args))
     def __init__(self, **kwargs):
-        name, doc, parent, required, attributes, linkable, nwb_type = getargs('name', 'doc', 'parent', 'required', 'attributes', 'linkable', 'nwb_type', **kwargs)
+        name, doc, parent, required, attributes, linkable, nwb_type = getargs('name', 'doc', 'parent', 'required', 'attributes', 'linkable', 'nwb_type', kwargs)
         super().__init__(name, doc=doc, required=required, parent=parent)
         self['attributes'] = attributes
         self['linkable'] = linkable
         if nwb_type:
             self['nwb_type'] = nwb_type
-        extends = getargs('extends', **kwargs)
+        extends = getargs('extends', kwargs)
         if extends:
             self['extends'] = extends
 
@@ -193,7 +193,7 @@ class DatasetSpec(BaseStorageSpec):
     @docval(*copy.deepcopy(_dset_args))
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        dimensions, dtype = getargs('dimensions', 'dtype', **kwargs)
+        dimensions, dtype = getargs('dimensions', 'dtype', kwargs)
         self['dimensions'] = dimensions
         self['type'] = dtype
 
@@ -239,7 +239,7 @@ class GroupSpec(BaseStorageSpec):
         #print(s)
         #print('GroupSpec.__int__ keys: %s' % ", ".join(kwargs.keys()))
         super(GroupSpec, self).__init__(**kwargs)
-        groups, datasets, links, nwb_type = getargs('groups', 'datasets', 'links', 'nwb_type', **kwargs)
+        groups, datasets, links, nwb_type = getargs('groups', 'datasets', 'links', 'nwb_type', kwargs)
         self['groups'] = groups
         self['datasets'] = datasets
         self['links'] = links
@@ -279,14 +279,14 @@ class GroupSpec(BaseStorageSpec):
 
     @docval({'name': 'spec', 'type': 'GroupSpec', 'doc': 'the specification for the subgroup'})
     def set_group(self, **kwargs):
-        spec = getargs('spec', **kwargs)
+        spec = getargs('spec', kwargs)
         spec.set_parent(self)
         self['groups'].append(spec)
         return spec
 
     @docval({'name': 'spec', 'type': 'DatasetSpec', 'doc': 'the specification for the dataset'})
     def set_dataset(self, **kwargs):
-        spec, = getargs('spec', **kwargs)
+        spec, = getargs('spec', kwargs)
         spec.set_parent(self)
         self['datasets'].append(spec)
         return spec

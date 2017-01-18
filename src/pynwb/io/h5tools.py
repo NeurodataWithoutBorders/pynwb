@@ -238,7 +238,7 @@ class GroupBuilder(dict):
         """
         Add a dataset to this group
         """
-        name, builder, = getargs('name', 'builder', **kwargs)
+        name, builder, = getargs('name', 'builder', kwargs)
         self.__set_builder(name, builder, GroupBuilder.__dataset)
 
     @docval({'name':'name', 'type': str, 'doc': 'the name of this subgroup'},
@@ -262,7 +262,7 @@ class GroupBuilder(dict):
         """
         Add a subgroup to this group
         """
-        name, builder, = getargs('name', 'builder', **kwargs)
+        name, builder, = getargs('name', 'builder', kwargs)
         self.__set_builder(name, builder, GroupBuilder.__group)
 
     @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
@@ -272,7 +272,7 @@ class GroupBuilder(dict):
         """
         Create a soft link and add it to this group.
         """
-        name, path = getargs('name', 'path', **kwargs)
+        name, path = getargs('name', 'path', kwargs)
         builder = LinkBuilder(path)
         self.set_link(name, builder)
         return builder
@@ -285,7 +285,7 @@ class GroupBuilder(dict):
         """
         Create an external link and add it to this group.
         """
-        name, file_path, path = getargs('name', 'file_path', 'path', **kwargs)
+        name, file_path, path = getargs('name', 'file_path', 'path', kwargs)
         builder = ExternalLinkBuilder(path, file_path)
         self.set_link(name, builder)
         return builder
@@ -296,7 +296,7 @@ class GroupBuilder(dict):
         """
         Add a link to this group
         """
-        name, builder = getargs('name', 'builder', **kwargs)
+        name, builder = getargs('name', 'builder', kwargs)
         self.__set_builder(name, builder, GroupBuilder.__link)
     
     @docval({'name':'name', 'type': str, 'doc': 'the name of the attribute'},
@@ -305,7 +305,7 @@ class GroupBuilder(dict):
         """
         Set an attribute for this group.
         """
-        name, value = getargs('name', 'value', **kwargs)
+        name, value = getargs('name', 'value', kwargs)
         super().__getitem__(GroupBuilder.__attribute)[name] = value
         self.obj_type[name] = GroupBuilder.__attribute
 
@@ -449,7 +449,7 @@ class DatasetBuilder(dict):
         Create a Builder object for a dataset
         '''
         super(DatasetBuilder, self).__init__()
-        data, dtype, attributes, maxshape, chunks = getargs('data', 'dtype', 'attributes', 'maxshape', 'chunks', **kwargs)
+        data, dtype, attributes, maxshape, chunks = getargs('data', 'dtype', 'attributes', 'maxshape', 'chunks', kwargs)
         self['data'] = data   
         self['attributes'] = _copy.deepcopy(attributes)
         self.chunks = chunks

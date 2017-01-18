@@ -6,7 +6,7 @@ class NWBContainer(object):
     @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
-        parent, container_source = getargs('parent', 'container_source', **kwargs)
+        parent, container_source = getargs('parent', 'container_source', kwargs)
         self.__fields = dict()
         self.__subcontainers = list()
         self.__parent = None
