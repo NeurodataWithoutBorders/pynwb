@@ -36,7 +36,6 @@ def __parse_args(validator, args, kwargs, enforce_type=True):
     ret = dict()
     errors = list()
     argsi = 0
-    #print("args = %s, kwargs = %s" % (args, kwargs))
     for arg in validator:
         argname = arg['name']
         # check if this is a positional argument or not
@@ -62,7 +61,6 @@ def __parse_args(validator, args, kwargs, enforce_type=True):
                     errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
         # this is a positional arg
         else:
-            #print('parsing %s' % argname)
             # check to make sure all positional
             # arguments were passed
             if argsi >= len(args):
@@ -171,10 +169,8 @@ def docval(*validator, **options):
             return func(self, **parsed['args'])
         sphinxy_docstring = __sphinxdoc(func, _docval['args'])
         if returns:
-            print("found returns")
             sphinxy_docstring += "\n:returns: %s" % returns
         if rtype:
-            print("found rtype")
             sphinxy_docstring += "\n:rtype: %s" % rtype
         setattr(func_call, '__doc__', sphinxy_docstring)
         setattr(func_call, docval_attr_name, _docval)
