@@ -36,15 +36,10 @@ import numpy as np
 import bisect
 
 from ..core import docval, getargs
-from .container import NWBContainer, nwbproperties
+from .container import NWBContainer
 from .timeseries import TimeSeries
 
-__std_fields = ('name',
-                'description',
-                'start_time',
-                'stop_time',
-                'tags')
-@nwbproperties(*__std_fields, neurodata_type='Epoch')
+#@nwbproperties(*__std_fields, neurodata_type='Epoch')
 class Epoch(NWBContainer):
     """ Epoch object
         Epochs represent specific experimental intervals and store
@@ -56,6 +51,12 @@ class Epoch(NWBContainer):
         Epochs should be created through NWBFile.create_epoch(). They should
         not be instantiated directly
     """
+    __nwbfields__ = ('name',
+                     'description',
+                     'start_time',
+                     'stop_time',
+                     'tags')
+        
 
     #_neurodata_type = 'Epoch'
 
@@ -277,52 +278,15 @@ class Epoch(NWBContainer):
             print("idx 1: %d\tt:%f" % (i1, timestamps[i1]))
             assert False, "Internal error"
 
-    def finalize(self):
-        """ Finish epoch entry and write data to the file
-
-            Arguments:
-                *none*
-
-            Returns:
-                *nothing*
-        """
-        if self.finalized:
-            return
-        # start and stop time stored outside of spec 
-        # put them in for writing
-        self.spec["start_time"]["_value"] = self.start_time
-        self.spec["stop_time"]["_value"] = self.stop_time
-        # write epoch entry
-        fp = self.nwb.file_pointer
-        epoch = fp["epochs"][self.name]
-        # manually create time series references
-        for k in list(self.timeseries_dict.keys()):
-            ts = self.timeseries_dict[k]
-            if k in epoch:
-                self.nwb.fatal_error("HDF5 object %s exists in epoch %s" % (k, self.name))
-            ets = epoch.create_group(k)
-            src = self.timeseries_dict[k]["timeseries"]
-            ets["timeseries"] = fp[src]
-            ets.create_dataset("idx_start", data=ts["start_idx"], dtype='i4')
-            ets.create_dataset("count", data=ts["count"], dtype='i4')
-        # report all tags to kernel so it can keep track of what was used
-        self.nwb.add_epoch_tags(self.spec["_attributes"]["tags"]["_value"])
-        # write content to file
-        grp = self.nwb.file_pointer["epochs/" + self.name]
-        self.nwb.write_datasets(grp, "", self.spec)
-        #
-        from . import nwb as nwblib
-        nwblib.register_finalization(self.name, self.serial_num);
-        # flag ourself as done
-        self.finalized = True
 
 
-__epoch_timseries_fields = ('name',
-                            'count',
-                            'idx_start',
-                            'timeseries')    
-@nwbproperties(*__epoch_timseries_fields)
+#@nwbproperties(*__epoch_timseries_fields)
 class EpochTimeSeries(NWBContainer):
+    __nwbfields__ = ('name',
+                     'count',
+                     'idx_start',
+                     'timeseries')    
+
     @docval({'name': 'ts', 'type': TimeSeries, 'doc':'the TimeSeries object'},
             {'name': 'start_time', 'type': float, 'doc':'the start time of the epoch'},
             {'name': 'stop_time', 'type': float, 'doc':'the stop time of the epoch'},

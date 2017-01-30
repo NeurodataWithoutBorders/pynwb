@@ -50,7 +50,7 @@ from .epoch import Epoch
 from .ephys import ElectrodeGroup
 
 from ..core import docval, getargs
-from .container import nwbproperties, NWBContainer
+from .container import NWBContainer
 
 VERS_MAJOR = 1
 VERS_MINOR = 0
@@ -98,13 +98,7 @@ def register_creation(name):
 #   when an attribute stores a list of links, that list will not be
 #   properly updated if new links are created during append  FIXME
 
-@nwbproperties(
-    'experimenter',
-    'experiment_description',
-    'session_id',
-    'lab',
-    'institution'
-)
+#@nwbproperties()
 class NWBFile(NWBContainer):
     """
     A representation of an NWB file.
@@ -165,6 +159,12 @@ class NWBFile(NWBContainer):
     #            "u1": 'uint8',
     #            "byte": 'uint8'
     #}
+    __nwbfields__ = ('experimenter',
+                     'description',
+                     'experiment_description',
+                     'session_id',
+                     'lab',
+                     'institution')
 
     __nwb_version = '1.0.4'
 
