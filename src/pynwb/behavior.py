@@ -1,3 +1,4 @@
+from .base import TimeSeries, Interface
 
 class SpatialSeries(TimeSeries):
 

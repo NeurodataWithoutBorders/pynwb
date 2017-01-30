@@ -1,7 +1,5 @@
-from pynwb.core import docval, getargs
-from pynwb.ui.container import NWBContainer
-#from pynwb.ui.module import Interface
-from pynwb.ui.iface import Interface
+from .base import TimeSeries, Interface
+from .core import docval, getargs, NWBContainer
 
 class ElectricalSeries(TimeSeries):
     

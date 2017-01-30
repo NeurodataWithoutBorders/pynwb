@@ -1,3 +1,4 @@
+from .base import TimeSeries
 
 class ImageSeries(TimeSeries):
     pass

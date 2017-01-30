@@ -1,4 +1,5 @@
-from pynwb.core import docval, getargs, popargs
+from .base import TimeSeries
+from .core import docval, getargs, NWBContainer
 
 class PatchClampSeries(TimeSeries):
     pass
