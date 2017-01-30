@@ -35,9 +35,8 @@ import copy
 import numpy as np
 import bisect
 
-from ..core import docval, getargs
-from .container import NWBContainer
-from .timeseries import TimeSeries
+from .base import TimeSeries
+from .core import docval, getargs, NWBContainer
 
 #@nwbproperties(*__std_fields, neurodata_type='Epoch')
 class Epoch(NWBContainer):
