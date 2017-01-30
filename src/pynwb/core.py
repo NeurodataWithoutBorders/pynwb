@@ -1,6 +1,121 @@
+import collections as _collections
 import itertools as _itertools
 import copy as _copy
 import abc 
+
+class ExtenderMeta(abc.ABCMeta):
+    """A metaclass that will extend the base class initialization
+       routine by executing additional functions defined in 
+       classes that use this metaclass
+        
+       In general, this class should only be used by core developers.
+    """
+
+    __preinit = '__preinit'
+    @classmethod
+    def pre_init(cls, func):
+        setattr(func, cls.__preinit, True)
+        return classmethod(func)
+
+    __postinit = '__postinit'
+    @classmethod
+    def post_init(cls, func):
+        '''A decorator for defining a routine to run after creation of a type object.
+
+        An example use of this method would be to define a classmethod that gathers
+        any defined methods or attributes after the base Python type construction (i.e. after
+        :py:func:`type` has been called)
+        '''
+        setattr(func, cls.__postinit, True)
+        return classmethod(func)
+
+    def __init__(cls, name, bases, classdict):
+        it = (getattr(cls, n) for n in dir(cls))
+        it = (a for a in it if hasattr(a, cls.__preinit))
+        for func in it:
+            func(name, bases, classdict)
+        super(ExtenderMeta, cls).__init__(name, bases, classdict)
+        it = (getattr(cls, n) for n in dir(cls))
+        it = (a for a in it if hasattr(a, cls.__postinit))
+        for func in it:
+            func(name, bases, classdict)
+
+class NWBContainer(metaclass=ExtenderMeta):
+    '''The base class to any NWB types.
+    
+    The purpose of this class is to provide a mechanism for representing hierarchical
+    relationships in neurodata.
+    '''
+
+
+    __nwbfields__ = tuple()
+    
+    @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        parent, container_source = getargs('parent', 'container_source', kwargs)
+        self.__fields = dict()
+        self.__subcontainers = list()
+        self.__parent = None
+        if parent:
+            self.parent = parent
+        self.__container_source = container_source
+
+    @property
+    def container_source(self):
+        '''The source of this Container e.g. file name or table
+        '''
+        return self.__container_source
+    
+    @property
+    def fields(self):
+        return self.__fields
+
+    @property
+    def subcontainers(self):
+        return self.__subcontainers
+
+    @property
+    def parent(self):
+        '''The parent NWBContainer of this NWBContainer
+        '''
+        return self.__parent
+    
+    @parent.setter
+    def parent(self, parent_container):
+        if self.__parent:
+            self.__parent.__subcontainers.remove(self)
+        self.__parent = parent_container
+        parent_container.__subcontainers.append(self)
+  
+    @staticmethod
+    def __getter(nwbfield):
+        def _func(self):
+            return self.fields.get(nwbfield)
+        return _func
+    
+    @staticmethod
+    def __setter(nwbfield):
+        def _func(self, val):
+            self.fields[nwbfield] = val
+        return _func
+    
+    @ExtenderMeta.pre_init
+    def __gather_nwbfields(cls, name, bases, classdict):
+        '''
+        This classmethod will be called during class declaration to automatically
+        create setters and getters for NWB fields that need to be exported
+        '''
+        if not isinstance(cls.__nwbfields__, tuple):
+            raise TypeError("'__nwbfields__' must be of type tuple")
+
+        if len(bases) and issubclass(bases[-1], NWBContainer) and bases[-1].__nwbfields__ is not cls.__nwbfields__:
+                new_nwbfields = list(cls.__nwbfields__)
+                new_nwbfields[0:0] = bases[-1].__nwbfields__
+                cls.__nwbfields__ = tuple(new_nwbfields)
+        for f in cls.__nwbfields__:
+            if not hasattr(cls, f):
+                setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
 
 def __type_okay(value, argtype, allow_none=False):
     if value is None:
@@ -289,40 +404,44 @@ def popargs(*argnames):
     #        setattr(cls, name, func_call)
 
 
-class ExtenderMeta(abc.ABCMeta):
-    """A metaclass that will extend the base class initialization
-       routine by executing additional functions defined in 
-       classes that use this metaclass
-        
-       In general, this class should only be used by core developers.
-    """
+class frozendict(_collections.Mapping):
+    '''An immutable dict
+    
+    This will be useful for getter of dicts that we don't want to support 
+    '''
+    def __init__(self, somedict):
+        self._dict = somedict   # make a copy
+        self._hash = None
 
-    #__preinit = '__preinit'
-    #@classmethod
-    #def pre_init(cls, func):
-    #    setattr(func, cls.__preinit, True)
-    #    return classmethod(func)
+    def __getitem__(self, key):
+        return self._dict[key]
 
-    __postinit = '__postinit'
-    @classmethod
-    def post_init(cls, func):
-        '''A decorator for defining a routine to run after creation of a type object.
+    def get(self, key, default=None):
+        return self._dict.get(key, default)
 
-        An example use of this method would be to define a classmethod that gathers
-        any defined methods or attributes after the base Python type construction (i.e. after
-        :py:func:`type` has been called)
-        '''
-        setattr(func, cls.__postinit, True)
-        return classmethod(func)
+    def __len__(self):
+        return len(self._dict)
 
-    def __init__(cls, name, bases, classdict):
-        #it = (getattr(cls, n) for n in dir(cls))
-        #it = (a for a in it if hasattr(a, cls.__preinit))
-        #for func in it:
-        #    func()
-        super(ExtenderMeta, cls).__init__(name, bases, classdict)
-        it = (getattr(cls, n) for n in dir(cls))
-        it = (a for a in it if hasattr(a, cls.__postinit))
-        for func in it:
-            func()
+    def __iter__(self):
+        return iter(self._dict)
+
+    def __hash__(self):
+        if self._hash is None:
+            self._hash = hash(frozenset(self._dict.items()))
+        return self._hash
+
+    def __eq__(self, other):
+        return self._dict == other._dict
+
+    def __contains__(self, key):
+        return self._dict.__contains__(key)
+
+    def keys(self):
+        return self._dict.keys()
+
+    def values(self):
+        return self._dict.values()
+
+    def items(self):
+        return self._dict.items()
 
