@@ -2,12 +2,14 @@ import numpy as np
 from collections import Iterable
 
 from pynwb.core import docval, getargs, popargs
-from pynwb.ui.container import NWBContainer, nwbproperties
+from pynwb.ui.container import NWBContainer
 
 from ..timeseries import TimeSeries, _default_conversion, _default_resolution
 
-@nwbproperties('electrodes', ancestry='TimeSeries,ElectricalSeries')
+#@nwbproperties('electrodes', ancestry='TimeSeries,ElectricalSeries')
 class ElectricalSeries(TimeSeries):
+    
+    __nwbfields__ = ('electrodes',)
 
     _ancestry = "TimeSeries,ElectricalSeries"
     _help = "Stores acquired voltage data from extracellular recordings"
