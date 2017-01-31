@@ -7,14 +7,24 @@ Subpackages
 .. toctree::
 
     pynwb.io
-    pynwb.ui
 
 Submodules
 ----------
 
 .. toctree::
 
+   pynwb.base
+   pynwb.behavior
    pynwb.core
+   pynwb.ecephys
+   pynwb.epoch
+   pynwb.file
+   pynwb.icephys
+   pynwb.image
+   pynwb.misc
+   pynwb.ogen
+   pynwb.ophys
+   pynwb.retinotopy
 
 Module contents
 ---------------
