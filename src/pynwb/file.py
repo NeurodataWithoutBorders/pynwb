@@ -44,13 +44,10 @@ import types
 from datetime import datetime
 
 
-from .timeseries import TimeSeries, ElectricalSeries
-from .module import Module
+from .base import TimeSeries, Module
 from .epoch import Epoch
-from .ephys import ElectrodeGroup
-
-from ..core import docval, getargs
-from .container import NWBContainer
+from .ecephys import ElectrodeGroup, ElectricalSeries
+from .core import docval, getargs, NWBContainer
 
 VERS_MAJOR = 1
 VERS_MINOR = 0

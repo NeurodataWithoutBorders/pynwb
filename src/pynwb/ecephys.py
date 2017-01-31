@@ -1,5 +1,8 @@
-from .base import TimeSeries, Interface
+from .base import TimeSeries, Interface, _default_resolution, _default_conversion
 from .core import docval, getargs, NWBContainer
+
+import numpy as np
+from collections import Iterable
 
 class ElectricalSeries(TimeSeries):
     

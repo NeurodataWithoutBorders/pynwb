@@ -1,7 +1,6 @@
 import unittest
 
 from pynwb.core import *
-from pynwb.ui.container import NWBContainer
 
 class MyTestClass(NWBContainer):
 

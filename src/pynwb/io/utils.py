@@ -6,7 +6,7 @@ class BaseObjectHandler(object, metaclass=ExtenderMeta):
 
     _property = "__item_property__"
     @ExtenderMeta.post_init
-    def __gather_procedures(cls):
+    def __gather_procedures(cls, name, bases, classdict):
         cls.procedures = dict()
         for name, func in filter(lambda tup: hasattr(tup[1], cls._property), cls.__dict__.items()):
             # NOTE: We need to get the original functions from the class dict since

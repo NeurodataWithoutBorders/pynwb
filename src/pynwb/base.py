@@ -34,8 +34,7 @@
 import numpy as np
 from collections import Iterable
 
-from pynwb.core import docval, getargs, popargs
-from ..container import NWBContainer
+from pynwb.core import docval, getargs, popargs, NWBContainer
 
 _default_conversion = 1.0
 _default_resolution = np.nan

@@ -1,10 +1,12 @@
-from pynwb.ui.container import NWBContainer
-from pynwb.ui.timeseries import TimeSeries, ElectricalSeries, SpatialSeries, AbstractFeatureSeries
-from pynwb.ui.epoch import Epoch, EpochTimeSeries
-from pynwb.ui.ephys import ElectrodeGroup
-from pynwb.ui.module import Module, Clustering
-from pynwb.ui.iface import Interface
-from pynwb.ui.file import NWBFile
+from pynwb.core import NWBContainer
+
+from pynwb.epoch import Epoch, EpochTimeSeries
+from pynwb.ecephys import ElectricalSeries, ElectrodeGroup, Clustering
+from pynwb.behavior import SpatialSeries
+from pynwb.misc import AbstractFeatureSeries
+
+from pynwb import TimeSeries, Module, Interface, NWBFile
+
 from .h5tools import GroupBuilder, DatasetBuilder, ExternalLinkBuilder, write_group, write_dataset
 from .utils import BaseObjectHandler
 from .map import TypeMap

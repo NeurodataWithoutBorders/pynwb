@@ -1,4 +1,9 @@
-from .base import TimeSeries, Interface
+from .core import docval, getargs 
+from .base import TimeSeries, Interface, _default_conversion, _default_resolution
+
+import numpy as np
+from collections import Iterable
+
 
 class AnnotationSeries(TimeSeries):
     ''' 

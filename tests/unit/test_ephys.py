@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.ui.ephys import *
+from pynwb.ecephys import *
 
 class TestElectrodeGroupConstructor(unittest.TestCase):
 

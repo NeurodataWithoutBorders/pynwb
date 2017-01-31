@@ -1,7 +1,7 @@
 import unittest
 
-from pynwb.ui.epoch import Epoch, EpochTimeSeries
-from pynwb.ui.timeseries import TimeSeries
+from pynwb.epoch import Epoch, EpochTimeSeries
+from pynwb import TimeSeries
 
 import numpy as np
 

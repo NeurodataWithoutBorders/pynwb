@@ -256,15 +256,15 @@ class GroupSpec(BaseStorageSpec):
     def links(self):
         return self['links']
 
-    #@docval(*_group_args)
     @docval(*copy.deepcopy(_group_args))
     def add_group(self, **kwargs):
         """ Add a group to this group spec
         """
         name = kwargs.pop('name')
         spec = GroupSpec(name, **kwargs)
-        spec.set_parent(self)
-        self['groups'].append(spec)
+        self.set_group(spec)
+        #spec.set_parent(self)
+        #self['groups'].append(spec)
         return spec
     
     @docval(*copy.deepcopy(_dset_args))
@@ -273,8 +273,9 @@ class GroupSpec(BaseStorageSpec):
         """
         name = kwargs.pop('name')
         spec = DatasetSpec(name, **kwargs)
-        spec.set_parent(self)
-        self['datasets'].append(spec)
+        self.set_dataset(spec)
+        #spec.set_parent(self)
+        #self['datasets'].append(spec)
         return spec
 
     @docval({'name': 'spec', 'type': 'GroupSpec', 'doc': 'the specification for the subgroup'})
@@ -286,7 +287,7 @@ class GroupSpec(BaseStorageSpec):
 
     @docval({'name': 'spec', 'type': 'DatasetSpec', 'doc': 'the specification for the dataset'})
     def set_dataset(self, **kwargs):
-        spec, = getargs('spec', kwargs)
+        spec = getargs('spec', kwargs)
         spec.set_parent(self)
         self['datasets'].append(spec)
         return spec

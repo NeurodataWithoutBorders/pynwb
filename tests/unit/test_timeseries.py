@@ -1,7 +1,7 @@
 import unittest
 
-from pynwb.ui.timeseries import TimeSeries
-from pynwb.ui.container import NWBContainer
+from pynwb import TimeSeries
+from pynwb.core import NWBContainer
 
 import numpy as np
 
