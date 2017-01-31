@@ -37,7 +37,7 @@ import numpy as np
 
 from . import ephys as _ephys
 
-from .container import nwbproperties, NWBContainer
+from .container import NWBContainer
 
 from . import timeseries as _timeseries
 
@@ -252,12 +252,6 @@ class Module(NWBContainer):
 #        from . import nwb as nwblib
 #        nwblib.register_finalization(self.name, self.serial_num)
 
-
-__interface_std_fields = ("help_statement",
-                          "neurodata_type",
-                          "source",
-                          "interface")
-@nwbproperties(*__interface_std_fields)
 class Interface(NWBContainer):
     """ Interfaces represent particular processing tasks and they publish
         (ie, make available) specific types of data. Each is required
@@ -267,6 +261,10 @@ class Interface(NWBContainer):
         Interfaces should be created through Module.create_interface().
         They should not be created directly
     """
+    __nwbfields__ = ("help_statement",
+                     "neurodata_type",
+                     "source",
+                     "interface")
 
     _neurodata_type = "Interface"
 

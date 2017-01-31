@@ -2,12 +2,11 @@ import numpy as np
 from collections import Iterable
 
 from pynwb.core import docval, getargs, popargs
-from ..container import NWBContainer, nwbproperties
+from ..container import NWBContainer
 
 from .timeseries import TimeSeries, _default_conversion, _default_resolution
 
 
-@nwbproperties('feature_units', 'features')
 class AbstractFeatureSeries(TimeSeries):
     """ 
     Represents the salient features of a data stream. Typically this
@@ -20,7 +19,7 @@ class AbstractFeatureSeries(TimeSeries):
     All time series are created by calls to  NWB.create_timeseries(). 
     They should not not be instantiated directly
     """
-
+    __nwbfields__ = ('feature_units', 'features')
     _ancestry = "TimeSeries,AbstractFeatureSeries"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},

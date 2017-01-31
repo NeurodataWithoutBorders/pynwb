@@ -1,10 +1,6 @@
-from .container import NWBContainer, nwbproperties
+from .container import NWBContainer
 
-__interface_std_fields = ("help_statement",
-                          "neurodata_type",
-                          "source",
-                          "interface")
-@nwbproperties(*__interface_std_fields)
+#@nwbproperties(*__interface_std_fields)
 class Interface(NWBContainer):
     """ Interfaces represent particular processing tasks and they publish
         (ie, make available) specific types of data. Each is required
@@ -14,12 +10,16 @@ class Interface(NWBContainer):
         Interfaces should be created through Module.create_interface().
         They should not be created directly
     """
+    __nwbfields__ = ('help_statement',
+                     'neurodata_type',
+                     'source',
+                     'interface')
 
     _neurodata_type = "Interface"
 
     _interface = "Interface"
 
-    _help_statement = None
+    _help = None
 
     def __init__(self, source=None):
         #Arguments:
