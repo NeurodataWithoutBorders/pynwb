@@ -12,6 +12,3 @@ class ImageMaskSeries(ImageSeries):
 class OpticalSeries(ImageSeries):
     pass
 
-class RoiResponseSeries(TimeSeries):
-    pass
-

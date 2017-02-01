@@ -5,6 +5,9 @@ from .base import Interface
 class TwoPhotonSeries(ImageSeries):
     pass
 
+class RoiResponseSeries(TimeSeries):
+    pass
+
 class DfOverF(Interface):
     pass
 
