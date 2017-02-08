@@ -178,6 +178,8 @@ def docval(*validator, **options):
     return dec
 
 def __sphinxdoc(func, validator):
+    '''Generate a Spinxy docstring
+    '''
     def to_str(argtype):
         if isinstance(argtype, type):
             return argtype.__name__
@@ -220,7 +222,6 @@ def getargs(*argnames):
     if len(argnames) == 2:
         return kwargs.get(argnames[0])
     return [kwargs.get(arg) for arg in argnames[:-1]]
-    #return [ kwargs.get(arg) for arg in argnames ]
 
 def popargs(*argnames):
     '''popargs(*argnames, argdict)
@@ -233,60 +234,7 @@ def popargs(*argnames):
         raise ValueError('must provide keyword to pop')
     if len(argnames) == 2:
         return kwargs.pop(argnames[0])
-    return [kwargs.get(arg) for arg in argnames[:-1]]
-
-
-#def properties(*props):
-#    """A decorator for automatically setting read-only
-#       properties for classes
-#    """
-#    # we need to use this function to force arg to get
-#    # passed into the getter by value
-#    def get_getter(arg):
-#        argname = "_%s" % arg
-#        def _func(self):
-#            return getattr(self, argname)
-#        return _func
-#
-#    def outer(cls):
-#        classdict = dict(cls.__dict__)
-#        for arg in props:
-#            getter = get_getter(arg)
-#            classdict[arg] = property(getter)
-#        return type(cls.__name__, cls.__bases__, classdict)
-#    return outer
-
-    
-    #@ExtenderMeta.pre_init
-    #def print_bases(cls):
-    #    print("%s %s" % (cls.__name__, cls.__base__))
-    #    base_cls = cls.__base__
-    #    for name, func in filter(lambda tup: hasattr(tup[1], docval_attr_name), cls.__dict__.items()):
-    #        docval = getattr(func, docval_attr_name)
-    #        if hasattr(base_cls, name):
-    #            print("base class has %s" % (name))
-    #            base_func = getattr(base_cls, name)
-    #            if hasattr(base_func, docval_attr_name):
-    #                print("%s has docval in base class" % (name))
-    #                
-    #                base_docval = getattr(base_func, docval_attr_name)
-    #                vdict = _collections.OrderedDict()
-    #                for arg in base_docval['args']:
-    #                    vdict[arg['name']] = arg
-    #                for arg in docval['args']:
-    #                    vdict[arg['name']] = arg
-    #                docval['args'] = list(vdict.values())
-    #
-    #        def func_call(*args, **kwargs):
-    #            self = args[0]
-    #            parsed = parse_args(docval['args'], args[1:], kwargs, enforce_type=docval.get('enforce_type', False))
-    #            parse_err = parsed.get('errors')
-    #            if parse_err:
-    #                # TODO: handle parse errors
-    #                pass
-    #            return func(self, **parsed['args'])
-    #        print("%s %s" % (name, docval))
-    #        setattr(cls, name, func_call)
+    return [kwargs.pop(arg) for arg in argnames[:-1]]
 
 class ExtenderMeta(abc.ABCMeta):
     """A metaclass that will extend the base class initialization
