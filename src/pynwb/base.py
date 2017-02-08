@@ -84,9 +84,9 @@ class TimeSeries(NWBContainer):
                                                    'acquisition data')},
             {'name': 'data', 'type': (list, np.ndarray, 'TimeSeries'), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
+            {'name': 'resolution', 'type': (str, float), 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             # Optional arguments:
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
+            {'name': 'conversion', 'type': (str, float), 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
 
             ## time related data is optional, but one is required -- this will have to be enforced in the constructor
             {'name': 'timestamps', 'type': (list, np.ndarray, 'TimeSeries'), 'doc': 'Timestamps for samples stored in data', 'default': None},
