@@ -541,7 +541,7 @@ class NWBFile(NWBContainer):
         
 
     @docval({'name': 'name', 'type': (str, int), 'doc': 'a unique name or ID for this electrode'},
-            {'name': 'coord', 'type': tuple, 'doc': 'the x,y,z coordinates of this electrode'},
+            {'name': 'coord', 'type': (tuple, list, np.ndarray), 'doc': 'the x,y,z coordinates of this electrode'},
             {'name': 'desc', 'type': str, 'doc': 'a description for this electrode'},
             {'name': 'dev', 'type': str, 'doc': 'the device this electrode was recorded from on'},
             {'name': 'loc', 'type': str, 'doc': 'a description of the location of this electrode'},
