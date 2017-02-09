@@ -28,7 +28,8 @@ with open('LICENSE') as f:
     license = f.read()
 
     
-pkgs=['pynwb', 'pynwb.io', 'pynwb.ui']
+pkgs=['pynwb',
+      'pynwb.io' ]
 
 setup_args = {
     'name': 'pynwb',
