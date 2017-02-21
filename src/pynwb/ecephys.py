@@ -1,5 +1,5 @@
 from .base import TimeSeries, Interface, _default_resolution, _default_conversion
-from .core import docval, getargs, NWBContainer
+from .core import docval, getargs, popargs, NWBContainer
 
 import numpy as np
 from collections import Iterable
