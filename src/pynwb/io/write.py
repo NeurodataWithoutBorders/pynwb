@@ -40,7 +40,7 @@ def process_spec(builder, spec, value):
 def render_container(container, attr_map):
     builder = GroupBuilder()
     children_attributes = dict()
-    
+
     for attr_name in container.nwb_fields:
         tmp_builder = builder
         attr = getattr(container, attr_name)
@@ -51,13 +51,13 @@ def render_container(container, attr_map):
         if attr_spec.parent != attr_map.spec:
             child_attributes.append(attr_name)
         process_spec(tmp_builder, attr_spec, attr)
-        
+
     # add attributes that apply to subgroups and datasets
     for attr_name in children_attributes:
         attr = getattr(container, attr_name)
         attr_spec = attr_map.get_spec(attr_name)
         parent_spec_attr_name = attr_map.get_attribute(attr_spec.parent)
-        parent_builder_name = attr_spec.parent.name 
+        parent_builder_name = attr_spec.parent.name
         # TODO: add check for wildcard name
         if parent_builder_name in builder:
             tmp_builder = builder.get(parent_builder_name)
@@ -65,7 +65,7 @@ def render_container(container, attr_map):
             #TODO: handle case where parent spec not created yet
             pass
         process_spec(tmp_builder, attr_spec, attr)
-        
+
     return builder
 
 
@@ -82,7 +82,7 @@ class HDF5Writer(object):
         builder = self.__renderer.process(nwb_container)
         links = dict()
         for name, grp_builder in builder.groups.items():
-            tmp_links = write_group(f, name, 
+            tmp_links = write_group(f, name,
                                     grp_builder.groups,
                                     grp_builder.datasets,
                                     grp_builder.attributes,
@@ -91,7 +91,7 @@ class HDF5Writer(object):
 
         for name, dset_builder in builder.datasets.items():
             write_dataset(f, name, dset_builder.data, dset_builder.attributes)
-            
+
         for link_name, link_builder in links.items():
             if isinstance(link_builder, ExternalLinkBuilder):
                 f[link_name] = h5py.ExternalLink(link_builder.file_path, link_builder.path)
@@ -160,7 +160,7 @@ class HDF5ContainerRenderer(BaseObjectHandler):
 
         if not isinstance(top_container, NWBFile):
             raise Exception('highest container not a file: %s (%s) --> ... --> %s (%s)' % (container, type(container), top_container, type(top_container)))
-        
+
         container_source = top_container.container_source
         container_path = '/%s' % posixpath.join(*reversed(location))
         #container_path = posixpath.join(*reversed(location))
@@ -202,7 +202,7 @@ class NWBFileHDF5Renderer(HDF5ContainerRenderer):
         builder.set_group('epochs', GroupBuilder())
         builder.set_group('processing', GroupBuilder())
         builder.set_group('analysis', GroupBuilder())
-    
+
         builder.add_dataset("nwb_version", container.nwb_version)
         builder.add_dataset("identifier", container.file_id)
         builder.add_dataset("session_description", container.session_description)
@@ -223,7 +223,7 @@ class NWBFileHDF5Renderer(HDF5ContainerRenderer):
             if val is not None:
                 general_grp.add_dataset(attr, val)
             else:
-                print('Could not find %s' % attr)
+                print("Recommended field '%s' not specified" % attr)
 
         epoch_renderer = EpochHDF5Renderer()
         epoch_tags = set()
@@ -234,30 +234,30 @@ class NWBFileHDF5Renderer(HDF5ContainerRenderer):
             epochs_group_builder.set_group(name, epoch_builder)
         #epochs_group_builder.add_dataset('tags', list(epoch_tags))
         #epochs_group_builder.set_attribute('tags', np.array(epoch_tags, dtype='|S6'))
-        epochs_group_builder.set_attribute('tags', epoch_tags)
+        epochs_group_builder.set_attribute('tags', list(epoch_tags))
 
         ts_renderer = TimeSeriesHDF5Renderer()
         subgroup_builder = builder['acquisition/timeseries']
         for ts_container in container.rawdata:
             ts_group_builder = ts_renderer.process(ts_container)
             subgroup_builder.set_group(ts_container.name, ts_group_builder)
-    
+
         subgroup_builder = builder['stimulus/presentation']
         for ts_container in container.stimulus:
             ts_group_builder = ts_renderer.process(ts_container)
             subgroup_builder.set_group(ts_container.name, ts_group_builder)
-    
+
         subgroup_builder = builder['stimulus/templates']
         for ts_container in container.stimulus_template:
             ts_group_builder = ts_renderer.process(ts_container)
             subgroup_builder.set_group(ts_container.name, ts_group_builder)
-    
+
         module_renderer = ModuleHDF5Renderer()
         processing_builder = builder['processing']
         for name, module_container in container.modules.items():
             mod_group_builder = module_renderer.process(module_container)
             processing_builder.set_group(name, mod_group_builder)
-        
+
         eg_renderer = ElectrodeGroupHDF5Renderer()
         if len(container.ec_electrodes):
             ec_builder = builder['general'].add_group('extracellular_ephys')
@@ -277,8 +277,8 @@ class NWBFileHDF5Renderer(HDF5ContainerRenderer):
             ec_builder.add_dataset('impedance', imp_dataset)
             ec_builder.add_dataset('filtering', 'A description of the filtering used')
         #ic_bulder = builder['general/extracellular_ephys']
-        
-    
+
+
         return builder
 
 
@@ -288,14 +288,14 @@ def is_link(container, attr):
 #def render_container(container, attr_map):
 #    builder = GroupBuilder()
 #    children_attributes = dict()
-#    
+#
 #    for attr_name in filter(lambda i: i[0] == '_', dir(container)):
 #        attr = getattr(container, attr_name)
 #        if callable(attr):
 #            continue
 #        #TODO: add something to handle links
 #        attr_spec = attr_map.children.get(attr_name)
-#        
+#
 #        if isinstance(attr_spec, AttributeSpec):
 #            if attr_spec.parent is not spec:
 #                children_attributes[attr_name] = attr_spec
@@ -319,47 +319,58 @@ def is_link(container, attr):
 #    return builder
 
 class TimeSeriesHDF5Renderer(HDF5ContainerRenderer):
-    
+
     @HDF5ContainerRenderer.procedure(TimeSeries)
     def time_series(container):
         builder = GroupBuilder()
+        missing_fields = list()
         # set top-level metadata
         #print("setting container %s of type %s ancestry to %s" % (container.name, str(type(container)), container.ancestry))
         anc = [t.__name__ for t in list(reversed(container.__class__.__mro__))[2:]]
         builder.set_attribute('ancestry', anc)
         builder.set_attribute('help', container.help)
-        builder.set_attribute('description', container.description)
+        if container.description is not None:
+            builder.set_attribute('description', container.description)
+        else:
+            builder.set_attribute('description', 'NO DESCRIPTION')
+
+        if container.comments is not None:
+            builder.set_attribute('comments', container.comments)
+        else:
+            builder.set_attribute('comments', 'NO COMMENTS')
         builder.set_attribute('source', container.source)
-        builder.set_attribute('comments', container.comments)
+
         builder.set_attribute('neurodata_type', "TimeSeries")
-    
+
         #BEGIN Set data
         if isinstance(container.fields['data'], TimeSeries):
             # If data points to another TimeSeries object, then we are linking
             (container_file, container_path) = HDF5ContainerRenderer.get_container_location(container)
             (reference_file, reference_path) = HDF5ContainerRenderer.get_container_location(container.fields['data'])
             data_path = posixpath.join(reference_path, 'data')
-            if container_file != reference_file: 
+            if container_file != reference_file:
                 builder.add_external_link('data', reference_file, data_path)
             else:
                 builder.add_soft_link('data', data_path)
         else:
             # else data will be written to file
             data_attrs = {
-                "unit": container.unit, 
+                "unit": container.unit,
                 "conversion": container.conversion,
                 "resolution": container.resolution,
             }
             builder.add_dataset("data", container.fields['data'], attributes=data_attrs)
             builder.add_dataset("num_samples", len(container.fields['data']))
         #END Set data
-        
+
         #BEGIN Set timestamps
         if container.starting_time is not None:
             builder.add_dataset("starting_time",
-                                        container.starting_time, 
-                                        attributes={"rate": container.rate, 
+                                        container.starting_time,
+                                        attributes={"rate": container.rate,
                                                     "unit": "Seconds"})
+            missing_fields.append('timestamps')
+
         else:
             if isinstance(container.fields['timestamps'], TimeSeries):
                 (container_file, container_path) = HDF5ContainerRenderer.get_container_location(container)
@@ -373,28 +384,37 @@ class TimeSeriesHDF5Renderer(HDF5ContainerRenderer):
                 ts_attrs = {"interval": 1, "unit": "Seconds"}
                 builder.add_dataset("timestamps", container.fields['timestamps'], attributes=ts_attrs)
         #END Set timestamps
+
+        if len(missing_fields) > 0:
+            builder.set_attribute('missing_fields', missing_fields)
+
         return builder
-    
+
     @HDF5ContainerRenderer.procedure(AbstractFeatureSeries)
     def abstract_feature_series(container):
         builder = GroupBuilder()
         builder.add_dataset('features', container.features)
         builder.add_dataset('feature_units', container.units)
         return builder
-    
+
     @HDF5ContainerRenderer.procedure(ElectricalSeries)
     def electrical_series(container):
         builder = GroupBuilder()
         idx = [container.parent.get_electrode_group_idx(e) for e in container.electrodes]
         builder.add_dataset("electrode_idx", idx)
         return builder
-    
+
     @HDF5ContainerRenderer.procedure(SpatialSeries)
     def spatial_series(container):
         builder = GroupBuilder()
         builder.add_dataset("reference_frame", container.reference_frame)
         return builder
-    
+
+#    @HDF5ContainerRenderer.procedure(IntervalSeries)
+#    def interval_series(container):
+#        builder = GroupBuilder()
+#        builder.add_dataset('data'
+#
 
 class ModuleHDF5Renderer(HDF5ContainerRenderer):
 
@@ -406,7 +426,7 @@ class ModuleHDF5Renderer(HDF5ContainerRenderer):
             interface_builder = iface_renderer.process(interface)
             builder.add_group(interface.iface_type, interface_builder)
         return builder
-    
+
 
 class InterfaceHDF5Renderer(HDF5ContainerRenderer):
 
@@ -418,7 +438,7 @@ class InterfaceHDF5Renderer(HDF5ContainerRenderer):
         #TODO: Figure out how to appropriately set source
         builder.set_attribute('source', container.source)
         return builder
-    
+
     @HDF5ContainerRenderer.procedure(Clustering)
     def clustering(container):
         builder = GroupBuilder()
@@ -451,9 +471,9 @@ class EpochHDF5Renderer(HDF5ContainerRenderer):
             builder.set_group(epts.name, epts_builder)
         #builder.set_attribute('links', np.array(links, dtype='|S6'))
         builder.set_attribute('links', links)
-            
+
         return builder
-        
+
 class ElectrodeGroupHDF5Renderer(HDF5ContainerRenderer):
     @HDF5ContainerRenderer.procedure(ElectrodeGroup)
     def electrode_group(container):
@@ -462,3 +482,4 @@ class ElectrodeGroupHDF5Renderer(HDF5ContainerRenderer):
         builder.add_dataset('device', container.device)
         builder.add_dataset('location', container.location)
         return builder
+
