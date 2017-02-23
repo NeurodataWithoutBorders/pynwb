@@ -1,4 +1,4 @@
-from .core import docval, getargs 
+from .core import docval, getargs
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution
 
 import numpy as np
@@ -6,19 +6,19 @@ from collections import Iterable
 
 
 class AnnotationSeries(TimeSeries):
-    ''' 
+    '''
     Stores text-based records about the experiment. To use the
-    AnnotationSeries, add records individually through 
-    add_annotation() and then call finalize(). Alternatively, if 
+    AnnotationSeries, add records individually through
+    add_annotation() and then call finalize(). Alternatively, if
     all annotations are already stored in a list, use set_data()
     and set_timestamps()
 
-    All time series are created by calls to  NWB.create_timeseries(). 
+    All time series are created by calls to  NWB.create_timeseries().
     They should not not be instantiated directly
-    ''' 
+    '''
 
     _ancestry = "TimeSeries,AnnotationSeries"
-    
+
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
@@ -46,7 +46,7 @@ class AnnotationSeries(TimeSeries):
         self.fields['data'].append(annotation)
 
 class AbstractFeatureSeries(TimeSeries):
-    """ 
+    """
     Represents the salient features of a data stream. Typically this
     will be used for things like a visual grating stimulus, where
     the bulk of data (each frame sent to the graphics card) is bulky
@@ -54,7 +54,7 @@ class AbstractFeatureSeries(TimeSeries):
     orientation, spatial frequency, contrast, etc) are what important
     and are what are used for analysis
 
-    All time series are created by calls to  NWB.create_timeseries(). 
+    All time series are created by calls to  NWB.create_timeseries().
     They should not not be instantiated directly
     """
     __nwbfields__ = ('feature_units', 'features')
@@ -82,7 +82,6 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        
         name, source, data = getargs('name', 'source', 'data', kwargs)
         super(AbstractFeatureSeries, self).__init__(name, source, data, "see 'feature_units'", **kwargs)
         self.features = getargs('features', kwargs)
