@@ -34,7 +34,6 @@ class NWBFileReader(BaseObjectHandler):
             ret.append(val)
         return ret
 
-
 '''
 
     for nwb_container_h5obj in file:
@@ -42,46 +41,57 @@ class NWBFileReader(BaseObjectHandler):
         attr_map = TypeMap.get_map(python_type)
         nwb_container_obj = build_constructor_args(attr_map, python_type, nwb_container_h5obj)
 '''
-def build_container(attr_map, nwb_container_type, h5_object):
-    if nwb_container_type is None:
-        return None
-    object_attributes = dict()
-    for name in h5_object:
-        sub_object = h5_object.get(name, getlink=True)
-        if isinstance(sub_object, h5py.SoftLink):
-            raise TypeError("cannot read links yet")
-        else:
-            if isinstance(sub_object, h5py.Dataset):
-                sub_object_spec = attr_map.spec.get_dataset_spec(name)
-                attribute_name = attr_map.get_attribute(sub_object_spec)
-                object_attributes[attribute_name] = sub_object
-            else:
-                sub_container_type = __determine_python_type(sub_object)
-                if sub_container_type is not None:
-                    sub_attr_map = TypeMap.get_map(sub_container_type)
-                    sub_container = build_container(sub_attr_map, sub_container_type, sub_object)
-                    attribute_name = attr_map.get_attribute(sub_attr_map.spec)
-                    object_attributes[attribute_name] = sub_container
+    def build_container(self, attr_map, nwb_container_type, h5_object):
+        if nwb_container_type is None:
+            return None
+        object_attributes = dict()
+        for name in h5_object:
+            sub_object = h5_object.get(name, getlink=True)
+            if isinstance(sub_object, h5py.SoftLink):
+                sub_object = h5_object[sub_object.path]
+                if isinstance(sub_object, h5py.Dataset):
+                    parent, parent_type = find_parent_and_type(sub_object)
+                    if parent and parent.name in self.seen:
+                        object_attributes[attribute_name] = self.seen[parent.name]
+                    else:
+                        # build parent object, and store in self.seen
+                        pass
                 else:
-                    raise TypeError('%s in %s does not have an NWBContainer subtype' % (name, h5_object.name))
-                    #sub_object_spec = attr_map.spec.get_group_spec(name)
-                    #attribute_name = attr_map.get_attribute(sub_object_spec)
-                    #object_attributes[attribute_name] = h5_attr_val
-    for name, h5_attr_val in h5_object.attrs:
-        sub_object_spec = attr_map.spec.get_attribute_spec(name)
-        attribute_name = attr_map.get_attribute(sub_object_spec)
-        object_attributes[attribute_name] = h5_attr_val
+                    # we have a link to a group
+                    pass
+            else:
+                if isinstance(sub_object, h5py.Dataset):
+                    sub_object_spec = attr_map.spec.get_dataset_spec(name)
+                    attribute_name = attr_map.get_attribute(sub_object_spec)
+                    object_attributes[attribute_name] = sub_object
+                else:
+                    sub_container_type = __determine_python_type(sub_object)
+                    if sub_container_type is not None:
+                        raise TypeError('%s in %s does not have an NWBContainer subtype' % (name, h5_object.name))
+                    sub_attr_map = TypeMap.get_map(sub_container_type)
+                    attribute_name = attr_map.get_attribute(sub_attr_map.spec)
+                    if sub_object.name in self.seen:
+                        subcontainer = self.seen[sub_object.name]
+                    else:
+                        sub_container = self.build_container(sub_attr_map, sub_container_type, sub_object)
+                        # keep track of containers we have already built in case we need to share i.e. something is linked to this
+                        self.seen[sub_object.name] = sub_container
+                    object_attributes[attribute_name] = sub_container
+        for name, h5_attr_val in h5_object.attrs:
+            sub_object_spec = attr_map.spec.get_attribute_spec(name)
+            attribute_name = attr_map.get_attribute(sub_object_spec)
+            object_attributes[attribute_name] = h5_attr_val
 
-    constr_docval = getattr(python_type.__init__, docval_attr_name)
-    constr_args = list()
-    constr_kwargs = dict()
-    for arg in constr_docval:
-        name = arg['name']
-        if 'default' in arg:
-            constr_kwargs[name] = object_attributes[name]
-        else:
-            constr_args.append(object_attributes[name])
-    return nwb_container_type(*constr_args, **constr_kwargs)
+        constr_docval = getattr(python_type.__init__, docval_attr_name)
+        constr_args = list()
+        constr_kwargs = dict()
+        for arg in constr_docval:
+            name = arg['name']
+            if 'default' in arg:
+                constr_kwargs[name] = object_attributes[name]
+            else:
+                constr_args.append(object_attributes[name])
+        return nwb_container_type(*constr_args, **constr_kwargs)
 
 def __determine_python_type(h5_object):
     name = h5_object.name
