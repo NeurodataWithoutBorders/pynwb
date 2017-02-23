@@ -3,7 +3,7 @@ import unittest
 from pynwb import TimeSeries
 from pynwb.core import NWBContainer
 
-import numpy as np
+import math
 
 class TimeSeriesConstructor(unittest.TestCase):
 
@@ -15,7 +15,7 @@ class TimeSeriesConstructor(unittest.TestCase):
     def test_init_datalink_set(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
         self.assertSetEqual(ts.data_link, set())
-        
+
     def test_init_timestampslink_set(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
         self.assertSetEqual(ts.timestamps_link, set())
@@ -32,7 +32,7 @@ class TimeSeriesConstructor(unittest.TestCase):
         ts = TimeSeries('test_ts', 'a hypothetical source', dat, 'Volts', timestamps=[0.1, 0.2, 0.3, 0.4])
         self.assertIs(ts.data, dat)
         self.assertEqual(ts.conversion, 1.0)
-        self.assertIs(ts.resolution, np.nan)
+        self.assertTrue(math.isnan(ts.resolution))
         self.assertEqual(ts.unit, 'Volts')
 
     def test_init_timestamps(self):
@@ -53,7 +53,7 @@ class TimeSeriesSetters(unittest.TestCase):
 
     def setUp(self):
         self.ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
-        
+
     def test_set_description(self):
         self.ts.set_description('this is a description')
         self.assertEqual(self.ts.description, 'this is a description')
