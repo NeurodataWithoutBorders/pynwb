@@ -100,7 +100,12 @@ class NWBFile(NWBContainer):
                      'experiment_description',
                      'session_id',
                      'lab',
-                     'institution')
+                     'institution',
+                     'raw_data'
+                     'stimulus'
+                     'stimulus_template'
+                     'ec_electrodes'
+                     'ic_electrodes')
 
     __nwb_version = '1.0.4'
 
@@ -118,15 +123,15 @@ class NWBFile(NWBContainer):
         self.__file_id = '%s %s' % (self.__filename, self.__start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
         self.__description = getargs('description', kwargs)
 
-        self.__rawdata = dict()
+        self.__raw_data = dict()
         self.__stimulus = dict()
         self.__stimulus_template = dict()
 
         self.modules = dict()
         self.epochs = dict()
-        self.__electrodes = dict()
-        self.__electrode_idx = dict()
-        
+        self.__ec_electrodes = dict()
+        self.__ec_electrode_idx = dict()
+
         recommended = [
             'experimenter',
             'experiment_description',
@@ -158,8 +163,8 @@ class NWBFile(NWBContainer):
         return self.__file_id
 
     @property
-    def rawdata(self):
-        return tuple(self.__rawdata.values())
+    def raw_data(self):
+        return tuple(self.__raw_data.values())
 
     @property
     def stimulus(self):
@@ -171,10 +176,10 @@ class NWBFile(NWBContainer):
 
     @property
     def ec_electrodes(self):
-        return tuple(self.__electrodes.values())
+        return tuple(self.__ec_electrodes.values())
 
-    def is_rawdata(self, ts):
-        return self.__exists(ts, self.__rawdata)
+    def is_raw_data(self, ts):
+        return self.__exists(ts, self.__raw_data)
 
     def is_stimulus(self, ts):
         return self.__exists(ts, self.__stimulus)
@@ -191,7 +196,7 @@ class NWBFile(NWBContainer):
             {'name': 'tags', 'type': (tuple, list), 'doc': 'tags for this epoch', 'default': list()},
             {'name': 'description', 'type': str, 'doc': 'a description of this epoch', 'default': None})
     def create_epoch(self, **kwargs):
-        """ 
+        """
         Creates a new Epoch object. Epochs are used to track intervals
         in an experiment, such as exposure to a certain type of stimuli
         (an interval where orientation gratings are shown, or of 
@@ -242,7 +247,7 @@ class NWBFile(NWBContainer):
         if isinstance(timeseries, TimeSeries):
             ts = timeseries 
         elif isinstance(timeseries, str): 
-            ts = self.__rawdata.get(timeseries, 
+            ts = self.__raw_data.get(timeseries, 
                     self.__stimulus.get(timeseries, 
                         self.__stimulus_template.get(timeseries, None)))
             if not ts:
@@ -259,7 +264,7 @@ class NWBFile(NWBContainer):
             returns="the TimeSeries object")
     def add_raw_timeseries(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', kwargs)
-        self.__set_timeseries(self.__rawdata, ts, epoch)
+        self.__set_timeseries(self.__raw_data, ts, epoch)
 
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
@@ -280,7 +285,7 @@ class NWBFile(NWBContainer):
         ts.parent = self
         if epoch:
             self.set_epoch_timeseries(epoch, ts)
-# 
+#
 #  Not sure what purpose this serves yet, so keeping it around for reference: AJT 09-02-2017
 #
 #    def create_reference_image(self, stream, name, fmt, desc, dtype=None):
@@ -311,7 +316,7 @@ class NWBFile(NWBContainer):
 #            img = img_grp.add_dataset(name, stream, dtype=dtype)
 #        img.set_attribute("format", np.string_(fmt))
 #        img.set_attribute("description", np.string_(desc))
-        
+
 
     @docval({'name': 'name', 'type': (str, int), 'doc': 'a unique name or ID for this electrode'},
             {'name': 'coord', 'type': (tuple, list, np.ndarray), 'doc': 'the x,y,z coordinates of this electrode'},
@@ -334,20 +339,20 @@ class NWBFile(NWBContainer):
         elec_grp = getargs('elec_grp', kwargs)
         elec_grp.parent = self
         name = elec_grp.name
-        self.__electrodes[name] = elec_grp
-        self.__electrode_idx[name] = len(self.__electrode_idx)
-        return self.__electrode_idx[name]
+        self.__ec_electrodes[name] = elec_grp
+        self.__ec_electrode_idx[name] = len(self.__ec_electrode_idx)
+        return self.__ec_electrode_idx[name]
 
     @docval({'name': 'name', 'type': (ElectrodeGroup, str), 'doc': 'the name of the electrode group or the ElectrodeGroup object'})
     def get_electrode_group_idx(self, **kwargs):
         name = getargs('name', kwargs)
         if isinstance(name, ElectrodeGroup):
             name = name.name
-        return self.__electrode_idx.get(name, None)
+        return self.__ec_electrode_idx.get(name, None)
 
     @docval({'name': 'name', 'type': (ElectrodeGroup, str), 'doc': 'the name of the electrode group'})
     def get_electrode_group(self, name):
-        return self.__electrodes.get(name)
+        return self.__ec_electrodes.get(name)
 
     @docval({'name': 'name',  'type': str, 'doc': 'the name of the processing module'},
             {'name': 'description',  'type': str, 'doc': 'description of the processing module'},
