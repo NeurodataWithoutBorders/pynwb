@@ -16,7 +16,7 @@ class BaseObjectHandler(object, metaclass=ExtenderMeta):
             # staticmethod objects are not callable (after staticmethods are processed
             # by type, they are bound to the class as a function)
             cls.procedures[getattr(func, cls._property)] = getattr(cls, name)
-    
+
 
     @classmethod
     @abstractmethod
@@ -46,12 +46,12 @@ class BaseObjectHandler(object, metaclass=ExtenderMeta):
         return ret
 
     @classmethod
-    def procedure(cls, prop):
+    def procedure(cls, prop, static=True):
         """Decorator for adding procedures within definition
            of derived classes.
         """
         def _dec(func):
-            func2 = staticmethod(func)
+            func2 = staticmethod(func) if static else func
             setattr(func2, cls._property, prop)
             return func2
         return _dec
