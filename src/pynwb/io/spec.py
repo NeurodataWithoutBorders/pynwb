@@ -176,6 +176,11 @@ class BaseStorageSpec(Spec):
                                'reason': 'missing'})
         return errors
 
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute to the Spec for'})
+    def get_attribute_spec(self, **kwargs):
+        # TODO:
+        pass
+
 _dset_args = [
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': '*'},
@@ -323,3 +328,13 @@ class GroupSpec(BaseStorageSpec):
         for group_spec in self['groups']:
             builder.add_group(group_spec['name'], builder=group_spec.template())
         return builder
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset to the Spec for'})
+    def get_dataset_spec(self, **kwargs):
+        # TODO:
+        pass
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the group to the Spec for'})
+    def get_group_spec(self, **kwargs):
+        # TODO:
+        pass
