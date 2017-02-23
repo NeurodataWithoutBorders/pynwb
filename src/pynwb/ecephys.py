@@ -5,10 +5,10 @@ import numpy as np
 from collections import Iterable
 
 class ElectricalSeries(TimeSeries):
-    
+
     __nwbfields__ = ('electrodes',)
 
-    _ancestry = "TimeSeries,ElectricalSeries"
+    __ancestry = "TimeSeries,ElectricalSeries"
     __help = "Stores acquired voltage data from extracellular recordings"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -33,7 +33,7 @@ class ElectricalSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        """ 
+        """
         Create a new ElectricalSeries dataset
         """
         name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', kwargs)
@@ -43,7 +43,7 @@ class ElectricalSeries(TimeSeries):
 
 class SpikeEventSeries(ElectricalSeries):
 
-    _ancestry = "TimeSeries,ElectricalSeries,SpikeSeries"
+    __ancestry = "TimeSeries,ElectricalSeries,SpikeSeries"
 
     __help = "Snapshots of spike events from data."
 
@@ -136,9 +136,9 @@ class EventWaveform(Interface):
     def __init__(self, **kwargs):
         source, data = getargs('source', 'spike_data_ts', kwargs)
         super(EventWaveform, self).__init__(source)
-        spike_data_ts.parent = self
+        data.parent = self
         self.data = data
-        
+
 
 class Clustering(Interface):
     """Specifies cluster event times and cluster
@@ -148,9 +148,9 @@ class Clustering(Interface):
     __nwbfields__  = ('cluster_times',
                       'cluster_ids',
                       'peak_over_rms')
-    
 
-    __help = ("Clustered spike data, whether from automatic clustering " 
+
+    __help = ("Clustered spike data, whether from automatic clustering "
              "tools (eg, klustakwik) or as a result of manual sorting")
 
 
@@ -184,7 +184,7 @@ class ClusterWaveform(Interface):
                      'filtering',
                      'means',
                      'stdevs')
-    
+
     __help = ("Mean waveform shape of clusters. Waveforms should be "
              "high-pass filtered (ie, not the same bandpass filter "
              "used waveform analysis and clustering)")
@@ -200,7 +200,7 @@ class ClusterWaveform(Interface):
         self.clustering = clustering
         self.filtering = filtering
         self.means = means
-        self.sds = stdevs
+        self.stdevs = stdevs
 
 class LFP(Interface):
 
