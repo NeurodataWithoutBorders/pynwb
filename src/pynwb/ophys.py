@@ -67,7 +67,7 @@ class ImageSegmentation(Interface):
             each pixel. If multi-planar manifolds are to be defined
             separately, a separate imaging plane should be used for each.
             Non-planar manifolds should be stored as a vector.
-            
+
             Pixels in the manifold must have a 1:1 correspondence
             with image segmentation masks and the masks and manifold
             must have the same dimensions.
@@ -89,7 +89,7 @@ class ImageSegmentation(Interface):
 
             Arguments:
                 *image_plane* (text) name of imaging plane
-            
+
                 *roi_name* (text) name of ROI
 
                 *desc* (text) description of ROI
