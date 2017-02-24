@@ -55,17 +55,20 @@ class NWBFileReader(BaseObjectHandler):
                         object_attributes[attribute_name] = self.seen[parent.name]
                     else:
                         # build parent object, and store in self.seen
-                        pass
+                        parent_attr_map = TypeMap.get_map(parent_type)
+                        parent_container = self.build_container(parent_attr_map, parent_type, parent)
+                        self.seen[parent.name] = parent_container
+                        attribute_name = attr_map.get_attribute_nwbcontainer(parent_container)
+                        object_attributes[attribute_name] = parent_container
                 else:
                     # we have a link to a group
                     pass
             else:
                 if isinstance(sub_object, h5py.Dataset):
-                    sub_object_spec = attr_map.spec.get_dataset_spec(name)
-                    attribute_name = attr_map.get_attribute(sub_object_spec)
-                    object_attributes[attribute_name] = sub_object
+                    attribute_name, attribute_value = attr_map.get_attribute_h5dataset(name, sub_object)
+                    object_attributes[attribute_name] = attribute_value
                 else:
-                    sub_container_type = __determine_python_type(sub_object)
+                    sub_container_type = self.__determine_python_type(sub_object)
                     if sub_container_type is not None:
                         raise TypeError('%s in %s does not have an NWBContainer subtype' % (name, h5_object.name))
                     sub_attr_map = TypeMap.get_map(sub_container_type)
@@ -77,10 +80,9 @@ class NWBFileReader(BaseObjectHandler):
                         # keep track of containers we have already built in case we need to share i.e. something is linked to this
                         self.seen[sub_object.name] = sub_container
                     object_attributes[attribute_name] = sub_container
-        for name, h5_attr_val in h5_object.attrs:
-            sub_object_spec = attr_map.spec.get_attribute_spec(name)
-            attribute_name = attr_map.get_attribute(sub_object_spec)
-            object_attributes[attribute_name] = h5_attr_val
+        for h5_attr_name, h5_attr_val in h5_object.attrs:
+            attribute_name, attribute_value = attr_map.get_attribute_h5attr(h5_attr_name, h5_attr_val)
+            object_attributes[attribute_name] = attribute_value
 
         constr_docval = getattr(python_type.__init__, docval_attr_name)
         constr_args = list()
@@ -93,32 +95,20 @@ class NWBFileReader(BaseObjectHandler):
                 constr_args.append(object_attributes[name])
         return nwb_container_type(*constr_args, **constr_kwargs)
 
-def __determine_python_type(h5_object):
-    name = h5_object.name
-    if 'neurodata_type' in h5_object.attrs:
-        neurodata_type = h5_object.attrs['']
-        if neurodata_type == 'Interface' :
-            return Interface.get_extensions(name.split('/')[-1])
-        elif neurodata_type == 'TimeSeries' :
-            return TimeSeries.get_extensions(h5_object.attrs['ancestry'][-1])
-        elif neurodata_type == 'Module' :
-            return Module
-        elif neurodata_type == 'Epoch' :
-            return Epoch
-    else:
-        if name.startswith('/general/extracellular_ephys'):
-            return ElectrodeGroup
-        elif name.startswith('/general/intracellular_ephys'):
-            return IntracellularElectrode
-        elif name.startswith('/general/optogenetics'):
-            return OptogeneticSite
-        elif name.startswith('/general/optophysiology'):
-            name_ar = name[1:].split('/')
-            if len(name_ar) == 3:
-                return ImagingPlane
-            elif len(name_ar) == 4
-                return OpticalChannel
-    return None
+    @classmethod
+    def __find_dataset_parent(cls, h5_object):
+        curr = h5_object
+        parent = None
+        parent_type = None
+        while True:
+            parent = curr.parent
+            parent_type = cls.__determine_python_type(parent)
+            if parent_type is not None:
+                break
+
+        return parent, parent_type
+
+
 
 def read_file(path):
     f = h5py.File(path, 'r')
