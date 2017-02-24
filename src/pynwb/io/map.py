@@ -56,10 +56,9 @@ class Condition(object):
         if self._condition:
             result = self._condition.find(spec)
         return result
-        
 
 class AttrMap(object):
-    
+
     @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'The specification for mapping objects to builders'})
     def __init__(self, **kwargs):
         """ Create a map from Container attributes to NWB specifications
@@ -107,3 +106,64 @@ class AttrMap(object):
         if self._spec.name != '*':
             ret = self._spec.name
         return ret
+
+    @docval({"name": "attr_name", "type": str, "doc": "the name of the HDF5 attribute"},
+            {"name": "attr_val", "type": None, "doc": "the value of the HDF5 attribute"})
+    def get_attribute_h5attr(self, **kwargs):
+        ''' Get the Python object attribute name and value given an HDF5 attribute name and value
+        '''
+        h5attr_name, h5attr_val = get_args('attr_name', 'attr_val', kwargs)
+        attribute_name = self.get_attribute(self._spec.get_attribute_spec(h5attr_name))
+        # do something to figure out the value of the attribute
+        attribute_value = h5attr_val
+        return attribute_name, attribute_value
+
+    @docval({"name": "dset_name", "type": str, "doc": "the name of the HDF5 dataset"},
+            {"name": "dset_val", "type": None, "doc": "the value of the HDF5 dataset"})
+    def get_attribute_h5dataset(self, **kwargs):
+        ''' Get the Python object attribute name and value given an HDF5 dataset name and value
+        '''
+        h5dset_name, h5dset_val = get_args('dset_name', 'dset_val', kwargs)
+        attribute_name = self.get_attribute(self._spec.get_attribute_dataset(h5dset_name))
+        # do something to figure out the value of the attribute
+        attribute_value = h5dset_val
+        return attribute_name, attribute_value
+
+    @docval({"name": "grp_name", "type": str, "doc": "the name of the HDF5 group"},
+            {"name": "grp", "type": None, "doc": "the HDF5 group object"})
+    def get_attribute_nwbcontainer(self, **kwargs):
+        ''' Get the Python object attribute name and value given an HDF5 dataset name and value
+        '''
+        grp_name, grp = get_args('grp_name', 'grp', kwargs)
+        pynwb_type = self.determine_python_type(grp)
+        spec = TypeMap.get_spec(pynwb_type)
+
+    @staticmethod
+    def determine_python_type(h5_object):
+        name = h5_object.name
+        if 'neurodata_type' in h5_object.attrs:
+            neurodata_type = h5_object.attrs['']
+            if neurodata_type == 'Interface' :
+                return Interface.get_extensions(name.split('/')[-1])
+            elif neurodata_type == 'TimeSeries' :
+                return TimeSeries.get_extensions(h5_object.attrs['ancestry'][-1])
+            elif neurodata_type == 'Module' :
+                return Module
+            elif neurodata_type == 'Epoch' :
+                return Epoch
+        else:
+            if name.startswith('/general/extracellular_ephys'):
+                return ElectrodeGroup
+            elif name.startswith('/general/intracellular_ephys'):
+                return IntracellularElectrode
+            elif name.startswith('/general/optogenetics'):
+                return OptogeneticSite
+            elif name.startswith('/general/optophysiology'):
+                name_ar = name[1:].split('/')
+                if len(name_ar) == 3:
+                    return ImagingPlane
+                elif len(name_ar) == 4
+                    return OpticalChannel
+        return None
+
+
