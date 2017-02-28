@@ -7,7 +7,11 @@ from ruamel import yaml
 import pynwb
 from pynwb.io.spec import Spec, AttributeSpec, BaseStorageSpec, DatasetSpec, GroupSpec, SpecCatalog
 
+
+all_specs = dict()
+
 def build_group(name, d):
+    #print('building %s' % name, file=sys.stderr)
     required = True
     myname = name
     if myname[-1] == '?':
@@ -25,23 +29,50 @@ def build_group(name, d):
         desc = d.pop('_description', None)
     else:
         desc = d.pop('description', None)
+
+    extends = None
+    if 'merge' in d:
+        merge = d.pop('merge')
+        base = merge[0]
+        end = base.rfind('>')
+        base = base[1:end] if end > 0 else base
+        extends = all_specs[base]
+
+
+    neurodata_type = None
+    #TODO: figure out why Interfaces aren't picking up neurodata_type
     if 'attributes' in d:
         attributes = d.pop('attributes', None)
-        nwb_type = None
         if 'neurodata_type' in attributes:
-            nwb_type = attributes['neurodata_type']['value']
-        grp_spec = GroupSpec(myname, required=required, doc=desc, nwb_type=nwb_type)
+            neurodata_type = attributes.pop('neurodata_type')['value']
+        elif 'ancestry' in attributes:
+            #neurodata_type = attributes['ancestry']['value'][-1]
+            neurodata_type = attributes.pop('ancestry')['value'][-1]
+        if extends is not None:
+            if neurodata_type is None:
+                neurodata_type = myname
+        grp_spec = GroupSpec(myname, required=required, doc=desc, neurodata_type=neurodata_type, extends=extends)
         add_attributes(grp_spec, attributes)
     else:
-        grp_spec = GroupSpec(myname, required=required, doc=desc)
+        grp_spec = GroupSpec(myname, required=required, doc=desc, extends=extends)
+
     for key, value in d.items():
         name = key
-        if isinstance(value, str) or key == 'merge':
+        if name[0] == '_':
+            #TODO: figure out how to deal with these reserved keys
+            continue
+        if isinstance(value, str):
             continue
         if key.rfind('/') == -1:
             grp_spec.set_dataset(build_dataset(name, value))
         else:
             grp_spec.set_group(build_group(name, value))
+
+    if neurodata_type is not None:
+        print('adding %s to all_specs' % neurodata_type, file=sys.stderr)
+        all_specs[neurodata_type] = grp_spec
+    else:
+        print('no neurodata_type found for %s' % myname, file=sys.stderr)
     return grp_spec
 
 def build_dataset(name, d):
@@ -72,7 +103,7 @@ def remap_keys(name, d):
         ret['required'] = False
     ret['const'] = d.get('const', None)
     ret['dtype'] = d.get('data_type', 'None')
-    
+
     ret['default'] = d.get('value', None)
     ret['doc'] = d.get('description', None)
     ret['dim'] = d.get('dimensions', None)
@@ -92,7 +123,7 @@ def merge_spec(target, source):
 def load_spec(spec):
 
     spec = spec['fs']['core']['schema']
-    
+
     # load Module specs
     # load File spec
     # /
@@ -106,10 +137,10 @@ def load_spec(spec):
     # /general/optophysiology/?
     # /processing/
     # /stimulus/
-    
-    #root = GroupSpec(nwb_type='NWBFile')
+
+    #root = GroupSpec(neurodata_type='NWBFile')
     root = build_group('root', spec['/'])
-    #root.set_dataset(build_dataset('file_create_date', 
+    #root.set_dataset(build_dataset('file_create_date',
 
 
     acquisition = root.set_group(build_group('acquisition', spec['/acquisition/']))
@@ -202,26 +233,26 @@ def load_spec(spec):
     ]
 
     ts_types = [
-        "<AbstractFeatureSeries>/", 
+        "<TimeSeries>/", #
+        "<AbstractFeatureSeries>/",
         "<AnnotationSeries>/",
+        "<PatchClampSeries>/",
         "<CurrentClampSeries>/", #
-        "<CurrentClampStimulusSeries>/", #
-        "<ElectricalSeries>/", #
         "<IZeroClampSeries>/", #
-        "<ImageMaskSeries>/", #
+        "<CurrentClampStimulusSeries>/", #
+        "<VoltageClampSeries>/", #
+        "<VoltageClampStimulusSeries>/", #
+        "<ElectricalSeries>/", #
+        "<SpikeEventSeries>/", #
         "<ImageSeries>/", #
+        "<ImageMaskSeries>/", #
         "<IndexSeries>/", #
         "<IntervalSeries>/",
         "<OpticalSeries>/", #
         "<OptogeneticSeries>/", #
-        "<PatchClampSeries>/",
         "<RoiResponseSeries>/", #
         "<SpatialSeries>/", #
-        "<SpikeEventSeries>/", #
-        "<TimeSeries>/", #
         "<TwoPhotonSeries>/", #
-        "<VoltageClampSeries>/", #
-        "<VoltageClampStimulusSeries>/" #
     ]
     ts_specs = dict()
     while ts_types:
@@ -239,20 +270,20 @@ def load_spec(spec):
                 break
         if not all_bases:
             continue
-        
+
         ts_spec = build_group('*', ts_dict)
-        for m in merge:
-            merge_spec(m, ts_spec)
+        #for m in merge:
+        #    merge_spec(m, ts_spec)
         ts_specs[ts_type] = ts_spec
 
     #print ('created specs for all TimeSeries', file=sys.stderr)
-        
+
     iface = build_group('*', spec['<Interface>/'])
     #print ('created specs for <Interface>', file=sys.stderr)
 
 
     mod_specs = dict()
-    
+
     mod_types = [
         "BehavioralEpochs/",
         "BehavioralEvents/",
@@ -278,11 +309,11 @@ def load_spec(spec):
     #print ('creating specs for Modules', file=sys.stderr)
     for mod in mod_types:
         mod_spec = spec[mod]
-        merge = mod_spec.pop('merge')
+        #merge = mod_spec.pop('merge')
         mod_specs[mod] = build_group(mod, mod_spec)
-        merge_spec(mod_specs[mod], iface)
+        #merge_spec(mod_specs[mod], iface)
     #print ('created specs for all Modules', file=sys.stderr)
-    
+
     #register with SpecMap
     #SpecCatalog.register_spec('NWB', root)
     #SpecCatalog.register_spec('Interface', iface)
@@ -293,11 +324,11 @@ def load_spec(spec):
     #    tmp = mod_type[1:len(mod_type)-1]
     #    SpecCatalog.register_spec(tmp, mod_spec)
     #    pass
-    
+
     ret = [root, iface]
     ret.extend(ts_specs.values())
     ret.extend(mod_specs.values())
-    ret = {'root': root, 'Interface': iface, 'modules': mod_specs, 'timeseries': ts_specs}
+    ret = {'root': list(root.values()), 'Interface': list(iface.values()), 'modules': list(mod_specs.values()), 'timeseries': list(ts_specs.values())}
     return ret
 
 
@@ -310,7 +341,7 @@ def represent_str(self, data):
     s = data.replace('"', '\\"')
     return s
     #return self.represent_scalar("", '"%s"' % s)
-        
+
 spec_path = sys.argv[1]
 with open(spec_path) as spec_in:
     nwb_spec = load_spec(json.load(spec_in))
