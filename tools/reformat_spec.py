@@ -10,8 +10,8 @@ from pynwb.io.spec import Spec, AttributeSpec, BaseStorageSpec, DatasetSpec, Gro
 
 all_specs = dict()
 
-def build_group(name, d):
-    #print('building %s' % name, file=sys.stderr)
+def build_group(name, d, ndtype=None):
+    print('building %s' % name, file=sys.stderr)
     required = True
     myname = name
     if myname[-1] == '?':
@@ -39,7 +39,7 @@ def build_group(name, d):
         extends = all_specs[base]
 
 
-    neurodata_type = None
+    neurodata_type = ndtype
     #TODO: figure out why Interfaces aren't picking up neurodata_type
     if 'attributes' in d:
         attributes = d.pop('attributes', None)
@@ -63,6 +63,14 @@ def build_group(name, d):
             continue
         if isinstance(value, str):
             continue
+        if 'link' in value:
+            ndt = value['link']['target_type']
+            if ndt[0] == '<':
+                ndt = ndt[1:ndt.rfind('>')]
+            else:
+                ndt = ndt[0:-1]
+            grp_spec.set_link(GroupSpec(key, neurodata_type=ndt))
+
         if key.rfind('/') == -1:
             grp_spec.set_dataset(build_dataset(name, value))
         else:
@@ -139,13 +147,15 @@ def load_spec(spec):
     # /stimulus/
 
     #root = GroupSpec(neurodata_type='NWBFile')
-    root = build_group('root', spec['/'])
+    root = build_group('root', spec['/'], 'NWBFile')
     #root.set_dataset(build_dataset('file_create_date',
 
 
     acquisition = root.set_group(build_group('acquisition', spec['/acquisition/']))
     analysis = root.set_group(build_group('analysis', spec['/analysis/']))
     epochs = root.set_group(build_group('epochs', spec['/epochs/']))
+
+    module_json =  spec['/processing/'].pop("<Module>/*")
 
     processing = root.set_group(build_group('processing', spec['/processing/']))
     stimulus = root.set_group(build_group('stimulus', spec['/stimulus/']))
@@ -155,8 +165,34 @@ def load_spec(spec):
     optogenetics = general.set_group(build_group('optogenetics?', spec['/general/optogenetics/?']))
     optophysiology = general.set_group(build_group('optophysiology?', spec['/general/optophysiology/?']))
 
+    base = [
+        "<TimeSeries>/", #
+        "<Interface>/",
+        "<Module>/",
+    ]
+    base = [
+        root,
+        build_group('*', module_json, ndtype='Module'),
+        build_group('*', spec["<TimeSeries>/"]),
+        build_group('*', spec["<Interface>/"])
+    ]
+
+
     # load TimeSeries specs
-    ec_ephys = [
+
+    type_specs = dict()
+    subspecs = [
+        'ec_ephys',
+        'ic_ephys',
+        'image',
+        'ophys',
+        'ogen',
+        'behavior',
+        'misc',
+        'retinotopy',
+    ]
+
+    type_specs['ec_ephys'] = [
         "<ElectricalSeries>/",
         "<SpikeEventSeries>/",
         "ClusterWaveforms/",
@@ -168,7 +204,8 @@ def load_spec(spec):
         "FeatureExtraction/",
         "LFP/",
     ]
-    ic_ephys = [
+
+    type_specs['ic_ephys'] = [
         "<PatchClampSeries>/",
         "<CurrentClampSeries>/",
         "<IZeroClampSeries>/",
@@ -176,23 +213,27 @@ def load_spec(spec):
         "<VoltageClampSeries>/",
         "<VoltageClampStimulusSeries>/"
     ]
-    ophys = [
-        "<TwoPhotonSeries>/",
-        "DfOverF/",
-        "Fluorescence/",
-        "ImageSegmentation/",
-    ]
-    ogen = [
-        "<OptogeneticSeries>/",
-    ]
-    image = [
+
+    type_specs['image'] = [
         "<ImageSeries>/",
         "<ImageMaskSeries>/",
         "<OpticalSeries>/",
         "<RoiResponseSeries>/",
         "<IndexSeries>/",
     ]
-    behavior = [
+
+    type_specs['ophys'] = [
+        "<TwoPhotonSeries>/",
+        "DfOverF/",
+        "Fluorescence/",
+        "ImageSegmentation/",
+    ]
+
+    type_specs['ogen'] = [
+        "<OptogeneticSeries>/",
+    ]
+
+    type_specs['behavior'] = [
         "<SpatialSeries>/",
         "BehavioralEpochs/",
         "BehavioralEvents/",
@@ -204,11 +245,32 @@ def load_spec(spec):
         "MotionCorrection/",
     ]
 
-    unsure = [
-        "ImagingRetinotopy/",
+    type_specs['misc'] = [
+        "<AbstractFeatureSeries>/",
+        "<AnnotationSeries>/",
+        "<IntervalSeries>/",
         "UnitTimes/",
     ]
 
+
+    type_specs['retinotopy'] = [
+        "ImagingRetinotopy/",
+    ]
+
+    def mapfunc(name):
+        if name[0] == '<':
+            return build_group('*', spec[name])
+        else:
+            return build_group(name, spec[name])
+
+    #for key in type_specs.keys():
+    for key in subspecs:
+        type_specs[key] = list(map(mapfunc, type_specs[key]))
+
+    type_specs['base'] = base
+    return type_specs
+
+"""
     mod_types = [
         "BehavioralEpochs/",
         "BehavioralEvents/",
@@ -234,8 +296,6 @@ def load_spec(spec):
 
     ts_types = [
         "<TimeSeries>/", #
-        "<AbstractFeatureSeries>/",
-        "<AnnotationSeries>/",
         "<PatchClampSeries>/",
         "<CurrentClampSeries>/", #
         "<IZeroClampSeries>/", #
@@ -247,7 +307,6 @@ def load_spec(spec):
         "<ImageSeries>/", #
         "<ImageMaskSeries>/", #
         "<IndexSeries>/", #
-        "<IntervalSeries>/",
         "<OpticalSeries>/", #
         "<OptogeneticSeries>/", #
         "<RoiResponseSeries>/", #
@@ -332,10 +391,12 @@ def load_spec(spec):
     return ret
 
 
+
 def load_iface(spec):
     spec = spec['fs']['core']['schema']
     iface = build_group('*', spec['<Interface>/'])
     return iface
+"""
 
 def represent_str(self, data):
     s = data.replace('"', '\\"')
@@ -347,6 +408,13 @@ with open(spec_path) as spec_in:
     nwb_spec = load_spec(json.load(spec_in))
     #nwb_spec = load_iface(json.load(spec_in))
 
+
+
+
+for key, value  in nwb_spec.items():
+    with open('nwb.%s.yaml' % key, 'w') as out:
+        yaml.dump(json.loads(json.dumps(value)), out, default_flow_style=False)
+
 #def quoted_presenter(dumper, data):
 #    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='"')
 
@@ -354,5 +422,5 @@ with open(spec_path) as spec_in:
 #yaml.add_representer(str, represent_str)
 ##print(json.dumps(nwb_spec, indent=4))
 #print(yaml.dump(json.loads(json.dumps(nwb_spec)), default_flow_style=False, default_style='"'))
-print(yaml.dump(json.loads(json.dumps(nwb_spec)), default_flow_style=False))
+#print(yaml.dump(json.loads(json.dumps(nwb_spec)), default_flow_style=False))
 
