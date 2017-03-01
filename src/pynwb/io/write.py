@@ -238,7 +238,7 @@ class NWBFileHDF5Renderer(HDF5ContainerRenderer):
 
         ts_renderer = TimeSeriesHDF5Renderer()
         subgroup_builder = builder['acquisition/timeseries']
-        for ts_container in container.rawdata:
+        for ts_container in container.raw_data:
             ts_group_builder = ts_renderer.process(ts_container)
             subgroup_builder.set_group(ts_container.name, ts_group_builder)
 
