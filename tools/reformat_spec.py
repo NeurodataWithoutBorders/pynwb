@@ -69,7 +69,7 @@ def build_group(name, d, ndtype=None):
                 ndt = ndt[1:ndt.rfind('>')]
             else:
                 ndt = ndt[0:-1]
-            grp_spec.set_link(GroupSpec(key, neurodata_type=ndt))
+            grp_spec.add_link(GroupSpec(neurodata_type=ndt))
 
         if key.rfind('/') == -1:
             grp_spec.set_dataset(build_dataset(name, value))
@@ -151,19 +151,35 @@ def load_spec(spec):
     #root.set_dataset(build_dataset('file_create_date',
 
 
-    acquisition = root.set_group(build_group('acquisition', spec['/acquisition/']))
-    analysis = root.set_group(build_group('analysis', spec['/analysis/']))
-    epochs = root.set_group(build_group('epochs', spec['/epochs/']))
+    acquisition = build_group('acquisition', spec['/acquisition/'])
+    root.set_group(acquisition)
+    analysis = build_group('analysis', spec['/analysis/'])
+    root.set_group(analysis)
+    epochs = build_group('epochs', spec['/epochs/'])
+    root.set_group(epochs)
 
     module_json =  spec['/processing/'].pop("<Module>/*")
 
-    processing = root.set_group(build_group('processing', spec['/processing/']))
-    stimulus = root.set_group(build_group('stimulus', spec['/stimulus/']))
-    general = root.set_group(build_group('general', spec['/general/']))
-    extracellular_ephys = general.set_group(build_group('extracellular_ephys?', spec['/general/extracellular_ephys/?']))
-    intracellular_ephys = general.set_group(build_group('intracellular_ephys?', spec['/general/intracellular_ephys/?']))
-    optogenetics = general.set_group(build_group('optogenetics?', spec['/general/optogenetics/?']))
-    optophysiology = general.set_group(build_group('optophysiology?', spec['/general/optophysiology/?']))
+    processing = build_group('processing', spec['/processing/'])
+    root.set_group(processing)
+
+    stimulus = build_group('stimulus', spec['/stimulus/'])
+    root.set_group(stimulus)
+
+    general = build_group('general', spec['/general/'])
+    root.set_group(general)
+
+    extracellular_ephys = build_group('extracellular_ephys?', spec['/general/extracellular_ephys/?'])
+    general.set_group(extracellular_ephys)
+
+    intracellular_ephys = build_group('intracellular_ephys?', spec['/general/intracellular_ephys/?'])
+    general.set_group(intracellular_ephys)
+
+    optogenetics = build_group('optogenetics?', spec['/general/optogenetics/?'])
+    general.set_group(optogenetics)
+
+    optophysiology = build_group('optophysiology?', spec['/general/optophysiology/?'])
+    general.set_group(optophysiology)
 
     base = [
         "<TimeSeries>/", #
