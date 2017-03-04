@@ -8,10 +8,35 @@ import pynwb
 from pynwb.io.spec import Spec, AttributeSpec, BaseStorageSpec, DatasetSpec, GroupSpec, SpecCatalog
 
 
+ndmap = {
+    "<timeseries_X>/*": 'EpochTimeSeries',
+    #"<epoch_X>/*": 'Epoch', # TODO: Figure out how to remove this spec's name
+    "<device_X>*": 'Device',
+    "<specification_file>*": 'SpecFile',
+    "<electrode_group_X>": 'ElectrodeGroup',
+    "<electrode_X>": 'IntracellularElectrode',
+    "<site_X>/*": 'OptogeneticStimulusSite',
+    "<channel_X>": 'OpticalChannel',
+    "<imaging_plane_X>/*": 'ImagingPlane',
+    "<unit_N>/+": 'SpikeUnit',
+    #"<image_name>/+": , # TODO: Figure out how to move this to a link to an ImagingPlane neurodata_type
+    "<roi_name>/*": 'ROI',
+    "<image_plane>/*": 'SegmentedImagingPlane',
+}
+
 all_specs = dict()
 
+
+def build_group_helper(**kwargs):
+    myname = kwargs.pop('name', '*')
+    if myname == '*':
+        grp_spec = GroupSpec(**kwargs)
+    else:
+        grp_spec = GroupSpec(name=myname, **kwargs)
+    return grp_spec
+
 def build_group(name, d, ndtype=None):
-    print('building %s' % name, file=sys.stderr)
+    #print('building %s' % name, file=sys.stderr)
     required = True
     myname = name
     if myname[-1] == '?':
@@ -39,7 +64,16 @@ def build_group(name, d, ndtype=None):
         extends = all_specs[base]
 
 
-    neurodata_type = ndtype
+    if myname[0] == '<':
+        neurodata_type = ndmap.get(myname)
+        print('found neurodata_type %s' % neurodata_type, file=sys.stderr)
+        if neurodata_type is None:
+            neurodata_type = ndtype
+        else:
+            myname = '*'
+        print('neurodata_type=%s, myname=%s' % (neurodata_type, myname), file=sys.stderr)
+    else:
+        neurodata_type = ndtype
     #TODO: figure out why Interfaces aren't picking up neurodata_type
     if 'attributes' in d:
         attributes = d.pop('attributes', None)
@@ -51,10 +85,15 @@ def build_group(name, d, ndtype=None):
         if extends is not None:
             if neurodata_type is None:
                 neurodata_type = myname
-        grp_spec = GroupSpec(myname, required=required, doc=desc, neurodata_type=neurodata_type, extends=extends)
+        grp_spec = build_group_helper(name=myname, required=required, doc=desc, neurodata_type=neurodata_type, extends=extends)
         add_attributes(grp_spec, attributes)
+    elif neurodata_type is not None:
+        grp_spec = build_group_helper(name=myname, required=required, doc=desc, neurodata_type=neurodata_type, extends=extends)
     else:
-        grp_spec = GroupSpec(myname, required=required, doc=desc, extends=extends)
+        if myname == '*':
+            grp_spec = GroupSpec(required=required, doc=desc, extends=extends)
+        else:
+            grp_spec = GroupSpec(name=myname, required=required, doc=desc, extends=extends)
 
     for key, value in d.items():
         name = key
@@ -77,10 +116,10 @@ def build_group(name, d, ndtype=None):
             grp_spec.set_group(build_group(name, value))
 
     if neurodata_type is not None:
-        print('adding %s to all_specs' % neurodata_type, file=sys.stderr)
+        #print('adding %s to all_specs' % neurodata_type, file=sys.stderr)
         all_specs[neurodata_type] = grp_spec
-    else:
-        print('no neurodata_type found for %s' % myname, file=sys.stderr)
+    #else:
+    #    print('no neurodata_type found for %s' % myname, file=sys.stderr)
     return grp_spec
 
 def build_dataset(name, d):
@@ -91,6 +130,8 @@ def build_dataset(name, d):
     return dset_spec
 
 def add_attributes(parent_spec, attributes):
+    if parent_spec.neurodata_type == 'ElectricalSeries':
+        print(attributes, file=sys.stderr)
     for attr_name, attr_spec in attributes.items():
         parent_spec.set_attribute(build_attribute(attr_name, attr_spec))
 
@@ -112,7 +153,7 @@ def remap_keys(name, d):
     ret['const'] = d.get('const', None)
     ret['dtype'] = d.get('data_type', 'None')
 
-    ret['default'] = d.get('value', None)
+    ret['value'] = d.get('value', None)
     ret['doc'] = d.get('description', None)
     ret['dim'] = d.get('dimensions', None)
 
