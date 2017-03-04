@@ -10,7 +10,7 @@ from pynwb.io.spec import Spec, AttributeSpec, BaseStorageSpec, DatasetSpec, Gro
 
 ndmap = {
     "<timeseries_X>/*": 'EpochTimeSeries',
-    #"<epoch_X>/*": 'Epoch', # TODO: Figure out how to remove this spec's name
+    "<epoch_X>/*": 'Epoch',
     "<device_X>*": 'Device',
     "<specification_file>*": 'SpecFile',
     "<electrode_group_X>": 'ElectrodeGroup',
@@ -63,18 +63,16 @@ def build_group(name, d, ndtype=None):
         base = base[1:end] if end > 0 else base
         extends = all_specs[base]
 
-
     if myname[0] == '<':
         neurodata_type = ndmap.get(myname)
-        print('found neurodata_type %s' % neurodata_type, file=sys.stderr)
+        #print('found neurodata_type %s' % neurodata_type, file=sys.stderr)
         if neurodata_type is None:
             neurodata_type = ndtype
         else:
             myname = '*'
-        print('neurodata_type=%s, myname=%s' % (neurodata_type, myname), file=sys.stderr)
+        #print('neurodata_type=%s, myname=%s' % (neurodata_type, myname), file=sys.stderr)
     else:
         neurodata_type = ndtype
-    #TODO: figure out why Interfaces aren't picking up neurodata_type
     if 'attributes' in d:
         attributes = d.pop('attributes', None)
         if 'neurodata_type' in attributes:
@@ -97,6 +95,8 @@ def build_group(name, d, ndtype=None):
 
     for key, value in d.items():
         name = key
+        if name == 'autogen':
+            continue
         if name[0] == '_':
             #TODO: figure out how to deal with these reserved keys
             continue
@@ -108,7 +108,10 @@ def build_group(name, d, ndtype=None):
                 ndt = ndt[1:ndt.rfind('>')]
             else:
                 ndt = ndt[0:-1]
-            grp_spec.add_link(GroupSpec(neurodata_type=ndt))
+            link_name = key
+            if link_name[-1] == '/':
+                link_name = link_name[0:-1]
+            grp_spec.add_link(GroupSpec(neurodata_type=ndt), name=link_name)
 
         if key.rfind('/') == -1:
             grp_spec.set_dataset(build_dataset(name, value))
@@ -124,7 +127,8 @@ def build_group(name, d, ndtype=None):
 
 def build_dataset(name, d):
     kwargs = remap_keys(name, d)
-    dset_spec = DatasetSpec(kwargs.pop('dtype'), name=name, **kwargs)
+    #dset_spec = DatasetSpec(kwargs.pop('dtype'), name=myname, **kwargs)
+    dset_spec = DatasetSpec(kwargs.pop('dtype'), **kwargs)
     if 'attributes' in d:
         add_attributes(dset_spec, d['attributes'])
     return dset_spec
@@ -142,14 +146,18 @@ def build_attribute(name, d):
         myname = myname[:-1]
     if myname[-1] == '^':
         myname = myname[:-1]
+    if 'tags?' in name:
+        print('found tags?: myname=%s' % myname, file=sys.stderr)
     attr_spec = AttributeSpec(myname, kwargs.pop('dtype'), **kwargs)
     return attr_spec
 
 def remap_keys(name, d):
     ret = dict()
     ret['required'] = True
+    ret['name'] = name
     if name[-1] == '?':
         ret['required'] = False
+        ret['name'] = name[:-1]
     ret['const'] = d.get('const', None)
     ret['dtype'] = d.get('data_type', 'None')
 
