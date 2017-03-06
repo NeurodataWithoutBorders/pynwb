@@ -5,6 +5,7 @@ from pynwb.core import docval, getargs, popargs
 import json
 import copy
 import sys
+from functools import partialmethod
 
 NAME_WILDCARD = None
 
@@ -80,7 +81,7 @@ _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
-        {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required', 'default': True},
+        {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
         {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
         {'name': 'value', 'type': None, 'doc': 'a constant value for this attribute', 'default': None}
 ]
@@ -96,7 +97,29 @@ class AttributeSpec(Spec):
             self['type'] = dtype.__name__
         else:
             self['type'] = dtype
+        if value is not None:
+            self.pop('required', None)
+            self['value'] = value
 
+    @property
+    def name(self):
+        return self.get('name', None)
+
+    @property
+    def dtype(self):
+        return self.get('dtype', None)
+
+    @property
+    def value(self):
+        return self.get('value', None)
+
+    @property
+    def doc(self):
+        return self.get('doc', None)
+
+    @property
+    def required(self):
+        return self.get('required', None)
 
     def verify(self, value):
         """Verify value (from an object) against this attribute specification
@@ -135,6 +158,7 @@ class BaseStorageSpec(Spec):
         if not linkable:
             self['linkable'] = linkable
         if neurodata_type is not None:
+            self.pop('required', None)
             self['neurodata_type'] = neurodata_type
         extends = getargs('extends', kwargs)
         if extends is not None:
@@ -142,15 +166,19 @@ class BaseStorageSpec(Spec):
 
     @property
     def attributes(self):
-        return self['attributes']
+        return self.get('attributes', None)
 
     @property
     def linkable(self):
-        return self['linkable']
+        return self.get('linkable', None)
 
     @property
     def neurodata_type(self):
-        return self['neurodata_type']
+        return self.get('neurodata_type', None)
+
+    @property
+    def extends(self):
+        return self.get('extends', None)
 
     @docval(*copy.deepcopy(_attr_args))
     def add_attribute(self, **kwargs):
@@ -200,7 +228,7 @@ class BaseStorageSpec(Spec):
 _dset_args = [
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
-        {'name': 'dimensions', 'type': tuple, 'doc': 'the dimensions of this dataset', 'default': None},
+        {'name': 'shape', 'type': tuple, 'doc': 'the shape of this dataset', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
@@ -214,13 +242,15 @@ class DatasetSpec(BaseStorageSpec):
     @docval(*copy.deepcopy(_dset_args))
     def __init__(self, **kwargs):
         super(DatasetSpec, self).__init__(**kwargs)
-        dimensions, dtype = getargs('dimensions', 'dtype', kwargs)
-        self['dimensions'] = dimensions
-        self['type'] = dtype
+        shape, dtype = getargs('shape', 'dtype', kwargs)
+        if shape is not None:
+            self['shape'] = shape
+        if dtype is not None:
+            self['type'] = dtype
 
     @property
-    def dimensions(self):
-        return self['dimensions']
+    def shape(self):
+        return self['shape']
 
     @classmethod
     def __check_dim(cls, dim, data):
@@ -230,8 +260,8 @@ class DatasetSpec(BaseStorageSpec):
         # verify attributes
         errors = super(DatasetSpec, self).verify(dataset_builder)
         err = {'name': self['name'], 'type': 'dataset'}
-        if self.__check_dim(self['dimensions'], dataset_builder.data):
-            err['reason'] = 'incorrect dimensions'
+        if self.__check_dim(self['shape'], dataset_builder.data):
+            err['reason'] = 'incorrect shape'
         if 'reason' in err:
             errors.append(err)
         return errors
