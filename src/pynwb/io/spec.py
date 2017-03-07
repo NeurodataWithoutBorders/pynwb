@@ -289,6 +289,7 @@ _group_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
         {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'extends', 'type': BaseStorageSpec, 'doc': 'the NWB type this specification extends', 'default': None},
 ]
 class GroupSpec(BaseStorageSpec):
     """ Specification for groups
@@ -296,8 +297,8 @@ class GroupSpec(BaseStorageSpec):
 
     @docval(*copy.deepcopy(_group_args))
     def __init__(self, **kwargs):
+        groups, datasets, links = popargs('groups', 'datasets', 'links', kwargs)
         super(GroupSpec, self).__init__(**kwargs)
-        groups, datasets, links, neurodata_type = getargs('groups', 'datasets', 'links', 'neurodata_type', kwargs)
         self.__neurodata_types = dict()
         self.__groups = dict()
         for group in groups:
