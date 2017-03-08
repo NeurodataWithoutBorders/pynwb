@@ -7,7 +7,7 @@ __all__ = [
 import itertools as _itertools
 import posixpath as _posixpath
 import copy as _copy
-from collections import Iterable
+from collections import Iterable, Callable
 import numpy as np
 import h5py as _h5py
 
@@ -21,11 +21,14 @@ def set_attributes(obj, attributes):
     for key, value in attributes.items():
         if any(isinstance(value, t) for t in (set, list, tuple)):
             tmp = tuple(value)
-            if len(tmp):
+            if len(tmp) > 0:
                 if isinstance(tmp[0], str):
                     max_len = max(len(s) for s in tmp)
                     dt = '|S%d' % max_len
                     value = np.array(tmp, dtype=dt) 
+            else:
+                print('converting %s to an empty numpy array' % key)
+                value = np.array(value)
         obj.attrs[key] = value
 
 def write_group(parent, name, subgroups, datasets, attributes, links):
@@ -458,6 +461,7 @@ class DatasetBuilder(dict):
 
     @property
     def data(self):
+        '''The data stored in the dataset represented by this builder'''
         return self['data']
 
     #@data.setter
@@ -466,15 +470,25 @@ class DatasetBuilder(dict):
 
     @property
     def attributes(self):
+        '''The attributes on the dataset represented by this builder'''
         return self['attributes']
 
-    def set_attribute(self, name, value):
+    @docval({'name':'name', 'type': str, 'doc': 'the name of the attribute'},
+            {'name':'value', 'type': None, 'doc': 'the attribute value'})
+    def set_attribute(self, **kwargs):
+        name, value = getargs('name', 'value', kwargs)
         self['attributes'][name] = value
 
-    def add_iter_inspector(self, callable_func):
-        self._inspector = callable_func
+    @docval({'name':'func', 'type': Callable, 'doc': 'the name of the attribute'})
+    def add_iter_inspector(self, **kwargs):
+        '''Add a function to call on each element in the dataset, as it is written to disk.'''
+        func = getargs('func', kwargs)
+        self._inspector = func
 
-    def deep_update(self, dataset):
+    @docval({'name':'dataset', 'type': 'DatasetBuilder', 'doc': 'the DatasetBuilder to merge into this DatasetBuilder'})
+    def deep_update(self, **kwargs):
+        """Merge data and attributes from given DatasetBuilder into this DatasetBuilder"""
+        dataset = getargs('dataset', kwargs)
         if dataset.data:
             self['data'] = dataset.data #TODO: figure out if we want to add a check for overwrite
         self['attributes'].update(dataset.attributes)

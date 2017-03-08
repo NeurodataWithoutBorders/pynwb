@@ -37,7 +37,80 @@ from collections import Iterable
 from pynwb.core import docval, getargs, popargs, NWBContainer
 
 _default_conversion = 1.0
-_default_resolution = np.nan
+_default_resolution = float("nan")
+
+class Interface(NWBContainer):
+    """ Interfaces represent particular processing tasks and they publish
+        (ie, make available) specific types of data. Each is required
+        to supply a minimum of specifically named data, but all can store 
+        data beyond this minimum
+
+        Interfaces should be created through Module.create_interface().
+        They should not be created directly
+    """
+    __nwbfields__ = ("help",
+                     "neurodata_type",
+                     "source")
+
+    __neurodata_type = "Interface"
+
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Interface'})
+    def __init__(self, **kwargs):
+        if self.__class__ == Interface:
+            raise NotImplementedError("Interface cannot by instantiated directly")
+        source = getargs('source', kwargs)
+        super(Interface, self).__init__()
+        self.source = source
+
+    @property
+    def name(self):
+        if hasattr(self, '__name'):
+            return self.__name
+        else:
+            return self.__class__.__name__
+        return None
+
+    @property
+    def help(self):
+        if hasattr(self, '__help'):
+            return self.__help
+        return None
+
+class Module(NWBContainer):
+    """ Processing module. This is a container for one or more interfaces
+        that provide data at intermediate levels of analysis
+
+        Modules should be created through calls to NWB.create_module().
+        They should not be instantiated directly
+    """
+
+    __nwbfields__ = ('name',
+                     'description',
+                     'interfaces',
+                     'neurodata_type')
+
+    __neurodata_type = "Module"
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this processing module'})
+    def __init__(self, **kwargs):
+        name, description = getargs('name', 'description', kwargs)
+        super(Module, self).__init__()
+        self.__name = name
+        self.__interfaces = list()
+
+    @property
+    def interfaces(self):
+        return tuple(self.__interfaces)
+
+    @property
+    def name(self):
+        return self.__name
+
+    @docval({'name': 'interface', 'type': Interface, 'doc': 'the Interface to add to this Module'})
+    def add_interface(self, **kwargs):
+        self.__interfaces.append(interface)
+        interface.parent = self
 
 class TimeSeries(NWBContainer):
     """ Standard TimeSeries constructor
@@ -84,9 +157,9 @@ class TimeSeries(NWBContainer):
                                                    'acquisition data')},
             {'name': 'data', 'type': (list, np.ndarray, 'TimeSeries'), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
+            {'name': 'resolution', 'type': (str, float), 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             # Optional arguments:
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
+            {'name': 'conversion', 'type': (str, float), 'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': _default_conversion},
 
             ## time related data is optional, but one is required -- this will have to be enforced in the constructor
             {'name': 'timestamps', 'type': (list, np.ndarray, 'TimeSeries'), 'doc': 'Timestamps for samples stored in data', 'default': None},
@@ -177,9 +250,6 @@ class TimeSeries(NWBContainer):
     def time_unit(self):
         return self.__time_unit
 
-
-    # have special calls for those that are common to all time series
-    
     @docval({'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset'})
     def set_description(self, **kwargs):
         """ Convenience function to set the description field of the
@@ -193,311 +263,3 @@ class TimeSeries(NWBContainer):
             *TimeSeries*
         """
         self.comments = kwargs['comments']
-
-
-class Module(NWBContainer):
-    """ Processing module. This is a container for one or more interfaces
-        that provide data at intermediate levels of analysis
-
-        Modules should be created through calls to NWB.create_module().
-        They should not be instantiated directly
-    """
-    def __init__(self, name, nwb, spec):
-        self.name = name
-        self.nwb = nwb
-        self.spec = copy.deepcopy(spec)
-        # a place to store interfaces belonging to this module
-        self.ifaces = {}
-        # create module folder immediately, so it's available 
-        folder = self.nwb.file_pointer["processing"]
-        if name in folder:
-            nwb.fatal_error("Module '%s' already exists" % name)
-        self.mod_folder = folder.create_group(self.name)
-        self.serial_num = -1
-        # 
-        self.finalized = False
-
-    def full_path(self):
-        """ Returns HDF5 path of module
-
-            Arguments:
-                *none*
-
-            Returns:
-                (text) the HDF5 path to the module
-        """
-        return "processing/" + self.name
-
-    def __build_electrical_ts(self, data, electrode_indices, timestamps=None, start_rate=None, name='data'):
-        ts = _timeseries.ElectricalSeries(name, electrodes=electrode_indices)
-        ts.set_data(data)
-        if timestamps:
-            ts.set_timestamps(timestamps)
-        elif start_rate:
-            ts.set_time_by_rate(start_rate[0], start_rate[1])
-        return ts
-
-    def add_lfp(self, data, electrode_indices, timestamps=None, start_rate=None, name='data'):
-        ts = self.__build_electrical_ts(data, 
-                                        electrode_indices,
-                                        timestamps=timestamps,
-                                        start_rate=start_rate)
-        iface = _ephys.LFP(lfp_ts=ts)
-        return iface
-
-    def add_filtered_ephys(self, data, electrode_indices, timestamps=None, start_rate=None, name='data'):
-        ts = self.__build_electrical_ts(data, 
-                                        electrode_indices,
-                                        timestamps=timestamps,
-                                        start_rate=start_rate,
-                                        name=name)
-        iface = _ephys.FilteredEphys(ephys_ts=ts)
-        return iface
-
-        
-#    def create_interface(self, iface_type):
-#        """ Creates an interface within the module. 
-#            Each module can have multiple interfaces.
-#            Standard interface options are:
-#
-#                BehavioralEpochs -- general container for storing and
-#                publishing intervals (IntervalSeries)
-#
-#                BehavioralEvents -- general container for storing and
-#                publishing event series (TimeSeries)
-#
-#                BehavioralTimeSeries -- general container for storing and
-#                publishing time series (TimeSeries)
-#
-#                Clustering -- clustered spike data, whether from
-#                automatic clustering tools or as a result of manual
-#                sorting
-#
-#                ClusterWaveform -- mean event waveform of clustered data
-#
-#                CompassDirection -- publishes 1+ SpatialSeries storing
-#                direction in degrees (or radians) 
-#
-#                DfOverF -- publishes 1+ RoiResponseSeries showing
-#                dF/F in observed ROIs
-#
-#                EventDetection -- information about detected events
-#
-#                EventWaveform -- publishes 1+ SpikeEventSeries
-#                of extracellularly recorded spike events
-#
-#                EyeTracking -- publishes 1+ SpatialSeries storing 
-#                direction of gaze
-#
-#                FeatureExtraction -- salient features of events
-#
-#                FilteredEphys -- publishes 1+ ElectricalSeries storing
-#                data from digital filtering
-#
-#                Fluorescence -- publishes 1+ RoiResponseSeries showing
-#                fluorescence of observed ROIs
-#
-#                ImageSegmentation -- publishes groups of pixels that
-#                represent regions of interest in an image
-#
-#                LFP -- a special case of FilteredEphys, filtered and
-#                downsampled for LFP signal
-#
-#                MotionCorrection -- publishes image stacks whos frames
-#                have been corrected to account for motion
-#
-#                Position -- publishes 1+ SpatialSeries storing physical
-#                position. This can be along x, xy or xyz axes
-#
-#                PupilTracking -- publishes 1+ standard *TimeSeries* 
-#                that stores pupil size
-#
-#                UnitTimes -- published data about the time(s) spikes
-#                were detected in an observed unit
-#        """
-#        iface_class = getattr(sys.modules[__name__], iface_type, None)
-#        
-#        self.interfaces[name] = iface_class(if_spec)
-#
-#        if iface_type not in self.nwb.spec["Interface"]:
-#            self.nwb.fatal_error("unrecognized interface: " + iface_type)
-#        if_spec = self.create_interface_definition(iface_type)
-#        if iface_type == "ImageSegmentation":
-#            iface = ImageSegmentation(iface_type, self, if_spec)
-#        elif iface_type == "Clustering":
-#            iface = Clustering(iface_type, self, if_spec)
-#        elif iface_type == "ImagingRetinotopy":
-#            iface = ImagingRetinotopy(iface_type, self, if_spec)
-#        elif iface_type == "UnitTimes":
-#            iface = UnitTimes(iface_type, self, if_spec)
-#        elif iface_type == "MotionCorrection":
-#            iface = MotionCorrection(iface_type, self, if_spec)
-#        else:
-#            iface = Interface(iface_type, self, if_spec)
-#        self.ifaces[iface_type] = iface
-#        from . import nwb as nwblib
-#        iface.serial_num = nwblib.register_creation("Interface -- " + iface_type)
-#        return iface
-#
-#    # internal function
-#    # read spec to create time series definition. do it recursively 
-#    #   if time series are subclassed
-#    def create_interface_definition(self, if_type):
-#        super_spec = copy.deepcopy(self.nwb.spec["Interface"]["SuperInterface"])
-#        if_spec = self.nwb.spec["Interface"][if_type]
-#        from . import nwb as nwblib
-#        return nwblib.recursive_dictionary_merge(super_spec, if_spec)
-#
-#    def set_description(self, desc):
-#        """ Set description field in module
-#
-#            Arguments:
-#                *desc* (text) Description of module
-#
-#            Returns:
-#                *nothing*
-#        """
-#        self.set_value("description", desc)
-#
-#    def set_value(self, key, value, **attrs):
-#        """Adds a custom key-value pair (ie, dataset) to the root of 
-#           the module.
-#   
-#           Arguments:
-#               *key* (string) A unique identifier within the TimeSeries
-#
-#               *value* (any) The value associated with this key
-#
-#               *attrs* (dict) Dictionary of key-value pairs to be
-#               stored as attributes
-#   
-#           Returns:
-#               *nothing*
-#        """
-#        if self.finalized:
-#            self.nwb.fatal_error("Added value to module after finalization")
-#        self.spec[key] = copy.deepcopy(self.spec["[]"])
-#        dtype = self.spec[key]["_datatype"]
-#        name = "module " + self.name
-#        self.nwb.set_value_internal(key, value, self.spec, name, dtype, **attrs)
-#
-#    def finalize(self):
-#        """ Completes the module and writes changes to disk.
-#
-#            Arguments: 
-#                *none*
-#
-#            Returns:
-#                *nothing*
-#        """
-#        if self.finalized:
-#            return
-#        self.finalized = True
-#        # finalize interfaces
-#        iface_names = []
-#        for k, v in self.ifaces.items():
-#            v.finalize()
-#            iface_names.append(v.name)
-#        iface_names.sort()
-#        self.spec["_attributes"]["interfaces"]["_value"] = iface_names
-#        # write own data
-#        grp = self.nwb.file_pointer["processing/" + self.name]
-#        self.nwb.write_datasets(grp, "", self.spec)
-#        from . import nwb as nwblib
-#        nwblib.register_finalization(self.name, self.serial_num)
-
-class Interface(NWBContainer):
-    """ Interfaces represent particular processing tasks and they publish
-        (ie, make available) specific types of data. Each is required
-        to supply a minimum of specifically named data, but all can store 
-        data beyond this minimum
-
-        Interfaces should be created through Module.create_interface().
-        They should not be created directly
-    """
-    __nwbfields__ = ("help_statement",
-                     "neurodata_type",
-                     "source",
-                     "interface")
-
-    _neurodata_type = "Interface"
-
-    _interface = "Interface"
-
-    _help_statement = None
-
-    def __init__(self, source=None):
-        #Arguments:
-        #    *name* (text) name of interface (may be class name)
-        #    *module* (*Module*) Reference to parent module object that 
-        #       interface belongs to
-        #    *spec* (dict) dictionary structure defining module specification
-        #self.module = module
-        #self.name = name
-        #self.nwb = module.nwb
-        #self.spec = copy.deepcopy(spec)
-        ## timeseries that are added to interface directly
-        #self.defined_timeseries = {}
-        ## timeseries that exist elsewhere and are HDF5-linked
-        #self.linked_timeseries = {}
-        #if name in module.mod_folder:
-        #    self.nwb.fatal_error("Interface %s already exists in module %s" % (name, module.name))
-        #self.iface_folder = module.mod_folder.create_group(name)
-        #self.serial_num = -1
-        #self.finalized = False
-        self._source = source
-        self._timeseries = dict()
-
-    def full_path(self):
-        """ Returns HDF5 path to this interface
-
-            Arguments:
-                *none*
-
-            Returns:
-                (text) the HDF5 path to the interface
-        """
-        return "processing/" + self.module.name + "/" + self.name
-
-    def create_timeseries(self, name, ts_type="TimeSeries"):
-        ts_class = getattr(_timeseries, ts_type, None)
-        if not ts_class:
-            raise ValueError("%s is an invalid TimeSeries type" % ts_type)
-        self.timeseries[name] = ts_class(name)
-        return self._timeseries[name]
-
-    def add_timeseries(self, ts, name=None):
-        """ Add a previously-defined *TimeSeries* to the interface. It will
-            be added as an HDF5 link
-
-            Arguments:
-                *ts_name* (text) name of time series as it will appear in
-                the interface
-
-                *path* (text) path to the time series
-
-            Returns:
-                *nothing*
-        """
-        if name:
-            self._timeseries[name] = ts
-        else:
-            self._timeseries[ts.name] = ts
-
-    def get_timeseries(self):
-        return timeseries
-
-    def set_source(self, src):
-        """ Identify source(s) for the data provided in the module.
-            This can be one or more other modules, or time series
-            in acquisition or stimulus
-
-            Arguments:
-                *src* (text) Path to objects providing data that the
-                data here is based on
-
-            Returns:
-                *nothing*
-        """
-        self._source = src
-

@@ -37,7 +37,7 @@ class SpecCatalog(object):
 #        else:
 #            sep = '/'
 #        return "%s%s%s" % (get_spec(spec.parent), sep, spec['name']
-#    
+#
 
 class Spec(dict, metaclass=abc.ABCMeta):
     """ A base specification class
@@ -76,7 +76,7 @@ _attr_args = [
 class AttributeSpec(Spec):
     """ Specification for attributes
     """
-    
+
     @docval(*_attr_args)
     def __init__(self, **kwargs):
         name, dtype, doc, required, parent, required, value = getargs('name', 'dtype', 'doc', 'required', 'parent', 'required', 'value', kwargs)
@@ -85,7 +85,7 @@ class AttributeSpec(Spec):
             self['type'] = dtype.__name__
         else:
             self['type'] = dtype
-        
+
 
     def verify(self, value):
         """Verify value (from an object) against this attribute specification
@@ -94,7 +94,7 @@ class AttributeSpec(Spec):
         if any(t.__name__ == self['type'] for t in type(value).__mro__):
             err['name'] = self['name']
             err['type'] = 'attribute'
-            err['reason'] = 'incorrect type' 
+            err['reason'] = 'incorrect type'
         if err:
             return [err]
         else:
@@ -161,8 +161,8 @@ class BaseStorageSpec(Spec):
         errors = list()
         if isinstance(dset_builder, LinkBuilder):
             if not self['linkable']:
-                errors.append({'name': self['name'], 
-                               'type': 'dataset', 
+                errors.append({'name': self['name'],
+                               'type': 'dataset',
                                'reason': 'cannot be link'})
         for attr_spec in self['attributes']:
             attr = builder.get(attr_spec['name'])
@@ -171,10 +171,15 @@ class BaseStorageSpec(Spec):
                     err['name'] = "%s.%s" % (self['name'], err['name'])
                     errors.extend(err)
             else:
-                errors.append({'name': "%s.%s" % (self['name'], attr_spec['name']), 
-                               'type': 'attribute', 
+                errors.append({'name': "%s.%s" % (self['name'], attr_spec['name']),
+                               'type': 'attribute',
                                'reason': 'missing'})
         return errors
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute to the Spec for'})
+    def get_attribute_spec(self, **kwargs):
+        # TODO:
+        pass
 
 _dset_args = [
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
@@ -205,7 +210,6 @@ class DatasetSpec(BaseStorageSpec):
     def __check_dim(cls, dim, data):
         return True
 
-    
     def verify(self, dataset_builder):
         # verify attributes
         errors = super(DatasetSpec, self).verify(dataset_builder)
@@ -230,7 +234,7 @@ _group_args = [
 class GroupSpec(BaseStorageSpec):
     """ Specification for groups
     """
-    
+
     @docval(*copy.deepcopy(_group_args))
     def __init__(self, **kwargs):
         #s = 'GroupSpec.__int__ keys:'
@@ -243,11 +247,11 @@ class GroupSpec(BaseStorageSpec):
         self['groups'] = groups
         self['datasets'] = datasets
         self['links'] = links
-    
+
     @property
     def groups(self):
         return self['groups']
-    
+
     @property
     def datasets(self):
         return self['datasets']
@@ -266,7 +270,7 @@ class GroupSpec(BaseStorageSpec):
         #spec.set_parent(self)
         #self['groups'].append(spec)
         return spec
-    
+
     @docval(*copy.deepcopy(_dset_args))
     def add_dataset(self, **kwargs):
         """ Add a dataset to this group spec
@@ -304,7 +308,7 @@ class GroupSpec(BaseStorageSpec):
                     errors.append(error)
             else:
                 errors.append({'name': "%s/%s" % (self['name'], dset_spec['name']),
-                               'type': 'dataset', 
+                               'type': 'dataset',
                                'reason': 'missing'})
         # verify groups
         for group_spec in self['groups']:
@@ -314,7 +318,7 @@ class GroupSpec(BaseStorageSpec):
                     err['name'] = "%s/%s" % (self['name'], err['name'])
                     errors.append(error)
             else:
-                errors.append({'name': "%s/%s" % (self['name'], group_spec['name']), 
+                errors.append({'name': "%s/%s" % (self['name'], group_spec['name']),
                                'type': 'group',
                                'reason': 'missing'})
         return errors
@@ -324,3 +328,13 @@ class GroupSpec(BaseStorageSpec):
         for group_spec in self['groups']:
             builder.add_group(group_spec['name'], builder=group_spec.template())
         return builder
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset to the Spec for'})
+    def get_dataset_spec(self, **kwargs):
+        # TODO:
+        pass
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the group to the Spec for'})
+    def get_group_spec(self, **kwargs):
+        # TODO:
+        pass

@@ -1,5 +1,6 @@
-from pynwb.ui.file import NWBFile
-from pynwb.ui.timeseries import ElectricalSeries, SpatialSeries
+from pynwb import NWBFile
+from pynwb.ecephys import ElectricalSeries
+from pynwb.behavior import SpatialSeries
 from pynwb.io.write import HDF5Writer
 #from pynwb.ui.epoch import Epoch
 #from pynwb.ui.ephys import ElectrodeGroup

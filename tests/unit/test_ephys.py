@@ -19,7 +19,7 @@ class TestElectrodeGroupConstructor(unittest.TestCase):
 
     def test_impedance(self):
         self.assertEqual(self.eg.impedance, -1)
-        
+
     def test_name(self):
         self.assertEqual(self.eg.name, self.name)
 

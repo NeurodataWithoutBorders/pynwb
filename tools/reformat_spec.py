@@ -1,7 +1,8 @@
 import os
 import sys
 import json
-import yaml
+#import yaml
+from ruamel import yaml
 
 import pynwb
 from pynwb.io.spec import Spec, AttributeSpec, BaseStorageSpec, DatasetSpec, GroupSpec, SpecCatalog
@@ -10,6 +11,9 @@ def build_group(name, d):
     required = True
     myname = name
     if myname[-1] == '?':
+        required = False
+        myname = myname[:-1]
+    if myname[-1] == '^':
         required = False
         myname = myname[:-1]
     if myname[-1] == '/':
@@ -26,10 +30,10 @@ def build_group(name, d):
         nwb_type = None
         if 'neurodata_type' in attributes:
             nwb_type = attributes['neurodata_type']['value']
-        grp_spec = GroupSpec(name, required=required, doc=desc, nwb_type=nwb_type)
+        grp_spec = GroupSpec(myname, required=required, doc=desc, nwb_type=nwb_type)
         add_attributes(grp_spec, attributes)
     else:
-        grp_spec = GroupSpec(name, required=required, doc=desc)
+        grp_spec = GroupSpec(myname, required=required, doc=desc)
     for key, value in d.items():
         name = key
         if isinstance(value, str) or key == 'merge':
@@ -53,13 +57,18 @@ def add_attributes(parent_spec, attributes):
 
 def build_attribute(name, d):
     kwargs = remap_keys(name, d)
-    attr_spec = AttributeSpec(name, kwargs.pop('dtype'), **kwargs)
+    myname = name
+    if myname[-1] == '?':
+        myname = myname[:-1]
+    if myname[-1] == '^':
+        myname = myname[:-1]
+    attr_spec = AttributeSpec(myname, kwargs.pop('dtype'), **kwargs)
     return attr_spec
 
 def remap_keys(name, d):
     ret = dict()
     ret['required'] = True
-    if name == '?':
+    if name[-1] == '?':
         ret['required'] = False
     ret['const'] = d.get('const', None)
     ret['dtype'] = d.get('data_type', 'None')
@@ -98,7 +107,11 @@ def load_spec(spec):
     # /processing/
     # /stimulus/
     
-    root = GroupSpec(nwb_type='NWBFile')
+    #root = GroupSpec(nwb_type='NWBFile')
+    root = build_group('root', spec['/'])
+    #root.set_dataset(build_dataset('file_create_date', 
+
+
     acquisition = root.set_group(build_group('acquisition', spec['/acquisition/']))
     analysis = root.set_group(build_group('analysis', spec['/analysis/']))
     epochs = root.set_group(build_group('epochs', spec['/epochs/']))
@@ -112,27 +125,103 @@ def load_spec(spec):
     optophysiology = general.set_group(build_group('optophysiology?', spec['/general/optophysiology/?']))
 
     # load TimeSeries specs
-    ts_types = [
-        "<AbstractFeatureSeries>/",
-        "<AnnotationSeries>/",
-        "<CurrentClampSeries>/",
-        "<CurrentClampStimulusSeries>/",
+    ec_ephys = [
         "<ElectricalSeries>/",
-        "<IZeroClampSeries>/",
-        "<ImageMaskSeries>/",
-        "<ImageSeries>/",
-        "<IndexSeries>/",
-        "<IntervalSeries>/",
-        "<OpticalSeries>/",
-        "<OptogeneticSeries>/",
-        "<PatchClampSeries>/",
-        "<RoiResponseSeries>/",
-        "<SpatialSeries>/",
         "<SpikeEventSeries>/",
-        "<TimeSeries>/",
-        "<TwoPhotonSeries>/",
+        "ClusterWaveforms/",
+        "Clustering/",
+        "FeatureExtraction/",
+        "EventDetection/",
+        "EventWaveform/",
+        "FilteredEphys/",
+        "FeatureExtraction/",
+        "LFP/",
+    ]
+    ic_ephys = [
+        "<PatchClampSeries>/",
+        "<CurrentClampSeries>/",
+        "<IZeroClampSeries>/",
+        "<CurrentClampStimulusSeries>/",
         "<VoltageClampSeries>/",
         "<VoltageClampStimulusSeries>/"
+    ]
+    ophys = [
+        "<TwoPhotonSeries>/",
+        "DfOverF/",
+        "Fluorescence/",
+        "ImageSegmentation/",
+    ]
+    ogen = [
+        "<OptogeneticSeries>/",
+    ]
+    image = [
+        "<ImageSeries>/",
+        "<ImageMaskSeries>/",
+        "<OpticalSeries>/",
+        "<RoiResponseSeries>/",
+        "<IndexSeries>/",
+    ]
+    behavior = [
+        "<SpatialSeries>/",
+        "BehavioralEpochs/",
+        "BehavioralEvents/",
+        "BehavioralTimeSeries/",
+        "PupilTracking/",
+        "EyeTracking/",
+        "CompassDirection/",
+        "Position/",
+        "MotionCorrection/",
+    ]
+
+    unsure = [
+        "ImagingRetinotopy/",
+        "UnitTimes/",
+    ]
+
+    mod_types = [
+        "BehavioralEpochs/",
+        "BehavioralEvents/",
+        "BehavioralTimeSeries/",
+        "ClusterWaveforms/",
+        "Clustering/",
+        "CompassDirection/",
+        "DfOverF/",
+        "EventDetection/",
+        "EventWaveform/",
+        "EyeTracking/",
+        "FeatureExtraction/",
+        "FilteredEphys/",
+        "Fluorescence/",
+        "ImageSegmentation/",
+        "ImagingRetinotopy/",
+        "LFP/",
+        "MotionCorrection/",
+        "Position/",
+        "PupilTracking/",
+        "UnitTimes/",
+    ]
+
+    ts_types = [
+        "<AbstractFeatureSeries>/", 
+        "<AnnotationSeries>/",
+        "<CurrentClampSeries>/", #
+        "<CurrentClampStimulusSeries>/", #
+        "<ElectricalSeries>/", #
+        "<IZeroClampSeries>/", #
+        "<ImageMaskSeries>/", #
+        "<ImageSeries>/", #
+        "<IndexSeries>/", #
+        "<IntervalSeries>/",
+        "<OpticalSeries>/", #
+        "<OptogeneticSeries>/", #
+        "<PatchClampSeries>/",
+        "<RoiResponseSeries>/", #
+        "<SpatialSeries>/", #
+        "<SpikeEventSeries>/", #
+        "<TimeSeries>/", #
+        "<TwoPhotonSeries>/", #
+        "<VoltageClampSeries>/", #
+        "<VoltageClampStimulusSeries>/" #
     ]
     ts_specs = dict()
     while ts_types:
@@ -208,6 +297,7 @@ def load_spec(spec):
     ret = [root, iface]
     ret.extend(ts_specs.values())
     ret.extend(mod_specs.values())
+    ret = {'root': root, 'Interface': iface, 'modules': mod_specs, 'timeseries': ts_specs}
     return ret
 
 
@@ -216,11 +306,22 @@ def load_iface(spec):
     iface = build_group('*', spec['<Interface>/'])
     return iface
 
+def represent_str(self, data):
+    s = data.replace('"', '\\"')
+    return s
+    #return self.represent_scalar("", '"%s"' % s)
+        
 spec_path = sys.argv[1]
 with open(spec_path) as spec_in:
     nwb_spec = load_spec(json.load(spec_in))
     #nwb_spec = load_iface(json.load(spec_in))
 
+#def quoted_presenter(dumper, data):
+#    return dumper.represent_scalar('tag:yaml.org,2002:str', data, style='"')
+
+#yaml.add_representer(str, quoted_presenter)
+#yaml.add_representer(str, represent_str)
 ##print(json.dumps(nwb_spec, indent=4))
+#print(yaml.dump(json.loads(json.dumps(nwb_spec)), default_flow_style=False, default_style='"'))
 print(yaml.dump(json.loads(json.dumps(nwb_spec)), default_flow_style=False))
 
