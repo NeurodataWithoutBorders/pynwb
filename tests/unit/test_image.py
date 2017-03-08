@@ -9,20 +9,23 @@ import numpy as np
 class ImageSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        ts = ImageSeries('test_ts', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', np.nan, [np.nan], timestamps=list())
-        self.assertEqual(ts.name, 'test_ts')
+        iS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', np.nan, [np.nan], timestamps=list())
+        self.assertEqual(iS.name, 'test_iS')
+        pass
 
 class IndexSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        ts = IndexSeries('test_ts', 'a hypothetical source', list(), 'unit', 'timeseries_link', 'index_timeseries_path', timestamps=list())
-        self.assertEqual(ts.name, 'test_ts')
+        ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
+        iS = IndexSeries('test_iS', 'a hypothetical source', list(), 'unit', ts, 'index_timeseries_path', timestamps=list())
+        self.assertEqual(iS.name, 'test_iS')
 
 class ImageMaskSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        ts = ImageMaskSeries('test_ts', 'a hypothetical source', list(), 'unit', 'masked_imageseries', 'masked_imageseries_path', ['external_file'], [1, 2, 3], 'tiff', timestamps=list())
-        self.assertEqual(ts.name, 'test_ts')
+        iS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', np.nan, [np.nan], timestamps=list())
+        ims = ImageMaskSeries('test_ims', 'a hypothetical source', list(), 'unit', iS, 'masked_imageseries_path', ['external_file'], [1, 2, 3], 'tiff', timestamps=list())
+        self.assertEqual(ims.name, 'test_ims')
 
 class OpticalSeriesConstructor(unittest.TestCase):
 
@@ -33,6 +36,7 @@ class OpticalSeriesConstructor(unittest.TestCase):
 class RoiResponseSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', ['name1'], 'segmenttation_interface', 'segmenttation_interface_path', timestamps=list())
+        iS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', np.nan, [np.nan], timestamps=list())
+        ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', ['name1'], iS, 'segmenttation_interface_path', timestamps=list())
         self.assertEqual(ts.name, 'test_ts')
 
