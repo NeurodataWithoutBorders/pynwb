@@ -1,35 +1,35 @@
-# Copyright (c) 2015 Allen Institute, California Institute of Technology, 
-# New York University School of Medicine, the Howard Hughes Medical 
-# Institute, University of California, Berkeley, GE, the Kavli Foundation 
-# and the International Neuroinformatics Coordinating Facility. 
+# Copyright (c) 2015 Allen Institute, California Institute of Technology,
+# New York University School of Medicine, the Howard Hughes Medical
+# Institute, University of California, Berkeley, GE, the Kavli Foundation
+# and the International Neuroinformatics Coordinating Facility.
 # All rights reserved.
-#     
-# Redistribution and use in source and binary forms, with or without 
-# modification, are permitted provided that the following 
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following
 # conditions are met:
-#     
-# 1.  Redistributions of source code must retain the above copyright 
+#
+# 1.  Redistributions of source code must retain the above copyright
 #     notice, this list of conditions and the following disclaimer.
-#     
-# 2.  Redistributions in binary form must reproduce the above copyright 
-#     notice, this list of conditions and the following disclaimer in 
+#
+# 2.  Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in
 #     the documentation and/or other materials provided with the distribution.
-#     
-# 3.  Neither the name of the copyright holder nor the names of its 
-#     contributors may be used to endorse or promote products derived 
+#
+# 3.  Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived
 #     from this software without specific prior written permission.
-#     
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import numpy as np
 from collections import Iterable
@@ -42,7 +42,7 @@ _default_resolution = float("nan")
 class Interface(NWBContainer):
     """ Interfaces represent particular processing tasks and they publish
         (ie, make available) specific types of data. Each is required
-        to supply a minimum of specifically named data, but all can store 
+        to supply a minimum of specifically named data, but all can store
         data beyond this minimum
 
         Interfaces should be created through Module.create_interface().
@@ -109,13 +109,14 @@ class Module(NWBContainer):
 
     @docval({'name': 'interface', 'type': Interface, 'doc': 'the Interface to add to this Module'})
     def add_interface(self, **kwargs):
+        interface = getargs('interface', kwargs)
         self.__interfaces.append(interface)
         interface.parent = self
 
 class TimeSeries(NWBContainer):
     """ Standard TimeSeries constructor
 
-        All time series are created by calls to  NWB.create_timeseries(). 
+        All time series are created by calls to  NWB.create_timeseries().
         They should not not be instantiated directly
     """
         # if modality == "acquisition":
@@ -196,7 +197,7 @@ class TimeSeries(NWBContainer):
         timestamps = kwargs.get('timestamps')
         starting_time = kwargs.get('starting_time')
         rate = kwargs.get('rate')
-        if timestamps is not None: 
+        if timestamps is not None:
             self.fields['timestamps'] = timestamps
             self.timestamps_unit = 'Seconds'
             self.interval = 1
