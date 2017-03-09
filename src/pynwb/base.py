@@ -64,16 +64,18 @@ class Interface(NWBContainer):
 
     @property
     def name(self):
-        if hasattr(self, '__name'):
-            return self.__name
+        name_attr_name = '_%s__name' % str(self.__class__.__name__).lstrip('_')
+        if hasattr(self, name_attr_name):
+            return getattr(self, name_attr_name)
         else:
             return self.__class__.__name__
         return None
 
     @property
     def help(self):
-        if hasattr(self, '__help'):
-            return self.__help
+        help_attr_name = '_%s__help' % str(self.__class__.__name__).lstrip('_')
+        if hasattr(self, help_attr_name):
+            return getattr(self, help_attr_name)
         return None
 
 class Module(NWBContainer):
