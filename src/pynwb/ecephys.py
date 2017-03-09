@@ -258,8 +258,6 @@ class FeatureExtraction(Interface):
                 raise ValueError("incorrect dimensions: features must be a 3D array.")
         except:
             raise ValueError("incorrect dimensions: features must be a 3D array.")
-        print(features_shape)
-        print(len(event_times), len(electrodes), len(description))
         if features_shape[0] != len(event_times):
             raise ValueError("incorrect dimensions: features -  must have one value per event time. Got %d, expected %d" % (features_shape[0], len(event_times)))
         if features_shape[1] != len(electrodes):
