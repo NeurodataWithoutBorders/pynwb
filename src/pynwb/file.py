@@ -1,35 +1,35 @@
-# Copyright (c) 2015 Allen Institute, California Institute of Technology, 
-# New York University School of Medicine, the Howard Hughes Medical 
-# Institute, University of California, Berkeley, GE, the Kavli Foundation 
-# and the International Neuroinformatics Coordinating Facility. 
+# Copyright (c) 2015 Allen Institute, California Institute of Technology,
+# New York University School of Medicine, the Howard Hughes Medical
+# Institute, University of California, Berkeley, GE, the Kavli Foundation
+# and the International Neuroinformatics Coordinating Facility.
 # All rights reserved.
-#     
-# Redistribution and use in source and binary forms, with or without 
-# modification, are permitted provided that the following 
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following
 # conditions are met:
-#     
-# 1.  Redistributions of source code must retain the above copyright 
+#
+# 1.  Redistributions of source code must retain the above copyright
 #     notice, this list of conditions and the following disclaimer.
-#     
-# 2.  Redistributions in binary form must reproduce the above copyright 
-#     notice, this list of conditions and the following disclaimer in 
+#
+# 2.  Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in
 #     the documentation and/or other materials provided with the distribution.
-#     
-# 3.  Neither the name of the copyright holder nor the names of its 
-#     contributors may be used to endorse or promote products derived 
+#
+# 3.  Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived
 #     from this software without specific prior written permission.
-#     
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
+# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
+# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
+# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
+# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 import sys
 import os.path
@@ -52,32 +52,32 @@ from .core import docval, getargs, NWBContainer
 # VERS_MAJOR = 1
 # VERS_MINOR = 0
 # VERS_PATCH = 5
-# 
+#
 # __version__ = "%d.%d.%d" % (VERS_MAJOR, VERS_MINOR, VERS_PATCH)
 # FILE_VERSION_STR = "NWB-%s" % __version__
-# 
+#
 # def get_major_vers():
 #     return VERS_MAJOR
-# 
+#
 # def get_minor_vers():
 #     return VERS_MINOR
-# 
+#
 # def get_patch_vers():
 #     return VERS_PATCH
-# 
+#
 # def get_file_vers_string():
 #     return FILE_VERSION_STR
-# 
+#
 # def create_identifier(base_string):
-#     """ Creates an identifying string for the file, hopefully unique 
+#     """ Creates an identifying string for the file, hopefully unique
 #         in and between labs, based on the supplied base string, the NWB file
 #         version, and the time the file was created. The base string
 #         should contain the name of the lab, experimenter and project, or
 #         some other string that is unique to a given lab
 #     """
 #     return base_string + "; " + FILE_VERSION_STR + "; " + time.ctime()
-# 
-# 
+#
+#
 # # it is too easy to create an object and forget to finalize it
 # # keep track of when each object is created and finalized, and
 # #   provide a way to detect when finalization doesnt occur
@@ -199,8 +199,8 @@ class NWBFile(NWBContainer):
         """
         Creates a new Epoch object. Epochs are used to track intervals
         in an experiment, such as exposure to a certain type of stimuli
-        (an interval where orientation gratings are shown, or of 
-        sparse noise) or a different paradigm (a rat exploring an 
+        (an interval where orientation gratings are shown, or of
+        sparse noise) or a different paradigm (a rat exploring an
         enclosure versus sleeping between explorations)
         """
         name, start, stop, tags, description = getargs('name', 'start', 'stop', 'tags', 'description', kwargs)
@@ -235,7 +235,7 @@ class NWBFile(NWBContainer):
     def __get_epoch(self, epoch):
         if isinstance(epoch, Epoch):
             ep = epoch
-        elif isinstance(epoch, str): 
+        elif isinstance(epoch, str):
             ep = self.epochs.get(epoch)
             if not ep:
                 raise KeyError("Epoch '%s' not found" % epoch)
@@ -245,10 +245,10 @@ class NWBFile(NWBContainer):
 
     def __get_timeseries(self, timeseries):
         if isinstance(timeseries, TimeSeries):
-            ts = timeseries 
-        elif isinstance(timeseries, str): 
-            ts = self.__raw_data.get(timeseries, 
-                    self.__stimulus.get(timeseries, 
+            ts = timeseries
+        elif isinstance(timeseries, str):
+            ts = self.__raw_data.get(timeseries,
+                    self.__stimulus.get(timeseries,
                         self.__stimulus_template.get(timeseries, None)))
             if not ts:
                 raise KeyError("TimeSeries '%s' not found" % timeseries)
@@ -327,7 +327,7 @@ class NWBFile(NWBContainer):
             returns='the electrode group', rtype=ElectrodeGroup)
     #TODO: investigate bug with electrode_group and electrode_map
     def create_electrode_group(self, **kwargs):
-        """Add an electrode group (e.g. a probe, shank, tetrode). 
+        """Add an electrode group (e.g. a probe, shank, tetrode).
         """
         name, coord, desc, dev, loc, imp = getargs('name', 'coord', 'desc', 'dev', 'loc', 'imp', kwargs)
         elec_grp = ElectrodeGroup(name, coord, desc, dev, loc, imp=imp, parent=self)
@@ -361,7 +361,7 @@ class NWBFile(NWBContainer):
         """ Creates a Module object of the specified name. Interfaces can
             be created by the module and will be stored inside it
         """
-        name, description = get_args('name', 'description', kwargs)
+        name, description = getargs('name', 'description', kwargs)
         ret = Module(name, description)
         self.add_processing_module(ret)
         return ret
