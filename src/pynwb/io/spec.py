@@ -3,7 +3,7 @@ from itertools import chain
 from pynwb.core import docval, getargs, popargs
 
 import json
-import copy
+from copy import deepcopy
 import sys
 from functools import partialmethod
 
@@ -26,26 +26,15 @@ class SpecCatalog(object):
     def get_registered_types(cls):
         return tuple(cls.__specs.keys())
 
-#
-#{'groups': [
-#    {'name': '/',
-#     'attributes': [{'name': 'descriptions', ...} ... ]
-#
-
-#def get_path(spec):
-#    if spec.parent = None:
-#        return spec['name']
-#    else:
-#        if isinstance(spec, AttributeSpec):
-#            sep = '.'
-#        else:
-#            sep = '/'
-#        return "%s%s%s" % (get_spec(spec.parent), sep, spec['name']
-#
-
 class Spec(dict, metaclass=abc.ABCMeta):
     """ A base specification class
     """
+
+    __print_order = (
+        'name',
+        'doc',
+        'required'
+    )
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this attribute', 'default': None},
             {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
@@ -73,9 +62,16 @@ class Spec(dict, metaclass=abc.ABCMeta):
     def parent(self):
         return self._parent
 
-    #def set_parent(self, spec):
-    #    #self._parent = spec
-    #    pass
+#    @classmethod
+#    def __print_order(cls):
+#        return cls.__print_order_tuple
+#
+#    def items(self):
+#        print('type %s printing in order %s' % (str(self.__print_order()), type(self).__name__), file=sys.stderr)
+#        for key in self.__print_order():
+#            val = self.get(key, None)
+#            if val is not None:
+#                yield (key, val)
 
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
@@ -89,9 +85,17 @@ class AttributeSpec(Spec):
     """ Specification for attributes
     """
 
+    __print_order = (
+        'name',
+        'doc',
+        'required',
+        'dtype',
+        'value',
+    )
+
     @docval(*_attr_args)
     def __init__(self, **kwargs):
-        name, dtype, doc, required, parent, required, value = getargs('name', 'dtype', 'doc', 'required', 'parent', 'required', 'value', kwargs)
+        name, dtype, doc, required, parent, value = getargs('name', 'dtype', 'doc', 'required', 'parent', 'value', kwargs)
         super().__init__(name=name, doc=doc, required=required, parent=parent)
         if isinstance(dtype, type):
             self['type'] = dtype.__name__
@@ -140,29 +144,39 @@ _attrbl_args = [
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
-        {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'extends', 'type': 'BaseStorageSpec', 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
 ]
 class BaseStorageSpec(Spec):
     """ A specification for any object that can hold attributes.
     """
-    @docval(*copy.deepcopy(_attrbl_args))
+    __print_order = (
+        'name',
+        'neurodata_type_def',
+        'neurodata_type',
+        'doc',
+        'required',
+        'linkable',
+        'attributes'
+    )
+
+    @docval(*deepcopy(_attrbl_args))
     def __init__(self, **kwargs):
-        name, doc, parent, required, attributes, linkable, neurodata_type = getargs('name', 'doc', 'parent', 'required', 'attributes', 'linkable', 'neurodata_type', kwargs)
-        if name == NAME_WILDCARD and neurodata_type is None:
-            raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'neurodata_type'")
+        name, doc, parent, required, attributes, linkable, neurodata_type_def, neurodata_type = getargs('name', 'doc', 'parent', 'required', 'attributes', 'linkable', 'neurodata_type_def', 'neurodata_type', kwargs)
+        if name == NAME_WILDCARD and neurodata_type_def is None and neurodata_type is None:
+            raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'neurodata_type_def' and/or 'neurodata_type'")
         super().__init__(name=name, doc=doc, required=required, parent=parent)
         self.__attributes = dict()
         for attribute in attributes:
             self.set_attribute(attribute)
         if not linkable:
             self['linkable'] = linkable
-        if neurodata_type is not None:
+        if neurodata_type_def is not None:
             self.pop('required', None)
+            self['neurodata_type_def'] = neurodata_type_def
+        neurodata_type = getargs('neurodata_type', kwargs)
+        if neurodata_type is not None:
             self['neurodata_type'] = neurodata_type
-        extends = getargs('extends', kwargs)
-        if extends is not None:
-            self['extends'] = extends
 
     @property
     def attributes(self):
@@ -173,20 +187,20 @@ class BaseStorageSpec(Spec):
         return self.get('linkable', None)
 
     @property
-    def neurodata_type(self):
-        return self.get('neurodata_type', None)
+    def neurodata_type_def(self):
+        return self.get('neurodata_type_def', None)
 
     @property
-    def extends(self):
-        return self.get('extends', None)
+    def neurodata_type(self):
+        return self.get('neurodata_type', self.neurodata_type_def)
 
-    @docval(*copy.deepcopy(_attr_args))
+    @docval(*deepcopy(_attr_args))
     def add_attribute(self, **kwargs):
         """ Add an attribute to this object
         """
         name = kwargs.pop('name')
         if isinstance(name, AttributeSpec):
-            spec = copy.deepcopy(name)
+            spec = deepcopy(name)
         else:
             spec = AttributeSpec(name, **kwargs)
         #attr.set_parent(self)
@@ -233,13 +247,26 @@ _dset_args = [
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
-        {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
 ]
 class DatasetSpec(BaseStorageSpec):
     """ Specification for datasets
     """
 
-    @docval(*copy.deepcopy(_dset_args))
+    __print_order = (
+        'name',
+        'neurodata_type_def',
+        'neurodata_type',
+        'dtype',
+        'shape',
+        'doc',
+        'required',
+        'linkable',
+        'attributes'
+    )
+
+    @docval(*deepcopy(_dset_args))
     def __init__(self, **kwargs):
         super(DatasetSpec, self).__init__(**kwargs)
         shape, dtype = getargs('shape', 'dtype', kwargs)
@@ -266,18 +293,30 @@ class DatasetSpec(BaseStorageSpec):
             errors.append(err)
         return errors
 
+_link_args = [
+    {'name': 'target_type', 'type': str, 'doc': 'the specification for the dataset'},
+    {'name': 'doc', 'type': str, 'doc': 'a description about what this link represents', 'default': None},
+    {'name': 'name', 'type': str, 'doc': 'the name of this link', 'default': None}
+]
 class LinkSpec(Spec):
 
-    @docval({'name': 'target_spec', 'type': BaseStorageSpec, 'doc': 'the specification for the dataset'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this link', 'default': None})
+    @docval(*_link_args)
     def __init__(self, **kwargs):
-        spec, name = getargs('target_spec', 'name', kwargs)
-        super(LinkSpec, self).__init__(name)
-        self['target_spec'] = spec
+        target_type, name = popargs('target_type', 'name', kwargs)
+        super(LinkSpec, self).__init__(name, **kwargs)
+        self['target_type'] = target_type
 
     @property
     def neurodata_type(self):
-        return self['target_spec'].get('neurodata_type', None)
+        return self['target_type'].get('neurodata_type', None)
+
+_ndt_args = [
+    {'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata type to specify'},
+    {'name': 'name', 'type': str, 'doc': 'The name of this attribute', 'default': None},
+    {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
+    {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required', 'default': True},
+    {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None}
+]
 
 _group_args = [
         {'name': 'name', 'type': str, 'doc': 'the name of this group', 'default': None},
@@ -288,14 +327,26 @@ _group_args = [
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
-        {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'extends', 'type': BaseStorageSpec, 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification neurodata_type', 'default': None},
 ]
 class GroupSpec(BaseStorageSpec):
     """ Specification for groups
     """
 
-    @docval(*copy.deepcopy(_group_args))
+    __print_order = (
+        'name',
+        'neurodata_type_def',
+        'neurodata_type',
+        'doc',
+        'required',
+        'linkable',
+        'attributes'
+        'datasets',
+        'groups',
+    )
+
+    @docval(*deepcopy(_group_args))
     def __init__(self, **kwargs):
         groups, datasets, links = popargs('groups', 'datasets', 'links', kwargs)
         super(GroupSpec, self).__init__(**kwargs)
@@ -327,7 +378,7 @@ class GroupSpec(BaseStorageSpec):
     def links(self):
         return self['links']
 
-    @docval(*copy.deepcopy(_group_args))
+    @docval(*deepcopy(_group_args))
     def add_group(self, **kwargs):
         """ Add a group to this group spec
         """
@@ -336,7 +387,7 @@ class GroupSpec(BaseStorageSpec):
         self.set_group(spec)
         return spec
 
-    @docval({'name': 'spec', 'type': 'GroupSpec', 'doc': 'the specification for the subgroup'})
+    @docval({'name': 'spec', 'type': ('GroupSpec', 'NeurodataTypeSpec'), 'doc': 'the specification for the subgroup'})
     def set_group(self, **kwargs):
         spec = getargs('spec', kwargs)
         self.setdefault('groups', list()).append(spec)
@@ -353,7 +404,7 @@ class GroupSpec(BaseStorageSpec):
         name = getargs('name', kwargs)
         return self.__groups.get(name, self.__links.get(name))
 
-    @docval(*copy.deepcopy(_dset_args))
+    @docval(*deepcopy(_dset_args))
     def add_dataset(self, **kwargs):
         """ Add a dataset to this group spec
         """
@@ -379,15 +430,14 @@ class GroupSpec(BaseStorageSpec):
         name = getargs('name', kwargs)
         return self.__datasets.get(name, self.__links.get(name))
 
-    @docval({'name': 'target_spec', 'type': BaseStorageSpec, 'doc': 'the specification for the dataset'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this link', 'default': None})
+    @docval(*_link_args)
     def add_link(self, **kwargs):
-        target_spec = popargs('target_spec', kwargs)
-        spec = LinkSpec(target_spec, **kwargs)
+        target_type = popargs('target_type', kwargs)
+        spec = LinkSpec(target_type, **kwargs)
         self.set_link(spec)
         return spec
 
-    @docval({'name': 'spec', 'type': LinkSpec, 'doc': 'the specification for the object to link to'})
+    @docval({'name': 'spec', 'type': 'LinkSpec', 'doc': 'the specification for the object to link to'})
     def set_link(self, **kwargs):
         spec = getargs('spec', kwargs)
         self.setdefault('links', list()).append(spec)
@@ -431,5 +481,3 @@ class GroupSpec(BaseStorageSpec):
         for group_spec in self['groups']:
             builder.add_group(group_spec['name'], builder=group_spec.template())
         return builder
-
-
