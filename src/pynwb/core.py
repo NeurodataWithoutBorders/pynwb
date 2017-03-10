@@ -1,9 +1,10 @@
 import collections as _collections
 import itertools as _itertools
 import copy as _copy
-import abc 
+import abc
 
 def __type_okay(value, argtype, allow_none=False):
+    #TODO:  modify to allow int8-int64 when 'int' is specified
     if value is None:
         return allow_none
     if isinstance(argtype, str):
