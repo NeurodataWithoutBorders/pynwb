@@ -25,7 +25,7 @@ def set_attributes(obj, attributes):
                 if isinstance(tmp[0], str):
                     max_len = max(len(s) for s in tmp)
                     dt = '|S%d' % max_len
-                    value = np.array(tmp, dtype=dt) 
+                    value = np.array(tmp, dtype=dt)
             else:
                 print('converting %s to an empty numpy array' % key)
                 value = np.array(value)
@@ -59,7 +59,7 @@ def write_group(parent, name, subgroups, datasets, attributes, links):
 
     set_attributes(group, attributes)
 
-    return {_posixpath.join(name, k) if k[0] != '/' else k: v 
+    return {_posixpath.join(name, k) if k[0] != '/' else k: v
             for k, v in links_to_create.items()}
 
 
@@ -99,7 +99,7 @@ def write_dataset(parent, name, data, attributes, function=None):
     else:
         dset = __scalar_fill__(parent, name, data)
     set_attributes(dset, attributes)
-    
+
 def __extend_dataset__(dset):
     new_shape = list(dset.shape)
     new_shape[0] = 2*new_shape[0]
@@ -140,7 +140,7 @@ def __iter_fill__(parent, name, data, chunk_size, function=None):
     else:
         def proc_chunk(chunk):
             dset[idx:idx+len(chunk),] = chunk
-            
+
     while more_data:
         try:
             next_chunk = next(chunks)
@@ -165,7 +165,7 @@ def __list_fill__(parent, name, data):
         dset.resize(new_shape)
     dset[:] = data
     return dset
-    
+
 
 class GroupBuilder(dict):
     __link = 'links'
@@ -199,7 +199,7 @@ class GroupBuilder(dict):
     @property
     def groups(self):
         return super().__getitem__(GroupBuilder.__group)
-    
+
     @property
     def datasets(self):
         return super().__getitem__(GroupBuilder.__dataset)
@@ -234,7 +234,7 @@ class GroupBuilder(dict):
         builder = DatasetBuilder(**kwargs)
         self.set_dataset(name, builder)
         return builder
-    
+
     @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
             {'name':'builder', 'type': 'DatasetBuilder', 'doc': 'the GroupBuilder that represents this dataset'})
     def set_dataset(self, **kwargs):
@@ -279,7 +279,7 @@ class GroupBuilder(dict):
         builder = LinkBuilder(path)
         self.set_link(name, builder)
         return builder
-    
+
     @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
             {'name':'file_path', 'type': str, 'doc': 'the file path of this external link'},
             {'name':'path', 'type': str, 'doc': 'the absolute path within the external HDF5 file'},
@@ -292,7 +292,7 @@ class GroupBuilder(dict):
         builder = ExternalLinkBuilder(path, file_path)
         self.set_link(name, builder)
         return builder
-    
+
     @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
             {'name':'builder', 'type': 'LinkBuilder', 'doc': 'the LinkBuilder that represents this link'})
     def set_link(self, **kwargs):
@@ -301,7 +301,7 @@ class GroupBuilder(dict):
         """
         name, builder = getargs('name', 'builder', kwargs)
         self.__set_builder(name, builder, GroupBuilder.__link)
-    
+
     @docval({'name':'name', 'type': str, 'doc': 'the name of the attribute'},
             {'name':'value', 'type': None, 'doc': 'the attribute value'})
     def set_attribute(self, **kwargs):
@@ -342,11 +342,11 @@ class GroupBuilder(dict):
             self.set_link(name, link)
 
     def is_empty(self):
-        """Returns true if there are no datasets, attributes, links or 
+        """Returns true if there are no datasets, attributes, links or
            subgroups that contain datasets, attributes or links. False otherwise.
         """
-        if (len(super().__getitem__(GroupBuilder.__dataset)) or 
-            len(super().__getitem__(GroupBuilder.__attribute)) or 
+        if (len(super().__getitem__(GroupBuilder.__dataset)) or
+            len(super().__getitem__(GroupBuilder.__attribute)) or
             len(super().__getitem__(GroupBuilder.__link))):
             return False
         elif len(super().__getitem__(GroupBuilder.__group)):
@@ -382,7 +382,7 @@ class GroupBuilder(dict):
             if key_ar[0] in super().__getitem__(GroupBuilder.__group):
                 return super().__getitem__(GroupBuilder.__group)[key_ar[0]].__get_rec(key_ar[1:])
         raise KeyError(key_ar[0])
-                
+
 
     def __setitem__(self, args, val):
         raise NotImplementedError('__setitem__')
@@ -394,26 +394,26 @@ class GroupBuilder(dict):
         """Like dict.items, but iterates over key-value pairs in groups,
            datasets, attributes, and links sub-dictionaries.
         """
-        return _itertools.chain(super().__getitem__(GroupBuilder.__group).items(), 
-                                super().__getitem__(GroupBuilder.__dataset).items(), 
+        return _itertools.chain(super().__getitem__(GroupBuilder.__group).items(),
+                                super().__getitem__(GroupBuilder.__dataset).items(),
                                 super().__getitem__(GroupBuilder.__attribute).items(),
                                 super().__getitem__(GroupBuilder.__link).items())
 
     def keys(self):
-        """Like dict.keys, but iterates over keys in groups, datasets, 
+        """Like dict.keys, but iterates over keys in groups, datasets,
            attributes, and links sub-dictionaries.
         """
-        return _itertools.chain(super().__getitem__(GroupBuilder.__group).keys(), 
-                                super().__getitem__(GroupBuilder.__dataset).keys(), 
+        return _itertools.chain(super().__getitem__(GroupBuilder.__group).keys(),
+                                super().__getitem__(GroupBuilder.__dataset).keys(),
                                 super().__getitem__(GroupBuilder.__attribute).keys(),
                                 super().__getitem__(GroupBuilder.__link).keys())
 
     def values(self):
-        """Like dict.values, but iterates over values in groups, datasets, 
+        """Like dict.values, but iterates over values in groups, datasets,
            attributes, and links sub-dictionaries.
         """
-        return _itertools.chain(super().__getitem__(GroupBuilder.__group).values(), 
-                                super().__getitem__(GroupBuilder.__dataset).values(), 
+        return _itertools.chain(super().__getitem__(GroupBuilder.__group).values(),
+                                super().__getitem__(GroupBuilder.__dataset).values(),
                                 super().__getitem__(GroupBuilder.__attribute).values(),
                                 super().__getitem__(GroupBuilder.__link).values())
 
@@ -453,7 +453,7 @@ class DatasetBuilder(dict):
         '''
         super(DatasetBuilder, self).__init__()
         data, dtype, attributes, maxshape, chunks = getargs('data', 'dtype', 'attributes', 'maxshape', 'chunks', kwargs)
-        self['data'] = data   
+        self['data'] = data
         self['attributes'] = _copy.deepcopy(attributes)
         self.chunks = chunks
         self.maxshape = maxshape
@@ -492,7 +492,7 @@ class DatasetBuilder(dict):
         if dataset.data:
             self['data'] = dataset.data #TODO: figure out if we want to add a check for overwrite
         self['attributes'].update(dataset.attributes)
-    
+
     # XXX: leave this here for now, we might want it later
     #def __setitem__(self, args, val):
     #    raise NotImplementedError('__setitem__')
