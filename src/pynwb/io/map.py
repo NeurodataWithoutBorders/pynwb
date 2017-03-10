@@ -86,6 +86,7 @@ class AttrMap(object):
     def get_spec(self, attr_name):
         return self._attr_map[attr_name]
 
+
     @docval({"name": "attr_name", "type": str, "doc": "The name of the object to map"},
             {"name": "spec", "type": (Condition, Spec), "doc": "The condition specifying the location within this map, or the spec"})
     def map_attr(self, **kwargs):
@@ -107,13 +108,16 @@ class AttrMap(object):
             ret = self._spec.name
         return ret
 
+    def add_transformation(self, **kwarg):
+        pass
+
     @docval({"name": "attr_name", "type": str, "doc": "the name of the HDF5 attribute"},
             {"name": "attr_val", "type": None, "doc": "the value of the HDF5 attribute"})
     def get_attribute_h5attr(self, **kwargs):
         ''' Get the Python object attribute name and value given an HDF5 attribute name and value
         '''
         h5attr_name, h5attr_val = get_args('attr_name', 'attr_val', kwargs)
-        attribute_name = self.get_attribute(self._spec.get_attribute_spec(h5attr_name))
+        attribute_name = self.get_attribute(self._spec.get_attribute(h5attr_name))
         # do something to figure out the value of the attribute
         attribute_value = h5attr_val
         return attribute_name, attribute_value
@@ -124,7 +128,7 @@ class AttrMap(object):
         ''' Get the Python object attribute name and value given an HDF5 dataset name and value
         '''
         h5dset_name, h5dset_val = get_args('dset_name', 'dset_val', kwargs)
-        attribute_name = self.get_attribute(self._spec.get_attribute_dataset(h5dset_name))
+        attribute_name = self.get_attribute(self._spec.get_dataset(h5dset_name))
         # do something to figure out the value of the attribute
         attribute_value = h5dset_val
         return attribute_name, attribute_value
@@ -162,7 +166,7 @@ class AttrMap(object):
                 name_ar = name[1:].split('/')
                 if len(name_ar) == 3:
                     return ImagingPlane
-                elif len(name_ar) == 4
+                elif len(name_ar) == 4:
                     return OpticalChannel
         return None
 
