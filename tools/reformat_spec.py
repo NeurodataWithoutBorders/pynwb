@@ -21,7 +21,25 @@ ndmap = {
     "<unit_N>/+": 'SpikeUnit',
     #"<image_name>/+": , # TODO: Figure out how to move this to a link to an ImagingPlane neurodata_type
     "<roi_name>/*": 'ROI',
-    "<image_plane>/*": 'SegmentedImagingPlane',
+    "<image_plane>/*": 'PlaneSegmentation',
+}
+
+metadata_links = {
+    'electrode_idx': 'ElectrodeGroup',
+    'imaging_plane': 'ImagingPlane',
+    'site': 'OptogeneticStimulusSite',
+    'electrode_name': 'IntracellularElectrode',
+}
+
+metadata_links_doc = {
+    'electrode_idx': 'link to ElectrodeGroup group that generated this TimeSeries data',
+    'imaging_plane': 'link to ImagingPlane group from which this TimeSeries data was generated',
+    'site': 'link to OptogeneticStimulusSite group that describes the site to which this stimulus was applied',
+    'electrode_name': 'link to IntracellularElectrode group that describes th electrode that was used to apply or record this data',
+}
+metadata_links_rename = {
+    'electrode_idx': 'electrode_group',
+    'electrode_name': 'electrode',
 }
 
 all_specs = dict()
@@ -58,10 +76,14 @@ def build_group(name, d, ndtype=None):
     extends = None
     if 'merge' in d:
         merge = d.pop('merge')
+        print('Found merge directive for %s' % name, file=sys.stderr)
         base = merge[0]
         end = base.rfind('>')
         base = base[1:end] if end > 0 else base
-        extends = all_specs[base]
+        #extends = all_specs[base]
+        extends = base
+        if len(d) == 0:
+            print('%s - spec empty after popping merge' %  name, file=sys.stderr)
 
     if myname[0] == '<':
         neurodata_type = ndmap.get(myname)
@@ -83,15 +105,15 @@ def build_group(name, d, ndtype=None):
         if extends is not None:
             if neurodata_type is None:
                 neurodata_type = myname
-        grp_spec = build_group_helper(name=myname, required=required, doc=desc, neurodata_type=neurodata_type, extends=extends)
+        grp_spec = build_group_helper(name=myname, required=required, doc=desc, neurodata_type_def=neurodata_type, neurodata_type=extends)
         add_attributes(grp_spec, attributes)
     elif neurodata_type is not None:
-        grp_spec = build_group_helper(name=myname, required=required, doc=desc, neurodata_type=neurodata_type, extends=extends)
+        grp_spec = build_group_helper(name=myname, required=required, doc=desc, neurodata_type_def=neurodata_type, neurodata_type=extends)
     else:
         if myname == '*':
-            grp_spec = GroupSpec(required=required, doc=desc, extends=extends)
+            grp_spec = GroupSpec(required=required, doc=desc, neurodata_type=extends)
         else:
-            grp_spec = GroupSpec(name=myname, required=required, doc=desc, extends=extends)
+            grp_spec = GroupSpec(name=myname, required=required, doc=desc, neurodata_type=extends)
 
     for key, value in d.items():
         name = key
@@ -102,7 +124,13 @@ def build_group(name, d, ndtype=None):
             continue
         if isinstance(value, str):
             continue
-        if 'link' in value:
+
+        if name == 'include':
+            ndt = next(iter(value.keys()))
+            ndt = ndt[1:ndt.rfind('>')]
+            #grp_spec.include_neurodata_group(ndt)
+            grp_spec.add_group(neurodata_type=ndt)
+        elif 'link' in value:
             ndt = value['link']['target_type']
             if ndt[0] == '<':
                 ndt = ndt[1:ndt.rfind('>')]
@@ -111,12 +139,29 @@ def build_group(name, d, ndtype=None):
             link_name = key
             if link_name[-1] == '/':
                 link_name = link_name[0:-1]
-            grp_spec.add_link(GroupSpec(neurodata_type=ndt), name=link_name)
-
-        if key.rfind('/') == -1:
-            grp_spec.set_dataset(build_dataset(name, value))
+            #grp_spec.include_neurodata_link(ndt, name=link_name)
+            grp_spec.add_link(ndt, name=link_name)
+        elif 'merge' in value:
+            ndt = value['merge'][0]
+            ndt = ndt[1:ndt.rfind('>')]
+            if key[0] == '<':
+                #grp_spec.include_neurodata_group(ndt)
+                grp_spec.add_group(neurodata_type=ndt)
+            else:
+                group_name = key
+                if group_name[-1] == '/':
+                    group_name = group_name[0:-1]
+                grp_spec.add_group(neurodata_type=ndt, name=group_name)
+        elif name in metadata_links:
+            ndt = metadata_links[name]
+            value.get('description', None)
+            doc = metadata_links_doc[name]
+            grp_spec.add_link(ndt, name=metadata_links_rename.get(name, name), doc=doc)
         else:
-            grp_spec.set_group(build_group(name, value))
+            if key.rfind('/') == -1: # forward-slash not found
+                grp_spec.set_dataset(build_dataset(name, value))
+            else:
+                grp_spec.set_group(build_group(name, value))
 
     if neurodata_type is not None:
         #print('adding %s to all_specs' % neurodata_type, file=sys.stderr)
@@ -141,13 +186,7 @@ def add_attributes(parent_spec, attributes):
 
 def build_attribute(name, d):
     kwargs = remap_keys(name, d)
-    myname = name
-    if myname[-1] == '?':
-        myname = myname[:-1]
-    if myname[-1] == '^':
-        myname = myname[:-1]
-    if 'tags?' in name:
-        print('found tags?: myname=%s' % myname, file=sys.stderr)
+    myname = kwargs['name']
     attr_spec = AttributeSpec(myname, kwargs.pop('dtype'), **kwargs)
     return attr_spec
 
@@ -158,10 +197,14 @@ def remap_keys(name, d):
     if name[-1] == '?':
         ret['required'] = False
         ret['name'] = name[:-1]
+    elif name[-1] == '^':
+        ret['name'] = name[:-1]
     ret['const'] = d.get('const', None)
     ret['dtype'] = d.get('data_type', 'None')
 
     ret['value'] = d.get('value', None)
+    if isinstance(ret['value'], list) and len(ret['value']) == 1:
+        ret['value'] = ret['value'][0]
     ret['doc'] = d.get('description', None)
     ret['dim'] = d.get('dimensions', None)
 
@@ -197,7 +240,6 @@ def load_spec(spec):
 
     #root = GroupSpec(neurodata_type='NWBFile')
     root = build_group('root', spec['/'], 'NWBFile')
-    #root.set_dataset(build_dataset('file_create_date',
 
 
     acquisition = build_group('acquisition', spec['/acquisition/'])
