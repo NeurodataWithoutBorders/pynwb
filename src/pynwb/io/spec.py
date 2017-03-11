@@ -1,6 +1,6 @@
 import abc
 from itertools import chain
-from pynwb.core import docval, getargs, popargs
+from pynwb.core import docval, getargs, popargs, get_docval
 
 import json
 from copy import deepcopy
@@ -13,18 +13,53 @@ class SpecCatalog(object):
     __specs = dict()
 
     @classmethod
-    def register_spec(cls, obj_type, spec):
+    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
+            {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'})
+    def register_spec(cls, **kwargs):
+        '''
+        Associate a specified object type with an HDF5 specification
+        '''
+        obj_type, spec = getargs('obj_type', 'spec', kwargs)
         type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
+        if type_name in cls.__specs:
+            raise ValueError("'%s' - cannot overwrite existing specification" % type_name)
         cls.__specs[type_name] = spec
 
     @classmethod
-    def get_spec(cls, obj_type):
+    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
+            returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
+    def get_spec(cls, **kwargs):
+        '''
+        Get the Spec object for the given type
+        '''
+        obj_type = getargs('obj_type', kwargs)
         type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
         return cls.__specs.get(type_name, None)
 
     @classmethod
     def get_registered_types(cls):
+        '''
+        Return all registered specifications
+        '''
         return tuple(cls.__specs.keys())
+
+    @classmethod
+    @docval({'name': 'spec', 'type': 'Spec', 'doc': 'the Spec object to register'})
+    def auto_register(cls, **kwargs):
+        '''
+        Register this specification and all sub-specification using neurodata_type as object type name
+        '''
+        spec = getargs('spec', kwargs)
+        ndt = spec.neurodata_type_def
+        if ndt is not None:
+            SpecCatalog.register_spec(ndt, spec)
+        for dataset_spec in spec.datasets:
+            dset_ndt = dataset_spec.neurodata_type_def
+            if dset_ndt is not None:
+                SpecCatalog.register_spec(dset_ndt, dataset_spec)
+        for group_spec in spec.groups:
+            cls.auto_register(group_spec)
+
 
 class Spec(dict, metaclass=abc.ABCMeta):
     """ A base specification class
@@ -56,9 +91,33 @@ class Spec(dict, metaclass=abc.ABCMeta):
     def parent(self):
         return self._parent
 
+    @classmethod
+    def build_const_args(cls, spec_dict):
+        ret = deepcopy(spec_dict)
+        if 'doc' not in ret:
+            identifer = None
+            if 'name' in ret:
+                identifier = "name '%s'" % ret['name']
+            elif 'neurodata_type_def' in ret:
+                identifier = "neurodata_type_def '%s'" % ret['neurodata_type_def']
+            elif 'neurodata_type' in ret:
+                identifier = "neurodata_type '%s'" % ret['neurodata_type']
+            raise ValueError("doc missing in spec with %s" % identifier)
+        return ret
+
+    @classmethod
+    def build_spec(cls, spec_dict):
+        kwargs = cls.build_const_args(spec_dict)
+        try:
+            args = [kwargs.pop(x['name']) for x in get_docval(cls.__init__) if 'default' not in x]
+        except KeyError as e:
+            raise KeyError("'%s' not found in %s" % (e.args[0], str(spec_dict)))
+        return cls(*args, **kwargs)
+
+
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
-        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
+        {'name': 'type', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
         {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
@@ -70,7 +129,7 @@ class AttributeSpec(Spec):
 
     @docval(*_attr_args)
     def __init__(self, **kwargs):
-        name, dtype, doc, required, parent, value = getargs('name', 'dtype', 'doc', 'required', 'parent', 'value', kwargs)
+        name, dtype, doc, required, parent, value = getargs('name', 'type', 'doc', 'required', 'parent', 'value', kwargs)
         super().__init__(doc, name=name, required=required, parent=parent)
         if isinstance(dtype, type):
             self['type'] = dtype.__name__
@@ -86,7 +145,7 @@ class AttributeSpec(Spec):
 
     @property
     def dtype(self):
-        return self.get('dtype', None)
+        return self.get('type', None)
 
     @property
     def value(self):
@@ -145,7 +204,7 @@ class BaseStorageSpec(Spec):
 
     @property
     def attributes(self):
-        return self.get('attributes', None)
+        return tuple(self.get('attributes', tuple()))
 
     @property
     def linkable(self):
@@ -201,9 +260,16 @@ class BaseStorageSpec(Spec):
                                'reason': 'missing'})
         return errors
 
+    @classmethod
+    def build_const_args(cls, spec_dict):
+        ret = super(BaseStorageSpec, cls).build_const_args(spec_dict)
+        if 'attributes' in ret:
+            ret['attributes'] = [AttributeSpec.build_spec(sub_spec) for sub_spec in ret['attributes']]
+        return ret
+
 _dataset_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
+        {'name': 'type', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
         {'name': 'shape', 'type': tuple, 'doc': 'the shape of this dataset', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
@@ -218,7 +284,7 @@ class DatasetSpec(BaseStorageSpec):
 
     @docval(*deepcopy(_dataset_args))
     def __init__(self, **kwargs):
-        doc, shape, dtype = popargs('doc', 'shape', 'dtype', kwargs)
+        doc, shape, dtype = popargs('doc', 'shape', 'type', kwargs)
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if shape is not None:
             self['shape'] = shape
@@ -298,15 +364,15 @@ class GroupSpec(BaseStorageSpec):
 
     @property
     def groups(self):
-        return self['groups']
+        return tuple(self.get('groups', tuple()))
 
     @property
     def datasets(self):
-        return self['datasets']
+        return tuple(self.get('datasets', tuple()))
 
     @property
     def links(self):
-        return self['links']
+        return tuple(self.get('links', tuple()))
 
     @docval(*deepcopy(_group_args))
     def add_group(self, **kwargs):
@@ -406,8 +472,13 @@ class GroupSpec(BaseStorageSpec):
                                'reason': 'missing'})
         return errors
 
-    def template(self):
-        builder = GroupBuilder()
-        for group_spec in self['groups']:
-            builder.add_group(group_spec['name'], builder=group_spec.template())
-        return builder
+    @classmethod
+    def build_const_args(cls, spec_dict):
+        ret = super(GroupSpec, cls).build_const_args(spec_dict)
+        if 'datasets' in ret:
+            ret['datasets'] = list(map(DatasetSpec.build_spec, ret['datasets']))
+        if 'groups' in ret:
+            ret['groups'] = list(map(GroupSpec.build_spec, ret['groups']))
+        if 'links' in ret:
+            ret['links'] = list(map(LinkSpec.build_spec, ret['links']))
+        return ret
