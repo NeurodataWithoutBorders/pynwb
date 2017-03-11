@@ -103,21 +103,38 @@ def __sort_args(validator):
     return list(_itertools.chain(pos,kw))
 
 docval_attr_name = 'docval'
+__docval_args_loc = 'args'
 
+# TODO: write unit tests for get_docval* functions
 def get_docval(func):
     '''get_docval(func)
-    Get a copy of docval arguments for a function'''
-    return tuple(getattr(func, docval_attr_name, tuple()))
+    Get a copy of docval arguments for a function
+    '''
+    func_docval = getattr(func, docval_attr_name, None)
+    if func_docval:
+        return tuple(func_docval[__docval_args_loc])
+    else:
+        return tuple()
 
 def get_docval_args(func):
     '''get_docval_args(func)
-    Like get_docval, but return only positional arguments'''
-    return tuple(a for a in getattr(func, docval_attr_name, tuple()) if 'default' not in a)
+    Like get_docval, but return only positional arguments
+    '''
+    func_docval = getattr(func, docval_attr_name, None)
+    if func_docval:
+        return tuple(a for a in func_docval[__docval_args_loc] if 'default' not in a)
+    else:
+        return tuple()
 
 def get_docval_kwargs(func):
     '''get_docval_kwargs(func)
-    Like get_docval, but return only keyword arguments'''
-    return tuple(a for a in getattr(func, docval_attr_name, tuple()) if 'default' in a)
+    Like get_docval, but return only keyword arguments
+    '''
+    func_docval = getattr(func, docval_attr_name, None)
+    if func_docval:
+        return tuple(a for a in func_docval[__docval_args_loc] if 'default' in a)
+    else:
+        return tuple()
 
 def docval(*validator, **options):
     '''A decorator for documenting and enforcing type for instance method arguments.
@@ -157,7 +174,7 @@ def docval(*validator, **options):
     val_copy = __sort_args(_copy.deepcopy(validator))
     def dec(func):
         _docval = _copy.copy(options)
-        _docval['args'] = val_copy
+        _docval[__docval_args_loc] = val_copy
         def func_call(*args, **kwargs):
             self = args[0]
             parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type)
