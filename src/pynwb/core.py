@@ -3,13 +3,22 @@ import itertools as _itertools
 import copy as _copy
 import abc
 
+import numpy as np
+
 def __type_okay(value, argtype, allow_none=False):
-    #TODO:  modify to allow int8-int64 when 'int' is specified
     if value is None:
         return allow_none
     if isinstance(argtype, str):
+        if argtype is 'int':
+            return __is_int(value)
+        elif argtype is 'float':
+            return __is_float(value)
         return argtype in [cls.__name__ for cls in value.__class__.__mro__]
     elif isinstance(argtype, type):
+        if argtype is int:
+            return __is_int(value)
+        elif argtype is float:
+            return __is_float(value)
         return isinstance(value, argtype)
     elif isinstance(argtype, tuple) or isinstance(argtype, list):
         return any(__type_okay(value, i) for i in argtype)
@@ -17,6 +26,12 @@ def __type_okay(value, argtype, allow_none=False):
         return True
     else:
         raise ValueError("argtype must be a type, a str, a list, a tuple, or None")
+
+def __is_int(value):
+    return any(isinstance(value, i) for i in (np.int8, np.int16, np.int32, np.int64))
+
+def __is_float(value):
+    return any(isinstance(value, i) for i in (np.float16, np.float32, np.float64, np.float128))
 
 def __format_type(argtype):
     if isinstance(argtype, str):
@@ -66,7 +81,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True):
             # check to make sure all positional
             # arguments were passed
             if argsi >= len(args):
-                errors.append("missing argument '%s'" % argname) 
+                errors.append("missing argument '%s'" % argname)
             else:
                 ret[argname] = args[argsi]
                 if enforce_type:
@@ -89,59 +104,41 @@ def __sort_args(validator):
 
 docval_attr_name = 'docval'
 
-#class Arg(object):
-#
-#    def __init__(self, *args):
-#        '''
-#        '''
-#        self._name = args[0]
-#        self._argtype = args[1]
-#        self._doc = args[2]
-#        if len(args) == 4:
-#            self._optional = True
-#            self._default = args[3]
-#
-#    @property
-#    def name(self):
-#        return self._name
-#
-#    @property
-#    def argtype(self):
-#        return self._argtype
-#
-#    @property
-#    def doc(self):
-#        return self._doc
-#
-#    @property
-#    def default(self):
-#        return self._default
-#
-#    @property
-#    def optional(self):
-#        return self._optional
-#    
+def get_docval(func):
+    '''get_docval(func)
+    Get a copy of docval arguments for a function'''
+    return tuple(getattr(func, docval_attr_name, tuple()))
+
+def get_docval_args(func):
+    '''get_docval_args(func)
+    Like get_docval, but return only positional arguments'''
+    return tuple(a for a in getattr(func, docval_attr_name, tuple()) if 'default' not in a)
+
+def get_docval_kwargs(func):
+    '''get_docval_kwargs(func)
+    Like get_docval, but return only keyword arguments'''
+    return tuple(a for a in getattr(func, docval_attr_name, tuple()) if 'default' in a)
 
 def docval(*validator, **options):
     '''A decorator for documenting and enforcing type for instance method arguments.
 
     This decorator takes a list of dictionaries that specify the method parameters. These
-    dictionaries are used for enforcing type and building a Sphinx docstring. 
-    
-    The first arguments are dictionaries that specify the positional 
+    dictionaries are used for enforcing type and building a Sphinx docstring.
+
+    The first arguments are dictionaries that specify the positional
     arguments and keyword arguments of the decorated function. These dictionaries
-    must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a 
+    must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a
     positional argument. To define a keyword argument, specify a default value
-    using the key ``'default'``. 
+    using the key ``'default'``.
 
     The decorated method must take ``self`` and ``**kwargs`` as arguments.
 
-    When using this decorator, the functions :py:func:`~pynwb.core.getargs` and 
-    :py:func:`~pynwb.core.popargs` can be used for easily extracting arguments from 
+    When using this decorator, the functions :py:func:`~pynwb.core.getargs` and
+    :py:func:`~pynwb.core.popargs` can be used for easily extracting arguments from
     kwargs.
 
     The following code example demonstrates the use of this decorator:
-    
+
     .. code-block:: python
 
        @docval({'name': 'arg1':,   'type': str,           'doc': 'this is the first positional argument'},
@@ -179,8 +176,7 @@ def docval(*validator, **options):
     return dec
 
 def __sphinxdoc(func, validator):
-    '''Generate a Spinxy docstring
-    '''
+    '''Generate a Spinxy docstring'''
     def to_str(argtype):
         if isinstance(argtype, type):
             return argtype.__name__
@@ -194,7 +190,7 @@ def __sphinxdoc(func, validator):
             fmt['type'] = " or ".join(map(to_str, arg['type']))
         else:
             fmt['type'] = to_str(arg['type'])
-        
+
         tmpl = (":param {name}: {doc}\n"
                 ":type  {name}: {type}")
         return tmpl.format(**fmt)
@@ -204,8 +200,8 @@ def __sphinxdoc(func, validator):
             return "%s=%s" % (argval['name'], str(argval['default']))
         else:
             return argval['name']
-    
-    sig =  "%s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator))) 
+
+    sig =  "%s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator)))
     if func.__doc__:
         sig += "%s\n\n" % func.__doc__
     sig += "\n".join(map(__sphinx_arg, validator))
@@ -239,9 +235,9 @@ def popargs(*argnames):
 
 class ExtenderMeta(abc.ABCMeta):
     """A metaclass that will extend the base class initialization
-       routine by executing additional functions defined in 
+       routine by executing additional functions defined in
        classes that use this metaclass
-        
+
        In general, this class should only be used by core developers.
     """
 
@@ -276,14 +272,14 @@ class ExtenderMeta(abc.ABCMeta):
 
 class NWBContainer(metaclass=ExtenderMeta):
     '''The base class to any NWB types.
-    
+
     The purpose of this class is to provide a mechanism for representing hierarchical
     relationships in neurodata.
     '''
 
 
     __nwbfields__ = tuple()
-    
+
     @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
@@ -300,7 +296,7 @@ class NWBContainer(metaclass=ExtenderMeta):
         '''The source of this Container e.g. file name or table
         '''
         return self.__container_source
-    
+
     @property
     def fields(self):
         return self.__fields
@@ -314,26 +310,26 @@ class NWBContainer(metaclass=ExtenderMeta):
         '''The parent NWBContainer of this NWBContainer
         '''
         return self.__parent
-    
+
     @parent.setter
     def parent(self, parent_container):
         if self.__parent:
             self.__parent.__subcontainers.remove(self)
         self.__parent = parent_container
         parent_container.__subcontainers.append(self)
-  
+
     @staticmethod
     def __getter(nwbfield):
         def _func(self):
             return self.fields.get(nwbfield)
         return _func
-    
+
     @staticmethod
     def __setter(nwbfield):
         def _func(self, val):
             self.fields[nwbfield] = val
         return _func
-    
+
     @ExtenderMeta.pre_init
     def __gather_nwbfields(cls, name, bases, classdict):
         '''
@@ -353,8 +349,8 @@ class NWBContainer(metaclass=ExtenderMeta):
 
 class frozendict(_collections.Mapping):
     '''An immutable dict
-    
-    This will be useful for getter of dicts that we don't want to support 
+
+    This will be useful for getter of dicts that we don't want to support
     '''
     def __init__(self, somedict):
         self._dict = somedict   # make a copy
