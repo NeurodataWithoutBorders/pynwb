@@ -1,12 +1,16 @@
-from .base import TimeSeries
+from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import docval, popargs, NWBContainer
+
+import numpy as np
+from collections import Iterable
+
 
 class OptogeneticSeries(TimeSeries):
     '''
     Optogenetic stimulus. The data[] field is in unit of watts.
     '''
 
-    __nwbfields__ = ('site')
+    __nwbfields__ = ('site',)
 
     _ancestry = "TimeSeries,OptogeneticSeries"
     _help = "Optogenetic stimulus."

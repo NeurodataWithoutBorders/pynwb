@@ -18,6 +18,7 @@ class AnnotationSeries(TimeSeries):
     '''
 
     _ancestry = "TimeSeries,AnnotationSeries"
+    _help = "Time-stamped annotations about an experiment."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
@@ -58,7 +59,9 @@ class AbstractFeatureSeries(TimeSeries):
     They should not not be instantiated directly
     """
     __nwbfields__ = ('feature_units', 'features')
+
     _ancestry = "TimeSeries,AbstractFeatureSeries"
+    _help = "Features of an applied stimulus. This is useful when storing the raw stimulus is impractical."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
@@ -95,6 +98,18 @@ class AbstractFeatureSeries(TimeSeries):
         self.data.append(features)
 
 class IntervalSeries(TimeSeries):
+    """
+    Stores intervals of data. The timestamps field stores the beginning and end of intervals. The
+    data field stores whether the interval just started (>0 value) or ended (<0 value). Different interval
+    types can be represented in the same series by using multiple key values (eg, 1 for feature A, 2
+    for feature B, 3 for feature C, etc). The field data stores an 8-bit integer. This is largely an alias
+    of a standard TimeSeries but that is identifiable as representing time intervals in a machinereadable
+    way.
+    """
+    __nwbfields__ = ()
+
+    _ancestry = "TimeSeries,IntervalSeries"
+    _help = "Stores the start and stop times for events."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
@@ -127,6 +142,11 @@ class IntervalSeries(TimeSeries):
         self.__interval_data.append(-1)
 
 class UnitTimes(Interface):
+    """
+    Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group contains a group
+    for each unit. The name of the group should match the value in the source module, if that is
+    possible/relevant (e.g., name of ROIs from Segmentation module).
+    """
 
     iface_type = "UnitTimes"
 

@@ -1,9 +1,20 @@
 import unittest
 
-from pynwb.ecephys import *
+from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, ElectrodeGroup, EventDetection, EventWaveform, Clustering, ClusterWaveform, LFP, FilteredEphys, FeatureExtraction
 
-class TestElectrodeGroupConstructor(unittest.TestCase):
+class ElectricalSeriesConstructor(unittest.TestCase):
+    def test_init(self):
+        eS = ElectricalSeries('test_eS', 'a hypothetical source', list(), list(), timestamps=list())
+        self.assertEqual(eS.name, 'test_eS')
+        self.assertEqual(eS.source, 'a hypothetical source')
 
+class SpikeEventSeriesConstructor(unittest.TestCase):
+    def test_init(self):
+        sES = SpikeEventSeries('test_sES', 'a hypothetical source', list(), list(), timestamps=list())
+        self.assertEqual(sES.name, 'test_sES')
+        self.assertEqual(sES.source, 'a hypothetical source')
+
+class ElectrodeGroupConstructor(unittest.TestCase):
     def setUp(self):
         #print(ElectrodeGroup.__init__.docval)
         self.name = 'my_group'
@@ -34,3 +45,32 @@ class TestElectrodeGroupConstructor(unittest.TestCase):
 
     def test_location(self):
         self.assertEqual(self.eg.location, self.loc)
+
+class EventDetectionConstructor(unittest.TestCase):
+    def test_init(self):
+        pass
+
+class EventWaveformConstructor(unittest.TestCase):
+    def test_init(self):
+        pass
+
+class ClusteringConstructor(unittest.TestCase):
+    def test_init(self):
+        pass
+
+class ClusterWaveformConstructor(unittest.TestCase):
+    def test_init(self):
+        pass
+
+class LFPConstructor(unittest.TestCase):
+    def test_init(self):
+        pass
+
+class FilteredEphysConstructor(unittest.TestCase):
+    def test_init(self):
+        pass
+
+class FeatureExtractionConstructor(unittest.TestCase):
+    def test_init(self):
+        pass
+

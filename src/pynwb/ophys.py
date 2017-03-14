@@ -1,6 +1,12 @@
+from .base import TimeSeries, _default_resolution, _default_conversion
+
 from .image import ImageSeries
 from .core import docval, getargs, popargs, NWBContainer
 from .base import Interface
+
+from collections import Iterable
+import numpy as np
+
 
 class TwoPhotonSeries(ImageSeries):
     '''

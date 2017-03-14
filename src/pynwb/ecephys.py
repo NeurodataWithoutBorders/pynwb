@@ -5,6 +5,11 @@ import numpy as np
 from collections import Iterable
 
 class ElectricalSeries(TimeSeries):
+    """
+    Stores acquired voltage data from extracellular recordings. The data field of an ElectricalSeries
+    is an int or float array storing data in Volts. TimeSeries::data array structure: [num times] [num
+    channels] (or [num_times] for single electrode).
+    """
 
     __nwbfields__ = ('electrodes',)
 
@@ -42,9 +47,19 @@ class ElectricalSeries(TimeSeries):
 
 
 class SpikeEventSeries(ElectricalSeries):
+    """
+    Stores "snapshots" of spike events (i.e., threshold crossings) in data. This may also be raw data,
+    as reported by ephys hardware. If so, the TimeSeries::description field should describing how
+    events were detected. All SpikeEventSeries should reside in a module (under EventWaveform
+    interface) even if the spikes were reported and stored by hardware. All events span the same
+    recording channels and store snapshots of equal duration. TimeSeries::data array structure:
+    [num events] [num channels] [num samples] (or [num events] [num samples] for single
+    electrode).
+    """
+
+    __nwbfields__ = ()
 
     __ancestry = "TimeSeries,ElectricalSeries,SpikeSeries"
-
     __help = "Snapshots of spike events from data."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -124,7 +139,8 @@ class EventDetection(Interface):
     #    self.event_time.append(time)
 
 class EventWaveform(Interface):
-    """Spike data for spike events detected in raw data
+    """
+    Spike data for spike events detected in raw data
     stored in this NWBFile, or events detect at acquisition
     """
     __nwbfields__ = ('data',)
@@ -141,9 +157,10 @@ class EventWaveform(Interface):
 
 
 class Clustering(Interface):
-    """Specifies cluster event times and cluster
-       metric for maximum ratio of waveform peak to
-       RMS on any channel in cluster.
+    """
+    Specifies cluster event times and cluster
+    metric for maximum ratio of waveform peak to
+    RMS on any channel in cluster.
     """
     __nwbfields__  = ('cluster_times',
                       'cluster_ids',
@@ -177,8 +194,9 @@ class Clustering(Interface):
 
 
 class ClusterWaveform(Interface):
-    """Describe cluster waveforms by mean and standard deviation
-       for at each sample.
+    """
+    Describe cluster waveforms by mean and standard deviation
+    for at each sample.
     """
     __nwbfields__ = ('clustering',
                      'filtering',
@@ -263,3 +281,4 @@ class FeatureExtraction(Interface):
     #def add_event_feature(self, time, features):
     #    self._features.append(features)
     #    self._event_times.append(time)
+

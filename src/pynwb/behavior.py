@@ -1,13 +1,23 @@
-from .core import docval, getargs 
+from .core import docval, popargs 
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution
 
 import numpy as np
 from collections import Iterable
 
 class SpatialSeries(TimeSeries):
+    """
+    Direction, e.g., of gaze or travel, or position. The TimeSeries::data field is a 2D array storing
+    position or direction relative to some reference frame. Array structure: [num measurements]
+    [num dimensions]. Each SpatialSeries has a text dataset reference_frame that indicates the
+    zero-position, or the zero-axes for direction. For example, if representing gaze direction,
+    "straight-ahead" might be a specific pixel on the monitor, or some other point in space. For
+    position data, the 0,0 point might be the top-left corner of an enclosure, as viewed from the
+    tracking camera. The unit of data will indicate how to interpret SpatialSeries values.
+    """
+
+    __nwbfields__ = ('reference_frame',)
 
     _ancestry = "TimeSeries,SpatialSeries"
-    
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -15,6 +25,7 @@ class SpatialSeries(TimeSeries):
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
             {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
 
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
@@ -34,7 +45,7 @@ class SpatialSeries(TimeSeries):
         """
         Create a SpatialSeries TimeSeries dataset
         """
-        name, source, data, reference_frame = getargs('name', 'source', 'data', 'reference_frame', kwargs)
+        name, source, data, reference_frame = popargs('name', 'source', 'data', 'reference_frame', kwargs)
         super(SpatialSeries, self).__init__(name, source, data, 'meters', **kwargs)
         self.reference_frame = reference_frame
 
@@ -135,4 +146,3 @@ class MotionCorrection(Interface):
                 corrected.finalize()
         self.spec[name]["_attributes"]["links"]["_value"] = links
 
-########################################################################
