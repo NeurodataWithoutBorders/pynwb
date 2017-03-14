@@ -1,7 +1,7 @@
 from pynwb.core import NWBContainer
 
 from pynwb.epoch import Epoch, EpochTimeSeries
-from pynwb.ecephys import ElectricalSeries, ElectrodeGroup, Clustering
+from pynwb.ecephys import ElectricalSeries, ElectrodeGroup, Clustering, FeatureExtraction
 from pynwb.behavior import SpatialSeries
 from pynwb.misc import AbstractFeatureSeries
 
@@ -422,9 +422,10 @@ class ModuleHDF5Renderer(HDF5ContainerRenderer):
     def module(container):
         builder = GroupBuilder()
         iface_renderer = InterfaceHDF5Renderer()
-        for name, interface in container.interfaces.items():
+        for interface in container.interfaces:
             interface_builder = iface_renderer.process(interface)
-            builder.add_group(interface.iface_type, interface_builder)
+            # builder.add_group(interface.iface_type, interface_builder)
+            builder.set_group(interface.name, interface_builder)   # TODO Check if add_group or set_group should be used
         return builder
 
 
@@ -449,6 +450,16 @@ class InterfaceHDF5Renderer(HDF5ContainerRenderer):
         #TODO: verify this works after finishing Clustering interface
         builder.add_dataset('num', container.num)
         builder.add_dataset('times', container.times)
+        return builder
+
+    @HDF5ContainerRenderer.procedure(FeatureExtraction)
+    def feature_extraction(container):
+        builder = GroupBuilder()
+        builder.add_dataset('features', container.features)
+        builder.add_dataset('times', container.event_times)
+        builder.add_dataset('description', container.description)
+        idx = [container.parent.parent.get_electrode_group_idx(e) for e in container.electrodes]
+        builder.add_dataset('electrode_idx', idx)
         return builder
 
 class EpochHDF5Renderer(HDF5ContainerRenderer):
