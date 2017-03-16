@@ -20,6 +20,22 @@ class TypeMap(object):
     def get_registered_types(cls):
         return tuple(cls.__maps.keys())
 
+    @classmethod
+    def build(cls, container):
+        attr_map = cls.get_map(container)
+        if attr_map is None:
+            raise ValueError('No AttrMap found for container of type %s' % str(container.__class__.__name__))
+        else:
+            return attr_map.build(container)
+
+    @classmethod
+    def get_h5object_name(cls, container):
+        attr_map = cls.get_map(container)
+        if attr_map is None:
+            raise ValueError('No AttrMap found for container of type %s' % str(container.__class__.__name__))
+        else:
+            return attr_map.get_h5object_name(container)
+
 class Condition(object):
     def __init__(self, key, value, spec_type=None, condition=None):
         self._key = key
@@ -86,30 +102,87 @@ class AttrMap(object):
     def get_spec(self, attr_name):
         return self._attr_map[attr_name]
 
+    def build(self, container):
+        if isinstance(spec, DatasetSpec):
+            builder = DatasetBuilder()
+        else:
+            builder = GroupBuilder()
+        # keep track of which specs we've built something for
+        seen = {self.spec: builder}
 
-    @docval({"name": "attr_name", "type": str, "doc": "The name of the object to map"},
-            {"name": "spec", "type": (Condition, Spec), "doc": "The condition specifying the location within this map, or the spec"})
+        attrs = deque(container.nwb_fields)
+        while attrs:
+            tmp_builder = builder
+            attr_name = attrs.pop()
+            attr_value = getattr(container, attr_name)
+            attr_spec = self.get_spec(attr_name)
+            if attr_spec is None:
+                continue
+            tmp_builder = seen.get(attr_spec.parent, None)
+            if tmp_builder is not None:
+                sub_builder = self.__process_spec(tmp_builder, attr_spec, attr_value)
+                if sub_builder is not None:
+                    seen[attr_spec] = sub_builder
+                #child_attributes.append(attr_name)
+            else:
+                attrs.appendleft(attr_name)
+
+        return builder
+
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the parent builder object to build on'},
+            {'name': 'spec', 'type': Spec, 'doc': 'the specification to use for building'},
+            {'name': 'value', 'type': None, 'doc': 'the value to add to builder using spec'})
+    def __process_spec(self, **kwargs):
+        builder, spec, value = getargs('builder', 'spec', 'value', kwargs)
+        sub_builder = None
+        if isinstance(value, NWBContainer):
+            rendered_obj = TypeMap.build(value)
+            name = TypeMap.get_h5object_name(value)
+            if isinstance(spec, LinkSpec):
+                sub_builder = builder.add_link(name, rendered_obj)
+            elif isinstance(spec, DatasetSpec):
+                sub_builder = builder.add_dataset(name, rendered_obj)
+            else:
+                sub_builder = builder.add_group(name, rendered_obj)
+        else:
+            if isinstance(spec, AttributeSpec):
+                builder.add_attribute(spec.name, value)
+            elif isinstance(spec, DatasetSpec):
+                sub_builder = builder.add_dataset(spec.name, value)
+            elif isinstance(spec, GroupSpec):
+                #TODO: this assumes that value is a NWBContainer or a list of NWBContainers
+                # This is where spec.name comes from -- Containers have a name value
+                group_name = spec.name
+                if any(isinstance(value, t) for t in (list, tuple)):
+                    values = value
+                elif isinstance(value, dict):
+                    values = value.values()
+                else:
+                    msg = ("received %s, expected NWBContainer - 'value' "
+                           "must be an NWBContainer a list/tuple/dict of "
+                           "NWBContainers if 'spec' is a GroupSpec")
+                    raise ValueError(msg % value.__class__.__name__)
+                for container in attrs:
+                    self.__process_spec(builder, spec, container)
+        return sub_builder
+
+
+    @docval({"name": "attr_name", "type": str, "doc": "the name of the object to map"},
+            {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
     def map_attr(self, **kwargs):
         """Map an attribute to spec. Use this to override default
            behavior
         """
         attr_name, spec = getargs()
         tmp = spec
-        if isinstance(spec, Condition):
-            tmp = spec.find(self._spec)
-            if not tmp:
-                raise KeyError(str(spec))
         self._attr_map[attr_name] = tmp
         self._spec_map[tmp] = attr_name
 
-    def get_group_name(self, container):
+    def get_h5object_name(self, container):
         ret = container.name
         if self._spec.name != '*':
             ret = self._spec.name
         return ret
-
-    def add_transformation(self, **kwarg):
-        pass
 
     @docval({"name": "attr_name", "type": str, "doc": "the name of the HDF5 attribute"},
             {"name": "attr_val", "type": None, "doc": "the value of the HDF5 attribute"})
@@ -169,5 +242,21 @@ class AttrMap(object):
                 elif len(name_ar) == 4:
                     return OpticalChannel
         return None
+
+class TimeSeriesMap(AttrMap):
+
+    def __init__(self, spec):
+        super(TimeSeriesMap, self).__init__(spec):
+        data_spec = self.spec.get_dataset('data')
+        self.map_attr('unit', data_spec.get_attribute('unit'))
+        self.map_attr('resolution', data_spec.get_attribute('resolution'))
+        self.map_attr('conversion', data_spec.get_attribute('conversion'))
+        timestamps_spec = self.spec.get_dataset('timestamps')
+        self.map_attr('timestamps_unit', timestamps_spec.get_attribute('unit'))
+        self.map_attr('interval', timestamps_spec.get_attribute('interval'))
+        startingtime_spec = self.spec.get_dataset('starting_time')
+        self.map_attr('rate_unit', startingtime_spec.get_attribute('unit'))
+        self.map_attr('rate', startingtime_spec.get_attribute('rate'))
+
 
 
