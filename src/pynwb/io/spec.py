@@ -1,6 +1,7 @@
 import abc
 from itertools import chain
 from pynwb.core import docval, getargs, popargs, get_docval
+from .map import TypeMap
 
 import json
 from copy import deepcopy
@@ -14,16 +15,19 @@ class SpecCatalog(object):
 
     @classmethod
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
-            {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'})
+            {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'},
+            {'name': 'register_map': 'type': bool, 'doc': 'register this spec with TypeMap', 'default': True)
     def register_spec(cls, **kwargs):
         '''
         Associate a specified object type with an HDF5 specification
         '''
-        obj_type, spec = getargs('obj_type', 'spec', kwargs)
+        obj_type, spec, register_map = getargs('obj_type', 'spec', 'register_map', kwargs)
         type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
         if type_name in cls.__specs:
             raise ValueError("'%s' - cannot overwrite existing specification" % type_name)
         cls.__specs[type_name] = spec
+        if register_map:
+            TypeMap.register_spec(obj_type, spec)
 
     @classmethod
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
@@ -44,19 +48,20 @@ class SpecCatalog(object):
         return tuple(cls.__specs.keys())
 
     @classmethod
-    @docval({'name': 'spec', 'type': 'Spec', 'doc': 'the Spec object to register'})
+    @docval({'name': 'spec', 'type': 'Spec', 'doc': 'the Spec object to register'},
+            {'name': 'register_map': 'type': bool, 'doc': 'register this spec with TypeMap', 'default': True)
     def auto_register(cls, **kwargs):
         '''
         Register this specification and all sub-specification using neurodata_type as object type name
         '''
-        spec = getargs('spec', kwargs)
+        spec, register_map = getargs('spec', 'register_map', kwargs)
         ndt = spec.neurodata_type_def
         if ndt is not None:
-            SpecCatalog.register_spec(ndt, spec)
+            SpecCatalog.register_spec(ndt, spec, register_map=register_map)
         for dataset_spec in spec.datasets:
             dset_ndt = dataset_spec.neurodata_type_def
             if dset_ndt is not None:
-                SpecCatalog.register_spec(dset_ndt, dataset_spec)
+                SpecCatalog.register_spec(dset_ndt, dataset_spec, register_map=register_map)
         for group_spec in spec.groups:
             cls.auto_register(group_spec)
 
@@ -91,6 +96,10 @@ class Spec(dict, metaclass=abc.ABCMeta):
     def parent(self):
         return self._parent
 
+    @parent.setter
+    def parent(self, spec):
+        self._parent = spec
+
     @classmethod
     def build_const_args(cls, spec_dict):
         ret = deepcopy(spec_dict)
@@ -113,6 +122,12 @@ class Spec(dict, metaclass=abc.ABCMeta):
         except KeyError as e:
             raise KeyError("'%s' not found in %s" % (e.args[0], str(spec_dict)))
         return cls(*args, **kwargs)
+
+    def __hash__(self):
+        return id(self)
+
+    def __eq__(self, other):
+        return id(self) == id(other)
 
 
 _attr_args = [
@@ -224,8 +239,7 @@ class BaseStorageSpec(Spec):
         """
         doc, name = kwargs.pop('doc', 'name')
         spec = AttributeSpec(doc, name, **kwargs)
-        #attr.set_parent(self)
-        self['attributes'].append(attr)
+        self.set_attribute(spec)
         return spec
 
     @docval({'name': 'spec', 'type': AttributeSpec, 'doc': 'the specification for the attribute to add'})
@@ -234,7 +248,7 @@ class BaseStorageSpec(Spec):
         #spec.set_parent(self)
         self.setdefault('attributes', list()).append(spec)
         self.__attributes[spec.name] = spec
-        return spec
+        spec.parent = self
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute to the Spec for'})
     def get_attribute(self, **kwargs):
@@ -394,6 +408,7 @@ class GroupSpec(BaseStorageSpec):
                 raise TypeError("must specify 'name' or 'neurodata_type' in Group spec")
         else:
             self.__groups[spec.name] = spec
+        spec.parent = self
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the group to the Spec for'})
     def get_group(self, **kwargs):
@@ -420,6 +435,7 @@ class GroupSpec(BaseStorageSpec):
                 raise TypeError("must specify 'name' or 'neurodata_type' in Dataset spec")
         else:
             self.__datasets[spec.name] = spec
+        spec.parent = self
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset to the Spec for'})
     def get_dataset(self, **kwargs):
@@ -444,6 +460,7 @@ class GroupSpec(BaseStorageSpec):
                 raise TypeError("must specify 'name' or 'neurodata_type' in Dataset spec")
         else:
             self.__links[spec.name] = spec
+        spec.parent = self
 
     def verify(self, group_builder):
         # verify attributes
