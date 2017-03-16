@@ -4,105 +4,123 @@ from pynwb.io.spec import BaseStorageSpec, Spec
 class TypeMap(object):
     __maps = dict()
 
+    __map_types = dict()
+
+    __built = dict()
+
     @classmethod
     def register_map(cls, container_type, attr_map):
+        """
+        Specify the attribute map for an NWBContainer type
+        """
         cls.__maps[container_type.__name__] = attr_map
 
     @classmethod
     def register_spec(cls, container_type, spec):
+        """
+        Specify the specification for an NWBContainer type
+        """
         SpecCatalog.register_spec(container_type, spec)
-        cls.register_map(container_type, AttrMap(spec))
+        ndt = spec.neurodata_type_def
+        if ndt is None:
+            raise ValueError("'spec' must define a neurodata type")
+        map_cls = cls.__map_types.get(ndt, H5Builder)
+        cls.register_map(container_type, map_cls(spec))
+
+    @classmethod
+    def neurodata_type(cls, ndt):
+        """
+        A decorator to specify H5Builder subclasses for specific neurodata types
+        """
+        def _dec(map_cls):
+            cls.__map_types[ndt] = map_cls
+            return map_cls
+        return _dec
 
     @classmethod
     def get_map(cls, container):
+        """
+        Return the H5Builder object that should be used for the given container
+        """
         cls.__maps.get(container.__class__.__name__, None)
 
+    @classmethod
     def get_registered_types(cls):
+        """
+        Return all NWBContainer types that have a map specified
+        """
         return tuple(cls.__maps.keys())
 
     @classmethod
-    def build(cls, container):
+    def build(cls, container, build_manager):
+        """
+        Build the GroupBuilder for the given NWBContainer
+        """
         attr_map = cls.get_map(container)
         if attr_map is None:
-            raise ValueError('No AttrMap found for container of type %s' % str(container.__class__.__name__))
+            raise ValueError('No H5Builder found for container of type %s' % str(container.__class__.__name__))
         else:
-            return attr_map.build(container)
+            return attr_map.build(container, build_manager)
 
     @classmethod
     def get_h5object_name(cls, container):
         attr_map = cls.get_map(container)
         if attr_map is None:
-            raise ValueError('No AttrMap found for container of type %s' % str(container.__class__.__name__))
+            raise ValueError('No H5Builder found for container of type %s' % str(container.__class__.__name__))
         else:
             return attr_map.get_h5object_name(container)
 
-class Condition(object):
-    def __init__(self, key, value, spec_type=None, condition=None):
-        self._key = key
-        self._value = value
-        self._condition = condition
-        self_spec_type = spec_type
+class H5BuildManager(object):
+    """
+    A class for managing builds of NWBContainers
+    """
 
-    @property
-    def key(self):
-        return self._key
+    def __init__(self):
+        self.__built = dict()
 
-    @property
-    def value(self):
-        return self._value
+    def build(self, container):
+        container_id = id(container)
+        return self.__built.setdefault(id(container), TypeMap.build(container, self))
 
-    def __str__(self):
-        tmp = [("key", self._key),
-               ("value", self._value)]
-        if self._condition:
-            tmp.append(('condition', str(self._condition)))
-        return '{' + ", ".join(lambda x: '"%s": "%s"' % x, tmp) + '}'
+    def prebuilt(self, container, builder):
+        self.__built[id(container)] = builder
 
-    @property
-    def condition(self):
-        self._condition
-
-    def find(self, spec):
-        result = None
-        if self._spec_type:
-            for sub_spec in spec[self._spec_type]:
-                if sub_spec[self._key] == self._value:
-                    result = sub_spec
-                    break
-        if self._condition:
-            result = self._condition.find(spec)
-        return result
-
-class AttrMap(object):
+class H5Builder(object):
 
     @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'The specification for mapping objects to builders'})
     def __init__(self, **kwargs):
         """ Create a map from Container attributes to NWB specifications
         """
         spec = getargs('spec', **kwargs)
-        self._spec = spec
-        self._attr_map = dict()
-        self._spec_map
+        self.__spec = spec
+        self.__attr_map = dict()
+        self.__spec_map
         for spec in chain(spec.attributes, spec.datasets):
             if spec.name != '*':
-                self._attr_map[spec.name] = spec
-                self._spec_map[spec] = spec.name
+                self.__attr_map[spec.name] = spec
+                self.__spec_map[spec] = spec.name
 
     @property
     def children(self):
-        return self._attr_map
+        return self.__attr_map
 
     @property
     def spec(self):
-        return self._spec
+        return self.__spec
 
     def get_attribute(self, spec):
-        return self._attr_spec[spec]
+        '''
+        Get the object attribute name for the given Spec
+        '''
+        return self.__spec_map[spec]
 
     def get_spec(self, attr_name):
-        return self._attr_map[attr_name]
+        '''
+        Get the specification for the given object attribute name
+        '''
+        return self.__attr_map[attr_name]
 
-    def build(self, container):
+    def build(self, container, build_manager):
         if isinstance(spec, DatasetSpec):
             builder = DatasetBuilder()
         else:
@@ -120,7 +138,7 @@ class AttrMap(object):
                 continue
             tmp_builder = seen.get(attr_spec.parent, None)
             if tmp_builder is not None:
-                sub_builder = self.__process_spec(tmp_builder, attr_spec, attr_value)
+                sub_builder = self.__build_helper(tmp_builder, attr_spec, attr_value, build_manager)
                 if sub_builder is not None:
                     seen[attr_spec] = sub_builder
                 #child_attributes.append(attr_name)
@@ -131,12 +149,13 @@ class AttrMap(object):
 
     @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the parent builder object to build on'},
             {'name': 'spec', 'type': Spec, 'doc': 'the specification to use for building'},
-            {'name': 'value', 'type': None, 'doc': 'the value to add to builder using spec'})
-    def __process_spec(self, **kwargs):
-        builder, spec, value = getargs('builder', 'spec', 'value', kwargs)
+            {'name': 'value', 'type': None, 'doc': 'the value to add to builder using spec'},
+            {'name': 'build_manager', 'type': H5BuildManager, 'doc': 'the manager for this build'})
+    def __build_helper(self, **kwargs):
+        builder, spec, value, build_manager = getargs('builder', 'spec', 'value', 'build_manager', kwargs)
         sub_builder = None
         if isinstance(value, NWBContainer):
-            rendered_obj = TypeMap.build(value)
+            rendered_obj = build_manager.build(value)
             name = TypeMap.get_h5object_name(value)
             if isinstance(spec, LinkSpec):
                 sub_builder = builder.add_link(name, rendered_obj)
@@ -175,13 +194,13 @@ class AttrMap(object):
         """
         attr_name, spec = getargs()
         tmp = spec
-        self._attr_map[attr_name] = tmp
-        self._spec_map[tmp] = attr_name
+        self.__attr_map[attr_name] = tmp
+        self.__spec_map[tmp] = attr_name
 
     def get_h5object_name(self, container):
         ret = container.name
-        if self._spec.name != '*':
-            ret = self._spec.name
+        if self.__spec.name != '*':
+            ret = self.__spec.name
         return ret
 
     @docval({"name": "attr_name", "type": str, "doc": "the name of the HDF5 attribute"},
@@ -190,7 +209,7 @@ class AttrMap(object):
         ''' Get the Python object attribute name and value given an HDF5 attribute name and value
         '''
         h5attr_name, h5attr_val = get_args('attr_name', 'attr_val', kwargs)
-        attribute_name = self.get_attribute(self._spec.get_attribute(h5attr_name))
+        attribute_name = self.get_attribute(self.__spec.get_attribute(h5attr_name))
         # do something to figure out the value of the attribute
         attribute_value = h5attr_val
         return attribute_name, attribute_value
@@ -201,7 +220,7 @@ class AttrMap(object):
         ''' Get the Python object attribute name and value given an HDF5 dataset name and value
         '''
         h5dset_name, h5dset_val = get_args('dset_name', 'dset_val', kwargs)
-        attribute_name = self.get_attribute(self._spec.get_dataset(h5dset_name))
+        attribute_name = self.get_attribute(self.__spec.get_dataset(h5dset_name))
         # do something to figure out the value of the attribute
         attribute_value = h5dset_val
         return attribute_name, attribute_value
@@ -243,7 +262,8 @@ class AttrMap(object):
                     return OpticalChannel
         return None
 
-class TimeSeriesMap(AttrMap):
+@TypeMap.neurodata_type('TimeSeries')
+class TimeSeriesMap(H5Builder):
 
     def __init__(self, spec):
         super(TimeSeriesMap, self).__init__(spec):
@@ -258,5 +278,40 @@ class TimeSeriesMap(AttrMap):
         self.map_attr('rate_unit', startingtime_spec.get_attribute('unit'))
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))
 
+class Condition(object):
+    def __init__(self, key, value, spec_type=None, condition=None):
+        self._key = key
+        self._value = value
+        self._condition = condition
+        self_spec_type = spec_type
 
+    @property
+    def key(self):
+        return self._key
+
+    @property
+    def value(self):
+        return self._value
+
+    def __str__(self):
+        tmp = [("key", self._key),
+               ("value", self._value)]
+        if self._condition:
+            tmp.append(('condition', str(self._condition)))
+        return '{' + ", ".join(lambda x: '"%s": "%s"' % x, tmp) + '}'
+
+    @property
+    def condition(self):
+        self._condition
+
+    def find(self, spec):
+        result = None
+        if self._spec_type:
+            for sub_spec in spec[self._spec_type]:
+                if sub_spec[self._key] == self._value:
+                    result = sub_spec
+                    break
+        if self._condition:
+            result = self._condition.find(spec)
+        return result
 
