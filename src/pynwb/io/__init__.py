@@ -16,7 +16,7 @@ if os.path.exists(__type_name_map_path):
     with open(__type_name_map_path, 'r') as stream:
         __type_name_map = yaml.safe_load(stream)
 
-for path in glob.glob('%s/*.yaml' % __data_dir_path):
+for path in glob.glob('%s/*.{yaml,json}' % __data_dir_path):
     with open(path, 'r') as stream:
         for obj in yaml.safe_load(stream):
             spec_obj = spec.GroupSpec.build_spec(obj)
