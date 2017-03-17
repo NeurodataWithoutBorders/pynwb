@@ -95,10 +95,18 @@ class H5Builder(object):
         self.__spec = spec
         self.__attr_map = dict()
         self.__spec_map
-        for spec in chain(spec.attributes, spec.datasets):
-            if spec.name != '*':
-                self.__attr_map[spec.name] = spec
-                self.__spec_map[spec] = spec.name
+        self.__map_specs(self, spec)
+
+    def __map_specs(self, spec):
+        for subspec in chain(spec.attributes, spec.datasets):
+            if subspec.name is not None:
+                self.__attr_map[subspec.name] = subspec
+                self.__spec_map[subspec] = subspec.name
+            else:
+                self.__attr_map[subspec.neurodata_type] = subspec
+                self.__spec_map[subspec] = subspec.neurodata_type
+        for subspec in spec.groups:
+            self.__map_specs(subspec)
 
     @property
     def children(self):
@@ -121,34 +129,51 @@ class H5Builder(object):
         return self.__attr_map[attr_name]
 
     def build(self, container, build_manager):
-        if isinstance(spec, DatasetSpec):
+        if isinstance(self.spec, DatasetSpec):
             builder = DatasetBuilder()
         else:
             builder = GroupBuilder()
-        # keep track of which specs we've built something for
-        seen = {self.spec: builder}
-
-        attrs = deque(container.nwb_fields)
-        while attrs:
-            tmp_builder = builder
-            attr_name = attrs.pop()
-            attr_value = getattr(container, attr_name)
-            attr_spec = self.get_spec(attr_name)
-            if attr_spec is None:
-                continue
-            tmp_builder = seen.get(attr_spec.parent, None)
-            if tmp_builder is not None:
-                sub_builder = self.__build_helper(tmp_builder, attr_spec, attr_value, build_manager)
-                if sub_builder is not None:
-                    seen[attr_spec] = sub_builder
-                #child_attributes.append(attr_name)
-            else:
-                attrs.appendleft(attr_name)
-
+        self.__add_attributes(builder, self.__spec, container)
+        self.__add_datasets(builder, self.__spec, container, build_manager)
+        self.__add_groups(builder, self.__spec, container, build_manager)
         return builder
 
+    def __add_attributes(self, builder, spec, container):
+        for spec in self.__spec.attributes:
+            attr_name = self.get_attribute(spec)
+            attr_value = getattr(container, attr_name)
+            if attr_value is None:
+                continue
+            builder.add_attribute(spec.name, attr_value)
+
+    def __add_datasets(self, builder, spec, container, build_manager):
+        for subspec in spec.datasets:
+            attr_name = self.get_attribute(subspec)
+            attr_value = getattr(container, attr_name)
+            if attr_value is None:
+                continue
+            if subspec.neurodata_type is None:
+                sub_builder = builder.add_dataset(subspec.name, attr_value)
+                self.__add_attributes(sub_builder, subspec, container)
+            else:
+                self.__build_helper(builder, subspec, attr_value, build_manager)
+
+    def __add_groups(self, builder, spec, container, build_manager):
+        for subspec in spec.groups:
+            if subspec.neurodata_type is None:
+                # we don't need to get attr_name since any named
+                # group does not have the concept of value
+                sub_builder = builder.add_group(subspec.name)
+                self.__add_attributes(sub_builder, subspec, container)
+                self.__add_datasets(sub_builder, subspec, container, build_manager)
+                self.__add_groups(sub_builder, subspec, container, build_manager)
+            else:
+                attr_name = self.get_attribute(subspec)
+                value = getattr(container, attr_name)
+                self.__build_helper(builder, subspec, value, build_manager)
+
     @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the parent builder object to build on'},
-            {'name': 'spec', 'type': Spec, 'doc': 'the specification to use for building'},
+            {'name': 'spec', 'type': (DatasetSpec, GroupSpec, LinkSpec), 'doc': 'the specification to use for building'},
             {'name': 'value', 'type': None, 'doc': 'the value to add to builder using spec'},
             {'name': 'build_manager', 'type': H5BuildManager, 'doc': 'the manager for this build'})
     def __build_helper(self, **kwargs):
@@ -157,6 +182,8 @@ class H5Builder(object):
         if isinstance(value, NWBContainer):
             rendered_obj = build_manager.build(value)
             name = TypeMap.get_h5object_name(value)
+            # use spec to determine what kind of HDF5
+            # object this NWBContainer corresponds to
             if isinstance(spec, LinkSpec):
                 sub_builder = builder.add_link(name, rendered_obj)
             elif isinstance(spec, DatasetSpec):
@@ -164,27 +191,18 @@ class H5Builder(object):
             else:
                 sub_builder = builder.add_group(name, rendered_obj)
         else:
-            if isinstance(spec, AttributeSpec):
-                builder.add_attribute(spec.name, value)
-            elif isinstance(spec, DatasetSpec):
-                sub_builder = builder.add_dataset(spec.name, value)
-            elif isinstance(spec, GroupSpec):
-                #TODO: this assumes that value is a NWBContainer or a list of NWBContainers
-                # This is where spec.name comes from -- Containers have a name value
-                group_name = spec.name
-                if any(isinstance(value, t) for t in (list, tuple)):
-                    values = value
-                elif isinstance(value, dict):
-                    values = value.values()
-                else:
-                    msg = ("received %s, expected NWBContainer - 'value' "
-                           "must be an NWBContainer a list/tuple/dict of "
-                           "NWBContainers if 'spec' is a GroupSpec")
-                    raise ValueError(msg % value.__class__.__name__)
-                for container in attrs:
-                    self.__process_spec(builder, spec, container)
+            if any(isinstance(value, t) for t in (list, tuple)):
+                values = value
+            elif isinstance(value, dict):
+                values = value.values()
+            else:
+                msg = ("received %s, expected NWBContainer - 'value' "
+                       "must be an NWBContainer a list/tuple/dict of "
+                       "NWBContainers if 'spec' is a GroupSpec")
+                raise ValueError(msg % value.__class__.__name__)
+            for container in values:
+                self.__build_helper(builder, spec, container, build_manager)
         return sub_builder
-
 
     @docval({"name": "attr_name", "type": str, "doc": "the name of the object to map"},
             {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
