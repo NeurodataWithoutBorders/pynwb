@@ -1,7 +1,7 @@
 import collections as _collections
 import itertools as _itertools
 import copy as _copy
-import abc 
+import abc
 
 def __type_okay(value, argtype, allow_none=False):
     if value is None:
@@ -65,7 +65,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True):
             # check to make sure all positional
             # arguments were passed
             if argsi >= len(args):
-                errors.append("missing argument '%s'" % argname) 
+                errors.append("missing argument '%s'" % argname)
             else:
                 ret[argname] = args[argsi]
                 if enforce_type:
@@ -119,28 +119,28 @@ docval_attr_name = 'docval'
 #    @property
 #    def optional(self):
 #        return self._optional
-#    
+#
 
 def docval(*validator, **options):
     '''A decorator for documenting and enforcing type for instance method arguments.
 
     This decorator takes a list of dictionaries that specify the method parameters. These
-    dictionaries are used for enforcing type and building a Sphinx docstring. 
-    
-    The first arguments are dictionaries that specify the positional 
+    dictionaries are used for enforcing type and building a Sphinx docstring.
+
+    The first arguments are dictionaries that specify the positional
     arguments and keyword arguments of the decorated function. These dictionaries
-    must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a 
+    must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a
     positional argument. To define a keyword argument, specify a default value
-    using the key ``'default'``. 
+    using the key ``'default'``.
 
     The decorated method must take ``self`` and ``**kwargs`` as arguments.
 
-    When using this decorator, the functions :py:func:`~pynwb.core.getargs` and 
-    :py:func:`~pynwb.core.popargs` can be used for easily extracting arguments from 
+    When using this decorator, the functions :py:func:`~pynwb.core.getargs` and
+    :py:func:`~pynwb.core.popargs` can be used for easily extracting arguments from
     kwargs.
 
     The following code example demonstrates the use of this decorator:
-    
+
     .. code-block:: python
 
        @docval({'name': 'arg1':,   'type': str,           'doc': 'this is the first positional argument'},
@@ -150,6 +150,9 @@ def docval(*validator, **options):
            arg1, arg2, kwarg1 = getargs('arg1', 'arg2', 'kwarg1', **kwargs)
            ...
 
+    :param enforce_type: Enforce types of input parameters (Default=True)
+    :param returns: String describing the return values
+    :param rtype: String describing the return the data type of the return values
     :param validator: :py:func:`dict` objects specifying the method parameters
     :param options: additional options for documenting and validating method parameters
     '''
@@ -193,7 +196,7 @@ def __sphinxdoc(func, validator):
             fmt['type'] = " or ".join(map(to_str, arg['type']))
         else:
             fmt['type'] = to_str(arg['type'])
-        
+
         tmpl = (":param {name}: {doc}\n"
                 ":type  {name}: {type}")
         return tmpl.format(**fmt)
@@ -203,8 +206,8 @@ def __sphinxdoc(func, validator):
             return "%s=%s" % (argval['name'], str(argval['default']))
         else:
             return argval['name']
-    
-    sig =  "%s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator))) 
+
+    sig =  "%s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator)))
     if func.__doc__:
         sig += "%s\n\n" % func.__doc__
     sig += "\n".join(map(__sphinx_arg, validator))
@@ -238,9 +241,9 @@ def popargs(*argnames):
 
 class ExtenderMeta(abc.ABCMeta):
     """A metaclass that will extend the base class initialization
-       routine by executing additional functions defined in 
+       routine by executing additional functions defined in
        classes that use this metaclass
-        
+
        In general, this class should only be used by core developers.
     """
 
@@ -275,14 +278,14 @@ class ExtenderMeta(abc.ABCMeta):
 
 class NWBContainer(metaclass=ExtenderMeta):
     '''The base class to any NWB types.
-    
+
     The purpose of this class is to provide a mechanism for representing hierarchical
     relationships in neurodata.
     '''
 
 
     __nwbfields__ = tuple()
-    
+
     @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
@@ -299,7 +302,7 @@ class NWBContainer(metaclass=ExtenderMeta):
         '''The source of this Container e.g. file name or table
         '''
         return self.__container_source
-    
+
     @property
     def fields(self):
         return self.__fields
@@ -313,26 +316,26 @@ class NWBContainer(metaclass=ExtenderMeta):
         '''The parent NWBContainer of this NWBContainer
         '''
         return self.__parent
-    
+
     @parent.setter
     def parent(self, parent_container):
         if self.__parent:
             self.__parent.__subcontainers.remove(self)
         self.__parent = parent_container
         parent_container.__subcontainers.append(self)
-  
+
     @staticmethod
     def __getter(nwbfield):
         def _func(self):
             return self.fields.get(nwbfield)
         return _func
-    
+
     @staticmethod
     def __setter(nwbfield):
         def _func(self, val):
             self.fields[nwbfield] = val
         return _func
-    
+
     @ExtenderMeta.pre_init
     def __gather_nwbfields(cls, name, bases, classdict):
         '''
@@ -352,8 +355,8 @@ class NWBContainer(metaclass=ExtenderMeta):
 
 class frozendict(_collections.Mapping):
     '''An immutable dict
-    
-    This will be useful for getter of dicts that we don't want to support 
+
+    This will be useful for getter of dicts that we don't want to support
     '''
     def __init__(self, somedict):
         self._dict = somedict   # make a copy
