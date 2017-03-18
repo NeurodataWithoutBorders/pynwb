@@ -12,6 +12,7 @@ import numpy as np
 import h5py as _h5py
 
 from ..core import docval, getargs
+from .utils import DataChunkIterator
 
 SOFT_LINK = 0
 HARD_LINK = 1
@@ -90,16 +91,21 @@ def __get_type(data):
         return __get_type(data[0])
 
 
-def write_dataset(parent, name, data, attributes, function=None):
+def write_dataset(parent, name, data, attributes):
     dset = None
     if isinstance(data, str):
         dset = __scalar_fill__(parent, name, data)
     elif hasattr(data, '__len__'):
         dset = __list_fill__(parent, name, data)
+    elif isinstance(data, DataChunkIterator):
+        dset = __chunked_iter_fill__(parent, name, data)
     elif isinstance(data, Iterable):
-        chunk_size = 100
-        # TODO: do something to figure out appropriate chunk_size
-        dset = __iter_fill__(parent, name, data, chunk_size, function=function)
+        # TODO: Do something to figure out the approbriate buffer_size
+        dset = __chunked_iter_fill__(DataChunkIterator(data=data, buffer_size=100))
+    #elif isinstance(data, Iterable):
+    #    chunk_size = 100
+    #    # TODO: do something to figure out appropriate chunk_size
+    #    dset = __iter_fill__(parent, name, data, chunk_size, function=function)
     else:
         dset = __scalar_fill__(parent, name, data)
     set_attributes(dset, attributes)
@@ -117,50 +123,54 @@ def __trim_dataset__(dset, length):
     dset.resize(new_shape)
 
 
+def __selection_max_bounds__(selection):
+    """Determine the bounds of a numpy selection index tuple"""
+    if isinstance(selection, int):
+        return selection+1
+    elif isinstance(selection, slice):
+        return selection.stop
+    elif isinstance(selection, list) or isinstance(selection, np.ndarray):
+        return np.nonzero(selection)[0][-1]+1
+    elif isinstance(selection, tuple):
+        return tuple([__selection_max_bounds__(i) for i in selection])
+
+
 def __scalar_fill__(parent, name, data):
     dtype = __get_type(data)
     dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype)
     return dset
 
 
-def __iter_fill__(parent, name, data, chunk_size, function=None):
-    # data_shape = list(__get_shape(data))
-    # data_shape[0] = None
-    # data_shape = tuple(data_shape)
-    data_iter = iter(data)
-    curr_chunk = [next(data_iter) for i in range(chunk_size)]
+def __chunked_iter_fill__(parent, name, data):
+    """
+    Write data to a dataset one-chunk-at-a-time based on the given DataChunkIterator
 
-    data_shape = __get_shape(curr_chunk)
-    data_dtype = __get_type(curr_chunk)
-    max_shape = list(data_shape)
-    max_shape[0] = None
-    dset = parent.create_dataset(name, shape=data_shape, dtype=data_dtype, maxshape=max_shape)
+    :param parent: The parent object to which the dataset should be added
+    :type parent: h5py.Group, h5py.File
+    :param name: The name of the dataset
+    :type name: str
+    :param data: The data to be written.
+    :type data: DataChunkIterator
 
-    idx = 0
-    more_data = True
-    args = [data_iter] * chunk_size
-    chunks = _itertools.zip_longest(*args, fillvalue=None)
-
-    if function:
-        def proc_chunk(chunk):
-            dset[idx:idx+len(chunk), ] = chunk
-            function(chunk)
-    else:
-        def proc_chunk(chunk):
-            dset[idx:idx+len(chunk), ] = chunk
-
-    while more_data:
-        try:
-            next_chunk = next(chunks)
-        except StopIteration:
-            curr_chunk = list(filter(lambda x: x, curr_chunk))
-            more_data = False
-        if idx >= dset.shape[0] or idx+len(curr_chunk) > dset.shape[0]:
-            __extend_dataset__(dset)
-        # dset[idx:idx+len(curr_chunk),] = curr_chunk
-        proc_chunk(curr_chunk)
-        curr_chunk = next_chunk
-        idx += chunk_size
+    """
+    recommended_chunks = data.recommended_chunk_shape()
+    chunks = True if recommended_chunks is None else recommended_chunks
+    baseshape = data.recommended_data_shape()
+    dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
+    for curr_chunk, curr_chunk_location in data:
+        # Determine the minimum array dimensions to fit the chunk selection
+        max_bounds = __selection_max_bounds__(curr_chunk_location)
+        if not hasattr(max_bounds, '__len__'):
+            max_bounds = (max_bounds,)
+        # Determine if we need to expand any of the data dimensions
+        expand_dims = [i for i, v in enumerate(max_bounds) if v > dset.shape[i]]
+        # Expand the dataset if needed
+        if len(expand_dims) > 0:
+            new_shape = np.asarray(dset.shape)
+            new_shape[expand_dims] = np.asarray(max_bounds)[expand_dims]
+            dset.resize(new_shape)
+        # Process and write the data
+        dset[curr_chunk_location] = curr_chunk
     return dset
 
 
@@ -510,107 +520,4 @@ class DatasetBuilder(dict):
     #def __setitem__(self, args, val):
     #    raise NotImplementedError('__setitem__')
 
-
-class DataChunkIterator(object):
-    """Custom iterator class used to iterate over chunks of data.
-
-    Derived classes must ensure that self.shape and self.dtype are set properly.
-    define the self.max_shape property describing the maximum shape of the array.
-    In addition, derived classes must implement the __next__ method (or overwrite __read_next_chunk__
-    if the default behavior of __next__ should be reused). The __next__ method must return
-    in each iteration 1) a numpy array with the data values for the chunk and 2) a numpy-compliant index tuple
-    describing where the chunk is located within the complete data.  HINT: numpy.s_ provides a
-    convenient way to generate index tuples using standard array slicing.
-
-    The default implementation accepts any iterable and assumes that we iterate over
-    the first dimension of the data array. The default implemention supports buffered read,
-    i.e., multiple values from the input iterator can be combined to a single chunk. This is
-    useful for buffered I/O operations, e.g., to improve performance by accumulating data
-    in memory and writing larger blocks at once.
-    """
-    @docval({'name': 'data', 'type': None, 'doc': 'The data object used for iteration', 'default': None},
-            {'name': 'max_shape', 'type': tuple, 'doc': 'The maximum shape of the full data array. Use None to indicate unlimited dimensions', 'default': None},
-            {'name': 'dtype', 'type': np.dtype, 'doc': 'The Numpy data type for the array', 'default': None},
-            {'name': 'buffer_size', 'type': int, 'doc': 'Number of values to be buffered in a chunk', 'default': 1},
-            )
-    def __init__(self, **kwargs):
-        """Initalize the DataChunkIterator"""
-        # Get the user parameters
-        self.data, self.max_shape, self.dtype, self.buffer_size = getargs('data',
-                                                                          'max_shape',
-                                                                          'dtype' ,
-                                                                          'buffer_size',
-                                                                          kwargs)
-        # Create an iterator for the data if possible
-        self.__data_iter = iter(self.data) if isinstance(self.data, Iterable) else None
-        self.__next_chunk = None
-        self.__next_chunk_location = None
-        # Determine the shape of the data if possible
-        if self.max_shape is None:
-            # If the self.data object identifies it shape then use it
-            if hasattr(self.data,  "shape"):
-                self.max_shape = self.data.shape
-                # Avoid the special case of scalar values by making them into a 1D numpy array
-                if len(self.max_shape) == 0:
-                    self.data = np.asarray([self.data,])
-                    self.max_shape = self.data.shape
-                    self.__data_iter = iter(self.data)
-            # If we have a data iterator, then read the first chunk
-            if self.__data_iter is not None:
-                self.__read_next_chunk__()
-            # If we still don't know the shape then try to determine the shape from the first chunk
-            if self.max_shape is None and self.__next_chunk is not None:
-                data_shape = globals()['__get_shape'](self.__next_chunk)
-                self.max_shape =  list(data_shape)
-                self.max_shape[0] = None
-                self.max_shape = tuple(self.max_shape)
-        # Determine the type of the data if possibe
-        if self.__next_chunk is not None:
-            self.dtype = self.__next_chunk.dtype
-
-    def __iter__(self):
-        """Return the iterator object"""
-        return self
-
-    def __read_next_chunk__(self):
-        """Read a single chunk from self.__data_iter and store the results in
-           self.__next_chunk and self.__chunk_location"""
-        if self.__data_iter is not None:
-            self.__next_chunk = []
-            for i in range(self.buffer_size):
-                try:
-                    self.__next_chunk.append(next(self.__data_iter))
-                except StopIteration:
-                    pass
-            next_chunk_size = len(self.__next_chunk)
-            if next_chunk_size == 0:
-                self.__next_chunk = None
-                self.__next_chunk_location = None
-            else:
-                self.__next_chunk = np.asarray(self.__next_chunk)
-                if self.__next_chunk_location is None:
-                    self.__next_chunk_location = slice(0, next_chunk_size)
-                else:
-                    self.__next_chunk_location = slice(self.__next_chunk_location.stop,
-                                                       self.__next_chunk_location.stop+next_chunk_size)
-
-        else:
-            self.__next_chunk = None
-            self.__next_chunk_location = None
-
-        return self.__next_chunk, self.__next_chunk_location
-
-    @docval(returns="The following two items must be returned: \n" + \
-                    "* Numpy array (or scalar) with the data for the next chunk \n" +\
-                    "* Numpy-compliant index tuple describing the location of the chunk in the complete array. " +\
-                    "HINT: numpy.s_ provides a convenient way to generate index tuples using standard array slicing.")
-    def __next__(self):
-        """Return the next data chunk or raise a StopIteration exception if all chunks have been retrieved."""
-        if self.__next_chunk is None:
-            raise StopIteration
-        else:
-            curr_chunk = self.__next_chunk
-            curr_location = self.__next_chunk_location
-            self.__read_next_chunk__()
-            return curr_chunk, curr_location
 
