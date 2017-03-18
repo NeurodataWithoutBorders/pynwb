@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.io.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
+from pynwb.io.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, DataChunkIterator,__iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
 
 import h5py
 import os
@@ -19,7 +19,7 @@ class H5IOTest(unittest.TestCase):
     def tearDown(self):
         self.f.close()
         os.remove(self.test_file_path)
-        
+
     def test_iter_fill_divisible_chunks_data_fit(self):
         my_dset = __iter_fill__(self.f, 'test_dataset', range(100), 25)
         self.assertEqual(my_dset[99], 99)
@@ -99,13 +99,13 @@ class GroupBuilderGetterTests(unittest.TestCase):
         }
         for key, value in attrs.items():
             setattr(self, key, value)
-        
+
         setattr(self, 'group1', GroupBuilder({'subgroup1':self.subgroup1}))
         setattr(self, 'gb', GroupBuilder({'group1': self.group1},
                                          {'dataset1': self.dataset1},
-                                         {'int_attr': self.int_attr, 
+                                         {'int_attr': self.int_attr,
                                           'str_attr': self.str_attr},
-                                         {'soft_link1': self.soft_link1, 
+                                         {'soft_link1': self.soft_link1,
                                           'hard_link1': self.hard_link1,
                                           'external_link1': self.external_link1}))
 
@@ -232,7 +232,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
             {
             "group1": {
                 "subgroup1": {
-        
+
                 }
             },
             "dataset1": {
@@ -272,7 +272,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
 
         print (dump)
         self.assertDictEqual(json.loads(builder_json), json.loads(dump))
-    
+
 
 class GroupBuilderIsEmptyTests(unittest.TestCase):
 
@@ -384,6 +384,77 @@ class DatasetBuilderDeepUpdateTests(unittest.TestCase):
         self.assertListEqual(db1.data, db2.data)
         self.assertIn('attr1', db1.attributes)
 
+class DataChunkIteratorTests(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_none_iter(self):
+        dci = DataChunkIterator(None)
+        self.assertIsNone(dci.max_shape)
+        self.assertIsNone(dci.dtype)
+        count = 0
+        for v, l in dci:
+            self.assertEqual(v, None)
+            self.assertEqual(l, None)
+            count+=1
+        self.assertEqual(count, 0)
+
+    def test_numpy_iter_unbuffered(self):
+        a = np.arange(20).reshape(10,2)
+        dci = DataChunkIterator(data=a)
+        count = 0
+        for v, l in dci:
+            self.assertEqual(v.shape[0], 1)
+            self.assertEqual(v.shape[1], 2)
+            count+=1
+        self.assertEqual(count, 10)
+
+    def test_numpy_iter_unmatched_buffer_size(self):
+        a = np.arange(10)
+        dci = DataChunkIterator(data=a, buffer_size=3)
+        self.assertTupleEqual(dci.max_shape, a.shape)
+        self.assertEquals(dci.dtype, a.dtype)
+        count = 0
+        for v, l in dci:
+            if count < 3:
+                self.assertEqual(v.shape[0], 3)
+            else:
+                self.assertEqual(v.shape[0], 1)
+            count +=1
+        self.assertEqual(count, 4)
+
+    def test_standard_iterator_unbuffered(self):
+        dci = DataChunkIterator(data=range(10), buffer_size=1)
+        self.assertEquals(dci.dtype, np.dtype(int))
+        self.assertTupleEqual(dci.max_shape, (None,))
+        count = 0
+        for v, l in dci:
+            self.assertEqual(v.shape[0], 1)
+            count+=1
+        self.assertEqual(count, 10)
+
+    def test_standard_iterator_unmatched_buffersized(self):
+        dci = DataChunkIterator(data=range(10), buffer_size=3)
+        self.assertEquals(dci.dtype, np.dtype(int))
+        self.assertTupleEqual(dci.max_shape, (None,))
+        count = 0
+        for v, l in dci:
+            if count < 3:
+                self.assertEqual(v.shape[0], 3)
+            else:
+                self.assertEqual(v.shape[0], 1)
+            count +=1
+        self.assertEqual(count, 4)
+
+    def test_multidimensional_list(self):
+        a = np.arange(30).reshape(5,2,3).tolist()
+        dci = DataChunkIterator(a)
+        self.assertTupleEqual(dci.max_shape, (None,2,3))
+        self.assertEqual(dci.dtype, np.dtype(int))
 
 
 if __name__ == '__main__':
