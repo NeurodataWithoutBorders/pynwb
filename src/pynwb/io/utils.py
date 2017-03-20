@@ -21,7 +21,6 @@ class BaseObjectHandler(object, metaclass=ExtenderMeta):
             # by type, they are bound to the class as a function)
             cls.procedures[getattr(func, cls._property)] = getattr(cls, name)
 
-
     @classmethod
     @abstractmethod
     def get_object_properties(cls, obj):
@@ -92,7 +91,9 @@ class DataChunkIterator(object):
     in memory and writing larger blocks at once.
     """
     @docval({'name': 'data', 'type': None, 'doc': 'The data object used for iteration', 'default': None},
-            {'name': 'max_shape', 'type': tuple, 'doc': 'The maximum shape of the full data array. Use None to indicate unlimited dimensions', 'default': None},
+            {'name': 'max_shape', 'type': tuple,
+             'doc': 'The maximum shape of the full data array. Use None to indicate unlimited dimensions',
+             'default': None},
             {'name': 'dtype', 'type': np.dtype, 'doc': 'The Numpy data type for the array', 'default': None},
             {'name': 'buffer_size', 'type': int, 'doc': 'Number of values to be buffered in a chunk', 'default': 1},
             )
@@ -101,7 +102,7 @@ class DataChunkIterator(object):
         # Get the user parameters
         self.data, self.max_shape, self.dtype, self.buffer_size = getargs('data',
                                                                           'max_shape',
-                                                                          'dtype' ,
+                                                                          'dtype',
                                                                           'buffer_size',
                                                                           kwargs)
         # Create an iterator for the data if possible
@@ -115,7 +116,7 @@ class DataChunkIterator(object):
                 self.max_shape = self.data.shape
                 # Avoid the special case of scalar values by making them into a 1D numpy array
                 if len(self.max_shape) == 0:
-                    self.data = np.asarray([self.data,])
+                    self.data = np.asarray([self.data, ])
                     self.max_shape = self.data.shape
                     self.__data_iter = iter(self.data)
             # Try to get an accurate idea of max_shape for other Python datastructures if possible.
@@ -123,17 +124,18 @@ class DataChunkIterator(object):
             elif isinstance(self.data, list) or isinstance(self.data, tuple):
                 self.max_shape = self.__get_shape(self.data)
 
-
             # If we have a data iterator, then read the first chunk
             if self.__data_iter is not None:
                 self.__read_next_chunk__()
             # Determine the recommended chunk shape
-            self.__recommended_chunk_shape = self.__get_shape(self.__next_chunk) if self.__next_chunk is not None else None
+            self.__recommended_chunk_shape = self.__get_shape(self.__next_chunk) \
+                                             if self.__next_chunk is not None \
+                                             else None
 
             # If we still don't know the shape then try to determine the shape from the first chunk
             if self.max_shape is None and self.__next_chunk is not None:
                 data_shape = self.__get_shape(self.__next_chunk)
-                self.max_shape =  list(data_shape)
+                self.max_shape = list(data_shape)
                 self.max_shape[0] = None
                 self.max_shape = tuple(self.max_shape)
         # Determine the type of the data if possibe
@@ -165,16 +167,15 @@ class DataChunkIterator(object):
                 else:
                     self.__next_chunk_location = slice(self.__next_chunk_location.stop,
                                                        self.__next_chunk_location.stop+next_chunk_size)
-
         else:
             self.__next_chunk = None
             self.__next_chunk_location = None
 
         return self.__next_chunk, self.__next_chunk_location
 
-    @docval(returns="The following two items must be returned: \n" + \
-                    "* Numpy array (or scalar) with the data for the next chunk \n" +\
-                    "* Numpy-compliant index tuple describing the location of the chunk in the complete array. " +\
+    @docval(returns="The following two items must be returned: \n" +
+                    "* Numpy array (or scalar) with the data for the next chunk \n" +
+                    "* Numpy-compliant index tuple describing the location of the chunk in the complete array. " +
                     "HINT: numpy.s_ provides a convenient way to generate index tuples using standard array slicing.")
     def __next__(self):
         """Return the next data chunk or raise a StopIteration exception if all chunks have been retrieved."""
@@ -186,16 +187,15 @@ class DataChunkIterator(object):
             self.__read_next_chunk__()
             return curr_chunk, curr_location
 
-
     @staticmethod
     def __get_shape(data):
         """Internal helper function used to determin the shape of data objects"""
-        def __get_shape_helper(data):
+        def __get_shape_helper(local_data):
             shape = list()
-            if hasattr(data, '__len__'):
-                shape.append(len(data))
-                if len(data) and not isinstance(data[0], str):
-                    shape.extend(__get_shape_helper(data[0]))
+            if hasattr(local_data, '__len__'):
+                shape.append(len(local_data))
+                if len(local_data) and not isinstance(local_data[0], str):
+                    shape.extend(__get_shape_helper(local_data[0]))
             return tuple(shape)
         if hasattr(data, '__len__') and not isinstance(data, str):
             return __get_shape_helper(data)
@@ -209,8 +209,8 @@ class DataChunkIterator(object):
         than write."""
         return self.__recommended_chunk_shape
 
-    @docval(returns='Recommended initial shape for the full data. This should be the shape of the full dataset' +\
-                    'if known beforehand or alternatively the minimum shape of the dataset. Return None if no ' +\
+    @docval(returns='Recommended initial shape for the full data. This should be the shape of the full dataset' +
+                    'if known beforehand or alternatively the minimum shape of the dataset. Return None if no ' +
                     'recommendation is available')
     def recommended_data_shape(self):
         """Recommend an initial shape of the data. This is useful when progressively writing data and
