@@ -20,7 +20,7 @@ for path in glob.glob('%s/*.{yaml,json}' % __data_dir_path):
     with open(path, 'r') as stream:
         for obj in yaml.safe_load(stream):
             spec_obj = spec.GroupSpec.build_spec(obj)
-            spec.SpecCatalog.auto_register(spec_obj)
+            map.TypeMap.auto_register(spec_obj)
 
 #def __map_types():
 #

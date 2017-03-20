@@ -1,5 +1,6 @@
 from pynwb.core import docval, getargs
-from pynwb.io.spec import BaseStorageSpec, Spec
+from .spec import BaseStorageSpec, Spec, DatasetSpec, GroupSpec, LinkSpec
+from .h5tools import DatasetBuilder, GroupBuilder
 
 class TypeMap(object):
     __maps = dict()
@@ -9,14 +10,18 @@ class TypeMap(object):
     __built = dict()
 
     @classmethod
-    def register_map(cls, container_type, attr_map):
+    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
+            {'name': 'map', 'type': 'AttrMap', 'doc': 'as AttrMap object'})
+    def register_map(cls, **kwargs):
         """
         Specify the attribute map for an NWBContainer type
         """
         cls.__maps[container_type.__name__] = attr_map
 
     @classmethod
-    def register_spec(cls, container_type, spec):
+    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
+            {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'})
+    def register_spec(cls, **kwargs):
         """
         Specify the specification for an NWBContainer type
         """
@@ -28,10 +33,29 @@ class TypeMap(object):
         cls.register_map(container_type, map_cls(spec))
 
     @classmethod
-    def neurodata_type(cls, ndt):
+    @docval({'name': 'spec', 'type': 'Spec', 'doc': 'the Spec object to register'})
+    def auto_register(cls, **kwargs):
+        '''
+        Register this specification and all sub-specification using neurodata_type as object type name
+        '''
+        spec = getargs('spec', kwargs)
+        ndt = spec.neurodata_type_def
+        if ndt is not None:
+            cls.register_spec(ndt, spec)
+        for dataset_spec in spec.datasets:
+            dset_ndt = dataset_spec.neurodata_type_def
+            if dset_ndt is not None:
+                cls.register_spec(dset_ndt, dataset_spec)
+        for group_spec in spec.groups:
+            cls.auto_register(group_spec)
+
+    @classmethod
+    @docval({'name': 'ndt', 'type': (type, str), 'doc': 'the neurodata type to associate the decorated class with'})
+    def neurodata_type(cls, **kwargs):
         """
         A decorator to specify H5Builder subclasses for specific neurodata types
         """
+        ndt = getargs('ndt', kwargs)
         def _dec(map_cls):
             cls.__map_types[ndt] = map_cls
             return map_cls
@@ -70,7 +94,7 @@ class TypeMap(object):
         else:
             return attr_map.get_h5object_name(container)
 
-class H5BuildManager(object):
+class BuildManager(object):
     """
     A class for managing builds of NWBContainers
     """
@@ -79,15 +103,18 @@ class H5BuildManager(object):
         self.__built = dict()
 
     def build(self, container):
-        container_id = id(container)
-        return self.__built.setdefault(id(container), TypeMap.build(container, self))
+        container_id = self.__ohash__(container)
+        return self.__built.setdefault(container_id, TypeMap.build(container, self))
 
     def prebuilt(self, container, builder):
-        self.__built[id(container)] = builder
+        self.__built[container_id] = builder
+
+    def __ohash__(self, obj):
+        return id(obj)
 
 class H5Builder(object):
 
-    @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'The specification for mapping objects to builders'})
+    @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'The specification for mapping objects to builders'})
     def __init__(self, **kwargs):
         """ Create a map from Container attributes to NWB specifications
         """
@@ -175,7 +202,7 @@ class H5Builder(object):
     @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the parent builder object to build on'},
             {'name': 'spec', 'type': (DatasetSpec, GroupSpec, LinkSpec), 'doc': 'the specification to use for building'},
             {'name': 'value', 'type': None, 'doc': 'the value to add to builder using spec'},
-            {'name': 'build_manager', 'type': H5BuildManager, 'doc': 'the manager for this build'})
+            {'name': 'build_manager', 'type': BuildManager, 'doc': 'the manager for this build'})
     def __build_helper(self, **kwargs):
         builder, spec, value, build_manager = getargs('builder', 'spec', 'value', 'build_manager', kwargs)
         sub_builder = None
@@ -284,7 +311,7 @@ class H5Builder(object):
 class TimeSeriesMap(H5Builder):
 
     def __init__(self, spec):
-        super(TimeSeriesMap, self).__init__(spec):
+        super(TimeSeriesMap, self).__init__(spec)
         data_spec = self.spec.get_dataset('data')
         self.map_attr('unit', data_spec.get_attribute('unit'))
         self.map_attr('resolution', data_spec.get_attribute('resolution'))

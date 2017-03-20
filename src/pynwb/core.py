@@ -28,10 +28,10 @@ def __type_okay(value, argtype, allow_none=False):
         raise ValueError("argtype must be a type, a str, a list, a tuple, or None")
 
 def __is_int(value):
-    return any(isinstance(value, i) for i in (np.int8, np.int16, np.int32, np.int64))
+    return any(isinstance(value, i) for i in (int, np.int8, np.int16, np.int32, np.int64))
 
 def __is_float(value):
-    return any(isinstance(value, i) for i in (np.float16, np.float32, np.float64, np.float128))
+    return any(isinstance(value, i) for i in (float, np.float16, np.float32, np.float64, np.float128))
 
 def __format_type(argtype):
     if isinstance(argtype, str):

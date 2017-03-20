@@ -1,8 +1,6 @@
 import abc
 from itertools import chain
 from pynwb.core import docval, getargs, popargs, get_docval
-from .map import TypeMap
-
 import json
 from copy import deepcopy
 import sys
@@ -15,8 +13,7 @@ class SpecCatalog(object):
 
     @classmethod
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
-            {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'},
-            {'name': 'register_map': 'type': bool, 'doc': 'register this spec with TypeMap', 'default': True)
+            {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'})
     def register_spec(cls, **kwargs):
         '''
         Associate a specified object type with an HDF5 specification
@@ -26,8 +23,6 @@ class SpecCatalog(object):
         if type_name in cls.__specs:
             raise ValueError("'%s' - cannot overwrite existing specification" % type_name)
         cls.__specs[type_name] = spec
-        if register_map:
-            TypeMap.register_spec(obj_type, spec)
 
     @classmethod
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
@@ -46,24 +41,6 @@ class SpecCatalog(object):
         Return all registered specifications
         '''
         return tuple(cls.__specs.keys())
-
-    @classmethod
-    @docval({'name': 'spec', 'type': 'Spec', 'doc': 'the Spec object to register'},
-            {'name': 'register_map': 'type': bool, 'doc': 'register this spec with TypeMap', 'default': True)
-    def auto_register(cls, **kwargs):
-        '''
-        Register this specification and all sub-specification using neurodata_type as object type name
-        '''
-        spec, register_map = getargs('spec', 'register_map', kwargs)
-        ndt = spec.neurodata_type_def
-        if ndt is not None:
-            SpecCatalog.register_spec(ndt, spec, register_map=register_map)
-        for dataset_spec in spec.datasets:
-            dset_ndt = dataset_spec.neurodata_type_def
-            if dset_ndt is not None:
-                SpecCatalog.register_spec(dset_ndt, dataset_spec, register_map=register_map)
-        for group_spec in spec.groups:
-            cls.auto_register(group_spec)
 
 
 class Spec(dict, metaclass=abc.ABCMeta):
@@ -208,7 +185,7 @@ class BaseStorageSpec(Spec):
         super().__init__(doc, name=name, required=required, parent=parent)
         self.__attributes = dict()
         if not linkable:
-            self['linkable'] = linkable
+            self['linkable'] = False
         if neurodata_type is not None:
             self['neurodata_type'] = neurodata_type
         if neurodata_type_def is not None:
@@ -235,7 +212,8 @@ class BaseStorageSpec(Spec):
 
     @docval(*deepcopy(_attr_args))
     def add_attribute(self, **kwargs):
-        """ Add an attribute to this object
+        """
+        Add an attribute to this object
         """
         doc, name = kwargs.pop('doc', 'name')
         spec = AttributeSpec(doc, name, **kwargs)

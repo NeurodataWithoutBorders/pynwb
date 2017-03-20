@@ -112,5 +112,4 @@ class NWBFileReader(BaseObjectHandler):
 
 def read_file(path):
     f = h5py.File(path, 'r')
-    for 
 
