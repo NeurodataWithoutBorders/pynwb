@@ -92,12 +92,18 @@ class H5IOTest(unittest.TestCase):
         dset = self.f['test_dataset']
         self.assertListEqual(dset[:].tolist(), list(range(10)))
 
+    def test_write_dataset_iterable_multidimensional_array(self):
+        a = np.arange(30).reshape(5, 2, 3)
+        aiter = iter(a)
+        write_dataset(self.f, 'test_dataset', aiter, {})
+        dset = self.f['test_dataset']
+        self.assertListEqual(dset[:].tolist(), a.tolist())
+
     def test_write_dataset_data_chunk_iterator(self):
         dci = DataChunkIterator(data=np.arange(10), buffer_size=2)
         write_dataset(self.f, 'test_dataset', dci, {})
         dset = self.f['test_dataset']
         self.assertListEqual(dset[:].tolist(), list(range(10)))
-
 
 class GroupBuilderSetterTests(unittest.TestCase):
     """Tests for setter functions in GroupBuilder class"""
