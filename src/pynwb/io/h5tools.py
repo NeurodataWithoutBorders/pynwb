@@ -163,7 +163,7 @@ def __chunked_iter_fill__(parent, name, data):
         if not hasattr(max_bounds, '__len__'):
             max_bounds = (max_bounds,)
         # Determine if we need to expand any of the data dimensions
-        expand_dims = [i for i, v in enumerate(max_bounds) if v > dset.shape[i]]
+        expand_dims = [i for i, v in enumerate(max_bounds) if v is not None and v > dset.shape[i]]
         # Expand the dataset if needed
         if len(expand_dims) > 0:
             new_shape = np.asarray(dset.shape)
