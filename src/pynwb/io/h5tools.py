@@ -91,21 +91,37 @@ def __get_type(data):
         return __get_type(data[0])
 
 
+def isintance_inmemory_array(data):
+    """Check if an object is a common in-memory data structure"""
+    return isinstance(data, list) or \
+           isinstance(data, np.ndarray) or \
+           isinstance(data, tuple) or \
+           isinstance(data, set) or \
+           isinstance(data, str) or \
+           isinstance(data, frozenset)
+
+
 def write_dataset(parent, name, data, attributes):
+    """
+    Write a dataset to HDF5.
+
+    The function uses other dataset-dependent write functions, e.g,
+    __scalar_fill__, __list_fill__ and __chunked_iter_fill__ to write the data.
+
+    :param parent: Parent HDF5 object
+    :param name: Name of the data to be written.
+    :param data: Data object to be written.
+    :param attributes:
+    """
     dset = None
     if isinstance(data, str):
         dset = __scalar_fill__(parent, name, data)
-    elif hasattr(data, '__len__'):
-        dset = __list_fill__(parent, name, data)
     elif isinstance(data, DataChunkIterator):
         dset = __chunked_iter_fill__(parent, name, data)
-    elif isinstance(data, Iterable):
-        # TODO: Do something to figure out the approbriate buffer_size
-        dset = __chunked_iter_fill__(DataChunkIterator(data=data, buffer_size=100))
-    #elif isinstance(data, Iterable):
-    #    chunk_size = 100
-    #    # TODO: do something to figure out appropriate chunk_size
-    #    dset = __iter_fill__(parent, name, data, chunk_size, function=function)
+    elif isinstance(data, Iterable) and not isintance_inmemory_array(data):
+        dset = __chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
+    elif hasattr(data, '__len__'):
+        dset = __list_fill__(parent, name, data)
     else:
         dset = __scalar_fill__(parent, name, data)
     set_attributes(dset, attributes)
