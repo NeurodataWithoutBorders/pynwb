@@ -6,7 +6,7 @@ from pynwb.behavior import SpatialSeries
 from pynwb.misc import AbstractFeatureSeries
 
 from pynwb import TimeSeries, Module, Interface, NWBFile
-from .h5tools import GroupBuilder, DatasetBuilder, ExternalLinkBuilder, write_group, write_dataset
+from .tools.h5tools import GroupBuilder, DatasetBuilder, ExternalLinkBuilder, write_group, write_dataset
 from .tools.handler import BaseObjectHandler
 
 import h5py
@@ -129,7 +129,7 @@ class HDF5ContainerRenderer(BaseObjectHandler):
         if isinstance(parent, NWBFile):
             if isinstance(child, TimeSeries):
                 relpath = None
-                if parent.is_rawdata(child):
+                if parent.is_raw_data(child):
                     relpath = "acquisition/timeseries"
                 elif parent.is_stimulus(child):
                     relpath = "stimulus/presentation"
@@ -236,7 +236,7 @@ class NWBFileHDF5Renderer(HDF5ContainerRenderer):
 
         ts_renderer = TimeSeriesHDF5Renderer()
         subgroup_builder = builder['acquisition/timeseries']
-        for ts_container in container.rawdata:
+        for ts_container in container.raw_data:
             ts_group_builder = ts_renderer.process(ts_container)
             subgroup_builder.set_group(ts_container.name, ts_group_builder)
 
