@@ -109,6 +109,7 @@ class DataChunkIterator(object):
         self.__data_iter = iter(self.data) if isinstance(self.data, Iterable) else None
         self.__next_chunk = None
         self.__next_chunk_location = None
+        self.__first_chunk_shape = None
         # Determine the shape of the data if possible
         if self.max_shape is None:
             # If the self.data object identifies it shape then use it
@@ -125,7 +126,7 @@ class DataChunkIterator(object):
                 self.max_shape = self.__get_shape(self.data)
 
         # If we have a data iterator, then read the first chunk
-        if self.__data_iter is not None and(self.max_shape is None or self.dtype is None):
+        if self.__data_iter is not None: # and(self.max_shape is None or self.dtype is None):
             self._read_next_chunk()
 
         # If we still don't know the shape then try to determine the shape from the first chunk
@@ -138,6 +139,7 @@ class DataChunkIterator(object):
         # Determine the type of the data if possible
         if self.__next_chunk is not None:
             self.dtype = self.__next_chunk.dtype
+            self.__first_chunk_shape = self.__next_chunk.shape
 
     def __iter__(self):
         """Return the iterator object"""
@@ -176,21 +178,22 @@ class DataChunkIterator(object):
                     "HINT: numpy.s_ provides a convenient way to generate index tuples using standard array slicing.")
     def __next__(self):
         """Return the next data chunk or raise a StopIteration exception if all chunks have been retrieved."""
+        # If we have not already read the next chunk, then read it now
+        if self.__next_chunk is None:
+            self._read_next_chunk()
+        # If we do not have any next chunk
         if self.__next_chunk is None:
             raise StopIteration
-        else:
-            # If we have not already read the next chunk, then read it now
-            if self.__next_chunk is None:
-                self._read_next_chunk()
-            # Keep the next chunk we need to return
-            curr_chunk = self.__next_chunk
-            curr_location = self.__next_chunk_location
-            # Load the chunk we need to return after this one
-            # self._read_next_chunk()
-            # Remove the next chunk from our list since we are returning it here. This avoids having 2 chunks in memory
-            self.__next_chunk = None
-            # Return the current next chunk
-            return curr_chunk, curr_location
+        # If this is the first time we see a chunk then remember the size of the first chunk
+        if self.__first_chunk_shape is None:
+            self.__first_chunk_shape = self.__next_chunk.shape
+        # Keep the next chunk we need to return
+        curr_chunk = self.__next_chunk
+        curr_location = self.__next_chunk_location
+        # Remove the next chunk from our list since we are returning it here. This avoids having 2 chunks in memory
+        self.__next_chunk = None
+        # Return the current next chunk
+        return curr_chunk, curr_location
 
     @staticmethod
     def __get_shape(data):
@@ -228,7 +231,5 @@ class DataChunkIterator(object):
         if self.max_shape is not None:
             if np.all([i is not None for i in self.max_shape]):
                 return self.max_shape
-        if self.__next_chunk is not None:
-            return self.__next_chunk.shape
-        return None
+        return self.__first_chunk_shape
 
