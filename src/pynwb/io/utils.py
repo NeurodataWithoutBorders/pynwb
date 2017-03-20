@@ -76,7 +76,7 @@ class DataChunkIterator(object):
 
     Derived classes must ensure that self.shape and self.dtype are set properly.
     define the self.max_shape property describing the maximum shape of the array.
-    In addition, derived classes must implement the __next__ method (or overwrite __read_next_chunk__
+    In addition, derived classes must implement the __next__ method (or overwrite _read_next_chunk
     if the default behavior of __next__ should be reused). The __next__ method must return
     in each iteration 1) a numpy array with the data values for the chunk and 2) a numpy-compliant index tuple
     describing where the chunk is located within the complete data.  HINT: numpy.s_ provides a
@@ -124,21 +124,18 @@ class DataChunkIterator(object):
             elif isinstance(self.data, list) or isinstance(self.data, tuple):
                 self.max_shape = self.__get_shape(self.data)
 
-            # If we have a data iterator, then read the first chunk
-            if self.__data_iter is not None:
-                self.__read_next_chunk__()
-            # Determine the recommended chunk shape
-            self.__recommended_chunk_shape = self.__get_shape(self.__next_chunk) \
-                                             if self.__next_chunk is not None \
-                                             else None
+        # If we have a data iterator, then read the first chunk
+        if self.__data_iter is not None and(self.max_shape is None or self.dtype is None):
+            self._read_next_chunk()
 
-            # If we still don't know the shape then try to determine the shape from the first chunk
-            if self.max_shape is None and self.__next_chunk is not None:
-                data_shape = self.__get_shape(self.__next_chunk)
-                self.max_shape = list(data_shape)
-                self.max_shape[0] = None
-                self.max_shape = tuple(self.max_shape)
-        # Determine the type of the data if possibe
+        # If we still don't know the shape then try to determine the shape from the first chunk
+        if self.max_shape is None and self.__next_chunk is not None:
+            data_shape = self.__get_shape(self.__next_chunk)
+            self.max_shape = list(data_shape)
+            self.max_shape[0] = None
+            self.max_shape = tuple(self.max_shape)
+
+        # Determine the type of the data if possible
         if self.__next_chunk is not None:
             self.dtype = self.__next_chunk.dtype
 
@@ -146,7 +143,7 @@ class DataChunkIterator(object):
         """Return the iterator object"""
         return self
 
-    def __read_next_chunk__(self):
+    def _read_next_chunk(self):
         """Read a single chunk from self.__data_iter and store the results in
            self.__next_chunk and self.__chunk_location"""
         if self.__data_iter is not None:
@@ -182,9 +179,17 @@ class DataChunkIterator(object):
         if self.__next_chunk is None:
             raise StopIteration
         else:
+            # If we have not already read the next chunk, then read it now
+            if self.__next_chunk is None:
+                self._read_next_chunk()
+            # Keep the next chunk we need to return
             curr_chunk = self.__next_chunk
             curr_location = self.__next_chunk_location
-            self.__read_next_chunk__()
+            # Load the chunk we need to return after this one
+            # self._read_next_chunk()
+            # Remove the next chunk from our list since we are returning it here. This avoids having 2 chunks in memory
+            self.__next_chunk = None
+            # Return the current next chunk
             return curr_chunk, curr_location
 
     @staticmethod
@@ -197,6 +202,8 @@ class DataChunkIterator(object):
                 if len(local_data) and not isinstance(local_data[0], str):
                     shape.extend(__get_shape_helper(local_data[0]))
             return tuple(shape)
+        if hasattr(data, 'shape'):
+            return data.shape
         if hasattr(data, '__len__') and not isinstance(data, str):
             return __get_shape_helper(data)
         else:
@@ -204,22 +211,24 @@ class DataChunkIterator(object):
 
     @docval(returns='Tuple with the recommended chunk shape or None if no particular shape is recommended.')
     def recommended_chunk_shape(self):
-        """Recommend a chunk shape. This will typcially be the most common shape of chunk returned by __next__
-        but may also be some other value in case one wants to recommend chunk shapes to optimize read rather
-        than write."""
-        return self.__recommended_chunk_shape
+        """Recommend a chunk shape.
+
+        To optimize iterative write the chunk should be aligned with the common shape of chunks returned by __next__
+        or if those chunks are too large, then a well-aligned subset of those chunks. This may also be
+        any other value in case one wants to recommend chunk shapes to optimize read rather
+        than write. The default implementation returns None, indicating no preferential chunking option."""
+        return None
 
     @docval(returns='Recommended initial shape for the full data. This should be the shape of the full dataset' +
                     'if known beforehand or alternatively the minimum shape of the dataset. Return None if no ' +
                     'recommendation is available')
     def recommended_data_shape(self):
         """Recommend an initial shape of the data. This is useful when progressively writing data and
-        we want to recommend and inital size for the dataset"""
+        we want to recommend and initial size for the dataset"""
         if self.max_shape is not None:
             if np.all([i is not None for i in self.max_shape]):
                 return self.max_shape
-            else:
-                return self.__recommended_chunk_shape
-        else:
-            return None
+        if self.__next_chunk is not None:
+            return self.__next_chunk.shape
+        return None
 
