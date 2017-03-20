@@ -265,28 +265,33 @@ class FeatureExtraction(Interface):
             {'name': 'electrodes', 'type': (list, tuple), 'doc': 'the electrode groups for each channel from which features were extracted'},
             {'name': 'description', 'type': (list, tuple, np.ndarray), 'doc': 'a description for each feature extracted'},
             {'name': 'event_times', 'type': (list, tuple, np.ndarray), 'doc': 'the times of events that features correspond to'},
-            {'name': 'features', 'type': (list, tuple, np.ndarray), 'doc': 'features for each channel'})
+            {'name': 'features', 'type': (list, tuple, np.ndarray, Iterable), 'doc': 'features for each channel'})
     def __init__(self, **kwargs):
         source, electrodes, description, event_times, features = getargs('source', 'electrodes', 'description', 'event_times', 'features', kwargs)
         try:
-            features_shape = features.shape if isinstance(features, np.ndarray) else (len(features),
-                                                                                      len(features[0]),
-                                                                                      len(features[0][0]))
+            features_shape = features.shape if hasattr(features, 'shape') else (len(features),
+                                                                                len(features[0]),
+                                                                                len(features[0][0]))
             if len(features_shape) != 3:
                 raise ValueError("incorrect dimensions: features must be a 3D array.")
+            check_feature_shape = True
         except:
-            raise ValueError("incorrect dimensions: features must be a 3D array.")
-        if features_shape[0] != len(event_times):
-            raise ValueError("incorrect dimensions: features -  must have one value per event time. Got %d, expected %d" % (features_shape[0], len(event_times)))
-        if features_shape[1] != len(electrodes):
-            raise ValueError("incorrect dimensions: features -  must have one value per channel. Got %d, expected %d" % (features_shape[1], len(electrodes)))
-        if features_shape[2] != len(description):
-            raise ValueError("incorrect dimensions: features -  must have one value per feature. Got %d, expected %d" % (features_shape[2], len(description)))
+            if isinstance(features, list) or isinstance(features, tuple) or isinstance(features, np.ndarray):
+                raise ValueError("incorrect dimensions: features must be a 3D array.")
+            else:
+                check_feature_shape = False
+        if check_feature_shape:
+            if features_shape[0] != len(event_times):
+                raise ValueError("incorrect dimensions: features -  must have one value per event time. Got %d, expected %d" % (features_shape[0], len(event_times)))
+            if features_shape[1] != len(electrodes):
+                raise ValueError("incorrect dimensions: features -  must have one value per channel. Got %d, expected %d" % (features_shape[1], len(electrodes)))
+            if features_shape[2] != len(description):
+                raise ValueError("incorrect dimensions: features -  must have one value per feature. Got %d, expected %d" % (features_shape[2], len(description)))
         super(FeatureExtraction, self).__init__(source)
         self.fields['electrodes'] = electrodes
         self.fields['description'] = description
         self.fields['event_times'] = list(event_times)
-        self.fields['features'] = list(features)
+        self.fields['features'] = features
 
     #def add_event_feature(self, time, features):
     #    self._features.append(features)
