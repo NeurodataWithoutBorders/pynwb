@@ -1,4 +1,6 @@
 #from .. import spec, map, h5tools, write, utils
+from .tools import spec, map
+
 from pkg_resources import resource_filename
 import os
 import glob

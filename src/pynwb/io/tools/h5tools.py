@@ -11,7 +11,7 @@ from collections import Iterable, Callable
 import numpy as np
 import h5py as _h5py
 
-from ..core import docval, getargs
+from pynwb.core import docval, getargs
 
 SOFT_LINK = 0
 HARD_LINK = 1
