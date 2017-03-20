@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.io.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
+from pynwb.io.tools.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
 
 import h5py
 import os
@@ -19,7 +19,7 @@ class H5IOTest(unittest.TestCase):
     def tearDown(self):
         self.f.close()
         os.remove(self.test_file_path)
-        
+
     def test_iter_fill_divisible_chunks_data_fit(self):
         my_dset = __iter_fill__(self.f, 'test_dataset', range(100), 25)
         self.assertEqual(my_dset[99], 99)
@@ -99,13 +99,13 @@ class GroupBuilderGetterTests(unittest.TestCase):
         }
         for key, value in attrs.items():
             setattr(self, key, value)
-        
+
         setattr(self, 'group1', GroupBuilder({'subgroup1':self.subgroup1}))
         setattr(self, 'gb', GroupBuilder({'group1': self.group1},
                                          {'dataset1': self.dataset1},
-                                         {'int_attr': self.int_attr, 
+                                         {'int_attr': self.int_attr,
                                           'str_attr': self.str_attr},
-                                         {'soft_link1': self.soft_link1, 
+                                         {'soft_link1': self.soft_link1,
                                           'hard_link1': self.hard_link1,
                                           'external_link1': self.external_link1}))
 
@@ -232,7 +232,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
             {
             "group1": {
                 "subgroup1": {
-        
+
                 }
             },
             "dataset1": {
@@ -272,7 +272,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
 
         print (dump)
         self.assertDictEqual(json.loads(builder_json), json.loads(dump))
-    
+
 
 class GroupBuilderIsEmptyTests(unittest.TestCase):
 
