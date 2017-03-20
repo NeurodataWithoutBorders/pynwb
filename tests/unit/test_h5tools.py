@@ -94,7 +94,7 @@ class H5IOTest(unittest.TestCase):
 
     def test_write_dataset_data_chunk_iterator(self):
         dci = DataChunkIterator(data=np.arange(10), buffer_size=2)
-        write_dataset(self.f, 'test_dataset', range(10), {})
+        write_dataset(self.f, 'test_dataset', dci, {})
         dset = self.f['test_dataset']
         self.assertListEqual(dset[:].tolist(), list(range(10)))
 
