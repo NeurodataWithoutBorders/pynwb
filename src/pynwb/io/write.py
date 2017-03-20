@@ -6,11 +6,8 @@ from pynwb.behavior import SpatialSeries
 from pynwb.misc import AbstractFeatureSeries
 
 from pynwb import TimeSeries, Module, Interface, NWBFile
-
 from .h5tools import GroupBuilder, DatasetBuilder, ExternalLinkBuilder, write_group, write_dataset
-from .utils import BaseObjectHandler
-#from pynwb.io import TypeMap
-from ..io import TypeMap
+from .tools.handler import BaseObjectHandler
 
 import h5py
 import numpy as np
