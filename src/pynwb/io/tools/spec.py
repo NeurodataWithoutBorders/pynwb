@@ -8,7 +8,7 @@ NAME_WILDCARD = None
 class SpecCatalog(object):
 
     def __init__(self):
-        __specs = dict()
+        self.__specs = dict()
 
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
             {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'})
