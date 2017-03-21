@@ -1,3 +1,5 @@
+from itertools import chain
+
 from pynwb.core import docval, getargs
 from .spec import SpecCatalog, Spec, DatasetSpec, GroupSpec, LinkSpec
 from .h5tools import DatasetBuilder, GroupBuilder
@@ -11,13 +13,15 @@ class TypeMap(object):
         self.__map_types = dict()
         self.__catalog = catalog
 
-    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
-            {'name': 'map', 'type': 'AttrMap', 'doc': 'as AttrMap object'})
-    def register_map(self, **kwargs):
-        """
-        Specify the attribute map for an NWBContainer type
-        """
-        self.__maps[container_type.__name__] = attr_map
+    #@docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
+    #        {'name': 'attr_map', 'type': 'H5Builder', 'doc': 'as H5Builder object'})
+    #def register_map(self, **kwargs):
+    #    """
+    #    Specify the attribute map for an NWBContainer type
+    #    """
+    #    obj_type, attr_map = getargs('obj_type', 'attr_map', kwargs)
+    #    type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
+    #    self.__maps[type_name] = attr_map
 
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
             {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'})
@@ -25,12 +29,12 @@ class TypeMap(object):
         """
         Specify the specification for an NWBContainer type
         """
-        self.__catalog.register_spec(container_type, spec)
+        obj_type, spec = getargs('obj_type', 'spec', kwargs)
+        self.__catalog.register_spec(obj_type, spec)
         ndt = spec.neurodata_type_def
         if ndt is None:
             raise ValueError("'spec' must define a neurodata type")
-        map_cls = self.__map_types.get(ndt, H5Builder)
-        self.register_map(container_type, map_cls(spec))
+        #self.register_map(obj_type, map_cls(spec))
 
     @docval({'name': 'spec', 'type': 'Spec', 'doc': 'the Spec object to register'})
     def auto_register(self, **kwargs):
@@ -54,16 +58,23 @@ class TypeMap(object):
         A decorator to specify H5Builder subclasses for specific neurodata types
         """
         ndt = getargs('ndt', kwargs)
-        def _dec(map_self):
-            self.__map_types[ndt] = map_self
-            return map_self
+        def _dec(map_cls):
+            self.__map_types[ndt] = map_cls
+            spec = self.__catalog.get_spec(ndt)
+            #if spec is not None:
+            #    self.register_map(ndt, map_cls(spec))
+            return map_cls
         return _dec
 
     def get_map(self, container):
         """
         Return the H5Builder object that should be used for the given container
         """
-        self.__maps.get(container.__class__.__name__, None)
+        ndt = container.__class__.__name__
+        spec = self.__catalog.get_spec(ndt)
+        map_cls = self.__map_types.get(ndt, H5Builder)
+        return map_cls(spec)
+        #return self.__maps.get(container.__class__.__name__, None)
 
     def get_registered_types(self):
         """
@@ -71,10 +82,12 @@ class TypeMap(object):
         """
         return tuple(self.__maps.keys())
 
-    def build(self, container, build_manager):
+    def build(self, container, build_manager=None):
         """
         Build the GroupBuilder for the given NWBContainer
         """
+        if build_manager is None:
+            build_manager = BuildManager()
         attr_map = self.get_map(container)
         if attr_map is None:
             raise ValueError('No H5Builder found for container of type %s' % str(container.__class__.__name__))
@@ -112,11 +125,11 @@ class H5Builder(object):
     def __init__(self, **kwargs):
         """ Create a map from Container attributes to NWB specifications
         """
-        spec = getargs('spec', **kwargs)
+        spec = getargs('spec', kwargs)
         self.__spec = spec
         self.__attr_map = dict()
-        self.__spec_map
-        self.__map_specs(self, spec)
+        self.__spec_map = dict()
+        self.__map_specs(spec)
 
     def __map_specs(self, spec):
         for subspec in chain(spec.attributes, spec.datasets):
@@ -166,7 +179,7 @@ class H5Builder(object):
             attr_value = getattr(container, attr_name)
             if attr_value is None:
                 continue
-            builder.add_attribute(spec.name, attr_value)
+            builder.set_attribute(spec.name, attr_value)
 
     def __add_datasets(self, builder, datasets, container, build_manager):
         for spec in datasets:
@@ -176,7 +189,7 @@ class H5Builder(object):
                 continue
             if spec.neurodata_type is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value)
-                self.__add_attributes(sub_builder, spec, container)
+                self.__add_attributes(sub_builder, spec.attributes, container)
             else:
                 self.__build_helper(builder, spec, attr_value, build_manager)
 
@@ -186,9 +199,9 @@ class H5Builder(object):
                 # we don't need to get attr_name since any named
                 # group does not have the concept of value
                 sub_builder = builder.add_group(spec.name)
-                self.__add_attributes(sub_builder, spec, container)
-                self.__add_datasets(sub_builder, spec, container, build_manager)
-                self.__add_groups(sub_builder, spec, container, build_manager)
+                self.__add_attributes(sub_builder, spec.attributes, container)
+                self.__add_datasets(sub_builder, spec.datasets, container, build_manager)
+                self.__add_groups(sub_builder, spec.groups, container, build_manager)
             else:
                 attr_name = self.get_attribute(spec)
                 value = getattr(container, attr_name)
@@ -232,7 +245,7 @@ class H5Builder(object):
         """Map an attribute to spec. Use this to override default
            behavior
         """
-        attr_name, spec = getargs()
+        attr_name, spec = getargs('attr_name', 'spec', kwargs)
         tmp = spec
         self.__attr_map[attr_name] = tmp
         self.__spec_map[tmp] = attr_name
