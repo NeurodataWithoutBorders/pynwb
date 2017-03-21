@@ -228,6 +228,8 @@ def getargs(*argnames):
     '''getargs(*argnames, argdict)
     Convenience function to retrieve arguments from a dictionary in batch
     '''
+    if len(argnames) < 2:
+        raise ValueError('Must supply at least one key and a dict')
     if not isinstance(argnames[-1], dict):
         raise ValueError('last argument must be dict')
     kwargs = argnames[-1]
@@ -241,6 +243,8 @@ def popargs(*argnames):
     '''popargs(*argnames, argdict)
     Convenience function to retrieve and remove arguments from a dictionary in batch
     '''
+    if len(argnames) < 2:
+        raise ValueError('Must supply at least one key and a dict')
     if not isinstance(argnames[-1], dict):
         raise ValueError('last argument must be dict')
     kwargs = argnames[-1]
