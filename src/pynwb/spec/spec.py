@@ -1,10 +1,7 @@
 import abc
 from copy import deepcopy
-
 from pynwb.core import docval, getargs, popargs, get_docval
-
 NAME_WILDCARD = None
-
 class SpecCatalog(object):
 
     def __init__(self):
