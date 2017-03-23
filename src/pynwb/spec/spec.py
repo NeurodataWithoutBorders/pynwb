@@ -2,39 +2,6 @@ import abc
 from copy import deepcopy
 from pynwb.core import docval, getargs, popargs, get_docval
 NAME_WILDCARD = None
-class SpecCatalog(object):
-
-    def __init__(self):
-        self.__specs = dict()
-
-    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
-            {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'})
-    def register_spec(self, **kwargs):
-        '''
-        Associate a specified object type with an HDF5 specification
-        '''
-        obj_type, spec, register_map = getargs('obj_type', 'spec', 'register_map', kwargs)
-        type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
-        if type_name in self.__specs:
-            raise ValueError("'%s' - cannot overwrite existing specification" % type_name)
-        self.__specs[type_name] = spec
-
-    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
-            returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
-    def get_spec(self, **kwargs):
-        '''
-        Get the Spec object for the given type
-        '''
-        obj_type = getargs('obj_type', kwargs)
-        type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
-        return self.__specs.get(type_name, None)
-
-    def get_registered_types(self):
-        '''
-        Return all registered specifications
-        '''
-        return tuple(self.__specs.keys())
-
 
 class Spec(dict, metaclass=abc.ABCMeta):
     """ A base specification class
@@ -470,3 +437,53 @@ class GroupSpec(BaseStorageSpec):
         if 'links' in ret:
             ret['links'] = list(map(LinkSpec.build_spec, ret['links']))
         return ret
+
+class SpecCatalog(object):
+
+    def __init__(self):
+        self.__specs = dict()
+
+    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
+            {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'})
+    def register_spec(self, **kwargs):
+        '''
+        Associate a specified object type with an HDF5 specification
+        '''
+        obj_type, spec, register_map = getargs('obj_type', 'spec', 'register_map', kwargs)
+        type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
+        if type_name in self.__specs:
+            raise ValueError("'%s' - cannot overwrite existing specification" % type_name)
+        self.__specs[type_name] = spec
+
+    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
+            returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
+    def get_spec(self, **kwargs):
+        '''
+        Get the Spec object for the given type
+        '''
+        obj_type = getargs('obj_type', kwargs)
+        type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
+        return self.__specs.get(type_name, None)
+
+    def get_registered_types(self):
+        '''
+        Return all registered specifications
+        '''
+        return tuple(self.__specs.keys())
+
+    @docval({'name': 'spec', 'type': 'Spec', 'doc': 'the Spec object to register'})
+    def auto_register(self, **kwargs):
+        '''
+        Register this specification and all sub-specification using neurodata_type as object type name
+        '''
+        spec = getargs('spec', kwargs)
+        ndt = spec.neurodata_type_def
+        if ndt is not None:
+            self.register_spec(ndt, spec)
+        for dataset_spec in spec.datasets:
+            dset_ndt = dataset_spec.neurodata_type_def
+            if dset_ndt is not None:
+                self.register_spec(dset_ndt, dataset_spec)
+        for group_spec in spec.groups:
+            self.auto_register(group_spec)
+
