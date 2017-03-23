@@ -1,7 +1,5 @@
-from itertools import chain
-
 from pynwb.core import docval, getargs
-from .spec import SpecCatalog, Spec, DatasetSpec, GroupSpec, LinkSpec
+from pynwb.spec import SpecCatalog, Spec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD
 from .h5tools import DatasetBuilder, GroupBuilder
 
 class TypeMap(object):
@@ -13,30 +11,19 @@ class TypeMap(object):
         self.__map_types = dict()
         self.__catalog = catalog
 
-    #@docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
-    #        {'name': 'attr_map', 'type': 'H5Builder', 'doc': 'as H5Builder object'})
-    #def register_map(self, **kwargs):
-    #    """
-    #    Specify the attribute map for an NWBContainer type
-    #    """
-    #    obj_type, attr_map = getargs('obj_type', 'attr_map', kwargs)
-    #    type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
-    #    self.__maps[type_name] = attr_map
-
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
-            {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'})
+            {'name': 'spec', 'type': Spec, 'doc': 'a Spec object'})
     def register_spec(self, **kwargs):
         """
         Specify the specification for an NWBContainer type
         """
         obj_type, spec = getargs('obj_type', 'spec', kwargs)
-        self.__catalog.register_spec(obj_type, spec)
         ndt = spec.neurodata_type_def
         if ndt is None:
             raise ValueError("'spec' must define a neurodata type")
-        #self.register_map(obj_type, map_cls(spec))
+        self.__catalog.register_spec(obj_type, spec)
 
-    @docval({'name': 'spec', 'type': 'Spec', 'doc': 'the Spec object to register'})
+    @docval({'name': 'spec', 'type': Spec, 'doc': 'the Spec object to register'})
     def auto_register(self, **kwargs):
         '''
         Register this specification and all sub-specification using neurodata_type as object type name
@@ -55,26 +42,22 @@ class TypeMap(object):
     @docval({'name': 'ndt', 'type': (type, str), 'doc': 'the neurodata type to associate the decorated class with'})
     def neurodata_type(self, **kwargs):
         """
-        A decorator to specify H5Builder subclasses for specific neurodata types
+        A decorator to specify ObjectMapper subclasses for specific neurodata types
         """
         ndt = getargs('ndt', kwargs)
         def _dec(map_cls):
             self.__map_types[ndt] = map_cls
-            spec = self.__catalog.get_spec(ndt)
-            #if spec is not None:
-            #    self.register_map(ndt, map_cls(spec))
             return map_cls
         return _dec
 
     def get_map(self, container):
         """
-        Return the H5Builder object that should be used for the given container
+        Return the ObjectMapper object that should be used for the given container
         """
         ndt = container.__class__.__name__
         spec = self.__catalog.get_spec(ndt)
-        map_cls = self.__map_types.get(ndt, H5Builder)
+        map_cls = self.__map_types.get(ndt, ObjectMapper)
         return map_cls(spec)
-        #return self.__maps.get(container.__class__.__name__, None)
 
     def get_registered_types(self):
         """
@@ -90,14 +73,14 @@ class TypeMap(object):
             build_manager = BuildManager()
         attr_map = self.get_map(container)
         if attr_map is None:
-            raise ValueError('No H5Builder found for container of type %s' % str(container.__class__.__name__))
+            raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
             return attr_map.build(container, build_manager)
 
     def get_h5object_name(self, container):
         attr_map = self.get_map(container)
         if attr_map is None:
-            raise ValueError('No H5Builder found for container of type %s' % str(container.__class__.__name__))
+            raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
             return attr_map.get_h5object_name(container)
 
@@ -119,7 +102,7 @@ class BuildManager(object):
     def __ohash__(self, obj):
         return id(obj)
 
-class H5Builder(object):
+class ObjectMapper(object):
 
     @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'The specification for mapping objects to builders'})
     def __init__(self, **kwargs):
@@ -129,18 +112,24 @@ class H5Builder(object):
         self.__spec = spec
         self.__attr_map = dict()
         self.__spec_map = dict()
-        self.__map_specs(spec)
+        for subspec in spec.attributes:
+            self.__map_spec(subspec)
+        if isinstance(spec, GroupSpec):
+            for subspec in spec.datasets:
+                self.__map_spec(subspec)
+            for subspec in spec.groups:
+                self.__map_spec(subspec)
 
-    def __map_specs(self, spec):
-        for subspec in chain(spec.attributes, spec.datasets):
-            if subspec.name is not None:
-                self.__attr_map[subspec.name] = subspec
-                self.__spec_map[subspec] = subspec.name
-            else:
-                self.__attr_map[subspec.neurodata_type] = subspec
-                self.__spec_map[subspec] = subspec.neurodata_type
-        for subspec in spec.groups:
-            self.__map_specs(subspec)
+    def __map_spec(self, spec):
+        if spec.name != NAME_WILDCARD:
+            self.__attr_map[spec.name] = spec
+            self.__spec_map[spec] = spec.name
+        else:
+            self.__attr_map[subspec.neurodata_type] = subspec
+            self.__spec_map[subspec] = subspec.neurodata_type
+        if isinstance(spec, DatasetSpec):
+            for subspec in spec.attributes:
+                self.__map_spec(subspec)
 
     @property
     def children(self):
@@ -316,7 +305,7 @@ class H5Builder(object):
 #        return None
 #
 #@pynwb.io.TypeMap.neurodata_type('TimeSeries')
-#class TimeSeriesMap(H5Builder):
+#class TimeSeriesMap(ObjectMapper):
 #
 #    def __init__(self, spec):
 #        super(TimeSeriesMap, self).__init__(spec)
