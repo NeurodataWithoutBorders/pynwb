@@ -1,4 +1,5 @@
 from .core import docval, popargs 
+from pynwb.misc import IntervalSeries
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution
 
 import numpy as np
@@ -50,99 +51,144 @@ class SpatialSeries(TimeSeries):
         self.reference_frame = reference_frame
 
 class BehavioralEpochs(Interface):
-    pass
+    """
+    TimeSeries for storing behavoioral epochs. The objective of this and the other two Behavioral
+    interfaces (e.g. BehavioralEvents and BehavioralTimeSeries) is to provide generic hooks for
+    software tools/scripts. This allows a tool/script to take the output one specific interface (e.g.,
+    UnitTimes) and plot that data relative to another data modality (e.g., behavioral events) without
+    having to define all possible modalities in advance. Declaring one of these interfaces means that
+    one or more TimeSeries of the specified type is published. These TimeSeries should reside in a
+    group having the same name as the interface. For example, if a BehavioralTimeSeries interface
+    is declared, the module will have one or more TimeSeries defined in the module sub-group
+    "BehavioralTimeSeries". BehavioralEpochs should use IntervalSeries. BehavioralEvents is used
+    for irregular events. BehavioralTimeSeries is for continuous data.
+    """
+
+    __nwbfields__ = ('_IntervalSeries',)
+
+    _help = "General container for storing behavorial epochs."
+
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
+            {'name': '_IntervalSeries', 'type': IntervalSeries, 'doc': 'IntervalSeries or any subtype.'})
+    def __init__(self, **kwargs):
+        source, _IntervalSeries = popargs('source', '_IntervalSeries', kwargs)
+        super(BehavioralEpochs, self).__init__(source, **kwargs)
+        self._IntervalSeries = _IntervalSeries
 
 class BehavioralEvents(Interface):
-    pass
+    """
+    TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
+    """
+
+    __nwbfields__ = ('_TimeSeries',)
+
+    _help = "General container for storing event series."
+
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
+            {'name': '_TimeSeries', 'type': TimeSeries, 'doc': 'TimeSeries or any subtype.'})
+    def __init__(self, **kwargs):
+        source, _TimeSeries = popargs('source', '_TimeSeries', kwargs)
+        super(BehavioralEvents, self).__init__(source, **kwargs)
+        self._TimeSeries = _TimeSeries
 
 class BehavioralTimeSeries(Interface):
-    pass
+    """
+    TimeSeries for storing Behavoioral time series data.See description of BehavioralEpochs for
+    more details.
+    """
+
+    __nwbfields__ = ('_TimeSeries',)
+
+    _help = ""
+
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+            {'name': '_TimeSeries', 'type': TimeSeries, 'doc': '<TimeSeries> or any subtype.'})
+    def __init__(self, **kwargs):
+        source, _TimeSeries = popargs('source', '_TimeSeries', kwargs)
+        super(BehavioralTimeSeries, self).__init__(source, **kwargs)
+        self._TimeSeries = _TimeSeries
 
 class PupilTracking(Interface):
-    pass
+    """
+    Eye-tracking data, representing pupil size.
+    """
+
+    __nwbfields__ = ('_TimeSeries',)
+
+    _help = "Eye-tracking data, representing pupil size"
+
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+            {'name': '_TimeSeries', 'type': TimeSeries, 'doc': ''})
+    def __init__(self, **kwargs):
+        source, _TimeSeries = popargs('source', '_TimeSeries', kwargs)
+        super(PupilTracking, self).__init__(source, **kwargs)
+        self._TimeSeries = _TimeSeries
 
 class EyeTracking(Interface):
-    pass
+    """
+    Eye-tracking data, representing direction of gaze.
+    """
+
+    __nwbfields__ = ('_SpatialSeries',)
+
+    _help = ""
+
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+            {'name': '_SpatialSeries', 'type': SpatialSeries, 'doc': ''})
+    def __init__(self, **kwargs):
+        source, _SpatialSeries = popargs('source', '_SpatialSeries', kwargs)
+        super(EyeTracking, self).__init__(source, **kwargs)
+        self._SpatialSeries =_SpatialSeries
 
 class CompassDirection(Interface):
-    pass
+    """
+    With a CompassDirection interface, a module publishes a SpatialSeries object representing a
+    floating point value for theta. The SpatialSeries::reference_frame field should indicate what
+    direction corresponds to 0 and which is the direction of rotation (this should be clockwise). The
+    si_unit for the SpatialSeries should be radians or degrees.
+    """
+
+    __nwbfields__ = ('_SpatialSeries',)
+
+    _help = "Direction as measured radially. Spatial series reference frame should indicate which direction corresponds to zero and what is the direction of positive rotation."
+
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+            {'name': '_SpatialSeries', 'type': SpatialSeries, 'doc': 'SpatialSeries or any subtype.'})
+    def __init__(self, **kwargs):
+        source, _SpatialSeries = popargs('source', '_SpatialSeries', kwargs)
+        super(CompassDirection, self).__init__(source, **kwargs)
+        self._SpatialSeries = _SpatialSeries
 
 class Position(Interface):
-    pass
+    """
+    Position data, whether along the x, x/y or x/y/z axis.
+    """
+
+    __nwbfields__ = ('_SpatialSeries',)
+
+    _help = "Position data, whether along the x, xy or xyz axis"
+
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+            {'name': '_SpatialSeries', 'type': SpatialSeries, 'doc': ''})
+    def __init__(self, **kwargs):
+        source, _SpatialSeries = popargs('source', '_SpatialSeries', kwargs)
+        super(Position, self).__init__(source, **kwargs)
+        self._SpatialSeries = _SpatialSeries
 
 class MotionCorrection(Interface):
+    """
+    An image stack where all frames are shifted (registered) to a common coordinate system, to
+    account for movement and drift between frames. Note: each frame at each point in time is
+    assumed to be 2-D (has only x & y dimensions).
+    """
+    __nwbfields__ = ('image_stack',)
 
-    iface_type = "MotionCorrection"
+    _help = "Image stacks whose frames have been shifted (registered) to account for motion."
 
-    def add_corrected_image(self, name, orig, xy_translation, corrected):
-        """ Adds a motion-corrected image to the module, including
-            the original image stack, the x,y delta necessary to
-            shift the image frames for registration, and the corrected
-            image stack.
-            NOTE 1: All 3 timeseries use the same timestamps and so can share/
-            link timestamp arrays
-
-            NOTE 2: The timeseries passed in as 'xy_translation' and
-            'corrected' will be renamed to these names, if they are not
-            links to existing timeseries
-
-            NOTE 3: The timeseries arguments can be either TimeSeries
-            objects (new or old in case of latter 2 args) or strings.
-            If they are new TimeSeries objects, they will be stored
-            within the module. If they are existing objects, a link
-            to those objects will be created
-
-            Arguments:
-                *orig* (ImageSeries or text) ImageSeries object or
-                text path to original image time series
-
-                *xy_translation* TimeSeries storing displacements of
-                x and y direction in the data[] field
-
-                *corrected* Motion-corrected ImageSeries
-
-            Returns:
-                *nothing*
-        """
-        self.spec[name] = copy.deepcopy(self.spec["<>"])
-        # create link to original object
-        if isinstance(orig, _timeseries.TimeSeries):
-            if not orig.finalized:
-                self.nwb.fatal_error("Original timeseries must already be stored and finalized")
-            orig_path = orig.full_path()
-        else:
-            orig_path = orig
-        self.spec[name]["original"]["_value_hardlink"] = orig_path
-        self.spec[name]["original_path"]["_value"] = orig_path
-        links = "'original' is '%s'" % orig_path
-        # finalize other time series, or create link if a string was
-        #   provided
-        # XY translation
-        if isinstance(xy_translation, str):
-            self.spec[name]["xy_translation"]["_value_hardlink"] = xy_translation
-            links += "; 'xy_translation' is '%s'" % xy_translation
-        else:
-            if xy_translation.finalized:
-                # timeseries exists in file -- link to it
-                self.spec[name]["xy_translation"]["_value_hardlink"] = xy_translation.full_path()
-                links += "; 'corrected' is '%s'" % xy_translation.full_path()
-            else:
-                # new timeseries -- set it's path and finalize it
-                xy_translation.set_path("processing/" + self.module.name + "/MotionCorrection/" + name + "/")
-                xy_translation.reset_name("xy_translation")
-                xy_translation.finalize()
-        # corrected series
-        if isinstance(corrected, str):
-            self.spec[name]["corrected"]["_value_hardlink"] = corrected
-            links += "; 'corrected' is '%s'" % corrected
-        else:
-            if corrected.finalized:
-                # timeseries exists in file -- link to it
-                self.spec[name]["corrected"]["_value_hardlink"] = corrected.full_path()
-                links += "; 'corrected' is '%s'" % corrected.full_path()
-            else:
-                corrected.set_path("processing/" + self.module.name + "/MotionCorrection/" + name + "/")
-                corrected.reset_name("corrected")
-                corrected.finalize()
-        self.spec[name]["_attributes"]["links"]["_value"] = links
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+            {'name': 'image_stack', 'type': Iterable, 'doc': ''})
+    def __init__(self, **kwargs):
+        source, image_stack = popargs('source', 'image_stack', kwargs)
+        super(MotionCorrection, self).__init__(source, **kwargs)
+        self.image_stack = image_stack
 

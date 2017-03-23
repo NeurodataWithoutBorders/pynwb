@@ -34,5 +34,10 @@ class IntervalSeriesConstructor(unittest.TestCase):
 
 class UnitTimesConstructor(unittest.TestCase):
     def test_init(self):
-        pass
+        unit_times = [1.0, 2.0]
+        ut = UnitTimes('test_ut', unit_times, 'unit_description', 'unit_source')
+        self.assertEqual(ut.source, 'test_ut')
+        self.assertEqual(ut.unit_times, unit_times)
+        self.assertEqual(ut.unit_description, 'unit_description')
+        self.assertEqual(ut.unit_source, 'unit_source')
 

@@ -1,4 +1,4 @@
-from .base import TimeSeries, _default_resolution, _default_conversion
+from .base import Interface, TimeSeries, _default_resolution, _default_conversion
 from .core import docval, popargs, NWBContainer
 
 import numpy as np
@@ -205,4 +205,33 @@ class OpticalSeries(ImageSeries):
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
+
+class ImagePlane(NWBContainer):
+    # see /general/optophysiology/<imaging_plane_X> spec
+    pass
+
+class ImageSegmentation(Interface):
+    """
+    Stores pixels in an image that represent different regions of interest (ROIs) or masks. All
+    segmentation for a given imaging plane is stored together, with storage for multiple imaging
+    planes (masks) supported. Each ROI is stored in its own subgroup, with the ROI group
+    containing both a 2D mask and a list of pixels that make up this mask. Segments can also be
+    used for masking neuropil. If segmentation is allowed to change with time, a new imaging plane
+    (or module) is required and ROI names should remain consistent between them.
+    """
+
+    __nwbfields__ = ('image_plane',)
+
+    _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
+
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
+            {'name': 'image_plane', 'type': ImagePlane, 'doc': 'ImagePlane class.'})
+    def __init__(self, **kwargs):
+        source, image_plane = popargs('source', 'image_plane', kwargs)
+        super(ImageSegmentation, self).__init__(source, **kwargs)
+        self.image_plane = image_plane
+
+class OpticalChannel(NWBContainer):
+    # see /general/optophysiology/<imaging_plane_X>/<channel_X> spec
+    pass
 

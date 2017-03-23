@@ -1,7 +1,7 @@
 import unittest
 
 from pynwb import TimeSeries
-from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries
+from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, ImageSegmentation, ImagePlane
 
 import numpy as np
 
@@ -58,4 +58,20 @@ class OpticalSeriesConstructor(unittest.TestCase):
         self.assertEqual(ts.external_file, ['external_file'])
         self.assertEqual(ts.starting_frame, [1, 2, 3])
         self.assertEqual(ts.format, 'tiff')
+
+class ImageSegmentationConstructor(unittest.TestCase):
+
+    def test_init(self):
+        ip = ImagePlane()
+        iS = ImageSegmentation('test_iS', ip)
+        self.assertEqual(iS.source, 'test_iS')
+        self.assertEqual(iS.image_plane, ip)
+
+class ImagePlaneConstructor(unittest.TestCase):
+    def test_init(self):
+        pass
+
+class OpticalChannelConstructor(unittest.TestCase):
+    def test_init(self):
+        pass
 

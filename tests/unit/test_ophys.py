@@ -1,7 +1,7 @@
 import unittest
 
 from pynwb import TimeSeries
-from pynwb.ophys import TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, ImageSegmentation, ImagingPlane, OpticalChannel
+from pynwb.ophys import TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence
 from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries
 
 import numpy as np
@@ -22,7 +22,6 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(tPS.format, 'tiff')
         self.assertEqual(tPS.dimension, [np.nan])
 
-
 class RoiResponseSeriesConstructor(unittest.TestCase):
     def test_init(self):
         iS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', np.nan, [np.nan], timestamps=list())
@@ -36,21 +35,17 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
 
 class DfOverFConstructor(unittest.TestCase):
     def test_init(self):
-        pass
+        iS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', np.nan, [np.nan], timestamps=list())
+        rrs = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', ['name1'], iS, 'segmenttation_interface_path', timestamps=list())
+        dof = DfOverF('test_dof', rrs)
+        self.assertEqual(dof.source, 'test_dof')
+        self.assertEqual(dof._RoiResponseSeries, rrs)
 
 class FluorescenceConstructor(unittest.TestCase):
     def test_init(self):
-        pass
-
-class ImageSegmentationConstructor(unittest.TestCase):
-    def test_init(self):
-        pass
-
-class ImagingPlaneConstructor(unittest.TestCase):
-    def test_init(self):
-        pass
-
-class OpticalChannelConstructor(unittest.TestCase):
-    def test_init(self):
-        pass
+        iS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', np.nan, [np.nan], timestamps=list())
+        ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', ['name1'], iS, 'segmenttation_interface_path', timestamps=list())
+        ff = Fluorescence('test_ff', ts)
+        self.assertEqual(ff.source, 'test_ff')
+        self.assertEqual(ff._RoiResponseSeries, ts)
 

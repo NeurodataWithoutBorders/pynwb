@@ -1,4 +1,4 @@
-from .core import docval, getargs
+from .core import docval, getargs, popargs
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution
 
 import numpy as np
@@ -6,7 +6,7 @@ from collections import Iterable
 
 
 class AnnotationSeries(TimeSeries):
-    '''
+    """
     Stores text-based records about the experiment. To use the
     AnnotationSeries, add records individually through
     add_annotation() and then call finalize(). Alternatively, if
@@ -15,7 +15,7 @@ class AnnotationSeries(TimeSeries):
 
     All time series are created by calls to  NWB.create_timeseries().
     They should not not be instantiated directly
-    '''
+    """
 
     _ancestry = "TimeSeries,AnnotationSeries"
     _help = "Time-stamped annotations about an experiment."
@@ -32,8 +32,8 @@ class AnnotationSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        name, source, data, timestamps = getargs('name', 'source', 'data', 'timestamps', kwargs)
-        super(AnnotationSeries, self).__init__(name, source, data, 'n/a', resolution=np.nan, conversion=np.nan, timestamps=timestamps)
+        name, source, data, timestamps = popargs('name', 'source', 'data', 'timestamps', kwargs)
+        super(AnnotationSeries, self).__init__(name, source, data, 'n/a', resolution=np.nan, conversion=np.nan, timestamps=timestamps, **kwargs)
 
 
     @docval({'name': 'time', 'type': float, 'doc': 'The time for the anotation'},
@@ -85,7 +85,7 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        name, source, data = getargs('name', 'source', 'data', kwargs)
+        name, source, data = popargs('name', 'source', 'data', kwargs)
         super(AbstractFeatureSeries, self).__init__(name, source, data, "see 'feature_units'", **kwargs)
         self.features = getargs('features', kwargs)
         self.feature_units = getargs('feature_units', kwargs)
@@ -122,7 +122,7 @@ class IntervalSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        name, source = getargs('name', 'source', kwargs)
+        name, source = popargs('name', 'source', kwargs)
         self.__interval_data = list()
         self.__interval_timestamps = list()
         super(IntervalSeries, self).__init__(name, source, self.__interval_data, "n/a",
@@ -148,73 +148,20 @@ class UnitTimes(Interface):
     possible/relevant (e.g., name of ROIs from Segmentation module).
     """
 
-    iface_type = "UnitTimes"
+    __nwbfields__ = ('unit_source',
+                     'unit_times',
+                     'unit_description')
 
-    def __init__(self, name, module, spec):
-        super(UnitTimes, self).__init__(name, module, spec)
-        self.unit_list = []
-    
-    def add_unit(self, unit_name, unit_times, description, source):
-        """ Adds data about a unit to the module, including unit name,
-            description and times. 
+    _help = "Estimated spike times from a single unit"
 
-            Arguments:
-                *unit_name* (text) Name of the unit, as it will appear in the file
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+            {'name': 'unit_times', 'type': Iterable, 'doc': 'Spike time for the units (exact or estimated)'},
+            {'name': 'unit_description', 'type': str, 'doc': 'Description of the unit (eg, cell type).'},
+            {'name': 'unit_source', 'type': str, 'doc': 'Name, path or description of where unit times originated. This is necessary only if the info here differs from or is more fine-grained than the interfaces source field.', 'default': None})
+    def __init__(self, **kwargs):
+        source, unit_times, unit_description, unit_source = popargs('source', 'unit_times', 'unit_description', 'unit_source', kwargs)
+        super(UnitTimes, self).__init__(source, **kwargs)
+        self.unit_times = unit_times
+        self.unit_description = unit_description
+        self.unit_source = unit_source
 
-                *unit_times* (double array) Times that the unit spiked
-
-                *description* (text) Information about the unit
-
-                *source* (text) Name, path or description of where unit times originated
-        """
-        if unit_name not in self.iface_folder:
-            self.iface_folder.create_group(unit_name)
-        else:
-            self.nwb.fatal_error("unit %s already exists" % unit_name)
-        spec = copy.deepcopy(self.spec["<>"])
-        spec["unit_description"]["_value"] = description
-        spec["times"]["_value"] = unit_times
-        spec["source"]["_value"] = source
-        self.spec[unit_name] = spec
-        #unit_times = ut.create_dataset("times", data=unit_times, dtype='f8')
-        #ut.create_dataset("unit_description", data=description)
-        self.unit_list.append(str(unit_name))
-
-    def append_unit_data(self, unit_name, key, value):
-        """ Add auxiliary information (key-value) about a unit.
-            Data will be stored in the folder that contains data
-            about that unit.
-
-            Arguments:
-                *unit_name* (text) Name of unit, as it appears in the file
-
-                *key* (text) Key under which the data is added
-
-                *value* (any) Data to be added
-
-            Returns:
-                *nothing*
-        """
-        if unit_name not in self.spec:
-            self.nwb.fatal_error("unrecognized unit name " + unit_name)
-        spec = copy.deepcopy(self.spec["<>"]["[]"])
-        spec["_value"] = value
-        self.spec[unit_name][key] = spec
-        #ut.create_dataset(data_name, data=aux_data)
-
-    def finalize(self):
-        """ Extended (subclassed) finalize procedure. It creates and stores a list of all units in the module and then
-            calls the superclass finalizer.
-
-            Arguments:
-                *none*
-
-            Returns:
-                *nothing*
-        """
-        if self.finalized:
-            return
-        self.spec["unit_list"]["_value"] = self.unit_list
-        if len(self.unit_list) == 0:
-            self.nwb.fatal_error("UnitTimes interface created with no units")
-        super(UnitTimes, self).finalize()
