@@ -111,7 +111,7 @@ class EventDetection(Interface):
             {'name': 'event_times', 'type': str, 'doc': 'timestamps of events'})
     def __init___(self, **kwargs):
                   #source_indices=list()):
-        source, data, detection_method, event_times = getargs('source', 'voltage_data_ts', 'detection_method', 'event_times', kwargs)
+        source, data, detection_method, event_times = getargs('source', 'data', 'detection_method', 'event_times', kwargs)
         super(EventDetection, self).__init__(source)
         self.detection_method = detection_method
         self.event_times = event_times
@@ -166,7 +166,7 @@ class Clustering(Interface):
         super(Clustering, self).__init__(source)
         self.cluster_times = cluster_times
         self.cluster_ids = cluster_ids
-        self.peak_over_rms = dict(enumerate(peak_over_rms))
+        self.peak_over_rms = list(peak_over_rms)
 
 #    def add_event(self, cluster_id, time):
 #        self.nums.append(cluster_num)
@@ -213,8 +213,8 @@ class LFP(Interface):
             {'name': 'data', 'type': ElectricalSeries, 'doc': 'LFP electrophysiology data'})
     def __init__(self, **kwargs):
         source, data = getargs('source', 'data', kwargs)
-        data.parent = self
         super(LFP, self).__init__(source)
+        data.parent = self
         self.data = data
 
 class FilteredEphys(Interface):
@@ -229,8 +229,8 @@ class FilteredEphys(Interface):
             {'name': 'data', 'type': ElectricalSeries, 'doc': 'filtered electrophysiology data'})
     def __init__(self, **kwargs):
         source, data = getargs('source', 'data', kwargs)
-        data.parent = self
         super(FilteredEphys, self).__init__(source)
+        data.parent = self
         self.data = data
 
 
