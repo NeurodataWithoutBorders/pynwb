@@ -38,9 +38,6 @@ class ElectricalSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        """
-        Create a new ElectricalSeries dataset
-        """
         name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', kwargs)
         super(ElectricalSeries, self).__init__(name, source, data, 'volt', **kwargs)
         self.electrodes = tuple(electrodes)
@@ -242,7 +239,7 @@ class FilteredEphys(Interface):
     electrode may have different filtered (e.g., theta and/or gamma) signals represented.
     """
 
-    __nwbfields__ = ('data',)
+    __nwbfields__ = ('_ElectricalSeries',)
 
     __help = ("Ephys data from one or more channels that is subjected to filtering, such as "
              "for gamma or theta oscillations (LFP has its own interface). Filter properties should "
@@ -273,13 +270,13 @@ class FeatureExtraction(Interface):
             {'name': 'electrodes', 'type': (list, tuple, np.ndarray), 'doc': 'the electrode groups for each channel from which features were extracted'},
             {'name': 'description', 'type': (list, tuple, np.ndarray), 'doc': 'a description for each feature extracted'},
             {'name': 'event_times', 'type': (list, tuple, np.ndarray), 'doc': 'the times of events that features correspond to'},
-            {'name': 'features', 'type': (list, tuple, np.ndarray), 'doc': 'features for each channel'})
+            {'name': 'features', 'type': (list, tuple, np.ndarray, Iterable), 'doc': 'features for each channel'})
     def __init__(self, **kwargs):
         source, electrodes, description, event_times, features = popargs('source', 'electrodes', 'description', 'event_times', 'features', kwargs)
         try:
-            features_shape = features.shape if isinstance(features, np.ndarray) else (len(features),
-                                                                                      len(features[0]),
-                                                                                      len(features[0][0]))
+            features_shape = features.shape if hasattr(features, 'shape') else (len(features),
+                                                                                len(features[0]),
+                                                                                len(features[0][0]))
             if len(features_shape) != 3:
                 raise ValueError("incorrect dimensions: features must be a 3D array.")
         except:
@@ -294,5 +291,5 @@ class FeatureExtraction(Interface):
         self.fields['electrodes'] = electrodes
         self.fields['description'] = description
         self.fields['event_times'] = list(event_times)
-        self.fields['features'] = list(features)
+        self.fields['features'] = features
 

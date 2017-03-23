@@ -1,6 +1,7 @@
 import unittest
 
-from pynwb.io.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
+from pynwb.io.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, DataChunkIterator, __chunked_iter_fill__, write_dataset, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
+from pynwb.io.utils import DataChunkIterator
 
 import h5py
 import os
@@ -13,28 +14,96 @@ class H5IOTest(unittest.TestCase):
 
 
     def setUp(self):
-        self.test_file_path = os.path.join(tempfile.gettempdir(), 'test.h5')
-        self.f = h5py.File(self.test_file_path, 'w')
+        self.test_temp_file = tempfile.NamedTemporaryFile()
+        self.f = h5py.File(self.test_temp_file.name, 'w')
 
     def tearDown(self):
-        self.f.close()
-        os.remove(self.test_file_path)
-        
-    def test_iter_fill_divisible_chunks_data_fit(self):
-        my_dset = __iter_fill__(self.f, 'test_dataset', range(100), 25)
-        self.assertEqual(my_dset[99], 99)
+        del self.f
+        del self.test_temp_file
+        self.f = None
+        self.test_temp_file = None
 
-    def test_iter_fill_divisible_chunks_data_nofit(self):
-        my_dset = __iter_fill__(self.f, 'test_dataset', range(200), 25)
-        self.assertEqual(my_dset[199], 199)
+    ##########################################
+    #  __chunked_iter_fill__(...) tests
+    ##########################################
+    def test__chunked_iter_fill_iterator_matched_buffer_size(self):
+        dci = DataChunkIterator(data=range(10), buffer_size=2)
+        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        self.assertListEqual(my_dset[:].tolist(), list(range(10)))
 
-    def test_iter_fill_nondivisible_chunks_data_fit(self):
-        my_dset = __iter_fill__(self.f, 'test_dataset', range(100), 30)
-        self.assertEqual(my_dset[99], 99)
+    def test__chunked_iter_fill_iterator_unmatched_buffer_size(self):
+        dci = DataChunkIterator(data=range(10), buffer_size=3)
+        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        self.assertListEqual(my_dset[:].tolist(), list(range(10)))
 
-    def test_iter_fill_nondivisible_chunks_data_nofit(self):
-        my_dset = __iter_fill__(self.f, 'test_dataset', range(200), 30)
-        self.assertEqual(my_dset[199], 199)
+    def test__chunked_iter_fill_numpy_matched_buffer_size(self):
+        a = np.arange(30).reshape(5,2,3)
+        dci = DataChunkIterator(data=a, buffer_size=1)
+        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        self.assertTrue(np.all(my_dset[:] == a))
+        self.assertTupleEqual(my_dset.shape, a.shape)
+
+    def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):
+        a = np.arange(30).reshape(5,2,3)
+        dci = DataChunkIterator(data=a, buffer_size=3)
+        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        self.assertTrue(np.all(my_dset[:] == a))
+        self.assertTupleEqual(my_dset.shape, a.shape)
+
+    def test__chunked_iter_fill_list_matched_buffer_size(self):
+        a = np.arange(30).reshape(5,2,3)
+        dci = DataChunkIterator(data=a.tolist(), buffer_size=1)
+        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        self.assertTrue(np.all(my_dset[:] == a))
+        self.assertTupleEqual(my_dset.shape, a.shape)
+
+    def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):
+        a = np.arange(30).reshape(5,2,3)
+        dci = DataChunkIterator(data=a.tolist(), buffer_size=3)
+        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        self.assertTrue(np.all(my_dset[:] == a))
+        self.assertTupleEqual(my_dset.shape, a.shape)
+
+    ##########################################
+    #  write_dataset tests
+    ##########################################
+    def test_write_dataset_scalar(self):
+        a = 10
+        write_dataset(self.f, 'test_dataset', a, {})
+        dset = self.f['test_dataset']
+        self.assertTupleEqual(dset.shape, ())
+        self.assertEqual(dset[()], a)
+
+    def test_write_dataset_string(self):
+        a = 'test string'
+        write_dataset(self.f, 'test_dataset', a, {})
+        dset = self.f['test_dataset']
+        self.assertTupleEqual(dset.shape, ())
+        self.assertEqual(dset[()].decode('utf-8'), a)
+
+    def test_write_dataset_list(self):
+        a = np.arange(30).reshape(5,2,3)
+        write_dataset(self.f, 'test_dataset', a.tolist(), {})
+        dset = self.f['test_dataset']
+        self.assertTrue(np.all(dset[:] == a))
+
+    def test_write_dataset_iterable(self):
+        write_dataset(self.f, 'test_dataset', range(10), {})
+        dset = self.f['test_dataset']
+        self.assertListEqual(dset[:].tolist(), list(range(10)))
+
+    def test_write_dataset_iterable_multidimensional_array(self):
+        a = np.arange(30).reshape(5, 2, 3)
+        aiter = iter(a)
+        write_dataset(self.f, 'test_dataset', aiter, {})
+        dset = self.f['test_dataset']
+        self.assertListEqual(dset[:].tolist(), a.tolist())
+
+    def test_write_dataset_data_chunk_iterator(self):
+        dci = DataChunkIterator(data=np.arange(10), buffer_size=2)
+        write_dataset(self.f, 'test_dataset', dci, {})
+        dset = self.f['test_dataset']
+        self.assertListEqual(dset[:].tolist(), list(range(10)))
 
 class GroupBuilderSetterTests(unittest.TestCase):
     """Tests for setter functions in GroupBuilder class"""
@@ -99,13 +168,13 @@ class GroupBuilderGetterTests(unittest.TestCase):
         }
         for key, value in attrs.items():
             setattr(self, key, value)
-        
+
         setattr(self, 'group1', GroupBuilder({'subgroup1':self.subgroup1}))
         setattr(self, 'gb', GroupBuilder({'group1': self.group1},
                                          {'dataset1': self.dataset1},
-                                         {'int_attr': self.int_attr, 
+                                         {'int_attr': self.int_attr,
                                           'str_attr': self.str_attr},
-                                         {'soft_link1': self.soft_link1, 
+                                         {'soft_link1': self.soft_link1,
                                           'hard_link1': self.hard_link1,
                                           'external_link1': self.external_link1}))
 
@@ -232,7 +301,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
             {
             "group1": {
                 "subgroup1": {
-        
+
                 }
             },
             "dataset1": {
@@ -272,7 +341,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
 
         print (dump)
         self.assertDictEqual(json.loads(builder_json), json.loads(dump))
-    
+
 
 class GroupBuilderIsEmptyTests(unittest.TestCase):
 
@@ -383,8 +452,6 @@ class DatasetBuilderDeepUpdateTests(unittest.TestCase):
         db1.deep_update(db2)
         self.assertListEqual(db1.data, db2.data)
         self.assertIn('attr1', db1.attributes)
-
-
 
 if __name__ == '__main__':
     unittest.main()

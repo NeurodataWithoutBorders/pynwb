@@ -12,10 +12,12 @@ import numpy as np
 import h5py as _h5py
 
 from ..core import docval, getargs
+from .utils import DataChunkIterator
 
 SOFT_LINK = 0
 HARD_LINK = 1
 EXTERNAL_LINK = 2
+
 
 def set_attributes(obj, attributes):
     for key, value in attributes.items():
@@ -25,11 +27,12 @@ def set_attributes(obj, attributes):
                 if isinstance(tmp[0], str):
                     max_len = max(len(s) for s in tmp)
                     dt = '|S%d' % max_len
-                    value = np.array(tmp, dtype=dt) 
+                    value = np.array(tmp, dtype=dt)
             else:
                 print('converting %s to an empty numpy array' % key)
                 value = np.array(value)
         obj.attrs[key] = value
+
 
 def write_group(parent, name, subgroups, datasets, attributes, links):
     group = parent.create_group(name)
@@ -37,15 +40,15 @@ def write_group(parent, name, subgroups, datasets, attributes, links):
     if subgroups:
         for subgroup_name, builder in subgroups.items():
             # do not create an empty group without attributes or links
-            #if builder.is_empty():
+            # if builder.is_empty():
             #    continue
             tmp_links = write_group(group,
-                            subgroup_name,
-                            builder.groups,
-                            builder.datasets,
-                            builder.attributes,
-                            builder.links)
-            #for link_name, target in tmp_links.items():
+                                    subgroup_name,
+                                    builder.groups,
+                                    builder.datasets,
+                                    builder.attributes,
+                                    builder.links)
+            # for link_name, target in tmp_links.items():
             #    if link_name[0] != '/':
             #        link_name = _posixpath.join(name, link_name)
             #    links_to_create[link_name] = target
@@ -59,9 +62,8 @@ def write_group(parent, name, subgroups, datasets, attributes, links):
 
     set_attributes(group, attributes)
 
-    return {_posixpath.join(name, k) if k[0] != '/' else k: v 
+    return {_posixpath.join(name, k) if k[0] != '/' else k: v
             for k, v in links_to_create.items()}
-
 
 
 def __get_shape_helper(data):
@@ -72,11 +74,13 @@ def __get_shape_helper(data):
             shape.extend(__get_shape_helper(data[0]))
     return tuple(shape)
 
+
 def __get_shape(data):
     if hasattr(data, '__len__') and not isinstance(data, str):
         return __get_shape_helper(data)
     else:
         return None
+
 
 def __get_type(data):
     if isinstance(data, str):
@@ -86,74 +90,105 @@ def __get_type(data):
     else:
         return __get_type(data[0])
 
-def write_dataset(parent, name, data, attributes, function=None):
+
+def isintance_inmemory_array(data):
+    """Check if an object is a common in-memory data structure"""
+    return isinstance(data, list) or \
+           isinstance(data, np.ndarray) or \
+           isinstance(data, tuple) or \
+           isinstance(data, set) or \
+           isinstance(data, str) or \
+           isinstance(data, frozenset)
+
+
+def write_dataset(parent, name, data, attributes):
+    """
+    Write a dataset to HDF5.
+
+    The function uses other dataset-dependent write functions, e.g,
+    __scalar_fill__, __list_fill__ and __chunked_iter_fill__ to write the data.
+
+    :param parent: Parent HDF5 object
+    :param name: Name of the data to be written.
+    :param data: Data object to be written.
+    :param attributes:
+    """
     dset = None
     if isinstance(data, str):
         dset = __scalar_fill__(parent, name, data)
+    elif isinstance(data, DataChunkIterator):
+        dset = __chunked_iter_fill__(parent, name, data)
+    elif isinstance(data, Iterable) and not isintance_inmemory_array(data):
+        dset = __chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
     elif hasattr(data, '__len__'):
         dset = __list_fill__(parent, name, data)
-    elif isinstance(data, Iterable):
-        chunk_size = 100
-        #TODO: do something to figure out appropriate chunk_size
-        dset = __iter_fill__(parent, name, data, chunk_size, function=None)
     else:
         dset = __scalar_fill__(parent, name, data)
     set_attributes(dset, attributes)
-    
+
+
 def __extend_dataset__(dset):
     new_shape = list(dset.shape)
     new_shape[0] = 2*new_shape[0]
     dset.resize(new_shape)
+
 
 def __trim_dataset__(dset, length):
     new_shape = list(dset.shape)
     new_shape[0] = length
     dset.resize(new_shape)
 
+
+def __selection_max_bounds__(selection):
+    """Determine the bounds of a numpy selection index tuple"""
+    if isinstance(selection, int):
+        return selection+1
+    elif isinstance(selection, slice):
+        return selection.stop
+    elif isinstance(selection, list) or isinstance(selection, np.ndarray):
+        return np.nonzero(selection)[0][-1]+1
+    elif isinstance(selection, tuple):
+        return tuple([__selection_max_bounds__(i) for i in selection])
+
+
 def __scalar_fill__(parent, name, data):
     dtype = __get_type(data)
     dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype)
     return dset
 
-def __iter_fill__(parent, name, data, chunk_size, function=None):
-    #data_shape = list(__get_shape(data))
-    #data_shape[0] = None
-    #data_shape = tuple(data_shape)
-    data_iter = iter(data)
-    curr_chunk = [next(data_iter) for i in range(chunk_size)]
 
-    data_shape = __get_shape(curr_chunk)
-    data_dtype = __get_type(curr_chunk)
-    max_shape = list(data_shape)
-    max_shape[0] = None
-    dset = parent.create_dataset(name, shape=data_shape, dtype=data_dtype, maxshape=max_shape)
+def __chunked_iter_fill__(parent, name, data):
+    """
+    Write data to a dataset one-chunk-at-a-time based on the given DataChunkIterator
 
-    idx = 0
-    more_data = True
-    args = [data_iter] * chunk_size
-    chunks = _itertools.zip_longest(*args, fillvalue=None)
+    :param parent: The parent object to which the dataset should be added
+    :type parent: h5py.Group, h5py.File
+    :param name: The name of the dataset
+    :type name: str
+    :param data: The data to be written.
+    :type data: DataChunkIterator
 
-    if function:
-        def proc_chunk(chunk):
-            dset[idx:idx+len(chunk),] = chunk
-            function(chunk)
-    else:
-        def proc_chunk(chunk):
-            dset[idx:idx+len(chunk),] = chunk
-            
-    while more_data:
-        try:
-            next_chunk = next(chunks)
-        except StopIteration:
-            curr_chunk = list(filter(lambda x: x, curr_chunk))
-            more_data = False
-        if idx >= dset.shape[0] or idx+len(curr_chunk) > dset.shape[0]:
-            __extend_dataset__(dset)
-        #dset[idx:idx+len(curr_chunk),] = curr_chunk
-        proc_chunk(curr_chunk)
-        curr_chunk = next_chunk
-        idx += chunk_size
+    """
+    recommended_chunks = data.recommended_chunk_shape()
+    chunks = True if recommended_chunks is None else recommended_chunks
+    baseshape = data.recommended_data_shape()
+    dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
+    for curr_chunk, curr_chunk_location in data:
+        # Determine the minimum array dimensions to fit the chunk selection
+        max_bounds = __selection_max_bounds__(curr_chunk_location)
+        if not hasattr(max_bounds, '__len__'):
+            max_bounds = (max_bounds,)
+        # Determine if we need to expand any of the data dimensions
+        expand_dims = [i for i, v in enumerate(max_bounds) if v is not None and v > dset.shape[i]]
+        # Expand the dataset if needed
+        if len(expand_dims) > 0:
+            new_shape = np.asarray(dset.shape)
+            new_shape[expand_dims] = np.asarray(max_bounds)[expand_dims]
+            dset.resize(new_shape)
+        # Process and write the data
+        dset[curr_chunk_location] = curr_chunk
     return dset
+
 
 def __list_fill__(parent, name, data):
     data_shape = __get_shape(data)
@@ -165,7 +200,7 @@ def __list_fill__(parent, name, data):
         dset.resize(new_shape)
     dset[:] = data
     return dset
-    
+
 
 class GroupBuilder(dict):
     __link = 'links'
@@ -173,10 +208,14 @@ class GroupBuilder(dict):
     __dataset = 'datasets'
     __attribute = 'attributes'
 
-    @docval({'name':'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this group', 'default': dict()},
-            {'name':'datasets', 'type': dict, 'doc': 'a dictionary of datasets to create in this group', 'default': dict()},
-            {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this group', 'default': dict()},
-            {'name':'links', 'type': dict, 'doc': 'a dictionary of links to create in this group', 'default': dict()})
+    @docval({'name': 'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this group',
+             'default': dict()},
+            {'name': 'datasets', 'type': dict, 'doc': 'a dictionary of datasets to create in this group',
+             'default': dict()},
+            {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this group',
+             'default': dict()},
+            {'name': 'links', 'type': dict, 'doc': 'a dictionary of links to create in this group',
+             'default': dict()})
     def __init__(self, groups=dict(), datasets=dict(), attributes=dict(), links=dict()):
         """
         Create a GroupBuilder object
@@ -199,7 +238,7 @@ class GroupBuilder(dict):
     @property
     def groups(self):
         return super().__getitem__(GroupBuilder.__group)
-    
+
     @property
     def datasets(self):
         return super().__getitem__(GroupBuilder.__dataset)
@@ -234,9 +273,9 @@ class GroupBuilder(dict):
         builder = DatasetBuilder(**kwargs)
         self.set_dataset(name, builder)
         return builder
-    
-    @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
-            {'name':'builder', 'type': 'DatasetBuilder', 'doc': 'the GroupBuilder that represents this dataset'})
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this dataset'},
+            {'name': 'builder', 'type': 'DatasetBuilder', 'doc': 'the GroupBuilder that represents this dataset'})
     def set_dataset(self, **kwargs):
         """
         Add a dataset to this group
@@ -244,11 +283,11 @@ class GroupBuilder(dict):
         name, builder, = getargs('name', 'builder', kwargs)
         self.__set_builder(name, builder, GroupBuilder.__dataset)
 
-    @docval({'name':'name', 'type': str, 'doc': 'the name of this subgroup'},
-            {'name':'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this subgroup', 'default': dict()},
-            {'name':'datasets', 'type': dict, 'doc': 'a dictionary of datasets to create in this subgroup', 'default': dict()},
-            {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this subgroup', 'default': dict()},
-            {'name':'links', 'type': dict, 'doc': 'a dictionary of links to create in this subgroup', 'default': dict()},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this subgroup'},
+            {'name': 'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this subgroup', 'default': dict()},
+            {'name': 'datasets', 'type': dict, 'doc': 'a dictionary of datasets to create in this subgroup', 'default': dict()},
+            {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this subgroup', 'default': dict()},
+            {'name': 'links', 'type': dict, 'doc': 'a dictionary of links to create in this subgroup', 'default': dict()},
             returns='the GroupBuilder object for the subgroup', rtype='GroupBuilder')
     def add_group(self, **kwargs):
         """
@@ -259,8 +298,8 @@ class GroupBuilder(dict):
         self.set_group(name, builder)
         return builder
 
-    @docval({'name':'name', 'type': str, 'doc': 'the name of this subgroup'},
-            {'name':'builder', 'type': 'GroupBuilder', 'doc': 'the GroupBuilder that represents this subgroup'})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this subgroup'},
+            {'name': 'builder', 'type': 'GroupBuilder', 'doc': 'the GroupBuilder that represents this subgroup'})
     def set_group(self, **kwargs):
         """
         Add a subgroup to this group
@@ -268,8 +307,8 @@ class GroupBuilder(dict):
         name, builder, = getargs('name', 'builder', kwargs)
         self.__set_builder(name, builder, GroupBuilder.__group)
 
-    @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
-            {'name':'path', 'type': str, 'doc': 'the path within this HDF5 file'},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this link'},
+            {'name': 'path', 'type': str, 'doc': 'the path within this HDF5 file'},
             returns='the builder object for the soft link', rtype='LinkBuilder')
     def add_link(self, **kwargs):
         """
@@ -279,7 +318,7 @@ class GroupBuilder(dict):
         builder = LinkBuilder(path)
         self.set_link(name, builder)
         return builder
-    
+
     @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
             {'name':'file_path', 'type': str, 'doc': 'the file path of this external link'},
             {'name':'path', 'type': str, 'doc': 'the absolute path within the external HDF5 file'},
@@ -292,7 +331,7 @@ class GroupBuilder(dict):
         builder = ExternalLinkBuilder(path, file_path)
         self.set_link(name, builder)
         return builder
-    
+
     @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
             {'name':'builder', 'type': 'LinkBuilder', 'doc': 'the LinkBuilder that represents this link'})
     def set_link(self, **kwargs):
@@ -301,7 +340,7 @@ class GroupBuilder(dict):
         """
         name, builder = getargs('name', 'builder', kwargs)
         self.__set_builder(name, builder, GroupBuilder.__link)
-    
+
     @docval({'name':'name', 'type': str, 'doc': 'the name of the attribute'},
             {'name':'value', 'type': None, 'doc': 'the attribute value'})
     def set_attribute(self, **kwargs):
@@ -342,11 +381,11 @@ class GroupBuilder(dict):
             self.set_link(name, link)
 
     def is_empty(self):
-        """Returns true if there are no datasets, attributes, links or 
+        """Returns true if there are no datasets, attributes, links or
            subgroups that contain datasets, attributes or links. False otherwise.
         """
-        if (len(super().__getitem__(GroupBuilder.__dataset)) or 
-            len(super().__getitem__(GroupBuilder.__attribute)) or 
+        if (len(super().__getitem__(GroupBuilder.__dataset)) or
+            len(super().__getitem__(GroupBuilder.__attribute)) or
             len(super().__getitem__(GroupBuilder.__link))):
             return False
         elif len(super().__getitem__(GroupBuilder.__group)):
@@ -382,7 +421,7 @@ class GroupBuilder(dict):
             if key_ar[0] in super().__getitem__(GroupBuilder.__group):
                 return super().__getitem__(GroupBuilder.__group)[key_ar[0]].__get_rec(key_ar[1:])
         raise KeyError(key_ar[0])
-                
+
 
     def __setitem__(self, args, val):
         raise NotImplementedError('__setitem__')
@@ -394,26 +433,26 @@ class GroupBuilder(dict):
         """Like dict.items, but iterates over key-value pairs in groups,
            datasets, attributes, and links sub-dictionaries.
         """
-        return _itertools.chain(super().__getitem__(GroupBuilder.__group).items(), 
-                                super().__getitem__(GroupBuilder.__dataset).items(), 
+        return _itertools.chain(super().__getitem__(GroupBuilder.__group).items(),
+                                super().__getitem__(GroupBuilder.__dataset).items(),
                                 super().__getitem__(GroupBuilder.__attribute).items(),
                                 super().__getitem__(GroupBuilder.__link).items())
 
     def keys(self):
-        """Like dict.keys, but iterates over keys in groups, datasets, 
+        """Like dict.keys, but iterates over keys in groups, datasets,
            attributes, and links sub-dictionaries.
         """
-        return _itertools.chain(super().__getitem__(GroupBuilder.__group).keys(), 
-                                super().__getitem__(GroupBuilder.__dataset).keys(), 
+        return _itertools.chain(super().__getitem__(GroupBuilder.__group).keys(),
+                                super().__getitem__(GroupBuilder.__dataset).keys(),
                                 super().__getitem__(GroupBuilder.__attribute).keys(),
                                 super().__getitem__(GroupBuilder.__link).keys())
 
     def values(self):
-        """Like dict.values, but iterates over values in groups, datasets, 
+        """Like dict.values, but iterates over values in groups, datasets,
            attributes, and links sub-dictionaries.
         """
-        return _itertools.chain(super().__getitem__(GroupBuilder.__group).values(), 
-                                super().__getitem__(GroupBuilder.__dataset).values(), 
+        return _itertools.chain(super().__getitem__(GroupBuilder.__group).values(),
+                                super().__getitem__(GroupBuilder.__dataset).values(),
                                 super().__getitem__(GroupBuilder.__attribute).values(),
                                 super().__getitem__(GroupBuilder.__link).values())
 
@@ -453,7 +492,7 @@ class DatasetBuilder(dict):
         '''
         super(DatasetBuilder, self).__init__()
         data, dtype, attributes, maxshape, chunks = getargs('data', 'dtype', 'attributes', 'maxshape', 'chunks', kwargs)
-        self['data'] = data   
+        self['data'] = data
         self['attributes'] = _copy.deepcopy(attributes)
         self.chunks = chunks
         self.maxshape = maxshape
@@ -492,7 +531,9 @@ class DatasetBuilder(dict):
         if dataset.data:
             self['data'] = dataset.data #TODO: figure out if we want to add a check for overwrite
         self['attributes'].update(dataset.attributes)
-    
+
     # XXX: leave this here for now, we might want it later
     #def __setitem__(self, args, val):
     #    raise NotImplementedError('__setitem__')
+
+
