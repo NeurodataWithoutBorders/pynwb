@@ -1,3 +1,10 @@
+from pynwb.core import docval, getargs
+import numpy as np
+import posixpath as _posixpath
+import copy as _copy
+import itertools as _itertools
+
+
 class GroupBuilder(dict):
     __link = 'links'
     __group = 'groups'
@@ -52,7 +59,7 @@ class GroupBuilder(dict):
 
     @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
             {'name':'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
-            {'name':'dtype', 'type': type, 'doc': 'the datatype of this dataset', 'default': None},
+            {'name':'dtype', 'type': (type, np.dtype), 'doc': 'the datatype of this dataset', 'default': None},
             {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name':'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
             {'name':'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False},
@@ -163,7 +170,6 @@ class GroupBuilder(dict):
                 self_datasets[name].deep_update(dataset)
                 #super().__getitem__(GroupBuilder.__dataset)[name] = dataset
             else:
-                #self.add_dataset(name, dataset.data, attributes=copy.copy(dataset.attributes)) #TODO: figure out if we want to do this copying, rather than just pointing to the argument
                 self.set_dataset(name, dataset)
         # merge attributes
         for name, value in super(GroupBuilder, builder).__getitem__(GroupBuilder.__attribute).items():
@@ -309,12 +315,6 @@ class DatasetBuilder(dict):
     def set_attribute(self, **kwargs):
         name, value = getargs('name', 'value', kwargs)
         self['attributes'][name] = value
-
-    @docval({'name':'func', 'type': Callable, 'doc': 'the name of the attribute'})
-    def add_iter_inspector(self, **kwargs):
-        '''Add a function to call on each element in the dataset, as it is written to disk.'''
-        func = getargs('func', kwargs)
-        self._inspector = func
 
     @docval({'name':'dataset', 'type': 'DatasetBuilder', 'doc': 'the DatasetBuilder to merge into this DatasetBuilder'})
     def deep_update(self, **kwargs):

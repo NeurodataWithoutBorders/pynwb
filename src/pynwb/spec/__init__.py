@@ -32,4 +32,4 @@ def __build_catalog(data_dir_path):
 
 __resources = __get_resources()
 
-CATALOG = __build_catalog(ret['data_dir_path'])
+CATALOG = __build_catalog(__resources['data_dir_path'])

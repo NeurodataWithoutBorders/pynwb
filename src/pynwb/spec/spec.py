@@ -449,7 +449,7 @@ class SpecCatalog(object):
         '''
         Associate a specified object type with an HDF5 specification
         '''
-        obj_type, spec, register_map = getargs('obj_type', 'spec', 'register_map', kwargs)
+        obj_type, spec = getargs('obj_type', 'spec', kwargs)
         type_name = obj_type.__name__ if isinstance(obj_type, type) else obj_type
         if type_name in self.__specs:
             raise ValueError("'%s' - cannot overwrite existing specification" % type_name)
@@ -487,3 +487,12 @@ class SpecCatalog(object):
         for group_spec in spec.groups:
             self.auto_register(group_spec)
 
+    def __copy__(self):
+        ret = SpecCatalog()
+        ret.__specs = copy.copy(spec)
+        return ret
+
+    def __deepcopy__(self):
+        ret = SpecCatalog()
+        ret.__specs = copy.deepcopy(spec)
+        return ret

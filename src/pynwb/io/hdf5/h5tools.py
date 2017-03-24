@@ -7,7 +7,7 @@ __all__ = [
 import itertools as _itertools
 import posixpath as _posixpath
 import copy as _copy
-from collections import Iterable, Callable
+from collections import Iterable
 import numpy as np
 import h5py as _h5py
 

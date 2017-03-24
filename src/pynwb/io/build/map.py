@@ -1,5 +1,6 @@
 from pynwb.core import docval, getargs
-from pynwb.spec import SpecCatalog, Spec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD
+from pynwb.spec import Spec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD
+from pynwb.spec.spec import SpecCatalog
 from .h5tools import DatasetBuilder, GroupBuilder
 
 class TypeMap(object):

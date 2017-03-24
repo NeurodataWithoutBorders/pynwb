@@ -1,6 +1,7 @@
 import unittest
 
-from pynwb.io.tools.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
+from pynwb.io.build.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder
+from pynwb.io.hdf5.h5tools import __iter_fill__, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
 
 import h5py
 import os
