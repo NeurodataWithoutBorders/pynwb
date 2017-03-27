@@ -1,15 +1,11 @@
 import unittest
 
-from pynwb.io.build.builders import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder
 from pynwb.core import DataChunkIterator
 from pynwb.io.hdf5.h5tools import __chunked_iter_fill__, write_dataset
 
 import h5py
-import os
 import tempfile
 import numpy as np
-import json
-import os
 
 class H5IOTest(unittest.TestCase):
     """Tests for h5tools IO tools"""
