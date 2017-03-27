@@ -12,6 +12,7 @@ import numpy as np
 import h5py as _h5py
 
 from pynwb.core import docval, getargs
+from ..build.h5tools import DataChunkIterator
 
 SOFT_LINK = 0
 HARD_LINK = 1
@@ -86,16 +87,36 @@ def __get_type(data):
     else:
         return __get_type(data[0])
 
-def write_dataset(parent, name, data, attributes, function=None):
+def isintance_inmemory_array(data):
+    """Check if an object is a common in-memory data structure"""
+    return isinstance(data, list) or \
+           isinstance(data, np.ndarray) or \
+           isinstance(data, tuple) or \
+           isinstance(data, set) or \
+           isinstance(data, str) or \
+           isinstance(data, frozenset)
+
+def write_dataset(parent, name, data, attributes):
+    """
+    Write a dataset to HDF5.
+
+    The function uses other dataset-dependent write functions, e.g,
+    __scalar_fill__, __list_fill__ and __chunked_iter_fill__ to write the data.
+
+    :param parent: Parent HDF5 object
+    :param name: Name of the data to be written.
+    :param data: Data object to be written.
+    :param attributes:
+    """
     dset = None
     if isinstance(data, str):
         dset = __scalar_fill__(parent, name, data)
+    elif isinstance(data, DataChunkIterator):
+        dset = __chunked_iter_fill__(parent, name, data)
+    elif isinstance(data, Iterable) and not isintance_inmemory_array(data):
+        dset = __chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
     elif hasattr(data, '__len__'):
         dset = __list_fill__(parent, name, data)
-    elif isinstance(data, Iterable):
-        chunk_size = 100
-        #TODO: do something to figure out appropriate chunk_size
-        dset = __iter_fill__(parent, name, data, chunk_size, function=None)
     else:
         dset = __scalar_fill__(parent, name, data)
     set_attributes(dset, attributes)
@@ -110,49 +131,52 @@ def __trim_dataset__(dset, length):
     new_shape[0] = length
     dset.resize(new_shape)
 
+def __selection_max_bounds__(selection):
+    """Determine the bounds of a numpy selection index tuple"""
+    if isinstance(selection, int):
+        return selection+1
+    elif isinstance(selection, slice):
+        return selection.stop
+    elif isinstance(selection, list) or isinstance(selection, np.ndarray):
+        return np.nonzero(selection)[0][-1]+1
+    elif isinstance(selection, tuple):
+        return tuple([__selection_max_bounds__(i) for i in selection])
+
 def __scalar_fill__(parent, name, data):
     dtype = __get_type(data)
     dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype)
     return dset
 
-def __iter_fill__(parent, name, data, chunk_size, function=None):
-    #data_shape = list(__get_shape(data))
-    #data_shape[0] = None
-    #data_shape = tuple(data_shape)
-    data_iter = iter(data)
-    curr_chunk = [next(data_iter) for i in range(chunk_size)]
+def __chunked_iter_fill__(parent, name, data):
+    """
+    Write data to a dataset one-chunk-at-a-time based on the given DataChunkIterator
 
-    data_shape = __get_shape(curr_chunk)
-    data_dtype = __get_type(curr_chunk)
-    max_shape = list(data_shape)
-    max_shape[0] = None
-    dset = parent.create_dataset(name, shape=data_shape, dtype=data_dtype, maxshape=max_shape)
+    :param parent: The parent object to which the dataset should be added
+    :type parent: h5py.Group, h5py.File
+    :param name: The name of the dataset
+    :type name: str
+    :param data: The data to be written.
+    :type data: DataChunkIterator
 
-    idx = 0
-    more_data = True
-    args = [data_iter] * chunk_size
-    chunks = _itertools.zip_longest(*args, fillvalue=None)
-
-    if function:
-        def proc_chunk(chunk):
-            dset[idx:idx+len(chunk),] = chunk
-            function(chunk)
-    else:
-        def proc_chunk(chunk):
-            dset[idx:idx+len(chunk),] = chunk
-
-    while more_data:
-        try:
-            next_chunk = next(chunks)
-        except StopIteration:
-            curr_chunk = list(filter(lambda x: x, curr_chunk))
-            more_data = False
-        if idx >= dset.shape[0] or idx+len(curr_chunk) > dset.shape[0]:
-            __extend_dataset__(dset)
-        #dset[idx:idx+len(curr_chunk),] = curr_chunk
-        proc_chunk(curr_chunk)
-        curr_chunk = next_chunk
-        idx += chunk_size
+    """
+    recommended_chunks = data.recommended_chunk_shape()
+    chunks = True if recommended_chunks is None else recommended_chunks
+    baseshape = data.recommended_data_shape()
+    dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
+    for curr_chunk, curr_chunk_location in data:
+        # Determine the minimum array dimensions to fit the chunk selection
+        max_bounds = __selection_max_bounds__(curr_chunk_location)
+        if not hasattr(max_bounds, '__len__'):
+            max_bounds = (max_bounds,)
+        # Determine if we need to expand any of the data dimensions
+        expand_dims = [i for i, v in enumerate(max_bounds) if v is not None and v > dset.shape[i]]
+        # Expand the dataset if needed
+        if len(expand_dims) > 0:
+            new_shape = np.asarray(dset.shape)
+            new_shape[expand_dims] = np.asarray(max_bounds)[expand_dims]
+            dset.resize(new_shape)
+        # Process and write the data
+        dset[curr_chunk_location] = curr_chunk
     return dset
 
 def __list_fill__(parent, name, data):

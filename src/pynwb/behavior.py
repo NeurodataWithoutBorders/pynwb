@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-from .core import docval, popargs 
+from .core import docval, popargs
 from pynwb.misc import IntervalSeries
-=======
-from .core import docval, getargs
->>>>>>> read
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution
 
 import numpy as np
@@ -23,10 +19,7 @@ class SpatialSeries(TimeSeries):
     __nwbfields__ = ('reference_frame',)
 
     _ancestry = "TimeSeries,SpatialSeries"
-<<<<<<< HEAD
-=======
 
->>>>>>> read
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -158,7 +151,6 @@ class CompassDirection(Interface):
 
     __nwbfields__ = ('_SpatialSeries',)
 
-<<<<<<< HEAD
     _help = "Direction as measured radially. Spatial series reference frame should indicate which direction corresponds to zero and what is the direction of positive rotation."
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
@@ -200,6 +192,3 @@ class MotionCorrection(Interface):
         source, image_stack = popargs('source', 'image_stack', kwargs)
         super(MotionCorrection, self).__init__(source, **kwargs)
         self.image_stack = image_stack
-
-=======
->>>>>>> read
