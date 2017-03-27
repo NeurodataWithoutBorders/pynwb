@@ -1,7 +1,7 @@
 import unittest
 
 from pynwb.spec import GroupSpec, AttributeSpec, DatasetSpec
-from pynwb.io.build.h5tools import GroupBuilder, DatasetBuilder
+from pynwb.io.build.builders import GroupBuilder, DatasetBuilder
 from pynwb.core import NWBContainer
 from pynwb.spec.spec import SpecCatalog
 from pynwb.io.build.map import ObjectMapper, BuildManager, TypeMap

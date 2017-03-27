@@ -4,7 +4,7 @@ import unittest
 #% from pynwb.io.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, write_dataset, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
 #% from pynwb.io.utils import DataChunkIterator
 #% =======
-from pynwb.io.build.h5tools import DataChunkIterator, GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder
+from pynwb.io.build.builders import DataChunkIterator, GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder
 from pynwb.io.hdf5.h5tools import __chunked_iter_fill__, write_dataset
 #% >>>>>>> read
 
