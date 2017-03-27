@@ -12,7 +12,7 @@ import numpy as np
 import h5py as _h5py
 
 from pynwb.core import docval, getargs
-from ..build.builders import DataChunkIterator
+from pynwb.core import DataChunkIterator
 
 SOFT_LINK = 0
 HARD_LINK = 1

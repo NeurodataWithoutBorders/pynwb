@@ -2,7 +2,7 @@ from .builders import GroupBuilder
 from .builders import DatasetBuilder
 from .builders import LinkBuilder
 from .builders import ExternalLinkBuilder
-from .builders import DataChunkIterator
+from src.pynwb.core import DataChunkIterator
 
 from .map import ObjectMapper
 from .map import BuildManager

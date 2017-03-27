@@ -1,12 +1,8 @@
 import unittest
 
-#% <<<<<<< HEAD
-#% from pynwb.io.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, write_dataset, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
-#% from pynwb.io.utils import DataChunkIterator
-#% =======
-from pynwb.io.build.builders import DataChunkIterator, GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder
+from pynwb.io.build.builders import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder
+from pynwb.core import DataChunkIterator
 from pynwb.io.hdf5.h5tools import __chunked_iter_fill__, write_dataset
-#% >>>>>>> read
 
 import h5py
 import os
@@ -24,13 +20,10 @@ class H5IOTest(unittest.TestCase):
         self.f = h5py.File(self.test_temp_file.name, 'w')
 
     def tearDown(self):
-#% <<<<<<< HEAD
         del self.f
         del self.test_temp_file
         self.f = None
         self.test_temp_file = None
-        #self.f.close()
-        #os.remove(self.test_temp_file.name)
 
     ##########################################
     #  __chunked_iter_fill__(...) tests
@@ -113,26 +106,7 @@ class H5IOTest(unittest.TestCase):
         write_dataset(self.f, 'test_dataset', dci, {})
         dset = self.f['test_dataset']
         self.assertListEqual(dset[:].tolist(), list(range(10)))
-#% =======
-#%         self.f.close()
-#%         os.remove(self.test_file_path)
-#%
-#%     def test_iter_fill_divisible_chunks_data_fit(self):
-#%         my_dset = __iter_fill__(self.f, 'test_dataset', range(100), 25)
-#%         self.assertEqual(my_dset[99], 99)
-#%
-#%     def test_iter_fill_divisible_chunks_data_nofit(self):
-#%         my_dset = __iter_fill__(self.f, 'test_dataset', range(200), 25)
-#%         self.assertEqual(my_dset[199], 199)
-#%
-#%     def test_iter_fill_nondivisible_chunks_data_fit(self):
-#%         my_dset = __iter_fill__(self.f, 'test_dataset', range(100), 30)
-#%         self.assertEqual(my_dset[99], 99)
-#%
-#%     def test_iter_fill_nondivisible_chunks_data_nofit(self):
-#%         my_dset = __iter_fill__(self.f, 'test_dataset', range(200), 30)
-#%         self.assertEqual(my_dset[199], 199)
-#% >>>>>>> read
+
 
 class GroupBuilderSetterTests(unittest.TestCase):
     """Tests for setter functions in GroupBuilder class"""
