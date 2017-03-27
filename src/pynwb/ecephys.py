@@ -178,7 +178,7 @@ class Clustering(Interface):
         super(Clustering, self).__init__(source, **kwargs)
         self.cluster_times = cluster_times
         self.cluster_ids = cluster_ids
-        self.peak_over_rms = peak_over_rms
+        self.peak_over_rms = list(peak_over_rms)
 
 class ClusterWaveform(Interface):
     """

@@ -49,12 +49,12 @@ class BaseObjectHandler(object, metaclass=ExtenderMeta):
         return ret
 
     @classmethod
-    def procedure(cls, prop):
+    def procedure(cls, prop, static=True):
         """Decorator for adding procedures within definition
            of derived classes.
         """
         def _dec(func):
-            func2 = staticmethod(func)
+            func2 = staticmethod(func) if static else func
             setattr(func2, cls._property, prop)
             return func2
         return _dec

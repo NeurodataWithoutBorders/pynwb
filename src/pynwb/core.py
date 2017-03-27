@@ -2,13 +2,22 @@ import collections as _collections
 import itertools as _itertools
 import copy as _copy
 import abc
+import numpy as np
 
 def __type_okay(value, argtype, allow_none=False):
     if value is None:
         return allow_none
     if isinstance(argtype, str):
+        if argtype is 'int':
+            return __is_int(value)
+        elif argtype is 'float':
+            return __is_float(value)
         return argtype in [cls.__name__ for cls in value.__class__.__mro__]
     elif isinstance(argtype, type):
+        if argtype is int:
+            return __is_int(value)
+        elif argtype is float:
+            return __is_float(value)
         return isinstance(value, argtype)
     elif isinstance(argtype, tuple) or isinstance(argtype, list):
         return any(__type_okay(value, i) for i in argtype)
@@ -16,6 +25,12 @@ def __type_okay(value, argtype, allow_none=False):
         return True
     else:
         raise ValueError("argtype must be a type, a str, a list, a tuple, or None")
+
+def __is_int(value):
+    return any(isinstance(value, i) for i in (int, np.int8, np.int16, np.int32, np.int64))
+
+def __is_float(value):
+    return any(isinstance(value, i) for i in (float, np.float16, np.float32, np.float64, np.float128))
 
 def __format_type(argtype):
     if isinstance(argtype, str):
@@ -87,39 +102,38 @@ def __sort_args(validator):
     return list(_itertools.chain(pos,kw))
 
 docval_attr_name = 'docval'
+__docval_args_loc = 'args'
 
-#class Arg(object):
-#
-#    def __init__(self, *args):
-#        '''
-#        '''
-#        self._name = args[0]
-#        self._argtype = args[1]
-#        self._doc = args[2]
-#        if len(args) == 4:
-#            self._optional = True
-#            self._default = args[3]
-#
-#    @property
-#    def name(self):
-#        return self._name
-#
-#    @property
-#    def argtype(self):
-#        return self._argtype
-#
-#    @property
-#    def doc(self):
-#        return self._doc
-#
-#    @property
-#    def default(self):
-#        return self._default
-#
-#    @property
-#    def optional(self):
-#        return self._optional
-#
+# TODO: write unit tests for get_docval* functions
+def get_docval(func):
+    '''get_docval(func)
+    Get a copy of docval arguments for a function
+    '''
+    func_docval = getattr(func, docval_attr_name, None)
+    if func_docval:
+        return tuple(func_docval[__docval_args_loc])
+    else:
+        return tuple()
+
+def get_docval_args(func):
+    '''get_docval_args(func)
+    Like get_docval, but return only positional arguments
+    '''
+    func_docval = getattr(func, docval_attr_name, None)
+    if func_docval:
+        return tuple(a for a in func_docval[__docval_args_loc] if 'default' not in a)
+    else:
+        return tuple()
+
+def get_docval_kwargs(func):
+    '''get_docval_kwargs(func)
+    Like get_docval, but return only keyword arguments
+    '''
+    func_docval = getattr(func, docval_attr_name, None)
+    if func_docval:
+        return tuple(a for a in func_docval[__docval_args_loc] if 'default' in a)
+    else:
+        return tuple()
 
 def docval(*validator, **options):
     '''A decorator for documenting and enforcing type for instance method arguments.
@@ -162,7 +176,7 @@ def docval(*validator, **options):
     val_copy = __sort_args(_copy.deepcopy(validator))
     def dec(func):
         _docval = _copy.copy(options)
-        _docval['args'] = val_copy
+        _docval[__docval_args_loc] = val_copy
         def func_call(*args, **kwargs):
             self = args[0]
             parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type)
@@ -181,8 +195,7 @@ def docval(*validator, **options):
     return dec
 
 def __sphinxdoc(func, validator):
-    '''Generate a Spinxy docstring
-    '''
+    '''Generate a Spinxy docstring'''
     def to_str(argtype):
         if isinstance(argtype, type):
             return argtype.__name__
@@ -217,6 +230,8 @@ def getargs(*argnames):
     '''getargs(*argnames, argdict)
     Convenience function to retrieve arguments from a dictionary in batch
     '''
+    if len(argnames) < 2:
+        raise ValueError('Must supply at least one key and a dict')
     if not isinstance(argnames[-1], dict):
         raise ValueError('last argument must be dict')
     kwargs = argnames[-1]
@@ -230,6 +245,8 @@ def popargs(*argnames):
     '''popargs(*argnames, argdict)
     Convenience function to retrieve and remove arguments from a dictionary in batch
     '''
+    if len(argnames) < 2:
+        raise ValueError('Must supply at least one key and a dict')
     if not isinstance(argnames[-1], dict):
         raise ValueError('last argument must be dict')
     kwargs = argnames[-1]
