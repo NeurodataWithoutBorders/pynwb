@@ -50,7 +50,7 @@ def __format_type(argtype):
     else:
         raise ValueError("argtype must be a type, str, list, or tuple")
 
-def __parse_args(validator, args, kwargs, enforce_type=True):
+def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     ret = dict()
     errors = list()
     argsi = 0
@@ -60,19 +60,14 @@ def __parse_args(validator, args, kwargs, enforce_type=True):
         #
         # this is a keyword arg
         if 'default' in arg:
-            skip_enforce_type = False
             if argname in kwargs:
                 ret[argname] = kwargs[argname]
-                #skip_enforce_type = ret[argname] is None and arg['default'] is None
             elif len(args) > argsi:
                 ret[argname] = args[argsi]
                 argsi += 1
             else:
                 ret[argname] = arg['default']
-                # if default is None, skip the argument check
-                # Note: this line effectively only allows NoneType for defaults
-                #skip_enforce_type = arg['default'] is None
-            if not skip_enforce_type and enforce_type:
+            if enforce_type:
                 argval = ret[argname]
                 if not __type_okay(argval, arg['type'], arg['default'] is None):
                     fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
@@ -91,6 +86,16 @@ def __parse_args(validator, args, kwargs, enforce_type=True):
                         fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                         errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
             argsi += 1
+        # Check that the number of dimensions of array arguments are Ok
+        if enforce_ndim and 'ndim' in arg and arg['ndim'] is not None:
+            argval = ret[argname]
+            arg_shape = ShapeValidator.get_data_shape(data=argval,
+                                                      strict_no_data_load=True)
+            if arg_shape is not None:  # Ignore in case we cannot determine the shape of the input array
+                if len(arg_shape) != arg['ndim']:
+                    fmt_val = (argname, len(arg_shape), arg['ndim'])
+                    errors.append("incorrect number of dimensions for array %s (got %s, expected %s)" % fmt_val)
+
     return {'args': ret, 'errors': errors}
 
 def __sort_args(validator):
@@ -147,7 +152,8 @@ def docval(*validator, **options):
     arguments and keyword arguments of the decorated function. These dictionaries
     must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a
     positional argument. To define a keyword argument, specify a default value
-    using the key ``'default'``.
+    using the key ``'default'``. To validate the number of dimensions of an input array
+    add the optional ``'ndim'`` parameter.
 
     The decorated method must take ``self`` and ``**kwargs`` as arguments.
 
@@ -161,14 +167,15 @@ def docval(*validator, **options):
 
        @docval({'name': 'arg1':,   'type': str,           'doc': 'this is the first positional argument'},
                {'name': 'arg2':,   'type': int,           'doc': 'this is the second positional argument'},
-               {'name': 'kwarg1':, 'type': (list, tuple), 'doc': 'this is a keyword argument', 'default': list()})
+               {'name': 'kwarg1':, 'type': (list, tuple), 'doc': 'this is a keyword argument', 'default': list()},
+               returns='foo object', rtype='Foo'))
        def foo(self, **kwargs):
            arg1, arg2, kwarg1 = getargs('arg1', 'arg2', 'kwarg1', **kwargs)
            ...
 
     :param enforce_type: Enforce types of input parameters (Default=True)
     :param returns: String describing the return values
-    :param rtype: String describing the return the data type of the return values
+    :param rtype: String describing the data type of the return values
     :param validator: :py:func:`dict` objects specifying the method parameters
     :param options: additional options for documenting and validating method parameters
     '''
@@ -464,9 +471,9 @@ class DataChunkIterator(object):
                     self.max_shape = self.data.shape
                     self.__data_iter = iter(self.data)
             # Try to get an accurate idea of max_shape for other Python datastructures if possible.
-            # Don't just call __get_shape for a generator as that would potentially trigger loading of all the data
+            # Don't just callget_shape for a generator as that would potentially trigger loading of all the data
             elif isinstance(self.data, list) or isinstance(self.data, tuple):
-                self.max_shape = self.__get_shape(self.data)
+                self.max_shape = ShapeValidator.get_data_shape(self.data)
 
         # If we have a data iterator, then read the first chunk
         if self.__data_iter is not None: # and(self.max_shape is None or self.dtype is None):
@@ -474,7 +481,7 @@ class DataChunkIterator(object):
 
         # If we still don't know the shape then try to determine the shape from the first chunk
         if self.max_shape is None and self.__next_chunk is not None:
-            data_shape = self.__get_shape(self.__next_chunk)
+            data_shape = ShapeValidator.get_data_shape(self.__next_chunk)
             self.max_shape = list(data_shape)
             self.max_shape[0] = None
             self.max_shape = tuple(self.max_shape)
@@ -538,23 +545,6 @@ class DataChunkIterator(object):
         # Return the current next chunk
         return curr_chunk, curr_location
 
-    @staticmethod
-    def __get_shape(data):
-        """Internal helper function used to determin the shape of data objects"""
-        def __get_shape_helper(local_data):
-            shape = list()
-            if hasattr(local_data, '__len__'):
-                shape.append(len(local_data))
-                if len(local_data) and not isinstance(local_data[0], str):
-                    shape.extend(__get_shape_helper(local_data[0]))
-            return tuple(shape)
-        if hasattr(data, 'shape'):
-            return data.shape
-        if hasattr(data, '__len__') and not isinstance(data, str):
-            return __get_shape_helper(data)
-        else:
-            return None
-
     @docval(returns='Tuple with the recommended chunk shape or None if no particular shape is recommended.')
     def recommended_chunk_shape(self):
         """Recommend a chunk shape.
@@ -590,12 +580,18 @@ class ShapeValidator(object):
         pass
 
     @staticmethod
-    def get_data_shape(data):
+    def get_data_shape(data, strict_no_data_load=False):
         """
         Helper function used to determine the shape of the given array.
 
         :param data: Array for which we should determine the shape.
         :type data: List, numpy.ndarray, DataChunkIterator, any object that support __len__ or .shape.
+        :param strict_no_data_load: In order to determin the shape of nested tuples and lists, this function
+                    recursively inspects elements along the dimensions, assuming that the data has a regular,
+                    rectangular shape. In the case of out-of-core iterators this means that the first item
+                    along each dimensions would potentially be loaded into memory. By setting this option
+                    we enforce that this does not happen, at the cost that we may not be able to determine
+                    the shape of the array.
         :return: Tuple of ints indicating the size of known dimensions. Dimenions for which the size is unknown
                  will be set to None.
         """
@@ -611,7 +607,10 @@ class ShapeValidator(object):
         if hasattr(data, 'shape'):
             return data.shape
         if hasattr(data, '__len__') and not isinstance(data, str):
-            return __get_shape_helper(data)
+            if not strict_no_data_load or (isinstance(data, list) or isinstance(data, tuple) or isinstance(data, set)):
+                return __get_shape_helper(data)
+            else:
+                return None
         else:
             return None
 
