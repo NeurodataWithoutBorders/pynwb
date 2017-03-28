@@ -267,19 +267,15 @@ class FeatureExtraction(Interface):
     __help = "Container for salient features of detected events"
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'electrodes', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'the electrode groups for each channel from which features were extracted'},
-            {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'a description for each feature extracted'},
-            {'name': 'event_times', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'the times of events that features correspond to'},
-            {'name': 'features', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'features for each channel'})
+            {'name': 'electrodes', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'the electrode groups for each channel from which features were extracted', 'ndim': 1},
+            {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'a description for each feature extracted', 'ndim': 1},
+            {'name': 'event_times', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'the times of events that features correspond to', 'ndim': 1},
+            {'name': 'features', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'features for each channel', 'ndim': 3})
     def __init__(self, **kwargs):
         # get the inputs
         source, electrodes, description, event_times, features = popargs('source', 'electrodes', 'description', 'event_times', 'features', kwargs)
 
         # Validate the shape of the inputs
-        # Validate the shape of the features array
-        features_shape = ShapeValidator.get_data_shape(features)
-        if features_shape is not None and len(features_shape) != 3:
-            raise ValueError("incorrect dimensions: features must be a 3D array.")
         # Validate event times compared to features
         shape_validators = []
         shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
@@ -313,7 +309,7 @@ class FeatureExtraction(Interface):
             if not sv.result:
                 error_msg += sv.message + "\n"
         if raise_error:
-            raise ValueError(error_msg)
+            raise TypeError(error_msg)
 
 
         # Initalize the object
