@@ -1,17 +1,9 @@
-__all__ = [
-    'GroupBuilder',
-    'DatasetBuilder',
-    'LinkBuilder',
-]
-
-import itertools as _itertools
 import posixpath as _posixpath
 import copy as _copy
 from collections import Iterable
 import numpy as np
 import h5py as _h5py
 
-from pynwb.core import docval, getargs
 from pynwb.core import DataChunkIterator
 
 SOFT_LINK = 0
