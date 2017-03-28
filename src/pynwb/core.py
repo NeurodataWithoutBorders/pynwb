@@ -739,13 +739,13 @@ class ShapeValidatorResult(object):
 
     @docval({'name': 'result', 'type': bool, 'doc': 'Result of the shape validation', 'default': False},
             {'name': 'message', 'type': str, 'doc': 'Message describing the result of the shape validation', 'default': None},
-            {'name': 'ignored', 'type': tuple, 'doc': 'Axes that have been ignored in the validaton process', 'default': tuple(),},
-            {'name': 'unmatched', 'type': tuple, 'doc': 'List of axes that did not match during shape validation', 'default': tuple()},
+            {'name': 'ignored', 'type': tuple, 'doc': 'Axes that have been ignored in the validaton process', 'default': tuple(), 'ndim': 1},
+            {'name': 'unmatched', 'type': tuple, 'doc': 'List of axes that did not match during shape validation', 'default': tuple(), 'ndim': 1},
             {'name': 'error', 'type': str, 'doc': 'Error that may have occurred. One of ERROR_TYPE', 'default': None},
-            {'name': 'shape1', 'type': tuple, 'doc': 'Shape of the first array for comparison', 'default': tuple()},
-            {'name': 'shape2', 'type': tuple, 'doc': 'Shape of the second array for comparison', 'default': tuple()},
-            {'name': 'axes1', 'type': tuple, 'doc': 'Axes for the first array that should match', 'default': tuple()},
-            {'name': 'axes2', 'type': tuple, 'doc': 'Axes for the second array that should match', 'default': tuple()},
+            {'name': 'shape1', 'type': tuple, 'doc': 'Shape of the first array for comparison', 'default': tuple(), 'ndim': 1},
+            {'name': 'shape2', 'type': tuple, 'doc': 'Shape of the second array for comparison', 'default': tuple(), 'ndim': 1},
+            {'name': 'axes1', 'type': tuple, 'doc': 'Axes for the first array that should match', 'default': tuple(), 'ndim': 1},
+            {'name': 'axes2', 'type': tuple, 'doc': 'Axes for the second array that should match', 'default': tuple(), 'ndim': 1},
             )
     def __init__(self, **kwargs):
         self.result, self.message, self.ignored, self.unmatched, self.error, self.shape1, self.shape2, self.axes1, self.axes2 = \
@@ -765,11 +765,11 @@ class ShapeValidatorResult(object):
         else:
             super(ShapeValidatorResult, self).__setattr__(key, value)
 
+    def __getattr__(self, item):
+         """
+         Overwrite to allow dynamic retrival of the default message
+         """
+         if item == 'default_message':
+             return self.SHAPE_ERROR[self.error]
+         return self.__getattribute__(item)
 
-    # def __getattr__(self, item):
-    #     """
-    #     Overwrite to allow dynamic retrival of the default message
-    #     """
-    #     if item == 'default_message':
-    #         return self.SHAPE_ERROR[self.error]
-    #     return self.__getattribute__(item)
