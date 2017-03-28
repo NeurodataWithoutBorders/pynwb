@@ -17,9 +17,9 @@ class DataChunkIteratorTests(unittest.TestCase):
         self.assertIsNone(dci.max_shape)
         self.assertIsNone(dci.dtype)
         count = 0
-        for v, l in dci:
-            self.assertEqual(v, None)
-            self.assertEqual(l, None)
+        for chunk in dci:
+            self.assertEqual(chunk.data, None)
+            self.assertEqual(chunk.selection, None)
             count+=1
         self.assertEqual(count, 0)
         self.assertIsNone(dci.recommended_data_shape())
@@ -43,11 +43,11 @@ class DataChunkIteratorTests(unittest.TestCase):
         self.assertTupleEqual(dci.max_shape, a.shape)
         self.assertEquals(dci.dtype, a.dtype)
         count = 0
-        for v, l in dci:
+        for chunk in dci:
             if count < 3:
-                self.assertEqual(v.shape[0], 3)
+                self.assertEqual(chunk.data.shape[0], 3)
             else:
-                self.assertEqual(v.shape[0], 1)
+                self.assertEqual(chunk.data.shape[0], 1)
             count +=1
         self.assertEqual(count, 4)
         self.assertTupleEqual(dci.recommended_data_shape(), a.shape)
@@ -55,12 +55,12 @@ class DataChunkIteratorTests(unittest.TestCase):
 
     def test_standard_iterator_unbuffered(self):
         dci = DataChunkIterator(data=range(10), buffer_size=1)
-        self.assertEquals(dci.dtype, np.dtype(int))
+        self.assertEqual(dci.dtype, np.dtype(int))
         self.assertTupleEqual(dci.max_shape, (None,))
         self.assertTupleEqual(dci.recommended_data_shape(), (1,)) # Test before and after iteration
         count = 0
-        for v, l in dci:
-            self.assertEqual(v.shape[0], 1)
+        for chunk in dci:
+            self.assertEqual(chunk.data.shape[0], 1)
             count+=1
         self.assertEqual(count, 10)
         self.assertTupleEqual(dci.recommended_data_shape(), (1,)) # Test before and after iteration
@@ -73,11 +73,11 @@ class DataChunkIteratorTests(unittest.TestCase):
         self.assertIsNone(dci.recommended_chunk_shape())
         self.assertTupleEqual(dci.recommended_data_shape(), (3,)) # Test before and after iteration
         count = 0
-        for v, l in dci:
+        for chunk in dci:
             if count < 3:
-                self.assertEqual(v.shape[0], 3)
+                self.assertEqual(chunk.data.shape[0], 3)
             else:
-                self.assertEqual(v.shape[0], 1)
+                self.assertEqual(chunk.data.shape[0], 1)
             count +=1
         self.assertTupleEqual(dci.recommended_data_shape(), (3,)) # Test before and after iteration
         self.assertEqual(count, 4)
@@ -88,8 +88,8 @@ class DataChunkIteratorTests(unittest.TestCase):
         self.assertTupleEqual(dci.max_shape, (5,2,3))
         self.assertEqual(dci.dtype, np.dtype(int))
         count = 0
-        for v, l in dci:
-            self.assertTupleEqual(v.shape, (1,2,3))
+        for chunk in dci:
+            self.assertTupleEqual(chunk.data.shape, (1,2,3))
             count +=1
         self.assertEquals(count, 5)
         self.assertTupleEqual(dci.recommended_data_shape(), (5, 2, 3))

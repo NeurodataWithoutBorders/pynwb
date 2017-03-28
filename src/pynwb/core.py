@@ -457,8 +457,7 @@ class DataChunkIterator(object):
                                                                           kwargs)
         # Create an iterator for the data if possible
         self.__data_iter = iter(self.data) if isinstance(self.data, Iterable) else None
-        self.__next_chunk = None
-        self.__next_chunk_location = None
+        self.__next_chunk = DataChunk(None, None)
         self.__first_chunk_shape = None
         # Determine the shape of the data if possible
         if self.max_shape is None:
@@ -480,16 +479,16 @@ class DataChunkIterator(object):
             self._read_next_chunk()
 
         # If we still don't know the shape then try to determine the shape from the first chunk
-        if self.max_shape is None and self.__next_chunk is not None:
-            data_shape = ShapeValidator.get_data_shape(self.__next_chunk)
+        if self.max_shape is None and self.__next_chunk.data is not None:
+            data_shape = ShapeValidator.get_data_shape(self.__next_chunk.data)
             self.max_shape = list(data_shape)
             self.max_shape[0] = None
             self.max_shape = tuple(self.max_shape)
 
         # Determine the type of the data if possible
-        if self.__next_chunk is not None:
-            self.dtype = self.__next_chunk.dtype
-            self.__first_chunk_shape = self.__next_chunk.shape
+        if self.__next_chunk.data is not None:
+            self.dtype = self.__next_chunk.data.dtype
+            self.__first_chunk_shape = self.__next_chunk.data.shape
 
     def __iter__(self):
         """Return the iterator object"""
@@ -497,30 +496,31 @@ class DataChunkIterator(object):
 
     def _read_next_chunk(self):
         """Read a single chunk from self.__data_iter and store the results in
-           self.__next_chunk and self.__chunk_location"""
+           self.__next_chunk
+
+        :returns: self.__next_chunk, i.e., the DataChunk object describing the next chunk
+        """
         if self.__data_iter is not None:
-            self.__next_chunk = []
+            curr_next_chunk = []
             for i in range(self.buffer_size):
                 try:
-                    self.__next_chunk.append(next(self.__data_iter))
+                    curr_next_chunk.append(next(self.__data_iter))
                 except StopIteration:
                     pass
-            next_chunk_size = len(self.__next_chunk)
+            next_chunk_size = len(curr_next_chunk)
             if next_chunk_size == 0:
-                self.__next_chunk = None
-                self.__next_chunk_location = None
+                self.__next_chunk = DataChunk(None, None)
             else:
-                self.__next_chunk = np.asarray(self.__next_chunk)
-                if self.__next_chunk_location is None:
-                    self.__next_chunk_location = slice(0, next_chunk_size)
+                self.__next_chunk.data = np.asarray(curr_next_chunk)
+                if self.__next_chunk.selection is None:
+                    self.__next_chunk.selection = slice(0, next_chunk_size)
                 else:
-                    self.__next_chunk_location = slice(self.__next_chunk_location.stop,
-                                                       self.__next_chunk_location.stop+next_chunk_size)
+                    self.__next_chunk.selection = slice(self.__next_chunk.selection.stop,
+                                                        self.__next_chunk.selection.stop+next_chunk_size)
         else:
-            self.__next_chunk = None
-            self.__next_chunk_location = None
+            self.__next_chunk = DataChunk(None, None)
 
-        return self.__next_chunk, self.__next_chunk_location
+        return self.__next_chunk
 
     @docval(returns="The following two items must be returned: \n" +
                     "* Numpy array (or scalar) with the data for the next chunk \n" +
@@ -529,21 +529,23 @@ class DataChunkIterator(object):
     def __next__(self):
         """Return the next data chunk or raise a StopIteration exception if all chunks have been retrieved."""
         # If we have not already read the next chunk, then read it now
-        if self.__next_chunk is None:
+        if self.__next_chunk.data is None:
             self._read_next_chunk()
         # If we do not have any next chunk
-        if self.__next_chunk is None:
+        if self.__next_chunk.data is None:
             raise StopIteration
         # If this is the first time we see a chunk then remember the size of the first chunk
         if self.__first_chunk_shape is None:
-            self.__first_chunk_shape = self.__next_chunk.shape
+            self.__first_chunk_shape = self.__next_chunk.data.shape
         # Keep the next chunk we need to return
-        curr_chunk = self.__next_chunk
-        curr_location = self.__next_chunk_location
-        # Remove the next chunk from our list since we are returning it here. This avoids having 2 chunks in memory
-        self.__next_chunk = None
+        curr_chunk = DataChunk(self.__next_chunk.data,
+                               self.__next_chunk.selection)
+        # Remove the data for the next chunk from our list since we are returning it here.
+        # This is to allow the GarbageCollector to remmove the data when it goes out of scope and avoid
+        # having 2 full chunks in memory if not necessary
+        self.__next_chunk.data = None
         # Return the current next chunk
-        return curr_chunk, curr_location
+        return curr_chunk
 
     @docval(returns='Tuple with the recommended chunk shape or None if no particular shape is recommended.')
     def recommended_chunk_shape(self):
@@ -566,6 +568,25 @@ class DataChunkIterator(object):
                 return self.max_shape
         return self.__first_chunk_shape
 
+
+class DataChunk(object):
+    """
+    Class used to describe a data chunk. Used in DataChunkIterator to describe
+
+    :ivar data: Numpy ndarray with the data value(s) of the chunk
+    :ivar selection: Numpy index tuple describing the location of the chunk
+    """
+
+    @docval({'name': 'data', 'type': np.ndarray, 'doc': 'Numpy array with the data value(s) of the chunk', 'default': None},
+            {'name':'selection', 'type': None, 'doc': 'Numpy index tuple describing the location of the chunk', 'default': None})
+    def __init__(self, **kwargs):
+        self.data, self.selection = getargs('data', 'selection', kwargs)
+
+    def __len__(self):
+        if self.data is not None:
+            return len(self.data)
+        else:
+            0
 
 class ShapeValidator(object):
     """
