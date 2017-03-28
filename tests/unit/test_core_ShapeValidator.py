@@ -170,6 +170,32 @@ class ShapeValidatorTests(unittest.TestCase):
         self.assertTupleEqual(res.axes2, (0,1))
 
 
+class ShapeValidatorResultTests(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_default_message(self):
+        temp = ShapeValidatorResult()
+        temp.error = 'AXIS_LEN_ERROR'
+        self.assertEquals(temp.default_message, ShapeValidatorResult.SHAPE_ERROR[temp.error])
+
+    def test_set_error_to_illegal_type(self):
+        temp = ShapeValidatorResult()
+        with self.assertRaises(ValueError):
+            temp.error = 'MY_ILLEGAL_ERROR_TYPE'
+
+    def test_ensure_use_of_tuples_during_asignment(self):
+        temp = ShapeValidatorResult()
+        temp_d = [1,2]
+        temp_cases = ['shape1', 'shape2', 'axes1', 'axes2', 'ignored', 'unmatched']
+        for var in temp_cases :
+            setattr(temp, var, temp_d)
+            self.assertIsInstance(getattr(temp, var), tuple,  var)
+
 if __name__ == '__main__':
     unittest.main()
 
