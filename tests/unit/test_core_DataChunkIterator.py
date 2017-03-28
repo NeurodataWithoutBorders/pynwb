@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.core import DataChunkIterator
+from pynwb.core import DataChunkIterator, DataChunk
 import numpy as np
 
 
@@ -95,6 +95,22 @@ class DataChunkIteratorTests(unittest.TestCase):
         self.assertTupleEqual(dci.recommended_data_shape(), (5, 2, 3))
         self.assertIsNone(dci.recommended_chunk_shape())
 
+
+class DataChunkTests(unittest.TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_len_operator_no_data(self):
+        temp = DataChunk()
+        self.assertEqual(len(temp), 0)
+
+    def test_len_operator_with_data(self):
+        temp = DataChunk(np.arange(10).reshape(5,2))
+        self.assertEqual(len(temp), 5)
 
 if __name__ == '__main__':
     unittest.main()
