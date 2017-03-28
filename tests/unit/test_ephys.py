@@ -22,7 +22,7 @@ class ElectrodeGroupConstructor(unittest.TestCase):
         self.desc = "an example electrode group"
         self.dev = "my favorite device"
         self.loc = "my favorote brain location"
-        self.eg = ElectrodeGroup(self.name, 
+        self.eg = ElectrodeGroup(self.name,
                                  self.coord,
                                  self.desc,
                                  self.dev,
@@ -67,7 +67,7 @@ class ClusteringConstructor(unittest.TestCase):
         self.assertEqual(cc.source, 'test_cc')
         self.assertEqual(cc.cluster_times, cluster_times)
         self.assertEqual(cc.cluster_ids, cluster_ids)
-        self.assertEqual(cc.peak_over_rms, peak_over_rms) 
+        self.assertEqual(cc.peak_over_rms, peak_over_rms)
 
 class ClusterWaveformConstructor(unittest.TestCase):
     def test_init(self):
@@ -107,3 +107,30 @@ class FeatureExtractionConstructor(unittest.TestCase):
         fe = FeatureExtraction('test_fe', electrodes, description, event_times, features)
         self.assertEqual(fe.source, 'test_fe')
 
+    def test_invalid_init_mismatched_event_times(self):
+        event_times = []  # Need 1 event time but give 0
+        electrodes  = [ 'elec1', 'elec2' ]
+        description = [ 'desc1', 'desc2', 'desc3' ]
+        features = [[[0,1,2], [3,4,5]]]
+        self.assertRaises(ValueError, FeatureExtraction, 'test_fe', electrodes, description, event_times, features)
+
+    def test_invalid_init_mismatched_electrodes(self):
+        event_times = [ 1 ]
+        electrodes  = [ 'elec1', ]  # Need 2 electrodes but give 1
+        description = [ 'desc1', 'desc2', 'desc3' ]
+        features = [[[0,1,2], [3,4,5]]]
+        self.assertRaises(ValueError, FeatureExtraction, 'test_fe', electrodes, description, event_times, features)
+
+    def test_invalid_init_mismatched_description(self):
+        event_times = [ 1 ]
+        electrodes  = [ 'elec1', 'elec2' ]
+        description = [ 'desc1', 'desc2', 'desc3', 'desc4' ]  # Need 3 descriptions but give 4
+        features = [[[0,1,2], [3,4,5]]]
+        self.assertRaises(ValueError, FeatureExtraction, 'test_fe', electrodes, description, event_times, features)
+
+    def test_invalid_init_mismatched_description(self):
+        event_times = [ 1 ]
+        electrodes  = [ 'elec1', 'elec2' ]
+        description = [ 'desc1', 'desc2', 'desc3' ]
+        features = [[0,1,2], [3,4,5]]  # Need 3D feature array but give only 2D array
+        self.assertRaises(ValueError, FeatureExtraction, 'test_fe', electrodes, description, event_times, features)
