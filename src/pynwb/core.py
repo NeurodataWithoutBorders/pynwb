@@ -576,7 +576,6 @@ class DataChunk(object):
     :ivar data: Numpy ndarray with the data value(s) of the chunk
     :ivar selection: Numpy index tuple describing the location of the chunk
     """
-
     @docval({'name': 'data', 'type': np.ndarray, 'doc': 'Numpy array with the data value(s) of the chunk', 'default': None},
             {'name':'selection', 'type': None, 'doc': 'Numpy index tuple describing the location of the chunk', 'default': None})
     def __init__(self, **kwargs):
@@ -586,7 +585,7 @@ class DataChunk(object):
         if self.data is not None:
             return len(self.data)
         else:
-            0
+            return 0
 
 class ShapeValidator(object):
     """
