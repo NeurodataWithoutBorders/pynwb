@@ -522,10 +522,6 @@ class DataChunkIterator(object):
 
         return self.__next_chunk
 
-    def next(self):
-        """Same as __next__. Provided only for convenience for folks used to Python 2"""
-        return self.__next__()
-
     @docval(returns="DatChunk object with the data and selection for the current chunk", rtype="DataChunk")
     def __next__(self):
         """Return the next data chunk or raise a StopIteration exception if all chunks have been retrieved.
