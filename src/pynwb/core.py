@@ -371,7 +371,7 @@ class NWBContainer(metaclass=ExtenderMeta):
         if not isinstance(cls.__nwbfields__, tuple):
             raise TypeError("'__nwbfields__' must be of type tuple")
 
-        if len(bases) and issubclass(bases[-1], NWBContainer) and bases[-1].__nwbfields__ is not cls.__nwbfields__:
+        if len(bases) and 'NWBContainer' in globals() and issubclass(bases[-1], NWBContainer) and bases[-1].__nwbfields__ is not cls.__nwbfields__:
                 new_nwbfields = list(cls.__nwbfields__)
                 new_nwbfields[0:0] = bases[-1].__nwbfields__
                 cls.__nwbfields__ = tuple(new_nwbfields)
