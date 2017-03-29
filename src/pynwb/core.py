@@ -522,12 +522,14 @@ class DataChunkIterator(object):
 
         return self.__next_chunk
 
-    @docval(returns="DatChunk object with the data and selection for the current chunk", rtype="DataChunk")
     def __next__(self):
         """Return the next data chunk or raise a StopIteration exception if all chunks have been retrieved.
 
         HINT: numpy.s_ provides a convenient way to generate index tuples using standard array slicing. This
         is often useful to define the DataChunkk.selection of the current chunk
+
+        :returns: DataChunk object with the data and selection of the current chunk
+        :rtype: DataChunk
 
         """
         # If we have not already read the next chunk, then read it now
