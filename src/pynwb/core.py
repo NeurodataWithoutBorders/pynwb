@@ -365,7 +365,7 @@ class NWBContainer(metaclass=ExtenderMeta):
     @ExtenderMeta.pre_init
     def __gather_nwbfields(cls, name, bases, classdict):
         '''
-        This classmethod will be called during class declaration to automatically
+        This classmethod will be called during class declaration in the metaclass to automatically
         create setters and getters for NWB fields that need to be exported
         '''
         if not isinstance(cls.__nwbfields__, tuple):
