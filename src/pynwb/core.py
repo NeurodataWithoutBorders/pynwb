@@ -522,12 +522,18 @@ class DataChunkIterator(object):
 
         return self.__next_chunk
 
-    @docval(returns="The following two items must be returned: \n" +
-                    "* Numpy array (or scalar) with the data for the next chunk \n" +
-                    "* Numpy-compliant index tuple describing the location of the chunk in the complete array. " +
-                    "HINT: numpy.s_ provides a convenient way to generate index tuples using standard array slicing.")
+    def next(self):
+        """Same as __next__. Provided only for convenience for folks used to Python 2"""
+        return self.__next__()
+
+    @docval(returns="DatChunk object with the data and selection for the current chunk", rtype="DataChunk")
     def __next__(self):
-        """Return the next data chunk or raise a StopIteration exception if all chunks have been retrieved."""
+        """Return the next data chunk or raise a StopIteration exception if all chunks have been retrieved.
+
+        HINT: numpy.s_ provides a convenient way to generate index tuples using standard array slicing. This
+        is often useful to define the DataChunkk.selection of the current chunk
+
+        """
         # If we have not already read the next chunk, then read it now
         if self.__next_chunk.data is None:
             self._read_next_chunk()
