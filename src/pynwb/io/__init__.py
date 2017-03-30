@@ -1,7 +1,12 @@
 from . import build, hdf5
 
 def __get_type_map():
-    from ..spec import CATALOG
-    return build.map.TypeMap(CATALOG)
+    from pynwb.core import NWBContainer
+    ret = build.get_type_map()
+    ret.neurodata_type(NWBContainer)(build.ObjectMapper)
+    return ret
 
-type_map = __get_type_map()
+TYPE_MAP = __get_type_map()
+
+def BuildManager(type_map=TYPE_MAP):
+    return build.BuildManager(type_map)
