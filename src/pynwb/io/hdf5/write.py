@@ -69,7 +69,7 @@ from datetime import datetime
 
 
 class HDF5Writer(object):
-    def __init__(self):
+    def __init__(self, build_manager):
         self.__renderer = NWBFileHDF5Renderer()
 
     def write(self, nwb_container, file_path):
