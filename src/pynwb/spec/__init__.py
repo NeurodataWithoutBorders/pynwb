@@ -19,11 +19,15 @@ def __get_resources():
     return ret
 
 def __build_catalog(data_dir_path):
-    import glob
+    from glob import iglob
     import ruamel.yaml as yaml
+    from itertools import chain
+    from os.path import join
     from .spec import SpecCatalog
     spec_catalog = SpecCatalog()
-    for path in glob.glob('%s/*.{yaml,json}' % data_dir_path):
+    exts = ['yaml', 'json']
+    glob_str = join(data_dir_path, "*.%s")
+    for path in chain(*[iglob(glob_str % ext) for ext in exts]):
         with open(path, 'r') as stream:
             for obj in yaml.safe_load(stream):
                 spec_obj = GroupSpec.build_spec(obj)
