@@ -302,7 +302,7 @@ class ExtenderMeta(abc.ABCMeta):
         for func in it:
             func(name, bases, classdict)
 
-class NWBContainer(metaclass=ExtenderMeta):
+class NWBContainer(object, metaclass=ExtenderMeta):
     '''The base class to any NWB types.
 
     The purpose of this class is to provide a mechanism for representing hierarchical
