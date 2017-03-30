@@ -1,7 +1,7 @@
 from .build import ObjectMapper
-from . import type_map
+from . import TYPE_MAP
 
-@type_map.neurodata_type('TimeSeries')
+@TYPE_MAP.neurodata_type('TimeSeries')
 class TimeSeriesMap(ObjectMapper):
 
     def __init__(self, spec):
