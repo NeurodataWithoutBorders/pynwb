@@ -1,4 +1,8 @@
-
+from pynwb.file import NWBFile
+from pynwb.io.tools.handler import BaseObjectHandler
+from pynwb.core import docval, getargs
+from pynwb.ecephys import ElectrodeGroup
+import h5py
 
 class NWBFileReader(BaseObjectHandler):
     @docval({'name': 'nwb_path', 'type': str, 'doc': 'The path to the NWB file to read'})
@@ -19,7 +23,7 @@ class NWBFileReader(BaseObjectHandler):
             loc = eg_group['location']
             coord = loc_dataset[idx]
             imp = imp_dataset[idx]
-            self.ec_electrodes.append(ElectrodeGroup(name, coord, desc, dev, loc, imp)
+            self.ec_electrodes.append(ElectrodeGroup(name, coord, desc, dev, loc, imp))
 
         self.nwbfile = NWBFile(...)
 
@@ -34,13 +38,13 @@ class NWBFileReader(BaseObjectHandler):
             ret.append(val)
         return ret
 
-'''
+    '''
 
     for nwb_container_h5obj in file:
         python_type = determine_python_type(nwb_container_h5obj)
         attr_map = TypeMap.get_map(python_type)
         nwb_container_obj = build_constructor_args(attr_map, python_type, nwb_container_h5obj)
-'''
+    '''
     def build_container(self, attr_map, nwb_container_type, h5_object):
         if nwb_container_type is None:
             return None

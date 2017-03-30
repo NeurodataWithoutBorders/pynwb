@@ -1,7 +1,7 @@
 import unittest
 
 from pynwb.spec import GroupSpec, AttributeSpec, DatasetSpec
-from pynwb.io.build.h5tools import GroupBuilder, DatasetBuilder
+from pynwb.io.build.builders import GroupBuilder, DatasetBuilder
 from pynwb.core import NWBContainer
 from pynwb.spec.spec import SpecCatalog
 from pynwb.io.build.map import ObjectMapper, BuildManager, TypeMap
@@ -82,3 +82,7 @@ class TestNested(unittest.TestCase):
                                 attributes={'attr1': 'value1'})
         builder = self.type_map.build(container_inst, self.build_manager)
         self.assertDictEqual(builder, expected)
+
+
+if __name__ == '__main__':
+    unittest.main()

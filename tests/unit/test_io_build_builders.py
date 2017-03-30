@@ -1,138 +1,8 @@
 import unittest
 
-#% <<<<<<< HEAD
-#% from pynwb.io.h5tools import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder, write_dataset, SOFT_LINK, HARD_LINK, EXTERNAL_LINK
-#% from pynwb.io.utils import DataChunkIterator
-#% =======
-from pynwb.io.build.h5tools import DataChunkIterator, GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder
-from pynwb.io.hdf5.h5tools import __chunked_iter_fill__, write_dataset
-#% >>>>>>> read
-
-import h5py
-import os
-import tempfile
-import numpy as np
+from pynwb.io.build.builders import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder
 import json
-import os
 
-class H5IOTest(unittest.TestCase):
-    """Tests for h5tools IO tools"""
-
-
-    def setUp(self):
-        self.test_temp_file = tempfile.NamedTemporaryFile()
-        self.f = h5py.File(self.test_temp_file.name, 'w')
-
-    def tearDown(self):
-#% <<<<<<< HEAD
-        del self.f
-        del self.test_temp_file
-        self.f = None
-        self.test_temp_file = None
-        #self.f.close()
-        #os.remove(self.test_temp_file.name)
-
-    ##########################################
-    #  __chunked_iter_fill__(...) tests
-    ##########################################
-    def test__chunked_iter_fill_iterator_matched_buffer_size(self):
-        dci = DataChunkIterator(data=range(10), buffer_size=2)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
-        self.assertListEqual(my_dset[:].tolist(), list(range(10)))
-
-    def test__chunked_iter_fill_iterator_unmatched_buffer_size(self):
-        dci = DataChunkIterator(data=range(10), buffer_size=3)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
-        self.assertListEqual(my_dset[:].tolist(), list(range(10)))
-
-    def test__chunked_iter_fill_numpy_matched_buffer_size(self):
-        a = np.arange(30).reshape(5,2,3)
-        dci = DataChunkIterator(data=a, buffer_size=1)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
-        self.assertTrue(np.all(my_dset[:] == a))
-        self.assertTupleEqual(my_dset.shape, a.shape)
-
-    def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):
-        a = np.arange(30).reshape(5,2,3)
-        dci = DataChunkIterator(data=a, buffer_size=3)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
-        self.assertTrue(np.all(my_dset[:] == a))
-        self.assertTupleEqual(my_dset.shape, a.shape)
-
-    def test__chunked_iter_fill_list_matched_buffer_size(self):
-        a = np.arange(30).reshape(5,2,3)
-        dci = DataChunkIterator(data=a.tolist(), buffer_size=1)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
-        self.assertTrue(np.all(my_dset[:] == a))
-        self.assertTupleEqual(my_dset.shape, a.shape)
-
-    def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):
-        a = np.arange(30).reshape(5,2,3)
-        dci = DataChunkIterator(data=a.tolist(), buffer_size=3)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
-        self.assertTrue(np.all(my_dset[:] == a))
-        self.assertTupleEqual(my_dset.shape, a.shape)
-
-    ##########################################
-    #  write_dataset tests
-    ##########################################
-    def test_write_dataset_scalar(self):
-        a = 10
-        write_dataset(self.f, 'test_dataset', a, {})
-        dset = self.f['test_dataset']
-        self.assertTupleEqual(dset.shape, ())
-        self.assertEqual(dset[()], a)
-
-    def test_write_dataset_string(self):
-        a = 'test string'
-        write_dataset(self.f, 'test_dataset', a, {})
-        dset = self.f['test_dataset']
-        self.assertTupleEqual(dset.shape, ())
-        self.assertEqual(dset[()].decode('utf-8'), a)
-
-    def test_write_dataset_list(self):
-        a = np.arange(30).reshape(5,2,3)
-        write_dataset(self.f, 'test_dataset', a.tolist(), {})
-        dset = self.f['test_dataset']
-        self.assertTrue(np.all(dset[:] == a))
-
-    def test_write_dataset_iterable(self):
-        write_dataset(self.f, 'test_dataset', range(10), {})
-        dset = self.f['test_dataset']
-        self.assertListEqual(dset[:].tolist(), list(range(10)))
-
-    def test_write_dataset_iterable_multidimensional_array(self):
-        a = np.arange(30).reshape(5, 2, 3)
-        aiter = iter(a)
-        write_dataset(self.f, 'test_dataset', aiter, {})
-        dset = self.f['test_dataset']
-        self.assertListEqual(dset[:].tolist(), a.tolist())
-
-    def test_write_dataset_data_chunk_iterator(self):
-        dci = DataChunkIterator(data=np.arange(10), buffer_size=2)
-        write_dataset(self.f, 'test_dataset', dci, {})
-        dset = self.f['test_dataset']
-        self.assertListEqual(dset[:].tolist(), list(range(10)))
-#% =======
-#%         self.f.close()
-#%         os.remove(self.test_file_path)
-#%
-#%     def test_iter_fill_divisible_chunks_data_fit(self):
-#%         my_dset = __iter_fill__(self.f, 'test_dataset', range(100), 25)
-#%         self.assertEqual(my_dset[99], 99)
-#%
-#%     def test_iter_fill_divisible_chunks_data_nofit(self):
-#%         my_dset = __iter_fill__(self.f, 'test_dataset', range(200), 25)
-#%         self.assertEqual(my_dset[199], 199)
-#%
-#%     def test_iter_fill_nondivisible_chunks_data_fit(self):
-#%         my_dset = __iter_fill__(self.f, 'test_dataset', range(100), 30)
-#%         self.assertEqual(my_dset[99], 99)
-#%
-#%     def test_iter_fill_nondivisible_chunks_data_nofit(self):
-#%         my_dset = __iter_fill__(self.f, 'test_dataset', range(200), 30)
-#%         self.assertEqual(my_dset[199], 199)
-#% >>>>>>> read
 
 class GroupBuilderSetterTests(unittest.TestCase):
     """Tests for setter functions in GroupBuilder class"""
@@ -295,7 +165,10 @@ class GroupBuilderGetterTests(unittest.TestCase):
             ('external_link1', self.external_link1)
         )
         #self.assertSetEqual(items, set(self.gb.items()))
-        self.assertCountEqual(items, self.gb.items())
+        try:
+            self.assertCountEqual(items, self.gb.items())
+        except AttributeError:
+            self.assertItemsEqual(items, self.gb.items())
 
     def test_keys(self):
         """Test keys()"""
@@ -308,7 +181,10 @@ class GroupBuilderGetterTests(unittest.TestCase):
             'hard_link1',
             'external_link1',
         )
-        self.assertCountEqual(keys, self.gb.keys())
+        try:
+            self.assertCountEqual(keys, self.gb.keys())
+        except AttributeError:
+            self.assertItemsEqual(keys, self.gb.keys())
 
     def test_values(self):
         """Test values()"""
@@ -320,7 +196,10 @@ class GroupBuilderGetterTests(unittest.TestCase):
             self.hard_link1,
             self.external_link1,
         )
-        self.assertCountEqual(values, self.gb.values())
+        try:
+            self.assertCountEqual(values, self.gb.values())
+        except AttributeError:
+            self.assertItemsEqual(values, self.gb.values())
 
     @unittest.skip('not necessarily useful')
     def test_write(self):
@@ -481,6 +360,7 @@ class DatasetBuilderDeepUpdateTests(unittest.TestCase):
         db1.deep_update(db2)
         self.assertListEqual(db1.data, db2.data)
         self.assertIn('attr1', db1.attributes)
+
 
 if __name__ == '__main__':
     unittest.main()
