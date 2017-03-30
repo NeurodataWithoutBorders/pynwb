@@ -1,9 +1,8 @@
-from .tools.map import H5Builder
-
+from .build import ObjectMapper
 from . import type_map
 
 @type_map.neurodata_type('TimeSeries')
-class TimeSeriesMap(H5Builder):
+class TimeSeriesMap(ObjectMapper):
 
     def __init__(self, spec):
         super(TimeSeriesMap, self).__init__(spec)
@@ -17,3 +16,7 @@ class TimeSeriesMap(H5Builder):
         startingtime_spec = self.spec.get_dataset('starting_time')
         self.map_attr('rate_unit', startingtime_spec.get_attribute('unit'))
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))
+
+    @ObjectMapper.const_arg('name')
+    def name(self, h5group):
+        return h5group.name
