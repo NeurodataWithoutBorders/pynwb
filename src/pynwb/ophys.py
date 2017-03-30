@@ -5,7 +5,6 @@ from .core import docval, popargs, NWBContainer
 from collections import Iterable
 import numpy as np
 
-
 class TwoPhotonSeries(ImageSeries):
     """
     A special case of optical imaging.

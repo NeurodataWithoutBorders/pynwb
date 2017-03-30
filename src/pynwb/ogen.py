@@ -4,7 +4,6 @@ from .core import docval, popargs, NWBContainer
 import numpy as np
 from collections import Iterable
 
-
 class OptogeneticSeries(TimeSeries):
     '''
     Optogenetic stimulus. The data[] field is in unit of watts.

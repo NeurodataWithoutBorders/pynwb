@@ -10,7 +10,7 @@ class ImageRetinotopy(Interface):
     maps (e.g., altitude/azimuth; radius/theta) of responses to specific stimuli and a combined
     polarity map from which to identify visual areas.
     Note: for data consistency, all images and arrays are stored in the format [row][column] and
-    [row, col], which equates to [y][x]. Field of view and dimension arrays may appear backward 
+    [row, col], which equates to [y][x]. Field of view and dimension arrays may appear backward
     (i.e., y before x).
     """
 

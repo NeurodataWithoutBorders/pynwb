@@ -4,7 +4,6 @@ from .base import TimeSeries, Interface, _default_conversion, _default_resolutio
 import numpy as np
 from collections import Iterable
 
-
 class AnnotationSeries(TimeSeries):
     """
     Stores text-based records about the experiment. To use the
