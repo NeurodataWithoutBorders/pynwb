@@ -4,3 +4,6 @@ for reading and writing data in NWB format
 
 from .base import TimeSeries, Module, Interface
 from .file import NWBFile
+
+from . import spec
+from . import io
