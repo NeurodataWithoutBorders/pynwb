@@ -62,3 +62,6 @@ class TimeSeriesSetters(unittest.TestCase):
         self.ts.set_comments('this is a comments')
         self.assertEqual(self.ts.comments, 'this is a comments')
 
+
+if __name__ == '__main__':
+    unittest.main()

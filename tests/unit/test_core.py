@@ -163,3 +163,7 @@ class TestDocValidator(unittest.TestCase):
             kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', None, arg6=True)
         msg = "incorrect type for 'arg5' (got 'NoneType', expected 'int')"
         self.assertEqual(cm.exception.args[0], msg)
+
+
+if __name__ == '__main__':
+    unittest.main()

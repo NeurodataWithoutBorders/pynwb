@@ -112,6 +112,7 @@ class DataChunkTests(unittest.TestCase):
         temp = DataChunk(np.arange(10).reshape(5,2))
         self.assertEqual(len(temp), 5)
 
+
 if __name__ == '__main__':
     unittest.main()
 

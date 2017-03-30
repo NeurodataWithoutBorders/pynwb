@@ -196,6 +196,7 @@ class ShapeValidatorResultTests(unittest.TestCase):
             setattr(temp, var, temp_d)
             self.assertIsInstance(getattr(temp, var), tuple,  var)
 
+
 if __name__ == '__main__':
     unittest.main()
 

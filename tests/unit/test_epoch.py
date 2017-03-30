@@ -31,7 +31,7 @@ class EpochConstructor(unittest.TestCase):
         self.assertEqual(epoch.description, "this is an epoch")
 
 class EpochSetters(unittest.TestCase):
-    
+
     def setUp(self):
         self.epoch = Epoch("test_epoch", 10.0, 20.0, "this is an epoch")
 
@@ -48,3 +48,6 @@ class EpochSetters(unittest.TestCase):
         self.assertEqual(epoch_ts.idx_start, 90)
         self.assertIs(self.epoch.get_timeseries("test_ts"), epoch_ts)
 
+
+if __name__ == '__main__':
+    unittest.main()

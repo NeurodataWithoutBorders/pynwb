@@ -134,3 +134,7 @@ class FeatureExtractionConstructor(unittest.TestCase):
         description = [ 'desc1', 'desc2', 'desc3' ]
         features = [[0,1,2], [3,4,5]]  # Need 3D feature array but give only 2D array
         self.assertRaises(TypeError, FeatureExtraction, 'test_fe', electrodes, description, event_times, features)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -41,3 +41,6 @@ class UnitTimesConstructor(unittest.TestCase):
         self.assertEqual(ut.unit_description, 'unit_description')
         self.assertEqual(ut.unit_source, 'unit_source')
 
+
+if __name__ == '__main__':
+    unittest.main()

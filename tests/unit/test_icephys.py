@@ -79,3 +79,6 @@ class VoltageClampStimulusSeriesConstructor(unittest.TestCase):
         self.assertEqual(vCSS.unit, 'unit')
         self.assertEqual(vCSS.electrode_name, 'electrode_name')
 
+
+if __name__ == '__main__':
+    unittest.main()

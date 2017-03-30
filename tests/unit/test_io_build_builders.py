@@ -361,6 +361,7 @@ class DatasetBuilderDeepUpdateTests(unittest.TestCase):
         self.assertListEqual(db1.data, db2.data)
         self.assertIn('attr1', db1.attributes)
 
+
 if __name__ == '__main__':
     unittest.main()
 

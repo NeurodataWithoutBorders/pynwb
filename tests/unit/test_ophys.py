@@ -49,3 +49,6 @@ class FluorescenceConstructor(unittest.TestCase):
         self.assertEqual(ff.source, 'test_ff')
         self.assertEqual(ff._RoiResponseSeries, ts)
 
+
+if __name__ == '__main__':
+    unittest.main()

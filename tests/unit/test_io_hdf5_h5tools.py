@@ -103,6 +103,7 @@ class H5IOTest(unittest.TestCase):
         dset = self.f['test_dataset']
         self.assertListEqual(dset[:].tolist(), list(range(10)))
 
+
 if __name__ == '__main__':
     unittest.main()
 

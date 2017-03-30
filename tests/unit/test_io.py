@@ -82,3 +82,7 @@ class TestNested(unittest.TestCase):
                                 attributes={'attr1': 'value1'})
         builder = self.type_map.build(container_inst, self.build_manager)
         self.assertDictEqual(builder, expected)
+
+
+if __name__ == '__main__':
+    unittest.main()
