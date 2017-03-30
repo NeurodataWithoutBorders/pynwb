@@ -27,18 +27,10 @@ class GroupBuilderSetterTests(unittest.TestCase):
         self.assertIsInstance(gp, GroupBuilder)
         self.assertIs(self.gb['my_subgroup'], gp)
 
-    def test_add_softlink(self):
-        sl = self.gb.add_link('my_softlink', '/path/to/target')
+    def test_add_link(self):
+        sl = self.gb.add_link('my_link', '/path/to/target')
         self.assertIsInstance(sl, LinkBuilder)
-        self.assertFalse(sl.hard)
-        self.assertIs(self.gb['my_softlink'], sl)
-
-    @unittest.skip('add_hard_link no longer exists. Leave unit test in case we want to resurrect')
-    def test_add_hardlink(self):
-        hl = self.gb.add_hard_link('my_hardlink', '/path/to/target')
-        self.assertIsInstance(hl, LinkBuilder)
-        self.assertTrue(hl.hard)
-        self.assertIs(self.gb['my_hardlink'], hl)
+        self.assertIs(self.gb['my_link'], sl)
 
     def test_add_external_link(self):
         el = self.gb.add_external_link('my_externallink', '/path/to/target', 'external.h5')
@@ -59,7 +51,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
             'subgroup1': GroupBuilder('subgroup1'),
             'dataset1': DatasetBuilder('dataset1', list(range(10))),
             'soft_link1': LinkBuilder('soft_link1', "/soft/path/to/target"),
-            'hard_link1': LinkBuilder('hard_link1', "/hard/path/to/target", True),
             'external_link1': ExternalLinkBuilder('external_link1', "/hard/path/to/target",
                                                   "test.h5"),
             'int_attr': 1,
@@ -74,7 +65,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
                                          {'int_attr': self.int_attr,
                                           'str_attr': self.str_attr},
                                          {'soft_link1': self.soft_link1,
-                                          'hard_link1': self.hard_link1,
                                           'external_link1': self.external_link1}))
 
     def tearDown(self):
@@ -109,10 +99,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
         """Test __get_item__ for soft links"""
         self.assertIs(self.gb['soft_link1'], self.soft_link1)
 
-    def test_get_item_hard_link(self):
-        """Test __get_item__ for hard links"""
-        self.assertIs(self.gb['hard_link1'], self.hard_link1)
-
     def test_get_item_external_link(self):
         """Test __get_item__ for external links"""
         self.assertIs(self.gb['external_link1'], self.external_link1)
@@ -141,10 +127,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
         """Test get() for soft links"""
         self.assertIs(self.gb.get('soft_link1'), self.soft_link1)
 
-    def test_get_item_hard_link(self):
-        """Test get() for hard links"""
-        self.assertIs(self.gb.get('hard_link1'), self.hard_link1)
-
     def test_get_item_external_link(self):
         """Test get() for external links"""
         self.assertIs(self.gb.get('external_link1'), self.external_link1)
@@ -161,7 +143,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
             ('int_attr', self.int_attr),
             ('str_attr', self.str_attr),
             ('soft_link1', self.soft_link1),
-            ('hard_link1', self.hard_link1),
             ('external_link1', self.external_link1)
         )
         #self.assertSetEqual(items, set(self.gb.items()))
@@ -178,7 +159,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
             'int_attr',
             'str_attr',
             'soft_link1',
-            'hard_link1',
             'external_link1',
         )
         try:
@@ -193,7 +173,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
             self.dataset1,
             self.int_attr, self.str_attr,
             self.soft_link1,
-            self.hard_link1,
             self.external_link1,
         )
         try:
@@ -231,10 +210,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
             "soft_link1": {
                 "path": "/soft/path/to/target",
                 "hard": false
-            },
-            "hard_link1": {
-                "path": "/hard/path/to/target",
-                "hard": true
             },
             "external_link1": {
                 "path": "/hard/path/to/target",
@@ -303,8 +278,8 @@ class GroupBuilderDeepUpdateTests(unittest.TestCase):
         self.assertListEqual(gb1['dataset2'].data, gb2['dataset2'].data)
 
     def test_mutually_exclusive_attributes(self):
-        gb1 = GroupBuilder'gb1', (attributes={'attr1': 'my_attribute1'})
-        gb2 = GroupBuilder'gb2', (attributes={'attr2': 'my_attribute2'})
+        gb1 = GroupBuilder('gb1', attributes={'attr1': 'my_attribute1'})
+        gb2 = GroupBuilder('gb2', attributes={'attr2': 'my_attribute2'})
         gb1.deep_update(gb2)
         self.assertIn('attr2', gb2)
         self.assertEqual(gb2['attr2'], 'my_attribute2')

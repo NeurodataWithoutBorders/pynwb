@@ -122,7 +122,7 @@ class BuildManager(object):
 
     def construct(self, builder):
         builder_id = self.__bldrhash__(builder)
-        result = self.__containers.setdefault(builder_id, self.__type_map.construct(builder, self)
+        result = self.__containers.setdefault(builder_id, self.__type_map.construct(builder, self))
         self.prebuilt(result, builder)
         return result
 
@@ -130,7 +130,7 @@ class BuildManager(object):
         pass
 
     def get_builder_name(self, container):
-        pass
+        return self.__type_map.get_builder_name(container)
 
 
 class ObjectMapper(object, metaclass=ExtenderMeta):
@@ -165,6 +165,7 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
         spec = getargs('spec', kwargs)
         self.__spec = spec
         self.__spec2attr = dict()
+        self.__spec2carg = dict()
         for subspec in spec.attributes:
             self.__map_spec(subspec)
         if isinstance(spec, GroupSpec):
@@ -339,7 +340,6 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
         return cls(*args, **kwargs)
 
     def get_builder_name(self, container):
-        ret = container.name
         if self.__spec.name != NAME_WILDCARD:
             ret = self.__spec.name
         else:

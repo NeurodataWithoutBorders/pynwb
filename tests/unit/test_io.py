@@ -8,6 +8,7 @@ from pynwb.io.build.map import ObjectMapper, BuildManager, TypeMap
 
 class MyNWBContainer(NWBContainer):
     def __init__(self, data, attr1, attr2, attr3=3.14):
+        super(MyNWBContainer, self).__init__()
         self.__data = data
         self.__attr1 = attr1
         self.__attr2 = attr2
@@ -34,8 +35,9 @@ class TestUnNested(unittest.TestCase):
     def setUp(self):
         self.spec_catalog = SpecCatalog()
         self.type_map = TypeMap(self.spec_catalog)
-        self.build_manager = BuildManager()
+        self.build_manager = BuildManager(self.type_map)
         my_spec = GroupSpec('A test group specification with a neurodata type',
+                         name="my_container",
                          neurodata_type_def='MyNWBContainer',
                          datasets=[DatasetSpec('an example dataset', 'int', name='data')],
                          attributes=[AttributeSpec('attr1', 'str', 'an example string attribute'),
@@ -45,7 +47,7 @@ class TestUnNested(unittest.TestCase):
     def test_default_mapping(self):
         container_inst = MyNWBContainer(list(range(10)), 'value1', 10)
         builder = self.type_map.build(container_inst, self.build_manager)
-        expected = GroupBuilder(datasets={'data': DatasetBuilder(list(range(10)))},
+        expected = GroupBuilder('my_container', datasets={'data': DatasetBuilder('data', list(range(10)))},
                                 attributes={'attr1': 'value1', 'attr2': 10})
 
         self.assertDictEqual(builder, expected)
@@ -55,12 +57,13 @@ class TestNested(unittest.TestCase):
     def setUp(self):
         self.spec_catalog = SpecCatalog()
         self.type_map = TypeMap(self.spec_catalog)
-        self.build_manager = BuildManager()
         my_spec = GroupSpec('A test group specification with a neurodata type',
+                         name="my_container",
                          neurodata_type_def='MyNWBContainer',
                          datasets=[DatasetSpec('an example dataset', 'int', name='data', attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
                          attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
         self.type_map.register_spec(MyNWBContainer, my_spec)
+        self.build_manager = BuildManager(self.type_map)
 
     def test_register(self):
 
@@ -78,10 +81,14 @@ class TestNested(unittest.TestCase):
 
     def test_override(self):
         container_inst = MyNWBContainer(list(range(10)), 'value1', 10)
-        expected = GroupBuilder(datasets={'data': DatasetBuilder(list(range(10)), attributes={'attr2': 10})},
+        expected = GroupBuilder('my_container', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
                                 attributes={'attr1': 'value1'})
         builder = self.type_map.build(container_inst, self.build_manager)
         self.assertDictEqual(builder, expected)
+
+#TODO:
+class TestWildCardNamedSpecs(unittest.TestCase):
+    pass
 
 
 if __name__ == '__main__':

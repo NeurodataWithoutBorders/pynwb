@@ -40,11 +40,11 @@ class GroupBuilder(dict):
         name, groups, datasets, links, attributes = getargs('name', 'groups', 'datasets', 'links', 'attributes', kwargs)
         self.__name = name
         for name, group in groups.items():
-            self.set_group(name, group)
+            self.set_group(group)
         for name, dataset in datasets.items():
-            self.set_dataset(name, dataset)
+            self.set_dataset(dataset)
         for name, link in links.items():
-            self.set_link(name, link)
+            self.set_link(link)
         for name, val in attributes.items():
             self.set_attribute(name, val)
 
@@ -100,7 +100,7 @@ class GroupBuilder(dict):
         """
         Add a dataset to this group
         """
-        builder, = getargs('builder', kwargs)
+        builder = getargs('builder', kwargs)
         self.__set_builder(builder, GroupBuilder.__dataset)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this subgroup'},
@@ -115,7 +115,7 @@ class GroupBuilder(dict):
         """
         name = kwargs.pop('name')
         builder = GroupBuilder(name, **kwargs)
-        self.set_group(name, builder)
+        self.set_group(builder)
         return builder
 
     @docval({'name': 'builder', 'type': 'GroupBuilder', 'doc': 'the GroupBuilder that represents this subgroup'})
@@ -124,7 +124,7 @@ class GroupBuilder(dict):
         Add a subgroup to this group
         """
         name, builder, = getargs('name', 'builder', kwargs)
-        self.__set_builder(name, builder, GroupBuilder.__group)
+        self.__set_builder(builder, GroupBuilder.__group)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this link'},
             {'name': 'path', 'type': str, 'doc': 'the path within this HDF5 file'},
@@ -179,7 +179,7 @@ class GroupBuilder(dict):
             if name in self_groups:
                 self_groups[name].deep_update(subgroup)
             else:
-                self.set_group(name, subgroup)
+                self.set_group(subgroup)
         # merge datasets
         datasets = super(GroupBuilder, builder).__getitem__(GroupBuilder.__dataset)
         self_datasets = super().__getitem__(GroupBuilder.__dataset)
@@ -189,13 +189,13 @@ class GroupBuilder(dict):
                 self_datasets[name].deep_update(dataset)
                 #super().__getitem__(GroupBuilder.__dataset)[name] = dataset
             else:
-                self.set_dataset(name, dataset)
+                self.set_dataset(dataset)
         # merge attributes
         for name, value in super(GroupBuilder, builder).__getitem__(GroupBuilder.__attribute).items():
             self.set_attribute(name, value)
         # merge links
         for name, link in super(GroupBuilder, builder).__getitem__(GroupBuilder.__link).items():
-            self.set_link(name, link)
+            self.set_link(link)
 
     def is_empty(self):
         """Returns true if there are no datasets, attributes, links or
@@ -282,6 +282,10 @@ class LinkBuilder(dict):
     @property
     def path(self):
         return self['path']
+
+    @property
+    def name(self):
+        return self['name']
 
 
 class ExternalLinkBuilder(LinkBuilder):
