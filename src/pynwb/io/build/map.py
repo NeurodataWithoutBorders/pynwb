@@ -1,7 +1,7 @@
-from pynwb.core import docval, getargs
+from pynwb.core import docval, getargs, ExtenderMeta
 from pynwb.spec import Spec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD
 from pynwb.spec.spec import SpecCatalog
-from .builders import DatasetBuilder, GroupBuilder
+from .builders import DatasetBuilder, GroupBuilder, get_subspec
 
 class TypeMap(object):
 
@@ -78,32 +78,85 @@ class TypeMap(object):
         else:
             return attr_map.build(container, build_manager)
 
-    def get_h5object_name(self, container):
+    def construct(self, builder, build_manager=None):
+        """
+        Construct the NWBContainer represented by the given builder
+        """
+        #TODO implement this
+        pass
+
+    def get_builder_name(self, container):
         attr_map = self.get_map(container)
         if attr_map is None:
             raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
-            return attr_map.get_h5object_name(container)
+            return attr_map.get_builder_name(container)
 
 class BuildManager(object):
     """
     A class for managing builds of NWBContainers
     """
 
-    def __init__(self):
-        self.__built = dict()
+    def __init__(self, type_map):
+        self.__builders = dict()
+        self.__containers = dict()
+        self.__type_map = type_map
 
     def build(self, container):
-        container_id = self.__ohash__(container)
-        return self.__built.setdefault(container_id, TypeMap.build(container, self))
+        container_id = self.__conthash__(container)
+        result = self.__builders.setdefault(container_id, self.__type_map.build(container, self))
+        self.prebuilt(container, result)
+        return result
 
     def prebuilt(self, container, builder):
-        self.__built[container_id] = builder
+        container_id = self.__conthash__(container)
+        self.__builders[container_id] = builder
+        builder_id = self.__bldrhash__(builder)
+        self.__builders[builder_id] = container
 
-    def __ohash__(self, obj):
+    def __conthash__(self, obj):
         return id(obj)
 
-class ObjectMapper(object):
+    def __bldrhash__(self, obj):
+        return id(obj)
+
+    def construct(self, builder):
+        builder_id = self.__bldrhash__(builder)
+        result = self.__containers.setdefault(builder_id, self.__type_map.construct(builder, self)
+        self.prebuilt(result, builder)
+        return result
+
+    def get_cls(self, builder):
+        pass
+
+    def get_builder_name(self, container):
+        pass
+
+
+class ObjectMapper(object, metaclass=ExtenderMeta):
+
+    __const_arg = '__const_arg__'
+    @classmethod
+    def const_arg(cls, name):
+        def _dec(func):
+            setattr(func, cls.__const_arg, name)
+            return func
+        return _dec
+
+    @classmethod
+    def __is_const_arg(cls, attr_val):
+        return hasattr(attr_val, cls.__const_arg)
+
+    @classmethod
+    def __get_cargname(cls, attr_val):
+        return getattr(attr_val, cls.__const_arg)
+
+    _property = "__item_property__"
+    @ExtenderMeta.post_init
+    def __gather_procedures(cls, name, bases, classdict):
+        cls.const_args = dict()
+        for name, func in filter(lambda tup: cls.__is_const_arg(tup[1]), cls.__dict__.items()):
+            cls.const_args[cls.__get_cargname(func)] = getattr(cls, name)
 
     @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'The specification for mapping objects to builders'})
     def __init__(self, **kwargs):
@@ -111,8 +164,7 @@ class ObjectMapper(object):
         """
         spec = getargs('spec', kwargs)
         self.__spec = spec
-        self.__attr_map = dict()
-        self.__spec_map = dict()
+        self.__spec2attr = dict()
         for subspec in spec.attributes:
             self.__map_spec(subspec)
         if isinstance(spec, GroupSpec):
@@ -123,18 +175,20 @@ class ObjectMapper(object):
 
     def __map_spec(self, spec):
         if spec.name != NAME_WILDCARD:
-            self.__attr_map[spec.name] = spec
-            self.__spec_map[spec] = spec.name
+            self.map_attr(spec.name, spec)
+            self.map_const_arg(spec.name, spec)
         else:
-            self.__attr_map[subspec.neurodata_type] = subspec
-            self.__spec_map[subspec] = subspec.neurodata_type
+            self.__spec2attr[subspec] = subspec.neurodata_type
+            self.__spec2attr[subspec] = subspec.neurodata_type
         if isinstance(spec, DatasetSpec):
             for subspec in spec.attributes:
                 self.__map_spec(subspec)
 
-    @property
-    def children(self):
-        return self.__attr_map
+    def __get_override_carg(self, name, builder):
+        if name in self.const_args:
+            func = getattr(self, self.const_args[name])
+            return func(builder)
+        return None
 
     @property
     def spec(self):
@@ -144,22 +198,22 @@ class ObjectMapper(object):
         '''
         Get the object attribute name for the given Spec
         '''
-        return self.__spec_map[spec]
+        return self.__spec2attr[spec]
 
-    def get_spec(self, attr_name):
+    def get_const_arg(self, spec):
         '''
-        Get the specification for the given object attribute name
+        Get the constructor argument for the given Spec
         '''
-        return self.__attr_map[attr_name]
+        return self.__spec2carg[spec]
 
     def build(self, container, build_manager):
-        group = isinstance(self.__spec, GroupSpec)
-        if group:
-            builder = GroupBuilder()
+        name = build_manager.get_builder_name(container)
+        if isinstance(self.__spec, GroupSpec):
+            builder = GroupBuilder(name)
             self.__add_datasets(builder, self.__spec.datasets, container, build_manager)
             self.__add_groups(builder, self.__spec.groups, container, build_manager)
         else:
-            builder = DatasetBuilder()
+            builder = DatasetBuilder(name)
         self.__add_attributes(builder, self.__spec.attributes, container)
         return builder
 
@@ -197,16 +251,11 @@ class ObjectMapper(object):
                 value = getattr(container, attr_name)
                 self.__build_helper(builder, spec, value, build_manager)
 
-    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the parent builder object to build on'},
-            {'name': 'spec', 'type': (DatasetSpec, GroupSpec, LinkSpec), 'doc': 'the specification to use for building'},
-            {'name': 'value', 'type': None, 'doc': 'the value to add to builder using spec'},
-            {'name': 'build_manager', 'type': BuildManager, 'doc': 'the manager for this build'})
-    def __build_helper(self, **kwargs):
-        builder, spec, value, build_manager = getargs('builder', 'spec', 'value', 'build_manager', kwargs)
+    def __build_helper(self, builder, spec, value, build_manager):
         sub_builder = None
         if isinstance(value, NWBContainer):
             rendered_obj = build_manager.build(value)
-            name = TypeMap.get_h5object_name(value)
+            name = build_manager.get_builder_name(value)
             # use spec to determine what kind of HDF5
             # object this NWBContainer corresponds to
             if isinstance(spec, LinkSpec):
@@ -236,125 +285,64 @@ class ObjectMapper(object):
            behavior
         """
         attr_name, spec = getargs('attr_name', 'spec', kwargs)
-        tmp = spec
-        self.__attr_map[attr_name] = tmp
-        self.__spec_map[tmp] = attr_name
+        self.__spec2attr[spec] = attr_name
 
-    def get_h5object_name(self, container):
-        ret = container.name
-        if self.__spec.name != '*':
-            ret = self.__spec.name
+    @docval({"name": "const_arg", "type": str, "doc": "the name of the constructor argument to map"},
+            {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
+    def map_const_arg(self, **kwargs):
+        """Map an attribute to spec. Use this to override default
+           behavior
+        """
+        const_arg, spec = getargs('const_arg', 'spec', kwargs)
+        self.__spec2carg[spec] = const_arg
+
+    def __get_subspec_values(self, builder, spec, manager):
+        ret = dict()
+        for h5attr_name, h5attr_val in builder.attributes.items():
+            subspec = spec.get_attribute(h5attr_name)
+            ret[subspec] = h5attr_val
+        if isinstance(builder, GroupBuilder):
+            for sub_builder_name, sub_builder in builder.items():
+                subspec = get_subspec(self.spec, sub_builder)
+                if subspec is not None:
+                    if 'neurodata_type' in sub_builder.attributes:
+                        ret[subspec] = build_manager.construct(sub_builder, manager)
+                    else:
+                        ret[subspec] = sub_builder
+                        ret.update(self.__get_subspec_values(sub_builder, subspec))
         return ret
 
-    @docval({"name": "attr_name", "type": str, "doc": "the name of the HDF5 attribute"},
-            {"name": "attr_val", "type": None, "doc": "the value of the HDF5 attribute"})
-    def get_attribute_h5attr(self, **kwargs):
-        ''' Get the Python object attribute name and value given an HDF5 attribute name and value
-        '''
-        h5attr_name, h5attr_val = get_args('attr_name', 'attr_val', kwargs)
-        attribute_name = self.get_attribute(self.__spec.get_attribute(h5attr_name))
-        # do something to figure out the value of the attribute
-        attribute_value = h5attr_val
-        return attribute_name, attribute_value
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the NWBContainer from'},
+            {'name': 'manaer', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
+    def construct(self, builder, manager):
+        builder, manager = getargs('builder', 'manager', kwargs)
+        cls = manager.get_cls(builder.attributes['neurodata_type'])
+        # gather all subspecs
+        subspecs = self.__get_subspec_values(builder, self.spec, manager)
+        # get the constructor argument each specification corresponds to
+        const_args = dict()
+        for subspec, value in subspecs.items():
+            const_arg = self.get_const_arg(subspec)
+            if const_arg is not None:
+                const_args[const_arg] = value
+        # build args and kwargs for the constructor
+        args = list()
+        kwargs = dict()
+        for const_arg in get_docval(cls.__init__):
+            argname = const_arg['name']
+            override = self.__get_override_carg(argname, h5group)
+            val = override if override else const_args[argname]
+            if 'default' in const_arg:
+                kwargs[argname] = val
+            else:
+                args.append(val)
+        return cls(*args, **kwargs)
 
-    @docval({"name": "dset_name", "type": str, "doc": "the name of the HDF5 dataset"},
-            {"name": "dset_val", "type": None, "doc": "the value of the HDF5 dataset"})
-    def get_attribute_h5dataset(self, **kwargs):
-        ''' Get the Python object attribute name and value given an HDF5 dataset name and value
-        '''
-        h5dset_name, h5dset_val = get_args('dset_name', 'dset_val', kwargs)
-        attribute_name = self.get_attribute(self.__spec.get_dataset(h5dset_name))
-        # do something to figure out the value of the attribute
-        attribute_value = h5dset_val
-        return attribute_name, attribute_value
+    def get_builder_name(self, container):
+        ret = container.name
+        if self.__spec.name != NAME_WILDCARD:
+            ret = self.__spec.name
+        else:
+            ret = container.name
+        return ret
 
-    @docval({"name": "grp_name", "type": str, "doc": "the name of the HDF5 group"},
-            {"name": "grp", "type": None, "doc": "the HDF5 group object"})
-    def get_attribute_nwbcontainer(self, **kwargs):
-        ''' Get the Python object attribute name and value given an HDF5 dataset name and value
-        '''
-        grp_name, grp = get_args('grp_name', 'grp', kwargs)
-        pynwb_type = self.determine_python_type(grp)
-        spec = TypeMap.get_spec(pynwb_type)
-
-#    @staticmethod
-#    def determine_python_type(h5_object):
-#        name = h5_object.name
-#        if 'neurodata_type' in h5_object.attrs:
-#            neurodata_type = h5_object.attrs['']
-#            if neurodata_type == 'Interface' :
-#                return Interface.get_extensions(name.split('/')[-1])
-#            elif neurodata_type == 'TimeSeries' :
-#                return TimeSeries.get_extensions(h5_object.attrs['ancestry'][-1])
-#            elif neurodata_type == 'Module' :
-#                return Module
-#            elif neurodata_type == 'Epoch' :
-#                return Epoch
-#        else:
-#            if name.startswith('/general/extracellular_ephys'):
-#                return ElectrodeGroup
-#            elif name.startswith('/general/intracellular_ephys'):
-#                return IntracellularElectrode
-#            elif name.startswith('/general/optogenetics'):
-#                return OptogeneticSite
-#            elif name.startswith('/general/optophysiology'):
-#                name_ar = name[1:].split('/')
-#                if len(name_ar) == 3:
-#                    return ImagingPlane
-#                elif len(name_ar) == 4:
-#                    return OpticalChannel
-#        return None
-#
-#@pynwb.io.TypeMap.neurodata_type('TimeSeries')
-#class TimeSeriesMap(ObjectMapper):
-#
-#    def __init__(self, spec):
-#        super(TimeSeriesMap, self).__init__(spec)
-#        data_spec = self.spec.get_dataset('data')
-#        self.map_attr('unit', data_spec.get_attribute('unit'))
-#        self.map_attr('resolution', data_spec.get_attribute('resolution'))
-#        self.map_attr('conversion', data_spec.get_attribute('conversion'))
-#        timestamps_spec = self.spec.get_dataset('timestamps')
-#        self.map_attr('timestamps_unit', timestamps_spec.get_attribute('unit'))
-#        self.map_attr('interval', timestamps_spec.get_attribute('interval'))
-#        startingtime_spec = self.spec.get_dataset('starting_time')
-#        self.map_attr('rate_unit', startingtime_spec.get_attribute('unit'))
-#        self.map_attr('rate', startingtime_spec.get_attribute('rate'))
-#
-#class Condition(object):
-#    def __init__(self, key, value, spec_type=None, condition=None):
-#        self._key = key
-#        self._value = value
-#        self._condition = condition
-#        self_spec_type = spec_type
-#
-#    @property
-#    def key(self):
-#        return self._key
-#
-#    @property
-#    def value(self):
-#        return self._value
-#
-#    def __str__(self):
-#        tmp = [("key", self._key),
-#               ("value", self._value)]
-#        if self._condition:
-#            tmp.append(('condition', str(self._condition)))
-#        return '{' + ", ".join(lambda x: '"%s": "%s"' % x, tmp) + '}'
-#
-#    @property
-#    def condition(self):
-#        self._condition
-#
-#    def find(self, spec):
-#        result = None
-#        if self._spec_type:
-#            for sub_spec in spec[self._spec_type]:
-#                if sub_spec[self._key] == self._value:
-#                    result = sub_spec
-#                    break
-#        if self._condition:
-#            result = self._condition.find(spec)
-#        return result
-#
