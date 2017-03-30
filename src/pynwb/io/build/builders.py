@@ -4,14 +4,13 @@ __all__ = [
     'LinkBuilder',
 ]
 
-
 import copy as _copy
 import itertools as _itertools
 import posixpath as _posixpath
 
 import numpy as np
 from pynwb.core import docval, getargs
-
+from pynwb.spec import DatasetSpec, GroupSpec
 
 class GroupBuilder(dict):
     __link = 'links'
