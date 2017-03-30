@@ -165,7 +165,10 @@ class GroupBuilderGetterTests(unittest.TestCase):
             ('external_link1', self.external_link1)
         )
         #self.assertSetEqual(items, set(self.gb.items()))
-        self.assertCountEqual(items, self.gb.items())
+        try:
+            self.assertCountEqual(items, self.gb.items())
+        except AttributeError:
+            self.assertItemsEqual(items, self.gb.items())
 
     def test_keys(self):
         """Test keys()"""
@@ -178,7 +181,10 @@ class GroupBuilderGetterTests(unittest.TestCase):
             'hard_link1',
             'external_link1',
         )
-        self.assertCountEqual(keys, self.gb.keys())
+        try:
+            self.assertCountEqual(keys, self.gb.keys())
+        except AttributeError:
+            self.assertItemsEqual(keys, self.gb.keys())
 
     def test_values(self):
         """Test values()"""
@@ -190,7 +196,10 @@ class GroupBuilderGetterTests(unittest.TestCase):
             self.hard_link1,
             self.external_link1,
         )
-        self.assertCountEqual(values, self.gb.values())
+        try:
+            self.assertCountEqual(values, self.gb.values())
+        except AttributeError:
+            self.assertItemsEqual(values, self.gb.values())
 
     @unittest.skip('not necessarily useful')
     def test_write(self):
