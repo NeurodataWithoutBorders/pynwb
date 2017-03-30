@@ -51,6 +51,21 @@ def __format_type(argtype):
         raise ValueError("argtype must be a type, str, list, or tuple")
 
 def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
+    """
+    Internal helper function used by the docval decroator to parse and validate function arguments
+
+    :param validator: List of dicts from docval with the description of the arguments
+    :param args: List of the values of positional arguments supplied by the caller
+    :param kwargs: Dict keyword arguments supplied by the caller where keys are the argument name and
+                   values are the argument value.
+    :param enforce_type: Boolean indicating whether the type of arguments should be enforced
+    :param enforce_ndim: Boolean indicating whether the number of dimensions of array arguments
+                         should be enforced if possible.
+
+    :return: Dict with:
+        * 'args' : Dict all arguments where keys are the names and values are the values of the arguments.
+        * 'errors' : List of string with error messages
+    """
     ret = dict()
     errors = list()
     argsi = 0
@@ -174,12 +189,14 @@ def docval(*validator, **options):
            ...
 
     :param enforce_type: Enforce types of input parameters (Default=True)
+    :param enforce_ndim: Enforce the number of dimensions of input arrays (Default=True)
     :param returns: String describing the return values
     :param rtype: String describing the data type of the return values
     :param validator: :py:func:`dict` objects specifying the method parameters
     :param options: additional options for documenting and validating method parameters
     '''
     enforce_type = options.pop('enforce_type', True)
+    enforce_ndim = options.pop('enforce_ndim', True)
     returns = options.pop('returns', None)
     rtype = options.pop('rtype', None)
     val_copy = __sort_args(_copy.deepcopy(validator))
@@ -188,7 +205,7 @@ def docval(*validator, **options):
         _docval[__docval_args_loc] = val_copy
         def func_call(*args, **kwargs):
             self = args[0]
-            parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type)
+            parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type, enforce_ndim=enforce_ndim)
             parse_err = parsed.get('errors')
             if parse_err:
                 raise TypeError(', '.join(parse_err))
