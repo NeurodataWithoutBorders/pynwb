@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     pynwb.io
+    pynwb.spec
 
 Submodules
 ----------
@@ -25,6 +26,7 @@ Submodules
    pynwb.ogen
    pynwb.ophys
    pynwb.retinotopy
+   pynwb.tmp_file
 
 Module contents
 ---------------
