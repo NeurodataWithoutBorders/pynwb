@@ -101,7 +101,7 @@ def __sort_args(validator):
             pos.append(arg)
     return list(_itertools.chain(pos,kw))
 
-docval_attr_name = 'docval'
+docval_attr_name = '__docval__'
 __docval_args_loc = 'args'
 
 # TODO: write unit tests for get_docval* functions
@@ -167,29 +167,41 @@ def docval(*validator, **options):
     :param enforce_type: Enforce types of input parameters (Default=True)
     :param returns: String describing the return values
     :param rtype: String describing the return the data type of the return values
+    :param is_method: True if this is decorating an instance or class method, False otherwise (Default=True)
     :param validator: :py:func:`dict` objects specifying the method parameters
     :param options: additional options for documenting and validating method parameters
     '''
     enforce_type = options.pop('enforce_type', True)
     returns = options.pop('returns', None)
     rtype = options.pop('rtype', None)
+    is_method = options.pop('is_method', True)
     val_copy = __sort_args(_copy.deepcopy(validator))
     def dec(func):
         _docval = _copy.copy(options)
         _docval[__docval_args_loc] = val_copy
-        def func_call(*args, **kwargs):
-            self = args[0]
-            parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type)
-            parse_err = parsed.get('errors')
-            if parse_err:
-                raise TypeError(', '.join(parse_err))
-            return func(self, **parsed['args'])
+        if is_method:
+            def func_call(*args, **kwargs):
+                self = args[0]
+                parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type)
+                parse_err = parsed.get('errors')
+                if parse_err:
+                    raise TypeError(', '.join(parse_err))
+                return func(self, **parsed['args'])
+        else:
+            def func_call(*args, **kwargs):
+                parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type)
+                parse_err = parsed.get('errors')
+                if parse_err:
+                    raise TypeError(', '.join(parse_err))
+                return func(**parsed['args'])
         sphinxy_docstring = __sphinxdoc(func, _docval['args'])
         if returns:
             sphinxy_docstring += "\n:returns: %s" % returns
         if rtype:
             sphinxy_docstring += "\n:rtype: %s" % rtype
         setattr(func_call, '__doc__', sphinxy_docstring)
+        #TODO: make sure this is okay --
+        setattr(func_call, '__name__', func.__name__)
         setattr(func_call, docval_attr_name, _docval)
         return func_call
     return dec
@@ -369,6 +381,16 @@ class NWBContainer(metaclass=ExtenderMeta):
         for f in cls.__nwbfields__:
             if not hasattr(cls, f):
                 setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
+
+    __all_subclasses = dict()
+
+    @ExtenderMeta.pre_init
+    def __register_subclass(cls, name, bases, classdict):
+        cls.__all_subclasses[name] = cls
+
+    @classmethod
+    def get_subclass(cls, neurodata_type):
+        return cls.__all_subclasses.get(neurodata_type, None)
 
 class frozendict(_collections.Mapping):
     '''An immutable dict
