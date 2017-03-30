@@ -4,6 +4,8 @@ import posixpath as _posixpath
 import copy as _copy
 import itertools as _itertools
 
+from pynwb.spec import DatasetSpec, GroupSpec
+
 from collections import Iterable
 
 
