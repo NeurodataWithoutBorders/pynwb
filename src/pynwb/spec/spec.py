@@ -170,6 +170,11 @@ class BaseStorageSpec(Spec):
     def neurodata_type(self):
         return self.get('neurodata_type', self.neurodata_type_def)
 
+    @property
+    def quantity(self):
+        #TODO:
+        return self.get('quantity', 1)
+
     @docval(*deepcopy(_attr_args))
     def add_attribute(self, **kwargs):
         """
@@ -314,6 +319,14 @@ class GroupSpec(BaseStorageSpec):
             raise TypeError('Cannot have multipled neurodata types of the same type without specifying name')
         self.__neurodata_types[spec.neurodata_type] = spec
 
+    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to retrieve'})
+    def get_neurodata_type(self, **kwargs):
+        '''
+        Get a specification by "neurodata_type"
+        '''
+        ndt = getargs('neurodata_type', kwargs)
+        return self.__neurodata_type.get(ndt, None)
+
     @property
     def groups(self):
         return tuple(self.get('groups', tuple()))
@@ -444,7 +457,7 @@ class SpecCatalog(object):
         self.__specs = dict()
 
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
-            {'name': 'spec', 'type': 'Spec', 'doc': 'a Spec object'})
+            {'name': 'spec', 'type': BaseStorageSpec, 'doc': 'a Spec object'})
     def register_spec(self, **kwargs):
         '''
         Associate a specified object type with an HDF5 specification
@@ -471,7 +484,7 @@ class SpecCatalog(object):
         '''
         return tuple(self.__specs.keys())
 
-    @docval({'name': 'spec', 'type': 'Spec', 'doc': 'the Spec object to register'})
+    @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'the Spec object to register'})
     def auto_register(self, **kwargs):
         '''
         Register this specification and all sub-specification using neurodata_type as object type name

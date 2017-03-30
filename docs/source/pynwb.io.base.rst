@@ -1,7 +1,7 @@
-pynwb.io.spec module
+pynwb.io.base module
 ====================
 
-.. automodule:: pynwb.io.spec
+.. automodule:: pynwb.io.base
     :members:
     :undoc-members:
     :show-inheritance:

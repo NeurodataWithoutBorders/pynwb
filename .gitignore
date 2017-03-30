@@ -5,9 +5,25 @@ __pycache__/
 
 # Sphinx documentation
 docs/_build/
+docs/build/
+
+
+# setuptools
+build/
+dist/
+*.egg-info
 
 # Jupyter Notebook
 .ipynb_checkpoints
 
 #PyCharm
 .idea/
+
+#data directory
+src/pynwb/data/
+
+# shell scripts (e.g. used with fswatch)
+*.sh
+
+docs/tmpl.conf.py
+docs/tmpl.index.rst

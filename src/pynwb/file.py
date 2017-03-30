@@ -10,53 +10,10 @@ import numpy as np
 import types
 from datetime import datetime
 
-
 from .base import TimeSeries, Module
 from .epoch import Epoch
 from .ecephys import ElectrodeGroup, ElectricalSeries
 from .core import docval, getargs, NWBContainer
-
-# VERS_MAJOR = 1
-# VERS_MINOR = 0
-# VERS_PATCH = 5
-#
-# __version__ = "%d.%d.%d" % (VERS_MAJOR, VERS_MINOR, VERS_PATCH)
-# FILE_VERSION_STR = "NWB-%s" % __version__
-#
-# def get_major_vers():
-#     return VERS_MAJOR
-#
-# def get_minor_vers():
-#     return VERS_MINOR
-#
-# def get_patch_vers():
-#     return VERS_PATCH
-#
-# def get_file_vers_string():
-#     return FILE_VERSION_STR
-#
-# def create_identifier(base_string):
-#     """ Creates an identifying string for the file, hopefully unique
-#         in and between labs, based on the supplied base string, the NWB file
-#         version, and the time the file was created. The base string
-#         should contain the name of the lab, experimenter and project, or
-#         some other string that is unique to a given lab
-#     """
-#     return base_string + "; " + FILE_VERSION_STR + "; " + time.ctime()
-#
-#
-# # it is too easy to create an object and forget to finalize it
-# # keep track of when each object is created and finalized, and
-# #   provide a way to detect when finalization doesnt occur
-# serial_number = 0
-# object_register = {}
-# def register_creation(name):
-#     global serial_number, object_register
-#     num = serial_number
-#     object_register[str(num)] = name
-#     serial_number += 1
-#     return num
-
 
 class NWBFile(NWBContainer):
     """
@@ -252,38 +209,6 @@ class NWBFile(NWBContainer):
         ts.parent = self
         if epoch:
             self.set_epoch_timeseries(epoch, ts)
-#
-#  Not sure what purpose this serves yet, so keeping it around for reference: AJT 09-02-2017
-#
-#    def create_reference_image(self, stream, name, fmt, desc, dtype=None):
-#        """ Adds documentation image (or movie) to file. This is stored
-#            in /acquisition/images/.
-#
-#            Args:
-#                *stream* (binary) Data stream of image (eg, binary contents of .png image)
-#
-#                *name* (text) Name that image will be stored as
-#
-#                *fmt* (text) Format of the image (eg, "png", "avi")
-#
-#                *desc* (text) Descriptive text describing the image
-#
-#                *dtype* (text) Optional field specifying the h5py datatype to use to store *stream*
-#
-#            Returns:
-#                *nothing*
-#        """
-#        fp = self.file_pointer
-#        img_grp = fp["acquisition"]["images"]
-#        if name in img_grp:
-#            self.fatal_error("Reference image %s alreayd exists" % name)
-#        if dtype is None:
-#            img = img_grp.add_dataset(name, stream)
-#        else:
-#            img = img_grp.add_dataset(name, stream, dtype=dtype)
-#        img.set_attribute("format", np.string_(fmt))
-#        img.set_attribute("description", np.string_(desc))
-
 
     @docval({'name': 'name', 'type': (str, int), 'doc': 'a unique name or ID for this electrode'},
             {'name': 'coord', 'type': (tuple, list, np.ndarray), 'doc': 'the x,y,z coordinates of this electrode'},

@@ -4,14 +4,13 @@ __all__ = [
     'LinkBuilder',
 ]
 
-
 import copy as _copy
 import itertools as _itertools
 import posixpath as _posixpath
 
 import numpy as np
 from pynwb.core import docval, getargs
-
+from pynwb.spec import DatasetSpec, GroupSpec
 
 class GroupBuilder(dict):
     __link = 'links'
@@ -19,7 +18,8 @@ class GroupBuilder(dict):
     __dataset = 'datasets'
     __attribute = 'attributes'
 
-    @docval({'name': 'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this group',
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the group'},
+            {'name': 'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this group',
              'default': dict()},
             {'name': 'datasets', 'type': dict, 'doc': 'a dictionary of datasets to create in this group',
              'default': dict()},
@@ -27,7 +27,7 @@ class GroupBuilder(dict):
              'default': dict()},
             {'name': 'links', 'type': dict, 'doc': 'a dictionary of links to create in this group',
              'default': dict()})
-    def __init__(self, groups=dict(), datasets=dict(), attributes=dict(), links=dict()):
+    def __init__(self, **kwargs):
         """
         Create a GroupBuilder object
         """
@@ -37,12 +37,14 @@ class GroupBuilder(dict):
         super().__setitem__(GroupBuilder.__attribute, dict())
         super().__setitem__(GroupBuilder.__link, dict())
         self.obj_type = dict()
+        name, groups, datasets, links, attributes = getargs('name', 'groups', 'datasets', 'links', 'attributes', kwargs)
+        self.__name = name
         for name, group in groups.items():
-            self.set_group(name, group)
+            self.set_group(group)
         for name, dataset in datasets.items():
-            self.set_dataset(name, dataset)
+            self.set_dataset(dataset)
         for name, link in links.items():
-            self.set_link(name, link)
+            self.set_link(link)
         for name, val in attributes.items():
             self.set_attribute(name, val)
 
@@ -62,7 +64,15 @@ class GroupBuilder(dict):
     def links(self):
         return super().__getitem__(GroupBuilder.__link)
 
-    def __set_builder(self, name, builder, obj_type):
+    @property
+    def name(self):
+        '''
+        The name of this group
+        '''
+        return self.__name
+
+    def __set_builder(self, builder, obj_type):
+        name = builder.name
         if name in self.obj_type:
             if self.obj_type[name] != obj_type:
                 raise KeyError("'%s' already exists as %s" % (name, self.obj_type[name]))
@@ -81,18 +91,17 @@ class GroupBuilder(dict):
         Create a dataset and add it to this group
         """
         name = kwargs.pop('name')
-        builder = DatasetBuilder(**kwargs)
-        self.set_dataset(name, builder)
+        builder = DatasetBuilder(name, **kwargs)
+        self.set_dataset(builder)
         return builder
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this dataset'},
-            {'name': 'builder', 'type': 'DatasetBuilder', 'doc': 'the DatasetBuilder that represents this dataset'})
+    @docval({'name': 'builder', 'type': 'DatasetBuilder', 'doc': 'the DatasetBuilder that represents this dataset'})
     def set_dataset(self, **kwargs):
         """
         Add a dataset to this group
         """
-        name, builder, = getargs('name', 'builder', kwargs)
-        self.__set_builder(name, builder, GroupBuilder.__dataset)
+        builder = getargs('builder', kwargs)
+        self.__set_builder(builder, GroupBuilder.__dataset)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this subgroup'},
             {'name': 'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this subgroup', 'default': dict()},
@@ -105,18 +114,17 @@ class GroupBuilder(dict):
         Add a subgroup with the given data to this group
         """
         name = kwargs.pop('name')
-        builder = GroupBuilder(**kwargs)
-        self.set_group(name, builder)
+        builder = GroupBuilder(name, **kwargs)
+        self.set_group(builder)
         return builder
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this subgroup'},
-            {'name': 'builder', 'type': 'GroupBuilder', 'doc': 'the GroupBuilder that represents this subgroup'})
+    @docval({'name': 'builder', 'type': 'GroupBuilder', 'doc': 'the GroupBuilder that represents this subgroup'})
     def set_group(self, **kwargs):
         """
         Add a subgroup to this group
         """
         name, builder, = getargs('name', 'builder', kwargs)
-        self.__set_builder(name, builder, GroupBuilder.__group)
+        self.__set_builder(builder, GroupBuilder.__group)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this link'},
             {'name': 'path', 'type': str, 'doc': 'the path within this HDF5 file'},
@@ -126,8 +134,8 @@ class GroupBuilder(dict):
         Create a soft link and add it to this group.
         """
         name, path = getargs('name', 'path', kwargs)
-        builder = LinkBuilder(path)
-        self.set_link(name, builder)
+        builder = LinkBuilder(name, path)
+        self.set_link(builder)
         return builder
 
     @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
@@ -139,18 +147,17 @@ class GroupBuilder(dict):
         Create an external link and add it to this group.
         """
         name, file_path, path = getargs('name', 'file_path', 'path', kwargs)
-        builder = ExternalLinkBuilder(path, file_path)
-        self.set_link(name, builder)
+        builder = ExternalLinkBuilder(name, path, file_path)
+        self.set_link(builder)
         return builder
 
-    @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
-            {'name':'builder', 'type': 'LinkBuilder', 'doc': 'the LinkBuilder that represents this link'})
+    @docval({'name':'builder', 'type': 'LinkBuilder', 'doc': 'the LinkBuilder that represents this link'})
     def set_link(self, **kwargs):
         """
         Add a link to this group
         """
-        name, builder = getargs('name', 'builder', kwargs)
-        self.__set_builder(name, builder, GroupBuilder.__link)
+        builder = getargs('builder', kwargs)
+        self.__set_builder(builder, GroupBuilder.__link)
 
     @docval({'name':'name', 'type': str, 'doc': 'the name of the attribute'},
             {'name':'value', 'type': None, 'doc': 'the attribute value'})
@@ -172,7 +179,7 @@ class GroupBuilder(dict):
             if name in self_groups:
                 self_groups[name].deep_update(subgroup)
             else:
-                self.set_group(name, subgroup)
+                self.set_group(subgroup)
         # merge datasets
         datasets = super(GroupBuilder, builder).__getitem__(GroupBuilder.__dataset)
         self_datasets = super().__getitem__(GroupBuilder.__dataset)
@@ -182,13 +189,13 @@ class GroupBuilder(dict):
                 self_datasets[name].deep_update(dataset)
                 #super().__getitem__(GroupBuilder.__dataset)[name] = dataset
             else:
-                self.set_dataset(name, dataset)
+                self.set_dataset(dataset)
         # merge attributes
         for name, value in super(GroupBuilder, builder).__getitem__(GroupBuilder.__attribute).items():
             self.set_attribute(name, value)
         # merge links
         for name, link in super(GroupBuilder, builder).__getitem__(GroupBuilder.__link).items():
-            self.set_link(name, link)
+            self.set_link(link)
 
     def is_empty(self):
         """Returns true if there are no datasets, attributes, links or
@@ -267,23 +274,23 @@ class GroupBuilder(dict):
                                 super().__getitem__(GroupBuilder.__link).values())
 
 class LinkBuilder(dict):
-    def __init__(self, path, hard=False):
+    def __init__(self, name, path):
         super().__init__()
+        self['name'] = name
         self['path'] = path
-        self['hard'] = hard
-
-    @property
-    def hard(self):
-        return self['hard']
 
     @property
     def path(self):
         return self['path']
 
+    @property
+    def name(self):
+        return self['name']
+
 
 class ExternalLinkBuilder(LinkBuilder):
-    def __init__(self, path, file_path):
-        super().__init__(path, hard=False)
+    def __init__(self, name, path, file_path):
+        super().__init__(name, path)
         self['file_path'] = file_path
 
     @property
@@ -291,22 +298,24 @@ class ExternalLinkBuilder(LinkBuilder):
         return self['file_path']
 
 class DatasetBuilder(dict):
-    @docval({'name':'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
-            {'name':'dtype', 'type': (type, np.dtype), 'doc': 'the datatype of this dataset', 'default': None},
-            {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
-            {'name':'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
-            {'name':'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
+            {'name': 'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
+            {'name': 'dtype', 'type': (type, np.dtype), 'doc': 'the datatype of this dataset', 'default': None},
+            {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
+            {'name': 'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
+            {'name': 'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False})
     def __init__(self, **kwargs):
         '''
         Create a Builder object for a dataset
         '''
         super(DatasetBuilder, self).__init__()
-        data, dtype, attributes, maxshape, chunks = getargs('data', 'dtype', 'attributes', 'maxshape', 'chunks', kwargs)
+        name, data, dtype, attributes, maxshape, chunks = getargs('name', 'data', 'dtype', 'attributes', 'maxshape', 'chunks', kwargs)
         self['data'] = data
         self['attributes'] = _copy.deepcopy(attributes)
         self.chunks = chunks
         self.maxshape = maxshape
         self.dtype = dtype
+        self.__name = name
 
     @property
     def data(self):
@@ -316,6 +325,13 @@ class DatasetBuilder(dict):
     #@data.setter
     #def data(self, val):
     #    self['data'] = val
+
+    @property
+    def name(self):
+        '''
+        The name of this dataset
+        '''
+        return self.__name
 
     @property
     def attributes(self):
@@ -341,3 +357,38 @@ class DatasetBuilder(dict):
     #    raise NotImplementedError('__setitem__')
 
 
+@docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
+        {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to get the sub-specification for'},
+        is_method=False)
+def get_subspec(**kwargs):
+    '''
+    Get the specification from this spec that corresponds to the given builder
+    '''
+    spec, builder = getargs('spec', 'builder', kwargs)
+    if isinstance(builder, DatasetBuilder):
+        subspec = spec.get_dataset(builder.name)
+    else:
+        subspec = spec.get_group(builder.name)
+    if subspec is None:
+        ndt = builder.attributes.get('neurodata_type')
+        if ndt is not None:
+            subspec = spec.get_neurodata_type(ndt)
+    return subspec
+
+@docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
+        {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to get the sub-specification for'},
+        is_method=False)
+def get_subspec(**kwargs):
+    '''
+    Get the specification from this spec that corresponds to the given builder
+    '''
+    spec, builder = getargs('spec', 'builder', kwargs)
+    if isinstance(builder, DatasetBuilder):
+        subspec = spec.get_dataset(builder.name)
+    else:
+        subspec = spec.get_group(builder.name)
+    if subspec is None:
+        ndt = builder.attributes.get('neurodata_type')
+        if ndt is not None:
+            subspec = spec.get_neurodata_type(ndt)
+    return subspec
