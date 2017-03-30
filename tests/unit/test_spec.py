@@ -138,3 +138,7 @@ class GroupSpecTests(unittest.TestCase):
         spec_ABCD.set_group(self.subgroups[1])
         self.assertListEqual(spec_ABCD['groups'], self.subgroups)
         json.dumps(spec_ABCD)
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -12,3 +12,6 @@ class ImageRetinotopyConstructor(unittest.TestCase):
         ir = ImageRetinotopy('test_ir', lt, lt, lt, lt, lt, lt, lt, lt)
         self.assertEqual(ir.source, 'test_ir')
 
+
+if __name__ == '__main__':
+    unittest.main()

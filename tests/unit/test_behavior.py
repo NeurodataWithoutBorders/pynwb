@@ -69,3 +69,6 @@ class MotionCorrectionConstructor(unittest.TestCase):
         mc = MotionCorrection('test_mc', list())
         self.assertEqual(mc.source, 'test_mc')
 
+
+if __name__ == '__main__':
+    unittest.main()

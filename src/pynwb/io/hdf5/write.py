@@ -6,14 +6,12 @@ from pynwb.behavior import SpatialSeries
 from pynwb.misc import AbstractFeatureSeries
 
 from pynwb import TimeSeries, Module, Interface, NWBFile
-from .tools.h5tools import GroupBuilder, DatasetBuilder, ExternalLinkBuilder, write_group, write_dataset
-from .tools.handler import BaseObjectHandler
+from pynwb.io.build.builders import GroupBuilder, DatasetBuilder, ExternalLinkBuilder
+from pynwb.io.hdf5.h5tools import write_group, write_dataset
+from pynwb.io.tools.handler import BaseObjectHandler
 
 import h5py
-import numpy as np
-import time
 import posixpath
-import json
 from datetime import datetime
 
 #def process_spec(builder, spec, value):

@@ -1,36 +1,3 @@
-# Copyright (c) 2015 Allen Institute, California Institute of Technology, 
-# New York University School of Medicine, the Howard Hughes Medical 
-# Institute, University of California, Berkeley, GE, the Kavli Foundation 
-# and the International Neuroinformatics Coordinating Facility. 
-# All rights reserved.
-#     
-# Redistribution and use in source and binary forms, with or without 
-# modification, are permitted provided that the following 
-# conditions are met:
-#     
-# 1.  Redistributions of source code must retain the above copyright 
-#     notice, this list of conditions and the following disclaimer.
-#     
-# 2.  Redistributions in binary form must reproduce the above copyright 
-#     notice, this list of conditions and the following disclaimer in 
-#     the documentation and/or other materials provided with the distribution.
-#     
-# 3.  Neither the name of the copyright holder nor the names of its 
-#     contributors may be used to endorse or promote products derived 
-#     from this software without specific prior written permission.
-#     
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS 
-# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT 
-# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS 
-# FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE 
-# COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, 
-# INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, 
-# BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; 
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER 
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT 
-# LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN 
-# ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE 
-# POSSIBILITY OF SUCH DAMAGE.
 import copy
 import numpy as np
 import bisect
@@ -55,7 +22,7 @@ class Epoch(NWBContainer):
                      'start_time',
                      'stop_time',
                      'tags')
-        
+
 
     #_neurodata_type = 'Epoch'
 
@@ -106,7 +73,7 @@ class Epoch(NWBContainer):
         self.description = desc
 
     def add_tag(self, tag):
-        """ Append string annotation to epoch. This will be stored in 
+        """ Append string annotation to epoch. This will be stored in
             the epoch's 'tags' dataset. Additionally, it will be added
             to a master tag list stored as an attribute on the root
             'epoch/' group. Each epoch can have multiple tags. The root
@@ -120,7 +87,7 @@ class Epoch(NWBContainer):
         """
         self.tags.add(tag)
 
-    # limit intervals to time boundary of epoch, but don't perform 
+    # limit intervals to time boundary of epoch, but don't perform
     #   additional logic (ie, if user supplies overlapping intervals,
     #   let them do so
     def add_ignore_interval(self, start, stop):
@@ -152,26 +119,26 @@ class Epoch(NWBContainer):
             calculate its overlaps.
 
             Arguments:
-                *in_epoch_name* (text) Name that time series will use 
-                in the epoch (this can be different than the actual 
+                *in_epoch_name* (text) Name that time series will use
+                in the epoch (this can be different than the actual
                 time series name)
 
-                *timeseries* (text or TimeSeries object) 
-                Full hdf5 path to time series that's being added, 
+                *timeseries* (text or TimeSeries object)
+                Full hdf5 path to time series that's being added,
                 or the TimeSeries object itself
 
             Returns:
                 *nothing*
         """
         name = in_epoch_name if in_epoch_name else timeseries.name
-        self._timeseries[name] = EpochTimeSeries(timeseries, 
+        self._timeseries[name] = EpochTimeSeries(timeseries,
                                                 self.start_time,
                                                 self.stop_time,
                                                 name=name,
                                                 parent=self)
         return self._timeseries[name]
 
-        
+
 
 
 #        # store path to timeseries, so can create hard link
@@ -216,7 +183,7 @@ class Epoch(NWBContainer):
     #     *timestamps* (double array) Timestamp array
 
     # Returns:
-    #     *idx_0*, "idx_1" (ints) Index of first and last elements 
+    #     *idx_0*, "idx_1" (ints) Index of first and last elements
     #     in *timestamps* that fall within specified
     #     interval, or None, None if there is no overlap
     #
@@ -229,16 +196,16 @@ class Epoch(NWBContainer):
         stop = self.stop_time
         # ensure there are non-nan times
         isnan = np.isnan(timestamps)
-        if isnan.all(): 
+        if isnan.all():
             return None, None   # all values are NaN -- no overlap
-        # convert all nans to a numerical value 
+        # convert all nans to a numerical value
         # when searching for start, use -1
         # when searching for end, use stop+1
         timestamps = np.nan_to_num(timestamps)
         t_test = timestamps + isnan * -1 # make nan<0
         # array now nan-friendly. find first index where timestamps >= start
         i0 = np.argmax(t_test >= start)
-        # if argmax returns zero then the first timestamp is >= start or 
+        # if argmax returns zero then the first timestamp is >= start or
         #   no timestamps are. find out which is which
         if i0 == 0:
             if t_test[0] < start:
@@ -262,7 +229,7 @@ class Epoch(NWBContainer):
         while isnan[i1]:
             i1 = i1 - 1
             assert i1 >= 0
-        try:    # error checking 
+        try:    # error checking
             assert i0 <= i1
             assert not np.isnan(timestamps[i0])
             assert not np.isnan(timestamps[i1])
@@ -284,7 +251,7 @@ class EpochTimeSeries(NWBContainer):
     __nwbfields__ = ('name',
                      'count',
                      'idx_start',
-                     'timeseries')    
+                     'timeseries')
 
     @docval({'name': 'ts', 'type': TimeSeries, 'doc':'the TimeSeries object'},
             {'name': 'start_time', 'type': float, 'doc':'the start time of the epoch'},
@@ -319,6 +286,6 @@ class EpochTimeSeries(NWBContainer):
             raise ValueError("TimeSeries object must have timestamps or starting_time and rate")
         self.count = stop_idx - start_idx
         self.idx_start = start_idx
-        
 
-    
+
+

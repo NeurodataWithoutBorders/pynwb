@@ -1,18 +1,10 @@
-__all__ = [
-    'GroupBuilder',
-    'DatasetBuilder',
-    'LinkBuilder',
-]
-
-import itertools as _itertools
 import posixpath as _posixpath
 import copy as _copy
 from collections import Iterable
 import numpy as np
 import h5py as _h5py
 
-from pynwb.core import docval, getargs
-from ..build.h5tools import DataChunkIterator
+from pynwb.core import DataChunkIterator
 
 SOFT_LINK = 0
 HARD_LINK = 1
@@ -163,9 +155,9 @@ def __chunked_iter_fill__(parent, name, data):
     chunks = True if recommended_chunks is None else recommended_chunks
     baseshape = data.recommended_data_shape()
     dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
-    for curr_chunk, curr_chunk_location in data:
+    for chunk_i in data:
         # Determine the minimum array dimensions to fit the chunk selection
-        max_bounds = __selection_max_bounds__(curr_chunk_location)
+        max_bounds = __selection_max_bounds__(chunk_i.selection)
         if not hasattr(max_bounds, '__len__'):
             max_bounds = (max_bounds,)
         # Determine if we need to expand any of the data dimensions
@@ -176,7 +168,7 @@ def __chunked_iter_fill__(parent, name, data):
             new_shape[expand_dims] = np.asarray(max_bounds)[expand_dims]
             dset.resize(new_shape)
         # Process and write the data
-        dset[curr_chunk_location] = curr_chunk
+        dset[chunk_i.selection] = chunk_i.data
     return dset
 
 def __list_fill__(parent, name, data):
