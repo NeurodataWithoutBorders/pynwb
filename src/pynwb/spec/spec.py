@@ -129,7 +129,7 @@ _attrbl_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
-        {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
+        {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
 ]
@@ -139,11 +139,13 @@ class BaseStorageSpec(Spec):
 
     @docval(*deepcopy(_attrbl_args))
     def __init__(self, **kwargs):
-        name, doc, parent, required, attributes, linkable, neurodata_type_def, neurodata_type = getargs('name', 'doc', 'parent', 'required', 'attributes', 'linkable', 'neurodata_type_def', 'neurodata_type', kwargs)
+        name, doc, parent, quantity, attributes, linkable, neurodata_type_def, neurodata_type = getargs('name', 'doc', 'parent', 'quantity', 'attributes', 'linkable', 'neurodata_type_def', 'neurodata_type', kwargs)
         if name == NAME_WILDCARD and neurodata_type_def is None and neurodata_type is None:
             raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'neurodata_type_def' and/or 'neurodata_type'")
-        super().__init__(doc, name=name, required=required, parent=parent)
+        super().__init__(doc, name=name, parent=parent)
         self.__attributes = dict()
+        if quantity != 1:
+            self['quantity'] = quantity
         if not linkable:
             self['linkable'] = False
         if neurodata_type is not None:
@@ -231,7 +233,7 @@ _dataset_args = [
         {'name': 'shape', 'type': tuple, 'doc': 'the shape of this dataset', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
-        {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
+        {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
 ]
@@ -291,7 +293,7 @@ _group_args = [
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'links', 'type': list, 'doc': 'the links in this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
-        {'name': 'required', 'type': bool, 'doc': 'whether or not this group is required', 'default': True},
+        {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification neurodata_type', 'default': None},
 ]
@@ -325,7 +327,7 @@ class GroupSpec(BaseStorageSpec):
         Get a specification by "neurodata_type"
         '''
         ndt = getargs('neurodata_type', kwargs)
-        return self.__neurodata_type.get(ndt, None)
+        return self.__neurodata_types.get(ndt, None)
 
     @property
     def groups(self):

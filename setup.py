@@ -1,25 +1,32 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup
+from setuptools.command.build_py import build_py
+
 from urllib.request import urlretrieve
 import json
 import pickle
 import os
+from tarfile import TarFile
 
 
-schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
-if not os.path.exists(schema_dir):
-    os.makedirs(schema_dir)
-schema_path = '%s/spec.json' % schema_dir
-def get_schema():
-    '''Here, we will do something to access a URL stored in the pynwb repo.
-    This URL will contain the source of the schema.
-    '''
-    # we should look this up in a config file somewhere
-    url = "https://bitbucket.org/lblneuro/nwb-schema/downloads/nwb_1.0.4_beta.json"
-    dest = schema_path
-    schema = urlretrieve(url, dest)
-    return schema
+class CustomBuild(build_py):
+    def run(self):
+        '''Here, we will do something to access a URL stored in the pynwb repo.
+        This URL will contain the source of the schema.
+        '''
+        # we should look this up in a config file somewhere
+        schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
+        if not os.path.exists(schema_dir):
+            os.makedirs(schema_dir)
+        url = "https://bitbucket.org/lblneuro/nwb-schema/downloads/nwb_core.tar"
+        dest = "nwb_core.tar"
+        schema = urlretrieve(url, dest)
+        tf = TarFile(dest, 'r')
+        tf.extractall(schema_dir)
+        super(CustomBuild, self).run()
+
+
 
 with open('README.rst') as f:
     readme = f.read()
@@ -42,7 +49,10 @@ setup_args = {
     'license': license,
     'packages': pkgs,
     'package_dir': {'': 'src'},
-    'package_data': {'pynwb':[schema_path]}
+    #'package_data': {'pynwb':[schema_dir]}
+    'cmdclass':{
+        'build_py': CustomBuild,
+    }
 }
 
 if __name__ == '__main__':
@@ -54,7 +64,7 @@ if __name__ == '__main__':
     rebuilding the package, and the schema will be hardcoded.
     '''
 
-    get_schema()
+    #get_schema()
     setup(**setup_args)
 
 
