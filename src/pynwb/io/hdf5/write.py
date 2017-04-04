@@ -14,6 +14,7 @@ import h5py
 import posixpath
 from datetime import datetime
 
+from os.path import basename as bn
 #def process_spec(builder, spec, value):
 #    if isinstance(spec, AttributeSpec):
 #        builder.add_attribute(spec.name, value)
@@ -65,6 +66,64 @@ from datetime import datetime
 #    return builder
 #
 
+class NWBHDF5File(object):
+    @docval({'name': 'path', 'type': , 'doc': 'the BuildManager to use for I/O', 'default': BuildManager()},
+            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': BuildManager()})
+    def __init__(self, **kwargs):
+        self.__manager = getargs('manager', kwargs)
+        self.__built = dict()
+
+    def read(self, path):
+        f = File(path, 'r+')
+
+    def __set_built(self, location, builder):
+        self.__built.setdefault(location, builder)
+
+    def __get_built(self, location)
+        return self.__built.get(location)
+
+    def __read_group(self, h5obj, name=None):
+        kwargs = {
+            "attributes": dict(h5obj.attr.items),
+            "groups": dict(),
+            "datasets": dict(),
+            "links": dict()
+        }
+        if name is None:
+            name = bn(h5obj.name)
+        for k in h5obj:
+            sub_h5obj = h5obj.get(k)
+            link_type = h5obj.get(k, getlink=True)
+            if isinstance(link_type, SoftLink):
+                # get path of link (the key used for tracking what's been built)
+                target_path = link_type.path
+                builder_name = bn(target_path)
+                # get builder if already read, else build it
+                builder = self.__get_built(target_path)
+                if builder is None:
+                    # NOTE: all links must have absolute paths
+                    if isinstance(sub_h5obj, Dataset):
+                        builder = self.__read_dataset(sub_h5obj, builder_name)
+                    else:
+                        builder = self.__read_group(sub_h5obj, builder_name)
+                    self.__set_built(target_path, builder)
+                kwargs['links'][builder_name] = LinkBuilder(builder)
+            else:
+                builder = self.__get_built(sub_h5obj.name)
+                obj_type = None
+                read_method = None
+                if isinstance(sub_h5obj, Dataset):
+                    read_method = self.__read_dataset
+                    obj_type = kwargs['dataset']
+                else:
+                    read_method = self.__read_group
+                    obj_type = kwargs['groups']
+                if builder is None
+                    builder = read_method(sub_h5obj)
+                    self.__set_built(sub_h5obj.name, builder)
+                obj_type[builder.name] = builder
+        ret = GroupBuilder(name, **kwargs)
+        return ret
 
 class HDF5Writer(object):
     def __init__(self, build_manager):
