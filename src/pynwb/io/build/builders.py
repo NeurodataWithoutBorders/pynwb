@@ -285,6 +285,9 @@ class LinkBuilder(dict):
 
     @property
     def name(self):
+        '''
+        The name of this link
+        '''
         return self['name']
 
 
