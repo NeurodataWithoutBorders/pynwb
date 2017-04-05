@@ -12,7 +12,33 @@ import numpy as np
 from pynwb.core import docval, getargs
 from pynwb.spec import DatasetSpec, GroupSpec
 
-class GroupBuilder(dict):
+class Builder(dict):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the group'},
+            {'name': 'parent', 'type': str, 'doc': 'the parent builder of this Builder'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
+    def __init__(self, **kwargs)::
+        name, parent, source = getargs('name', 'parent', 'source', kwargs)
+        self.__name = name
+        self.__parent = parent
+        self.__source = source if source is not None else parent.source
+
+    @property
+    def name(self):
+        '''
+        The name of this group
+        '''
+        return self.__name
+
+    @property
+    def source(self):
+        return self.__source
+
+    @property
+    def parent(self):
+        return self.__parent
+
+class GroupBuilder(Builder):
     __link = 'links'
     __group = 'groups'
     __dataset = 'datasets'
@@ -26,18 +52,20 @@ class GroupBuilder(dict):
             {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this group',
              'default': dict()},
             {'name': 'links', 'type': dict, 'doc': 'a dictionary of links to create in this group',
-             'default': dict()})
+             'default': dict()},
+            {'name': 'parent', 'type': str, 'doc': 'the parent builder of this Builder', 'default': None},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Builder', 'default': None})
     def __init__(self, **kwargs):
         """
         Create a GroupBuilder object
         """
-        super().__init__()
+        name, groups, datasets, links, attributes, parent, source = getargs('name', 'groups', 'datasets', 'links', 'attributes', 'parent', 'source', kwargs)
+        super().__init__(name, parent, source)
         super().__setitem__(GroupBuilder.__group, dict())
         super().__setitem__(GroupBuilder.__dataset, dict())
         super().__setitem__(GroupBuilder.__attribute, dict())
         super().__setitem__(GroupBuilder.__link, dict())
         self.obj_type = dict()
-        name, groups, datasets, links, attributes = getargs('name', 'groups', 'datasets', 'links', 'attributes', kwargs)
         self.__name = name
         for name, group in groups.items():
             self.set_group(group)
@@ -64,13 +92,6 @@ class GroupBuilder(dict):
     def links(self):
         return super().__getitem__(GroupBuilder.__link)
 
-    @property
-    def name(self):
-        '''
-        The name of this group
-        '''
-        return self.__name
-
     def __set_builder(self, builder, obj_type):
         name = builder.name
         if name in self.obj_type:
@@ -91,7 +112,7 @@ class GroupBuilder(dict):
         Create a dataset and add it to this group
         """
         name = kwargs.pop('name')
-        builder = DatasetBuilder(name, **kwargs)
+        builder = DatasetBuilder(name, parent=self, **kwargs)
         self.set_dataset(builder)
         return builder
 
@@ -114,7 +135,7 @@ class GroupBuilder(dict):
         Add a subgroup with the given data to this group
         """
         name = kwargs.pop('name')
-        builder = GroupBuilder(name, **kwargs)
+        builder = GroupBuilder(name, parent=self, **kwargs)
         self.set_group(builder)
         return builder
 
@@ -127,14 +148,14 @@ class GroupBuilder(dict):
         self.__set_builder(builder, GroupBuilder.__group)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this link'},
-            {'name': 'path', 'type': str, 'doc': 'the path within this HDF5 file'},
+            {'name': 'target', 'type': ('GroupBuilder', 'DatasetBuilder'), 'doc': 'the target Builder'},
             returns='the builder object for the soft link', rtype='LinkBuilder')
     def add_link(self, **kwargs):
         """
         Create a soft link and add it to this group.
         """
         name, path = getargs('name', 'path', kwargs)
-        builder = LinkBuilder(name, path)
+        builder = LinkBuilder(name, path, parent=self)
         self.set_link(builder)
         return builder
 
@@ -273,9 +294,15 @@ class GroupBuilder(dict):
                                 super().__getitem__(GroupBuilder.__attribute).values(),
                                 super().__getitem__(GroupBuilder.__link).values())
 
-class LinkBuilder(dict):
+class LinkBuilder(Builder):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
+            {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the target of this link'},
+            {'name': 'parent', 'type': str, 'doc': 'the parent builder of this Builder'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
     def __init__(self, name, path):
-        super().__init__()
+        name, parent, source = getargs('name', 'parent', 'source', kwargs)
+        super().__init__(name, parent, source)
         self['name'] = name
         self['path'] = path
 
@@ -300,19 +327,21 @@ class ExternalLinkBuilder(LinkBuilder):
     def file_path(self):
         return self['file_path']
 
-class DatasetBuilder(dict):
+class DatasetBuilder(Builder):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
+            {'name': 'parent', 'type': str, 'doc': 'the parent builder of this Builder'},
             {'name': 'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
             {'name': 'dtype', 'type': (type, np.dtype), 'doc': 'the datatype of this dataset', 'default': None},
             {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name': 'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
-            {'name': 'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False})
+            {'name': 'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
     def __init__(self, **kwargs):
         '''
         Create a Builder object for a dataset
         '''
-        super(DatasetBuilder, self).__init__()
-        name, data, dtype, attributes, maxshape, chunks = getargs('name', 'data', 'dtype', 'attributes', 'maxshape', 'chunks', kwargs)
+        name, data, dtype, attributes, maxshape, chunks, parent, source = getargs('name', 'data', 'dtype', 'attributes', 'maxshape', 'chunks', 'parent', 'source', kwargs)
+        super(DatasetBuilder, self).__init__(name, parent, source)
         self['data'] = data
         self['attributes'] = _copy.deepcopy(attributes)
         self.chunks = chunks
@@ -324,10 +353,6 @@ class DatasetBuilder(dict):
     def data(self):
         '''The data stored in the dataset represented by this builder'''
         return self['data']
-
-    #@data.setter
-    #def data(self, val):
-    #    self['data'] = val
 
     @property
     def name(self):
