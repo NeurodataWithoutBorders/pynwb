@@ -126,7 +126,7 @@ class BuildManager(object):
         builder_id = self.__bldrhash__(builder)
         result = self.__containers.get(builder_id)
         if result is None:
-            result = self.__type_map.construct(builder, self))
+            result = self.__type_map.construct(builder, self)
             self.__containers[builder_id] = result
         return result
 
