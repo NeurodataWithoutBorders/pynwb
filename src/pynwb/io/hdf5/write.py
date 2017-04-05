@@ -75,12 +75,32 @@ class NWBHDF5File(object):
 
     def read(self, path):
         f = File(path, 'r+')
+        f_builder = self.__read_group(f)
+        nwb_file = self.__manager.construct(f_builder)
+        return nwb_file
 
-    def __set_built(self, location, builder):
-        self.__built.setdefault(location, builder)
+    def write(self, path, nwb_file):
+        open_flag = 'w'
+        if os.path.exists(path):
+            open_flag = 'r+'
+        f = File(path, open_flag)
+        builder = self.__manager.build(nwb_file)
+        for name, grp_builder in builder.groups.items():
+            tmp_links = write_group(f, name,
+                                    grp_builder.groups,
+                                    grp_builder.datasets,
+                                    grp_builder.attributes,
+                                    grp_builder.links)
 
-    def __get_built(self, location)
-        return self.__built.get(location)
+    def __set_built(self, fpath, path, builder):
+        self.__built.setdefault(fpath, dict()).setdefault(path, builder)
+
+    def __get_built(self, fpath, path)
+        fdict = self.__built.get(fpath)
+        if fdict:
+            return fdict.get(path)
+        else:
+            return None
 
     def __read_group(self, h5obj, name=None):
         kwargs = {
@@ -99,17 +119,17 @@ class NWBHDF5File(object):
                 target_path = link_type.path
                 builder_name = bn(target_path)
                 # get builder if already read, else build it
-                builder = self.__get_built(target_path)
+                builder = self.__get_built(sub_h5obj.file.filename, target_path)
                 if builder is None:
                     # NOTE: all links must have absolute paths
                     if isinstance(sub_h5obj, Dataset):
                         builder = self.__read_dataset(sub_h5obj, builder_name)
                     else:
                         builder = self.__read_group(sub_h5obj, builder_name)
-                    self.__set_built(target_path, builder)
+                    self.__set_built(sub_h5obj.file.filename, target_path, builder)
                 kwargs['links'][builder_name] = LinkBuilder(builder)
             else:
-                builder = self.__get_built(sub_h5obj.name)
+                builder = self.__get_built(sub_h5obj.file.filename, sub_h5obj.name)
                 obj_type = None
                 read_method = None
                 if isinstance(sub_h5obj, Dataset):
@@ -120,9 +140,21 @@ class NWBHDF5File(object):
                     obj_type = kwargs['groups']
                 if builder is None
                     builder = read_method(sub_h5obj)
-                    self.__set_built(sub_h5obj.name, builder)
+                    self.__set_built(sub_h5obj.file.filename, sub_h5obj.name, builder)
                 obj_type[builder.name] = builder
         ret = GroupBuilder(name, **kwargs)
+        return ret
+
+    def __read_dataset(self, h5obj, name=None):
+        kwargs = {
+            "attributes": dict(h5obj.attr.items),
+            "data": h5obj,
+            "dtype": h5obj.dtype,
+            "maxshape": h5obj.maxshape
+        }
+        if name is None:
+            name = h5obj.name
+        ret = DatasetBuilder(name, **kwargs)
         return ret
 
 class HDF5Writer(object):
