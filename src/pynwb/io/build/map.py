@@ -211,14 +211,14 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
         '''
         return self.__spec2carg[spec]
 
-    def build(self, container, build_manager):
+    def build(self, container, build_manager, parent=None):
         name = build_manager.get_builder_name(container)
         if isinstance(self.__spec, GroupSpec):
-            builder = GroupBuilder(name)
+            builder = GroupBuilder(name, parent=parent)
             self.__add_datasets(builder, self.__spec.datasets, container, build_manager)
             self.__add_groups(builder, self.__spec.groups, container, build_manager)
         else:
-            builder = DatasetBuilder(name)
+            builder = DatasetBuilder(name, parent=parent)
         self.__add_attributes(builder, self.__spec.attributes, container)
         return builder
 
@@ -257,18 +257,17 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
                 self.__build_helper(builder, spec, value, build_manager)
 
     def __build_helper(self, builder, spec, value, build_manager):
-        sub_builder = None
         if isinstance(value, NWBContainer):
             rendered_obj = build_manager.build(value)
             name = build_manager.get_builder_name(value)
             # use spec to determine what kind of HDF5
             # object this NWBContainer corresponds to
             if isinstance(spec, LinkSpec):
-                sub_builder = builder.add_link(name, rendered_obj)
+                builder.set_link(LinkBuilder(name, rendered_obj, builder))
             elif isinstance(spec, DatasetSpec):
-                sub_builder = builder.add_dataset(name, rendered_obj)
+                builder.set_dataset(rendered_obj)
             else:
-                sub_builder = builder.add_group(name, rendered_obj)
+                builder.set_group(rendered_obj)
         else:
             if any(isinstance(value, t) for t in (list, tuple)):
                 values = value
@@ -281,7 +280,6 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
                 raise ValueError(msg % value.__class__.__name__)
             for container in values:
                 self.__build_helper(builder, spec, container, build_manager)
-        return sub_builder
 
     @docval({"name": "attr_name", "type": str, "doc": "the name of the object to map"},
             {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
