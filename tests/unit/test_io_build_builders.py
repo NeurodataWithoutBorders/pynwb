@@ -8,7 +8,8 @@ class GroupBuilderSetterTests(unittest.TestCase):
     """Tests for setter functions in GroupBuilder class"""
 
     def setUp(self):
-        setattr(self, 'gb', GroupBuilder('gb'))
+        self.gb = GroupBuilder('gb')
+        self.gb2 = GroupBuilder('gb', source='file1')
 
     def tearDown(self):
         pass
@@ -21,23 +22,28 @@ class GroupBuilderSetterTests(unittest.TestCase):
     def test_add_dataset(self):
         ds = self.gb.add_dataset('my_dataset', list(range(10)))
         self.assertIsInstance(ds, DatasetBuilder)
+        self.assertIs(self.gb, ds.parent)
 
     def test_add_group(self):
         gp = self.gb.add_group('my_subgroup')
         self.assertIsInstance(gp, GroupBuilder)
         self.assertIs(self.gb['my_subgroup'], gp)
+        self.assertIs(self.gb, gp.parent)
 
     def test_add_link(self):
         gp = self.gb.add_group('my_subgroup')
         sl = self.gb.add_link('my_link', gp)
         self.assertIsInstance(sl, LinkBuilder)
         self.assertIs(self.gb['my_link'], sl)
+        self.assertIs(self.gb, sl.parent)
 
-    @unittest.skip('deprecating ExternalLinkBuilder')
     def test_add_external_link(self):
-        el = self.gb.add_external_link('my_externallink', '/path/to/target', 'external.h5')
-        self.assertIsInstance(el, ExternalLinkBuilder)
+        gp = self.gb2.add_group('my_subgroup')
+        el = self.gb.add_link('my_externallink', gp)
+        self.assertIsInstance(el, LinkBuilder)
         self.assertIs(self.gb['my_externallink'], el)
+        self.assertIs(self.gb, el.parent)
+        self.assertIs(self.gb2, gp.parent)
 
     #@unittest.expectedFailure
     def test_set_attribute(self):
