@@ -26,36 +26,44 @@ def set_attributes(obj, attributes):
 
 def write_group(parent, name, subgroups, datasets, attributes, links):
     group = parent.create_group(name)
-    links_to_create = _copy.deepcopy(links)
+    # write all groups
     if subgroups:
         for subgroup_name, builder in subgroups.items():
             # do not create an empty group without attributes or links
-            #if builder.is_empty():
-            #    continue
             tmp_links = write_group(group,
                             subgroup_name,
                             builder.groups,
                             builder.datasets,
                             builder.attributes,
                             builder.links)
-            #for link_name, target in tmp_links.items():
-            #    if link_name[0] != '/':
-            #        link_name = _posixpath.join(name, link_name)
-            #    links_to_create[link_name] = target
-            links_to_create.update(tmp_links)
+    # write all datasets
     if datasets:
         for dset_name, builder in datasets.items():
             write_dataset(group,
                           dset_name,
                           builder.get('data'),
                           builder.get('attributes'))
-
+    # write all links
+    if links:
+        for link_name, builder in links.items():
+            write_link(group, name, builder.target)
     set_attributes(group, attributes)
 
-    return {_posixpath.join(name, k) if k[0] != '/' else k: v
-            for k, v in links_to_create.items()}
-
-
+def write_link(parent, name, target_builder):
+    # get target path
+    names = list()
+    curr = target_builder
+    while curr is not None:
+        names.append(curr.name)
+        curr = target_builder.parent
+    delim = "/"
+    path = "%s%s" % delim.join(reversed(names))
+    # source will indicate target_builder's location
+    if parent.file.filename == target_builder.source:
+        link_obj = SoftLink(path)
+    else:
+        link_obj = ExternalLink(target_builder.source, path)
+    parent[name] = link_obj
 
 def __get_shape_helper(data):
     shape = list()
