@@ -85,12 +85,8 @@ class NWBHDF5File(object):
             open_flag = 'r+'
         f = File(path, open_flag)
         builder = self.__manager.build(nwb_file)
-        for name, grp_builder in builder.groups.items():
-            tmp_links = write_group(f, name,
-                                    grp_builder.groups,
-                                    grp_builder.datasets,
-                                    grp_builder.attributes,
-                                    grp_builder.links)
+        for name, gbldr in builder.groups.items():
+            write_group(f, name, gbldr.groups, gbldr.datasets, gbldr.attributes, gbldr.links)
 
     def __set_built(self, fpath, path, builder):
         self.__built.setdefault(fpath, dict()).setdefault(path, builder)
@@ -114,7 +110,7 @@ class NWBHDF5File(object):
         for k in h5obj:
             sub_h5obj = h5obj.get(k)
             link_type = h5obj.get(k, getlink=True)
-            if isinstance(link_type, SoftLink):
+            if isinstance(link_type, SoftLink) or isinstance(link_type, ExternalLink):
                 # get path of link (the key used for tracking what's been built)
                 target_path = link_type.path
                 builder_name = bn(target_path)
