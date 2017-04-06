@@ -207,7 +207,7 @@ class BaseStorageSpec(Spec):
                 errors.append({'name': self['name'],
                                'type': 'dataset',
                                'reason': 'cannot be link'})
-        for attr_spec in self['attributes']:
+        for attr_spec in self.attributes:
             attr = builder.get(attr_spec['name'])
             if attr:
                 for err in attr_spec.verify(attr):
