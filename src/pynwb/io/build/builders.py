@@ -15,13 +15,18 @@ from pynwb.spec import DatasetSpec, GroupSpec
 class Builder(dict):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the group'},
-            {'name': 'parent', 'type': str, 'doc': 'the parent builder of this Builder'},
+            {'name': 'parent', 'type': 'Builder', 'doc': 'the parent builder of this Builder', 'default': None},
             {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
-    def __init__(self, **kwargs)::
+    def __init__(self, **kwargs):
         name, parent, source = getargs('name', 'parent', 'source', kwargs)
         self.__name = name
         self.__parent = parent
-        self.__source = source if source is not None else parent.source
+        if source is not None:
+            self.__source = source
+        elif parent is not None:
+            self.__source = parent.source
+        else:
+            self.__source = None
 
     @property
     def name(self):
@@ -53,7 +58,7 @@ class GroupBuilder(Builder):
              'default': dict()},
             {'name': 'links', 'type': dict, 'doc': 'a dictionary of links to create in this group',
              'default': dict()},
-            {'name': 'parent', 'type': str, 'doc': 'the parent builder of this Builder', 'default': None},
+            {'name': 'parent', 'type': 'GroupBuilder', 'doc': 'the parent builder of this Builder', 'default': None},
             {'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Builder', 'default': None})
     def __init__(self, **kwargs):
         """
@@ -99,6 +104,8 @@ class GroupBuilder(Builder):
                 raise KeyError("'%s' already exists as %s" % (name, self.obj_type[name]))
         super().__getitem__(obj_type)[name] = builder
         self.obj_type[name] = obj_type
+        if builder.parent is None:
+            setattr(builder, '_%s__parent' % builder.__class__.__name__, self)
 
     @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
             {'name':'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
@@ -112,7 +119,7 @@ class GroupBuilder(Builder):
         Create a dataset and add it to this group
         """
         name = kwargs.pop('name')
-        builder = DatasetBuilder(name, parent=self, **kwargs)
+        builder = DatasetBuilder(name, self, **kwargs)
         self.set_dataset(builder)
         return builder
 
@@ -154,24 +161,25 @@ class GroupBuilder(Builder):
         """
         Create a soft link and add it to this group.
         """
-        name, path = getargs('name', 'path', kwargs)
-        builder = LinkBuilder(name, path, parent=self)
+        name, target = getargs('name', 'target', kwargs)
+        builder = LinkBuilder(name, target, self)
         self.set_link(builder)
         return builder
 
-    @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
-            {'name':'file_path', 'type': str, 'doc': 'the file path of this external link'},
-            {'name':'path', 'type': str, 'doc': 'the absolute path within the external HDF5 file'},
-            returns='the builder object for the external link', rtype='ExternalLinkBuilder')
-    def add_external_link(self, **kwargs):
-        """
-        Create an external link and add it to this group.
-        """
-        name, file_path, path = getargs('name', 'file_path', 'path', kwargs)
-        builder = ExternalLinkBuilder(name, path, file_path)
-        self.set_link(builder)
-        return builder
-
+#deprecating...
+#    @docval({'name':'name', 'type': str, 'doc': 'the name of this link'},
+#            {'name':'file_path', 'type': str, 'doc': 'the file path of this external link'},
+#            {'name':'path', 'type': str, 'doc': 'the absolute path within the external HDF5 file'},
+#            returns='the builder object for the external link', rtype='ExternalLinkBuilder')
+#    def add_external_link(self, **kwargs):
+#        """
+#        Create an external link and add it to this group.
+#        """
+#        name, file_path, path = getargs('name', 'file_path', 'path', kwargs)
+#        builder = ExternalLinkBuilder(name, path, file_path)
+#        self.set_link(builder)
+#        return builder
+#
     @docval({'name':'builder', 'type': 'LinkBuilder', 'doc': 'the LinkBuilder that represents this link'})
     def set_link(self, **kwargs):
         """
@@ -294,47 +302,14 @@ class GroupBuilder(Builder):
                                 super().__getitem__(GroupBuilder.__attribute).values(),
                                 super().__getitem__(GroupBuilder.__link).values())
 
-class LinkBuilder(Builder):
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the target of this link'},
-            {'name': 'parent', 'type': str, 'doc': 'the parent builder of this Builder'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
-    def __init__(self, name, path):
-        name, parent, source = getargs('name', 'parent', 'source', kwargs)
-        super().__init__(name, parent, source)
-        self['name'] = name
-        self['path'] = path
-
-    @property
-    def path(self):
-        return self['path']
-
-    @property
-    def name(self):
-        '''
-        The name of this link
-        '''
-        return self['name']
-
-
-class ExternalLinkBuilder(LinkBuilder):
-    def __init__(self, name, path, file_path):
-        super().__init__(name, path)
-        self['file_path'] = file_path
-
-    @property
-    def file_path(self):
-        return self['file_path']
-
 class DatasetBuilder(Builder):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'parent', 'type': str, 'doc': 'the parent builder of this Builder'},
             {'name': 'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
             {'name': 'dtype', 'type': (type, np.dtype), 'doc': 'the datatype of this dataset', 'default': None},
             {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name': 'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
             {'name': 'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False},
+            {'name': 'parent', 'type': GroupBuilder, 'doc': 'the parent builder of this Builder', 'default': None},
             {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
     def __init__(self, **kwargs):
         '''
@@ -383,6 +358,31 @@ class DatasetBuilder(Builder):
     # XXX: leave this here for now, we might want it later
     #def __setitem__(self, args, val):
     #    raise NotImplementedError('__setitem__')
+
+class LinkBuilder(Builder):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
+            {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the target of this link'},
+            {'name': 'parent', 'type': GroupBuilder, 'doc': 'the parent builder of this Builder', 'default': None},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
+    def __init__(self, **kwargs):
+        name, builder, parent, source = getargs('name', 'builder', 'parent', 'source', kwargs)
+        super().__init__(name, parent, source)
+        self['builder'] = builder
+
+    @property
+    def builder(self):
+        return self['builder']
+
+
+class ExternalLinkBuilder(LinkBuilder):
+    def __init__(self, name, path, file_path):
+        super().__init__(name, path)
+        self['file_path'] = file_path
+
+    @property
+    def file_path(self):
+        return self['file_path']
 
 
 @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
