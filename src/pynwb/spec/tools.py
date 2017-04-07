@@ -1,4 +1,4 @@
-from .spec import GroupSpec, SpecCatalog
+from .spec import GroupSpec, DatasetSpec, AttributeSpec, LinkSpec, SpecCatalog
 from pynwb.core import docval, getargs
 
 
@@ -87,13 +87,13 @@ class HierarchyDescription(dict):
     RELATIONSHIP_TYPES = {'managed_by': 'Object managed by',
                           'attribute_of': 'Object is attribute of'}
 
-
     def __init__(self):
         super(HierarchyDescription, self).__init__()
         super(HierarchyDescription, self).__setitem__('datasets', [])
         super(HierarchyDescription, self).__setitem__('groups', [])
         super(HierarchyDescription, self).__setitem__('attributes', [])
         super(HierarchyDescription, self).__setitem__('relationships', [])
+        super(HierarchyDescription, self).__setitem__('links', [])
 
     def __setitem__(self, key, value):
         raise ValueError("Explicit setting of objects not allowed. Use the add_* functions to add objects")
@@ -140,27 +140,108 @@ class HierarchyDescription(dict):
             'value': value
         })
 
-    def add_relationship(self, source, target, name, type):
+    def add_link(self, name, target_type):
+        """
+        Add a link
+
+        :param name: Name of the link (full path)
+        :param target_type: Type of object the link points to.
+        """
+        self['links'].append({'name': name,
+                              'target_type': target_type})
+
+    def add_relationship(self, source, target, name, rtype):
         """
         Add a relationship between two objects
 
         :param source: Name of the source object (full path)
         :param target: Name of the target object (full path)
         :param name: Name of the relationship
-        :param type: Type of the relationship
+        :param rtype: Type of the relationship
         """
         self['relationships'].append({
             'source': source,
             'target': target,
             'name': name,
-            'type': type
+            'type': rtype
         })
+
+    @classmethod
+    def from_spec(cls, spec):
+        """
+        Traverse the spec to compute spec related hierarchy data.
+        :param spec: The specification object
+        :type spec: GroupSpec, AttributeSpec, DatasetSpec
+        :return: Instance of HierarchyDescription with the hierarchy of the objects
+        """
+        import os
+
+        specstats = cls()
+
+        def update_stats(obj, parent_name):
+            """
+            Function used to recursively visit all items in a stat and update the specstats object
+            :param obj: The spec for the object
+            :param parent_name: String with the full path of the parent in the hierarchy
+            """
+            obj_main_name = obj.name \
+                if obj.name is not None \
+                else obj.neurodata_type_def \
+                if obj.neurodata_type_def is not None \
+                else obj.neurodata_type
+            obj_name = os.path.join(parent_name, obj_main_name)
+
+            if isinstance(obj, GroupSpec):
+                specstats.add_group(name=obj_name,
+                                    neurodata_type=obj.neurodata_type)
+            elif isinstance(obj, DatasetSpec):
+                specstats.add_dataset(name=obj_name,
+                                      shape=obj.shape,
+                                      dtype=obj['type'] if hasattr(obj, 'type') else None,
+                                      neurodata_type=obj.neurodata_type)
+            elif isinstance(obj, AttributeSpec):
+                specstats.add_attribute(name=obj_name,
+                                        value=obj.value)
+            elif isinstance(obj, LinkSpec):
+                specstats.add_link(name=os.path.join(parent_name, obj.name),
+                                   target_type=obj.neurodata_type)
+
+            # Recursively add all groups and datasets
+            if isinstance(obj, GroupSpec):
+                for d in obj.datasets:
+                    dn = update_stats(d, obj_name)
+                    specstats.add_relationship(source=obj_name,
+                                               target=dn,
+                                               name=dn+"_managed_by_"+obj_name,
+                                               rtype='managed_by')
+                for g in obj.groups:
+                    gn = update_stats(g, obj_name)
+                    specstats.add_relationship(source=obj_name,
+                                               target=gn,
+                                               name=gn+"_managed_by_"+obj_name,
+                                               rtype='managed_by')
+                for l in obj.links:
+                    ln = update_stats(l, obj_name)
+                    specstats.add_relationship(source=obj_name,
+                                               target=ln,
+                                               name=ln+"_managed_by_"+obj_name,
+                                               rtype='managed_by')
+            if isinstance(obj, GroupSpec) or isinstance(obj, DatasetSpec):
+                for a in obj.attributes:
+                    an = update_stats(a, obj_name)
+                    specstats.add_relationship(source=obj_name,
+                                               target=an,
+                                               name=an+"_attribute_of_"+obj_name,
+                                               rtype='attribute_of')
+            return obj_name
+
+        update_stats(spec, parent_name='/')
+        return specstats
 
     @classmethod
     def from_hdf5(cls, hdf_object, root='/'):
         """
-        Traverse the file to compute file related statistics, e.g., the number of objects
-        of a given type etc.
+        Traverse the file to compute file object hierarchy data.
 
         :param hdf_object: The h5py.Group or h5py.File object. If a string is given then the function assumes
                            that this is a path to and HDF5 file and will open the file.
@@ -168,7 +249,7 @@ class HierarchyDescription(dict):
                      Default value is "/", i.e., starting from the root itself
         :type root: String
 
-        :return: Instance of HierarchyRendererDescription with the hierarchy of the objects
+        :return: Instance of HierarchyDescription with the hierarchy of the objects
 
         """
         import h5py
@@ -182,7 +263,7 @@ class HierarchyDescription(dict):
             statistics for the file
 
             :param name: the name of the object in the file
-            :param obj: the hdf5 object itsel
+            :param obj: the hdf5 object itself
             """
             obj_name = os.path.join(root, name)
             # Group and dataset metadata
@@ -202,15 +283,14 @@ class HierarchyDescription(dict):
                 filestats.add_relationship(source=attr_path,
                                            target=obj_name,
                                            name=attr_name + '_attribute_of_' + obj_name,
-                                           type='attribute_of')
-
+                                           rtype='attribute_of')
 
             # Create the relationship for the object
             if obj_name != '/':
                 filestats.add_relationship(source=os.path.dirname(obj_name),
                                            target=obj_name,
                                            name=obj_name + '_managed_by_' + root,
-                                           type='managed_by')
+                                           rtype='managed_by')
         # Determine the main HDF5 object
         if isinstance(hdf_object, str):
             main_hdf_object = h5py.File(hdf_object, 'r')
@@ -239,19 +319,29 @@ class NXGraphHierarchyDescription(object):
     """
 
     @docval({'name': 'data', 'type': HierarchyDescription, 'doc': 'Data of the hierarchy'},
-            {'name': 'include_groups', 'type': bool, 'doc': 'Bool indicating whether we should include groups in the hiararchy', 'default': True},
-            {'name': 'include_datasets', 'type': bool, 'doc': 'Bool indicating whether we should include datasets in the hiararchy', 'default': True},
-            {'name': 'include_attributes', 'type': bool, 'doc': 'Bool indicating whether we should include attributes in the hiararchy', 'default': True},
-            {'name': 'include_relationships', 'type': bool, 'doc': 'Bool or list of strings indicating which types of relationships should be included', 'default': True})
+            {'name': 'include_groups', 'type': bool,
+             'doc': 'Bool indicating whether we should include groups in the hierarchy', 'default': True},
+            {'name': 'include_datasets', 'type': bool,
+             'doc': 'Bool indicating whether we should include datasets in the hierarchy', 'default': True},
+            {'name': 'include_attributes', 'type': bool,
+             'doc': 'Bool indicating whether we should include attributes in the hierarchy', 'default': True},
+            {'name': 'include_links', 'type': bool,
+             'doc': 'Bool indicating whether we should include links in the hierarchy', 'default': True},
+            {'name': 'include_relationships', 'type': bool,
+             'doc': 'Bool or list of strings indicating thh types of relationships to be included', 'default': True})
     def __init__(self, **kwargs):
-        self.data, self.include_groups, self.include_datasets, self.include_attributes, self.include_relationships = \
-            getargs('data', 'include_groups', 'include_datasets', 'include_attributes', 'include_relationships', kwargs)
+        self.data, self.include_groups, self.include_datasets, self.include_attributes, \
+            self.include_links, self.include_relationships = getargs('data', 'include_groups',
+                                                                     'include_datasets', 'include_attributes',
+                                                                     'include_links', 'include_relationships',
+                                                                     kwargs)
         self.graph = self.nxgraph_from_data(self.data,
                                             self.include_groups,
                                             self.include_datasets,
                                             self.include_attributes,
+                                            self.include_links,
                                             self.include_relationships)
-        self.pos = self.normalize_graph_layout(self.create_hierarchical_graph_layout(self.graph))
+        self.pos = self.create_hierarchical_graph_layout(self.graph)
 
     def draw(self, **kwargs):
         """
@@ -259,40 +349,60 @@ class NXGraphHierarchyDescription(object):
         :param kwargs: Additional keyword arguments to be passed to the static draw_graph method
         :return:
         """
-        return self.draw_graph(G=self.graph, pos=self.pos, object_stats=self.data, **kwargs)
+        return self.draw_graph(graph=self.graph, pos=self.pos, data=self.data, **kwargs)
 
     @staticmethod
-    def nxgraph_from_data(data, include_groups=True, include_datasets=True, include_attributes=True, include_relationships=True):
+    def nxgraph_from_data(data,
+                          include_groups=True,
+                          include_datasets=True,
+                          include_attributes=True,
+                          include_links=True,
+                          include_relationships=True):
         """
         Create a networkX representation of the objects in the HiearchyDescription stored in self.data
+
+        :param data: Description of the object hierarchy
+        :type data: HierarchyDescription
+        :param include_groups: Bool indicating whether we should include groups in the hierarchy
+        :param include_datasets: Bool indicating whether we should include datasets in the hierarchy
+        :param include_attributes: Bool indicating whether we should include groups in the hierarchy
+        :param include_links: Bool indicating whether we should include links in the hierarchy
+        :param include_relationships: Bool or list of strings indicating which types of relationships should be included
 
         :return:  NXGraph from self.data
         """
         import networkx as nx
 
-        G = nx.Graph() # nx.MultiDiGraph()
+        graph = nx.Graph() # nx.MultiDiGraph()
         # Add all nodes
         if include_datasets:
             for d in data['datasets']:
-                G.add_node(d['name'])
+                graph.add_node(d['name'])
         if include_groups:
             for g in data['groups']:
-                G.add_node(g['name'])
+                graph.add_node(g['name'])
         if include_attributes:
             for g in data['attributes']:
-                G.add_node(g['name'])
+                graph.add_node(g['name'])
+        if include_links:
+            for l in data['links']:
+                graph.add_node(l['name'])
 
         # Create edges from relationships
-        rel_list = include_relationships if isinstance(include_relationships, list) else data.RELATIONSHIP_TYPES if include_relationships is True else []
-        all_nodes = G.nodes(data=False)
+        rel_list = include_relationships \
+            if isinstance(include_relationships, list) \
+            else data.RELATIONSHIP_TYPES \
+            if include_relationships is True \
+            else []
+        all_nodes = graph.nodes(data=False)
         if len(rel_list) > 0:
             for r in data['relationships']:
                 # Add only those relationships we were asked to include
                 if r['type'] in rel_list:
-                     # Add only relationships for which we have both the source and target in the graph
+                    # Add only relationships for which we have both the source and target in the graph
                     if r['source'] in all_nodes and r['target'] in all_nodes:
-                        G.add_edge(r['source'], r['target'])
-        return G
+                        graph.add_edge(r['source'], r['target'])
+        return graph
 
     @staticmethod
     def create_hierarchical_graph_layout(graph):
@@ -301,7 +411,6 @@ class NXGraphHierarchyDescription(object):
         graph (i.e., groups and datasets) in a hierarchical layout
 
         :param graph: Network X graph of file objects
-        :param v_min_space: Minimum vertical space between notes in the hierarchy
 
         :return: Dictionary where the keys are the names of the nodes in the graph and the values are
                  tuples with the floating point x and y coordinates for that node.
@@ -311,7 +420,7 @@ class NXGraphHierarchyDescription(object):
 
         pos_hierarchy = {}
         allnodes = graph.nodes(data=False)
-        nodes_at_level = {} # {i:0 for i in range(7)}
+        nodes_at_level = {}
         for v in allnodes:
             xpos = len(v.split('/')) if v != '/' else 1
             try:
@@ -319,12 +428,12 @@ class NXGraphHierarchyDescription(object):
             except KeyError:
                 nodes_at_level[xpos] = 1
 
-        curr_nodes_at_level = {i:0 for i in nodes_at_level.keys()}
+        curr_nodes_at_level = {i: 0 for i in nodes_at_level.keys()}
         for i, v in enumerate(np.sort(allnodes)):
             xpos = len(v.split('/')) if v != '/' else 1
             ypos = 1 - float(curr_nodes_at_level[xpos]) / nodes_at_level[xpos] * 1
             curr_nodes_at_level[xpos] += 1
-            pos_hierarchy[v] = np.asarray([np.power(xpos,2),ypos])
+            pos_hierarchy[v] = np.asarray([np.power(xpos, 2), ypos])
 
         return pos_hierarchy
 
@@ -344,7 +453,7 @@ class NXGraphHierarchyDescription(object):
 
         pos_hierarchy = {}
         allnodes = graph.nodes(data=False)
-        nodes_at_level = {} # {i:0 for i in range(7)}
+        nodes_at_level = {}
         for v in allnodes:
             xpos = len(v.split('/')) if v != '/' else 1
             try:
@@ -352,15 +461,15 @@ class NXGraphHierarchyDescription(object):
             except KeyError:
                 nodes_at_level[xpos] = 1
 
-        curr_nodes_at_level = {i:0 for i in range(7)}
+        curr_nodes_at_level = {i: 0 for i in range(7)}
         for i, v in enumerate(np.sort(allnodes)):
             xpos = len(v.split('/')) if v != '/' else 1
             ypos = float(curr_nodes_at_level[xpos]) / nodes_at_level[xpos]
             curr_nodes_at_level[xpos] += 1
             if xpos > 3:
                 xpos += np.sin(ypos*np.pi)
-            xpos = np.power(xpos,2)
-            pos_hierarchy[v] = np.asarray([xpos,-ypos])
+            xpos = np.power(xpos, 2)
+            pos_hierarchy[v] = np.asarray([xpos, -ypos])
 
         return pos_hierarchy
 
@@ -385,42 +494,44 @@ class NXGraphHierarchyDescription(object):
         yr = ymax - ymin
 
         # Create the output layout
-        normlized_layout = {k: np.asarray([(n[0] - xmin)/ xr, (n[1] - xmin) / yr]) for k,n in graph_layout.items()}
+        normlized_layout = {k: np.asarray([(n[0] - xmin) / xr, (n[1] - xmin) / yr]) for k, n in graph_layout.items()}
         return normlized_layout
 
     @staticmethod
-    def draw_graph(G,
-               pos,
-               object_stats,
-               show_labels=True,
-               node_size=800,
-               relationship_types=None,
-               figsize=None,
-               label_offset=None,
-               label_font_size=8,
-               xlim=None,
-               ylim=None,
-               legend_location='lower left',
-               axis_on=False,
-               relationship_counts=None,
-               show_plot=True):
+    def draw_graph(graph,
+                   pos,
+                   data,
+                   show_labels=True,
+                   node_size=20,
+                   relationship_types=None,
+                   figsize=None,
+                   label_offset=(0.0, 0.01),
+                   label_font_size=8,
+                   xlim=None,
+                   ylim=None,
+                   legend_location='lower left',
+                   axis_on=False,
+                   relationship_counts=True,
+                   show_plot=True):
         """
         Helper function used to render the file hierarchy and the inter-object relationships
 
-        :param G: The networkx graph
-        :param pos: Dict with the position for each node generated, e.g., via nx.shell_layout(G)
-        :param show_lables: Boolean indicating whether we should show the names of the nodes
+        :param graph: The networkx graph
+        :param pos: Dict with the position for each node generated, e.g., via nx.shell_layout(graph)
+        :param data: Data about the hierarchy
+        :type data: HierarchyDescription
+        :param show_labels: Boolean indicating whether we should show the names of the nodes
         :param node_size: Size of the nodes
-        :param relationship_type: List of edge types that should be rendered. If None, then all edges will be rendered.
+        :param relationship_types: List of edge types that should be rendered. If None, then all edges will be rendered.
         :param figsize: The size of the matplotlib figure
-        :param lable_offset: Offsets for the node lables. This may be either: i) None (default),
+        :param label_offset: Offsets for the node lables. This may be either: i) None (default),
                    ii) Tuple with constant (x,y) offset for the text labels, or
                    iii) Dict of tuples where the keys are the names of the nodes for which labels should be moved
                         and the values are the (x,y) offsets for the given nodes.
         :param label_font_size: Font size for the lables
         :param xlim: The x limits to be used for the plot
         :param ylim: The y limits to be used for the plot
-        :param legend_locations: The legend location (e.g., 'upper left' , 'lower right')
+        :param legend_location: The legend location (e.g., 'upper left' , 'lower right')
         :param axis_on: Boolean indicating whether the axes should be turned on or not.
         :param relationship_counts: Boolean indicating if edge/relationship counts should be shown.
         :param show_plot: If true call show to display the figure. If False return the matplotlib figure
@@ -435,45 +546,72 @@ class NXGraphHierarchyDescription(object):
         from copy import deepcopy
         from matplotlib.ticker import NullLocator
 
-
-        figsize = figsize if figsize is not None else (12,12)
         fig = plt.figure(figsize=figsize)
         # List of object names
-        untyped_group_names = [i['name'] for i in object_stats['groups'] if i['neurodata_type'] is None]
-        typed_group_names   = [i['name'] for i in object_stats['groups'] if i['neurodata_type'] is not None]
-        dataset_names       = [i['name'] for i in object_stats['datasets']]
+        untyped_group_names = [i['name'] for i in data['groups'] if i['neurodata_type'] is None]
+        typed_group_names = [i['name'] for i in data['groups'] if i['neurodata_type'] is not None]
+        untyped_dataset_names = [i['name'] for i in data['datasets'] if i['neurodata_type'] is None]
+        typed_dataset_names = [i['name'] for i in data['datasets'] if i['neurodata_type'] is not None]
+        attribute_names = [i['name'] for i in data['attributes']]
+        links_names = [i['name'] for i in data['links']]
 
-        # Draw the nodes of the network
-        nx.draw_networkx_nodes(G,pos,
-                               nodelist=dataset_names,
-                               node_color='gray',
+        # Draw the untyped dataset nodes of the network
+        nx.draw_networkx_nodes(graph, pos,
+                               nodelist=untyped_dataset_names,
+                               node_color='lightblue',
                                node_shape='o',
                                node_size=node_size,
-                               alpha=0.7,
+                               alpha=1.0,
                                font_family='STIXGeneral',
-                               label='Dataset (%i)' % len(dataset_names) )
-        # All groups in the rat data are managed so we don't need to handle unmanged groups sparately
-        nx.draw_networkx_nodes(G,pos,
+                               label='Untyped Dataset (%i)' % len(untyped_dataset_names))
+        # Draw the typed dataset nodes of the network
+        nx.draw_networkx_nodes(graph, pos,
+                               nodelist=typed_dataset_names,
+                               node_color='lightblue',
+                               node_shape='o',
+                               node_size=node_size,
+                               alpha=1.0,
+                               font_family='STIXGeneral',
+                               label='Typed Dataset (%i)' % len(typed_dataset_names))
+        # Draw all groups with a neurodata type
+        nx.draw_networkx_nodes(graph, pos,
                                nodelist=typed_group_names,
-                               node_color='r',
+                               node_color='red',
                                node_shape='o',
                                node_size=node_size,
                                font_family='STIXGeneral',
                                alpha=1.0,
                                label='Typed Group (%i)' % len(typed_group_names))
-        # Overplot the dataset nodes that are in fact managed datasets
-        # managed_datasets = set(object_stats['datasets']) & set(object_stats['managed'])
-        nx.draw_networkx_nodes(G,pos,
-                               nodelist= untyped_group_names,
-                               node_color='cyan',
+        # Draw all groups without a neurodata type
+        nx.draw_networkx_nodes(graph, pos,
+                               nodelist=untyped_group_names,
+                               node_color='orange',
                                node_shape='o',
                                node_size=node_size,
                                font_family='STIXGeneral',
                                alpha=1.0,
-                               label='Group (%i)' % len(untyped_group_names))
+                               label='Untyped Group (%i)' % len(untyped_group_names))
+        # Draw all attributes
+        nx.draw_networkx_nodes(graph, pos,
+                               nodelist=attribute_names,
+                               node_color='gray',
+                               node_shape='o',
+                               node_size=node_size,
+                               font_family='STIXGeneral',
+                               alpha=1.0,
+                               label='Attributes (%i)' % len(attribute_names))
+        # Draw all attributes
+        nx.draw_networkx_nodes(graph, pos,
+                               nodelist=links_names,
+                               node_color='white',
+                               node_shape='o',
+                               node_size=node_size,
+                               font_family='STIXGeneral',
+                               alpha=1.0,
+                               label='Links (%i)' % len(links_names))
 
         # Draw the network edges
-        rel_colors = {'shared_encoding': 'steelblue',
+        rel_colors = {'shared_encoding': 'magenta',
                       'indexes_values': 'cyan',
                       'equivalent': 'gray',
                       'indexes': 'orange',
@@ -481,12 +619,12 @@ class NXGraphHierarchyDescription(object):
                       'shared_ascending_encoding': 'blue',
                       'order': 'red',
                       'managed_by': 'black',
-                      'attribute_of': 'magenta'}
-        # nx.draw_networkx_edges(G, pos)
+                      'attribute_of': 'steelblue'}
+        # nx.draw_networkx_edges(graph, pos)
 
         # Resort edges by type
         edge_by_type = {}
-        for r in object_stats['relationships']:
+        for r in data['relationships']:
             if r['type'] in edge_by_type:
                 edge_by_type[r['type']].append((r['source'], r['target']))
             else:
@@ -495,23 +633,23 @@ class NXGraphHierarchyDescription(object):
         if relationship_counts:
             relationship_counts = {rt: len(rl) for rt, rl in edge_by_type.items()}
         else:
-            relationship_counts= None
+            relationship_counts = None
 
         for rt, rl in edge_by_type.items():
             if relationship_types is None or rt in relationship_types:
-                nx.draw_networkx_edges(G,
+                nx.draw_networkx_edges(graph,
                                        pos,
                                        edgelist=rl,
                                        width=1.0,
-                                       alpha=0.9 if rt != 'managed_by' else 0.3,
+                                       alpha=0.9 if rt != 'managed_by' else 0.6,
                                        edge_color=rel_colors[rt],
                                        label=rt if relationship_counts is None else (rt+' (%i)' % relationship_counts[rt])
                                        )
 
         if show_labels:
-            # Create node lables
-            labels={i:os.path.basename(i) if len(os.path.basename(i)) > 0 else i for i in G.nodes(data=False)}
-            # Determine lable positions
+            # Create node labels
+            labels = {i: os.path.basename(i) if len(os.path.basename(i)) > 0 else i for i in graph.nodes(data=False)}
+            # Determine label positions
             if label_offset is not None:
                 # Move individual lables by the user-defined offsets
                 if isinstance(label_offset, dict):
@@ -525,7 +663,7 @@ class NXGraphHierarchyDescription(object):
                 # Use the node positions as label positions
                 label_pos = pos
             # Draw the labels
-            nx.draw_networkx_labels(G,label_pos,labels,font_size=label_font_size)
+            nx.draw_networkx_labels(graph, label_pos, labels, font_size=label_font_size)
 
         if axis_on:
             plt.axis('on')
@@ -568,6 +706,13 @@ class RSTDocument(object):
         for i in range(len(title)):
             heading += heading_char
         return heading
+
+    def add_text(self, text):
+        """
+        Add the given text to the document
+        :param text: String with the text to be added
+        """
+        self.document += text
 
     def add_part(self, title):
         """
@@ -637,13 +782,25 @@ class RSTDocument(object):
         self.document += (heading + self.newline)
         self.document += self.newline
 
-    def add_code(self, code_block, code_type='python'):
+    def add_code(self, code_block, code_type='python', show_line_numbers=True, emphasize_lines=None):
         """
         Add code block to the document
         :param code_block: String with the code block
+        :param show_line_numbers: Bool indicating whether line number should be shown
+        :param emphasize_lines: None or list of int with the line numbers to be highlighted
         :param code_type: The language type to be used for source code highlighting in the rst doc
         """
-        self.document += ".. code-block:: %s%s%s" % (code_type, self.newline, self.newline)
+        self.document += ".. code-block:: %s%s" % (code_type, self.newline)
+        if show_line_numbers:
+            self.document += self.indent_text(':linenos:') + self.newline
+        if emphasize_lines is not None:
+            self.document += self.indent_text(':emphasize-lines: ')
+            for i, j in enumerate(emphasize_lines):
+                self.document += str(j)
+                if i < len(emphasize_lines)-1:
+                    self.document += ','
+            self.document += self.newline
+        self.document += self.newline
         self.document += self.indent_text(code_block)  # Indent text by 4 spaces
         self.document += self.newline
         self.document += self.newline
@@ -677,7 +834,16 @@ class RSTDocument(object):
         self.document += self.newline
         self.document += self.newline
 
-    def add_figure(self, img, caption=None, legend=None, alt=None, height=None, width=None, scale=None, align=None, target=None):
+    def add_figure(self,
+                   img,
+                   caption=None,
+                   legend=None,
+                   alt=None,
+                   height=None,
+                   width=None,
+                   scale=None,
+                   align=None,
+                   target=None):
         """
 
         :param img: Path to the image to be shown as part of the figure.
@@ -699,13 +865,13 @@ class RSTDocument(object):
         self.document += ".. figure:: %s" % img
         self.document += self.newline
         if scale is not None:
-            self.document += (self.indent_text(':scale: %i' % scale ) + ' %' + self.newline)
+            self.document += (self.indent_text(':scale: %i' % scale) + ' %' + self.newline)
         if alt is not None:
             self.document += (self.indent_text(':alt: %s' % alt) + self.newline)
         if height is not None:
-            self.document += (self.indent_text(':height: %i px' % height ) + self.newline)
+            self.document += (self.indent_text(':height: %i px' % height) + self.newline)
         if width is not None:
-            self.document += (self.indent_text(':width: %i px' % width ) + self.newline)
+            self.document += (self.indent_text(':width: %i px' % width) + self.newline)
         if align is not None:
             if align not in self.ALIGN:
                 raise ValueError('align not valid. Found %s expected one of %s' % (str(align), str(self.ALIGN)))
@@ -768,9 +934,14 @@ class RSTDocument(object):
         :type spec: GroupSpec, DatasetSpec, AttributeSpec, LinkSpec
         """
         if show_json:
-            self.add_code(SpecFormatter.spec_to_json(spec, True), code_type='python')
+            self.add_code(SpecFormatter.spec_to_json(spec, True), code_type='json')
         if show_yaml:
-            self.add_code(SpecFormatter.spec_to_yaml(spec), code_type='python')
+            self.add_code(SpecFormatter.spec_to_yaml(spec), code_type='yaml')
+
+    def add_latex_clearpage(self):
+        self.document += self.newline
+        self.document += ".. raw:: latex" + self.newline + self.newline
+        self.document += self.default_indent + '\clearpage \\newpage' + self.newline + self.newline
 
     def write(self, filename, mode='w'):
         """
