@@ -79,11 +79,13 @@ class SpecFormatter(object):
 
 class RSTDocument(object):
     """
-    Helper class for generating an RST document
+    Helper class for generating an reStructuredText (RST) document
 
     :ivar document: The string with the RST document
     :ivar newline: Newline string
     """
+    ADMONITIONS = ['attention', 'caution', 'danger', 'error', 'hint', 'important', 'note', 'tip', 'warning']
+
 
     def __init__(self):
         """Initalize empty RST document"""
@@ -172,7 +174,37 @@ class RSTDocument(object):
         :param code_type: The language type to be used for source code highlighting in the rst doc
         """
         self.document += ".. code-block:: %s%s%s" % (code_type, self.newline, self.newline)
-        self.document += '    ' + '    '.join(code_block.splitlines(True))  # Add 4-space indent to code_block
+        self.document += self.indent_text(code_block)  # Indent text by 4 spaces
+        self.document += self.newline
+        self.document += self.newline
+
+    @staticmethod
+    def indent_text(text, indent=None):
+        """
+        Helper function used to indent a given text by a given prefix. Usually 4 spaces.
+
+        :param text: String with the text to be indented
+        :param indent: String with the prefix to be added to each line of the string. If None then the defautl is
+                       4 spaces: '    '
+
+        :return: New string with each line indented by the current indent
+        """
+        curr_indent = indent if indent is not None else '    '
+        return curr_indent + curr_indent.join(text.splitlines(True))
+
+    def add_admonitions(self, atype, text):
+        """
+        Add and admonition to the text. Admonitions are specially marked "topics"
+        that can appear anywhere an ordinary body element can
+
+        :param atype: One of RTDDocument.ADMONITIONS
+        :param text: The RTD formatted text to be shown or the RTDDocument to be rendered as part of the admonition
+        """
+        curr_text = text if not isinstance(text, RSTDocument) else text.document
+        self.document += self.newline
+        self.document += ".. %s::" % atype
+        self.document += self.newline
+        self.document += self.indent_text(text)
         self.document += self.newline
         self.document += self.newline
 
@@ -201,3 +233,5 @@ class RSTDocument(object):
         outfile.write(self.document)
         outfile.flush()
         outfile.close()
+
+
