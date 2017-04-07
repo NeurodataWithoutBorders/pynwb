@@ -213,7 +213,9 @@ class RSTDocument(object):
 
         :param img: Path to the image to be shown as part of the figure.
         :param caption: Optional caption for the figure
-        :type caption: String
+        :type caption: String or RSTDocument
+        :param legend: Figure legend
+        :type legend: String or RST Document
         :param alt: Alternate text.  A short description of the image used when the image cannot be displayed.
         :param height: Height of the figure in pixel
         :type height: Int
@@ -243,12 +245,49 @@ class RSTDocument(object):
             self.document += (self.indent_text(':target: %s' % target) + self.newline)
         self.document += self.newline
         if caption is not None:
-            self.document += (self.indent_text(caption) + self.newline)
+            curr_caption = caption if not isinstance(caption, RSTDocument) else caption.document
+            self.document += (self.indent_text(curr_caption) + self.newline)
         if legend is not None:
             if caption is None:
                 self.document += (self.indent_text('.. ') + self.newline + self.default_indent + self.newline)
-            self.document += (self.indent_text(legend) + self.newline)
+            curr_legend = legend if not isinstance(legend, RSTDocument) else legend.document
+            self.document += (self.indent_text(curr_legend) + self.newline)
         self.document += self.newline
+
+    def add_sidebar(self, text, title, subtitle=None):
+        """
+        Add a sidebar. Sidebars are like miniature, parallel documents that occur inside other
+        documents, providing related or reference material.
+
+        :param text: The content of the sidebar
+        :type text: String or RSTDocument
+        :param title: Title of the sidebar
+        :type title: String
+        :param subtitle: Optional subtitel of the sidebar
+        :type subtitle: String
+        """
+        self.document += self.newline
+        self.document += '.. sidebar:: ' + title + self.newline
+        if subtitle is not None:
+            self.document += (self.indent_text(':subtitle: %s' % subtitle) + self.newline)
+        self.document += self.newline
+        curr_text = text if not isinstance(text, RSTDocument) else text.document
+        self.document += (self.indent_text(curr_text)) + self.newline + self.newline
+
+    def add_topic(self, text, title):
+        """
+        Add a topic. A topic is like a block quote with a title, or a self-contained section with no subsections.
+
+        :param text: The content of the sidebar
+        :type text: String or RSTDocument
+        :param title: Title of the sidebar
+        :type title: String
+        """
+        self.document += self.newline
+        self.document += '.. sidebar:: ' + title + self.newline
+        self.document += self.newline
+        curr_text = text if not isinstance(text, RSTDocument) else text.document
+        self.document += (self.indent_text(curr_text)) + self.newline + self.newline
 
     def add_spec(self, spec, show_json=False, show_yaml=False):
         """
