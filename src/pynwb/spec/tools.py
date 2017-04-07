@@ -85,12 +85,13 @@ class RSTDocument(object):
     :ivar newline: Newline string
     """
     ADMONITIONS = ['attention', 'caution', 'danger', 'error', 'hint', 'important', 'note', 'tip', 'warning']
-
+    ALIGN = ['top', 'middle', 'bottom', 'left', 'center', 'right']
 
     def __init__(self):
         """Initalize empty RST document"""
         self.document = ""
         self.newline = "\n"
+        self.default_indent = '    '
 
     def __get_headingline(self, title, heading_char):
         """Create a headingline for a given title"""
@@ -178,18 +179,17 @@ class RSTDocument(object):
         self.document += self.newline
         self.document += self.newline
 
-    @staticmethod
-    def indent_text(text, indent=None):
+    def indent_text(self, text, indent=None):
         """
         Helper function used to indent a given text by a given prefix. Usually 4 spaces.
 
         :param text: String with the text to be indented
-        :param indent: String with the prefix to be added to each line of the string. If None then the defautl is
-                       4 spaces: '    '
+        :param indent: String with the prefix to be added to each line of the string. If None then self.default_indent
+                       will be used.
 
         :return: New string with each line indented by the current indent
         """
-        curr_indent = indent if indent is not None else '    '
+        curr_indent = indent if indent is not None else self.default_indent
         return curr_indent + curr_indent.join(text.splitlines(True))
 
     def add_admonitions(self, atype, text):
@@ -206,6 +206,44 @@ class RSTDocument(object):
         self.document += self.newline
         self.document += self.indent_text(text)
         self.document += self.newline
+        self.document += self.newline
+
+    def add_figure(self, img, caption=None, alt=None, height=None, width=None, scale=None, align=None, target=None):
+        """
+
+        :param img: Path to the image to be shown as part of the figure.
+        :param caption: Optional caption for the figure
+        :type caption: String
+        :param alt: Alternate text.  A short description of the image used when the image cannot be displayed.
+        :param height: Height of the figure in pixel
+        :type height: Int
+        :param width: Width of the figure in pixel
+        :type width: Int
+        :param scale: Uniform scaling of the figure in %. Default is 100.
+        :type scale: Int
+        :param align: Alignment of the figure. One of RTDDocument.ALIGN
+        :param target: Hyperlink to be placed on the image.
+        """
+        self.document += self.newline
+        self.document += ".. figure:: %s" % img
+        self.document += self.newline
+        if scale is not None:
+            self.document += (self.indent_text(':scale: %i' % scale ) + ' %' + self.newline)
+        if alt is not None:
+            self.document += (self.indent_text(':alt: %s' % alt) + self.newline)
+        if height is not None:
+            self.document += (self.indent_text(':height: %i px' % height ) + self.newline)
+        if width is not None:
+            self.document += (self.indent_text(':width: %i px' % width ) + self.newline)
+        if align is not None:
+            if align not in self.ALIGN:
+                raise ValueError('align not valid. Found %s expected one of %s' % (str(align), str(self.ALIGN)))
+            self.document += (self.indent_text(':align: %s' % align) + self.newline)
+        if target is not None:
+            self.document += (self.indent_text(':target: %s' % target) + self.newline)
+        self.document += self.newline
+        if caption is not None:
+            self.document += (self.indent_text(caption) + self.newline)
         self.document += self.newline
 
     def add_spec(self, spec, show_json=False, show_yaml=False):
