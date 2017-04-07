@@ -208,7 +208,7 @@ class RSTDocument(object):
         self.document += self.newline
         self.document += self.newline
 
-    def add_figure(self, img, caption=None, alt=None, height=None, width=None, scale=None, align=None, target=None):
+    def add_figure(self, img, caption=None, legend=None, alt=None, height=None, width=None, scale=None, align=None, target=None):
         """
 
         :param img: Path to the image to be shown as part of the figure.
@@ -244,6 +244,10 @@ class RSTDocument(object):
         self.document += self.newline
         if caption is not None:
             self.document += (self.indent_text(caption) + self.newline)
+        if legend is not None:
+            if caption is None:
+                self.document += (self.indent_text('.. ') + self.newline + self.default_indent + self.newline)
+            self.document += (self.indent_text(legend) + self.newline)
         self.document += self.newline
 
     def add_spec(self, spec, show_json=False, show_yaml=False):
