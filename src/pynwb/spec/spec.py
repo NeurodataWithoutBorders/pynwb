@@ -252,7 +252,10 @@ class DatasetSpec(BaseStorageSpec):
 
     @property
     def shape(self):
-        return self['shape']
+        try:
+            return self['shape']
+        except KeyError:
+            return None
 
     @classmethod
     def __check_dim(cls, dim, data):
@@ -283,7 +286,12 @@ class LinkSpec(Spec):
 
     @property
     def neurodata_type(self):
-        return self['target_type'].get('neurodata_type', None)
+        if isinstance(self['target_type'], dict):
+            return self['target_type'].get('neurodata_type', None)
+        elif isinstance(self['target_type'], str):
+            return self['target_type']
+        else:
+            None
 
 _group_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
