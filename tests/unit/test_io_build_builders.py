@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.io.build.builders import GroupBuilder, DatasetBuilder, LinkBuilder, ExternalLinkBuilder
+from pynwb.io.build.builders import GroupBuilder, DatasetBuilder, LinkBuilder
 import json
 
 
@@ -58,8 +58,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
         self.subgroup1 = GroupBuilder('subgroup1')
         self.dataset1 = DatasetBuilder('dataset1', list(range(10)))
         self.soft_link1 = LinkBuilder('soft_link1', self.subgroup1)
-        #self.external_link1 = ExternalLinkBuilder('external_link1', "/hard/path/to/target",
-        #                                           "test.h5"),
         self.int_attr = 1
         self.str_attr = "my_str"
 
