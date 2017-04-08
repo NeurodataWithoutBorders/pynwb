@@ -10,7 +10,6 @@ import posixpath as _posixpath
 
 import numpy as np
 from pynwb.core import docval, getargs
-from pynwb.spec import DatasetSpec, GroupSpec
 
 class Builder(dict):
 
@@ -384,39 +383,3 @@ class ExternalLinkBuilder(LinkBuilder):
     def file_path(self):
         return self['file_path']
 
-
-@docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
-        {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to get the sub-specification for'},
-        is_method=False)
-def get_subspec(**kwargs):
-    '''
-    Get the specification from this spec that corresponds to the given builder
-    '''
-    spec, builder = getargs('spec', 'builder', kwargs)
-    if isinstance(builder, DatasetBuilder):
-        subspec = spec.get_dataset(builder.name)
-    else:
-        subspec = spec.get_group(builder.name)
-    if subspec is None:
-        ndt = builder.attributes.get('neurodata_type')
-        if ndt is not None:
-            subspec = spec.get_neurodata_type(ndt)
-    return subspec
-
-@docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
-        {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to get the sub-specification for'},
-        is_method=False)
-def get_subspec(**kwargs):
-    '''
-    Get the specification from this spec that corresponds to the given builder
-    '''
-    spec, builder = getargs('spec', 'builder', kwargs)
-    if isinstance(builder, DatasetBuilder):
-        subspec = spec.get_dataset(builder.name)
-    else:
-        subspec = spec.get_group(builder.name)
-    if subspec is None:
-        ndt = builder.attributes.get('neurodata_type')
-        if ndt is not None:
-            subspec = spec.get_neurodata_type(ndt)
-    return subspec
