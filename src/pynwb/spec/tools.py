@@ -738,6 +738,26 @@ class RSTDocument(object):
         self.document += (heading + self.newline)
         self.document += self.newline
 
+    def add_section_label(self, label):
+        """
+        Add a section lable
+        :param label: name of the lable
+        """
+        self.document += ".. _%s:" % label
+        self.document += self.newline + self.newline
+
+    def get_reference(self, label, link_title=None):
+        """
+        Get RST text to create a reference to the given label
+        :param label: Name of the lable to link to
+        :param link_title: Text for the link
+        :return: String with the inline reference text
+        """
+        if link_title is not None:
+            return ":ref:`%s <%s>`" % (link_title, label)
+        else:
+            return ":ref:`%s`" % label
+
     def add_section(self, title):
         """
         Add a document section heading
