@@ -1,12 +1,11 @@
-import posixpath as _posixpath
-import copy as _copy
 from collections import Iterable
 import numpy as np
-import h5py as _h5py
+from h5py import File, Group, Dataset, special_dtype
 
-from pynwb.core import DataChunkIterator
+from pynwb.core import DataChunkIterator, docval, getargs
 
 from ..io import NWBReader, NWBWriter
+from ..build import GroupBuilder, DatasetBuilder, LinkBuilder
 
 class HDF5Reader(NWBReader):
 
@@ -103,7 +102,7 @@ class HDF5Writer(NWBWriter):
             write_group(f, name, gbldr.groups, gbldr.datasets, gbldr.attributes, gbldr.links)
 
 
-@docval({'name': 'obj', 'type': Group, 'doc': 'the HDF5 object to add attributes to'},
+@docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
         {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Group, indexed by attribute name'},
         is_method=False)
 def set_attributes(**kwargs):
@@ -193,7 +192,7 @@ def __get_shape(data):
 
 def __get_type(data):
     if isinstance(data, str):
-        return _h5py.special_dtype(vlen=bytes)
+        return special_dtype(vlen=bytes)
     elif not hasattr(data, '__len__'):
         return type(data)
     else:
@@ -208,10 +207,18 @@ def isinstance_inmemory_array(data):
            isinstance(data, str) or \
            isinstance(data, frozenset)
 
+__data_types = (
+    str,
+    DataChunkIterator,
+    float,
+    int,
+    Iterable
+)
+
 @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
         {'name': 'name', 'type': str, 'doc': 'the name of the Dataset to write'},
-        {'name': 'data', 'type': (str, DataChunkIterator, list, tuple, set, frozenset, np.ndarray), 'doc': 'the data object to be written'},
-        {'name': 'attributes', 'type': Group, 'doc': 'the attributes on the Dataset'},
+        {'name': 'data', 'type': __data_types, 'doc': 'the data object to be written'},
+        {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Dataset, indexed by attribute name'},
         returns='the Dataset that was created', rtype=Dataset, is_method=False)
 def write_dataset(**kwargs):
     """ Write a dataset to HDF5

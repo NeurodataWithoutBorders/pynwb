@@ -1,6 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from .build import BuildManager
 from .build import GroupBuilder
+from ..core import docval
+from ..file import NWBFile
 
 class NWBReader(object, metaclass=ABCMeta):
 
@@ -36,7 +38,7 @@ class NWBIO(object):
         return nwb_file
 
     @docval({'name': 'nwb_file', 'type': NWBFile, 'doc': 'the NWBFile object to write'},
-            {'name': 'writer', 'type': Writer, 'doc': 'the Writer object that handles writing'})
+            {'name': 'writer', 'type': NWBWriter, 'doc': 'the NWBWriter object that handles writing'})
     def write(self, **kwargs):
         nwb_file, writer = getargs('nwb_file', 'writer', kwargs)
         f_builder = self.__manager.build(nwb_file)
