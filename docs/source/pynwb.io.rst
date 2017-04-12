@@ -7,6 +7,7 @@ Subpackages
 .. toctree::
 
     pynwb.io.build
+    pynwb.io.hdf5
     pynwb.io.tools
 
 Submodules
@@ -15,8 +16,7 @@ Submodules
 .. toctree::
 
    pynwb.io.base
-   pynwb.io.new_map
-   pynwb.io.read
+   pynwb.io.io
 
 Module contents
 ---------------

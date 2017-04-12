@@ -1,4 +1,4 @@
-pynwb.io.build package
+pynwb.io.tools package
 ======================
 
 Submodules
@@ -6,13 +6,12 @@ Submodules
 
 .. toctree::
 
-   pynwb.io.build.builders
-   pynwb.io.build.map
+   pynwb.io.tools.handler
 
 Module contents
 ---------------
 
-.. automodule:: pynwb.io.build
+.. automodule:: pynwb.io.tools
     :members:
     :undoc-members:
     :show-inheritance:

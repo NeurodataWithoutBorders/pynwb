@@ -1,7 +1,7 @@
-pynwb.io.build.h5tools module
+pynwb.io.tools.handler module
 =============================
 
-.. automodule:: pynwb.io.build.h5tools
+.. automodule:: pynwb.io.tools.handler
     :members:
     :undoc-members:
     :show-inheritance:

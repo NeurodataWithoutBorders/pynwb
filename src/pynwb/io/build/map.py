@@ -1,7 +1,25 @@
 from pynwb.core import docval, getargs, ExtenderMeta
 from pynwb.spec import Spec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD
 from pynwb.spec.spec import SpecCatalog
-from .builders import DatasetBuilder, GroupBuilder, get_subspec
+from .builders import DatasetBuilder, GroupBuilder
+
+@docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
+        {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to get the sub-specification for'},
+        is_method=False)
+def get_subspec(**kwargs):
+    '''
+    Get the specification from this spec that corresponds to the given builder
+    '''
+    spec, builder = getargs('spec', 'builder', kwargs)
+    if isinstance(builder, DatasetBuilder):
+        subspec = spec.get_dataset(builder.name)
+    else:
+        subspec = spec.get_group(builder.name)
+    if subspec is None:
+        ndt = builder.attributes.get('neurodata_type')
+        if ndt is not None:
+            subspec = spec.get_neurodata_type(ndt)
+    return subspec
 
 class TypeMap(object):
 
@@ -112,7 +130,7 @@ class BuildManager(object):
         container_id = self.__conthash__(container)
         self.__builders[container_id] = builder
         builder_id = self.__bldrhash__(builder)
-        self.__builders[builder_id] = container
+        self.__containers[builder_id] = container
 
     def __conthash__(self, obj):
         return id(obj)
@@ -121,9 +139,13 @@ class BuildManager(object):
         return id(obj)
 
     def construct(self, builder):
+        if isinstance(builder, LinkBuilder):
+            builder = bulder.target
         builder_id = self.__bldrhash__(builder)
-        result = self.__containers.setdefault(builder_id, self.__type_map.construct(builder, self))
-        self.prebuilt(result, builder)
+        result = self.__containers.get(builder_id)
+        if result is None:
+            result = self.__type_map.construct(builder, self)
+            self.__containers[builder_id] = result
         return result
 
     def get_cls(self, builder):
@@ -207,14 +229,14 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
         '''
         return self.__spec2carg[spec]
 
-    def build(self, container, build_manager):
+    def build(self, container, build_manager, parent=None):
         name = build_manager.get_builder_name(container)
         if isinstance(self.__spec, GroupSpec):
-            builder = GroupBuilder(name)
+            builder = GroupBuilder(name, parent=parent)
             self.__add_datasets(builder, self.__spec.datasets, container, build_manager)
             self.__add_groups(builder, self.__spec.groups, container, build_manager)
         else:
-            builder = DatasetBuilder(name)
+            builder = DatasetBuilder(name, parent=parent)
         self.__add_attributes(builder, self.__spec.attributes, container)
         return builder
 
@@ -253,18 +275,17 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
                 self.__build_helper(builder, spec, value, build_manager)
 
     def __build_helper(self, builder, spec, value, build_manager):
-        sub_builder = None
         if isinstance(value, NWBContainer):
             rendered_obj = build_manager.build(value)
             name = build_manager.get_builder_name(value)
             # use spec to determine what kind of HDF5
             # object this NWBContainer corresponds to
             if isinstance(spec, LinkSpec):
-                sub_builder = builder.add_link(name, rendered_obj)
+                builder.set_link(LinkBuilder(name, rendered_obj, builder))
             elif isinstance(spec, DatasetSpec):
-                sub_builder = builder.add_dataset(name, rendered_obj)
+                builder.set_dataset(rendered_obj)
             else:
-                sub_builder = builder.add_group(name, rendered_obj)
+                builder.set_group(rendered_obj)
         else:
             if any(isinstance(value, t) for t in (list, tuple)):
                 values = value
@@ -277,7 +298,6 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
                 raise ValueError(msg % value.__class__.__name__)
             for container in values:
                 self.__build_helper(builder, spec, container, build_manager)
-        return sub_builder
 
     @docval({"name": "attr_name", "type": str, "doc": "the name of the object to map"},
             {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
@@ -345,4 +365,3 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
         else:
             ret = container.name
         return ret
-

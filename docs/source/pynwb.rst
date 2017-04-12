@@ -26,7 +26,6 @@ Submodules
    pynwb.ogen
    pynwb.ophys
    pynwb.retinotopy
-   pynwb.tmp_file
 
 Module contents
 ---------------
