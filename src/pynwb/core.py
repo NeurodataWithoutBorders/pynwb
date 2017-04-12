@@ -215,7 +215,7 @@ def docval(*validator, **options):
                 return func(self, **parsed['args'])
         else:
             def func_call(*args, **kwargs):
-                parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type)
+                parsed = __parse_args(_copy.deepcopy(val_copy), args, kwargs, enforce_type=enforce_type)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     raise TypeError(', '.join(parse_err))
