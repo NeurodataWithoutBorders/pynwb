@@ -6,7 +6,7 @@ Submodules
 
 .. toctree::
 
-   pynwb.io.build.h5tools
+   pynwb.io.build.builders
    pynwb.io.build.map
 
 Module contents

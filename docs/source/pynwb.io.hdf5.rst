@@ -7,7 +7,6 @@ Submodules
 .. toctree::
 
    pynwb.io.hdf5.h5tools
-   pynwb.io.hdf5.write
 
 Module contents
 ---------------
