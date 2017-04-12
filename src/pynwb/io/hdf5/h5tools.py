@@ -1,16 +1,112 @@
-import posixpath as _posixpath
-import copy as _copy
 from collections import Iterable
 import numpy as np
-import h5py as _h5py
+from h5py import File, Group, Dataset, special_dtype
 
-from pynwb.core import DataChunkIterator
+from pynwb.core import DataChunkIterator, docval, getargs
 
-SOFT_LINK = 0
-HARD_LINK = 1
-EXTERNAL_LINK = 2
+from ..io import NWBReader, NWBWriter
+from ..build import GroupBuilder, DatasetBuilder, LinkBuilder
 
-def set_attributes(obj, attributes):
+class HDF5Reader(NWBReader):
+
+    @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'})
+    def __init__(self, **kwargs):
+        path = getargs('path', kwargs)
+        self.__path = path
+
+    @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
+    def read_builder(self):
+        f = File(self.__path, 'r+')
+        f_builder = self.__read_group(f, 'root')
+
+    def __set_built(self, fpath, path, builder):
+        self.__built.setdefault(fpath, dict()).setdefault(path, builder)
+
+    def __get_built(self, fpath, path):
+        fdict = self.__built.get(fpath)
+        if fdict:
+            return fdict.get(path)
+        else:
+            return None
+
+    def __read_group(self, h5obj, name=None):
+        kwargs = {
+            "attributes": dict(h5obj.attr.items),
+            "groups": dict(),
+            "datasets": dict(),
+            "links": dict()
+        }
+        if name is None:
+            name = bn(h5obj.name)
+        for k in h5obj:
+            sub_h5obj = h5obj.get(k)
+            link_type = h5obj.get(k, getlink=True)
+            if isinstance(link_type, SoftLink) or isinstance(link_type, ExternalLink):
+                # get path of link (the key used for tracking what's been built)
+                target_path = link_type.path
+                builder_name = bn(target_path)
+                # get builder if already read, else build it
+                builder = self.__get_built(sub_h5obj.file.filename, target_path)
+                if builder is None:
+                    # NOTE: all links must have absolute paths
+                    if isinstance(sub_h5obj, Dataset):
+                        builder = self.__read_dataset(sub_h5obj, builder_name)
+                    else:
+                        builder = self.__read_group(sub_h5obj, builder_name)
+                    self.__set_built(sub_h5obj.file.filename, target_path, builder)
+                kwargs['links'][builder_name] = LinkBuilder(builder)
+            else:
+                builder = self.__get_built(sub_h5obj.file.filename, sub_h5obj.name)
+                obj_type = None
+                read_method = None
+                if isinstance(sub_h5obj, Dataset):
+                    read_method = self.__read_dataset
+                    obj_type = kwargs['dataset']
+                else:
+                    read_method = self.__read_group
+                    obj_type = kwargs['groups']
+                if builder is None:
+                    builder = read_method(sub_h5obj)
+                    self.__set_built(sub_h5obj.file.filename, sub_h5obj.name, builder)
+                obj_type[builder.name] = builder
+        ret = GroupBuilder(name, **kwargs)
+        return ret
+
+    def __read_dataset(self, h5obj, name=None):
+        kwargs = {
+            "attributes": dict(h5obj.attr.items),
+            "data": h5obj,
+            "dtype": h5obj.dtype,
+            "maxshape": h5obj.maxshape
+        }
+        if name is None:
+            name = h5obj.name
+        ret = DatasetBuilder(name, **kwargs)
+        return ret
+
+class HDF5Writer(NWBWriter):
+
+    @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'})
+    def __init__(self, **kwargs):
+        path = getargs('path', kwargs)
+        self.__path = path
+
+    @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
+    def write_builder(self, **kwargs):
+        f_builder = getargs('builder', kwargs)
+        open_flag = 'w'
+        if os.path.exists(path):
+            open_flag = 'r+'
+        f = File(path, open_flag)
+        for name, gbldr in f_builder.groups.items():
+            write_group(f, name, gbldr.groups, gbldr.datasets, gbldr.attributes, gbldr.links)
+
+
+@docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
+        {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Group, indexed by attribute name'},
+        is_method=False)
+def set_attributes(**kwargs):
+    obj, attributes = getargs('obj', 'attributes', kwargs)
     for key, value in attributes.items():
         if any(isinstance(value, t) for t in (set, list, tuple)):
             tmp = tuple(value)
@@ -24,38 +120,61 @@ def set_attributes(obj, attributes):
                 value = np.array(value)
         obj.attrs[key] = value
 
-def write_group(parent, name, subgroups, datasets, attributes, links):
+@docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
+        {'name': 'name', 'type': str, 'doc': 'the name of the Dataset to write'},
+        {'name': 'subgroups', 'type': dict, 'doc': 'a dict containing GroupBuilders for subgroups in this group, indexed by group name'},
+        {'name': 'datasets', 'type': dict, 'doc': 'a dict containing DatasetBuilders for datasets in this group, indexed by dataset name'},
+        {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Group, indexed by attribute name'},
+        {'name': 'links', 'type': dict, 'doc': 'a dict containing LinkBuilders for links in this group, indexed by link name'},
+        returns='the Group that was created', rtype='Group', is_method=False)
+def write_group(**kwargs):
+    parent, name, subgroups, datasets, attributes, links = getargs('parent', 'name', 'subgroups', 'datasets', 'attributes', 'links', kwargs)
     group = parent.create_group(name)
-    links_to_create = _copy.deepcopy(links)
+    # write all groups
     if subgroups:
         for subgroup_name, builder in subgroups.items():
             # do not create an empty group without attributes or links
-            #if builder.is_empty():
-            #    continue
             tmp_links = write_group(group,
                             subgroup_name,
                             builder.groups,
                             builder.datasets,
                             builder.attributes,
                             builder.links)
-            #for link_name, target in tmp_links.items():
-            #    if link_name[0] != '/':
-            #        link_name = _posixpath.join(name, link_name)
-            #    links_to_create[link_name] = target
-            links_to_create.update(tmp_links)
+    # write all datasets
     if datasets:
         for dset_name, builder in datasets.items():
             write_dataset(group,
                           dset_name,
                           builder.get('data'),
                           builder.get('attributes'))
-
+    # write all links
+    if links:
+        for link_name, builder in links.items():
+            write_link(group, name, builder.target)
     set_attributes(group, attributes)
+    return group
 
-    return {_posixpath.join(name, k) if k[0] != '/' else k: v
-            for k, v in links_to_create.items()}
-
-
+@docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
+        {'name': 'name', 'type': str, 'doc': 'the name of the Link to write'},
+        {'name': 'target_builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the Builder representing the target'},
+        returns='the Link that was created', rtype='Link', is_method=False)
+def write_link(**kwargs):
+    parent, name, target_builder = getargs('parent', 'name', 'target_builder', kwargs)
+    # get target path
+    names = list()
+    curr = target_builder
+    while curr is not None:
+        names.append(curr.name)
+        curr = target_builder.parent
+    delim = "/"
+    path = "%s%s" % (delim, delim.join(reversed(names)))
+    # source will indicate target_builder's location
+    if parent.file.filename == target_builder.source:
+        link_obj = SoftLink(path)
+    else:
+        link_obj = ExternalLink(target_builder.source, path)
+    parent[name] = link_obj
+    return link_obj
 
 def __get_shape_helper(data):
     shape = list()
@@ -73,13 +192,13 @@ def __get_shape(data):
 
 def __get_type(data):
     if isinstance(data, str):
-        return _h5py.special_dtype(vlen=bytes)
+        return special_dtype(vlen=bytes)
     elif not hasattr(data, '__len__'):
         return type(data)
     else:
         return __get_type(data[0])
 
-def isintance_inmemory_array(data):
+def isinstance_inmemory_array(data):
     """Check if an object is a common in-memory data structure"""
     return isinstance(data, list) or \
            isinstance(data, np.ndarray) or \
@@ -88,40 +207,39 @@ def isintance_inmemory_array(data):
            isinstance(data, str) or \
            isinstance(data, frozenset)
 
-def write_dataset(parent, name, data, attributes):
-    """
-    Write a dataset to HDF5.
+__data_types = (
+    str,
+    DataChunkIterator,
+    float,
+    int,
+    Iterable
+)
+
+@docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
+        {'name': 'name', 'type': str, 'doc': 'the name of the Dataset to write'},
+        {'name': 'data', 'type': __data_types, 'doc': 'the data object to be written'},
+        {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Dataset, indexed by attribute name'},
+        returns='the Dataset that was created', rtype=Dataset, is_method=False)
+def write_dataset(**kwargs):
+    """ Write a dataset to HDF5
 
     The function uses other dataset-dependent write functions, e.g,
     __scalar_fill__, __list_fill__ and __chunked_iter_fill__ to write the data.
-
-    :param parent: Parent HDF5 object
-    :param name: Name of the data to be written.
-    :param data: Data object to be written.
-    :param attributes:
     """
+    parent, name, data, attributes = getargs('parent', 'name', 'data', 'attributes', kwargs)
     dset = None
     if isinstance(data, str):
         dset = __scalar_fill__(parent, name, data)
     elif isinstance(data, DataChunkIterator):
         dset = __chunked_iter_fill__(parent, name, data)
-    elif isinstance(data, Iterable) and not isintance_inmemory_array(data):
+    elif isinstance(data, Iterable) and not isinstance_inmemory_array(data):
         dset = __chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
     elif hasattr(data, '__len__'):
         dset = __list_fill__(parent, name, data)
     else:
         dset = __scalar_fill__(parent, name, data)
     set_attributes(dset, attributes)
-
-def __extend_dataset__(dset):
-    new_shape = list(dset.shape)
-    new_shape[0] = 2*new_shape[0]
-    dset.resize(new_shape)
-
-def __trim_dataset__(dset, length):
-    new_shape = list(dset.shape)
-    new_shape[0] = length
-    dset.resize(new_shape)
+    return dset
 
 def __selection_max_bounds__(selection):
     """Determine the bounds of a numpy selection index tuple"""
