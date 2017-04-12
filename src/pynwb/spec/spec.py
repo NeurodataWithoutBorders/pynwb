@@ -107,7 +107,7 @@ class AttributeSpec(Spec):
         super().__init__(doc, name=name, required=required, parent=parent)
         if isinstance(dtype, type):
             self['type'] = dtype.__name__
-        else:
+        elif dtype is not None:
             self['type'] = dtype
         if value is not None:
             self.pop('required', None)
@@ -256,6 +256,7 @@ _dataset_args = [
         {'name': 'type', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
         {'name': 'shape', 'type': tuple, 'doc': 'the shape of this dataset', 'default': None},
+        {'name': 'dims', 'type': tuple, 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
@@ -268,10 +269,17 @@ class DatasetSpec(BaseStorageSpec):
 
     @docval(*deepcopy(_dataset_args))
     def __init__(self, **kwargs):
-        doc, shape, dtype = popargs('doc', 'shape', 'type', kwargs)
+        doc, shape, dims, dtype = popargs('doc', 'shape', 'dims', 'type', kwargs)
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if shape is not None:
             self['shape'] = shape
+        if dims is not None:
+            self['dims'] = dims
+            if 'shape' not in self:
+                self['shape'] = tuple([None] * len(dims))
+            else:
+                if len(self['dims']) != len(self['shape']):
+                    raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
             self['type'] = dtype
 
