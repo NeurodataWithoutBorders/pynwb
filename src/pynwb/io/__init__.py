@@ -1,4 +1,5 @@
 from . import build, hdf5
+from .io import NWBReader, NWBWriter, NWBIO
 
 def __get_type_map():
     from pynwb.core import NWBContainer
