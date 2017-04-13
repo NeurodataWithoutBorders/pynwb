@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    pynwb.spec.spec
+   pynwb.spec.tools
 
 Module contents
 ---------------
