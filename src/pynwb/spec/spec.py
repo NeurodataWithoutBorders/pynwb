@@ -285,15 +285,8 @@ class DatasetSpec(BaseStorageSpec):
 
     @property
     def shape(self):
-<<<<<<< HEAD
         ''' The shape of the dataset '''
-        return self['shape']
-=======
-        try:
-            return self['shape']
-        except KeyError:
-            return None
->>>>>>> dev
+        return self.get('shape', None)
 
     @classmethod
     def __check_dim(cls, dim, data):
