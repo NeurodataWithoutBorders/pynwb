@@ -1,7 +1,8 @@
-from pynwb.core import docval, getargs, ExtenderMeta
+from pynwb.core import docval, getargs, ExtenderMeta, NWBContainer, get_docval
 from pynwb.spec import Spec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD
 from pynwb.spec.spec import SpecCatalog
-from .builders import DatasetBuilder, GroupBuilder
+from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
+import sys
 
 @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
         {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to get the sub-specification for'},
@@ -29,6 +30,18 @@ class TypeMap(object):
         self.__maps = dict()
         self.__map_types = dict()
         self.__catalog = catalog
+        self.__classes = self.__get_subclasses(NWBContainer)
+
+    def __get_subclasses(self, cls):
+        ret = dict()
+        for subcls in cls.__subclasses__():
+            ret[subcls.__name__] = subcls
+            ret.update(self.__get_subclasses(subcls))
+        return ret
+
+    def get_cls(self, cls_name):
+        return self.__classes.get(cls_name)
+
 
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
             {'name': 'spec', 'type': Spec, 'doc': 'a Spec object'})
@@ -69,11 +82,14 @@ class TypeMap(object):
             return map_cls
         return _dec
 
-    def get_map(self, container):
+    def get_map(self, obj):
         """
         Return the ObjectMapper object that should be used for the given container
         """
-        ndt = container.__class__.__name__
+        if isinstance(obj, NWBContainer):
+            ndt = obj.__class__.__name__
+        elif isinstance(obj, GroupBuilder) or isinstance(obj, DatasetBuilder):
+            ndt = obj.attributes.get('neurodata_type')
         spec = self.__catalog.get_spec(ndt)
         map_cls = self.__map_types.get(ndt, ObjectMapper)
         return map_cls(spec)
@@ -100,8 +116,13 @@ class TypeMap(object):
         """
         Construct the NWBContainer represented by the given builder
         """
-        #TODO implement this
-        pass
+        if build_manager is None:
+            build_manager = BuildManager()
+        attr_map = self.get_map(builder)
+        if attr_map is None:
+            raise ValueError('No ObjectMapper found for builder of type %s' % str(container.__class__.__name__))
+        else:
+            return attr_map.construct(builder, build_manager)
 
     def get_builder_name(self, container):
         attr_map = self.get_map(container)
@@ -149,7 +170,7 @@ class BuildManager(object):
         return result
 
     def get_cls(self, builder):
-        pass
+        return self.__type_map.get_cls(builder.attributes.get('neurodata_type'))
 
     def get_builder_name(self, container):
         return self.__type_map.get_builder_name(container)
@@ -221,13 +242,15 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
         '''
         Get the object attribute name for the given Spec
         '''
-        return self.__spec2attr[spec]
+        return self.__spec2attr.get(spec, None)
 
     def get_const_arg(self, spec):
         '''
         Get the constructor argument for the given Spec
         '''
-        return self.__spec2carg[spec]
+        #if spec not in self.__spec2carg:
+        #    print("spec == %s" % str(spec), file=sys.stderr)
+        return self.__spec2carg.get(spec, None)
 
     def build(self, container, build_manager, parent=None):
         name = build_manager.get_builder_name(container)
@@ -321,28 +344,37 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
         ret = dict()
         for h5attr_name, h5attr_val in builder.attributes.items():
             subspec = spec.get_attribute(h5attr_name)
+            if subspec is None:
+                continue
             ret[subspec] = h5attr_val
+            #print('iterattribs --> %s: %s' % (str(subspec), str(h5attr_val)))
         if isinstance(builder, GroupBuilder):
             for sub_builder_name, sub_builder in builder.items():
+                if not isinstance(sub_builder, Builder):
+                    continue
                 subspec = get_subspec(self.spec, sub_builder)
                 if subspec is not None:
                     if 'neurodata_type' in sub_builder.attributes:
                         ret[subspec] = build_manager.construct(sub_builder, manager)
                     else:
                         ret[subspec] = sub_builder
-                        ret.update(self.__get_subspec_values(sub_builder, subspec))
+                        ret.update(self.__get_subspec_values(sub_builder, subspec, manager))
+        else:
+            ret[spec] = builder.data
         return ret
 
     @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the NWBContainer from'},
-            {'name': 'manaer', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
-    def construct(self, builder, manager):
+            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
+    def construct(self, **kwargs):
         builder, manager = getargs('builder', 'manager', kwargs)
-        cls = manager.get_cls(builder.attributes['neurodata_type'])
+        cls = manager.get_cls(builder)
         # gather all subspecs
         subspecs = self.__get_subspec_values(builder, self.spec, manager)
         # get the constructor argument each specification corresponds to
         const_args = dict()
+        #print('found these subspecs')
         for subspec, value in subspecs.items():
+            #print('%s: %s' % (str(subspec), str(value)))
             const_arg = self.get_const_arg(subspec)
             if const_arg is not None:
                 const_args[const_arg] = value
@@ -351,8 +383,13 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
         kwargs = dict()
         for const_arg in get_docval(cls.__init__):
             argname = const_arg['name']
-            override = self.__get_override_carg(argname, h5group)
-            val = override if override else const_args[argname]
+            override = self.__get_override_carg(argname, builder)
+            if override:
+                val = override
+            elif argname in const_args:
+                val = const_args[argname]
+            else:
+                continue
             if 'default' in const_arg:
                 kwargs[argname] = val
             else:

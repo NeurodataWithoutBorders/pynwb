@@ -95,7 +95,7 @@ class TestNested(unittest.TestCase):
         builder = self.type_map.build(container_inst, self.build_manager)
         self.assertDictEqual(builder, expected)
 
-class TestBuildManager(unittest.TestCase):
+class TestBuildManagerBuild(unittest.TestCase):
 
     def setUp(self):
         self.spec_catalog = SpecCatalog()
@@ -124,6 +124,28 @@ class TestBuildManager(unittest.TestCase):
         self.assertDictEqual(builder1, expected)
         self.assertIs(builder1, builder2)
 
+
+class TestBuildManagerConstruct(unittest.TestCase):
+
+    def setUp(self):
+        self.spec_catalog = SpecCatalog()
+        self.type_map = TypeMap(self.spec_catalog)
+        self.my_spec = GroupSpec('A test group specification with a neurodata type',
+                                 name="my_container",
+                                 neurodata_type_def='MyNWBContainer',
+                                 datasets=[DatasetSpec('an example dataset', 'int', name='data', attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
+                                 attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
+        self.type_map.register_spec(MyNWBContainer, self.my_spec)
+        self.build_manager = BuildManager(self.type_map)
+
+    def test_default_mapping(self):
+        builder = GroupBuilder('my_container', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
+                                attributes={'attr1': 'value1', 'neurodata_type': 'MyNWBContainer'})
+        expected = MyNWBContainer(list(range(10)), 'value1', 10)
+        container = self.build_manager.construct(builder)
+        self.assertListEqual(container.data, list(range(10)))
+        self.assertEqual(container.attr1, 'value1')
+        self.assertEqual(container.attr2, 10)
 
 #TODO:
 class TestWildCardNamedSpecs(unittest.TestCase):
