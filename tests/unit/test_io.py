@@ -196,6 +196,7 @@ class TestContainingContainer(unittest.TestCase):
         self.build_manager = BuildManager(self.type_map)
 
     def test_default_mapping(self):
+        ''' Test default mapping for an NWBContainer that has an NWBContainer as an attribute value '''
         self.bucket_spec = GroupSpec('A test group specification for a neurodata type containing neurodata type',
                                     name="my foo bucket",
                                     neurodata_type_def='FooBucket',
@@ -215,6 +216,9 @@ class TestContainingContainer(unittest.TestCase):
         self.assertDictEqual(builder, expected)
 
     def test_default_mapping_additional_group(self):
+        ''' Test default mapping for an NWBContainer that has an NWBContainer as an attribute value
+            when those containers go into their own subgroup
+        '''
         tmp_spec = GroupSpec('A subgroup for Foos', 'foos', groups=[GroupSpec('the Foos in this bucket', neurodata_type='Foo')])
         self.bucket_spec = GroupSpec('A test group specification for a neurodata type containing neurodata type',
                                     name="my foo bucket",
@@ -237,6 +241,9 @@ class TestContainingContainer(unittest.TestCase):
         self.assertDictEqual(builder, expected)
 
     def test_default_mapping_additional_group_nested(self):
+        ''' Test default mapping for an NWBContainer that has an NWBContainer as an attribute value
+            when those containers go into their own subgroup of another subgroup
+        '''
         tmp_spec = GroupSpec('A subgroup for Foos', 'foos', groups=[GroupSpec('the Foos in this bucket', neurodata_type='Foo')])
         tmp_spec = GroupSpec('A subgroup to hold the subgroup', 'foo_holder', groups=[tmp_spec])
         self.bucket_spec = GroupSpec('A test group specification for a neurodata type containing neurodata type',
