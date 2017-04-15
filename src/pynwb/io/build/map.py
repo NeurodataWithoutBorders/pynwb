@@ -393,18 +393,25 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             if subspec is None:
                 continue
             ret[subspec] = h5attr_val
-            #print('iterattribs --> %s: %s' % (str(subspec), str(h5attr_val)))
         if isinstance(builder, GroupBuilder):
             for sub_builder_name, sub_builder in builder.items():
+                # GroupBuilder.items will return attributes as well, need to skip non Builder items
                 if not isinstance(sub_builder, Builder):
                     continue
-                subspec = get_subspec(self.spec, sub_builder)
+                subspec = get_subspec(spec, sub_builder)
                 if subspec is not None:
                     if 'neurodata_type' in sub_builder.attributes:
-                        ret[subspec] = build_manager.construct(sub_builder, manager)
+                        val = manager.construct(sub_builder)
+                        if subspec.is_many():
+                            if subspec in ret:
+                               ret[subspec].append(val)
+                            else:
+                                ret[subspec] = [val]
+                        else:
+                            ret[subspec] = val
                     else:
-                        ret[subspec] = sub_builder
-                        ret.update(self.__get_subspec_values(sub_builder, subspec, manager))
+                        result = self.__get_subspec_values(sub_builder, subspec, manager)
+                        ret.update(result)
         else:
             ret[spec] = builder.data
         return ret
@@ -419,6 +426,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         # get the constructor argument each specification corresponds to
         const_args = dict()
         #print('found these subspecs')
+        #print('found these subspecs : %s' % str(subspecs), file=sys.stderr)
         for subspec, value in subspecs.items():
             #print('%s: %s' % (str(subspec), str(value)))
             const_arg = self.get_const_arg(subspec)
