@@ -1,12 +1,10 @@
-import datadiff
 import unittest
-import json
-import sys
+from abc import ABCMeta, abstractmethod
 
 from pynwb.spec import GroupSpec, AttributeSpec, DatasetSpec
 from pynwb.io.build.builders import GroupBuilder, DatasetBuilder
 from pynwb.core import NWBContainer, docval, getargs
-from pynwb.spec.spec import SpecCatalog
+from pynwb.spec.spec import SpecCatalog, ZERO_OR_MANY
 from pynwb.io.build.map import ObjectMapper, BuildManager, TypeMap
 
 class Foo(NWBContainer):
@@ -24,6 +22,14 @@ class Foo(NWBContainer):
         self.__attr1 = attr1
         self.__attr2 = attr2
         self.__attr3 = attr3
+
+    def __eq__(self, other):
+        attrs = ('name', 'data', 'attr1', 'attr2', 'attr3')
+        return all(getattr(self, a) == getattr(other, a) for a in attrs)
+
+    def __str__(self):
+        attrs = ('name', 'data', 'attr1', 'attr2', 'attr3')
+        return '<' + ','.join('%s=%s' % (a, getattr(self, a)) for a in attrs) + '>'
 
     @property
     def name(self):
@@ -45,6 +51,9 @@ class Foo(NWBContainer):
     def attr3(self):
         return self.__attr3
 
+    def __hash__(self):
+        return hash(self.name)
+
 class FooBucket(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this bucket'},
@@ -55,6 +64,13 @@ class FooBucket(NWBContainer):
         self.__name = name
         self.__foos = foos
 
+    def __eq__(self, other):
+        return self.name == other.name and set(self.foos) == set(other.foos)
+
+    def __str__(self):
+        foo_str = "[" + ",".join(str(f) for f in self.foos) + "]"
+        return 'name=%s, foos=%s' % (self.name, foo_str)
+
     @property
     def name(self):
         return self.__name
@@ -63,86 +79,29 @@ class FooBucket(NWBContainer):
     def foos(self):
         return self.__foos
 
-    def add_foo(self, foo):
-        self.__foos.append(foo)
-
-
-class TestTypeMap(unittest.TestCase):
-
-    def setUp(self):
-        self.spec_catalog = SpecCatalog()
-        self.type_map = TypeMap(self.spec_catalog)
-        self.build_manager = BuildManager(self.type_map)
-        self.foo_spec = GroupSpec('A test group specification with a neurodata type',
-                         neurodata_type_def='Foo',
-                         datasets=[DatasetSpec('an example dataset', 'int', name='data')],
-                         attributes=[AttributeSpec('attr1', 'str', 'an example string attribute'),
-                                     AttributeSpec('attr2', 'int', 'an example integer attribute')])
-        self.type_map.register_spec(Foo, self.foo_spec)
-
-    def test_get_map(self):
-        container_inst = Foo('my_foo', list(range(10)), 'value1', 10)
-        mapper = self.type_map.get_map(container_inst)
-        self.assertIsInstance(mapper, ObjectMapper)
-        self.assertIs(mapper.spec, self.foo_spec)
-
-    def test_get_map_register(self):
-        @self.type_map.neurodata_type('Foo')
-        class MyMap(ObjectMapper):
-            pass
-        container_inst = Foo('my_foo', list(range(10)), 'value1', 10)
-        mapper = self.type_map.get_map(container_inst)
-        self.assertIs(mapper.spec, self.foo_spec)
-        self.assertIsInstance(mapper, MyMap)
-
-
-    def test_build_default_mapping(self):
-        ''' Test default mapping functionality '''
-        container_inst = Foo('my_foo', list(range(10)), 'value1', 10)
-        builder = self.type_map.build(container_inst, self.build_manager)
-        expected = GroupBuilder('my_foo', datasets={'data': DatasetBuilder('data', list(range(10)))},
-                                attributes={'attr1': 'value1', 'attr2': 10, 'neurodata_type': 'Foo'})
-        self.assertDictEqual(builder, expected)
-
-class TestNested(unittest.TestCase):
+class TestBase(unittest.TestCase):
 
     def setUp(self):
         self.spec_catalog = SpecCatalog()
         self.type_map = TypeMap(self.spec_catalog)
         self.foo_spec = GroupSpec('A test group specification with a neurodata type',
                                  neurodata_type_def='Foo',
-                                 datasets=[DatasetSpec('an example dataset', 'int', name='data', attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
+                                 datasets=[DatasetSpec('an example dataset', 'int', name='data',
+                                                       attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
                                  attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
         self.type_map.register_spec(Foo, self.foo_spec)
         self.build_manager = BuildManager(self.type_map)
 
-    def test_default_mapping(self):
-        container_inst = Foo('my_foo', list(range(10)), 'value1', 10)
-        expected = GroupBuilder('my_foo', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
-                                attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
-        builder = self.type_map.build(container_inst, self.build_manager)
-        self.assertDictEqual(builder, expected)
+class TestBuildManager(TestBase):
 
-class TestBuildManagerBuild(unittest.TestCase):
-
-    def setUp(self):
-        self.spec_catalog = SpecCatalog()
-        self.type_map = TypeMap(self.spec_catalog)
-        self.foo_spec = GroupSpec('A test group specification with a neurodata type',
-                                 neurodata_type_def='Foo',
-                                 datasets=[DatasetSpec('an example dataset', 'int', name='data', attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
-                                 attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
-        self.type_map.register_spec(Foo, self.foo_spec)
-        self.build_manager = BuildManager(self.type_map)
-
-    def test_default_mapping(self):
+    def test_build(self):
         container_inst = Foo('my_foo', list(range(10)), 'value1', 10)
         expected = GroupBuilder('my_foo', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
                                 attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
         builder1 = self.build_manager.build(container_inst)
         self.assertDictEqual(builder1, expected)
 
-    def test_memoization(self):
+    def test_build_memoization(self):
         container_inst = Foo('my_foo', list(range(10)), 'value1', 10)
         expected = GroupBuilder('my_foo', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
                                 attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
@@ -151,21 +110,7 @@ class TestBuildManagerBuild(unittest.TestCase):
         self.assertDictEqual(builder1, expected)
         self.assertIs(builder1, builder2)
 
-
-class TestBuildManagerConstruct(unittest.TestCase):
-
-    def setUp(self):
-        self.spec_catalog = SpecCatalog()
-        self.type_map = TypeMap(self.spec_catalog)
-        self.foo_spec = GroupSpec('A test group specification with a neurodata type',
-                                 neurodata_type_def='Foo',
-                                 datasets=[DatasetSpec('an example dataset', 'int', name='data',
-                                                      attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
-                                 attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
-        self.type_map.register_spec(Foo, self.foo_spec)
-        self.build_manager = BuildManager(self.type_map)
-
-    def test_default_mapping(self):
+    def test_construct(self):
         builder = GroupBuilder('my_foo', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
                                 attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
         expected = Foo('my_foo', list(range(10)), 'value1', 10)
@@ -174,7 +119,7 @@ class TestBuildManagerConstruct(unittest.TestCase):
         self.assertEqual(container.attr1, 'value1')
         self.assertEqual(container.attr2, 10)
 
-    def test_memoization(self):
+    def test_construct_memoization(self):
         builder = GroupBuilder('my_foo', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
                                 attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
         expected = Foo('my_foo', list(range(10)), 'value1', 10)
@@ -182,89 +127,85 @@ class TestBuildManagerConstruct(unittest.TestCase):
         container2 = self.build_manager.construct(builder)
         self.assertIs(container1, container2)
 
+class TestNestedBase(TestBase):
 
-class TestContainingContainer(unittest.TestCase):
     def setUp(self):
-        self.spec_catalog = SpecCatalog()
-        self.type_map = TypeMap(self.spec_catalog)
-        self.foo_spec = GroupSpec('A test group specification with a neurodata type',
-                                 neurodata_type_def='Foo',
-                                 datasets=[DatasetSpec('an example dataset', 'int', name='data',
-                                                      attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
-                                 attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
-        self.type_map.register_spec(Foo, self.foo_spec)
-        self.build_manager = BuildManager(self.type_map)
+        if type(self) == TestNestedBase:
+            raise unittest.SkipTest('Abstract Base Class')
+        super(TestNestedBase, self).setUp()
+        self.foo_bucket = FooBucket('test_foo_bucket', [
+                            Foo('my_foo1', list(range(10)), 'value1', 10),
+                            Foo('my_foo2', list(range(10, 20)), 'value2', 20)])
+        self.foo_builders = {
+            'my_foo1': GroupBuilder('my_foo1', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
+                                                                                attributes={'attr1': 'value1', 'neurodata_type': 'Foo'}),
+            'my_foo2': GroupBuilder('my_foo2', datasets={'data': DatasetBuilder('data', list(range(10, 20)), attributes={'attr2': 20})},
+                                                                                attributes={'attr1': 'value2', 'neurodata_type': 'Foo'})
+        }
+        self.setUpBucketBuilder()
+        self.setUpBucketSpec()
 
-    def test_default_mapping(self):
+    def setUpBucketBuilder(self):
+        pass
+
+    def setUpBucketSpec(self):
+        pass
+
+    def test_build(self):
         ''' Test default mapping for an NWBContainer that has an NWBContainer as an attribute value '''
-        self.bucket_spec = GroupSpec('A test group specification for a neurodata type containing neurodata type',
-                                    name="my foo bucket",
-                                    neurodata_type_def='FooBucket',
-                                    groups=[GroupSpec('the Foos in this bucket', neurodata_type='Foo')])
-        self.type_map.register_spec(FooBucket, self.bucket_spec)
-        foo1 = Foo('my_foo1', list(range(10)), 'value1', 10)
-        foo2 = Foo('my_foo2', list(range(10, 20)), 'value2', 20)
-        foos = [foo1, foo2]
-        bucket = FooBucket('test_foo_bucket', foos)
-        foo_builder1 = GroupBuilder('my_foo1', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
-                                attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
-        foo_builder2 = GroupBuilder('my_foo2', datasets={'data': DatasetBuilder('data', list(range(10, 20)), attributes={'attr2': 20})},
-                                attributes={'attr1': 'value2', 'neurodata_type': 'Foo'})
-        foo_builders = {'my_foo1': foo_builder1,'my_foo2':  foo_builder2}
-        expected = GroupBuilder('test_foo_bucket', groups=foo_builders, attributes={'neurodata_type': 'FooBucket'})
-        builder = self.build_manager.build(bucket)
-        self.assertDictEqual(builder, expected)
+        builder = self.build_manager.build(self.foo_bucket)
+        self.assertDictEqual(builder, self.bucket_builder)
 
-    def test_default_mapping_additional_group(self):
-        ''' Test default mapping for an NWBContainer that has an NWBContainer as an attribute value
-            when those containers go into their own subgroup
-        '''
-        tmp_spec = GroupSpec('A subgroup for Foos', 'foos', groups=[GroupSpec('the Foos in this bucket', neurodata_type='Foo')])
-        self.bucket_spec = GroupSpec('A test group specification for a neurodata type containing neurodata type',
-                                    name="my foo bucket",
-                                    neurodata_type_def='FooBucket',
-                                    groups=[tmp_spec])
-        self.type_map.register_spec(FooBucket, self.bucket_spec)
-        foo1 = Foo('my_foo1', list(range(10)), 'value1', 10)
-        foo2 = Foo('my_foo2', list(range(10, 20)), 'value2', 20)
-        foos = [foo1, foo2]
-        foos = [foo1]
-        bucket = FooBucket('test_foo_bucket', foos)
-        foo_builder1 = GroupBuilder('my_foo1', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
-                                attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
-        foo_builder2 = GroupBuilder('my_foo2', datasets={'data': DatasetBuilder('data', list(range(10, 20)), attributes={'attr2': 20})},
-                                attributes={'attr1': 'value2', 'neurodata_type': 'Foo'})
-        foo_builders = {'my_foo1': foo_builder1,'my_foo2':  foo_builder2}
-        foo_builders = {'my_foo1': foo_builder1}
-        expected = GroupBuilder('test_foo_bucket', groups={'foo': GroupBuilder('foos', groups=foo_builders)}, attributes={'neurodata_type': 'FooBucket'})
-        builder = self.build_manager.build(bucket)
-        self.assertDictEqual(builder, expected)
+    def test_construct(self):
+        container = self.build_manager.construct(self.bucket_builder)
+        self.assertEqual(container, self.foo_bucket)
 
-    def test_default_mapping_additional_group_nested(self):
-        ''' Test default mapping for an NWBContainer that has an NWBContainer as an attribute value
-            when those containers go into their own subgroup of another subgroup
-        '''
-        tmp_spec = GroupSpec('A subgroup for Foos', 'foos', groups=[GroupSpec('the Foos in this bucket', neurodata_type='Foo')])
+class TestNestedContainersNoSubgroups(TestNestedBase):
+    '''
+        Test BuildManager.build and BuildManager.construct when the
+        NWBContainer contains other NWBContainers, but does not keep them in
+        additional subgroups
+    '''
+
+    def setUpBucketBuilder(self):
+        self.bucket_builder = GroupBuilder('test_foo_bucket', groups=self.foo_builders, attributes={'neurodata_type': 'FooBucket'})
+
+    def setUpBucketSpec(self):
+        self.bucket_spec = GroupSpec('A test group specification for a neurodata type containing neurodata type',
+                                     name="test_foo_bucket",
+                                     neurodata_type_def='FooBucket',
+                                     groups=[GroupSpec('the Foos in this bucket', neurodata_type='Foo', quantity=ZERO_OR_MANY)])
+        self.type_map.register_spec(FooBucket, self.bucket_spec)
+
+class TestNestedContainersSubgroup(TestNestedBase):
+
+    def setUpBucketBuilder(self):
+        tmp_builder = GroupBuilder('foos', groups=self.foo_builders)
+        self.bucket_builder = GroupBuilder('test_foo_bucket', groups={'foos': tmp_builder}, attributes={'neurodata_type': 'FooBucket'})
+
+    def setUpBucketSpec(self):
+        tmp_spec = GroupSpec('A subgroup for Foos', 'foos', groups=[GroupSpec('the Foos in this bucket', neurodata_type='Foo', quantity=ZERO_OR_MANY)])
+        self.bucket_spec = GroupSpec('A test group specification for a neurodata type containing neurodata type',
+                               name="test_foo_bucket",
+                               neurodata_type_def='FooBucket',
+                               groups=[tmp_spec])
+        self.type_map.register_spec(FooBucket, self.bucket_spec)
+
+class TestNestedContainersSubgroupSubgroup(TestNestedBase):
+
+    def setUpBucketBuilder(self):
+        tmp_builder = GroupBuilder('foos', groups=self.foo_builders)
+        tmp_builder = GroupBuilder('foo_holder', groups={'foos': tmp_builder})
+        self.bucket_builder = GroupBuilder('test_foo_bucket', groups={'foo_holder': tmp_builder}, attributes={'neurodata_type': 'FooBucket'})
+
+    def setUpBucketSpec(self):
+        tmp_spec = GroupSpec('A subgroup for Foos', 'foos', groups=[GroupSpec('the Foos in this bucket', neurodata_type='Foo', quantity=ZERO_OR_MANY)])
         tmp_spec = GroupSpec('A subgroup to hold the subgroup', 'foo_holder', groups=[tmp_spec])
-        self.bucket_spec = GroupSpec('A test group specification for a neurodata type containing neurodata type',
-                                    name="my foo bucket",
-                                    neurodata_type_def='FooBucket',
-                                    groups=[tmp_spec])
-        self.type_map.register_spec(FooBucket, self.bucket_spec)
-        foo1 = Foo('my_foo1', list(range(10)), 'value1', 10)
-        foo2 = Foo('my_foo2', list(range(10, 20)), 'value2', 20)
-        foos = [foo1, foo2]
-        bucket = FooBucket('test_foo_bucket', foos)
-        foo_builder1 = GroupBuilder('my_foo1', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
-                                attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
-        foo_builder2 = GroupBuilder('my_foo2', datasets={'data': DatasetBuilder('data', list(range(10, 20)), attributes={'attr2': 20})},
-                                attributes={'attr1': 'value2', 'neurodata_type': 'Foo'})
-        foo_builders = {'my_foo1': foo_builder1,'my_foo2':  foo_builder2}
-        expected = GroupBuilder('test_foo_bucket', groups={'foo_holder':
-                                                                GroupBuilder('foo_holder', groups={'foo':
-                                                                    GroupBuilder('foos', groups=foo_builders)})}, attributes={'neurodata_type': 'FooBucket'})
-        builder = self.build_manager.build(bucket)
-        self.assertDictEqual(builder, expected)
+        bucket_spec = GroupSpec('A test group specification for a neurodata type containing neurodata type',
+                               name="test_foo_bucket",
+                               neurodata_type_def='FooBucket',
+                               groups=[tmp_spec])
+        self.type_map.register_spec(FooBucket, bucket_spec)
 
 #TODO:
 class TestWildCardNamedSpecs(unittest.TestCase):
