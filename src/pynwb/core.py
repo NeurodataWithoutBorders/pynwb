@@ -412,6 +412,7 @@ class NWBContainer(object, metaclass=ExtenderMeta):
             if not hasattr(cls, f):
                 setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
 
+    # TODO: do something to handle when multiple derived classes have the same name
     __all_subclasses = dict()
 
     @ExtenderMeta.pre_init

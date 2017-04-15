@@ -32,6 +32,7 @@ class TypeMap(object):
         self.__maps = dict()
         self.__map_types = dict()
         self.__catalog = catalog
+        # TODO: do something to handle when multiple derived classes have the same name
         self.__classes = self.__get_subclasses(NWBContainer)
 
     def __get_subclasses(self, cls):
