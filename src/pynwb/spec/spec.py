@@ -175,6 +175,9 @@ class BaseStorageSpec(Spec):
         for attribute in attributes:
             self.set_attribute(attribute)
 
+    def is_many(self):
+        return self.quantity not in (1, ZERO_OR_ONE)
+
     @property
     def attributes(self):
         ''' The attributes for this specification '''
