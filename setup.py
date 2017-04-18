@@ -10,17 +10,18 @@ import os
 from tarfile import TarFile
 
 
+schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
 class CustomBuild(build_py):
     def run(self):
         '''Here, we will do something to access a URL stored in the pynwb repo.
         This URL will contain the source of the schema.
         '''
         # we should look this up in a config file somewhere
-        schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
         if not os.path.exists(schema_dir):
             os.makedirs(schema_dir)
         url = "https://bitbucket.org/lblneuro/nwb-schema/downloads/nwb_core.tar"
         dest = "nwb_core.tar"
+        print('getting NWB specification')
         schema = urlretrieve(url, dest)
         tf = TarFile(dest, 'r')
         tf.extractall(schema_dir)
@@ -49,7 +50,7 @@ setup_args = {
     'license': license,
     'packages': pkgs,
     'package_dir': {'': 'src'},
-    #'package_data': {'pynwb':[schema_dir]}
+    'package_data': {'pynwb':["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
     'cmdclass':{
         'build_py': CustomBuild,
     }
