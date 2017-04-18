@@ -94,9 +94,12 @@ class TypeMap(object):
             ndt = obj.__class__.__name__
         elif isinstance(obj, GroupBuilder) or isinstance(obj, DatasetBuilder):
             ndt = obj.attributes.get('neurodata_type')
-        spec = self.__catalog.get_spec(ndt)
-        map_cls = self.__map_types.get(ndt, ObjectMapper)
-        return map_cls(spec)
+        ret = self.__maps.get(ndt)
+        if ret is None:
+            spec = self.__catalog.get_spec(ndt)
+            map_cls = self.__map_types.get(ndt, ObjectMapper)
+            ret = map_cls(spec)
+        return ret
 
     def get_registered_types(self):
         """
@@ -297,11 +300,21 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         builder.set_attribute('neurodata_type', container.neurodata_type)
         return builder
 
+    def __is_null(self, item):
+        if item is None:
+            return True
+        else:
+            if any(isinstance(item, t) for t in (list, tuple, dict, set)):
+                return len(item) == 0
+        return False
+
     def __add_attributes(self, builder, attributes, container):
         for spec in attributes:
             attr_name = self.get_attribute(spec)
-            attr_value = getattr(container, attr_name)
-            if attr_value is None:
+            attr_value = getattr(container, attr_name, None)
+            #if attr_value is None:
+            #if not attr_value:
+            if self.__is_null(attr_value):
                 continue
             builder.set_attribute(spec.name, attr_value)
 
@@ -309,7 +322,9 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         for spec in datasets:
             attr_name = self.get_attribute(spec)
             attr_value = getattr(container, attr_name)
-            if attr_value is None:
+            #if attr_value is None:
+            #if not attr_value:
+            if self.__is_null(attr_value):
                 continue
             if spec.neurodata_type is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value)
@@ -322,7 +337,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             if spec.neurodata_type is None:
                 # we don't need to get attr_name since any named
                 # group does not have the concept of value
-                sub_builder = builder.add_group(spec.name)
+                sub_builder = GroupBuilder(spec.name)
                 self.__add_attributes(sub_builder, spec.attributes, container)
                 self.__add_datasets(sub_builder, spec.datasets, container, build_manager)
 
@@ -337,8 +352,10 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                         for item in it:
                             if isinstance(item, NWBContainer):
                                 self.__build_helper(sub_builder, spec, item, build_manager)
-                        continue
+                        #continue
                 self.__add_groups(sub_builder, spec.groups, container, build_manager)
+                if not sub_builder.is_empty():
+                    builder.set_group(sub_builder)
             else:
                 attr_name = self.get_attribute(spec)
                 value = getattr(container, attr_name)
@@ -426,10 +443,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         subspecs = self.__get_subspec_values(builder, self.spec, manager)
         # get the constructor argument each specification corresponds to
         const_args = dict()
-        #print('found these subspecs')
-        #print('found these subspecs : %s' % str(subspecs), file=sys.stderr)
         for subspec, value in subspecs.items():
-            #print('%s: %s' % (str(subspec), str(value)))
             const_arg = self.get_const_arg(subspec)
             if const_arg is not None:
                 const_args[const_arg] = value

@@ -158,10 +158,13 @@ class TimeSeries(NWBContainer):
         for key in keys:
             setattr(self, key, kwargs.get(key))
 
+        self.fields['data_link'] = list()
+        self.fields['timestamp_link'] = list()
+
         data = getargs('data', kwargs)
         self.fields['data'] = data
         if isinstance(data, TimeSeries):
-            data.fields['data_link'].add(self)
+            timestamps.fields['timestamp_link'].append(self)
 
         timestamps = kwargs.get('timestamps')
         starting_time = kwargs.get('starting_time')
@@ -171,7 +174,7 @@ class TimeSeries(NWBContainer):
             self.timestamps_unit = 'Seconds'
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
-                timestamps.fields['timestamps_link'].add(self)
+                timestamps.fields['timestamp_link'].append(self)
         elif starting_time is not None and rate is not None:
             self.starting_time = starting_time
             self.rate = rate
@@ -179,8 +182,8 @@ class TimeSeries(NWBContainer):
         else:
             raise TypeError("either 'timestamps' or 'starting_time' and 'rate' must be specified")
 
-        self.fields['data_link'] = set()
-        self.fields['timestamps_link'] = set()
+        #self.fields['data_link'] = set()
+        #self.fields['timestamp_link'] = set()
 
     @property
     def ancestry(self):
@@ -203,7 +206,8 @@ class TimeSeries(NWBContainer):
 
     @property
     def data_link(self):
-        return frozenset(self.fields['data_link'])
+        return set(self.fields.get('data_link'))
+        #return frozenset(self.fields['data_link'])
 
     @property
     def timestamps(self):
@@ -213,8 +217,8 @@ class TimeSeries(NWBContainer):
             return self.fields['timestamps']
 
     @property
-    def timestamps_link(self):
-        return frozenset(self.fields['timestamps_link'])
+    def timestamp_link(self):
+        return set(self.fields.get('timestamp_link'))
 
     @property
     def time_unit(self):
