@@ -260,8 +260,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             for subspec in spec.datasets:
                 self.__map_spec(subspec)
             for subspec in spec.groups:
-                if subspec.neurodata_type is not None and subspec.neurodata_type_def is None:
-                    print('__map_spec include neurodata_type %s %s' % (str(subspec), hash(subspec)))
+                #if subspec.neurodata_type is not None and subspec.neurodata_type_def is None:
+                #    print('__map_spec include neurodata_type %s %s' % (str(subspec), hash(subspec)))
                 if subspec.neurodata_type_def is None:
                     self.__map_spec(subspec)
 
@@ -321,17 +321,25 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         if attr_val is None:
             return None
         else:
-            return self.convert_value(attr_val, spec)
+            return self.__convert_value(attr_val, spec)
 
-    def convert_value(self, value, spec):
+    def __convert_value(self, value, spec):
         ret = value
         if isinstance(spec, AttributeSpec):
             if 'text' in spec.dtype:
-                ret = str(value)
-
+                if spec.dims is not None:
+                #if any(isinstance(value, t) for t in (tuple, list)):
+                    ret =  list(map(str, value))
+                else:
+                    ret = str(value)
         elif isinstance(spec, DatasetSpec):
             if 'text' in spec.dtype:
-                ret = str(value)
+                if spec.dims is not None:
+                #if any(isinstance(value, t) for t in (tuple, list)):
+                    ret =  list(map(str, value))
+                else:
+                    ret = str(value)
+        return ret
 
     def get_const_arg(self, spec):
         '''
@@ -383,7 +391,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 sub_builder = builder.add_dataset(spec.name, attr_value)
                 self.__add_attributes(sub_builder, spec.attributes, container)
             else:
-                self.__build_helper(builder, spec, attr_value, build_manager)
+                self.__add_containers(builder, spec, attr_value, build_manager)
 
     def __add_groups(self, builder, groups, container, build_manager):
         for spec in groups:
@@ -392,7 +400,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 # group does not have the concept of value
                 sub_builder = GroupBuilder(spec.name)
                 self.__add_attributes(sub_builder, spec.attributes, container)
-                print('adding datasets for %s %s' % (spec.name, hash(spec)))
+                #print('adding datasets for %s %s' % (spec.name, hash(spec)))
                 self.__add_datasets(sub_builder, spec.datasets, container, build_manager)
 
                 # handle subgroups that are not NWBContainers
@@ -406,36 +414,36 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                             it = iter(attr_value.values())
                         for item in it:
                             if isinstance(item, NWBContainer):
-                                self.__build_helper(sub_builder, spec, item, build_manager)
+                                self.__add_containers(sub_builder, spec, item, build_manager)
                         #continue
                 self.__add_groups(sub_builder, spec.groups, container, build_manager)
                 if not sub_builder.is_empty():
                     builder.set_group(sub_builder)
             else:
                 if spec.neurodata_type_def is not None:
-                    print('Found nested neurodata_type_def %s - %s' % (spec, hash(spec)))
+                    #print('Found nested neurodata_type_def %s - %s' % (spec, hash(spec)))
                     attr_name = self.get_attribute(spec)
-                    print('attr_name %s' % attr_name)
+                    #print('attr_name %s' % attr_name)
                     if attr_name is None:
                         print('Skipping def (no attr_name found) %s - %s' % (spec, hash(spec)))
                     else:
                         attr_value = getattr(container, attr_name, None)
                         if attr_value is not None:
-                            self.__build_helper(builder, spec, attr_value, build_manager)
-                        else:
-                            print('Skipping def %s - %s' % (spec, hash(spec)))
+                            self.__add_containers(builder, spec, attr_value, build_manager)
+                    #    else:
+                    #        print('Skipping def %s - %s' % (spec, hash(spec)))
                 else:
-                    print('Found nested include %s - %s' % (spec, hash(spec)))
+                    #print('Found nested include %s - %s' % (spec, hash(spec)))
                     attr_name = self.get_attribute(spec)
 
                     attr_value = getattr(container, attr_name, None)
                     if attr_value is not None:
-                        self.__build_helper(builder, spec, attr_value, build_manager)
-                    else:
-                        print('Skipping include %s - %s' % (spec, hash(spec)))
+                        self.__add_containers(builder, spec, attr_value, build_manager)
+                    #else:
+                    #    print('Skipping include %s - %s' % (spec, hash(spec)))
                     #self.__add_groups(sub_builder, spec.groups, container, build_manager)
 
-    def __build_helper(self, builder, spec, value, build_manager):
+    def __add_containers(self, builder, spec, value, build_manager):
         if isinstance(value, NWBContainer):
             rendered_obj = build_manager.build(value)
             name = build_manager.get_builder_name(value)
@@ -458,7 +466,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                        "NWBContainers if 'spec' is a GroupSpec")
                 raise ValueError(msg % value.__class__.__name__)
             for container in values:
-                self.__build_helper(builder, spec, container, build_manager)
+                self.__add_containers(builder, spec, container, build_manager)
 
     def __get_subspec_values(self, builder, spec, manager):
         ret = dict()

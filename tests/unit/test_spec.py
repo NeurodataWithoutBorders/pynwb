@@ -12,7 +12,7 @@ class AttributeSpecTests(unittest.TestCase):
                              'str',
                              'my first attribute')
         self.assertEqual(spec['name'], 'attribute1')
-        self.assertEqual(spec['type'], 'str')
+        self.assertEqual(spec['dtype'], 'str')
         self.assertEqual(spec['doc'], 'my first attribute')
         self.assertIsNone(spec.parent)
         json.dumps(spec)
@@ -30,7 +30,7 @@ class DatasetSpecTests(unittest.TestCase):
                            'int',
                            name='dataset1',
                            attributes=self.attributes)
-        self.assertEqual(spec['type'], 'int')
+        self.assertEqual(spec['dtype'], 'int')
         self.assertEqual(spec['name'], 'dataset1')
         self.assertEqual(spec['doc'], 'my first dataset')
         self.assertNotIn('linkable', spec)
@@ -48,7 +48,7 @@ class DatasetSpecTests(unittest.TestCase):
                            attributes=self.attributes,
                            linkable=False,
                            neurodata_type_def='EphysData')
-        self.assertEqual(spec['type'], 'int')
+        self.assertEqual(spec['dtype'], 'int')
         self.assertEqual(spec['name'], 'dataset1')
         self.assertEqual(spec['doc'], 'my first dataset')
         self.assertEqual(spec['neurodata_type_def'], 'EphysData')

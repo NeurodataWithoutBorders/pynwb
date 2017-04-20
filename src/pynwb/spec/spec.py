@@ -91,7 +91,7 @@ class Spec(dict, metaclass=abc.ABCMeta):
 
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
-        {'name': 'type', 'type': str, 'doc': 'The data type of this attribute'},
+        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
         {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
@@ -103,12 +103,12 @@ class AttributeSpec(Spec):
 
     @docval(*_attr_args)
     def __init__(self, **kwargs):
-        name, dtype, doc, required, parent, value = getargs('name', 'type', 'doc', 'required', 'parent', 'value', kwargs)
+        name, dtype, doc, required, parent, value = getargs('name', 'dtype', 'doc', 'required', 'parent', 'value', kwargs)
         super().__init__(doc, name=name, required=required, parent=parent)
         if isinstance(dtype, type):
-            self['type'] = dtype.__name__
+            self['dtype'] = dtype.__name__
         elif dtype is not None:
-            self['type'] = dtype
+            self['dtype'] = dtype
         if value is not None:
             self.pop('required', None)
             self['value'] = value
@@ -116,7 +116,7 @@ class AttributeSpec(Spec):
     @property
     def dtype(self):
         ''' The data type of the attribute '''
-        return self.get('type', None)
+        return self.get('dtype', None)
 
     @property
     def value(self):
@@ -127,6 +127,11 @@ class AttributeSpec(Spec):
     def required(self):
         ''' True if this attribute is required, False otherwise. '''
         return self.get('required', None)
+
+    @property
+    def dims(self):
+        ''' The dimensions of this Dataset '''
+        return self.get('dims', None)
 
 #    def verify(self, value):
 #        '''Verify value (from an object) against this attribute specification '''
@@ -256,7 +261,7 @@ class BaseStorageSpec(Spec):
 
 _dataset_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'type', 'type': str, 'doc': 'The data type of this attribute'},
+        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
         {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
@@ -272,7 +277,7 @@ class DatasetSpec(BaseStorageSpec):
 
     @docval(*deepcopy(_dataset_args))
     def __init__(self, **kwargs):
-        doc, shape, dims, dtype = popargs('doc', 'shape', 'dims', 'type', kwargs)
+        doc, shape, dims, dtype = popargs('doc', 'shape', 'dims', 'dtype', kwargs)
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if shape is not None:
             self['shape'] = shape
@@ -284,12 +289,17 @@ class DatasetSpec(BaseStorageSpec):
                 if len(self['dims']) != len(self['shape']):
                     raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
-            self['type'] = dtype
+            self['dtype'] = dtype
+
+    @property
+    def dims(self):
+        ''' The dimensions of this Dataset '''
+        return self.get('dims', None)
 
     @property
     def dtype(self):
         ''' The data type of the attribute '''
-        return self.get('type', None)
+        return self.get('dtype', None)
 
     @property
     def shape(self):

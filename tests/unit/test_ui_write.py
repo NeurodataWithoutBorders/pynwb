@@ -25,6 +25,9 @@ class TestNWBContainerIO(unittest.TestCase):
 
     def test_build(self):
         result = self.manager.build(self.container)
+        import json
+        print('EXPECTED', json.dumps(self.builder, indent=2))
+        print('RECIEVED', json.dumps(result, indent=2))
         self.assertDictEqual(result, self.builder)
 
     @unittest.skip('not now')
@@ -69,7 +72,6 @@ class TestTimeSeriesIO(TestNWBContainerIO):
 class TestNWBFileIO(TestNWBContainerIO):
 
     def setUp(self):
-        self.pattern = "%Y-%m-%dT%H:%M:%S"
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)
         super(TestNWBFileIO, self).setUp()
@@ -93,11 +95,11 @@ class TestNWBFileIO(TestNWBContainerIO):
                                          'general': GroupBuilder('general'),
                                          'processing': GroupBuilder('processing'),
                                          'stimulus': GroupBuilder('stimulus')},
-                                 datasets={'file_create_date': DatasetBuilder('file_create_date', self.create_date.strftime(self.pattern)),
+                                 datasets={'file_create_date': DatasetBuilder('file_create_date', str(self.create_date)),
                                            'identifier': DatasetBuilder('identifier', 'TEST123'),
                                            'session_description': DatasetBuilder('session_description', 'a test NWB file'),
                                            'nwb_version': DatasetBuilder('nwb_version', '1.0.6'),
-                                           'session_start_time': DatasetBuilder('session_start_time', self.start_time.strftime(self.pattern))},)
+                                           'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},)
 
     def setUpContainer(self):
         self.container = NWBFile('test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
