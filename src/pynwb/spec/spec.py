@@ -535,6 +535,8 @@ class SpecCatalog(object):
         Create a new catalog for storing specifications
         '''
         self.__specs = dict()
+        self.__parent_types = dict()
+        self.__hierarchy = dict()
 
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
             {'name': 'spec', 'type': BaseStorageSpec, 'doc': 'a Spec object'})
@@ -547,6 +549,10 @@ class SpecCatalog(object):
         if type_name in self.__specs:
             raise ValueError("'%s' - cannot overwrite existing specification" % type_name)
         self.__specs[type_name] = spec
+        ndt = spec.neurodata_type
+        ndt_def = spec.neurodata_type_def
+        if ndt_def != ndt:
+            self.__parent_types[ndt_def] = ndt
 
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
             returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
@@ -579,6 +585,27 @@ class SpecCatalog(object):
                 self.register_spec(dset_ndt, dataset_spec)
         for group_spec in spec.groups:
             self.auto_register(group_spec)
+
+    @docval({'name': 'neurodata_type', 'type': (str, type), 'doc': 'the neurodata_type to get the hierarchy of'})
+    def get_hierarchy(self, **kwargs):
+        ''' Get the extension hierarchy for the given neurodata_type '''
+        neurodata_type = getargs('neurodata_type', kwargs)
+        if isinstance(neurodata_type, type):
+            neurodata_type = neurodata_type.__name__
+        ret = self.__hierarchy.get(neurodata_type)
+        if ret is None:
+            hierarchy = list()
+            parent = neurodata_type
+            while parent is not None:
+                hierarchy.append(parent)
+                parent = self.__parent_types.get(parent)
+            # store computed hierarchy for later
+            tmp_hier = tuple(hierarchy)
+            ret = tmp_hier
+            while len(tmp_hier) > 0:
+                self.__hierarchy[tmp_hier[0]] = tmp_hier
+                tmp_hier = tmp_hier[1:]
+        return ret
 
     def __copy__(self):
         ret = SpecCatalog()

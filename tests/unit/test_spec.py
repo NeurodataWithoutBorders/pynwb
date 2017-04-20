@@ -164,18 +164,38 @@ class SpecCatalogTest(unittest.TestCase):
             AttributeSpec('attribute1', 'str', 'my first attribute'),
             AttributeSpec('attribute2', 'str', 'my second attribute')
         ]
-
-    def test_register_spec(self):
-        spec = DatasetSpec('my first dataset',
+        self.spec = DatasetSpec('my first dataset',
                            'int',
                            name='dataset1',
                            dimension=(None, None),
                            attributes=self.attributes,
                            linkable=False,
                            neurodata_type_def='EphysData')
-        self.catalog.register_spec('EphysData', spec)
+
+    def test_register_spec(self):
+        self.catalog.register_spec('EphysData', self.spec)
         result = self.catalog.get_spec('EphysData')
-        self.assertIs(result, spec)
+        self.assertIs(result, self.spec)
+
+    def test_hierarchy(self):
+        spikes_spec = DatasetSpec('my extending dataset', 'int',
+                                neurodata_type='EphysData',
+                                neurodata_type_def='SpikeData')
+
+        lfp_spec = DatasetSpec('my second extending dataset', 'int',
+                                neurodata_type='EphysData',
+                                neurodata_type_def='LFPData')
+
+        self.catalog.register_spec('EphysData', self.spec)
+        self.catalog.register_spec('SpikeData', spikes_spec)
+        self.catalog.register_spec('LFPData', lfp_spec)
+
+        spike_hierarchy = self.catalog.get_hierarchy('SpikeData')
+        lfp_hierarchy = self.catalog.get_hierarchy('LFPData')
+        ephys_hierarchy = self.catalog.get_hierarchy('EphysData')
+        self.assertTupleEqual(spike_hierarchy, ('SpikeData', 'EphysData'))
+        self.assertTupleEqual(lfp_hierarchy, ('LFPData', 'EphysData'))
+        self.assertTupleEqual(ephys_hierarchy, ('EphysData',))
 
 if __name__ == '__main__':
     unittest.main()
