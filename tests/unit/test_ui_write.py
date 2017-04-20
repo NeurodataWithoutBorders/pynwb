@@ -89,17 +89,18 @@ class TestNWBFileIO(TestNWBContainerIO):
                                            'timestamps': DatasetBuilder('timestamps', list(range(10)),
                                                                   attributes={'unit': 'Seconds', 'interval': 1})})
         self.builder = GroupBuilder('root',
-                                 groups={'acquisition': GroupBuilder('acquisition', groups={'timeseries': GroupBuilder('timeseries', groups={'test_timeseries': ts_builder})}),
+                                 groups={'acquisition': GroupBuilder('acquisition', groups={'timeseries': GroupBuilder('timeseries', groups={'test_timeseries': ts_builder}), 'images': GroupBuilder('images')}),
                                          'analysis': GroupBuilder('analysis'),
                                          'epochs': GroupBuilder('epochs'),
                                          'general': GroupBuilder('general'),
                                          'processing': GroupBuilder('processing'),
-                                         'stimulus': GroupBuilder('stimulus')},
-                                 datasets={'file_create_date': DatasetBuilder('file_create_date', str(self.create_date)),
+                                         'stimulus': GroupBuilder('stimulus', groups={'presentation': GroupBuilder('presentation'), 'template': GroupBuilder('template')})},
+                                 datasets={'file_create_date': DatasetBuilder('file_create_date', [str(self.create_date)]),
                                            'identifier': DatasetBuilder('identifier', 'TEST123'),
                                            'session_description': DatasetBuilder('session_description', 'a test NWB file'),
                                            'nwb_version': DatasetBuilder('nwb_version', '1.0.6'),
-                                           'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},)
+                                           'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
+                                 attributes={'neurodata_type': 'NWBFile'})
 
     def setUpContainer(self):
         self.container = NWBFile('test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)

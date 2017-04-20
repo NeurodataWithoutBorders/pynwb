@@ -374,7 +374,10 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             attr_value = self.get_attr_value(spec, container)
             #if attr_value is None:
             #if not attr_value:
-            if self.__is_null(attr_value):
+            if spec.name == 'data_link':
+                print('data_link attr_value =', attr_value)
+            #if self.__is_null(attr_value):
+            if not attr_value:
                 continue
             builder.set_attribute(spec.name, attr_value)
 
@@ -385,6 +388,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             attr_value = self.get_attr_value(spec, container)
             #if attr_value is None:
             #if not attr_value:
+            if spec.name == 'stimulus':
+                print ('FOUND stimulus')
             if self.__is_null(attr_value):
                 continue
             if spec.neurodata_type is None:
@@ -417,7 +422,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                                 self.__add_containers(sub_builder, spec, item, build_manager)
                         #continue
                 self.__add_groups(sub_builder, spec.groups, container, build_manager)
-                if not sub_builder.is_empty():
+                empty = sub_builder.is_empty()
+                if not empty or (empty and isinstance(spec.quantity, int)):
                     builder.set_group(sub_builder)
             else:
                 if spec.neurodata_type_def is not None:
