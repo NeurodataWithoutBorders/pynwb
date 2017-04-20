@@ -25,8 +25,6 @@ class TestNWBContainerIO(unittest.TestCase):
 
     def test_build(self):
         result = self.manager.build(self.container)
-        import json
-        print(json.dumps(result))
         self.assertDictEqual(result, self.builder)
 
     @unittest.skip('not now')
@@ -49,7 +47,6 @@ class TestNWBContainerIO(unittest.TestCase):
 
 @unittest.skip('TODO')
 class TestTimeSeriesIO(TestNWBContainerIO):
-
 
     def setUp(self):
         super(TestTimeSeriesIO, self).setUp()
