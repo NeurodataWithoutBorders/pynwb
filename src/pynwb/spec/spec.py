@@ -287,6 +287,11 @@ class DatasetSpec(BaseStorageSpec):
             self['type'] = dtype
 
     @property
+    def dtype(self):
+        ''' The data type of the attribute '''
+        return self.get('type', None)
+
+    @property
     def shape(self):
         ''' The shape of the dataset '''
         return self.get('shape', None)

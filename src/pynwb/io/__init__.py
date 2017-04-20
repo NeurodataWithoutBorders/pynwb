@@ -13,6 +13,7 @@ def BuildManager(type_map=TYPE_MAP):
     return build.BuildManager(type_map)
 
 from . import base as __base
+from . import file as __file
 from . import behavior as __behavior
 from . import ecephys as __ecephys
 from . import epoch as __epoch
