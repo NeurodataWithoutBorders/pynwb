@@ -93,6 +93,8 @@ _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
+        {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
+        {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
         {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
         {'name': 'value', 'type': None, 'doc': 'a constant value for this attribute', 'default': None}
@@ -103,7 +105,7 @@ class AttributeSpec(Spec):
 
     @docval(*_attr_args)
     def __init__(self, **kwargs):
-        name, dtype, doc, required, parent, value = getargs('name', 'dtype', 'doc', 'required', 'parent', 'value', kwargs)
+        name, dtype, doc, dims, shape, required, parent, value = getargs('name', 'dtype', 'doc', 'dims', 'shape', 'required', 'parent', 'value', kwargs)
         super().__init__(doc, name=name, required=required, parent=parent)
         if isinstance(dtype, type):
             self['dtype'] = dtype.__name__
@@ -112,6 +114,13 @@ class AttributeSpec(Spec):
         if value is not None:
             self.pop('required', None)
             self['value'] = value
+        if dims is not None:
+            self['dims'] = dims
+            if 'shape' not in self:
+                self['shape'] = tuple([None] * len(dims))
+            else:
+                if len(self['dims']) != len(self['shape']):
+                    raise ValueError("'dims' and 'shape' must be the same length")
 
     @property
     def dtype(self):
@@ -130,8 +139,13 @@ class AttributeSpec(Spec):
 
     @property
     def dims(self):
-        ''' The dimensions of this Dataset '''
+        ''' The dimensions of this attribute's value '''
         return self.get('dims', None)
+
+    @property
+    def shape(self):
+        ''' The shape of this attribute's value '''
+        return self.get('shape', None)
 
 #    def verify(self, value):
 #        '''Verify value (from an object) against this attribute specification '''
