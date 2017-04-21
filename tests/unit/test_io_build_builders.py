@@ -110,11 +110,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
         """Test __get_item__ for soft links"""
         self.assertIs(self.gb['soft_link1'], self.soft_link1)
 
-    @unittest.skip('deprecating ExternalLinkBuilder')
-    def test_get_item_external_link(self):
-        """Test __get_item__ for external links"""
-        self.assertIs(self.gb['external_link1'], self.external_link1)
-
     def test_get_group(self):
         """Test get() for groups"""
         self.assertIs(self.gb.get('group1'), self.group1)
@@ -138,11 +133,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
     def test_get_item_soft_link(self):
         """Test get() for soft links"""
         self.assertIs(self.gb.get('soft_link1'), self.soft_link1)
-
-    @unittest.skip('deprecating ExternalLinkBuilder')
-    def test_get_item_external_link(self):
-        """Test get() for external links"""
-        self.assertIs(self.gb.get('external_link1'), self.external_link1)
 
     def test_get_invalid_key(self):
         """Test get() for invalid key"""
