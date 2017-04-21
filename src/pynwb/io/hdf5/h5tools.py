@@ -1,23 +1,31 @@
 from collections import Iterable
 import numpy as np
-from h5py import File, Group, Dataset, special_dtype
+from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink
+import os.path
 
-from pynwb.core import DataChunkIterator, docval, getargs
+from pynwb.core import DataChunkIterator, docval, getargs, popargs
 
-from ..io import NWBReader, NWBWriter
+#from ..io import NWBReader, NWBWriter
+from ..io import NWBIO
 from ..build import GroupBuilder, DatasetBuilder, LinkBuilder
+from ..build import BuildManager
 
-class HDF5Reader(NWBReader):
+class HDF5IO(NWBIO):
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'})
+    @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'},
+            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None})
     def __init__(self, **kwargs):
-        path = getargs('path', kwargs)
+        path = popargs('path', kwargs)
+        super(HDF5IO, self).__init__(**kwargs)
         self.__path = path
+        self.__built = dict()
 
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
-        f = File(self.__path, 'r+')
-        f_builder = self.__read_group(f, 'root')
+        self.open()
+        #f = File(self.__path, 'r+')
+        f_builder = self.__read_group(self.__file, 'root')
+        return f_builder
 
     def __set_built(self, fpath, path, builder):
         self.__built.setdefault(fpath, dict()).setdefault(path, builder)
@@ -31,20 +39,20 @@ class HDF5Reader(NWBReader):
 
     def __read_group(self, h5obj, name=None):
         kwargs = {
-            "attributes": dict(h5obj.attr.items),
+            "attributes": dict(h5obj.attrs.items()),
             "groups": dict(),
             "datasets": dict(),
             "links": dict()
         }
         if name is None:
-            name = bn(h5obj.name)
+            name = os.path.basename(h5obj.name)
         for k in h5obj:
             sub_h5obj = h5obj.get(k)
             link_type = h5obj.get(k, getlink=True)
             if isinstance(link_type, SoftLink) or isinstance(link_type, ExternalLink):
                 # get path of link (the key used for tracking what's been built)
                 target_path = link_type.path
-                builder_name = bn(target_path)
+                builder_name = os.path.basename(target_path)
                 # get builder if already read, else build it
                 builder = self.__get_built(sub_h5obj.file.filename, target_path)
                 if builder is None:
@@ -61,7 +69,7 @@ class HDF5Reader(NWBReader):
                 read_method = None
                 if isinstance(sub_h5obj, Dataset):
                     read_method = self.__read_dataset
-                    obj_type = kwargs['dataset']
+                    obj_type = kwargs['datasets']
                 else:
                     read_method = self.__read_group
                     obj_type = kwargs['groups']
@@ -74,7 +82,7 @@ class HDF5Reader(NWBReader):
 
     def __read_dataset(self, h5obj, name=None):
         kwargs = {
-            "attributes": dict(h5obj.attr.items),
+            "attributes": dict(h5obj.attrs.items()),
             "data": h5obj,
             "dtype": h5obj.dtype,
             "maxshape": h5obj.maxshape
@@ -84,22 +92,31 @@ class HDF5Reader(NWBReader):
         ret = DatasetBuilder(name, **kwargs)
         return ret
 
-class HDF5Writer(NWBWriter):
+#class HDF5Writer(NWBWriter):
+#
+#    @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'})
+#    def __init__(self, **kwargs):
+#        path = getargs('path', kwargs)
+#        self.__path = path
+#        self.__file = None
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'})
-    def __init__(self, **kwargs):
-        path = getargs('path', kwargs)
-        self.__path = path
+    def open(self):
+        open_flag = 'w'
+        if os.path.exists(self.__path):
+            open_flag = 'r+'
+        self.__file = File(self.__path, open_flag)
+
+    def close(self):
+        self.__file.close()
 
     @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
     def write_builder(self, **kwargs):
         f_builder = getargs('builder', kwargs)
-        open_flag = 'w'
-        if os.path.exists(path):
-            open_flag = 'r+'
-        f = File(path, open_flag)
+        self.open()
         for name, gbldr in f_builder.groups.items():
-            write_group(f, name, gbldr.groups, gbldr.datasets, gbldr.attributes, gbldr.links)
+            write_group(self.__file, name, gbldr.groups, gbldr.datasets, gbldr.attributes, gbldr.links)
+        for name, dbldr in f_builder.datasets.items():
+            write_dataset(self.__file, name, dbldr.data, dbldr.attributes)
 
 
 @docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
@@ -129,7 +146,7 @@ def set_attributes(**kwargs):
         returns='the Group that was created', rtype='Group', is_method=False)
 def write_group(**kwargs):
     parent, name, subgroups, datasets, attributes, links = getargs('parent', 'name', 'subgroups', 'datasets', 'attributes', 'links', kwargs)
-    group = parent.create_group(name)
+    group = parent.require_group(name)
     # write all groups
     if subgroups:
         for subgroup_name, builder in subgroups.items():
@@ -254,7 +271,7 @@ def __selection_max_bounds__(selection):
 
 def __scalar_fill__(parent, name, data):
     dtype = __get_type(data)
-    dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype)
+    dset = parent.require_dataset(name, data=data, shape=None, dtype=dtype)
     return dset
 
 def __chunked_iter_fill__(parent, name, data):
@@ -272,7 +289,7 @@ def __chunked_iter_fill__(parent, name, data):
     recommended_chunks = data.recommended_chunk_shape()
     chunks = True if recommended_chunks is None else recommended_chunks
     baseshape = data.recommended_data_shape()
-    dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
+    dset = parent.require_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
     for chunk_i in data:
         # Determine the minimum array dimensions to fit the chunk selection
         max_bounds = __selection_max_bounds__(chunk_i.selection)
@@ -292,7 +309,7 @@ def __chunked_iter_fill__(parent, name, data):
 def __list_fill__(parent, name, data):
     data_shape = __get_shape(data)
     data_dtype = __get_type(data)
-    dset = parent.create_dataset(name, shape=data_shape, dtype=data_dtype)
+    dset = parent.require_dataset(name, shape=data_shape, dtype=data_dtype)
     if len(data) > dset.shape[0]:
         new_shape = list(dset.shape)
         new_shape[0] = len(data)
