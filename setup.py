@@ -37,7 +37,8 @@ with open('LICENSE') as f:
 
 
 pkgs=['pynwb',
-      'pynwb.io' ]
+      'pynwb.io',
+      'pynwb.spec' ]
 
 setup_args = {
     'name': 'pynwb',
