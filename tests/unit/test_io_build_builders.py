@@ -9,7 +9,7 @@ class GroupBuilderSetterTests(unittest.TestCase):
 
     def setUp(self):
         self.gb = GroupBuilder('gb')
-        self.gb2 = GroupBuilder('gb', source='file1')
+        self.gb2 = GroupBuilder('gb2', source='file1')
 
     def tearDown(self):
         pass
@@ -51,6 +51,14 @@ class GroupBuilderSetterTests(unittest.TestCase):
         self.assertIn('key', self.gb.obj_type)
         #self.assertEqual(dict.__getitem__(self.gb, 'attributes')['key'], 'value')
         self.assertEqual(self.gb['key'], 'value')
+
+    def test_parent_constructor(self):
+        gb2 = GroupBuilder('gb2', parent=self.gb)
+        self.assertIs(gb2.parent, self.gb)
+
+    def test_set_group(self):
+        self.gb.set_group(self.gb2)
+        self.assertIs(self.gb2.parent, self.gb)
 
 class GroupBuilderGetterTests(unittest.TestCase):
 

@@ -14,7 +14,9 @@ from .base import TimeSeries, Module
 from .epoch import Epoch
 from .ecephys import ElectrodeGroup, ElectricalSeries
 from .core import docval, getargs, NWBContainer
+from dateutil.parser import parse as parse_date
 
+_default_file_id = 'UNSPECIFIED'
 class NWBFile(NWBContainer):
     """
     A representation of an NWB file.
@@ -29,12 +31,19 @@ class NWBFile(NWBContainer):
                      'stimulus'
                      'stimulus_template'
                      'ec_electrodes'
-                     'ic_electrodes')
+                     'ic_electrodes',
+                     'imaging_planes',
+                     'optogenetic_sites',
+                     'modules',
+                     'epochs')
 
-    __nwb_version = '1.0.4'
+    __nwb_version = '1.0.6'
 
     @docval({'name': 'file_name', 'type': str, 'doc': 'path to NWB file'},
-            {'name': 'description', 'type': str, 'doc': 'a description of the session where this data was generated'},
+            {'name': 'session_description', 'type': str, 'doc': 'a description of the session where this data was generated'},
+            {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
+            {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
+            {'name': 'file_create_date', 'type': (list, datetime, str), 'doc': 'the time the file was created and subsequenct modifications made', 'default': list()},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str, 'doc': 'general description of the experiment', 'default': None},
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
@@ -45,14 +54,25 @@ class NWBFile(NWBContainer):
         self.__filename = getargs('file_name', kwargs)
         self.__start_time = datetime.utcnow()
         self.__file_id = '%s %s' % (self.__filename, self.__start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
-        self.__description = getargs('description', kwargs)
+        self.__session_description = getargs('session_description', kwargs)
+        self.__identifier = getargs('identifier', kwargs)
+        self.__session_start_time = getargs('session_start_time', kwargs)
+        if isinstance(self.__session_start_time, str):
+            self.__session_start_time = parse_date(self.__session_start_time)
+        self.__file_create_date = getargs('file_create_date', kwargs)
+        if self.__file_create_date is None:
+            self.__file_create_date = datetime.now()
+        elif isinstance(self.__file_create_date, datetime):
+            self.__file_create_date = [self.__file_create_date]
+        elif isinstance(self.__file_create_date, str):
+            self.__file_create_date = [parse_date(self.__file_create_date)]
 
         self.__raw_data = dict()
         self.__stimulus = dict()
         self.__stimulus_template = dict()
 
-        self.modules = dict()
-        self.epochs = dict()
+        self.__modules = dict()
+        self.__epochs = dict()
         self.__ec_electrodes = dict()
         self.__ec_electrode_idx = dict()
 
@@ -67,12 +87,20 @@ class NWBFile(NWBContainer):
             setattr(self, attr, kwargs.get(attr, None))
 
     @property
-    def nwb_version(self):
-        return self.__nwb_version
+    def epochs(self):
+        return self.__epochs
 
     @property
-    def start_time(self):
-        return self.__start_time
+    def modules(self):
+        return self.__modules
+
+    @property
+    def identifier(self):
+        return self.__identifier
+
+    @property
+    def nwb_version(self):
+        return self.__nwb_version
 
     @property
     def filename(self):
@@ -80,11 +108,15 @@ class NWBFile(NWBContainer):
 
     @property
     def session_description(self):
-        return self.__description
+        return self.__session_description
 
     @property
-    def file_id(self):
-        return self.__file_id
+    def file_create_date(self):
+        return self.__file_create_date
+
+    @property
+    def session_start_time(self):
+        return self.__session_start_time
 
     @property
     def raw_data(self):
@@ -129,7 +161,7 @@ class NWBFile(NWBContainer):
         """
         name, start, stop, tags, description = getargs('name', 'start', 'stop', 'tags', 'description', kwargs)
         epoch = Epoch(name, start, stop, description=description, tags=tags, parent=self)
-        self.epochs[name] = epoch
+        self.__epochs[name] = epoch
         return epoch
 
     def get_epoch(self, name):
@@ -160,7 +192,7 @@ class NWBFile(NWBContainer):
         if isinstance(epoch, Epoch):
             ep = epoch
         elif isinstance(epoch, str):
-            ep = self.epochs.get(epoch)
+            ep = self.__epochs.get(epoch)
             if not ep:
                 raise KeyError("Epoch '%s' not found" % epoch)
         else:
@@ -262,4 +294,4 @@ class NWBFile(NWBContainer):
     def add_processing_module(self, **kwargs):
         module = getargs('module', kwargs)
         module.parent = self
-        self.modules[module.name] = module
+        self.__modules[module.name] = module

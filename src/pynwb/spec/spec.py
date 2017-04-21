@@ -91,8 +91,10 @@ class Spec(dict, metaclass=abc.ABCMeta):
 
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
-        {'name': 'type', 'type': str, 'doc': 'The data type of this attribute'},
+        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
+        {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
+        {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
         {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
         {'name': 'value', 'type': None, 'doc': 'a constant value for this attribute', 'default': None}
@@ -103,20 +105,27 @@ class AttributeSpec(Spec):
 
     @docval(*_attr_args)
     def __init__(self, **kwargs):
-        name, dtype, doc, required, parent, value = getargs('name', 'type', 'doc', 'required', 'parent', 'value', kwargs)
+        name, dtype, doc, dims, shape, required, parent, value = getargs('name', 'dtype', 'doc', 'dims', 'shape', 'required', 'parent', 'value', kwargs)
         super().__init__(doc, name=name, required=required, parent=parent)
         if isinstance(dtype, type):
-            self['type'] = dtype.__name__
+            self['dtype'] = dtype.__name__
         elif dtype is not None:
-            self['type'] = dtype
+            self['dtype'] = dtype
         if value is not None:
             self.pop('required', None)
             self['value'] = value
+        if dims is not None:
+            self['dims'] = dims
+            if 'shape' not in self:
+                self['shape'] = tuple([None] * len(dims))
+            else:
+                if len(self['dims']) != len(self['shape']):
+                    raise ValueError("'dims' and 'shape' must be the same length")
 
     @property
     def dtype(self):
         ''' The data type of the attribute '''
-        return self.get('type', None)
+        return self.get('dtype', None)
 
     @property
     def value(self):
@@ -127,6 +136,16 @@ class AttributeSpec(Spec):
     def required(self):
         ''' True if this attribute is required, False otherwise. '''
         return self.get('required', None)
+
+    @property
+    def dims(self):
+        ''' The dimensions of this attribute's value '''
+        return self.get('dims', None)
+
+    @property
+    def shape(self):
+        ''' The shape of this attribute's value '''
+        return self.get('shape', None)
 
 #    def verify(self, value):
 #        '''Verify value (from an object) against this attribute specification '''
@@ -256,10 +275,10 @@ class BaseStorageSpec(Spec):
 
 _dataset_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'type', 'type': str, 'doc': 'The data type of this attribute'},
+        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
-        {'name': 'shape', 'type': tuple, 'doc': 'the shape of this dataset', 'default': None},
-        {'name': 'dims', 'type': tuple, 'doc': 'the dimensions of this dataset', 'default': None},
+        {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
+        {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
@@ -272,7 +291,7 @@ class DatasetSpec(BaseStorageSpec):
 
     @docval(*deepcopy(_dataset_args))
     def __init__(self, **kwargs):
-        doc, shape, dims, dtype = popargs('doc', 'shape', 'dims', 'type', kwargs)
+        doc, shape, dims, dtype = popargs('doc', 'shape', 'dims', 'dtype', kwargs)
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if shape is not None:
             self['shape'] = shape
@@ -284,7 +303,17 @@ class DatasetSpec(BaseStorageSpec):
                 if len(self['dims']) != len(self['shape']):
                     raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
-            self['type'] = dtype
+            self['dtype'] = dtype
+
+    @property
+    def dims(self):
+        ''' The dimensions of this Dataset '''
+        return self.get('dims', None)
+
+    @property
+    def dtype(self):
+        ''' The data type of the attribute '''
+        return self.get('dtype', None)
 
     @property
     def shape(self):
@@ -520,6 +549,8 @@ class SpecCatalog(object):
         Create a new catalog for storing specifications
         '''
         self.__specs = dict()
+        self.__parent_types = dict()
+        self.__hierarchy = dict()
 
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
             {'name': 'spec', 'type': BaseStorageSpec, 'doc': 'a Spec object'})
@@ -532,6 +563,10 @@ class SpecCatalog(object):
         if type_name in self.__specs:
             raise ValueError("'%s' - cannot overwrite existing specification" % type_name)
         self.__specs[type_name] = spec
+        ndt = spec.neurodata_type
+        ndt_def = spec.neurodata_type_def
+        if ndt_def != ndt:
+            self.__parent_types[ndt_def] = ndt
 
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
             returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
@@ -564,6 +599,27 @@ class SpecCatalog(object):
                 self.register_spec(dset_ndt, dataset_spec)
         for group_spec in spec.groups:
             self.auto_register(group_spec)
+
+    @docval({'name': 'neurodata_type', 'type': (str, type), 'doc': 'the neurodata_type to get the hierarchy of'})
+    def get_hierarchy(self, **kwargs):
+        ''' Get the extension hierarchy for the given neurodata_type '''
+        neurodata_type = getargs('neurodata_type', kwargs)
+        if isinstance(neurodata_type, type):
+            neurodata_type = neurodata_type.__name__
+        ret = self.__hierarchy.get(neurodata_type)
+        if ret is None:
+            hierarchy = list()
+            parent = neurodata_type
+            while parent is not None:
+                hierarchy.append(parent)
+                parent = self.__parent_types.get(parent)
+            # store computed hierarchy for later
+            tmp_hier = tuple(hierarchy)
+            ret = tmp_hier
+            while len(tmp_hier) > 0:
+                self.__hierarchy[tmp_hier[0]] = tmp_hier
+                tmp_hier = tmp_hier[1:]
+        return ret
 
     def __copy__(self):
         ret = SpecCatalog()

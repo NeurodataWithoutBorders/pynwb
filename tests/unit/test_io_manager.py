@@ -10,25 +10,25 @@ from pynwb.io.build.map import ObjectMapper, BuildManager, TypeMap
 class Foo(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this Foo'},
-            {'name': 'data', 'type': list, 'doc': 'some data'},
+            {'name': 'my_data', 'type': list, 'doc': 'some data'},
             {'name': 'attr1', 'type': str, 'doc': 'an attribute'},
             {'name': 'attr2', 'type': int, 'doc': 'another attribute'},
             {'name': 'attr3', 'type': float, 'doc': 'a third attribute', 'default': 3.14})
     def __init__(self, **kwargs):
-        name, data, attr1, attr2, attr3 = getargs('name', 'data', 'attr1', 'attr2', 'attr3', kwargs)
+        name, my_data, attr1, attr2, attr3 = getargs('name', 'my_data', 'attr1', 'attr2', 'attr3', kwargs)
         super(Foo, self).__init__()
         self.__name = name
-        self.__data = data
+        self.__data = my_data
         self.__attr1 = attr1
         self.__attr2 = attr2
         self.__attr3 = attr3
 
     def __eq__(self, other):
-        attrs = ('name', 'data', 'attr1', 'attr2', 'attr3')
+        attrs = ('name', 'my_data', 'attr1', 'attr2', 'attr3')
         return all(getattr(self, a) == getattr(other, a) for a in attrs)
 
     def __str__(self):
-        attrs = ('name', 'data', 'attr1', 'attr2', 'attr3')
+        attrs = ('name', 'my_data', 'attr1', 'attr2', 'attr3')
         return '<' + ','.join('%s=%s' % (a, getattr(self, a)) for a in attrs) + '>'
 
     @property
@@ -36,7 +36,7 @@ class Foo(NWBContainer):
         return self.__name
 
     @property
-    def data(self):
+    def my_data(self):
         return self.__data
 
     @property
@@ -86,7 +86,7 @@ class TestBase(unittest.TestCase):
         self.type_map = TypeMap(self.spec_catalog)
         self.foo_spec = GroupSpec('A test group specification with a neurodata type',
                                  neurodata_type_def='Foo',
-                                 datasets=[DatasetSpec('an example dataset', 'int', name='data',
+                                 datasets=[DatasetSpec('an example dataset', 'int', name='my_data',
                                                        attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
                                  attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
         self.type_map.register_spec(Foo, self.foo_spec)
@@ -96,14 +96,14 @@ class TestBuildManager(TestBase):
 
     def test_build(self):
         container_inst = Foo('my_foo', list(range(10)), 'value1', 10)
-        expected = GroupBuilder('my_foo', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
+        expected = GroupBuilder('my_foo', datasets={'my_data': DatasetBuilder('my_data', list(range(10)), attributes={'attr2': 10})},
                                 attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
         builder1 = self.build_manager.build(container_inst)
         self.assertDictEqual(builder1, expected)
 
     def test_build_memoization(self):
         container_inst = Foo('my_foo', list(range(10)), 'value1', 10)
-        expected = GroupBuilder('my_foo', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
+        expected = GroupBuilder('my_foo', datasets={'my_data': DatasetBuilder('my_data', list(range(10)), attributes={'attr2': 10})},
                                 attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
         builder1 = self.build_manager.build(container_inst)
         builder2 = self.build_manager.build(container_inst)
@@ -111,16 +111,16 @@ class TestBuildManager(TestBase):
         self.assertIs(builder1, builder2)
 
     def test_construct(self):
-        builder = GroupBuilder('my_foo', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
+        builder = GroupBuilder('my_foo', datasets={'my_data': DatasetBuilder('my_data', list(range(10)), attributes={'attr2': 10})},
                                 attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
         expected = Foo('my_foo', list(range(10)), 'value1', 10)
         container = self.build_manager.construct(builder)
-        self.assertListEqual(container.data, list(range(10)))
+        self.assertListEqual(container.my_data, list(range(10)))
         self.assertEqual(container.attr1, 'value1')
         self.assertEqual(container.attr2, 10)
 
     def test_construct_memoization(self):
-        builder = GroupBuilder('my_foo', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
+        builder = GroupBuilder('my_foo', datasets={'my_data': DatasetBuilder('my_data', list(range(10)), attributes={'attr2': 10})},
                                 attributes={'attr1': 'value1', 'neurodata_type': 'Foo'})
         expected = Foo('my_foo', list(range(10)), 'value1', 10)
         container1 = self.build_manager.construct(builder)
@@ -137,9 +137,9 @@ class TestNestedBase(TestBase):
                             Foo('my_foo1', list(range(10)), 'value1', 10),
                             Foo('my_foo2', list(range(10, 20)), 'value2', 20)])
         self.foo_builders = {
-            'my_foo1': GroupBuilder('my_foo1', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
+            'my_foo1': GroupBuilder('my_foo1', datasets={'my_data': DatasetBuilder('my_data', list(range(10)), attributes={'attr2': 10})},
                                                                                 attributes={'attr1': 'value1', 'neurodata_type': 'Foo'}),
-            'my_foo2': GroupBuilder('my_foo2', datasets={'data': DatasetBuilder('data', list(range(10, 20)), attributes={'attr2': 20})},
+            'my_foo2': GroupBuilder('my_foo2', datasets={'my_data': DatasetBuilder('my_data', list(range(10, 20)), attributes={'attr2': 20})},
                                                                                 attributes={'attr1': 'value2', 'neurodata_type': 'Foo'})
         }
         self.setUpBucketBuilder()
