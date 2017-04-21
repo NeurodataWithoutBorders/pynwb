@@ -14,6 +14,7 @@ from .base import TimeSeries, Module
 from .epoch import Epoch
 from .ecephys import ElectrodeGroup, ElectricalSeries
 from .core import docval, getargs, NWBContainer
+from dateutil.parser import parse as parse_date
 
 _default_file_id = 'UNSPECIFIED'
 class NWBFile(NWBContainer):
@@ -41,8 +42,8 @@ class NWBFile(NWBContainer):
     @docval({'name': 'file_name', 'type': str, 'doc': 'path to NWB file'},
             {'name': 'session_description', 'type': str, 'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
-            {'name': 'session_start_time', 'type': datetime, 'doc': 'the start time of the recording session'},
-            {'name': 'file_create_date', 'type': (list, datetime), 'doc': 'the time the file was created and subsequenct modifications made', 'default': list()},
+            {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
+            {'name': 'file_create_date', 'type': (list, datetime, str), 'doc': 'the time the file was created and subsequenct modifications made', 'default': list()},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str, 'doc': 'general description of the experiment', 'default': None},
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
@@ -56,11 +57,15 @@ class NWBFile(NWBContainer):
         self.__session_description = getargs('session_description', kwargs)
         self.__identifier = getargs('identifier', kwargs)
         self.__session_start_time = getargs('session_start_time', kwargs)
+        if isinstance(self.__session_start_time, str):
+            self.__session_start_time = parse_date(self.__session_start_time)
         self.__file_create_date = getargs('file_create_date', kwargs)
         if self.__file_create_date is None:
             self.__file_create_date = datetime.now()
         elif isinstance(self.__file_create_date, datetime):
             self.__file_create_date = [self.__file_create_date]
+        elif isinstance(self.__file_create_date, str):
+            self.__file_create_date = [parse_date(self.__file_create_date)]
 
         self.__raw_data = dict()
         self.__stimulus = dict()

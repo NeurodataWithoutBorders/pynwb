@@ -16,8 +16,9 @@ class NWBFileMap(ObjectMapper):
         self.map_attr('ec_electrodes', general_spec.get_group('extracellular_ephys'))
         self.map_attr('optogenetic_sites', general_spec.get_group('optogenetics'))
         self.map_attr('imaging_planes', general_spec.get_group('optophysiology'))
-        self.map_attr('', self.spec.get_group('processing'))
+        self.map_attr('modules', self.spec.get_group('processing'))
+        self.unmap(general_spec.get_dataset('stimulus'))
 
-    @ObjectMapper.const_arg('name')
+    @ObjectMapper.const_arg('file_name')
     def name(self, h5group):
         return h5group.name

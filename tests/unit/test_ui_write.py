@@ -24,13 +24,11 @@ class TestNWBContainerIO(unittest.TestCase):
         self.setUpBuilder()
 
     def test_build(self):
+        self.maxDiff = None
         result = self.manager.build(self.container)
-        import json
-        print('EXPECTED', json.dumps(self.builder, indent=2))
-        print('RECIEVED', json.dumps(result, indent=2))
         self.assertDictEqual(result, self.builder)
 
-    @unittest.skip('not now')
+    #@unittest.skip('not now')
     def test_construct(self):
         result = self.manager.construct(self.builder)
         self.assertContainerEqual(result, self.container)
@@ -48,7 +46,6 @@ class TestNWBContainerIO(unittest.TestCase):
     def assertContainerEqual(self, container1, container2):
         pass
 
-@unittest.skip('TODO')
 class TestTimeSeriesIO(TestNWBContainerIO):
 
     def setUp(self):
@@ -94,10 +91,10 @@ class TestNWBFileIO(TestNWBContainerIO):
                                          'epochs': GroupBuilder('epochs'),
                                          'general': GroupBuilder('general'),
                                          'processing': GroupBuilder('processing'),
-                                         'stimulus': GroupBuilder('stimulus', groups={'presentation': GroupBuilder('presentation'), 'template': GroupBuilder('template')})},
+                                         'stimulus': GroupBuilder('stimulus', groups={'presentation': GroupBuilder('presentation'), 'templates': GroupBuilder('templates')})},
                                  datasets={'file_create_date': DatasetBuilder('file_create_date', [str(self.create_date)]),
                                            'identifier': DatasetBuilder('identifier', 'TEST123'),
-                                           'session_description': DatasetBuilder('session_description', 'a test NWB file'),
+                                           'session_description': DatasetBuilder('session_description', 'a test NWB File'),
                                            'nwb_version': DatasetBuilder('nwb_version', '1.0.6'),
                                            'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
                                  attributes={'neurodata_type': 'NWBFile'})
@@ -106,17 +103,3 @@ class TestNWBFileIO(TestNWBContainerIO):
         self.container = NWBFile('test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
         ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
         self.container.add_raw_timeseries(ts)
-        #from pynwb.spec import CATALOG
-        #def find_general(spec):
-        #    for sub in spec.groups:
-        #        if sub.name == 'general':
-        #            print('found general, GroupSpec')
-        #        else:
-        #            find_general(sub)
-        #fspec = CATALOG.get_spec('NWBFile')
-        #find_general(fspec)
-        #print('fspec hash = %s' % hash(fspec))
-        #print(json.dumps(fspec, indent=2))
-
-#$        result = self.manager.build(nwbfile)
-#$        print(json.dumps(result, indent=2))
