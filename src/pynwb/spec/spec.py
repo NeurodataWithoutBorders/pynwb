@@ -22,6 +22,7 @@ class Spec(dict, metaclass=abc.ABCMeta):
             {'name': 'parent', 'type': 'Spec', 'doc': 'the parent of this spec', 'default': None})
     def __init__(self, **kwargs):
         name, doc, required, parent = getargs('name', 'doc', 'required', 'parent', kwargs)
+        super(Spec, self).__init__()
         if name is not None:
             self['name'] = name
         if doc is not None:
