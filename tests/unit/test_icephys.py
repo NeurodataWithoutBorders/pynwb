@@ -69,7 +69,6 @@ class VoltageClampSeriesConstructor(unittest.TestCase):
         self.assertEqual(vCS.whole_cell_capacitance_comp, 7.0)
         self.assertEqual(vCS.whole_cell_series_resistance_comp, 8.0)
 
-
 class VoltageClampStimulusSeriesConstructor(unittest.TestCase):
 
     def test_init(self):

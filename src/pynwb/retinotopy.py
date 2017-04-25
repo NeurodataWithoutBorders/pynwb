@@ -4,7 +4,7 @@ from .base import Interface
 from collections import Iterable
 
 
-class ImageRetinotopy(Interface):
+class ImagingRetinotopy(Interface):
     """
     Intrinsic signal optical imaging or widefield imaging for measuring retinotopy. Stores orthogonal
     maps (e.g., altitude/azimuth; radius/theta) of responses to specific stimuli and a combined
@@ -36,7 +36,7 @@ class ImageRetinotopy(Interface):
             {'name': 'vasculature_image', 'type': Iterable, 'doc': ''})
     def __init__(self, **kwargs):
         source, axis_1_phase_map, axis_1_power_map, axis_2_phase_map, axis_2_power_map, axis_descriptions, focal_depth_image, sign_map, vasculature_image = popargs('source', 'axis_1_phase_map', 'axis_1_power_map', 'axis_2_phase_map', 'axis_2_power_map', 'axis_descriptions', 'focal_depth_image', 'sign_map', 'vasculature_image', kwargs)
-        super(ImageRetinotopy, self).__init__(source, **kwargs)
+        super(ImagingRetinotopy, self).__init__(source, **kwargs)
         self.axis_1_phase_map = axis_1_phase_map
         self.axis_1_power_map = axis_1_power_map
         self.axis_2_phase_map = axis_2_phase_map

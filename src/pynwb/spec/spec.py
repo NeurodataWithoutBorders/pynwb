@@ -1,9 +1,20 @@
+from collections import OrderedDict
 import abc
 from copy import deepcopy
 from pynwb.core import docval, getargs, popargs, get_docval
 NAME_WILDCARD = None
 
-class Spec(dict, metaclass=abc.ABCMeta):
+CountNum = 0
+
+def PrintDict( dict ):
+    a = '[{'
+    for k, v in dict.items():
+        #a = a + "'" + str(k) + "': [ **%s** " % (type(v)) + str(v) + "], "
+        a = a + "'" + str(k) + "': [" + str(v) + "], "
+    a = a + '}],'
+    return a
+
+class Spec(OrderedDict, metaclass=abc.ABCMeta):
     """ A base specification class
     """
 
@@ -13,6 +24,7 @@ class Spec(dict, metaclass=abc.ABCMeta):
             {'name': 'parent', 'type': 'Spec', 'doc': 'the parent of this spec', 'default': None})
     def __init__(self, **kwargs):
         name, doc, required, parent = getargs('name', 'doc', 'required', 'parent', kwargs)
+        super(Spec, self).__init__()
         if name is not None:
             self['name'] = name
         if doc is not None:
@@ -20,6 +32,13 @@ class Spec(dict, metaclass=abc.ABCMeta):
         if not required:
             self['required'] = required
         self._parent = parent
+
+    def __str__(self):
+        a = ""
+        a = a + "'name': '%s'," % ( self.name )
+        a = a + "'doc': '%s'," % ( self['doc'] )
+        a = a + "'required': '%s'," % (self.get('required', True))
+        return a
 
     @abc.abstractmethod
     def verify(self):
@@ -66,7 +85,6 @@ class Spec(dict, metaclass=abc.ABCMeta):
     def __eq__(self, other):
         return id(self) == id(other)
 
-
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
         {'name': 'type', 'type': str, 'doc': 'The data type of this attribute'},
@@ -91,6 +109,13 @@ class AttributeSpec(Spec):
             self.pop('required', None)
             self['value'] = value
 
+    def __str__(self):
+        a = super(AttributeSpec, self).__str__()
+        #a = a + "\nAttributeSpec: "
+        a = a + "'type': '%s'," % ( self.dtype )
+        a = a + "'value': '%s'," % ( self.value )
+        return a
+
     @property
     def name(self):
         return self.get('name', None)
@@ -114,7 +139,8 @@ class AttributeSpec(Spec):
     def verify(self, value):
         """Verify value (from an object) against this attribute specification
         """
-        err = dict()
+        ##err = dict()
+        err = OrderedDict()
         if any(t.__name__ == self['type'] for t in type(value).__mro__):
             err['name'] = self['name']
             err['type'] = 'attribute'
@@ -143,7 +169,8 @@ class BaseStorageSpec(Spec):
         if name == NAME_WILDCARD and neurodata_type_def is None and neurodata_type is None:
             raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'neurodata_type_def' and/or 'neurodata_type'")
         super().__init__(doc, name=name, parent=parent)
-        self.__attributes = dict()
+        ##self.__attributes = dict()
+        self.__attributes = OrderedDict()
         if quantity != 1:
             self['quantity'] = quantity
         if not linkable:
@@ -155,6 +182,17 @@ class BaseStorageSpec(Spec):
             self['neurodata_type_def'] = neurodata_type_def
         for attribute in attributes:
             self.set_attribute(attribute)
+
+    def __str__(self):
+        a = super(BaseStorageSpec, self).__str__()
+        #a = a + "\nBaseStorage: , "
+        if self.__attributes:
+            a = a + "'attributes': %s" % ( PrintDict(self.__attributes) )
+        a = a + "'quantity': '%s'," % ( self.quantity )
+        a = a + "'linkable': '%s'," % ( self.linkable )
+        a = a + "'neurodata_type': '%s'," % ( self.neurodata_type )
+        a = a + "'neurodata_type_def': '%s'," % ( self.neurodata_type_def )
+        return a
 
     @property
     def attributes(self):
@@ -250,6 +288,13 @@ class DatasetSpec(BaseStorageSpec):
         if dtype is not None:
             self['type'] = dtype
 
+    def __str__(self):
+        a = super(DatasetSpec, self).__str__()
+        #a = a + "\nDatasetSpec: "
+        a = a + "'shape': '%s'," % ( self.get('shape', None) )
+        a = a + "'type': '%s'," % ( self['type'] )
+        return a
+
     @property
     def shape(self):
         return self['shape']
@@ -281,6 +326,12 @@ class LinkSpec(Spec):
         super(LinkSpec, self).__init__(doc, name, **kwargs)
         self['target_type'] = target_type
 
+    def __str__(self):
+        a = super(LinkSpec, self).__str__()
+        #a = a + "\nLinkSpec: "
+        a = a + "'target_type': '%s'," % ( self['target_type'] )
+        return a
+
     @property
     def neurodata_type(self):
         return self['target_type'].get('neurodata_type', None)
@@ -305,16 +356,38 @@ class GroupSpec(BaseStorageSpec):
     def __init__(self, **kwargs):
         doc, groups, datasets, links = popargs('doc', 'groups', 'datasets', 'links', kwargs)
         super(GroupSpec, self).__init__(doc, **kwargs)
-        self.__neurodata_types = dict()
-        self.__groups = dict()
+        ##self.__neurodata_types = dict()
+        self.__neurodata_types = OrderedDict()
+        ##self.__groups = dict()
+        self.__groups = OrderedDict()
         for group in groups:
             self.set_group(group)
-        self.__datasets = dict()
+        ##self.__datasets = dict()
+        self.__datasets = OrderedDict()
         for dataset in datasets:
             self.set_dataset(dataset)
-        self.__links = dict()
+        ##self.__links = dict()
+        self.__links = OrderedDict()
         for link in links:
             self.set_link(link)
+
+    def __str__(self):
+        global CountNum
+        CountNum = CountNum + 1
+        a = "{"
+        a = a + super(GroupSpec, self).__str__()
+        #a = a + "\n\n'GroupSpec' %s: " % (CountNum)
+        if self.__neurodata_types:
+            a = a + "'neurodata_types': %s" % (PrintDict(self.__neurodata_types))
+        if self.__groups:
+            a = a + "'groups': %s" % (PrintDict(self.__groups))
+        if self.__datasets:
+            a = a + "'datasets': %s" % (PrintDict(self.__datasets))
+        if self.__links:
+            a = a + "'links': %s" % (PrintDict(self.__links))
+        a = a + "}"
+        CountNum = CountNum - 1
+        return a
 
     def __add_neurodata_type(self, spec):
         if spec.neurodata_type in self.__neurodata_types:
@@ -456,7 +529,14 @@ class GroupSpec(BaseStorageSpec):
 class SpecCatalog(object):
 
     def __init__(self):
-        self.__specs = dict()
+        ##self.__specs = dict()
+        self.__specs = OrderedDict()
+
+    def __str__(self):
+        a = '{'
+        a = a + PrintDict( self.__specs )
+        a = a + '}'
+        return a
 
     @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
             {'name': 'spec', 'type': BaseStorageSpec, 'doc': 'a Spec object'})

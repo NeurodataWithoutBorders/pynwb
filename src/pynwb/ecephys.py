@@ -11,7 +11,7 @@ class ElectricalSeries(TimeSeries):
     channels] (or [num_times] for single electrode).
     """
 
-    __nwbfields__ = ('electrodes',)
+    __nwbfields__ = ('electrode_group',)
 
     __ancestry = "TimeSeries,ElectricalSeries"
     __help = "Stores acquired voltage data from extracellular recordings."
@@ -22,7 +22,7 @@ class ElectricalSeries(TimeSeries):
                                                    'acquisition data')},
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
-            {'name': 'electrodes', 'type': (list, tuple), 'doc': 'the names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to'},
+            {'name': 'electrode_group', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'The names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to.', 'ndim': 1},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
@@ -38,9 +38,9 @@ class ElectricalSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', kwargs)
+        name, source, electrode_group, data = popargs('name', 'source', 'electrode_group', 'data', kwargs)
         super(ElectricalSeries, self).__init__(name, source, data, 'volt', **kwargs)
-        self.electrodes = tuple(electrodes)
+        self.electrode_group = tuple(electrode_group)
 
 
 class SpikeEventSeries(ElectricalSeries):
@@ -65,7 +65,7 @@ class SpikeEventSeries(ElectricalSeries):
                                                    'acquisition data')},
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
-            {'name': 'electrodes', 'type': (list, tuple), 'doc': 'the names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to'},
+            {'name': 'electrode_group', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'The names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to.', 'ndim': 1},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
@@ -81,10 +81,13 @@ class SpikeEventSeries(ElectricalSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', kwargs)
-        super(SpikeEventSeries, self).__init__(name, source, electrodes, data, **kwargs)
+        name, source, electrode_group, data = popargs('name', 'source', 'electrode_group', 'data', kwargs)
+        super(SpikeEventSeries, self).__init__(name, source, electrode_group, data, **kwargs)
 
 class ElectrodeGroup(NWBContainer):
+    """
+    """
+
     __nwbfields__ = ('name',
                      'description',
                      'device',
@@ -114,30 +117,27 @@ class EventDetection(Interface):
     Detected spike events from voltage trace(s).
     """
 
-    __nwbfields__ =  ('detection_method',
-                      'source_indices',
-                      'event_times',
-                      'data')
+    __nwbfields__ = ('detection_method',
+                     'source_electricalseries',
+                     'source_idx',
+                     'times')
 
     _help_statement = ("Description of how events were detected, such as voltage "
                        "threshold, or dV/dT threshold, as well as relevant values.")
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'data', 'type': ElectricalSeries, 'doc': 'the source electrophysiology data'},
-            {'name': 'detection_method', 'type': str, 'doc': 'a description of how events were detected'},
-            {'name': 'event_times', 'type': Iterable, 'doc': 'timestamps of events, in Seconds'})
-    def __init___(self, **kwargs):
-        source, data, detection_method, event_times = popargs('source', 'data', 'detection_method', 'event_times', kwargs)
+            {'name': 'detection_method', 'type': str, 'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, as well as relevant values.'},
+            {'name': 'source_electricalseries', 'type': ElectricalSeries, 'doc': 'The source electrophysiology data'},
+            {'name': 'source_idx', 'type': Iterable, 'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding to time of event. Module description should define what is meant by time of event (e.g., .25msec before action potential peak, zero-crossing time, etc). The index points to each event from the raw data'},
+            {'name': 'times', 'type': Iterable, 'doc': 'Timestamps of events, in Seconds'})
+    def __init__(self, **kwargs):
+        source, detection_method, source_electricalseries, source_idx, times = popargs('source', 'detection_method', 'source_electricalseries', 'source_idx', 'times', kwargs)
         super(EventDetection, self).__init__(source, **kwargs)
         self.detection_method = detection_method
-        self.event_times = event_times
-        self.source_indices = list() # I think we should calculate this under the hood
         # do not set parent, since this is a link
-        self.data = data
-
-    #def add_event(self, idx, time):
-    #    self.source_indices.append(idx)
-    #    self.event_time.append(time)
+        self.source_electricalseries = source_electricalseries
+        self.source_idx = source_idx
+        self.times = times
 
 class EventWaveform(Interface):
     """
@@ -145,67 +145,70 @@ class EventWaveform(Interface):
     stored in this NWBFile, or events detect at acquisition
     """
 
-    __nwbfields__ = ('data',)
+    __nwbfields__ = ('spike_event_series',)
 
     __help = "Waveform of detected extracellularly recorded spike events"
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'data', 'type': SpikeEventSeries, 'doc': 'spiking event data'})
+            {'name': 'spike_event_series', 'type': SpikeEventSeries, 'doc': 'spiking event data'})
     def __init__(self, **kwargs):
-        source, data = popargs('source', 'data', kwargs)
+        source, spike_event_series = popargs('source', 'spike_event_series', kwargs)
         super(EventWaveform, self).__init__(source, **kwargs)
-        data.parent = self
-        self.data = data
+        spike_event_series.parent = self
+        self.spike_event_series = spike_event_series
 
 class Clustering(Interface):
     """
     Specifies cluster event times and cluster metric for maximum ratio of waveform peak to RMS on any channel in cluster.
     """
 
-    __nwbfields__  = ('cluster_times',
-                      'cluster_ids',
-                      'peak_over_rms')
+    __nwbfields__  = ('description',
+                      'num',
+                      'peak_over_rms',
+                      'times')
 
     __help = ("Clustered spike data, whether from automatic clustering "
-             "tools (eg, klustakwik) or as a result of manual sorting")
+             "tools (eg, klustakwik) or as a result of manual sorting.")
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'cluster_times', 'type': (tuple, list, np.ndarray), 'doc': 'times of clustered events'},
-            {'name': 'cluster_ids', 'type': (tuple, list, np.ndarray), 'doc': 'description of clusters and/or clustering method'},
-            {'name': 'peak_over_rms', 'type': (tuple, list, np.ndarray), 'doc': 'maximum ratio of waveform peak to RMS on any channel in the cluster'})
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface'},
+            {'name': 'description', 'type': str, 'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, clusters curated using Klusters, etc).'},
+            {'name': 'num', 'type': (tuple, list, np.ndarray), 'doc': 'Cluster number of each event.'},
+            {'name': 'peak_over_rms', 'type': (tuple, list, np.ndarray), 'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster(provides a basic clustering metric).'},
+            {'name': 'times', 'type': (tuple, list, np.ndarray), 'doc': 'Times of clustered events, in seconds.'})
     def __init__(self, **kwargs):
-        source, cluster_times, cluster_ids, peak_over_rms = popargs('source', 'cluster_times', 'cluster_ids', 'peak_over_rms', kwargs)
+        source, description, num, peak_over_rms, times = popargs('source', 'description', 'num', 'peak_over_rms', 'times', kwargs)
         super(Clustering, self).__init__(source, **kwargs)
-        self.cluster_times = cluster_times
-        self.cluster_ids = cluster_ids
+        self.description = description
+        self.num = num
         self.peak_over_rms = list(peak_over_rms)
+        self.times = times
 
-class ClusterWaveform(Interface):
+class ClusterWaveforms(Interface):
     """
     Describe cluster waveforms by mean and standard deviation for at each sample.
     """
 
-    __nwbfields__ = ('clustering',
-                     'filtering',
-                     'means',
-                     'stdevs')
+    __nwbfields__ = ('clustering_interface',
+                     'waveform_filtering',
+                     'waveform_mean',
+                     'waveform_sd')
 
     __help = ("Mean waveform shape of clusters. Waveforms should be "
              "high-pass filtered (ie, not the same bandpass filter "
              "used waveform analysis and clustering)")
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'clustering', 'type': Clustering, 'doc': 'the clustered spike data used as input for computing waveforms'},
-            {'name': 'filtering', 'type': str, 'doc': 'filter applied to data before calculating mean and standard deviation'},
-            {'name': 'means', 'type': Iterable, 'doc': 'the mean waveform for each cluster'},
-            {'name': 'stdevs', 'type': Iterable, 'doc': 'the standard deviations of waveforms for each cluster'})
+            {'name': 'clustering_interface', 'type': Clustering, 'doc': 'the clustered spike data used as input for computing waveforms'},
+            {'name': 'waveform_filtering', 'type': str, 'doc': 'filter applied to data before calculating mean and standard deviation'},
+            {'name': 'waveform_mean', 'type': Iterable, 'doc': 'the mean waveform for each cluster'},
+            {'name': 'waveform_sd', 'type': Iterable, 'doc': 'the standard deviations of waveforms for each cluster'})
     def __init__(self, **kwargs):
-        source, clustering, filtering, means, stdevs = popargs('source', 'clustering', 'filtering', 'means', 'stdevs', kwargs)
-        super(ClusterWaveform, self).__init__(source, **kwargs)
-        self.clustering = clustering
-        self.filtering = filtering
-        self.means = means
-        self.stdevs = stdevs
+        source, clustering_interface, waveform_filtering, waveform_mean, waveform_sd = popargs('source', 'clustering_interface', 'waveform_filtering', 'waveform_mean', 'waveform_sd', kwargs)
+        super(ClusterWaveforms, self).__init__(source, **kwargs)
+        self.clustering_interface = clustering_interface
+        self.waveform_filtering = waveform_filtering
+        self.waveform_mean = waveform_mean
+        self.waveform_sd = waveform_sd
 
 class LFP(Interface):
     """
@@ -214,18 +217,18 @@ class LFP(Interface):
     ElectricalSeries description or comments field.
     """
 
-    __nwbfields__ = ('data',)
+    __nwbfields__ = ('electrical_series',)
 
     __help = ("LFP data from one or more channels. Filter properties "
              "should be noted in the ElectricalSeries")
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'data', 'type': ElectricalSeries, 'doc': 'LFP electrophysiology data'})
+            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'LFP electrophysiology data'})
     def __init__(self, **kwargs):
-        source, data = popargs('source', 'data', kwargs)
+        source, electrical_series = popargs('source', 'electrical_series', kwargs)
         super(LFP, self).__init__(source, **kwargs)
-        data.parent = self
-        self.data = data
+        electrical_series.parent = self
+        self.electrical_series = electrical_series
 
 class FilteredEphys(Interface):
     """
@@ -239,19 +242,19 @@ class FilteredEphys(Interface):
     electrode may have different filtered (e.g., theta and/or gamma) signals represented.
     """
 
-    __nwbfields__ = ('_ElectricalSeries',)
+    __nwbfields__ = ('electrical_series',)
 
     __help = ("Ephys data from one or more channels that is subjected to filtering, such as "
              "for gamma or theta oscillations (LFP has its own interface). Filter properties should "
              "be noted in the ElectricalSeries")
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': '_ElectricalSeries', 'type': ElectricalSeries, 'doc': 'filtered electrophysiology data'})
+            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'filtered electrophysiology data'})
     def __init__(self, **kwargs):
-        source, _ElectricalSeries = popargs('source', '_ElectricalSeries', kwargs)
+        source, electrical_series = popargs('source', 'electrical_series', kwargs)
         super(FilteredEphys, self).__init__(source, **kwargs)
-        _ElectricalSeries.parent = self
-        self._ElectricalSeries = _ElectricalSeries
+        electrical_series.parent = self
+        self.electrical_series = electrical_series
 
 class FeatureExtraction(Interface):
     """
@@ -261,37 +264,37 @@ class FeatureExtraction(Interface):
 
     __nwbfields__ = ('description',
                      'electrodes',
-                     'event_times',
+                     'times',
                      'features')
 
     __help = "Container for salient features of detected events"
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'electrodes', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'the electrode groups for each channel from which features were extracted', 'ndim': 1},
-            {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'a description for each feature extracted', 'ndim': 1},
-            {'name': 'event_times', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'the times of events that features correspond to', 'ndim': 1},
-            {'name': 'features', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'features for each channel', 'ndim': 3})
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface'},
+            {'name': 'electrode_group', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'The electrode groups for each channel from which features were extracted', 'ndim': 1},
+            {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'A description for each feature extracted', 'ndim': 1},
+            {'name': 'times', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'The times of events that features correspond to', 'ndim': 1},
+            {'name': 'features', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'Features for each channel', 'ndim': 3})
     def __init__(self, **kwargs):
         # get the inputs
-        source, electrodes, description, event_times, features = popargs('source', 'electrodes', 'description', 'event_times', 'features', kwargs)
+        source, electrode_group, description, times, features = popargs('source', 'electrode_group', 'description', 'times', 'features', kwargs)
 
         # Validate the shape of the inputs
         # Validate event times compared to features
         shape_validators = []
         shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=event_times,
+                                                                data2=times,
                                                                 axes1=0,
                                                                 axes2=0,
                                                                 name1='feature_shape',
-                                                                name2='event_times',
+                                                                name2='times',
                                                                 ignore_undetermined=True))
         # Validate electrodes compared to features
         shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=electrodes,
+                                                                data2=electrode_group,
                                                                 axes1=1,
                                                                 axes2=0,
                                                                 name1='feature_shape',
-                                                                name2='electrodes',
+                                                                name2='electrode_group',
                                                                 ignore_undetermined=True))
         # Valided description compared to features
         shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
@@ -314,8 +317,8 @@ class FeatureExtraction(Interface):
 
         # Initalize the object
         super(FeatureExtraction, self).__init__(source, **kwargs)
-        self.fields['electrodes'] = electrodes
+        self.fields['electrode_group'] = electrode_group
         self.fields['description'] = description
-        self.fields['event_times'] = list(event_times)
+        self.fields['times'] = list(times)
         self.fields['features'] = features
 

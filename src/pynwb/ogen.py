@@ -4,6 +4,11 @@ from .core import docval, popargs, NWBContainer
 import numpy as np
 from collections import Iterable
 
+
+class OptogeneticStimulusSite(NWBContainer):
+    # see /general/optogenetics/<site_X> spec
+    pass
+
 class OptogeneticSeries(TimeSeries):
     '''
     Optogenetic stimulus. The data[] field is in unit of watts.
@@ -21,7 +26,7 @@ class OptogeneticSeries(TimeSeries):
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'Value is the string "Watt".', 'default': 'Watt'},
 
-            {'name': 'site', 'type': str, 'doc': 'Name of site description in general/optogentics.'},
+            {'name': 'site', 'type': OptogeneticStimulusSite, 'doc': 'Name of site description in general/optogentics.'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
@@ -41,8 +46,4 @@ class OptogeneticSeries(TimeSeries):
         site = popargs('site', kwargs)
         super(OptogeneticSeries, self).__init__(name, source, data, unit, **kwargs)
         self.site = site
-
-class OptogeneticSite(NWBContainer):
-    # see /general/optogenetics/<site_X> spec
-    pass
 
