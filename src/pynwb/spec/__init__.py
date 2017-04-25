@@ -26,7 +26,8 @@ def __build_catalog(data_dir_path):
         with open(path, 'r') as stream:
             for obj in yaml.safe_load(stream):
                 spec_obj = GroupSpec.build_spec(obj)
-                spec_catalog.auto_register(spec_obj)
+                spec_catalog.auto_register(spec_obj,
+                                           source_file=path)
     return spec_catalog
 
 __resources = __get_resources()

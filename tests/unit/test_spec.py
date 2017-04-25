@@ -197,5 +197,13 @@ class SpecCatalogTest(unittest.TestCase):
         self.assertTupleEqual(lfp_hierarchy, ('LFPData', 'EphysData'))
         self.assertTupleEqual(ephys_hierarchy, ('EphysData',))
 
+    def test_get_spec_source_file(self):
+        spikes_spec = GroupSpec('test group',
+                                neurodata_type_def='SpikeData')
+        source_file_path = '/test/myt/test.yaml'
+        self.catalog.auto_register(spikes_spec, source_file_path)
+        recorded_source_file_path = self.catalog.get_spec_source_file('SpikeData')
+        self.assertEqual(recorded_source_file_path, source_file_path)
+
 if __name__ == '__main__':
     unittest.main()
