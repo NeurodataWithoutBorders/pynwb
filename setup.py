@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from setuptools import setup
+from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
 
 from urllib.request import urlretrieve
@@ -10,7 +10,7 @@ import os
 from tarfile import TarFile
 
 
-schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
+schema_dir = '%s/src/pynwb/spec/data' % os.path.abspath(os.path.dirname(__file__))
 class CustomBuild(build_py):
     def run(self):
         '''Here, we will do something to access a URL stored in the pynwb repo.
@@ -40,6 +40,9 @@ pkgs=['pynwb',
       'pynwb.io',
       'pynwb.spec' ]
 
+pkgs = find_packages('src', exclude=['data'])
+print('found these packages:', pkgs)
+
 setup_args = {
     'name': 'pynwb',
     'version': '0.0.1',
@@ -52,6 +55,7 @@ setup_args = {
     'packages': pkgs,
     'package_dir': {'': 'src'},
     'package_data': {'pynwb':["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
+    #'package_data': {'pynwb':["data/*.yaml"]},
     'cmdclass':{
         'build_py': CustomBuild,
     }
