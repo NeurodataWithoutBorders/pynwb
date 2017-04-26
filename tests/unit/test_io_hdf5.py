@@ -51,7 +51,29 @@ class GroupBuilderTestCase(unittest.TestCase):
             return obj[...]
         return obj
 
+    def __compare_attr_dicts(self, a, b):
+        reasons = list()
+        b_keys = set(b.keys())
+        for k in a:
+            if k not in b:
+                reasons.append("'%s' attribute missing from second dataset" % k)
+            else:
+                if a[k] != b[k]:
+                    reasons.append("'%s' attribute on datasets not equal" % k)
+                b_keys.remove(k)
+        for k in b_keys:
+            reasons.append("'%s' attribute missing from first dataset" % k)
+        return reasons
+
+
     def __compare_dataset(self, a, b):
+        reasons = self.__compare_attr_dicts(a.attributes, b.attributes)
+        if not self.__compare_data(a.data, b.data):
+            reasons.append("dataset '%s' not equal" % a.name)
+        return reasons
+
+
+    def __compare_data(self, a, b):
         if isinstance(a, Number) and isinstance(b, Number):
             return a == b
         elif isinstance(a, Number) != isinstance(b, Number):
@@ -65,7 +87,7 @@ class GroupBuilderTestCase(unittest.TestCase):
                 return False
             if len(a) == len(b):
                 for i in range(len(a)):
-                    if not self.__compare_dataset(a[i], b[i]):
+                    if not self.__compare_data(a[i], b[i]):
                         return False
             else:
                 return False
@@ -88,8 +110,9 @@ class GroupBuilderTestCase(unittest.TestCase):
                 elif isinstance(a_sub, LinkBuilder) != isinstance(a_sub, LinkBuilder):
                     reasons.append('%s != %s' % (a_sub, b_sub))
                 if isinstance(a_sub, DatasetBuilder) and isinstance(a_sub, DatasetBuilder):
-                    if not self.__compare_dataset(a_sub['data'], b_sub['data']):
-                        reasons.append('%s != %s' % (a_sub['data'], b_sub['data']))
+                    #if not self.__compare_dataset(a_sub, b_sub):
+                    #    reasons.append('%s != %s' % (a_sub, b_sub))
+                    reasons.extend(self.__compare_dataset(a_sub, b_sub))
                 elif isinstance(a_sub, GroupBuilder) and isinstance(a_sub, GroupBuilder):
                     reasons.extend(self.__assert_helper(a_sub, b_sub))
                 else:
@@ -103,6 +126,7 @@ class GroupBuilderTestCase(unittest.TestCase):
 
 
     def assertBuilderEqual(self, a, b):
+        ''' Tests that two GroupBuilders are equal '''
         reasons = self.__assert_helper(a,b)
         if len(reasons):
             raise AssertionError(', '.join(reasons))
@@ -116,9 +140,6 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.path = "test_pynwb_io_hdf5.h5"
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)
-        #self.container = NWBFile('test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
-        #ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
-        #self.container.add_raw_timeseries(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
                                  attributes={'ancestry': 'TimeSeries',
@@ -148,7 +169,6 @@ class TestHDF5Writer(GroupBuilderTestCase):
     def tearDown(self):
         os.remove(self.path)
 
-    @unittest.skip('not now')
     def test_write_builder(self):
         writer = HDF5IO(self.path)
         writer.write_builder(self.builder)
@@ -176,4 +196,5 @@ class TestHDF5Writer(GroupBuilderTestCase):
         io.write_builder(self.builder)
         io.close()
         builder = io.read_builder()
+        #print('RECEIVED:', json.dumps(builder,indent=2, cls=HDF5Encoder))
         self.assertBuilderEqual(builder, self.builder)
