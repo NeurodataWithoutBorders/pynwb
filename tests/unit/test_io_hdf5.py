@@ -146,8 +146,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
                                  attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        pass
-        #os.remove(self.path)
+        os.remove(self.path)
 
     @unittest.skip('not now')
     def test_write_builder(self):
