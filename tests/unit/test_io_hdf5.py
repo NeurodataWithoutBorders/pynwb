@@ -1,14 +1,114 @@
 import unittest
 from datetime import datetime
 import os
-from h5py import File
+from h5py import File, Dataset
 
 from pynwb.io.hdf5 import HDF5IO
 from pynwb.io import BuildManager
 from pynwb import NWBFile, TimeSeries
-from pynwb.io.build.builders import GroupBuilder, DatasetBuilder
+from pynwb.io.build.builders import GroupBuilder, DatasetBuilder, LinkBuilder
 
-class TestHDF5Writer(unittest.TestCase):
+from numbers import Number
+
+import json
+import numpy as np
+
+class HDF5Encoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, Dataset):
+            ret = None
+            for t in (list, str):
+                try:
+                    ret = t(obj)
+                    break
+                except:
+                    pass
+            if ret is None:
+                return obj
+            else:
+                return ret
+        elif isinstance(obj, np.int64):
+            return int(obj)
+        elif isinstance(obj, bytes):
+            return str(obj)
+        return json.JSONEncoder.default(self, obj)
+
+class GroupBuilderTestCase(unittest.TestCase):
+
+    def __is_scalar(self, obj):
+        if hasattr(obj, 'shape'):
+            return len(obj.shape) == 0
+        else:
+            if any(isinstance(obj, t) for t in (int, str, float)):
+                return True
+        return False
+
+    def __convert_h5_scalar(self, obj):
+        if isinstance(obj, Dataset):
+            return obj[...]
+        return obj
+
+    def __compare_dataset(self, a, b):
+        if isinstance(a, Number) and isinstance(b, Number):
+            return a == b
+        elif isinstance(a, Number) != isinstance(b, Number):
+            return False
+        else:
+            a_dset = a
+            b_dset = b
+            a_scalar = self.__is_scalar(a_dset)
+            b_scalar = self.__is_scalar(b_dset)
+            if a_scalar and b_scalar:
+                return self.__convert_h5_scalar(a_scalar) == self.__convert_h5_scalar(b_scalar)
+            elif a_scalar != b_scalar:
+                return False
+            if len(a_dset) == len(b_dset):
+                for i in range(len(a_dset)):
+                    if not self.__compare_dataset(a_dset[i], b_dset[i]):
+                        return False
+            else:
+                return False
+        return True
+
+
+    def __fmt(self, val):
+        return "%s (%s)" % (val, type(val))
+
+    def __assert_helper(self, a, b):
+        reasons = list()
+        b_keys = set(b.keys())
+        for k, a_sub in a.items():
+            if k in b:
+                b_sub = b[k]
+                b_keys.remove(k)
+                if isinstance(a_sub, LinkBuilder) and isinstance(a_sub, LinkBuilder):
+                    a_sub = a_sub['target']
+                    b_sub = b_sub['target']
+                elif isinstance(a_sub, LinkBuilder) != isinstance(a_sub, LinkBuilder):
+                    reasons.append('%s != %s' % (a_sub, b_sub))
+                if isinstance(a_sub, DatasetBuilder) and isinstance(a_sub, DatasetBuilder):
+                    if not self.__compare_dataset(a_sub['data'], b_sub['data']):
+                        reasons.append('%s != %s' % (a_sub['data'], b_sub['data']))
+                elif isinstance(a_sub, GroupBuilder) and isinstance(a_sub, GroupBuilder):
+                    reasons.extend(self.__assert_helper(a_sub, b_sub))
+                else:
+                    if a_sub != b_sub:
+                        reasons.append('%s != %s' % (self.__fmt(a_sub), self.__fmt(b_sub)))
+            else:
+                reasons.append("'%s' not in both" % k)
+        for k in b_keys:
+            reasons.append("'%s' not in both" % k)
+        return reasons
+
+
+    def assertBuilderEqual(self, a, b):
+        reasons = self.__assert_helper(a,b)
+        if len(reasons):
+            raise AssertionError(', '.join(reasons))
+        return True
+
+
+class TestHDF5Writer(GroupBuilderTestCase):
 
     def setUp(self):
         self.manager = BuildManager()
@@ -74,4 +174,6 @@ class TestHDF5Writer(unittest.TestCase):
         io.write_builder(self.builder)
         io.close()
         builder = io.read_builder()
-        self.assertEqual(builder, self.builder)
+        print('EXPECTED', json.dumps(self.builder, indent=2))
+        print('RECEIVED', json.dumps(builder, indent=2, cls=HDF5Encoder))
+        self.assertBuilderEqual(builder, self.builder)
