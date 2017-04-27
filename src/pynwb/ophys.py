@@ -1,6 +1,7 @@
 from .base import Interface, TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import docval, popargs, NWBContainer
+from .core import NWBContainer
+from .utils import docval, popargs
 
 from collections import Iterable
 import numpy as np

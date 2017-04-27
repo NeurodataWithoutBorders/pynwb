@@ -1,4 +1,4 @@
-from .core import docval, getargs, popargs
+from .utils import docval, getargs, popargs
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution
 
 import numpy as np
