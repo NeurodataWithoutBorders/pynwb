@@ -6,6 +6,8 @@ from collections import Iterable
 
 import numpy as np
 
+from .spec import DEFAULT_NAMESPACE
+
 def __type_okay(value, argtype, allow_none=False):
     if value is None:
         return allow_none
@@ -341,6 +343,8 @@ class NWBContainer(object, metaclass=ExtenderMeta):
 
     __nwbfields__ = tuple()
 
+    __namespace = DEFAULT_NAMESPACE
+
     @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
@@ -355,6 +359,10 @@ class NWBContainer(object, metaclass=ExtenderMeta):
     @property
     def neurodata_type(self):
         return self.__class__.__name__
+
+    @property
+    def namespace(cls):
+        return getattr(cls, '_%s__namespace' % cls.__name__)
 
     @property
     def container_source(self):
