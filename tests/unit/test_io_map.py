@@ -2,7 +2,8 @@ import unittest
 
 from pynwb.spec import GroupSpec, AttributeSpec, DatasetSpec
 from pynwb.io.build.builders import GroupBuilder, DatasetBuilder
-from pynwb.core import NWBContainer, docval, getargs
+from pynwb.core import NWBContainer
+from pynwb.utils import docval, getargs
 from pynwb.spec.spec import SpecCatalog
 from pynwb.io.build.map import ObjectMapper, BuildManager, TypeMap, get_subspec
 

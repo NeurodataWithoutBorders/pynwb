@@ -1,7 +1,7 @@
 import abc
 from datetime import datetime
 from copy import deepcopy
-from pynwb.core import docval, getargs, popargs, get_docval
+from pynwb.utils import docval, getargs, popargs, get_docval
 
 NAME_WILDCARD = None
 ZERO_OR_ONE = '?'
@@ -13,7 +13,24 @@ FLAGS = {
     'one_or_many': ONE_OR_MANY
 }
 
-class Spec(dict, metaclass=abc.ABCMeta):
+
+class ConstructableDict(dict, metaclass=abc.ABCMeta):
+    @classmethod
+    def build_const_args(cls, spec_dict):
+        ''' Build constructor arguments for this ConstructableDict class from a dictionary '''
+        return deepcopy(spec_dict)
+
+    @classmethod
+    def build_spec(cls, spec_dict):
+        ''' Build a Spec object from the given Spec dict '''
+        kwargs = cls.build_const_args(spec_dict)
+        try:
+            args = [kwargs.pop(x['name']) for x in get_docval(cls.__init__) if 'default' not in x]
+        except KeyError as e:
+            raise KeyError("'%s' not found in %s" % (e.args[0], str(spec_dict)))
+        return cls(*args, **kwargs)
+
+class Spec(ConstructableDict):
     ''' A base specification class
     '''
 
@@ -61,7 +78,7 @@ class Spec(dict, metaclass=abc.ABCMeta):
     @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
-        ret = deepcopy(spec_dict)
+        ret = super(Spec, cls).build_const_args(spec_dict)
         if 'doc' not in ret:
             identifer = None
             if 'name' in ret:
@@ -72,16 +89,6 @@ class Spec(dict, metaclass=abc.ABCMeta):
                 identifier = "neurodata_type '%s'" % ret['neurodata_type']
             raise ValueError("doc missing in spec with %s" % identifier)
         return ret
-
-    @classmethod
-    def build_spec(cls, spec_dict):
-        ''' Build a Spec object from the given Spec dict '''
-        kwargs = cls.build_const_args(spec_dict)
-        try:
-            args = [kwargs.pop(x['name']) for x in get_docval(cls.__init__) if 'default' not in x]
-        except KeyError as e:
-            raise KeyError("'%s' not found in %s" % (e.args[0], str(spec_dict)))
-        return cls(*args, **kwargs)
 
     def __hash__(self):
         return id(self)
@@ -665,7 +672,6 @@ class SpecCatalog(object):
 _namespace_args = [
     {'name': 'doc', 'type': str, 'doc': 'a description about what this namespace represents'},
     {'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
-    {'name': 'catalog', 'type': SpecCatalog, 'doc': 'Catalog with the specifications associated with this namespace'},
     {'name': 'full_name', 'type': str, 'doc': 'extended full name of this namespace', 'default': None},
     {'name': 'version', 'type': (str, tuple, list), 'doc': 'Version number of the namespace', 'default': None},
     {'name': 'date', 'type': (datetime, str), 'doc': "Date last modified or released. Formatting is %Y-%m-%d %H:%M:%S, e.g, 2017-04-25 17:14:13",
@@ -673,17 +679,17 @@ _namespace_args = [
     {'name': 'author', 'type': (str, list), 'doc': 'Author or list of authors.', 'default': None},
     {'name': 'contact', 'type': (str, list), 'doc': 'List of emails. Ordering should be the same as for author', 'default': None}
 ]
-class NamespaceSpec(Spec):
+class SpecNamespace(ConstructableDict):
     """
-    Specification of a Namespace of type specifications
+    A namespace for specifications
     """
     @docval(*deepcopy(_namespace_args))
     def __init__(self, **kwargs):
-        doc, catalog, full_name, version, date, author, contact  = \
-            popargs('doc', 'catalog', 'full_name', 'version', 'date', 'author', 'contact', kwargs)
-        super(NamespaceSpec, self).__init__(doc, **kwargs)
-        if catalog is not None:
-            self['catalog'] = catalog
+        doc, full_name, version, date, author, contact  = \
+            popargs('doc', 'full_name', 'version', 'date', 'author', 'contact', kwargs)
+        super(SpecNamespace, self).__init__()
+        if doc is not None:
+            self['doc'] = doc
         if full_name is not None:
             self['full_name'] = full_name
         if version is not None:

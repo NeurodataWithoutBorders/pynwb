@@ -3,7 +3,7 @@ import numpy as np
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink
 import os.path
 
-from pynwb.core import DataChunkIterator, docval, getargs, popargs
+from pynwb.utils import DataChunkIterator, docval, getargs, popargs
 
 #from ..io import NWBReader, NWBWriter
 from ..io import NWBIO

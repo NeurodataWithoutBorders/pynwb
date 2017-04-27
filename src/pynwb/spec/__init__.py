@@ -5,6 +5,7 @@ from .spec import AttributeSpec
 from .spec import DatasetSpec
 from .spec import LinkSpec
 from .spec import GroupSpec
+from .spec import SpecNamespace
 
 def __get_resources():
     from pkg_resources import resource_filename
@@ -34,3 +35,4 @@ def __build_catalog(data_dir_path):
 __resources = __get_resources()
 
 CATALOG = __build_catalog(__resources['data_dir_path'])
+DEFAULT_NAMESPACE = 'core'

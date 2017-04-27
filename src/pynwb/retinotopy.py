@@ -1,4 +1,4 @@
-from .core import docval, popargs
+from .utils import docval, popargs
 from .base import Interface
 
 from collections import Iterable

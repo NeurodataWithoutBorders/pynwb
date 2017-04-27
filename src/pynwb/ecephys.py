@@ -1,5 +1,6 @@
 from .base import TimeSeries, Interface, _default_resolution, _default_conversion
-from .core import docval, popargs, NWBContainer, DataChunkIterator, ShapeValidator
+from .utils import docval, popargs, DataChunkIterator, ShapeValidator
+from .core import NWBContainer
 
 import numpy as np
 from collections import Iterable

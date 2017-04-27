@@ -1,4 +1,4 @@
-from .core import docval, popargs
+from .utils import docval, popargs
 from pynwb.misc import IntervalSeries
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution
 

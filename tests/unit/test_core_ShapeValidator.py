@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.core import ShapeValidator,ShapeValidatorResult, DataChunkIterator
+from pynwb.utils import ShapeValidator,ShapeValidatorResult, DataChunkIterator
 import numpy as np
 
 

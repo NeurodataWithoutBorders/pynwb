@@ -1,4 +1,5 @@
-from pynwb.core import docval, getargs, ExtenderMeta, NWBContainer, get_docval
+from pynwb.utils import docval, getargs, ExtenderMeta, get_docval
+from pynwb.core import NWBContainer
 from pynwb.spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD
 from pynwb.spec.spec import SpecCatalog
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder

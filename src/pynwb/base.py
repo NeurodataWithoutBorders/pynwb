@@ -1,7 +1,8 @@
 import numpy as np
 from collections import Iterable
 
-from pynwb.core import docval, getargs, popargs, NWBContainer
+from .utils import docval, getargs, popargs
+from .core import  NWBContainer
 
 _default_conversion = 1.0
 _default_resolution = float("nan")

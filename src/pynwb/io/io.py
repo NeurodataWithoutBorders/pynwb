@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from .build import BuildManager
 from .build import GroupBuilder
-from ..core import docval, popargs, getargs
+from ..utils import docval, popargs, getargs
 from ..file import NWBFile
 
 class NWBReader(object, metaclass=ABCMeta):

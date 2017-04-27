@@ -3,7 +3,8 @@ import numpy as np
 import bisect
 
 from .base import TimeSeries
-from .core import docval, getargs, NWBContainer
+from .utils import docval, getargs
+from .core import NWBContainer
 
 #@nwbproperties(*__std_fields, neurodata_type='Epoch')
 class Epoch(NWBContainer):

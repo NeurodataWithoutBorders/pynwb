@@ -10,7 +10,7 @@ import posixpath as _posixpath
 from abc import ABCMeta
 
 import numpy as np
-from pynwb.core import docval, getargs
+from pynwb.utils import docval, getargs
 
 class Builder(dict, metaclass=ABCMeta):
 

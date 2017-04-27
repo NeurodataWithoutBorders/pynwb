@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.core import DataChunkIterator, DataChunk
+from pynwb.utils import DataChunkIterator, DataChunk
 import numpy as np
 
 
