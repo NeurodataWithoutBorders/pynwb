@@ -1,7 +1,7 @@
 import unittest
 
 from pynwb.spec import GroupSpec, DatasetSpec, AttributeSpec, Spec
-from pynwb.spec.spec import SpecCatalog
+from pynwb.spec.catalog import SpecCatalog
 
 import json
 

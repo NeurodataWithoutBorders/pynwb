@@ -5,7 +5,8 @@ from pynwb.spec import GroupSpec, AttributeSpec, DatasetSpec
 from pynwb.io.build.builders import GroupBuilder, DatasetBuilder
 from pynwb.core import NWBContainer
 from pynwb.utils import docval, getargs
-from pynwb.spec.spec import SpecCatalog, ZERO_OR_MANY
+from pynwb.spec.catalog import SpecCatalog
+from pynwb.spec.spec import ZERO_OR_MANY
 from pynwb.io.build.map import ObjectMapper, BuildManager, TypeMap
 
 class Foo(NWBContainer):
