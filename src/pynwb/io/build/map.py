@@ -1,7 +1,7 @@
 from pynwb.utils import docval, getargs, ExtenderMeta, get_docval
 from pynwb.core import NWBContainer
-from pynwb.spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD
-from pynwb.spec.spec import SpecCatalog
+from pynwb.spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, DEFAULT_NAMESPACE
+from pynwb.spec.catalog import SpecCatalog
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
 
 import re
@@ -90,12 +90,14 @@ class BuildManager(object):
 
 class TypeMap(object):
 
-    @docval({'name': 'catalog', 'type': SpecCatalog, 'doc': 'a catalog of existing specifications'})
+    #@docval({'name': 'catalog', 'type': SpecCatalog, 'doc': 'a catalog of existing specifications'})
+    @docval({'name': 'namespaces', 'type': list, 'doc': 'namespaces to use for building'})
     def __init__(self, **kwargs):
-        catalog = getargs('catalog', kwargs)
+        namespaces = getargs('namespaces', kwargs)
         self.__maps = dict()
         self.__map_types = dict()
-        self.__catalog = catalog
+        #self.__catalog = catalog
+        self.__namespaces = {ns.name: ns for ns in namespaces}
         # TODO: do something to handle when multiple derived classes have the same name
         self.__classes = self.__get_subclasses(NWBContainer)
 
@@ -162,12 +164,20 @@ class TypeMap(object):
                 raise ValueError("builder '%s' is does not have a neurodata_type" % builder.name)
         return ret
 
+    def __get_namespace(self, obj):
+        if isinstance(obj, NWBContainer):
+            ret = obj.__class__.namespace
+        elif isinstance(obj, GroupBuilder) or isinstance(obj, DatasetBuilder):
+            ret = obj.get('namespace', DEFAULT_NAMESPACE)
+        return ret
+
     @docval({'name': 'obj', 'type': (NWBContainer, Builder), 'doc': 'the object to get the ObjectMapper for'},
             returns='the ObjectMapper to use for mapping the given object', rtype='ObjectMapper')
     def get_map(self, **kwargs):
         """ Return the ObjectMapper object that should be used for the given container """
         obj = getargs('obj', kwargs)
         neurodata_type = self.__get_neurodata_type(obj)
+        namespace = self.__get_namespace(obj)
         hierarchy = self.__catalog.get_hierarchy(neurodata_type)
         for ndt in hierarchy:
             ret = self.__maps.get(ndt)
