@@ -1,7 +1,8 @@
 from pynwb.utils import docval, getargs, ExtenderMeta, get_docval
 from pynwb.core import NWBContainer
-from pynwb.spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, DEFAULT_NAMESPACE
+from pynwb.spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, CORE_NAMESPACE
 from pynwb.spec.catalog import SpecCatalog
+from pynwb.spec.namespace import NamespaceCatalog
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
 
 import re
@@ -91,13 +92,13 @@ class BuildManager(object):
 class TypeMap(object):
 
     #@docval({'name': 'catalog', 'type': SpecCatalog, 'doc': 'a catalog of existing specifications'})
-    @docval({'name': 'namespaces', 'type': list, 'doc': 'namespaces to use for building'})
+    @docval({'name': 'namespaces', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use'})
     def __init__(self, **kwargs):
         namespaces = getargs('namespaces', kwargs)
         self.__maps = dict()
         self.__map_types = dict()
         #self.__catalog = catalog
-        self.__namespaces = {ns.name: ns for ns in namespaces}
+        self.__namespaces = namespaces
         # TODO: do something to handle when multiple derived classes have the same name
         self.__classes = self.__get_subclasses(NWBContainer)
 
@@ -114,29 +115,29 @@ class TypeMap(object):
         cls_name = getargs('cls_name', kwargs)
         return NWBContainer.get_subclass(cls_name)
 
-    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
-            {'name': 'spec', 'type': Spec, 'doc': 'a Spec object'})
-    def register_spec(self, **kwargs):
-        """ Specify the specification for an NWBContainer type """
-        obj_type, spec = getargs('obj_type', 'spec', kwargs)
-        ndt = spec.neurodata_type_def
-        if ndt is None:
-            raise ValueError("'spec' must define a neurodata type")
-        self.__catalog.register_spec(obj_type, spec)
-
-    @docval({'name': 'spec', 'type': Spec, 'doc': 'the Spec object to register'})
-    def auto_register(self, **kwargs):
-        ''' Register this specification and all sub-specification using neurodata_type as object type name '''
-        spec = getargs('spec', kwargs)
-        ndt = spec.neurodata_type_def
-        if ndt is not None:
-            self.register_spec(ndt, spec)
-        for dataset_spec in spec.datasets:
-            dset_ndt = dataset_spec.neurodata_type_def
-            if dset_ndt is not None:
-                self.register_spec(dset_ndt, dataset_spec)
-        for group_spec in spec.groups:
-            self.auto_register(group_spec)
+#    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
+#            {'name': 'spec', 'type': Spec, 'doc': 'a Spec object'})
+#    def register_spec(self, **kwargs):
+#        """ Specify the specification for an NWBContainer type """
+#        obj_type, spec = getargs('obj_type', 'spec', kwargs)
+#        ndt = spec.neurodata_type_def
+#        if ndt is None:
+#            raise ValueError("'spec' must define a neurodata type")
+#        self.__catalog.register_spec(obj_type, spec)
+#
+#    @docval({'name': 'spec', 'type': Spec, 'doc': 'the Spec object to register'})
+#    def auto_register(self, **kwargs):
+#        ''' Register this specification and all sub-specification using neurodata_type as object type name '''
+#        spec = getargs('spec', kwargs)
+#        ndt = spec.neurodata_type_def
+#        if ndt is not None:
+#            self.register_spec(ndt, spec)
+#        for dataset_spec in spec.datasets:
+#            dset_ndt = dataset_spec.neurodata_type_def
+#            if dset_ndt is not None:
+#                self.register_spec(dset_ndt, dataset_spec)
+#        for group_spec in spec.groups:
+#            self.auto_register(group_spec)
 
     @docval({'name': 'ndt', 'type': (type, str), 'doc': 'the neurodata type to associate the decorated class with'})
     def neurodata_type(self, **kwargs):
@@ -168,7 +169,7 @@ class TypeMap(object):
         if isinstance(obj, NWBContainer):
             ret = obj.__class__.namespace
         elif isinstance(obj, GroupBuilder) or isinstance(obj, DatasetBuilder):
-            ret = obj.get('namespace', DEFAULT_NAMESPACE)
+            ret = obj.get('namespace', CORE_NAMESPACE)
         return ret
 
     @docval({'name': 'obj', 'type': (NWBContainer, Builder), 'doc': 'the object to get the ObjectMapper for'},
@@ -179,15 +180,20 @@ class TypeMap(object):
         neurodata_type = self.__get_neurodata_type(obj)
         namespace = self.__get_namespace(obj)
         hierarchy = self.__catalog.get_hierarchy(neurodata_type)
-        for ndt in hierarchy:
-            ret = self.__maps.get(ndt)
-            if ret is not None:
-                break
+        ret = None
+        ns_maps = self.__maps.get(namespace)
+        if ns_maps is not None:
+            for ndt in hierarchy:
+                ret = ns_maps.get(ndt)
+                if ret is not None:
+                    break
+        else:
+            self.__maps[namespace] = dict()
         if ret is None:
             spec = self.__catalog.get_spec(neurodata_type)
             map_cls = self.__map_types.get(neurodata_type, ObjectMapper)
             ret = map_cls(spec)
-            self.__maps[neurodata_type] = ret
+            self.__maps[namespace][neurodata_type] = ret
         return ret
 
     def get_registered_types(self):

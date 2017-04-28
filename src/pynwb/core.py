@@ -1,5 +1,5 @@
 from .utils import docval, getargs, ExtenderMeta
-from .spec import DEFAULT_NAMESPACE
+from .spec import CORE_NAMESPACE
 
 class NWBContainer(object, metaclass=ExtenderMeta):
     '''The base class to any NWB types.
@@ -11,7 +11,7 @@ class NWBContainer(object, metaclass=ExtenderMeta):
 
     __nwbfields__ = tuple()
 
-    __namespace = DEFAULT_NAMESPACE
+    __namespace = CORE_NAMESPACE
 
     @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})

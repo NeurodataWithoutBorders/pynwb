@@ -30,7 +30,7 @@ class SpatialSeries(TimeSeries):
 
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
 
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to meters', 'default': _default_conversion},
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
 
             {'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data', 'default': None},

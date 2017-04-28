@@ -8,4 +8,4 @@ from .map import BuildManager
 def get_type_map():
     from pynwb.spec import NAMESPACES
     from .map import TypeMap
-    return TypeMap(list(NAMESPACES.values()))
+    return TypeMap(NAMESPACES)

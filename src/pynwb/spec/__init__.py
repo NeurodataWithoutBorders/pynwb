@@ -6,23 +6,29 @@ from .spec import DatasetSpec
 from .spec import LinkSpec
 from .spec import GroupSpec
 from .namespace import SpecNamespace
+from .namespace import NamespaceCatalog
+
+from ..utils import docval
+
+CORE_NAMESPACE = 'core'
+__core_ns_file_name = 'nwb.namespace.yaml'
 
 def __get_resources():
     from pkg_resources import resource_filename
-    import os
+    from os.path import join
     ret = dict()
-    ret['data_dir_path'] = resource_filename(__name__, 'data')
+    ret['namespace_path'] = join(resource_filename(__name__, 'data'), __core_ns_file_name)
     return ret
 
-def __get_namespace_catalog(data_dir_path, catalog):
-    namespaces = SpecNameSpace.build_namespace(data_dir_path)
+def __get_namespace_catalog(namespace_path, catalog):
+    namespaces = SpecNamespace.build_namespaces(namespace_path, catalog)
     for ns_name, ns in namespaces.items():
         catalog.add_namespace(ns_name, ns)
+    return catalog
 
 __resources = __get_resources()
 
-DEFAULT_NAMESPACE = 'core'
-NAMESPACES = __get_namespace_catalog(__resources['data_dir_path'], NamespaceCatalog())
+NAMESPACES = __get_namespace_catalog(__resources['namespace_path'], NamespaceCatalog())
 
 @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
         {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'},
