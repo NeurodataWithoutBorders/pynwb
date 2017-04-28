@@ -1,4 +1,3 @@
-from collections import OrderedDict
 from .spec import NAME_WILDCARD
 
 from .spec import Spec
@@ -10,15 +9,8 @@ from .spec import GroupSpec
 def __get_resources():
     from pkg_resources import resource_filename
     import os
-    ###ret = dict()
-    ret = OrderedDict()
-    ret['data_dir_path'] = resource_filename(__name__, '../data')
-    type_name_map_path = resource_filename(__name__, '../type_name_map.yaml')
-    ##ret['type_name_map'] = dict()
-    ret['type_name_map'] = OrderedDict()
-    if os.path.exists(type_name_map_path):
-        with open(type_name_map_path, 'r') as stream:
-            ret['type_name_map'] = yaml.safe_load(stream)
+    ret = dict()
+    ret['data_dir_path'] = resource_filename(__name__, 'data')
     return ret
 
 def __build_catalog(data_dir_path):

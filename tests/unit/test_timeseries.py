@@ -18,7 +18,7 @@ class TimeSeriesConstructor(unittest.TestCase):
 
     def test_init_timestampslink_set(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
-        self.assertSetEqual(ts.timestamps_link, set())
+        self.assertSetEqual(ts.timestamp_link, set())
 
     def test_init_no_parent(self):
         parent = NWBContainer()

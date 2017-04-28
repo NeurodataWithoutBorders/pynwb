@@ -1,18 +1,18 @@
-pynwb.io.build package
-======================
+pynwb.spec package
+==================
 
 Submodules
 ----------
 
 .. toctree::
 
-   pynwb.io.build.builders
-   pynwb.io.build.map
+   pynwb.spec.spec
+   pynwb.spec.tools
 
 Module contents
 ---------------
 
-.. automodule:: pynwb.io.build
+.. automodule:: pynwb.spec
     :members:
     :undoc-members:
     :show-inheritance:

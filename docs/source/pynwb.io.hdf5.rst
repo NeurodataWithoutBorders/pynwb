@@ -1,18 +1,17 @@
-pynwb.io.build package
-======================
+pynwb.io.hdf5 package
+=====================
 
 Submodules
 ----------
 
 .. toctree::
 
-   pynwb.io.build.builders
-   pynwb.io.build.map
+   pynwb.io.hdf5.h5tools
 
 Module contents
 ---------------
 
-.. automodule:: pynwb.io.build
+.. automodule:: pynwb.io.hdf5
     :members:
     :undoc-members:
     :show-inheritance:

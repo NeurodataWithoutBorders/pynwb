@@ -215,7 +215,7 @@ def docval(*validator, **options):
                 return func(self, **parsed['args'])
         else:
             def func_call(*args, **kwargs):
-                parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type)
+                parsed = __parse_args(_copy.deepcopy(val_copy), args, kwargs, enforce_type=enforce_type)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     raise TypeError(', '.join(parse_err))
@@ -353,6 +353,10 @@ class NWBContainer(object, metaclass=ExtenderMeta):
         self.__container_source = container_source
 
     @property
+    def neurodata_type(self):
+        return self.__class__.__name__
+
+    @property
     def container_source(self):
         '''The source of this Container e.g. file name or table
         '''
@@ -408,6 +412,7 @@ class NWBContainer(object, metaclass=ExtenderMeta):
             if not hasattr(cls, f):
                 setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
 
+    # TODO: do something to handle when multiple derived classes have the same name
     __all_subclasses = dict()
 
     @ExtenderMeta.pre_init
