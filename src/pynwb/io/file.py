@@ -1,8 +1,7 @@
-from .build import ObjectMapper
-from . import TYPE_MAP
+from form import ObjectMapper
+from . import register_map
 
-@TYPE_MAP.neurodata_type('NWBFile')
-#class NWBFileMap(ObjectMapper):
+@register_map('NWBFile')
 class NWBFileMap(ObjectMapper):
 
     def __init__(self, spec):
@@ -19,6 +18,6 @@ class NWBFileMap(ObjectMapper):
         self.map_attr('modules', self.spec.get_group('processing'))
         self.unmap(general_spec.get_dataset('stimulus'))
 
-    @ObjectMapper.const_arg('file_name')
+    @const_arg('file_name')
     def name(self, h5group):
         return h5group.name

@@ -1,7 +1,7 @@
-from .build import ObjectMapper
-from . import TYPE_MAP
+from form import ObjectMapper
+from .. import register_map
 
-@TYPE_MAP.neurodata_type('TimeSeries')
+@register_map('TimeSeries')
 class TimeSeriesMap(ObjectMapper):
 
     def __init__(self, spec):
@@ -17,6 +17,6 @@ class TimeSeriesMap(ObjectMapper):
         self.map_attr('rate_unit', startingtime_spec.get_attribute('unit'))
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))
 
-    @ObjectMapper.const_arg('name')
+    @const_arg('name')
     def name(self, h5group):
         return h5group.name
