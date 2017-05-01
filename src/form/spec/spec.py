@@ -1,7 +1,7 @@
 import abc
 from datetime import datetime
 from copy import deepcopy, copy
-from pynwb.utils import docval, getargs, popargs, get_docval
+from ..utils import docval, getargs, popargs, get_docval
 
 NAME_WILDCARD = None
 ZERO_OR_ONE = '?'
@@ -96,7 +96,6 @@ class Spec(ConstructableDict):
     def __eq__(self, other):
         return id(self) == id(other)
 
-
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
@@ -175,13 +174,15 @@ _attrbl_args = [
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace for the neurodata_type of this specification', 'default': None},
 ]
 class BaseStorageSpec(Spec):
     ''' A specification for any object that can hold attributes. '''
 
     @docval(*deepcopy(_attrbl_args))
     def __init__(self, **kwargs):
-        name, doc, parent, quantity, attributes, linkable, neurodata_type_def, neurodata_type = getargs('name', 'doc', 'parent', 'quantity', 'attributes', 'linkable', 'neurodata_type_def', 'neurodata_type', kwargs)
+        name, doc, parent, quantity, attributes, linkable, neurodata_type_def, neurodata_type, namespace =\
+             getargs('name', 'doc', 'parent', 'quantity', 'attributes', 'linkable', 'neurodata_type_def', 'neurodata_type', 'namespace', kwargs)
         if name == NAME_WILDCARD and neurodata_type_def is None and neurodata_type is None:
             raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'neurodata_type_def' and/or 'neurodata_type'")
         super().__init__(doc, name=name, parent=parent)
@@ -196,9 +197,17 @@ class BaseStorageSpec(Spec):
             self['linkable'] = False
         if neurodata_type is not None:
             self['neurodata_type'] = neurodata_type
+            if namespace is None:
+                raise ValueError("'namespace' must be specified when specifying 'neurodata_type'")
+            self['namespace'] = namespace
         if neurodata_type_def is not None:
             self.pop('required', None)
             self['neurodata_type_def'] = neurodata_type_def
+            if namespace is None:
+                raise ValueError("'namespace' must be specified when specifying 'neurodata_type_def'")
+            self['namespace'] = namespace
+            self.set_attribute(AttributeSpec('neurodata_type', 'text', 'the neurodata type of this object', value=neurodata_type_def))
+            self.set_attribute(AttributeSpec('namespace', 'text', 'the namespace for the neurodata type of this object', value=namespace))
         for attribute in attributes:
             self.set_attribute(attribute)
 
@@ -216,14 +225,19 @@ class BaseStorageSpec(Spec):
         return self.get('linkable', None)
 
     @property
-    def neurodata_type_def(self):
+    def namespace(self):
         ''' The neurodata type this specification defines '''
-        return self.get('neurodata_type_def', None)
+        return self.get('namespace', None)
 
     @property
     def neurodata_type(self):
         ''' The neurodata type of this specification '''
         return self.get('neurodata_type', self.neurodata_type_def)
+
+    @property
+    def neurodata_type_def(self):
+        ''' The neurodata type this specification defines '''
+        return self.get('neurodata_type_def', None)
 
     @property
     def quantity(self):
@@ -292,6 +306,7 @@ _dataset_args = [
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace for the neurodata_type of this specification', 'default': None},
 ]
 class DatasetSpec(BaseStorageSpec):
     ''' Specification for datasets
@@ -379,6 +394,7 @@ _group_args = [
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification neurodata_type', 'default': None},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace for the neurodata_type of this specification', 'default': None},
 ]
 class GroupSpec(BaseStorageSpec):
     ''' Specification for groups

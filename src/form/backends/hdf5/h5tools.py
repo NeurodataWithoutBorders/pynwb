@@ -1,16 +1,15 @@
 from collections import Iterable
 import numpy as np
-from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink
 import os.path
+from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink
 
-from pynwb.utils import DataChunkIterator, docval, getargs, popargs
+from form.utils import DataChunkIterator, docval, getargs, popargs
 
-#from ..io import NWBReader, NWBWriter
-from ..io import NWBIO
-from ..build import GroupBuilder, DatasetBuilder, LinkBuilder
-from ..build import BuildManager
+from ..io import FORMIO
+from form import GroupBuilder, DatasetBuilder, LinkBuilder
+from form import BuildManager
 
-class HDF5IO(NWBIO):
+class HDF5IO(FORMIO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None})
@@ -91,14 +90,6 @@ class HDF5IO(NWBIO):
             name = h5obj.name
         ret = DatasetBuilder(name, **kwargs)
         return ret
-
-#class HDF5Writer(NWBWriter):
-#
-#    @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'})
-#    def __init__(self, **kwargs):
-#        path = getargs('path', kwargs)
-#        self.__path = path
-#        self.__file = None
 
     def open(self):
         open_flag = 'w'

@@ -1,32 +1,13 @@
 from abc import ABCMeta, abstractmethod
-from .build import BuildManager
-from .build import GroupBuilder
+from ..map import BuildManager
+from ..build import GroupBuilder
 from ..utils import docval, popargs, getargs
 from ..file import NWBFile
 
-class NWBReader(object, metaclass=ABCMeta):
-
-    @abstractmethod
-    @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
-    def read_builder(self):
-        ''' Read an NWB Dataset and return the GroupBuilder represention '''
-        pass
-
-class NWBWriter(object, metaclass=ABCMeta):
-
-    @abstractmethod
-    @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
-    def write_builder(self, **kwargs):
-        ''' Write a GroupBuilder representing an NWBFile object '''
-        pass
-
-class NWBIO(object, metaclass=ABCMeta):
-    @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None})
+class FORMIO(object, metaclass=ABCMeta):
+    @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'})
     def __init__(self, **kwargs):
         self.__manager = getargs('manager', kwargs)
-        if self.__manager is None:
-            from pynwb.io import TYPE_MAP
-            self.__manager = BuildManager(TYPE_MAP)
         self.__built = dict()
 
     @docval(returns='the NWBFile object', rtype=NWBFile)

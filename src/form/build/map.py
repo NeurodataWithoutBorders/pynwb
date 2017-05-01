@@ -97,10 +97,13 @@ class TypeMap(object):
         namespaces = getargs('namespaces', kwargs)
         self.__maps = dict()
         self.__map_types = dict()
-        #self.__catalog = catalog
         self.__namespaces = namespaces
         # TODO: do something to handle when multiple derived classes have the same name
         self.__classes = self.__get_subclasses(NWBContainer)
+        self.__mappers = dict() ## already constructed ObjectMapper classes
+        self.__mapper_cls = dict() ## the ObjectMapper class to use for each container type
+        self.__container_types = dict()
+        self.__neurodata_types = dict()
 
     def __get_subclasses(self, cls):
         ret = dict()
@@ -139,14 +142,14 @@ class TypeMap(object):
 #        for group_spec in spec.groups:
 #            self.auto_register(group_spec)
 
-    @docval({'name': 'ndt', 'type': (type, str), 'doc': 'the neurodata type to associate the decorated class with'})
-    def neurodata_type(self, **kwargs):
-        """ A decorator to specify ObjectMapper subclasses for specific neurodata types """
-        ndt = getargs('ndt', kwargs)
-        def _dec(map_cls):
-            self.__map_types[ndt] = map_cls
-            return map_cls
-        return _dec
+#    @docval({'name': 'ndt', 'type': (type, str), 'doc': 'the neurodata type to associate the decorated class with'})
+#    def neurodata_type(self, **kwargs):
+#        """ A decorator to specify ObjectMapper subclasses for specific neurodata types """
+#        ndt = getargs('ndt', kwargs)
+#        def _dec(map_cls):
+#            self.__map_types[ndt] = map_cls
+#            return map_cls
+#        return _dec
 
     def __get_map_container(self, container):
         ret = None
@@ -177,24 +180,50 @@ class TypeMap(object):
     def get_map(self, **kwargs):
         """ Return the ObjectMapper object that should be used for the given container """
         obj = getargs('obj', kwargs)
-        neurodata_type = self.__get_neurodata_type(obj)
-        namespace = self.__get_namespace(obj)
-        hierarchy = self.__catalog.get_hierarchy(neurodata_type)
-        ret = None
-        ns_maps = self.__maps.get(namespace)
-        if ns_maps is not None:
-            for ndt in hierarchy:
-                ret = ns_maps.get(ndt)
-                if ret is not None:
-                    break
+        # get the container class, and namespace/neurodata_type
+        if isinstance(obj, NWBContainer):
+            container_cls = obj.__class__
+            namespace, neurodata_type = self.__neurodata_types.get(container_cls, (None, None))
+            if namespace is None:
+                raise ValueError("class %s does not mapped to a neurodata_type")
         else:
-            self.__maps[namespace] = dict()
-        if ret is None:
-            spec = self.__catalog.get_spec(neurodata_type)
-            map_cls = self.__map_types.get(neurodata_type, ObjectMapper)
-            ret = map_cls(spec)
-            self.__maps[namespace][neurodata_type] = ret
-        return ret
+            neurodata_type = self.__get_neurodata_type(obj)
+            namespace = self.__get_namespace(obj)
+            if namespace not in self.__container_types:
+                raise ValueError("no neurodata_types from namespace '%s' have been mapped" % namespace)
+            if neurodata_type not in self.__container_types[namespace]:
+                raise ValueError("no neurodata_type '%s' from namespace '%s has been mapped'" % (neurodata_type, namespace))
+            container_cls = self.__container_types[namespace][neurodata_types]
+        # now build the ObjectMapper class
+        for cls in container_cls.__mro__:
+            mapper = self.__mappers.get(cls)
+            if mapper is None: # we haven't yet constructed a mapper for this type
+                mapper_cls = self.__mapper_cls.get(cls)
+                if mapper_cls is None:
+                    continue
+                mapper = mapper_cls(self.__namespaces.get_spec(namespace, neurodata_type))
+                self.__mappers[cls] = mapper
+                break
+            else:
+                break
+        if mapper is None:
+            raise ValueError("No ObjectMapper found for class %s, namespace '%s', neurodata_type '%s'" % (container_cls, namespace, neurodata_type))
+        return mappper
+
+    @docval({"name": "namespace", "type": str, "doc": "the namespace containing the neurodata_type to map the class to"},
+            {"name": "neurodata_type", "type": str, "doc": "the neurodata_type to mape the class to"},
+            {"name": "container_cls", "type": type, "doc": "the class to map to the specified neurodata_type"})
+    def register_container_type(self, **kwargs):
+        namespace, neurodata_type, container_cls = getargs('namespace', 'neurodata_type', 'container_cls', kwargs)
+        self.__container_types.setdefault(namespace, dict())
+        self.__container_types[namespace][neurodata_type] = container_cls
+        self.__neurodata_types[container_cls] = (namespace, neurodata_type)
+
+    @docval({"name": "container_cls", "type": type, "doc": "the Container class for which the given ObjectMapper class gets used for"},
+            {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map"})
+    def register_map(self, **kwargs):
+        container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
+        self.__mappers[container_cls] = mapper_cls
 
     def get_registered_types(self):
         """ Return all NWBContainer types that have a map specified """

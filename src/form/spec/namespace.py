@@ -3,7 +3,7 @@ from copy import deepcopy, copy
 import ruamel.yaml as yaml
 import os.path
 
-from pynwb.utils import docval, getargs, popargs, get_docval
+from ..utils import docval, getargs, popargs, get_docval
 from .catalog import SpecCatalog
 from .spec import GroupSpec
 
@@ -84,6 +84,14 @@ class SpecNamespace(dict):
         """The SpecCatalog containing all the Specs"""
         return self.__catalog
 
+    @docval({'name': 'neurodata_type', 'type': (str, type), 'doc': 'the neurodata_type to get the spec for'})
+    def get_spec(self, **kwargs):
+        neurodata_type = getargs('neurodata_type', **kwargs)
+        self.__catalog.get_spec(neurodata_type)
+
+    def get_registered_types(self):
+        return self.__catalog.get_registered_types()
+
     @classmethod
     def build_namespace(cls, **spec_dict):
         kwargs = copy(spec_dict)
@@ -121,6 +129,8 @@ class SpecNamespace(dict):
     @classmethod
     def build_namespaces(cls, namespace_path, ns_catalog):
         # load namespace definition from file
+        if not os.path.exists(namespace_path):
+            raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
         with open(namespace_path, 'r') as stream:
             d = yaml.safe_load(stream)
             namespaces = d.get('namespaces')
@@ -133,12 +143,12 @@ class SpecNamespace(dict):
             for s in ns['schema']:
                 if 'source' in s:
                     # read specs from file
-                    spec_path = cls.__get_spec_path(namespace_path, s['source'])
-                    ndts = cls.__load_spec_file(spec_path).items()
+                    spec_file = cls.__get_spec_path(namespace_path, s['source'])
+                    ndts = cls.__load_spec_file(spec_file).items()
                     if 'neurodata_types' in s:
                         ndts = filter(lambda k,v: k in set(s['neurodata_types']), ndts)
-                    for ndt, ndt_spec in ndts:
-                        catalog.auto_register(ndt_spec, spec_path)
+                    for ndt, spec in ndts:
+                        catalog.auto_register(spec, spec_file)
                 elif 'namespace' in s:
                     # load specs from namespace
                     try:
@@ -150,9 +160,9 @@ class SpecNamespace(dict):
                     else:
                         types = inc_ns.get_registered_types()
                     for ndt in types:
-                        spec = inc_ns.catalog.get_spec(ndt)
+                        spec = inc_ns.get_spec(ndt)
                         spec_file = inc_ns.catalog.get_spec_source_file(ndt)
-                        catalog,auto_register(spec, spec_file)
+                        catalog.auto_register(spec, spec_file)
             # construct namespace
             ret[ns['name']] = cls.build_namespace(**ns, catalog=catalog)
         return ret
@@ -249,15 +259,15 @@ class NamespaceCatalog(object):
             raise KeyError("'%s' not a namespace" % name)
         return ret
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the namespace'},
-            {'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
+    @docval({'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
+            {'name': 'neurodata_type', 'type': (str, type), 'doc': 'the neurodata_type to get the spec for'},
             returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
     def get_spec(self, **kwargs):
         '''
         Get the Spec object for the given type from the given Namespace
         '''
-        name, obj_type = getargs('name', 'obj_type', kwargs)
+        namespace, neurodata_type = getargs('namespace', 'neurodata_type', kwargs)
         if name not in self.__namespaces:
-            raise KeyError("'%s' not a namespace" % name)
-        return self.__namespaces[name].get_spec(obj_type)
+            raise KeyError("'%s' not a namespace" % namespace)
+        return self.__namespaces[namespace].get_spec(neurodata_type)
 

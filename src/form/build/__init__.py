@@ -4,8 +4,4 @@ from .builders import LinkBuilder
 
 from .map import ObjectMapper
 from .map import BuildManager
-
-def get_type_map():
-    from pynwb.spec import NAMESPACES
-    from .map import TypeMap
-    return TypeMap(NAMESPACES)
+from .map import TypeMap
