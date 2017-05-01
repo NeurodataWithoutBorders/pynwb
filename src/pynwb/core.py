@@ -1,7 +1,7 @@
-from .utils import docval, getargs, ExtenderMeta
-from .spec import CORE_NAMESPACE
+from form.utils import docval, getargs, ExtenderMeta
+from form import Container
 
-class NWBContainer(object, metaclass=ExtenderMeta):
+class NWBContainer(Container, metaclass=ExtenderMeta):
     '''The base class to any NWB types.
 
     The purpose of this class is to provide a mechanism for representing hierarchical
@@ -11,7 +11,6 @@ class NWBContainer(object, metaclass=ExtenderMeta):
 
     __nwbfields__ = tuple()
 
-    __namespace = CORE_NAMESPACE
 
     @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
@@ -98,4 +97,5 @@ class NWBContainer(object, metaclass=ExtenderMeta):
     @classmethod
     def get_subclass(cls, neurodata_type):
         return cls.__all_subclasses.get(neurodata_type, None)
+
 

@@ -1,10 +1,14 @@
-from .base import TimeSeries, Interface, _default_resolution, _default_conversion
-from .utils import docval, popargs, DataChunkIterator, ShapeValidator
-from .core import NWBContainer
-
 import numpy as np
 from collections import Iterable
 
+from form.utils import docval, popargs, DataChunkIterator, ShapeValidator
+
+from .base import TimeSeries, Interface, _default_resolution, _default_conversion
+from .core import NWBContainer
+
+
+
+@register_class('ElectricalSeries', CORE_NAMESPACE)
 class ElectricalSeries(TimeSeries):
     """
     Stores acquired voltage data from extracellular recordings. The data field of an ElectricalSeries
@@ -44,6 +48,7 @@ class ElectricalSeries(TimeSeries):
         self.electrodes = tuple(electrodes)
 
 
+@register_class('SpikeEventSeries', CORE_NAMESPACE)
 class SpikeEventSeries(ElectricalSeries):
     """
     Stores "snapshots" of spike events (i.e., threshold crossings) in data. This may also be raw data,
@@ -85,6 +90,7 @@ class SpikeEventSeries(ElectricalSeries):
         name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', kwargs)
         super(SpikeEventSeries, self).__init__(name, source, electrodes, data, **kwargs)
 
+@register_class('ElectrodeGroup', CORE_NAMESPACE)
 class ElectrodeGroup(NWBContainer):
     __nwbfields__ = ('name',
                      'description',
@@ -110,6 +116,7 @@ class ElectrodeGroup(NWBContainer):
         self.location = loc
         self.impedance = imp
 
+@register_class('EventDetection', CORE_NAMESPACE)
 class EventDetection(Interface):
     """
     Detected spike events from voltage trace(s).
@@ -140,6 +147,7 @@ class EventDetection(Interface):
     #    self.source_indices.append(idx)
     #    self.event_time.append(time)
 
+@register_class('EventWaveform', CORE_NAMESPACE)
 class EventWaveform(Interface):
     """
     Spike data for spike events detected in raw data
@@ -158,6 +166,7 @@ class EventWaveform(Interface):
         data.parent = self
         self.data = data
 
+@register_class('Clustering', CORE_NAMESPACE)
 class Clustering(Interface):
     """
     Specifies cluster event times and cluster metric for maximum ratio of waveform peak to RMS on any channel in cluster.
@@ -181,6 +190,7 @@ class Clustering(Interface):
         self.cluster_ids = cluster_ids
         self.peak_over_rms = list(peak_over_rms)
 
+@register_class('ClusterWaveform', CORE_NAMESPACE)
 class ClusterWaveform(Interface):
     """
     Describe cluster waveforms by mean and standard deviation for at each sample.
@@ -208,6 +218,7 @@ class ClusterWaveform(Interface):
         self.means = means
         self.stdevs = stdevs
 
+@register_class('LFP', CORE_NAMESPACE)
 class LFP(Interface):
     """
     LFP data from one or more channels. The electrode map in each published ElectricalSeries will
@@ -228,6 +239,7 @@ class LFP(Interface):
         data.parent = self
         self.data = data
 
+@register_class('FilteredEphys', CORE_NAMESPACE)
 class FilteredEphys(Interface):
     """
     Ephys data from one or more channels that has been subjected to filtering. Examples of filtered
@@ -254,6 +266,7 @@ class FilteredEphys(Interface):
         _ElectricalSeries.parent = self
         self._ElectricalSeries = _ElectricalSeries
 
+@register_class('FeatureExtraction', CORE_NAMESPACE)
 class FeatureExtraction(Interface):
     """
     Features, such as PC1 and PC2, that are extracted from signals stored in a SpikeEvent

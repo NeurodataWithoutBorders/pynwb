@@ -1,11 +1,13 @@
-from .base import Interface, TimeSeries, _default_resolution, _default_conversion
-from .image import ImageSeries
-from .core import NWBContainer
-from .utils import docval, popargs
-
 from collections import Iterable
 import numpy as np
 
+from form.utils import docval, popargs
+
+from .base import Interface, TimeSeries, _default_resolution, _default_conversion
+from .image import ImageSeries
+from .core import NWBContainer
+
+@register_class('TwoPhotonSeries', CORE_NAMESPACE)
 class TwoPhotonSeries(ImageSeries):
     """
     A special case of optical imaging.
@@ -59,6 +61,7 @@ class TwoPhotonSeries(ImageSeries):
         self.pmt_gain = pmt_gain
         self.scan_line_rate = scan_line_rate
 
+@register_class('RoiResponseSeries', CORE_NAMESPACE)
 class RoiResponseSeries(TimeSeries):
     '''
     ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one ROI.
@@ -103,6 +106,7 @@ class RoiResponseSeries(TimeSeries):
         self.segmenttation_interface = segmenttation_interface
         self.segmenttation_interface_path = segmenttation_interface_path
 
+@register_class('DfOverF', CORE_NAMESPACE)
 class DfOverF(Interface):
     """
     dF/F information about a region of interest (ROI). Storage hierarchy of dF/F should be the same
@@ -120,6 +124,7 @@ class DfOverF(Interface):
         super(DfOverF, self).__init__(source, **kwargs)
         self._RoiResponseSeries = _RoiResponseSeries
 
+@register_class('Fluorescence', CORE_NAMESPACE)
 class Fluorescence(Interface):
     """
     Fluorescence information about a region of interest (ROI). Storage hierarchy of fluorescence

@@ -1,10 +1,13 @@
-from .utils import docval, popargs
-from pynwb.misc import IntervalSeries
-from .base import TimeSeries, Interface, _default_conversion, _default_resolution
-
 import numpy as np
 from collections import Iterable
 
+from form.utils import docval, popargs
+
+from . import register_class
+from .misc import IntervalSeries
+from .base import TimeSeries, Interface, _default_conversion, _default_resolution
+
+@register_class('SpatialSeries', CORE_NAMESPACE)
 class SpatialSeries(TimeSeries):
     """
     Direction, e.g., of gaze or travel, or position. The TimeSeries::data field is a 2D array storing
@@ -51,6 +54,7 @@ class SpatialSeries(TimeSeries):
         super(SpatialSeries, self).__init__(name, source, data, 'meters', **kwargs)
         self.reference_frame = reference_frame
 
+@register_class('BehavioralEpochs', CORE_NAMESPACE)
 class BehavioralEpochs(Interface):
     """
     TimeSeries for storing behavoioral epochs. The objective of this and the other two Behavioral
@@ -76,6 +80,7 @@ class BehavioralEpochs(Interface):
         super(BehavioralEpochs, self).__init__(source, **kwargs)
         self._IntervalSeries = _IntervalSeries
 
+@register_class('BehavioralEvents', CORE_NAMESPACE)
 class BehavioralEvents(Interface):
     """
     TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
@@ -92,6 +97,7 @@ class BehavioralEvents(Interface):
         super(BehavioralEvents, self).__init__(source, **kwargs)
         self._TimeSeries = _TimeSeries
 
+@register_class('BehavioralTimeSeries', CORE_NAMESPACE)
 class BehavioralTimeSeries(Interface):
     """
     TimeSeries for storing Behavoioral time series data.See description of BehavioralEpochs for
@@ -109,6 +115,7 @@ class BehavioralTimeSeries(Interface):
         super(BehavioralTimeSeries, self).__init__(source, **kwargs)
         self._TimeSeries = _TimeSeries
 
+@register_class('PupilTracking', CORE_NAMESPACE)
 class PupilTracking(Interface):
     """
     Eye-tracking data, representing pupil size.
@@ -125,6 +132,7 @@ class PupilTracking(Interface):
         super(PupilTracking, self).__init__(source, **kwargs)
         self._TimeSeries = _TimeSeries
 
+@register_class('EyeTracking', CORE_NAMESPACE)
 class EyeTracking(Interface):
     """
     Eye-tracking data, representing direction of gaze.
@@ -141,6 +149,7 @@ class EyeTracking(Interface):
         super(EyeTracking, self).__init__(source, **kwargs)
         self._SpatialSeries =_SpatialSeries
 
+@register_class('CompassDirection', CORE_NAMESPACE)
 class CompassDirection(Interface):
     """
     With a CompassDirection interface, a module publishes a SpatialSeries object representing a
@@ -160,6 +169,7 @@ class CompassDirection(Interface):
         super(CompassDirection, self).__init__(source, **kwargs)
         self._SpatialSeries = _SpatialSeries
 
+@register_class('Position', CORE_NAMESPACE)
 class Position(Interface):
     """
     Position data, whether along the x, x/y or x/y/z axis.
@@ -176,6 +186,7 @@ class Position(Interface):
         super(Position, self).__init__(source, **kwargs)
         self._SpatialSeries = _SpatialSeries
 
+@register_class('MotionCorrection', CORE_NAMESPACE)
 class MotionCorrection(Interface):
     """
     An image stack where all frames are shifted (registered) to a common coordinate system, to

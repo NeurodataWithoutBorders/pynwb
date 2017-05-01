@@ -1,10 +1,12 @@
-from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer
-from .utils import docval, popargs
-
 import numpy as np
 from collections import Iterable
 
+from form.utils import docval, popargs
+
+from .base import TimeSeries, _default_resolution, _default_conversion
+from .core import NWBContainer
+
+@register_class('OptogeneticSeries', CORE_NAMESPACE)
 class OptogeneticSeries(TimeSeries):
     '''
     Optogenetic stimulus. The data[] field is in unit of watts.
@@ -43,6 +45,7 @@ class OptogeneticSeries(TimeSeries):
         super(OptogeneticSeries, self).__init__(name, source, data, unit, **kwargs)
         self.site = site
 
+@register_class('OptogeneticSite', CORE_NAMESPACE)
 class OptogeneticSite(NWBContainer):
     # see /general/optogenetics/<site_X> spec
     pass

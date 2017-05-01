@@ -9,15 +9,16 @@ import copy
 import numpy as np
 import types
 from datetime import datetime
+from dateutil.parser import parse as parse_date
+
+from form.utils import docval, getargs
 
 from .base import TimeSeries, Module
 from .epoch import Epoch
 from .ecephys import ElectrodeGroup, ElectricalSeries
-from .utils import docval, getargs
 from .core import NWBContainer
-from dateutil.parser import parse as parse_date
 
-_default_file_id = 'UNSPECIFIED'
+@register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(NWBContainer):
     """
     A representation of an NWB file.

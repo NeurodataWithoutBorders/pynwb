@@ -1,11 +1,12 @@
-from .base import Interface, TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer
-from .utils import docval, popargs
-
 import numpy as np
 from collections import Iterable
 
+from form.utils import docval, popargs
 
+from .base import Interface, TimeSeries, _default_resolution, _default_conversion
+from .core import NWBContainer
+
+@register_class('ImageSeries', CORE_NAMESPACE)
 class ImageSeries(TimeSeries):
     '''
     General image data that is common between acquisition and stimulus time series.
@@ -58,6 +59,7 @@ class ImageSeries(TimeSeries):
         self.format = format
 
 
+@register_class('IndexSeries', CORE_NAMESPACE)
 class IndexSeries(TimeSeries):
     '''
     Stores indices to image frames stored in an ImageSeries. The purpose of the ImageIndexSeries is to allow
@@ -103,6 +105,7 @@ class IndexSeries(TimeSeries):
         self.index_timeseries = index_timeseries
         self.index_timeseries_path = index_timeseries_path
 
+@register_class('ImageMaskSeries', CORE_NAMESPACE)
 class ImageMaskSeries(ImageSeries):
     '''
     An alpha mask that is applied to a presented visual stimulus. The data[] array contains an array
@@ -153,6 +156,7 @@ class ImageMaskSeries(ImageSeries):
         self.masked_imageseries = masked_imageseries
         self.masked_imageseries_path = masked_imageseries_path
 
+@register_class('OpticalSeries', CORE_NAMESPACE)
 class OpticalSeries(ImageSeries):
     '''
     Image data that is presented or recorded. A stimulus template movie will be stored only as an
@@ -207,10 +211,12 @@ class OpticalSeries(ImageSeries):
         self.field_of_view = field_of_view
         self.orientation = orientation
 
+@register_class('ImagePlane', CORE_NAMESPACE)
 class ImagePlane(NWBContainer):
     # see /general/optophysiology/<imaging_plane_X> spec
     pass
 
+@register_class('ImageSegmentation', CORE_NAMESPACE)
 class ImageSegmentation(Interface):
     """
     Stores pixels in an image that represent different regions of interest (ROIs) or masks. All
@@ -232,6 +238,7 @@ class ImageSegmentation(Interface):
         super(ImageSegmentation, self).__init__(source, **kwargs)
         self.image_plane = image_plane
 
+@register_class('OpticalChannel', CORE_NAMESPACE)
 class OpticalChannel(NWBContainer):
     # see /general/optophysiology/<imaging_plane_X>/<channel_X> spec
     pass

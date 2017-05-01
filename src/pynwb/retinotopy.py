@@ -1,9 +1,10 @@
-from .utils import docval, popargs
-from .base import Interface
-
 from collections import Iterable
 
+from form.utils import docval, popargs
 
+from .base import Interface
+
+@register_class('ImageRetinotopy', CORE_NAMESPACE)
 class ImageRetinotopy(Interface):
     """
     Intrinsic signal optical imaging or widefield imaging for measuring retinotopy. Stores orthogonal

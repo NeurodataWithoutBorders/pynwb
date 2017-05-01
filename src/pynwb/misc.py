@@ -1,9 +1,12 @@
-from .utils import docval, getargs, popargs
-from .base import TimeSeries, Interface, _default_conversion, _default_resolution
-
 import numpy as np
 from collections import Iterable
 
+from form.utils import docval, getargs, popargs
+
+from .base import TimeSeries, Interface, _default_conversion, _default_resolution
+
+@register_class('AnnotationSeries', CORE_NAMESPACE)
+@register_class('AnnotationSeries', CORE_NAMESPACE)
 class AnnotationSeries(TimeSeries):
     """
     Stores text-based records about the experiment. To use the
@@ -45,6 +48,7 @@ class AnnotationSeries(TimeSeries):
         self.fields['timestamps'].append(time)
         self.fields['data'].append(annotation)
 
+@register_class('AbstractFeatureSeries', CORE_NAMESPACE)
 class AbstractFeatureSeries(TimeSeries):
     """
     Represents the salient features of a data stream. Typically this
@@ -140,6 +144,7 @@ class IntervalSeries(TimeSeries):
         self.__interval_data.append(1)
         self.__interval_data.append(-1)
 
+@register_class('UnitTimes', CORE_NAMESPACE)
 class UnitTimes(Interface):
     """
     Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group contains a group
