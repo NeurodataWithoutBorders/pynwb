@@ -1,14 +1,20 @@
 import unittest
 
-from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, ElectrodeGroup, EventDetection, EventWaveform, Clustering, ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction
+from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, ElectrodeGroup, Device, EventDetection, EventWaveform, Clustering, ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction
 
 class ElectricalSeriesConstructor(unittest.TestCase):
     def test_init(self):
-        data = list()
-        coord = (1, 2, 3)
-        elec1 = ElectrodeGroup('name', coord, 'desc', 'dev', 'loc', 1.0)
-        elec2 = ElectrodeGroup('name', coord, 'desc', 'dev', 'loc', 2.0)
+        dev1 = Device('dev1')
+        dev2 = Device('dev2')
+        channel_description = ('ch1', 'ch2')
+        channel_location = ('lo1', 'lo2')
+        channel_filtering = ('fi1', 'fi2')
+        channel_coordinates = ('co1', 'co2')
+        channel_impedance = ('im1', 'im2')
+        elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
+        elec2 = ElectrodeGroup('elec2', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc2', 'loc2', dev2)
         elec = (elec1, elec2)
+        data = list()
 
         eS = ElectricalSeries('test_eS', 'a hypothetical source', data, elec, timestamps=list())
         self.assertEqual(eS.name, 'test_eS')
@@ -23,36 +29,24 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
         self.assertEqual(sES.source, 'a hypothetical source')
 
 class ElectrodeGroupConstructor(unittest.TestCase):
-    def setUp(self):
-        #print(ElectrodeGroup.__init__.docval)
-        self.name = 'my_group'
-        self.coord = (1.1, 2.2, 3.3)
-        self.desc = "an example electrode group"
-        self.dev = "my favorite device"
-        self.loc = "my favorote brain location"
-        self.eg = ElectrodeGroup(self.name,
-                                 self.coord,
-                                 self.desc,
-                                 self.dev,
-                                 self.loc)
+    def test_init(self):
+        dev1 = Device('dev1')
+        channel_description = ('ch1', 'ch2')
+        channel_location = ('lo1', 'lo2')
+        channel_filtering = ('fi1', 'fi2')
+        channel_coordinates = ('co1', 'co2')
+        channel_impedance = ('im1', 'im2')
 
-    def test_impedance(self):
-        self.assertEqual(self.eg.impedance, -1)
-
-    def test_name(self):
-        self.assertEqual(self.eg.name, self.name)
-
-    def test_physical_location(self):
-        self.assertTupleEqual(self.eg.physical_location, self.coord)
-
-    def test_description(self):
-        self.assertEqual(self.eg.description, self.desc)
-
-    def test_device(self):
-        self.assertEqual(self.eg.device, self.dev)
-
-    def test_location(self):
-        self.assertEqual(self.eg.location, self.loc)
+        elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
+        self.assertEqual(elec1.name, 'elec1')
+        self.assertEqual(elec1.channel_description, channel_description)
+        self.assertEqual(elec1.channel_location, channel_location)
+        self.assertEqual(elec1.channel_filtering, channel_filtering)
+        self.assertEqual(elec1.channel_coordinates, channel_coordinates)
+        self.assertEqual(elec1.channel_impedance, channel_impedance)
+        self.assertEqual(elec1.description, 'desc1')
+        self.assertEqual(elec1.location, 'loc1')
+        self.assertEqual(elec1.device, dev1)
 
 class EventDetectionConstructor(unittest.TestCase):
     def test_init(self):
@@ -64,6 +58,7 @@ class EventDetectionConstructor(unittest.TestCase):
         self.assertEqual(eD.source_electricalseries, eS)
         self.assertEqual(eD.source_idx, (1, 2, 3))
         self.assertEqual(eD.times, 'event_times')
+        self.assertEqual(eD.unit, 'Seconds')
 
 class EventWaveformConstructor(unittest.TestCase):
     def test_init(self):

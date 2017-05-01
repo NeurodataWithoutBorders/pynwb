@@ -1,68 +1,10 @@
 from .base import Interface, TimeSeries, _default_resolution, _default_conversion
-from .image import ImageSegmentation, ImageSeries
+from .image import ImageSegmentation, PlaneSegmentation, ROI, ImageSeries, ImagingPlane, OpticalChannel
 from .core import docval, popargs, NWBContainer
 
 from collections import Iterable
 import numpy as np
 
-class OpticalChannel(NWBContainer):
-    """
-    """
-
-    __nwbfields__ = ('description',
-                     'emission_lambda')
-
-    @docval({'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},
-            {'name': 'emission_lambda', 'type': str, 'doc': 'Emission lambda for channel.'},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
-    def __init__(self, **kwargs):
-        description, emission_lambda, parent = popargs("description", "emission_lambda", "parent", kwargs)
-        super(OpticalChannel, self).__init__(parent=parent)
-        self.description = description
-        self.emission_lambda = emission_lambda
-
-class ImagingPlane(NWBContainer):
-    """
-    """
-
-    __nwbfields__ = ('optical_channel',
-                     'description',
-                     'device',
-                     'excitation_lambda',
-                     'imaging_rate',
-                     'indicator',
-                     'location',
-                     'manifold',
-                     'conversion',
-                     'unit',
-                     'reference_frame')
-
-    @docval({'name': 'optical_channel', 'type': OpticalChannel, 'doc': 'One of possibly many groups storing channelspecific data.'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
-            {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
-            {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
-            {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
-            {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
-            {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
-            {'name': 'manifold', 'type': Iterable, 'doc': 'Physical position of each pixel. height, weight, x, y, z.'},
-            {'name': 'conversion', 'type': float, 'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)'},
-            {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).'},
-            {'name': 'reference_frame', 'type': str, 'doc': 'Describes position and reference frame of manifold based on position of first element in manifold. For example, text description of anotomical location or vectors needed to rotate to common anotomical axis (eg, AP/DV/ML).'},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
-    def __init__(self, **kwargs):
-        optical_channel, description, device, excitation_lambda, imaging_rate, indicator, location, manifold, conversion, unit, reference_frame, parent = popargs('optical_channel', 'description', 'device', 'excitation_lambda', 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion', 'unit', 'reference_frame', 'parent', kwargs)
-        super(ImagingPlane, self).__init__(parent=parent)
-        self.optical_channel = optical_channel
-        self.description = description
-        self.device = device
-        self.excitation_lambda = excitation_lambda
-        self.imaging_rate = imaging_rate
-        self.indicator = indicator
-        self.location = location
-        self.manifold = manifold
-        self.conversion = conversion
-        self.unit = unit
-        self.reference_frame = reference_frame
 
 class TwoPhotonSeries(ImageSeries):
     """

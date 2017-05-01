@@ -84,33 +84,55 @@ class SpikeEventSeries(ElectricalSeries):
         name, source, electrode_group, data = popargs('name', 'source', 'electrode_group', 'data', kwargs)
         super(SpikeEventSeries, self).__init__(name, source, electrode_group, data, **kwargs)
 
+class Device(NWBContainer):
+    """
+    """
+
+    __nwbfields__ = ('name',)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    def __init__(self, **kwargs):
+        name, parent = popargs("name", "parent", kwargs)
+        super(Device, self).__init__(parent=parent)
+        self.name = name
+
 class ElectrodeGroup(NWBContainer):
     """
     """
 
     __nwbfields__ = ('name',
+                     'channel_description',
+                     'channel_location',
+                     'channel_filtering',
+                     'channel_coordinates',
+                     'channel_impedance',
                      'description',
-                     'device',
                      'location',
-                     'physical_location',
-                     'impedance')
+                     'device')
 
-    @docval({'name': 'name', 'type': (str, int), 'doc': 'the name of this electrode'},
-            {'name': 'coord', 'type': (tuple, list, np.ndarray), 'doc': 'the x,y,z coordinates of this electrode'},
-            {'name': 'desc', 'type': str, 'doc': 'a description for this electrode'},
-            {'name': 'dev', 'type': str, 'doc': 'the device this electrode was recorded from on'},
-            {'name': 'loc', 'type': str, 'doc': 'a description of the location of this electrode'},
-            {'name': 'imp', 'type': float, 'doc': 'the impedance of this electrode', 'default': -1.0},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
+            {'name': 'channel_description', 'type': Iterable, 'doc': 'array with description for each channel'},
+            {'name': 'channel_location', 'type': Iterable, 'doc': 'array with location description for each channel e.g. "CA1"'},
+            {'name': 'channel_filtering', 'type': Iterable, 'doc': 'array with description of filtering applied to each channel'},
+            {'name': 'channel_coordinates', 'type': Iterable, 'doc': 'xyz-coordinates for each channel. use NaN for unknown dimensions'},
+            {'name': 'channel_impedance', 'type': Iterable, 'doc': 'float array with impedance used on each channel. Can be 2D matrix to store a range'},
+            {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
+            {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, coord, desc, dev, loc, imp, parent = popargs("name", "coord", "desc", "dev", "loc", "imp", "parent", kwargs)
+        name, channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, description, location, device, parent = popargs("name", "channel_description", "channel_location", "channel_filtering", "channel_coordinates", "channel_impedance", "description", "location", "device", "parent", kwargs)
         super(ElectrodeGroup, self).__init__(parent=parent)
         self.name = name
-        self.physical_location = coord
-        self.description = desc
-        self.device = dev
-        self.location = loc
-        self.impedance = imp
+        self.channel_description = channel_description
+        self.channel_location = channel_location
+        self.channel_filtering = channel_filtering
+        self.channel_coordinates = channel_coordinates
+        self.channel_impedance = channel_impedance
+        self.description = description
+        self.location = location
+        self.device = device
 
 class EventDetection(Interface):
     """
@@ -138,6 +160,7 @@ class EventDetection(Interface):
         self.source_electricalseries = source_electricalseries
         self.source_idx = source_idx
         self.times = times
+        self.unit = 'Seconds'
 
 class EventWaveform(Interface):
     """

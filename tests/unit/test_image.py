@@ -1,7 +1,7 @@
 import unittest
 
 from pynwb import TimeSeries
-from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, ImageSegmentation, PlaneSegmentation
+from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, ImageSegmentation, PlaneSegmentation, ROI, ImagingPlane, OpticalChannel
 
 import numpy as np
 
@@ -68,11 +68,19 @@ class ImageSegmentationConstructor(unittest.TestCase):
         pix_mask = [[0 for x in range(w)] for y in range(h)]
         pix_mask_weight = [0 for x in range(w)]
         iSS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', timestamps=list())
-        ip = PlaneSegmentation('name', 'roi_name', img_mask, pix_mask, pix_mask_weight, 'roi_description', 'description', 'imaging_plane_name', iSS)
 
-        iS = ImageSegmentation('test_iS', ip)
+        roi1 = ROI('roi1', 'roi description1', pix_mask, pix_mask_weight, img_mask, iSS)
+        roi2 = ROI('roi2', 'roi description2', pix_mask, pix_mask_weight, img_mask, iSS)
+        roi_list = (roi1, roi2)
+
+        oc = OpticalChannel('description', 'emission_lambda')
+        ip = ImagingPlane(oc, 'description', 'device', 'excitation_lambda', 'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+
+        ps = PlaneSegmentation('name', 'description', roi_list, ip, iSS)
+
+        iS = ImageSegmentation('test_iS', ps)
         self.assertEqual(iS.source, 'test_iS')
-        self.assertEqual(iS.plane_segmentation, ip)
+        self.assertEqual(iS.plane_segmentation, ps)
 
 class PlaneSegmentationConstructor(unittest.TestCase):
     def test_init(self):
@@ -82,11 +90,20 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         pix_mask = [[0 for x in range(w)] for y in range(h)]
         pix_mask_weight = [0 for x in range(w)]
         iSS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', timestamps=list())
-        ip = PlaneSegmentation('name', 'roi_name', img_mask, pix_mask, pix_mask_weight, 'roi_description', 'description', 'imaging_plane_name', iSS)
 
-class OpticalChannelConstructor(unittest.TestCase):
-    def test_init(self):
-        pass
+        roi1 = ROI('roi1', 'roi description1', pix_mask, pix_mask_weight, img_mask, iSS)
+        roi2 = ROI('roi2', 'roi description2', pix_mask, pix_mask_weight, img_mask, iSS)
+        roi_list = (roi1, roi2)
+
+        oc = OpticalChannel('description', 'emission_lambda')
+        ip = ImagingPlane(oc, 'description', 'device', 'excitation_lambda', 'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+
+        iS = PlaneSegmentation('name', 'description', roi_list, ip, iSS)
+        self.assertEqual(iS.name, 'name')
+        self.assertEqual(iS.description, 'description')
+        self.assertEqual(iS.roi_list, roi_list)
+        self.assertEqual(iS.imaging_plane, ip)
+        self.assertEqual(iS.reference_images, iSS)
 
 if __name__ == '__main__':
     unittest.main()

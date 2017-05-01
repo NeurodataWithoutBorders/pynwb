@@ -6,8 +6,25 @@ from collections import Iterable
 
 
 class OptogeneticStimulusSite(NWBContainer):
-    # see /general/optogenetics/<site_X> spec
-    pass
+    '''
+    '''
+
+    __nwbfields__ = ('device',
+                     'description',
+                     'excitation_lambda',
+                     'location')
+
+    @docval({'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
+            {'name': 'description', 'type': str, 'doc': 'Description of site.'},
+            {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
+            {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})
+    def __init__(self, **kwargs):
+        device, description, excitation_lambda, location = popargs('device', 'description', 'excitation_lambda', 'location', kwargs)
+        super(OptogeneticStimulusSite, self).__init__(**kwargs)
+        self.device = device
+        self.description = description
+        self.excitation_lambda = excitation_lambda
+        self.location = location
 
 class OptogeneticSeries(TimeSeries):
     '''
@@ -39,8 +56,7 @@ class OptogeneticSeries(TimeSeries):
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         site = popargs('site', kwargs)

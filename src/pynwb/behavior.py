@@ -1,4 +1,4 @@
-from .core import docval, popargs
+from .core import docval, popargs, NWBContainer
 from .image import ImageSeries
 from pynwb.misc import IntervalSeries
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution
@@ -177,26 +177,25 @@ class Position(Interface):
         super(Position, self).__init__(source, **kwargs)
         self.spatial_series = spatial_series
 
-class ImageStack():
+class CorrectedImageStack(NWBContainer):
     """
     """
 
     __nwbfields__ = ('corrected',
                      'original',
-                     'time_series_group',
-                    )
+                     'xy_translation')
 
     _help = ""
 
-    @docval({'name': 'corrected', 'type': ImageSeries, 'doc': ''},
-            {'name': 'original', 'type': Iterable, 'doc': ''},
-            {'name': 'time_series_group', 'type': Iterable, 'doc': ''})
+    @docval({'name': 'corrected', 'type': ImageSeries, 'doc': 'Image stack with frames shifted to the common coordinates.'},
+            {'name': 'original', 'type': ImageSeries, 'doc': 'Link to image series that is being registered.'},
+            {'name': 'xy_translation', 'type': TimeSeries, 'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates, for example, to align each frame to a reference image.'})
     def __init__(self, **kwargs):
-        corrected, original, time_series_group = popargs('corrected', 'original', 'time_series_group', kwargs)
-        super(ImageStack, self).__init__(source, **kwargs)
+        corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
+        super(CorrectedImageStack, self).__init__(**kwargs)
         self.corrected = corrected
         self.original = original
-        self.time_series_group = time_series_group
+        self.xy_translation = xy_translation
 
 class MotionCorrection(Interface):
     """
@@ -205,14 +204,14 @@ class MotionCorrection(Interface):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ('image_stack',)
+    __nwbfields__ = ('corrected_image_stack',)
 
     _help = "Image stacks whose frames have been shifted (registered) to account for motion."
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'image_stack', 'type': Iterable, 'doc': ''})
+            {'name': 'corrected_image_stack', 'type': CorrectedImageStack, 'doc': ''})
     def __init__(self, **kwargs):
-        source, image_stack = popargs('source', 'image_stack', kwargs)
+        source, corrected_image_stack = popargs('source', 'corrected_image_stack', kwargs)
         super(MotionCorrection, self).__init__(source, **kwargs)
-        self.image_stack = image_stack
+        self.corrected_image_stack = corrected_image_stack
 

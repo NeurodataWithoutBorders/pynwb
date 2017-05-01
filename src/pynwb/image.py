@@ -200,41 +200,112 @@ class OpticalSeries(ImageSeries):
         self.field_of_view = field_of_view
         self.orientation = orientation
 
+class ROI(NWBContainer):
+    """
+    """
+
+    __nwbfields__ = ('name',
+                     'roi_description',
+                     'pix_mask',
+                     'pix_mask_weight',
+                     'img_mask')
+
+    @docval({'name': 'name', 'type': str, 'doc': 'name of ROI.'},
+            {'name': 'roi_description', 'type': str, 'doc': 'Description of this ROI.'},
+            {'name': 'pix_mask', 'type': Iterable, 'doc': 'List of pixels (x,y) that compose the mask.'},
+            {'name': 'pix_mask_weight', 'type': Iterable, 'doc': 'Weight of each pixel listed in pix_mask.'},
+            {'name': 'img_mask', 'type': Iterable, 'doc': 'ROI mask, represented in 2D ([y][x]) intensity image.'},
+            {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
+    def __init__(self, **kwargs):
+        name, roi_description, pix_mask, pix_mask_weight, img_mask = popargs('name', 'roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
+        super(ROI, self).__init__(**kwargs)
+        self.name = name
+        self.roi_description = roi_description
+        self.pix_mask = pix_mask
+        self.pix_mask_weight = pix_mask_weight
+        self.img_mask = img_mask
+
+class OpticalChannel(NWBContainer):
+    """
+    """
+
+    __nwbfields__ = ('description',
+                     'emission_lambda')
+
+    @docval({'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},
+            {'name': 'emission_lambda', 'type': str, 'doc': 'Emission lambda for channel.'},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    def __init__(self, **kwargs):
+        description, emission_lambda, parent = popargs("description", "emission_lambda", "parent", kwargs)
+        super(OpticalChannel, self).__init__(parent=parent)
+        self.description = description
+        self.emission_lambda = emission_lambda
+
+class ImagingPlane(NWBContainer):
+    """
+    """
+
+    __nwbfields__ = ('optical_channel',
+                     'description',
+                     'device',
+                     'excitation_lambda',
+                     'imaging_rate',
+                     'indicator',
+                     'location',
+                     'manifold',
+                     'conversion',
+                     'unit',
+                     'reference_frame')
+
+    @docval({'name': 'optical_channel', 'type': OpticalChannel, 'doc': 'One of possibly many groups storing channelspecific data.'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
+            {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
+            {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
+            {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
+            {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
+            {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
+            {'name': 'manifold', 'type': Iterable, 'doc': 'Physical position of each pixel. height, weight, x, y, z.'},
+            {'name': 'conversion', 'type': float, 'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)'},
+            {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).'},
+            {'name': 'reference_frame', 'type': str, 'doc': 'Describes position and reference frame of manifold based on position of first element in manifold.'},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    def __init__(self, **kwargs):
+        optical_channel, description, device, excitation_lambda, imaging_rate, indicator, location, manifold, conversion, unit, reference_frame, parent = popargs('optical_channel', 'description', 'device', 'excitation_lambda', 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion', 'unit', 'reference_frame', 'parent', kwargs)
+        super(ImagingPlane, self).__init__(parent=parent)
+        self.optical_channel = optical_channel
+        self.description = description
+        self.device = device
+        self.excitation_lambda = excitation_lambda
+        self.imaging_rate = imaging_rate
+        self.indicator = indicator
+        self.location = location
+        self.manifold = manifold
+        self.conversion = conversion
+        self.unit = unit
+        self.reference_frame = reference_frame
+
 class PlaneSegmentation(NWBContainer):
     """
     """
 
     __nwbfields__ = ('name',
-                     'roi_name',
-                     'img_mask',
-                     'pix_mask',
-                     'pix_mask_weight',
-                     'roi_description',
                      'description',
-                     'imaging_plane_name',
-                     'reference_images',
-                    )
+                     'roi_list',
+                     'imaging_plane',
+                     'reference_images')
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
-            {'name': 'roi_name', 'type': str, 'doc': 'Name of ROI.'},
-            {'name': 'img_mask', 'type': Iterable, 'doc': 'ROI mask, represented in 2D ([y][x]) intensity image.'},
-            {'name': 'pix_mask', 'type': Iterable, 'doc': 'List of pixels (x,y) that compose the mask.'},
-            {'name': 'pix_mask_weight', 'type': Iterable, 'doc': 'Weight of each pixel listed in pix_mask.'},
-            {'name': 'roi_description', 'type': str, 'doc': 'Description of this ROI.'},
             {'name': 'description', 'type': str, 'doc': 'Description of image plane, recording wavelength, depth, etc.'},
-            {'name': 'imaging_plane_name', 'type': str, 'doc': 'Name of imaging plane under general/optophysiology.'},
+            {'name': 'roi_list', 'type': Iterable, 'doc': 'List of ROIs in this imaging plane.'},
+            {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'link to ImagingPlane group from which this TimeSeries data was generated.'},
             {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
-        name, roi_name, img_mask, pix_mask, pix_mask_weight, roi_description, description, imaging_plane_name, reference_images = popargs('name', 'roi_name', 'img_mask', 'pix_mask', 'pix_mask_weight', 'roi_description', 'description', 'imaging_plane_name', 'reference_images', kwargs)
+        name, description, roi_list, imaging_plane, reference_images = popargs('name', 'description', 'roi_list', 'imaging_plane', 'reference_images', kwargs)
         super(PlaneSegmentation, self).__init__(**kwargs)
         self.name = name
-        self.roi_name = roi_name
-        self.img_mask = img_mask
-        self.pix_mask = pix_mask
-        self.pix_mask_weight = pix_mask_weight
-        self.roi_description = roi_description
         self.description = description
-        self.imaging_plane_name = imaging_plane_name
+        self.roi_list = roi_list
+        self.imaging_plane = imaging_plane
         self.reference_images = reference_images
 
 class ImageSegmentation(Interface):
@@ -257,8 +328,4 @@ class ImageSegmentation(Interface):
         source, plane_segmentation = popargs('source', 'plane_segmentation', kwargs)
         super(ImageSegmentation, self).__init__(source, **kwargs)
         self.plane_segmentation = plane_segmentation
-
-class OpticalChannel(NWBContainer):
-    # see /general/optophysiology/<imaging_plane_X>/<channel_X> spec
-    pass
 
