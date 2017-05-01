@@ -2,7 +2,7 @@ import unittest
 
 from pynwb import TimeSeries
 from pynwb.misc import IntervalSeries
-from pynwb.behavior import SpatialSeries, BehavioralEpochs, BehavioralEvents, BehavioralTimeSeries, PupilTracking, EyeTracking, CompassDirection, Position, MotionCorrection
+from pynwb.behavior import SpatialSeries, BehavioralEpochs, BehavioralEvents, BehavioralTimeSeries, PupilTracking, EyeTracking, CompassDirection, Position, MotionCorrection, CorrectedImageStack
 
 import numpy as np
 
@@ -17,58 +17,65 @@ class SpatialSeriesConstructor(unittest.TestCase):
 
 class BehavioralEpochsConstructor(unittest.TestCase):
     def test_init(self):
-        iS = IntervalSeries('test_iS', 'a hypothetical source')
+        data = [0, 1, 0, 1]
+        iS = IntervalSeries('test_iS', 'a hypothetical source', data, timestamps=list())
+
         bE = BehavioralEpochs('test_bE', iS)
         self.assertEqual(bE.source, 'test_bE')
-        self.assertEqual(bE._IntervalSeries, iS)
+        self.assertEqual(bE.interval_series, iS)
 
 class BehavioralEventsConstructor(unittest.TestCase):
     def test_init(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
+
         bE = BehavioralEvents('test_bE', ts)
         self.assertEqual(bE.source, 'test_bE')
-        self.assertEqual(bE._TimeSeries, ts)
+        self.assertEqual(bE.time_series, ts)
 
 class BehavioralTimeSeriesConstructor(unittest.TestCase):
     def test_init(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
+
         bts = BehavioralTimeSeries('test_bts', ts)
         self.assertEqual(bts.source, 'test_bts')
-        self.assertEqual(bts._TimeSeries, ts)
+        self.assertEqual(bts.time_series, ts)
 
 class PupilTrackingConstructor(unittest.TestCase):
     def test_init(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
-        pt = BehavioralTimeSeries('test_pt', ts)
+
+        pt = PupilTracking('test_pt', ts)
         self.assertEqual(pt.source, 'test_pt')
-        self.assertEqual(pt._TimeSeries, ts)
+        self.assertEqual(pt.time_series, ts)
 
 class EyeTrackingConstructor(unittest.TestCase):
     def test_init(self):
         sS = SpatialSeries('test_sS', 'a hypothetical source', list(), 'reference_frame', timestamps=list())
+
         et = EyeTracking('test_et', sS)
         self.assertEqual(et.source, 'test_et')
-        self.assertEqual(et._SpatialSeries, sS)
+        self.assertEqual(et.spatial_series, sS)
 
 class CompassDirectionConstructor(unittest.TestCase):
     def test_init(self):
         sS = SpatialSeries('test_sS', 'a hypothetical source', list(), 'reference_frame', timestamps=list())
         cd = CompassDirection('test_cd', sS)
         self.assertEqual(cd.source, 'test_cd')
-        self.assertEqual(cd._SpatialSeries, sS)
+        self.assertEqual(cd.spatial_series, sS)
 
 class PositionConstructor(unittest.TestCase):
     def test_init(self):
         sS = SpatialSeries('test_sS', 'a hypothetical source', list(), 'reference_frame', timestamps=list())
         pc = Position('test_pc', sS)
         self.assertEqual(pc.source, 'test_pc')
-        self.assertEqual(pc._SpatialSeries, sS)
+        self.assertEqual(pc.spatial_series, sS)
 
 class MotionCorrectionConstructor(unittest.TestCase):
     def test_init(self):
-        mc = MotionCorrection('test_mc', list())
-        self.assertEqual(mc.source, 'test_mc')
-
+        #mc = MotionCorrection('test_mc', list())
+        #self.assertEqual(mc.source, 'test_mc')
+        pass
 
 if __name__ == '__main__':
     unittest.main()
+

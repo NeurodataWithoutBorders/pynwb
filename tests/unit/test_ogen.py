@@ -1,7 +1,7 @@
 import unittest
 
 from pynwb import TimeSeries
-from pynwb.ogen import OptogeneticSeries, OptogeneticSite
+from pynwb.ogen import OptogeneticSeries, OptogeneticStimulusSite
 
 import numpy as np
 
@@ -9,18 +9,18 @@ import numpy as np
 class OptogeneticSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        iS = OptogeneticSeries('test_iS', 'a hypothetical source', list(), 'site', timestamps=list())
+        oS = OptogeneticStimulusSite('device', 'description', 'excitation_lambda', 'location')
+        self.assertEqual(oS.device, 'device')
+        self.assertEqual(oS.description, 'description')
+        self.assertEqual(oS.excitation_lambda, 'excitation_lambda')
+        self.assertEqual(oS.location, 'location')
+
+        iS = OptogeneticSeries('test_iS', 'a hypothetical source', list(), oS, timestamps=list())
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.source, 'a hypothetical source')
         self.assertEqual(iS.unit, 'Watt')
-        self.assertEqual(iS.site, 'site')
-
-
-class OptogeneticSiteConstructor(unittest.TestCase):
-
-    def test_init(self):
-        pass
-
+        self.assertEqual(iS.site, oS)
 
 if __name__ == '__main__':
     unittest.main()
+

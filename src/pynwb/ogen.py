@@ -4,6 +4,28 @@ from .core import docval, popargs, NWBContainer
 import numpy as np
 from collections import Iterable
 
+
+class OptogeneticStimulusSite(NWBContainer):
+    '''
+    '''
+
+    __nwbfields__ = ('device',
+                     'description',
+                     'excitation_lambda',
+                     'location')
+
+    @docval({'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
+            {'name': 'description', 'type': str, 'doc': 'Description of site.'},
+            {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
+            {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})
+    def __init__(self, **kwargs):
+        device, description, excitation_lambda, location = popargs('device', 'description', 'excitation_lambda', 'location', kwargs)
+        super(OptogeneticStimulusSite, self).__init__(**kwargs)
+        self.device = device
+        self.description = description
+        self.excitation_lambda = excitation_lambda
+        self.location = location
+
 class OptogeneticSeries(TimeSeries):
     '''
     Optogenetic stimulus. The data[] field is in unit of watts.
@@ -21,7 +43,7 @@ class OptogeneticSeries(TimeSeries):
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'Value is the string "Watt".', 'default': 'Watt'},
 
-            {'name': 'site', 'type': str, 'doc': 'Name of site description in general/optogentics.'},
+            {'name': 'site', 'type': OptogeneticStimulusSite, 'doc': 'Name of site description in general/optogentics.'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
@@ -34,15 +56,10 @@ class OptogeneticSeries(TimeSeries):
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         site = popargs('site', kwargs)
         super(OptogeneticSeries, self).__init__(name, source, data, unit, **kwargs)
         self.site = site
-
-class OptogeneticSite(NWBContainer):
-    # see /general/optogenetics/<site_X> spec
-    pass
 
