@@ -239,9 +239,15 @@ class SpecNamespace(dict):
 
 class NamespaceCatalog(object):
 
-    def __init__(self):
+    @docval({'name': 'default_namespace', 'type': str, 'doc': 'the name of the default Namespace'})
+    def __init__(self, **kwargs):
         """Create a catalog for storing  multiple Namespaces"""
+        self.__default_namespace = getargs('default_namespace', kwargs)
         self.__namespaces = dict()
+
+    @property
+    def default_namespace(self):
+        return self.__default_namespace
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
             {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'})
