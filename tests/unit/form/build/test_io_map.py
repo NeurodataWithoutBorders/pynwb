@@ -1,13 +1,11 @@
 import unittest
 
-from pynwb.spec import GroupSpec, AttributeSpec, DatasetSpec
-from pynwb.io.build.builders import GroupBuilder, DatasetBuilder
-from pynwb.core import NWBContainer
-from pynwb.utils import docval, getargs
-from pynwb.spec.catalog import SpecCatalog
-from pynwb.io.build.map import ObjectMapper, BuildManager, TypeMap, get_subspec
+from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog
+from form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap, get_subspec
+from form.core import Container
+from form.utils import docval, getargs
 
-class Bar(NWBContainer):
+class Bar(Container):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this Bar'},
             {'name': 'data', 'type': list, 'doc': 'some data'},

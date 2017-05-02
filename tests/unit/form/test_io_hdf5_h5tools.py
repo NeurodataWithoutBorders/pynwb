@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.utils import DataChunkIterator
+from form.utils import DataChunkIterator
 from pynwb.io.hdf5.h5tools import __chunked_iter_fill__, write_dataset
 
 import h5py

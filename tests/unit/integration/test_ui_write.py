@@ -3,8 +3,8 @@ import numpy as np
 import json
 from datetime import datetime
 
-from pynwb.io.build.builders import GroupBuilder, DatasetBuilder
-from pynwb.io import BuildManager
+from form.build import GroupBuilder, DatasetBuilder, BuildManager
+
 from pynwb import NWBFile, TimeSeries
 
 class SetEncoder(json.JSONEncoder):

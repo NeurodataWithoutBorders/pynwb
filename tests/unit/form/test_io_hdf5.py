@@ -3,10 +3,10 @@ from datetime import datetime
 import os
 from h5py import File, Dataset
 
-from pynwb.io.hdf5 import HDF5IO
-from pynwb.io import BuildManager
 from pynwb import NWBFile, TimeSeries
-from pynwb.io.build.builders import GroupBuilder, DatasetBuilder, LinkBuilder
+from form.backends.hdf5 import HDF5IO
+from form.build import BuildManager
+from form.build import GroupBuilder, DatasetBuilder, LinkBuilder
 
 from numbers import Number
 

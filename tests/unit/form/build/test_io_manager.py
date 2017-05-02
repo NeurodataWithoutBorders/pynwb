@@ -1,13 +1,13 @@
 import unittest
 from abc import ABCMeta, abstractmethod
 
-from pynwb.spec import GroupSpec, AttributeSpec, DatasetSpec
-from pynwb.io.build.builders import GroupBuilder, DatasetBuilder
 from pynwb.core import NWBContainer
-from pynwb.utils import docval, getargs
-from pynwb.spec.catalog import SpecCatalog
-from pynwb.spec.spec import ZERO_OR_MANY
-from pynwb.io.build.map import ObjectMapper, BuildManager, TypeMap
+
+from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog
+from form.spec.spec import ZERO_OR_MANY
+from form.build import GroupBuilder, DatasetBuilder
+from form.utils import docval, getargs
+from form.build import ObjectMapper, BuildManager, TypeMap
 
 class Foo(NWBContainer):
 
