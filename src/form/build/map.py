@@ -1,12 +1,10 @@
-from pynwb.utils import docval, getargs, ExtenderMeta, get_docval
-from pynwb.core import NWBContainer
-from pynwb.spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, CORE_NAMESPACE
-from pynwb.spec.catalog import SpecCatalog
-from pynwb.spec.namespace import NamespaceCatalog
-from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
-
 import re
 import sys
+
+from form.utils import docval, getargs, ExtenderMeta, get_docval
+from form.core import NWBContainer
+from form.spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, CORE_NAMESPACE, SpecCatalog, NamespaceCatalog
+from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
 
 @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
         {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to get the sub-specification for'},

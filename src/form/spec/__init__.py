@@ -6,6 +6,7 @@ from .spec import AttributeSpec
 from .spec import DatasetSpec
 from .spec import LinkSpec
 from .spec import GroupSpec
+from .catalog import SpecCatalog
 from .namespace import SpecNamespace
 from .namespace import NamespaceCatalog
 

@@ -6,8 +6,6 @@ from form.utils import docval, popargs, DataChunkIterator, ShapeValidator
 from .base import TimeSeries, Interface, _default_resolution, _default_conversion
 from .core import NWBContainer
 
-
-
 @register_class('ElectricalSeries', CORE_NAMESPACE)
 class ElectricalSeries(TimeSeries):
     """

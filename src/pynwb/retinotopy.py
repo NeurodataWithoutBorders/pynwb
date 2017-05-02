@@ -52,7 +52,6 @@ class amap(NWBContainer):
         self.dimension = dimension
 
 class ImagingRetinotopy(Interface):
->>>>>>> dev
     """
     Intrinsic signal optical imaging or widefield imaging for measuring retinotopy. Stores orthogonal
     maps (e.g., altitude/azimuth; radius/theta) of responses to specific stimuli and a combined
