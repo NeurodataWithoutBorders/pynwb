@@ -25,12 +25,13 @@ class Interface(NWBContainer):
 
     __neurodata_type = "Interface"
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Interface'})
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Interface'},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         if self.__class__ == Interface:
             raise NotImplementedError("Interface cannot by instantiated directly")
         source = getargs('source', kwargs)
-        super(Interface, self).__init__()
+        super(Interface, self).__init__(**kwargs)
         self.source = source
 
     @property
@@ -66,10 +67,11 @@ class Module(NWBContainer):
     __neurodata_type = "Module"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this processing module'})
+            {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, description = getargs('name', 'description', kwargs)
-        super(Module, self).__init__()
+        super(Module, self).__init__(**kwargs)
         self.__name = name
         self.__interfaces = list()
 

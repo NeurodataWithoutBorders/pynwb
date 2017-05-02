@@ -1,0 +1,19 @@
+#!/bin/ksh
+
+# use default coverage name
+COV=coverage3
+
+cd ../..
+
+echo ""
+echo "Running Tests with Coverage:"
+${COV} run --source=. test.py
+
+echo ""
+echo "Creating HTML output:"
+${COV} html -d tests/coverage/htmlcov
+echo ""
+
+echo "Open <src>/coverage/htmlcov/index.html to see results."
+echo ""
+

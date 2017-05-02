@@ -29,7 +29,7 @@ class TwoPhotonSeries(ImageSeries):
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
             {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'doc': 'Width, height and depth of image, or imaged area (meters).'},
-            {'name': 'imaging_plane', 'type': str, 'doc': 'Name of imaging plane description in /general/optophysiology.'},
+            {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},
             {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.'},
             {'name': 'scan_line_rate', 'type': float, 'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept here as it is useful information for analysis, and so good to be stored w/ the actual data.'},
 
@@ -68,8 +68,7 @@ class RoiResponseSeries(TimeSeries):
     '''
 
     __nwbfields__ = ('roi_names',
-                     'segmenttation_interface',
-                     'segmenttation_interface_path')
+                     'segmenttation_interface')
 
     _ancestry = "TimeSeries,ImageSeries,ImageMaskSeries"
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
@@ -82,8 +81,7 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
             {'name': 'roi_names', 'type': Iterable, 'doc': 'List of ROIs represented, one name for each row of data[].'},
-            {'name': 'segmenttation_interface', 'type': ImageSeries, 'doc': 'Link to ImageSeries that mask is applied to.'},
-            {'name': 'segmenttation_interface_path', 'type': str, 'doc': 'Path to linked ImageSeries.'},
+            {'name': 'segmenttation_interface', 'type': ImageSegmentation, 'doc': 'Link to ImageSegmentation.'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
@@ -100,11 +98,10 @@ class RoiResponseSeries(TimeSeries):
     )
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
-        roi_names, segmenttation_interface, segmenttation_interface_path = popargs('roi_names', 'segmenttation_interface', 'segmenttation_interface_path', kwargs)
+        roi_names, segmenttation_interface = popargs('roi_names', 'segmenttation_interface', kwargs)
         super(RoiResponseSeries, self).__init__(name, source, data, unit, **kwargs)
         self.roi_names = roi_names
         self.segmenttation_interface = segmenttation_interface
-        self.segmenttation_interface_path = segmenttation_interface_path
 
 @register_class('DfOverF', CORE_NAMESPACE)
 class DfOverF(Interface):
@@ -113,16 +110,16 @@ class DfOverF(Interface):
     as for segmentation (ie, same names for ROIs and for image planes).
     """
 
-    __nwbfields__ = ('_RoiResponseSeries',)
+    __nwbfields__ = ('roi_response_series',)
 
     _help = "Df/f over time of one or more ROIs. TimeSeries names should correspond to imaging plane names"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': '_RoiResponseSeries', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'})
+            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'})
     def __init__(self, **kwargs):
-        source, _RoiResponseSeries = popargs('source', '_RoiResponseSeries', kwargs)
+        source, roi_response_series = popargs('source', 'roi_response_series', kwargs)
         super(DfOverF, self).__init__(source, **kwargs)
-        self._RoiResponseSeries = _RoiResponseSeries
+        self.roi_response_series = roi_response_series
 
 @register_class('Fluorescence', CORE_NAMESPACE)
 class Fluorescence(Interface):
@@ -131,14 +128,14 @@ class Fluorescence(Interface):
     should be the same as for segmentation (ie, same names for ROIs and for image planes).
     """
 
-    __nwbfields__ = ('_RoiResponseSeries',)
+    __nwbfields__ = ('roi_response_series',)
 
     _help = "Fluorescence over time of one or more ROIs. TimeSeries names should correspond to imaging plane names."
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': '_RoiResponseSeries', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'})
+            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'})
     def __init__(self, **kwargs):
-        source, _RoiResponseSeries = popargs('source', '_RoiResponseSeries', kwargs)
+        source, roi_response_series = popargs('source', 'roi_response_series', kwargs)
         super(Fluorescence, self).__init__(source, **kwargs)
-        self._RoiResponseSeries = _RoiResponseSeries
+        self.roi_response_series = roi_response_series
 

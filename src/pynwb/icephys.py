@@ -6,6 +6,40 @@ from form.utils import docval, popargs
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer
 
+@register_class('IntracellularElectrode', CORE_NAMESPACE)
+class IntracellularElectrode(NWBContainer):
+    '''
+    '''
+
+    __nwbfields__ = ('slice',
+                     'seal',
+                     'description',
+                     'location',
+                     'resistance',
+                     'filtering',
+                     'initial_access_resistance',
+                     'device')
+
+    @docval({'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.'},
+            {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.'},
+            {'name': 'description', 'type': str, 'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc)COMMENT: Free-form text (can be from Methods)'},
+            {'name': 'location', 'type': str, 'doc': 'Area, layer, comments on estimation, stereotaxis coordinates (if in vivo, etc).'},
+            {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance COMMENT: unit: Ohm.'},
+            {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.'},
+            {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.'},
+            {'name': 'device', 'type': str, 'doc': 'Name(s) of devices in general/devices.'})
+    def __init__(self, **kwargs):
+        slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs('slice', 'seal', 'description', 'location', 'resistance', 'filtering', 'initial_access_resistance', 'device', kwargs)
+        super(IntracellularElectrode, self).__init__(**kwargs)
+        self.slice = slice
+        self.seal = seal
+        self.description = description
+        self.location = location
+        self.resistance = resistance
+        self.filtering = filtering
+        self.initial_access_resistance = initial_access_resistance
+        self.device = device
+
 @register_class('PatchClampSeries', CORE_NAMESPACE)
 class PatchClampSeries(TimeSeries):
     '''
@@ -13,7 +47,7 @@ class PatchClampSeries(TimeSeries):
     (this class should not be instantiated directly).
     '''
 
-    __nwbfields__ = ('electrode_name',
+    __nwbfields__ = ('electrode',
                      'gain')
 
     _ancestry = "TimeSeries,PatchClampSeries"
@@ -26,7 +60,7 @@ class PatchClampSeries(TimeSeries):
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'electrode_name', 'type': str, 'doc': 'Name of electrode entry in /general/intracellular_ephys.'},
+            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
@@ -40,13 +74,12 @@ class PatchClampSeries(TimeSeries):
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
-        electrode_name, gain = popargs('electrode_name', 'gain', kwargs)
+        electrode, gain = popargs('electrode', 'gain', kwargs)
         super(PatchClampSeries, self).__init__(name, source, data, unit, **kwargs)
-        self.electrode_name = electrode_name
+        self.electrode = electrode
         self.gain = gain
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)
@@ -71,7 +104,7 @@ class CurrentClampSeries(PatchClampSeries):
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'electrode_name', 'type': str, 'doc': 'Name of electrode entry in /general/intracellular_ephys.'},
+            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
 
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp'},
@@ -89,13 +122,12 @@ class CurrentClampSeries(PatchClampSeries):
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
-        electrode_name, gain = popargs('electrode_name', 'gain', kwargs)
+        electrode, gain = popargs('electrode', 'gain', kwargs)
         bias_current, bridge_balance, capacitance_compensation = popargs('bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
-        super(CurrentClampSeries, self).__init__(name, source, data, unit, electrode_name, gain, **kwargs)
+        super(CurrentClampSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
         self.bias_current = bias_current
         self.bridge_balance = bridge_balance
         self.capacitance_compensation = capacitance_compensation
@@ -121,7 +153,7 @@ class IZeroClampSeries(CurrentClampSeries):
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'electrode_name', 'type': str, 'doc': 'Name of electrode entry in /general/intracellular_ephys.'},
+            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
 
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': 0.0},
@@ -139,13 +171,12 @@ class IZeroClampSeries(CurrentClampSeries):
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
-        electrode_name, gain = popargs('electrode_name', 'gain', kwargs)
+        electrode, gain = popargs('electrode', 'gain', kwargs)
         bias_current, bridge_balance, capacitance_compensation = popargs('bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
-        super(IZeroClampSeries, self).__init__(name, source, data, unit, electrode_name, gain, bias_current, bridge_balance, capacitance_compensation, **kwargs)
+        super(IZeroClampSeries, self).__init__(name, source, data, unit, electrode, gain, bias_current, bridge_balance, capacitance_compensation, **kwargs)
 
 
 @register_class('CurrentClampStimulusSeries', CORE_NAMESPACE)
@@ -167,7 +198,7 @@ class CurrentClampStimulusSeries(PatchClampSeries):
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'electrode_name', 'type': str, 'doc': 'Name of electrode entry in /general/intracellular_ephys.'},
+            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
@@ -181,12 +212,11 @@ class CurrentClampStimulusSeries(PatchClampSeries):
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
-        electrode_name, gain = popargs('electrode_name', 'gain', kwargs)
-        super(CurrentClampStimulusSeries, self).__init__(name, source, data, unit, electrode_name, gain, **kwargs)
+        electrode, gain = popargs('electrode', 'gain', kwargs)
+        super(CurrentClampStimulusSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
 
 @register_class('VoltageClampSeries', CORE_NAMESPACE)
 class VoltageClampSeries(PatchClampSeries):
@@ -214,7 +244,7 @@ class VoltageClampSeries(PatchClampSeries):
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'electrode_name', 'type': str, 'doc': 'Name of electrode entry in /general/intracellular_ephys.'},
+            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
 
             {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad'},
@@ -236,13 +266,12 @@ class VoltageClampSeries(PatchClampSeries):
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
-        electrode_name, gain = popargs('electrode_name', 'gain', kwargs)
+        electrode, gain = popargs('electrode', 'gain', kwargs)
         capacitance_fast, capacitance_slow, resistance_comp_bandwidth, resistance_comp_correction, resistance_comp_prediction, whole_cell_capacitance_comp, whole_cell_series_resistance_comp = popargs('capacitance_fast', 'capacitance_slow', 'resistance_comp_bandwidth', 'resistance_comp_correction', 'resistance_comp_prediction', 'whole_cell_capacitance_comp', 'whole_cell_series_resistance_comp', kwargs)
-        super(VoltageClampSeries, self).__init__(name, source, data, unit, electrode_name, gain, **kwargs)
+        super(VoltageClampSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
         self.capacitance_fast = capacitance_fast
         self.capacitance_slow = capacitance_slow
         self.resistance_comp_bandwidth = resistance_comp_bandwidth
@@ -270,7 +299,7 @@ class VoltageClampStimulusSeries(PatchClampSeries):
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'electrode_name', 'type': str, 'doc': 'Name of electrode entry in /general/intracellular_ephys.'},
+            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
@@ -284,15 +313,8 @@ class VoltageClampStimulusSeries(PatchClampSeries):
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
-        electrode_name, gain = popargs('electrode_name', 'gain', kwargs)
-        super(VoltageClampStimulusSeries, self).__init__(name, source, data, unit, electrode_name, gain, **kwargs)
-
-@register_class('IntracellularElectrode', CORE_NAMESPACE)
-class IntracellularElectrode(NWBContainer):
-    # see /general/intracellular_ephys/<electrode_X> spec
-    pass
-
+        electrode, gain = popargs('electrode', 'gain', kwargs)
+        super(VoltageClampStimulusSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)

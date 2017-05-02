@@ -470,6 +470,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __add_attributes(self, builder, attributes, container):
         for spec in attributes:
             attr_value = self.get_attr_value(spec, container)
+            #if self.__is_null(attr_value):
             if not attr_value:
                 continue
             builder.set_attribute(spec.name, attr_value)
@@ -477,7 +478,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __add_datasets(self, builder, datasets, container, build_manager):
         for spec in datasets:
             attr_value = self.get_attr_value(spec, container)
-            if self.__is_null(attr_value):
+            #if self.__is_null(attr_value):
+            if not attr_value:
                 continue
             if spec.neurodata_type is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value)

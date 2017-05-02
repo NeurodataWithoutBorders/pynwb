@@ -87,7 +87,7 @@ class HDF5IO(FORMIO):
             "maxshape": h5obj.maxshape
         }
         if name is None:
-            name = h5obj.name
+            name = os.path.basename(h5obj.name)
         ret = DatasetBuilder(name, **kwargs)
         return ret
 
@@ -108,6 +108,7 @@ class HDF5IO(FORMIO):
             write_group(self.__file, name, gbldr.groups, gbldr.datasets, gbldr.attributes, gbldr.links)
         for name, dbldr in f_builder.datasets.items():
             write_dataset(self.__file, name, dbldr.data, dbldr.attributes)
+        set_attributes(self.__file, f_builder.attributes)
 
 
 @docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},

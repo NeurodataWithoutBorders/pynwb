@@ -36,10 +36,6 @@ with open('LICENSE') as f:
     license = f.read()
 
 
-pkgs=['pynwb',
-      'pynwb.io',
-      'pynwb.spec' ]
-
 pkgs = find_packages('src', exclude=['data'])
 print('found these packages:', pkgs)
 
