@@ -28,7 +28,7 @@ def __get_namespace_catalog(namespace_path, catalog):
 
 __resources = __get_resources()
 
-__NAMESPACES = __get_namespace_catalog(__resources['namespace_path'], NamespaceCatalog())
+__NAMESPACES = __get_namespace_catalog(__resources['namespace_path'], NamespaceCatalog(CORE_NAMESPACE))
 
 @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
         {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'},
