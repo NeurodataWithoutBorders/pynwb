@@ -2,6 +2,7 @@ from collections import Iterable
 
 from form.utils import docval, popargs
 
+from . import register_class, CORE_NAMESPACE
 from .base import Interface
 
 #@register_class('ImageRetinotopy', CORE_NAMESPACE)    # make sure to uncomment this after this class is implemented

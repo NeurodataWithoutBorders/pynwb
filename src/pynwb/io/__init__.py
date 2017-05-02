@@ -1,5 +1,3 @@
-from .io import NWBReader, NWBWriter, NWBIO
-
 from . import base as __base
 from . import file as __file
 from . import behavior as __behavior

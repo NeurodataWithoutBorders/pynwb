@@ -1,13 +1,13 @@
 '''This ackage will contain functions, classes, and objects
 for reading and writing data in NWB format
 '''
+import os.path
 
 
-from .base import TimeSeries, Module, Interface
-from .file import NWBFile
-
-from form import NamespaceCatalog
+from form.spec import NamespaceCatalog, SpecNamespace
 from form.utils import docval, getargs
+
+from .core import NWBContainer
 
 CORE_NAMESPACE = 'core'
 __core_ns_file_name = 'nwb.namespace.yaml'
@@ -44,7 +44,7 @@ def load_namespace(**kwargs):
     __get_namespace_catalog(namespace_path, __NAMESPACES)
 
 def get_type_map():
-    from form import TypeMap
+    from form.build import TypeMap, ObjectMapper
     ret = TypeMap(__NAMESPACES)
     ret.register_map(NWBContainer, ObjectMapper)
     return ret
@@ -53,7 +53,7 @@ __TYPE_MAP = get_type_map()
 
 # added here for convenience to users
 def BuildManager(type_map=__TYPE_MAP):
-    from form import BuildManager
+    from form.build import BuildManager
     return BuildManager(type_map)
 
 @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the spec for'},
@@ -88,3 +88,6 @@ def register_map(**kwargs):
         _dec(mapper_cls)
 
 from . import io as __io
+from .base import TimeSeries, Module, Interface
+from .file import NWBFile
+

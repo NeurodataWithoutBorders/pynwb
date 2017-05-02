@@ -1,7 +1,8 @@
-from form import ObjectMapper
-from . import register_map
+from form.build import ObjectMapper
+from .. import register_map
+from ..file import NWBFile
 
-@register_map('NWBFile')
+@register_map(NWBFile)
 class NWBFileMap(ObjectMapper):
 
     def __init__(self, spec):

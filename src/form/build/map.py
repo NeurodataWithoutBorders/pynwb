@@ -1,9 +1,9 @@
 import re
 import sys
 
-from form.utils import docval, getargs, ExtenderMeta, get_docval
-from form.core import NWBContainer
-from form.spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, CORE_NAMESPACE, SpecCatalog, NamespaceCatalog
+from ..utils import docval, getargs, ExtenderMeta, get_docval
+from ..container import Container
+from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
 
 @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
@@ -26,7 +26,7 @@ def get_subspec(**kwargs):
 
 class BuildManager(object):
     """
-    A class for managing builds of NWBContainers
+    A class for managing builds of Containers
     """
 
     def __init__(self, type_map):
@@ -34,9 +34,9 @@ class BuildManager(object):
         self.__containers = dict()
         self.__type_map = type_map
 
-    @docval({"name": "container", "type": NWBContainer, "doc": "the container to convert to a Builder"})
+    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"})
     def build(self, **kwargs):
-        """ Build the GroupBuilder for the given NWBContainer"""
+        """ Build the GroupBuilder for the given Container"""
         container = getargs('container', kwargs)
         container_id = self.__conthash__(container)
         result = self.__builders.get(container_id)
@@ -45,10 +45,10 @@ class BuildManager(object):
             self.prebuilt(container, result)
         return result
 
-    @docval({"name": "container", "type": NWBContainer, "doc": "the NWBContainer to save as prebuilt"},
+    @docval({"name": "container", "type": Container, "doc": "the Container to save as prebuilt"},
             {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the Builder representation of the given container'})
     def prebuilt(self, **kwargs):
-        ''' Save the Builder for a given NWBContainer for future use '''
+        ''' Save the Builder for a given Container for future use '''
         container, builder = getargs('container', 'builder', kwargs)
         container_id = self.__conthash__(container)
         self.__builders[container_id] = builder
@@ -61,9 +61,9 @@ class BuildManager(object):
     def __bldrhash__(self, obj):
         return id(obj)
 
-    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the NWBContainer from'})
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'})
     def construct(self, **kwargs):
-        """ Construct the NWBContainer represented by the given builder """
+        """ Construct the Container represented by the given builder """
         builder = getargs('builder', kwargs)
         if isinstance(builder, LinkBuilder):
             builder = bulder.target
@@ -80,7 +80,7 @@ class BuildManager(object):
         builder = getargs('builder', kwargs)
         return self.__type_map.get_cls(builder.attributes.get('neurodata_type'))
 
-    @docval({"name": "container", "type": NWBContainer, "doc": "the container to convert to a Builder"},
+    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             returns='The name a Builder should be given when building this container', rtype=str)
     def get_builder_name(self, **kwargs):
         ''' Get the name a Builder should be given '''
@@ -96,30 +96,21 @@ class TypeMap(object):
         self.__maps = dict()
         self.__map_types = dict()
         self.__namespaces = namespaces
-        # TODO: do something to handle when multiple derived classes have the same name
-        self.__classes = self.__get_subclasses(NWBContainer)
-        self.__mappers = dict() ## already constructed ObjectMapper classes
-        self.__mapper_cls = dict() ## the ObjectMapper class to use for each container type
+        self.__mappers = dict()     ## already constructed ObjectMapper classes
+        self.__mapper_cls = dict()  ## the ObjectMapper class to use for each container type
         self.__container_types = dict()
         self.__neurodata_types = dict()
-
-    def __get_subclasses(self, cls):
-        ret = dict()
-        for subcls in cls.__subclasses__():
-            ret[subcls.__name__] = subcls
-            ret.update(self.__get_subclasses(subcls))
-        return ret
 
     @docval({'name': 'cls_name', 'type': str, 'doc': 'the class name to class object for'})
     def get_cls(self, **kwargs):
         ''' Get the class object for the given class name '''
         cls_name = getargs('cls_name', kwargs)
-        return NWBContainer.get_subclass(cls_name)
+        return Container.get_subclass(cls_name)
 
 #    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
 #            {'name': 'spec', 'type': Spec, 'doc': 'a Spec object'})
 #    def register_spec(self, **kwargs):
-#        """ Specify the specification for an NWBContainer type """
+#        """ Specify the specification for an Container type """
 #        obj_type, spec = getargs('obj_type', 'spec', kwargs)
 #        ndt = spec.neurodata_type_def
 #        if ndt is None:
@@ -158,7 +149,7 @@ class TypeMap(object):
         return ret
 
     def __get_neurodata_type(self, obj):
-        if isinstance(obj, NWBContainer):
+        if isinstance(obj, Container):
             ret = obj.__class__.__name__
         elif isinstance(obj, GroupBuilder) or isinstance(obj, DatasetBuilder):
             ret = obj.get('neurodata_type')
@@ -167,19 +158,19 @@ class TypeMap(object):
         return ret
 
     def __get_namespace(self, obj):
-        if isinstance(obj, NWBContainer):
+        if isinstance(obj, Container):
             ret = obj.__class__.namespace
         elif isinstance(obj, GroupBuilder) or isinstance(obj, DatasetBuilder):
-            ret = obj.get('namespace', CORE_NAMESPACE)
+            ret = obj.get('namespace', self.__namespaces.default_namespace)
         return ret
 
-    @docval({'name': 'obj', 'type': (NWBContainer, Builder), 'doc': 'the object to get the ObjectMapper for'},
+    @docval({'name': 'obj', 'type': (Container, Builder), 'doc': 'the object to get the ObjectMapper for'},
             returns='the ObjectMapper to use for mapping the given object', rtype='ObjectMapper')
     def get_map(self, **kwargs):
         """ Return the ObjectMapper object that should be used for the given container """
         obj = getargs('obj', kwargs)
         # get the container class, and namespace/neurodata_type
-        if isinstance(obj, NWBContainer):
+        if isinstance(obj, Container):
             container_cls = obj.__class__
             namespace, neurodata_type = self.__neurodata_types.get(container_cls, (None, None))
             if namespace is None:
@@ -199,6 +190,7 @@ class TypeMap(object):
                 mapper_cls = self.__mapper_cls.get(cls)
                 if mapper_cls is None:
                     continue
+                print('BUILDING mapper for  %s %s' % (namespace, neurodata_type))
                 mapper = mapper_cls(self.__namespaces.get_spec(namespace, neurodata_type))
                 self.__mappers[cls] = mapper
                 break
@@ -206,7 +198,7 @@ class TypeMap(object):
                 break
         if mapper is None:
             raise ValueError("No ObjectMapper found for class %s, namespace '%s', neurodata_type '%s'" % (container_cls, namespace, neurodata_type))
-        return mappper
+        return mapper
 
     @docval({"name": "namespace", "type": str, "doc": "the namespace containing the neurodata_type to map the class to"},
             {"name": "neurodata_type", "type": str, "doc": "the neurodata_type to mape the class to"},
@@ -221,29 +213,31 @@ class TypeMap(object):
             {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map"})
     def register_map(self, **kwargs):
         container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
-        self.__mappers[container_cls] = mapper_cls
+        self.__mapper_cls[container_cls] = mapper_cls
 
     def get_registered_types(self):
-        """ Return all NWBContainer types that have a map specified """
+        """ Return all Container types that have a map specified """
         return tuple(self.__maps.keys())
 
-    @docval({"name": "container", "type": NWBContainer, "doc": "the container to convert to a Builder"},
+    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             {"name": "manager", "type": BuildManager, "doc": "the BuildManager to use for managing this build", 'default': None})
     def build(self, **kwargs):
-        """ Build the GroupBuilder for the given NWBContainer"""
+        """ Build the GroupBuilder for the given Container"""
         container, manager = getargs('container', 'manager', kwargs)
+        print('container %s, manager %s' % (str(container), str(manager)))
         if manager is None:
             manager = BuildManager(self)
         attr_map = self.get_map(container)
+        print('attr_map %s' % attr_map)
         if attr_map is None:
             raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
             return attr_map.build(container, manager)
 
-    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the NWBContainer from'},
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for constructing', 'default': None})
     def construct(self, **kwargs):
-        """ Construct the NWBContainer represented by the given builder """
+        """ Construct the Container represented by the given builder """
         builder, build_manager = getargs('builder', 'build_manager', kwargs)
         if build_manager is None:
             build_manager = BuildManager(self)
@@ -253,7 +247,7 @@ class TypeMap(object):
         else:
             return attr_map.construct(builder, build_manager)
 
-    @docval({"name": "container", "type": NWBContainer, "doc": "the container to convert to a Builder"},
+    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             returns='The name a Builder should be given when building this container', rtype=str)
     def get_builder_name(self, **kwargs):
         ''' Get the name a Builder should be given '''
@@ -402,7 +396,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         return self.__spec2attr.get(spec, None)
 
     @docval({"name": "spec", "type": Spec, "doc": "the spec to get the attribute value for"},
-            {"name": "container", "type": NWBContainer, "doc": "the container to get the attribute value from"},
+            {"name": "container", "type": Container, "doc": "the container to get the attribute value from"},
             returns='the value of the attribute')
     def get_attr_value(self, **kwargs):
         ''' Get the value of the attribute corresponding to this spec from the given container '''
@@ -439,12 +433,12 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         spec = getargs('spec', kwargs)
         return self.__spec2carg.get(spec, None)
 
-    @docval({"name": "container", "type": NWBContainer, "doc": "the container to convert to a Builder"},
+    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             {"name": "manager", "type": BuildManager, "doc": "the BuildManager to use for managing this build"},
             {"name": "parent", "type": Builder, "doc": "the parent of the resulting Builder", 'default': None},
-            returns="the Builder representing the given NWBContainer", rtype=Builder)
+            returns="the Builder representing the given Container", rtype=Builder)
     def build(self, **kwargs):
-        ''' Convert an NWBContainer to a Builder representation '''
+        ''' Convert an Container to a Builder representation '''
         container, manager, parent = getargs('container', 'manager', 'parent', kwargs)
         name = manager.get_builder_name(container)
         if isinstance(self.__spec, GroupSpec):
@@ -494,7 +488,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 self.__add_attributes(sub_builder, spec.attributes, container)
                 self.__add_datasets(sub_builder, spec.datasets, container, build_manager)
 
-                # handle subgroups that are not NWBContainers
+                # handle subgroups that are not Containers
                 attr_name = self.get_attribute(spec)
                 if attr_name is not None:
                     attr_value = getattr(container, attr_name, None)
@@ -504,7 +498,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                         if isinstance(attr_value, dict):
                             it = iter(attr_value.values())
                         for item in it:
-                            if isinstance(item, NWBContainer):
+                            if isinstance(item, Container):
                                 self.__add_containers(sub_builder, spec, item, build_manager)
                         #continue
                 self.__add_groups(sub_builder, spec.groups, container, build_manager)
@@ -526,11 +520,11 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                         self.__add_containers(builder, spec, attr_value, build_manager)
 
     def __add_containers(self, builder, spec, value, build_manager):
-        if isinstance(value, NWBContainer):
+        if isinstance(value, Container):
             rendered_obj = build_manager.build(value)
             name = build_manager.get_builder_name(value)
             # use spec to determine what kind of HDF5
-            # object this NWBContainer corresponds to
+            # object this Container corresponds to
             if isinstance(spec, LinkSpec):
                 builder.set_link(LinkBuilder(name, rendered_obj, builder))
             elif isinstance(spec, DatasetSpec):
@@ -543,9 +537,9 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             elif isinstance(value, dict):
                 values = value.values()
             else:
-                msg = ("received %s, expected NWBContainer - 'value' "
-                       "must be an NWBContainer a list/tuple/dict of "
-                       "NWBContainers if 'spec' is a GroupSpec")
+                msg = ("received %s, expected Container - 'value' "
+                       "must be an Container a list/tuple/dict of "
+                       "Containers if 'spec' is a GroupSpec")
                 raise ValueError(msg % value.__class__.__name__)
             for container in values:
                 self.__add_containers(builder, spec, container, build_manager)
@@ -580,10 +574,10 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             ret[spec] = builder.data
         return ret
 
-    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the NWBContainer from'},
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
     def construct(self, **kwargs):
-        ''' Construct an NWBContainer from the given Builder '''
+        ''' Construct an Container from the given Builder '''
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
         # gather all subspecs

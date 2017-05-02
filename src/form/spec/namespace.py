@@ -273,7 +273,7 @@ class NamespaceCatalog(object):
         Get the Spec object for the given type from the given Namespace
         '''
         namespace, neurodata_type = getargs('namespace', 'neurodata_type', kwargs)
-        if name not in self.__namespaces:
+        if namespace not in self.__namespaces:
             raise KeyError("'%s' not a namespace" % namespace)
         return self.__namespaces[namespace].get_spec(neurodata_type)
 

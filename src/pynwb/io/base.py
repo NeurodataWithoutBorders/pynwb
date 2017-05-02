@@ -1,7 +1,9 @@
-from form import ObjectMapper
+from form.build import ObjectMapper
 from .. import register_map
 
-@register_map('TimeSeries')
+from ..base import TimeSeries
+
+@register_map(TimeSeries)
 class TimeSeriesMap(ObjectMapper):
 
     def __init__(self, spec):

@@ -6,16 +6,15 @@ from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink
 from form.utils import DataChunkIterator, docval, getargs, popargs
 
 from ..io import FORMIO
-from form import GroupBuilder, DatasetBuilder, LinkBuilder
-from form import BuildManager
+from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager
 
 class HDF5IO(FORMIO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None})
     def __init__(self, **kwargs):
-        path = popargs('path', kwargs)
-        super(HDF5IO, self).__init__(**kwargs)
+        path, manager = popargs('path', 'manager', kwargs)
+        super(HDF5IO, self).__init__(manager)
         self.__path = path
         self.__built = dict()
 

@@ -3,6 +3,7 @@ import numpy as np
 
 from form.utils import docval, popargs
 
+from . import register_class, CORE_NAMESPACE
 from .base import Interface, TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
 from .core import NWBContainer

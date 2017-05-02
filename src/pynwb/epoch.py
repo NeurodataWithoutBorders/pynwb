@@ -4,6 +4,7 @@ import bisect
 
 from form.utils import docval, getargs
 
+from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer
 

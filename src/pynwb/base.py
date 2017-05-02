@@ -3,7 +3,7 @@ from collections import Iterable
 
 from form.utils import docval, getargs
 
-from . register_class
+from . import register_class, CORE_NAMESPACE
 from .core import  NWBContainer
 
 _default_conversion = 1.0

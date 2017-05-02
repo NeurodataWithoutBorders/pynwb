@@ -13,6 +13,7 @@ from dateutil.parser import parse as parse_date
 
 from form.utils import docval, getargs
 
+from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Module
 from .epoch import Epoch
 from .ecephys import ElectrodeGroup, ElectricalSeries

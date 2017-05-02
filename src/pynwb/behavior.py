@@ -3,7 +3,7 @@ from collections import Iterable
 
 from form.utils import docval, popargs
 
-from . import register_class
+from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
 from .misc import IntervalSeries
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution

@@ -1,8 +1,8 @@
 from abc import ABCMeta, abstractmethod
-from ..map import BuildManager
+from ..build import BuildManager
 from ..build import GroupBuilder
 from ..utils import docval, popargs, getargs
-from ..file import NWBFile
+from ..container import Container
 
 class FORMIO(object, metaclass=ABCMeta):
     @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'})
@@ -10,27 +10,27 @@ class FORMIO(object, metaclass=ABCMeta):
         self.__manager = getargs('manager', kwargs)
         self.__built = dict()
 
-    @docval(returns='the NWBFile object', rtype=NWBFile)
+    @docval(returns='the Container object that was read in', rtype=Container)
     def read(self, **kwargs):
         f_builder = self.read_builder()
-        nwb_file = self.__manager.construct(f_builder)
-        return nwb_file
+        container = self.__manager.construct(f_builder)
+        return container
 
-    @docval({'name': 'nwb_file', 'type': NWBFile, 'doc': 'the NWBFile object to write'})
+    @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'})
     def write(self, **kwargs):
-        nwb_file = getargs('nwb_file', kwargs)
-        f_builder = self.__manager.build(nwb_file)
+        container = getargs('container', kwargs)
+        f_builder = self.__manager.build(container)
         self.write_builder(f_builder)
 
     @abstractmethod
-    @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
+    @docval(returns='a GroupBuilder representing the read data', rtype='GroupBuilder')
     def read_builder(self):
-        ''' Read an NWB Dataset and return the GroupBuilder represention '''
+        ''' Read data and return the GroupBuilder represention '''
         pass
 
     @abstractmethod
-    @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
+    @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the Container'})
     def write_builder(self, **kwargs):
-        ''' Write a GroupBuilder representing an NWBFile object '''
+        ''' Write a GroupBuilder representing an Container object '''
         pass
 
