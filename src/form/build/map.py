@@ -132,8 +132,10 @@ class TypeMap(object):
             container_cls = obj.__class__
             namespace, neurodata_type = self.__neurodata_types.get(container_cls, (None, None))
             if namespace is None:
-                raise ValueError("class %s does not mapped to a neurodata_type")
+                raise ValueError("class %s does not mapped to a neurodata_type" % container_cls)
         else:
+            neurodata_type = self.__get_neurodata_type(obj)
+            namespace = self.__get_namespace(obj)
             container_cls = self.get_cls(obj)
         # now build the ObjectMapper class
         for cls in container_cls.__mro__:

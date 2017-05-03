@@ -4,9 +4,10 @@ from form.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
 from .base import Interface
+from .core import NWBContainer
 
 #@register_class('ImageRetinotopy', CORE_NAMESPACE)    # make sure to uncomment this after this class is implemented
-class ImageRetinotopy(Interface):
+class aimage(NWBContainer):
     """
     """
 
