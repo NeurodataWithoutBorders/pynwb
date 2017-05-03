@@ -78,7 +78,8 @@ class BuildManager(object):
     def get_cls(self, **kwargs):
         ''' Get the class object for the given Builder '''
         builder = getargs('builder', kwargs)
-        return self.__type_map.get_cls(builder.attributes.get('neurodata_type'))
+        #return self.__type_map.get_cls(builder.attributes.get('neurodata_type'))
+        return self.__type_map.get_cls(builder)
 
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             returns='The name a Builder should be given when building this container', rtype=str)
@@ -93,7 +94,6 @@ class TypeMap(object):
     @docval({'name': 'namespaces', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use'})
     def __init__(self, **kwargs):
         namespaces = getargs('namespaces', kwargs)
-        self.__maps = dict()
         self.__map_types = dict()
         self.__namespaces = namespaces
         self.__mappers = dict()     ## already constructed ObjectMapper classes
@@ -101,68 +101,26 @@ class TypeMap(object):
         self.__container_types = dict()
         self.__neurodata_types = dict()
 
-    @docval({'name': 'cls_name', 'type': str, 'doc': 'the class name to class object for'})
-    def get_cls(self, **kwargs):
-        ''' Get the class object for the given class name '''
-        cls_name = getargs('cls_name', kwargs)
-        return Container.get_subclass(cls_name)
-
-#    @docval({'name': 'obj_type', 'type': (str, type), 'doc': 'a class name or type object'},
-#            {'name': 'spec', 'type': Spec, 'doc': 'a Spec object'})
-#    def register_spec(self, **kwargs):
-#        """ Specify the specification for an Container type """
-#        obj_type, spec = getargs('obj_type', 'spec', kwargs)
-#        ndt = spec.neurodata_type_def
-#        if ndt is None:
-#            raise ValueError("'spec' must define a neurodata type")
-#        self.__catalog.register_spec(obj_type, spec)
-#
-#    @docval({'name': 'spec', 'type': Spec, 'doc': 'the Spec object to register'})
-#    def auto_register(self, **kwargs):
-#        ''' Register this specification and all sub-specification using neurodata_type as object type name '''
-#        spec = getargs('spec', kwargs)
-#        ndt = spec.neurodata_type_def
-#        if ndt is not None:
-#            self.register_spec(ndt, spec)
-#        for dataset_spec in spec.datasets:
-#            dset_ndt = dataset_spec.neurodata_type_def
-#            if dset_ndt is not None:
-#                self.register_spec(dset_ndt, dataset_spec)
-#        for group_spec in spec.groups:
-#            self.auto_register(group_spec)
-
-#    @docval({'name': 'ndt', 'type': (type, str), 'doc': 'the neurodata type to associate the decorated class with'})
-#    def neurodata_type(self, **kwargs):
-#        """ A decorator to specify ObjectMapper subclasses for specific neurodata types """
-#        ndt = getargs('ndt', kwargs)
-#        def _dec(map_cls):
-#            self.__map_types[ndt] = map_cls
-#            return map_cls
-#        return _dec
-
-    def __get_map_container(self, container):
-        ret = None
-        for cls in container.__class__.__mro__:
-            ret = self.__maps.get(cls.__name__)
-            if ret is not None:
-                break
-        return ret
-
     def __get_neurodata_type(self, obj):
-        if isinstance(obj, Container):
-            ret = obj.__class__.__name__
-        elif isinstance(obj, GroupBuilder) or isinstance(obj, DatasetBuilder):
-            ret = obj.get('neurodata_type')
-            if ret is None:
-                raise ValueError("builder '%s' is does not have a neurodata_type" % builder.name)
+        ret = obj.get('neurodata_type')
+        if ret is None:
+            raise ValueError("builder '%s' is does not have a neurodata_type" % builder.name)
         return ret
 
-    def __get_namespace(self, obj):
-        if isinstance(obj, Container):
-            ret = obj.__class__.namespace
-        elif isinstance(obj, GroupBuilder) or isinstance(obj, DatasetBuilder):
-            ret = obj.get('namespace', self.__namespaces.default_namespace)
-        return ret
+    def __get_namespace(self, bldr):
+        return bldr.get('namespace', self.__namespaces.default_namespace)
+
+    @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder object to get the corresponding Container class for'})
+    def get_cls(self, **kwargs):
+        builder = getargs('builder', kwargs)
+        neurodata_type = self.__get_neurodata_type(builder)
+        namespace = self.__get_namespace(builder)
+        if namespace not in self.__container_types:
+            raise ValueError("no neurodata_types from namespace '%s' have been mapped" % namespace)
+        if neurodata_type not in self.__container_types[namespace]:
+            raise ValueError("no neurodata_type '%s' from namespace '%s has been mapped'" % (neurodata_type, namespace))
+        container_cls = self.__container_types[namespace][neurodata_type]
+        return container_cls
 
     @docval({'name': 'obj', 'type': (Container, Builder), 'doc': 'the object to get the ObjectMapper for'},
             returns='the ObjectMapper to use for mapping the given object', rtype='ObjectMapper')
@@ -176,13 +134,7 @@ class TypeMap(object):
             if namespace is None:
                 raise ValueError("class %s does not mapped to a neurodata_type")
         else:
-            neurodata_type = self.__get_neurodata_type(obj)
-            namespace = self.__get_namespace(obj)
-            if namespace not in self.__container_types:
-                raise ValueError("no neurodata_types from namespace '%s' have been mapped" % namespace)
-            if neurodata_type not in self.__container_types[namespace]:
-                raise ValueError("no neurodata_type '%s' from namespace '%s has been mapped'" % (neurodata_type, namespace))
-            container_cls = self.__container_types[namespace][neurodata_types]
+            container_cls = self.get_cls(obj)
         # now build the ObjectMapper class
         for cls in container_cls.__mro__:
             mapper = self.__mappers.get(cls)
@@ -190,8 +142,8 @@ class TypeMap(object):
                 mapper_cls = self.__mapper_cls.get(cls)
                 if mapper_cls is None:
                     continue
-                print('BUILDING mapper for  %s %s' % (namespace, neurodata_type))
-                mapper = mapper_cls(self.__namespaces.get_spec(namespace, neurodata_type))
+                spec = self.__namespaces.get_spec(namespace, neurodata_type)
+                mapper = mapper_cls(spec)
                 self.__mappers[cls] = mapper
                 break
             else:
@@ -215,20 +167,18 @@ class TypeMap(object):
         container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
         self.__mapper_cls[container_cls] = mapper_cls
 
-    def get_registered_types(self):
-        """ Return all Container types that have a map specified """
-        return tuple(self.__maps.keys())
-
+#    def get_registered_types(self):
+#        """ Return all Container types that have a map specified """
+#        return tuple(self.__maps.keys())
+#
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             {"name": "manager", "type": BuildManager, "doc": "the BuildManager to use for managing this build", 'default': None})
     def build(self, **kwargs):
         """ Build the GroupBuilder for the given Container"""
         container, manager = getargs('container', 'manager', kwargs)
-        print('container %s, manager %s' % (str(container), str(manager)))
         if manager is None:
             manager = BuildManager(self)
         attr_map = self.get_map(container)
-        print('attr_map %s' % attr_map)
         if attr_map is None:
             raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
@@ -580,6 +530,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         ''' Construct an Container from the given Builder '''
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
+        #cls = self.get_cls(builder)
         # gather all subspecs
         subspecs = self.__get_subspec_values(builder, self.spec, manager)
         # get the constructor argument each specification corresponds to

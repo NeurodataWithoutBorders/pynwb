@@ -11,13 +11,13 @@ from .spec import GroupSpec
 _namespace_args = [
     {'name': 'doc', 'type': str, 'doc': 'a description about what this namespace represents'},
     {'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
+    {'name': 'schema', 'type': list, 'doc': 'location of schema specification files or other Namespaces'},
     {'name': 'full_name', 'type': str, 'doc': 'extended full name of this namespace', 'default': None},
     {'name': 'version', 'type': (str, tuple, list), 'doc': 'Version number of the namespace', 'default': None},
     {'name': 'date', 'type': (datetime, str), 'doc': "Date last modified or released. Formatting is %Y-%m-%d %H:%M:%S, e.g, 2017-04-25 17:14:13",
      'default': None},
     {'name': 'author', 'type': (str, list), 'doc': 'Author or list of authors.', 'default': None},
     {'name': 'contact', 'type': (str, list), 'doc': 'List of emails. Ordering should be the same as for author', 'default': None},
-    {'name': 'schema', 'type': list, 'doc': 'location of schema specification files or other Namespaces', 'default': None},
     {'name': 'catalog', 'type': SpecCatalog, 'doc': 'The SpecCatalog object for this SpecNamespace', 'default': None}
 ]
 class SpecNamespace(dict):
@@ -29,12 +29,11 @@ class SpecNamespace(dict):
         doc, full_name, name, version, date, author, contact, schema, catalog  = \
             popargs('doc', 'full_name', 'name', 'version', 'date', 'author', 'contact', 'schema', 'catalog', kwargs)
         super(SpecNamespace, self).__init__()
-        if doc is not None:
-            self['doc'] = doc
+        self['doc'] = doc
+        self['schema'] = schema
+        self['name'] = name
         if full_name is not None:
             self['full_name'] = full_name
-        if name is not None:
-            self['name'] = name
         if version is not None:
             self['version'] = version
         if date is not None:
@@ -43,8 +42,6 @@ class SpecNamespace(dict):
             self['author'] = author
         if contact is not None:
             self['contact'] = contact
-        if schema is not None:
-            self['schema'] = schema
         self.__catalog = catalog if catalog is not None else SpecCatalog()
 
     @property
@@ -86,8 +83,8 @@ class SpecNamespace(dict):
 
     @docval({'name': 'neurodata_type', 'type': (str, type), 'doc': 'the neurodata_type to get the spec for'})
     def get_spec(self, **kwargs):
-        neurodata_type = getargs('neurodata_type', **kwargs)
-        self.__catalog.get_spec(neurodata_type)
+        neurodata_type = getargs('neurodata_type', kwargs)
+        return self.__catalog.get_spec(neurodata_type)
 
     def get_registered_types(self):
         return self.__catalog.get_registered_types()

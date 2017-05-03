@@ -52,9 +52,9 @@ def get_type_map():
 __TYPE_MAP = get_type_map()
 
 # added here for convenience to users
+from form.build import BuildManager as __BuildManager
 def BuildManager(type_map=__TYPE_MAP):
-    from form.build import BuildManager
-    return BuildManager(type_map)
+    return __BuildManager(type_map)
 
 @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the spec for'},
         {'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},

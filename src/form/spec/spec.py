@@ -205,7 +205,7 @@ class BaseStorageSpec(Spec):
             self.pop('required', None)
             self['neurodata_type_def'] = neurodata_type_def
             if namespace is None:
-                raise ValueError("'namespace' must be specified when specifying 'neurodata_type_def'")
+                raise ValueError("'namespace' must be specified when specifying 'neurodata_type_def', %s"%neurodata_type_def)
             self['namespace'] = namespace
             self.set_attribute(AttributeSpec('neurodata_type', 'text', 'the neurodata type of this object', value=neurodata_type_def))
             self.set_attribute(AttributeSpec('namespace', 'text', 'the namespace for the neurodata type of this object', value=namespace))

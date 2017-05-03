@@ -123,8 +123,6 @@ def set_attributes(**kwargs):
                     max_len = max(len(s) for s in tmp)
                     dt = '|S%d' % max_len
                     value = np.array(tmp, dtype=dt)
-            else:
-                print('converting %s to an empty numpy array' % key)
                 value = np.array(value)
         obj.attrs[key] = value
 
