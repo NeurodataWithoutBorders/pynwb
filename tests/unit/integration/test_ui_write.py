@@ -3,9 +3,12 @@ import numpy as np
 import json
 from datetime import datetime
 
-from form.build import GroupBuilder, DatasetBuilder, BuildManager
+from form.build import GroupBuilder, DatasetBuilder
+from pynwb import BuildManager
 
 from pynwb import NWBFile, TimeSeries
+
+CORE_NAMESPACE = 'core'
 
 class SetEncoder(json.JSONEncoder):
     def default(self, o):
@@ -58,6 +61,7 @@ class TestTimeSeriesIO(TestNWBContainerIO):
         self.builder = GroupBuilder('test_timeseries',
                                 attributes={'ancestry': 'TimeSeries',
                                             'source': 'example_source',
+                                            'namespace': CORE_NAMESPACE,
                                             'neurodata_type': 'TimeSeries',
                                             'help': 'General purpose TimeSeries'},
                                 datasets={'data': DatasetBuilder('data', list(range(100,200,10)),
@@ -77,6 +81,7 @@ class TestNWBFileIO(TestNWBContainerIO):
         ts_builder = GroupBuilder('test_timeseries',
                                  attributes={'ancestry': 'TimeSeries',
                                              'source': 'example_source',
+                                             'namespace': CORE_NAMESPACE,
                                              'neurodata_type': 'TimeSeries',
                                              'help': 'General purpose TimeSeries'},
                                  datasets={'data': DatasetBuilder('data', list(range(100,200,10)),
@@ -97,7 +102,7 @@ class TestNWBFileIO(TestNWBContainerIO):
                                            'session_description': DatasetBuilder('session_description', 'a test NWB File'),
                                            'nwb_version': DatasetBuilder('nwb_version', '1.0.6'),
                                            'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
-                                 attributes={'neurodata_type': 'NWBFile'})
+                                 attributes={'namespace': CORE_NAMESPACE, 'neurodata_type': 'NWBFile'})
 
     def setUpContainer(self):
         self.container = NWBFile('test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)

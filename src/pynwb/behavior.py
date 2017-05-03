@@ -7,6 +7,7 @@ from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
 from .misc import IntervalSeries
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution
+from .image import ImageSeries
 
 @register_class('SpatialSeries', CORE_NAMESPACE)
 class SpatialSeries(TimeSeries):
@@ -187,6 +188,7 @@ class Position(Interface):
         super(Position, self).__init__(source, **kwargs)
         self.spatial_series = spatial_series
 
+@register_class('CorrectedImageStack', CORE_NAMESPACE)
 class CorrectedImageStack(NWBContainer):
     """
     """

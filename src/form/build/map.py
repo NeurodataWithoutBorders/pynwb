@@ -416,7 +416,11 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             attr_value = self.get_attr_value(spec, container)
             #if self.__is_null(attr_value):
             if not attr_value:
-                continue
+                if spec.value is not None:
+                    print('setting %s to constant %s' % (spec.name, spec.value))
+                    attr_value = spec.value
+                else:
+                    continue
             builder.set_attribute(spec.name, attr_value)
 
     def __add_datasets(self, builder, datasets, container, build_manager):

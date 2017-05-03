@@ -4,8 +4,8 @@ import os
 from h5py import File, Dataset
 
 from pynwb import NWBFile, TimeSeries
+from pynwb import BuildManager
 from form.backends.hdf5 import HDF5IO
-from form.build import BuildManager
 from form.build import GroupBuilder, DatasetBuilder, LinkBuilder
 
 from numbers import Number
@@ -170,7 +170,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
         os.remove(self.path)
 
     def test_write_builder(self):
-        writer = HDF5IO(self.path)
+        writer = HDF5IO(self.path, self.manager)
         writer.write_builder(self.builder)
         writer.close()
         f = File(self.path)
@@ -192,7 +192,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
 
     def test_read_builder(self):
         self.maxDiff = None
-        io = HDF5IO(self.path)
+        io = HDF5IO(self.path, self.manager)
         io.write_builder(self.builder)
         io.close()
         builder = io.read_builder()

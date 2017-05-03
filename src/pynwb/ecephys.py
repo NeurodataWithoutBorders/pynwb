@@ -215,8 +215,8 @@ class Clustering(Interface):
         self.peak_over_rms = list(peak_over_rms)
         self.times = times
 
-@register_class('ClusterWaveform', CORE_NAMESPACE)
-class ClusterWaveform(Interface):
+@register_class('ClusterWaveforms', CORE_NAMESPACE)
+class ClusterWaveforms(Interface):
     """
     Describe cluster waveforms by mean and standard deviation for at each sample.
     """

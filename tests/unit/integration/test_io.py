@@ -3,10 +3,10 @@ from datetime import datetime
 import os
 from h5py import File
 
-from pynwb import NWBFile, TimeSeries
+from pynwb import NWBFile, TimeSeries, BuildManager
 
 from form.backends.hdf5 import HDF5IO
-from form.build import GroupBuilder, DatasetBuilder, BuildManager
+from form.build import GroupBuilder, DatasetBuilder
 
 class TestHDF5Writer(unittest.TestCase):
 

@@ -11,7 +11,7 @@ from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager
 class HDF5IO(FORMIO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'},
-            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None})
+            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'})
     def __init__(self, **kwargs):
         path, manager = popargs('path', 'manager', kwargs)
         super(HDF5IO, self).__init__(manager)

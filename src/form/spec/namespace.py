@@ -84,7 +84,10 @@ class SpecNamespace(dict):
     @docval({'name': 'neurodata_type', 'type': (str, type), 'doc': 'the neurodata_type to get the spec for'})
     def get_spec(self, **kwargs):
         neurodata_type = getargs('neurodata_type', kwargs)
-        return self.__catalog.get_spec(neurodata_type)
+        spec = self.__catalog.get_spec(neurodata_type)
+        if spec is None:
+            raise ValueError("No specification for '%s' in namespace '%s'" % (neurodata_type, self.name))
+        return spec
 
     def get_registered_types(self):
         return self.__catalog.get_registered_types()
