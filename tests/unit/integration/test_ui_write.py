@@ -31,7 +31,6 @@ class TestNWBContainerIO(unittest.TestCase):
         result = self.manager.build(self.container)
         self.assertDictEqual(result, self.builder)
 
-    #@unittest.skip('not now')
     def test_construct(self):
         result = self.manager.construct(self.builder)
         self.assertContainerEqual(result, self.container)

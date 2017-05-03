@@ -135,8 +135,6 @@ class GroupSpecTests(unittest.TestCase):
                          namespace='core',
                          neurodata_type_def='EphysData')
         self.assertFalse(spec['linkable'])
-#        print('EXPECTED :', attributes)
-#        print('RECEIVED :', spec['attributes'])
         self.assertDictEqual(spec['attributes'][0], self.ndt_attr_spec)
         self.assertDictEqual(spec['attributes'][1], self.ns_attr_spec)
         self.assertListEqual(spec['attributes'][2:], self.attributes)
@@ -192,7 +190,8 @@ class SpecCatalogTest(unittest.TestCase):
         result = self.catalog.get_spec('EphysData')
         self.assertIs(result, self.spec)
 
-    @unittest.skip('no longer a method')
+    # keep this test around in case we need to bring back this method
+    @unittest.skip('SpecCatalog.get_hierarchy is not implemented')
     def test_hierarchy(self):
         spikes_spec = DatasetSpec('my extending dataset', 'int',
                                 namespace='core',

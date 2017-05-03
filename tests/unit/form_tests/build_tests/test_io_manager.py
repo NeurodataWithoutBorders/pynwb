@@ -179,8 +179,6 @@ class TestNestedBase(TestBase):
     def test_build(self):
         ''' Test default mapping for an NWBContainer that has an NWBContainer as an attribute value '''
         builder = self.manager.build(self.foo_bucket)
-        print("EXPECTED: ", self.bucket_builder)
-        print("RECEIVED: ", builder)
         self.assertDictEqual(builder, self.bucket_builder)
 
     def test_construct(self):

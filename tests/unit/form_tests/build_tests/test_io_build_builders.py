@@ -183,52 +183,6 @@ class GroupBuilderGetterTests(unittest.TestCase):
         except AttributeError:
             self.assertItemsEqual(values, self.gb.values())
 
-    @unittest.skip('not necessarily useful')
-    def test_write(self):
-        """Test for base dictionary functionality preservation"""
-        self.maxDiff = None
-        builder_json = '''
-            {
-            "group1": {
-                "subgroup1": {
-
-                }
-            },
-            "dataset1": {
-                "attributes": {
-                },
-                "data": [
-                    0,
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                    7,
-                    8,
-                    9
-                ]
-            },
-            "soft_link1": {
-                "path": "/soft/path/to/target",
-                "hard": false
-            },
-            "external_link1": {
-                "path": "/hard/path/to/target",
-                "file_path": "test.h5",
-                "hard": false
-            },
-            "int_attr": 1,
-            "str_attr": "my_str"
-        }
-        '''
-        dump = json.dumps(self.gb)
-
-        print (dump)
-        self.assertDictEqual(json.loads(builder_json), json.loads(dump))
-
-
 class GroupBuilderIsEmptyTests(unittest.TestCase):
 
     def test_is_empty_true(self):
