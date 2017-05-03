@@ -417,7 +417,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             #if self.__is_null(attr_value):
             if not attr_value:
                 if spec.value is not None:
-                    print('setting %s to constant %s' % (spec.name, spec.value))
                     attr_value = spec.value
                 else:
                     continue
