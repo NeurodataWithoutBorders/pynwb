@@ -18,6 +18,7 @@ API Documentation
    Behavior <pynwb.behavior>
    NWB Base Classes <pynwb.base>
    Miscellaneous <pynwb.misc>
+   Epoch <pynwb.epoch>
 
 
 .. :py:mod:`pynwb.ui`     | A subpackage for high-level Python abstraction of the NWB and neurodata concepts   |
