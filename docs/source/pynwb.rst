@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     pynwb.io
-    pynwb.spec
 
 Submodules
 ----------

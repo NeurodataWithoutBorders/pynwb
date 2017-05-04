@@ -1,22 +1,13 @@
 pynwb.io package
 ================
 
-Subpackages
------------
-
-.. toctree::
-
-    pynwb.io.build
-    pynwb.io.hdf5
-    pynwb.io.tools
-
 Submodules
 ----------
 
 .. toctree::
 
    pynwb.io.base
-   pynwb.io.io
+   pynwb.io.file
 
 Module contents
 ---------------
