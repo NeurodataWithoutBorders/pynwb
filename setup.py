@@ -41,7 +41,7 @@ print('found these packages:', pkgs)
 
 setup_args = {
     'name': 'pynwb',
-    'version': '0.0.1',
+    'version': '0.1',
     'description': 'Package for working with Neurodata stored in the NWB format',
     'long_description': readme,
     'author': 'Andrew Tritt',
