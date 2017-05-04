@@ -6,9 +6,18 @@ API Documentation
 
 .. toctree::
    :maxdepth: 2
-   :caption: Basics
+   :caption: PyNWB Modules
 
-   pynwb.io
+   NWBFile <pynwb.file>
+   Extracellular Electrophysiology <pynwb.ecephys>
+   Intracellular Electrophysiology <pynwb.icephys>
+   Optophysiology <pynwb.ophys>
+   Optogenetics <pynwb.ogen>
+   Retinotopy <pynwb.retinotopy>
+   General Imaging <pynwb.image>
+   Behavior <pynwb.behavior>
+   NWB Base Classes <pynwb.base>
+   Miscellaneous <pynwb.misc>
 
 
 .. :py:mod:`pynwb.ui`     | A subpackage for high-level Python abstraction of the NWB and neurodata concepts   |
