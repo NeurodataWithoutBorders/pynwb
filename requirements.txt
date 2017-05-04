@@ -2,4 +2,4 @@ h5py
 numpy
 scipy
 ruamel.yaml
-dateutil
+python-dateutil
