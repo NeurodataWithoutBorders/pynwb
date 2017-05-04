@@ -1,18 +1,18 @@
-pynwb.io.build package
-======================
+form.build package
+==================
 
 Submodules
 ----------
 
 .. toctree::
 
-   pynwb.io.build.builders
-   pynwb.io.build.map
+   form.build.builders
+   form.build.map
 
 Module contents
 ---------------
 
-.. automodule:: pynwb.io.build
+.. automodule:: form.build
     :members:
     :undoc-members:
     :show-inheritance:

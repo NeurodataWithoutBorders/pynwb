@@ -1,17 +1,24 @@
-pynwb.io.hdf5 package
+form.backends package
 =====================
+
+Subpackages
+-----------
+
+.. toctree::
+
+    form.backends.hdf5
 
 Submodules
 ----------
 
 .. toctree::
 
-   pynwb.io.hdf5.h5tools
+   form.backends.io
 
 Module contents
 ---------------
 
-.. automodule:: pynwb.io.hdf5
+.. automodule:: form.backends
     :members:
     :undoc-members:
     :show-inheritance:

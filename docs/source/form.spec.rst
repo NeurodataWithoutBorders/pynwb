@@ -1,18 +1,19 @@
-pynwb.spec package
-==================
+form.spec package
+=================
 
 Submodules
 ----------
 
 .. toctree::
 
-   pynwb.spec.spec
-   pynwb.spec.tools
+   form.spec.catalog
+   form.spec.namespace
+   form.spec.spec
 
 Module contents
 ---------------
 
-.. automodule:: pynwb.spec
+.. automodule:: form.spec
     :members:
     :undoc-members:
     :show-inheritance:
