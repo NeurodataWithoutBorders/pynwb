@@ -19,9 +19,6 @@ dist/
 #PyCharm
 .idea/
 
-#data directory
-src/pynwb/data/
-
 # shell scripts (e.g. used with fswatch)
 *.sh
 
