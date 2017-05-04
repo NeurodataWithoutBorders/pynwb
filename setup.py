@@ -19,8 +19,8 @@ class CustomBuild(build_py):
         # we should look this up in a config file somewhere
         if not os.path.exists(schema_dir):
             os.makedirs(schema_dir)
-        rl = "https://bitbucket.org/lblneuro/nwb-schema/downloads/nwb_core.tar"
-        est = "nwb_core.tar"
+        url = "https://bitbucket.org/lblneuro/nwb-schema/downloads/nwb_core.tar"
+        dest = "nwb_core.tar"
         print('getting NWB specification')
         schema = urlretrieve(url, dest)
         tf = TarFile(dest, 'r')
