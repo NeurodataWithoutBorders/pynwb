@@ -1,9 +1,13 @@
-from .core import docval, getargs, popargs, NWBContainer
-from .base import TimeSeries, Interface, _default_conversion, _default_resolution
-
 import numpy as np
 from collections import Iterable
 
+from form.utils import docval, getargs, popargs
+
+from . import register_class, CORE_NAMESPACE
+from .base import TimeSeries, Interface, _default_conversion, _default_resolution
+from .core import NWBContainer
+
+@register_class('AnnotationSeries', CORE_NAMESPACE)
 class AnnotationSeries(TimeSeries):
     """
     Stores text-based records about the experiment. To use the
@@ -30,7 +34,7 @@ class AnnotationSeries(TimeSeries):
 
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
+            {'name': 'parent', 'type': NWBContainer, 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
         name, source, data, timestamps = popargs('name', 'source', 'data', 'timestamps', kwargs)
@@ -46,6 +50,7 @@ class AnnotationSeries(TimeSeries):
         self.fields['timestamps'].append(time)
         self.fields['data'].append(annotation)
 
+@register_class('AbstractFeatureSeries', CORE_NAMESPACE)
 class AbstractFeatureSeries(TimeSeries):
     """
     Represents the salient features of a data stream. Typically this
@@ -59,7 +64,7 @@ class AbstractFeatureSeries(TimeSeries):
     They should not not be instantiated directly
     """
 
-    __nwbfields__ = ('feature_units', 
+    __nwbfields__ = ('feature_units',
                      'features')
 
     _ancestry = "TimeSeries,AbstractFeatureSeries"
@@ -84,7 +89,7 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
+            {'name': 'parent', 'type': NWBContainer, 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
         name, source, data = popargs('name', 'source', 'data', kwargs)
@@ -99,6 +104,7 @@ class AbstractFeatureSeries(TimeSeries):
         self.timestamps.append(time)
         self.data.append(features)
 
+@register_class('IntervalSeries', CORE_NAMESPACE)
 class IntervalSeries(TimeSeries):
     """
     Stores intervals of data. The timestamps field stores the beginning and end of intervals. The
@@ -132,7 +138,7 @@ class IntervalSeries(TimeSeries):
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
+            {'name': 'parent', 'type': NWBContainer, 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
@@ -148,6 +154,7 @@ class IntervalSeries(TimeSeries):
         #self.__interval_data.append(1)
         #self.__interval_data.append(-1)
 
+@register_class('SpikeUnit', CORE_NAMESPACE)
 class SpikeUnit(NWBContainer):
     """
     For use in the UnitTimes class.
@@ -169,6 +176,7 @@ class SpikeUnit(NWBContainer):
         self.unit_description = unit_description
         self.source = source
 
+@register_class('UnitTimes', CORE_NAMESPACE)
 class UnitTimes(Interface):
     """
     Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group contains a group
@@ -181,7 +189,7 @@ class UnitTimes(Interface):
     _help = "Estimated spike times from a single unit"
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'spike_unit', 'type': Iterable, 'doc': 'Group storing times'})
+            {'name': 'spike_unit', 'type': Iterable, 'doc': 'The SpikeUnits contained in this Interface'})
     def __init__(self, **kwargs):
         source, spike_unit = popargs('source', 'spike_unit', kwargs)
         super(UnitTimes, self).__init__(source, **kwargs)

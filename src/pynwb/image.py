@@ -1,10 +1,13 @@
-from .base import Interface, TimeSeries, _default_resolution, _default_conversion
-from .core import docval, popargs, NWBContainer
-
 import numpy as np
 from collections import Iterable
 
+from form.utils import docval, popargs
 
+from . import register_class, CORE_NAMESPACE
+from .base import Interface, TimeSeries, _default_resolution, _default_conversion
+from .core import NWBContainer
+
+@register_class('ImageSeries', CORE_NAMESPACE)
 class ImageSeries(TimeSeries):
     '''
     General image data that is common between acquisition and stimulus time series.
@@ -57,6 +60,7 @@ class ImageSeries(TimeSeries):
         self.format = format
 
 
+@register_class('IndexSeries', CORE_NAMESPACE)
 class IndexSeries(TimeSeries):
     '''
     Stores indices to image frames stored in an ImageSeries. The purpose of the ImageIndexSeries is to allow
@@ -99,6 +103,7 @@ class IndexSeries(TimeSeries):
         super(IndexSeries, self).__init__(name, source, data, unit, **kwargs)
         self.index_timeseries = index_timeseries
 
+@register_class('ImageMaskSeries', CORE_NAMESPACE)
 class ImageMaskSeries(ImageSeries):
     '''
     An alpha mask that is applied to a presented visual stimulus. The data[] array contains an array
@@ -146,6 +151,7 @@ class ImageMaskSeries(ImageSeries):
         super(ImageMaskSeries, self).__init__(name, source, data, unit, external_file, starting_frame, format, **kwargs)
         self.masked_imageseries = masked_imageseries
 
+@register_class('OpticalSeries', CORE_NAMESPACE)
 class OpticalSeries(ImageSeries):
     '''
     Image data that is presented or recorded. A stimulus template movie will be stored only as an
@@ -199,133 +205,3 @@ class OpticalSeries(ImageSeries):
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
-
-class ROI(NWBContainer):
-    """
-    """
-
-    __nwbfields__ = ('name',
-                     'roi_description',
-                     'pix_mask',
-                     'pix_mask_weight',
-                     'img_mask')
-
-    @docval({'name': 'name', 'type': str, 'doc': 'name of ROI.'},
-            {'name': 'roi_description', 'type': str, 'doc': 'Description of this ROI.'},
-            {'name': 'pix_mask', 'type': Iterable, 'doc': 'List of pixels (x,y) that compose the mask.'},
-            {'name': 'pix_mask_weight', 'type': Iterable, 'doc': 'Weight of each pixel listed in pix_mask.'},
-            {'name': 'img_mask', 'type': Iterable, 'doc': 'ROI mask, represented in 2D ([y][x]) intensity image.'},
-            {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
-    def __init__(self, **kwargs):
-        name, roi_description, pix_mask, pix_mask_weight, img_mask = popargs('name', 'roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
-        super(ROI, self).__init__(**kwargs)
-        self.name = name
-        self.roi_description = roi_description
-        self.pix_mask = pix_mask
-        self.pix_mask_weight = pix_mask_weight
-        self.img_mask = img_mask
-
-class OpticalChannel(NWBContainer):
-    """
-    """
-
-    __nwbfields__ = ('description',
-                     'emission_lambda')
-
-    @docval({'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},
-            {'name': 'emission_lambda', 'type': str, 'doc': 'Emission lambda for channel.'},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
-    def __init__(self, **kwargs):
-        description, emission_lambda, parent = popargs("description", "emission_lambda", "parent", kwargs)
-        super(OpticalChannel, self).__init__(parent=parent)
-        self.description = description
-        self.emission_lambda = emission_lambda
-
-class ImagingPlane(NWBContainer):
-    """
-    """
-
-    __nwbfields__ = ('optical_channel',
-                     'description',
-                     'device',
-                     'excitation_lambda',
-                     'imaging_rate',
-                     'indicator',
-                     'location',
-                     'manifold',
-                     'conversion',
-                     'unit',
-                     'reference_frame')
-
-    @docval({'name': 'optical_channel', 'type': OpticalChannel, 'doc': 'One of possibly many groups storing channelspecific data.'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
-            {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
-            {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
-            {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
-            {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
-            {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
-            {'name': 'manifold', 'type': Iterable, 'doc': 'Physical position of each pixel. height, weight, x, y, z.'},
-            {'name': 'conversion', 'type': float, 'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)'},
-            {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).'},
-            {'name': 'reference_frame', 'type': str, 'doc': 'Describes position and reference frame of manifold based on position of first element in manifold.'},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
-    def __init__(self, **kwargs):
-        optical_channel, description, device, excitation_lambda, imaging_rate, indicator, location, manifold, conversion, unit, reference_frame, parent = popargs('optical_channel', 'description', 'device', 'excitation_lambda', 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion', 'unit', 'reference_frame', 'parent', kwargs)
-        super(ImagingPlane, self).__init__(parent=parent)
-        self.optical_channel = optical_channel
-        self.description = description
-        self.device = device
-        self.excitation_lambda = excitation_lambda
-        self.imaging_rate = imaging_rate
-        self.indicator = indicator
-        self.location = location
-        self.manifold = manifold
-        self.conversion = conversion
-        self.unit = unit
-        self.reference_frame = reference_frame
-
-class PlaneSegmentation(NWBContainer):
-    """
-    """
-
-    __nwbfields__ = ('name',
-                     'description',
-                     'roi_list',
-                     'imaging_plane',
-                     'reference_images')
-
-    @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
-            {'name': 'description', 'type': str, 'doc': 'Description of image plane, recording wavelength, depth, etc.'},
-            {'name': 'roi_list', 'type': Iterable, 'doc': 'List of ROIs in this imaging plane.'},
-            {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'link to ImagingPlane group from which this TimeSeries data was generated.'},
-            {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
-    def __init__(self, **kwargs):
-        name, description, roi_list, imaging_plane, reference_images = popargs('name', 'description', 'roi_list', 'imaging_plane', 'reference_images', kwargs)
-        super(PlaneSegmentation, self).__init__(**kwargs)
-        self.name = name
-        self.description = description
-        self.roi_list = roi_list
-        self.imaging_plane = imaging_plane
-        self.reference_images = reference_images
-
-class ImageSegmentation(Interface):
-    """
-    Stores pixels in an image that represent different regions of interest (ROIs) or masks. All
-    segmentation for a given imaging plane is stored together, with storage for multiple imaging
-    planes (masks) supported. Each ROI is stored in its own subgroup, with the ROI group
-    containing both a 2D mask and a list of pixels that make up this mask. Segments can also be
-    used for masking neuropil. If segmentation is allowed to change with time, a new imaging plane
-    (or module) is required and ROI names should remain consistent between them.
-    """
-
-    __nwbfields__ = ('plane_segmentation',)
-
-    _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
-
-    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentation', 'type': PlaneSegmentation, 'doc': 'ImagePlane class.'})
-    def __init__(self, **kwargs):
-        source, plane_segmentation = popargs('source', 'plane_segmentation', kwargs)
-        super(ImageSegmentation, self).__init__(source, **kwargs)
-        self.plane_segmentation = plane_segmentation
-

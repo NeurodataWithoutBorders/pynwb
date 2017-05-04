@@ -1,11 +1,15 @@
 import numpy as np
 from collections import Iterable
 
-from pynwb.core import docval, getargs, popargs, NWBContainer
+from form.utils import docval, getargs
+
+from . import register_class, CORE_NAMESPACE
+from .core import  NWBContainer
 
 _default_conversion = 1.0
 _default_resolution = float("nan")
 
+@register_class('Interface', CORE_NAMESPACE)
 class Interface(NWBContainer):
     """ Interfaces represent particular processing tasks and they publish
         (ie, make available) specific types of data. Each is required
@@ -46,6 +50,7 @@ class Interface(NWBContainer):
             return getattr(self, help_attr_name)
         return None
 
+@register_class('Module', CORE_NAMESPACE)
 class Module(NWBContainer):
     """ Processing module. This is a container for one or more interfaces
         that provide data at intermediate levels of analysis
@@ -84,6 +89,7 @@ class Module(NWBContainer):
         self.__interfaces.append(interface)
         interface.parent = self
 
+@register_class('TimeSeries', CORE_NAMESPACE)
 class TimeSeries(NWBContainer):
     """ Standard TimeSeries constructor
 

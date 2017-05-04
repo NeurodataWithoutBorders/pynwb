@@ -2,10 +2,14 @@ import copy
 import numpy as np
 import bisect
 
+from form.utils import docval, getargs
+
+from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import docval, getargs, NWBContainer
+from .core import NWBContainer
 
 #@nwbproperties(*__std_fields, neurodata_type='Epoch')
+@register_class('Epoch', CORE_NAMESPACE)
 class Epoch(NWBContainer):
     """ Epoch object
         Epochs represent specific experimental intervals and store
@@ -247,6 +251,7 @@ class Epoch(NWBContainer):
 
 
 #@nwbproperties(*__epoch_timseries_fields)
+@register_class('EpochTimeSeries', CORE_NAMESPACE)
 class EpochTimeSeries(NWBContainer):
     __nwbfields__ = ('name',
                      'count',

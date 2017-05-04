@@ -1,10 +1,13 @@
-from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import docval, popargs, NWBContainer
-
 import numpy as np
 from collections import Iterable
 
+from form.utils import docval, popargs
 
+from . import register_class, CORE_NAMESPACE
+from .base import TimeSeries, _default_resolution, _default_conversion
+from .core import NWBContainer
+
+@register_class('OptogeneticStimulusSite', CORE_NAMESPACE)
 class OptogeneticStimulusSite(NWBContainer):
     '''
     '''
@@ -26,9 +29,10 @@ class OptogeneticStimulusSite(NWBContainer):
         self.excitation_lambda = excitation_lambda
         self.location = location
 
+@register_class('OptogeneticSeries', CORE_NAMESPACE)
 class OptogeneticSeries(TimeSeries):
     '''
-    Optogenetic stimulus. The data[] field is in unit of watts.
+    Optogenetic stimulus. The data field is in unit of watts.
     '''
 
     __nwbfields__ = ('site',)
@@ -62,4 +66,3 @@ class OptogeneticSeries(TimeSeries):
         site = popargs('site', kwargs)
         super(OptogeneticSeries, self).__init__(name, source, data, unit, **kwargs)
         self.site = site
-

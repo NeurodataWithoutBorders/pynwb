@@ -10,7 +10,7 @@ import os
 from tarfile import TarFile
 
 
-schema_dir = '%s/src/pynwb/spec/data' % os.path.abspath(os.path.dirname(__file__))
+schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
 class CustomBuild(build_py):
     def run(self):
         '''Here, we will do something to access a URL stored in the pynwb repo.

@@ -1,10 +1,13 @@
-from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import docval, popargs, NWBContainer
-
 import numpy as np
 from collections import Iterable
 
+from form.utils import docval, popargs
 
+from . import register_class, CORE_NAMESPACE
+from .base import TimeSeries, _default_resolution, _default_conversion
+from .core import NWBContainer
+
+@register_class('IntracellularElectrode', CORE_NAMESPACE)
 class IntracellularElectrode(NWBContainer):
     '''
     '''
@@ -38,6 +41,7 @@ class IntracellularElectrode(NWBContainer):
         self.initial_access_resistance = initial_access_resistance
         self.device = device
 
+@register_class('PatchClampSeries', CORE_NAMESPACE)
 class PatchClampSeries(TimeSeries):
     '''
     Stores stimulus or response current or voltage. Superclass definition for patch-clamp data
@@ -79,6 +83,7 @@ class PatchClampSeries(TimeSeries):
         self.electrode = electrode
         self.gain = gain
 
+@register_class('CurrentClampSeries', CORE_NAMESPACE)
 class CurrentClampSeries(PatchClampSeries):
     '''
     Stores voltage data recorded from intracellular current-clamp recordings. A corresponding
@@ -128,6 +133,7 @@ class CurrentClampSeries(PatchClampSeries):
         self.bridge_balance = bridge_balance
         self.capacitance_compensation = capacitance_compensation
 
+@register_class('IZeroClampSeries', CORE_NAMESPACE)
 class IZeroClampSeries(CurrentClampSeries):
     '''
     Stores recorded voltage data from intracellular recordings when all current and amplifier settings
@@ -174,6 +180,7 @@ class IZeroClampSeries(CurrentClampSeries):
         super(IZeroClampSeries, self).__init__(name, source, data, unit, electrode, gain, bias_current, bridge_balance, capacitance_compensation, **kwargs)
 
 
+@register_class('CurrentClampStimulusSeries', CORE_NAMESPACE)
 class CurrentClampStimulusSeries(PatchClampSeries):
     '''
     Aliases to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries for
@@ -212,6 +219,7 @@ class CurrentClampStimulusSeries(PatchClampSeries):
         electrode, gain = popargs('electrode', 'gain', kwargs)
         super(CurrentClampStimulusSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
 
+@register_class('VoltageClampSeries', CORE_NAMESPACE)
 class VoltageClampSeries(PatchClampSeries):
     '''
     Stores current data recorded from intracellular voltage-clamp recordings. A corresponding
@@ -273,6 +281,7 @@ class VoltageClampSeries(PatchClampSeries):
         self.whole_cell_capacitance_comp = whole_cell_capacitance_comp
         self.whole_cell_series_resistance_comp = whole_cell_series_resistance_comp
 
+@register_class('VoltageClampStimulusSeries', CORE_NAMESPACE)
 class VoltageClampStimulusSeries(PatchClampSeries):
     '''
     Aliases to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries for
@@ -310,4 +319,3 @@ class VoltageClampStimulusSeries(PatchClampSeries):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
         super(VoltageClampStimulusSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
-
