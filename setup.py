@@ -32,7 +32,7 @@ class CustomBuild(build_py):
 with open('README.rst') as f:
     readme = f.read()
 
-with open('LICENSE') as f:
+with open('license.txt') as f:
     license = f.read()
 
 
