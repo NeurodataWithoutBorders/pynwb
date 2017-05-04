@@ -1,0 +1,598 @@
+specs:
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: NWBFile
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  datasets:
+  - doc: 'A unique text identifier for the file. COMMENT: Eg, concatenated lab name,
+      file creation date/time and experimentalist, or a hash of these and/or other
+      values. The goal is that the string should be unique to all other files.'
+    dtype: text
+    name: identifier
+  - doc: One or two sentences describing the experiment and data in the file.
+    dtype: text
+    name: session_description
+  - doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
+      format with trailing major, minor and patch numbers.'
+    dtype: text
+    name: nwb_version
+  - doc: 'Time of experiment/session start, UTC.  COMMENT: Date + time, Use ISO format
+      (eg, ISO 8601) or an easy-to-read and unambiguous format. All times stored in
+      the file use this time as reference (ie, time zero)'
+    dtype: text
+    name: session_start_time
+  - dims:
+    - '*unlimited*'
+    doc: 'Time file was created, UTC, and subsequent modifications to file. COMMENT:
+      Date + time, Use ISO format (eg, ISO 8601) or a format that is easy to read
+      and unambiguous. File can be created after the experiment was run, so this may
+      differ from experiment start time. Each modifictation to file adds new entry
+      to array. '
+    dtype: text
+    name: file_create_date
+    shape:
+    - null
+  doc: Top level of NWB file.
+  groups:
+  - doc: 'Data streams recorded from the system, including ephys, ophys, tracking,
+      etc. COMMENT: This group is read-only after the experiment is completed and
+      timestamps are corrected to a common timebase. The data stored here may be links
+      to raw data stored in external HDF5 files. This will allow keeping bulky raw
+      data out of the file while preserving the option of keeping some/all in the
+      file. MORE_INFO: Acquired data includes tracking and experimental data streams
+      (ie, everything measured from the system).If bulky data is stored in the /acquisition
+      group, the data can exist in a separate HDF5 file that is linked to by the file
+      being used for processing and analysis.'
+    groups:
+    - doc: 'Acquired TimeSeries.COMMENT: When importing acquisition data to an NWB
+        file, all acquisition/tracking/stimulus data must already be aligned to a
+        common time frame. It is assumed that this task has already been performed.'
+      groups:
+      - doc: TimeSeries object containing data generated during data acquisition
+        namespace: core
+        neurodata_type: TimeSeries
+      name: timeseries
+    - datasets:
+      - attributes:
+        - doc: the neurodata type of this object
+          dtype: text
+          name: neurodata_type
+          value: Image
+        - doc: the namespace for the neurodata type of this object
+          dtype: text
+          name: namespace
+          value: core
+        - doc: 'Human description of image. COMMENT: If image is of slice data, include
+            slice thickness and orientation, and reference to appropriate entry in
+            /general/slices'
+          dtype: text
+          name: description
+        - doc: 'Format of the image.  COMMENT: eg, jpg, png, mpeg'
+          dtype: text
+          name: format
+        doc: 'Photograph of experiment or experimental setup (video also OK). COMMENT:
+          Name is arbitrary.  Data is stored as a single binary object (HDF5 opaque
+          type).'
+        dtype: binary
+        namespace: core
+        neurodata_type_def: Image
+        quantity: '*'
+      doc: Acquired images
+      name: images
+    name: acquisition
+  - doc: 'Lab-specific and custom scientific analysis of data. There is no defined
+      format for the content of this group - the format is up to the individual user/lab.
+      COMMENT: To facilitate sharing analysis data between labs, the contents here
+      should be stored in standard types (eg, INCF types) and appropriately documented.
+      MORE_INFO: The file can store lab-specific and custom data analysis without
+      restriction on its form or schema, reducing data formatting restrictions on
+      end users. Such data should be placed in the analysis group. The analysis data
+      should be documented so that it is sharable with other labs'
+    name: analysis
+  - attributes:
+    - dims:
+      - num_tags
+      doc: A sorted list of the different tags used by epochs. COMMENT:This is a sorted
+        list of all tags that are in any of the &lt;epoch_X&gt;/tags datasets`.
+      dtype: text
+      name: tags
+      shape:
+      - null
+    doc: "Experimental intervals, whether that be logically distinct sub-experiments\
+      \ having a particular scientific goal, trials during an experiment, or epochs\
+      \ deriving from analysis of data.  COMMENT: Epochs provide pointers to time\
+      \ series that are relevant to the epoch, and windows into the data in those\
+      \ time series (i.e., the start and end indices of TimeSeries::data[] that overlap\
+      \ with the epoch). This allows easy access to a range of data in specific experimental\
+      \ intervals. MORE_INFO: An experiment can be separated into one or many logical\
+      \ intervals, with the order and duration of these intervals often definable\
+      \ before the experiment starts. In this document, and in the context of NWB,\
+      \ these intervals are called 'epochs'. Epochs have acquisition and stimulus\
+      \ data associated with them, and different epochs can overlap. Examples of epochs\
+      \ are the time when a rat runs around an enclosure or maze as well as intervening\
+      \ sleep sessions; the presentation of a set of visual stimuli to a mouse running\
+      \ on a wheel; or the uninterrupted presentation of current to a patch-clamped\
+      \ cell. Epochs can be limited to the interval of a particular stimulus, or they\
+      \ can span multiple stimuli. Different windows into the same time series can\
+      \ be achieved by including multiple instances of that time series, each with\
+      \ different start/stop times."
+    groups:
+    - doc: 'One of possibly many different experimental epochCOMMENT: Name is arbitrary
+        but must be unique within the experiment.'
+      namespace: core
+      neurodata_type: Epoch
+      quantity: '*'
+    name: epochs
+  - doc: "The home for processing Modules. These modules perform intermediate analysis\
+      \ of data that is necessary to perform before scientific analysis. Examples\
+      \ include spike clustering, extracting position from tracking data, stitching\
+      \ together image slices. COMMENT: Modules are defined below. They can be large\
+      \ and express many data sets from relatively complex analysis (e.g., spike detection\
+      \ and clustering) or small, representing extraction of position information\
+      \ from tracking video, or even binary lick/no-lick decisions. Common software\
+      \ tools (e.g., klustakwik, MClust) are expected to read/write data here. MORE_INFO:\
+      \ 'Processing' refers to intermediate analysis of the acquired data to make\
+      \ it more amenable to scientific analysis. These are performed using Modules,\
+      \ as defined above. All modules reside in the processing group."
+    name: processing
+  - doc: 'Data pushed into the system (eg, video stimulus, sound, voltage, etc) and
+      secondary representations of that data (eg, measurements of something used as
+      a stimulus) COMMENT: This group is read-only after experiment complete and timestamps
+      are corrected to common timebase. Stores both presented stimuli and stimulus
+      templates, the latter in case the same stimulus is presented multiple times,
+      or is pulled from an external stimulus library.MORE_INFO: Stimuli are here defined
+      as any signal that is pushed into the system as part of the experiment (eg,
+      sound, video, voltage, etc). Many different experiments can use the same stimuli,
+      and stimuli can be re-used during an experiment. The stimulus group is organized
+      so that one version of template stimuli can be stored and these be used multiple
+      times. These templates can exist in the present file or can be HDF5-linked to
+      a remote library file.'
+    groups:
+    - doc: "Template stimuli. COMMENT: Time stamps in templates are based on stimulus\
+        \ design and are relative to the beginning of the stimulus. When templates\
+        \ are used, the stimulus instances must convert presentation times to the\
+        \ experiment's time reference frame."
+      groups:
+      - doc: TimeSeries objects containing template data of presented stimuli
+        namespace: core
+        neurodata_type: TimeSeries
+      name: templates
+    - doc: Stimuli presented during the experiment.
+      groups:
+      - doc: TimeSeries objects containing data of presented stimuli
+        namespace: core
+        neurodata_type: TimeSeries
+      name: presentation
+    name: stimulus
+  - datasets:
+    - doc: 'Notes about data collection and analysis.COMMENT: Can be from Methods'
+      dtype: text
+      name: data_collection
+      quantity: '?'
+    - doc: 'Description of drugs used, including how and when they were administered.
+        COMMENT: Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.'
+      dtype: text
+      name: pharmacology
+      quantity: '?'
+    - doc: 'Name of person who performed the experiment.COMMENT: More than one person
+        OK. Can specify roles of different people involved.'
+      dtype: text
+      name: experimenter
+      quantity: '?'
+    - doc: Lab where experiment was performed
+      dtype: text
+      name: lab
+      quantity: '?'
+    - attributes:
+      - doc: Name of script file
+        dtype: text
+        name: file_name
+      doc: Script file used to create this NWB file.
+      dtype: text
+      name: source_script
+      quantity: '?'
+    - doc: Institution(s) where experiment was performed
+      dtype: text
+      name: institution
+      quantity: '?'
+    - doc: Description of slices, including information about preparation thickness,
+        orientation, temperature and bath solution
+      dtype: text
+      name: slices
+      quantity: '?'
+    - doc: Information about virus(es) used in experiments, including virus ID, source,
+        date made, injection location, volume, etc
+      dtype: text
+      name: virus
+      quantity: '?'
+    - doc: 'Notes about the experiment.  COMMENT: Things particular to this experiment'
+      dtype: text
+      name: notes
+      quantity: '?'
+    - doc: 'Lab-specific ID for the session.COMMENT: Only 1 session_id per file, with
+        all time aligned to experiment start time.'
+      dtype: text
+      name: session_id
+      quantity: '?'
+    - doc: 'Notes about stimuli, such as how and where presented.COMMENT: Can be from
+        Methods'
+      dtype: text
+      name: stimulus
+      quantity: '?'
+    - doc: 'Narrative description about surgery/surgeries, including date(s) and who
+        performed surgery. COMMENT: Much can be copied from Methods'
+      dtype: text
+      name: surgery
+      quantity: '?'
+    - doc: 'Experimetnal protocol, if applicable.COMMENT: E.g., include IACUC protocol'
+      dtype: text
+      name: protocol
+      quantity: '?'
+    - doc: 'Publication information.COMMENT: PMID, DOI, URL, etc. If multiple, concatenate
+        together and describe which is which. such as PMID, DOI, URL, etc'
+      dtype: text
+      name: related_publications
+      quantity: '?'
+    - doc: 'General description of the experiment.COMMENT: Can be from Methods'
+      dtype: text
+      name: experiment_description
+      quantity: '?'
+    doc: "Experimental metadata, including protocol, notes and description of hardware\
+      \ device(s).  COMMENT: The metadata stored in this section should be used to\
+      \ describe the experiment. Metadata necessary for interpreting the data is stored\
+      \ with the data. MORE_INFO: General experimental metadata, including animal\
+      \ strain, experimental protocols, experimenter, devices, etc, are stored under\
+      \ 'general'. Core metadata (e.g., that required to interpret data fields) is\
+      \ stored with the data itself, and implicitly defined by the file specification\
+      \ (eg, time is in seconds). The strategy used here for storing non-core metadata\
+      \ is to use free-form text fields, such as would appear in sentences or paragraphs\
+      \ from a Methods section. Metadata fields are text to enable them to be more\
+      \ general, for example to represent ranges instead of numerical values. Machine-readable\
+      \ metadata is stored as attributes to these free-form datasets. <br /><br />All\
+      \ entries in the below table are to be included when data is present. Unused\
+      \ groups (e.g., intracellular_ephys in an optophysiology experiment) should\
+      \ not be created unless there is data to store within them."
+    groups:
+    - doc: 'Description of hardware devices used during experiment. COMMENT: Eg, monitors,
+        ADC boards, microscopes, etc'
+      groups:
+      - attributes:
+        - doc: the neurodata type of this object
+          dtype: text
+          name: neurodata_type
+          value: Device
+        - doc: the namespace for the neurodata type of this object
+          dtype: text
+          name: namespace
+          value: core
+        doc: 'One of possibly many. Information about device and device description.
+          COMMENT: Name should be informative. Contents can be from Methods.'
+        namespace: core
+        neurodata_type_def: Device
+        quantity: '*'
+      name: devices
+      quantity: '?'
+    - datasets:
+      - doc: ID of animal/person used/participating in experiment (lab convention)
+        dtype: text
+        name: subject_id
+        quantity: '?'
+      - doc: 'Genetic strain COMMENT: If absent, assume Wild Type (WT)'
+        dtype: text
+        name: genotype
+        quantity: '?'
+      - doc: Weight at time of experiment, at time of surgery and at other important
+          times
+        dtype: text
+        name: weight
+        quantity: '?'
+      - doc: Gender of subject
+        dtype: text
+        name: sex
+        quantity: '?'
+      - doc: Description of subject and where subject came from (e.g., breeder, if
+          animal)
+        dtype: text
+        name: description
+        quantity: '?'
+      - doc: Age of subject
+        dtype: text
+        name: age
+        quantity: '?'
+      - doc: Species of subject
+        dtype: text
+        name: species
+        quantity: '?'
+      doc: Information about the animal or person from which the data was measured.
+      name: subject
+      quantity: '?'
+    - datasets:
+      - attributes:
+        - doc: the neurodata type of this object
+          dtype: text
+          name: neurodata_type
+          value: SpecFile
+        - doc: the namespace for the neurodata type of this object
+          dtype: text
+          name: namespace
+          value: core
+        - dims:
+          - num_namespaces
+          doc: Namespaces defined in the file
+          dtype: text
+          name: namespaces
+          shape:
+          - null
+        - doc: Value is Contents of format specification file.
+          dtype: text
+          name: help
+          value: Contents of format specification file.
+        doc: Dataset for storing contents of a specification file for either the core
+          format or an extension.  Name should match name of file.`
+        dtype: text
+        namespace: core
+        neurodata_type_def: SpecFile
+        quantity: '*'
+      doc: Group for storing format specification files.
+      name: specifications
+      quantity: '?'
+    - doc: Metadata related to extracellular electrophysiology.
+      groups:
+      - doc: One of possibly many groups, one for each electrode group.
+        namespace: core
+        neurodata_type: ElectrodeGroup
+        quantity: '*'
+      name: extracellular_ephys
+      quantity: '?'
+    - datasets:
+      - doc: 'Description of filtering used. COMMENT: Includes filtering type and
+          parameters, frequency fall- off, etc. If this changes between TimeSeries,
+          filter description should be stored as a text attribute for each TimeSeries.'
+        dtype: text
+        name: filtering
+        quantity: '?'
+      doc: Metadata related to intracellular electrophysiology
+      groups:
+      - doc: 'One of possibly many. COMMENT: Name should be informative.'
+        namespace: core
+        neurodata_type: IntracellularElectrode
+        quantity: '*'
+      name: intracellular_ephys
+      quantity: '?'
+    - doc: Metadata describing optogenetic stimuluation
+      groups:
+      - doc: 'One of possibly many groups describing an optogenetic stimuluation site.
+          COMMENT: Name is arbitrary but should be meaningful. Name is referenced
+          by OptogeneticSeries'
+        namespace: core
+        neurodata_type: OptogeneticStimulusSite
+        quantity: '*'
+      name: optogenetics
+      quantity: '?'
+    - doc: Metadata related to optophysiology.
+      groups:
+      - doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name
+          is arbitrary but should be meaningful. It is referenced by TwoPhotonSeries
+          and also ImageSegmentation and DfOverF interfaces'
+        namespace: core
+        neurodata_type: ImagingPlane
+        quantity: '*'
+      name: optophysiology
+      quantity: '?'
+    name: general
+  name: root
+  namespace: core
+  neurodata_type_def: NWBFile
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: Module
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - doc: Description of Module
+    dtype: text
+    name: description
+  - dims:
+    - num_interfaces
+    doc: 'Names of the data interfaces offered by this module. COMMENT: E.g., [0]="EventDetection",
+      [1]="Clustering", [2]="FeatureExtraction"'
+    dtype: text
+    name: interfaces
+    shape:
+    - null
+  doc: Module.  Name should be descriptive. Stores a collection of related data organized
+    by contained interfaces.  Each interface is a contract specifying content related
+    to a particular type of data.
+  groups:
+  - doc: Interface objects containing data output from processing steps
+    namespace: core
+    neurodata_type: Interface
+  namespace: core
+  neurodata_type_def: Module
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: TimeSeries
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - dims:
+    - num_extern_fields
+    doc: 'List of fields that are HDF5 external links.COMMENT: Only present if one
+      or more datasets is set to an HDF5 external link.'
+    dtype: text
+    name: extern_fields
+    shape:
+    - null
+  - doc: Description of TimeSeries
+    dtype: text
+    name: description
+  - doc: Human-readable comments about the TimeSeries. This second descriptive field
+      can be used to store additional information, or descriptive information if the
+      primary description field is populated with a computer-readable string.
+    dtype: text
+    name: comments
+  - dims:
+    - num_tslinks
+    doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
+      timestamps field.  Example element of list: "/acquisition/timeseries/lick_trace"
+      COMMENT: Attribute is only present if links are present. List should include
+      the path to this TimeSeries also.'
+    dtype: text
+    name: timestamp_link
+    shape:
+    - null
+  - doc: Name of TimeSeries or Modules that serve as the source for the data contained
+      here. It can also be the name of a device, for stimulus or acquisition data
+    dtype: text
+    name: source
+  - doc: Value is General time series object
+    dtype: text
+    name: help
+    value: General time series object
+  - doc: Value is TimeSeries
+    dtype: text
+    name: ancestry
+    value: TimeSeries
+  - dims:
+    - num_missing_fields
+    doc: 'List of fields that are not optional (i.e. either required or recommended
+      parts of the TimeSeries) that are missing. COMMENT: Only present if one or more
+      required or recommended fields are missing. Note that a missing required field
+      (such as data or timestamps) should generate an error by the API'
+    dtype: text
+    name: missing_fields
+    shape:
+    - null
+  - dims:
+    - num_dlinks
+    doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
+      data field. Example element of list: "/stimulus/presentation/Sweep_0"` COMMENT:
+      Attribute is only present if links are present. List should include the path
+      to this TimeSeries also.'
+    dtype: text
+    name: data_link
+    shape:
+    - null
+  datasets:
+  - attributes:
+    - doc: Value is 0.0
+      dtype: float32!
+      name: resolution
+      value: 0.0
+    - doc: Value is 1.0
+      dtype: float32!
+      name: conversion
+      value: 1.0
+    - doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      dtype: text
+      name: unit
+    dims:
+    - num_times
+    doc: 'Data values. Can also store binary data (eg, image frames) COMMENT: This
+      field may be a link to data stored in an external file, especially in the case
+      of raw data.'
+    dtype: any
+    name: data
+    shape:
+    - null
+  - dims:
+    - num_times
+    doc: 'Numerical labels that apply to each element in data[]. COMMENT: Optional
+      field. If present, the control array should have the same number of elements
+      as data[].'
+    dtype: uint8
+    name: control
+    quantity: '?'
+    shape:
+    - null
+  - attributes:
+    - doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
+      dtype: float32!
+      name: rate
+    - doc: Value is Seconds
+      dtype: text
+      name: unit
+      value: Seconds
+    doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
+      spaced, the timestamp of the first sample can be specified and all subsequent
+      ones calculated from the sampling rate.'
+    dtype: float64!
+    name: starting_time
+    quantity: '?'
+  - doc: 'Number of samples in data, or number of image frames. COMMENT: This is important
+      if the length of timestamp and data are different, such as for externally stored
+      stimulus image stacks'
+    dtype: int32
+    name: num_samples
+  - attributes:
+    - doc: Value is Seconds
+      dtype: text
+      name: unit
+      value: Seconds
+    - doc: Value is 1
+      dtype: int32
+      name: interval
+      value: 1
+    dims:
+    - num_times
+    doc: 'Timestamps for samples stored in data.COMMENT: Timestamps here have all
+      been corrected to the common experiment master-clock. Time is stored as seconds
+      and all timestamps are relative to experiment start time.'
+    dtype: float64!
+    name: timestamps
+    shape:
+    - null
+  - dims:
+    - num_control_values
+    doc: 'Description of each control value. COMMENT: Array length should be as long
+      as the highest number in control minus one, generating an zero-based indexed
+      array for control values.'
+    dtype: text
+    name: control_description
+    quantity: '?'
+    shape:
+    - null
+  doc: General purpose time series.
+  groups:
+  - doc: "Lab specific time and sync information as provided directly from hardware\
+      \ devices and that is necessary for aligning all acquired time information to\
+      \ a common timebase. The timestamp array stores time in the common timebase.\
+      \ COMMENT: This group will usually only be populated in TimeSeries that are\
+      \ stored external to the NWB file, in files storing raw data. Once timestamp\
+      \ data is calculated, the contents of 'sync' are mostly for archival purposes."
+    name: sync
+    quantity: '?'
+  namespace: core
+  neurodata_type_def: TimeSeries
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: Interface
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - doc: Path to the origin of the data represented in this interface.
+    dtype: text
+    name: source
+  - doc: Short description of what this type of Interface contains.
+    dtype: text
+    name: help
+  doc: The attributes specified here are included in all interfaces.
+  namespace: core
+  neurodata_type_def: Interface

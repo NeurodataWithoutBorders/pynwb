@@ -1,0 +1,26 @@
+namespaces:
+- author:
+  - Keith Godfrey
+  - Jeff Teeters
+  - Oliver Ruebel
+  - Andrew Tritt
+  contact:
+  - keithg@alleninstitute.org
+  - jteeters@berkeley.edu
+  - oruebel@lbl.gov
+  - ajtritt@lbl.gov
+  date: '2017-05-02 14:19:38'
+  doc: NWB namespace
+  full_name: NWB core
+  name: core
+  schema:
+  - source: nwb.ogen.yaml
+  - source: nwb.ec_ephys.yaml
+  - source: nwb.image.yaml
+  - source: nwb.misc.yaml
+  - source: nwb.epoch.yaml
+  - source: nwb.ic_ephys.yaml
+  - source: nwb.retinotopy.yaml
+  - source: nwb.ophys.yaml
+  - source: nwb.base.yaml
+  - source: nwb.behavior.yaml

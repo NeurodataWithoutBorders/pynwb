@@ -52,9 +52,9 @@ setup_args = {
     'package_dir': {'': 'src'},
     'package_data': {'pynwb':["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
     #'package_data': {'pynwb':["data/*.yaml"]},
-    'cmdclass':{
-        'build_py': CustomBuild,
-    }
+    #'cmdclass':{
+    #    'build_py': CustomBuild,
+    #}
 }
 
 if __name__ == '__main__':
