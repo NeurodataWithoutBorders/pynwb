@@ -1,0 +1,442 @@
+specs:
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: ElectricalSeries
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - doc: Value is Stores acquired voltage data from extracellular recordings
+    dtype: text
+    name: help
+    value: Stores acquired voltage data from extracellular recordings
+  datasets:
+  - attributes:
+    - doc: Value is volt
+      dtype: text
+      name: unit
+      value: volt
+    dims:
+    - - num_times
+    - - num_times
+      - num_channels
+    doc: Recorded voltage data.
+    dtype: number
+    name: data
+    shape:
+    - - null
+    - - null
+      - null
+  doc: 'Stores acquired voltage data from extracellular recordings. The data field
+    of an ElectricalSeries is an int or float array storing data in Volts. TimeSeries::data
+    array structure: :blue:`[num times] [num channels] (or [num_times] for single
+    electrode).`'
+  links:
+  - doc: link to ElectrodeGroup group that generated this TimeSeries data
+    name: electrode_group
+    target_type: ElectrodeGroup
+  namespace: core
+  neurodata_type: TimeSeries
+  neurodata_type_def: ElectricalSeries
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: SpikeEventSeries
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - doc: Value is Snapshots of spike events from data.
+    dtype: text
+    name: help
+    value: Snapshots of spike events from data.
+  datasets:
+  - attributes:
+    - doc: Value is volt
+      dtype: text
+      name: unit
+      value: volt
+    dims:
+    - - num_events
+      - num_samples
+    - - num_events
+      - num_channels
+      - num_samples
+    doc: Spike waveforms.
+    dtype: float32
+    name: data
+    shape:
+    - - null
+      - null
+    - - null
+      - null
+      - null
+  doc: 'Stores "snapshots" of spike events (i.e., threshold crossings) in data. This
+    may also be raw data, as reported by ephys hardware. If so, the TimeSeries::description
+    field should describing how events were detected. All SpikeEventSeries should
+    reside in a module (under EventWaveform interface) even if the spikes were reported
+    and stored by hardware. All events span the same recording channels and store
+    snapshots of equal duration. TimeSeries::data array structure: :blue:`[num events]
+    [num channels] [num samples] (or [num events] [num samples] for single electrode)`.'
+  namespace: core
+  neurodata_type: ElectricalSeries
+  neurodata_type_def: SpikeEventSeries
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: ClusterWaveforms
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - doc: Value is Mean waveform shape of clusters. Waveforms should be high-pass filtered
+      (ie, not the same bandpass filter used waveform analysis and clustering)
+    dtype: text
+    name: help
+    value: Mean waveform shape of clusters. Waveforms should be high-pass filtered
+      (ie, not the same bandpass filter used waveform analysis and clustering)
+  datasets:
+  - doc: Filtering applied to data before generating mean/sd
+    dtype: text
+    name: waveform_filtering
+  - dims:
+    - num_clusters
+    - num_samples
+    doc: Stdev of waveforms for each cluster, using the same indices as in mean
+    dtype: float32
+    name: waveform_sd
+    shape:
+    - null
+    - null
+  - dims:
+    - num_clusters
+    - num_samples
+    doc: The mean waveform for each cluster, using the same indices for each wave
+      as cluster numbers in the associated Clustering module (i.e, cluster 3 is in
+      array slot [3]). Waveforms corresponding to gaps in cluster sequence should
+      be empty (e.g., zero- filled)
+    dtype: float32
+    name: waveform_mean
+    shape:
+    - null
+    - null
+  - doc: Path to linked clustering interface
+    dtype: text
+    name: clustering_interface_path
+  doc: The mean waveform shape, including standard deviation, of the different clusters.
+    Ideally, the waveform analysis should be performed on data that is only high-pass
+    filtered. This is a separate module because it is expected to require updating.
+    For example, IMEC probes may require different storage requirements to store/display
+    mean waveforms, requiring a new interface or an extension of this one.
+  links:
+  - doc: HDF5 link to Clustering interface that was the source of the clustered data
+    name: clustering_interface
+    target_type: Clustering
+  name: ClusterWaveforms
+  namespace: core
+  neurodata_type: Interface
+  neurodata_type_def: ClusterWaveforms
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: Clustering
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - doc: Value is Clustered spike data, whether from automatic clustering tools (eg,
+      klustakwik) or as a result of manual sorting
+    dtype: text
+    name: help
+    value: Clustered spike data, whether from automatic clustering tools (eg, klustakwik)
+      or as a result of manual sorting
+  datasets:
+  - dims:
+    - num_clusters
+    doc: List of cluster number that are a part of this set (cluster numbers can be
+      non- continuous)
+    dtype: int32
+    name: cluster_nums
+    shape:
+    - null
+  - dims:
+    - num_clusters
+    doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
+      a basic clustering metric).
+    dtype: float32
+    name: peak_over_rms
+    shape:
+    - null
+  - dims:
+    - num_events
+    doc: Times of clustered events, in seconds. This may be a link to times field
+      in associated FeatureExtraction module.
+    dtype: float64!
+    name: times
+    shape:
+    - null
+  - dims:
+    - num_events
+    doc: Cluster number of each event
+    dtype: int32
+    name: num
+    shape:
+    - null
+  - doc: Description of clusters or clustering, (e.g. cluster 0 is noise, clusters
+      curated using Klusters, etc)
+    dtype: text
+    name: description
+  doc: Clustered spike data, whether from automatic clustering tools (e.g., klustakwik)
+    or as a result of manual sorting.
+  name: Clustering
+  namespace: core
+  neurodata_type: Interface
+  neurodata_type_def: Clustering
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: FeatureExtraction
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - doc: Value is Container for salient features of detected events
+    dtype: text
+    name: help
+    value: Container for salient features of detected events
+  datasets:
+  - dims:
+    - num_events
+    doc: Times of events that features correspond to (can be a link).
+    dtype: float64!
+    name: times
+    shape:
+    - null
+  - dims:
+    - num_events
+    - num_channels
+    - num_features
+    doc: Multi-dimensional array of features extracted from each event.
+    dtype: float32
+    name: features
+    shape:
+    - null
+    - null
+    - null
+  - dims:
+    - num_features
+    doc: Description of features (eg, "PC1") for each of the extracted features.
+    dtype: text
+    name: description
+    shape:
+    - null
+  doc: Features, such as PC1 and PC2, that are extracted from signals stored in a
+    SpikeEvent TimeSeries or other source.
+  links:
+  - doc: link to ElectrodeGroup group that generated this TimeSeries data
+    name: electrode_group
+    target_type: ElectrodeGroup
+  name: FeatureExtraction
+  namespace: core
+  neurodata_type: Interface
+  neurodata_type_def: FeatureExtraction
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: EventDetection
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  datasets:
+  - attributes:
+    - doc: Value is Seconds
+      dtype: text
+      name: unit
+      value: Seconds
+    dims:
+    - num_events
+    doc: Timestamps of events, in Seconds
+    dtype: float64!
+    name: times
+    shape:
+    - null
+  - doc: Description of how events were detected, such as voltage threshold, or dV/dT
+      threshold, as well as relevant values.
+    dtype: text
+    name: detection_method
+  - dims:
+    - num_events
+    doc: Indices (zero-based) into source ElectricalSeries::data array corresponding
+      to time of event. Module description should define what is meant by time of
+      event (e.g., .25msec before action potential peak, zero-crossing time, etc).
+      The index points to each event from the raw data
+    dtype: int32
+    name: source_idx
+    shape:
+    - null
+  - doc: Path to linked ElectricalSeries.
+    dtype: text
+    name: source_electricalseries_path
+  doc: Detected spike events from voltage trace(s).
+  links:
+  - doc: HDF5 link to ElectricalSeries that this data was calculated from. Metadata
+      about electrodes and their position can be read from that ElectricalSeries so
+      it's not necessary to mandate that information be stored here
+    name: source_electricalseries
+    target_type: ElectricalSeries
+  name: EventDetection
+  namespace: core
+  neurodata_type: Interface
+  neurodata_type_def: EventDetection
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: EventWaveform
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - doc: Value is Waveform of detected extracellularly recorded spike events
+    dtype: text
+    name: help
+    value: Waveform of detected extracellularly recorded spike events
+  doc: Represents either the waveforms of detected events, as extracted from a raw
+    data trace in /acquisition, or the event waveforms that were stored during experiment
+    acquisition.
+  groups:
+  - doc: SpikeEventSeries object containing detected spike event waveforms
+    namespace: core
+    neurodata_type: SpikeEventSeries
+  name: EventWaveform
+  namespace: core
+  neurodata_type: Interface
+  neurodata_type_def: EventWaveform
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: FilteredEphys
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - doc: Value is Ephys data from one or more channels that is subjected to filtering,
+      such as for gamma or theta oscillations (LFP has its own interface). Filter
+      properties should be noted in the ElectricalSeries
+    dtype: text
+    name: help
+    value: Ephys data from one or more channels that is subjected to filtering, such
+      as for gamma or theta oscillations (LFP has its own interface). Filter properties
+      should be noted in the ElectricalSeries
+  doc: Ephys data from one or more channels that has been subjected to filtering.
+    Examples of filtered data include Theta and Gamma (LFP has its own interface).
+    FilteredEphys modules publish an ElectricalSeries for each filtered channel or
+    set of channels. The name of each ElectricalSeries is arbitrary but should be
+    informative. The source of the filtered data, whether this is from analysis of
+    another time series or as acquired by hardware, should be noted in each's TimeSeries::description
+    field. There is no assumed 1::1 correspondence between filtered ephys signals
+    and electrodes, as a single signal can apply to many nearby electrodes, and one
+    electrode may have different filtered (e.g., theta and/or gamma) signals represented.
+  groups:
+  - doc: ElectricalSeries object containing filtered electrophysiology data
+    namespace: core
+    neurodata_type: ElectricalSeries
+  name: FilteredEphys
+  namespace: core
+  neurodata_type: Interface
+  neurodata_type_def: FilteredEphys
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: LFP
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  - doc: Value is LFP data from one or more channels. Filter properties should be
+      noted in the ElectricalSeries
+    dtype: text
+    name: help
+    value: LFP data from one or more channels. Filter properties should be noted in
+      the ElectricalSeries
+  doc: LFP data from one or more channels. The electrode map in each published ElectricalSeries
+    will identify which channels are providing LFP data. Filter properties should
+    be noted in the ElectricalSeries description or comments field.
+  groups:
+  - doc: ElectricalSeries object containing LFP data for one or channels
+    namespace: core
+    neurodata_type: ElectricalSeries
+  name: LFP
+  namespace: core
+  neurodata_type: Interface
+  neurodata_type_def: LFP
+- attributes:
+  - doc: the neurodata type of this object
+    dtype: text
+    name: neurodata_type
+    value: ElectrodeGroup
+  - doc: the namespace for the neurodata type of this object
+    dtype: text
+    name: namespace
+    value: core
+  datasets:
+  - dims:
+    - num_channels
+    doc: array with description for each channel
+    dtype: text
+    name: channel_description
+    shape:
+    - null
+  - dims:
+    - num_channels
+    doc: array with location description for each channel e.g. "CA1"
+    dtype: text
+    name: channel_location
+    shape:
+    - null
+  - dims:
+    - num_channels
+    doc: array with description of filtering applied to each channel
+    dtype: text
+    name: channel_filtering
+    shape:
+    - null
+  - dims:
+    - num_channels
+    - dimensions
+    doc: xyz-coordinates for each channel. use NaN for unknown dimensions
+    dtype: text
+    name: channel_coordinates
+    shape:
+    - null
+    - 3
+  - dims:
+    - num_channels
+    doc: float array with impedance used on each channel. Can be 2D matrix to store
+      a range
+    dtype: text
+    name: channel_impedance
+    shape:
+    - null
+  - doc: description of this electrode group
+    dtype: text
+    name: description
+  - doc: description of location of this electrode group
+    dtype: text
+    name: location
+  doc: One of possibly many groups, one for each electrode group.
+  links:
+  - doc: the device that was used to record from this electrode group
+    target_type: Device
+  namespace: core
+  neurodata_type_def: ElectrodeGroup
