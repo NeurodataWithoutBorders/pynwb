@@ -13,7 +13,6 @@ FLAGS = {
     'one_or_many': ONE_OR_MANY
 }
 
-
 class ConstructableDict(dict, metaclass=abc.ABCMeta):
     @classmethod
     def build_const_args(cls, spec_dict):
@@ -54,11 +53,6 @@ class Spec(ConstructableDict):
         ''' Documentation on what this Spec is specifying '''
         return self.get('doc', None)
 
-#    @abc.abstractmethod
-#    def verify(self):
-#        ''' A method to verify if a value meets this specification '''
-#        return True
-#
     @property
     def name(self):
         ''' The name of the object being specified '''
@@ -81,14 +75,7 @@ class Spec(ConstructableDict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
         ret = super(Spec, cls).build_const_args(spec_dict)
         if 'doc' not in ret:
-            identifer = None
-            if 'name' in ret:
-                identifier = "name '%s'" % ret['name']
-            elif 'neurodata_type_def' in ret:
-                identifier = "neurodata_type_def '%s'" % ret['neurodata_type_def']
-            elif 'neurodata_type' in ret:
-                identifier = "neurodata_type '%s'" % ret['neurodata_type']
-            raise ValueError("doc missing in spec with %s" % identifier)
+            raise ValueError("'doc' missing")
         return ret
 
     def __hash__(self):
@@ -173,19 +160,23 @@ _attrbl_args = [
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
-        {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
-        {'name': 'namespace', 'type': str, 'doc': 'the namespace for the neurodata_type of this specification', 'default': None},
+        {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'data_type_inc', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace for data_type_inc and/or data_type_def of this specification', 'default': None},
 ]
 class BaseStorageSpec(Spec):
     ''' A specification for any object that can hold attributes. '''
 
+    __inc_key = 'data_type_inc'
+    __def_key = 'data_type_def'
+    __type_key = 'data_type'
+
     @docval(*deepcopy(_attrbl_args))
     def __init__(self, **kwargs):
-        name, doc, parent, quantity, attributes, linkable, neurodata_type_def, neurodata_type, namespace =\
-             getargs('name', 'doc', 'parent', 'quantity', 'attributes', 'linkable', 'neurodata_type_def', 'neurodata_type', 'namespace', kwargs)
-        if name == NAME_WILDCARD and neurodata_type_def is None and neurodata_type is None:
-            raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'neurodata_type_def' and/or 'neurodata_type'")
+        name, doc, parent, quantity, attributes, linkable, data_type_def, data_type_inc, namespace =\
+             getargs('name', 'doc', 'parent', 'quantity', 'attributes', 'linkable', 'data_type_def', 'data_type_inc', 'namespace', kwargs)
+        if name == NAME_WILDCARD and data_type_def is None and data_type_inc is None:
+            raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'data_type_def' and/or 'data_type_inc'")
         super().__init__(doc, name=name, parent=parent)
         self.__attributes = dict()
         if quantity in (ONE_OR_MANY, ZERO_OR_MANY):
@@ -196,24 +187,34 @@ class BaseStorageSpec(Spec):
             self['quantity'] = quantity
         if not linkable:
             self['linkable'] = False
-        if neurodata_type is not None:
-            self['neurodata_type'] = neurodata_type
+        if data_type_inc is not None:
+            self[self.inc_key()] = data_type_inc
             if namespace is None:
-                raise ValueError("'namespace' must be specified when specifying 'neurodata_type'")
+                raise ValueError("'namespace' must be specified when specifying '%s', '%s'" % (self.inc_key(), data_type_inc))
             self['namespace'] = namespace
-        if neurodata_type_def is not None:
+        if data_type_def is not None:
             self.pop('required', None)
-            self['neurodata_type_def'] = neurodata_type_def
+            self[self.def_key()] = data_type_def
             if namespace is None:
-                raise ValueError("'namespace' must be specified when specifying 'neurodata_type_def', %s"%neurodata_type_def)
+                raise ValueError("'namespace' must be specified when specifying '%s', '%s'" % (self.def_key(), data_type_def))
             self['namespace'] = namespace
-            self.set_attribute(AttributeSpec('neurodata_type', 'text', 'the neurodata type of this object', value=neurodata_type_def))
-            self.set_attribute(AttributeSpec('namespace', 'text', 'the namespace for the neurodata type of this object', value=namespace))
+
+            self.set_attribute(self.get_data_type_spec(data_type_def))
+            self.set_attribute(self.get_namespace_spec(namespace))
+
         for attribute in attributes:
             self.set_attribute(attribute)
 
     def is_many(self):
         return self.quantity not in (1, ZERO_OR_ONE)
+
+    @classmethod
+    def get_data_type_spec(cls, data_type_def):
+        return AttributeSpec(cls.type_key(), 'text', 'the data type of this object', value=data_type_def)
+
+    @classmethod
+    def get_namespace_spec(cls, namespace):
+        return AttributeSpec('namespace', 'text', 'the namespace for the data type of this object', value=namespace)
 
     @property
     def attributes(self):
@@ -227,18 +228,46 @@ class BaseStorageSpec(Spec):
 
     @property
     def namespace(self):
-        ''' The neurodata type this specification defines '''
+        ''' The data type this specification defines '''
         return self.get('namespace', None)
 
     @property
-    def neurodata_type(self):
-        ''' The neurodata type of this specification '''
-        return self.get('neurodata_type', self.neurodata_type_def)
+    def data_type(self):
+        return self.get(self.def_key(), self.get(self.inc_key(), None))
+
+    @classmethod
+    def type_key(cls):
+        ''' Get the key used to store data type on an instance
+
+        Override this method to use a different name for 'data_type'
+        '''
+        return cls.__type_key
+
+    @classmethod
+    def inc_key(cls):
+        ''' Get the key used to define a data_type include.
+
+        Override this method to use a different keyword for 'data_type_inc'
+        '''
+        return cls.__inc_key
+
+    @classmethod
+    def def_key(cls):
+        ''' Get the key used to define a data_type definition.
+
+        Override this method to use a different keyword for 'data_type_def'
+        '''
+        return cls.__def_key
 
     @property
-    def neurodata_type_def(self):
-        ''' The neurodata type this specification defines '''
-        return self.get('neurodata_type_def', None)
+    def data_type_inc(self):
+        ''' The data type of this specification '''
+        return self.get(self.inc_key(), self.data_type_def)
+
+    @property
+    def data_type_def(self):
+        ''' The data type this specification defines '''
+        return self.get(self.def_key(), None)
 
     @property
     def quantity(self):
@@ -305,9 +334,9 @@ _dataset_args = [
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
-        {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
-        {'name': 'namespace', 'type': str, 'doc': 'the namespace for the neurodata_type of this specification', 'default': None},
+        {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'data_type_inc', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace for this specification', 'default': None},
 ]
 class DatasetSpec(BaseStorageSpec):
     ''' Specification for datasets
@@ -375,14 +404,9 @@ class LinkSpec(Spec):
         self['target_type'] = target_type
 
     @property
-    def neurodata_type(self):
-        ''' The neurodata type of target specification '''
-        if isinstance(self['target_type'], dict):
-            return self['target_type'].get('neurodata_type', None)
-        elif isinstance(self['target_type'], str):
-            return self['target_type']
-        else:
-            None
+    def data_type_inc(self):
+        ''' The data type of target specification '''
+        return self.get('target_type')
 
 _group_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
@@ -393,9 +417,9 @@ _group_args = [
         {'name': 'links', 'type': list, 'doc': 'the links in this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
-        {'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'neurodata_type', 'type': str, 'doc': 'the NWB type this specification neurodata_type', 'default': None},
-        {'name': 'namespace', 'type': str, 'doc': 'the namespace for the neurodata_type of this specification', 'default': None},
+        {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
+        {'name': 'data_type_inc', 'type': str, 'doc': 'the NWB type this specification data_type_inc', 'default': None},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace for this specification', 'default': None},
 ]
 class GroupSpec(BaseStorageSpec):
     ''' Specification for groups
@@ -405,7 +429,7 @@ class GroupSpec(BaseStorageSpec):
     def __init__(self, **kwargs):
         doc, groups, datasets, links = popargs('doc', 'groups', 'datasets', 'links', kwargs)
         super(GroupSpec, self).__init__(doc, **kwargs)
-        self.__neurodata_types = dict()
+        self.__data_types = dict()
         self.__groups = dict()
         for group in groups:
             self.set_group(group)
@@ -416,18 +440,18 @@ class GroupSpec(BaseStorageSpec):
         for link in links:
             self.set_link(link)
 
-    def __add_neurodata_type(self, spec):
-        if spec.neurodata_type in self.__neurodata_types:
-            raise TypeError('Cannot have multipled neurodata types of the same type without specifying name')
-        self.__neurodata_types[spec.neurodata_type] = spec
+    def __add_data_type_inc(self, spec):
+        if spec.data_type_inc in self.__data_types:
+            raise TypeError('Cannot have multipled data types of the same type without specifying name')
+        self.__data_types[spec.data_type_inc] = spec
 
-    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to retrieve'})
-    def get_neurodata_type(self, **kwargs):
+    @docval({'name': 'data_type', 'type': str, 'doc': 'the data_type to retrieve'})
+    def get_data_type(self, **kwargs):
         '''
-        Get a specification by "neurodata_type"
+        Get a specification by "data_type"
         '''
-        ndt = getargs('neurodata_type', kwargs)
-        return self.__neurodata_types.get(ndt, None)
+        ndt = getargs('data_type', kwargs)
+        return self.__data_types.get(ndt, None)
 
     @property
     def groups(self):
@@ -458,10 +482,10 @@ class GroupSpec(BaseStorageSpec):
         spec = getargs('spec', kwargs)
         self.setdefault('groups', list()).append(spec)
         if spec.name == NAME_WILDCARD:
-            if spec.neurodata_type is not None:
-                self.__add_neurodata_type(spec)
+            if spec.data_type_inc is not None:
+                self.__add_data_type_inc(spec)
             else:
-                raise TypeError("must specify 'name' or 'neurodata_type' in Group spec")
+                raise TypeError("must specify 'name' or 'data_type_inc' in Group spec")
         else:
             self.__groups[spec.name] = spec
         spec.parent = self
@@ -486,10 +510,10 @@ class GroupSpec(BaseStorageSpec):
         spec = getargs('spec', kwargs)
         self.setdefault('datasets', list()).append(spec)
         if spec.name == NAME_WILDCARD:
-            if spec.neurodata_type is not None:
-                self.__add_neurodata_type(spec)
+            if spec.data_type is not None:
+                self.__add_data_type_inc(spec)
             else:
-                raise TypeError("must specify 'name' or 'neurodata_type' in Dataset spec")
+                raise TypeError("must specify 'name' or 'data_type_inc' in Dataset spec")
         else:
             self.__datasets[spec.name] = spec
         spec.parent = self
@@ -514,10 +538,10 @@ class GroupSpec(BaseStorageSpec):
         spec = getargs('spec', kwargs)
         self.setdefault('links', list()).append(spec)
         if spec.name == NAME_WILDCARD:
-            if spec.neurodata_type is not None:
-                self.__add_neurodata_type(spec)
+            if spec.data_type_inc is not None:
+                self.__add_data_type_inc(spec)
             else:
-                raise TypeError("must specify 'name' or 'neurodata_type' in Dataset spec")
+                raise TypeError("must specify 'name' or 'data_type_inc' in Dataset spec")
         else:
             self.__links[spec.name] = spec
         spec.parent = self
@@ -556,14 +580,24 @@ class GroupSpec(BaseStorageSpec):
 #        return errors
 #
     @classmethod
+    def dataset_spec_cls(cls):
+        return DatasetSpec
+
+
+    @classmethod
+    def link_spec_cls(cls):
+        return LinkSpec
+
+    @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
-        ret = super(GroupSpec, cls).build_const_args(spec_dict)
+        #ret = super(GroupSpec, cls).build_const_args(spec_dict)
+        ret = super().build_const_args(spec_dict)
         if 'datasets' in ret:
-            ret['datasets'] = list(map(DatasetSpec.build_spec, ret['datasets']))
+            ret['datasets'] = list(map(cls.dataset_spec_cls().build_spec, ret['datasets']))
         if 'groups' in ret:
-            ret['groups'] = list(map(GroupSpec.build_spec, ret['groups']))
+            ret['groups'] = list(map(cls.build_spec, ret['groups']))
         if 'links' in ret:
-            ret['links'] = list(map(LinkSpec.build_spec, ret['links']))
+            ret['links'] = list(map(cls.link_spec_cls().build_spec, ret['links']))
         return ret
 

@@ -19,9 +19,9 @@ def get_subspec(**kwargs):
     else:
         subspec = spec.get_group(builder.name)
     if subspec is None:
-        ndt = builder.attributes.get('neurodata_type')
+        ndt = builder.attributes.get(spec.type_key())
         if ndt is not None:
-            subspec = spec.get_neurodata_type(ndt)
+            subspec = spec.get_data_type(ndt)
     return subspec
 
 class BuildManager(object):
@@ -78,7 +78,6 @@ class BuildManager(object):
     def get_cls(self, **kwargs):
         ''' Get the class object for the given Builder '''
         builder = getargs('builder', kwargs)
-        #return self.__type_map.get_cls(builder.attributes.get('neurodata_type'))
         return self.__type_map.get_cls(builder)
 
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
@@ -99,12 +98,12 @@ class TypeMap(object):
         self.__mappers = dict()     ## already constructed ObjectMapper classes
         self.__mapper_cls = dict()  ## the ObjectMapper class to use for each container type
         self.__container_types = dict()
-        self.__neurodata_types = dict()
+        self.__data_types = dict()
 
-    def __get_neurodata_type(self, obj):
-        ret = obj.get('neurodata_type')
+    def __get_data_type(self, obj):
+        ret = obj.get(self.__namespaces.group_spec_cls.type_key())
         if ret is None:
-            raise ValueError("builder '%s' is does not have a neurodata_type" % builder.name)
+            raise ValueError("builder '%s' is does not have a data_type" % builder.name)
         return ret
 
     def __get_namespace(self, bldr):
@@ -113,13 +112,13 @@ class TypeMap(object):
     @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder object to get the corresponding Container class for'})
     def get_cls(self, **kwargs):
         builder = getargs('builder', kwargs)
-        neurodata_type = self.__get_neurodata_type(builder)
+        data_type = self.__get_data_type(builder)
         namespace = self.__get_namespace(builder)
         if namespace not in self.__container_types:
-            raise ValueError("no neurodata_types from namespace '%s' have been mapped" % namespace)
-        if neurodata_type not in self.__container_types[namespace]:
-            raise ValueError("no neurodata_type '%s' from namespace '%s has been mapped'" % (neurodata_type, namespace))
-        container_cls = self.__container_types[namespace][neurodata_type]
+            raise ValueError("no data_types from namespace '%s' have been mapped" % namespace)
+        if data_type not in self.__container_types[namespace]:
+            raise ValueError("no data_type '%s' from namespace '%s has been mapped'" % (data_type, namespace))
+        container_cls = self.__container_types[namespace][data_type]
         return container_cls
 
     @docval({'name': 'obj', 'type': (Container, Builder), 'doc': 'the object to get the ObjectMapper for'},
@@ -127,14 +126,14 @@ class TypeMap(object):
     def get_map(self, **kwargs):
         """ Return the ObjectMapper object that should be used for the given container """
         obj = getargs('obj', kwargs)
-        # get the container class, and namespace/neurodata_type
+        # get the container class, and namespace/data_type
         if isinstance(obj, Container):
             container_cls = obj.__class__
-            namespace, neurodata_type = self.__neurodata_types.get(container_cls, (None, None))
+            namespace, data_type = self.__data_types.get(container_cls, (None, None))
             if namespace is None:
-                raise ValueError("class %s does not mapped to a neurodata_type" % container_cls)
+                raise ValueError("class %s does not mapped to a data_type" % container_cls)
         else:
-            neurodata_type = self.__get_neurodata_type(obj)
+            data_type = self.__get_data_type(obj)
             namespace = self.__get_namespace(obj)
             container_cls = self.get_cls(obj)
         # now build the ObjectMapper class
@@ -144,24 +143,24 @@ class TypeMap(object):
                 mapper_cls = self.__mapper_cls.get(cls)
                 if mapper_cls is None:
                     continue
-                spec = self.__namespaces.get_spec(namespace, neurodata_type)
+                spec = self.__namespaces.get_spec(namespace, data_type)
                 mapper = mapper_cls(spec)
                 self.__mappers[cls] = mapper
                 break
             else:
                 break
         if mapper is None:
-            raise ValueError("No ObjectMapper found for class %s, namespace '%s', neurodata_type '%s'" % (container_cls, namespace, neurodata_type))
+            raise ValueError("No ObjectMapper found for class %s, namespace '%s', data_type '%s'" % (container_cls, namespace, data_type))
         return mapper
 
-    @docval({"name": "namespace", "type": str, "doc": "the namespace containing the neurodata_type to map the class to"},
-            {"name": "neurodata_type", "type": str, "doc": "the neurodata_type to mape the class to"},
-            {"name": "container_cls", "type": type, "doc": "the class to map to the specified neurodata_type"})
+    @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type to map the class to"},
+            {"name": "data_type", "type": str, "doc": "the data_type to mape the class to"},
+            {"name": "container_cls", "type": type, "doc": "the class to map to the specified data_type"})
     def register_container_type(self, **kwargs):
-        namespace, neurodata_type, container_cls = getargs('namespace', 'neurodata_type', 'container_cls', kwargs)
+        namespace, data_type, container_cls = getargs('namespace', 'data_type', 'container_cls', kwargs)
         self.__container_types.setdefault(namespace, dict())
-        self.__container_types[namespace][neurodata_type] = container_cls
-        self.__neurodata_types[container_cls] = (namespace, neurodata_type)
+        self.__container_types[namespace][data_type] = container_cls
+        self.__data_types[container_cls] = (namespace, data_type)
 
     @docval({"name": "container_cls", "type": type, "doc": "the Container class for which the given ObjectMapper class gets used for"},
             {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map"})
@@ -296,7 +295,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             for subspec in spec.datasets:
                 self.__map_spec(subspec)
             for subspec in spec.groups:
-                if subspec.neurodata_type_def is None:
+                if subspec.data_type_def is None:
                     self.__map_spec(subspec)
 
     def __map_spec_helper(self, spec):
@@ -304,7 +303,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             self.map_attr(spec.name, spec)
             self.map_const_arg(spec.name, spec)
         else:
-            name = self.__convert_name(spec.neurodata_type)
+            name = self.__convert_name(spec.data_type)
             self.map_attr(name, spec)
             self.map_const_arg(name, spec)
 
@@ -315,8 +314,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         attr_name, spec = getargs('attr_name', 'spec', kwargs)
         if hasattr(spec, 'name') and spec.name is not None:
             n = spec.name
-        elif hasattr(spec, 'neurodata_type') and spec.neurodata_type is not None:
-            n = spec.neurodata_type
+        elif hasattr(spec, 'data_type') and spec.data_type is not None:
+            n = spec.data_type
         self.__spec2attr[spec] = attr_name
 
     @docval({"name": "const_arg", "type": str, "doc": "the name of the constructor argument to map"},
@@ -400,7 +399,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         else:
             builder = DatasetBuilder(name, parent=parent)
         self.__add_attributes(builder, self.__spec.attributes, container)
-        builder.set_attribute('neurodata_type', container.neurodata_type)
+        #builder.set_attribute('data_type', container.data_type) # I think this is obsolete, leaving around for now though
         return builder
 
     def __is_null(self, item):
@@ -428,7 +427,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             #if self.__is_null(attr_value):
             if not attr_value:
                 continue
-            if spec.neurodata_type is None:
+            if spec.data_type is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value)
                 self.__add_attributes(sub_builder, spec.attributes, container)
             else:
@@ -436,7 +435,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
 
     def __add_groups(self, builder, groups, container, build_manager):
         for spec in groups:
-            if spec.neurodata_type is None:
+            if spec.data_type is None:
                 # we don't need to get attr_name since any named
                 # group does not have the concept of value
                 sub_builder = GroupBuilder(spec.name)
@@ -461,7 +460,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 if not empty or (empty and isinstance(spec.quantity, int)):
                     builder.set_group(sub_builder)
             else:
-                if spec.neurodata_type_def is not None:
+                if spec.data_type_def is not None:
                     attr_name = self.get_attribute(spec)
                     if attr_name is not None:
                         attr_value = getattr(container, attr_name, None)
@@ -513,7 +512,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                     continue
                 subspec = get_subspec(spec, sub_builder)
                 if subspec is not None:
-                    if 'neurodata_type' in sub_builder.attributes:
+                    if 'data_type' in sub_builder.attributes:
                         val = manager.construct(sub_builder)
                         if subspec.is_many():
                             if subspec in ret:
