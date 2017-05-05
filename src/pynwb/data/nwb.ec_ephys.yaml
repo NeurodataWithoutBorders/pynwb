@@ -1,10 +1,10 @@
 specs:
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: ElectricalSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -38,14 +38,14 @@ specs:
     name: electrode_group
     target_type: ElectrodeGroup
   namespace: core
-  neurodata_type: TimeSeries
   neurodata_type_def: ElectricalSeries
+  neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: SpikeEventSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -82,14 +82,14 @@ specs:
     snapshots of equal duration. TimeSeries::data array structure: :blue:`[num events]
     [num channels] [num samples] (or [num events] [num samples] for single electrode)`.'
   namespace: core
-  neurodata_type: ElectricalSeries
   neurodata_type_def: SpikeEventSeries
+  neurodata_type_inc: ElectricalSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: ClusterWaveforms
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -100,18 +100,9 @@ specs:
     value: Mean waveform shape of clusters. Waveforms should be high-pass filtered
       (ie, not the same bandpass filter used waveform analysis and clustering)
   datasets:
-  - doc: Filtering applied to data before generating mean/sd
+  - doc: Path to linked clustering interface
     dtype: text
-    name: waveform_filtering
-  - dims:
-    - num_clusters
-    - num_samples
-    doc: Stdev of waveforms for each cluster, using the same indices as in mean
-    dtype: float32
-    name: waveform_sd
-    shape:
-    - null
-    - null
+    name: clustering_interface_path
   - dims:
     - num_clusters
     - num_samples
@@ -124,9 +115,18 @@ specs:
     shape:
     - null
     - null
-  - doc: Path to linked clustering interface
+  - doc: Filtering applied to data before generating mean/sd
     dtype: text
-    name: clustering_interface_path
+    name: waveform_filtering
+  - dims:
+    - num_clusters
+    - num_samples
+    doc: Stdev of waveforms for each cluster, using the same indices as in mean
+    dtype: float32
+    name: waveform_sd
+    shape:
+    - null
+    - null
   doc: The mean waveform shape, including standard deviation, of the different clusters.
     Ideally, the waveform analysis should be performed on data that is only high-pass
     filtered. This is a separate module because it is expected to require updating.
@@ -138,14 +138,14 @@ specs:
     target_type: Clustering
   name: ClusterWaveforms
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: ClusterWaveforms
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: Clustering
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -156,14 +156,6 @@ specs:
     value: Clustered spike data, whether from automatic clustering tools (eg, klustakwik)
       or as a result of manual sorting
   datasets:
-  - dims:
-    - num_clusters
-    doc: List of cluster number that are a part of this set (cluster numbers can be
-      non- continuous)
-    dtype: int32
-    name: cluster_nums
-    shape:
-    - null
   - dims:
     - num_clusters
     doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
@@ -191,18 +183,26 @@ specs:
       curated using Klusters, etc)
     dtype: text
     name: description
+  - dims:
+    - num_clusters
+    doc: List of cluster number that are a part of this set (cluster numbers can be
+      non- continuous)
+    dtype: int32
+    name: cluster_nums
+    shape:
+    - null
   doc: Clustered spike data, whether from automatic clustering tools (e.g., klustakwik)
     or as a result of manual sorting.
   name: Clustering
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: Clustering
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: FeatureExtraction
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -244,14 +244,14 @@ specs:
     target_type: ElectrodeGroup
   name: FeatureExtraction
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: FeatureExtraction
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: EventDetection
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -268,10 +268,9 @@ specs:
     name: times
     shape:
     - null
-  - doc: Description of how events were detected, such as voltage threshold, or dV/dT
-      threshold, as well as relevant values.
+  - doc: Path to linked ElectricalSeries.
     dtype: text
-    name: detection_method
+    name: source_electricalseries_path
   - dims:
     - num_events
     doc: Indices (zero-based) into source ElectricalSeries::data array corresponding
@@ -282,9 +281,10 @@ specs:
     name: source_idx
     shape:
     - null
-  - doc: Path to linked ElectricalSeries.
+  - doc: Description of how events were detected, such as voltage threshold, or dV/dT
+      threshold, as well as relevant values.
     dtype: text
-    name: source_electricalseries_path
+    name: detection_method
   doc: Detected spike events from voltage trace(s).
   links:
   - doc: HDF5 link to ElectricalSeries that this data was calculated from. Metadata
@@ -294,14 +294,13 @@ specs:
     target_type: ElectricalSeries
   name: EventDetection
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: EventDetection
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: EventWaveform
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -315,17 +314,17 @@ specs:
   groups:
   - doc: SpikeEventSeries object containing detected spike event waveforms
     namespace: core
-    neurodata_type: SpikeEventSeries
+    neurodata_type_inc: SpikeEventSeries
   name: EventWaveform
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: EventWaveform
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: FilteredEphys
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -349,17 +348,17 @@ specs:
   groups:
   - doc: ElectricalSeries object containing filtered electrophysiology data
     namespace: core
-    neurodata_type: ElectricalSeries
+    neurodata_type_inc: ElectricalSeries
   name: FilteredEphys
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: FilteredEphys
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: LFP
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -375,17 +374,17 @@ specs:
   groups:
   - doc: ElectricalSeries object containing LFP data for one or channels
     namespace: core
-    neurodata_type: ElectricalSeries
+    neurodata_type_inc: ElectricalSeries
   name: LFP
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: LFP
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: ElectrodeGroup
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core

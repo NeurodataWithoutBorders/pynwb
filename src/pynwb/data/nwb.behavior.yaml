@@ -1,10 +1,10 @@
 specs:
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: SpatialSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -15,6 +15,10 @@ specs:
     value: Stores points in space over time. The data[] array structure is [num samples][num
       spatial dimensions]
   datasets:
+  - doc: Description defining what exactly 'straight-ahead' means.
+    dtype: text
+    name: reference_frame
+    quantity: '?'
   - attributes:
     - doc: Value is meter
       dtype: text
@@ -29,10 +33,6 @@ specs:
     shape:
     - null
     - null
-  - doc: Description defining what exactly 'straight-ahead' means.
-    dtype: text
-    name: reference_frame
-    quantity: '?'
   doc: 'Direction, e.g., of gaze or travel, or position. The TimeSeries::data field
     is a 2D array storing position or direction relative to some reference frame.
     Array structure: [num measurements] [num dimensions]. Each SpatialSeries has a
@@ -43,14 +43,14 @@ specs:
     the tracking camera. The unit of data will indicate how to interpret SpatialSeries
     values.'
   namespace: core
-  neurodata_type: TimeSeries
   neurodata_type_def: SpatialSeries
+  neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: BehavioralEpochs
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -73,17 +73,17 @@ specs:
   groups:
   - doc: IntervalSeries object containing start and stop times of epochs
     namespace: core
-    neurodata_type: IntervalSeries
+    neurodata_type_inc: IntervalSeries
   name: BehavioralEpochs
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: BehavioralEpochs
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: BehavioralEvents
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -96,17 +96,17 @@ specs:
   groups:
   - doc: TimeSeries object containing irregular behavioral events
     namespace: core
-    neurodata_type: TimeSeries
+    neurodata_type_inc: TimeSeries
   name: BehavioralEvents
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: BehavioralEvents
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: BehavioralTimeSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -119,17 +119,17 @@ specs:
   groups:
   - doc: TimeSeries object containing continuous behavioral data
     namespace: core
-    neurodata_type: TimeSeries
+    neurodata_type_inc: TimeSeries
   name: BehavioralTimeSeries
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: BehavioralTimeSeries
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: PupilTracking
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -141,17 +141,17 @@ specs:
   groups:
   - doc: TimeSeries object containing time series data on pupil size
     namespace: core
-    neurodata_type: TimeSeries
+    neurodata_type_inc: TimeSeries
   name: PupilTracking
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: PupilTracking
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: EyeTracking
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -163,17 +163,17 @@ specs:
   groups:
   - doc: SpatialSeries object containing data measuring direction of gaze
     namespace: core
-    neurodata_type: SpatialSeries
+    neurodata_type_inc: SpatialSeries
   name: EyeTracking
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: EyeTracking
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: CompassDirection
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -192,17 +192,17 @@ specs:
   groups:
   - doc: SpatialSeries object containing direction of gaze travel
     namespace: core
-    neurodata_type: SpatialSeries
+    neurodata_type_inc: SpatialSeries
   name: CompassDirection
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: CompassDirection
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: Position
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -214,17 +214,17 @@ specs:
   groups:
   - doc: SpatialSeries object containing position data
     namespace: core
-    neurodata_type: SpatialSeries
+    neurodata_type_inc: SpatialSeries
   name: Position
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: Position
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: MotionCorrection
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -239,11 +239,11 @@ specs:
     each point in time is assumed to be 2-D (has only x & y dimensions).'
   groups:
   - attributes:
-    - doc: the neurodata type of this object
+    - doc: the data type of this object
       dtype: text
       name: neurodata_type
       value: CorrectedImageStack
-    - doc: the namespace for the neurodata type of this object
+    - doc: the namespace for the data type of this object
       dtype: text
       name: namespace
       value: core
@@ -253,13 +253,13 @@ specs:
       name: original_path
     doc: One of possibly many.  Name should be informative.
     groups:
-    - doc: Image stack with frames shifted to the common coordinates.
-      namespace: core
-      neurodata_type: ImageSeries
     - doc: Stores the x,y delta necessary to align each frame to the common coordinates,
         for example, to align each frame to a reference image.
       namespace: core
-      neurodata_type: TimeSeries
+      neurodata_type_inc: TimeSeries
+    - doc: Image stack with frames shifted to the common coordinates.
+      namespace: core
+      neurodata_type_inc: ImageSeries
     links:
     - doc: HDF5 Link to image series that is being registered.
       name: original
@@ -269,5 +269,5 @@ specs:
     quantity: +
   name: MotionCorrection
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: MotionCorrection
+  neurodata_type_inc: Interface

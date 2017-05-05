@@ -1,10 +1,10 @@
 specs:
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: TwoPhotonSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -21,15 +21,15 @@ specs:
     quantity: '?'
     shape:
     - 3
-  - doc: Photomultiplier gain
-    dtype: float32
-    name: pmt_gain
-    quantity: '?'
   - doc: Lines imaged per second. This is also stored in /general/optophysiology but
       is kept here as it is useful information for analysis, and so good to be stored
       w/ the actual data.
     dtype: float32
     name: scan_line_rate
+    quantity: '?'
+  - doc: Photomultiplier gain
+    dtype: float32
+    name: pmt_gain
     quantity: '?'
   doc: A special case of optical imaging.
   links:
@@ -37,14 +37,14 @@ specs:
     name: imaging_plane
     target_type: ImagingPlane
   namespace: core
-  neurodata_type: ImageSeries
   neurodata_type_def: TwoPhotonSeries
+  neurodata_type_inc: ImageSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: RoiResponseSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -56,6 +56,16 @@ specs:
       to the signal from one ROI
   datasets:
   - dims:
+    - num_ROIs
+    doc: List of ROIs represented, one name for each row of data[].
+    dtype: text
+    name: roi_names
+    shape:
+    - null
+  - doc: Path to segmentation module.
+    dtype: text
+    name: segmentation_interface_path
+  - dims:
     - num_times
     - num_ROIs
     doc: Signals from ROIs
@@ -64,16 +74,6 @@ specs:
     shape:
     - null
     - null
-  - doc: Path to segmentation module.
-    dtype: text
-    name: segmentation_interface_path
-  - dims:
-    - num_ROIs
-    doc: List of ROIs represented, one name for each row of data[].
-    dtype: text
-    name: roi_names
-    shape:
-    - null
   doc: ROI responses over an imaging plane. Each row in data[] should correspond to
     the signal from one ROI.
   links:
@@ -81,14 +81,14 @@ specs:
     name: segmentation_interface
     target_type: ImageSegmentation
   namespace: core
-  neurodata_type: TimeSeries
   neurodata_type_def: RoiResponseSeries
+  neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: DfOverF
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -104,17 +104,17 @@ specs:
   groups:
   - doc: RoiResponseSeries object containing dF/F for a ROI
     namespace: core
-    neurodata_type: RoiResponseSeries
+    neurodata_type_inc: RoiResponseSeries
   name: DfOverF
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: DfOverF
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: Fluorescence
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -130,17 +130,17 @@ specs:
   groups:
   - doc: RoiResponseSeries object containing fluorescence data for a ROI
     namespace: core
-    neurodata_type: RoiResponseSeries
+    neurodata_type_inc: RoiResponseSeries
   name: Fluorescence
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: Fluorescence
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: ImageSegmentation
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -159,11 +159,11 @@ specs:
     ROI names should remain consistent between them.
   groups:
   - attributes:
-    - doc: the neurodata type of this object
+    - doc: the data type of this object
       dtype: text
       name: neurodata_type
       value: PlaneSegmentation
-    - doc: the namespace for the neurodata type of this object
+    - doc: the namespace for the data type of this object
       dtype: text
       name: namespace
       value: core
@@ -186,30 +186,18 @@ specs:
       - doc: One or more image stacks that the masks apply to (can be one-element
           stack)
         namespace: core
-        neurodata_type: ImageSeries
+        neurodata_type_inc: ImageSeries
       name: reference_images
     - attributes:
-      - doc: the neurodata type of this object
+      - doc: the data type of this object
         dtype: text
         name: neurodata_type
         value: ROI
-      - doc: the namespace for the neurodata type of this object
+      - doc: the namespace for the data type of this object
         dtype: text
         name: namespace
         value: core
       datasets:
-      - doc: Description of this ROI.
-        dtype: text
-        name: roi_description
-      - dims:
-        - num_pixels
-        - '2'
-        doc: List of pixels (x,y) that compose the mask
-        dtype: uint16
-        name: pix_mask
-        shape:
-        - null
-        - null
       - dims:
         - num_pixels
         doc: Weight of each pixel listed in pix_mask
@@ -217,12 +205,24 @@ specs:
         name: pix_mask_weight
         shape:
         - null
+      - doc: Description of this ROI.
+        dtype: text
+        name: roi_description
       - dims:
         - num_x
         - num_y
         doc: ROI mask, represented in 2D ([y][x]) intensity image
         dtype: float32
         name: img_mask
+        shape:
+        - null
+        - null
+      - dims:
+        - num_pixels
+        - '2'
+        doc: List of pixels (x,y) that compose the mask
+        dtype: uint16
+        name: pix_mask
         shape:
         - null
         - null
@@ -239,34 +239,28 @@ specs:
     quantity: '*'
   name: ImageSegmentation
   namespace: core
-  neurodata_type: Interface
   neurodata_type_def: ImageSegmentation
+  neurodata_type_inc: Interface
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: ImagingPlane
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
   datasets:
-  - doc: Name of device in /general/devices
+  - doc: Excitation wavelength
     dtype: text
-    name: device
-  - doc: Rate images are acquired, in Hz.
+    name: excitation_lambda
+  - doc: 'Describes position and reference frame of manifold based on position of
+      first element in manifold. For example, text description of anotomical location
+      or vectors needed to rotate to common anotomical axis (eg, AP/DV/ML). COMMENT:
+      This field is necessary to interpret manifold. If manifold is not present then
+      this field is not required'
     dtype: text
-    name: imaging_rate
-  - doc: Location of image plane
-    dtype: text
-    name: location
-  - doc: Calcium indicator
-    dtype: text
-    name: indicator
-  - doc: Description of &lt;image_plane_X&gt;
-    dtype: text
-    name: description
-    quantity: '?'
+    name: reference_frame
   - attributes:
     - doc: Value is 1.0
       dtype: float
@@ -288,26 +282,32 @@ specs:
     - null
     - null
     - 3
-  - doc: 'Describes position and reference frame of manifold based on position of
-      first element in manifold. For example, text description of anotomical location
-      or vectors needed to rotate to common anotomical axis (eg, AP/DV/ML). COMMENT:
-      This field is necessary to interpret manifold. If manifold is not present then
-      this field is not required'
+  - doc: Rate images are acquired, in Hz.
     dtype: text
-    name: reference_frame
-  - doc: Excitation wavelength
+    name: imaging_rate
+  - doc: Calcium indicator
     dtype: text
-    name: excitation_lambda
+    name: indicator
+  - doc: Description of &lt;image_plane_X&gt;
+    dtype: text
+    name: description
+    quantity: '?'
+  - doc: Location of image plane
+    dtype: text
+    name: location
+  - doc: Name of device in /general/devices
+    dtype: text
+    name: device
   doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name is
     arbitrary but should be meaningful. It is referenced by TwoPhotonSeries and also
     ImageSegmentation and DfOverF interfaces'
   groups:
   - attributes:
-    - doc: the neurodata type of this object
+    - doc: the data type of this object
       dtype: text
       name: neurodata_type
       value: OpticalChannel
-    - doc: the namespace for the neurodata type of this object
+    - doc: the namespace for the data type of this object
       dtype: text
       name: namespace
       value: core

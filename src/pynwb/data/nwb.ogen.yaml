@@ -1,10 +1,10 @@
 specs:
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: OptogeneticSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -32,30 +32,30 @@ specs:
     name: site
     target_type: OptogeneticStimulusSite
   namespace: core
-  neurodata_type: TimeSeries
   neurodata_type_def: OptogeneticSeries
+  neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: OptogeneticStimulusSite
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
   datasets:
-  - doc: Name of device in /general/devices
-    dtype: text
-    name: device
-  - doc: Description of site
-    dtype: text
-    name: description
-  - doc: Location of stimulation site
-    dtype: text
-    name: location
   - doc: Excitation wavelength
     dtype: text
     name: excitation_lambda
+  - doc: Location of stimulation site
+    dtype: text
+    name: location
+  - doc: Description of site
+    dtype: text
+    name: description
+  - doc: Name of device in /general/devices
+    dtype: text
+    name: device
   doc: 'One of possibly many groups describing an optogenetic stimuluation site. COMMENT:
     Name is arbitrary but should be meaningful. Name is referenced by OptogeneticSeries'
   namespace: core
