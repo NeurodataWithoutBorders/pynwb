@@ -25,10 +25,10 @@ class SpecCatalog(object):
         Associate a specified object type with an HDF5 specification
         '''
         spec, source_file = getargs('spec', 'source_file', kwargs)
-        ndt = spec.neurodata_type
-        ndt_def = spec.neurodata_type_def
+        ndt = spec.data_type_inc
+        ndt_def = spec.data_type_def
         if ndt_def is None:
-            raise ValueError('cannot register spec that has no neurodata_type_def')
+            raise ValueError('cannot register spec that has no data_type_def')
         if ndt_def != ndt:
             self.__parent_types[ndt_def] = ndt
         type_name = ndt_def if ndt_def is not None else ndt
@@ -37,15 +37,14 @@ class SpecCatalog(object):
         self.__specs[type_name] = spec
         self.__spec_source_files[type_name] = source_file
 
-    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the Spec for'},
+    @docval({'name': 'data_type', 'type': str, 'doc': 'the data_type to get the Spec for'},
             returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
     def get_spec(self, **kwargs):
         '''
         Get the Spec object for the given type
         '''
-        neurodata_type = getargs('neurodata_type', kwargs)
-        type_name = neurodata_type.__name__ if isinstance(neurodata_type, type) else neurodata_type
-        return self.__specs.get(type_name, None)
+        data_type = getargs('data_type', kwargs)
+        return self.__specs.get(data_type, None)
 
     def get_registered_types(self):
         '''
@@ -53,7 +52,7 @@ class SpecCatalog(object):
         '''
         return tuple(self.__specs.keys())
 
-    @docval({'name': 'neurodata_type', 'type': (str, type), 'doc': 'a class name or type object'},
+    @docval({'name': 'data_type', 'type': str, 'doc': 'the data_type of the spec to get the source file for'},
             returns="the path to source specification file from which the spec was orignially loaded or None ",
             rtype='str')
     def get_spec_source_file(self, **kwargs):
@@ -63,21 +62,21 @@ class SpecCatalog(object):
         for the spec. Note: The spec in the file may not be identical to the
         object in case teh spec is modified after load.
         '''
-        neurodata_type = getargs('neurodata_type', kwargs)
-        return self.__spec_source_files.get(neurodata_type, None)
+        data_type = getargs('data_type', kwargs)
+        return self.__spec_source_files.get(data_type, None)
 
     @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'the Spec object to register'},
             {'name': 'source_file', 'type': str, 'doc': 'path to the source file from which the spec was loaded', 'default': None})
     def auto_register(self, **kwargs):
         '''
-        Register this specification and all sub-specification using neurodata_type as object type name
+        Register this specification and all sub-specification using data_type as object type name
         '''
         spec, source_file = getargs('spec', 'source_file', kwargs)
-        ndt = spec.neurodata_type_def
+        ndt = spec.data_type_def
         if ndt is not None:
             self.register_spec(spec, source_file)
         for dataset_spec in spec.datasets:
-            dset_ndt = dataset_spec.neurodata_type_def
+            dset_ndt = dataset_spec.data_type_def
             if dset_ndt is not None:
                 self.register_spec(dataset_spec, source_file)
         for group_spec in spec.groups:

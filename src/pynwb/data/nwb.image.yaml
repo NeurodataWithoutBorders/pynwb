@@ -1,10 +1,10 @@
 specs:
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: ImageSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -13,9 +13,13 @@ specs:
     name: help
     value: Storage object for time-series 2-D image data
   datasets:
-  - doc: Number of bit per image pixel.
-    dtype: int32
-    name: bits_per_pixel
+  - doc: Format of image. If this is 'external' then the field external_file contains
+      the path or URL information to that file. For tiff, png, jpg, etc, the binary
+      representation of the image is stored in data. If the format is raw then the
+      fields bit_per_pixel and dimension are used. For raw images, only a single channel
+      is stored (eg, red).
+    dtype: text
+    name: format
     quantity: '?'
   - attributes:
     - dims:
@@ -40,6 +44,18 @@ specs:
     shape:
     - null
   - dims:
+    - rank
+    doc: Number of pixels on x, y, (and z) axes.
+    dtype: int32
+    name: dimension
+    quantity: '?'
+    shape:
+    - null
+  - doc: Number of bit per image pixel.
+    dtype: int32
+    name: bits_per_pixel
+    quantity: '?'
+  - dims:
     - - x
       - y
     - - frame
@@ -62,36 +78,20 @@ specs:
       - null
       - null
       - null
-  - dims:
-    - rank
-    doc: Number of pixels on x, y, (and z) axes.
-    dtype: int32
-    name: dimension
-    quantity: '?'
-    shape:
-    - null
-  - doc: Format of image. If this is 'external' then the field external_file contains
-      the path or URL information to that file. For tiff, png, jpg, etc, the binary
-      representation of the image is stored in data. If the format is raw then the
-      fields bit_per_pixel and dimension are used. For raw images, only a single channel
-      is stored (eg, red).
-    dtype: text
-    name: format
-    quantity: '?'
   doc: 'General image data that is common between acquisition and stimulus time series.
     Sometimes the image data is stored in the HDF5 file in a raw format while other
     times it will be stored as an external image file in the host file system. The
     data field will either be binary data or empty. TimeSeries::data array structure:
     [frame] [y][x] or [frame][z][y][x].'
   namespace: core
-  neurodata_type: TimeSeries
   neurodata_type_def: ImageSeries
+  neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: ImageMaskSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -113,14 +113,14 @@ specs:
     name: masked_imageseries
     target_type: ImageSeries
   namespace: core
-  neurodata_type: ImageSeries
   neurodata_type_def: ImageMaskSeries
+  neurodata_type_inc: ImageSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: OpticalSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -138,14 +138,14 @@ specs:
     quantity: '?'
     shape:
     - 2
-  - doc: Distance from camera/monitor to target/eye.
-    dtype: float32
-    name: distance
-    quantity: '?'
   - doc: Description of image relative to some reference frame (e.g., which way is
       up). Must also specify frame of reference.
     dtype: text
     name: orientation
+    quantity: '?'
+  - doc: Distance from camera/monitor to target/eye.
+    dtype: float32
+    name: distance
     quantity: '?'
   doc: Image data that is presented or recorded. A stimulus template movie will be
     stored only as an image. When the image is presented as stimulus, additional data
@@ -153,14 +153,14 @@ specs:
     covers, or how what is the area of the target being imaged). If the OpticalSeries
     represents acquired imaging data, orientation is also important.
   namespace: core
-  neurodata_type: ImageSeries
   neurodata_type_def: OpticalSeries
+  neurodata_type_inc: ImageSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: IndexSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -194,5 +194,5 @@ specs:
     name: indexed_timeseries
     target_type: ImageSeries
   namespace: core
-  neurodata_type: TimeSeries
   neurodata_type_def: IndexSeries
+  neurodata_type_inc: TimeSeries

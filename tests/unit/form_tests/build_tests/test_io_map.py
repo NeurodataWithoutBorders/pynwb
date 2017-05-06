@@ -32,7 +32,7 @@ class Bar(Container):
         return ','.join('%s=%s' % (a, getattr(self, a)) for a in attrs)
 
     @property
-    def neurodata_type(self):
+    def data_type(self):
         return 'Bar'
 
     @property
@@ -57,18 +57,18 @@ class Bar(Container):
 
 class TestGetSubSpec(unittest.TestCase):
 
-    def test_get_subspec_neurodata_type_noname(self):
-        child_spec = GroupSpec('A test group specification with a neurodata type', namespace=CORE_NAMESPACE, neurodata_type_def='Bar')
+    def test_get_subspec_data_type_noname(self):
+        child_spec = GroupSpec('A test group specification with a data type', namespace=CORE_NAMESPACE, data_type_def='Bar')
         parent_spec = GroupSpec('Something to hold a Bar', 'bar_bucket', groups=[child_spec])
-        sub_builder = GroupBuilder('my_bar', attributes={'neurodata_type': 'Bar', 'namespace': CORE_NAMESPACE})
+        sub_builder = GroupBuilder('my_bar', attributes={'data_type': 'Bar', 'namespace': CORE_NAMESPACE})
         builder = GroupBuilder('bar_bucket', groups={'my_bar': sub_builder})
         result = get_subspec(parent_spec, sub_builder)
         self.assertIs(result, child_spec)
 
     def test_get_subspec_named(self):
-        child_spec = GroupSpec('A test group specification with a neurodata type', 'my_subgroup')
+        child_spec = GroupSpec('A test group specification with a data type', 'my_subgroup')
         parent_spec = GroupSpec('Something to hold a Bar', 'my_group', groups=[child_spec])
-        sub_builder = GroupBuilder('my_subgroup', attributes={'neurodata_type': 'Bar', 'namespace': CORE_NAMESPACE})
+        sub_builder = GroupBuilder('my_subgroup', attributes={'data_type': 'Bar', 'namespace': CORE_NAMESPACE})
         builder = GroupBuilder('my_group', groups={'my_bar': sub_builder})
         result = get_subspec(parent_spec, sub_builder)
         self.assertIs(result, child_spec)
@@ -76,7 +76,7 @@ class TestGetSubSpec(unittest.TestCase):
 class TestTypeMap(unittest.TestCase):
 
     def setUp(self):
-        self.bar_spec = GroupSpec('A test group specification with a neurodata type', namespace=CORE_NAMESPACE, neurodata_type_def='Bar')
+        self.bar_spec = GroupSpec('A test group specification with a data type', namespace=CORE_NAMESPACE, data_type_def='Bar')
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.bar_spec, 'test.yaml')
         self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
@@ -124,9 +124,9 @@ class TestObjectMapper(unittest.TestCase):
 class TestObjectMapperNested(TestObjectMapper):
 
     def setUpBarSpec(self):
-        self.bar_spec = GroupSpec('A test group specification with a neurodata type',
+        self.bar_spec = GroupSpec('A test group specification with a data type',
                                  namespace=CORE_NAMESPACE,
-                                 neurodata_type_def='Bar',
+                                 data_type_def='Bar',
                                  datasets=[DatasetSpec('an example dataset', 'int', name='data',
                                                 attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
                                  attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
@@ -135,14 +135,14 @@ class TestObjectMapperNested(TestObjectMapper):
         ''' Test default mapping functionality when object attributes map to an attribute deeper than top-level Builder '''
         container_inst = Bar('my_bar', list(range(10)), 'value1', 10)
         expected = GroupBuilder('my_bar', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
-                                attributes={'attr1': 'value1', 'neurodata_type': 'Bar', 'namespace': CORE_NAMESPACE})
+                                attributes={'attr1': 'value1', 'data_type': 'Bar', 'namespace': CORE_NAMESPACE})
         builder = self.mapper.build(container_inst, self.manager)
         self.assertDictEqual(builder, expected)
 
     def test_construct(self):
         ''' Test default mapping functionality when object attributes map to an attribute deeper than top-level Builder '''
         builder = GroupBuilder('my_bar', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
-                                attributes={'attr1': 'value1', 'neurodata_type': 'Bar', 'namespace': CORE_NAMESPACE})
+                                attributes={'attr1': 'value1', 'data_type': 'Bar', 'namespace': CORE_NAMESPACE})
         expected = Bar('my_bar', list(range(10)), 'value1', 10)
         container = self.mapper.construct(builder, self.manager)
         self.assertEqual(container, expected)
@@ -151,9 +151,9 @@ class TestObjectMapperNested(TestObjectMapper):
 class TestObjectMapperNoNesting(TestObjectMapper):
 
     def setUpBarSpec(self):
-        self.bar_spec = GroupSpec('A test group specification with a neurodata type',
+        self.bar_spec = GroupSpec('A test group specification with a data type',
                          namespace=CORE_NAMESPACE,
-                         neurodata_type_def='Bar',
+                         data_type_def='Bar',
                          datasets=[DatasetSpec('an example dataset', 'int', name='data')],
                          attributes=[AttributeSpec('attr1', 'str', 'an example string attribute'),
                                      AttributeSpec('attr2', 'int', 'an example integer attribute')])
@@ -164,12 +164,12 @@ class TestObjectMapperNoNesting(TestObjectMapper):
         container = Bar('my_bar', list(range(10)), 'value1', 10)
         builder = self.mapper.build(container, self.manager)
         expected = GroupBuilder('my_bar', datasets={'data': DatasetBuilder('data', list(range(10)))},
-                                attributes={'attr1': 'value1', 'attr2': 10, 'neurodata_type': 'Bar', 'namespace': CORE_NAMESPACE})
+                                attributes={'attr1': 'value1', 'attr2': 10, 'data_type': 'Bar', 'namespace': CORE_NAMESPACE})
         self.assertDictEqual(builder, expected)
 
     def test_construct(self):
         builder = GroupBuilder('my_bar', datasets={'data': DatasetBuilder('data', list(range(10)))},
-                               attributes={'attr1': 'value1', 'attr2': 10, 'neurodata_type': 'Bar', 'namespace': CORE_NAMESPACE})
+                               attributes={'attr1': 'value1', 'attr2': 10, 'data_type': 'Bar', 'namespace': CORE_NAMESPACE})
         expected = Bar('my_bar', list(range(10)), 'value1', 10)
         container = self.mapper.construct(builder, self.manager)
         self.assertEqual(container, expected)

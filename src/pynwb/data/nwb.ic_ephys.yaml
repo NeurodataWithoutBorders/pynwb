@@ -1,10 +1,10 @@
 specs:
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: PatchClampSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -32,14 +32,14 @@ specs:
     name: electrode
     target_type: IntracellularElectrode
   namespace: core
-  neurodata_type: TimeSeries
   neurodata_type_def: PatchClampSeries
+  neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: CurrentClampSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -48,10 +48,6 @@ specs:
     name: help
     value: Voltage recorded from cell during current-clamp recording
   datasets:
-  - doc: 'Unit: Ohm'
-    dtype: float32
-    name: bridge_balance
-    quantity: '?'
   - doc: 'Unit: Farad'
     dtype: float32
     name: capacitance_compensation
@@ -60,18 +56,22 @@ specs:
     dtype: float32
     name: bias_current
     quantity: '?'
+  - doc: 'Unit: Ohm'
+    dtype: float32
+    name: bridge_balance
+    quantity: '?'
   doc: Stores voltage data recorded from intracellular current-clamp recordings. A
     corresponding CurrentClampStimulusSeries (stored separately as a stimulus) is
     used to store the current injected.
   namespace: core
-  neurodata_type: PatchClampSeries
   neurodata_type_def: CurrentClampSeries
+  neurodata_type_inc: PatchClampSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: IZeroClampSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -86,14 +86,14 @@ specs:
     There is no CurrentClampStimulusSeries associated with an IZero series because
     the amplifier is disconnected and no stimulus can reach the cell.
   namespace: core
-  neurodata_type: CurrentClampSeries
   neurodata_type_def: IZeroClampSeries
+  neurodata_type_inc: CurrentClampSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: CurrentClampStimulusSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -104,14 +104,14 @@ specs:
   doc: Aliases to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries
     for machine (and human) readability of the file.
   namespace: core
-  neurodata_type: PatchClampSeries
   neurodata_type_def: CurrentClampStimulusSeries
+  neurodata_type_inc: PatchClampSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: VoltageClampSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -121,22 +121,13 @@ specs:
     value: Current recorded from cell during voltage-clamp recording
   datasets:
   - attributes:
-    - doc: Value is Hz
+    - doc: Value is pecent
       dtype: text
       name: unit
-      value: Hz
-    doc: 'Unit: Hz'
+      value: pecent
+    doc: 'Unit: %'
     dtype: float32
-    name: resistance_comp_bandwidth
-    quantity: '?'
-  - attributes:
-    - doc: Value is Farad
-      dtype: text
-      name: unit
-      value: Farad
-    doc: 'Unit: Farad'
-    dtype: float32
-    name: whole_cell_capacitance_comp
+    name: resistance_comp_correction
     quantity: '?'
   - attributes:
     - doc: Value is pecent
@@ -154,16 +145,7 @@ specs:
       value: Farad
     doc: 'Unit: Farad'
     dtype: float32
-    name: capacitance_fast
-    quantity: '?'
-  - attributes:
-    - doc: Value is pecent
-      dtype: text
-      name: unit
-      value: pecent
-    doc: 'Unit: %'
-    dtype: float32
-    name: resistance_comp_correction
+    name: capacitance_slow
     quantity: '?'
   - attributes:
     - doc: Value is Farad
@@ -172,7 +154,25 @@ specs:
       value: Farad
     doc: 'Unit: Farad'
     dtype: float32
-    name: capacitance_slow
+    name: capacitance_fast
+    quantity: '?'
+  - attributes:
+    - doc: Value is Farad
+      dtype: text
+      name: unit
+      value: Farad
+    doc: 'Unit: Farad'
+    dtype: float32
+    name: whole_cell_capacitance_comp
+    quantity: '?'
+  - attributes:
+    - doc: Value is Hz
+      dtype: text
+      name: unit
+      value: Hz
+    doc: 'Unit: Hz'
+    dtype: float32
+    name: resistance_comp_bandwidth
     quantity: '?'
   - attributes:
     - doc: Value is Ohm
@@ -187,14 +187,14 @@ specs:
     corresponding VoltageClampStimulusSeries (stored separately as a stimulus) is
     used to store the voltage injected.
   namespace: core
-  neurodata_type: PatchClampSeries
   neurodata_type_def: VoltageClampSeries
+  neurodata_type_inc: PatchClampSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: VoltageClampStimulusSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
@@ -205,51 +205,51 @@ specs:
   doc: Aliases to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries
     for machine (and human) readability of the file.
   namespace: core
-  neurodata_type: PatchClampSeries
   neurodata_type_def: VoltageClampStimulusSeries
+  neurodata_type_inc: PatchClampSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: IntracellularElectrode
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
   datasets:
-  - doc: Initial access resistance
+  - doc: Name(s) of devices in general/devices
     dtype: text
-    name: initial_access_resistance
+    name: device
+    quantity: '?'
+  - doc: 'Electrode resistance COMMENT: unit: Ohm'
+    dtype: text
+    name: resistance
     quantity: '?'
   - doc: Area, layer, comments on estimation, stereotaxis coordinates (if in vivo,
       etc)
     dtype: text
     name: location
     quantity: '?'
-  - doc: Information about slice used for recording
-    dtype: text
-    name: slice
-    quantity: '?'
   - doc: Information about seal used for recording
     dtype: text
     name: seal
     quantity: '?'
-  - doc: Name(s) of devices in general/devices
+  - doc: Information about slice used for recording
     dtype: text
-    name: device
+    name: slice
     quantity: '?'
-  - doc: 'Recording description, description of electrode (e.g.,  whole-cell, sharp,
-      etc)COMMENT: Free-form text (can be from Methods)'
+  - doc: Initial access resistance
     dtype: text
-    name: description
-  - doc: 'Electrode resistance COMMENT: unit: Ohm'
-    dtype: text
-    name: resistance
+    name: initial_access_resistance
     quantity: '?'
   - doc: Electrode specific filtering.
     dtype: text
     name: filtering
     quantity: '?'
+  - doc: 'Recording description, description of electrode (e.g.,  whole-cell, sharp,
+      etc)COMMENT: Free-form text (can be from Methods)'
+    dtype: text
+    name: description
   doc: 'One of possibly many. COMMENT: Name should be informative.'
   namespace: core
   neurodata_type_def: IntracellularElectrode

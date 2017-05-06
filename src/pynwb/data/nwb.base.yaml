@@ -1,22 +1,14 @@
 specs:
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: NWBFile
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
   datasets:
-  - doc: 'A unique text identifier for the file. COMMENT: Eg, concatenated lab name,
-      file creation date/time and experimentalist, or a hash of these and/or other
-      values. The goal is that the string should be unique to all other files.'
-    dtype: text
-    name: identifier
-  - doc: One or two sentences describing the experiment and data in the file.
-    dtype: text
-    name: session_description
   - doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
       format with trailing major, minor and patch numbers.'
     dtype: text
@@ -26,6 +18,11 @@ specs:
       the file use this time as reference (ie, time zero)'
     dtype: text
     name: session_start_time
+  - doc: 'A unique text identifier for the file. COMMENT: Eg, concatenated lab name,
+      file creation date/time and experimentalist, or a hash of these and/or other
+      values. The goal is that the string should be unique to all other files.'
+    dtype: text
+    name: identifier
   - dims:
     - '*unlimited*'
     doc: 'Time file was created, UTC, and subsequent modifications to file. COMMENT:
@@ -37,6 +34,9 @@ specs:
     name: file_create_date
     shape:
     - null
+  - doc: One or two sentences describing the experiment and data in the file.
+    dtype: text
+    name: session_description
   doc: Top level of NWB file.
   groups:
   - doc: 'Data streams recorded from the system, including ephys, ophys, tracking,
@@ -55,26 +55,26 @@ specs:
       groups:
       - doc: TimeSeries object containing data generated during data acquisition
         namespace: core
-        neurodata_type: TimeSeries
+        neurodata_type_inc: TimeSeries
       name: timeseries
     - datasets:
       - attributes:
-        - doc: the neurodata type of this object
+        - doc: the data type of this object
           dtype: text
           name: neurodata_type
           value: Image
-        - doc: the namespace for the neurodata type of this object
+        - doc: the namespace for the data type of this object
           dtype: text
           name: namespace
           value: core
+        - doc: 'Format of the image.  COMMENT: eg, jpg, png, mpeg'
+          dtype: text
+          name: format
         - doc: 'Human description of image. COMMENT: If image is of slice data, include
             slice thickness and orientation, and reference to appropriate entry in
             /general/slices'
           dtype: text
           name: description
-        - doc: 'Format of the image.  COMMENT: eg, jpg, png, mpeg'
-          dtype: text
-          name: format
         doc: 'Photograph of experiment or experimental setup (video also OK). COMMENT:
           Name is arbitrary.  Data is stored as a single binary object (HDF5 opaque
           type).'
@@ -125,7 +125,7 @@ specs:
     - doc: 'One of possibly many different experimental epochCOMMENT: Name is arbitrary
         but must be unique within the experiment.'
       namespace: core
-      neurodata_type: Epoch
+      neurodata_type_inc: Epoch
       quantity: '*'
     name: epochs
   - doc: "The home for processing Modules. These modules perform intermediate analysis\
@@ -153,6 +153,12 @@ specs:
       times. These templates can exist in the present file or can be HDF5-linked to
       a remote library file.'
     groups:
+    - doc: Stimuli presented during the experiment.
+      groups:
+      - doc: TimeSeries objects containing data of presented stimuli
+        namespace: core
+        neurodata_type_inc: TimeSeries
+      name: presentation
     - doc: "Template stimuli. COMMENT: Time stamps in templates are based on stimulus\
         \ design and are relative to the beginning of the stimulus. When templates\
         \ are used, the stimulus instances must convert presentation times to the\
@@ -160,33 +166,32 @@ specs:
       groups:
       - doc: TimeSeries objects containing template data of presented stimuli
         namespace: core
-        neurodata_type: TimeSeries
+        neurodata_type_inc: TimeSeries
       name: templates
-    - doc: Stimuli presented during the experiment.
-      groups:
-      - doc: TimeSeries objects containing data of presented stimuli
-        namespace: core
-        neurodata_type: TimeSeries
-      name: presentation
     name: stimulus
   - datasets:
-    - doc: 'Notes about data collection and analysis.COMMENT: Can be from Methods'
+    - doc: 'Publication information.COMMENT: PMID, DOI, URL, etc. If multiple, concatenate
+        together and describe which is which. such as PMID, DOI, URL, etc'
       dtype: text
-      name: data_collection
+      name: related_publications
+      quantity: '?'
+    - doc: Lab where experiment was performed
+      dtype: text
+      name: lab
+      quantity: '?'
+    - doc: 'Experimetnal protocol, if applicable.COMMENT: E.g., include IACUC protocol'
+      dtype: text
+      name: protocol
       quantity: '?'
     - doc: 'Description of drugs used, including how and when they were administered.
         COMMENT: Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.'
       dtype: text
       name: pharmacology
       quantity: '?'
-    - doc: 'Name of person who performed the experiment.COMMENT: More than one person
-        OK. Can specify roles of different people involved.'
+    - doc: 'Narrative description about surgery/surgeries, including date(s) and who
+        performed surgery. COMMENT: Much can be copied from Methods'
       dtype: text
-      name: experimenter
-      quantity: '?'
-    - doc: Lab where experiment was performed
-      dtype: text
-      name: lab
+      name: surgery
       quantity: '?'
     - attributes:
       - doc: Name of script file
@@ -196,6 +201,38 @@ specs:
       dtype: text
       name: source_script
       quantity: '?'
+    - doc: Information about virus(es) used in experiments, including virus ID, source,
+        date made, injection location, volume, etc
+      dtype: text
+      name: virus
+      quantity: '?'
+    - doc: 'Notes about stimuli, such as how and where presented.COMMENT: Can be from
+        Methods'
+      dtype: text
+      name: stimulus
+      quantity: '?'
+    - doc: 'Notes about the experiment.  COMMENT: Things particular to this experiment'
+      dtype: text
+      name: notes
+      quantity: '?'
+    - doc: 'Name of person who performed the experiment.COMMENT: More than one person
+        OK. Can specify roles of different people involved.'
+      dtype: text
+      name: experimenter
+      quantity: '?'
+    - doc: 'Lab-specific ID for the session.COMMENT: Only 1 session_id per file, with
+        all time aligned to experiment start time.'
+      dtype: text
+      name: session_id
+      quantity: '?'
+    - doc: 'General description of the experiment.COMMENT: Can be from Methods'
+      dtype: text
+      name: experiment_description
+      quantity: '?'
+    - doc: 'Notes about data collection and analysis.COMMENT: Can be from Methods'
+      dtype: text
+      name: data_collection
+      quantity: '?'
     - doc: Institution(s) where experiment was performed
       dtype: text
       name: institution
@@ -204,43 +241,6 @@ specs:
         orientation, temperature and bath solution
       dtype: text
       name: slices
-      quantity: '?'
-    - doc: Information about virus(es) used in experiments, including virus ID, source,
-        date made, injection location, volume, etc
-      dtype: text
-      name: virus
-      quantity: '?'
-    - doc: 'Notes about the experiment.  COMMENT: Things particular to this experiment'
-      dtype: text
-      name: notes
-      quantity: '?'
-    - doc: 'Lab-specific ID for the session.COMMENT: Only 1 session_id per file, with
-        all time aligned to experiment start time.'
-      dtype: text
-      name: session_id
-      quantity: '?'
-    - doc: 'Notes about stimuli, such as how and where presented.COMMENT: Can be from
-        Methods'
-      dtype: text
-      name: stimulus
-      quantity: '?'
-    - doc: 'Narrative description about surgery/surgeries, including date(s) and who
-        performed surgery. COMMENT: Much can be copied from Methods'
-      dtype: text
-      name: surgery
-      quantity: '?'
-    - doc: 'Experimetnal protocol, if applicable.COMMENT: E.g., include IACUC protocol'
-      dtype: text
-      name: protocol
-      quantity: '?'
-    - doc: 'Publication information.COMMENT: PMID, DOI, URL, etc. If multiple, concatenate
-        together and describe which is which. such as PMID, DOI, URL, etc'
-      dtype: text
-      name: related_publications
-      quantity: '?'
-    - doc: 'General description of the experiment.COMMENT: Can be from Methods'
-      dtype: text
-      name: experiment_description
       quantity: '?'
     doc: "Experimental metadata, including protocol, notes and description of hardware\
       \ device(s).  COMMENT: The metadata stored in this section should be used to\
@@ -262,11 +262,11 @@ specs:
         ADC boards, microscopes, etc'
       groups:
       - attributes:
-        - doc: the neurodata type of this object
+        - doc: the data type of this object
           dtype: text
           name: neurodata_type
           value: Device
-        - doc: the namespace for the neurodata type of this object
+        - doc: the namespace for the data type of this object
           dtype: text
           name: namespace
           value: core
@@ -278,46 +278,12 @@ specs:
       name: devices
       quantity: '?'
     - datasets:
-      - doc: ID of animal/person used/participating in experiment (lab convention)
-        dtype: text
-        name: subject_id
-        quantity: '?'
-      - doc: 'Genetic strain COMMENT: If absent, assume Wild Type (WT)'
-        dtype: text
-        name: genotype
-        quantity: '?'
-      - doc: Weight at time of experiment, at time of surgery and at other important
-          times
-        dtype: text
-        name: weight
-        quantity: '?'
-      - doc: Gender of subject
-        dtype: text
-        name: sex
-        quantity: '?'
-      - doc: Description of subject and where subject came from (e.g., breeder, if
-          animal)
-        dtype: text
-        name: description
-        quantity: '?'
-      - doc: Age of subject
-        dtype: text
-        name: age
-        quantity: '?'
-      - doc: Species of subject
-        dtype: text
-        name: species
-        quantity: '?'
-      doc: Information about the animal or person from which the data was measured.
-      name: subject
-      quantity: '?'
-    - datasets:
       - attributes:
-        - doc: the neurodata type of this object
+        - doc: the data type of this object
           dtype: text
           name: neurodata_type
           value: SpecFile
-        - doc: the namespace for the neurodata type of this object
+        - doc: the namespace for the data type of this object
           dtype: text
           name: namespace
           value: core
@@ -341,11 +307,45 @@ specs:
       doc: Group for storing format specification files.
       name: specifications
       quantity: '?'
+    - datasets:
+      - doc: Weight at time of experiment, at time of surgery and at other important
+          times
+        dtype: text
+        name: weight
+        quantity: '?'
+      - doc: Gender of subject
+        dtype: text
+        name: sex
+        quantity: '?'
+      - doc: Description of subject and where subject came from (e.g., breeder, if
+          animal)
+        dtype: text
+        name: description
+        quantity: '?'
+      - doc: ID of animal/person used/participating in experiment (lab convention)
+        dtype: text
+        name: subject_id
+        quantity: '?'
+      - doc: Age of subject
+        dtype: text
+        name: age
+        quantity: '?'
+      - doc: 'Genetic strain COMMENT: If absent, assume Wild Type (WT)'
+        dtype: text
+        name: genotype
+        quantity: '?'
+      - doc: Species of subject
+        dtype: text
+        name: species
+        quantity: '?'
+      doc: Information about the animal or person from which the data was measured.
+      name: subject
+      quantity: '?'
     - doc: Metadata related to extracellular electrophysiology.
       groups:
       - doc: One of possibly many groups, one for each electrode group.
         namespace: core
-        neurodata_type: ElectrodeGroup
+        neurodata_type_inc: ElectrodeGroup
         quantity: '*'
       name: extracellular_ephys
       quantity: '?'
@@ -360,7 +360,7 @@ specs:
       groups:
       - doc: 'One of possibly many. COMMENT: Name should be informative.'
         namespace: core
-        neurodata_type: IntracellularElectrode
+        neurodata_type_inc: IntracellularElectrode
         quantity: '*'
       name: intracellular_ephys
       quantity: '?'
@@ -370,7 +370,7 @@ specs:
           COMMENT: Name is arbitrary but should be meaningful. Name is referenced
           by OptogeneticSeries'
         namespace: core
-        neurodata_type: OptogeneticStimulusSite
+        neurodata_type_inc: OptogeneticStimulusSite
         quantity: '*'
       name: optogenetics
       quantity: '?'
@@ -380,7 +380,7 @@ specs:
           is arbitrary but should be meaningful. It is referenced by TwoPhotonSeries
           and also ImageSegmentation and DfOverF interfaces'
         namespace: core
-        neurodata_type: ImagingPlane
+        neurodata_type_inc: ImagingPlane
         quantity: '*'
       name: optophysiology
       quantity: '?'
@@ -389,17 +389,14 @@ specs:
   namespace: core
   neurodata_type_def: NWBFile
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: Module
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
-  - doc: Description of Module
-    dtype: text
-    name: description
   - dims:
     - num_interfaces
     doc: 'Names of the data interfaces offered by this module. COMMENT: E.g., [0]="EventDetection",
@@ -408,62 +405,27 @@ specs:
     name: interfaces
     shape:
     - null
+  - doc: Description of Module
+    dtype: text
+    name: description
   doc: Module.  Name should be descriptive. Stores a collection of related data organized
     by contained interfaces.  Each interface is a contract specifying content related
     to a particular type of data.
   groups:
   - doc: Interface objects containing data output from processing steps
     namespace: core
-    neurodata_type: Interface
+    neurodata_type_inc: Interface
   namespace: core
   neurodata_type_def: Module
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: TimeSeries
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core
-  - dims:
-    - num_extern_fields
-    doc: 'List of fields that are HDF5 external links.COMMENT: Only present if one
-      or more datasets is set to an HDF5 external link.'
-    dtype: text
-    name: extern_fields
-    shape:
-    - null
-  - doc: Description of TimeSeries
-    dtype: text
-    name: description
-  - doc: Human-readable comments about the TimeSeries. This second descriptive field
-      can be used to store additional information, or descriptive information if the
-      primary description field is populated with a computer-readable string.
-    dtype: text
-    name: comments
-  - dims:
-    - num_tslinks
-    doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
-      timestamps field.  Example element of list: "/acquisition/timeseries/lick_trace"
-      COMMENT: Attribute is only present if links are present. List should include
-      the path to this TimeSeries also.'
-    dtype: text
-    name: timestamp_link
-    shape:
-    - null
-  - doc: Name of TimeSeries or Modules that serve as the source for the data contained
-      here. It can also be the name of a device, for stimulus or acquisition data
-    dtype: text
-    name: source
-  - doc: Value is General time series object
-    dtype: text
-    name: help
-    value: General time series object
-  - doc: Value is TimeSeries
-    dtype: text
-    name: ancestry
-    value: TimeSeries
   - dims:
     - num_missing_fields
     doc: 'List of fields that are not optional (i.e. either required or recommended
@@ -475,6 +437,17 @@ specs:
     shape:
     - null
   - dims:
+    - num_extern_fields
+    doc: 'List of fields that are HDF5 external links.COMMENT: Only present if one
+      or more datasets is set to an HDF5 external link.'
+    dtype: text
+    name: extern_fields
+    shape:
+    - null
+  - doc: Description of TimeSeries
+    dtype: text
+    name: description
+  - dims:
     - num_dlinks
     doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
       data field. Example element of list: "/stimulus/presentation/Sweep_0"` COMMENT:
@@ -484,7 +457,91 @@ specs:
     name: data_link
     shape:
     - null
+  - doc: Value is General time series object
+    dtype: text
+    name: help
+    value: General time series object
+  - dims:
+    - num_tslinks
+    doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
+      timestamps field.  Example element of list: "/acquisition/timeseries/lick_trace"
+      COMMENT: Attribute is only present if links are present. List should include
+      the path to this TimeSeries also.'
+    dtype: text
+    name: timestamp_link
+    shape:
+    - null
+  - doc: Value is TimeSeries
+    dtype: text
+    name: ancestry
+    value: TimeSeries
+  - doc: Name of TimeSeries or Modules that serve as the source for the data contained
+      here. It can also be the name of a device, for stimulus or acquisition data
+    dtype: text
+    name: source
+  - doc: Human-readable comments about the TimeSeries. This second descriptive field
+      can be used to store additional information, or descriptive information if the
+      primary description field is populated with a computer-readable string.
+    dtype: text
+    name: comments
   datasets:
+  - attributes:
+    - doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
+      dtype: float32!
+      name: rate
+    - doc: Value is Seconds
+      dtype: text
+      name: unit
+      value: Seconds
+    doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
+      spaced, the timestamp of the first sample can be specified and all subsequent
+      ones calculated from the sampling rate.'
+    dtype: float64!
+    name: starting_time
+    quantity: '?'
+  - dims:
+    - num_control_values
+    doc: 'Description of each control value. COMMENT: Array length should be as long
+      as the highest number in control minus one, generating an zero-based indexed
+      array for control values.'
+    dtype: text
+    name: control_description
+    quantity: '?'
+    shape:
+    - null
+  - attributes:
+    - doc: Value is 1
+      dtype: int32
+      name: interval
+      value: 1
+    - doc: Value is Seconds
+      dtype: text
+      name: unit
+      value: Seconds
+    dims:
+    - num_times
+    doc: 'Timestamps for samples stored in data.COMMENT: Timestamps here have all
+      been corrected to the common experiment master-clock. Time is stored as seconds
+      and all timestamps are relative to experiment start time.'
+    dtype: float64!
+    name: timestamps
+    shape:
+    - null
+  - dims:
+    - num_times
+    doc: 'Numerical labels that apply to each element in data[]. COMMENT: Optional
+      field. If present, the control array should have the same number of elements
+      as data[].'
+    dtype: uint8
+    name: control
+    quantity: '?'
+    shape:
+    - null
+  - doc: 'Number of samples in data, or number of image frames. COMMENT: This is important
+      if the length of timestamp and data are different, such as for externally stored
+      stimulus image stacks'
+    dtype: int32
+    name: num_samples
   - attributes:
     - doc: Value is 0.0
       dtype: float32!
@@ -509,63 +566,6 @@ specs:
     name: data
     shape:
     - null
-  - dims:
-    - num_times
-    doc: 'Numerical labels that apply to each element in data[]. COMMENT: Optional
-      field. If present, the control array should have the same number of elements
-      as data[].'
-    dtype: uint8
-    name: control
-    quantity: '?'
-    shape:
-    - null
-  - attributes:
-    - doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
-      dtype: float32!
-      name: rate
-    - doc: Value is Seconds
-      dtype: text
-      name: unit
-      value: Seconds
-    doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
-      spaced, the timestamp of the first sample can be specified and all subsequent
-      ones calculated from the sampling rate.'
-    dtype: float64!
-    name: starting_time
-    quantity: '?'
-  - doc: 'Number of samples in data, or number of image frames. COMMENT: This is important
-      if the length of timestamp and data are different, such as for externally stored
-      stimulus image stacks'
-    dtype: int32
-    name: num_samples
-  - attributes:
-    - doc: Value is Seconds
-      dtype: text
-      name: unit
-      value: Seconds
-    - doc: Value is 1
-      dtype: int32
-      name: interval
-      value: 1
-    dims:
-    - num_times
-    doc: 'Timestamps for samples stored in data.COMMENT: Timestamps here have all
-      been corrected to the common experiment master-clock. Time is stored as seconds
-      and all timestamps are relative to experiment start time.'
-    dtype: float64!
-    name: timestamps
-    shape:
-    - null
-  - dims:
-    - num_control_values
-    doc: 'Description of each control value. COMMENT: Array length should be as long
-      as the highest number in control minus one, generating an zero-based indexed
-      array for control values.'
-    dtype: text
-    name: control_description
-    quantity: '?'
-    shape:
-    - null
   doc: General purpose time series.
   groups:
   - doc: "Lab specific time and sync information as provided directly from hardware\
@@ -579,11 +579,11 @@ specs:
   namespace: core
   neurodata_type_def: TimeSeries
 - attributes:
-  - doc: the neurodata type of this object
+  - doc: the data type of this object
     dtype: text
     name: neurodata_type
     value: Interface
-  - doc: the namespace for the neurodata type of this object
+  - doc: the namespace for the data type of this object
     dtype: text
     name: namespace
     value: core

@@ -4,10 +4,11 @@ for reading and writing data in NWB format
 import os.path
 
 
-from form.spec import NamespaceCatalog, SpecNamespace
+from form.spec import NamespaceCatalog, SpecNamespace, AttributeSpec
 from form.utils import docval, getargs
 
 from .core import NWBContainer
+from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
 CORE_NAMESPACE = 'core'
 __core_ns_file_name = 'nwb.namespace.yaml'
@@ -28,24 +29,26 @@ def __get_namespace_catalog(namespace_path, catalog):
 
 __resources = __get_resources()
 
-__NAMESPACES = __get_namespace_catalog(__resources['namespace_path'], NamespaceCatalog(CORE_NAMESPACE))
+__NS_CATALOG = NamespaceCatalog(CORE_NAMESPACE, NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+if os.path.exists(__resources['namespace_path']):
+    __NS_CATALOG.load_namespaces(__resources['namespace_path'])
 
 @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
         {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'},
         is_method=False)
 def register_namespace(**kwargs):
     name, namespace = getargs('name', 'namespace', kwargs)
-    __NAMESPACES[name] = namespace
+    __NS_CATALOG[name] = namespace
 
 @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
         is_method=False)
 def load_namespace(**kwargs):
     namespace_path = getargs('namespace_path', kwargs)
-    __get_namespace_catalog(namespace_path, __NAMESPACES)
+    __get_namespace_catalog(namespace_path, __NS_CATALOG)
 
 def get_type_map():
     from form.build import TypeMap, ObjectMapper
-    ret = TypeMap(__NAMESPACES)
+    ret = TypeMap(__NS_CATALOG)
     ret.register_map(NWBContainer, ObjectMapper)
     return ret
 
