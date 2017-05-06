@@ -472,7 +472,8 @@ class GroupSpec(BaseStorageSpec):
     def add_group(self, **kwargs):
         ''' Add a new specification for a subgroup to this group specification '''
         doc = kwargs.pop('doc')
-        spec = GroupSpec(doc, **kwargs)
+        spec = self.__class__(doc, **kwargs)
+        #spec = GroupSpec(doc, **kwargs)
         self.set_group(spec)
         return spec
 
@@ -500,7 +501,7 @@ class GroupSpec(BaseStorageSpec):
     def add_dataset(self, **kwargs):
         ''' Add a new specification for a dataset to this group specification '''
         doc = kwargs.pop('doc')
-        spec = DatasetSpec(doc, **kwargs)
+        spec = self.dataset_spec_cls(doc, **kwargs)
         self.set_dataset(spec)
         return spec
 
@@ -581,11 +582,21 @@ class GroupSpec(BaseStorageSpec):
 #
     @classmethod
     def dataset_spec_cls(cls):
+        ''' The class to use when constructing DatasetSpec objects
+
+            Override this if extending to use a class other than DatasetSpec to build
+            dataset specifications
+        '''
         return DatasetSpec
 
 
     @classmethod
     def link_spec_cls(cls):
+        ''' The class to use when constructing LinkSpec objects
+
+            Override this if extending to use a class other than LinkSpec to build
+            link specifications
+        '''
         return LinkSpec
 
     @classmethod
