@@ -81,10 +81,17 @@ class HDF5IO(FORMIO):
     def __read_dataset(self, h5obj, name=None):
         kwargs = {
             "attributes": dict(h5obj.attrs.items()),
-            "data": h5obj,
             "dtype": h5obj.dtype,
             "maxshape": h5obj.maxshape
         }
+        #kwargs["data"] = h5obj
+        ndims = len(h5obj.shape)
+        if ndims == 0:                                       # read scalar
+            kwargs["data"] = h5obj[()]
+        elif ndims == 1 and h5obj.dtype == np.dtype('O'):    # read list of strings
+            kwargs["data"] = list(h5obj[()])
+        else:
+            kwargs["data"] = h5obj
         if name is None:
             name = os.path.basename(h5obj.name)
         ret = DatasetBuilder(name, **kwargs)
@@ -198,7 +205,7 @@ def __get_shape(data):
 
 def __get_type(data):
     if isinstance(data, str):
-        return special_dtype(vlen=bytes)
+        return special_dtype(vlen=str)
     elif not hasattr(data, '__len__'):
         return type(data)
     else:
