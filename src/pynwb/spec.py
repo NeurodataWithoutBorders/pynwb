@@ -67,7 +67,7 @@ class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
     ''' The Spec class to use for NWB specifications '''
 
     @staticmethod
-    def __translate_kwargs(kwargs):
+    def translate_kwargs(kwargs):
         kwargs[DatasetSpec.def_key()] = kwargs.pop(BaseStorageOverride.def_key())
         kwargs[DatasetSpec.inc_key()] = kwargs.pop(BaseStorageOverride.inc_key())
         args = [kwargs.pop(x['name']) for x in get_docval(DatasetSpec.__init__) if 'default' not in x]
@@ -75,16 +75,17 @@ class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
 
     @docval(*_dataset_docval)
     def __init__(self, **kwargs):
-        args, kwargs = self.__translate_kwargs(kwargs)
+        args, kwargs = self.translate_kwargs(kwargs)
         super(NWBDatasetSpec, self).__init__(*args, **kwargs)
 
 
 _group_docval = __swap_inc_def(get_docval(GroupSpec.__init__))
 class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     ''' The Spec class to use for NWB specifications '''
+    #TODO: add unit tests for this
 
     @staticmethod
-    def __translate_kwargs(kwargs):
+    def translate_kwargs(kwargs):
         kwargs[GroupSpec.def_key()] = kwargs.pop(BaseStorageOverride.def_key())
         kwargs[GroupSpec.inc_key()] = kwargs.pop(BaseStorageOverride.inc_key())
         args = [kwargs.pop(x['name']) for x in get_docval(GroupSpec.__init__) if 'default' not in x]
@@ -92,7 +93,7 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
 
     @docval(*_group_docval)
     def __init__(self, **kwargs):
-        args, kwargs = self.__translate_kwargs(kwargs)
+        args, kwargs = self.translate_kwargs(kwargs)
         super(NWBGroupSpec, self).__init__(*args, **kwargs)
 
     @classmethod
@@ -105,6 +106,22 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
         Get a specification by "data_type"
         '''
         return super().get_data_type(kwargs['neurodata_type'])
+
+    @docval(*deepcopy(_group_docval))
+    def add_group(self, **kwargs):
+        ''' Add a new specification for a subgroup to this group specification '''
+        doc = kwargs.pop('doc')
+        spec = NWBGroupSpec(doc, **kwargs)
+        self.set_group(spec)
+        return spec
+
+    @docval(*deepcopy(_dataset_docval))
+    def add_dataset(self, **kwargs):
+        ''' Add a new specification for a subgroup to this group specification '''
+        doc = kwargs.pop('doc')
+        spec = NWBDatasetSpec(doc, **kwargs)
+        self.set_dataset(spec)
+        return spec
 
 class NWBNamespace(SpecNamespace):
 
