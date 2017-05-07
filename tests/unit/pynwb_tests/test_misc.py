@@ -26,13 +26,25 @@ class AbstractFeatureSeriesConstructor(unittest.TestCase):
 
 class IntervalSeriesConstructor(unittest.TestCase):
     def test_init(self):
-        data = [0, 1, 0, 1]
-        iS = IntervalSeries('test_iS', 'a hypothetical source', data, timestamps=list())
+        data = [1.0, -1.0, 1.0, -1.0]
+        timestamps = [0.0, 1.0, 2.0, 3.0]
+        iS = IntervalSeries('test_iS', 'a hypothetical source', data=data, timestamps=timestamps)
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.source, 'a hypothetical source')
         self.assertEqual(iS.data, data)
+        self.assertEqual(iS.timestamps, timestamps)
 
-        iS.add_interval(1.0, 2.0)
+    def test_add_interval(self):
+        data = [1.0, -1.0, 1.0, -1.0]
+        timestamps = [0.0, 1.0, 2.0, 3.0]
+        iS = IntervalSeries('test_iS', 'a hypothetical source', data=data, timestamps=timestamps)
+        iS.add_interval(4.0, 5.0)
+        data.append(1.0)
+        data.append(-1.0)
+        timestamps.append(4.0)
+        timestamps.append(5.0)
+        self.assertEqual(iS.data, data)
+        self.assertEqual(iS.timestamps, timestamps)
 
 class UnitTimesConstructor(unittest.TestCase):
     def test_init(self):
