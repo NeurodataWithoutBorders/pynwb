@@ -167,7 +167,8 @@ class TestHDF5Writer(GroupBuilderTestCase):
                                  attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        os.remove(self.path)
+        if os.path.exists(self.path):
+            os.remove(self.path)
 
     def test_write_builder(self):
         writer = HDF5IO(self.path, self.manager)

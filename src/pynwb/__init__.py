@@ -20,31 +20,26 @@ def __get_resources():
     ret['namespace_path'] = join(resource_filename(__name__, 'data'), __core_ns_file_name)
     return ret
 
-def __get_namespace_catalog(namespace_path, catalog):
-    if os.path.exists(namespace_path):
-        namespaces = SpecNamespace.build_namespaces(namespace_path, catalog)
-        for ns_name, ns in namespaces.items():
-            catalog.add_namespace(ns_name, ns)
-    return catalog
-
-__resources = __get_resources()
-
+# a global namespace catalog
 __NS_CATALOG = NamespaceCatalog(CORE_NAMESPACE, NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-if os.path.exists(__resources['namespace_path']):
-    __NS_CATALOG.load_namespaces(__resources['namespace_path'])
 
 @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
         {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'},
         is_method=False)
 def register_namespace(**kwargs):
     name, namespace = getargs('name', 'namespace', kwargs)
-    __NS_CATALOG[name] = namespace
+    __NS_CATALOG.add_namespace(name, namespace)
 
 @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
         is_method=False)
-def load_namespace(**kwargs):
+def load_namespaces(**kwargs):
+    '''Load namespaces from file'''
     namespace_path = getargs('namespace_path', kwargs)
-    __get_namespace_catalog(namespace_path, __NS_CATALOG)
+    __NS_CATALOG.load_namespaces(namespace_path)
+
+__resources = __get_resources()
+if os.path.exists(__resources['namespace_path']):
+    load_namespaces(__resources['namespace_path'])
 
 def get_type_map():
     from form.build import TypeMap, ObjectMapper
@@ -52,6 +47,7 @@ def get_type_map():
     ret.register_map(NWBContainer, ObjectMapper)
     return ret
 
+# a global type map
 __TYPE_MAP = get_type_map()
 
 # added here for convenience to users

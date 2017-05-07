@@ -77,7 +77,8 @@ class H5IOTest(unittest.TestCase):
         write_dataset(self.f, 'test_dataset', a, {})
         dset = self.f['test_dataset']
         self.assertTupleEqual(dset.shape, ())
-        self.assertEqual(dset[()].decode('utf-8'), a)
+        #self.assertEqual(dset[()].decode('utf-8'), a)
+        self.assertEqual(dset[()], a)
 
     def test_write_dataset_list(self):
         a = np.arange(30).reshape(5,2,3)

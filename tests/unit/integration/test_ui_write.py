@@ -2,8 +2,10 @@ import unittest
 import numpy as np
 import json
 from datetime import datetime
+import os
 
 from form.build import GroupBuilder, DatasetBuilder
+from form.backends.hdf5 import HDF5IO
 from pynwb import BuildManager
 
 from pynwb import NWBFile, TimeSeries
@@ -75,6 +77,7 @@ class TestNWBFileIO(TestNWBContainerIO):
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)
         super(TestNWBFileIO, self).setUp()
+        self.path = "test_pynwb_io_hdf5.h5"
 
     def setUpBuilder(self):
         ts_builder = GroupBuilder('test_timeseries',
@@ -107,3 +110,23 @@ class TestNWBFileIO(TestNWBContainerIO):
         self.container = NWBFile('test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
         ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
         self.container.add_raw_timeseries(ts)
+
+    def tearDown(self):
+        if os.path.exists(self.path):
+            os.remove(self.path)
+
+    def test_write(self):
+        hdf5io = HDF5IO(self.path, self.manager)
+        hdf5io.write(self.container)
+        hdf5io.close()
+        #TODO add some asserts
+
+    def test_read(self):
+        hdf5io = HDF5IO(self.path, self.manager)
+        hdf5io.write(self.container)
+        hdf5io.close()
+        container = hdf5io.read()
+        # the read NWBFile object doesn't have any TimeSeries
+        hdf5io.close()
+        #TODO add some asserts
+
