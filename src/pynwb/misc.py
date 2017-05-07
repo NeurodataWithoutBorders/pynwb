@@ -124,16 +124,9 @@ class IntervalSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': '>0 if interval started, <0 if interval ended.'},
-            {'name': 'unit', 'type': str, 'doc': 'n/a', 'default': 'n/a'},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
 
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': list()},
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
@@ -141,18 +134,33 @@ class IntervalSeries(TimeSeries):
             {'name': 'parent', 'type': NWBContainer, 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
-        super(IntervalSeries, self).__init__(name, source, data, unit, **kwargs)
+        name, source, data, timestamps = popargs('name', 'source', 'data', 'timestamps', kwargs)
+        unit = 'n/a'
+        self.__interval_timestamps = timestamps
+        self.__interval_data = data
+        super(IntervalSeries, self).__init__(name, source, data, unit,
+                                             timestamps=timestamps,
+                                             resolution=_default_resolution,
+                                             conversiont=_default_conversion,
+                                             **kwargs)
 
     @docval({'name': 'start', 'type': float, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'stop', 'type': float, 'doc': 'The name of this TimeSeries dataset'}
     )
     def add_interval(self, **kwargs):
         start, stop = getargs('start', 'stop', kwargs)
-        #self.__interval_timestamps.append(start)
-        #self.__interval_timestamps.append(stop)
-        #self.__interval_data.append(1)
-        #self.__interval_data.append(-1)
+        self.__interval_timestamps.append(start)
+        self.__interval_timestamps.append(stop)
+        self.__interval_data.append(1)
+        self.__interval_data.append(-1)
+
+    @property
+    def data(self):
+        return self.__interval_data
+
+    @property
+    def timestamps(self):
+        return self.__interval_timestamps
 
 @register_class('SpikeUnit', CORE_NAMESPACE)
 class SpikeUnit(NWBContainer):
