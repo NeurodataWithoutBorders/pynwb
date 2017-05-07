@@ -119,13 +119,14 @@ class TestNWBFileIO(TestNWBContainerIO):
         hdf5io = HDF5IO(self.path, self.manager)
         hdf5io.write(self.container)
         hdf5io.close()
+        #TODO add some asserts
 
     def test_read(self):
-        hdf5io = HDF5IO('dontremove.h5', self.manager)
+        hdf5io = HDF5IO(self.path, self.manager)
         hdf5io.write(self.container)
         hdf5io.close()
         container = hdf5io.read()
-        print(container)
-        print(container.raw_data)
+        # the read NWBFile object doesn't have any TimeSeries
         hdf5io.close()
+        #TODO add some asserts
 
