@@ -137,6 +137,22 @@ def get_docval(func):
     else:
         return tuple()
 
+def fmt_docval_args(func, kwargs):
+    ''' Separate positional and keyword arguments
+
+    Useful for methods that wrap other methods
+    '''
+    func_docval = getattr(func, docval_attr_name, None)
+    ret_args = list()
+    ret_kwargs = dict()
+    if func_docval:
+        for arg in func_docval[__docval_args_loc]:
+            val = kwargs.get(arg['name'])
+            if 'default' in arg:
+                ret_kwargs[arg['name']] = val
+            else:
+                ret_args.append(val)
+    return (ret_args, ret_kwargs)
 def get_docval_args(func):
     '''get_docval_args(func)
     Like get_docval, but return only positional arguments
