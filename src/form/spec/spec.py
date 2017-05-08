@@ -476,12 +476,12 @@ class GroupSpec(BaseStorageSpec):
             if dataset.name in self.__datasets:
                 self.__datasets[dataset.name].resolve_spec(dataset)
             else:
-                self.set_dataset(deepcopy(dataset))
+                self.set_dataset(dataset)
         for group in inc_spec.datasets:
             if group.name in self.__groups:
                 self.__groups[group.name].resolve_spec(group)
             else:
-                self.set_group(deepcopy(group))
+                self.set_group(group)
         super(GroupSpec, self).resolve_spec(inc_spec)
 
     def __add_data_type_inc(self, spec):
@@ -525,6 +525,8 @@ class GroupSpec(BaseStorageSpec):
         ''' Add the given specification for a subgroup to this group specification '''
         spec = getargs('spec', kwargs)
         self.setdefault('groups', list()).append(spec)
+        if spec.parent is not None:
+            spec = GroupSpec.build_spec(spec)
         if spec.name == NAME_WILDCARD:
             if spec.data_type_inc is not None:
                 self.__add_data_type_inc(spec)
@@ -553,6 +555,8 @@ class GroupSpec(BaseStorageSpec):
         ''' Add the given specification for a dataset to this group specification '''
         spec = getargs('spec', kwargs)
         self.setdefault('datasets', list()).append(spec)
+        if spec.parent is not None:
+            spec = DatasetSpec.build_spec(spec)
         if spec.name == NAME_WILDCARD:
             if spec.data_type is not None:
                 self.__add_data_type_inc(spec)
@@ -581,6 +585,8 @@ class GroupSpec(BaseStorageSpec):
         ''' Add a given specification for a link to this group specification '''
         spec = getargs('spec', kwargs)
         self.setdefault('links', list()).append(spec)
+        if spec.parent is not None:
+            spec = LinkSpec.build_spec(spec)
         if spec.name == NAME_WILDCARD:
             if spec.data_type_inc is not None:
                 self.__add_data_type_inc(spec)
