@@ -10,13 +10,14 @@ import numpy as np
 import types
 from datetime import datetime
 from dateutil.parser import parse as parse_date
+from collections import Iterable
 
 from form.utils import docval, getargs
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Module
 from .epoch import Epoch
-from .ecephys import ElectrodeGroup, ElectricalSeries
+from .ecephys import ElectrodeGroup, ElectricalSeries, Device
 from .core import NWBContainer
 
 @register_class('NWBFile', CORE_NAMESPACE)
