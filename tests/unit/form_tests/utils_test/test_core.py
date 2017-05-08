@@ -42,6 +42,19 @@ class TestDocValidator(unittest.TestCase):
         self.test_obj = MyTestClass()
         self.test_obj_sub = MyTestSubclass()
 
+    def test_fmt_docval_args(self):
+        """ Test that fmt_docval_args works """
+        test_kwargs = {
+            'arg1': 'a string',
+            'arg2': 1,
+            'arg3': True,
+        }
+        rec_args, rec_kwargs = fmt_docval_args(self.test_obj.basic_add2_kw, test_kwargs)
+        exp_args = ['a string', 1]
+        self.assertListEqual(rec_args, exp_args)
+        exp_kwargs = {'arg3': True}
+        self.assertDictEqual(rec_kwargs, exp_kwargs)
+
     def test_docval_add(self):
         """Test that docval works with a single positional
            argument
