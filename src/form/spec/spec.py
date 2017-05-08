@@ -302,23 +302,22 @@ class BaseStorageSpec(Spec):
         ''' Set an attribute on this specification '''
         spec = kwargs.get('spec')
         attributes = self.setdefault('attributes', list())
-        to_save = spec
-        if to_save.parent is not None:
-            to_save = AttributeSpec.build_spec(spec)
-        if to_save.name in self.__attributes:
+        if spec.parent is not None:
+            spec = AttributeSpec.build_spec(spec)
+        if spec.name in self.__attributes:
             idx = -1
             for i, attribute in enumerate(attributes):
-                if attribute.name == to_save.name:
+                if attribute.name == spec.name:
                     idx = i
                     break
             if idx >= 0:
-                attribute[idx] = to_save
+                attributes[idx] = spec
             else:
-                raise ValueError('%s in __attributes but not in spec record' % to_save.name)
+                raise ValueError('%s in __attributes but not in spec record' % spec.name)
         else:
-            attributes.append(to_save)
-        self.__attributes[to_save.name] = to_save
-        to_save.parent = self
+            attributes.append(spec)
+        self.__attributes[spec.name] = spec
+        spec.parent = self
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute to the Spec for'})
     def get_attribute(self, **kwargs):
@@ -477,7 +476,7 @@ class GroupSpec(BaseStorageSpec):
                 self.__datasets[dataset.name].resolve_spec(dataset)
             else:
                 self.set_dataset(dataset)
-        for group in inc_spec.datasets:
+        for group in inc_spec.groups:
             if group.name in self.__groups:
                 self.__groups[group.name].resolve_spec(group)
             else:
