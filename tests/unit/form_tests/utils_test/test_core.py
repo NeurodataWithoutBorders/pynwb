@@ -43,6 +43,7 @@ class TestDocValidator(unittest.TestCase):
         self.test_obj_sub = MyTestSubclass()
 
     def test_fmt_docval_args(self):
+        """ Test that fmt_docval_args works """
         test_kwargs = {
             'arg1': 'a string',
             'arg2': 1,
