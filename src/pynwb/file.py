@@ -245,19 +245,21 @@ class NWBFile(NWBContainer):
         if epoch:
             self.set_epoch_timeseries(epoch, ts)
 
-    @docval({'name': 'name', 'type': (str, int), 'doc': 'a unique name or ID for this electrode'},
-            {'name': 'coord', 'type': (tuple, list, np.ndarray), 'doc': 'the x,y,z coordinates of this electrode'},
-            {'name': 'desc', 'type': str, 'doc': 'a description for this electrode'},
-            {'name': 'dev', 'type': str, 'doc': 'the device this electrode was recorded from on'},
-            {'name': 'loc', 'type': str, 'doc': 'a description of the location of this electrode'},
-            {'name': 'imp', 'type': (float, tuple), 'doc': 'the impedance of this electrode. A tuple can be provided to specify a range', 'default': -1.0},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
+            {'name': 'channel_description', 'type': Iterable, 'doc': 'array with description for each channel'},
+            {'name': 'channel_location', 'type': Iterable, 'doc': 'array with location description for each channel e.g. "CA1"'},
+            {'name': 'channel_filtering', 'type': Iterable, 'doc': 'array with description of filtering applied to each channel'},
+            {'name': 'channel_coordinates', 'type': Iterable, 'doc': 'xyz-coordinates for each channel. use NaN for unknown dimensions'},
+            {'name': 'channel_impedance', 'type': Iterable, 'doc': 'float array with impedance used on each channel. Can be 2D matrix to store a range'},
+            {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
+            {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
             returns='the electrode group', rtype=ElectrodeGroup)
-    #TODO: investigate bug with electrode_group and electrode_map
     def create_electrode_group(self, **kwargs):
         """Add an electrode group (e.g. a probe, shank, tetrode).
         """
-        name, coord, desc, dev, loc, imp = getargs('name', 'coord', 'desc', 'dev', 'loc', 'imp', kwargs)
-        elec_grp = ElectrodeGroup(name, coord, desc, dev, loc, imp=imp, parent=self)
+        eg_args, eg_kwargs = fmt_docval_args(ElectrodeGroup.__init__, kwargs)
+        elec_grp = ElectrodeGroup(*eg_args, **eg_kwargs, parent=self)
         self.set_electrode_group(elec_grp)
         return elec_grp
 
