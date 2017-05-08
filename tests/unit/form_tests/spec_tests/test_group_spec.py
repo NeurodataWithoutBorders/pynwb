@@ -8,14 +8,14 @@ class GroupSpecTests(unittest.TestCase):
         self.attributes = [
             AttributeSpec('attribute1', 'str', 'my first attribute'),
             AttributeSpec('attribute2', 'str', 'my second attribute')
-       ]
+        ]
 
-        dset1_attributes = [
+        self.dset1_attributes = [
             AttributeSpec('attribute3', 'str', 'my third attribute'),
             AttributeSpec('attribute4', 'str', 'my fourth attribute')
         ]
 
-        dset2_attributes = [
+        self.dset2_attributes = [
             AttributeSpec('attribute5', 'str', 'my fifth attribute'),
             AttributeSpec('attribute6', 'str', 'my sixth attribute')
         ]
@@ -24,16 +24,16 @@ class GroupSpecTests(unittest.TestCase):
             DatasetSpec('my first dataset',
                         'int',
                         name='dataset1',
-                        attributes=dset1_attributes,
+                        attributes=self.dset1_attributes,
                         linkable=True),
             DatasetSpec('my second dataset',
                         'int',
                         name='dataset2',
                         dimension=(None, None),
-                        attributes=dset2_attributes,
+                        attributes=self.dset2_attributes,
                         linkable=True,
                         namespace='core',
-                        data_type_def='EphysData')
+                        data_type_def='VoltageArray')
         ]
 
         self.subgroups = [
@@ -108,3 +108,78 @@ class GroupSpecTests(unittest.TestCase):
         self.assertIs(spec, self.subgroups[0].parent)
         self.assertIs(spec, self.subgroups[1].parent)
         json.dumps(spec)
+
+    def test_nwbtype_extension(self):
+        spec = GroupSpec('A test group',
+                         name='root_constructor_nwbtype',
+                         datasets=self.datasets,
+                         attributes=self.attributes,
+                         linkable=False,
+                         namespace='core',
+                         data_type_def='EphysData')
+        dset1_attributes_ext = [
+            AttributeSpec('dset1_extra_attribute', 'str', 'an extra attribute for the first dataset')
+        ]
+        ext_datasets = [
+            DatasetSpec('my first dataset extension',
+                        'int',
+                        name='dataset1',
+                        attributes=dset1_attributes_ext,
+                        linkable=True),
+        ]
+        ext_attributes = [
+            AttributeSpec('ext_extra_attribute', 'str', 'an extra attribute for the group'),
+        ]
+        ext =  GroupSpec('A test group extension',
+                         name='root_constructor_nwbtype',
+                         datasets=ext_datasets,
+                         attributes=ext_attributes,
+                         linkable=False,
+                         namespace='core',
+                         data_type_inc=spec,
+                         data_type_def='SpikeData')
+        ext_dset1 = ext.get_dataset('dataset1')
+        ext_dset1_attrs = ext_dset1.attributes
+        self.assertDictEqual(ext_dset1_attrs[0], dset1_attributes_ext[0])
+        self.assertDictEqual(ext_dset1_attrs[1], self.dset1_attributes[0])
+        self.assertDictEqual(ext_dset1_attrs[2], self.dset1_attributes[1])
+
+
+        ext_dset2 = ext.get_dataset('dataset2')
+        self.maxDiff = None
+        self.assertEqual(str(ext_dset2), str(self.datasets[1])) # this will suffice for now,  assertDictEqual doesn't do deep equality checks
+        self.assertAttributesEqual(ext_dset2, self.datasets[1])
+
+        #self.ns_attr_spec
+        ndt_attr_spec = AttributeSpec('data_type', 'text', 'the data type of this object', value='SpikeData')
+
+       # self.attributes = [
+       #     AttributeSpec('attribute1', 'str', 'my first attribute'),
+       #     AttributeSpec('attribute2', 'str', 'my second attribute')
+       #]
+        res_attrs = ext.attributes
+        self.assertDictEqual(res_attrs[0], ndt_attr_spec)
+        self.assertDictEqual(res_attrs[1], self.ns_attr_spec)
+        self.assertDictEqual(res_attrs[2], ext_attributes[0])
+        self.assertDictEqual(res_attrs[3], self.attributes[0])
+        self.assertDictEqual(res_attrs[4], self.attributes[1])
+        json.dumps(spec)
+
+    def assertDatasetsEqual(self, spec1, spec2):
+        spec1_dsets = spec1.datasets
+        spec2_dsets = spec2.datasets
+        if len(spec1_dsets) != len(spec2_dsets):
+            raise AssertionError('different number of AttributeSpecs')
+        else:
+            for i in range(len(spec1_dsets)):
+                self.assertAttributesEqual(spec1_dsets[i], spec2_dsets[i])
+
+    def assertAttributesEqual(self, spec1, spec2):
+        spec1_attr = spec1.attributes
+        spec2_attr = spec2.attributes
+        if len(spec1_attr) != len(spec2_attr):
+            raise AssertionError('different number of AttributeSpecs')
+        else:
+            for i in range(len(spec1_attr)):
+                self.assertDictEqual(spec1_attr[i], spec2_attr[i])
+
