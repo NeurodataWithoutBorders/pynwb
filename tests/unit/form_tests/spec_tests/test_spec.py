@@ -60,7 +60,39 @@ class DatasetSpecTests(unittest.TestCase):
         self.assertListEqual(spec['attributes'][2:], self.attributes)
         self.assertIs(spec, self.attributes[0].parent)
         self.assertIs(spec, self.attributes[1].parent)
-        json.dumps(spec)
+
+    def test_nwbtype_extension(self):
+        base = DatasetSpec('my first dataset',
+                           'int',
+                           name='dataset1',
+                           dimension=(None, None),
+                           attributes=self.attributes,
+                           linkable=False,
+                           namespace='core',
+                           data_type_def='EphysData')
+
+        attributes = [AttributeSpec('attribute3', 'float', 'my first extending attribute')]
+        ext = DatasetSpec('my first dataset extension',
+                          'int',
+                          name='dataset1',
+                          dimension=(None, None),
+                          attributes=attributes,
+                          linkable=False,
+                          namespace='core',
+                          data_type_inc=base,
+                          data_type_def='SpikeData')
+        ndt_attr_spec = AttributeSpec('data_type', 'text', 'the data type of this object', value='SpikeData')
+        self.assertDictEqual(ext['attributes'][0], ndt_attr_spec)
+        self.assertDictEqual(ext['attributes'][1], self.ns_attr_spec)
+        self.assertDictEqual(ext['attributes'][2], attributes[0])
+        self.assertDictEqual(ext['attributes'][3], self.attributes[0])
+        self.assertDictEqual(ext['attributes'][4], self.attributes[1])
+        ext_attrs = ext.attributes
+        self.assertIs(ext, ext_attrs[0].parent)
+        self.assertIs(ext, ext_attrs[1].parent)
+        self.assertIs(ext, ext_attrs[2].parent)
+        self.assertIs(ext, ext_attrs[3].parent)
+        self.assertIs(ext, ext_attrs[4].parent)
 
 class GroupSpecTests(unittest.TestCase):
     def setUp(self):

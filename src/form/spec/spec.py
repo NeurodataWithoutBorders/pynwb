@@ -161,7 +161,7 @@ _attrbl_args = [
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'data_type_inc', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'data_type_inc', 'type': (str, 'BaseStorageSpec'), 'doc': 'the NWB type this specification extends', 'default': None},
         {'name': 'namespace', 'type': str, 'doc': 'the namespace for data_type_inc and/or data_type_def of this specification', 'default': None},
 ]
 class BaseStorageSpec(Spec):
@@ -187,8 +187,13 @@ class BaseStorageSpec(Spec):
             self['quantity'] = quantity
         if not linkable:
             self['linkable'] = False
+        need_to_resolve = False
+        resolve = False
         if data_type_inc is not None:
-            self[self.inc_key()] = data_type_inc
+            if isinstance(data_type_inc, BaseStorageSpec):
+                self[self.inc_key()] = data_type_inc.data_type_inc
+            else:
+                self[self.inc_key()] = data_type_inc
             if namespace is None:
                 raise ValueError("'namespace' must be specified when specifying '%s', '%s'" % (self.inc_key(), data_type_inc))
             self['namespace'] = namespace
@@ -198,11 +203,21 @@ class BaseStorageSpec(Spec):
             if namespace is None:
                 raise ValueError("'namespace' must be specified when specifying '%s', '%s'" % (self.def_key(), data_type_def))
             self['namespace'] = namespace
-
             self.set_attribute(self.get_data_type_spec(data_type_def))
             self.set_attribute(self.get_namespace_spec(namespace))
-
+            if data_type_inc is not None and isinstance(data_type_inc, BaseStorageSpec):
+                resolve = True
         for attribute in attributes:
+            self.set_attribute(attribute)
+        if resolve:
+            self.resolve_spec(data_type_inc)
+
+    @docval({'name': 'inc_spec', 'type': 'BaseStorageSpec', 'doc': 'the data type this specification represents'})
+    def resolve_spec(self, **kwargs):
+        inc_spec = getargs('inc_spec', kwargs)
+        for attribute in inc_spec.attributes:
+            if attribute.name in self.__attributes:
+                continue
             self.set_attribute(attribute)
 
     def is_many(self):
@@ -286,10 +301,24 @@ class BaseStorageSpec(Spec):
     def set_attribute(self, **kwargs):
         ''' Set an attribute on this specification '''
         spec = kwargs.get('spec')
-        #spec.set_parent(self)
-        self.setdefault('attributes', list()).append(spec)
-        self.__attributes[spec.name] = spec
-        spec.parent = self
+        attributes = self.setdefault('attributes', list())
+        to_save = spec
+        if to_save.parent is not None:
+            to_save = AttributeSpec.build_spec(spec)
+        if to_save.name in self.__attributes:
+            idx = -1
+            for i, attribute in enumerate(attributes):
+                if attribute.name == to_save.name:
+                    idx = i
+                    break
+            if idx >= 0:
+                attribute[idx] = to_save
+            else:
+                raise ValueError('%s in __attributes but not in spec record' % to_save.name)
+        else:
+            attributes.append(to_save)
+        self.__attributes[to_save.name] = to_save
+        to_save.parent = self
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute to the Spec for'})
     def get_attribute(self, **kwargs):
@@ -335,7 +364,7 @@ _dataset_args = [
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'data_type_inc', 'type': str, 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'data_type_inc', 'type': (str, 'DatasetSpec'), 'doc': 'the NWB type this specification extends', 'default': None},
         {'name': 'namespace', 'type': str, 'doc': 'the namespace for this specification', 'default': None},
 ]
 class DatasetSpec(BaseStorageSpec):
@@ -418,7 +447,7 @@ _group_args = [
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'data_type_inc', 'type': str, 'doc': 'the NWB type this specification data_type_inc', 'default': None},
+        {'name': 'data_type_inc', 'type': (str, 'GroupSpec'), 'doc': 'the NWB type this specification data_type_inc', 'default': None},
         {'name': 'namespace', 'type': str, 'doc': 'the namespace for this specification', 'default': None},
 ]
 class GroupSpec(BaseStorageSpec):
@@ -428,7 +457,6 @@ class GroupSpec(BaseStorageSpec):
     @docval(*deepcopy(_group_args))
     def __init__(self, **kwargs):
         doc, groups, datasets, links = popargs('doc', 'groups', 'datasets', 'links', kwargs)
-        super(GroupSpec, self).__init__(doc, **kwargs)
         self.__data_types = dict()
         self.__groups = dict()
         for group in groups:
@@ -439,6 +467,22 @@ class GroupSpec(BaseStorageSpec):
         self.__links = dict()
         for link in links:
             self.set_link(link)
+        super(GroupSpec, self).__init__(doc, **kwargs)
+
+    @docval({'name': 'inc_spec', 'type': 'GroupSpec', 'doc': 'the data type this specification represents'})
+    def resolve_spec(self, **kwargs):
+        inc_spec = getargs('inc_spec', kwargs)
+        for dataset in inc_spec.datasets:
+            if dataset.name in self.__datasets:
+                self.__datasets[dataset.name].resolve_spec(dataset)
+            else:
+                self.set_dataset(deepcopy(dataset))
+        for group in inc_spec.datasets:
+            if group.name in self.__groups:
+                self.__groups[group.name].resolve_spec(group)
+            else:
+                self.set_group(deepcopy(group))
+        super(GroupSpec, self).resolve_spec(inc_spec)
 
     def __add_data_type_inc(self, spec):
         if spec.data_type_inc in self.__data_types:
