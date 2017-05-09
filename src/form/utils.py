@@ -245,6 +245,7 @@ def docval(*validator, **options):
         #TODO: make sure this is okay --
         setattr(func_call, '__name__', func.__name__)
         setattr(func_call, docval_attr_name, _docval)
+        setattr(func_call, '__module__', func.__module__)
         return func_call
     return dec
 
