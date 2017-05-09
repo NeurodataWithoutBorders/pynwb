@@ -86,8 +86,8 @@ class SpikeEventSeries(ElectricalSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        name, source, electrode_group, data = popargs('name', 'source', 'electrode_group', 'data', kwargs)
-        super(SpikeEventSeries, self).__init__(name, source, electrode_group, data, **kwargs)
+        name, source, data, electrode_group = popargs('name', 'source', 'data', 'electrode_group', kwargs)
+        super(SpikeEventSeries, self).__init__(name, source, data, electrode_group, **kwargs)
 
 class Device(NWBContainer):
     """
