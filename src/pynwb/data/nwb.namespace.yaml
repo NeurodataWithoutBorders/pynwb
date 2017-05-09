@@ -14,13 +14,13 @@ namespaces:
   full_name: NWB core
   name: core
   schema:
-  - source: nwb.ophys.yaml
+  - source: nwb.base.yaml
   - source: nwb.epoch.yaml
+  - source: nwb.image.yaml
+  - source: nwb.ophys.yaml
   - source: nwb.ec_ephys.yaml
   - source: nwb.retinotopy.yaml
   - source: nwb.misc.yaml
   - source: nwb.behavior.yaml
-  - source: nwb.image.yaml
   - source: nwb.ogen.yaml
-  - source: nwb.base.yaml
   - source: nwb.ic_ephys.yaml
