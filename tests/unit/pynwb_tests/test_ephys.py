@@ -1,6 +1,8 @@
 import unittest
 
-from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, ElectrodeGroup, Device, EventDetection, EventWaveform, Clustering, ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction
+import numpy as np
+
+from pynwb.ecephys import *
 
 class ElectricalSeriesConstructor(unittest.TestCase):
     def test_init(self):
@@ -24,7 +26,20 @@ class ElectricalSeriesConstructor(unittest.TestCase):
 
 class SpikeEventSeriesConstructor(unittest.TestCase):
     def test_init(self):
-        sES = SpikeEventSeries('test_sES', 'a hypothetical source', list(), list(), timestamps=list())
+        dev1 = Device('dev1')
+        dev2 = Device('dev2')
+        channel_description = ('ch1', 'ch2')
+        channel_location = ('lo1', 'lo2')
+        channel_filtering = ('fi1', 'fi2')
+        channel_coordinates = ([1.0, 1.0, 1.0], [1.0, 1.0, 1.0])
+        channel_impedance = (-1, -1)
+        elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
+        elec2 = ElectrodeGroup('elec2', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc2', 'loc2', dev2)
+        elec = (elec1, elec2)
+        data = np.zeros(10)
+        timestamps = np.arange(10)
+
+        sES = SpikeEventSeries('test_sES', 'a hypothetical source', data, elec, timestamps=timestamps)
         self.assertEqual(sES.name, 'test_sES')
         self.assertEqual(sES.source, 'a hypothetical source')
 
