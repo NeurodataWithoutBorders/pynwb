@@ -12,7 +12,7 @@ from datetime import datetime
 from dateutil.parser import parse as parse_date
 from collections import Iterable
 
-from form.utils import docval, getargs
+from form.utils import docval, getargs, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Module
@@ -260,7 +260,8 @@ class NWBFile(NWBContainer):
         """Add an electrode group (e.g. a probe, shank, tetrode).
         """
         eg_args, eg_kwargs = fmt_docval_args(ElectrodeGroup.__init__, kwargs)
-        elec_grp = ElectrodeGroup(*eg_args, **eg_kwargs, parent=self)
+        eg_kwargs['parent'] = self
+        elec_grp = ElectrodeGroup(*eg_args, **eg_kwargs)
         self.set_electrode_group(elec_grp)
         return elec_grp
 
