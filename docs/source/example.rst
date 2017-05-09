@@ -3,7 +3,7 @@
 Examples
 ===========
 
-The following examples will reference variables that may not be defined within the block they are used. For 
+The following examples will reference variables that may not be defined within the block they are used. For
 clarity, we define them here.
 
 .. code-block:: python
@@ -14,13 +14,13 @@ clarity, we define them here.
     ephys_data = np.random.rand(data_len)
     ephys_timestamps = np.arange(data_len) / rate
     spatial_timestamps = ephys_timestamps[::10]
-    spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T 
+    spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T
 
 Creating and Writing NWB files
 -----------------------------------------------------
 
 When creating an NWB file, the first step is to create the :py:class:`~pynwb.ui.file.NWBFile`. The first
-argument is the name of the NWB file, and the second argument is a brief description of the dataset. 
+argument is the name of the NWB file, and the second argument is a brief description of the dataset.
 
 .. code-block:: python
 
@@ -55,7 +55,7 @@ Creating Electrode Groups
 -----------------------------------------------------
 
 Electrode groups (i.e. experimentally relevant groupings of channels) are represented by :py:class:`~pynwb.ui.ephys.ElectrodeGroup` objects. To create
-an electrode group, you can use the :py:class:`~pynwb.ui.file.NWBFile` instance method :py:func:`~pynwb.ui.file.NWBFile.create_electrode_group`. 
+an electrode group, you can use the :py:class:`~pynwb.ui.file.NWBFile` instance method :py:func:`~pynwb.ui.file.NWBFile.create_electrode_group`.
 
 .. code-block:: python
 
@@ -65,7 +65,7 @@ Creating TimeSeries
 -----------------------------------------------------
 
 TimeSeries objects can be created in two ways. The first way is by instantiating :ref:`timeseries_overview` objects directly and then adding them to
-the :ref:`file_overview` using the instance method :py:func:`~pynwb.ui.file.NWBFile.add_raw_timeseries`. The second way is by calling the :py:class:`~pynwb.ui.file.NWBFile` 
+the :ref:`file_overview` using the instance method :py:func:`~pynwb.ui.file.NWBFile.add_raw_timeseries`. The second way is by calling the :py:class:`~pynwb.ui.file.NWBFile`
 instance method :py:func:`~pynwb.ui.file.NWBFile.create_timeseries`. This first example will demonstrate instatiating two different
 types of :ref:`timeseries_overview` objects directly, and adding them with :py:func:`~pynwb.ui.file.NWBFile.add_raw_timeseries`.
 
@@ -93,3 +93,51 @@ types of :ref:`timeseries_overview` objects directly, and adding them with :py:f
                                comments="This data was generated with numpy, using 1234 as the seed",
                                description="This 2D Brownian process generated with numpy.cumsum(scipy.stats.norm.rvs(size=(2,len(timestamps))), axis=-1).T")
     f.add_raw_timeseries(spatial_ts, [ep1, ep2])
+
+Using Extensions
+-----------------------------------------------------
+
+The NWB file format supports extending existing data types (See <create_link> for more details on creating extensions).
+Extensions must be registered with PyNWB to be used for reading and writing of custom neurodata types.
+
+The following code demonstrates how to load custom namespaces.
+
+.. code-block:: python
+
+    from pynwb import load_namespaces
+    namespace_path = 'my_namespace.yaml'
+    load_namespaces(namespace_path)
+
+*NOTE*: This will register all namespaces defined in the file ``'my_namespace.yaml'``.
+
+To read and write custom data, corresponding NWBContainer classes must be associated with their respective specifications.
+NWBContainer classes are associated with their respective specification using the :ref:`~pynwb.register_class` decorator.
+
+The following code demonstrates how to associate a specification with the NWBContainer class that represents it.
+
+.. code-block:: python
+
+    from pynwb import register_class
+    @register_class('my_namespace', 'MyExtension')
+    class MyExtensionContainer(NWBContainer):
+        ...
+
+This is the same as the following:
+
+.. code-block:: python
+
+    from pynwb import register_class
+    class MyExtensionContainer(NWBContainer):
+        ...
+    register_class('my_namespace', 'MyExtension', MyExtensionContainer)
+
+Write an NWBFile
+-----------------------------------------------------
+
+.. code-block:: python
+
+    from pynwb import NWBFile, HDF5IO
+    nwbfile = NWBFile(...)
+    io = HDF5IO(...)
+    io.write(nwbfile)
+
