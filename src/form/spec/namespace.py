@@ -170,7 +170,7 @@ class NamespaceCatalog(object):
 
     __loaded_specs = dict()
 
-    def __load_spec_file(self, spec_file_path):
+    def __load_spec_file(self, spec_file_path, catalog, dtypes=None):
         ret = self.__loaded_specs.get(spec_file_path)
         if ret is None:
             ret = dict()
@@ -180,8 +180,18 @@ class NamespaceCatalog(object):
                 if specs is None:
                     raise ValueError("no 'specs' found in %s" % spec_file_path)
                 for spec_dict in specs:
+                    dt_def = spec_dict.get(self.__group_spec_cls.def_key())
+                    if dtypes and dt_def not in dtypes:
+                        continue
+                    dt_inc = spec_dict.get(self.__group_spec_cls.inc_key())
+                    if dt_inc is not None:
+                        parent_spec = catalog.get_spec(dt_inc)
+                        if parent_spec is None:
+                            raise ValueError("Cannot resolve include spec '%s' for type '%s'" % (dt_inc, dt_def))
+                        spec_dict[self.__group_spec_cls.inc_key()] = parent_spec
                     spec_obj = self.__group_spec_cls.build_spec(spec_dict)
-                    ret[spec_obj.data_type_def] = spec_obj
+                    catalog.auto_register(spec_obj, spec_file_path)
+                    #ret[spec_obj.data_type_def] = spec_obj
             self.__loaded_specs[spec_file_path] = ret
         return ret
 
@@ -210,11 +220,12 @@ class NamespaceCatalog(object):
                 if 'source' in s:
                     # read specs from file
                     spec_file = self.__get_spec_path(namespace_path, s['source'])
-                    ndts = self.__load_spec_file(spec_file).items()
+                    dtypes = None
                     if types_key in s:
-                        ndts = filter(lambda k,v: k in set(s[types_key]), ndts)
-                    for ndt, spec in ndts:
-                        catalog.auto_register(spec, spec_file)
+                        dtypes = set(s[types_key])
+                    ndts = self.__load_spec_file(spec_file, catalog, dtypes=dtypes)
+                    #for ndt, spec in ndts:
+                    #    catalog.auto_register(spec, spec_file)
                 elif 'namespace' in s:
                     # load specs from namespace
                     try:
