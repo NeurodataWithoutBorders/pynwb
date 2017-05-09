@@ -110,10 +110,10 @@ The following code demonstrates how to load custom namespaces.
 
 *NOTE*: This will register all namespaces defined in the file ``'my_namespace.yaml'``.
 
-To read and write custom data, corresponding NWBContainer classes must be associated with their respective specifications.
-NWBContainer classes are associated with their respective specification using the :ref:`~pynwb.register_class` decorator.
+To read and write custom data, corresponding :py:class:`~pynwb.core.NWBContainer` classes must be associated with their respective specifications.
+:py:class:`~pynwb.core.NWBContainer` classes are associated with their respective specification using the decorator :py:func:`~pynwb.register_class`.
 
-The following code demonstrates how to associate a specification with the NWBContainer class that represents it.
+The following code demonstrates how to associate a specification with the :py:class:`~pynwb.core.NWBContainer` class that represents it.
 
 .. code-block:: python
 
@@ -122,7 +122,7 @@ The following code demonstrates how to associate a specification with the NWBCon
     class MyExtensionContainer(NWBContainer):
         ...
 
-This is the same as the following:
+:py:func:`~pynwb.register_class` can also be used as a function.
 
 .. code-block:: python
 
@@ -131,12 +131,34 @@ This is the same as the following:
         ...
     register_class('my_namespace', 'MyExtension', MyExtensionContainer)
 
+If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer` class for reading and writing, you will need
+to implement and register a custom :py:class:`~form.build.map.ObjectMapper`. :py:class:`~form.build.map.ObjectMapper` extensions are registerd with the decorator :py:func:`~pynwb.register_map`.
+
+.. code-block:: python
+
+    from pynwb import register_map
+    from form import ObjectMapper
+    @register_map(MyExtensionContainer)
+    class MyExtensionMapper(ObjectMapper)
+        ...
+
+:py:func:`~pynwb.register_map` can also be used as a function.
+
+.. code-block:: python
+
+    from pynwb import register_map
+    from form import ObjectMapper
+    class MyExtensionMapper(ObjectMapper)
+        ...
+    register_map(MyExtensionContainer, MyExtensionMapper)
+
 Write an NWBFile
 -----------------------------------------------------
 
 .. code-block:: python
 
-    from pynwb import NWBFile, HDF5IO
+    from pynwb import NWBFile
+    from form import HDF5IO
     nwbfile = NWBFile(...)
     io = HDF5IO(...)
     io.write(nwbfile)
