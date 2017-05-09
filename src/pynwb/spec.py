@@ -51,18 +51,21 @@ class BaseStorageOverride(object):
         return self.data_type_def
 
 
-def __swap_inc_def(args):
+def __swap_inc_def(cls):
+    args = get_docval(cls.__init__)
+    clsname = 'NWB%s' % cls.__name__
     ret = list()
     for arg in args:
         if arg['name'] == 'data_type_def':
             ret.append({'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB data type this spec defines', 'default': None})
         elif arg['name'] == 'data_type_inc':
-            ret.append({'name': 'neurodata_type_inc', 'type': str, 'doc': 'the NWB data type this spec includes', 'default': None})
+            ret.append({'name': 'neurodata_type_inc', 'type': (clsname, str), 'doc': 'the NWB data type this spec includes', 'default': None})
         else:
             ret.append(copy(arg))
     return ret
 
-_dataset_docval = __swap_inc_def(get_docval(DatasetSpec.__init__))
+#_dataset_docval = __swap_inc_def(get_docval(DatasetSpec.__init__))
+_dataset_docval = __swap_inc_def(DatasetSpec)
 class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
     ''' The Spec class to use for NWB specifications '''
 
@@ -79,7 +82,8 @@ class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
         super(NWBDatasetSpec, self).__init__(*args, **kwargs)
 
 
-_group_docval = __swap_inc_def(get_docval(GroupSpec.__init__))
+#_group_docval = __swap_inc_def(get_docval(GroupSpec.__init__))
+_group_docval = __swap_inc_def(GroupSpec)
 class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     ''' The Spec class to use for NWB specifications '''
     #TODO: add unit tests for this
