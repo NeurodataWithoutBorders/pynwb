@@ -239,8 +239,10 @@ def docval(*validator, **options):
         sphinxy_docstring = __sphinxdoc(func, _docval['args'])
         if returns:
             sphinxy_docstring += "\n:returns: %s" % returns
-        if rtype:
+        if isinstance(rtype, str):
             sphinxy_docstring += "\n:rtype: %s" % rtype
+        elif isinstance(rtype, type):
+            sphinxy_docstring += "\n:rtype: %s" % rtype.__name__
         setattr(func_call, '__doc__', sphinxy_docstring)
         #TODO: make sure this is okay --
         setattr(func_call, '__name__', func.__name__)
