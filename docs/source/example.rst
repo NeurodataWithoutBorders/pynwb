@@ -157,9 +157,19 @@ Write an NWBFile
 
 .. code-block:: python
 
-    from pynwb import NWBFile
+    from pynwb import NWBFile, BuildManager
     from form import HDF5IO
-    nwbfile = NWBFile(...)
-    io = HDF5IO(...)
-    io.write(nwbfile)
 
+    # make an NWBFile
+    start_time = datetime(1970, 1, 1, 12, 0, 0)
+    create_date = datetime(2017, 4, 15, 12, 0, 0)
+    nwbfile = NWBFile('test.nwb', 'a test NWB File', 'TEST123', start_time, file_create_date=create_date)
+    ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
+    nwbfile.add_raw_timeseries(ts)
+
+    manager = BuildManager()
+    path = "test_pynwb_io_hdf5.h5"
+
+    io = HDF5IO(path, manager)
+    io.write(nwbfile)
+    io.close()
