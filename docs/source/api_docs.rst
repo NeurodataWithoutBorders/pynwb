@@ -8,6 +8,7 @@ API Documentation
    :maxdepth: 2
    :caption: PyNWB Modules
 
+   PyNWB <pynwb>
    NWBFile <pynwb.file>
    Extracellular Electrophysiology <pynwb.ecephys>
    Intracellular Electrophysiology <pynwb.icephys>
