@@ -1,13 +1,5 @@
-specs:
+groups:
 - attributes:
-  - doc: the data type of this object
-    dtype: text
-    name: neurodata_type
-    value: TwoPhotonSeries
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
   - doc: Value is Image stack recorded from 2-photon microscope
     dtype: text
     name: help
@@ -21,33 +13,24 @@ specs:
     quantity: '?'
     shape:
     - 3
+  - doc: Photomultiplier gain
+    dtype: float32
+    name: pmt_gain
+    quantity: '?'
   - doc: Lines imaged per second. This is also stored in /general/optophysiology but
       is kept here as it is useful information for analysis, and so good to be stored
       w/ the actual data.
     dtype: float32
     name: scan_line_rate
     quantity: '?'
-  - doc: Photomultiplier gain
-    dtype: float32
-    name: pmt_gain
-    quantity: '?'
   doc: A special case of optical imaging.
   links:
   - doc: link to ImagingPlane group from which this TimeSeries data was generated
     name: imaging_plane
     target_type: ImagingPlane
-  namespace: core
   neurodata_type_def: TwoPhotonSeries
   neurodata_type_inc: ImageSeries
 - attributes:
-  - doc: the data type of this object
-    dtype: text
-    name: neurodata_type
-    value: RoiResponseSeries
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
   - doc: Value is ROI responses over an imaging plane. Each row in data[] should correspond
       to the signal from one ROI
     dtype: text
@@ -62,9 +45,6 @@ specs:
     name: roi_names
     shape:
     - null
-  - doc: Path to segmentation module.
-    dtype: text
-    name: segmentation_interface_path
   - dims:
     - num_times
     - num_ROIs
@@ -74,24 +54,18 @@ specs:
     shape:
     - null
     - null
+  - doc: Path to segmentation module.
+    dtype: text
+    name: segmentation_interface_path
   doc: ROI responses over an imaging plane. Each row in data[] should correspond to
     the signal from one ROI.
   links:
   - doc: HDF5 link to image segmentation module defining ROIs.
     name: segmentation_interface
     target_type: ImageSegmentation
-  namespace: core
   neurodata_type_def: RoiResponseSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: the data type of this object
-    dtype: text
-    name: neurodata_type
-    value: DfOverF
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
   - doc: Value is Df/f over time of one or more ROIs. TimeSeries names should correspond
       to imaging plane names
     dtype: text
@@ -103,21 +77,11 @@ specs:
     planes).
   groups:
   - doc: RoiResponseSeries object containing dF/F for a ROI
-    namespace: core
     neurodata_type_inc: RoiResponseSeries
   name: DfOverF
-  namespace: core
   neurodata_type_def: DfOverF
   neurodata_type_inc: Interface
 - attributes:
-  - doc: the data type of this object
-    dtype: text
-    name: neurodata_type
-    value: Fluorescence
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
   - doc: Value is Fluorescence over time of one or more ROIs. TimeSeries names should
       correspond to imaging plane names
     dtype: text
@@ -129,21 +93,11 @@ specs:
     and for image planes).
   groups:
   - doc: RoiResponseSeries object containing fluorescence data for a ROI
-    namespace: core
     neurodata_type_inc: RoiResponseSeries
   name: Fluorescence
-  namespace: core
   neurodata_type_def: Fluorescence
   neurodata_type_inc: Interface
 - attributes:
-  - doc: the data type of this object
-    dtype: text
-    name: neurodata_type
-    value: ImageSegmentation
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
   - doc: Value is Stores groups of pixels that define regions of interest from one
       or more imaging planes
     dtype: text
@@ -158,16 +112,7 @@ specs:
     is allowed to change with time, a new imaging plane (or module) is required and
     ROI names should remain consistent between them.
   groups:
-  - attributes:
-    - doc: the data type of this object
-      dtype: text
-      name: neurodata_type
-      value: PlaneSegmentation
-    - doc: the namespace for the data type of this object
-      dtype: text
-      name: namespace
-      value: core
-    datasets:
+  - datasets:
     - doc: Description of image plane, recording wavelength, depth, etc
       dtype: text
       name: description
@@ -185,19 +130,18 @@ specs:
       groups:
       - doc: One or more image stacks that the masks apply to (can be one-element
           stack)
-        namespace: core
         neurodata_type_inc: ImageSeries
       name: reference_images
-    - attributes:
-      - doc: the data type of this object
-        dtype: text
-        name: neurodata_type
-        value: ROI
-      - doc: the namespace for the data type of this object
-        dtype: text
-        name: namespace
-        value: core
-      datasets:
+    - datasets:
+      - dims:
+        - num_pixels
+        - '2'
+        doc: List of pixels (x,y) that compose the mask
+        dtype: uint16
+        name: pix_mask
+        shape:
+        - null
+        - null
       - dims:
         - num_pixels
         doc: Weight of each pixel listed in pix_mask
@@ -217,43 +161,29 @@ specs:
         shape:
         - null
         - null
-      - dims:
-        - num_pixels
-        - '2'
-        doc: List of pixels (x,y) that compose the mask
-        dtype: uint16
-        name: pix_mask
-        shape:
-        - null
-        - null
       doc: Name of ROI
-      namespace: core
       neurodata_type_def: ROI
       quantity: '*'
     links:
     - doc: link to ImagingPlane group from which this TimeSeries data was generated
       name: imaging_plane
       target_type: ImagingPlane
-    namespace: core
     neurodata_type_def: PlaneSegmentation
     quantity: '*'
   name: ImageSegmentation
-  namespace: core
   neurodata_type_def: ImageSegmentation
   neurodata_type_inc: Interface
-- attributes:
-  - doc: the data type of this object
+- datasets:
+  - doc: Name of device in /general/devices
     dtype: text
-    name: neurodata_type
-    value: ImagingPlane
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
-  datasets:
+    name: device
   - doc: Excitation wavelength
     dtype: text
     name: excitation_lambda
+  - doc: Description of &lt;image_plane_X&gt;
+    dtype: text
+    name: description
+    quantity: '?'
   - doc: 'Describes position and reference frame of manifold based on position of
       first element in manifold. For example, text description of anotomical location
       or vectors needed to rotate to common anotomical axis (eg, AP/DV/ML). COMMENT:
@@ -262,14 +192,14 @@ specs:
     dtype: text
     name: reference_frame
   - attributes:
-    - doc: Value is 1.0
-      dtype: float
-      name: conversion
-      value: 1.0
     - doc: Value is Meter
       dtype: text
       name: unit
       value: Meter
+    - doc: Value is 1.0
+      dtype: float
+      name: conversion
+      value: 1.0
     dims:
     - height
     - weight
@@ -282,46 +212,28 @@ specs:
     - null
     - null
     - 3
-  - doc: Rate images are acquired, in Hz.
-    dtype: text
-    name: imaging_rate
   - doc: Calcium indicator
     dtype: text
     name: indicator
-  - doc: Description of &lt;image_plane_X&gt;
+  - doc: Rate images are acquired, in Hz.
     dtype: text
-    name: description
-    quantity: '?'
+    name: imaging_rate
   - doc: Location of image plane
     dtype: text
     name: location
-  - doc: Name of device in /general/devices
-    dtype: text
-    name: device
   doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name is
     arbitrary but should be meaningful. It is referenced by TwoPhotonSeries and also
     ImageSegmentation and DfOverF interfaces'
   groups:
-  - attributes:
-    - doc: the data type of this object
-      dtype: text
-      name: neurodata_type
-      value: OpticalChannel
-    - doc: the namespace for the data type of this object
-      dtype: text
-      name: namespace
-      value: core
-    datasets:
-    - doc: Emission lambda for channel
-      dtype: text
-      name: emission_lambda
+  - datasets:
     - doc: Any notes or comments about the channel
       dtype: text
       name: description
+    - doc: Emission lambda for channel
+      dtype: text
+      name: emission_lambda
     doc: 'One of possibly many groups storing channel-specific data COMMENT: Name
       is arbitrary but should be meaningful'
-    namespace: core
     neurodata_type_def: OpticalChannel
-  namespace: core
   neurodata_type_def: ImagingPlane
   quantity: '*'

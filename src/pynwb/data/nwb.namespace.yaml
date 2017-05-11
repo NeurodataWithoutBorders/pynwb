@@ -9,7 +9,7 @@ namespaces:
   - jteeters@berkeley.edu
   - oruebel@lbl.gov
   - ajtritt@lbl.gov
-  date: '2017-05-05 16:12:43'
+  date: '2017-05-10 19:55:25'
   doc: NWB namespace
   full_name: NWB core
   name: core
@@ -17,10 +17,11 @@ namespaces:
   - source: nwb.base.yaml
   - source: nwb.epoch.yaml
   - source: nwb.image.yaml
-  - source: nwb.ophys.yaml
-  - source: nwb.ec_ephys.yaml
-  - source: nwb.retinotopy.yaml
+  - source: nwb.file.yaml
   - source: nwb.misc.yaml
   - source: nwb.behavior.yaml
+  - source: nwb.ecephys.yaml
+  - source: nwb.icephys.yaml
   - source: nwb.ogen.yaml
-  - source: nwb.ic_ephys.yaml
+  - source: nwb.ophys.yaml
+  - source: nwb.retinotopy.yaml

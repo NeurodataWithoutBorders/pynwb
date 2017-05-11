@@ -162,7 +162,6 @@ _attrbl_args = [
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'data_type_inc', 'type': (str, 'BaseStorageSpec'), 'doc': 'the NWB type this specification extends', 'default': None},
-        {'name': 'namespace', 'type': str, 'doc': 'the namespace for data_type_inc and/or data_type_def of this specification', 'default': None},
 ]
 class BaseStorageSpec(Spec):
     ''' A specification for any object that can hold attributes. '''
@@ -173,8 +172,8 @@ class BaseStorageSpec(Spec):
 
     @docval(*deepcopy(_attrbl_args))
     def __init__(self, **kwargs):
-        name, doc, parent, quantity, attributes, linkable, data_type_def, data_type_inc, namespace =\
-             getargs('name', 'doc', 'parent', 'quantity', 'attributes', 'linkable', 'data_type_def', 'data_type_inc', 'namespace', kwargs)
+        name, doc, parent, quantity, attributes, linkable, data_type_def, data_type_inc =\
+             getargs('name', 'doc', 'parent', 'quantity', 'attributes', 'linkable', 'data_type_def', 'data_type_inc', kwargs)
         if name == NAME_WILDCARD and data_type_def is None and data_type_inc is None:
             raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'data_type_def' and/or 'data_type_inc'")
         super().__init__(doc, name=name, parent=parent)
@@ -194,17 +193,11 @@ class BaseStorageSpec(Spec):
                 self[self.inc_key()] = data_type_inc.data_type_inc
             else:
                 self[self.inc_key()] = data_type_inc
-            if namespace is None:
-                raise ValueError("'namespace' must be specified when specifying '%s', '%s'" % (self.inc_key(), data_type_inc))
-            self['namespace'] = namespace
         if data_type_def is not None:
             self.pop('required', None)
             self[self.def_key()] = data_type_def
-            if namespace is None:
-                raise ValueError("'namespace' must be specified when specifying '%s', '%s'" % (self.def_key(), data_type_def))
-            self['namespace'] = namespace
-            self.set_attribute(self.get_data_type_spec(data_type_def))
-            self.set_attribute(self.get_namespace_spec(namespace))
+            #self.set_attribute(self.get_data_type_spec(data_type_def))
+            #self.set_attribute(self.get_namespace_spec())
             if data_type_inc is not None and isinstance(data_type_inc, BaseStorageSpec):
                 resolve = True
         for attribute in attributes:
@@ -228,8 +221,8 @@ class BaseStorageSpec(Spec):
         return AttributeSpec(cls.type_key(), 'text', 'the data type of this object', value=data_type_def)
 
     @classmethod
-    def get_namespace_spec(cls, namespace):
-        return AttributeSpec('namespace', 'text', 'the namespace for the data type of this object', value=namespace)
+    def get_namespace_spec(cls):
+        return AttributeSpec('namespace', 'text', 'the namespace for the data type of this object', required=False)
 
     @property
     def attributes(self):
@@ -240,11 +233,6 @@ class BaseStorageSpec(Spec):
     def linkable(self):
         ''' True if object can be a link, False otherwise '''
         return self.get('linkable', None)
-
-    @property
-    def namespace(self):
-        ''' The data type this specification defines '''
-        return self.get('namespace', None)
 
     @property
     def data_type(self):
@@ -364,7 +352,6 @@ _dataset_args = [
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'data_type_inc', 'type': (str, 'DatasetSpec'), 'doc': 'the NWB type this specification extends', 'default': None},
-        {'name': 'namespace', 'type': str, 'doc': 'the namespace for this specification', 'default': None},
 ]
 class DatasetSpec(BaseStorageSpec):
     ''' Specification for datasets
@@ -447,7 +434,6 @@ _group_args = [
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'data_type_inc', 'type': (str, 'GroupSpec'), 'doc': 'the NWB type this specification data_type_inc', 'default': None},
-        {'name': 'namespace', 'type': str, 'doc': 'the namespace for this specification', 'default': None},
 ]
 class GroupSpec(BaseStorageSpec):
     ''' Specification for groups

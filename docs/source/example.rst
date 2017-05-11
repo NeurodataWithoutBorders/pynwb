@@ -19,7 +19,7 @@ clarity, we define them here.
 Creating and Writing NWB files
 -----------------------------------------------------
 
-When creating an NWB file, the first step is to create the :py:class:`~pynwb.ui.file.NWBFile`. The first
+When creating an NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
 argument is the name of the NWB file, and the second argument is a brief description of the dataset.
 
 .. code-block:: python
@@ -42,8 +42,8 @@ the :py:class:`~pynwb.io.write.HDFWriter` class.
 Creating Epochs
 -----------------------------------------------------
 
-Experimental epochs are represented with :py:class:`~pynwb.ui.epoch.Epoch` objects. To create epochs for an NWB file,
-you can use the :py:class:`~pynwb.ui.file.NWBFile` instance method :py:func:`~pynwb.ui.file.NWBFile.create_epoch`.
+Experimental epochs are represented with :py:class:`~pynwb.epoch.Epoch` objects. To create epochs for an NWB file,
+you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_epoch`.
 
 .. code-block:: python
 
@@ -54,8 +54,8 @@ you can use the :py:class:`~pynwb.ui.file.NWBFile` instance method :py:func:`~py
 Creating Electrode Groups
 -----------------------------------------------------
 
-Electrode groups (i.e. experimentally relevant groupings of channels) are represented by :py:class:`~pynwb.ui.ephys.ElectrodeGroup` objects. To create
-an electrode group, you can use the :py:class:`~pynwb.ui.file.NWBFile` instance method :py:func:`~pynwb.ui.file.NWBFile.create_electrode_group`.
+Electrode groups (i.e. experimentally relevant groupings of channels) are represented by :py:class:`~pynwb.ephys.ElectrodeGroup` objects. To create
+an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_electrode_group`.
 
 .. code-block:: python
 
@@ -65,9 +65,9 @@ Creating TimeSeries
 -----------------------------------------------------
 
 TimeSeries objects can be created in two ways. The first way is by instantiating :ref:`timeseries_overview` objects directly and then adding them to
-the :ref:`file_overview` using the instance method :py:func:`~pynwb.ui.file.NWBFile.add_raw_timeseries`. The second way is by calling the :py:class:`~pynwb.ui.file.NWBFile`
-instance method :py:func:`~pynwb.ui.file.NWBFile.create_timeseries`. This first example will demonstrate instatiating two different
-types of :ref:`timeseries_overview` objects directly, and adding them with :py:func:`~pynwb.ui.file.NWBFile.add_raw_timeseries`.
+the :ref:`file_overview` using the instance method :py:func:`~pynwb.file.NWBFile.add_raw_timeseries`. The second way is by calling the :py:class:`~pynwb.file.NWBFile`
+instance method :py:func:`~pynwb.file.NWBFile.create_timeseries`. This first example will demonstrate instatiating two different
+types of :ref:`timeseries_overview` objects directly, and adding them with :py:meth:`~pynwb.file.NWBFile.add_raw_timeseries`.
 
 .. code-block:: python
 
@@ -155,11 +155,27 @@ to implement and register a custom :py:class:`~form.build.map.ObjectMapper`. :py
 Write an NWBFile
 -----------------------------------------------------
 
+Writing NWB files to disk is handled by the :py:mod:`form` package, which :py:mod:`pynwb` depends. Currently, the only storage format supported by
+:py:mod:`form` is HDF5. Reading and writing to and from HDF5 is handled by the class :py:class:`~form.backends.hdf5.HDF5IO`. The first argument to this
+is the path of the HDF5, and the second is the :py:class:`~form.build.map.BuildManager` to use for IO. Briefly, the :py:class:`~form.build.map.BuildManager` is a class
+that manages objects to be read and written from disk. A PyNWB-specific BuildManager can be retrieved using the module-level function :py:func:`~pynwb.get_build_manager`.
+
+
 .. code-block:: python
 
-    from pynwb import NWBFile
-    from form import HDF5IO
-    nwbfile = NWBFile(...)
-    io = HDF5IO(...)
-    io.write(nwbfile)
+    from pynwb import NWBFile, get_build_manager
+    from form.backends.hdf5 import HDF5IO
 
+    # make an NWBFile
+    start_time = datetime(1970, 1, 1, 12, 0, 0)
+    create_date = datetime(2017, 4, 15, 12, 0, 0)
+    nwbfile = NWBFile('test.nwb', 'a test NWB File', 'TEST123', start_time, file_create_date=create_date)
+    ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
+    nwbfile.add_raw_timeseries(ts)
+
+    manager = get_build_manager()
+    path = "test_pynwb_io_hdf5.h5"
+
+    io = HDF5IO(path, manager)
+    io.write(nwbfile)
+    io.close()

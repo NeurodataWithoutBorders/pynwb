@@ -1,13 +1,5 @@
-specs:
+groups:
 - attributes:
-  - doc: the data type of this object
-    dtype: text
-    name: neurodata_type
-    value: Epoch
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
   - dims:
     - num_links
     doc: "A sorted list mapping TimeSeries entries in the epoch to the path of the\
@@ -23,9 +15,6 @@ specs:
     shape:
     - null
   datasets:
-  - doc: Start time of epoch, in seconds
-    dtype: float64!
-    name: start_time
   - doc: Stop time of epoch, in seconds
     dtype: float64!
     name: stop_time
@@ -43,35 +32,27 @@ specs:
     quantity: '?'
     shape:
     - null
+  - doc: Start time of epoch, in seconds
+    dtype: float64!
+    name: start_time
   doc: 'One of possibly many different experimental epochCOMMENT: Name is arbitrary
     but must be unique within the experiment.'
   groups:
-  - attributes:
-    - doc: the data type of this object
-      dtype: text
-      name: neurodata_type
-      value: EpochTimeSeries
-    - doc: the namespace for the data type of this object
-      dtype: text
-      name: namespace
-      value: core
-    datasets:
+  - datasets:
+    - doc: Number of data samples available in this time series, during this epoch.
+      dtype: int32
+      name: count
     - doc: "Epoch's start index in TimeSeries data[] field. COMMENT: This can be used\
         \ to calculate location in TimeSeries timestamp[] field"
       dtype: int32
       name: idx_start
-    - doc: Number of data samples available in this time series, during this epoch.
-      dtype: int32
-      name: count
     doc: 'One of possibly many input or output streams recorded during epoch. COMMENT:
       Name is arbitrary and does not have to match the TimeSeries that it refers to.'
     links:
     - doc: Link to TimeSeries.  An HDF5 soft-link should be used.
       name: timeseries
       target_type: TimeSeries
-    namespace: core
     neurodata_type_def: EpochTimeSeries
     quantity: '*'
-  namespace: core
   neurodata_type_def: Epoch
   quantity: '*'

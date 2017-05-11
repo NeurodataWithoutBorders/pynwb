@@ -3,10 +3,9 @@ from datetime import datetime
 import os
 from h5py import File, Dataset
 
-from pynwb import NWBFile, TimeSeries
-from pynwb import BuildManager
 from form.backends.hdf5 import HDF5IO
-from form.build import GroupBuilder, DatasetBuilder, LinkBuilder
+from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
+from form.spec import NamespaceCatalog
 
 from numbers import Number
 
@@ -136,7 +135,7 @@ class GroupBuilderTestCase(unittest.TestCase):
 class TestHDF5Writer(GroupBuilderTestCase):
 
     def setUp(self):
-        self.manager = BuildManager()
+        self.manager = BuildManager(TypeMap(NamespaceCatalog('core')))
         self.path = "test_pynwb_io_hdf5.h5"
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)

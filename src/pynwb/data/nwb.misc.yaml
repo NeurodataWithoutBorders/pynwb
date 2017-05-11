@@ -1,13 +1,5 @@
-specs:
+groups:
 - attributes:
-  - doc: the data type of this object
-    dtype: text
-    name: neurodata_type
-    value: AbstractFeatureSeries
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
   - doc: Value is Features of an applied stimulus. This is useful when storing the
       raw stimulus is impractical
     dtype: text
@@ -52,18 +44,9 @@ specs:
     or through use of the TimeSeries::control fields. A set of features is considered
     to persist until the next set of features is defined. The final set of features
     stored should be the null set.
-  namespace: core
   neurodata_type_def: AbstractFeatureSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: the data type of this object
-    dtype: text
-    name: neurodata_type
-    value: AnnotationSeries
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
   - doc: Value is Time-stamped annotations about an experiment
     dtype: text
     name: help
@@ -74,14 +57,14 @@ specs:
       dtype: None
       name: resolution
       value: NaN
-    - doc: Value is float('NaN')
-      dtype: None
-      name: conversion
-      value: NaN
     - doc: Value is n/a
       dtype: None
       name: unit
       value: n/a
+    - doc: Value is float('NaN')
+      dtype: None
+      name: conversion
+      value: NaN
     dims:
     - num_times
     doc: Annotations made during an experiment.
@@ -93,18 +76,9 @@ specs:
     field stores a text array, and timestamps are stored for each annotation (ie,
     interval=1). This is largely an alias to a standard TimeSeries storing a text
     array but that is identifiable as storing annotations in a machine-readable way.
-  namespace: core
   neurodata_type_def: AnnotationSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: the data type of this object
-    dtype: text
-    name: neurodata_type
-    value: IntervalSeries
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
   - doc: Value is Stores the start and stop times for events
     dtype: text
     name: help
@@ -115,14 +89,14 @@ specs:
       dtype: None
       name: resolution
       value: NaN
-    - doc: Value is float('NaN')
-      dtype: None
-      name: conversion
-      value: NaN
     - doc: Value is n/a
       dtype: None
       name: unit
       value: n/a
+    - doc: Value is float('NaN')
+      dtype: None
+      name: conversion
+      value: NaN
     dims:
     - num_times
     doc: '>0 if interval started, <0 if interval ended.'
@@ -137,18 +111,9 @@ specs:
     C, etc). The field data stores an 8-bit integer. This is largely an alias of a
     standard TimeSeries but that is identifiable as representing time intervals in
     a machine-readable way.
-  namespace: core
   neurodata_type_def: IntervalSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: the data type of this object
-    dtype: text
-    name: neurodata_type
-    value: UnitTimes
-  - doc: the namespace for the data type of this object
-    dtype: text
-    name: namespace
-    value: core
   - doc: Value is Estimated spike times from a single unit
     dtype: text
     name: help
@@ -166,16 +131,10 @@ specs:
     the source module, if that is possible/relevant (e.g., name of ROIs from Segmentation
     module).
   groups:
-  - attributes:
-    - doc: the data type of this object
+  - datasets:
+    - doc: Description of the unit (eg, cell type).
       dtype: text
-      name: neurodata_type
-      value: SpikeUnit
-    - doc: the namespace for the data type of this object
-      dtype: text
-      name: namespace
-      value: core
-    datasets:
+      name: unit_description
     - doc: Name, path or description of where unit times originated. This is necessary
         only if the info here differs from or is more fine-grained than the interface's
         source field
@@ -189,14 +148,9 @@ specs:
       name: times
       shape:
       - null
-    - doc: Description of the unit (eg, cell type).
-      dtype: text
-      name: unit_description
     doc: Group storing times for &lt;unit_N&gt;.
-    namespace: core
     neurodata_type_def: SpikeUnit
     quantity: +
   name: UnitTimes
-  namespace: core
   neurodata_type_def: UnitTimes
   neurodata_type_inc: Interface
