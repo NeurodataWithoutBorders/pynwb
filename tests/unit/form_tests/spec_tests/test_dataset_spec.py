@@ -74,5 +74,3 @@ class DatasetSpecTests(unittest.TestCase):
         self.assertIs(ext, ext_attrs[0].parent)
         self.assertIs(ext, ext_attrs[1].parent)
         self.assertIs(ext, ext_attrs[2].parent)
-        self.assertIs(ext, ext_attrs[3].parent)
-        self.assertIs(ext, ext_attrs[4].parent)
