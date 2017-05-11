@@ -400,10 +400,10 @@ class DataChunkIterator(object):
     In addition, derived classes must implement the __next__ method (or overwrite _read_next_chunk
     if the default behavior of __next__ should be reused). The __next__ method must return
     in each iteration 1) a numpy array with the data values for the chunk and 2) a numpy-compliant index tuple
-    describing where the chunk is located within the complete data.  HINT: numpy.s_ provides a
+    describing where the chunk is located within the complete data.  HINT: `numpy.s_ <https://docs.scipy.org/doc/numpy/reference/generated/numpy.s_.html>`_ provides a
     convenient way to generate index tuples using standard array slicing. There are
     a number of additional functions that one can overwrite to customize behavior, e.g,
-    the recommended_chunk_size() or recommended_
+    the :py:func:`~form.utils.DataChunkIterator.recommended_chunk_shape` or :py:func:`~form.utils.DataChunkIterator.recommended_data_shape`
 
     The default implementation accepts any iterable and assumes that we iterate over
     the first dimension of the data array. The default implemention supports buffered read,
