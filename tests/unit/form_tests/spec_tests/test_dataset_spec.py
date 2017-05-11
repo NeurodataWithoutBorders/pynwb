@@ -11,7 +11,7 @@ class DatasetSpecTests(unittest.TestCase):
             AttributeSpec('attribute2', 'str', 'my second attribute')
         ]
         self.ndt_attr_spec = AttributeSpec('data_type', 'text', 'the data type of this object', value='EphysData')
-        self.ns_attr_spec = AttributeSpec('namespace', 'text', 'the namespace for the data type of this object', value='core')
+        self.ns_attr_spec = AttributeSpec('namespace', 'text', 'the namespace for the data type of this object', required=False)
 
     def test_constructor(self):
         spec = DatasetSpec('my first dataset',
@@ -42,9 +42,7 @@ class DatasetSpecTests(unittest.TestCase):
         self.assertEqual(spec['doc'], 'my first dataset')
         self.assertEqual(spec['data_type_def'], 'EphysData')
         self.assertFalse(spec['linkable'])
-        self.assertDictEqual(spec['attributes'][0], self.ndt_attr_spec)
-        self.assertDictEqual(spec['attributes'][1], self.ns_attr_spec)
-        self.assertListEqual(spec['attributes'][2:], self.attributes)
+        self.assertListEqual(spec['attributes'], self.attributes)
         self.assertIs(spec, self.attributes[0].parent)
         self.assertIs(spec, self.attributes[1].parent)
 
@@ -69,11 +67,9 @@ class DatasetSpecTests(unittest.TestCase):
                           data_type_inc=base,
                           data_type_def='SpikeData')
         ndt_attr_spec = AttributeSpec('data_type', 'text', 'the data type of this object', value='SpikeData')
-        self.assertDictEqual(ext['attributes'][0], ndt_attr_spec)
-        self.assertDictEqual(ext['attributes'][1], self.ns_attr_spec)
-        self.assertDictEqual(ext['attributes'][2], attributes[0])
-        self.assertDictEqual(ext['attributes'][3], self.attributes[0])
-        self.assertDictEqual(ext['attributes'][4], self.attributes[1])
+        self.assertDictEqual(ext['attributes'][0], attributes[0])
+        self.assertDictEqual(ext['attributes'][1], self.attributes[0])
+        self.assertDictEqual(ext['attributes'][2], self.attributes[1])
         ext_attrs = ext.attributes
         self.assertIs(ext, ext_attrs[0].parent)
         self.assertIs(ext, ext_attrs[1].parent)

@@ -6,7 +6,7 @@ import os
 
 from form.build import GroupBuilder, DatasetBuilder
 from form.backends.hdf5 import HDF5IO
-from pynwb import BuildManager
+from pynwb import get_build_manager
 
 from pynwb import NWBFile, TimeSeries
 
@@ -24,7 +24,7 @@ class TestNWBContainerIO(unittest.TestCase):
     def setUp(self):
         if type(self) == TestNWBContainerIO:
             raise unittest.SkipTest('TestNWBContainerIO must be extended with setUpBuilder and setUpContainer implemented')
-        self.manager = BuildManager()
+        self.manager = get_build_manager()
         self.setUpContainer()
         self.setUpBuilder()
 

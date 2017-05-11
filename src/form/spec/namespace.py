@@ -176,7 +176,7 @@ class NamespaceCatalog(object):
             ret = dict()
             with open(spec_file_path, 'r') as stream:
                 d = yaml.safe_load(stream)
-                specs = d.get('specs')
+                specs = d.get('groups')
                 if specs is None:
                     raise ValueError("no 'specs' found in %s" % spec_file_path)
                 for spec_dict in specs:

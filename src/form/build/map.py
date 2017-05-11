@@ -94,20 +94,20 @@ class TypeMap(object):
     def __init__(self, **kwargs):
         namespaces = getargs('namespaces', kwargs)
         self.__map_types = dict()
-        self.__namespaces = namespaces
+        self.__ns_catalog = namespaces
         self.__mappers = dict()     ## already constructed ObjectMapper classes
         self.__mapper_cls = dict()  ## the ObjectMapper class to use for each container type
         self.__container_types = dict()
         self.__data_types = dict()
 
     def __get_data_type(self, obj):
-        ret = obj.get(self.__namespaces.group_spec_cls.type_key())
+        ret = obj.get(self.__ns_catalog.group_spec_cls.type_key())
         if ret is None:
             raise ValueError("builder '%s' is does not have a data_type" % builder.name)
         return ret
 
     def __get_namespace(self, bldr):
-        return bldr.get('namespace', self.__namespaces.default_namespace)
+        return bldr.get('namespace', self.__ns_catalog.default_namespace)
 
     @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder object to get the corresponding Container class for'})
     def get_cls(self, **kwargs):
@@ -121,6 +121,11 @@ class TypeMap(object):
         container_cls = self.__container_types[namespace][data_type]
         return container_cls
 
+    def __get_container_ns_dt(self, obj):
+        container_cls = obj.__class__
+        namespace, data_type = self.__data_types.get(container_cls, (None, None))
+        return namespace, data_type
+
     @docval({'name': 'obj', 'type': (Container, Builder), 'doc': 'the object to get the ObjectMapper for'},
             returns='the ObjectMapper to use for mapping the given object', rtype='ObjectMapper')
     def get_map(self, **kwargs):
@@ -129,7 +134,7 @@ class TypeMap(object):
         # get the container class, and namespace/data_type
         if isinstance(obj, Container):
             container_cls = obj.__class__
-            namespace, data_type = self.__data_types.get(container_cls, (None, None))
+            namespace, data_type = self.__get_container_ns_dt(obj)
             if namespace is None:
                 raise ValueError("class %s does not mapped to a data_type" % container_cls)
         else:
@@ -143,7 +148,7 @@ class TypeMap(object):
                 mapper_cls = self.__mapper_cls.get(cls)
                 if mapper_cls is None:
                     continue
-                spec = self.__namespaces.get_spec(namespace, data_type)
+                spec = self.__ns_catalog.get_spec(namespace, data_type)
                 mapper = mapper_cls(spec)
                 self.__mappers[cls] = mapper
                 break
@@ -183,7 +188,11 @@ class TypeMap(object):
         if attr_map is None:
             raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
-            return attr_map.build(container, manager)
+            builder = attr_map.build(container, manager)
+        namespace, data_type = self.__get_container_ns_dt(container)
+        builder.set_attribute('namespace', namespace)
+        builder.set_attribute(attr_map.spec.type_key(), data_type)
+        return builder
 
     @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for constructing', 'default': None})

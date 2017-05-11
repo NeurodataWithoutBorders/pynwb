@@ -46,7 +46,7 @@ class GroupSpecTests(unittest.TestCase):
 
         ]
         self.ndt_attr_spec = AttributeSpec('data_type', 'text', 'the data type of this object', value='EphysData')
-        self.ns_attr_spec = AttributeSpec('namespace', 'text', 'the namespace for the data type of this object', value='core')
+        self.ns_attr_spec = AttributeSpec('namespace', 'text', 'the namespace for the data type of this object', required=False)
 
     def test_constructor(self):
         spec = GroupSpec('A test group',
@@ -76,9 +76,10 @@ class GroupSpecTests(unittest.TestCase):
                          namespace='core',
                          data_type_def='EphysData')
         self.assertFalse(spec['linkable'])
-        self.assertDictEqual(spec['attributes'][0], self.ndt_attr_spec)
-        self.assertDictEqual(spec['attributes'][1], self.ns_attr_spec)
-        self.assertListEqual(spec['attributes'][2:], self.attributes)
+        #self.assertDictEqual(spec['attributes'][0], self.ndt_attr_spec)
+        #self.assertDictEqual(spec['attributes'][1], self.ns_attr_spec)
+        #self.assertListEqual(spec['attributes'][2:], self.attributes)
+        self.assertListEqual(spec['attributes'], self.attributes)
         self.assertListEqual(spec['datasets'], self.datasets)
         self.assertEqual(spec['data_type_def'], 'EphysData')
         self.assertIs(spec, self.attributes[0].parent)
@@ -153,16 +154,12 @@ class GroupSpecTests(unittest.TestCase):
         #self.ns_attr_spec
         ndt_attr_spec = AttributeSpec('data_type', 'text', 'the data type of this object', value='SpikeData')
 
-       # self.attributes = [
-       #     AttributeSpec('attribute1', 'str', 'my first attribute'),
-       #     AttributeSpec('attribute2', 'str', 'my second attribute')
-       #]
         res_attrs = ext.attributes
-        self.assertDictEqual(res_attrs[0], ndt_attr_spec)
-        self.assertDictEqual(res_attrs[1], self.ns_attr_spec)
-        self.assertDictEqual(res_attrs[2], ext_attributes[0])
-        self.assertDictEqual(res_attrs[3], self.attributes[0])
-        self.assertDictEqual(res_attrs[4], self.attributes[1])
+        #self.assertDictEqual(res_attrs[0], ndt_attr_spec)
+        #self.assertDictEqual(res_attrs[1], self.ns_attr_spec)
+        self.assertDictEqual(res_attrs[0], ext_attributes[0])
+        self.assertDictEqual(res_attrs[1], self.attributes[0])
+        self.assertDictEqual(res_attrs[2], self.attributes[1])
         json.dumps(spec)
 
     def assertDatasetsEqual(self, spec1, spec2):
