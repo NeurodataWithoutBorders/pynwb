@@ -69,15 +69,11 @@ class SpikeEventSeries(ElectricalSeries):
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data'},
             {'name': 'electrode_group', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'The names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to.', 'ndim': 1},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},

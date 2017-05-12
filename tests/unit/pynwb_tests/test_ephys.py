@@ -39,7 +39,7 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
         data = np.zeros(10)
         timestamps = np.arange(10)
 
-        sES = SpikeEventSeries('test_sES', 'a hypothetical source', data, elec, timestamps=timestamps)
+        sES = SpikeEventSeries('test_sES', 'a hypothetical source', data, timestamps, elec)
         self.assertEqual(sES.name, 'test_sES')
         self.assertEqual(sES.source, 'a hypothetical source')
 
@@ -77,7 +77,7 @@ class EventDetectionConstructor(unittest.TestCase):
 
 class EventWaveformConstructor(unittest.TestCase):
     def test_init(self):
-        sES = SpikeEventSeries('test_sES', 'a hypothetical source', list(), list(), timestamps=list())
+        sES = SpikeEventSeries('test_sES', 'a hypothetical source', list(range(10)), list(range(10)), list())
 
         ew  = EventWaveform('test_ew', sES)
         self.assertEqual(ew.source, 'test_ew')
