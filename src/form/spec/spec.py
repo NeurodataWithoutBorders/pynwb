@@ -190,7 +190,7 @@ class BaseStorageSpec(Spec):
         resolve = False
         if data_type_inc is not None:
             if isinstance(data_type_inc, BaseStorageSpec):
-                self[self.inc_key()] = data_type_inc.data_type_inc
+                self[self.inc_key()] = data_type_inc.data_type_def
             else:
                 self[self.inc_key()] = data_type_inc
         if data_type_def is not None:
