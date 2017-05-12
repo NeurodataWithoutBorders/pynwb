@@ -26,6 +26,9 @@ groups:
   neurodata_type_def: OptogeneticSeries
   neurodata_type_inc: TimeSeries
 - datasets:
+  - doc: Location of stimulation site
+    dtype: text
+    name: location
   - doc: Name of device in /general/devices
     dtype: text
     name: device
@@ -35,9 +38,6 @@ groups:
   - doc: Description of site
     dtype: text
     name: description
-  - doc: Location of stimulation site
-    dtype: text
-    name: location
   doc: 'One of possibly many groups describing an optogenetic stimuluation site. COMMENT:
     Name is arbitrary but should be meaningful. Name is referenced by OptogeneticSeries'
   neurodata_type_def: OptogeneticStimulusSite

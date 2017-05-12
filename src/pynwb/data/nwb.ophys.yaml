@@ -13,15 +13,15 @@ groups:
     quantity: '?'
     shape:
     - 3
-  - doc: Photomultiplier gain
-    dtype: float32
-    name: pmt_gain
-    quantity: '?'
   - doc: Lines imaged per second. This is also stored in /general/optophysiology but
       is kept here as it is useful information for analysis, and so good to be stored
       w/ the actual data.
     dtype: float32
     name: scan_line_rate
+    quantity: '?'
+  - doc: Photomultiplier gain
+    dtype: float32
+    name: pmt_gain
     quantity: '?'
   doc: A special case of optical imaging.
   links:
@@ -39,13 +39,6 @@ groups:
       to the signal from one ROI
   datasets:
   - dims:
-    - num_ROIs
-    doc: List of ROIs represented, one name for each row of data[].
-    dtype: text
-    name: roi_names
-    shape:
-    - null
-  - dims:
     - num_times
     - num_ROIs
     doc: Signals from ROIs
@@ -53,6 +46,13 @@ groups:
     name: data
     shape:
     - null
+    - null
+  - dims:
+    - num_ROIs
+    doc: List of ROIs represented, one name for each row of data[].
+    dtype: text
+    name: roi_names
+    shape:
     - null
   - doc: Path to segmentation module.
     dtype: text
@@ -133,6 +133,16 @@ groups:
         neurodata_type_inc: ImageSeries
       name: reference_images
     - datasets:
+      - doc: Description of this ROI.
+        dtype: text
+        name: roi_description
+      - dims:
+        - num_pixels
+        doc: Weight of each pixel listed in pix_mask
+        dtype: float32
+        name: pix_mask_weight
+        shape:
+        - null
       - dims:
         - num_pixels
         - '2'
@@ -142,16 +152,6 @@ groups:
         shape:
         - null
         - null
-      - dims:
-        - num_pixels
-        doc: Weight of each pixel listed in pix_mask
-        dtype: float32
-        name: pix_mask_weight
-        shape:
-        - null
-      - doc: Description of this ROI.
-        dtype: text
-        name: roi_description
       - dims:
         - num_x
         - num_y
@@ -174,16 +174,12 @@ groups:
   neurodata_type_def: ImageSegmentation
   neurodata_type_inc: Interface
 - datasets:
+  - doc: Calcium indicator
+    dtype: text
+    name: indicator
   - doc: Name of device in /general/devices
     dtype: text
     name: device
-  - doc: Excitation wavelength
-    dtype: text
-    name: excitation_lambda
-  - doc: Description of &lt;image_plane_X&gt;
-    dtype: text
-    name: description
-    quantity: '?'
   - doc: 'Describes position and reference frame of manifold based on position of
       first element in manifold. For example, text description of anotomical location
       or vectors needed to rotate to common anotomical axis (eg, AP/DV/ML). COMMENT:
@@ -191,6 +187,12 @@ groups:
       this field is not required'
     dtype: text
     name: reference_frame
+  - doc: Excitation wavelength
+    dtype: text
+    name: excitation_lambda
+  - doc: Location of image plane
+    dtype: text
+    name: location
   - attributes:
     - doc: Value is Meter
       dtype: text
@@ -212,26 +214,24 @@ groups:
     - null
     - null
     - 3
-  - doc: Calcium indicator
+  - doc: Description of &lt;image_plane_X&gt;
     dtype: text
-    name: indicator
+    name: description
+    quantity: '?'
   - doc: Rate images are acquired, in Hz.
     dtype: text
     name: imaging_rate
-  - doc: Location of image plane
-    dtype: text
-    name: location
   doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name is
     arbitrary but should be meaningful. It is referenced by TwoPhotonSeries and also
     ImageSegmentation and DfOverF interfaces'
   groups:
   - datasets:
-    - doc: Any notes or comments about the channel
-      dtype: text
-      name: description
     - doc: Emission lambda for channel
       dtype: text
       name: emission_lambda
+    - doc: Any notes or comments about the channel
+      dtype: text
+      name: description
     doc: 'One of possibly many groups storing channel-specific data COMMENT: Name
       is arbitrary but should be meaningful'
     neurodata_type_def: OpticalChannel
