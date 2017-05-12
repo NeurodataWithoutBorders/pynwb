@@ -39,10 +39,6 @@ class BaseStorageOverride(object):
         return cls.__def_key
 
     @property
-    def neurodata_type(self):
-        return self.data_type
-
-    @property
     def neurodata_type_inc(self):
         return self.data_type_inc
 
