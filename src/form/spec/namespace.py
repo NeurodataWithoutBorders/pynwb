@@ -149,7 +149,7 @@ class NamespaceCatalog(object):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'})
     def get_namespace(self, **kwargs):
-        name = getargs('namespace', kwargs)
+        name = getargs('name', kwargs)
         ret = self.__namespaces.get(name)
         if ret is None:
             raise KeyError("'%s' not a namespace" % name)
