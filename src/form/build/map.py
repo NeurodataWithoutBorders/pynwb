@@ -89,7 +89,6 @@ class BuildManager(object):
 
 class TypeMap(object):
 
-    #@docval({'name': 'catalog', 'type': SpecCatalog, 'doc': 'a catalog of existing specifications'})
     @docval({'name': 'namespaces', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use'})
     def __init__(self, **kwargs):
         namespaces = getargs('namespaces', kwargs)
@@ -266,7 +265,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     @ExtenderMeta.post_init
     def __gather_procedures(cls, name, bases, classdict):
         cls.const_args = dict()
-        #cls.const_args['name'] = lambda self, builder: builder.name
         for name, func in filter(lambda tup: cls.is_const_arg(tup[1]), cls.__dict__.items()):
             cls.const_args[cls.get_cargname(func)] = getattr(cls, name)
 
@@ -312,7 +310,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             self.map_attr(spec.name, spec)
             self.map_const_arg(spec.name, spec)
         else:
-            name = self.__convert_name(spec.data_type)
+            name = self.__convert_name(spec.data_type_inc)
             self.map_attr(name, spec)
             self.map_const_arg(name, spec)
 
@@ -323,8 +321,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         attr_name, spec = getargs('attr_name', 'spec', kwargs)
         if hasattr(spec, 'name') and spec.name is not None:
             n = spec.name
-        elif hasattr(spec, 'data_type') and spec.data_type is not None:
-            n = spec.data_type
+        elif hasattr(spec, 'data_type_def') and spec.data_type_def is not None:
+            n = spec.data_type_def
         self.__spec2attr[spec] = attr_name
 
     @docval({"name": "const_arg", "type": str, "doc": "the name of the constructor argument to map"},
@@ -343,7 +341,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
 
     def __get_override_carg(self, name, builder):
         if name in self.const_args:
-            #func = getattr(self, self.const_args[name])
             func = self.const_args[name]
             return func(self, builder)
         return None
@@ -408,7 +405,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         else:
             builder = DatasetBuilder(name, parent=parent)
         self.__add_attributes(builder, self.__spec.attributes, container)
-        #builder.set_attribute('data_type', container.data_type) # I think this is obsolete, leaving around for now though
         return builder
 
     def __is_null(self, item):
@@ -422,7 +418,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __add_attributes(self, builder, attributes, container):
         for spec in attributes:
             attr_value = self.get_attr_value(spec, container)
-            #if self.__is_null(attr_value):
             if not attr_value:
                 if spec.value is not None:
                     attr_value = spec.value
@@ -433,10 +428,9 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __add_datasets(self, builder, datasets, container, build_manager):
         for spec in datasets:
             attr_value = self.get_attr_value(spec, container)
-            #if self.__is_null(attr_value):
             if not attr_value:
                 continue
-            if spec.data_type is None:
+            if spec.data_type_def is None and spec.data_type_inc is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value)
                 self.__add_attributes(sub_builder, spec.attributes, container)
             else:
@@ -444,7 +438,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
 
     def __add_groups(self, builder, groups, container, build_manager):
         for spec in groups:
-            if spec.data_type is None:
+            if spec.data_type_def is None and spec.data_type_inc is None:
                 # we don't need to get attr_name since any named
                 # group does not have the concept of value
                 sub_builder = GroupBuilder(spec.name)
@@ -463,7 +457,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                         for item in it:
                             if isinstance(item, Container):
                                 self.__add_containers(sub_builder, spec, item, build_manager)
-                        #continue
                 self.__add_groups(sub_builder, spec.groups, container, build_manager)
                 empty = sub_builder.is_empty()
                 if not empty or (empty and isinstance(spec.quantity, int)):
@@ -543,7 +536,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         ''' Construct an Container from the given Builder '''
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
-        #cls = self.get_cls(builder)
         # gather all subspecs
         subspecs = self.__get_subspec_values(builder, self.spec, manager)
         # get the constructor argument each specification corresponds to

@@ -196,8 +196,6 @@ class BaseStorageSpec(Spec):
         if data_type_def is not None:
             self.pop('required', None)
             self[self.def_key()] = data_type_def
-            #self.set_attribute(self.get_data_type_spec(data_type_def))
-            #self.set_attribute(self.get_namespace_spec())
             if data_type_inc is not None and isinstance(data_type_inc, BaseStorageSpec):
                 resolve = True
         for attribute in attributes:
@@ -233,10 +231,6 @@ class BaseStorageSpec(Spec):
     def linkable(self):
         ''' True if object can be a link, False otherwise '''
         return self.get('linkable', None)
-
-    @property
-    def data_type(self):
-        return self.get(self.def_key(), self.get(self.inc_key(), None))
 
     @classmethod
     def type_key(cls):
@@ -470,9 +464,16 @@ class GroupSpec(BaseStorageSpec):
         super(GroupSpec, self).resolve_spec(inc_spec)
 
     def __add_data_type_inc(self, spec):
-        if spec.data_type_inc in self.__data_types:
+        dt = None
+        if hasattr(spec, 'data_type_def') and spec.data_type_def is not None:
+            dt = spec.data_type_def
+        elif hasattr(spec, 'data_type_inc') and spec.data_type_inc is not None:
+            dt = spec.data_type_inc
+        if not dt:
+            raise TypeError("spec does not have '%s' or '%s' defined" % (self.def_key(), self.inc_key()))
+        if dt in self.__data_types:
             raise TypeError('Cannot have multipled data types of the same type without specifying name')
-        self.__data_types[spec.data_type_inc] = spec
+        self.__data_types[dt] = spec
 
     @docval({'name': 'data_type', 'type': str, 'doc': 'the data_type to retrieve'})
     def get_data_type(self, **kwargs):
@@ -513,7 +514,7 @@ class GroupSpec(BaseStorageSpec):
         if spec.parent is not None:
             spec = GroupSpec.build_spec(spec)
         if spec.name == NAME_WILDCARD:
-            if spec.data_type_inc is not None:
+            if spec.data_type_inc is not None or spec.data_type_def is not None:
                 self.__add_data_type_inc(spec)
             else:
                 raise TypeError("must specify 'name' or 'data_type_inc' in Group spec")
@@ -543,7 +544,7 @@ class GroupSpec(BaseStorageSpec):
         if spec.parent is not None:
             spec = DatasetSpec.build_spec(spec)
         if spec.name == NAME_WILDCARD:
-            if spec.data_type is not None:
+            if spec.data_type_inc is not None or spec.data_type_def is not None:
                 self.__add_data_type_inc(spec)
             else:
                 raise TypeError("must specify 'name' or 'data_type_inc' in Dataset spec")
@@ -573,7 +574,7 @@ class GroupSpec(BaseStorageSpec):
         if spec.parent is not None:
             spec = LinkSpec.build_spec(spec)
         if spec.name == NAME_WILDCARD:
-            if spec.data_type_inc is not None:
+            if spec.data_type_inc is not None or spec.data_type_def is not None:
                 self.__add_data_type_inc(spec)
             else:
                 raise TypeError("must specify 'name' or 'data_type_inc' in Dataset spec")
@@ -636,7 +637,6 @@ class GroupSpec(BaseStorageSpec):
     @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
-        #ret = super(GroupSpec, cls).build_const_args(spec_dict)
         ret = super().build_const_args(spec_dict)
         if 'datasets' in ret:
             ret['datasets'] = list(map(cls.dataset_spec_cls().build_spec, ret['datasets']))
