@@ -76,9 +76,6 @@ class GroupSpecTests(unittest.TestCase):
                          namespace='core',
                          data_type_def='EphysData')
         self.assertFalse(spec['linkable'])
-        #self.assertDictEqual(spec['attributes'][0], self.ndt_attr_spec)
-        #self.assertDictEqual(spec['attributes'][1], self.ns_attr_spec)
-        #self.assertListEqual(spec['attributes'][2:], self.attributes)
         self.assertListEqual(spec['attributes'], self.attributes)
         self.assertListEqual(spec['datasets'], self.datasets)
         self.assertEqual(spec['data_type_def'], 'EphysData')
@@ -86,6 +83,8 @@ class GroupSpecTests(unittest.TestCase):
         self.assertIs(spec, self.attributes[1].parent)
         self.assertIs(spec, self.datasets[0].parent)
         self.assertIs(spec, self.datasets[1].parent)
+        self.assertEqual(spec.data_type_def, 'EphysData')
+        self.assertIsNone(spec.data_type_inc)
         json.dumps(spec)
 
     def test_set_dataset(self):
@@ -144,6 +143,8 @@ class GroupSpecTests(unittest.TestCase):
         self.assertDictEqual(ext_dset1_attrs[0], dset1_attributes_ext[0])
         self.assertDictEqual(ext_dset1_attrs[1], self.dset1_attributes[0])
         self.assertDictEqual(ext_dset1_attrs[2], self.dset1_attributes[1])
+        self.assertEqual(ext.data_type_def, 'SpikeData')
+        self.assertEqual(ext.data_type_inc, 'EphysData')
 
 
         ext_dset2 = ext.get_dataset('dataset2')
@@ -155,8 +156,6 @@ class GroupSpecTests(unittest.TestCase):
         ndt_attr_spec = AttributeSpec('data_type', 'text', 'the data type of this object', value='SpikeData')
 
         res_attrs = ext.attributes
-        #self.assertDictEqual(res_attrs[0], ndt_attr_spec)
-        #self.assertDictEqual(res_attrs[1], self.ns_attr_spec)
         self.assertDictEqual(res_attrs[0], ext_attributes[0])
         self.assertDictEqual(res_attrs[1], self.attributes[0])
         self.assertDictEqual(res_attrs[2], self.attributes[1])

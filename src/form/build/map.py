@@ -310,7 +310,14 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             self.map_attr(spec.name, spec)
             self.map_const_arg(spec.name, spec)
         else:
-            name = self.__convert_name(spec.data_type_inc)
+            dt = None
+            if spec.data_type_def is not None:
+                dt = spec.data_type_def
+            elif spec.data_type_inc is not None:
+                dt = spec.data_type_inc
+            else:
+                raise ValueError('Cannot map spec with wildcard name and no data_type_inc or data_type_def')
+            name = self.__convert_name(dt)
             self.map_attr(name, spec)
             self.map_const_arg(name, spec)
 

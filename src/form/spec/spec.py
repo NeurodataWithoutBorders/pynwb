@@ -259,7 +259,7 @@ class BaseStorageSpec(Spec):
     @property
     def data_type_inc(self):
         ''' The data type of this specification '''
-        return self.get(self.inc_key(), self.data_type_def)
+        return self.get(self.inc_key())
 
     @property
     def data_type_def(self):
