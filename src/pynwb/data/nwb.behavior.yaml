@@ -7,6 +7,10 @@ groups:
     value: Stores points in space over time. The data[] array structure is [num samples][num
       spatial dimensions]
   datasets:
+  - doc: Description defining what exactly 'straight-ahead' means.
+    dtype: text
+    name: reference_frame
+    quantity: '?'
   - attributes:
     - doc: Value is meter
       dtype: text
@@ -21,10 +25,6 @@ groups:
     shape:
     - null
     - null
-  - doc: Description defining what exactly 'straight-ahead' means.
-    dtype: text
-    name: reference_frame
-    quantity: '?'
   doc: 'Direction, e.g., of gaze or travel, or position. The TimeSeries::data field
     is a 2D array storing position or direction relative to some reference frame.
     Array structure: [num measurements] [num dimensions]. Each SpatialSeries has a

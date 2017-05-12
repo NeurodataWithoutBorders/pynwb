@@ -1,14 +1,14 @@
 groups:
 - datasets:
-  - doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
-      format with trailing major, minor and patch numbers.'
-    dtype: text
-    name: nwb_version
   - doc: 'A unique text identifier for the file. COMMENT: Eg, concatenated lab name,
       file creation date/time and experimentalist, or a hash of these and/or other
       values. The goal is that the string should be unique to all other files.'
     dtype: text
     name: identifier
+  - doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
+      format with trailing major, minor and patch numbers.'
+    dtype: text
+    name: nwb_version
   - dims:
     - '*unlimited*'
     doc: 'Time file was created, UTC, and subsequent modifications to file. COMMENT:
@@ -20,14 +20,14 @@ groups:
     name: file_create_date
     shape:
     - null
-  - doc: One or two sentences describing the experiment and data in the file.
-    dtype: text
-    name: session_description
   - doc: 'Time of experiment/session start, UTC.  COMMENT: Date + time, Use ISO format
       (eg, ISO 8601) or an easy-to-read and unambiguous format. All times stored in
       the file use this time as reference (ie, time zero)'
     dtype: text
     name: session_start_time
+  - doc: One or two sentences describing the experiment and data in the file.
+    dtype: text
+    name: session_description
   doc: Top level of NWB file.
   groups:
   - doc: 'Data streams recorded from the system, including ephys, ophys, tracking,
@@ -40,16 +40,23 @@ groups:
       group, the data can exist in a separate HDF5 file that is linked to by the file
       being used for processing and analysis.'
     groups:
+    - doc: 'Acquired TimeSeries.COMMENT: When importing acquisition data to an NWB
+        file, all acquisition/tracking/stimulus data must already be aligned to a
+        common time frame. It is assumed that this task has already been performed.'
+      groups:
+      - doc: TimeSeries object containing data generated during data acquisition
+        neurodata_type_inc: TimeSeries
+      name: timeseries
     - datasets:
       - attributes:
-        - doc: 'Format of the image.  COMMENT: eg, jpg, png, mpeg'
-          dtype: text
-          name: format
         - doc: 'Human description of image. COMMENT: If image is of slice data, include
             slice thickness and orientation, and reference to appropriate entry in
             /general/slices'
           dtype: text
           name: description
+        - doc: 'Format of the image.  COMMENT: eg, jpg, png, mpeg'
+          dtype: text
+          name: format
         doc: 'Photograph of experiment or experimental setup (video also OK). COMMENT:
           Name is arbitrary.  Data is stored as a single binary object (HDF5 opaque
           type).'
@@ -58,13 +65,6 @@ groups:
         quantity: '*'
       doc: Acquired images
       name: images
-    - doc: 'Acquired TimeSeries.COMMENT: When importing acquisition data to an NWB
-        file, all acquisition/tracking/stimulus data must already be aligned to a
-        common time frame. It is assumed that this task has already been performed.'
-      groups:
-      - doc: TimeSeries object containing data generated during data acquisition
-        neurodata_type_inc: TimeSeries
-      name: timeseries
     name: acquisition
   - doc: 'Lab-specific and custom scientific analysis of data. There is no defined
       format for the content of this group - the format is up to the individual user/lab.
@@ -148,13 +148,14 @@ groups:
       name: presentation
     name: stimulus
   - datasets:
-    - doc: 'Experimetnal protocol, if applicable.COMMENT: E.g., include IACUC protocol'
+    - doc: 'Description of drugs used, including how and when they were administered.
+        COMMENT: Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.'
       dtype: text
-      name: protocol
+      name: pharmacology
       quantity: '?'
-    - doc: 'General description of the experiment.COMMENT: Can be from Methods'
+    - doc: 'Notes about the experiment.  COMMENT: Things particular to this experiment'
       dtype: text
-      name: experiment_description
+      name: notes
       quantity: '?'
     - doc: 'Publication information.COMMENT: PMID, DOI, URL, etc. If multiple, concatenate
         together and describe which is which. such as PMID, DOI, URL, etc'
@@ -166,9 +167,14 @@ groups:
       dtype: text
       name: session_id
       quantity: '?'
-    - doc: Lab where experiment was performed
+    - doc: 'Experimetnal protocol, if applicable.COMMENT: E.g., include IACUC protocol'
       dtype: text
-      name: lab
+      name: protocol
+      quantity: '?'
+    - doc: 'Notes about stimuli, such as how and where presented.COMMENT: Can be from
+        Methods'
+      dtype: text
+      name: stimulus
       quantity: '?'
     - attributes:
       - doc: Name of script file
@@ -178,47 +184,41 @@ groups:
       dtype: text
       name: source_script
       quantity: '?'
-    - doc: 'Notes about data collection and analysis.COMMENT: Can be from Methods'
+    - doc: Lab where experiment was performed
       dtype: text
-      name: data_collection
+      name: lab
       quantity: '?'
     - doc: 'Narrative description about surgery/surgeries, including date(s) and who
         performed surgery. COMMENT: Much can be copied from Methods'
       dtype: text
       name: surgery
       quantity: '?'
-    - doc: Institution(s) where experiment was performed
+    - doc: Information about virus(es) used in experiments, including virus ID, source,
+        date made, injection location, volume, etc
       dtype: text
-      name: institution
-      quantity: '?'
-    - doc: 'Name of person who performed the experiment.COMMENT: More than one person
-        OK. Can specify roles of different people involved.'
-      dtype: text
-      name: experimenter
-      quantity: '?'
-    - doc: 'Description of drugs used, including how and when they were administered.
-        COMMENT: Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.'
-      dtype: text
-      name: pharmacology
-      quantity: '?'
-    - doc: 'Notes about the experiment.  COMMENT: Things particular to this experiment'
-      dtype: text
-      name: notes
-      quantity: '?'
-    - doc: 'Notes about stimuli, such as how and where presented.COMMENT: Can be from
-        Methods'
-      dtype: text
-      name: stimulus
+      name: virus
       quantity: '?'
     - doc: Description of slices, including information about preparation thickness,
         orientation, temperature and bath solution
       dtype: text
       name: slices
       quantity: '?'
-    - doc: Information about virus(es) used in experiments, including virus ID, source,
-        date made, injection location, volume, etc
+    - doc: 'General description of the experiment.COMMENT: Can be from Methods'
       dtype: text
-      name: virus
+      name: experiment_description
+      quantity: '?'
+    - doc: 'Name of person who performed the experiment.COMMENT: More than one person
+        OK. Can specify roles of different people involved.'
+      dtype: text
+      name: experimenter
+      quantity: '?'
+    - doc: Institution(s) where experiment was performed
+      dtype: text
+      name: institution
+      quantity: '?'
+    - doc: 'Notes about data collection and analysis.COMMENT: Can be from Methods'
+      dtype: text
+      name: data_collection
       quantity: '?'
     doc: "Experimental metadata, including protocol, notes and description of hardware\
       \ device(s).  COMMENT: The metadata stored in this section should be used to\
@@ -237,45 +237,7 @@ groups:
       \ not be created unless there is data to store within them."
     groups:
     - datasets:
-      - doc: Weight at time of experiment, at time of surgery and at other important
-          times
-        dtype: text
-        name: weight
-        quantity: '?'
-      - doc: 'Genetic strain COMMENT: If absent, assume Wild Type (WT)'
-        dtype: text
-        name: genotype
-        quantity: '?'
-      - doc: Description of subject and where subject came from (e.g., breeder, if
-          animal)
-        dtype: text
-        name: description
-        quantity: '?'
-      - doc: Species of subject
-        dtype: text
-        name: species
-        quantity: '?'
-      - doc: ID of animal/person used/participating in experiment (lab convention)
-        dtype: text
-        name: subject_id
-        quantity: '?'
-      - doc: Age of subject
-        dtype: text
-        name: age
-        quantity: '?'
-      - doc: Gender of subject
-        dtype: text
-        name: sex
-        quantity: '?'
-      doc: Information about the animal or person from which the data was measured.
-      name: subject
-      quantity: '?'
-    - datasets:
       - attributes:
-        - doc: Value is Contents of format specification file.
-          dtype: text
-          name: help
-          value: Contents of format specification file.
         - dims:
           - num_namespaces
           doc: Namespaces defined in the file
@@ -283,6 +245,10 @@ groups:
           name: namespaces
           shape:
           - null
+        - doc: Value is Contents of format specification file.
+          dtype: text
+          name: help
+          value: Contents of format specification file.
         doc: Dataset for storing contents of a specification file for either the core
           format or an extension.  Name should match name of file.`
         dtype: text
@@ -290,6 +256,40 @@ groups:
         quantity: '*'
       doc: Group for storing format specification files.
       name: specifications
+      quantity: '?'
+    - datasets:
+      - doc: Gender of subject
+        dtype: text
+        name: sex
+        quantity: '?'
+      - doc: Age of subject
+        dtype: text
+        name: age
+        quantity: '?'
+      - doc: Species of subject
+        dtype: text
+        name: species
+        quantity: '?'
+      - doc: 'Genetic strain COMMENT: If absent, assume Wild Type (WT)'
+        dtype: text
+        name: genotype
+        quantity: '?'
+      - doc: ID of animal/person used/participating in experiment (lab convention)
+        dtype: text
+        name: subject_id
+        quantity: '?'
+      - doc: Weight at time of experiment, at time of surgery and at other important
+          times
+        dtype: text
+        name: weight
+        quantity: '?'
+      - doc: Description of subject and where subject came from (e.g., breeder, if
+          animal)
+        dtype: text
+        name: description
+        quantity: '?'
+      doc: Information about the animal or person from which the data was measured.
+      name: subject
       quantity: '?'
     - doc: 'Description of hardware devices used during experiment. COMMENT: Eg, monitors,
         ADC boards, microscopes, etc'

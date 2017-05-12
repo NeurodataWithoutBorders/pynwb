@@ -1,8 +1,5 @@
 groups:
 - attributes:
-  - doc: Description of Module
-    dtype: text
-    name: description
   - dims:
     - num_interfaces
     doc: 'Names of the data interfaces offered by this module. COMMENT: E.g., [0]="EventDetection",
@@ -11,6 +8,9 @@ groups:
     name: interfaces
     shape:
     - null
+  - doc: Description of Module
+    dtype: text
+    name: description
   doc: Module.  Name should be descriptive. Stores a collection of related data organized
     by contained interfaces.  Each interface is a contract specifying content related
     to a particular type of data.
@@ -19,54 +19,22 @@ groups:
     neurodata_type_inc: Interface
   neurodata_type_def: Module
 - attributes:
+  - doc: Value is TimeSeries
+    dtype: text
+    name: ancestry
+    value: TimeSeries
+  - doc: Description of TimeSeries
+    dtype: text
+    name: description
   - doc: Human-readable comments about the TimeSeries. This second descriptive field
       can be used to store additional information, or descriptive information if the
       primary description field is populated with a computer-readable string.
     dtype: text
     name: comments
-  - dims:
-    - num_tslinks
-    doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
-      timestamps field.  Example element of list: "/acquisition/timeseries/lick_trace"
-      COMMENT: Attribute is only present if links are present. List should include
-      the path to this TimeSeries also.'
-    dtype: text
-    name: timestamp_link
-    shape:
-    - null
   - doc: Value is General time series object
     dtype: text
     name: help
     value: General time series object
-  - doc: Value is TimeSeries
-    dtype: text
-    name: ancestry
-    value: TimeSeries
-  - dims:
-    - num_dlinks
-    doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
-      data field. Example element of list: "/stimulus/presentation/Sweep_0"` COMMENT:
-      Attribute is only present if links are present. List should include the path
-      to this TimeSeries also.'
-    dtype: text
-    name: data_link
-    shape:
-    - null
-  - doc: Name of TimeSeries or Modules that serve as the source for the data contained
-      here. It can also be the name of a device, for stimulus or acquisition data
-    dtype: text
-    name: source
-  - dims:
-    - num_extern_fields
-    doc: 'List of fields that are HDF5 external links.COMMENT: Only present if one
-      or more datasets is set to an HDF5 external link.'
-    dtype: text
-    name: extern_fields
-    shape:
-    - null
-  - doc: Description of TimeSeries
-    dtype: text
-    name: description
   - dims:
     - num_missing_fields
     doc: 'List of fields that are not optional (i.e. either required or recommended
@@ -77,7 +45,87 @@ groups:
     name: missing_fields
     shape:
     - null
+  - dims:
+    - num_tslinks
+    doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
+      timestamps field.  Example element of list: "/acquisition/timeseries/lick_trace"
+      COMMENT: Attribute is only present if links are present. List should include
+      the path to this TimeSeries also.'
+    dtype: text
+    name: timestamp_link
+    shape:
+    - null
+  - doc: Name of TimeSeries or Modules that serve as the source for the data contained
+      here. It can also be the name of a device, for stimulus or acquisition data
+    dtype: text
+    name: source
+  - dims:
+    - num_dlinks
+    doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
+      data field. Example element of list: "/stimulus/presentation/Sweep_0"` COMMENT:
+      Attribute is only present if links are present. List should include the path
+      to this TimeSeries also.'
+    dtype: text
+    name: data_link
+    shape:
+    - null
+  - dims:
+    - num_extern_fields
+    doc: 'List of fields that are HDF5 external links.COMMENT: Only present if one
+      or more datasets is set to an HDF5 external link.'
+    dtype: text
+    name: extern_fields
+    shape:
+    - null
   datasets:
+  - attributes:
+    - doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      dtype: text
+      name: unit
+    - doc: Value is 0.0
+      dtype: float32!
+      name: resolution
+      value: 0.0
+    - doc: Value is 1.0
+      dtype: float32!
+      name: conversion
+      value: 1.0
+    dims:
+    - num_times
+    doc: 'Data values. Can also store binary data (eg, image frames) COMMENT: This
+      field may be a link to data stored in an external file, especially in the case
+      of raw data.'
+    dtype: any
+    name: data
+    shape:
+    - null
+  - dims:
+    - num_control_values
+    doc: 'Description of each control value. COMMENT: Array length should be as long
+      as the highest number in control minus one, generating an zero-based indexed
+      array for control values.'
+    dtype: text
+    name: control_description
+    quantity: '?'
+    shape:
+    - null
+  - attributes:
+    - doc: Value is Seconds
+      dtype: text
+      name: unit
+      value: Seconds
+    - doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
+      dtype: float32!
+      name: rate
+    doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
+      spaced, the timestamp of the first sample can be specified and all subsequent
+      ones calculated from the sampling rate.'
+    dtype: float64!
+    name: starting_time
+    quantity: '?'
   - dims:
     - num_times
     doc: 'Numerical labels that apply to each element in data[]. COMMENT: Optional
@@ -111,54 +159,6 @@ groups:
       stimulus image stacks'
     dtype: int32
     name: num_samples
-  - attributes:
-    - doc: Value is 0.0
-      dtype: float32!
-      name: resolution
-      value: 0.0
-    - doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
-      dtype: text
-      name: unit
-    - doc: Value is 1.0
-      dtype: float32!
-      name: conversion
-      value: 1.0
-    dims:
-    - num_times
-    doc: 'Data values. Can also store binary data (eg, image frames) COMMENT: This
-      field may be a link to data stored in an external file, especially in the case
-      of raw data.'
-    dtype: any
-    name: data
-    shape:
-    - null
-  - attributes:
-    - doc: Value is Seconds
-      dtype: text
-      name: unit
-      value: Seconds
-    - doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
-      dtype: float32!
-      name: rate
-    doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
-      spaced, the timestamp of the first sample can be specified and all subsequent
-      ones calculated from the sampling rate.'
-    dtype: float64!
-    name: starting_time
-    quantity: '?'
-  - dims:
-    - num_control_values
-    doc: 'Description of each control value. COMMENT: Array length should be as long
-      as the highest number in control minus one, generating an zero-based indexed
-      array for control values.'
-    dtype: text
-    name: control_description
-    quantity: '?'
-    shape:
-    - null
   doc: General purpose time series.
   groups:
   - doc: "Lab specific time and sync information as provided directly from hardware\
