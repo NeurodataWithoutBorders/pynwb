@@ -53,8 +53,8 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
 
     @parent.setter
     def parent(self, parent_container):
-        if self.__parent:
-            self.__parent.__subcontainers.remove(self)
+        if self.__parent is not None:
+            raise Exception('cannot reassign parent')
         self.__parent = parent_container
         parent_container.__subcontainers.append(self)
 
