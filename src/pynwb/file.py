@@ -31,7 +31,7 @@ class NWBFile(NWBContainer):
                      'session_id',
                      'lab',
                      'institution',
-                     'raw_data'
+                     'raw_timeseries'
                      'stimulus'
                      'stimulus_template'
                      'ec_electrodes'
@@ -52,7 +52,13 @@ class NWBFile(NWBContainer):
             {'name': 'experiment_description', 'type': str, 'doc': 'general description of the experiment', 'default': None},
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
             {'name': 'institution', 'type': str, 'doc': 'institution(s) where experiment is performed', 'default': None},
-            {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None})
+            {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
+            {'name': 'raw_timeseries', 'type': (list, tuple), 'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
+            {'name': 'stimulus', 'type': (list, tuple), 'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
+            {'name': 'stimulus_template', 'type': (list, tuple), 'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
+            {'name': 'epochs', 'type': (list, tuple), 'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
+            {'name': 'modules', 'type': (list, tuple), 'doc': 'Module objects belonging to this NWBFile', 'default': None},
+    )
     def __init__(self, **kwargs):
         super(NWBFile, self).__init__()
         self.__filename = getargs('file_name', kwargs)
@@ -71,9 +77,10 @@ class NWBFile(NWBContainer):
         elif isinstance(self.__file_create_date, str):
             self.__file_create_date = [parse_date(self.__file_create_date)]
 
-        self.__raw_data = dict()
-        self.__stimulus = dict()
-        self.__stimulus_template = dict()
+        self.__raw_timeseries = self.__build_ts(getargs('raw_timeseries', kwargs))
+        print(len(self.__raw_timeseries), ' raw timeseries')
+        self.__stimulus = self.__build_ts(getargs('stimulus', kwargs))
+        self.__stimulus_template = self.__build_ts(getargs('stimulus_template', kwargs))
 
         self.__modules = dict()
         self.__epochs = dict()
@@ -89,6 +96,13 @@ class NWBFile(NWBContainer):
         ]
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
+
+    def __build_ts(self, const_arg):
+        ret = dict()
+        if const_arg:
+            for ts in const_arg:
+                self.__set_timeseries(ret, ts)
+        return ret
 
     @property
     def epochs(self):
@@ -123,8 +137,8 @@ class NWBFile(NWBContainer):
         return self.__session_start_time
 
     @property
-    def raw_data(self):
-        return tuple(self.__raw_data.values())
+    def raw_timeseries(self):
+        return tuple(self.__raw_timeseries.values())
 
     @property
     def stimulus(self):
@@ -138,8 +152,8 @@ class NWBFile(NWBContainer):
     def ec_electrodes(self):
         return tuple(self.__ec_electrodes.values())
 
-    def is_raw_data(self, ts):
-        return self.__exists(ts, self.__raw_data)
+    def is_raw_timeseries(self, ts):
+        return self.__exists(ts, self.__raw_timeseries)
 
     def is_stimulus(self, ts):
         return self.__exists(ts, self.__stimulus)
@@ -207,7 +221,7 @@ class NWBFile(NWBContainer):
         if isinstance(timeseries, TimeSeries):
             ts = timeseries
         elif isinstance(timeseries, str):
-            ts = self.__raw_data.get(timeseries,
+            ts = self.__raw_timeseries.get(timeseries,
                     self.__stimulus.get(timeseries,
                         self.__stimulus_template.get(timeseries, None)))
             if not ts:
@@ -224,7 +238,7 @@ class NWBFile(NWBContainer):
             returns="the TimeSeries object")
     def add_raw_timeseries(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', kwargs)
-        self.__set_timeseries(self.__raw_data, ts, epoch)
+        self.__set_timeseries(self.__raw_timeseries, ts, epoch)
 
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
@@ -242,7 +256,8 @@ class NWBFile(NWBContainer):
 
     def __set_timeseries(self, ts_dict, ts, epoch=None):
         ts_dict[ts.name] = ts
-        ts.parent = self
+        if ts.parent is None:
+            ts.parent = self
         if epoch:
             self.set_epoch_timeseries(epoch, ts)
 
@@ -260,7 +275,6 @@ class NWBFile(NWBContainer):
         """Add an electrode group (e.g. a probe, shank, tetrode).
         """
         eg_args, eg_kwargs = fmt_docval_args(ElectrodeGroup.__init__, kwargs)
-        eg_kwargs['parent'] = self
         elec_grp = ElectrodeGroup(*eg_args, **eg_kwargs)
         self.set_electrode_group(elec_grp)
         return elec_grp
@@ -300,5 +314,6 @@ class NWBFile(NWBContainer):
     @docval({'name': 'module',  'type': Module, 'doc': 'the processing module to add to this file'})
     def add_processing_module(self, **kwargs):
         module = getargs('module', kwargs)
-        module.parent = self
+        if module.parent is None:
+            module.parent = self
         self.__modules[module.name] = module
