@@ -337,6 +337,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def map_const_arg(self, **kwargs):
         """ Map an attribute to spec. Use this to override default behavior """
         const_arg, spec = getargs('const_arg', 'spec', kwargs)
+        if const_arg == 'raw_timeseries':
+            print('mapping raw_timeseries constructor argument to %s' % spec)
         self.__spec2carg[spec] = const_arg
 
     @docval({"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
