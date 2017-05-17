@@ -77,7 +77,7 @@ class SpecCatalog(object):
             self.register_spec(spec, source_file)
         for dataset_spec in spec.datasets:
             dset_ndt = dataset_spec.data_type_def
-            if dset_ndt is not None:
+            if dset_ndt is not None and not spec.is_inherited(dataset_spec):
                 self.register_spec(dataset_spec, source_file)
         for group_spec in spec.groups:
             self.auto_register(group_spec, source_file)

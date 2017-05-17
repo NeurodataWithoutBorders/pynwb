@@ -126,6 +126,9 @@ class NamespaceCatalog(object):
         self.__dataset_spec_cls = getargs('dataset_spec_cls', kwargs)
         self.__group_spec_cls = getargs('group_spec_cls', kwargs)
         self.__spec_namespace_cls = getargs('spec_namespace_cls', kwargs)
+        # keep track of all spec objects ever loaded, so we don't have
+        # multiple object instances of a spec
+        self.__loaded_specs = dict()
 
     @property
     def dataset_spec_cls(self):
@@ -168,9 +171,8 @@ class NamespaceCatalog(object):
         return self.__namespaces[namespace].get_spec(data_type)
 
 
-    __loaded_specs = dict()
 
-    def __load_spec_file(self, spec_file_path, catalog, dtypes=None):
+    def __load_spec_file(self, spec_file_path, catalog, dtypes=None, resolve=True):
         ret = self.__loaded_specs.get(spec_file_path)
         if ret is None:
             ret = dict()
@@ -183,15 +185,15 @@ class NamespaceCatalog(object):
                     dt_def = spec_dict.get(self.__group_spec_cls.def_key())
                     if dtypes and dt_def not in dtypes:
                         continue
-                    dt_inc = spec_dict.get(self.__group_spec_cls.inc_key())
-                    if dt_inc is not None:
-                        parent_spec = catalog.get_spec(dt_inc)
-                        if parent_spec is None:
-                            raise ValueError("Cannot resolve include spec '%s' for type '%s'" % (dt_inc, dt_def))
-                        spec_dict[self.__group_spec_cls.inc_key()] = parent_spec
+                    if resolve:
+                        dt_inc = spec_dict.get(self.__group_spec_cls.inc_key())
+                        if dt_inc is not None:
+                            parent_spec = catalog.get_spec(dt_inc)
+                            if parent_spec is None:
+                                raise ValueError("Cannot resolve include spec '%s' for type '%s'" % (dt_inc, dt_def))
+                            spec_dict[self.__group_spec_cls.inc_key()] = parent_spec
                     spec_obj = self.__group_spec_cls.build_spec(spec_dict)
                     catalog.auto_register(spec_obj, spec_file_path)
-                    #ret[spec_obj.data_type_def] = spec_obj
             self.__loaded_specs[spec_file_path] = ret
         return ret
 
@@ -201,8 +203,10 @@ class NamespaceCatalog(object):
             return spec_path
         return os.path.join(os.path.dirname(ns_path), spec_path)
 
-    def load_namespaces(self, namespace_path):
-        # TODO: adapt to be a classmethod on NamespaceCatalog
+    @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
+            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True})
+    def load_namespaces(self, **kwargs):
+        namespace_path, resolve = getargs('namespace_path', 'resolve', kwargs)
         # load namespace definition from file
         if not os.path.exists(namespace_path):
             raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
@@ -223,7 +227,7 @@ class NamespaceCatalog(object):
                     dtypes = None
                     if types_key in s:
                         dtypes = set(s[types_key])
-                    ndts = self.__load_spec_file(spec_file, catalog, dtypes=dtypes)
+                    ndts = self.__load_spec_file(spec_file, catalog, dtypes=dtypes, resolve=resolve)
                     #for ndt, spec in ndts:
                     #    catalog.auto_register(spec, spec_file)
                 elif 'namespace' in s:
