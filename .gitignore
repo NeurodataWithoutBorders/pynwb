@@ -24,3 +24,7 @@ dist/
 
 docs/tmpl.conf.py
 docs/tmpl.index.rst
+
+# coverage output
+tests/coverage/htmlcov
+.coverage

@@ -446,6 +446,7 @@ class GroupSpec(BaseStorageSpec):
         self.__links = dict()
         for link in links:
             self.set_link(link)
+        self.__inherited_data_type_defs = set()
         super(GroupSpec, self).__init__(doc, **kwargs)
 
     @docval({'name': 'inc_spec', 'type': 'GroupSpec', 'doc': 'the data type this specification represents'})
@@ -456,12 +457,24 @@ class GroupSpec(BaseStorageSpec):
                 self.__datasets[dataset.name].resolve_spec(dataset)
             else:
                 self.set_dataset(dataset)
+            if dataset.data_type_def is not None:
+                self.__inherited_data_type_defs.add(dataset.data_type_def)
         for group in inc_spec.groups:
             if group.name in self.__groups:
                 self.__groups[group.name].resolve_spec(group)
             else:
                 self.set_group(group)
+            if group.data_type_def is not None:
+                self.__inherited_data_type_defs.add(group.data_type_def)
         super(GroupSpec, self).resolve_spec(inc_spec)
+
+    @docval({'name': 'spec', 'type': 'BaseStorageSpec', 'doc': 'the specification to check'})
+    def is_inherited(self, **kwargs):
+        ''' Returns True if `spec` represents a spec that was inherited from an included data_type '''
+        spec = getargs('spec', kwargs)
+        if spec.data_type_def is None:
+            raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
+        return spec.data_type_def in self.__inherited_data_type_defs
 
     def __add_data_type_inc(self, spec):
         dt = None
