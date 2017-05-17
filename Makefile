@@ -1,20 +1,48 @@
+PYTHON = python3
+COVERAGE = coverage
+
+help:
+	@echo "Please use \`make <target>' where <target> is one of"
+	@echo "  init           to install required packages"
+	@echo "  build          to build the python package(s)"
+	@echo "  install        to build and install the python package(s)"
+	@echo "  develop        to build and install the python package(s) for development"
+	@echo "  test           to run all unit tests"
+	@echo "  htmldoc        to make the HTML documentation"
+	@echo "  pdfdoc         to make the LaTeX sources and build the PDF of the documentation"
+	@echo "  coverage       to run coverage"
+	@echo "  coverage_html  to run coverage and build the coverage report in HTML"
+	@echo ""
+
 init:
 	pip install -r requirements.txt
 
 build:
-	python3 setup.py build
+	$(PYTHON) setup.py build
 
 install: build
-	python3 setup.py install
+	$(PYTHON) setup.py install
 
 develop: build
-	python3 setup.py develop
+	$(PYTHON) setup.py develop
 
 test:
-	python3 test.py
+	$(PYTHON) test.py
+
+htmldoc:
+	cd docs && $(MAKE) html
+	@echo ""
+	@echo "To view the PDF documentation open: docs/_build/html/index.html"
+
+pdfdoc:
+	cd docs && $(MAKE) latexpdf
+	@echo ""
+	@echo "To view the PDF documentation open: docs/_build/latex/PyNWB.pdf"
 
 coverage:
-	coverage3 run --source=. test.py
+	$(COVERAGE) run --source=. test.py
 
 coverage_html: coverage
-	coverage3 html -d tests/coverage/htmlcov
+	$(COVERAGE) html -d tests/coverage/htmlcov
+	@echo ""
+	@echo "To view coverage data open: tests/coverage/htmlcov/index.html"
