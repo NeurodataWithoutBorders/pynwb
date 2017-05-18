@@ -449,7 +449,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __add_datasets(self, builder, datasets, container, build_manager):
         for spec in datasets:
             attr_value = self.get_attr_value(spec, container)
-            if not attr_value:
+            if attr_value is None:
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value)

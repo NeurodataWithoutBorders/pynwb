@@ -39,7 +39,8 @@ class NWBFile(NWBContainer):
                      'imaging_planes',
                      'optogenetic_sites',
                      'modules',
-                     'epochs')
+                     'epochs',
+                     'devices')
 
     __nwb_version = '1.0.6'
 
@@ -58,6 +59,7 @@ class NWBFile(NWBContainer):
             {'name': 'stimulus_template', 'type': (list, tuple), 'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'epochs', 'type': (list, tuple), 'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
             {'name': 'modules', 'type': (list, tuple), 'doc': 'Module objects belonging to this NWBFile', 'default': None},
+            {'name': 'devices', 'type': (list, tuple), 'doc': 'Device objects belonging to this NWBFile', 'default': None},
     )
     def __init__(self, **kwargs):
         super(NWBFile, self).__init__()
@@ -85,6 +87,7 @@ class NWBFile(NWBContainer):
         self.__epochs = dict()
         self.__ec_electrodes = dict()
         self.__ec_electrode_idx = dict()
+        self.__devices = dict()
 
         recommended = [
             'experimenter',
@@ -102,6 +105,10 @@ class NWBFile(NWBContainer):
             for ts in const_arg:
                 self.__set_timeseries(ret, ts)
         return ret
+
+    @property
+    def devices(self):
+        return self.__devices
 
     @property
     def epochs(self):
@@ -278,6 +285,7 @@ class NWBFile(NWBContainer):
         self.set_electrode_group(elec_grp)
         return elec_grp
 
+
     @docval({'name': 'elec_grp', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'})
     def set_electrode_group(self, **kwargs):
         elec_grp = getargs('elec_grp', kwargs)
@@ -285,7 +293,22 @@ class NWBFile(NWBContainer):
         name = elec_grp.name
         self.__ec_electrodes[name] = elec_grp
         self.__ec_electrode_idx[name] = len(self.__ec_electrode_idx)
+        # TODO: get rid of this line when you have time to make sure it doesn't break anything
         return self.__ec_electrode_idx[name]
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'})
+    def create_device(self, **kwargs):
+        name = getargs('name', kwargs)
+        device = Device(name)
+        self.set_device(device)
+        return device
+
+    @docval({'name': 'device', 'type': Device, 'doc': 'the Device object to add to this NWBFile'})
+    def set_device(self, **kwargs):
+        device = getargs('device', kwargs)
+        device.parent = self
+        name = device.name
+        self.__devices[name] = device
 
     @docval({'name': 'name', 'type': (ElectrodeGroup, str), 'doc': 'the name of the electrode group or the ElectrodeGroup object'})
     def get_electrode_group_idx(self, **kwargs):
