@@ -163,7 +163,7 @@ def write_group(**kwargs):
     # write all links
     if links:
         for link_name, builder in links.items():
-            write_link(group, name, builder.target)
+            write_link(group, name, builder.builder)
     set_attributes(group, attributes)
     return group
 
@@ -209,6 +209,8 @@ def __get_type(data):
     elif not hasattr(data, '__len__'):
         return type(data)
     else:
+        if len(data) == 0:
+            raise ValueError('cannot determine type for empty data')
         return __get_type(data[0])
 
 def isinstance_inmemory_array(data):
