@@ -303,7 +303,7 @@ class NWBFile(NWBContainer):
         self.set_device(device)
         return device
 
-    @docval({'name': 'name', 'type': Device, 'doc': 'the Device object to add to this NWBFile'})
+    @docval({'name': 'device', 'type': Device, 'doc': 'the Device object to add to this NWBFile'})
     def set_device(self, **kwargs):
         device = getargs('device', kwargs)
         device.parent = self
