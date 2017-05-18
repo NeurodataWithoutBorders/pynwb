@@ -76,14 +76,14 @@ class ElectricalSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
             {'name': 'electrode_group', 'type': ElectrodeGroup, 'doc': 'The names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to.'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
@@ -120,8 +120,8 @@ class SpikeEventSeries(ElectricalSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data'},
+            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries), 'doc': 'Timestamps for samples stored in data'},
             {'name': 'electrode_group', 'type': ElectrodeGroup, 'doc': 'The names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to.', 'ndim': 1},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
