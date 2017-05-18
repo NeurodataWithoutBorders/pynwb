@@ -154,10 +154,16 @@ class FilteredEphysConstructor(unittest.TestCase):
 class FeatureExtractionConstructor(unittest.TestCase):
     def test_init(self):
         event_times = [ 1 ]
-        electrodes  = [ 'elec1', 'elec2' ]
+        dev1 = Device('dev1')
+        channel_description = ('ch1', 'ch2')
+        channel_location = ('lo1', 'lo2')
+        channel_filtering = ('fi1', 'fi2')
+        channel_coordinates = ('co1', 'co2')
+        channel_impedance = ('im1', 'im2')
+        elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
         description = [ 'desc1', 'desc2', 'desc3' ]
         features = [[[0,1,2], [3,4,5]]]
-        fe = FeatureExtraction('test_fe', electrodes, description, event_times, features)
+        fe = FeatureExtraction('test_fe', elec1, description, event_times, features)
         self.assertEqual(fe.source, 'test_fe')
 
     def test_invalid_init_mismatched_event_times(self):
