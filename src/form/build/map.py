@@ -273,6 +273,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         """ Create a map from Container attributes to NWB specifications """
         spec = getargs('spec', kwargs)
         self.__spec = spec
+        self.__data_type_key = spec.type_key()
         self.__spec2attr = dict()
         self.__spec2carg = dict()
         self.__map_spec(spec)
@@ -337,8 +338,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def map_const_arg(self, **kwargs):
         """ Map an attribute to spec. Use this to override default behavior """
         const_arg, spec = getargs('const_arg', 'spec', kwargs)
-        if const_arg == 'raw_timeseries':
-            print('mapping raw_timeseries constructor argument to %s' % spec)
         self.__spec2carg[spec] = const_arg
 
     @docval({"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
@@ -523,7 +522,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                     continue
                 subspec = get_subspec(spec, sub_builder)
                 if subspec is not None:
-                    if 'data_type' in sub_builder.attributes:
+                    if self.__data_type_key in sub_builder.attributes:
                         val = manager.construct(sub_builder)
                         if subspec.is_many():
                             if subspec in ret:
