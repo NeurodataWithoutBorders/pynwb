@@ -273,6 +273,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         """ Create a map from Container attributes to NWB specifications """
         spec = getargs('spec', kwargs)
         self.__spec = spec
+        self.__data_type_key = spec.type_key()
         self.__spec2attr = dict()
         self.__spec2carg = dict()
         self.__map_spec(spec)
@@ -521,7 +522,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                     continue
                 subspec = get_subspec(spec, sub_builder)
                 if subspec is not None:
-                    if 'data_type' in sub_builder.attributes:
+                    if self.__data_type_key in sub_builder.attributes:
                         val = manager.construct(sub_builder)
                         if subspec.is_many():
                             if subspec in ret:

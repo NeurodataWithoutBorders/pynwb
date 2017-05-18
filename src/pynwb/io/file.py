@@ -7,7 +7,9 @@ class NWBFileMap(ObjectMapper):
 
     def __init__(self, spec):
         super(NWBFileMap, self).__init__(spec)
-        self.map_attr('raw_data', self.spec.get_group('acquisition').get_group('timeseries').get_neurodata_type('TimeSeries'))
+        raw_ts_spec = self.spec.get_group('acquisition').get_group('timeseries').get_neurodata_type('TimeSeries')
+        self.map_attr('raw_timeseries', raw_ts_spec)
+        self.map_const_arg('raw_timeseries', raw_ts_spec)
         stimulus_spec = self.spec.get_group('stimulus')
         self.map_attr('stimulus', stimulus_spec.get_group('presentation'))
         self.map_attr('stimulus_templates', stimulus_spec.get_group('templates'))

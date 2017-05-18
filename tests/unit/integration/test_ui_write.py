@@ -8,7 +8,7 @@ from form.build import GroupBuilder, DatasetBuilder
 from form.backends.hdf5 import HDF5IO
 from pynwb import get_build_manager
 
-from pynwb import NWBFile, TimeSeries
+from pynwb import NWBContainer, NWBFile, TimeSeries
 
 CORE_NAMESPACE = 'core'
 
@@ -48,12 +48,21 @@ class TestNWBContainerIO(unittest.TestCase):
             raise unittest.SkipTest('Cannot run test unless setUpContainer is implemented')
 
     def assertContainerEqual(self, container1, container2):
-        pass
+        type1 = type(container1)
+        type2 = type(container2)
+        self.assertEqual(type1, type2)
+        for nwbfield in container1.__nwbfields__:
+            with self.subTest(nwbfield=nwbfield, container_type=type1.__name__):
+                f1 = getattr(container1, nwbfield)
+                f2 = getattr(container2, nwbfield)
+                if isinstance(f1, tuple) or isinstance(f1, list):
+                    if len(f1) > 0 and isinstance(f1[0], NWBContainer):
+                        for sub1, sub2 in zip(f1,f2):
+                            self.assertContainerEqual(sub1, sub2)
+                        continue
+                self.assertEqual(f1, f2)
 
 class TestTimeSeriesIO(TestNWBContainerIO):
-
-    def setUp(self):
-        super(TestTimeSeriesIO, self).setUp()
 
     def setUpContainer(self):
         self.container = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
@@ -126,7 +135,9 @@ class TestNWBFileIO(TestNWBContainerIO):
         hdf5io.write(self.container)
         hdf5io.close()
         container = hdf5io.read()
-        # the read NWBFile object doesn't have any TimeSeries
+        self.assertIsInstance(container, NWBFile)
+        raw_ts = container.raw_timeseries
+        self.assertEqual(len(raw_ts), 1)
+        self.assertIsInstance(raw_ts[0], TimeSeries)
         hdf5io.close()
-        #TODO add some asserts
 

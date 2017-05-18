@@ -46,6 +46,7 @@ groups:
       groups:
       - doc: TimeSeries object containing data generated during data acquisition
         neurodata_type_inc: TimeSeries
+        quantity: '*'
       name: timeseries
     - datasets:
       - attributes:
