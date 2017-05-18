@@ -296,14 +296,14 @@ class FeatureExtraction(Interface):
     """
 
     __nwbfields__ = ('description',
-                     'electrodes',
+                     'electrode_group',
                      'times',
                      'features')
 
     __help = "Container for salient features of detected events"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface'},
-            {'name': 'electrode_group', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'The electrode groups for each channel from which features were extracted', 'ndim': 1},
+            {'name': 'electrode_group', 'type': ElectrodeGroup, 'doc': 'The electrode groups for each channel from which features were extracted', 'ndim': 1},
             {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'A description for each feature extracted', 'ndim': 1},
             {'name': 'times', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'The times of events that features correspond to', 'ndim': 1},
             {'name': 'features', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'Features for each channel', 'ndim': 3})
@@ -323,7 +323,7 @@ class FeatureExtraction(Interface):
                                                                 ignore_undetermined=True))
         # Validate electrodes compared to features
         shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=electrode_group,
+                                                                data2=electrode_group.channel_description,
                                                                 axes1=1,
                                                                 axes2=0,
                                                                 name1='feature_shape',
