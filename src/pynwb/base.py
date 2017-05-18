@@ -219,6 +219,8 @@ class TimeSeries(NWBContainer):
 
     @property
     def timestamps(self):
+        if 'timestamps' not in self.fields:
+            return None
         if isinstance(self.fields['timestamps'], TimeSeries):
             return self.fields['timestamps'].timestamps
         else:
