@@ -178,7 +178,7 @@ def write_link(**kwargs):
     curr = target_builder
     while curr is not None:
         names.append(curr.name)
-        curr = target_builder.parent
+        curr = curr.parent
     delim = "/"
     path = "%s%s" % (delim, delim.join(reversed(names)))
     # source will indicate target_builder's location
