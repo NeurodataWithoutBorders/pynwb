@@ -7,20 +7,6 @@ groups:
     value: Features of an applied stimulus. This is useful when storing the raw stimulus
       is impractical
   datasets:
-  - attributes:
-    - doc: Value is see 'feature_units'
-      dtype: None
-      name: unit
-      value: see 'feature_units'
-    dims:
-    - num_times
-    - num_features
-    doc: Values of each feature at each time.
-    dtype: float32
-    name: data
-    shape:
-    - null
-    - null
   - dims:
     - num_features
     doc: Units of each feature.
@@ -35,6 +21,20 @@ groups:
     dtype: text
     name: features
     shape:
+    - null
+  - attributes:
+    - doc: Value is see 'feature_units'
+      dtype: None
+      name: unit
+      value: see 'feature_units'
+    dims:
+    - num_times
+    - num_features
+    doc: Values of each feature at each time.
+    dtype: float32
+    name: data
+    shape:
+    - null
     - null
   doc: Abstract features, such as quantitative descriptions of sensory stimuli. The
     TimeSeries::data field is a 2D array, storing those features (e.g., for visual
@@ -53,18 +53,18 @@ groups:
     value: Time-stamped annotations about an experiment
   datasets:
   - attributes:
-    - doc: Value is n/a
-      dtype: None
-      name: unit
-      value: n/a
-    - doc: Value is float('NaN')
-      dtype: None
-      name: resolution
-      value: NaN
     - doc: Value is float('NaN')
       dtype: None
       name: conversion
       value: NaN
+    - doc: Value is float('NaN')
+      dtype: None
+      name: resolution
+      value: NaN
+    - doc: Value is n/a
+      dtype: None
+      name: unit
+      value: n/a
     dims:
     - num_times
     doc: Annotations made during an experiment.
@@ -85,18 +85,18 @@ groups:
     value: Stores the start and stop times for events
   datasets:
   - attributes:
-    - doc: Value is n/a
-      dtype: None
-      name: unit
-      value: n/a
-    - doc: Value is float('NaN')
-      dtype: None
-      name: resolution
-      value: NaN
     - doc: Value is float('NaN')
       dtype: None
       name: conversion
       value: NaN
+    - doc: Value is float('NaN')
+      dtype: None
+      name: resolution
+      value: NaN
+    - doc: Value is n/a
+      dtype: None
+      name: unit
+      value: n/a
     dims:
     - num_times
     doc: '>0 if interval started, <0 if interval ended.'
