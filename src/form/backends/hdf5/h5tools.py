@@ -268,7 +268,10 @@ def __selection_max_bounds__(selection):
         return tuple([__selection_max_bounds__(i) for i in selection])
 
 def __scalar_fill__(parent, name, data):
-    dtype = __get_type(data)
+    try:
+        dtype = __get_type(data)
+    except Exception as exc:
+        raise Exception('cannot add %s to %s - could not determine type' % (name, parent.name)) from exc
     try:
         dset = parent.require_dataset(name, data=data, shape=None, dtype=dtype)
     except Exception as exc:
@@ -312,7 +315,10 @@ def __chunked_iter_fill__(parent, name, data):
 
 def __list_fill__(parent, name, data):
     data_shape = __get_shape(data)
-    data_dtype = __get_type(data)
+    try:
+        data_dtype = __get_type(data)
+    except Exception as exc:
+        raise Exception('cannot add %s to %s - could not determine type' % (name, parent.name)) from exc
     try:
         dset = parent.require_dataset(name, shape=data_shape, dtype=data_dtype)
     except Exception as exc:
