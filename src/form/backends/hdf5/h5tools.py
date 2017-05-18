@@ -267,7 +267,10 @@ def __selection_max_bounds__(selection):
 
 def __scalar_fill__(parent, name, data):
     dtype = __get_type(data)
-    dset = parent.require_dataset(name, data=data, shape=None, dtype=dtype)
+    try:
+        dset = parent.require_dataset(name, data=data, shape=None, dtype=dtype)
+    except Exception as exc:
+        raise Exception("Could not create scalar dataset %s in %s" % (name, parent.name)) from exc
     return dset
 
 def __chunked_iter_fill__(parent, name, data):
@@ -285,7 +288,10 @@ def __chunked_iter_fill__(parent, name, data):
     recommended_chunks = data.recommended_chunk_shape()
     chunks = True if recommended_chunks is None else recommended_chunks
     baseshape = data.recommended_data_shape()
-    dset = parent.require_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
+    try:
+        dset = parent.require_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
+    except Exception as exc:
+        raise Exception("Could not create scalar dataset %s in %s" % (name, parent.name)) from exc
     for chunk_i in data:
         # Determine the minimum array dimensions to fit the chunk selection
         max_bounds = __selection_max_bounds__(chunk_i.selection)
@@ -305,7 +311,10 @@ def __chunked_iter_fill__(parent, name, data):
 def __list_fill__(parent, name, data):
     data_shape = __get_shape(data)
     data_dtype = __get_type(data)
-    dset = parent.require_dataset(name, shape=data_shape, dtype=data_dtype)
+    try:
+        dset = parent.require_dataset(name, shape=data_shape, dtype=data_dtype)
+    except Exception as exc:
+        raise Exception("Could not create scalar dataset %s in %s" % (name, parent.name)) from exc
     if len(data) > dset.shape[0]:
         new_shape = list(dset.shape)
         new_shape[0] = len(data)
