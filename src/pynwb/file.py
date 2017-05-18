@@ -31,10 +31,10 @@ class NWBFile(NWBContainer):
                      'session_id',
                      'lab',
                      'institution',
-                     'raw_timeseries'
-                     'stimulus'
-                     'stimulus_template'
-                     'ec_electrodes'
+                     'raw_timeseries',
+                     'stimulus',
+                     'stimulus_template',
+                     'ec_electrodes',
                      'ic_electrodes',
                      'imaging_planes',
                      'optogenetic_sites',
@@ -78,7 +78,6 @@ class NWBFile(NWBContainer):
             self.__file_create_date = [parse_date(self.__file_create_date)]
 
         self.__raw_timeseries = self.__build_ts(getargs('raw_timeseries', kwargs))
-        print(len(self.__raw_timeseries), ' raw timeseries')
         self.__stimulus = self.__build_ts(getargs('stimulus', kwargs))
         self.__stimulus_template = self.__build_ts(getargs('stimulus_template', kwargs))
 
