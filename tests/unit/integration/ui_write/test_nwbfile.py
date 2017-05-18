@@ -6,40 +6,12 @@ import os
 
 from form.build import GroupBuilder, DatasetBuilder
 from form.backends.hdf5 import HDF5IO
-from pynwb import get_build_manager
 
 from pynwb import NWBFile, TimeSeries
 
-from .base import TestNWBContainerIO
+from .  import base
 
-CORE_NAMESPACE = 'core'
-
-class SetEncoder(json.JSONEncoder):
-    def default(self, o):
-        if isinstance(o, set) or isinstance(o, frozenset):
-            return list(o)
-        else:
-            return json.JSONEncoder.default(self, o)
-
-class TestTimeSeriesIO(TestNWBContainerIO):
-
-    def setUpContainer(self):
-        self.container = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
-
-    def setUpBuilder(self):
-        self.builder = GroupBuilder('test_timeseries',
-                                attributes={'ancestry': 'TimeSeries',
-                                            'source': 'example_source',
-                                            'namespace': CORE_NAMESPACE,
-                                            'neurodata_type': 'TimeSeries',
-                                            'help': 'General purpose TimeSeries'},
-                                datasets={'data': DatasetBuilder('data', list(range(100,200,10)),
-                                                                 attributes={'unit': 'SIunit',
-                                                                             'conversion': 1.0,
-                                                                             'resolution': 0.1}),
-                                          'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                 attributes={'unit': 'Seconds', 'interval': 1})})
-class TestNWBFileIO(TestNWBContainerIO):
+class TestNWBFileIO(base.TestNWBContainerIO):
 
     def setUp(self):
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
@@ -51,7 +23,7 @@ class TestNWBFileIO(TestNWBContainerIO):
         ts_builder = GroupBuilder('test_timeseries',
                                  attributes={'ancestry': 'TimeSeries',
                                              'source': 'example_source',
-                                             'namespace': CORE_NAMESPACE,
+                                             'namespace': base.CORE_NAMESPACE,
                                              'neurodata_type': 'TimeSeries',
                                              'help': 'General purpose TimeSeries'},
                                  datasets={'data': DatasetBuilder('data', list(range(100,200,10)),
@@ -72,7 +44,7 @@ class TestNWBFileIO(TestNWBContainerIO):
                                            'session_description': DatasetBuilder('session_description', 'a test NWB File'),
                                            'nwb_version': DatasetBuilder('nwb_version', '1.0.6'),
                                            'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
-                                 attributes={'namespace': CORE_NAMESPACE, 'neurodata_type': 'NWBFile'})
+                                 attributes={'namespace': base.CORE_NAMESPACE, 'neurodata_type': 'NWBFile'})
 
     def setUpContainer(self):
         self.container = NWBFile('test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)

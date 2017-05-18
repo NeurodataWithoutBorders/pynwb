@@ -2,6 +2,8 @@ import unittest
 
 from pynwb import NWBContainer, get_build_manager
 
+CORE_NAMESPACE = 'core'
+
 class TestNWBContainerIO(unittest.TestCase):
 
     def setUp(self):
@@ -43,5 +45,10 @@ class TestNWBContainerIO(unittest.TestCase):
                         for sub1, sub2 in zip(f1,f2):
                             self.assertContainerEqual(sub1, sub2)
                         continue
-                self.assertEqual(f1, f2)
+                    else:
+                        self.assertEqual(f1, f2)
+                elif isinstance(f1, NWBContainer):
+                    self.assertContainerEqual(f1, f2)
+                else:
+                    self.assertEqual(f1, f2)
 
