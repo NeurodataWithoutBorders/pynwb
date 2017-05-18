@@ -7,39 +7,33 @@ from pynwb.ecephys import *
 class ElectricalSeriesConstructor(unittest.TestCase):
     def test_init(self):
         dev1 = Device('dev1')
-        dev2 = Device('dev2')
         channel_description = ('ch1', 'ch2')
         channel_location = ('lo1', 'lo2')
         channel_filtering = ('fi1', 'fi2')
         channel_coordinates = ('co1', 'co2')
         channel_impedance = ('im1', 'im2')
         elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
-        elec2 = ElectrodeGroup('elec2', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc2', 'loc2', dev2)
-        elec = (elec1, elec2)
         data = list()
 
-        eS = ElectricalSeries('test_eS', 'a hypothetical source', data, elec, timestamps=list())
+        eS = ElectricalSeries('test_eS', 'a hypothetical source', data, elec1, timestamps=list())
         self.assertEqual(eS.name, 'test_eS')
         self.assertEqual(eS.source, 'a hypothetical source')
         self.assertEqual(eS.data, data)
-        self.assertEqual(eS.electrode_group, elec)
+        self.assertEqual(eS.electrode_group, elec1)
 
 class SpikeEventSeriesConstructor(unittest.TestCase):
     def test_init(self):
         dev1 = Device('dev1')
-        dev2 = Device('dev2')
         channel_description = ('ch1', 'ch2')
         channel_location = ('lo1', 'lo2')
         channel_filtering = ('fi1', 'fi2')
         channel_coordinates = ([1.0, 1.0, 1.0], [1.0, 1.0, 1.0])
         channel_impedance = (-1, -1)
         elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
-        elec2 = ElectrodeGroup('elec2', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc2', 'loc2', dev2)
-        elec = (elec1, elec2)
         data = np.zeros(10)
         timestamps = np.arange(10)
 
-        sES = SpikeEventSeries('test_sES', 'a hypothetical source', data, timestamps, elec)
+        sES = SpikeEventSeries('test_sES', 'a hypothetical source', data, timestamps, elec1)
         self.assertEqual(sES.name, 'test_sES')
         self.assertEqual(sES.source, 'a hypothetical source')
 
@@ -65,7 +59,14 @@ class ElectrodeGroupConstructor(unittest.TestCase):
 
 class EventDetectionConstructor(unittest.TestCase):
     def test_init(self):
-        eS = ElectricalSeries('test_eS', 'a hypothetical source', list(), list(), timestamps=list())
+        dev1 = Device('dev1')
+        channel_description = ('ch1', 'ch2')
+        channel_location = ('lo1', 'lo2')
+        channel_filtering = ('fi1', 'fi2')
+        channel_coordinates = ('co1', 'co2')
+        channel_impedance = ('im1', 'im2')
+        elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
+        eS = ElectricalSeries('test_eS', 'a hypothetical source', list(), elec1, timestamps=list())
 
         eD = EventDetection('test_ed', 'detection_method', eS, (1, 2, 3), 'event_times')
         self.assertEqual(eD.source, 'test_ed')
@@ -77,7 +78,14 @@ class EventDetectionConstructor(unittest.TestCase):
 
 class EventWaveformConstructor(unittest.TestCase):
     def test_init(self):
-        sES = SpikeEventSeries('test_sES', 'a hypothetical source', list(range(10)), list(range(10)), list())
+        dev1 = Device('dev1')
+        channel_description = ('ch1', 'ch2')
+        channel_location = ('lo1', 'lo2')
+        channel_filtering = ('fi1', 'fi2')
+        channel_coordinates = ('co1', 'co2')
+        channel_impedance = ('im1', 'im2')
+        elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
+        sES = SpikeEventSeries('test_sES', 'a hypothetical source', list(range(10)), list(range(10)), elec1)
 
         ew  = EventWaveform('test_ew', sES)
         self.assertEqual(ew.source, 'test_ew')
@@ -115,7 +123,14 @@ class ClusterWaveformsConstructor(unittest.TestCase):
 
 class LFPConstructor(unittest.TestCase):
     def test_init(self):
-        eS = ElectricalSeries('test_eS', 'a hypothetical source', list(), list(), timestamps=list())
+        dev1 = Device('dev1')
+        channel_description = ('ch1', 'ch2')
+        channel_location = ('lo1', 'lo2')
+        channel_filtering = ('fi1', 'fi2')
+        channel_coordinates = ('co1', 'co2')
+        channel_impedance = ('im1', 'im2')
+        elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
+        eS = ElectricalSeries('test_eS', 'a hypothetical source', list(), elec1, timestamps=list())
 
         lfp = LFP('test_lfp', eS)
         self.assertEqual(lfp.source, 'test_lfp')
@@ -123,7 +138,14 @@ class LFPConstructor(unittest.TestCase):
 
 class FilteredEphysConstructor(unittest.TestCase):
     def test_init(self):
-        eS = ElectricalSeries('test_eS', 'a hypothetical source', list(), list(), timestamps=list())
+        dev1 = Device('dev1')
+        channel_description = ('ch1', 'ch2')
+        channel_location = ('lo1', 'lo2')
+        channel_filtering = ('fi1', 'fi2')
+        channel_coordinates = ('co1', 'co2')
+        channel_impedance = ('im1', 'im2')
+        elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
+        eS = ElectricalSeries('test_eS', 'a hypothetical source', list(), elec1, timestamps=list())
 
         fe = FilteredEphys('test_fe', eS)
         self.assertEqual(fe.source, 'test_fe')

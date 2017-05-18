@@ -7,19 +7,26 @@ from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_W
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
 
 @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
-        {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to get the sub-specification for'},
+        {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder), 'doc': 'the builder to get the sub-specification for'},
         is_method=False)
 def get_subspec(**kwargs):
     '''
     Get the specification from this spec that corresponds to the given builder
     '''
     spec, builder = getargs('spec', 'builder', kwargs)
-    if isinstance(builder, DatasetBuilder):
+    if isinstance(builder, LinkBuilder):
+        builder_type = type(builder.builder)
+    else:
+        builder_type = type(builder)
+    if builder_type == DatasetBuilder:
         subspec = spec.get_dataset(builder.name)
     else:
         subspec = spec.get_group(builder.name)
     if subspec is None:
-        ndt = builder.attributes.get(spec.type_key())
+        if isinstance(builder, LinkBuilder):
+            ndt = builder.builder.attributes.get(spec.type_key())
+        else:
+            ndt = builder.attributes.get(spec.type_key())
         if ndt is not None:
             subspec = spec.get_data_type(ndt)
     return subspec
@@ -172,10 +179,6 @@ class TypeMap(object):
         container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
         self.__mapper_cls[container_cls] = mapper_cls
 
-#    def get_registered_types(self):
-#        """ Return all Container types that have a map specified """
-#        return tuple(self.__maps.keys())
-#
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             {"name": "manager", "type": BuildManager, "doc": "the BuildManager to use for managing this build", 'default': None})
     def build(self, **kwargs):
@@ -305,6 +308,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             for subspec in spec.groups:
                 if subspec.data_type_def is None:
                     self.__map_spec(subspec)
+            for subspec in spec.links:
+                self.__map_spec_helper(subspec)
 
     def __map_spec_helper(self, spec):
         if spec.name != NAME_WILDCARD:
@@ -410,6 +415,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             builder = GroupBuilder(name, parent=parent)
             self.__add_datasets(builder, self.__spec.datasets, container, manager)
             self.__add_groups(builder, self.__spec.groups, container, manager)
+            self.__add_links(builder, self.__spec.links, container, manager)
         else:
             builder = DatasetBuilder(name, parent=parent)
         self.__add_attributes(builder, self.__spec.attributes, container)
@@ -432,6 +438,13 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 else:
                     continue
             builder.set_attribute(spec.name, attr_value)
+
+    def __add_links(self, builder, links, container, build_manager):
+        for spec in links:
+            attr_value = self.get_attr_value(spec, container)
+            if not attr_value:
+                continue
+            self.__add_containers(builder, spec, attr_value, build_manager)
 
     def __add_datasets(self, builder, datasets, container, build_manager):
         for spec in datasets:
@@ -486,10 +499,10 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __add_containers(self, builder, spec, value, build_manager):
         if isinstance(value, Container):
             rendered_obj = build_manager.build(value)
-            name = build_manager.get_builder_name(value)
             # use spec to determine what kind of HDF5
             # object this Container corresponds to
             if isinstance(spec, LinkSpec):
+                name = spec.name
                 builder.set_link(LinkBuilder(name, rendered_obj, builder))
             elif isinstance(spec, DatasetSpec):
                 builder.set_dataset(rendered_obj)
@@ -520,8 +533,13 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 # GroupBuilder.items will return attributes as well, need to skip non Builder items
                 if not isinstance(sub_builder, Builder):
                     continue
+                link_name = None
+                if isinstance(sub_builder, LinkBuilder):
+                    link_name = sub_builder.name
                 subspec = get_subspec(spec, sub_builder)
                 if subspec is not None:
+                    if isinstance(subspec, LinkSpec):
+                        sub_builder = sub_builder.builder
                     if self.__data_type_key in sub_builder.attributes:
                         val = manager.construct(sub_builder)
                         if subspec.is_many():
@@ -549,6 +567,9 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         # get the constructor argument each specification corresponds to
         const_args = dict()
         for subspec, value in subspecs.items():
+            if subspec.name == 'electrode_group':
+                print('found electrode_group subspec in construct', subspec)
+
             const_arg = self.get_const_arg(subspec)
             if const_arg is not None:
                 const_args[const_arg] = value

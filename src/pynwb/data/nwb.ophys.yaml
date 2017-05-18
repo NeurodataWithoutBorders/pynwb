@@ -5,14 +5,6 @@ groups:
     name: help
     value: Image stack recorded from 2-photon microscope
   datasets:
-  - dims:
-    - width|height|depth
-    doc: Width, height and depth of image, or imaged area (meters).
-    dtype: float32
-    name: field_of_view
-    quantity: '?'
-    shape:
-    - 3
   - doc: Lines imaged per second. This is also stored in /general/optophysiology but
       is kept here as it is useful information for analysis, and so good to be stored
       w/ the actual data.
@@ -23,6 +15,14 @@ groups:
     dtype: float32
     name: pmt_gain
     quantity: '?'
+  - dims:
+    - width|height|depth
+    doc: Width, height and depth of image, or imaged area (meters).
+    dtype: float32
+    name: field_of_view
+    quantity: '?'
+    shape:
+    - 3
   doc: A special case of optical imaging.
   links:
   - doc: link to ImagingPlane group from which this TimeSeries data was generated
@@ -38,6 +38,9 @@ groups:
     value: ROI responses over an imaging plane. Each row in data[] should correspond
       to the signal from one ROI
   datasets:
+  - doc: Path to segmentation module.
+    dtype: text
+    name: segmentation_interface_path
   - dims:
     - num_times
     - num_ROIs
@@ -54,9 +57,6 @@ groups:
     name: roi_names
     shape:
     - null
-  - doc: Path to segmentation module.
-    dtype: text
-    name: segmentation_interface_path
   doc: ROI responses over an imaging plane. Each row in data[] should correspond to
     the signal from one ROI.
   links:
@@ -78,6 +78,7 @@ groups:
   groups:
   - doc: RoiResponseSeries object containing dF/F for a ROI
     neurodata_type_inc: RoiResponseSeries
+    quantity: '*'
   name: DfOverF
   neurodata_type_def: DfOverF
   neurodata_type_inc: Interface
@@ -94,6 +95,7 @@ groups:
   groups:
   - doc: RoiResponseSeries object containing fluorescence data for a ROI
     neurodata_type_inc: RoiResponseSeries
+    quantity: +
   name: Fluorescence
   neurodata_type_def: Fluorescence
   neurodata_type_inc: Interface
@@ -133,9 +135,15 @@ groups:
         neurodata_type_inc: ImageSeries
       name: reference_images
     - datasets:
-      - doc: Description of this ROI.
-        dtype: text
-        name: roi_description
+      - dims:
+        - num_x
+        - num_y
+        doc: ROI mask, represented in 2D ([y][x]) intensity image
+        dtype: float32
+        name: img_mask
+        shape:
+        - null
+        - null
       - dims:
         - num_pixels
         doc: Weight of each pixel listed in pix_mask
@@ -152,15 +160,9 @@ groups:
         shape:
         - null
         - null
-      - dims:
-        - num_x
-        - num_y
-        doc: ROI mask, represented in 2D ([y][x]) intensity image
-        dtype: float32
-        name: img_mask
-        shape:
-        - null
-        - null
+      - doc: Description of this ROI.
+        dtype: text
+        name: roi_description
       doc: Name of ROI
       neurodata_type_def: ROI
       quantity: '*'
@@ -174,12 +176,19 @@ groups:
   neurodata_type_def: ImageSegmentation
   neurodata_type_inc: Interface
 - datasets:
-  - doc: Calcium indicator
-    dtype: text
-    name: indicator
   - doc: Name of device in /general/devices
     dtype: text
     name: device
+  - doc: Rate images are acquired, in Hz.
+    dtype: text
+    name: imaging_rate
+  - doc: Excitation wavelength
+    dtype: text
+    name: excitation_lambda
+  - doc: Description of &lt;image_plane_X&gt;
+    dtype: text
+    name: description
+    quantity: '?'
   - doc: 'Describes position and reference frame of manifold based on position of
       first element in manifold. For example, text description of anotomical location
       or vectors needed to rotate to common anotomical axis (eg, AP/DV/ML). COMMENT:
@@ -187,21 +196,18 @@ groups:
       this field is not required'
     dtype: text
     name: reference_frame
-  - doc: Excitation wavelength
+  - doc: Calcium indicator
     dtype: text
-    name: excitation_lambda
-  - doc: Location of image plane
-    dtype: text
-    name: location
+    name: indicator
   - attributes:
-    - doc: Value is Meter
-      dtype: text
-      name: unit
-      value: Meter
     - doc: Value is 1.0
       dtype: float
       name: conversion
       value: 1.0
+    - doc: Value is Meter
+      dtype: text
+      name: unit
+      value: Meter
     dims:
     - height
     - weight
@@ -214,24 +220,20 @@ groups:
     - null
     - null
     - 3
-  - doc: Description of &lt;image_plane_X&gt;
+  - doc: Location of image plane
     dtype: text
-    name: description
-    quantity: '?'
-  - doc: Rate images are acquired, in Hz.
-    dtype: text
-    name: imaging_rate
+    name: location
   doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name is
     arbitrary but should be meaningful. It is referenced by TwoPhotonSeries and also
     ImageSegmentation and DfOverF interfaces'
   groups:
   - datasets:
-    - doc: Emission lambda for channel
-      dtype: text
-      name: emission_lambda
     - doc: Any notes or comments about the channel
       dtype: text
       name: description
+    - doc: Emission lambda for channel
+      dtype: text
+      name: emission_lambda
     doc: 'One of possibly many groups storing channel-specific data COMMENT: Name
       is arbitrary but should be meaningful'
     neurodata_type_def: OpticalChannel

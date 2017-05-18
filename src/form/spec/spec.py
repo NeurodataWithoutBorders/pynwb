@@ -402,20 +402,36 @@ class DatasetSpec(BaseStorageSpec):
 _link_args = [
     {'name': 'doc', 'type': str, 'doc': 'a description about what this link represents'},
     {'name': 'target_type', 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
+    {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
     {'name': 'name', 'type': str, 'doc': 'the name of this link', 'default': None}
 ]
 class LinkSpec(Spec):
 
     @docval(*_link_args)
     def __init__(self, **kwargs):
-        doc, target_type, name = popargs('doc', 'target_type', 'name', kwargs)
+        doc, target_type, name, quantity = popargs('doc', 'target_type', 'name', 'quantity', kwargs)
         super(LinkSpec, self).__init__(doc, name, **kwargs)
         self['target_type'] = target_type
+        if quantity != 1:
+            self['quantity'] = quantity
+
+    @property
+    def target_type(self):
+        ''' The data type of target specification '''
+        return self.get('target_type')
 
     @property
     def data_type_inc(self):
         ''' The data type of target specification '''
         return self.get('target_type')
+
+    def is_many(self):
+        return self.quantity not in (1, ZERO_OR_ONE)
+
+    @property
+    def quantity(self):
+        ''' The number of times the object being specified should be present '''
+        return self.get('quantity', 1)
 
 _group_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},

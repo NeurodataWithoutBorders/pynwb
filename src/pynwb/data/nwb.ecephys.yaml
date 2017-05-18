@@ -74,12 +74,6 @@ groups:
     value: Mean waveform shape of clusters. Waveforms should be high-pass filtered
       (ie, not the same bandpass filter used waveform analysis and clustering)
   datasets:
-  - doc: Path to linked clustering interface
-    dtype: text
-    name: clustering_interface_path
-  - doc: Filtering applied to data before generating mean/sd
-    dtype: text
-    name: waveform_filtering
   - dims:
     - num_clusters
     - num_samples
@@ -92,6 +86,12 @@ groups:
     shape:
     - null
     - null
+  - doc: Path to linked clustering interface
+    dtype: text
+    name: clustering_interface_path
+  - doc: Filtering applied to data before generating mean/sd
+    dtype: text
+    name: waveform_filtering
   - dims:
     - num_clusters
     - num_samples
@@ -122,19 +122,23 @@ groups:
       or as a result of manual sorting
   datasets:
   - dims:
-    - num_clusters
-    doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
-      a basic clustering metric).
-    dtype: float32
-    name: peak_over_rms
-    shape:
-    - null
-  - dims:
     - num_events
     doc: Times of clustered events, in seconds. This may be a link to times field
       in associated FeatureExtraction module.
     dtype: float64!
     name: times
+    shape:
+    - null
+  - doc: Description of clusters or clustering, (e.g. cluster 0 is noise, clusters
+      curated using Klusters, etc)
+    dtype: text
+    name: description
+  - dims:
+    - num_clusters
+    doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
+      a basic clustering metric).
+    dtype: float32
+    name: peak_over_rms
     shape:
     - null
   - dims:
@@ -145,10 +149,6 @@ groups:
     name: cluster_nums
     shape:
     - null
-  - doc: Description of clusters or clustering, (e.g. cluster 0 is noise, clusters
-      curated using Klusters, etc)
-    dtype: text
-    name: description
   - dims:
     - num_events
     doc: Cluster number of each event
@@ -202,13 +202,6 @@ groups:
   neurodata_type_def: FeatureExtraction
   neurodata_type_inc: Interface
 - datasets:
-  - doc: Path to linked ElectricalSeries.
-    dtype: text
-    name: source_electricalseries_path
-  - doc: Description of how events were detected, such as voltage threshold, or dV/dT
-      threshold, as well as relevant values.
-    dtype: text
-    name: detection_method
   - attributes:
     - doc: Value is Seconds
       dtype: text
@@ -221,6 +214,10 @@ groups:
     name: times
     shape:
     - null
+  - doc: Description of how events were detected, such as voltage threshold, or dV/dT
+      threshold, as well as relevant values.
+    dtype: text
+    name: detection_method
   - dims:
     - num_events
     doc: Indices (zero-based) into source ElectricalSeries::data array corresponding
@@ -231,6 +228,9 @@ groups:
     name: source_idx
     shape:
     - null
+  - doc: Path to linked ElectricalSeries.
+    dtype: text
+    name: source_electricalseries_path
   doc: Detected spike events from voltage trace(s).
   links:
   - doc: HDF5 link to ElectricalSeries that this data was calculated from. Metadata
@@ -252,6 +252,7 @@ groups:
   groups:
   - doc: SpikeEventSeries object containing detected spike event waveforms
     neurodata_type_inc: SpikeEventSeries
+    quantity: '*'
   name: EventWaveform
   neurodata_type_def: EventWaveform
   neurodata_type_inc: Interface
@@ -276,6 +277,7 @@ groups:
   groups:
   - doc: ElectricalSeries object containing filtered electrophysiology data
     neurodata_type_inc: ElectricalSeries
+    quantity: +
   name: FilteredEphys
   neurodata_type_def: FilteredEphys
   neurodata_type_inc: Interface
@@ -292,6 +294,7 @@ groups:
   groups:
   - doc: ElectricalSeries object containing LFP data for one or channels
     neurodata_type_inc: ElectricalSeries
+    quantity: +
   name: LFP
   neurodata_type_def: LFP
   neurodata_type_inc: Interface
@@ -343,5 +346,6 @@ groups:
   doc: One of possibly many groups, one for each electrode group.
   links:
   - doc: the device that was used to record from this electrode group
+    name: device
     target_type: Device
   neurodata_type_def: ElectrodeGroup
