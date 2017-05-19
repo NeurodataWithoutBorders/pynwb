@@ -33,6 +33,13 @@ class Builder(dict, metaclass=ABCMeta):
         ''' The source of this Builder '''
         return self.__source
 
+    @source.setter
+    def source(self, s):
+        if self.__source is None:
+            self.__source = s
+        else:
+            raise ValueError('Cannot reset source once it is specified')
+
     @property
     def parent(self):
         ''' The parent Builder of this Builder '''
@@ -42,6 +49,8 @@ class Builder(dict, metaclass=ABCMeta):
     def parent(self, p):
         if self.__parent is None:
             self.__parent = p
+            if self.__source is None:
+                self.source =  p.source
         else:
             raise ValueError('Cannot reset parent once it is specified')
 
@@ -117,6 +126,28 @@ class GroupBuilder(BaseBuilder):
             self.set_link(link)
 
     @property
+    def source(self):
+        ''' The source of this Builder '''
+        return super(GroupBuilder, self).source
+
+    @source.setter
+    def source(self, s):
+        '''
+        A recursive setter to set all subgroups/datasets/links
+        source when this source is set
+        '''
+        super(GroupBuilder, self.__class__).source.fset(self, s)
+        for g in self.groups.values():
+            if g.source is None:
+                g.source = s
+        for d in self.datasets.values():
+            if d.source is None:
+                d.source = s
+        for l in self.links.values():
+            if l.source is None:
+                l.source = s
+
+    @property
     def groups(self):
         ''' The subgroups contained in this GroupBuilder '''
         return super().__getitem__(GroupBuilder.__group)
@@ -147,7 +178,6 @@ class GroupBuilder(BaseBuilder):
         super().__getitem__(obj_type)[name] = builder
         self.obj_type[name] = obj_type
         if builder.parent is None:
-            #setattr(builder, '_%s__parent' % builder.__class__.__name__, self)
             builder.parent = self
 
     @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
