@@ -185,8 +185,10 @@ def write_link(**kwargs):
     path = "%s%s" % (delim, delim.join(reversed(names)))
     # source will indicate target_builder's location
     if parent.file.filename == target_builder.source:
+        #print('creating link %s in %s to %s' % (name, parent.name, path))
         link_obj = SoftLink(path)
     else:
+        #print('creating link %s in %s to %s:%s' % (name, parent.name, target_builder.source, path))
         link_obj = ExternalLink(target_builder.source, path)
     parent[name] = link_obj
     return link_obj

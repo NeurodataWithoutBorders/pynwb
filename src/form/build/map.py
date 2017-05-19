@@ -466,7 +466,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 # we don't need to get attr_name since any named
                 # group does not have the concept of value
                 sub_builder = GroupBuilder(spec.name)
-                builder.set_group(sub_builder)
                 self.__add_attributes(sub_builder, spec.attributes, container)
                 self.__add_datasets(sub_builder, spec.datasets, container, build_manager)
 
@@ -484,8 +483,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                                 self.__add_containers(sub_builder, spec, item, build_manager)
                 self.__add_groups(sub_builder, spec.groups, container, build_manager)
                 empty = sub_builder.is_empty()
-                #if not empty or (empty and isinstance(spec.quantity, int)):
-                #    builder.set_group(sub_builder)
+                if not empty or (empty and isinstance(spec.quantity, int)):
+                    builder.set_group(sub_builder)
             else:
                 if spec.data_type_def is not None:
                     attr_name = self.get_attribute(spec)
