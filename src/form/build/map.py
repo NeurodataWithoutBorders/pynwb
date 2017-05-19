@@ -41,14 +41,15 @@ class BuildManager(object):
         self.__containers = dict()
         self.__type_map = type_map
 
-    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"})
+    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
+            {"name": "source", "type": str, "doc": "the source of container being built i.e. file path", 'default': None})
     def build(self, **kwargs):
         """ Build the GroupBuilder for the given Container"""
         container = getargs('container', kwargs)
         container_id = self.__conthash__(container)
         result = self.__builders.get(container_id)
         if result is None:
-            result = self.__type_map.build(container, self)
+            result = self.__type_map.build(container, self, source=getargs('source', kwargs))
             self.prebuilt(container, result)
         return result
 
@@ -180,7 +181,8 @@ class TypeMap(object):
         self.__mapper_cls[container_cls] = mapper_cls
 
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
-            {"name": "manager", "type": BuildManager, "doc": "the BuildManager to use for managing this build", 'default': None})
+            {"name": "manager", "type": BuildManager, "doc": "the BuildManager to use for managing this build", 'default': None},
+            {"name": "source", "type": str, "doc": "the source of container being built i.e. file path", 'default': None})
     def build(self, **kwargs):
         """ Build the GroupBuilder for the given Container"""
         container, manager = getargs('container', 'manager', kwargs)
@@ -190,7 +192,7 @@ class TypeMap(object):
         if attr_map is None:
             raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
-            builder = attr_map.build(container, manager)
+            builder = attr_map.build(container, manager, source=getargs('source', kwargs))
         namespace, data_type = self.__get_container_ns_dt(container)
         builder.set_attribute('namespace', namespace)
         builder.set_attribute(attr_map.spec.type_key(), data_type)
@@ -406,13 +408,14 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             {"name": "manager", "type": BuildManager, "doc": "the BuildManager to use for managing this build"},
             {"name": "parent", "type": Builder, "doc": "the parent of the resulting Builder", 'default': None},
+            {"name": "source", "type": str, "doc": "the source of container being built i.e. file path", 'default': None},
             returns="the Builder representing the given Container", rtype=Builder)
     def build(self, **kwargs):
         ''' Convert an Container to a Builder representation '''
-        container, manager, parent = getargs('container', 'manager', 'parent', kwargs)
+        container, manager, parent, source = getargs('container', 'manager', 'parent', 'source', kwargs)
         name = manager.get_builder_name(container)
         if isinstance(self.__spec, GroupSpec):
-            builder = GroupBuilder(name, parent=parent)
+            builder = GroupBuilder(name, parent=parent, source=source)
             self.__add_datasets(builder, self.__spec.datasets, container, manager)
             self.__add_groups(builder, self.__spec.groups, container, manager)
             self.__add_links(builder, self.__spec.links, container, manager)
@@ -463,6 +466,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 # we don't need to get attr_name since any named
                 # group does not have the concept of value
                 sub_builder = GroupBuilder(spec.name)
+                builder.set_group(sub_builder)
                 self.__add_attributes(sub_builder, spec.attributes, container)
                 self.__add_datasets(sub_builder, spec.datasets, container, build_manager)
 
@@ -480,8 +484,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                                 self.__add_containers(sub_builder, spec, item, build_manager)
                 self.__add_groups(sub_builder, spec.groups, container, build_manager)
                 empty = sub_builder.is_empty()
-                if not empty or (empty and isinstance(spec.quantity, int)):
-                    builder.set_group(sub_builder)
+                #if not empty or (empty and isinstance(spec.quantity, int)):
+                #    builder.set_group(sub_builder)
             else:
                 if spec.data_type_def is not None:
                     attr_name = self.get_attribute(spec)

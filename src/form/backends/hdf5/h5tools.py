@@ -8,13 +8,15 @@ from form.utils import DataChunkIterator, docval, getargs, popargs
 from ..io import FORMIO
 from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager
 
+ROOT_NAME = 'root'
+
 class HDF5IO(FORMIO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'})
     def __init__(self, **kwargs):
         path, manager = popargs('path', 'manager', kwargs)
-        super(HDF5IO, self).__init__(manager)
+        super(HDF5IO, self).__init__(manager, source=path)
         self.__path = path
         self.__built = dict()
 
@@ -22,7 +24,7 @@ class HDF5IO(FORMIO):
     def read_builder(self):
         self.open()
         #f = File(self.__path, 'r+')
-        f_builder = self.__read_group(self.__file, 'root')
+        f_builder = self.__read_group(self.__file, ROOT_NAME)
         return f_builder
 
     def __set_built(self, fpath, path, builder):
@@ -163,7 +165,7 @@ def write_group(**kwargs):
     # write all links
     if links:
         for link_name, builder in links.items():
-            write_link(group, name, builder.builder)
+            write_link(group, link_name, builder.builder)
     set_attributes(group, attributes)
     return group
 
@@ -176,7 +178,7 @@ def write_link(**kwargs):
     # get target path
     names = list()
     curr = target_builder
-    while curr is not None:
+    while curr is not None and curr.name != ROOT_NAME:
         names.append(curr.name)
         curr = curr.parent
     delim = "/"

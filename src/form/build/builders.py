@@ -42,6 +42,8 @@ class Builder(dict, metaclass=ABCMeta):
     def parent(self, p):
         if self.__parent is None:
             self.__parent = p
+            if self.__source is None:
+                self.__source =  p.source
         else:
             raise ValueError('Cannot reset parent once it is specified')
 
@@ -147,7 +149,6 @@ class GroupBuilder(BaseBuilder):
         super().__getitem__(obj_type)[name] = builder
         self.obj_type[name] = obj_type
         if builder.parent is None:
-            #setattr(builder, '_%s__parent' % builder.__class__.__name__, self)
             builder.parent = self
 
     @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
