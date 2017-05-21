@@ -3,6 +3,7 @@ for reading and writing data in NWB format
 '''
 import os.path
 
+CORE_NAMESPACE = 'core'
 
 from form.spec import NamespaceCatalog, SpecNamespace, AttributeSpec
 from form.utils import docval, getargs
@@ -10,9 +11,8 @@ from form.utils import docval, getargs
 from .core import NWBContainer
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
-CORE_NAMESPACE = 'core'
-__core_ns_file_name = 'nwb.namespace.yaml'
 
+__core_ns_file_name = 'nwb.namespace.yaml'
 def __get_resources():
     from pkg_resources import resource_filename
     from os.path import join
