@@ -9,6 +9,7 @@ from .spec import GroupSpec
 from .catalog import SpecCatalog
 from .namespace import SpecNamespace
 from .namespace import NamespaceCatalog
+from .write import NamespaceBuilder
 
 from ..utils import docval
 

@@ -2,6 +2,7 @@ from datetime import datetime
 from copy import deepcopy, copy
 import ruamel.yaml as yaml
 import os.path
+import string
 
 from ..utils import docval, getargs, popargs, get_docval
 from .catalog import SpecCatalog
@@ -34,6 +35,8 @@ class SpecNamespace(dict):
         super(SpecNamespace, self).__init__()
         self['doc'] = doc
         self['schema'] = schema
+        if any(c in string.whitespace for c in name):
+            raise ValueError("'name' must not contain any whitespace")
         self['name'] = name
         if full_name is not None:
             self['full_name'] = full_name
