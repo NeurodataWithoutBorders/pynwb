@@ -139,7 +139,8 @@ class NWBNamespace(SpecNamespace):
 
 class NWBNamespaceBuilder(NamespaceBuilder):
     '''
-    A class for writing namespace and spec files for extensions
+    A class for writing namespace and spec files for extensions of types in
+    the NWB core namespace
     '''
 
     @docval({'name': 'doc', 'type': str, 'doc': 'a description about what this namespace represents'},
