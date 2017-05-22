@@ -123,22 +123,9 @@ groups:
   datasets:
   - dims:
     - num_events
-    doc: Times of clustered events, in seconds. This may be a link to times field
-      in associated FeatureExtraction module.
-    dtype: float64!
-    name: times
-    shape:
-    - null
-  - doc: Description of clusters or clustering, (e.g. cluster 0 is noise, clusters
-      curated using Klusters, etc)
-    dtype: text
-    name: description
-  - dims:
-    - num_clusters
-    doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
-      a basic clustering metric).
-    dtype: float32
-    name: peak_over_rms
+    doc: Cluster number of each event
+    dtype: int32
+    name: num
     shape:
     - null
   - dims:
@@ -149,11 +136,24 @@ groups:
     name: cluster_nums
     shape:
     - null
+  - doc: Description of clusters or clustering, (e.g. cluster 0 is noise, clusters
+      curated using Klusters, etc)
+    dtype: text
+    name: description
   - dims:
     - num_events
-    doc: Cluster number of each event
-    dtype: int32
-    name: num
+    doc: Times of clustered events, in seconds. This may be a link to times field
+      in associated FeatureExtraction module.
+    dtype: float64!
+    name: times
+    shape:
+    - null
+  - dims:
+    - num_clusters
+    doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
+      a basic clustering metric).
+    dtype: float32
+    name: peak_over_rms
     shape:
     - null
   doc: Clustered spike data, whether from automatic clustering tools (e.g., klustakwik)
@@ -167,13 +167,6 @@ groups:
     name: help
     value: Container for salient features of detected events
   datasets:
-  - dims:
-    - num_events
-    doc: Times of events that features correspond to (can be a link).
-    dtype: float64!
-    name: times
-    shape:
-    - null
   - dims:
     - num_events
     - num_channels
@@ -192,6 +185,13 @@ groups:
     name: description
     shape:
     - null
+  - dims:
+    - num_events
+    doc: Times of events that features correspond to (can be a link).
+    dtype: float64!
+    name: times
+    shape:
+    - null
   doc: Features, such as PC1 and PC2, that are extracted from signals stored in a
     SpikeEvent TimeSeries or other source.
   links:
@@ -202,6 +202,23 @@ groups:
   neurodata_type_def: FeatureExtraction
   neurodata_type_inc: Interface
 - datasets:
+  - doc: Path to linked ElectricalSeries.
+    dtype: text
+    name: source_electricalseries_path
+  - dims:
+    - num_events
+    doc: Indices (zero-based) into source ElectricalSeries::data array corresponding
+      to time of event. Module description should define what is meant by time of
+      event (e.g., .25msec before action potential peak, zero-crossing time, etc).
+      The index points to each event from the raw data
+    dtype: int32
+    name: source_idx
+    shape:
+    - null
+  - doc: Description of how events were detected, such as voltage threshold, or dV/dT
+      threshold, as well as relevant values.
+    dtype: text
+    name: detection_method
   - attributes:
     - doc: Value is Seconds
       dtype: text
@@ -214,23 +231,6 @@ groups:
     name: times
     shape:
     - null
-  - doc: Description of how events were detected, such as voltage threshold, or dV/dT
-      threshold, as well as relevant values.
-    dtype: text
-    name: detection_method
-  - dims:
-    - num_events
-    doc: Indices (zero-based) into source ElectricalSeries::data array corresponding
-      to time of event. Module description should define what is meant by time of
-      event (e.g., .25msec before action potential peak, zero-crossing time, etc).
-      The index points to each event from the raw data
-    dtype: int32
-    name: source_idx
-    shape:
-    - null
-  - doc: Path to linked ElectricalSeries.
-    dtype: text
-    name: source_electricalseries_path
   doc: Detected spike events from voltage trace(s).
   links:
   - doc: HDF5 link to ElectricalSeries that this data was calculated from. Metadata
@@ -347,5 +347,6 @@ groups:
   links:
   - doc: the device that was used to record from this electrode group
     name: device
+    quantity: '?'
     target_type: Device
   neurodata_type_def: ElectrodeGroup

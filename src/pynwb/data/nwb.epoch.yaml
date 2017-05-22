@@ -15,13 +15,6 @@ groups:
     shape:
     - null
   datasets:
-  - doc: Stop time of epoch, in seconds
-    dtype: float64!
-    name: stop_time
-  - doc: Description of this epoch (&lt;epoch_X&gt;).
-    dtype: text
-    name: description
-    quantity: '?'
   - dims:
     - num_tags
     doc: 'User-defined tags used throughout the epochs. Tags are to help identify
@@ -32,6 +25,13 @@ groups:
     quantity: '?'
     shape:
     - null
+  - doc: Description of this epoch (&lt;epoch_X&gt;).
+    dtype: text
+    name: description
+    quantity: '?'
+  - doc: Stop time of epoch, in seconds
+    dtype: float64!
+    name: stop_time
   - doc: Start time of epoch, in seconds
     dtype: float64!
     name: start_time
