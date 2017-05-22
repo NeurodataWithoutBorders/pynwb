@@ -184,8 +184,11 @@ Extending NWB
 -----------------------------------------------------
 
 The NWB specification is designed to be extended. Extension for the NWB format can be done so using classes provided in the :py:mod:`pynwb.spec` module.
-The classes :py:class:`~pynwb.spec.NWBGroupSpec` :py:class:`~pynwb.spec.NWBGroupSpec` can be used to define custom types by setting the arguments
-`neurodata_type_inc` and `neurodata_type_def`. New types are specified by setting the argument `neurodata_type_def`. New types can extend an existing type
+The classes :py:class:`~pynwb.spec.NWBGroupSpec`, :py:class:`~pynwb.spec.NWBDatasetSpec`, :py:class:`~pynwb.spec.NWBAttributeSpec`, and :py:class:`~pynwb.spec.NWBLinkSpec`
+can be used to define custom types.
+
+:py:class:`~pynwb.spec.NWBGroupSpec` and :py:class:`~pynwb.spec.NWBDatasetSpec` use the arguments `neurodata_type_inc` and `neurodata_type_def` for
+declaring new types and extending existing types. New types are specified by setting the argument `neurodata_type_def`. New types can extend an existing type
 by specifying the argument `neurodata_type_inc`. Specifications can instantiate existing types by only specifying the `neurodata_type_inc`.
 
 Create a new type
@@ -194,8 +197,11 @@ Create a new type
 
     from pynwb.spec import NWBGroupSpec
 
+    # A list of NWBAttributeSpec objects to specify new attributes
     addl_attributes = [...]
+    # A list of NWBDatasetSpec objects to specify new datasets
     addl_datasets = [...]
+    # A list of NWBDatasetSpec objects to specify new groups
     addl_groups = [...]
     spec = NWBGroupSpec('A custom NWB type',
                         attributes = addl_attributes,
@@ -209,8 +215,11 @@ Extend an existing type
 
     from pynwb.spec import NWBGroupSpec
 
+    # A list of NWBAttributeSpec objects to specify additional attributes or attributes to be overriden
     addl_attributes = [...]
+    # A list of NWBDatasetSpec objects to specify additional datasets or datasets to be overriden
     addl_datasets = [...]
+    # A list of NWBGroupSpec objects to specify additional groups or groups to be overriden
     addl_groups = [...]
     spec = NWBGroupSpec('An extended NWB type',
                         attributes = addl_attributes,
@@ -225,20 +234,19 @@ Use an existing type
 
     from pynwb.spec import NWBGroupSpec
 
-    addl_attributes = [...]
-    addl_datasets = [...]
     # use another NWBGroupSpec object to specify that a group of type
     # ElectricalSeries should be present in the new type defined below
     addl_groups = [ NWBGroupSpec('An included ElectricalSeries instance',
                                  neurodata_type_inc='ElectricalSeries') ]
 
     spec = NWBGroupSpec('An extended NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
                         groups = addl_groups,
                         neurodata_type_inc='Clustering',
                         neurodata_type_def='MyExtendedClustering')
 
+
+Datasets can be extended in the same manner (with regard to `neurodata_type_inc` and `neurodata_type_def`,
+by using the class :py:class:`~pynwb.spec.NWBDatasetSpec`.
 
 Saving Extensions
 -----------------------------------------------------
