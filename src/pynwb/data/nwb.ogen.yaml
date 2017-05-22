@@ -29,12 +29,12 @@ groups:
   - doc: Description of site
     dtype: text
     name: description
-  - doc: Name of device in /general/devices
-    dtype: text
-    name: device
   - doc: Excitation wavelength
     dtype: text
     name: excitation_lambda
+  - doc: Name of device in /general/devices
+    dtype: text
+    name: device
   - doc: Location of stimulation site
     dtype: text
     name: location

@@ -29,6 +29,11 @@ develop: build
 test:
 	$(PYTHON) test.py
 
+apidoc:
+	cd docs && $(MAKE) apidoc
+	@echo ""
+	@echo "To view the PDF documentation open: docs/_build/html/index.html"
+
 htmldoc:
 	cd docs && $(MAKE) html
 	@echo ""

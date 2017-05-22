@@ -280,7 +280,9 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         self.__spec = spec
         self.__data_type_key = spec.type_key()
         self.__spec2attr = dict()
+        self.__attr2spec = dict()
         self.__spec2carg = dict()
+        self.__carg2spec = dict()
         self.__map_spec(spec)
 
     @property
@@ -315,8 +317,9 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
 
     def __map_spec_helper(self, spec):
         if spec.name != NAME_WILDCARD:
-            self.map_attr(spec.name, spec)
-            self.map_const_arg(spec.name, spec)
+            self.map_spec(spec.name, spec)
+            #self.map_attr(spec.name, spec)
+            #self.map_const_arg(spec.name, spec)
         else:
             dt = None
             if spec.data_type_def is not None:
@@ -326,8 +329,9 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             else:
                 raise ValueError('Cannot map spec with wildcard name and no data_type_inc or data_type_def')
             name = self.__convert_name(dt)
-            self.map_attr(name, spec)
-            self.map_const_arg(name, spec)
+            self.map_spec(name, spec)
+            #self.map_attr(name, spec)
+            #self.map_const_arg(name, spec)
 
     @docval({"name": "attr_name", "type": str, "doc": "the name of the object to map"},
             {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
@@ -338,14 +342,24 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             n = spec.name
         elif hasattr(spec, 'data_type_def') and spec.data_type_def is not None:
             n = spec.data_type_def
+        if attr_name in self.__attr2spec:
+            existing = self.__attr2spec.pop(attr_name)
+            if existing is not spec:
+                self.__spec2attr.pop(existing)
         self.__spec2attr[spec] = attr_name
+        self.__attr2spec[attr_name] = spec
 
     @docval({"name": "const_arg", "type": str, "doc": "the name of the constructor argument to map"},
             {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
     def map_const_arg(self, **kwargs):
         """ Map an attribute to spec. Use this to override default behavior """
         const_arg, spec = getargs('const_arg', 'spec', kwargs)
+        if const_arg in self.__carg2spec:
+            existing = self.__carg2spec.pop(const_arg)
+            if existing is not spec:
+                self.__spec2carg.pop(existing)
         self.__spec2carg[spec] = const_arg
+        self.__carg2spec[const_arg] = spec
 
     @docval({"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
     def unmap(self, **kwargs):
@@ -353,6 +367,14 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         spec = getargs('spec', kwargs)
         self.__spec2attr.pop(spec, None)
         self.__spec2carg.pop(spec, None)
+
+    @docval({"name": "attr_carg", "type": str, "doc": "the constructor argument/object attribute to map this spec to"},
+            {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
+    def map_spec(self, **kwargs):
+        """ Map the given specification to the construct argument and object attribute """
+        spec, attr_carg = getargs('spec', 'attr_carg', kwargs)
+        self.map_const_arg(attr_carg, spec)
+        self.map_attr(attr_carg, spec)
 
     def __get_override_carg(self, name, builder):
         if name in self.const_args:
@@ -365,7 +387,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def get_attribute(self, **kwargs):
         ''' Get the object attribute name for the given Spec '''
         spec = getargs('spec', kwargs)
-        return self.__spec2attr.get(spec, None)
+        val = self.__spec2attr.get(spec, None)
+        return val
 
     @docval({"name": "spec", "type": Spec, "doc": "the spec to get the attribute value for"},
             {"name": "container", "type": Container, "doc": "the container to get the attribute value from"},
@@ -494,7 +517,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                             self.__add_containers(builder, spec, attr_value, build_manager)
                 else:
                     attr_name = self.get_attribute(spec)
-
                     attr_value = getattr(container, attr_name, None)
                     if attr_value is not None:
                         self.__add_containers(builder, spec, attr_value, build_manager)
@@ -570,9 +592,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         # get the constructor argument each specification corresponds to
         const_args = dict()
         for subspec, value in subspecs.items():
-            if subspec.name == 'electrode_group':
-                print('found electrode_group subspec in construct', subspec)
-
             const_arg = self.get_const_arg(subspec)
             if const_arg is not None:
                 const_args[const_arg] = value

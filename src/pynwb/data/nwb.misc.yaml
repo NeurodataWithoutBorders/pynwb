@@ -57,14 +57,14 @@ groups:
       dtype: None
       name: conversion
       value: NaN
-    - doc: Value is float('NaN')
-      dtype: None
-      name: resolution
-      value: NaN
     - doc: Value is n/a
       dtype: None
       name: unit
       value: n/a
+    - doc: Value is float('NaN')
+      dtype: None
+      name: resolution
+      value: NaN
     dims:
     - num_times
     doc: Annotations made during an experiment.
@@ -89,14 +89,14 @@ groups:
       dtype: None
       name: conversion
       value: NaN
-    - doc: Value is float('NaN')
-      dtype: None
-      name: resolution
-      value: NaN
     - doc: Value is n/a
       dtype: None
       name: unit
       value: n/a
+    - doc: Value is float('NaN')
+      dtype: None
+      name: resolution
+      value: NaN
     dims:
     - num_times
     doc: '>0 if interval started, <0 if interval ended.'
@@ -132,15 +132,15 @@ groups:
     module).
   groups:
   - datasets:
+    - doc: Description of the unit (eg, cell type).
+      dtype: text
+      name: unit_description
     - doc: Name, path or description of where unit times originated. This is necessary
         only if the info here differs from or is more fine-grained than the interface's
         source field
       dtype: text
       name: source
       quantity: '?'
-    - doc: Description of the unit (eg, cell type).
-      dtype: text
-      name: unit_description
     - dims:
       - num_events
       doc: Spike time for the units (exact or estimated)

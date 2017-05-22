@@ -9,7 +9,6 @@ namespaces:
   - jteeters@berkeley.edu
   - oruebel@lbl.gov
   - ajtritt@lbl.gov
-  date: '2017-05-17 18:46:02'
   doc: NWB namespace
   full_name: NWB core
   name: core
