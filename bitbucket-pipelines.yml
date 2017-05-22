@@ -10,6 +10,6 @@ pipelines:
     - step:
         script: # Modify the commands below to build your repository.
           #- python test.py
-          - python -m unittest discover tests/
+          #- python -m unittest discover tests/
           #- pip install setuptools
-          #- python setup.py build
+          - python setup.py build
