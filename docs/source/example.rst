@@ -192,7 +192,7 @@ Create a new type
 
 .. code-block:: python
 
-    from form.spec import NWBGroupSpec
+    from pynwb.spec import NWBGroupSpec
 
     addl_attributes = [...]
     addl_datasets = [...]
@@ -207,7 +207,7 @@ Extend an existing type
 
 .. code-block:: python
 
-    from form.spec import NWBGroupSpec
+    from pynwb.spec import NWBGroupSpec
 
     addl_attributes = [...]
     addl_datasets = [...]
@@ -223,7 +223,7 @@ Use an existing type
 
 .. code-block:: python
 
-    from form.spec import NWBGroupSpec
+    from pynwb.spec import NWBGroupSpec
 
     addl_attributes = [...]
     addl_datasets = [...]
@@ -238,3 +238,50 @@ Use an existing type
                         groups = addl_groups,
                         neurodata_type_inc='Clustering',
                         neurodata_type_def='MyExtendedClustering')
+
+
+Saving Extensions
+-----------------------------------------------------
+
+Extensions are used by including them in a loaded namespace. Namespaces and extensions need to be saved to file
+for downstream use. The class :py:class:`~pynwb.spec.NWBNamespaceBuilder` can be used to create new namespace and
+specification files.
+
+`NOTE`: when using :py:class:`~pynwb.spec.NWBNamespaceBuilder`, the core NWB namespace is automatically included
+
+Create a new namespace with extensions
+
+.. code-block:: python
+
+    from pynwb.spec import NWBGroupSpec, NWBNamespaceBuilder
+
+    # create a builder for the namespace
+    ns_builder = NWBNamespaceBuilder("Extension for use in my laboratory", "mylab", ...)
+
+    # create extensions
+    ext1 = NWBGroupSpec('A custom Clustering interface',
+                        attributes = [...]
+                        datasets = [...],
+                        groups = [...],
+                        neurodata_type_inc='Clustering',
+                        neurodata_type_def='MyExtendedClustering')
+
+    ext2 = NWBGroupSpec('A custom ClusterWaveforms interface',
+                        attributes = [...]
+                        datasets = [...],
+                        groups = [...],
+                        neurodata_type_inc='ClusterWaveforms',
+                        neurodata_type_def='MyExtendedClusterWaveforms')
+
+
+    # add the extension
+    ext_source = 'mylab.specs.yaml'
+    ns_builder.add_spec(ext_source, ext1)
+    ns_builder.add_spec(ext_source, ext2)
+
+    # include an existing namespace - this will include all specifications in that namespace
+    ns_builder.include_namespace('collab_ns')
+
+    # save the namespace and extensions
+    ns_path = 'mylab.namespace.yaml'
+    ns_builder.export(ns_path)
