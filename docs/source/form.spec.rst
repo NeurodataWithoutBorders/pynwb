@@ -9,6 +9,7 @@ Submodules
    form.spec.catalog
    form.spec.namespace
    form.spec.spec
+   form.spec.write
 
 Module contents
 ---------------

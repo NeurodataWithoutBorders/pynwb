@@ -1,7 +1,10 @@
 from copy import copy, deepcopy
+from datetime import datetime
 
-from form.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace
-from form.utils import docval, get_docval, getargs
+from form.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder
+from form.utils import docval, get_docval, getargs, fmt_docval_args
+
+from . import CORE_NAMESPACE
 
 
 class BaseStorageOverride(object):
@@ -124,10 +127,32 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
         return spec
 
 class NWBNamespace(SpecNamespace):
+    '''
+    A Namespace class for NWB
+    '''
 
     __types_key = 'neurodata_types'
 
     @classmethod
     def types_key(cls):
         return cls.__types_key
+
+class NWBNamespaceBuilder(NamespaceBuilder):
+    '''
+    A class for writing namespace and spec files for extensions of types in
+    the NWB core namespace
+    '''
+
+    @docval({'name': 'doc', 'type': str, 'doc': 'a description about what this namespace represents'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
+            {'name': 'full_name', 'type': str, 'doc': 'extended full name of this namespace', 'default': None},
+            {'name': 'version', 'type': (str, tuple, list), 'doc': 'Version number of the namespace', 'default': None},
+            {'name': 'author', 'type': (str, list), 'doc': 'Author or list of authors.', 'default': None},
+            {'name': 'contact', 'type': (str, list), 'doc': 'List of emails. Ordering should be the same as for author', 'default': None})
+    def __init__(self, **kwargs):
+        ''' Create a NWBNamespaceBuilder '''
+        args, vargs = fmt_docval_args(kwargs)
+        args.insert(NWBNamespace)
+        super(NWBNamespaceBuilder, self).__init__(*args, **kwargs)
+        self.include_namespace(CORE_NAMESPACE)
 
