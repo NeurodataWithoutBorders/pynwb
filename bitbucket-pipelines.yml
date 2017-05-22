@@ -12,4 +12,5 @@ pipelines:
           #- python -m unittest discover tests/
           #- pip install setuptools
           - python setup.py build
+          - python setup.py install
           - python test.py
