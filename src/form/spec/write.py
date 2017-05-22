@@ -10,10 +10,11 @@ from ..utils import docval, getargs, popargs
 
 
 class NamespaceBuilder(object):
+    ''' A class for building namespace and spec files '''
 
-    @docval({'name': 'doc', 'type': str, 'doc': 'a description about what this namespace represents'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
-            {'name': 'full_name', 'type': str, 'doc': 'extended full name of this namespace', 'default': None},
+    @docval({'name': 'doc', 'type': str, 'doc': 'a description about what name namespace represents'},
+            {'name': 'name', 'type': str, 'doc': 'the name of namespace'},
+            {'name': 'full_name', 'type': str, 'doc': 'extended full name of name namespace', 'default': None},
             {'name': 'version', 'type': (str, tuple, list), 'doc': 'Version number of the namespace', 'default': None},
             {'name': 'author', 'type': (str, list), 'doc': 'Author or list of authors.', 'default': None},
             {'name': 'contact', 'type': (str, list), 'doc': 'List of emails. Ordering should be the same as for author', 'default': None},
@@ -25,15 +26,17 @@ class NamespaceBuilder(object):
         self.__sources = dict()
         self.__dt_key = ns_cls.types_key()
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to write the spec to'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the path to write the spec to'},
             {'name': 'spec', 'type': (GroupSpec, DatasetSpec), 'doc': 'the Spec to add'})
     def add_spec(self, **kwargs):
-        path, spec = getargs('path', 'spec', kwargs)
-        self.add_source(path)
-        self.__sources[path].setdefault(self.__dt_key, list()).append(spec)
+        ''' Add a Spec to the namespace '''
+        source, spec = getargs('source', 'spec', kwargs)
+        self.add_source(source)
+        self.__sources[source].setdefault(self.__dt_key, list()).append(spec)
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to write the spec to'})
+    @docval({'name': 'source', 'type': str, 'doc': 'the path to write the spec to'})
     def add_source(self, **kwargs):
+        ''' Add a source file to the namespace '''
         path = getargs('path', kwargs)
         self.__sources.setdefault(path, {'source': path})
 
@@ -41,6 +44,7 @@ class NamespaceBuilder(object):
             {'name': 'source', 'type': str, 'doc': 'the source file to include the type from', 'default': None},
             {'name': 'namespace', 'type': str, 'doc': 'the namespace from which to include the data type', 'default': None})
     def include_type(self, **kwargs):
+        ''' Include a data type from an existing namespace or source '''
         dt, src, ns = getargs('data_type', 'source', 'namespace', kwargs)
         if src is not None:
             self.add_source(source)
@@ -53,6 +57,7 @@ class NamespaceBuilder(object):
 
     @docval({'name': 'namespace', 'type': str, 'doc': 'the namespace to include'})
     def include_namespace(self, **kwargs):
+        ''' Include an entire namespace '''
         namespace = getargs('namespace', kwargs)
         self.__namespaces.setdefault(namespace, {'namespace': namespace})
 
@@ -61,6 +66,11 @@ class NamespaceBuilder(object):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to write the spec to'})
     def export(self, **kwargs):
+        ''' Export the namespace to the given path.
+
+        All new specification source files will be written in the same directory as the
+        given path.
+        '''
         ns_path = getargs('path', kwargs)
         outdir = os.path.dirname(ns_path)
         ns_args = copy.copy(self.__ns_args)
