@@ -39,6 +39,7 @@ with open('license.txt') as f:
 pkgs = find_packages('src', exclude=['data'])
 print('found these packages:', pkgs)
 
+schema_dir = 'data'
 setup_args = {
     'name': 'pynwb',
     'version': '0.1',
