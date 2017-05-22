@@ -2,6 +2,7 @@ import copy
 import json
 import ruamel.yaml as yaml
 import os.path
+from collections import OrderedDict
 
 from .namespace import SpecNamespace
 from .spec import GroupSpec, DatasetSpec
@@ -22,8 +23,8 @@ class NamespaceBuilder(object):
     def __init__(self, **kwargs):
         ns_cls = popargs('namespace_cls', kwargs)
         self.__ns_args = copy.deepcopy(kwargs)
-        self.__namespaces = dict()
-        self.__sources = dict()
+        self.__namespaces = OrderedDict()
+        self.__sources = OrderedDict()
         self.__dt_key = ns_cls.types_key()
 
     @docval({'name': 'source', 'type': str, 'doc': 'the path to write the spec to'},
@@ -37,8 +38,8 @@ class NamespaceBuilder(object):
     @docval({'name': 'source', 'type': str, 'doc': 'the path to write the spec to'})
     def add_source(self, **kwargs):
         ''' Add a source file to the namespace '''
-        path = getargs('path', kwargs)
-        self.__sources.setdefault(path, {'source': path})
+        source = getargs('source', kwargs)
+        self.__sources.setdefault(source, {'source': source})
 
     @docval({'name': 'data_type', 'type': str, 'doc': 'the data type to include'},
             {'name': 'source', 'type': str, 'doc': 'the source file to include the type from', 'default': None},
@@ -91,10 +92,8 @@ class NamespaceBuilder(object):
             if out and dts:
                 raise ValueError('cannot include from source if writing to source')
             elif dts:
-                print('including types from %s' % path)
                 item[self.__dt_key] = dts
             elif out:
-                print('writing all specs to %s' % path)
                 with open(os.path.join(outdir, path), 'w') as stream:
                     self.__dump_spec(out, stream)
             ns_args['schema'].append(item)
