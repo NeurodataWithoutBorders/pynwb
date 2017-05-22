@@ -19,7 +19,7 @@ def __swap_inc_def(cls):
             ret.append(copy(arg))
     return ret
 
-_attr_docval = __swap_inc_def(AttributeSpec.__init__)
+_attr_docval = __swap_inc_def(AttributeSpec)
 class NWBAttributeSpec(AttributeSpec):
 
     @docval(*_attr_docval)
@@ -27,7 +27,7 @@ class NWBAttributeSpec(AttributeSpec):
         args, kwargs = fmt_docval_args(AttributeSpec.__init__, kwargs)
         super(NWBAttributeSpec, self).__init__(*args, **kwargs)
 
-_link_docval = __swap_inc_def(LinkSpec.__init__)
+_link_docval = __swap_inc_def(LinkSpec)
 class NWBLinkSpec(LinkSpec):
 
     @docval(*_link_docval)
