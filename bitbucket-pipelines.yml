@@ -9,4 +9,9 @@ pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
+          #- python -m unittest discover tests/
+          #- pip install setuptools
+          - pip install -r requirements.txt
           - python setup.py build
+          - python setup.py install
+          - python test.py
