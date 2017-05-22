@@ -1,5 +1,8 @@
 groups:
 - attributes:
+  - doc: Description of Module
+    dtype: text
+    name: description
   - dims:
     - num_interfaces
     doc: 'Names of the data interfaces offered by this module. COMMENT: E.g., [0]="EventDetection",
@@ -8,9 +11,6 @@ groups:
     name: interfaces
     shape:
     - null
-  - doc: Description of Module
-    dtype: text
-    name: description
   doc: Module.  Name should be descriptive. Stores a collection of related data organized
     by contained interfaces.  Each interface is a contract specifying content related
     to a particular type of data.
@@ -30,13 +30,10 @@ groups:
     name: timestamp_link
     shape:
     - null
-  - doc: Name of TimeSeries or Modules that serve as the source for the data contained
-      here. It can also be the name of a device, for stimulus or acquisition data
+  - doc: Value is TimeSeries
     dtype: text
-    name: source
-  - doc: Description of TimeSeries
-    dtype: text
-    name: description
+    name: ancestry
+    value: TimeSeries
   - dims:
     - num_extern_fields
     doc: 'List of fields that are HDF5 external links.COMMENT: Only present if one
@@ -45,6 +42,10 @@ groups:
     name: extern_fields
     shape:
     - null
+  - doc: Value is General time series object
+    dtype: text
+    name: help
+    value: General time series object
   - doc: Human-readable comments about the TimeSeries. This second descriptive field
       can be used to store additional information, or descriptive information if the
       primary description field is populated with a computer-readable string.
@@ -60,10 +61,13 @@ groups:
     name: missing_fields
     shape:
     - null
-  - doc: Value is General time series object
+  - doc: Name of TimeSeries or Modules that serve as the source for the data contained
+      here. It can also be the name of a device, for stimulus or acquisition data
     dtype: text
-    name: help
-    value: General time series object
+    name: source
+  - doc: Description of TimeSeries
+    dtype: text
+    name: description
   - dims:
     - num_dlinks
     doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
@@ -74,63 +78,7 @@ groups:
     name: data_link
     shape:
     - null
-  - doc: Value is TimeSeries
-    dtype: text
-    name: ancestry
-    value: TimeSeries
   datasets:
-  - dims:
-    - num_times
-    doc: 'Numerical labels that apply to each element in data[]. COMMENT: Optional
-      field. If present, the control array should have the same number of elements
-      as data[].'
-    dtype: uint8
-    name: control
-    quantity: '?'
-    shape:
-    - null
-  - dims:
-    - num_control_values
-    doc: 'Description of each control value. COMMENT: Array length should be as long
-      as the highest number in control minus one, generating an zero-based indexed
-      array for control values.'
-    dtype: text
-    name: control_description
-    quantity: '?'
-    shape:
-    - null
-  - attributes:
-    - doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
-      dtype: float32!
-      name: rate
-    - doc: Value is Seconds
-      dtype: text
-      name: unit
-      value: Seconds
-    doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
-      spaced, the timestamp of the first sample can be specified and all subsequent
-      ones calculated from the sampling rate.'
-    dtype: float64!
-    name: starting_time
-    quantity: '?'
-  - attributes:
-    - doc: Value is 1
-      dtype: int32
-      name: interval
-      value: 1
-    - doc: Value is Seconds
-      dtype: text
-      name: unit
-      value: Seconds
-    dims:
-    - num_times
-    doc: 'Timestamps for samples stored in data.COMMENT: Timestamps here have all
-      been corrected to the common experiment master-clock. Time is stored as seconds
-      and all timestamps are relative to experiment start time.'
-    dtype: float64!
-    name: timestamps
-    shape:
-    - null
   - attributes:
     - doc: Value is 1.0
       dtype: float32!
@@ -155,11 +103,63 @@ groups:
     name: data
     shape:
     - null
+  - dims:
+    - num_control_values
+    doc: 'Description of each control value. COMMENT: Array length should be as long
+      as the highest number in control minus one, generating an zero-based indexed
+      array for control values.'
+    dtype: text
+    name: control_description
+    quantity: '?'
+    shape:
+    - null
+  - dims:
+    - num_times
+    doc: 'Numerical labels that apply to each element in data[]. COMMENT: Optional
+      field. If present, the control array should have the same number of elements
+      as data[].'
+    dtype: uint8
+    name: control
+    quantity: '?'
+    shape:
+    - null
   - doc: 'Number of samples in data, or number of image frames. COMMENT: This is important
       if the length of timestamp and data are different, such as for externally stored
       stimulus image stacks'
     dtype: int32
     name: num_samples
+  - attributes:
+    - doc: Value is Seconds
+      dtype: text
+      name: unit
+      value: Seconds
+    - doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
+      dtype: float32!
+      name: rate
+    doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
+      spaced, the timestamp of the first sample can be specified and all subsequent
+      ones calculated from the sampling rate.'
+    dtype: float64!
+    name: starting_time
+    quantity: '?'
+  - attributes:
+    - doc: Value is Seconds
+      dtype: text
+      name: unit
+      value: Seconds
+    - doc: Value is 1
+      dtype: int32
+      name: interval
+      value: 1
+    dims:
+    - num_times
+    doc: 'Timestamps for samples stored in data.COMMENT: Timestamps here have all
+      been corrected to the common experiment master-clock. Time is stored as seconds
+      and all timestamps are relative to experiment start time.'
+    dtype: float64!
+    name: timestamps
+    shape:
+    - null
   doc: General purpose time series.
   groups:
   - doc: "Lab specific time and sync information as provided directly from hardware\

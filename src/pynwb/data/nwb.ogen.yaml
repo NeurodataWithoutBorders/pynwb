@@ -26,15 +26,15 @@ groups:
   neurodata_type_def: OptogeneticSeries
   neurodata_type_inc: TimeSeries
 - datasets:
-  - doc: Name of device in /general/devices
-    dtype: text
-    name: device
   - doc: Description of site
     dtype: text
     name: description
   - doc: Excitation wavelength
     dtype: text
     name: excitation_lambda
+  - doc: Name of device in /general/devices
+    dtype: text
+    name: device
   - doc: Location of stimulation site
     dtype: text
     name: location

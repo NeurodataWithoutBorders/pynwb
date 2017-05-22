@@ -13,14 +13,14 @@ namespaces:
   full_name: NWB core
   name: core
   schema:
-  - source: nwb.ogen.yaml
-  - source: nwb.epoch.yaml
-  - source: nwb.ophys.yaml
-  - source: nwb.image.yaml
-  - source: nwb.icephys.yaml
-  - source: nwb.misc.yaml
-  - source: nwb.retinotopy.yaml
-  - source: nwb.behavior.yaml
-  - source: nwb.file.yaml
-  - source: nwb.ecephys.yaml
   - source: nwb.base.yaml
+  - source: nwb.epoch.yaml
+  - source: nwb.image.yaml
+  - source: nwb.file.yaml
+  - source: nwb.misc.yaml
+  - source: nwb.behavior.yaml
+  - source: nwb.ecephys.yaml
+  - source: nwb.icephys.yaml
+  - source: nwb.ogen.yaml
+  - source: nwb.ophys.yaml
+  - source: nwb.retinotopy.yaml
