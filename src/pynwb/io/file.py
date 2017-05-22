@@ -8,17 +8,24 @@ class NWBFileMap(ObjectMapper):
     def __init__(self, spec):
         super(NWBFileMap, self).__init__(spec)
         raw_ts_spec = self.spec.get_group('acquisition').get_group('timeseries').get_neurodata_type('TimeSeries')
-        self.map_attr('raw_timeseries', raw_ts_spec)
-        self.map_const_arg('raw_timeseries', raw_ts_spec)
+        self.map_spec('raw_timeseries', raw_ts_spec)
+
         stimulus_spec = self.spec.get_group('stimulus')
-        self.map_attr('stimulus', stimulus_spec.get_group('presentation'))
-        self.map_attr('stimulus_templates', stimulus_spec.get_group('templates'))
+        presentation_ts_spec = stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries')
+        self.map_spec('stimulus', presentation_ts_spec)
+        stimulus_ts_spec = stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries')
+        self.map_spec('stimulus_templates', stimulus_ts_spec)
+
+        epochs_spec = self.spec.get_group('epochs').get_neurodata_type('Epoch')
+        self.map_spec('epochs', epochs_spec)
+
         general_spec = self.spec.get_group('general')
-        self.map_attr('ic_electrodes', general_spec.get_group('intracellular_ephys'))
-        self.map_attr('ec_electrodes', general_spec.get_group('extracellular_ephys'))
-        self.map_attr('optogenetic_sites', general_spec.get_group('optogenetics'))
-        self.map_attr('imaging_planes', general_spec.get_group('optophysiology'))
-        self.map_attr('modules', self.spec.get_group('processing'))
+        self.map_spec('ic_electrodes', general_spec.get_group('intracellular_ephys').get_neurodata_type('IntracellularElectrode'))
+        self.map_spec('ec_electrodes', general_spec.get_group('extracellular_ephys').get_neurodata_type('ElectrodeGroup'))
+        self.map_spec('optogenetic_sites', general_spec.get_group('optogenetics').get_neurodata_type('OptogeneticStimulusSite'))
+        self.map_spec('imaging_planes', general_spec.get_group('optophysiology').get_neurodata_type('ImagingPlane'))
+
+        self.map_spec('modules', self.spec.get_group('processing').get_neurodata_type('Module'))
         self.unmap(general_spec.get_dataset('stimulus'))
 
     @const_arg('file_name')
