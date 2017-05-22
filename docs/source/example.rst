@@ -179,3 +179,62 @@ that manages objects to be read and written from disk. A PyNWB-specific BuildMan
     io = HDF5IO(path, manager)
     io.write(nwbfile)
     io.close()
+
+Extending NWB
+-----------------------------------------------------
+
+The NWB specification is designed to be extended. Extension for the NWB format can be done so using classes provided in the :py:mod:`pynwb.spec` module.
+The classes :py:class:`~pynwb.spec.NWBGroupSpec` :py:class:`~pynwb.spec.NWBGroupSpec` can be used to define custom types by setting the arguments
+`neurodata_type_inc` and `neurodata_type_def`. New types are specified by setting the argument `neurodata_type_def`. New types can extend an existing type
+by specifying the argument `neurodata_type_inc`. Specifications can instantiate existing types by only specifying the `neurodata_type_inc`.
+
+Create a new type
+
+.. code-block:: python
+
+    from form.spec import NWBGroupSpec
+
+    addl_attributes = [...]
+    addl_datasets = [...]
+    addl_groups = [...]
+    spec = NWBGroupSpec('A custom NWB type',
+                        attributes = addl_attributes,
+                        datasets = addl_datasets,
+                        groups = addl_groups,
+                        neurodata_type_def='MyNewNWBType')
+
+Extend an existing type
+
+.. code-block:: python
+
+    from form.spec import NWBGroupSpec
+
+    addl_attributes = [...]
+    addl_datasets = [...]
+    addl_groups = [...]
+    spec = NWBGroupSpec('An extended NWB type',
+                        attributes = addl_attributes,
+                        datasets = addl_datasets,
+                        groups = addl_groups,
+                        neurodata_type_inc='Clustering',
+                        neurodata_type_def='MyExtendedClustering')
+
+Use an existing type
+
+.. code-block:: python
+
+    from form.spec import NWBGroupSpec
+
+    addl_attributes = [...]
+    addl_datasets = [...]
+    # use another NWBGroupSpec object to specify that a group of type
+    # ElectricalSeries should be present in the new type defined below
+    addl_groups = [ NWBGroupSpec('An included ElectricalSeries instance',
+                                 neurodata_type_inc='ElectricalSeries') ]
+
+    spec = NWBGroupSpec('An extended NWB type',
+                        attributes = addl_attributes,
+                        datasets = addl_datasets,
+                        groups = addl_groups,
+                        neurodata_type_inc='Clustering',
+                        neurodata_type_def='MyExtendedClustering')
