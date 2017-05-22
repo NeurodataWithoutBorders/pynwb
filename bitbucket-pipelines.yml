@@ -9,5 +9,8 @@ pipelines:
   default:
     - step:
         script: # Modify the commands below to build your repository.
+          - python test.py
+    - step:
+        script: # Modify the commands below to build your repository.
           - pip install setuptools
           - python setup.py build
