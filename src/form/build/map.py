@@ -298,14 +298,13 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __convert_name(name):
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
         ret = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
-        if ret[-1] != 's':
-            ret += 's'
         return ret
 
     def __map_spec(self, spec):
         for subspec in spec.attributes:
             self.__map_spec_helper(subspec)
-        self.__map_spec_helper(spec)
+        if spec != self.__spec:
+            self.__map_spec_helper(spec)
         if isinstance(spec, GroupSpec):
             for subspec in spec.datasets:
                 self.__map_spec(subspec)
@@ -329,9 +328,9 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             else:
                 raise ValueError('Cannot map spec with wildcard name and no data_type_inc or data_type_def')
             name = self.__convert_name(dt)
+            if name[-1] != 's' and spec.is_many():
+                name += 's'
             self.map_spec(name, spec)
-            #self.map_attr(name, spec)
-            #self.map_const_arg(name, spec)
 
     @docval({"name": "attr_name", "type": str, "doc": "the name of the object to map"},
             {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
@@ -457,7 +456,9 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
 
     def __add_attributes(self, builder, attributes, container):
         for spec in attributes:
+            isdesc = spec.name == 'description'
             attr_value = self.get_attr_value(spec, container)
+            #TODO: add check for required attributes
             if not attr_value:
                 if spec.value is not None:
                     attr_value = spec.value
@@ -475,6 +476,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __add_datasets(self, builder, datasets, container, build_manager):
         for spec in datasets:
             attr_value = self.get_attr_value(spec, container)
+            #TODO: add check for required datasets
             if attr_value is None:
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
@@ -611,7 +613,11 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 kwargs[argname] = val
             else:
                 args.append(val)
-        return cls(*args, **kwargs)
+        try:
+            obj = cls(*args, **kwargs)
+        except Exception as ex:
+            raise Exception('Could not construct %s object' % (cls.__name__)) from ex
+        return obj
 
     def get_builder_name(self, container):
         if self.__spec.name != NAME_WILDCARD:

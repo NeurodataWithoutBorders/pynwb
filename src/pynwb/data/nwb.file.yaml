@@ -123,6 +123,7 @@ groups:
     groups:
     - doc: Intermediate analysis of acquired data
       neurodata_type_inc: Module
+      quantity: '*'
     name: processing
   - doc: 'Data pushed into the system (eg, video stimulus, sound, voltage, etc) and
       secondary representations of that data (eg, measurements of something used as

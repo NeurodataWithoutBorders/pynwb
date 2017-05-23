@@ -1,7 +1,19 @@
 from form.build import ObjectMapper
 from .. import register_map
 
-from ..base import TimeSeries
+from ..base import TimeSeries, Module
+
+@register_map(Module)
+class ModuleMap(ObjectMapper):
+
+    def __init__(self, spec):
+        super(ModuleMap, self).__init__(spec)
+        interfaces_spec = self.spec.get_neurodata_type('Interface')
+        self.map_spec('interfaces', interfaces_spec)
+
+    @const_arg('name')
+    def name(self, builder):
+        return builder.name
 
 @register_map(TimeSeries)
 class TimeSeriesMap(ObjectMapper):
@@ -21,5 +33,5 @@ class TimeSeriesMap(ObjectMapper):
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))
 
     @const_arg('name')
-    def name(self, h5group):
-        return h5group.name
+    def name(self, builder):
+        return builder.name

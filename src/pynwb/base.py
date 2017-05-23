@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs
+from form.utils import docval, getargs, popargs
 
 from . import register_class, CORE_NAMESPACE
 from .core import  NWBContainer
@@ -68,12 +68,14 @@ class Module(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
+            {'name': 'interfaces', 'type': list, 'doc': 'Interfaces that belong to this Modules', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, description = getargs('name', 'description', kwargs)
+        name, description, interfaces = popargs('name', 'description', 'interfaces', kwargs)
         super(Module, self).__init__(**kwargs)
+        self.description = description
         self.__name = name
-        self.__interfaces = list()
+        self.__interfaces = list() if interfaces is None else interfaces
 
     @property
     def interfaces(self):
