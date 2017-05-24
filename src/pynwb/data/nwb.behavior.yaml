@@ -1,7 +1,7 @@
 groups:
 - attributes:
-  - doc: Value is Stores points in space over time. The data[] array structure is
-      [num samples][num spatial dimensions]
+  - doc: Value is 'Stores points in space over time. The data[] array structure is
+      [num samples][num spatial dimensions]'
     dtype: text
     name: help
     value: Stores points in space over time. The data[] array structure is [num samples][num
@@ -12,10 +12,13 @@ groups:
     name: reference_frame
     quantity: '?'
   - attributes:
-    - doc: Value is meter
+    - default_value: meter
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
       dtype: text
       name: unit
-      value: meter
     dims:
     - num_times
     - num_features
@@ -37,7 +40,7 @@ groups:
   neurodata_type_def: SpatialSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: Value is General container for storing behavorial epochs
+  - doc: Value is 'General container for storing behavorial epochs'
     dtype: text
     name: help
     value: General container for storing behavorial epochs
@@ -61,7 +64,7 @@ groups:
   neurodata_type_def: BehavioralEpochs
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Position data, whether along the x, xy or xyz axis
+  - doc: Value is 'Position data, whether along the x, xy or xyz axis'
     dtype: text
     name: help
     value: Position data, whether along the x, xy or xyz axis
@@ -75,7 +78,7 @@ groups:
   neurodata_type_def: BehavioralEvents
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is General container for storing continuously sampled behavioral data.
+  - doc: Value is 'General container for storing continuously sampled behavioral data.'
     dtype: text
     name: help
     value: General container for storing continuously sampled behavioral data.
@@ -89,7 +92,7 @@ groups:
   neurodata_type_def: BehavioralTimeSeries
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Eye-tracking data, representing pupil size
+  - doc: Value is 'Eye-tracking data, representing pupil size'
     dtype: text
     name: help
     value: Eye-tracking data, representing pupil size
@@ -102,7 +105,7 @@ groups:
   neurodata_type_def: PupilTracking
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Eye-tracking data, representing direction of gaze
+  - doc: Value is 'Eye-tracking data, representing direction of gaze'
     dtype: text
     name: help
     value: Eye-tracking data, representing direction of gaze
@@ -115,9 +118,9 @@ groups:
   neurodata_type_def: EyeTracking
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Direction as measured radially. Spatial series reference frame should
-      indicate which direction corresponds to zero and what is the direction of positive
-      rotation
+  - doc: Value is 'Direction as measured radially. Spatial series reference frame
+      should indicate which direction corresponds to zero and what is the direction
+      of positive rotation'
     dtype: text
     name: help
     value: Direction as measured radially. Spatial series reference frame should indicate
@@ -135,7 +138,7 @@ groups:
   neurodata_type_def: CompassDirection
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Position data, whether along the x, xy or xyz axis
+  - doc: Value is 'Position data, whether along the x, xy or xyz axis'
     dtype: text
     name: help
     value: Position data, whether along the x, xy or xyz axis
@@ -148,8 +151,8 @@ groups:
   neurodata_type_def: Position
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Image stacks whose frames have been shifted (registered) to account
-      for motion
+  - doc: Value is 'Image stacks whose frames have been shifted (registered) to account
+      for motion'
     dtype: text
     name: help
     value: Image stacks whose frames have been shifted (registered) to account for

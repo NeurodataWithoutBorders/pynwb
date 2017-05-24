@@ -1,7 +1,7 @@
 groups:
 - attributes:
-  - doc: Value is Features of an applied stimulus. This is useful when storing the
-      raw stimulus is impractical
+  - doc: Value is 'Features of an applied stimulus. This is useful when storing the
+      raw stimulus is impractical'
     dtype: text
     name: help
     value: Features of an applied stimulus. This is useful when storing the raw stimulus
@@ -23,10 +23,13 @@ groups:
     shape:
     - null
   - attributes:
-    - doc: Value is see 'feature_units'
+    - default_value: see 'feature_units'
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
       dtype: None
       name: unit
-      value: see 'feature_units'
     dims:
     - num_times
     - num_features
@@ -47,21 +50,21 @@ groups:
   neurodata_type_def: AbstractFeatureSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: Value is Time-stamped annotations about an experiment
+  - doc: Value is 'Time-stamped annotations about an experiment'
     dtype: text
     name: help
     value: Time-stamped annotations about an experiment
   datasets:
   - attributes:
-    - doc: Value is float('NaN')
+    - doc: Value is 'float('NaN')'
       dtype: None
       name: conversion
       value: NaN
-    - doc: Value is n/a
+    - doc: Value is 'n/a'
       dtype: None
       name: unit
       value: n/a
-    - doc: Value is float('NaN')
+    - doc: Value is 'float('NaN')'
       dtype: None
       name: resolution
       value: NaN
@@ -79,21 +82,21 @@ groups:
   neurodata_type_def: AnnotationSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: Value is Stores the start and stop times for events
+  - doc: Value is 'Stores the start and stop times for events'
     dtype: text
     name: help
     value: Stores the start and stop times for events
   datasets:
   - attributes:
-    - doc: Value is float('NaN')
+    - doc: Value is 'float('NaN')'
       dtype: None
       name: conversion
       value: NaN
-    - doc: Value is n/a
+    - doc: Value is 'n/a'
       dtype: None
       name: unit
       value: n/a
-    - doc: Value is float('NaN')
+    - doc: Value is 'float('NaN')'
       dtype: None
       name: resolution
       value: NaN
@@ -114,7 +117,7 @@ groups:
   neurodata_type_def: IntervalSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: Value is Estimated spike times from a single unit
+  - doc: Value is 'Estimated spike times from a single unit'
     dtype: text
     name: help
     value: Estimated spike times from a single unit

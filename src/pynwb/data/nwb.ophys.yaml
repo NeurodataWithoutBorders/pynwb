@@ -1,6 +1,6 @@
 groups:
 - attributes:
-  - doc: Value is Image stack recorded from 2-photon microscope
+  - doc: Value is 'Image stack recorded from 2-photon microscope'
     dtype: text
     name: help
     value: Image stack recorded from 2-photon microscope
@@ -31,22 +31,13 @@ groups:
   neurodata_type_def: TwoPhotonSeries
   neurodata_type_inc: ImageSeries
 - attributes:
-  - doc: Value is ROI responses over an imaging plane. Each row in data[] should correspond
-      to the signal from one ROI
+  - doc: Value is 'ROI responses over an imaging plane. Each row in data[] should
+      correspond to the signal from one ROI'
     dtype: text
     name: help
     value: ROI responses over an imaging plane. Each row in data[] should correspond
       to the signal from one ROI
   datasets:
-  - dims:
-    - num_times
-    - num_ROIs
-    doc: Signals from ROIs
-    dtype: float32
-    name: data
-    shape:
-    - null
-    - null
   - dims:
     - num_ROIs
     doc: List of ROIs represented, one name for each row of data[].
@@ -57,6 +48,15 @@ groups:
   - doc: Path to segmentation module.
     dtype: text
     name: segmentation_interface_path
+  - dims:
+    - num_times
+    - num_ROIs
+    doc: Signals from ROIs
+    dtype: float32
+    name: data
+    shape:
+    - null
+    - null
   doc: ROI responses over an imaging plane. Each row in data[] should correspond to
     the signal from one ROI.
   links:
@@ -66,8 +66,8 @@ groups:
   neurodata_type_def: RoiResponseSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: Value is Df/f over time of one or more ROIs. TimeSeries names should correspond
-      to imaging plane names
+  - doc: Value is 'Df/f over time of one or more ROIs. TimeSeries names should correspond
+      to imaging plane names'
     dtype: text
     name: help
     value: Df/f over time of one or more ROIs. TimeSeries names should correspond
@@ -83,8 +83,8 @@ groups:
   neurodata_type_def: DfOverF
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Fluorescence over time of one or more ROIs. TimeSeries names should
-      correspond to imaging plane names
+  - doc: Value is 'Fluorescence over time of one or more ROIs. TimeSeries names should
+      correspond to imaging plane names'
     dtype: text
     name: help
     value: Fluorescence over time of one or more ROIs. TimeSeries names should correspond
@@ -100,8 +100,8 @@ groups:
   neurodata_type_def: Fluorescence
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Stores groups of pixels that define regions of interest from one
-      or more imaging planes
+  - doc: Value is 'Stores groups of pixels that define regions of interest from one
+      or more imaging planes'
     dtype: text
     name: help
     value: Stores groups of pixels that define regions of interest from one or more
@@ -128,19 +128,15 @@ groups:
       - null
     doc: Group name is human-readable description of imaging plane
     groups:
-    - doc: Stores image stacks segmentation mask apply to.
-      groups:
-      - doc: One or more image stacks that the masks apply to (can be one-element
-          stack)
-        neurodata_type_inc: ImageSeries
-      name: reference_images
     - datasets:
       - dims:
-        - num_pixels
-        doc: Weight of each pixel listed in pix_mask
+        - num_x
+        - num_y
+        doc: ROI mask, represented in 2D ([y][x]) intensity image
         dtype: float32
-        name: pix_mask_weight
+        name: img_mask
         shape:
+        - null
         - null
       - dims:
         - num_pixels
@@ -151,21 +147,25 @@ groups:
         shape:
         - null
         - null
+      - dims:
+        - num_pixels
+        doc: Weight of each pixel listed in pix_mask
+        dtype: float32
+        name: pix_mask_weight
+        shape:
+        - null
       - doc: Description of this ROI.
         dtype: text
         name: roi_description
-      - dims:
-        - num_x
-        - num_y
-        doc: ROI mask, represented in 2D ([y][x]) intensity image
-        dtype: float32
-        name: img_mask
-        shape:
-        - null
-        - null
       doc: Name of ROI
       neurodata_type_def: ROI
       quantity: '*'
+    - doc: Stores image stacks segmentation mask apply to.
+      groups:
+      - doc: One or more image stacks that the masks apply to (can be one-element
+          stack)
+        neurodata_type_inc: ImageSeries
+      name: reference_images
     links:
     - doc: link to ImagingPlane group from which this TimeSeries data was generated
       name: imaging_plane
@@ -176,21 +176,23 @@ groups:
   neurodata_type_def: ImageSegmentation
   neurodata_type_inc: Interface
 - datasets:
-  - doc: Excitation wavelength
+  - doc: Name of device in /general/devices
     dtype: text
-    name: excitation_lambda
-  - doc: Calcium indicator
+    name: device
+  - doc: Description of &lt;image_plane_X&gt;
     dtype: text
-    name: indicator
+    name: description
+    quantity: '?'
   - attributes:
-    - doc: Value is 1.0
+    - default_value: 1.0
+      doc: Multiplier to get from stored values to specified unit (e.g., 1e-3 for
+        millimeters)
       dtype: float
       name: conversion
-      value: 1.0
-    - doc: Value is Meter
+    - default_value: Meter
+      doc: Base unit that coordinates are stored in (e.g., Meters)
       dtype: text
       name: unit
-      value: Meter
     dims:
     - height
     - weight
@@ -203,16 +205,6 @@ groups:
     - null
     - null
     - 3
-  - doc: Location of image plane
-    dtype: text
-    name: location
-  - doc: Description of &lt;image_plane_X&gt;
-    dtype: text
-    name: description
-    quantity: '?'
-  - doc: Rate images are acquired, in Hz.
-    dtype: text
-    name: imaging_rate
   - doc: 'Describes position and reference frame of manifold based on position of
       first element in manifold. For example, text description of anotomical location
       or vectors needed to rotate to common anotomical axis (eg, AP/DV/ML). COMMENT:
@@ -220,9 +212,18 @@ groups:
       this field is not required'
     dtype: text
     name: reference_frame
-  - doc: Name of device in /general/devices
+  - doc: Calcium indicator
     dtype: text
-    name: device
+    name: indicator
+  - doc: Location of image plane
+    dtype: text
+    name: location
+  - doc: Rate images are acquired, in Hz.
+    dtype: text
+    name: imaging_rate
+  - doc: Excitation wavelength
+    dtype: text
+    name: excitation_lambda
   doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name is
     arbitrary but should be meaningful. It is referenced by TwoPhotonSeries and also
     ImageSegmentation and DfOverF interfaces'
