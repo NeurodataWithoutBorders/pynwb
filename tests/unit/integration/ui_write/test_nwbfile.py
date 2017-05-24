@@ -14,13 +14,6 @@ from .  import base
 
 class TestNWBFileIO(base.TestNWBContainerIO):
 
-    cluster_nums = [0, 1, 2]
-    num = [0, 1, 2, 0, 1, 2]
-    times = list(range(10,61,10))
-    peak_over_rms = [100, 101, 102]
-    clustering_desc = "A fake Clustering interface"
-    clustering_source = "an example source for Clustering"
-
     def setUp(self):
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)
@@ -48,15 +41,15 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                  groups={'Clustering': GroupBuilder('Clustering',
                                          attributes={
                                             'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting.',
-                                            'source': self.clustering_source,
+                                            'source': "an example source for Clustering",
                                             'neurodata_type': 'Clustering',
                                             'namespace': base.CORE_NAMESPACE},
                                          datasets={
-                                            'cluster_nums': DatasetBuilder('cluster_nums', self.cluster_nums),
-                                            'num': DatasetBuilder('num', self.num),
-                                            'times': DatasetBuilder('times', self.times),
-                                            'peak_over_rms': DatasetBuilder('peak_over_rms', self.peak_over_rms),
-                                            'description': DatasetBuilder('description', self.clustering_desc)})})
+                                            'cluster_nums': DatasetBuilder('cluster_nums', [0,1,2]),
+                                            'num': DatasetBuilder('num', [0, 1, 2, 0, 1, 2]),
+                                            'times': DatasetBuilder('times', list(range(10,61,10))),
+                                            'peak_over_rms': DatasetBuilder('peak_over_rms', [100, 101, 102]),
+                                            'description': DatasetBuilder('description', "A fake Clustering interface")})})
 
 
         self.builder = GroupBuilder('root',
@@ -78,7 +71,7 @@ class TestNWBFileIO(base.TestNWBContainerIO):
         ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
         self.container.add_raw_timeseries(ts)
         mod = self.container.create_processing_module('test_module', 'a test module')
-        mod.add_interface(Clustering(self.clustering_source, self.clustering_desc, self.num, self.peak_over_rms, self.times))
+        mod.add_interface(Clustering("an example source for Clustering", "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10,61,10))))
 
     def tearDown(self):
         if os.path.exists(self.path):
@@ -100,4 +93,3 @@ class TestNWBFileIO(base.TestNWBContainerIO):
         self.assertEqual(len(raw_ts), 1)
         self.assertIsInstance(raw_ts[0], TimeSeries)
         hdf5io.close()
-
