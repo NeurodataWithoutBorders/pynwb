@@ -456,8 +456,10 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
 
     def __add_attributes(self, builder, attributes, container):
         for spec in attributes:
-            isdesc = spec.name == 'description'
-            attr_value = self.get_attr_value(spec, container)
+            if spec.value is not None:
+                attr_value = spec.value
+            else:
+                attr_value = self.get_attr_value(spec, container)
             #TODO: add check for required attributes
             if not attr_value:
                 if spec.value is not None:
