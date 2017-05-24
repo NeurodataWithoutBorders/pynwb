@@ -173,11 +173,14 @@ class TypeMap(object):
         self.__container_types.setdefault(namespace, dict())
         self.__container_types[namespace][data_type] = container_cls
         self.__data_types[container_cls] = (namespace, data_type)
+        self.register_map(container_cls, ObjectMapper)
 
     @docval({"name": "container_cls", "type": type, "doc": "the Container class for which the given ObjectMapper class gets used for"},
             {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map"})
     def register_map(self, **kwargs):
         container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
+        if container_cls  not in self.__data_types:
+            raise ValueError('cannot register map for type %s - no data_type found' % container_cls)
         self.__mapper_cls[container_cls] = mapper_cls
 
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
