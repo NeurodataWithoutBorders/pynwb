@@ -100,7 +100,7 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
                                 datasets={'data': DatasetBuilder('data', data,
                                                                  attributes={'unit': 'volt',
                                                                              'conversion': 1.0,
-                                                                             'resolution': np.nan}),
+                                                                             'resolution': 0.0}),
                                           'timestamps': DatasetBuilder('timestamps', timestamps,
                                                                  attributes={'unit': 'Seconds', 'interval': 1})},
                                 links={'electrode_group': LinkBuilder('electrode_group', elcgrp_builder)})
@@ -110,7 +110,7 @@ class TestClusteringIO(base.TestNWBContainerIO):
     def setUpBuilder(self):
         self.builder = GroupBuilder('Clustering',
             attributes={
-               'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting.',
+               'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',
                'source': "an example source for Clustering",
                'neurodata_type': 'Clustering',
                'namespace': base.CORE_NAMESPACE},

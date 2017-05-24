@@ -26,7 +26,7 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                              'source': 'example_source',
                                              'namespace': base.CORE_NAMESPACE,
                                              'neurodata_type': 'TimeSeries',
-                                             'help': 'General purpose TimeSeries'},
+                                             'help': 'General time series object'},
                                  datasets={'data': DatasetBuilder('data', list(range(100,200,10)),
                                                                   attributes={'unit': 'SIunit',
                                                                               'conversion': 1.0,
@@ -40,7 +40,7 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                              'description': 'a test module'},
                                  groups={'Clustering': GroupBuilder('Clustering',
                                          attributes={
-                                            'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting.',
+                                            'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',
                                             'source': "an example source for Clustering",
                                             'neurodata_type': 'Clustering',
                                             'namespace': base.CORE_NAMESPACE},

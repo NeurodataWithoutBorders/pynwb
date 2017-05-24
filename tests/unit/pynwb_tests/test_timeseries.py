@@ -14,11 +14,11 @@ class TimeSeriesConstructor(unittest.TestCase):
 
     def test_init_datalink_set(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
-        self.assertSetEqual(ts.data_link, set())
+        self.assertIsNone(ts.data_link)
 
     def test_init_timestampslink_set(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
-        self.assertSetEqual(ts.timestamp_link, set())
+        self.assertIsNone(ts.timestamp_link)
 
     def test_init_no_parent(self):
         parent = NWBContainer()
@@ -32,7 +32,7 @@ class TimeSeriesConstructor(unittest.TestCase):
         ts = TimeSeries('test_ts', 'a hypothetical source', dat, 'Volts', timestamps=[0.1, 0.2, 0.3, 0.4])
         self.assertIs(ts.data, dat)
         self.assertEqual(ts.conversion, 1.0)
-        self.assertTrue(math.isnan(ts.resolution))
+        self.assertEqual(ts.resolution, 0.0)
         self.assertEqual(ts.unit, 'Volts')
 
     def test_init_timestamps(self):
