@@ -1,10 +1,30 @@
 groups:
 - attributes:
-  - doc: Value is Storage object for time-series 2-D image data
+  - doc: Value is 'Storage object for time-series 2-D image data'
     dtype: text
     name: help
     value: Storage object for time-series 2-D image data
   datasets:
+  - doc: Format of image. If this is 'external' then the field external_file contains
+      the path or URL information to that file. For tiff, png, jpg, etc, the binary
+      representation of the image is stored in data. If the format is raw then the
+      fields bit_per_pixel and dimension are used. For raw images, only a single channel
+      is stored (eg, red).
+    dtype: text
+    name: format
+    quantity: '?'
+  - doc: Number of bit per image pixel.
+    dtype: int32
+    name: bits_per_pixel
+    quantity: '?'
+  - dims:
+    - rank
+    doc: Number of pixels on x, y, (and z) axes.
+    dtype: int32
+    name: dimension
+    quantity: '?'
+    shape:
+    - null
   - dims:
     - - x
       - y
@@ -28,22 +48,6 @@ groups:
       - null
       - null
       - null
-  - dims:
-    - rank
-    doc: Number of pixels on x, y, (and z) axes.
-    dtype: int32
-    name: dimension
-    quantity: '?'
-    shape:
-    - null
-  - doc: Format of image. If this is 'external' then the field external_file contains
-      the path or URL information to that file. For tiff, png, jpg, etc, the binary
-      representation of the image is stored in data. If the format is raw then the
-      fields bit_per_pixel and dimension are used. For raw images, only a single channel
-      is stored (eg, red).
-    dtype: text
-    name: format
-    quantity: '?'
   - attributes:
     - dims:
       - num_files
@@ -66,10 +70,6 @@ groups:
     quantity: '?'
     shape:
     - null
-  - doc: Number of bit per image pixel.
-    dtype: int32
-    name: bits_per_pixel
-    quantity: '?'
   doc: 'General image data that is common between acquisition and stimulus time series.
     Sometimes the image data is stored in the HDF5 file in a raw format while other
     times it will be stored as an external image file in the host file system. The
@@ -78,7 +78,7 @@ groups:
   neurodata_type_def: ImageSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: Value is An alpha mask that is applied to a presented visual stimulus
+  - doc: Value is 'An alpha mask that is applied to a presented visual stimulus'
     dtype: text
     name: help
     value: An alpha mask that is applied to a presented visual stimulus
@@ -98,11 +98,20 @@ groups:
   neurodata_type_def: ImageMaskSeries
   neurodata_type_inc: ImageSeries
 - attributes:
-  - doc: Value is Time-series image stack for optical recording or stimulus
+  - doc: Value is 'Time-series image stack for optical recording or stimulus'
     dtype: text
     name: help
     value: Time-series image stack for optical recording or stimulus
   datasets:
+  - doc: Description of image relative to some reference frame (e.g., which way is
+      up). Must also specify frame of reference.
+    dtype: text
+    name: orientation
+    quantity: '?'
+  - doc: Distance from camera/monitor to target/eye.
+    dtype: float32
+    name: distance
+    quantity: '?'
   - dims:
     - - width|height
       - width|height|depth
@@ -112,15 +121,6 @@ groups:
     quantity: '?'
     shape:
     - 2
-  - doc: Distance from camera/monitor to target/eye.
-    dtype: float32
-    name: distance
-    quantity: '?'
-  - doc: Description of image relative to some reference frame (e.g., which way is
-      up). Must also specify frame of reference.
-    dtype: text
-    name: orientation
-    quantity: '?'
   doc: Image data that is presented or recorded. A stimulus template movie will be
     stored only as an image. When the image is presented as stimulus, additional data
     is required, such as field of view (eg, how much of the visual field the image
@@ -129,18 +129,15 @@ groups:
   neurodata_type_def: OpticalSeries
   neurodata_type_inc: ImageSeries
 - attributes:
-  - doc: Value is A sequence that is generated from an existing image stack. Frames
+  - doc: Value is 'A sequence that is generated from an existing image stack. Frames
       can be presented in an arbitrary order. The data[] field stores frame number
-      in reference stack
+      in reference stack'
     dtype: text
     name: help
     value: A sequence that is generated from an existing image stack. Frames can be
       presented in an arbitrary order. The data[] field stores frame number in reference
       stack
   datasets:
-  - doc: Path to linked TimeSeries
-    dtype: text
-    name: indexed_timeseries_path
   - dims:
     - num_times
     doc: Index of the frame in the referenced ImageSeries.
@@ -148,6 +145,9 @@ groups:
     name: data
     shape:
     - null
+  - doc: Path to linked TimeSeries
+    dtype: text
+    name: indexed_timeseries_path
   doc: Stores indices to image frames stored in an ImageSeries. The purpose of the
     ImageIndexSeries is to allow a static image stack to be stored somewhere, and
     the images in the stack to be referenced out-of-order. This can be for the display

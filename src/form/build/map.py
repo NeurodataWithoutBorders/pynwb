@@ -149,20 +149,18 @@ class TypeMap(object):
             namespace = self.__get_namespace(obj)
             container_cls = self.get_cls(obj)
         # now build the ObjectMapper class
-        for cls in container_cls.__mro__:
-            mapper = self.__mappers.get(cls)
-            if mapper is None: # we haven't yet constructed a mapper for this type
-                mapper_cls = self.__mapper_cls.get(cls)
-                if mapper_cls is None:
-                    continue
-                spec = self.__ns_catalog.get_spec(namespace, data_type)
-                mapper = mapper_cls(spec)
-                self.__mappers[cls] = mapper
-                break
-            else:
-                break
+        spec = self.__ns_catalog.get_spec(namespace, data_type)
+        mapper = self.__mappers.get(container_cls)
         if mapper is None:
-            raise ValueError("No ObjectMapper found for class %s, namespace '%s', data_type '%s'" % (container_cls, namespace, data_type))
+            mapper_cls = ObjectMapper
+            for cls in container_cls.__mro__:
+                tmp_mapper_cls = self.__mapper_cls.get(cls)
+                if tmp_mapper_cls is not None:
+                    mapper_cls = tmp_mapper_cls
+                    break
+
+            mapper = mapper_cls(spec)
+            self.__mappers[container_cls] = mapper
         return mapper
 
     @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type to map the class to"},
@@ -178,6 +176,8 @@ class TypeMap(object):
             {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map"})
     def register_map(self, **kwargs):
         container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
+        if container_cls  not in self.__data_types:
+            raise ValueError('cannot register map for type %s - no data_type found' % container_cls)
         self.__mapper_cls[container_cls] = mapper_cls
 
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
@@ -298,14 +298,13 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __convert_name(name):
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
         ret = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
-        if ret[-1] != 's':
-            ret += 's'
         return ret
 
     def __map_spec(self, spec):
         for subspec in spec.attributes:
             self.__map_spec_helper(subspec)
-        self.__map_spec_helper(spec)
+        if spec != self.__spec:
+            self.__map_spec_helper(spec)
         if isinstance(spec, GroupSpec):
             for subspec in spec.datasets:
                 self.__map_spec(subspec)
@@ -329,9 +328,9 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             else:
                 raise ValueError('Cannot map spec with wildcard name and no data_type_inc or data_type_def')
             name = self.__convert_name(dt)
+            if name[-1] != 's' and spec.is_many():
+                name += 's'
             self.map_spec(name, spec)
-            #self.map_attr(name, spec)
-            #self.map_const_arg(name, spec)
 
     @docval({"name": "attr_name", "type": str, "doc": "the name of the object to map"},
             {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
@@ -457,12 +456,17 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
 
     def __add_attributes(self, builder, attributes, container):
         for spec in attributes:
-            attr_value = self.get_attr_value(spec, container)
-            if not attr_value:
-                if spec.value is not None:
-                    attr_value = spec.value
-                else:
-                    continue
+            if spec.value is not None:
+                attr_value = spec.value
+            else:
+                attr_value = self.get_attr_value(spec, container)
+                if attr_value is None:
+                    attr_value = spec.default_value
+
+            if attr_value is None:
+                if spec.required:
+                    raise Warning("missing required attribute '%s'" % spec.name)
+                continue
             builder.set_attribute(spec.name, attr_value)
 
     def __add_links(self, builder, links, container, build_manager):
@@ -475,6 +479,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __add_datasets(self, builder, datasets, container, build_manager):
         for spec in datasets:
             attr_value = self.get_attr_value(spec, container)
+            #TODO: add check for required datasets
             if attr_value is None:
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
@@ -611,7 +616,12 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 kwargs[argname] = val
             else:
                 args.append(val)
-        return cls(*args, **kwargs)
+        try:
+
+            obj = cls(*args, **kwargs)
+        except Exception as ex:
+            raise Exception('Could not construct %s object' % (cls.__name__)) from ex
+        return obj
 
     def get_builder_name(self, container):
         if self.__spec.name != NAME_WILDCARD:

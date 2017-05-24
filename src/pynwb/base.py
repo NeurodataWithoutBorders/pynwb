@@ -1,13 +1,13 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs
+from form.utils import docval, getargs, popargs
 
 from . import register_class, CORE_NAMESPACE
 from .core import  NWBContainer
 
 _default_conversion = 1.0
-_default_resolution = float("nan")
+_default_resolution = 0.0
 
 @register_class('Interface', CORE_NAMESPACE)
 class Interface(NWBContainer):
@@ -68,12 +68,14 @@ class Module(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
+            {'name': 'interfaces', 'type': list, 'doc': 'Interfaces that belong to this Modules', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, description = getargs('name', 'description', kwargs)
+        name, description, interfaces = popargs('name', 'description', 'interfaces', kwargs)
         super(Module, self).__init__(**kwargs)
+        self.description = description
         self.__name = name
-        self.__interfaces = list()
+        self.__interfaces = list() if interfaces is None else interfaces
 
     @property
     def interfaces(self):
@@ -166,9 +168,6 @@ class TimeSeries(NWBContainer):
         for key in keys:
             setattr(self, key, kwargs.get(key))
 
-        self.fields['data_link'] = list()
-        self.fields['timestamp_link'] = list()
-
         data = getargs('data', kwargs)
         self.fields['data'] = data
         if isinstance(data, TimeSeries):
@@ -214,8 +213,7 @@ class TimeSeries(NWBContainer):
 
     @property
     def data_link(self):
-        return set(self.fields.get('data_link'))
-        #return frozenset(self.fields['data_link'])
+        return self.__get_links('data_link')
 
     @property
     def timestamps(self):
@@ -228,7 +226,16 @@ class TimeSeries(NWBContainer):
 
     @property
     def timestamp_link(self):
-        return set(self.fields.get('timestamp_link'))
+        return self.__get_links('timestamp_link')
+
+    def __get_links(self, links):
+        ret = self.fields.get(links)
+        if ret is not None:
+            ret = set(ret)
+        return ret
+
+    def __add_link(self, links_key, link):
+        self.fields.setdefault(links_key, list()).append(link)
 
     @property
     def time_unit(self):

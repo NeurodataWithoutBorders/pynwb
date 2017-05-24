@@ -1,15 +1,18 @@
 groups:
 - attributes:
-  - doc: Value is Stores acquired voltage data from extracellular recordings
+  - doc: Value is 'Stores acquired voltage data from extracellular recordings'
     dtype: text
     name: help
     value: Stores acquired voltage data from extracellular recordings
   datasets:
   - attributes:
-    - doc: Value is volt
+    - default_value: volt
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
       dtype: text
       name: unit
-      value: volt
     dims:
     - - num_times
     - - num_times
@@ -32,16 +35,19 @@ groups:
   neurodata_type_def: ElectricalSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: Value is Snapshots of spike events from data.
+  - doc: Value is 'Snapshots of spike events from data.'
     dtype: text
     name: help
     value: Snapshots of spike events from data.
   datasets:
   - attributes:
-    - doc: Value is volt
+    - default_value: volt
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
       dtype: text
       name: unit
-      value: volt
     dims:
     - - num_events
       - num_samples
@@ -67,8 +73,8 @@ groups:
   neurodata_type_def: SpikeEventSeries
   neurodata_type_inc: ElectricalSeries
 - attributes:
-  - doc: Value is Mean waveform shape of clusters. Waveforms should be high-pass filtered
-      (ie, not the same bandpass filter used waveform analysis and clustering)
+  - doc: Value is 'Mean waveform shape of clusters. Waveforms should be high-pass
+      filtered (ie, not the same bandpass filter used waveform analysis and clustering)'
     dtype: text
     name: help
     value: Mean waveform shape of clusters. Waveforms should be high-pass filtered
@@ -83,6 +89,12 @@ groups:
     shape:
     - null
     - null
+  - doc: Filtering applied to data before generating mean/sd
+    dtype: text
+    name: waveform_filtering
+  - doc: Path to linked clustering interface
+    dtype: text
+    name: clustering_interface_path
   - dims:
     - num_clusters
     - num_samples
@@ -95,12 +107,6 @@ groups:
     shape:
     - null
     - null
-  - doc: Filtering applied to data before generating mean/sd
-    dtype: text
-    name: waveform_filtering
-  - doc: Path to linked clustering interface
-    dtype: text
-    name: clustering_interface_path
   doc: The mean waveform shape, including standard deviation, of the different clusters.
     Ideally, the waveform analysis should be performed on data that is only high-pass
     filtered. This is a separate module because it is expected to require updating.
@@ -114,29 +120,13 @@ groups:
   neurodata_type_def: ClusterWaveforms
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Clustered spike data, whether from automatic clustering tools (eg,
-      klustakwik) or as a result of manual sorting
+  - doc: Value is 'Clustered spike data, whether from automatic clustering tools (eg,
+      klustakwik) or as a result of manual sorting'
     dtype: text
     name: help
     value: Clustered spike data, whether from automatic clustering tools (eg, klustakwik)
       or as a result of manual sorting
   datasets:
-  - dims:
-    - num_clusters
-    doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
-      a basic clustering metric).
-    dtype: float32
-    name: peak_over_rms
-    shape:
-    - null
-  - dims:
-    - num_events
-    doc: Times of clustered events, in seconds. This may be a link to times field
-      in associated FeatureExtraction module.
-    dtype: float64!
-    name: times
-    shape:
-    - null
   - dims:
     - num_events
     doc: Cluster number of each event
@@ -152,6 +142,22 @@ groups:
     name: cluster_nums
     shape:
     - null
+  - dims:
+    - num_events
+    doc: Times of clustered events, in seconds. This may be a link to times field
+      in associated FeatureExtraction module.
+    dtype: float64!
+    name: times
+    shape:
+    - null
+  - dims:
+    - num_clusters
+    doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
+      a basic clustering metric).
+    dtype: float32
+    name: peak_over_rms
+    shape:
+    - null
   - doc: Description of clusters or clustering, (e.g. cluster 0 is noise, clusters
       curated using Klusters, etc)
     dtype: text
@@ -162,22 +168,11 @@ groups:
   neurodata_type_def: Clustering
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Container for salient features of detected events
+  - doc: Value is 'Container for salient features of detected events'
     dtype: text
     name: help
     value: Container for salient features of detected events
   datasets:
-  - dims:
-    - num_events
-    - num_channels
-    - num_features
-    doc: Multi-dimensional array of features extracted from each event.
-    dtype: float32
-    name: features
-    shape:
-    - null
-    - null
-    - null
   - dims:
     - num_events
     doc: Times of events that features correspond to (can be a link).
@@ -191,6 +186,17 @@ groups:
     dtype: text
     name: description
     shape:
+    - null
+  - dims:
+    - num_events
+    - num_channels
+    - num_features
+    doc: Multi-dimensional array of features extracted from each event.
+    dtype: float32
+    name: features
+    shape:
+    - null
+    - null
     - null
   doc: Features, such as PC1 and PC2, that are extracted from signals stored in a
     SpikeEvent TimeSeries or other source.
@@ -206,6 +212,18 @@ groups:
       threshold, as well as relevant values.
     dtype: text
     name: detection_method
+  - attributes:
+    - default_value: Seconds
+      doc: The string "Seconds"
+      dtype: text
+      name: unit
+    dims:
+    - num_events
+    doc: Timestamps of events, in Seconds
+    dtype: float64!
+    name: times
+    shape:
+    - null
   - doc: Path to linked ElectricalSeries.
     dtype: text
     name: source_electricalseries_path
@@ -219,18 +237,6 @@ groups:
     name: source_idx
     shape:
     - null
-  - attributes:
-    - doc: Value is Seconds
-      dtype: text
-      name: unit
-      value: Seconds
-    dims:
-    - num_events
-    doc: Timestamps of events, in Seconds
-    dtype: float64!
-    name: times
-    shape:
-    - null
   doc: Detected spike events from voltage trace(s).
   links:
   - doc: HDF5 link to ElectricalSeries that this data was calculated from. Metadata
@@ -242,7 +248,7 @@ groups:
   neurodata_type_def: EventDetection
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Waveform of detected extracellularly recorded spike events
+  - doc: Value is 'Waveform of detected extracellularly recorded spike events'
     dtype: text
     name: help
     value: Waveform of detected extracellularly recorded spike events
@@ -257,9 +263,9 @@ groups:
   neurodata_type_def: EventWaveform
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is Ephys data from one or more channels that is subjected to filtering,
+  - doc: Value is 'Ephys data from one or more channels that is subjected to filtering,
       such as for gamma or theta oscillations (LFP has its own interface). Filter
-      properties should be noted in the ElectricalSeries
+      properties should be noted in the ElectricalSeries'
     dtype: text
     name: help
     value: Ephys data from one or more channels that is subjected to filtering, such
@@ -282,8 +288,8 @@ groups:
   neurodata_type_def: FilteredEphys
   neurodata_type_inc: Interface
 - attributes:
-  - doc: Value is LFP data from one or more channels. Filter properties should be
-      noted in the ElectricalSeries
+  - doc: Value is 'LFP data from one or more channels. Filter properties should be
+      noted in the ElectricalSeries'
     dtype: text
     name: help
     value: LFP data from one or more channels. Filter properties should be noted in

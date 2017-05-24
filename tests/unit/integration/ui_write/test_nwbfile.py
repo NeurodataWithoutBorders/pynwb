@@ -8,6 +8,7 @@ from form.build import GroupBuilder, DatasetBuilder
 from form.backends.hdf5 import HDF5IO
 
 from pynwb import NWBFile, TimeSeries
+from pynwb.ecephys import Clustering
 
 from .  import base
 
@@ -25,19 +26,38 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                              'source': 'example_source',
                                              'namespace': base.CORE_NAMESPACE,
                                              'neurodata_type': 'TimeSeries',
-                                             'help': 'General purpose TimeSeries'},
+                                             'help': 'General time series object'},
                                  datasets={'data': DatasetBuilder('data', list(range(100,200,10)),
                                                                   attributes={'unit': 'SIunit',
                                                                               'conversion': 1.0,
                                                                               'resolution': 0.1}),
                                            'timestamps': DatasetBuilder('timestamps', list(range(10)),
                                                                   attributes={'unit': 'Seconds', 'interval': 1})})
+
+        module_builder = GroupBuilder('test_module',
+                                 attributes={'namespace': base.CORE_NAMESPACE,
+                                             'neurodata_type': 'Module',
+                                             'description': 'a test module'},
+                                 groups={'Clustering': GroupBuilder('Clustering',
+                                         attributes={
+                                            'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',
+                                            'source': "an example source for Clustering",
+                                            'neurodata_type': 'Clustering',
+                                            'namespace': base.CORE_NAMESPACE},
+                                         datasets={
+                                            'cluster_nums': DatasetBuilder('cluster_nums', [0,1,2]),
+                                            'num': DatasetBuilder('num', [0, 1, 2, 0, 1, 2]),
+                                            'times': DatasetBuilder('times', list(range(10,61,10))),
+                                            'peak_over_rms': DatasetBuilder('peak_over_rms', [100, 101, 102]),
+                                            'description': DatasetBuilder('description', "A fake Clustering interface")})})
+
+
         self.builder = GroupBuilder('root',
                                  groups={'acquisition': GroupBuilder('acquisition', groups={'timeseries': GroupBuilder('timeseries', groups={'test_timeseries': ts_builder}), 'images': GroupBuilder('images')}),
                                          'analysis': GroupBuilder('analysis'),
                                          'epochs': GroupBuilder('epochs'),
                                          'general': GroupBuilder('general'),
-                                         'processing': GroupBuilder('processing'),
+                                         'processing': GroupBuilder('processing', groups={'test_module': module_builder}),
                                          'stimulus': GroupBuilder('stimulus', groups={'presentation': GroupBuilder('presentation'), 'templates': GroupBuilder('templates')})},
                                  datasets={'file_create_date': DatasetBuilder('file_create_date', [str(self.create_date)]),
                                            'identifier': DatasetBuilder('identifier', 'TEST123'),
@@ -50,6 +70,8 @@ class TestNWBFileIO(base.TestNWBContainerIO):
         self.container = NWBFile('test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
         ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
         self.container.add_raw_timeseries(ts)
+        mod = self.container.create_processing_module('test_module', 'a test module')
+        mod.add_interface(Clustering("an example source for Clustering", "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10,61,10))))
 
     def tearDown(self):
         if os.path.exists(self.path):
@@ -71,4 +93,3 @@ class TestNWBFileIO(base.TestNWBContainerIO):
         self.assertEqual(len(raw_ts), 1)
         self.assertIsInstance(raw_ts[0], TimeSeries)
         hdf5io.close()
-

@@ -45,7 +45,6 @@ from form.build import TypeMap as __TypeMap
 from form.build import ObjectMapper as __ObjectMapper
 def get_type_map():
     ret = __TypeMap(__NS_CATALOG)
-    ret.register_map(NWBContainer, __ObjectMapper)
     return ret
 
 # a global type map

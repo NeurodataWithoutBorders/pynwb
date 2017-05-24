@@ -191,7 +191,8 @@ class Clustering(Interface):
     Specifies cluster event times and cluster metric for maximum ratio of waveform peak to RMS on any channel in cluster.
     """
 
-    __nwbfields__  = ('description',
+    __nwbfields__  = ('cluster_nums',
+                      'description',
                       'num',
                       'peak_over_rms',
                       'times')
@@ -211,6 +212,7 @@ class Clustering(Interface):
         self.num = num
         self.peak_over_rms = list(peak_over_rms)
         self.times = times
+        self.cluster_nums = list(set(num))
 
 @register_class('ClusterWaveforms', CORE_NAMESPACE)
 class ClusterWaveforms(Interface):

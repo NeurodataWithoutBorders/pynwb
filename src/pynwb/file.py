@@ -59,6 +59,10 @@ class NWBFile(NWBContainer):
             {'name': 'stimulus_template', 'type': (list, tuple), 'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'epochs', 'type': (list, tuple), 'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
             {'name': 'modules', 'type': (list, tuple), 'doc': 'Module objects belonging to this NWBFile', 'default': None},
+            {'name': 'ec_electrodes', 'type': (list, tuple), 'doc': 'ElectrodeGroups that belong to this NWBFile', 'default': None},
+            {'name': 'ic_electrodes', 'type': (list, tuple), 'doc': 'IntracellularElectrodes that belong to this NWBFile', 'default': None},
+            {'name': 'imaging_planes', 'type': (list, tuple), 'doc': 'ImagingPlanes that belong to this NWBFile', 'default': None},
+            {'name': 'optogenetic_sites', 'type': (list, tuple), 'doc': 'OptogeneticStimulusSites that belong to this NWBFile', 'default': None},
             {'name': 'devices', 'type': (list, tuple), 'doc': 'Device objects belonging to this NWBFile', 'default': None},
     )
     def __init__(self, **kwargs):
@@ -83,11 +87,10 @@ class NWBFile(NWBContainer):
         self.__stimulus = self.__build_ts(getargs('stimulus', kwargs))
         self.__stimulus_template = self.__build_ts(getargs('stimulus_template', kwargs))
 
-        self.__modules = dict()
-        self.__epochs = dict()
-        self.__ec_electrodes = dict()
-        self.__ec_electrode_idx = dict()
-        self.__devices = dict()
+        self.__modules = self.__to_dict(getargs('modules', kwargs))
+        self.__epochs = self.__to_dict(getargs('epochs', kwargs))
+        self.__ec_electrodes = self.__to_dict(getargs('ec_electrodes', kwargs))
+        self.__devices = self.__to_dict(getargs('devices', kwargs))
 
         recommended = [
             'experimenter',
@@ -98,6 +101,13 @@ class NWBFile(NWBContainer):
         ]
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
+
+    def __to_dict(self, arg):
+        if arg is None:
+            return dict()
+        else:
+            return {i.name: i for i in arg}
+
 
     def __build_ts(self, const_arg):
         ret = dict()
@@ -292,9 +302,6 @@ class NWBFile(NWBContainer):
         elec_grp.parent = self
         name = elec_grp.name
         self.__ec_electrodes[name] = elec_grp
-        self.__ec_electrode_idx[name] = len(self.__ec_electrode_idx)
-        # TODO: get rid of this line when you have time to make sure it doesn't break anything
-        return self.__ec_electrode_idx[name]
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'})
     def create_device(self, **kwargs):
@@ -309,13 +316,6 @@ class NWBFile(NWBContainer):
         device.parent = self
         name = device.name
         self.__devices[name] = device
-
-    @docval({'name': 'name', 'type': (ElectrodeGroup, str), 'doc': 'the name of the electrode group or the ElectrodeGroup object'})
-    def get_electrode_group_idx(self, **kwargs):
-        name = getargs('name', kwargs)
-        if isinstance(name, ElectrodeGroup):
-            name = name.name
-        return self.__ec_electrode_idx.get(name, None)
 
     @docval({'name': 'name', 'type': (ElectrodeGroup, str), 'doc': 'the name of the electrode group'})
     def get_electrode_group(self, name):
