@@ -149,20 +149,18 @@ class TypeMap(object):
             namespace = self.__get_namespace(obj)
             container_cls = self.get_cls(obj)
         # now build the ObjectMapper class
-        for cls in container_cls.__mro__:
-            mapper = self.__mappers.get(cls)
-            if mapper is None: # we haven't yet constructed a mapper for this type
-                mapper_cls = self.__mapper_cls.get(cls)
-                if mapper_cls is None:
-                    continue
-                spec = self.__ns_catalog.get_spec(namespace, data_type)
-                mapper = mapper_cls(spec)
-                self.__mappers[cls] = mapper
-                break
-            else:
-                break
+        spec = self.__ns_catalog.get_spec(namespace, data_type)
+        mapper = self.__mappers.get(container_cls)
         if mapper is None:
-            raise ValueError("No ObjectMapper found for class %s, namespace '%s', data_type '%s'" % (container_cls, namespace, data_type))
+            mapper_cls = ObjectMapper
+            for cls in container_cls.__mro__:
+                tmp_mapper_cls = self.__mapper_cls.get(cls)
+                if tmp_mapper_cls is not None:
+                    mapper_cls = tmp_mapper_cls
+                    break
+
+            mapper = mapper_cls(spec)
+            self.__mappers[container_cls] = mapper
         return mapper
 
     @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type to map the class to"},
@@ -173,7 +171,6 @@ class TypeMap(object):
         self.__container_types.setdefault(namespace, dict())
         self.__container_types[namespace][data_type] = container_cls
         self.__data_types[container_cls] = (namespace, data_type)
-        self.register_map(container_cls, ObjectMapper)
 
     @docval({"name": "container_cls", "type": type, "doc": "the Container class for which the given ObjectMapper class gets used for"},
             {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map"})
