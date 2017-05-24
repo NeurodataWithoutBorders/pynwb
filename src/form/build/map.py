@@ -460,12 +460,13 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 attr_value = spec.value
             else:
                 attr_value = self.get_attr_value(spec, container)
-            #TODO: add check for required attributes
-            if not attr_value:
-                if spec.value is not None:
-                    attr_value = spec.value
-                else:
-                    continue
+                if attr_value is None:
+                    attr_value = spec.default_value
+
+            if attr_value is None:
+                if spec.required:
+                    raise Warning("missing required attribute '%s'" % spec.name)
+                continue
             builder.set_attribute(spec.name, attr_value)
 
     def __add_links(self, builder, links, container, build_manager):
@@ -616,6 +617,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             else:
                 args.append(val)
         try:
+
             obj = cls(*args, **kwargs)
         except Exception as ex:
             raise Exception('Could not construct %s object' % (cls.__name__)) from ex
