@@ -6,7 +6,7 @@ import os
 
 from form.build import GroupBuilder, DatasetBuilder, LinkBuilder
 
-from pynwb.ecephys import Device, ElectrodeGroup, ElectricalSeries, SpikeEventSeries
+from pynwb.ecephys import *
 
 from . import base
 
@@ -50,7 +50,6 @@ class TestElectrodeGroup(base.TestNWBContainerIO):
                         )
 
 
-@unittest.skip('skipping for now')
 class TestElectricalSeriesIO(base.TestNWBContainerIO):
 
     def setUpContainer(self):
@@ -97,7 +96,7 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
                                             'source': 'a hypothetical source',
                                             'namespace': base.CORE_NAMESPACE,
                                             'neurodata_type': 'ElectricalSeries',
-                                            'help': 'General purpose TimeSeries'},
+                                            'help': 'Stores acquired voltage data from extracellular recordings'},
                                 datasets={'data': DatasetBuilder('data', data,
                                                                  attributes={'unit': 'volt',
                                                                              'conversion': 1.0,
@@ -106,3 +105,22 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
                                                                  attributes={'unit': 'Seconds', 'interval': 1})},
                                 links={'electrode_group': LinkBuilder('electrode_group', elcgrp_builder)})
 
+class TestClusteringIO(base.TestNWBContainerIO):
+
+    def setUpBuilder(self):
+        self.builder = GroupBuilder('Clustering',
+            attributes={
+               'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting.',
+               'source': "an example source for Clustering",
+               'neurodata_type': 'Clustering',
+               'namespace': base.CORE_NAMESPACE},
+            datasets={
+               'cluster_nums': DatasetBuilder('cluster_nums', [0,1,2]),
+               'num': DatasetBuilder('num', [0, 1, 2, 0, 1, 2]),
+               'times': DatasetBuilder('times', list(range(10,61,10))),
+               'peak_over_rms': DatasetBuilder('peak_over_rms', [100, 101, 102]),
+               'description': DatasetBuilder('description', "A fake Clustering interface")}
+        )
+
+    def setUpContainer(self):
+        self.container = Clustering("an example source for Clustering", "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10,61,10)))
