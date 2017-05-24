@@ -9,39 +9,12 @@ groups:
   - attributes:
     - dims:
       - row_col
-      doc: Size of viewing area, in meters
-      dtype: float
-      name: field_of_view
-      shape:
-      - null
-    - dims:
-      - row_col
       doc: 'Number of rows and columns in the image. NOTE: row, column representation
         is equivalent to height,width.'
       dtype: int32
       name: dimension
       shape:
       - null
-    - doc: Format of image. Right now only 'raw' supported
-      dtype: text
-      name: format
-    - doc: Number of bits used to represent each value. This is necessary to determine
-        maximum (white) pixel value
-      dtype: int32
-      name: bits_per_pixel
-    dims:
-    - num_rows
-    - num_cols
-    doc: 'Gray-scale anatomical image of cortical surface. Array structure: [rows][columns]'
-    dtype: uint16
-    name: vasculature_image
-    shape:
-    - null
-    - null
-  - attributes:
-    - doc: Unit that axis data is stored in (e.g., degrees)
-      dtype: text
-      name: unit
     - dims:
       - row_col
       doc: Size of viewing area, in meters
@@ -49,72 +22,6 @@ groups:
       name: field_of_view
       shape:
       - null
-    - dims:
-      - row_col
-      doc: 'Number of rows and columns in the image. NOTE: row, column representation
-        is equivalent to height,width.'
-      dtype: int32
-      name: dimension
-      shape:
-      - null
-    dims:
-    - num_rows
-    - num_cols
-    doc: Power response on the first measured axis. Response is scaled so 0.0 is no
-      power in the response and 1.0 is maximum relative power.
-    dtype: float32
-    name: axis_1_power_map
-    quantity: '?'
-    shape:
-    - null
-    - null
-  - attributes:
-    - doc: Unit that axis data is stored in (e.g., degrees)
-      dtype: text
-      name: unit
-    - dims:
-      - row_col
-      doc: Size of viewing area, in meters
-      dtype: float
-      name: field_of_view
-      shape:
-      - null
-    - dims:
-      - row_col
-      doc: 'Number of rows and columns in the image. NOTE: row, column representation
-        is equivalent to height,width.'
-      dtype: int32
-      name: dimension
-      shape:
-      - null
-    dims:
-    - num_rows
-    - num_cols
-    doc: Phase response to stimulus on the second measured axis
-    dtype: float32
-    name: axis_2_phase_map
-    shape:
-    - null
-    - null
-  - attributes:
-    - dims:
-      - row_col
-      doc: Size of viewing area, in meters
-      dtype: float
-      name: field_of_view
-      shape:
-      - null
-    - dims:
-      - row_col
-      doc: 'Number of rows and columns in the image. NOTE: row, column representation
-        is equivalent to height,width.'
-      dtype: int32
-      name: dimension
-      shape:
-      - null
-    - doc: Format of image. Right now only 'raw' supported
-      dtype: text
-      name: format
     - doc: Focal depth offset, in meters
       dtype: float
       name: focal_depth
@@ -122,6 +29,9 @@ groups:
         maximum (white) pixel value
       dtype: int32
       name: bits_per_pixel
+    - doc: Format of image. Right now only 'raw' supported
+      dtype: text
+      name: format
     dims:
     - num_rows
     - num_cols
@@ -133,6 +43,14 @@ groups:
     - null
     - null
   - attributes:
+    - dims:
+      - row_col
+      doc: 'Number of rows and columns in the image. NOTE: row, column representation
+        is equivalent to height,width.'
+      dtype: int32
+      name: dimension
+      shape:
+      - null
     - doc: Unit that axis data is stored in (e.g., degrees)
       dtype: text
       name: unit
@@ -143,6 +61,16 @@ groups:
       name: field_of_view
       shape:
       - null
+    dims:
+    - num_rows
+    - num_cols
+    doc: Phase response to stimulus on the first measured axis
+    dtype: float32
+    name: axis_1_phase_map
+    shape:
+    - null
+    - null
+  - attributes:
     - dims:
       - row_col
       doc: 'Number of rows and columns in the image. NOTE: row, column representation
@@ -151,12 +79,22 @@ groups:
       name: dimension
       shape:
       - null
+    - doc: Unit that axis data is stored in (e.g., degrees)
+      dtype: text
+      name: unit
+    - dims:
+      - row_col
+      doc: Size of viewing area, in meters
+      dtype: float
+      name: field_of_view
+      shape:
+      - null
     dims:
     - num_rows
     - num_cols
-    doc: Phase response to stimulus on the first measured axis
+    doc: Phase response to stimulus on the second measured axis
     dtype: float32
-    name: axis_1_phase_map
+    name: axis_2_phase_map
     shape:
     - null
     - null
@@ -172,17 +110,77 @@ groups:
   - attributes:
     - dims:
       - row_col
-      doc: Size of viewing area, in meters.
+      doc: 'Number of rows and columns in the image. NOTE: row, column representation
+        is equivalent to height,width.'
+      dtype: int32
+      name: dimension
+      shape:
+      - null
+    - doc: Unit that axis data is stored in (e.g., degrees)
+      dtype: text
+      name: unit
+    - dims:
+      - row_col
+      doc: Size of viewing area, in meters
       dtype: float
       name: field_of_view
       shape:
       - null
+    dims:
+    - num_rows
+    - num_cols
+    doc: Power response on the second measured axis. Response is scaled so 0.0 is
+      no power in the response and 1.0 is maximum relative power.
+    dtype: float32
+    name: axis_2_power_map
+    quantity: '?'
+    shape:
+    - null
+    - null
+  - attributes:
     - dims:
       - row_col
       doc: 'Number of rows and columns in the image. NOTE: row, column representation
         is equivalent to height,width.'
       dtype: int32
       name: dimension
+      shape:
+      - null
+    - doc: Unit that axis data is stored in (e.g., degrees)
+      dtype: text
+      name: unit
+    - dims:
+      - row_col
+      doc: Size of viewing area, in meters
+      dtype: float
+      name: field_of_view
+      shape:
+      - null
+    dims:
+    - num_rows
+    - num_cols
+    doc: Power response on the first measured axis. Response is scaled so 0.0 is no
+      power in the response and 1.0 is maximum relative power.
+    dtype: float32
+    name: axis_1_power_map
+    quantity: '?'
+    shape:
+    - null
+    - null
+  - attributes:
+    - dims:
+      - row_col
+      doc: 'Number of rows and columns in the image. NOTE: row, column representation
+        is equivalent to height,width.'
+      dtype: int32
+      name: dimension
+      shape:
+      - null
+    - dims:
+      - row_col
+      doc: Size of viewing area, in meters.
+      dtype: float
+      name: field_of_view
       shape:
       - null
     dims:
@@ -195,16 +193,6 @@ groups:
     - null
     - null
   - attributes:
-    - doc: Unit that axis data is stored in (e.g., degrees)
-      dtype: text
-      name: unit
-    - dims:
-      - row_col
-      doc: Size of viewing area, in meters
-      dtype: float
-      name: field_of_view
-      shape:
-      - null
     - dims:
       - row_col
       doc: 'Number of rows and columns in the image. NOTE: row, column representation
@@ -213,14 +201,26 @@ groups:
       name: dimension
       shape:
       - null
+    - dims:
+      - row_col
+      doc: Size of viewing area, in meters
+      dtype: float
+      name: field_of_view
+      shape:
+      - null
+    - doc: Format of image. Right now only 'raw' supported
+      dtype: text
+      name: format
+    - doc: Number of bits used to represent each value. This is necessary to determine
+        maximum (white) pixel value
+      dtype: int32
+      name: bits_per_pixel
     dims:
     - num_rows
     - num_cols
-    doc: Power response on the second measured axis. Response is scaled so 0.0 is
-      no power in the response and 1.0 is maximum relative power.
-    dtype: float32
-    name: axis_2_power_map
-    quantity: '?'
+    doc: 'Gray-scale anatomical image of cortical surface. Array structure: [rows][columns]'
+    dtype: uint16
+    name: vasculature_image
     shape:
     - null
     - null

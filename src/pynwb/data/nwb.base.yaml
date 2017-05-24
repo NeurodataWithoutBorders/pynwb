@@ -1,25 +1,15 @@
 groups:
 - attributes:
-  - doc: Description of Module
-    dtype: text
-    name: description
   - dims:
-    - num_interfaces
-    doc: 'Names of the data interfaces offered by this module. COMMENT: E.g., [0]="EventDetection",
-      [1]="Clustering", [2]="FeatureExtraction"'
+    - num_dlinks
+    doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
+      data field. Example element of list: "/stimulus/presentation/Sweep_0"` COMMENT:
+      Attribute is only present if links are present. List should include the path
+      to this TimeSeries also.'
     dtype: text
-    name: interfaces
+    name: data_link
     shape:
     - null
-  doc: Module.  Name should be descriptive. Stores a collection of related data organized
-    by contained interfaces.  Each interface is a contract specifying content related
-    to a particular type of data.
-  groups:
-  - doc: Interface objects containing data output from processing steps
-    neurodata_type_inc: Interface
-    quantity: '*'
-  neurodata_type_def: Module
-- attributes:
   - dims:
     - num_tslinks
     doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
@@ -30,27 +20,26 @@ groups:
     name: timestamp_link
     shape:
     - null
-  - doc: Value is TimeSeries
+  - doc: Description of TimeSeries
     dtype: text
-    name: ancestry
-    value: TimeSeries
-  - dims:
-    - num_extern_fields
-    doc: 'List of fields that are HDF5 external links.COMMENT: Only present if one
-      or more datasets is set to an HDF5 external link.'
-    dtype: text
-    name: extern_fields
-    shape:
-    - null
-  - doc: Value is General time series object
-    dtype: text
-    name: help
-    value: General time series object
+    name: description
   - doc: Human-readable comments about the TimeSeries. This second descriptive field
       can be used to store additional information, or descriptive information if the
       primary description field is populated with a computer-readable string.
     dtype: text
     name: comments
+  - doc: Value is General time series object
+    dtype: text
+    name: help
+    value: General time series object
+  - doc: Name of TimeSeries or Modules that serve as the source for the data contained
+      here. It can also be the name of a device, for stimulus or acquisition data
+    dtype: text
+    name: source
+  - doc: Value is TimeSeries
+    dtype: text
+    name: ancestry
+    value: TimeSeries
   - dims:
     - num_missing_fields
     doc: 'List of fields that are not optional (i.e. either required or recommended
@@ -61,21 +50,12 @@ groups:
     name: missing_fields
     shape:
     - null
-  - doc: Name of TimeSeries or Modules that serve as the source for the data contained
-      here. It can also be the name of a device, for stimulus or acquisition data
-    dtype: text
-    name: source
-  - doc: Description of TimeSeries
-    dtype: text
-    name: description
   - dims:
-    - num_dlinks
-    doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
-      data field. Example element of list: "/stimulus/presentation/Sweep_0"` COMMENT:
-      Attribute is only present if links are present. List should include the path
-      to this TimeSeries also.'
+    - num_extern_fields
+    doc: 'List of fields that are HDF5 external links.COMMENT: Only present if one
+      or more datasets is set to an HDF5 external link.'
     dtype: text
-    name: data_link
+    name: extern_fields
     shape:
     - null
   datasets:
@@ -103,31 +83,6 @@ groups:
     name: data
     shape:
     - null
-  - dims:
-    - num_control_values
-    doc: 'Description of each control value. COMMENT: Array length should be as long
-      as the highest number in control minus one, generating an zero-based indexed
-      array for control values.'
-    dtype: text
-    name: control_description
-    quantity: '?'
-    shape:
-    - null
-  - dims:
-    - num_times
-    doc: 'Numerical labels that apply to each element in data[]. COMMENT: Optional
-      field. If present, the control array should have the same number of elements
-      as data[].'
-    dtype: uint8
-    name: control
-    quantity: '?'
-    shape:
-    - null
-  - doc: 'Number of samples in data, or number of image frames. COMMENT: This is important
-      if the length of timestamp and data are different, such as for externally stored
-      stimulus image stacks'
-    dtype: int32
-    name: num_samples
   - attributes:
     - doc: Value is Seconds
       dtype: text
@@ -160,6 +115,31 @@ groups:
     name: timestamps
     shape:
     - null
+  - doc: 'Number of samples in data, or number of image frames. COMMENT: This is important
+      if the length of timestamp and data are different, such as for externally stored
+      stimulus image stacks'
+    dtype: int32
+    name: num_samples
+  - dims:
+    - num_times
+    doc: 'Numerical labels that apply to each element in data[]. COMMENT: Optional
+      field. If present, the control array should have the same number of elements
+      as data[].'
+    dtype: uint8
+    name: control
+    quantity: '?'
+    shape:
+    - null
+  - dims:
+    - num_control_values
+    doc: 'Description of each control value. COMMENT: Array length should be as long
+      as the highest number in control minus one, generating an zero-based indexed
+      array for control values.'
+    dtype: text
+    name: control_description
+    quantity: '?'
+    shape:
+    - null
   doc: General purpose time series.
   groups:
   - doc: "Lab specific time and sync information as provided directly from hardware\
@@ -180,3 +160,23 @@ groups:
     name: help
   doc: The attributes specified here are included in all interfaces.
   neurodata_type_def: Interface
+- attributes:
+  - dims:
+    - num_interfaces
+    doc: 'Names of the data interfaces offered by this module. COMMENT: E.g., [0]="EventDetection",
+      [1]="Clustering", [2]="FeatureExtraction"'
+    dtype: text
+    name: interfaces
+    shape:
+    - null
+  - doc: Description of Module
+    dtype: text
+    name: description
+  doc: Module.  Name should be descriptive. Stores a collection of related data organized
+    by contained interfaces.  Each interface is a contract specifying content related
+    to a particular type of data.
+  groups:
+  - doc: Interface objects containing data output from processing steps
+    neurodata_type_inc: Interface
+    quantity: '*'
+  neurodata_type_def: Module
