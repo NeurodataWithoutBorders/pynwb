@@ -55,6 +55,9 @@ class Bar(Container):
     def attr3(self):
         return self.__attr3
 
+class Foo(Container):
+    pass
+
 class TestGetSubSpec(unittest.TestCase):
 
     def test_get_subspec_data_type_noname(self):
@@ -77,14 +80,26 @@ class TestTypeMap(unittest.TestCase):
 
     def setUp(self):
         self.bar_spec = GroupSpec('A test group specification with a data type', data_type_def='Bar')
+        self.foo_spec = GroupSpec('A test group specification with data type Foo', data_type_def='Foo')
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.bar_spec, 'test.yaml')
+        self.spec_catalog.register_spec(self.foo_spec, 'test.yaml')
         self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
         self.namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
         self.namespace_catalog.add_namespace(CORE_NAMESPACE, self.namespace)
         self.type_map = TypeMap(self.namespace_catalog)
         self.type_map.register_container_type(CORE_NAMESPACE, 'Bar', Bar)
+        self.type_map.register_container_type(CORE_NAMESPACE, 'Foo', Foo)
         #self.build_manager = BuildManager(self.type_map)
+
+    def test_get_map_unique_mappers(self):
+        self.type_map.register_map(Bar, ObjectMapper)
+        self.type_map.register_map(Foo, ObjectMapper)
+        bar_inst = Bar('my_bar', list(range(10)), 'value1', 10)
+        foo_inst = Foo()
+        bar_mapper = self.type_map.get_map(bar_inst)
+        foo_mapper = self.type_map.get_map(foo_inst)
+        self.assertIsNot(bar_mapper, foo_mapper)
 
     def test_get_map(self):
         self.type_map.register_map(Bar, ObjectMapper)
@@ -92,6 +107,8 @@ class TestTypeMap(unittest.TestCase):
         mapper = self.type_map.get_map(container_inst)
         self.assertIsInstance(mapper, ObjectMapper)
         self.assertIs(mapper.spec, self.bar_spec)
+        mapper2 = self.type_map.get_map(container_inst)
+        self.assertIs(mapper, mapper2)
 
     def test_get_map_register(self):
         class MyMap(ObjectMapper):
