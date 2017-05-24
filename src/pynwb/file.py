@@ -302,9 +302,6 @@ class NWBFile(NWBContainer):
         elec_grp.parent = self
         name = elec_grp.name
         self.__ec_electrodes[name] = elec_grp
-        self.__ec_electrode_idx[name] = len(self.__ec_electrode_idx)
-        # TODO: get rid of this line when you have time to make sure it doesn't break anything
-        return self.__ec_electrode_idx[name]
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'})
     def create_device(self, **kwargs):
@@ -319,13 +316,6 @@ class NWBFile(NWBContainer):
         device.parent = self
         name = device.name
         self.__devices[name] = device
-
-    @docval({'name': 'name', 'type': (ElectrodeGroup, str), 'doc': 'the name of the electrode group or the ElectrodeGroup object'})
-    def get_electrode_group_idx(self, **kwargs):
-        name = getargs('name', kwargs)
-        if isinstance(name, ElectrodeGroup):
-            name = name.name
-        return self.__ec_electrode_idx.get(name, None)
 
     @docval({'name': 'name', 'type': (ElectrodeGroup, str), 'doc': 'the name of the electrode group'})
     def get_electrode_group(self, name):
