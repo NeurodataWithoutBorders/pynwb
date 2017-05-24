@@ -92,7 +92,8 @@ _attr_args = [
         {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
         {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
-        {'name': 'value', 'type': None, 'doc': 'a constant value for this attribute', 'default': None}
+        {'name': 'value', 'type': None, 'doc': 'a constant value for this attribute', 'default': None},
+        {'name': 'default_value', 'type': None, 'doc': 'a default value for this attribute', 'default': None}
 ]
 class AttributeSpec(Spec):
     ''' Specification for attributes
@@ -100,7 +101,7 @@ class AttributeSpec(Spec):
 
     @docval(*_attr_args)
     def __init__(self, **kwargs):
-        name, dtype, doc, dims, shape, required, parent, value = getargs('name', 'dtype', 'doc', 'dims', 'shape', 'required', 'parent', 'value', kwargs)
+        name, dtype, doc, dims, shape, required, parent, value, default_value = getargs('name', 'dtype', 'doc', 'dims', 'shape', 'required', 'parent', 'value', 'default_value', kwargs)
         super().__init__(doc, name=name, required=required, parent=parent)
         if isinstance(dtype, type):
             self['dtype'] = dtype.__name__
@@ -109,6 +110,10 @@ class AttributeSpec(Spec):
         if value is not None:
             self.pop('required', None)
             self['value'] = value
+        if default_value is not None:
+            if value is not None:
+                raise ValueError("cannot specify 'value' and 'default_value'")
+            self['default_value'] = default_value
         if dims is not None:
             self['dims'] = dims
             if 'shape' not in self:
@@ -126,6 +131,11 @@ class AttributeSpec(Spec):
     def value(self):
         ''' The constant value of the attribute. "None" if this attribute is not constant '''
         return self.get('value', None)
+
+    @property
+    def default_value(self):
+        ''' The default value of the attribute. "None" if this attribute has no default value '''
+        return self.get('default_value', None)
 
     @property
     def required(self):
