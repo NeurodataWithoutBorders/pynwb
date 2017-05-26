@@ -3,7 +3,7 @@
 Examples
 ===========
 
-The following examples will reference variables that may not be defined within the block they are used. For
+The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here.
 
 .. code-block:: python
@@ -40,7 +40,7 @@ the :py:class:`~pynwb.io.write.HDFWriter` class.
     writer.write(f, f.filename)
 
 Creating Epochs
------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Experimental epochs are represented with :py:class:`~pynwb.epoch.Epoch` objects. To create epochs for an NWB file,
 you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_epoch`.
@@ -52,7 +52,7 @@ you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb
     ep2 = f.create_epoch('epoch2', timestamps[600], timestamps[700], tags=epoch_tags, description="the second test epoch")
 
 Creating Electrode Groups
------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Electrode groups (i.e. experimentally relevant groupings of channels) are represented by :py:class:`~pynwb.ephys.ElectrodeGroup` objects. To create
 an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_electrode_group`.
@@ -62,7 +62,7 @@ an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance met
     f.create_electrode_group(electrode_name, (2.0,2.0,2.0), 'a lonely probe', 'trodes_rig123', 'the most desolate of brain regions')
 
 Creating TimeSeries
------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 TimeSeries objects can be created in two ways. The first way is by instantiating :ref:`timeseries_overview` objects directly and then adding them to
 the :ref:`file_overview` using the instance method :py:func:`~pynwb.file.NWBFile.add_raw_timeseries`. The second way is by calling the :py:class:`~pynwb.file.NWBFile`
@@ -94,8 +94,10 @@ types of :ref:`timeseries_overview` objects directly, and adding them with :py:m
                                description="This 2D Brownian process generated with numpy.cumsum(scipy.stats.norm.rvs(size=(2,len(timestamps))), axis=-1).T")
     f.add_raw_timeseries(spatial_ts, [ep1, ep2])
 
+.. _useextension:
+
 Using Extensions
------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The NWB file format supports extending existing data types (See <create_link> for more details on creating extensions).
 Extensions must be registered with PyNWB to be used for reading and writing of custom neurodata types.
@@ -108,7 +110,9 @@ The following code demonstrates how to load custom namespaces.
     namespace_path = 'my_namespace.yaml'
     load_namespaces(namespace_path)
 
-*NOTE*: This will register all namespaces defined in the file ``'my_namespace.yaml'``.
+.. note::
+
+    This will register all namespaces defined in the file ``'my_namespace.yaml'``.
 
 To read and write custom data, corresponding :py:class:`~pynwb.core.NWBContainer` classes must be associated with their respective specifications.
 :py:class:`~pynwb.core.NWBContainer` classes are associated with their respective specification using the decorator :py:func:`~pynwb.register_class`.
@@ -153,7 +157,7 @@ to implement and register a custom :py:class:`~form.build.map.ObjectMapper`. :py
     register_map(MyExtensionContainer, MyExtensionMapper)
 
 Write an NWBFile
------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Writing NWB files to disk is handled by the :py:mod:`form` package, which :py:mod:`pynwb` depends. Currently, the only storage format supported by
 :py:mod:`form` is HDF5. Reading and writing to and from HDF5 is handled by the class :py:class:`~form.backends.hdf5.HDF5IO`. The first argument to this
@@ -182,6 +186,9 @@ that manages objects to be read and written from disk. A PyNWB-specific BuildMan
 
 Extending NWB
 -----------------------------------------------------
+
+Creating new Extensions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The NWB specification is designed to be extended. Extension for the NWB format can be done so using classes provided in the :py:mod:`pynwb.spec` module.
 The classes :py:class:`~pynwb.spec.NWBGroupSpec`, :py:class:`~pynwb.spec.NWBDatasetSpec`, :py:class:`~pynwb.spec.NWBAttributeSpec`, and :py:class:`~pynwb.spec.NWBLinkSpec`
@@ -249,13 +256,15 @@ Datasets can be extended in the same manner (with regard to `neurodata_type_inc`
 by using the class :py:class:`~pynwb.spec.NWBDatasetSpec`.
 
 Saving Extensions
------------------------------------------------------
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Extensions are used by including them in a loaded namespace. Namespaces and extensions need to be saved to file
 for downstream use. The class :py:class:`~pynwb.spec.NWBNamespaceBuilder` can be used to create new namespace and
 specification files.
 
-`NOTE`: when using :py:class:`~pynwb.spec.NWBNamespaceBuilder`, the core NWB namespace is automatically included
+.. note::
+
+    When using :py:class:`~pynwb.spec.NWBNamespaceBuilder`, the core NWB namespace is automatically included
 
 Create a new namespace with extensions
 
@@ -293,3 +302,110 @@ Create a new namespace with extensions
     # save the namespace and extensions
     ns_path = 'mylab.namespace.yaml'
     ns_builder.export(ns_path)
+
+
+.. tip::
+
+    Using the API to generate extensions (rather than writing YAML sources directly) helps avoid errors in the specification
+    (e.g., due to missing required keys or invalid values) and ensure compliance of the extension definition with the
+    NWB specification language. It also helps with maintanence of extensions, e.g., if extensions have to be ported to
+    newer versions of the `specification language <http://schema-language.readthedocs.io/en/latest/>`_
+    in the future.
+
+
+Documenting Extensions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Using the same tools used to generate the documentation for the `NWB-N core format <http://nwb-schema.readthedocs.io/en/latest/>`_
+one can easily generate documentation in HTML, PDF, ePub and many other format for extensions as well.
+
+For the purpose of this example we assume that our current directory has the following structure.
+
+.. code-block:: text
+
+    - nwb_schema (cloned from `https://bitbucket.org/lblneuro/nwb-schema`)
+    - my_extension/
+        - my_extension_source/
+            - mylab.namespace.yaml
+            - mylab.specs.yaml
+            - ...
+            - docs/  (Optional)
+                - mylab_description.rst
+                - mylab_release_notes.rst
+
+In addition to Python 3.x you will also need ``sphinx`` (including the ``sphinx-quickstart`` tool) installed.
+Sphinx is availble here http://www.sphinx-doc.org/en/stable/install.html .
+
+We can now create the sources of our documentation as follows:
+
+.. code-block:: text
+
+    python3 nwb-schema/docs/utils/init_sphinx_extension_doc.py \
+                 --project test \
+                 --author "Dr. Master Expert" \
+                 --version "1.2.3" \
+                 --release alpha \
+                 --output my_extension_docs \
+                 --spec_dir my_extension_source \
+                 --namespace_filename mylab.namespace.yaml \
+                 --default_namespace mylab
+                 --external_description my_extension_source/docs/mylab_description.rst \  (Optional)
+                 --external_release_notes my_extension_source/docs/mylab_release_notes.rst \  (Optional)
+
+The new folder ``my_extension_docs/`` now contains the basic setup for the documentation. To automatically generate
+the RST documentation files from the YAML (or JSON) sources of the extension simply run:
+
+.. code-block:: text
+
+    cd my_extension_docs
+    make apidoc
+
+Finally, to generate the HTML version of the docs run:
+
+.. code-block:: text
+
+    make html
+
+.. tip::
+
+    Additional instructions for how to use and customize the extension documentations are also available
+    in the ``Readme.md`` file that  ``init_sphinx_extension_doc.py`` automatically adds to the docs.
+
+.. tip::
+
+    See ``make help`` for a list of available options for building the documentation in many different
+    output formats (e.g., PDF, ePub, LaTeX, etc.).
+
+.. tip::
+
+    See ``python3 init_sphinx_extension_doc.py --help`` for a complete list of option to customize the documentation
+    directly during initialization.
+
+.. tip::
+
+    The above example included additional description and release note docs as part of the specification. These are
+    included in the docs via ``.. include`` commands so that changes in those files are automatically picked up
+    when rebuilding to docs. Alternatively, we can also add custom documentation directly to the docs.
+    In this case the options ``--custom_description format_description.rst``
+    and ``--custom_release_notes format_release_notes.rst`` of the ``init_sphinx_extension_doc.py`` script are useful
+    to automatically generate the basic setup for those files so that one can easily start to add content directly
+    without having to worry about the additional setup.
+
+
+
+
+
+
+
+
+
+
+
+
+
+Further Reading
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+* **Using Extensions:** See :ref:`useextension` for an example on how to use extensions during read and write.
+* **Specification Language:** For a detailed overview of the specification language itself see http://schema-language.readthedocs.io/en/latest/
+
