@@ -99,7 +99,7 @@ types of :ref:`timeseries_overview` objects directly, and adding them with :py:m
 Using Extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The NWB file format supports extending existing data types (See <create_link> for more details on creating extensions).
+The NWB file format supports extending existing data types (See :ref:`extending-nwb` for more details on creating extensions).
 Extensions must be registered with PyNWB to be used for reading and writing of custom neurodata types.
 
 The following code demonstrates how to load custom namespaces.
@@ -183,6 +183,8 @@ that manages objects to be read and written from disk. A PyNWB-specific BuildMan
     io = HDF5IO(path, manager)
     io.write(nwbfile)
     io.close()
+
+.. _extending-nwb:
 
 Extending NWB
 -----------------------------------------------------
