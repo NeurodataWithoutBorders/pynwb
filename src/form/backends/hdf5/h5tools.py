@@ -12,12 +12,18 @@ ROOT_NAME = 'root'
 
 class HDF5IO(FORMIO):
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the  path to the HDF5 file to write to'},
-            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'})
+    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
+            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'},
+            {'name': 'mode', 'type': str, 'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'})
     def __init__(self, **kwargs):
-        path, manager = popargs('path', 'manager', kwargs)
+        '''Open an HDF5 file for IO
+
+        For `mode`, see :ref:`write_nwbfile`
+        '''
+        path, manager, mode = popargs('path', 'manager', 'mode', kwargs)
         super(HDF5IO, self).__init__(manager, source=path)
         self.__path = path
+        self.__mode = mode
         self.__built = dict()
 
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
@@ -100,9 +106,7 @@ class HDF5IO(FORMIO):
         return ret
 
     def open(self):
-        open_flag = 'w'
-        if os.path.exists(self.__path):
-            open_flag = 'r+'
+        open_flag = self.__mode
         self.__file = File(self.__path, open_flag)
 
     def close(self):
