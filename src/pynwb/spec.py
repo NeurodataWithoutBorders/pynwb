@@ -170,7 +170,7 @@ class NWBNamespaceBuilder(NamespaceBuilder):
     def __init__(self, **kwargs):
         ''' Create a NWBNamespaceBuilder '''
         args, vargs = fmt_docval_args(NamespaceBuilder.__init__, kwargs)
-        args.insert(NWBNamespace)
+        kwargs['namespace_cls'] = NWBNamespace
         super(NWBNamespaceBuilder, self).__init__(*args, **kwargs)
         self.include_namespace(CORE_NAMESPACE)
 
