@@ -67,3 +67,13 @@ class TestHDF5Writer(unittest.TestCase):
         self.assertIn('timeseries', acq)
         ts = acq.get('timeseries')
         self.assertIn('test_timeseries', ts)
+
+    def test_write_clobber(self):
+        io = HDF5IO(self.path, self.manager)
+        io.write(self.container)
+        io.close()
+        f = File(self.path)
+        with self.assertRaises(OSError):
+            io = HDF5IO(self.path, self.manager, mode='w-')
+            io.write(self.container)
+            io.close()
