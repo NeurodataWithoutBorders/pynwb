@@ -317,8 +317,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def __map_spec_helper(self, spec):
         if spec.name != NAME_WILDCARD:
             self.map_spec(spec.name, spec)
-            #self.map_attr(spec.name, spec)
-            #self.map_const_arg(spec.name, spec)
         else:
             dt = None
             if spec.data_type_def is not None:
@@ -604,6 +602,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         args = list()
         kwargs = dict()
         for const_arg in get_docval(cls.__init__):
+
             argname = const_arg['name']
             override = self.__get_override_carg(argname, builder)
             if override:
@@ -617,7 +616,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             else:
                 args.append(val)
         try:
-
             obj = cls(*args, **kwargs)
         except Exception as ex:
             raise Exception('Could not construct %s object' % (cls.__name__)) from ex
