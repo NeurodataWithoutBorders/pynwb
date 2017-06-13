@@ -46,7 +46,7 @@ class TestNWBContainerIO(unittest.TestCase):
                             self.assertContainerEqual(sub1, sub2)
                         continue
                     else:
-                        self.assertEqual(f1, f2)
+                        self.assertSequenceEqual(f1, f2)
                 elif isinstance(f1, dict) and len(f1) and isinstance(next(iter(f1.values())), NWBContainer):
                     f1_keys = set(f1.keys())
                     f2_keys = set(f2.keys())
