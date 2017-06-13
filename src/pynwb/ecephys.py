@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, popargs, DataChunkIterator, ShapeValidator
+from form.utils import docval, getargs, popargs, DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Interface, _default_resolution, _default_conversion
@@ -135,6 +135,14 @@ class SpikeEventSeries(ElectricalSeries):
     )
     def __init__(self, **kwargs):
         name, source, data, electrode_group = popargs('name', 'source', 'data', 'electrode_group', kwargs)
+        timestamps = getargs('timestamps', kwargs)
+        if not (isinstance(data, TimeSeries) and isinstance(timestamps, TimeSeries)):
+            if not (isinstance(data, DataChunkIterator) and isinstance(timestamps, DataChunkIterator)):
+                if len(data) != len(timestamps):
+                    raise Exception('Must provide the same number of timestamps and spike events')
+            else:
+                #TODO: add check when we have DataChunkIterators
+                pass
         super(SpikeEventSeries, self).__init__(name, source, data, electrode_group, **kwargs)
 
 @register_class('EventDetection', CORE_NAMESPACE)
