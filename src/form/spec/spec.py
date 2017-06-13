@@ -196,7 +196,6 @@ class BaseStorageSpec(Spec):
             self['quantity'] = quantity
         if not linkable:
             self['linkable'] = False
-        need_to_resolve = False
         resolve = False
         if data_type_inc is not None:
             if isinstance(data_type_inc, BaseStorageSpec):
@@ -549,7 +548,6 @@ class GroupSpec(BaseStorageSpec):
     def set_group(self, **kwargs):
         ''' Add the given specification for a subgroup to this group specification '''
         spec = getargs('spec', kwargs)
-        self.setdefault('groups', list()).append(spec)
         if spec.parent is not None:
             spec = GroupSpec.build_spec(spec)
         if spec.name == NAME_WILDCARD:
@@ -559,6 +557,7 @@ class GroupSpec(BaseStorageSpec):
                 raise TypeError("must specify 'name' or 'data_type_inc' in Group spec")
         else:
             self.__groups[spec.name] = spec
+        self.setdefault('groups', list()).append(spec)
         spec.parent = self
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the group to the Spec for'})
@@ -579,7 +578,6 @@ class GroupSpec(BaseStorageSpec):
     def set_dataset(self, **kwargs):
         ''' Add the given specification for a dataset to this group specification '''
         spec = getargs('spec', kwargs)
-        self.setdefault('datasets', list()).append(spec)
         if spec.parent is not None:
             spec = DatasetSpec.build_spec(spec)
         if spec.name == NAME_WILDCARD:
@@ -589,6 +587,7 @@ class GroupSpec(BaseStorageSpec):
                 raise TypeError("must specify 'name' or 'data_type_inc' in Dataset spec")
         else:
             self.__datasets[spec.name] = spec
+        self.setdefault('datasets', list()).append(spec)
         spec.parent = self
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset to the Spec for'})
@@ -609,7 +608,6 @@ class GroupSpec(BaseStorageSpec):
     def set_link(self, **kwargs):
         ''' Add a given specification for a link to this group specification '''
         spec = getargs('spec', kwargs)
-        self.setdefault('links', list()).append(spec)
         if spec.parent is not None:
             spec = LinkSpec.build_spec(spec)
         if spec.name == NAME_WILDCARD:
@@ -619,6 +617,7 @@ class GroupSpec(BaseStorageSpec):
                 raise TypeError("must specify 'name' or 'data_type_inc' in Dataset spec")
         else:
             self.__links[spec.name] = spec
+        self.setdefault('links', list()).append(spec)
         spec.parent = self
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the link to the Spec for'})
