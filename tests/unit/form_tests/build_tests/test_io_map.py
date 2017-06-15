@@ -1,7 +1,7 @@
 import unittest
 
 from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
-from form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap, get_subspec
+from form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap
 from form import Container
 from form.utils import docval, getargs
 
@@ -60,20 +60,29 @@ class Foo(Container):
 
 class TestGetSubSpec(unittest.TestCase):
 
+    def setUp(self):
+        self.bar_spec = GroupSpec('A test group specification with a data type', data_type_def='Bar')
+        spec_catalog = SpecCatalog()
+        spec_catalog.register_spec(self.bar_spec, 'test.yaml')
+        namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=spec_catalog)
+        namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
+        namespace_catalog.add_namespace(CORE_NAMESPACE, namespace)
+        self.type_map = TypeMap(namespace_catalog)
+        self.type_map.register_container_type(CORE_NAMESPACE, 'Bar', Bar)
+
     def test_get_subspec_data_type_noname(self):
-        child_spec = GroupSpec('A test group specification with a data type', data_type_def='Bar')
-        parent_spec = GroupSpec('Something to hold a Bar', 'bar_bucket', groups=[child_spec])
+        parent_spec = GroupSpec('Something to hold a Bar', 'bar_bucket', groups=[self.bar_spec])
         sub_builder = GroupBuilder('my_bar', attributes={'data_type': 'Bar'})
         builder = GroupBuilder('bar_bucket', groups={'my_bar': sub_builder})
-        result = get_subspec(parent_spec, sub_builder)
-        self.assertIs(result, child_spec)
+        result = self.type_map.get_subspec(parent_spec, sub_builder)
+        self.assertIs(result, self.bar_spec)
 
     def test_get_subspec_named(self):
         child_spec = GroupSpec('A test group specification with a data type', 'my_subgroup')
         parent_spec = GroupSpec('Something to hold a Bar', 'my_group', groups=[child_spec])
         sub_builder = GroupBuilder('my_subgroup', attributes={'data_type': 'Bar'})
         builder = GroupBuilder('my_group', groups={'my_bar': sub_builder})
-        result = get_subspec(parent_spec, sub_builder)
+        result = self.type_map.get_subspec(parent_spec, sub_builder)
         self.assertIs(result, child_spec)
 
 class TestTypeMap(unittest.TestCase):

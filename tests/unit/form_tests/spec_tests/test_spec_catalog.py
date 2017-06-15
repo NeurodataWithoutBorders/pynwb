@@ -25,17 +25,15 @@ class SpecCatalogTest(unittest.TestCase):
         result = self.catalog.get_spec('EphysData')
         self.assertIs(result, self.spec)
 
-    # keep this test around in case we need to bring back this method
-    @unittest.skip('SpecCatalog.get_hierarchy is not implemented')
     def test_hierarchy(self):
         spikes_spec = DatasetSpec('my extending dataset', 'int',
                                 namespace='core',
-                                data_type='EphysData',
+                                data_type_inc='EphysData',
                                 data_type_def='SpikeData')
 
         lfp_spec = DatasetSpec('my second extending dataset', 'int',
                                 namespace='core',
-                                data_type='EphysData',
+                                data_type_inc='EphysData',
                                 data_type_def='LFPData')
 
         self.catalog.register_spec(self.spec, 'test.yaml')

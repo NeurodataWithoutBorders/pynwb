@@ -6,31 +6,6 @@ from ..container import Container
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
 
-@docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
-        {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder), 'doc': 'the builder to get the sub-specification for'},
-        is_method=False)
-def get_subspec(**kwargs):
-    '''
-    Get the specification from this spec that corresponds to the given builder
-    '''
-    spec, builder = getargs('spec', 'builder', kwargs)
-    if isinstance(builder, LinkBuilder):
-        builder_type = type(builder.builder)
-    else:
-        builder_type = type(builder)
-    if builder_type == DatasetBuilder:
-        subspec = spec.get_dataset(builder.name)
-    else:
-        subspec = spec.get_group(builder.name)
-    if subspec is None:
-        if isinstance(builder, LinkBuilder):
-            ndt = builder.builder.attributes.get(spec.type_key())
-        else:
-            ndt = builder.attributes.get(spec.type_key())
-        if ndt is not None:
-            subspec = spec.get_data_type(ndt)
-    return subspec
-
 class BuildManager(object):
     """
     A class for managing builds of Containers
@@ -95,6 +70,15 @@ class BuildManager(object):
         container = getargs('container', kwargs)
         return self.__type_map.get_builder_name(container)
 
+    @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
+            {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder), 'doc': 'the builder to get the sub-specification for'})
+    def get_subspec(self, **kwargs):
+        '''
+        Get the specification from this spec that corresponds to the given builder
+        '''
+        spec, builder = getargs('spec', 'builder', kwargs)
+        return self.__type_map.get_subspec(spec, builder)
+
 class TypeMap(object):
 
     @docval({'name': 'namespaces', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use'})
@@ -107,8 +91,8 @@ class TypeMap(object):
         self.__container_types = dict()
         self.__data_types = dict()
 
-    def __get_data_type(self, obj):
-        ret = obj.get(self.__ns_catalog.group_spec_cls.type_key())
+    def __get_data_type(self, builder):
+        ret = builder.get(self.__ns_catalog.group_spec_cls.type_key())
         if ret is None:
             raise ValueError("builder '%s' is does not have a data_type" % builder.name)
         return ret
@@ -127,6 +111,39 @@ class TypeMap(object):
             raise ValueError("no data_type '%s' from namespace '%s has been mapped'" % (data_type, namespace))
         container_cls = self.__container_types[namespace][data_type]
         return container_cls
+
+    @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
+            {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder), 'doc': 'the builder to get the sub-specification for'})
+    def get_subspec(self, **kwargs):
+        '''
+        Get the specification from this spec that corresponds to the given builder
+        '''
+        spec, builder = getargs('spec', 'builder', kwargs)
+        if isinstance(builder, LinkBuilder):
+            builder_type = type(builder.builder)
+        else:
+            builder_type = type(builder)
+        if builder_type == DatasetBuilder:
+            subspec = spec.get_dataset(builder.name)
+        else:
+            subspec = spec.get_group(builder.name)
+        if subspec is None:
+            # builder was generated from something with a data_type and a wildcard name
+            if isinstance(builder, LinkBuilder):
+                #dt = builder.builder.attributes.get(spec.type_key())
+                dt = self.__get_data_type(builder.builder)
+            else:
+                #dt = builder.attributes.get(spec.type_key())
+                dt = self.__get_data_type(builder)
+            if dt is not None:
+                # TODO: this returns None when using subclasses
+                ns = self.__get_namespace(builder)
+                hierarchy = self.__ns_catalog.get_hierarchy(ns, dt)
+                for t in hierarchy:
+                    subspec = spec.get_data_type(t)
+                    if subspec is not None:
+                        break
+        return subspec
 
     def __get_container_ns_dt(self, obj):
         container_cls = obj.__class__
@@ -564,7 +581,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 link_name = None
                 if isinstance(sub_builder, LinkBuilder):
                     link_name = sub_builder.name
-                subspec = get_subspec(spec, sub_builder)
+                subspec = manager.get_subspec(spec, sub_builder)
                 if subspec is not None:
                     if isinstance(subspec, LinkSpec):
                         sub_builder = sub_builder.builder
