@@ -107,6 +107,12 @@ class SpecNamespace(dict):
     def get_registered_types(self):
         return self.__catalog.get_registered_types()
 
+    @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the hierarchy of'})
+    def get_hierarchy(self, **kwargs):
+        ''' Get the extension hierarchy for the given data_type in this namespace'''
+        data_type = getargs('data_type', kwargs)
+        return self.__catalog.get_hierarchy(data_type)
+
     @classmethod
     def build_namespace(cls, **spec_dict):
         kwargs = copy(spec_dict)
@@ -173,7 +179,18 @@ class NamespaceCatalog(object):
             raise KeyError("'%s' not a namespace" % namespace)
         return self.__namespaces[namespace].get_spec(data_type)
 
-
+    @docval({'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
+            {'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the spec for'},
+            returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
+    def get_hierarchy(self, **kwargs):
+        '''
+        Get the type hierarchy for a given data_type in a given namespace
+        '''
+        namespace, data_type = getargs('namespace', 'data_type', kwargs)
+        spec_ns = self.__namespaces.get(namespace)
+        if spec_ns is None:
+            raise KeyError("'%s' not a namespace" % namespace)
+        return spec_ns.get_hierarchy(data_type)
 
     def __load_spec_file(self, spec_file_path, catalog, dtypes=None, resolve=True):
         ret = self.__loaded_specs.get(spec_file_path)
