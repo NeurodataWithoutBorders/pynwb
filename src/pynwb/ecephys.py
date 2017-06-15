@@ -210,9 +210,9 @@ class Clustering(Interface):
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface'},
             {'name': 'description', 'type': str, 'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, clusters curated using Klusters, etc).'},
-            {'name': 'num', 'type': (tuple, list, np.ndarray), 'doc': 'Cluster number of each event.'},
-            {'name': 'peak_over_rms', 'type': (tuple, list, np.ndarray), 'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster(provides a basic clustering metric).'},
-            {'name': 'times', 'type': (tuple, list, np.ndarray), 'doc': 'Times of clustered events, in seconds.'})
+            {'name': 'num', 'type': Iterable, 'doc': 'Cluster number of each event.'},
+            {'name': 'peak_over_rms', 'type': Iterable, 'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster(provides a basic clustering metric).'},
+            {'name': 'times', 'type': Iterable, 'doc': 'Times of clustered events, in seconds.'})
     def __init__(self, **kwargs):
         source, description, num, peak_over_rms, times = popargs('source', 'description', 'num', 'peak_over_rms', 'times', kwargs)
         super(Clustering, self).__init__(source, **kwargs)
