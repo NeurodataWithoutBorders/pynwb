@@ -12,10 +12,14 @@ class SpecCatalog(object):
         :ivar __specs: Dict with the specification of each registered type
         :ivar __parent_types: Dict with parent types for each registered type
         :ivar __spec_source_files: Dict with the path to the source files (if available) for each registered type
-
+        :ivar __hierarchy: Dict describing the hierarchy for each registered type.
+                    NOTE: Always use SpecCatalog.get_hierarchy(...) to retrieve the hierarchy
+                    as this dictionary is used like a cache, i.e., to avoid repeated calcuation
+                    of the hierarchy but the contents are computed on first request by SpecCatalog.get_hierarchy(...)
         '''
         self.__specs = dict()
         self.__parent_types = dict()
+        self.__hierarchy = dict()
         self.__spec_source_files = dict()
 
     @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'a Spec object'},
@@ -81,6 +85,28 @@ class SpecCatalog(object):
                 self.register_spec(dataset_spec, source_file)
         for group_spec in spec.groups:
             self.auto_register(group_spec, source_file)
+
+
+    @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the hierarchy of'})
+    def get_hierarchy(self, **kwargs):
+        ''' Get the extension hierarchy for the given data_type '''
+        data_type = getargs('data_type', kwargs)
+        if isinstance(data_type, type):
+            data_type = data_type.__name__
+        ret = self.__hierarchy.get(data_type)
+        if ret is None:
+            hierarchy = list()
+            parent = data_type
+            while parent is not None:
+                hierarchy.append(parent)
+                parent = self.__parent_types.get(parent)
+            # store computed hierarchy for later
+            tmp_hier = tuple(hierarchy)
+            ret = tmp_hier
+            while len(tmp_hier) > 0:
+                self.__hierarchy[tmp_hier[0]] = tmp_hier
+                tmp_hier = tmp_hier[1:]
+        return ret
 
     def __copy__(self):
         ret = SpecCatalog()
