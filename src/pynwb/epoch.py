@@ -48,7 +48,7 @@ class Epoch(NWBContainer):
         self.name = name
         self.description = description
 
-        self.tags = {x for x in tags}
+        self.tags = list({x for x in tags})
 
     @property
     def timeseries(self):
