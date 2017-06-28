@@ -4,7 +4,7 @@ from collections import Iterable
 from form.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer
+from .core import NWBContainer, set_parents
 from .misc import IntervalSeries
 from .base import TimeSeries, Interface, _default_conversion, _default_resolution
 from .image import ImageSeries
@@ -31,14 +31,14 @@ class SpatialSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'data', 'type': (list, np.ndarray, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
 
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to meters', 'default': _default_conversion},
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': (list, np.ndarray, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
@@ -76,11 +76,11 @@ class BehavioralEpochs(Interface):
     _help = "General container for storing behavorial epochs."
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'interval_series', 'type': IntervalSeries, 'doc': 'IntervalSeries or any subtype.'})
+            {'name': 'interval_series', 'type': (list, IntervalSeries), 'doc': 'IntervalSeries or any subtype.'})
     def __init__(self, **kwargs):
         source, interval_series = popargs('source', 'interval_series', kwargs)
         super(BehavioralEpochs, self).__init__(source, **kwargs)
-        self.interval_series = interval_series
+        self.interval_series = set_parents(interval_series, self)
 
 @register_class('BehavioralEvents', CORE_NAMESPACE)
 class BehavioralEvents(Interface):
@@ -145,11 +145,11 @@ class EyeTracking(Interface):
     _help = ""
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'spatial_series', 'type': SpatialSeries, 'doc': ''})
+            {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': ''})
     def __init__(self, **kwargs):
         source, spatial_series = popargs('source', 'spatial_series', kwargs)
         super(EyeTracking, self).__init__(source, **kwargs)
-        self.spatial_series =spatial_series
+        self.spatial_series = set_parents(spatial_series, self)
 
 @register_class('CompassDirection', CORE_NAMESPACE)
 class CompassDirection(Interface):
@@ -165,11 +165,11 @@ class CompassDirection(Interface):
     _help = "Direction as measured radially. Spatial series reference frame should indicate which direction corresponds to zero and what is the direction of positive rotation."
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'spatial_series', 'type': SpatialSeries, 'doc': 'SpatialSeries or any subtype.'})
+            {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': 'SpatialSeries or any subtype.'})
     def __init__(self, **kwargs):
         source, spatial_series = popargs('source', 'spatial_series', kwargs)
         super(CompassDirection, self).__init__(source, **kwargs)
-        self.spatial_series = spatial_series
+        self.spatial_series = set_parents(spatial_series, self)
 
 @register_class('Position', CORE_NAMESPACE)
 class Position(Interface):
@@ -182,11 +182,11 @@ class Position(Interface):
     _help = "Position data, whether along the x, xy or xyz axis"
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'spatial_series', 'type': SpatialSeries, 'doc': ''})
+            {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': ''})
     def __init__(self, **kwargs):
         source, spatial_series = popargs('source', 'spatial_series', kwargs)
         super(Position, self).__init__(source, **kwargs)
-        self.spatial_series = spatial_series
+        self.spatial_series = set_parents(spatial_series, self)
 
 @register_class('CorrectedImageStack', CORE_NAMESPACE)
 class CorrectedImageStack(NWBContainer):

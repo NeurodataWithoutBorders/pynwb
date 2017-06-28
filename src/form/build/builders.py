@@ -182,7 +182,7 @@ class GroupBuilder(BaseBuilder):
 
     @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
             {'name':'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
-            {'name':'dtype', 'type': (type, np.dtype), 'doc': 'the datatype of this dataset', 'default': None},
+            {'name':'dtype', 'type': (type, np.dtype, str), 'doc': 'the datatype of this dataset', 'default': None},
             {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name':'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
             {'name':'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False},
@@ -340,7 +340,7 @@ class GroupBuilder(BaseBuilder):
 class DatasetBuilder(BaseBuilder):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
             {'name': 'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
-            {'name': 'dtype', 'type': (type, np.dtype), 'doc': 'the datatype of this dataset', 'default': None},
+            {'name': 'dtype', 'type': (type, np.dtype, str), 'doc': 'the datatype of this dataset', 'default': None},
             {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name': 'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
             {'name': 'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False},
@@ -362,14 +362,17 @@ class DatasetBuilder(BaseBuilder):
         ''' The data stored in the dataset represented by this builder '''
         return self['data']
 
+    @property
     def chunks(self):
         ''' Whether or not this dataset is chunked '''
         return self.__chunks
 
+    @property
     def maxshape(self):
         ''' The max shape of this object '''
         return self.__maxshape
 
+    @property
     def dtype(self):
         ''' The data type of this object '''
         return self.__dtype

@@ -38,7 +38,7 @@ class EpochSetters(unittest.TestCase):
     def test_add_tags(self):
         self.epoch.add_tag("tag1")
         self.epoch.add_tag("tag2")
-        self.assertSetEqual(self.epoch.tags, {"tag1", "tag2"})
+        self.assertListEqual(self.epoch.tags, ["tag1", "tag2"])
 
     def test_add_timeseries(self):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)

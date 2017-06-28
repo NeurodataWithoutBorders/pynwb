@@ -491,6 +491,8 @@ class GroupSpec(BaseStorageSpec):
                 self.set_group(group)
             if group.data_type_def is not None:
                 self.__inherited_data_type_defs.add(group.data_type_def)
+        for link in inc_spec.links:
+            self.set_link(link)
         super(GroupSpec, self).resolve_spec(inc_spec)
 
     @docval({'name': 'spec', 'type': 'BaseStorageSpec', 'doc': 'the specification to check'})

@@ -60,10 +60,7 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
         channel_coordinates = ('co1', 'co2')
         channel_impedance = ('im1', 'im2')
         elec1 = ElectrodeGroup('elec1', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
-        data = [
-            list(range(10)),
-            list(range(10, 20)),
-        ]
+        data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
         self.container = ElectricalSeries('test_eS', 'a hypothetical source', data, elec1, timestamps=timestamps)
 
@@ -86,10 +83,7 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
                                 'device': LinkBuilder('device', device_builder)
                             }
                         )
-        data = [
-            list(range(10)),
-            list(range(10, 20)),
-        ]
+        data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
         self.builder = GroupBuilder('test_eS',
                                 attributes={'ancestry': 'TimeSeries',
@@ -101,6 +95,7 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
                                                                  attributes={'unit': 'volt',
                                                                              'conversion': 1.0,
                                                                              'resolution': 0.0}),
+                                          'num_samples': DatasetBuilder('num_samples', len(data)),
                                           'timestamps': DatasetBuilder('timestamps', timestamps,
                                                                  attributes={'unit': 'Seconds', 'interval': 1})},
                                 links={'electrode_group': LinkBuilder('electrode_group', elcgrp_builder)})

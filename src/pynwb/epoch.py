@@ -1,6 +1,6 @@
 import copy
 import numpy as np
-import bisect
+from bisect import bisect_left
 
 from form.utils import docval, getargs
 
@@ -48,7 +48,7 @@ class Epoch(NWBContainer):
         self.name = name
         self.description = description
 
-        self.tags = {x for x in tags}
+        self.tags = list({x for x in tags})
 
     @property
     def timeseries(self):
@@ -89,7 +89,10 @@ class Epoch(NWBContainer):
             Returns:
                 *nothing*
         """
-        self.tags.add(tag)
+        i = bisect_left(self.tags, tag)
+        if i == len(self.tags) or self.tags[i] != tag:
+            self.tags.insert(i, tag)
+
 
     # limit intervals to time boundary of epoch, but don't perform
     #   additional logic (ie, if user supplies overlapping intervals,
@@ -283,8 +286,8 @@ class EpochTimeSeries(NWBContainer):
         elif len(ts.timestamps) > 0:
             timestamps = ts.timestamps
             #XXX This assume timestamps are sorted!
-            start_idx = bisect.bisect_left(timestamps, start_time)
-            stop_idx = bisect.bisect_left(timestamps, stop_time)
+            start_idx = bisect_left(timestamps, start_time)
+            stop_idx = bisect_left(timestamps, stop_time)
             #TODO: check to see if this should be inclusive or exclusive
             # assume exclusive for now - AJT 10/24/16
         else:

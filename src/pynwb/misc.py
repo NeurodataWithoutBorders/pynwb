@@ -124,9 +124,9 @@ class IntervalSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': list()},
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': list()},
             {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},

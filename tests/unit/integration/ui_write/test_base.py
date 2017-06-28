@@ -26,6 +26,7 @@ class TestTimeSeriesIO(base.TestNWBContainerIO):
                                                                  attributes={'unit': 'SIunit',
                                                                              'conversion': 1.0,
                                                                              'resolution': 0.1}),
+                                          'num_samples': DatasetBuilder('num_samples', 10),
                                           'timestamps': DatasetBuilder('timestamps', list(range(10)),
                                                                  attributes={'unit': 'Seconds', 'interval': 1})})
 

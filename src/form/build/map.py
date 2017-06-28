@@ -457,7 +457,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             self.__add_groups(builder, self.__spec.groups, container, manager)
             self.__add_links(builder, self.__spec.links, container, manager)
         else:
-            builder = DatasetBuilder(name, parent=parent)
+            builder = DatasetBuilder(name, parent=parent, dtype=self.__spec.dtype)
         self.__add_attributes(builder, self.__spec.attributes, container)
         return builder
 
@@ -498,7 +498,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             if attr_value is None:
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
-                sub_builder = builder.add_dataset(spec.name, attr_value)
+                sub_builder = builder.add_dataset(spec.name, attr_value, dtype=spec.dtype)
                 self.__add_attributes(sub_builder, spec.attributes, container)
             else:
                 self.__add_containers(builder, spec, attr_value, build_manager)
@@ -619,7 +619,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         args = list()
         kwargs = dict()
         for const_arg in get_docval(cls.__init__):
-
             argname = const_arg['name']
             override = self.__get_override_carg(argname, builder)
             if override:
