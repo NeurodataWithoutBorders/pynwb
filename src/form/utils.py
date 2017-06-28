@@ -3,6 +3,7 @@ import itertools as _itertools
 import copy as _copy
 import abc
 from collections import Iterable
+from abc import ABCMeta, abstractmethod
 
 import numpy as np
 
@@ -392,7 +393,25 @@ class frozendict(_collections.Mapping):
         return self._dict.items()
 
 
-class DataChunkIterator(object):
+class AbstractDataChunkIterator(object, metaclass=ABCMeta):
+
+    @abstractmethod
+    def __iter__(self):
+        pass
+
+    @abstractmethod
+    def __next__(self):
+        pass
+
+    @abstractmethod
+    def recommended_chunk_shape(self):
+        pass
+
+    @abstractmethod
+    def recommended_data_shape(self):
+        pass
+
+class DataChunkIterator(AbstractDataChunkIterator):
     """Custom iterator class used to iterate over chunks of data.
 
     Derived classes must ensure that self.shape and self.dtype are set properly.
