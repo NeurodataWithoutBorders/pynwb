@@ -1,6 +1,19 @@
 from form.utils import docval, getargs, ExtenderMeta
 from form import Container
 
+
+def set_parents(container, parent):
+    if isinstance(container, list):
+        for c in container:
+            if c.parent is None:
+                c.parent = parent
+        ret = container
+    else:
+        ret = [container]
+        if container.parent is None:
+            container.parent = parent
+    return ret
+
 class NWBContainer(Container, metaclass=ExtenderMeta):
     '''The base class to any NWB types.
 
@@ -50,6 +63,7 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
         '''The parent NWBContainer of this NWBContainer
         '''
         return self.__parent
+
 
     @parent.setter
     def parent(self, parent_container):
