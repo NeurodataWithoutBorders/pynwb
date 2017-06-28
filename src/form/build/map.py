@@ -619,7 +619,6 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         args = list()
         kwargs = dict()
         for const_arg in get_docval(cls.__init__):
-
             argname = const_arg['name']
             override = self.__get_override_carg(argname, builder)
             if override:
