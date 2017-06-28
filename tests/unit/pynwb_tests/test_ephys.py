@@ -89,7 +89,7 @@ class EventWaveformConstructor(unittest.TestCase):
 
         ew  = EventWaveform('test_ew', sES)
         self.assertEqual(ew.source, 'test_ew')
-        self.assertEqual(ew.spike_event_series, sES)
+        self.assertEqual(ew.spike_event_series, [sES])
 
 class ClusteringConstructor(unittest.TestCase):
     def test_init(self):

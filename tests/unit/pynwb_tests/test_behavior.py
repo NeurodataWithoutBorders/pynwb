@@ -22,7 +22,7 @@ class BehavioralEpochsConstructor(unittest.TestCase):
 
         bE = BehavioralEpochs('test_bE', iS)
         self.assertEqual(bE.source, 'test_bE')
-        self.assertEqual(bE.interval_series, iS)
+        self.assertEqual(bE.interval_series, [iS])
 
 class BehavioralEventsConstructor(unittest.TestCase):
     def test_init(self):
@@ -54,21 +54,21 @@ class EyeTrackingConstructor(unittest.TestCase):
 
         et = EyeTracking('test_et', sS)
         self.assertEqual(et.source, 'test_et')
-        self.assertEqual(et.spatial_series, sS)
+        self.assertEqual(et.spatial_series, [sS])
 
 class CompassDirectionConstructor(unittest.TestCase):
     def test_init(self):
         sS = SpatialSeries('test_sS', 'a hypothetical source', list(), 'reference_frame', timestamps=list())
         cd = CompassDirection('test_cd', sS)
         self.assertEqual(cd.source, 'test_cd')
-        self.assertEqual(cd.spatial_series, sS)
+        self.assertEqual(cd.spatial_series, [sS])
 
 class PositionConstructor(unittest.TestCase):
     def test_init(self):
         sS = SpatialSeries('test_sS', 'a hypothetical source', list(), 'reference_frame', timestamps=list())
         pc = Position('test_pc', sS)
         self.assertEqual(pc.source, 'test_pc')
-        self.assertEqual(pc.spatial_series, sS)
+        self.assertEqual(pc.spatial_series, [sS])
 
 class MotionCorrectionConstructor(unittest.TestCase):
     def test_init(self):
