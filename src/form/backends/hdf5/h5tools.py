@@ -68,7 +68,7 @@ class HDF5IO(FORMIO):
                     else:
                         builder = self.__read_group(sub_h5obj, builder_name)
                     self.__set_built(sub_h5obj.file.filename, target_path, builder)
-                kwargs['links'][builder_name] = LinkBuilder(builder)
+                kwargs['links'][builder_name] = LinkBuilder(k, builder)
             else:
                 builder = self.__get_built(sub_h5obj.file.filename, sub_h5obj.name)
                 obj_type = None
