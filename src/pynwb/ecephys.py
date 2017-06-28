@@ -5,7 +5,7 @@ from form.utils import docval, getargs, popargs, DataChunkIterator, ShapeValidat
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Interface, _default_resolution, _default_conversion
-from .core import NWBContainer
+from .core import NWBContainer, set_parents
 
 @register_class('Device', CORE_NAMESPACE)
 class Device(NWBContainer):
@@ -76,14 +76,14 @@ class ElectricalSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
             {'name': 'electrode_group', 'type': ElectrodeGroup, 'doc': 'The names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to.'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
@@ -120,9 +120,9 @@ class SpikeEventSeries(ElectricalSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries), 'doc': 'Timestamps for samples stored in data'},
-            {'name': 'electrode_group', 'type': ElectrodeGroup, 'doc': 'The names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to.', 'ndim': 1},
+            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data'},
+            {'name': 'electrode_group', 'type': ElectrodeGroup, 'doc': 'The names of the electrode groups, or the ElectrodeGroup objects that each channel corresponds to.'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
@@ -186,12 +186,11 @@ class EventWaveform(Interface):
     __help = "Waveform of detected extracellularly recorded spike events"
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'spike_event_series', 'type': SpikeEventSeries, 'doc': 'spiking event data'})
+            {'name': 'spike_event_series', 'type': (list, SpikeEventSeries), 'doc': 'spiking event data'})
     def __init__(self, **kwargs):
         source, spike_event_series = popargs('source', 'spike_event_series', kwargs)
         super(EventWaveform, self).__init__(source, **kwargs)
-        spike_event_series.parent = self
-        self.spike_event_series = spike_event_series
+        self.spike_event_series = set_parents(spike_event_series, self)
 
 @register_class('Clustering', CORE_NAMESPACE)
 class Clustering(Interface):
