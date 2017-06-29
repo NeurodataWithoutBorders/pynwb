@@ -8,6 +8,9 @@ clarity, we define them here.
 
 .. code-block:: python
 
+    import numpy as np
+    import scipy.stats as sps
+
     electrode_name = 'tetrode1'
     rate = 10.0
     np.random.seed(1234)
@@ -24,6 +27,7 @@ argument is the name of the NWB file, and the second argument is a brief descrip
 
 .. code-block:: python
 
+    from datetime import datetime
     from pynwb import NWBFile
 
     f = NWBFile(filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
@@ -45,6 +49,7 @@ the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` class.
     io = HDF5IO(filename, manager, mode='w')
     io.write(f)
     io.close()
+
 
 Creating Epochs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
