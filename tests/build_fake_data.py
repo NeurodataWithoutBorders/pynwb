@@ -1,9 +1,8 @@
 from pynwb import NWBFile
 from pynwb.ecephys import ElectricalSeries
 from pynwb.behavior import SpatialSeries
-from pynwb.io.write import HDF5Writer
-#from pynwb.ui.epoch import Epoch
-#from pynwb.ui.ephys import ElectrodeGroup
+from pynwb import NWBFile, get_build_manager
+from form.backends.hdf5 import HDF5IO
 
 import numpy as np
 import scipy.stats as sps
@@ -38,7 +37,8 @@ location = "somewhere in the hippocampus"
 device = f.create_device('trodes_rig123')
 
 
-electrode_group = f.create_electrode_group(channel_description,
+electrode_group = f.create_electrode_group(electrode_name,
+                                           channel_description,
                                            channel_location,
                                            channel_filtering,
                                            channel_coordinates,
@@ -57,10 +57,10 @@ ephys_timestamps = np.arange(data_len) / rate
 spatial_timestamps = ephys_timestamps[::10]
 spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T
 
-ephys_ts = ElectricalSeries('test_timeseries',
+ephys_ts = ElectricalSeries('test_ephys_data',
                             'test_source',
                             ephys_data,
-                            [electrode_name],
+                            electrode_group,
                             timestamps=ephys_timestamps,
                             # Alternatively, could specify starting_time and rate as follows
                             #starting_time=ephys_timestamps[0],
@@ -69,7 +69,7 @@ ephys_ts = ElectricalSeries('test_timeseries',
                             comments="This data was randomly generated with numpy, using 1234 as the seed",
                             description="Random numbers generated with numpy.randon.rand")
 
-spatial_ts = SpatialSeries('test_spatial_timeseries',
+spatial_ts = SpatialSeries('test_spatial_data',
                            'a stumbling rat',
                            spatial_data,
                            'origin on x,y-plane',
@@ -88,5 +88,8 @@ f.add_raw_timeseries(ephys_ts, [ep1, ep2])
 f.add_raw_timeseries(spatial_ts, [ep1, ep2])
 
 # Write the NWB file
-writer = HDF5Writer()
-writer.write(f, f.filename)
+manager = get_build_manager()
+
+io = HDF5IO(filename, manager, mode='w')
+io.write(f)
+io.close()
