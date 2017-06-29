@@ -303,7 +303,8 @@ class NWBFile(NWBContainer):
         name = elec_grp.name
         self.__ec_electrodes[name] = elec_grp
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
+            returns='the recording device', rtype=Device)
     def create_device(self, **kwargs):
         name = getargs('name', kwargs)
         device = Device(name)
