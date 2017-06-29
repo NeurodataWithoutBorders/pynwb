@@ -24,7 +24,9 @@ argument is the name of the NWB file, and the second argument is a brief descrip
 
 .. code-block:: python
 
-    f = NWBFile('test.nwb', 'my first synthetic recording',
+    from pynwb import NWBFile
+
+    f = NWBFile(filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
                 experimenter='Dr. Bilbo Baggins',
                 lab='Bag End Labatory',
                 institution='University of Middle Earth at the Shire',
@@ -32,12 +34,17 @@ argument is the name of the NWB file, and the second argument is a brief descrip
                 session_id='LONELYMTN')
 
 Once you have created your NWB and added all of your data and other necessary metadata, you can write it to disk using
-the :py:class:`~pynwb.io.write.HDFWriter` class.
+the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` class.
 
 .. code-block:: python
 
-    writer = HDF5Writer()
-    writer.write(f, f.filename)
+    from form.backends.hdf5 import HDF5IO
+    from pynwb get_build_manager
+
+    manager = get_build_manager()
+    io = HDF5IO(filename, manager, mode='w')
+    io.write(f)
+    io.close()
 
 Creating Epochs
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -51,15 +58,45 @@ you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb
     ep1 = f.create_epoch('epoch1', timestamps[100], timestamps[200], tags=epoch_tags, description="the first test epoch")
     ep2 = f.create_epoch('epoch2', timestamps[600], timestamps[700], tags=epoch_tags, description="the second test epoch")
 
+
 Creating Electrode Groups
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Electrode groups (i.e. experimentally relevant groupings of channels) are represented by :py:class:`~pynwb.ephys.ElectrodeGroup` objects. To create
+Electrode groups (i.e. experimentally relevant groupings of channels) are represented by :py:class:`~pynwb.ecephys.ElectrodeGroup` objects. To create
 an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_electrode_group`.
+
+Before creating an :py:class:`~pynwb.ecephys.ElectrodeGroup`, you need to provide some information about the device that was used to record from the electrode.
+This is done by creating a :py:class:`~pynwb.ecephys.Device` object using the instance method :py:meth:`~pynwb.file.NWBFile.create_device`.
 
 .. code-block:: python
 
-    f.create_electrode_group(electrode_name, (2.0,2.0,2.0), 'a lonely probe', 'trodes_rig123', 'the most desolate of brain regions')
+    device = f.create_device('trodes_rig123')
+
+
+Once you have created the :py:class:`~pynwb.ecephys.Device`, you can create the :py:class:`~pynwb.ecephys.ElectrodeGroup`.
+
+.. code-block:: python
+
+    channel_description = ['channel1', 'channel2', 'channel3', 'channel4']
+    num_channels = len(channel_description)
+    channel_location = ['CA1'] * num_channels
+    channel_filtering = ['no filtering'] * num_channels
+    channel_coordinates = [(2.0,2.0,2.0)] * num_channels
+    channel_impedance = [-1] * num_channels
+    description = "an example tetrode"
+    location = "somewhere in the hippocampus"
+
+    electrode_group = f.create_electrode_group(electrode_name,
+                                               channel_description,
+                                               channel_location,
+                                               channel_filtering,
+                                               channel_coordinates,
+                                               channel_impedance,
+                                               description,
+                                               location,
+                                               device)
+
+
 
 Creating TimeSeries
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -71,10 +108,13 @@ types of :ref:`timeseries_overview` objects directly, and adding them with :py:m
 
 .. code-block:: python
 
-    ephys_ts = ElectricalSeries('test_timeseries',
+    from pynwb.ecephys import ElectricalSeries
+    from pynwb.behavior import SpatialSeries
+
+    ephys_ts = ElectricalSeries('test_ephys_data',
                                 'test_source',
                                 ephys_data,
-                                [electrode_name],
+                                electrode_group,
                                 timestamps=ephys_timestamps,
                                 # Alternatively, could specify starting_time and rate as follows
                                 #starting_time=ephys_timestamps[0],
