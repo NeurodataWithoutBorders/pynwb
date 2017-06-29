@@ -8,6 +8,7 @@ from pynwb.io.write import HDF5Writer
 import numpy as np
 import scipy.stats as sps
 import os
+from datetime import datetime
 
 data_len = 1000
 filename = 'test.nwb'
@@ -17,7 +18,7 @@ if os.path.exists(filename):
     print('removing %s' % filename)
     os.remove(filename)
 
-f = NWBFile(filename, 'my first synthetic recording',
+f = NWBFile(filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
             experimenter='Dr. Bilbo Baggins',
             lab='Bag End Labatory',
             institution='University of Middle Earth at the Shire',
@@ -26,7 +27,25 @@ f = NWBFile(filename, 'my first synthetic recording',
 
 # Create the electrode group this simulated data is generated from
 electrode_name = 'tetrode1'
-f.create_electrode_group(electrode_name, (2.0,2.0,2.0), 'a lonely probe', 'trodes_rig123', 'the most desolate or brain regions')
+channel_description = ['channel1', 'channel2', 'channel3', 'channel4']
+num_channels = len(channel_description)
+channel_location = ['CA1'] * num_channels
+channel_filtering = ['no filtering'] * num_channels
+channel_coordinates = [(2.0,2.0,2.0)] * num_channels
+channel_impedance = [-1] * num_channels
+description = "an example tetrode"
+location = "somewhere in the hippocampus"
+device = f.create_device('trodes_rig123')
+
+
+electrode_group = f.create_electrode_group(channel_description,
+                                           channel_location,
+                                           channel_filtering,
+                                           channel_coordinates,
+                                           channel_impedance,
+                                           description,
+                                           location,
+                                           device)
 
 # Create the TimeSeries object for the eletrophysiology data
 
@@ -36,7 +55,7 @@ np.random.seed(1234)
 ephys_data = np.random.rand(data_len)
 ephys_timestamps = np.arange(data_len) / rate
 spatial_timestamps = ephys_timestamps[::10]
-spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T 
+spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T
 
 ephys_ts = ElectricalSeries('test_timeseries',
                             'test_source',
