@@ -212,6 +212,11 @@ class BaseStorageSpec(Spec):
         if resolve:
             self.resolve_spec(data_type_inc)
 
+    @property
+    def required(self):
+        ''' Whether or not the this spec represents a required field '''
+        return self.quantity not in (ZERO_OR_ONE, ZERO_OR_MANY)
+
     @docval({'name': 'inc_spec', 'type': 'BaseStorageSpec', 'doc': 'the data type this specification represents'})
     def resolve_spec(self, **kwargs):
         inc_spec = getargs('inc_spec', kwargs)
