@@ -3,7 +3,7 @@ import unittest
 from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
 from form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap
 from form import Container
-from form.utils import docval, getargs
+from form.utils import docval, getargs, get_docval
 
 CORE_NAMESPACE = 'core'
 
@@ -128,6 +128,37 @@ class TestTypeMap(unittest.TestCase):
         mapper = self.type_map.get_map(container_inst)
         self.assertIs(mapper.spec, self.bar_spec)
         self.assertIsInstance(mapper, MyMap)
+
+class TestDynamicContainer(unittest.TestCase):
+
+    def setUp(self):
+        self.bar_spec = GroupSpec('A test group specification with a data type',
+                                 data_type_def='Bar',
+                                 datasets=[DatasetSpec('an example dataset', 'int', name='data',
+                                                attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
+                                 attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
+        self.spec_catalog = SpecCatalog()
+        self.spec_catalog.register_spec(self.bar_spec, 'test.yaml')
+        self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
+        self.namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
+        self.namespace_catalog.add_namespace(CORE_NAMESPACE, self.namespace)
+        self.type_map = TypeMap(self.namespace_catalog)
+        self.type_map.register_container_type(CORE_NAMESPACE, 'Bar', Bar)
+        self.type_map.register_map(Bar, ObjectMapper)
+        self.manager = BuildManager(self.type_map)
+        self.mapper = ObjectMapper(self.bar_spec)
+
+    def test_dynamic_container_creation(self):
+        baz_spec = GroupSpec('A test extension with no Container class', data_type_def='Baz', data_type_inc=self.bar_spec,
+                             attributes=[AttributeSpec('attr3', 'float', 'an example float attribute'),
+                                         AttributeSpec('attr4', 'float', 'an example float attribute')])
+        self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
+        cls = self.type_map.create_container_cls(CORE_NAMESPACE, 'Baz')
+        expected_args = {'name', 'data', 'attr1', 'attr2', 'attr3', 'attr4'}
+        received_args = set(map(lambda x: x['name'], get_docval(cls.__init__)))
+        self.assertSetEqual(expected_args, received_args)
+        self.assertEqual(cls.__name__, 'Baz')
+        #TODO: test that constructor works!
 
 class TestObjectMapper(unittest.TestCase):
 

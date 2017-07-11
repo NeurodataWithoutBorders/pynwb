@@ -109,9 +109,9 @@ class GroupSpecTests(unittest.TestCase):
         self.assertIs(spec, self.subgroups[1].parent)
         json.dumps(spec)
 
-    def test_nwbtype_extension(self):
+    def test_type_extension(self):
         spec = GroupSpec('A test group',
-                         name='root_constructor_nwbtype',
+                         name='parent_type',
                          datasets=self.datasets,
                          attributes=self.attributes,
                          linkable=False,
@@ -131,7 +131,7 @@ class GroupSpecTests(unittest.TestCase):
             AttributeSpec('ext_extra_attribute', 'str', 'an extra attribute for the group'),
         ]
         ext =  GroupSpec('A test group extension',
-                         name='root_constructor_nwbtype',
+                         name='child_type',
                          datasets=ext_datasets,
                          attributes=ext_attributes,
                          linkable=False,
@@ -159,6 +159,13 @@ class GroupSpecTests(unittest.TestCase):
         self.assertDictEqual(res_attrs[0], ext_attributes[0])
         self.assertDictEqual(res_attrs[1], self.attributes[0])
         self.assertDictEqual(res_attrs[2], self.attributes[1])
+
+        # test that inherited specs are tracked appropriate
+        for d in self.datasets:
+            with self.subTest(dataset=d.name):
+                self.assertTrue(ext.is_inherited_spec(d))
+                self.assertFalse(spec.is_inherited_spec(d))
+
         json.dumps(spec)
 
     def assertDatasetsEqual(self, spec1, spec2):
