@@ -219,11 +219,18 @@ class BaseStorageSpec(Spec):
 
     @docval({'name': 'inc_spec', 'type': 'BaseStorageSpec', 'doc': 'the data type this specification represents'})
     def resolve_spec(self, **kwargs):
+        self.__new_attributes = set(self.__attributes.keys())
         inc_spec = getargs('inc_spec', kwargs)
         for attribute in inc_spec.attributes:
+            self.__new_attributes.discard(attribute)
             if attribute.name in self.__attributes:
                 continue
             self.set_attribute(attribute)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute to the Spec for'})
+    def is_inherited_attribute(self, **kwargs):
+        name = getargs('name', kwargs)
+        return name not in self.__new_attributes
 
     def is_many(self):
         return self.quantity not in (1, ZERO_OR_ONE)
@@ -482,23 +489,49 @@ class GroupSpec(BaseStorageSpec):
     @docval({'name': 'inc_spec', 'type': 'GroupSpec', 'doc': 'the data type this specification represents'})
     def resolve_spec(self, **kwargs):
         inc_spec = getargs('inc_spec', kwargs)
+        self.__new_datasets = set(self.__datasets.keys())
         for dataset in inc_spec.datasets:
+            self.__new_datasets.discard(dataset.name)
             if dataset.name in self.__datasets:
                 self.__datasets[dataset.name].resolve_spec(dataset)
             else:
                 self.set_dataset(dataset)
             if dataset.data_type_def is not None:
                 self.__inherited_data_type_defs.add(dataset.data_type_def)
+        self.__new_groups = set(self.__groups.keys())
         for group in inc_spec.groups:
+            self.__new_groups.discard(group.name)
             if group.name in self.__groups:
                 self.__groups[group.name].resolve_spec(group)
             else:
                 self.set_group(group)
             if group.data_type_def is not None:
                 self.__inherited_data_type_defs.add(group.data_type_def)
+        self.__new_links = set(self.__links.keys())
         for link in inc_spec.links:
+            self.__new_links.discard(link.name)
+            if link.name in self.__links:
+                continue
             self.set_link(link)
         super(GroupSpec, self).resolve_spec(inc_spec)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'})
+    def is_inherited_dataset(self, **kwargs):
+        '''Return true of a dataset with the given name was inherited'''
+        name = getargs('name', kwargs)
+        return name not in self.__new_dataset
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the group'})
+    def is_inherited_group(self, **kwargs):
+        '''Return true of a group with the given name was inherited'''
+        name = getargs('name', kwargs)
+        return name not in self.__new_group
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the link'})
+    def is_inherited_link(self, **kwargs):
+        '''Return true of a link with the given name was inherited'''
+        name = getargs('name', kwargs)
+        return name not in self.__new_link
 
     @docval({'name': 'spec', 'type': 'BaseStorageSpec', 'doc': 'the specification to check'})
     def is_inherited(self, **kwargs):
