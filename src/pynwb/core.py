@@ -120,15 +120,3 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
             if not hasattr(cls, f):
                 setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
 
-    # TODO: do something to handle when multiple derived classes have the same name
-    __all_subclasses = dict()
-
-    @ExtenderMeta.pre_init
-    def __register_subclass(cls, name, bases, classdict):
-        cls.__all_subclasses[name] = cls
-
-    @classmethod
-    def get_subclass(cls, neurodata_type):
-        return cls.__all_subclasses.get(neurodata_type, None)
-
-
