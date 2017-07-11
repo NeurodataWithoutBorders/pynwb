@@ -1,6 +1,8 @@
 import abc
 from datetime import datetime
 from copy import deepcopy, copy
+from itertools import chain
+
 from ..utils import docval, getargs, popargs, get_docval
 
 NAME_WILDCARD = None
@@ -209,6 +211,7 @@ class BaseStorageSpec(Spec):
                 resolve = True
         for attribute in attributes:
             self.set_attribute(attribute)
+        self.__new_attributes = set(self.__attributes.keys())
         if resolve:
             self.resolve_spec(data_type_inc)
 
@@ -219,7 +222,6 @@ class BaseStorageSpec(Spec):
 
     @docval({'name': 'inc_spec', 'type': 'BaseStorageSpec', 'doc': 'the data type this specification represents'})
     def resolve_spec(self, **kwargs):
-        self.__new_attributes = set(self.__attributes.keys())
         inc_spec = getargs('inc_spec', kwargs)
         for attribute in inc_spec.attributes:
             self.__new_attributes.discard(attribute)
@@ -227,9 +229,20 @@ class BaseStorageSpec(Spec):
                 continue
             self.set_attribute(attribute)
 
+    @docval({'name': 'spec', 'type': (Spec, str), 'doc': 'the specification to check'})
+    def is_inherited_spec(self, **kwargs):
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, Spec):
+            spec = spec.name
+        if spec in self.__attributes:
+            return self.is_inherited_attribute(spec)
+        return False
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute to the Spec for'})
     def is_inherited_attribute(self, **kwargs):
         name = getargs('name', kwargs)
+        if name not in self.__attributes:
+            raise ValueError("Attribute '%s' not found" % name)
         return name not in self.__new_attributes
 
     def is_many(self):
@@ -484,12 +497,14 @@ class GroupSpec(BaseStorageSpec):
         for link in links:
             self.set_link(link)
         self.__inherited_data_type_defs = set()
+        self.__new_datasets = set(self.__datasets.keys())
+        self.__new_groups = set(self.__groups.keys())
+        self.__new_links = set(self.__links.keys())
         super(GroupSpec, self).__init__(doc, **kwargs)
 
     @docval({'name': 'inc_spec', 'type': 'GroupSpec', 'doc': 'the data type this specification represents'})
     def resolve_spec(self, **kwargs):
         inc_spec = getargs('inc_spec', kwargs)
-        self.__new_datasets = set(self.__datasets.keys())
         for dataset in inc_spec.datasets:
             self.__new_datasets.discard(dataset.name)
             if dataset.name in self.__datasets:
@@ -498,7 +513,6 @@ class GroupSpec(BaseStorageSpec):
                 self.set_dataset(dataset)
             if dataset.data_type_def is not None:
                 self.__inherited_data_type_defs.add(dataset.data_type_def)
-        self.__new_groups = set(self.__groups.keys())
         for group in inc_spec.groups:
             self.__new_groups.discard(group.name)
             if group.name in self.__groups:
@@ -507,7 +521,6 @@ class GroupSpec(BaseStorageSpec):
                 self.set_group(group)
             if group.data_type_def is not None:
                 self.__inherited_data_type_defs.add(group.data_type_def)
-        self.__new_links = set(self.__links.keys())
         for link in inc_spec.links:
             self.__new_links.discard(link.name)
             if link.name in self.__links:
@@ -515,26 +528,61 @@ class GroupSpec(BaseStorageSpec):
             self.set_link(link)
         super(GroupSpec, self).resolve_spec(inc_spec)
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
+            raises="ValueError, if 'name' is not part of this spec")
     def is_inherited_dataset(self, **kwargs):
         '''Return true of a dataset with the given name was inherited'''
         name = getargs('name', kwargs)
-        return name not in self.__new_dataset
+        if name not in self.__datasets:
+            raise ValueError("Dataset '%s' not found in spec" % name)
+        return name not in self.__new_datasets
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the group'})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the group'},
+            raises="ValueError, if 'name' is not part of this spec")
     def is_inherited_group(self, **kwargs):
         '''Return true of a group with the given name was inherited'''
         name = getargs('name', kwargs)
-        return name not in self.__new_group
+        if name not in self.__groups:
+            raise ValueError("Group '%s' not found in spec" % name)
+        return name not in self.__new_groups
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the link'})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the link'},
+            raises="ValueError, if 'name' is not part of this spec")
     def is_inherited_link(self, **kwargs):
         '''Return true of a link with the given name was inherited'''
         name = getargs('name', kwargs)
-        return name not in self.__new_link
+        if name not in self.__links:
+            raise ValueError("Link '%s' not found in spec" % name)
+        return name not in self.__new_links
+
+    @docval({'name': 'spec', 'type': (Spec, str), 'doc': 'the specification to check'})
+    def is_inherited_spec(self, **kwargs):
+        ''' Returns 'True' if specification was inherited from a parent type '''
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, Spec):
+            spec = spec.name
+        if spec in self.__links:
+            return self.is_inherited_link(spec)
+        elif spec in self.__groups:
+            return self.is_inherited_group(spec)
+        elif spec in self.__datasets:
+            return self.is_inherited_dataset(spec)
+        else:
+            if super().is_inherited_spec(spec):
+                return True
+            else:
+                for s in self.__datasets:
+                    if self.is_inherited_dataset(s):
+                        if self.__datasets[s].get_attribute(spec) is not None:
+                            return True
+                for s in self.__groups:
+                    if self.is_inherited_groups(s):
+                        if self.__groups[s].get_attribute(spec) is not None:
+                            return True
+        return False
 
     @docval({'name': 'spec', 'type': 'BaseStorageSpec', 'doc': 'the specification to check'})
-    def is_inherited(self, **kwargs):
+    def is_inherited_type(self, **kwargs):
         ''' Returns True if `spec` represents a spec that was inherited from an included data_type '''
         spec = getargs('spec', kwargs)
         if spec.data_type_def is None:
