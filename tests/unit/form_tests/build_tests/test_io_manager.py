@@ -1,7 +1,7 @@
 import unittest
 from abc import ABCMeta, abstractmethod
 
-from pynwb.core import NWBContainer
+from pynwb.core import Container
 
 from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
 from form.spec.spec import ZERO_OR_MANY
@@ -11,7 +11,7 @@ from form.build import ObjectMapper, BuildManager, TypeMap
 
 CORE_NAMESPACE = 'core'
 
-class Foo(NWBContainer):
+class Foo(Container):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this Foo'},
             {'name': 'my_data', 'type': list, 'doc': 'some data'},
@@ -58,7 +58,7 @@ class Foo(NWBContainer):
     def __hash__(self):
         return hash(self.name)
 
-class FooBucket(NWBContainer):
+class FooBucket(Container):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this bucket'},
             {'name': 'foos', 'type': list, 'doc': 'the Foo objects in this bucket', 'default': list()})
@@ -158,13 +158,6 @@ class TestNestedBase(TestBase):
         self.setUpBucketBuilder()
         self.setUpBucketSpec()
 
-        #self.spec_catalog = SpecCatalog()
-        #self.spec_catalog.register_spec(self.bucket_spec, 'test.yaml')
-        #self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
-        #self.namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
-        #self.namespace_catalog.add_namespace(CORE_NAMESPACE, self.namespace)
-        #self.type_map = TypeMap(self.namespace_catalog)
-
         self.spec_catalog.register_spec(self.bucket_spec, 'test.yaml')
         self.type_map.register_container_type(CORE_NAMESPACE, 'FooBucket', FooBucket)
         self.type_map.register_map(FooBucket, ObjectMapper)
@@ -177,7 +170,7 @@ class TestNestedBase(TestBase):
         pass
 
     def test_build(self):
-        ''' Test default mapping for an NWBContainer that has an NWBContainer as an attribute value '''
+        ''' Test default mapping for an Container that has an Container as an attribute value '''
         builder = self.manager.build(self.foo_bucket)
         self.assertDictEqual(builder, self.bucket_builder)
 
@@ -188,7 +181,7 @@ class TestNestedBase(TestBase):
 class TestNestedContainersNoSubgroups(TestNestedBase):
     '''
         Test BuildManager.build and BuildManager.construct when the
-        NWBContainer contains other NWBContainers, but does not keep them in
+        Container contains other Containers, but does not keep them in
         additional subgroups
     '''
 
@@ -201,44 +194,49 @@ class TestNestedContainersNoSubgroups(TestNestedBase):
                                      namespace=CORE_NAMESPACE,
                                      data_type_def='FooBucket',
                                      groups=[GroupSpec('the Foos in this bucket', namespace=CORE_NAMESPACE, data_type_inc='Foo', quantity=ZERO_OR_MANY)])
-        #self.type_map.register_spec(FooBucket, self.bucket_spec)
 
 class TestNestedContainersSubgroup(TestNestedBase):
+    '''
+        Test BuildManager.build and BuildManager.construct when the
+        Container contains other Containers that are stored in a subgroup
+    '''
 
     def setUpBucketBuilder(self):
-        tmp_builder = GroupBuilder('foos', groups=self.foo_builders)
+        tmp_builder = GroupBuilder('foo_holder', groups=self.foo_builders)
         self.bucket_builder = GroupBuilder('test_foo_bucket', groups={'foos': tmp_builder}, attributes={'namespace': CORE_NAMESPACE, 'data_type': 'FooBucket'})
 
     def setUpBucketSpec(self):
-        tmp_spec = GroupSpec('A subgroup for Foos', 'foos', groups=[GroupSpec('the Foos in this bucket', namespace=CORE_NAMESPACE, data_type_inc='Foo', quantity=ZERO_OR_MANY)])
+        tmp_spec = GroupSpec('A subgroup for Foos', name='foo_holder', groups=[GroupSpec('the Foos in this bucket', namespace=CORE_NAMESPACE, data_type_inc='Foo', quantity=ZERO_OR_MANY)])
         self.bucket_spec = GroupSpec('A test group specification for a data type containing data type',
                                name="test_foo_bucket",
                                namespace=CORE_NAMESPACE,
                                data_type_def='FooBucket',
                                groups=[tmp_spec])
-        #self.type_map.register_spec(FooBucket, self.bucket_spec)
 
 class TestNestedContainersSubgroupSubgroup(TestNestedBase):
+    '''
+        Test BuildManager.build and BuildManager.construct when the
+        Container contains other Containers that are stored in a subgroup
+        in a subgroup
+    '''
 
     def setUpBucketBuilder(self):
-        tmp_builder = GroupBuilder('foos', groups=self.foo_builders)
-        tmp_builder = GroupBuilder('foo_holder', groups={'foos': tmp_builder})
+        tmp_builder = GroupBuilder('foo_holder', groups=self.foo_builders)
+        tmp_builder = GroupBuilder('foo_holder_holder', groups={'foo_holder': tmp_builder})
         self.bucket_builder = GroupBuilder('test_foo_bucket', groups={'foo_holder': tmp_builder}, attributes={'namespace': CORE_NAMESPACE, 'data_type': 'FooBucket'})
 
     def setUpBucketSpec(self):
-        tmp_spec = GroupSpec('A subgroup for Foos', 'foos', groups=[GroupSpec('the Foos in this bucket', namespace=CORE_NAMESPACE, data_type_inc='Foo', quantity=ZERO_OR_MANY)])
-        tmp_spec = GroupSpec('A subgroup to hold the subgroup', 'foo_holder', groups=[tmp_spec])
+        tmp_spec = GroupSpec('A subgroup for Foos', name='foo_holder', groups=[GroupSpec('the Foos in this bucket', namespace=CORE_NAMESPACE, data_type_inc='Foo', quantity=ZERO_OR_MANY)])
+        tmp_spec = GroupSpec('A subgroup to hold the subgroup', name='foo_holder_holder', groups=[tmp_spec])
         self.bucket_spec = GroupSpec('A test group specification for a data type containing data type',
                                name="test_foo_bucket",
                                namespace=CORE_NAMESPACE,
                                data_type_def='FooBucket',
                                groups=[tmp_spec])
-        #self.type_map.register_spec(FooBucket, bucket_spec)
 
 #TODO:
 class TestWildCardNamedSpecs(unittest.TestCase):
     pass
-
 
 if __name__ == '__main__':
     unittest.main()

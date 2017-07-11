@@ -145,7 +145,15 @@ class TestObjectMapper(unittest.TestCase):
         self.mapper = ObjectMapper(self.bar_spec)
 
     def setUpBarSpec(self):
-        raise SkipTest('setUpBarSpec not implemented')
+        raise unittest.SkipTest('setUpBarSpec not implemented')
+
+    def test_default_mapping(self):
+        attr_map = self.mapper.get_attr_names(self.bar_spec)
+        keys = set(attr_map.keys())
+        for key in keys:
+            with self.subTest(key=key):
+                self.assertIs(attr_map[key], self.mapper.get_attr_spec(key))
+                self.assertIs(attr_map[key], self.mapper.get_carg_spec(key))
 
 class TestObjectMapperNested(TestObjectMapper):
 
@@ -172,7 +180,12 @@ class TestObjectMapperNested(TestObjectMapper):
         container = self.mapper.construct(builder, self.manager)
         self.assertEqual(container, expected)
 
-#class TestObjectMapperNoNesting(unittest.TestCase):
+    def test_default_mapping_keys(self):
+        attr_map = self.mapper.get_attr_names(self.bar_spec)
+        keys = set(attr_map.keys())
+        expected = {'attr1', 'data', 'attr2'}
+        self.assertSetEqual(keys, expected)
+
 class TestObjectMapperNoNesting(TestObjectMapper):
 
     def setUpBarSpec(self):
@@ -197,6 +210,28 @@ class TestObjectMapperNoNesting(TestObjectMapper):
         expected = Bar('my_bar', list(range(10)), 'value1', 10)
         container = self.mapper.construct(builder, self.manager)
         self.assertEqual(container, expected)
+
+    def test_default_mapping_keys(self):
+        attr_map = self.mapper.get_attr_names(self.bar_spec)
+        keys = set(attr_map.keys())
+        expected = {'attr1', 'data', 'attr2'}
+        self.assertSetEqual(keys, expected)
+
+class TestObjectMapperContainer(TestObjectMapper):
+
+    def setUpBarSpec(self):
+        self.bar_spec = GroupSpec('A test group specification with a data type',
+                         data_type_def='Bar',
+                         groups=[GroupSpec('an example group', data_type_def='Foo')],
+                         attributes=[AttributeSpec('attr1', 'str', 'an example string attribute'),
+                                     AttributeSpec('attr2', 'int', 'an example integer attribute')])
+
+    def test_default_mapping_keys(self):
+        attr_map = self.mapper.get_attr_names(self.bar_spec)
+        keys = set(attr_map.keys())
+        expected = {'attr1', 'foo', 'attr2'}
+        self.assertSetEqual(keys, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
