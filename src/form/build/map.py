@@ -538,51 +538,57 @@ class TypeMap(object):
     @staticmethod
     def __get_constructor(base, addl_fields):
 
+        existing_args = set()
         docval_args = list()
         for arg in get_docval(base.__init__):
             docval_args.append(arg)
+            existing_args.add(arg['name'])
         for f in addl_fields:
+            if f in existing_args:
+                continue
             docval_args.append({'name': f, 'type': object, 'doc': 'dynamically created argument', 'default': None})
 
+        @docval(*docval_args)
         def __init__(self, **kwargs):
             pargs, pkwargs = fmt_docval_args(base.__init__)
             super().__init__(*pargs, **pkwargs)
             for f in addl_fields:
                 setattr(self, f, kwargs.get(f,None))
+        return __init__
 
     def create_container_cls(self, namespace, data_type):
-        cls = self.__get_container_cls(namespace, t)
+        cls = self.__get_container_cls(namespace, data_type)
         if cls is None:
             dt_hier = self.__ns_catalog.get_hierarchy(namespace, data_type)
             parent_cls = None
             for t in dt_hier:
-                try:
-                    parent_cls = self.__get_container_cls(namespace, t)
+                parent_cls = self.__get_container_cls(namespace, t)
+                if parent_cls is not None:
                     break
-                except ValueError as e:
-                    continue
             if parent_cls is None:
                 raise ValueError('No Container class found for parents of %s:%s %s' % (namespace, data_type, dt_hier))
             name = data_type
             bases = (parent_cls,)
+            spec = self.__ns_catalog.get_spec(namespace, data_type)
             attr_names = self.__default_mapper_cls.get_attr_names(spec)
-            fields = list(filter(lambda x: not spec.is_inherited(attr_names[x]), attr_names))
+            #print('found these attr_names %s' % str(list(attr_names.keys())))
+            fields = list()
             for k in attr_names:
-                if spec.is_inherited(attr_names[k]):
-                    attr_names.pop(k)
+                if not spec.is_inherited_spec(attr_names[k]):
+                    fields.append(k)
+            #print('found these additional fields %s' % str(fields))
             d = {'__init__': self.__get_constructor(parent_cls, fields)}
             cls = type(name, bases, d)
             self.register_container_type(namespace, data_type, cls)
 
-        return cls(**fields)
+        return cls
 
     def __get_container_cls(self, namespace, data_type):
         if namespace not in self.__container_types:
-            raise ValueError("no data_types from namespace '%s' have been mapped" % namespace)
+            return None
         if data_type not in self.__container_types[namespace]:
-            raise ValueError("no data_type '%s' from namespace '%s has been mapped'" % (data_type, namespace))
-        container_cls = self.__container_types[namespace][data_type]
-        return container_cls
+            return None
+        return self.__container_types[namespace][data_type]
 
     def __get_data_type(self, builder):
         ret = builder.get(self.__ns_catalog.group_spec_cls.type_key())
