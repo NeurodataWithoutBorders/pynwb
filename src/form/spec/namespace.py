@@ -107,7 +107,8 @@ class SpecNamespace(dict):
     def get_registered_types(self):
         return self.__catalog.get_registered_types()
 
-    @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the hierarchy of'})
+    @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the hierarchy of'},
+            returns="a tuple with the type hierarchy", rtype=tuple)
     def get_hierarchy(self, **kwargs):
         ''' Get the extension hierarchy for the given data_type in this namespace'''
         data_type = getargs('data_type', kwargs)
@@ -181,7 +182,7 @@ class NamespaceCatalog(object):
 
     @docval({'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
             {'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the spec for'},
-            returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
+            returns="a tuple with the type hierarchy", rtype=tuple)
     def get_hierarchy(self, **kwargs):
         '''
         Get the type hierarchy for a given data_type in a given namespace
