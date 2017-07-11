@@ -1,9 +1,11 @@
 import re
 import sys
+from collections import OrderedDict
 
 from ..utils import docval, getargs, ExtenderMeta, get_docval
 from ..container import Container
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog
+from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
 
 class BuildManager(object):
@@ -79,166 +81,6 @@ class BuildManager(object):
         spec, builder = getargs('spec', 'builder', kwargs)
         return self.__type_map.get_subspec(spec, builder)
 
-class TypeMap(object):
-
-    @docval({'name': 'namespaces', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use'})
-    def __init__(self, **kwargs):
-        namespaces = getargs('namespaces', kwargs)
-        self.__map_types = dict()
-        self.__ns_catalog = namespaces
-        self.__mappers = dict()     ## already constructed ObjectMapper classes
-        self.__mapper_cls = dict()  ## the ObjectMapper class to use for each container type
-        self.__container_types = dict()
-        self.__data_types = dict()
-
-    def __get_data_type(self, builder):
-        ret = builder.get(self.__ns_catalog.group_spec_cls.type_key())
-        if ret is None:
-            raise ValueError("builder '%s' is does not have a data_type" % builder.name)
-        return ret
-
-    def __get_namespace(self, bldr):
-        return bldr.get('namespace', self.__ns_catalog.default_namespace)
-
-    @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder object to get the corresponding Container class for'})
-    def get_cls(self, **kwargs):
-        builder = getargs('builder', kwargs)
-        data_type = self.__get_data_type(builder)
-        namespace = self.__get_namespace(builder)
-        if namespace not in self.__container_types:
-            raise ValueError("no data_types from namespace '%s' have been mapped" % namespace)
-        if data_type not in self.__container_types[namespace]:
-            raise ValueError("no data_type '%s' from namespace '%s has been mapped'" % (data_type, namespace))
-        container_cls = self.__container_types[namespace][data_type]
-        return container_cls
-
-    @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
-            {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder), 'doc': 'the builder to get the sub-specification for'})
-    def get_subspec(self, **kwargs):
-        '''
-        Get the specification from this spec that corresponds to the given builder
-        '''
-        spec, builder = getargs('spec', 'builder', kwargs)
-        if isinstance(builder, LinkBuilder):
-            builder_type = type(builder.builder)
-        else:
-            builder_type = type(builder)
-        if builder_type == DatasetBuilder:
-            subspec = spec.get_dataset(builder.name)
-        else:
-            subspec = spec.get_group(builder.name)
-        if subspec is None:
-            # builder was generated from something with a data_type and a wildcard name
-            if isinstance(builder, LinkBuilder):
-                #dt = builder.builder.attributes.get(spec.type_key())
-                dt = self.__get_data_type(builder.builder)
-            else:
-                #dt = builder.attributes.get(spec.type_key())
-                dt = self.__get_data_type(builder)
-            if dt is not None:
-                # TODO: this returns None when using subclasses
-                ns = self.__get_namespace(builder)
-                hierarchy = self.__ns_catalog.get_hierarchy(ns, dt)
-                for t in hierarchy:
-                    subspec = spec.get_data_type(t)
-                    if subspec is not None:
-                        break
-        return subspec
-
-    def __get_container_ns_dt(self, obj):
-        container_cls = obj.__class__
-        namespace, data_type = self.__data_types.get(container_cls, (None, None))
-        return namespace, data_type
-
-    @docval({'name': 'obj', 'type': (Container, Builder), 'doc': 'the object to get the ObjectMapper for'},
-            returns='the ObjectMapper to use for mapping the given object', rtype='ObjectMapper')
-    def get_map(self, **kwargs):
-        """ Return the ObjectMapper object that should be used for the given container """
-        obj = getargs('obj', kwargs)
-        # get the container class, and namespace/data_type
-        if isinstance(obj, Container):
-            container_cls = obj.__class__
-            namespace, data_type = self.__get_container_ns_dt(obj)
-            if namespace is None:
-                raise ValueError("class %s does not mapped to a data_type" % container_cls)
-        else:
-            data_type = self.__get_data_type(obj)
-            namespace = self.__get_namespace(obj)
-            container_cls = self.get_cls(obj)
-        # now build the ObjectMapper class
-        spec = self.__ns_catalog.get_spec(namespace, data_type)
-        mapper = self.__mappers.get(container_cls)
-        if mapper is None:
-            mapper_cls = ObjectMapper
-            for cls in container_cls.__mro__:
-                tmp_mapper_cls = self.__mapper_cls.get(cls)
-                if tmp_mapper_cls is not None:
-                    mapper_cls = tmp_mapper_cls
-                    break
-
-            mapper = mapper_cls(spec)
-            self.__mappers[container_cls] = mapper
-        return mapper
-
-    @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type to map the class to"},
-            {"name": "data_type", "type": str, "doc": "the data_type to mape the class to"},
-            {"name": "container_cls", "type": type, "doc": "the class to map to the specified data_type"})
-    def register_container_type(self, **kwargs):
-        namespace, data_type, container_cls = getargs('namespace', 'data_type', 'container_cls', kwargs)
-        self.__container_types.setdefault(namespace, dict())
-        self.__container_types[namespace][data_type] = container_cls
-        self.__data_types[container_cls] = (namespace, data_type)
-
-    @docval({"name": "container_cls", "type": type, "doc": "the Container class for which the given ObjectMapper class gets used for"},
-            {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map"})
-    def register_map(self, **kwargs):
-        container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
-        if container_cls  not in self.__data_types:
-            raise ValueError('cannot register map for type %s - no data_type found' % container_cls)
-        self.__mapper_cls[container_cls] = mapper_cls
-
-    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
-            {"name": "manager", "type": BuildManager, "doc": "the BuildManager to use for managing this build", 'default': None},
-            {"name": "source", "type": str, "doc": "the source of container being built i.e. file path", 'default': None})
-    def build(self, **kwargs):
-        """ Build the GroupBuilder for the given Container"""
-        container, manager = getargs('container', 'manager', kwargs)
-        if manager is None:
-            manager = BuildManager(self)
-        attr_map = self.get_map(container)
-        if attr_map is None:
-            raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
-        else:
-            builder = attr_map.build(container, manager, source=getargs('source', kwargs))
-        namespace, data_type = self.__get_container_ns_dt(container)
-        builder.set_attribute('namespace', namespace)
-        builder.set_attribute(attr_map.spec.type_key(), data_type)
-        return builder
-
-    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'},
-            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for constructing', 'default': None})
-    def construct(self, **kwargs):
-        """ Construct the Container represented by the given builder """
-        builder, build_manager = getargs('builder', 'build_manager', kwargs)
-        if build_manager is None:
-            build_manager = BuildManager(self)
-        attr_map = self.get_map(builder)
-        if attr_map is None:
-            raise ValueError('No ObjectMapper found for builder of type %s' % str(container.__class__.__name__))
-        else:
-            return attr_map.construct(builder, build_manager)
-
-    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
-            returns='The name a Builder should be given when building this container', rtype=str)
-    def get_builder_name(self, **kwargs):
-        ''' Get the name a Builder should be given '''
-        container = getargs('container', kwargs)
-        attr_map = self.get_map(container)
-        if attr_map is None:
-            raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
-        else:
-            return attr_map.get_builder_name(container)
-
 class DecExtenderMeta(ExtenderMeta):
 
     @classmethod
@@ -249,22 +91,22 @@ class DecExtenderMeta(ExtenderMeta):
             'get_cargname': metacls.get_cargname,
         }
 
-#    __obj_attr = '__obj_attr__'
-#    @classmethod
-#    def obj_attr(cls, name):
-#        def _dec(func):
-#            setattr(func, cls.__obj_attr, name)
-#            return func
-#        return _dec
-#
-#    @classmethod
-#    def is_attr(cls, attr_val):
-#        return hasattr(attr_val, cls.__obj_attr)
-#
-#    @classmethod
-#    def get_obj_attr(cls, attr_val):
-#        return getattr(attr_val, cls.__obj_attr)
-#
+    __obj_attr = '__obj_attr__'
+    @classmethod
+    def obj_attr(cls, name):
+        def _dec(func):
+            setattr(func, cls.__obj_attr, name)
+            return func
+        return _dec
+
+    @classmethod
+    def is_attr(cls, attr_val):
+        return hasattr(attr_val, cls.__obj_attr)
+
+    @classmethod
+    def get_obj_attr(cls, attr_val):
+        return getattr(attr_val, cls.__obj_attr)
+
     __const_arg = '__const_arg__'
     @classmethod
     def const_arg(cls, name):
@@ -283,7 +125,6 @@ class DecExtenderMeta(ExtenderMeta):
 
 class ObjectMapper(object, metaclass=DecExtenderMeta):
 
-    _property = "__item_property__"
     @ExtenderMeta.post_init
     def __gather_procedures(cls, name, bases, classdict):
         cls.const_args = dict()
@@ -311,41 +152,62 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
     def get_container_name(self, builder):
         return builder.name
 
-    @staticmethod
-    def __convert_name(name):
+    @classmethod
+    def convert_dt_name(cls, spec):
+        if spec.data_type_def is not None:
+            name = spec.data_type_def
+        elif spec.data_type_inc is not None:
+            name = spec.data_type_inc
+        else:
+            raise ValueError('found spec without name or data_type')
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-        ret = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
-        return ret
+        name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
+        if name[-1] != 's' and spec.is_many():
+            name += 's'
+        return name
+
+    @classmethod
+    def __get_fields(cls, name_stack, all_names, spec):
+        name = spec.name
+        if spec.name is None:
+            name = cls.convert_dt_name(spec)
+        name_stack.append(name)
+        if name in all_names:
+            name = "_".join(name_stack)
+        all_names[name] = spec
+        if isinstance(spec, BaseStorageSpec):
+            if not (spec.data_type_def is None and spec.data_type_inc is None):
+                # don't get names for components in data_types
+                return
+            for subspec in spec.attributes:
+                cls.__get_fields(name_stack, all_names, subspec)
+            if isinstance(spec, GroupSpec):
+                for subspec in spec.datasets:
+                    cls.__get_fields(name_stack, all_names, subspec)
+                for subspec in spec.groups:
+                    cls.__get_fields(name_stack, all_names, subspec)
+                for subspec in spec.links:
+                    cls.__get_fields(name_stack, all_names, subspec)
+        name_stack.pop()
+
+    @classmethod
+    def get_attr_names(cls, spec):
+        names = OrderedDict()
+        for subspec in spec.attributes:
+            cls.__get_fields(list(), names, subspec)
+        if isinstance(spec, GroupSpec):
+            for subspec in spec.groups:
+                cls.__get_fields(list(), names, subspec)
+            for subspec in spec.datasets:
+                cls.__get_fields(list(), names, subspec)
+            for subspec in spec.links:
+                cls.__get_fields(list(), names, subspec)
+        return names
 
     def __map_spec(self, spec):
-        for subspec in spec.attributes:
-            self.__map_spec_helper(subspec)
-        if spec != self.__spec:
-            self.__map_spec_helper(spec)
-        if isinstance(spec, GroupSpec):
-            for subspec in spec.datasets:
-                self.__map_spec(subspec)
-            for subspec in spec.groups:
-                if subspec.data_type_def is None:
-                    self.__map_spec(subspec)
-            for subspec in spec.links:
-                self.__map_spec_helper(subspec)
-
-    def __map_spec_helper(self, spec):
-        if spec.name != NAME_WILDCARD:
-            self.map_spec(spec.name, spec)
-        else:
-            dt = None
-            if spec.data_type_def is not None:
-                dt = spec.data_type_def
-            elif spec.data_type_inc is not None:
-                dt = spec.data_type_inc
-            else:
-                raise ValueError('Cannot map spec with wildcard name and no data_type_inc or data_type_def')
-            name = self.__convert_name(dt)
-            if name[-1] != 's' and spec.is_many():
-                name += 's'
-            self.map_spec(name, spec)
+        attr_names = self.get_attr_names(spec)
+        for k, v in attr_names.items():
+            self.map_spec(k, v)
 
     @docval({"name": "attr_name", "type": str, "doc": "the name of the object to map"},
             {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
@@ -362,6 +224,18 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
                 self.__spec2attr.pop(existing)
         self.__spec2attr[spec] = attr_name
         self.__attr2spec[attr_name] = spec
+
+    @docval({"name": "attr_name", "type": str, "doc": "the name of the attribute"})
+    def get_attr_spec(self, **kwargs):
+        """ Return the Spec for a given attribute """
+        attr_name = getargs('attr_name', kwargs)
+        return self.__attr2spec.get(attr_name)
+
+    @docval({"name": "carg_name", "type": str, "doc": "the name of the constructor argument"})
+    def get_carg_spec(self, **kwargs):
+        """ Return the Spec for a given constructor argument """
+        carg_name = getargs('carg_name', kwargs)
+        return self.__attr2spec.get(carg_name)
 
     @docval({"name": "const_arg", "type": str, "doc": "the name of the constructor argument to map"},
             {"name": "spec", "type": Spec, "doc": "the spec to map the attribute to"})
@@ -496,6 +370,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             attr_value = self.get_attr_value(spec, container)
             #TODO: add check for required datasets
             if attr_value is None:
+                if spec.required:
+                    raise Warning("missing required attribute '%s'" % spec.name)
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value, dtype=spec.dtype)
@@ -643,3 +519,209 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         else:
             ret = container.name
         return ret
+
+class TypeMap(object):
+
+    @docval({'name': 'namespaces', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use'},
+            {'name': 'mapper_cls', 'type': type, 'doc': 'the ObjectMapper class to use', 'default': ObjectMapper})
+    def __init__(self, **kwargs):
+        namespaces = getargs('namespaces', kwargs)
+        self.__map_types = dict()
+        self.__ns_catalog = namespaces
+        self.__mappers = dict()     ## already constructed ObjectMapper classes
+        self.__mapper_cls = dict()  ## the ObjectMapper class to use for each container type
+        self.__container_types = dict()
+        self.__data_types = dict()
+        self.__default_mapper_cls = getargs('mapper_cls', kwargs)
+
+
+    @staticmethod
+    def __get_constructor(base, addl_fields):
+
+        docval_args = list()
+        for arg in get_docval(base.__init__):
+            docval_args.append(arg)
+        for f in addl_fields:
+            docval_args.append({'name': f, 'type': object, 'doc': 'dynamically created argument', 'default': None})
+
+        def __init__(self, **kwargs):
+            pargs, pkwargs = fmt_docval_args(base.__init__)
+            super().__init__(*pargs, **pkwargs)
+            for f in addl_fields:
+                setattr(self, f, kwargs.get(f,None))
+
+    def create_container_cls(self, namespace, data_type):
+        cls = self.__get_container_cls(namespace, t)
+        if cls is None:
+            dt_hier = self.__ns_catalog.get_hierarchy(namespace, data_type)
+            parent_cls = None
+            for t in dt_hier:
+                try:
+                    parent_cls = self.__get_container_cls(namespace, t)
+                    break
+                except ValueError as e:
+                    continue
+            if parent_cls is None:
+                raise ValueError('No Container class found for parents of %s:%s %s' % (namespace, data_type, dt_hier))
+            name = data_type
+            bases = (parent_cls,)
+            attr_names = self.__default_mapper_cls.get_attr_names(spec)
+            fields = list(filter(lambda x: not spec.is_inherited(attr_names[x]), attr_names))
+            for k in attr_names:
+                if spec.is_inherited(attr_names[k]):
+                    attr_names.pop(k)
+            d = {'__init__': self.__get_constructor(parent_cls, fields)}
+            cls = type(name, bases, d)
+            self.register_container_type(namespace, data_type, cls)
+
+        return cls(**fields)
+
+    def __get_container_cls(self, namespace, data_type):
+        if namespace not in self.__container_types:
+            raise ValueError("no data_types from namespace '%s' have been mapped" % namespace)
+        if data_type not in self.__container_types[namespace]:
+            raise ValueError("no data_type '%s' from namespace '%s has been mapped'" % (data_type, namespace))
+        container_cls = self.__container_types[namespace][data_type]
+        return container_cls
+
+    def __get_data_type(self, builder):
+        ret = builder.get(self.__ns_catalog.group_spec_cls.type_key())
+        if ret is None:
+            raise ValueError("builder '%s' is does not have a data_type" % builder.name)
+        return ret
+
+    def __get_namespace(self, bldr):
+        return bldr.get('namespace', self.__ns_catalog.default_namespace)
+
+    @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder object to get the corresponding Container class for'})
+    def get_cls(self, **kwargs):
+        builder = getargs('builder', kwargs)
+        data_type = self.__get_data_type(builder)
+        namespace = self.__get_namespace(builder)
+        return self.__get_container_cls(namespace, data_type)
+
+    @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
+            {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder), 'doc': 'the builder to get the sub-specification for'})
+    def get_subspec(self, **kwargs):
+        '''
+        Get the specification from this spec that corresponds to the given builder
+        '''
+        spec, builder = getargs('spec', 'builder', kwargs)
+        if isinstance(builder, LinkBuilder):
+            builder_type = type(builder.builder)
+        else:
+            builder_type = type(builder)
+        if builder_type == DatasetBuilder:
+            subspec = spec.get_dataset(builder.name)
+        else:
+            subspec = spec.get_group(builder.name)
+        if subspec is None:
+            # builder was generated from something with a data_type and a wildcard name
+            if isinstance(builder, LinkBuilder):
+                dt = self.__get_data_type(builder.builder)
+            else:
+                dt = self.__get_data_type(builder)
+            if dt is not None:
+                # TODO: this returns None when using subclasses
+                ns = self.__get_namespace(builder)
+                hierarchy = self.__ns_catalog.get_hierarchy(ns, dt)
+                for t in hierarchy:
+                    subspec = spec.get_data_type(t)
+                    if subspec is not None:
+                        break
+        return subspec
+
+    def __get_container_ns_dt(self, obj):
+        container_cls = obj.__class__
+        namespace, data_type = self.__data_types.get(container_cls, (None, None))
+        return namespace, data_type
+
+    @docval({'name': 'obj', 'type': (Container, Builder), 'doc': 'the object to get the ObjectMapper for'},
+            returns='the ObjectMapper to use for mapping the given object', rtype='ObjectMapper')
+    def get_map(self, **kwargs):
+        """ Return the ObjectMapper object that should be used for the given container """
+        obj = getargs('obj', kwargs)
+        # get the container class, and namespace/data_type
+        if isinstance(obj, Container):
+            container_cls = obj.__class__
+            namespace, data_type = self.__get_container_ns_dt(obj)
+            if namespace is None:
+                raise ValueError("class %s does not mapped to a data_type" % container_cls)
+        else:
+            data_type = self.__get_data_type(obj)
+            namespace = self.__get_namespace(obj)
+            container_cls = self.get_cls(obj)
+        # now build the ObjectMapper class
+        spec = self.__ns_catalog.get_spec(namespace, data_type)
+        mapper = self.__mappers.get(container_cls)
+        if mapper is None:
+            mapper_cls = self.__default_mapper_cls
+            for cls in container_cls.type_hierarchy():
+                tmp_mapper_cls = self.__mapper_cls.get(cls)
+                if tmp_mapper_cls is not None:
+                    mapper_cls = tmp_mapper_cls
+                    break
+
+            mapper = mapper_cls(spec)
+            self.__mappers[container_cls] = mapper
+        return mapper
+
+    @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type to map the class to"},
+            {"name": "data_type", "type": str, "doc": "the data_type to mape the class to"},
+            {"name": "container_cls", "type": type, "doc": "the class to map to the specified data_type"})
+    def register_container_type(self, **kwargs):
+        namespace, data_type, container_cls = getargs('namespace', 'data_type', 'container_cls', kwargs)
+        self.__container_types.setdefault(namespace, dict())
+        self.__container_types[namespace][data_type] = container_cls
+        self.__data_types[container_cls] = (namespace, data_type)
+
+    @docval({"name": "container_cls", "type": type, "doc": "the Container class for which the given ObjectMapper class gets used for"},
+            {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map"})
+    def register_map(self, **kwargs):
+        container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
+        if container_cls  not in self.__data_types:
+            raise ValueError('cannot register map for type %s - no data_type found' % container_cls)
+        self.__mapper_cls[container_cls] = mapper_cls
+
+    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
+            {"name": "manager", "type": BuildManager, "doc": "the BuildManager to use for managing this build", 'default': None},
+            {"name": "source", "type": str, "doc": "the source of container being built i.e. file path", 'default': None})
+    def build(self, **kwargs):
+        """ Build the GroupBuilder for the given Container"""
+        container, manager = getargs('container', 'manager', kwargs)
+        if manager is None:
+            manager = BuildManager(self)
+        attr_map = self.get_map(container)
+        if attr_map is None:
+            raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
+        else:
+            builder = attr_map.build(container, manager, source=getargs('source', kwargs))
+        namespace, data_type = self.__get_container_ns_dt(container)
+        builder.set_attribute('namespace', namespace)
+        builder.set_attribute(attr_map.spec.type_key(), data_type)
+        return builder
+
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'},
+            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for constructing', 'default': None})
+    def construct(self, **kwargs):
+        """ Construct the Container represented by the given builder """
+        builder, build_manager = getargs('builder', 'build_manager', kwargs)
+        if build_manager is None:
+            build_manager = BuildManager(self)
+        attr_map = self.get_map(builder)
+        if attr_map is None:
+            raise ValueError('No ObjectMapper found for builder of type %s' % str(container.__class__.__name__))
+        else:
+            return attr_map.construct(builder, build_manager)
+
+    @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
+            returns='The name a Builder should be given when building this container', rtype=str)
+    def get_builder_name(self, **kwargs):
+        ''' Get the name a Builder should be given '''
+        container = getargs('container', kwargs)
+        attr_map = self.get_map(container)
+        if attr_map is None:
+            raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
+        else:
+            return attr_map.get_builder_name(container)
+
