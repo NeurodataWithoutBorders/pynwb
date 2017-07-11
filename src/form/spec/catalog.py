@@ -106,7 +106,7 @@ class SpecCatalog(object):
             while len(tmp_hier) > 0:
                 self.__hierarchy[tmp_hier[0]] = tmp_hier
                 tmp_hier = tmp_hier[1:]
-        return ret
+        return tuple(ret)
 
     def __copy__(self):
         ret = SpecCatalog()
