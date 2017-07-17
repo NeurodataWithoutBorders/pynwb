@@ -2,7 +2,7 @@ import re
 import sys
 from collections import OrderedDict
 
-from ..utils import docval, getargs, ExtenderMeta, get_docval
+from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog
 from ..spec.spec import BaseStorageSpec
@@ -540,6 +540,7 @@ class TypeMap(object):
 
         existing_args = set()
         docval_args = list()
+        new_args = list()
         for arg in get_docval(base.__init__):
             docval_args.append(arg)
             existing_args.add(arg['name'])
@@ -547,12 +548,13 @@ class TypeMap(object):
             if f in existing_args:
                 continue
             docval_args.append({'name': f, 'type': object, 'doc': 'dynamically created argument', 'default': None})
+            new_args.append(f)
 
         @docval(*docval_args)
         def __init__(self, **kwargs):
-            pargs, pkwargs = fmt_docval_args(base.__init__)
-            super().__init__(*pargs, **pkwargs)
-            for f in addl_fields:
+            pargs, pkwargs = fmt_docval_args(base.__init__, kwargs)
+            super(type(self), self).__init__(*pargs, **pkwargs)
+            for f in new_args:
                 setattr(self, f, kwargs.get(f,None))
         return __init__
 
@@ -571,12 +573,10 @@ class TypeMap(object):
             bases = (parent_cls,)
             spec = self.__ns_catalog.get_spec(namespace, data_type)
             attr_names = self.__default_mapper_cls.get_attr_names(spec)
-            #print('found these attr_names %s' % str(list(attr_names.keys())))
             fields = list()
             for k in attr_names:
                 if not spec.is_inherited_spec(attr_names[k]):
                     fields.append(k)
-            #print('found these additional fields %s' % str(fields))
             d = {'__init__': self.__get_constructor(parent_cls, fields)}
             cls = type(name, bases, d)
             self.register_container_type(namespace, data_type, cls)
