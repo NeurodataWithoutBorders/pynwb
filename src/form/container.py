@@ -1,4 +1,7 @@
 import abc
 
 class Container(object, metaclass=abc.ABCMeta):
-    pass
+
+    @classmethod
+    def type_hierarchy(cls):
+        return cls.__mro__

@@ -1,6 +1,25 @@
 from form.utils import docval, getargs, ExtenderMeta
 from form import Container
 
+from . import CORE_NAMESPACE
+
+class GenericNWBContainer(Container, metaclass=ExtenderMeta):
+    ''' A generic NWBContainer.
+
+    This can be used for writing and reading custom extensions
+    '''
+
+    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata type this container instantiates'},
+            {'name': 'nwbfields', 'type': dict, 'doc': 'the source of this Container e.g. file name'},
+            {'name': 'namespace', 'type': str, 'doc': 'the namespace of the neurodata type', 'default': CORE_NAMESPACE})
+    def __init__(self, **kwargs):
+        '''
+        Construct a GenericNWBContainer
+        '''
+        super(GenericNWBContainer, self).__init__()
+        for k, v in nwbfields.items():
+            setattr(self, k, v)
+
 
 def set_parents(container, parent):
     if isinstance(container, list):
@@ -100,16 +119,4 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
         for f in cls.__nwbfields__:
             if not hasattr(cls, f):
                 setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
-
-    # TODO: do something to handle when multiple derived classes have the same name
-    __all_subclasses = dict()
-
-    @ExtenderMeta.pre_init
-    def __register_subclass(cls, name, bases, classdict):
-        cls.__all_subclasses[name] = cls
-
-    @classmethod
-    def get_subclass(cls, neurodata_type):
-        return cls.__all_subclasses.get(neurodata_type, None)
-
 

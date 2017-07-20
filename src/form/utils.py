@@ -237,22 +237,18 @@ def docval(*validator, **options):
                 if parse_err:
                     raise TypeError(', '.join(parse_err))
                 return func(**parsed['args'])
-        sphinxy_docstring = __sphinxdoc(func, _docval['args'])
-        if returns:
-            sphinxy_docstring += "\n:returns: %s" % returns
-        if isinstance(rtype, str):
-            sphinxy_docstring += "\n:rtype: %s" % rtype
-        elif isinstance(rtype, type):
-            sphinxy_docstring += "\n:rtype: %s" % rtype.__name__
-        setattr(func_call, '__doc__', sphinxy_docstring)
-        #TODO: make sure this is okay --
+        _rtype = rtype
+        if isinstance(rtype, type):
+            _rtype = rtype.__name__
+        docstring = __googledoc(func, _docval['args'], returns=returns, rtype=_rtype)
+        setattr(func_call, '__doc__', docstring)
         setattr(func_call, '__name__', func.__name__)
         setattr(func_call, docval_attr_name, _docval)
         setattr(func_call, '__module__', func.__module__)
         return func_call
     return dec
 
-def __sphinxdoc(func, validator):
+def __builddoc(func, validator, docstring_fmt, arg_fmt, ret_fmt=None, returns=None, rtype=None):
     '''Generate a Spinxy docstring'''
     def to_str(argtype):
         if isinstance(argtype, type):
@@ -268,9 +264,7 @@ def __sphinxdoc(func, validator):
         else:
             fmt['type'] = to_str(arg['type'])
 
-        tmpl = (":param {name}: {doc}\n"
-                ":type  {name}: {type}")
-        return tmpl.format(**fmt)
+        return arg_fmt.format(**fmt)
 
     def __sig_arg(argval):
         if 'default' in argval:
@@ -279,10 +273,29 @@ def __sphinxdoc(func, validator):
             return argval['name']
 
     sig =  "%s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator)))
-    if func.__doc__:
-        sig += "%s\n\n" % func.__doc__
-    sig += "\n".join(map(__sphinx_arg, validator))
+    desc = func.__doc__.strip() if func.__doc__ is not None else ""
+    sig += docstring_fmt.format(description=desc, args="\n".join(map(__sphinx_arg, validator)))
+
+    if not (ret_fmt is None or returns is None or rtype is None):
+        sig += ret_fmt.format(returns=returns, rtype=rtype)
     return sig
+
+def __sphinxdoc(func, validator, returns=None, rtype=None):
+    arg_fmt = (":param {name}: {doc}\n"
+               ":type  {name}: {type}")
+    docstring_fmt = ("{description}\n\n"
+                     "{args}\n")
+    ret_fmt = (":returns: {returns}\n"
+               ":rtype: {rtype}")
+    return __builddoc(func, validator, docstring_fmt, arg_fmt, ret_fmt=ret_fmt, returns=returns, rtype=rtype)
+
+def __googledoc(func, validator, returns=None, rtype=None):
+    arg_fmt = "    {name} ({type}): {doc}"
+    docstring_fmt = ("{description}\n\n"
+                     "Args:\n{args}\n")
+    ret_fmt = ("\nReturns:\n"
+               "    {rtype}: {returns}")
+    return __builddoc(func, validator, docstring_fmt, arg_fmt, ret_fmt=ret_fmt, returns=returns, rtype=rtype)
 
 def getargs(*argnames):
     '''getargs(*argnames, argdict)

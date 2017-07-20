@@ -107,7 +107,8 @@ class SpecNamespace(dict):
     def get_registered_types(self):
         return self.__catalog.get_registered_types()
 
-    @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the hierarchy of'})
+    @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the hierarchy of'},
+            returns="a tuple with the type hierarchy", rtype=tuple)
     def get_hierarchy(self, **kwargs):
         ''' Get the extension hierarchy for the given data_type in this namespace'''
         data_type = getargs('data_type', kwargs)
@@ -138,6 +139,7 @@ class NamespaceCatalog(object):
         # keep track of all spec objects ever loaded, so we don't have
         # multiple object instances of a spec
         self.__loaded_specs = dict()
+        self.__loaded_ns_files = dict()
 
     @property
     def dataset_spec_cls(self):
@@ -181,7 +183,7 @@ class NamespaceCatalog(object):
 
     @docval({'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
             {'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the spec for'},
-            returns="the specification for writing the given object type to HDF5 ", rtype='Spec')
+            returns="a tuple with the type hierarchy", rtype=tuple)
     def get_hierarchy(self, **kwargs):
         '''
         Get the type hierarchy for a given data_type in a given namespace
@@ -224,22 +226,28 @@ class NamespaceCatalog(object):
         return os.path.join(os.path.dirname(ns_path), spec_path)
 
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
-            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True})
+            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
+            returns='a dictionary describing the dependencies of loaded namespaces', rtype=dict)
     def load_namespaces(self, **kwargs):
         namespace_path, resolve = getargs('namespace_path', 'resolve', kwargs)
         # load namespace definition from file
         if not os.path.exists(namespace_path):
             raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
+        ret = self.__loaded_ns_files.get(namespace_path)
+        if ret is None:
+            ret = dict()
+        else:
+            return ret
         with open(namespace_path, 'r') as stream:
             d = yaml.safe_load(stream)
             namespaces = d.get('namespaces')
             if namespaces == None:
                 raise ValueError("no 'namespaces' found in %s" % namespace_path)
         types_key = self.__spec_namespace_cls.types_key()
-        ret = dict()
         # now load specs into namespace
         for ns in namespaces:
             catalog = SpecCatalog()
+            included_types = dict()
             for s in ns['schema']:
                 if 'source' in s:
                     # read specs from file
@@ -248,8 +256,6 @@ class NamespaceCatalog(object):
                     if types_key in s:
                         dtypes = set(s[types_key])
                     ndts = self.__load_spec_file(spec_file, catalog, dtypes=dtypes, resolve=resolve)
-                    #for ndt, spec in ndts:
-                    #    catalog.auto_register(spec, spec_file)
                 elif 'namespace' in s:
                     # load specs from namespace
                     try:
@@ -263,9 +269,12 @@ class NamespaceCatalog(object):
                     for ndt in types:
                         spec = inc_ns.get_spec(ndt)
                         spec_file = inc_ns.catalog.get_spec_source_file(ndt)
-                        catalog.auto_register(spec, spec_file)
+                        catalog.register_spec(spec, spec_file)
+                    included_types[s['namespace']] = tuple(types)
+            ret[ns['name']] = included_types
             # construct namespace
             self.add_namespace(ns['name'], self.__spec_namespace_cls.build_namespace(**ns, catalog=catalog))
+        self.__loaded_ns_files[namespace_path] = ret
         return ret
 
 

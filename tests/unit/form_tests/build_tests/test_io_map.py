@@ -3,7 +3,7 @@ import unittest
 from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
 from form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap
 from form import Container
-from form.utils import docval, getargs
+from form.utils import docval, getargs, get_docval
 
 CORE_NAMESPACE = 'core'
 
@@ -129,6 +129,52 @@ class TestTypeMap(unittest.TestCase):
         self.assertIs(mapper.spec, self.bar_spec)
         self.assertIsInstance(mapper, MyMap)
 
+class TestDynamicContainer(unittest.TestCase):
+
+    def setUp(self):
+        self.bar_spec = GroupSpec('A test group specification with a data type',
+                                 data_type_def='Bar',
+                                 datasets=[DatasetSpec('an example dataset', 'int', name='data',
+                                                attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
+                                 attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
+        self.spec_catalog = SpecCatalog()
+        self.spec_catalog.register_spec(self.bar_spec, 'test.yaml')
+        self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
+        self.namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
+        self.namespace_catalog.add_namespace(CORE_NAMESPACE, self.namespace)
+        self.type_map = TypeMap(self.namespace_catalog)
+        self.type_map.register_container_type(CORE_NAMESPACE, 'Bar', Bar)
+        self.type_map.register_map(Bar, ObjectMapper)
+        self.manager = BuildManager(self.type_map)
+        self.mapper = ObjectMapper(self.bar_spec)
+
+    def test_dynamic_container_creation(self):
+        baz_spec = GroupSpec('A test extension with no Container class', data_type_def='Baz', data_type_inc=self.bar_spec,
+                             attributes=[AttributeSpec('attr3', 'float', 'an example float attribute'),
+                                         AttributeSpec('attr4', 'float', 'another example float attribute')])
+        self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
+        cls = self.type_map.create_container_cls(CORE_NAMESPACE, 'Baz')
+        expected_args = {'name', 'data', 'attr1', 'attr2', 'attr3', 'attr4'}
+        received_args = set(map(lambda x: x['name'], get_docval(cls.__init__)))
+        self.assertSetEqual(expected_args, received_args)
+        self.assertEqual(cls.__name__, 'Baz')
+        self.assertTrue(issubclass(cls, Bar))
+
+    def test_dynamic_container_constructor(self):
+        baz_spec = GroupSpec('A test extension with no Container class', data_type_def='Baz', data_type_inc=self.bar_spec,
+                             attributes=[AttributeSpec('attr3', 'float', 'an example float attribute'),
+                                         AttributeSpec('attr4', 'float', 'another example float attribute')])
+        self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
+        cls = self.type_map.create_container_cls(CORE_NAMESPACE, 'Baz')
+        #TODO: test that constructor works!
+        inst = cls('My Baz', [1,2,3,4], 'string attribute', 1000, attr3=98.6, attr4=1.0)
+        self.assertEqual(inst.name, 'My Baz')
+        self.assertEqual(inst.data, [1,2,3,4])
+        self.assertEqual(inst.attr1, 'string attribute')
+        self.assertEqual(inst.attr2, 1000)
+        self.assertEqual(inst.attr3, 98.6)
+        self.assertEqual(inst.attr4, 1.0)
+
 class TestObjectMapper(unittest.TestCase):
 
     def setUp(self):
@@ -145,7 +191,15 @@ class TestObjectMapper(unittest.TestCase):
         self.mapper = ObjectMapper(self.bar_spec)
 
     def setUpBarSpec(self):
-        raise SkipTest('setUpBarSpec not implemented')
+        raise unittest.SkipTest('setUpBarSpec not implemented')
+
+    def test_default_mapping(self):
+        attr_map = self.mapper.get_attr_names(self.bar_spec)
+        keys = set(attr_map.keys())
+        for key in keys:
+            with self.subTest(key=key):
+                self.assertIs(attr_map[key], self.mapper.get_attr_spec(key))
+                self.assertIs(attr_map[key], self.mapper.get_carg_spec(key))
 
 class TestObjectMapperNested(TestObjectMapper):
 
@@ -172,7 +226,12 @@ class TestObjectMapperNested(TestObjectMapper):
         container = self.mapper.construct(builder, self.manager)
         self.assertEqual(container, expected)
 
-#class TestObjectMapperNoNesting(unittest.TestCase):
+    def test_default_mapping_keys(self):
+        attr_map = self.mapper.get_attr_names(self.bar_spec)
+        keys = set(attr_map.keys())
+        expected = {'attr1', 'data', 'attr2'}
+        self.assertSetEqual(keys, expected)
+
 class TestObjectMapperNoNesting(TestObjectMapper):
 
     def setUpBarSpec(self):
@@ -197,6 +256,28 @@ class TestObjectMapperNoNesting(TestObjectMapper):
         expected = Bar('my_bar', list(range(10)), 'value1', 10)
         container = self.mapper.construct(builder, self.manager)
         self.assertEqual(container, expected)
+
+    def test_default_mapping_keys(self):
+        attr_map = self.mapper.get_attr_names(self.bar_spec)
+        keys = set(attr_map.keys())
+        expected = {'attr1', 'data', 'attr2'}
+        self.assertSetEqual(keys, expected)
+
+class TestObjectMapperContainer(TestObjectMapper):
+
+    def setUpBarSpec(self):
+        self.bar_spec = GroupSpec('A test group specification with a data type',
+                         data_type_def='Bar',
+                         groups=[GroupSpec('an example group', data_type_def='Foo')],
+                         attributes=[AttributeSpec('attr1', 'str', 'an example string attribute'),
+                                     AttributeSpec('attr2', 'int', 'an example integer attribute')])
+
+    def test_default_mapping_keys(self):
+        attr_map = self.mapper.get_attr_names(self.bar_spec)
+        keys = set(attr_map.keys())
+        expected = {'attr1', 'foo', 'attr2'}
+        self.assertSetEqual(keys, expected)
+
 
 if __name__ == '__main__':
     unittest.main()

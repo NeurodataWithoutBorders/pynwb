@@ -93,3 +93,7 @@ manager = get_build_manager()
 io = HDF5IO(filename, manager, mode='w')
 io.write(f)
 io.close()
+io = HDF5IO(filename, manager, mode='r')
+io.read()
+io.close()
+

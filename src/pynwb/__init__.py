@@ -21,6 +21,9 @@ def __get_resources():
     return ret
 
 # a global namespace catalog
+global __NS_CATALOG
+global __TYPE_MAP
+
 __NS_CATALOG = NamespaceCatalog(CORE_NAMESPACE, NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
@@ -30,17 +33,6 @@ def register_namespace(**kwargs):
     name, namespace = getargs('name', 'namespace', kwargs)
     __NS_CATALOG.add_namespace(name, namespace)
 
-@docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
-        is_method=False)
-def load_namespaces(**kwargs):
-    '''Load namespaces from file'''
-    namespace_path = getargs('namespace_path', kwargs)
-    __NS_CATALOG.load_namespaces(namespace_path)
-
-__resources = __get_resources()
-if os.path.exists(__resources['namespace_path']):
-    load_namespaces(__resources['namespace_path'])
-
 from form.build import TypeMap as __TypeMap
 from form.build import ObjectMapper as __ObjectMapper
 def get_type_map():
@@ -49,6 +41,17 @@ def get_type_map():
 
 # a global type map
 __TYPE_MAP = get_type_map()
+
+@docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
+        is_method=False)
+def load_namespaces(**kwargs):
+    '''Load namespaces from file'''
+    namespace_path = getargs('namespace_path', kwargs)
+    __TYPE_MAP.load_namespaces(namespace_path)
+
+__resources = __get_resources()
+if os.path.exists(__resources['namespace_path']):
+    load_namespaces(__resources['namespace_path'])
 
 # added here for convenience to users
 from form.build import BuildManager as __BuildManager
@@ -65,6 +68,10 @@ def get_build_manager(**kwargs):
         {"name": "container_cls", "type": type, "doc": "the class to map to the specified neurodata_type", 'default': None},
         is_method=False)
 def register_class(**kwargs):
+    """Register an NWBContainer class to use for reading and writing a neurodata_type from a specification
+    If container_cls is not specified, returns a decorator for registering an NWBContainer subclass
+    as the class for neurodata_type in namespace.
+    """
     neurodata_type, namespace, container_cls = getargs('neurodata_type', 'namespace', 'container_cls', kwargs)
     def _dec(cls):
         __TYPE_MAP.register_container_type(namespace, neurodata_type, cls)
@@ -90,6 +97,16 @@ def register_map(**kwargs):
         return _dec
     else:
         _dec(mapper_cls)
+
+@docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the spec for'},
+        {'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
+        is_method=False)
+def get_class(**kwargs):
+    """Get the class object of the NWBContainer subclass corresponding to a given neurdata_type.
+    """
+    neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
+    return __TYPE_MAP.create_container_cls(namespace, neurodata_type)
+
 
 from . import io as __io
 from .base import TimeSeries, Module, Interface
