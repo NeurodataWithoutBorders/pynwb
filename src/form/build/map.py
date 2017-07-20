@@ -583,28 +583,6 @@ class TypeMap(object):
         self.__data_types = dict()
         self.__default_mapper_cls = getargs('mapper_cls', kwargs)
 
-    @staticmethod
-    def __get_constructor(base, addl_fields):
-        existing_args = set()
-        docval_args = list()
-        new_args = list()
-        for arg in get_docval(base.__init__):
-            docval_args.append(arg)
-            existing_args.add(arg['name'])
-        for f in addl_fields:
-            if f in existing_args:
-                continue
-            docval_args.append({'name': f, 'type': object, 'doc': 'dynamically created argument', 'default': None})
-            new_args.append(f)
-
-        @docval(*docval_args)
-        def __init__(self, **kwargs):
-            pargs, pkwargs = fmt_docval_args(base.__init__, kwargs)
-            super(type(self), self).__init__(*pargs, **pkwargs)
-            for f in new_args:
-                setattr(self, f, kwargs.get(f,None))
-        return __init__
-
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
             {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True})
     def load_namespaces(self, **kwargs):
@@ -623,6 +601,51 @@ class TypeMap(object):
                     if container_cls is None:
                         container_cls = TypeSource(src_ns, dt)
                     self.register_container_type(new_ns, dt, container_cls)
+
+    _type_map = {
+        'text': str,
+        'float': float,
+        'float64': float,
+        'int': int,
+        'int32': int
+    }
+    @classmethod
+    def __get_type(self, spec):
+        if isinstance(spec, AttributeSpec):
+            return self._type_map.get(spec.dtype)
+        elif isinstance(spec, LinkSpec):
+            return Container
+        else:
+            if not (spec.data_type_inc is None and spec.data_type_inc is None):
+               if spec.name is not None:
+                    return (list, tuple, dict, set)
+               else:
+                    return Container
+            else:
+                return (list, tuple, dict, set)
+
+    @classmethod
+    def __get_constructor(self, base, addl_fields):
+        existing_args = set()
+        docval_args = list()
+        new_args = list()
+        for arg in get_docval(base.__init__):
+            docval_args.append(arg)
+            existing_args.add(arg['name'])
+        for f, field_spec in addl_fields.items():
+            if f in existing_args:
+                continue
+            dtype = self.__get_type(field_spec)
+            docval_args.append({'name': f, 'type': dtype, 'doc': field_spec.doc, 'default': None})
+            new_args.append(f)
+
+        @docval(*docval_args)
+        def __init__(self, **kwargs):
+            pargs, pkwargs = fmt_docval_args(base.__init__, kwargs)
+            super(type(self), self).__init__(*pargs, **pkwargs)
+            for f in new_args:
+                setattr(self, f, kwargs.get(f,None))
+        return __init__
 
     @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type"},
             {"name": "data_type", "type": str, "doc": "the data type to create a Container class for"},
@@ -645,10 +668,11 @@ class TypeMap(object):
             bases = (parent_cls,)
             spec = self.__ns_catalog.get_spec(namespace, data_type)
             attr_names = self.__default_mapper_cls.get_attr_names(spec)
-            fields = list()
-            for k in attr_names:
-                if not spec.is_inherited_spec(attr_names[k]):
-                    fields.append(k)
+            fields = dict()
+            for k, field_spec in attr_names.items():
+                if not spec.is_inherited_spec(field_spec):
+                    #fields.append(k)
+                    fields[k] = field_spec
             d = {'__init__': self.__get_constructor(parent_cls, fields)}
             cls = type(name, bases, d)
             self.register_container_type(namespace, data_type, cls)
