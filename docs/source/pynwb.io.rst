@@ -7,6 +7,7 @@ Submodules
 .. toctree::
 
    pynwb.io.base
+   pynwb.io.epoch
    pynwb.io.file
 
 Module contents
