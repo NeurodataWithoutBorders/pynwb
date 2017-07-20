@@ -15,7 +15,7 @@ extension will be written once, and read or used multiple times. Here, we provid
 
 
 The following block of code demonstrates how to create a new namespace, and then add a new `neurodata_type` to this namespace. Finally,
-it calls :py:meth:`pynwb.spec.NWBNamespaceBuilder.export` to save the extensions to disk for downstream use.
+it calls :py:meth:`~form.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
 
 .. code-block:: python
 
@@ -24,7 +24,7 @@ it calls :py:meth:`pynwb.spec.NWBNamespaceBuilder.export` to save the extensions
     ns_path = "mylab.namespace.yaml"
     ext_source = "mylab.extensions.yaml"
 
-    ns_builder = NWBNamespaceBuilder('Extension for us in my Lab', "mylab")
+    ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "mylab")
     ext = NWBGroupSpec('A custom ElectricalSeries for my lab',
                        attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
                        neurodata_type_inc='ElectricalSeries',
@@ -33,20 +33,22 @@ it calls :py:meth:`pynwb.spec.NWBNamespaceBuilder.export` to save the extensions
     ns_builder.add_spec(ext_source, ext)
     ns_builder.export(ns_path)
 
-Running this block will produce two files. The first file shown below is the
+Running this block will produce two YAML files.
 
-The first file is the namespace file.
+The first file contains the specification of the namespace.
+
 .. code-block:: yaml
 
     # mylab.namespace.yaml
     namespaces:
-    - doc: Extension for us in my Lab
+    - doc: Extension for use in my Lab
       name: mylab
       schema:
       - namespace: core
       - source: fake_extension.yaml
 
-And the second file is the file containing the details on new types.
+The second file contains the details on newly defined types.
+
 .. code-block:: yaml
 
     # mylab.extensions.yaml
@@ -60,8 +62,52 @@ And the second file is the file containing the details on new types.
       neurodata_type_inc: ElectricalSeries
 
 
+Using existing extensions
+-----------------------------------------------------
+
+After an extension has been created, it can be used by downstream codes for reading and writing data.
+There are two main mechanisms for reading and writing extension data with PyNWB.
+The first involves defining new :py:class:`~pynwb.core.NWBContainer` classes that are then mapped to the neurodata types in the extension.
+
+.. code-block:: python
+
+    from pynwb import register_class, load_namespaces
+    from pynwb.ecephys import ElectricalSeries
+
+    ns_path = "mylab.namespace.yaml"
+    load_namespaces(ns_path)
+
+    @register_class('mylab', 'TetrodeSeries')
+    class TetrodeSeries(ElectricalSeries):
+        __nwbfields__ = ('tetrode_id',)
+
+        def __init__(self, ...):
+            ...
+
+.. note::
+
+    Although it is not used here, it is encouraged to use the :py:func:`~form.utils.docval` decorator for documenting constructors, methods, and functions.
+
+When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer` subclasses, you should defining the class field ``__nwbfields__``. This will
+tell PyNWB the properties of the :py:class:`~pynwb.core.NWBContainer` extension.
+
+If you do not want to write additional code to read your extensions, PyNWB is able to dynamically create an :py:class:`~pynwb.core.NWBContainer` subclass for use within the PyNWB API.
+Dynamically created classes can be inspected using the built-in :py:func:`.help` or the :py:mod:`inspect` module.
+
+.. code-block:: python
+
+    from pynwb import get_class, load_namespaces
+
+    ns_path = "mylab.namespace.yaml"
+    load_namespaces(ns_path)
+
+    TetrodeSeries = get_class('TetrodeSeries', 'mylab')
 
 
+.. note::
 
-:ref:`useextension`
+    When defining your own :py:class:`~pynwb.core.NWBContainer`, the subclass name does not need to be the same as the extension type name. However,
+    it is encouraged to keep class and extension names the same for the purposes of readibility.
+
+
 
