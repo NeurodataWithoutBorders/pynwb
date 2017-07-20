@@ -201,6 +201,20 @@ to implement and register a custom :py:class:`~form.build.map.ObjectMapper`. :py
         ...
     register_map(MyExtensionContainer, MyExtensionMapper)
 
+
+If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your exentsion specification, a dynamically created class is created by default.
+To use the dynamic class, you will need to retrieve the class object using the function :py:func:`~pynwb.get_class`. Once you have retrieved the class object, you can
+use it just like you would a statically defined class.
+
+.. code-block:: python
+
+    from pynwb import get_class
+    MyExtensionContainer = get_class('my_namespace', 'MyExtension')
+    my_ext_inst = MyExtensionContainer(...)
+
+
+If using iPython, you can access documentation for the class's constructor using the help command.
+
 .. _write_nwbfile:
 
 Write an NWBFile
@@ -448,14 +462,6 @@ Finally, to generate the HTML version of the docs run:
     and ``--custom_release_notes format_release_notes.rst`` of the ``init_sphinx_extension_doc.py`` script are useful
     to automatically generate the basic setup for those files so that one can easily start to add content directly
     without having to worry about the additional setup.
-
-
-
-
-
-
-
-
 
 
 
