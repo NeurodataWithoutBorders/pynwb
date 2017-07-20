@@ -139,6 +139,7 @@ class NamespaceCatalog(object):
         # keep track of all spec objects ever loaded, so we don't have
         # multiple object instances of a spec
         self.__loaded_specs = dict()
+        self.__loaded_ns_files = dict()
 
     @property
     def dataset_spec_cls(self):
@@ -231,13 +232,17 @@ class NamespaceCatalog(object):
         # load namespace definition from file
         if not os.path.exists(namespace_path):
             raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
+        ret = self.__loaded_ns_files.get(namespace_path)
+        if ret is None:
+            ret = list()
+        else:
+            return ret
         with open(namespace_path, 'r') as stream:
             d = yaml.safe_load(stream)
             namespaces = d.get('namespaces')
             if namespaces == None:
                 raise ValueError("no 'namespaces' found in %s" % namespace_path)
         types_key = self.__spec_namespace_cls.types_key()
-        ret = dict()
         # now load specs into namespace
         for ns in namespaces:
             catalog = SpecCatalog()
@@ -264,9 +269,12 @@ class NamespaceCatalog(object):
                     for ndt in types:
                         spec = inc_ns.get_spec(ndt)
                         spec_file = inc_ns.catalog.get_spec_source_file(ndt)
-                        catalog.auto_register(spec, spec_file)
+                        catalog.register_spec(spec, spec_file)
             # construct namespace
             self.add_namespace(ns['name'], self.__spec_namespace_cls.build_namespace(**ns, catalog=catalog))
+            ret.append(ns['name'])
+        ret = tuple(ret)
+        self.__loaded_ns_files[namespace_path] = ret
         return ret
 
 
