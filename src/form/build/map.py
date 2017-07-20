@@ -547,6 +547,28 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             ret = container.name
         return ret
 
+
+class TypeSource(object):
+    '''A class to indicate the source of a data_type in a namespace.
+
+    This class should only be used by TypeMap
+    '''
+
+    @docval({"name": "namespace", "type": str, "doc": "the namespace the from, which the data_type originated"},
+            {"name": "data_type", "type": str, "doc": "the name of the type"})
+    def __init__(self, **kwargs):
+        namespace, data_type = getargs('namespace', 'data_type', kwargs)
+        self.__namespace = namespace
+        self.__data_type = data_type
+
+    @property
+    def namespace(self):
+        return self.__namespace
+
+    @property
+    def data_type(self):
+        return self.__data_type
+
 class TypeMap(object):
 
     @docval({'name': 'namespaces', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use'},
@@ -583,6 +605,25 @@ class TypeMap(object):
                 setattr(self, f, kwargs.get(f,None))
         return __init__
 
+    @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
+            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True})
+    def load_namespaces(self, **kwargs):
+        '''Load namespaces from a namespace file.
+
+        This method will call load_namespaces on the NamespaceCatalog used to construct this TypeMap. Additionally,
+        it will process the return value to keep track of what types were included in the loaded namespaces. Calling
+        load_namespaces here has the advantage of being able to keep track of type dependencies across namespaces.
+        '''
+        namespace_path, resolve = getargs('namespace_path', 'resolve', kwargs)
+        deps = self.__ns_catalog.load_namespaces(namespace_path, resolve)
+        for new_ns, ns_deps in deps.items():
+            for src_ns, types in ns_deps.items():
+                for dt in types:
+                    container_cls = self.__get_container_cls(src_ns, dt)
+                    if container_cls is None:
+                        container_cls = TypeSource(src_ns, dt)
+                    self.register_container_type(new_ns, dt, container_cls)
+
     @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type"},
             {"name": "data_type", "type": str, "doc": "the data type to create a Container class for"},
             returns='a dynamically created class based on the spec of the data type', rtype=type)
@@ -598,6 +639,7 @@ class TypeMap(object):
                 if parent_cls is not None:
                     break
             if parent_cls is None:
+                print(list(self.__container_types.keys()))
                 raise ValueError('No Container class found for parents of %s:%s %s' % (namespace, data_type, dt_hier))
             name = data_type
             bases = (parent_cls,)
@@ -617,9 +659,13 @@ class TypeMap(object):
             return None
         if data_type not in self.__container_types[namespace]:
             return None
-        return self.__container_types[namespace][data_type]
+        ret = self.__container_types[namespace][data_type]
+        if isinstance(ret, TypeSource):
+            ret = self.__container_types[ret.namespace][ret.data_type]
+            self.register_container_type(namespace, data_type, ret)
+        return ret
 
-    def __get_data_type(self, builder):
+    def __get_builder_dt(self, builder):
         ret = builder.get(self.__ns_catalog.group_spec_cls.type_key())
         if ret is None:
             raise ValueError("builder '%s' is does not have a data_type" % builder.name)
@@ -632,7 +678,7 @@ class TypeMap(object):
     def get_cls(self, **kwargs):
         ''' Get the class object for the given Builder '''
         builder = getargs('builder', kwargs)
-        data_type = self.__get_data_type(builder)
+        data_type = self.__get_builder_dt(builder)
         namespace = self.__get_namespace(builder)
         return self.__get_container_cls(namespace, data_type)
 
@@ -654,9 +700,9 @@ class TypeMap(object):
         if subspec is None:
             # builder was generated from something with a data_type and a wildcard name
             if isinstance(builder, LinkBuilder):
-                dt = self.__get_data_type(builder.builder)
+                dt = self.__get_builder_dt(builder.builder)
             else:
-                dt = self.__get_data_type(builder)
+                dt = self.__get_builder_dt(builder)
             if dt is not None:
                 # TODO: this returns None when using subclasses
                 ns = self.__get_namespace(builder)
@@ -669,8 +715,11 @@ class TypeMap(object):
 
     def __get_container_ns_dt(self, obj):
         container_cls = obj.__class__
-        namespace, data_type = self.__data_types.get(container_cls, (None, None))
+        namespace, data_type = self.__get_container_cls_dt(container_cls)
         return namespace, data_type
+
+    def __get_container_cls_dt(self, cls):
+        return self.__data_types.get(cls, (None, None))
 
     @docval({'name': 'obj', 'type': (Container, Builder), 'doc': 'the object to get the ObjectMapper for'},
             returns='the ObjectMapper to use for mapping the given object', rtype='ObjectMapper')
@@ -684,7 +733,7 @@ class TypeMap(object):
             if namespace is None:
                 raise ValueError("class %s does not mapped to a data_type" % container_cls)
         else:
-            data_type = self.__get_data_type(obj)
+            data_type = self.__get_builder_dt(obj)
             namespace = self.__get_namespace(obj)
             container_cls = self.get_cls(obj)
         # now build the ObjectMapper class
@@ -704,7 +753,7 @@ class TypeMap(object):
 
     @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type to map the class to"},
             {"name": "data_type", "type": str, "doc": "the data_type to mape the class to"},
-            {"name": "container_cls", "type": type, "doc": "the class to map to the specified data_type"})
+            {"name": "container_cls", "type": (TypeSource, type), "doc": "the class to map to the specified data_type"})
     def register_container_type(self, **kwargs):
         ''' Map a container class to a data_type '''
         namespace, data_type, container_cls = getargs('namespace', 'data_type', 'container_cls', kwargs)
@@ -717,7 +766,7 @@ class TypeMap(object):
     def register_map(self, **kwargs):
         ''' Map a container class to an ObjectMapper class '''
         container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
-        if container_cls  not in self.__data_types:
+        if self.__get_container_cls_dt(container_cls) == (None, None):
             raise ValueError('cannot register map for type %s - no data_type found' % container_cls)
         self.__mapper_cls[container_cls] = mapper_cls
 
