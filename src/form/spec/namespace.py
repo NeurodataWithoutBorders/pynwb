@@ -226,7 +226,8 @@ class NamespaceCatalog(object):
         return os.path.join(os.path.dirname(ns_path), spec_path)
 
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
-            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True})
+            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
+            returns='a dictionary describing the dependencies of loaded namespaces', rtype=dict)
     def load_namespaces(self, **kwargs):
         namespace_path, resolve = getargs('namespace_path', 'resolve', kwargs)
         # load namespace definition from file
@@ -234,7 +235,7 @@ class NamespaceCatalog(object):
             raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
         ret = self.__loaded_ns_files.get(namespace_path)
         if ret is None:
-            ret = list()
+            ret = dict()
         else:
             return ret
         with open(namespace_path, 'r') as stream:
@@ -246,6 +247,7 @@ class NamespaceCatalog(object):
         # now load specs into namespace
         for ns in namespaces:
             catalog = SpecCatalog()
+            included_types = dict()
             for s in ns['schema']:
                 if 'source' in s:
                     # read specs from file
@@ -254,8 +256,6 @@ class NamespaceCatalog(object):
                     if types_key in s:
                         dtypes = set(s[types_key])
                     ndts = self.__load_spec_file(spec_file, catalog, dtypes=dtypes, resolve=resolve)
-                    #for ndt, spec in ndts:
-                    #    catalog.auto_register(spec, spec_file)
                 elif 'namespace' in s:
                     # load specs from namespace
                     try:
@@ -270,10 +270,10 @@ class NamespaceCatalog(object):
                         spec = inc_ns.get_spec(ndt)
                         spec_file = inc_ns.catalog.get_spec_source_file(ndt)
                         catalog.register_spec(spec, spec_file)
+                    included_types[s['namespace']] = tuple(types)
+            ret[ns['name']] = included_types
             # construct namespace
             self.add_namespace(ns['name'], self.__spec_namespace_cls.build_namespace(**ns, catalog=catalog))
-            ret.append(ns['name'])
-        ret = tuple(ret)
         self.__loaded_ns_files[namespace_path] = ret
         return ret
 
