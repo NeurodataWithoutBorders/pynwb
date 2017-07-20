@@ -16,6 +16,7 @@ Submodules
 .. toctree::
 
    form.container
+   form.monitor
    form.utils
 
 Module contents
