@@ -15,6 +15,7 @@ PyNWB is a Python package for working with NWB files.
    getting_started
    overview
    example
+   extension
    api_docs
    legal
 
