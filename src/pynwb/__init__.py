@@ -5,11 +5,11 @@ import os.path
 
 CORE_NAMESPACE = 'core'
 
-from form.spec import NamespaceCatalog, SpecNamespace, AttributeSpec
+from form.spec import NamespaceCatalog
 from form.utils import docval, getargs
 
 from .core import NWBContainer
-from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
+from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
 
 
 __core_ns_file_name = 'nwb.namespace.yaml'
@@ -25,13 +25,6 @@ global __NS_CATALOG
 global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(CORE_NAMESPACE, NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-
-#@docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
-#        {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'},
-#        is_method=False)
-#def register_namespace(**kwargs):
-#    name, namespace = getargs('name', 'namespace', kwargs)
-#    __NS_CATALOG.add_namespace(name, namespace)
 
 from form.build import TypeMap as __TypeMap
 from form.build import ObjectMapper as __ObjectMapper
