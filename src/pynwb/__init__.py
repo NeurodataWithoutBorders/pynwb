@@ -26,12 +26,12 @@ global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(CORE_NAMESPACE, NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-@docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
-        {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'},
-        is_method=False)
-def register_namespace(**kwargs):
-    name, namespace = getargs('name', 'namespace', kwargs)
-    __NS_CATALOG.add_namespace(name, namespace)
+#@docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
+#        {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'},
+#        is_method=False)
+#def register_namespace(**kwargs):
+#    name, namespace = getargs('name', 'namespace', kwargs)
+#    __NS_CATALOG.add_namespace(name, namespace)
 
 from form.build import TypeMap as __TypeMap
 from form.build import ObjectMapper as __ObjectMapper
@@ -98,8 +98,8 @@ def register_map(**kwargs):
     else:
         _dec(mapper_cls)
 
-@docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the spec for'},
-        {'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
+@docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the NWBConatiner class for'},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace the neurodata_type is defined in'},
         is_method=False)
 def get_class(**kwargs):
     """Get the class object of the NWBContainer subclass corresponding to a given neurdata_type.
