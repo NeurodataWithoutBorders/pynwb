@@ -189,8 +189,8 @@ def docval(*validator, **options):
 
     The decorated method must take ``self`` and ``**kwargs`` as arguments.
 
-    When using this decorator, the functions :py:func:`~pynwb.utils.getargs` and
-    :py:func:`~pynwb.utils.popargs` can be used for easily extracting arguments from
+    When using this decorator, the functions :py:func:`getargs` and
+    :py:func:`popargs` can be used for easily extracting arguments from
     kwargs.
 
     The following code example demonstrates the use of this decorator:
@@ -206,7 +206,6 @@ def docval(*validator, **options):
            ...
 
     :param enforce_type: Enforce types of input parameters (Default=True)
-    :param enforce_ndim: Enforce the number of dimensions of input arrays (Default=True)
     :param returns: String describing the return values
     :param rtype: String describing the data type of the return values
     :param is_method: True if this is decorating an instance or class method, False otherwise (Default=True)
@@ -214,7 +213,8 @@ def docval(*validator, **options):
     :param options: additional options for documenting and validating method parameters
     '''
     enforce_type = options.pop('enforce_type', True)
-    enforce_ndim = options.pop('enforce_ndim', True)
+    #:param enforce_ndim: Enforce the number of dimensions of input arrays (Default=True)
+    #enforce_ndim = options.pop('enforce_ndim', True)
     returns = options.pop('returns', None)
     rtype = options.pop('rtype', None)
     is_method = options.pop('is_method', True)
