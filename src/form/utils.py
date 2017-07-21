@@ -209,12 +209,12 @@ def docval(*validator, **options):
     :param returns: String describing the return values
     :param rtype: String describing the data type of the return values
     :param is_method: True if this is decorating an instance or class method, False otherwise (Default=True)
+    :param enforce_ndim: Enforce the number of dimensions of input arrays (Default=True)
     :param validator: :py:func:`dict` objects specifying the method parameters
     :param options: additional options for documenting and validating method parameters
     '''
     enforce_type = options.pop('enforce_type', True)
-    #:param enforce_ndim: Enforce the number of dimensions of input arrays (Default=True)
-    #enforce_ndim = options.pop('enforce_ndim', True)
+    enforce_ndim = options.pop('enforce_ndim', True)
     returns = options.pop('returns', None)
     rtype = options.pop('rtype', None)
     is_method = options.pop('is_method', True)
@@ -225,7 +225,7 @@ def docval(*validator, **options):
         if is_method:
             def func_call(*args, **kwargs):
                 self = args[0]
-                parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type)
+                parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type, enforce_ndim=enforce_ndim)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     raise TypeError(', '.join(parse_err))
