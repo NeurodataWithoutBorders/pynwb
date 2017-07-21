@@ -1,7 +1,7 @@
-.. _extensions_tutorial:
+.. _tutorial_extensions:
 
-Extending NWB
-==============
+Extensions
+=========================
 
 The NWB-N format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
 PyNWB API.
@@ -62,7 +62,7 @@ The second file contains the details on newly defined types.
       neurodata_type_inc: ElectricalSeries
 
 
-Using existing extensions
+Using extensions
 -----------------------------------------------------
 
 After an extension has been created, it can be used by downstream codes for reading and writing data.
