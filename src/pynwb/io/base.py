@@ -10,6 +10,7 @@ class ModuleMap(ObjectMapper):
         super(ModuleMap, self).__init__(spec)
         interfaces_spec = self.spec.get_neurodata_type('Interface')
         self.map_spec('interfaces', interfaces_spec)
+        self.map_spec('interface_names', self.spec.get_attribute('interfaces'))
 
     @const_arg('name')
     def name(self, builder):

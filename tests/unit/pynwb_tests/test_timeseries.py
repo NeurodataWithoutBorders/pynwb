@@ -14,11 +14,13 @@ class TimeSeriesConstructor(unittest.TestCase):
 
     def test_init_datalink_set(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
-        self.assertIsNone(ts.data_link)
+        self.assertIsInstance(ts.data_link, set)
+        self.assertEqual(len(ts.data_link), 0)
 
     def test_init_timestampslink_set(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
-        self.assertIsNone(ts.timestamp_link)
+        self.assertIsInstance(ts.timestamp_link, set)
+        self.assertEqual(len(ts.timestamp_link), 0)
 
     def test_init_no_parent(self):
         parent = NWBContainer()

@@ -40,6 +40,7 @@ class NWBFile(NWBContainer):
                      'optogenetic_sites',
                      'modules',
                      'epochs',
+                     'epoch_tags',
                      'devices')
 
     __nwb_version = '1.0.6'
@@ -123,6 +124,13 @@ class NWBFile(NWBContainer):
     @property
     def epochs(self):
         return self.__epochs
+
+    @property
+    def epoch_tags(self):
+        ret = set()
+        for ep in self.__epochs:
+            ret.update(ep.tags)
+        return sorted(ret)
 
     @property
     def modules(self):

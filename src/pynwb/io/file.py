@@ -16,8 +16,10 @@ class NWBFileMap(ObjectMapper):
         stimulus_ts_spec = stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries')
         self.map_spec('stimulus_templates', stimulus_ts_spec)
 
-        epochs_spec = self.spec.get_group('epochs').get_neurodata_type('Epoch')
-        self.map_spec('epochs', epochs_spec)
+
+        epochs_spec = self.spec.get_group('epochs')
+        self.map_spec('epochs', epochs_spec.get_neurodata_type('Epoch'))
+        self.map_spec('epoch_tags', epochs_spec.get_attribute('tags'))
 
         general_spec = self.spec.get_group('general')
         self.map_spec('ic_electrodes', general_spec.get_group('intracellular_ephys').get_neurodata_type('IntracellularElectrode'))
@@ -27,6 +29,7 @@ class NWBFileMap(ObjectMapper):
 
         self.map_spec('modules', self.spec.get_group('processing').get_neurodata_type('Module'))
         self.unmap(general_spec.get_dataset('stimulus'))
+
 
     @const_arg('file_name')
     def name(self, h5group):

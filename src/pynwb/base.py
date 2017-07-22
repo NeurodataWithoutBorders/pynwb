@@ -36,11 +36,12 @@ class Interface(NWBContainer):
 
     @property
     def name(self):
-        name_attr_name = '_%s__name' % str(self.__class__.__name__).lstrip('_')
-        if hasattr(self, name_attr_name):
-            return getattr(self, name_attr_name)
-        else:
-            return self.__class__.__name__
+        #name_attr_name = '_%s__name' % str(self.__class__.__name__).lstrip('_')
+        #if hasattr(self, name_attr_name):
+        #    return getattr(self, name_attr_name)
+        #else:
+        #    return self.__class__.__name__
+        return self.__class__.__name__
         return None
 
     @property
@@ -62,6 +63,7 @@ class Module(NWBContainer):
     __nwbfields__ = ('name',
                      'description',
                      'interfaces',
+                     'interface_names',
                      'neurodata_type')
 
     __neurodata_type = "Module"
@@ -84,6 +86,10 @@ class Module(NWBContainer):
     @property
     def name(self):
         return self.__name
+
+    @property
+    def interface_names(self):
+        return tuple(i.name for i in self.__interfaces)
 
     @docval({'name': 'interface', 'type': Interface, 'doc': 'the Interface to add to this Module'})
     def add_interface(self, **kwargs):
@@ -234,7 +240,7 @@ class TimeSeries(NWBContainer):
         return self.__get_links('timestamp_link')
 
     def __get_links(self, links):
-        ret = self.fields.get(links)
+        ret = self.fields.get(links, list())
         if ret is not None:
             ret = set(ret)
         return ret

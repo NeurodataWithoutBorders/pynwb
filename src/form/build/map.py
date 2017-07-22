@@ -378,7 +378,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
 
             if attr_value is None:
                 if spec.required:
-                    raise Warning("missing required attribute '%s'" % spec.name)
+                    raise Warning("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
                 continue
             builder.set_attribute(spec.name, attr_value)
 
@@ -395,7 +395,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             #TODO: add check for required datasets
             if attr_value is None:
                 if spec.required:
-                    raise Warning("missing required attribute '%s'" % spec.name)
+                    raise Warning("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value, dtype=spec.dtype)
@@ -630,15 +630,19 @@ class TypeMap(object):
         docval_args = list()
         new_args = list()
         for arg in get_docval(base.__init__):
-            docval_args.append(arg)
             existing_args.add(arg['name'])
-        for f, field_spec in addl_fields.items():
-            if f in existing_args:
+            if arg['name'] in addl_fields:
                 continue
+            docval_args.append(arg)
+        for f, field_spec in addl_fields.items():
             dtype = self.__get_type(field_spec)
-            docval_args.append({'name': f, 'type': dtype, 'doc': field_spec.doc, 'default': None})
-            new_args.append(f)
-
+            docval_arg = {'name': f, 'type': dtype, 'doc': field_spec.doc}
+            if not field_spec.required:
+                docval_arg['default'] = field_spec.default_value
+            docval_args.append(docval_arg)
+            if f not in existing_args:
+                new_args.append(f)
+        # TODO: set __nwbfields__
         @docval(*docval_args)
         def __init__(self, **kwargs):
             pargs, pkwargs = fmt_docval_args(base.__init__, kwargs)
