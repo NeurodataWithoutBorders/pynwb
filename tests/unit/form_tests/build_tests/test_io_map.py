@@ -155,6 +155,22 @@ class TestDynamicContainer(unittest.TestCase):
         self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
         cls = self.type_map.create_container_cls(CORE_NAMESPACE, 'Baz')
         expected_args = {'name', 'data', 'attr1', 'attr2', 'attr3', 'attr4'}
+        received_args = set()
+        for x in get_docval(cls.__init__):
+            received_args.add(x['name'])
+            with self.subTest(name=x['name']):
+                self.assertNotIn('default', x)
+        self.assertSetEqual(expected_args, received_args)
+        self.assertEqual(cls.__name__, 'Baz')
+        self.assertTrue(issubclass(cls, Bar))
+
+    def test_dynamic_container_creation_defaults(self):
+        baz_spec = GroupSpec('A test extension with no Container class', data_type_def='Baz', data_type_inc=self.bar_spec,
+                             attributes=[AttributeSpec('attr3', 'float', 'an example float attribute'),
+                                         AttributeSpec('attr4', 'float', 'another example float attribute')])
+        self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
+        cls = self.type_map.create_container_cls(CORE_NAMESPACE, 'Baz')
+        expected_args = {'name', 'data', 'attr1', 'attr2', 'attr3', 'attr4'}
         received_args = set(map(lambda x: x['name'], get_docval(cls.__init__)))
         self.assertSetEqual(expected_args, received_args)
         self.assertEqual(cls.__name__, 'Baz')
