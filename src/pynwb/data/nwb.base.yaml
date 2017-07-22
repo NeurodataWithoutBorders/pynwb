@@ -20,6 +20,7 @@ groups:
     name: missing_fields
     shape:
     - null
+    required: False
   - dims:
     - num_dlinks
     doc: 'A sorted list of the paths of all TimeSeries that share a link to the same
@@ -39,6 +40,7 @@ groups:
       primary description field is populated with a computer-readable string.
     dtype: text
     name: comments
+    required: False
   - doc: Name of TimeSeries or Modules that serve as the source for the data contained
       here. It can also be the name of a device, for stimulus or acquisition data
     dtype: text
@@ -46,6 +48,7 @@ groups:
   - doc: Description of TimeSeries
     dtype: text
     name: description
+    required: False
   - doc: Value is 'General time series object'
     dtype: text
     name: help
@@ -58,6 +61,7 @@ groups:
     name: extern_fields
     shape:
     - null
+    required: False
   datasets:
   - attributes:
     - doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
