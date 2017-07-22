@@ -89,6 +89,8 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
                                 attributes={'ancestry': 'TimeSeries',
                                             'source': 'a hypothetical source',
                                             'namespace': base.CORE_NAMESPACE,
+                                            'data_link': list(),
+                                            'timestamp_link': list(),
                                             'neurodata_type': 'ElectricalSeries',
                                             'help': 'Stores acquired voltage data from extracellular recordings'},
                                 datasets={'data': DatasetBuilder('data', data,

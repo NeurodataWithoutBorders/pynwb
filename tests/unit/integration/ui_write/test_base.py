@@ -21,6 +21,8 @@ class TestTimeSeriesIO(base.TestNWBContainerIO):
                                             'source': 'example_source',
                                             'namespace': base.CORE_NAMESPACE,
                                             'neurodata_type': 'TimeSeries',
+                                            'data_link': list(),
+                                            'timestamp_link': list(),
                                             'help': 'General time series object'},
                                 datasets={'data': DatasetBuilder('data', list(range(100,200,10)),
                                                                  attributes={'unit': 'SIunit',
