@@ -70,12 +70,45 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     ret = dict()
     errors = list()
     argsi = 0
-    for arg in validator:
-        argname = arg['name']
-        # check if this is a positional argument or not
-        #
-        # this is a keyword arg
-        if 'default' in arg:
+    try:
+        it = iter(validator)
+        arg = next(it)
+        #process positional arguments
+        while True:
+            #
+            if 'default' in arg:
+                break
+            argname = arg['name']
+            argval_set = False
+            if argname in kwargs:
+                argval = kwargs[argname]
+                argval_set = True
+            elif argsi < len(args):
+                argval = args[argsi]
+                argval_set = True
+            if not argval_set:
+                errors.append("missing argument '%s'" % argname)
+            else:
+                if argname in ret:
+                    errors.append("'got multiple arguments for '%s" % argname)
+                else:
+                    if enforce_type:
+                        if not __type_okay(argval, arg['type']):
+                            fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
+                            errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+                    ret[argname] = argval
+
+            argsi += 1
+            arg = next(it)
+#        if argsi < len(args):
+#            print('argsi:', argsi, '  len(args:', len(args))
+#            for i in range(argsi, len(args)):
+#                errors.append("missing argument '%s'" % argname)
+#                next(it)
+
+        #process keyword arguments
+        while True:
+            argname = arg['name']
             if argname in kwargs:
                 ret[argname] = kwargs[argname]
             elif len(args) > argsi:
@@ -88,29 +121,27 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
                 if not __type_okay(argval, arg['type'], arg['default'] is None):
                     fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                     errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
-        # this is a positional arg
-        else:
-            # check to make sure all positional
-            # arguments were passed
-            if argsi >= len(args):
-                errors.append("missing argument '%s'" % argname)
-            else:
-                ret[argname] = args[argsi]
-                if enforce_type:
-                    argval = ret[argname]
-                    if not __type_okay(argval, arg['type']):
-                        fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
-                        errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
-            argsi += 1
-        # Check that the number of dimensions of array arguments are Ok
-        if enforce_ndim and 'ndim' in arg and arg['ndim'] is not None:
-            argval = ret[argname]
-            arg_shape = ShapeValidator.get_data_shape(data=argval,
-                                                      strict_no_data_load=True)
-            if arg_shape is not None:  # Ignore in case we cannot determine the shape of the input array
-                if len(arg_shape) != arg['ndim']:
-                    fmt_val = (argname, len(arg_shape), arg['ndim'])
-                    errors.append("incorrect number of dimensions for array %s (got %s, expected %s)" % fmt_val)
+            arg = next(it)
+    except StopIteration:
+        pass
+
+#    for arg in validator:
+#        else:
+#            # check to make sure all positional
+#            # arguments were passed
+#            if argsi >= len(args):
+#                errors.append("missing argument '%s'" % argname)
+#            else:
+#            argsi += 1
+#        # Check that the number of dimensions of array arguments are Ok
+#        if enforce_ndim and 'ndim' in arg and arg['ndim'] is not None:
+#            argval = ret[argname]
+#            arg_shape = ShapeValidator.get_data_shape(data=argval,
+#                                                      strict_no_data_load=True)
+#            if arg_shape is not None:  # Ignore in case we cannot determine the shape of the input array
+#                if len(arg_shape) != arg['ndim']:
+#                    fmt_val = (argname, len(arg_shape), arg['ndim'])
+#                    errors.append("incorrect number of dimensions for array %s (got %s, expected %s)" % fmt_val)
 
     return {'args': ret, 'errors': errors}
 
@@ -221,18 +252,26 @@ def docval(*validator, **options):
     val_copy = __sort_args(_copy.deepcopy(validator))
     def dec(func):
         _docval = _copy.copy(options)
-        _docval[__docval_args_loc] = val_copy
+        pos = list()
+        kw = list()
+        for a in val_copy:
+            if 'default' in a:
+                kw.append(a)
+            else:
+                pos.append(a)
+        loc_val = pos+kw
+        _docval[__docval_args_loc] = loc_val
         if is_method:
             def func_call(*args, **kwargs):
                 self = args[0]
-                parsed = __parse_args(_copy.deepcopy(val_copy), args[1:], kwargs, enforce_type=enforce_type, enforce_ndim=enforce_ndim)
+                parsed = __parse_args(_copy.deepcopy(loc_val), args[1:], kwargs, enforce_type=enforce_type, enforce_ndim=enforce_ndim)
                 parse_err = parsed.get('errors')
                 if parse_err:
-                    raise TypeError(', '.join(parse_err))
+                    raise TypeError(', '.join(parse_err)) from None
                 return func(self, **parsed['args'])
         else:
             def func_call(*args, **kwargs):
-                parsed = __parse_args(_copy.deepcopy(val_copy), args, kwargs, enforce_type=enforce_type)
+                parsed = __parse_args(_copy.deepcopy(loc_val), args, kwargs, enforce_type=enforce_type)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     raise TypeError(', '.join(parse_err))
