@@ -142,7 +142,7 @@ class AttributeSpec(Spec):
     @property
     def required(self):
         ''' True if this attribute is required, False otherwise. '''
-        return self.get('required', None)
+        return self.get('required', True)
 
     @property
     def dims(self):
