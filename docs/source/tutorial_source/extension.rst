@@ -19,7 +19,7 @@ it calls :py:meth:`~form.spec.write.NamespaceBuilder.export` to save the extensi
 
 .. code-block:: python
 
-    from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
+    from pynwb import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 
     ns_path = "mylab.namespace.yaml"
     ext_source = "mylab.extensions.yaml"
