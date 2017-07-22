@@ -20,6 +20,11 @@ class MyTestClass(object):
     def basic_add2_kw(self, **kwargs):
         return kwargs
 
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str', 'default': 'a'},
+            {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int', 'default': 1})
+    def basic_only_kw(self, **kwargs):
+        return kwargs
+
 class MyTestSubclass(MyTestClass):
 
     @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},
@@ -62,6 +67,13 @@ class TestDocValidator(unittest.TestCase):
         kwargs = self.test_obj.basic_add('a string')
         self.assertDictEqual(kwargs, {'arg1': 'a string'})
 
+    def test_docval_add_kw(self):
+        """Test that docval works with a single positional
+           argument passed as key-value
+        """
+        kwargs = self.test_obj.basic_add(arg1='a string')
+        self.assertDictEqual(kwargs, {'arg1': 'a string'})
+
     def test_docval_add_missing_args(self):
         """Test that docval catches missing argument
            with a single positional argument
@@ -86,12 +98,29 @@ class TestDocValidator(unittest.TestCase):
         kwargs = self.test_obj.basic_add2_kw('a string', 100)
         self.assertDictEqual(kwargs, {'arg1': 'a string', 'arg2': 100, 'arg3': False})
 
+    def test_docval_add2_pos_as_kw(self):
+        """Test that docval works with two positional
+           arguments and a keyword argument when using
+           default keyword argument value, but pass
+           positional arguments by key-value
+        """
+        kwargs = self.test_obj.basic_add2_kw(arg1='a string', arg2=100)
+        self.assertDictEqual(kwargs, {'arg1': 'a string', 'arg2': 100, 'arg3': False})
+
     def test_docval_add2_kw_kw_syntax(self):
         """Test that docval works with two positional
            arguments and a keyword argument when specifying
            keyword argument value with keyword syntax
         """
         kwargs = self.test_obj.basic_add2_kw('a string', 100, arg3=True)
+        self.assertDictEqual(kwargs, {'arg1': 'a string', 'arg2': 100, 'arg3': True})
+
+    def test_docval_add2_kw_all_kw_syntax(self):
+        """Test that docval works with two positional
+           arguments and a keyword argument when specifying
+           all arguments by key-value
+        """
+        kwargs = self.test_obj.basic_add2_kw(arg1='a string', arg2=100, arg3=True)
         self.assertDictEqual(kwargs, {'arg1': 'a string', 'arg2': 100, 'arg3': True})
 
     def test_docval_add2_kw_pos_syntax(self):
@@ -176,6 +205,54 @@ class TestDocValidator(unittest.TestCase):
             kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', None, arg6=True)
         msg = "incorrect type for 'arg5' (got 'NoneType', expected 'int')"
         self.assertEqual(cm.exception.args[0], msg)
+
+    def test_only_kw_no_args(self):
+        """Test that docval parses arguments when only keyword
+           arguments exist, and no arguments are specified
+        """
+        kwargs = self.test_obj.basic_only_kw()
+        self.assertDictEqual(kwargs, {'arg1': 'a', 'arg2': 1})
+
+    def test_only_kw_arg1_no_arg2(self):
+        """Test that docval parses arguments when only keyword
+           arguments exist, and only first argument is specified
+           as key-value
+        """
+        kwargs = self.test_obj.basic_only_kw(arg1='b')
+        self.assertDictEqual(kwargs, {'arg1': 'b', 'arg2': 1})
+
+    def test_only_kw_arg1_pos_no_arg2(self):
+        """Test that docval parses arguments when only keyword
+           arguments exist, and only first argument is specified
+           as positionl argument
+        """
+        kwargs = self.test_obj.basic_only_kw('b')
+        self.assertDictEqual(kwargs, {'arg1': 'b', 'arg2': 1})
+
+    def test_only_kw_arg2_no_arg1(self):
+        """Test that docval parses arguments when only keyword
+           arguments exist, and only second argument is specified
+           as key-value
+        """
+        kwargs = self.test_obj.basic_only_kw(arg2=2)
+        self.assertDictEqual(kwargs, {'arg1': 'a', 'arg2': 2})
+
+    def test_only_kw_arg1_arg2(self):
+        """Test that docval parses arguments when only keyword
+           arguments exist, and both arguments are specified
+           as key-value
+        """
+        kwargs = self.test_obj.basic_only_kw(arg1='b', arg2=2)
+        self.assertDictEqual(kwargs, {'arg1': 'b', 'arg2': 2})
+
+    def test_only_kw_arg1_arg2_pos(self):
+        """Test that docval parses arguments when only keyword
+           arguments exist, and both arguments are specified
+           as positional arguments
+        """
+        kwargs = self.test_obj.basic_only_kw('b', 2)
+        self.assertDictEqual(kwargs, {'arg1': 'b', 'arg2': 2})
+
 
 
 if __name__ == '__main__':

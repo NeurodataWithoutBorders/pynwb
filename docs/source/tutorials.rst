@@ -2,4 +2,4 @@
 Tutorials
 #################################
 
-.. include:: extension.rst
+.. include:: tutorial_source/extension.rst
