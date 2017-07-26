@@ -1,6 +1,6 @@
 import unittest
 
-from form.utils import DataChunkIterator, DataChunk
+from form.data_utils import DataChunkIterator, DataChunk
 import numpy as np
 
 
