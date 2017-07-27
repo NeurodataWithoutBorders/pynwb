@@ -51,7 +51,7 @@ class BuildManager(object):
         """ Construct the Container represented by the given builder """
         builder = getargs('builder', kwargs)
         if isinstance(builder, LinkBuilder):
-            builder = bulder.target
+            builder = builder.target
         builder_id = self.__bldrhash__(builder)
         result = self.__containers.get(builder_id)
         if result is None:
