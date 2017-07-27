@@ -31,6 +31,6 @@ class NWBFileMap(ObjectMapper):
         self.unmap(general_spec.get_dataset('stimulus'))
 
 
-    @const_arg('file_name')
+    @constructor_arg('file_name')
     def name(self, h5group):
         return h5group.name

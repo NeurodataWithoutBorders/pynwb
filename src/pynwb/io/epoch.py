@@ -13,7 +13,7 @@ class EpochMap(ObjectMapper):
         self.map_const_arg('start', start_spec)
         self.map_const_arg('stop', stop_spec)
 
-    @const_arg('name')
+    @constructor_arg('name')
     def name(self, builder):
         return builder.name
 

@@ -252,17 +252,3 @@ class TimeSeries(NWBContainer):
     @property
     def time_unit(self):
         return self.__time_unit
-
-    @docval({'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset'})
-    def set_description(self, **kwargs):
-        """ Convenience function to set the description field of the
-            *TimeSeries*
-        """
-        self.description = kwargs['description']
-
-    @docval({'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset'})
-    def set_comments(self, **kwargs):
-        """ Convenience function to set the comments field of the
-            *TimeSeries*
-        """
-        self.comments = kwargs['comments']
