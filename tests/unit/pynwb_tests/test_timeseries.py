@@ -50,20 +50,3 @@ class TimeSeriesConstructor(unittest.TestCase):
         self.assertEqual(ts.starting_time, 0.0)
         self.assertEqual(ts.rate, 1.0)
         self.assertEqual(ts.time_unit, "Seconds")
-
-class TimeSeriesSetters(unittest.TestCase):
-
-    def setUp(self):
-        self.ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
-
-    def test_set_description(self):
-        self.ts.set_description('this is a description')
-        self.assertEqual(self.ts.description, 'this is a description')
-
-    def test_set_comments(self):
-        self.ts.set_comments('this is a comments')
-        self.assertEqual(self.ts.comments, 'this is a comments')
-
-
-if __name__ == '__main__':
-    unittest.main()
