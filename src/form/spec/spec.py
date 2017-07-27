@@ -154,18 +154,6 @@ class AttributeSpec(Spec):
         ''' The shape of this attribute's value '''
         return self.get('shape', None)
 
-#    def verify(self, value):
-#        '''Verify value (from an object) against this attribute specification '''
-#        err = dict()
-#        if any(t.__name__ == self['type'] for t in type(value).__mro__):
-#            err['name'] = self['name']
-#            err['type'] = 'attribute'
-#            err['reason'] = 'incorrect type'
-#        if err:
-#            return [err]
-#        else:
-#            return list()
-#
 _attrbl_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
@@ -341,26 +329,6 @@ class BaseStorageSpec(Spec):
         name = getargs('name', kwargs)
         return self.__attributes.get(name)
 
-#    def verify(self, builder):
-#        ''' Verify that a builder meets this specification '''
-#        errors = list()
-#        if isinstance(dset_builder, LinkBuilder):
-#            if not self['linkable']:
-#                errors.append({'name': self['name'],
-#                               'type': 'dataset',
-#                               'reason': 'cannot be link'})
-#        for attr_spec in self.attributes:
-#            attr = builder.get(attr_spec['name'])
-#            if attr:
-#                for err in attr_spec.verify(attr):
-#                    err['name'] = "%s.%s" % (self['name'], err['name'])
-#                    errors.extend(err)
-#            else:
-#                errors.append({'name': "%s.%s" % (self['name'], attr_spec['name']),
-#                               'type': 'attribute',
-#                               'reason': 'missing'})
-#        return errors
-#
     @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
@@ -420,19 +388,6 @@ class DatasetSpec(BaseStorageSpec):
     def __check_dim(cls, dim, data):
         return True
 
-#    @docval({'name': 'dataset_builder', 'type': DatasetBuilder, 'doc': 'the builder object to verify'})
-#    def verify(self, **kwargs):
-#        ''' Verify that a DatasetBuilder meets this specification '''
-#        # verify attributes
-#        dataset_builder = kwargs['dataset_builder']
-#        errors = super(DatasetSpec, self).verify(dataset_builder)
-#        err = {'name': self['name'], 'type': 'dataset'}
-#        if self.__check_dim(self['shape'], dataset_builder.data):
-#            err['reason'] = 'incorrect shape'
-#        if 'reason' in err:
-#            errors.append(err)
-#        return errors
-#
 _link_args = [
     {'name': 'doc', 'type': str, 'doc': 'a description about what this link represents'},
     {'name': 'target_type', 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
@@ -714,33 +669,6 @@ class GroupSpec(BaseStorageSpec):
         name = getargs('name', kwargs)
         return self.__datasets.get(name, self.__links.get(name))
 
-#    def verify(self, group_builder):
-#        # verify attributes
-#        errors = super(GroupSpec, self).verify(group_builder)
-#        # verify datasets
-#        for dset_spec in self['datasets']:
-#            dset_builder = group_builder.get(dset_spec['name'])
-#            if dset_builder:
-#                for err in dset_spec.verify(dset_builder):
-#                    err['name'] = "%s/%s" % (self['name'], err['name'])
-#                    errors.append(error)
-#            else:
-#                errors.append({'name': "%s/%s" % (self['name'], dset_spec['name']),
-#                               'type': 'dataset',
-#                               'reason': 'missing'})
-#        # verify groups
-#        for group_spec in self['groups']:
-#            subgroup_builder = group_builder.get(group_spec['name'])
-#            if subgroup_builder:
-#                for err in group_spec.verify(subgroup_builder):
-#                    err['name'] = "%s/%s" % (self['name'], err['name'])
-#                    errors.append(error)
-#            else:
-#                errors.append({'name': "%s/%s" % (self['name'], group_spec['name']),
-#                               'type': 'group',
-#                               'reason': 'missing'})
-#        return errors
-#
     @classmethod
     def dataset_spec_cls(cls):
         ''' The class to use when constructing DatasetSpec objects
