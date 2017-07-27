@@ -118,8 +118,8 @@ class NWBFile(NWBContainer):
     @property
     def epoch_tags(self):
         ret = set()
-        for ep in self.__epochs:
-            ret.update(ep.tags)
+        for epoch_name, epoch_obj in self.__epochs.items():
+            ret.update(epoch_obj.tags)
         return sorted(ret)
 
     @property
