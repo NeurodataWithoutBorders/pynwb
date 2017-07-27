@@ -82,6 +82,8 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
     @staticmethod
     def __setter(nwbfield):
         def _func(self, val):
+            if nwbfield in self.fields:
+                raise AttributeError("cannot set '%s' once it has been set" % nwbfield)
             self.fields[nwbfield] = val
         return _func
 
