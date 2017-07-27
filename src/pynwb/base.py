@@ -1,7 +1,8 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs, popargs, DataChunkIterator
+from form.utils import docval, getargs, popargs
+from form.data_utils import DataChunkIterator
 
 from . import register_class, CORE_NAMESPACE
 from .core import  NWBContainer

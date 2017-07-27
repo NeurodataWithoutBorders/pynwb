@@ -1,7 +1,8 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs, popargs, DataChunkIterator, ShapeValidator
+from form.utils import docval, getargs, popargs
+from form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Interface, _default_resolution, _default_conversion
