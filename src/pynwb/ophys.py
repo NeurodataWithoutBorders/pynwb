@@ -89,16 +89,14 @@ class TwoPhotonSeries(ImageSeries):
                                                    'acquisition data')},
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-
+            {'name': 'format', 'type': str, 'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
             {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},
             {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.'},
             {'name': 'scan_line_rate', 'type': float, 'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept here as it is useful information for analysis, and so good to be stored w/ the actual data.'},
-
-            {'name': 'external_file', 'type': Iterable, 'doc': 'Path or URL to one or more external file(s). Field only present if format=external. Either external_file or data must be specified, but not both.'},
-            {'name': 'starting_frame', 'type': Iterable, 'doc': 'Each entry is the frame number in the corresponding external_file variable. This serves as an index to what frames each file contains.'},
-            {'name': 'format', 'type': str, 'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
-            {'name': 'bits_per_pixel', 'type': float, 'doc': 'Number of bit per image pixel', 'default': np.nan},
+            {'name': 'external_file', 'type': Iterable, 'doc': 'Path or URL to one or more external file(s). Field only present if format=external. Either external_file or data must be specified, but not both.', 'default': None},
+            {'name': 'starting_frame', 'type': Iterable, 'doc': 'Each entry is the frame number in the corresponding external_file variable. This serves as an index to what frames each file contains.', 'default': None},
+            {'name': 'bits_per_pixel', 'type': int, 'doc': 'Number of bit per image pixel', 'default': None},
             {'name': 'dimension', 'type': Iterable, 'doc': 'Number of pixels on x, y, (and z) axes.', 'default': [np.nan]},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
@@ -117,7 +115,7 @@ class TwoPhotonSeries(ImageSeries):
     def __init__(self, **kwargs):
         name, source, data, unit, external_file, starting_frame, format = popargs('name', 'source', 'data', 'unit', 'external_file', 'starting_frame', 'format', kwargs)
         field_of_view, imaging_plane, pmt_gain, scan_line_rate = popargs('field_of_view', 'imaging_plane', 'pmt_gain', 'scan_line_rate', kwargs)
-        super(TwoPhotonSeries, self).__init__(name, source, data, unit, external_file, starting_frame, format, **kwargs)
+        super(TwoPhotonSeries, self).__init__(name=name, source=source, data=data, unit=unit, external_file=external_file, starting_frame=starting_frame, format=format, **kwargs)
         self.field_of_view = field_of_view
         self.imaging_plane = imaging_plane
         self.pmt_gain = pmt_gain
