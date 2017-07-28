@@ -638,7 +638,7 @@ class TypeMap(object):
             dtype = self.__get_type(field_spec)
             docval_arg = {'name': f, 'type': dtype, 'doc': field_spec.doc}
             if not field_spec.required:
-                docval_arg['default'] = field_spec.default_value
+                docval_arg['default'] = getattr(field_spec, 'default_value', None)
             docval_args.append(docval_arg)
             if f not in existing_args:
                 new_args.append(f)
