@@ -50,6 +50,16 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(elecgrp.location, loc)
         self.assertIs(elecgrp.device, d)
 
+    def test_epoch_tags(self):
+        tags1 = ['t1', 't2']
+        tags2 = ['t3', 't4']
+        expected_tags = tags1 + tags2
+        self.nwbfile.create_epoch(name='test_epoch1', start=0.0, stop=1.0, tags=tags1, descrition='test epoch')
+        self.nwbfile.create_epoch(name='test_epoch2', start=0.0, stop=1.0, tags=tags2, descrition='test epoch')
+        tags = self.nwbfile.epoch_tags
+        self.assertCountEqual(expected_tags, tags)
+
+
 
 
 

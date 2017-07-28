@@ -13,7 +13,7 @@ def CreatePlaneSegmentation():
     w, h = 5, 2;
     pix_mask = [[0 for x in range(w)] for y in range(h)]
     pix_mask_weight = [0 for x in range(w)]
-    iSS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', timestamps=list())
+    iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit', external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
     roi1 = ROI('roi1', 'roi description1', pix_mask, pix_mask_weight, img_mask, iSS)
     roi2 = ROI('roi2', 'roi description2', pix_mask, pix_mask_weight, img_mask, iSS)
@@ -24,6 +24,7 @@ def CreatePlaneSegmentation():
 
     ps = PlaneSegmentation('name', 'description', roi_list, ip, iSS)
     return ps
+
 
 class TwoPhotonSeriesConstructor(unittest.TestCase):
     def test_init(self):
@@ -43,7 +44,7 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(ip.unit, 'unit')
         self.assertEqual(ip.reference_frame, 'reference_frame')
 
-        tPS = TwoPhotonSeries('test_tPS', 'a hypothetical source', list(), 'unit', list(), ip, 1.0, 2.0, ['external_file'], [1, 2, 3], 'tiff', timestamps=list())
+        tPS = TwoPhotonSeries(name='test_tPS', source='a hypothetical source', data=list(), unit='unit', field_of_view=list(), imaging_plane=ip, pmt_gain=1.0, scan_line_rate=2.0, external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
         self.assertEqual(tPS.name, 'test_tPS')
         self.assertEqual(tPS.source, 'a hypothetical source')
         self.assertEqual(tPS.unit, 'unit')
@@ -98,7 +99,7 @@ class ImageSegmentationConstructor(unittest.TestCase):
         w, h = 5, 2;
         pix_mask = [[0 for x in range(w)] for y in range(h)]
         pix_mask_weight = [0 for x in range(w)]
-        iSS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', timestamps=list())
+        iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit', external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
         roi1 = ROI('roi1', 'roi description1', pix_mask, pix_mask_weight, img_mask, iSS)
         roi2 = ROI('roi2', 'roi description2', pix_mask, pix_mask_weight, img_mask, iSS)
@@ -120,7 +121,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         w, h = 5, 2;
         pix_mask = [[0 for x in range(w)] for y in range(h)]
         pix_mask_weight = [0 for x in range(w)]
-        iSS = ImageSeries('test_iS', 'a hypothetical source', list(), 'unit', ['external_file'], [1, 2, 3], 'tiff', timestamps=list())
+        iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit', external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
         roi1 = ROI('roi1', 'roi description1', pix_mask, pix_mask_weight, img_mask, iSS)
         roi2 = ROI('roi2', 'roi description2', pix_mask, pix_mask_weight, img_mask, iSS)

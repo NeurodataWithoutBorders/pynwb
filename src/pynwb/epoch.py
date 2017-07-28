@@ -25,7 +25,8 @@ class Epoch(NWBContainer):
                      'description',
                      'start_time',
                      'stop_time',
-                     'tags')
+                     'tags',
+                     'links')
 
 
     #_neurodata_type = 'Epoch'
@@ -49,6 +50,10 @@ class Epoch(NWBContainer):
         self.description = description
 
         self.tags = list({x for x in tags})
+
+    @property
+    def links(self):
+        return []  # TODO need to implement links
 
     @property
     def timeseries(self):

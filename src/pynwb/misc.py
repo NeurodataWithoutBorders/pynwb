@@ -174,15 +174,17 @@ class SpikeUnit(NWBContainer):
 
     _help = "Estimated spike times from a single unit"
 
-    @docval({'name': 'times', 'type': Iterable, 'doc': 'Spike time for the units (exact or estimated)'},
+    @docval({'name': 'name', 'type': str, 'doc': 'Name of the SpikeUnit'},
+            {'name': 'times', 'type': Iterable, 'doc': 'Spike time for the units (exact or estimated)'},
             {'name': 'unit_description', 'type': str, 'doc': 'Description of the unit (eg, cell type).'},
             {'name': 'source', 'type': str, 'doc': 'Name, path or description of where unit times originated. This is necessary only if the info here differs from or is more fine-grained than the interfaces source field.', 'default': None})
     def __init__(self, **kwargs):
-        times, unit_description, source = popargs('times', 'unit_description', 'source', kwargs)
+        name, times, unit_description, source = popargs('name', 'times', 'unit_description', 'source', kwargs)
         super(SpikeUnit, self).__init__(**kwargs)
         self.times = times
         self.unit_description = unit_description
         self.source = source
+        self.name = name
 
 @register_class('UnitTimes', CORE_NAMESPACE)
 class UnitTimes(Interface):
@@ -192,14 +194,21 @@ class UnitTimes(Interface):
     possible/relevant (e.g., name of ROIs from Segmentation module).
     """
 
-    __nwbfields__ = ('spike_unit',)
+    __nwbfields__ = ('spike_units', 'unit_list')
 
     _help = "Estimated spike times from a single unit"
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'spike_unit', 'type': Iterable, 'doc': 'The SpikeUnits contained in this Interface'})
+            {'name': 'spike_units', 'type': Iterable, 'doc': 'The SpikeUnits contained in this Interface'})
     def __init__(self, **kwargs):
-        source, spike_unit = popargs('source', 'spike_unit', kwargs)
+        source, spike_units = popargs('source', 'spike_units', kwargs)
         super(UnitTimes, self).__init__(source, **kwargs)
-        self.spike_unit = spike_unit
+        self.spike_units = spike_units
+        # self.unit_list = [si.name for si in self.spike_units]
+        # if len(self.unit_list) != len (self.spike_units):
+        #    raise ValueError("Length of unit_list does not match length of spike_unit")
+
+    @property
+    def unit_list(self):
+        return [si.name for si in self.spike_units]
 
