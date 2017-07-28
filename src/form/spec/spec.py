@@ -496,36 +496,55 @@ class GroupSpec(BaseStorageSpec):
         self.__links = dict()
         for link in links:
             self.set_link(link)
-        self.__inherited_data_type_defs = set()
+        self.__new_data_types = set(self.__data_types.keys())
         self.__new_datasets = set(self.__datasets.keys())
-        self.__new_groups = set(self.__groups.keys())
         self.__new_links = set(self.__links.keys())
+        self.__new_groups = set(self.__groups.keys())
         super(GroupSpec, self).__init__(doc, **kwargs)
 
     @docval({'name': 'inc_spec', 'type': 'GroupSpec', 'doc': 'the data type this specification represents'})
     def resolve_spec(self, **kwargs):
         inc_spec = getargs('inc_spec', kwargs)
+        data_types = list()
+        # resolve inherited datasets
         for dataset in inc_spec.datasets:
+            #if not (dataset.data_type_def is None and dataset.data_type_inc is None):
+            if dataset.name is None:
+                data_types.append(dataset)
+                continue
             self.__new_datasets.discard(dataset.name)
             if dataset.name in self.__datasets:
                 self.__datasets[dataset.name].resolve_spec(dataset)
             else:
                 self.set_dataset(dataset)
-            if dataset.data_type_def is not None:
-                self.__inherited_data_type_defs.add(dataset.data_type_def)
+        # resolve inherited groups
         for group in inc_spec.groups:
+            #if not (group.data_type_def is None and group.data_type_inc is None):
+            if group.name is None:
+                data_types.append(group)
+                continue
             self.__new_groups.discard(group.name)
             if group.name in self.__groups:
                 self.__groups[group.name].resolve_spec(group)
             else:
                 self.set_group(group)
-            if group.data_type_def is not None:
-                self.__inherited_data_type_defs.add(group.data_type_def)
+        # resolve inherited links
         for link in inc_spec.links:
+            if link.data_type_inc is not None:
+                data_types.append(link)
+                continue
             self.__new_links.discard(link.name)
             if link.name in self.__links:
                 continue
             self.set_link(link)
+        # resolve inherited data_types
+        for dt_spec in data_types:
+            dt = getattr(dt_spec, 'data_type_def',
+                         getattr(dt_spec, 'data_type_inc', None))
+            self.__new_data_types.discard(dt)
+            if dt not in self.__data_types:
+                self.__add_data_type_inc(dt_spec)
+
         super(GroupSpec, self).resolve_spec(inc_spec)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
@@ -560,13 +579,22 @@ class GroupSpec(BaseStorageSpec):
         ''' Returns 'True' if specification was inherited from a parent type '''
         spec = getargs('spec', kwargs)
         if isinstance(spec, Spec):
-            spec = spec.name
+            name = spec.name
+            if name is None:
+                name = spec.data_type_def
+            if name is None:
+                name = spec.data_type_inc
+            if name is None:
+                raise ValueError('received Spec with wildcard name but no data_type_inc or data_type_def')
+            spec = name
         if spec in self.__links:
             return self.is_inherited_link(spec)
         elif spec in self.__groups:
             return self.is_inherited_group(spec)
         elif spec in self.__datasets:
             return self.is_inherited_dataset(spec)
+        elif spec in self.__data_types:
+            return self.is_inherited_type(spec)
         else:
             if super().is_inherited_spec(spec):
                 return True
@@ -587,7 +615,8 @@ class GroupSpec(BaseStorageSpec):
         spec = getargs('spec', kwargs)
         if spec.data_type_def is None:
             raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
-        return spec.data_type_def in self.__inherited_data_type_defs
+        #return spec.data_type_def in self.__inherited_data_type_defs
+        return spec.data_type_def not in self.__new_data_types
 
     def __add_data_type_inc(self, spec):
         dt = None
