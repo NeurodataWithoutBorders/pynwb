@@ -50,12 +50,12 @@ class UnitTimesConstructor(unittest.TestCase):
     def test_init(self):
         unit_times = [1.0, 2.0]
 
-        su1 = SpikeUnit(unit_times, 'unit_description_1', 'unit_source_1')
+        su1 = SpikeUnit('su1', unit_times, 'unit_description_1', 'unit_source_1')
         self.assertEqual(su1.times, unit_times)
         self.assertEqual(su1.unit_description, 'unit_description_1')
         self.assertEqual(su1.source, 'unit_source_1')
 
-        su2 = SpikeUnit(unit_times, 'unit_description_2', 'unit_source_2')
+        su2 = SpikeUnit('su2', unit_times, 'unit_description_2', 'unit_source_2')
         self.assertEqual(su2.times, unit_times)
         self.assertEqual(su2.unit_description, 'unit_description_2')
         self.assertEqual(su2.source, 'unit_source_2')
@@ -63,7 +63,7 @@ class UnitTimesConstructor(unittest.TestCase):
         sul = [su1, su2]
         ut = UnitTimes('test_ut', sul)
         self.assertEqual(ut.source, 'test_ut')
-        self.assertEqual(ut.spike_unit, sul)
+        self.assertEqual(ut.spike_units, sul)
 
 if __name__ == '__main__':
     unittest.main()
