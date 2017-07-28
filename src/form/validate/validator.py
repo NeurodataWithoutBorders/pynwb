@@ -1,6 +1,19 @@
 from warnings import warn
+import numpy as np
+from abc import ABCMeta, abstractmethod
+from itertools import chain
 
-from ..data_utils import get_type, get_shape, type_okay
+from ..utils import docval, getargs
+from ..data_utils import get_type, get_shape
+
+from ..spec import Spec, AttributeSpec, GroupSpec, DatasetSpec
+from ..spec.spec import BaseStorageSpec
+from ..spec import SpecNamespace
+
+from ..build import GroupBuilder, DatasetBuilder, LinkBuilder
+from ..build.builders import BaseBuilder
+
+from .errors import *
 
 __valid_types = {
     'float': float,
@@ -9,7 +22,7 @@ __valid_types = {
     'int': int,
     'int32': np.int32,
     'int16': np.int16,
-    'text': str,
+    'text': str
 }
 
 def check_type(expected, received):
@@ -28,7 +41,7 @@ def check_shape(expected, received):
 
 class Validator(object, metaclass=ABCMeta):
 
-    @docval({'name': 'spec', 'type', Spec, 'doc': 'the specification to use to validate'})
+    @docval({'name': 'spec', 'type': Spec, 'doc': 'the specification to use to validate'})
     def __init__(self, **kwargs):
         self.__spec = getargs('spec', kwargs)
 
@@ -37,18 +50,18 @@ class Validator(object, metaclass=ABCMeta):
         return self.__spec
 
     @abstractmethod
-    @docval({'name': 'value', 'type', None, 'doc': 'either in the form of a value or a Builder'},
+    @docval({'name': 'value', 'type': None, 'doc': 'either in the form of a value or a Builder'},
             returns='a list of Errors', rtype=list)
     def validate(self, **kwargs):
         pass
 
 class AttributeValidator(Validator):
 
-    @docval({'name': 'spec', 'type', AttributeSpec, 'doc': 'the specification to use to validate'})
+    @docval({'name': 'spec', 'type': AttributeSpec, 'doc': 'the specification to use to validate'})
     def __init__(self, **kwargs):
         super().__init__(getargs('spec', kwargs))
 
-    @docval({'name': 'value', 'type', None, 'doc': 'the value to validate'},
+    @docval({'name': 'value', 'type': None, 'doc': 'the value to validate'},
             returns='a list of Errors', rtype=list)
     def validate(self, **kwargs):
         value = getargs('value', kwargs)
@@ -66,7 +79,7 @@ class AttributeValidator(Validator):
 
 class BaseStorageValidator(Validator):
 
-    @docval({'name': 'spec', 'type', BaseStorageSpec, 'doc': 'the specification to use to validate'})
+    @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'the specification to use to validate'})
     def __init__(self, **kwargs):
         super().__init__(getargs('spec', kwargs))
         self.__attribute_validators = dict()
@@ -80,7 +93,11 @@ class BaseStorageValidator(Validator):
         attributes = builder.attributes
         ret = list()
         for attr, validator in self.__attribute_validators.items():
-            ret.extend(validator.validate(attributes[attr]))
+            attr_val = attributes.get(attr)
+            if attr_val is None:
+                ret.append(MissingError(attr))
+            else:
+                ret.extend(validator.validate(attr_val))
         return ret
 
 class ValidatorMap(object):
@@ -88,34 +105,41 @@ class ValidatorMap(object):
     @docval({'name': 'namespace', 'type': SpecNamespace, 'doc': 'the namespace to builder map for'})
     def __init__(self, **kwargs):
         ns = getargs('namespace', kwargs)
+        self.__ns = ns
         tree = dict()
-        for dt in ns.get_registered_types():
+        types = ns.get_registered_types()
+        for dt in types:
             spec = ns.get_spec(dt)
             parent = spec.data_type_inc
             child = spec.data_type_def
             tree.setdefault(child, list())
             if parent is not None:
-                tree.setdefault(parent, list()).append(child))
+                tree.setdefault(parent, list()).append(child)
         for t in tree:
             self.__rec(tree, t)
         self.__valid_types = dict()
+        self.__validators = dict()
         for dt, children in tree.items():
-            self.__valid_types[dt] = tuple(self.__get_val(t) for t in children)
-
-    def __get_val(self, dt):
-        spec = self.__namespace.get_spec(dt)
-        if isinstance(spec, GroupSpec):
-            return GroupValidator(spec, self)
-        else:
-            return DatasetValidator(spec)
+            l = list()
+            for t in children:
+                spec = self.__ns.get_spec(dt)
+                if isinstance(spec, GroupSpec):
+                    val = GroupValidator(spec, self)
+                else:
+                    val = DatasetValidator(spec)
+                if t == dt:
+                    self.__validators[t] = val
+                l.append(val)
+            self.__valid_types[t] = tuple(l)
 
     def __rec(self, tree, node):
         if isinstance(tree[node], tuple):
             return tree[node]
-        sub_types = [node]
+        sub_types = {node}
         for child in tree[node]:
             sub_types.update(self.__rec(tree, child))
-        return tuple(sub_types)
+        tree[node] = tuple(sub_types)
+        return tree[node]
 
     def valid_types(self, spec):
         try:
@@ -123,9 +147,19 @@ class ValidatorMap(object):
         except KeyError:
             raise ValueError("no children for '%s'" % spec.data_type_def)
 
+
+    @docval({'name': 'data_type', 'type': str, 'doc': 'the data type to get the validator for'})
+    def get_validator(self, **kwargs):
+        dt = getargs('data_type', kwargs)
+        try:
+            return self.__validators[dt]
+        except KeyError:
+            msg = "data type '%s' not found in namespace %s" % (dt, self.__ns.name)
+            raise ValueError(msg)
+
 #class IncludeValidator(Validator):
 #
-#    @docval({'name': 'spec', 'type', BaseStorageSpec, 'doc': 'the specification to use to validate'},
+#    @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'the specification to use to validate'},
 #            {'name': 'valid_types', 'type': list, 'doc': 'a list of Validators of allowable types'})
 #    def __init__(self, **kwargs):
 #        super().__init__(getargs('spec', kwargs))
@@ -152,7 +186,7 @@ class ValidatorMap(object):
 
 class DatasetValidator(BaseStorageValidator):
 
-    @docval({'name': 'spec', 'type', DatasetSpec, 'doc': 'the specification to use to validate'})
+    @docval({'name': 'spec', 'type': DatasetSpec, 'doc': 'the specification to use to validate'})
     def __init__(self, **kwargs):
         super().__init__(getargs('spec', kwargs))
 
@@ -172,7 +206,7 @@ class DatasetValidator(BaseStorageValidator):
 
 class GroupValidator(BaseStorageValidator):
 
-    @docval({'name': 'spec', 'type', GroupSpec, 'doc': 'the specification to use to validate'},
+    @docval({'name': 'spec', 'type': GroupSpec, 'doc': 'the specification to use to validate'},
             {'name': 'validator_map', 'type': ValidatorMap, 'doc': 'the ValidatorMap to use during validation'})
     def __init__(self, **kwargs):
         super().__init__(getargs('spec', kwargs))
@@ -187,7 +221,7 @@ class GroupValidator(BaseStorageValidator):
                     if isinstance(spec, GroupSpec):
                         self.__group_validators[spec.name] = GroupValidator(spec, self.__vmap)
                     else:
-                        self.__datasets_validators[spec.name] = DatasetValidator(spec)
+                        self.__dataset_validators[spec.name] = DatasetValidator(spec)
                 else:
                     self.__include_dts.append(spec.data_type_inc)
             else:
@@ -210,7 +244,7 @@ class GroupValidator(BaseStorageValidator):
                     data_types.setdefault(dt, list()).append(value)
         for dt in self.__include_dts:
             found = False
-            for sub_val in self.__vmap.valid_types(dt);
+            for sub_val in self.__vmap.valid_types(dt):
                 sub_dt = sub_val.data_type
                 dt_builders = data_types.get(sub_dt)
                 if dt_builders is not None:
@@ -226,7 +260,7 @@ class GroupValidator(BaseStorageValidator):
             spec = validator.spec
             if sub_builder is None:
                 if spec.required:
-                    ret.append(MissingObject(spec))
+                    ret.append(MissingError(spec.name))
             else:
                 ret.extend(validator.validate(sub_builder))
 

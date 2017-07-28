@@ -13,7 +13,7 @@ class Error(object):
     def name(self):
         return name
 
-    @property(self):
+    @property
     def reason(self):
         return self.__reason
 
