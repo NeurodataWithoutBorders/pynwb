@@ -584,7 +584,8 @@ class TypeMap(object):
         self.__default_mapper_cls = getargs('mapper_cls', kwargs)
 
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
-            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True})
+            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
+            returns="the namespaces loaded from the given file", rtype=tuple)
     def load_namespaces(self, **kwargs):
         '''Load namespaces from a namespace file.
 
@@ -601,6 +602,7 @@ class TypeMap(object):
                     if container_cls is None:
                         container_cls = TypeSource(src_ns, dt)
                     self.register_container_type(new_ns, dt, container_cls)
+        return tuple(deps.keys())
 
     _type_map = {
         'text': str,
