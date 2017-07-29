@@ -26,12 +26,17 @@ class HDF5IO(FORMIO):
         self.__path = path
         self.__mode = mode
         self.__built = dict()
+        self.__file = None
+        self.__read = dict()
 
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
         self.open()
         #f = File(self.__path, 'r+')
-        f_builder = self.__read_group(self.__file, ROOT_NAME)
+        f_builder = self.__read.get(self.__file)
+        if f_builder is None:
+            f_builder = self.__read_group(self.__file, ROOT_NAME)
+            self.__read[self.__file] = f_builder
         return f_builder
 
     def __set_built(self, fpath, path, builder):
