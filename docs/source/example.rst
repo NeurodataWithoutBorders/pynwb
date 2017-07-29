@@ -43,7 +43,7 @@ the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` class.
 .. code-block:: python
 
     from form.backends.hdf5 import HDF5IO
-    from pynwb get_build_manager
+    from pynwb import get_build_manager
 
     manager = get_build_manager()
     io = HDF5IO(filename, manager, mode='w')
