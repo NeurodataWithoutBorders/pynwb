@@ -7,6 +7,8 @@ CORE_NAMESPACE = 'core'
 
 from form.spec import NamespaceCatalog
 from form.utils import docval, getargs
+from form.backends.io import FORMIO
+from form.validate import ValidatorMap
 
 from .core import NWBContainer
 from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
@@ -36,11 +38,12 @@ def get_type_map():
 __TYPE_MAP = get_type_map()
 
 @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
+        returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
 def load_namespaces(**kwargs):
     '''Load namespaces from file'''
     namespace_path = getargs('namespace_path', kwargs)
-    __TYPE_MAP.load_namespaces(namespace_path)
+    return __TYPE_MAP.load_namespaces(namespace_path)
 
 # load the core namespace i.e. base NWB specification
 __resources = __get_resources()
@@ -56,6 +59,10 @@ def get_build_manager(**kwargs):
     if type_map is None:
         type_map = __TYPE_MAP
     return __BuildManager(type_map)
+
+@docval(returns="a tuple of the available namespaces", rtype=tuple)
+def available_namespaces(**kwargs):
+    return tuple(__NS_CATALOG.namespaces.keys())
 
 # a function to register a container classes with the global map
 @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the spec for'},
@@ -112,7 +119,7 @@ def validate(**kwargs):
     """Validate an NWB file against a namespace"""
     io, namespace = getargs('io', 'namespace', kwargs)
     builder = io.read_builder()
-    validator = ValidatorMap(__NS_CATALOG.get_namespace(namespace)
+    validator = ValidatorMap(__NS_CATALOG.get_namespace(namespace))
     return validator.validate(builder)
 
 
