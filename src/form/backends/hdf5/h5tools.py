@@ -262,17 +262,27 @@ def write_dataset(**kwargs):
     """
     parent, name, data, attributes, default_dtype = getargs('parent', 'name', 'data', 'attributes', 'default_dtype', kwargs)
     dset = None
+    link = None
     if isinstance(data, str):
         dset = __scalar_fill__(parent, name, data)
     elif isinstance(data, DataChunkIterator):
         dset = __chunked_iter_fill__(parent, name, data)
+    elif isinstance(data, Dataset):
+        data_filename = os.path.abspath(data.file.filename)
+        parent_filename = os.path.abspath(parent.file.filename)
+        if data_filename != parent_filename:
+            link = ExternalLink(os.path.relpath(data_filename, os.path.dirname(parent_filename)), data.name)
+        else:
+            link = SoftLink(data.name)
+        parent[name] = link
     elif isinstance(data, Iterable) and not isinstance_inmemory_array(data):
         dset = __chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
     elif hasattr(data, '__len__'):
         dset = __list_fill__(parent, name, data, default_dtype=default_dtype)
     else:
         dset = __scalar_fill__(parent, name, data, default_dtype=default_dtype)
-    set_attributes(dset, attributes)
+    if link is None:
+        set_attributes(dset, attributes)
     return dset
 
 def __selection_max_bounds__(selection):
