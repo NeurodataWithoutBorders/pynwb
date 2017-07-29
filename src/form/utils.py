@@ -268,7 +268,7 @@ def docval(*validator, **options):
         _rtype = rtype
         if isinstance(rtype, type):
             _rtype = rtype.__name__
-        docstring = __googledoc(func, _docval['args'], returns=returns, rtype=_rtype)
+        docstring = __googledoc(func, _docval[__docval_args_loc], returns=returns, rtype=_rtype)
         setattr(func_call, '__doc__', docstring)
         setattr(func_call, '__name__', func.__name__)
         setattr(func_call, docval_attr_name, _docval)
@@ -319,8 +319,9 @@ def __sphinxdoc(func, validator, returns=None, rtype=None):
 
 def __googledoc(func, validator, returns=None, rtype=None):
     arg_fmt = "    {name} ({type}): {doc}"
-    docstring_fmt = ("{description}\n\n"
-                     "Args:\n{args}\n")
+    docstring_fmt = "{description}\n\n"
+    if len(validator) > 0:
+        docstring_fmt += "Args:\n{args}\n"
     ret_fmt = ("\nReturns:\n"
                "    {rtype}: {returns}")
     return __builddoc(func, validator, docstring_fmt, arg_fmt, ret_fmt=ret_fmt, returns=returns, rtype=rtype)
