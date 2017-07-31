@@ -171,7 +171,7 @@ class Epoch(NWBContainer):
             raise ValueError("TimeSeries object must have timestamps or starting_time and rate")
         count = stop_idx - start_idx
         idx_start = start_idx
-        return (idx_start, count)
+        return (int(idx_start), int(count))
 
 @register_class('EpochTimeSeries', CORE_NAMESPACE)
 class EpochTimeSeries(NWBContainer):
