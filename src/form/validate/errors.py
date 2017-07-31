@@ -1,6 +1,14 @@
 
 from ..utils import docval, getargs
 
+__all__ = [
+    "Error",
+    "DtypeError",
+    "MissingError",
+    "ShapeError",
+    "MissingDataType",
+]
+
 class Error(object):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
@@ -11,11 +19,17 @@ class Error(object):
 
     @property
     def name(self):
-        return name
+        return self.__name
 
     @property
     def reason(self):
         return self.__reason
+
+    def __str__(self):
+        return "%s - %s: %s" % (self.__class__.__name__, self.name, self.reason)
+
+    def __repr__(self):
+        return self.__str__()
 
 class DtypeError(Error):
 
@@ -35,6 +49,19 @@ class MissingError(Error):
         name = getargs('name', kwargs)
         reason = "argument missing"
         super().__init__(name, reason)
+
+class MissingDataType(Error):
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
+            {'name': 'data_type', 'type': str, 'doc': 'the missing data type'})
+    def __init__(self, **kwargs):
+        name, data_type = getargs('name', 'data_type', kwargs)
+        self.__data_type = data_type
+        reason = "missing data type %s" % self.__data_type
+        super().__init__(name, reason)
+
+    @property
+    def data_type(self):
+        return self.__data_type
 
 class ShapeError(object):
 
