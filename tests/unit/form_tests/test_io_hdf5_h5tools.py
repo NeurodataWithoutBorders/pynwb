@@ -1,6 +1,6 @@
 import unittest
 
-from form.utils import DataChunkIterator
+from form.data_utils import DataChunkIterator
 from form.backends.hdf5.h5tools import __chunked_iter_fill__, write_dataset
 
 import h5py

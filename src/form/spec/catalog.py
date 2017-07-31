@@ -50,7 +50,8 @@ class SpecCatalog(object):
         data_type = getargs('data_type', kwargs)
         return self.__specs.get(data_type, None)
 
-    def get_registered_types(self):
+    @docval(rtype=tuple)
+    def get_registered_types(self, **kwargs):
         '''
         Return all registered specifications
         '''

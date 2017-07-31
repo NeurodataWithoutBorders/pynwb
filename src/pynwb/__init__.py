@@ -7,6 +7,8 @@ CORE_NAMESPACE = 'core'
 
 from form.spec import NamespaceCatalog
 from form.utils import docval, getargs
+from form.backends.io import FORMIO
+from form.validate import ValidatorMap
 
 from .core import NWBContainer
 from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
@@ -36,12 +38,14 @@ def get_type_map():
 __TYPE_MAP = get_type_map()
 
 @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
+        returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
 def load_namespaces(**kwargs):
     '''Load namespaces from file'''
     namespace_path = getargs('namespace_path', kwargs)
-    __TYPE_MAP.load_namespaces(namespace_path)
+    return __TYPE_MAP.load_namespaces(namespace_path)
 
+# load the core namespace i.e. base NWB specification
 __resources = __get_resources()
 if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
@@ -56,6 +60,11 @@ def get_build_manager(**kwargs):
         type_map = __TYPE_MAP
     return __BuildManager(type_map)
 
+@docval(returns="a tuple of the available namespaces", rtype=tuple)
+def available_namespaces(**kwargs):
+    return tuple(__NS_CATALOG.namespaces.keys())
+
+# a function to register a container classes with the global map
 @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the spec for'},
         {'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
         {"name": "container_cls", "type": type, "doc": "the class to map to the specified neurodata_type", 'default': None},
@@ -74,6 +83,7 @@ def register_class(**kwargs):
     else:
         _dec(container_cls)
 
+# a function to register an object mapper for a container class
 @docval({"name": "container_cls", "type": type, "doc": "the Container class for which the given ObjectMapper class gets used for"},
         {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map", 'default': None},
         is_method=False)
@@ -91,6 +101,7 @@ def register_map(**kwargs):
     else:
         _dec(mapper_cls)
 
+# a function to get the container class for a give type
 @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the NWBConatiner class for'},
         {'name': 'namespace', 'type': str, 'doc': 'the namespace the neurodata_type is defined in'},
         is_method=False)
@@ -99,6 +110,17 @@ def get_class(**kwargs):
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
     return __TYPE_MAP.create_container_cls(namespace, neurodata_type)
+
+@docval({'name': 'io', 'type': FORMIO, 'doc': 'the FORMIO object to read from'},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace to validate against', 'default':CORE_NAMESPACE},
+        returns="errors in the file", rtype=list,
+        is_method=False)
+def validate(**kwargs):
+    """Validate an NWB file against a namespace"""
+    io, namespace = getargs('io', 'namespace', kwargs)
+    builder = io.read_builder()
+    validator = ValidatorMap(__NS_CATALOG.get_namespace(namespace))
+    return validator.validate(builder)
 
 
 from . import io as __io

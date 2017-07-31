@@ -12,7 +12,7 @@ class ModuleMap(ObjectMapper):
         self.map_spec('interfaces', interfaces_spec)
         self.map_spec('interface_names', self.spec.get_attribute('interfaces'))
 
-    @const_arg('name')
+    @constructor_arg('name')
     def name(self, builder):
         return builder.name
 
@@ -33,6 +33,6 @@ class TimeSeriesMap(ObjectMapper):
         self.map_attr('rate_unit', startingtime_spec.get_attribute('unit'))
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))
 
-    @const_arg('name')
+    @constructor_arg('name')
     def name(self, builder):
         return builder.name

@@ -3,7 +3,8 @@ import numpy as np
 import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink
 
-from form.utils import DataChunkIterator, docval, getargs, popargs
+from form.utils import docval, getargs, popargs
+from form.data_utils import DataChunkIterator, get_shape
 
 from ..io import FORMIO
 from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager
@@ -25,12 +26,17 @@ class HDF5IO(FORMIO):
         self.__path = path
         self.__mode = mode
         self.__built = dict()
+        self.__file = None
+        self.__read = dict()
 
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
         self.open()
         #f = File(self.__path, 'r+')
-        f_builder = self.__read_group(self.__file, ROOT_NAME)
+        f_builder = self.__read.get(self.__file)
+        if f_builder is None:
+            f_builder = self.__read_group(self.__file, ROOT_NAME)
+            self.__read[self.__file] = f_builder
         return f_builder
 
     def __set_built(self, fpath, path, builder):
@@ -121,6 +127,16 @@ class HDF5IO(FORMIO):
         for name, dbldr in f_builder.datasets.items():
             write_dataset(self.__file, name, dbldr.data, dbldr.attributes, default_dtype=dbldr.dtype)
         set_attributes(self.__file, f_builder.attributes)
+
+def get_type(data):
+    if isinstance(data, str):
+        return special_dtype(vlen=str)
+    elif not hasattr(data, '__len__'):
+        return type(data)
+    else:
+        if len(data) == 0:
+            raise ValueError('cannot determine type for empty data')
+        return get_type(data[0])
 
 __dtypes = {
     "float": float,
@@ -220,30 +236,6 @@ def write_link(**kwargs):
     parent[name] = link_obj
     return link_obj
 
-def __get_shape_helper(data):
-    shape = list()
-    if hasattr(data, '__len__'):
-        shape.append(len(data))
-        if len(data) and not isinstance(data[0], str):
-            shape.extend(__get_shape_helper(data[0]))
-    return tuple(shape)
-
-def __get_shape(data):
-    if hasattr(data, '__len__') and not isinstance(data, str):
-        return __get_shape_helper(data)
-    else:
-        return None
-
-def __get_type(data):
-    if isinstance(data, str):
-        return special_dtype(vlen=str)
-    elif not hasattr(data, '__len__'):
-        return type(data)
-    else:
-        if len(data) == 0:
-            raise ValueError('cannot determine type for empty data')
-        return __get_type(data[0])
-
 def isinstance_inmemory_array(data):
     """Check if an object is a common in-memory data structure"""
     return isinstance(data, list) or \
@@ -311,7 +303,7 @@ def __selection_max_bounds__(selection):
 
 def __scalar_fill__(parent, name, data, default_dtype=None):
     try:
-        dtype = __get_type(data)
+        dtype = get_type(data)
     except Exception as exc:
         if default_dtype is not None:
             dtype = __resolve_dtype__(default_dtype)
@@ -359,9 +351,9 @@ def __chunked_iter_fill__(parent, name, data):
     return dset
 
 def __list_fill__(parent, name, data, default_dtype=None):
-    data_shape = __get_shape(data)
+    data_shape = get_shape(data)
     try:
-        dtype = __get_type(data)
+        dtype = get_type(data)
     except Exception as exc:
         if default_dtype is not None:
             dtype = __resolve_dtype__(default_dtype)

@@ -98,13 +98,16 @@ class SpecNamespace(dict):
 
     @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the spec for'})
     def get_spec(self, **kwargs):
+        """Get the Spec object for the given data type"""
         data_type = getargs('data_type', kwargs)
         spec = self.__catalog.get_spec(data_type)
         if spec is None:
             raise ValueError("No specification for '%s' in namespace '%s'" % (data_type, self.name))
         return spec
 
-    def get_registered_types(self):
+    @docval(returns="the a tuple of the available data types", rtype=tuple)
+    def get_registered_types(self, **kwargs):
+        """Get the available types in this namespace"""
         return self.__catalog.get_registered_types()
 
     @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the hierarchy of'},
@@ -141,28 +144,41 @@ class NamespaceCatalog(object):
         self.__loaded_specs = dict()
         self.__loaded_ns_files = dict()
 
+
+    @property
+    @docval(returns='a tuple of the availble namespaces', rtype=tuple)
+    def namespaces(self):
+        """The namespaces in this NamespaceCatalog"""
+        return tuple(self.__namespaces.keys())
+
     @property
     def dataset_spec_cls(self):
+        """The DatasetSpec class used in this NamespaceCatalog"""
         return self.__dataset_spec_cls
 
     @property
     def group_spec_cls(self):
+        """The GroupSpec class used in this NamespaceCatalog"""
         return self.__group_spec_cls
 
     @property
     def default_namespace(self):
+        """The name of the default namespace"""
         return self.__default_namespace
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
             {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'})
     def add_namespace(self, **kwargs):
+        """Add a namespace to this catalog"""
         name, namespace = getargs('name', 'namespace', kwargs)
         if name in self.__namespaces:
             raise KeyError("namespace '%s' already exists" % name)
         self.__namespaces[name] = namespace
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
+            returns="the SpecNamespace with the given name", rtype=SpecNamespace)
     def get_namespace(self, **kwargs):
+        """Get the a SpecNamespace"""
         name = getargs('name', kwargs)
         ret = self.__namespaces.get(name)
         if ret is None:
@@ -229,6 +245,7 @@ class NamespaceCatalog(object):
             {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
             returns='a dictionary describing the dependencies of loaded namespaces', rtype=dict)
     def load_namespaces(self, **kwargs):
+        """Load the namespaces in the given file"""
         namespace_path, resolve = getargs('namespace_path', 'resolve', kwargs)
         # load namespace definition from file
         if not os.path.exists(namespace_path):

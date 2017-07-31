@@ -10,14 +10,14 @@ class EpochTimeSeriesConstructor(unittest.TestCase):
     def test_init_timestamps(self):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
         ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        epoch_ts = EpochTimeSeries(ts, 5.0, 15.5)
+        epoch_ts = EpochTimeSeries(ts, 40, 105)
         self.assertEqual(epoch_ts.count, 105)
         self.assertEqual(epoch_ts.idx_start, 40)
 
     def test_init_sample_rate(self):
         #self.ts.set_time_by_rate(1.0, 10.0)
         ts = TimeSeries("test_ts", "a hypothetical source", list(range(200)), 'unit', starting_time=1.0, rate=10.0)
-        epoch_ts = EpochTimeSeries(ts, 5.0, 15.5)
+        epoch_ts = EpochTimeSeries(ts, 40, 105)
         self.assertEqual(epoch_ts.count, 105)
         self.assertEqual(epoch_ts.idx_start, 40)
 
