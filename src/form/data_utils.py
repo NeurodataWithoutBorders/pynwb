@@ -20,8 +20,8 @@ def get_shape(data):
 
 def get_type(data):
     if isinstance(data, str):
-        return special_dtype(vlen=str)
-    elif not hasattr(data, '__len__'):
+        return str
+    if not hasattr(data, '__len__'):
         return type(data)
     else:
         if len(data) == 0:
