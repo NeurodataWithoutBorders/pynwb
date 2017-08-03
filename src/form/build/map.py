@@ -666,7 +666,6 @@ class TypeMap(object):
                 if parent_cls is not None:
                     break
             if parent_cls is None:
-                print(list(self.__container_types.keys()))
                 raise ValueError('No Container class found for parents of %s:%s %s' % (namespace, data_type, dt_hier))
             name = data_type
             bases = (parent_cls,)
