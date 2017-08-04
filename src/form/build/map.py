@@ -786,7 +786,7 @@ class TypeMap(object):
         namespace, data_type, container_cls = getargs('namespace', 'data_type', 'container_cls', kwargs)
         self.__container_types.setdefault(namespace, dict())
         self.__container_types[namespace][data_type] = container_cls
-        self.__data_types[container_cls] = (namespace, data_type)
+        self.__data_types.setdefault(container_cls, (namespace, data_type))
 
     @docval({"name": "container_cls", "type": type, "doc": "the Container class for which the given ObjectMapper class gets used for"},
             {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map"})

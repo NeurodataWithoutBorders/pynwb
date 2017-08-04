@@ -25,7 +25,7 @@ class TestExtension(unittest.TestCase):
                             neurodata_type_inc='ElectricalSeries',
                             neurodata_type_def='TetrodeSeries')
         ns_builder.add_spec(self.ext_source, ext1)
-        ns_builder.export(os.path.join(self.tempdir, self.ns_path))
+        ns_builder.export(self.ns_path, outdir=self.tempdir)
 
     def test_load_namespace(self):
         self.test_export()
@@ -38,16 +38,21 @@ class TestExtension(unittest.TestCase):
 class TestCatchDupNS(unittest.TestCase):
 
     def setUp(self):
+        self.tempdir = gettempdir()
         self.ext_source1 = 'fake_extension1.yaml'
         self.ns_path1 = 'fake_namespace1.yaml'
         self.ext_source2 = 'fake_extension2.yaml'
         self.ns_path2 = 'fake_namespace2.yaml'
 
     def tearDown(self):
-        os.remove(self.ext_source1)
-        os.remove(self.ns_path1)
-        os.remove(self.ext_source2)
-        os.remove(self.ns_path2)
+        files = (self.ext_source1,
+                 self.ns_path1,
+                 self.ext_source2,
+                 self.ns_path2)
+        for f in files:
+            path = os.path.join(self.tempdir, f)
+            os.remove(path)
+
 
     def test_catch_dup_name(self):
         ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1")
@@ -56,14 +61,14 @@ class TestCatchDupNS(unittest.TestCase):
                             neurodata_type_inc='ElectricalSeries',
                             neurodata_type_def='TetrodeSeries')
         ns_builder1.add_spec(self.ext_source1, ext1)
-        ns_builder1.export(self.ns_path1)
+        ns_builder1.export(self.ns_path1, outdir=self.tempdir)
         ns_builder2 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1")
         ext2 = NWBGroupSpec('A custom ElectricalSeries for my lab',
                             attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
                             neurodata_type_inc='ElectricalSeries',
                             neurodata_type_def='TetrodeSeries')
         ns_builder2.add_spec(self.ext_source2, ext2)
-        ns_builder2.export(self.ns_path2)
-        load_namespaces(self.ns_path1)
+        ns_builder2.export(self.ns_path2, outdir=self.tempdir)
+        load_namespaces(os.path.join(self.tempdir, self.ns_path1))
         with self.assertRaises(KeyError):
-            load_namespaces(self.ns_path2)
+            load_namespaces(os.path.join(self.tempdir, self.ns_path2))
