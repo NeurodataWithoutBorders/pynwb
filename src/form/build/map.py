@@ -597,7 +597,7 @@ class TypeMap(object):
         for new_ns, ns_deps in deps.items():
             for src_ns, types in ns_deps.items():
                 for dt in types:
-                    container_cls = self.__get_container_cls(src_ns, dt)
+                    container_cls = self.get_container_cls(src_ns, dt)
                     if container_cls is None:
                         container_cls = TypeSource(src_ns, dt)
                     self.register_container_type(new_ns, dt, container_cls)
@@ -653,9 +653,13 @@ class TypeMap(object):
 
     @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type"},
             {"name": "data_type", "type": str, "doc": "the data type to create a Container class for"},
-            returns='a dynamically created class based on the spec of the data type', rtype=type)
-    def create_container_cls(self, **kwargs):
-        '''Create a container class from data type specification'''
+            returns='the class for the given namespace and data_type', rtype=type)
+    def get_container_cls(self, **kwargs):
+        '''Get the container class from data type specification
+
+        If no class has been associated with the ``data_type`` from ``namespace``,
+        a class will be dynamically created and returned.
+        '''
         namespace, data_type = getargs('namespace', 'data_type', kwargs)
         cls = self.__get_container_cls(namespace, data_type)
         if cls is None:
@@ -707,7 +711,7 @@ class TypeMap(object):
         builder = getargs('builder', kwargs)
         data_type = self.__get_builder_dt(builder)
         namespace = self.__get_namespace(builder)
-        return self.__get_container_cls(namespace, data_type)
+        return self.get_container_cls(namespace, data_type)
 
     @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
             {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder), 'doc': 'the builder to get the sub-specification for'})

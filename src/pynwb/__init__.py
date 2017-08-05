@@ -98,7 +98,7 @@ def get_class(**kwargs):
     """Get the class object of the NWBContainer subclass corresponding to a given neurdata_type.
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
-    return __TYPE_MAP.create_container_cls(namespace, neurodata_type)
+    return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
 
 
 from . import io as __io
