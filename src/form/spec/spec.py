@@ -9,6 +9,7 @@ NAME_WILDCARD = None
 ZERO_OR_ONE = '?'
 ZERO_OR_MANY = '*'
 ONE_OR_MANY = '+'
+DEF_QUANTITY = 1
 FLAGS = {
     'zero_or_one': ZERO_OR_ONE,
     'zero_or_many': ZERO_OR_MANY,
@@ -116,6 +117,7 @@ class AttributeSpec(Spec):
             if value is not None:
                 raise ValueError("cannot specify 'value' and 'default_value'")
             self['default_value'] = default_value
+            self['required'] = False
         if dims is not None:
             self['dims'] = dims
             if 'shape' not in self:
@@ -154,21 +156,10 @@ class AttributeSpec(Spec):
         ''' The shape of this attribute's value '''
         return self.get('shape', None)
 
-#    def verify(self, value):
-#        '''Verify value (from an object) against this attribute specification '''
-#        err = dict()
-#        if any(t.__name__ == self['type'] for t in type(value).__mro__):
-#            err['name'] = self['name']
-#            err['type'] = 'attribute'
-#            err['reason'] = 'incorrect type'
-#        if err:
-#            return [err]
-#        else:
-#            return list()
-#
 _attrbl_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
+        {'name': 'name', 'type': str, 'doc': 'the name of this base storage container', 'default': None},
+        {'name': 'default_name', 'type': str, 'doc': 'The default name of this base storage container', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
@@ -194,7 +185,7 @@ class BaseStorageSpec(Spec):
             if name != NAME_WILDCARD:
                 raise ValueError(("Cannot give specific name to something that can ",
                                   "exist multiple times: name='%s', quantity='%s'" % (name, quantity)))
-        if quantity != 1:
+        if quantity != DEF_QUANTITY:
             self['quantity'] = quantity
         if not linkable:
             self['linkable'] = False
@@ -303,7 +294,7 @@ class BaseStorageSpec(Spec):
     @property
     def quantity(self):
         ''' The number of times the object being specified should be present '''
-        return self.get('quantity', 1)
+        return self.get('quantity', DEF_QUANTITY)
 
     @docval(*deepcopy(_attr_args))
     def add_attribute(self, **kwargs):
@@ -341,26 +332,6 @@ class BaseStorageSpec(Spec):
         name = getargs('name', kwargs)
         return self.__attributes.get(name)
 
-#    def verify(self, builder):
-#        ''' Verify that a builder meets this specification '''
-#        errors = list()
-#        if isinstance(dset_builder, LinkBuilder):
-#            if not self['linkable']:
-#                errors.append({'name': self['name'],
-#                               'type': 'dataset',
-#                               'reason': 'cannot be link'})
-#        for attr_spec in self.attributes:
-#            attr = builder.get(attr_spec['name'])
-#            if attr:
-#                for err in attr_spec.verify(attr):
-#                    err['name'] = "%s.%s" % (self['name'], err['name'])
-#                    errors.extend(err)
-#            else:
-#                errors.append({'name': "%s.%s" % (self['name'], attr_spec['name']),
-#                               'type': 'attribute',
-#                               'reason': 'missing'})
-#        return errors
-#
     @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
@@ -372,12 +343,14 @@ class BaseStorageSpec(Spec):
 _dataset_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
-        {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
+        {'name': 'name', 'type': str, 'doc': 'The name of this dataset', 'default': None},
+        {'name': 'default_name', 'type': str, 'doc': 'The default name of this dataset', 'default': None},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
         {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
+        {'name': 'default_value', 'type': None, 'doc': 'a default value for this dataset', 'default': None},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'data_type_inc', 'type': (str, 'DatasetSpec'), 'doc': 'the NWB type this specification extends', 'default': None},
 ]
@@ -387,7 +360,7 @@ class DatasetSpec(BaseStorageSpec):
 
     @docval(*deepcopy(_dataset_args))
     def __init__(self, **kwargs):
-        doc, shape, dims, dtype = popargs('doc', 'shape', 'dims', 'dtype', kwargs)
+        doc, shape, dims, dtype, default_value = popargs('doc', 'shape', 'dims', 'dtype', 'default_value', kwargs)
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if shape is not None:
             self['shape'] = shape
@@ -400,6 +373,13 @@ class DatasetSpec(BaseStorageSpec):
                     raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
             self['dtype'] = dtype
+        if default_value is not None:
+            self['default_value'] = default_value
+            if self.name is not None:
+                self.pop('quantity')
+            else:
+                self['quantity'] = ZERO_OR_MORE
+
 
     @property
     def dims(self):
@@ -420,19 +400,6 @@ class DatasetSpec(BaseStorageSpec):
     def __check_dim(cls, dim, data):
         return True
 
-#    @docval({'name': 'dataset_builder', 'type': DatasetBuilder, 'doc': 'the builder object to verify'})
-#    def verify(self, **kwargs):
-#        ''' Verify that a DatasetBuilder meets this specification '''
-#        # verify attributes
-#        dataset_builder = kwargs['dataset_builder']
-#        errors = super(DatasetSpec, self).verify(dataset_builder)
-#        err = {'name': self['name'], 'type': 'dataset'}
-#        if self.__check_dim(self['shape'], dataset_builder.data):
-#            err['reason'] = 'incorrect shape'
-#        if 'reason' in err:
-#            errors.append(err)
-#        return errors
-#
 _link_args = [
     {'name': 'doc', 'type': str, 'doc': 'a description about what this link represents'},
     {'name': 'target_type', 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
@@ -465,11 +432,12 @@ class LinkSpec(Spec):
     @property
     def quantity(self):
         ''' The number of times the object being specified should be present '''
-        return self.get('quantity', 1)
+        return self.get('quantity', DEF_QUANTITY)
 
 _group_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'name', 'type': str, 'doc': 'the name of this group', 'default': None},
+        {'name': 'default_name', 'type': str, 'doc': 'The default name of this group', 'default': None},
         {'name': 'groups', 'type': list, 'doc': 'the subgroups in this group', 'default': list()},
         {'name': 'datasets', 'type': list, 'doc': 'the datasets in this group', 'default': list()},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
@@ -743,33 +711,6 @@ class GroupSpec(BaseStorageSpec):
         name = getargs('name', kwargs)
         return self.__datasets.get(name, self.__links.get(name))
 
-#    def verify(self, group_builder):
-#        # verify attributes
-#        errors = super(GroupSpec, self).verify(group_builder)
-#        # verify datasets
-#        for dset_spec in self['datasets']:
-#            dset_builder = group_builder.get(dset_spec['name'])
-#            if dset_builder:
-#                for err in dset_spec.verify(dset_builder):
-#                    err['name'] = "%s/%s" % (self['name'], err['name'])
-#                    errors.append(error)
-#            else:
-#                errors.append({'name': "%s/%s" % (self['name'], dset_spec['name']),
-#                               'type': 'dataset',
-#                               'reason': 'missing'})
-#        # verify groups
-#        for group_spec in self['groups']:
-#            subgroup_builder = group_builder.get(group_spec['name'])
-#            if subgroup_builder:
-#                for err in group_spec.verify(subgroup_builder):
-#                    err['name'] = "%s/%s" % (self['name'], err['name'])
-#                    errors.append(error)
-#            else:
-#                errors.append({'name': "%s/%s" % (self['name'], group_spec['name']),
-#                               'type': 'group',
-#                               'reason': 'missing'})
-#        return errors
-#
     @classmethod
     def dataset_spec_cls(cls):
         ''' The class to use when constructing DatasetSpec objects
