@@ -15,7 +15,7 @@ class EpochMap(ObjectMapper):
         epts_spec = self.spec.get_neurodata_type('EpochTimeSeries')
         self.map_spec('timeseries', epts_spec)
 
-    @constructor_arg('name')
+    @ObjectMapper.constructor_arg('name')
     def name(self, builder):
         return builder.name
 

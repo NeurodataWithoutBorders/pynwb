@@ -1,6 +1,6 @@
 from form.utils import docval, getargs, ExtenderMeta
 from form import Container
-
+from six import with_metaclass
 from . import CORE_NAMESPACE
 
 def set_parents(container, parent):
@@ -15,7 +15,7 @@ def set_parents(container, parent):
             container.parent = parent
     return ret
 
-class NWBContainer(Container, metaclass=ExtenderMeta):
+class NWBContainer(with_metaclass(ExtenderMeta, Container)):
     '''The base class to any NWB types.
 
     The purpose of this class is to provide a mechanism for representing hierarchical
@@ -103,4 +103,3 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
         for f in cls.__nwbfields__:
             if not hasattr(cls, f):
                 setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
-

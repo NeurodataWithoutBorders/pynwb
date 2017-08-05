@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 
 from pynwb import NWBContainer, get_build_manager
 
@@ -58,4 +58,3 @@ class TestNWBContainerIO(unittest.TestCase):
                     self.assertContainerEqual(f1, f2)
                 else:
                     self.assertEqual(f1, f2)
-

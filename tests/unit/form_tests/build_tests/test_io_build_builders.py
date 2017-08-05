@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 
 from form.build import GroupBuilder, DatasetBuilder, LinkBuilder
 import json
@@ -296,4 +296,3 @@ class DatasetBuilderDeepUpdateTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

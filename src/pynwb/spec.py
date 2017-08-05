@@ -126,7 +126,7 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
         '''
         Get a specification by "data_type"
         '''
-        return super().get_data_type(kwargs['neurodata_type'])
+        return super(NWBGroupSpec, self).get_data_type(kwargs['neurodata_type'])
 
     @docval(*deepcopy(_group_docval))
     def add_group(self, **kwargs):
@@ -173,4 +173,3 @@ class NWBNamespaceBuilder(NamespaceBuilder):
         kwargs['namespace_cls'] = NWBNamespace
         super(NWBNamespaceBuilder, self).__init__(*args, **kwargs)
         self.include_namespace(CORE_NAMESPACE)
-

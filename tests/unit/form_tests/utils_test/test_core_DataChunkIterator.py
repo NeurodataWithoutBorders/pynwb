@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 
 from form.data_utils import DataChunkIterator, DataChunk
 import numpy as np
@@ -115,4 +115,3 @@ class DataChunkTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-

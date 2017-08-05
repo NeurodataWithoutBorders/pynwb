@@ -15,7 +15,9 @@ FLAGS = {
     'one_or_many': ONE_OR_MANY
 }
 
-class ConstructableDict(dict, metaclass=abc.ABCMeta):
+from six import with_metaclass
+
+class ConstructableDict(with_metaclass(abc.ABCMeta, dict)):
     @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this ConstructableDict class from a dictionary '''
@@ -104,7 +106,7 @@ class AttributeSpec(Spec):
     @docval(*_attr_args)
     def __init__(self, **kwargs):
         name, dtype, doc, dims, shape, required, parent, value, default_value = getargs('name', 'dtype', 'doc', 'dims', 'shape', 'required', 'parent', 'value', 'default_value', kwargs)
-        super().__init__(doc, name=name, required=required, parent=parent)
+        super(AttributeSpec, self).__init__(doc, name=name, required=required, parent=parent)
         if isinstance(dtype, type):
             self['dtype'] = dtype.__name__
         elif dtype is not None:
@@ -176,7 +178,7 @@ class BaseStorageSpec(Spec):
              getargs('name', 'doc', 'parent', 'quantity', 'attributes', 'linkable', 'data_type_def', 'data_type_inc', kwargs)
         if name == NAME_WILDCARD and data_type_def is None and data_type_inc is None:
             raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'data_type_def' and/or 'data_type_inc'")
-        super().__init__(doc, name=name, parent=parent)
+        super(BaseStorageSpec, self).__init__(doc, name=name, parent=parent)
         self.__attributes = dict()
         if quantity in (ONE_OR_MANY, ZERO_OR_MANY):
             if name != NAME_WILDCARD:
@@ -551,7 +553,7 @@ class GroupSpec(BaseStorageSpec):
         elif spec in self.__data_types:
             return self.is_inherited_type(spec)
         else:
-            if super().is_inherited_spec(spec):
+            if super(GroupSpec, self).is_inherited_spec(spec):
                 return True
             else:
                 for s in self.__datasets:
@@ -720,7 +722,7 @@ class GroupSpec(BaseStorageSpec):
     @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
-        ret = super().build_const_args(spec_dict)
+        ret = super(GroupSpec, cls).build_const_args(spec_dict)
         if 'datasets' in ret:
             ret['datasets'] = list(map(cls.dataset_spec_cls().build_spec, ret['datasets']))
         if 'groups' in ret:
@@ -728,4 +730,3 @@ class GroupSpec(BaseStorageSpec):
         if 'links' in ret:
             ret['links'] = list(map(cls.link_spec_cls().build_spec, ret['links']))
         return ret
-

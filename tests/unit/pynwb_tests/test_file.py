@@ -1,5 +1,6 @@
 ''' Tests for NWBFile '''
 import unittest
+import six
 
 from datetime import datetime
 
@@ -57,9 +58,4 @@ class NWBFileTest(unittest.TestCase):
         self.nwbfile.create_epoch(name='test_epoch1', start=0.0, stop=1.0, tags=tags1, descrition='test epoch')
         self.nwbfile.create_epoch(name='test_epoch2', start=0.0, stop=1.0, tags=tags2, descrition='test epoch')
         tags = self.nwbfile.epoch_tags
-        self.assertCountEqual(expected_tags, tags)
-
-
-
-
-
+        six.assertCountEqual(self, expected_tags, tags)

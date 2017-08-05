@@ -63,7 +63,7 @@ class NamespaceBuilder(object):
         self.__namespaces.setdefault(namespace, {'namespace': namespace})
 
     def __dump_spec(self, specs, stream):
-        yaml.dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
+        yaml.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to write the spec to'})
     def export(self, **kwargs):

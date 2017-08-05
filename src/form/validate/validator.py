@@ -14,6 +14,7 @@ from ..build import GroupBuilder, DatasetBuilder, LinkBuilder
 from ..build.builders import BaseBuilder
 
 from .errors import *
+from six import with_metaclass, raise_from
 
 __valid_dtypes = {
     'float': float,
@@ -40,7 +41,7 @@ def check_shape(expected, received):
         ret = True
     return ret
 
-class Validator(object, metaclass=ABCMeta):
+class Validator(with_metaclass(ABCMeta, object)):
     '''A base class for classes that will be used to validate against Spec subclasses'''
 
     @docval({'name': 'spec', 'type': Spec, 'doc': 'the specification to use to validate'})
@@ -62,7 +63,7 @@ class AttributeValidator(Validator):
 
     @docval({'name': 'spec', 'type': AttributeSpec, 'doc': 'the specification to use to validate'})
     def __init__(self, **kwargs):
-        super().__init__(getargs('spec', kwargs))
+        super(AttributeValidator, self).__init__(getargs('spec', kwargs))
 
     @docval({'name': 'value', 'type': None, 'doc': 'the value to validate'},
             returns='a list of Errors', rtype=list)
@@ -86,7 +87,7 @@ class BaseStorageValidator(Validator):
 
     @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'the specification to use to validate'})
     def __init__(self, **kwargs):
-        super().__init__(getargs('spec', kwargs))
+        super(BaseStorageValidator, self).__init__(getargs('spec', kwargs))
         self.__attribute_validators = dict()
         for attr in self.spec.attributes:
             self.__attribute_validators[attr.name] = AttributeValidator(attr)
@@ -159,7 +160,7 @@ class ValidatorMap(object):
         try:
             return self.__valid_types[spec]
         except KeyError:
-            raise ValueError("no children for '%s'" % spec) from None
+            raise_from(ValueError("no children for '%s'" % spec), None)
 
 
     @docval({'name': 'data_type', 'type': (BaseStorageSpec, str), 'doc': 'the data type to get the validator for'},
@@ -176,7 +177,7 @@ class ValidatorMap(object):
             return self.__validators[dt]
         except KeyError:
             msg = "data type '%s' not found in namespace %s" % (dt, self.__ns.name)
-            raise ValueError(msg) from None
+            raise_from(ValueError(msg), None)
 
     @docval({'name': 'builder', 'type': BaseBuilder, 'doc': 'the builder to validate'},
             returns="a list of errors found", rtype=list)
@@ -199,13 +200,13 @@ class DatasetValidator(BaseStorageValidator):
 
     @docval({'name': 'spec', 'type': DatasetSpec, 'doc': 'the specification to use to validate'})
     def __init__(self, **kwargs):
-        super().__init__(getargs('spec', kwargs))
+        super(DatasetValidator, self).__init__(getargs('spec', kwargs))
 
     @docval({"name": "builder", "type": DatasetBuilder, "doc": "the builder to validate"},
             returns='a list of Errors', rtype=list)
     def validate(self, **kwargs):
         builder = getargs('builder', kwargs)
-        ret = super().validate(builder)
+        ret = super(DatasetValidator, self).validate(builder)
         data = builder.data
         dtype = get_type(data)
         if not check_type(self.spec.dtype, dtype):
@@ -221,7 +222,7 @@ class GroupValidator(BaseStorageValidator):
     @docval({'name': 'spec', 'type': GroupSpec, 'doc': 'the specification to use to validate'},
             {'name': 'validator_map', 'type': ValidatorMap, 'doc': 'the ValidatorMap to use during validation'})
     def __init__(self, **kwargs):
-        super().__init__(getargs('spec', kwargs))
+        super(GroupValidator, self).__init__(getargs('spec', kwargs))
         self.__vmap = getargs('validator_map', kwargs)
         self.__include_dts = list()
         self.__dataset_validators = dict()
@@ -255,7 +256,7 @@ class GroupValidator(BaseStorageValidator):
             returns='a list of Errors', rtype=list)
     def validate(self, **kwargs):
         builder = getargs('builder', kwargs)
-        ret = super().validate(builder)
+        ret = super(GroupValidator, self).validate(builder)
         # get the data_types
         data_types = dict()
         for key, value in builder.items():

@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 import tempfile
 import ruamel.yaml as yaml
 import json
@@ -65,7 +65,7 @@ class TestSpecLoad(unittest.TestCase):
         self.specs_path = 'test_load_namespace.specs.yaml'
         self.namespace_path = 'test_load_namespace.namespace.yaml'
         with open(self.specs_path, 'w') as tmp:
-            yaml.dump(json.loads(json.dumps(to_dump)), tmp, default_flow_style=False)
+            yaml.safe_dump(json.loads(json.dumps(to_dump)), tmp, default_flow_style=False)
         ns_dict = {
             'doc': 'a test namespace',
             'name': self.NS_NAME,
@@ -76,7 +76,7 @@ class TestSpecLoad(unittest.TestCase):
         self.namespace = SpecNamespace.build_namespace(**ns_dict)
         to_dump = {'namespaces': [self.namespace]}
         with open(self.namespace_path, 'w') as tmp:
-            yaml.dump(json.loads(json.dumps(to_dump)), tmp, default_flow_style=False)
+            yaml.safe_dump(json.loads(json.dumps(to_dump)), tmp, default_flow_style=False)
         self.ns_catalog = NamespaceCatalog(self.NS_NAME)
 
     def tearDown(self):
@@ -112,4 +112,3 @@ class TestSpecLoad(unittest.TestCase):
         src_dsets = { s.name for s in self.ext_datasets }
         ext_dsets = { s.name for s in es_spec.datasets }
         self.assertSetEqual(src_dsets, ext_dsets)
-

@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 
 from form.data_utils import ShapeValidator,ShapeValidatorResult, DataChunkIterator
 import numpy as np
@@ -199,4 +199,3 @@ class ShapeValidatorResultTests(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
