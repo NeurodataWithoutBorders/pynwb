@@ -3,10 +3,17 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to PyNWB's documentation!
+NWB for Python
 =================================
 
 PyNWB is a Python package for working with NWB files.
+
+Neurodata Without Borders: Neurophysiology (NWB:N) is a project to develop a
+unified data format for cellular-based neurophysiology data, focused on the
+dynamics of groups of neurons measured under a large range of experimental
+conditions. The NWB:N team consists of neuroscientists and software developers
+who recognize that adoption of a unified data format is an important step toward
+breaking down the barriers to data sharing in neuroscience.
 
 .. toctree::
    :maxdepth: 2
@@ -14,9 +21,19 @@ PyNWB is a Python package for working with NWB files.
 
    getting_started
    overview
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Resources
+
    example
    tutorials
    api_docs
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Legal
+
    legal
 
 Indices and tables
