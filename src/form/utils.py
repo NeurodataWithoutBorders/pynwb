@@ -3,7 +3,7 @@ import itertools as _itertools
 import copy as _copy
 from collections import Iterable
 from abc import ABCMeta
-
+import six
 import numpy as np
 
 def __type_okay(value, argtype, allow_none=False):
@@ -33,7 +33,10 @@ def __type_okay(value, argtype, allow_none=False):
             return __is_int(value) or __is_float(value)
         return argtype in [cls.__name__ for cls in value.__class__.__mro__]
     elif isinstance(argtype, type):
-        if argtype is int:
+
+        if argtype == str:
+            return isinstance(value, six.string_types)
+        elif argtype is int:
             return __is_int(value)
         elif argtype is float:
             return __is_float(value)
@@ -102,6 +105,15 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
             elif argsi < len(args):
                 argval = args[argsi]
                 argval_set = True
+
+            # if type(argval) == unicode and arg['type'] == str:
+            #     if unicode_allowed:
+            #         arg['type'] = unicode
+            #     else:
+            #         import unicodedata
+            #         argval = unicodedata.normalize('NFKD', argval).encode('ascii','ignore')
+            #     argval_set = True
+
             if not argval_set:
                 errors.append("missing argument '%s'" % argname)
             else:

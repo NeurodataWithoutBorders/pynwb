@@ -14,6 +14,7 @@ class TestNWBContainerIO(unittest.TestCase):
         self.setUpBuilder()
 
     def test_build(self):
+        # raise Exception
         self.maxDiff = None
         result = self.manager.build(self.container)
         self.assertDictEqual(result, self.builder)

@@ -1,4 +1,5 @@
-import unittest2 as unittest
+import unittest
+import six
 from datetime import datetime
 import os
 from h5py import File
@@ -73,7 +74,13 @@ class TestHDF5Writer(unittest.TestCase):
         io.write(self.container)
         io.close()
         f = File(self.path)
-        with self.assertRaises(OSError):
+
+        if six.PY2:
+            assert_file_exists = IOError
+        elif six.PY3:
+            assert_file_exists = OSError
+
+        with self.assertRaises(assert_file_exists):
             io = HDF5IO(self.path, self.manager, mode='w-')
             io.write(self.container)
             io.close()
