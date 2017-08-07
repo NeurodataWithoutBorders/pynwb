@@ -2,6 +2,7 @@ from collections import Iterable
 import numpy as np
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
+import six
 from .utils import docval, getargs, popargs
 
 def __get_shape_helper(data):
@@ -81,11 +82,13 @@ class DataChunkIterator(AbstractDataChunkIterator):
                                                                           'buffer_size',
                                                                           kwargs)
         # Create an iterator for the data if possible
+        print (self.max_shape)
         self.__data_iter = iter(self.data) if isinstance(self.data, Iterable) else None
         self.__next_chunk = DataChunk(None, None)
         self.__first_chunk_shape = None
         # Determine the shape of the data if possible
         if self.max_shape is None:
+            print (self.data)
             # If the self.data object identifies it shape then use it
             if hasattr(self.data,  "shape"):
                 self.max_shape = self.data.shape
@@ -96,7 +99,8 @@ class DataChunkIterator(AbstractDataChunkIterator):
                     self.__data_iter = iter(self.data)
             # Try to get an accurate idea of max_shape for other Python datastructures if possible.
             # Don't just callget_shape for a generator as that would potentially trigger loading of all the data
-            elif isinstance(self.data, list) or isinstance(self.data, tuple):
+            # elif isinstance(self.data, list) or isinstance(self.data, tuple):
+            elif isinstance(self.data, (list, tuple, six.moves.range)):
                 self.max_shape = ShapeValidator.get_data_shape(self.data)
 
         # If we have a data iterator, then read the first chunk
@@ -176,7 +180,7 @@ class DataChunkIterator(AbstractDataChunkIterator):
         # Return the current next chunk
         return curr_chunk
 
-    next = __next__ 
+    next = __next__
 
     @docval(returns='Tuple with the recommended chunk shape or None if no particular shape is recommended.')
     def recommended_chunk_shape(self):
