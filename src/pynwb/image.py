@@ -4,7 +4,7 @@ from collections import Iterable
 from form.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
-from .base import Interface, TimeSeries, _default_resolution, _default_conversion
+from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer
 
 @register_class('ImageSeries', CORE_NAMESPACE)

@@ -102,6 +102,6 @@ def get_class(**kwargs):
 
 
 from . import io as __io
-from .base import TimeSeries, Module, Interface
+from .base import TimeSeries, ProcessingModule
 from .file import NWBFile
 

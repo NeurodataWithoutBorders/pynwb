@@ -15,6 +15,7 @@ def set_parents(container, parent):
             container.parent = parent
     return ret
 
+@register_class(CORE_NAMESPACE, 'NWBContainer')
 class NWBContainer(Container, metaclass=ExtenderMeta):
     '''The base class to any NWB types.
 
@@ -23,27 +24,27 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
     '''
 
 
-    __nwbfields__ = tuple()
+    __nwbfields__ = ('source',)
 
-
-    @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
-        parent, container_source = getargs('parent', 'container_source', kwargs)
+        parent, container_source, source = getargs('parent', 'container_source', 'source', kwargs)
+        super().__init__()
+        self.source = source
         self.__fields = dict()
         self.__subcontainers = list()
         self.__parent = None
+        self.__name = getargs('name', kwargs)
         if parent:
             self.parent = parent
         self.__container_source = container_source
 
     @property
-    def neurodata_type(self):
-        return self.__class__.__name__
-
-    @property
-    def namespace(cls):
-        return getattr(cls, '_%s__namespace' % cls.__name__)
+    def name(self):
+        return self.__name
 
     @property
     def container_source(self):
@@ -64,7 +65,6 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
         '''The parent NWBContainer of this NWBContainer
         '''
         return self.__parent
-
 
     @parent.setter
     def parent(self, parent_container):
