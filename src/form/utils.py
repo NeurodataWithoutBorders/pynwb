@@ -351,7 +351,6 @@ def getargs(*argnames):
         raise ValueError('must provide keyword to get')
     if len(argnames) == 2:
         return kwargs.get(argnames[0])
-    # print ([kwargs.get(arg) for arg in argnames[:-1]]) # HACK remove after debug
     return [kwargs.get(arg) for arg in argnames[:-1]]
 
 def popargs(*argnames):

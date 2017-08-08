@@ -82,13 +82,11 @@ class DataChunkIterator(AbstractDataChunkIterator):
                                                                           'buffer_size',
                                                                           kwargs)
         # Create an iterator for the data if possible
-        print (self.max_shape)
         self.__data_iter = iter(self.data) if isinstance(self.data, Iterable) else None
         self.__next_chunk = DataChunk(None, None)
         self.__first_chunk_shape = None
         # Determine the shape of the data if possible
         if self.max_shape is None:
-            print (self.data)
             # If the self.data object identifies it shape then use it
             if hasattr(self.data,  "shape"):
                 self.max_shape = self.data.shape
@@ -99,9 +97,8 @@ class DataChunkIterator(AbstractDataChunkIterator):
                     self.__data_iter = iter(self.data)
             # Try to get an accurate idea of max_shape for other Python datastructures if possible.
             # Don't just callget_shape for a generator as that would potentially trigger loading of all the data
-            # elif isinstance(self.data, list) or isinstance(self.data, tuple):
-            elif isinstance(self.data, (list, tuple, six.moves.range)):
-                self.max_shape = ShapeValidator.get_data_shape(self.data)
+            elif isinstance(self.data, list) or isinstance(self.data, tuple):
+                self.max_shape = ShapeValidator.get_data_shape(self.data, strict_no_data_load=True)
 
         # If we have a data iterator, then read the first chunk
         if self.__data_iter is not None: # and(self.max_shape is None or self.dtype is None):
@@ -111,13 +108,16 @@ class DataChunkIterator(AbstractDataChunkIterator):
         if self.max_shape is None and self.__next_chunk.data is not None:
             data_shape = ShapeValidator.get_data_shape(self.__next_chunk.data)
             self.max_shape = list(data_shape)
-            self.max_shape[0] = None
+            try:
+                self.max_shape[0] = len(self.data)  # We use self.data here because self.__data_iter does not allow len
+            except TypeError:
+                self.max_shape[0] = None
             self.max_shape = tuple(self.max_shape)
 
         # Determine the type of the data if possible
         if self.__next_chunk.data is not None:
             self.dtype = self.__next_chunk.data.dtype
-            self.__first_chunk_shape = self.__next_chunk.data.shape
+            self.__first_chunk_shape = ShapeValidator.get_data_shape(self.__next_chunk.data)
 
     def __iter__(self):
         """Return the iterator object"""
