@@ -50,6 +50,7 @@ setup_args = {
     'url': 'https://bitbucket.org/lblneuro/pynwb',
     'license': license,
     'packages': pkgs,
+    'install_requires': ['requirements.txt']
     'package_dir': {'': 'src'},
     'package_data': {'pynwb':["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
     #'package_data': {'pynwb':["data/*.yaml"]},
