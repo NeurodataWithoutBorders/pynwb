@@ -534,7 +534,8 @@ class ObjectMapper(with_metaclass(DecExtenderMeta, object)):
         try:
             obj = cls(*args, **kwargs)
         except Exception as ex:
-            raise_from(Exception('Could not construct %s object' % (cls.__name__)), ex)
+            msg = 'Could not construct %s object' % (cls.__name__)
+            raise_from(Exception(msg), ex)
         return obj
 
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container to get the Builder name for'})
@@ -598,7 +599,7 @@ class TypeMap(object):
         for new_ns, ns_deps in deps.items():
             for src_ns, types in ns_deps.items():
                 for dt in types:
-                    container_cls = self.__get_container_cls(src_ns, dt)
+                    container_cls = self.get_container_cls(src_ns, dt)
                     if container_cls is None:
                         container_cls = TypeSource(src_ns, dt)
                     self.register_container_type(new_ns, dt, container_cls)
@@ -628,14 +629,16 @@ class TypeMap(object):
 
     @classmethod
     def __get_constructor(self, base, addl_fields):
+        #TODO: fix this to be more maintainable and smarter
         existing_args = set()
         docval_args = list()
         new_args = list()
-        for arg in get_docval(base.__init__):
-            existing_args.add(arg['name'])
-            if arg['name'] in addl_fields:
-                continue
-            docval_args.append(arg)
+        if base is not None:
+            for arg in get_docval(base.__init__):
+                existing_args.add(arg['name'])
+                if arg['name'] in addl_fields:
+                    continue
+                docval_args.append(arg)
         for f, field_spec in addl_fields.items():
             dtype = self.__get_type(field_spec)
             docval_arg = {'name': f, 'type': dtype, 'doc': field_spec.doc}
@@ -645,19 +648,30 @@ class TypeMap(object):
             if f not in existing_args:
                 new_args.append(f)
         # TODO: set __nwbfields__
-        @docval(*docval_args)
-        def __init__(self, **kwargs):
-            pargs, pkwargs = fmt_docval_args(base.__init__, kwargs)
-            super(type(self), self).__init__(*pargs, **pkwargs)
-            for f in new_args:
-                setattr(self, f, kwargs.get(f,None))
-        return __init__
+        if base is None:
+            @docval(*docval_args)
+            def __init__(self, **kwargs):
+                for f in new_args:
+                    setattr(self, f, kwargs.get(f,None))
+            return __init__
+        else:
+            @docval(*docval_args)
+            def __init__(self, **kwargs):
+                pargs, pkwargs = fmt_docval_args(base.__init__, kwargs)
+                super(type(self), self).__init__(*pargs, **pkwargs)
+                for f in new_args:
+                    setattr(self, f, kwargs.get(f,None))
+            return __init__
 
     @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type"},
             {"name": "data_type", "type": str, "doc": "the data type to create a Container class for"},
-            returns='a dynamically created class based on the spec of the data type', rtype=type)
-    def create_container_cls(self, **kwargs):
-        '''Create a container class from data type specification'''
+            returns='the class for the given namespace and data_type', rtype=type)
+    def get_container_cls(self, **kwargs):
+        '''Get the container class from data type specification
+
+        If no class has been associated with the ``data_type`` from ``namespace``,
+        a class will be dynamically created and returned.
+        '''
         namespace, data_type = getargs('namespace', 'data_type', kwargs)
         cls = self.__get_container_cls(namespace, data_type)
         if cls is None:
@@ -667,11 +681,10 @@ class TypeMap(object):
                 parent_cls = self.__get_container_cls(namespace, t)
                 if parent_cls is not None:
                     break
-            if parent_cls is None:
-                print(list(self.__container_types.keys()))
-                raise ValueError('No Container class found for parents of %s:%s %s' % (namespace, data_type, dt_hier))
+            bases = tuple()
+            if parent_cls is not None:
+                bases = (parent_cls,)
             name = data_type
-            bases = (parent_cls,)
             spec = self.__ns_catalog.get_spec(namespace, data_type)
             attr_names = self.__default_mapper_cls.get_attr_names(spec)
             fields = dict()
@@ -712,8 +725,8 @@ class TypeMap(object):
         ''' Get the class object for the given Builder '''
         builder = getargs('builder', kwargs)
         data_type = self.__get_builder_dt(builder)
-        namespace = self.__get_builder_ns(builder)
-        return self.__get_container_cls(namespace, data_type)
+        namespace = self.__get_namespace(builder)
+        return self.get_container_cls(namespace, data_type)
 
     @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
             {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder), 'doc': 'the builder to get the sub-specification for'})
@@ -792,7 +805,7 @@ class TypeMap(object):
         namespace, data_type, container_cls = getargs('namespace', 'data_type', 'container_cls', kwargs)
         self.__container_types.setdefault(namespace, dict())
         self.__container_types[namespace][data_type] = container_cls
-        self.__data_types[container_cls] = (namespace, data_type)
+        self.__data_types.setdefault(container_cls, (namespace, data_type))
 
     @docval({"name": "container_cls", "type": type, "doc": "the Container class for which the given ObjectMapper class gets used for"},
             {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map"})

@@ -3,12 +3,13 @@ from datetime import datetime
 from copy import deepcopy, copy
 from itertools import chain
 
-from ..utils import docval, getargs, popargs, get_docval
+from ..utils import docval, getargs, popargs, get_docval, fmt_docval_args
 
 NAME_WILDCARD = None
 ZERO_OR_ONE = '?'
 ZERO_OR_MANY = '*'
 ONE_OR_MANY = '+'
+DEF_QUANTITY = 1
 FLAGS = {
     'zero_or_one': ZERO_OR_ONE,
     'zero_or_many': ZERO_OR_MANY,
@@ -118,6 +119,7 @@ class AttributeSpec(Spec):
             if value is not None:
                 raise ValueError("cannot specify 'value' and 'default_value'")
             self['default_value'] = default_value
+            self['required'] = False
         if dims is not None:
             self['dims'] = dims
             if 'shape' not in self:
@@ -158,7 +160,8 @@ class AttributeSpec(Spec):
 
 _attrbl_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
+        {'name': 'name', 'type': str, 'doc': 'the name of this base storage container', 'default': None},
+        {'name': 'default_name', 'type': str, 'doc': 'The default name of this base storage container', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
@@ -184,7 +187,7 @@ class BaseStorageSpec(Spec):
             if name != NAME_WILDCARD:
                 raise ValueError(("Cannot give specific name to something that can ",
                                   "exist multiple times: name='%s', quantity='%s'" % (name, quantity)))
-        if quantity != 1:
+        if quantity != DEF_QUANTITY:
             self['quantity'] = quantity
         if not linkable:
             self['linkable'] = False
@@ -202,8 +205,14 @@ class BaseStorageSpec(Spec):
         for attribute in attributes:
             self.set_attribute(attribute)
         self.__new_attributes = set(self.__attributes.keys())
+        self.__resolved = False
         if resolve:
             self.resolve_spec(data_type_inc)
+            self.__resolved = True
+
+    @property
+    def resolved(self):
+        return self.__resolved
 
     @property
     def required(self):
@@ -293,13 +302,13 @@ class BaseStorageSpec(Spec):
     @property
     def quantity(self):
         ''' The number of times the object being specified should be present '''
-        return self.get('quantity', 1)
+        return self.get('quantity', DEF_QUANTITY)
 
     @docval(*deepcopy(_attr_args))
     def add_attribute(self, **kwargs):
         ''' Add an attribute to this specification '''
-        doc, name = kwargs.pop('doc', 'name')
-        spec = AttributeSpec(doc, name, **kwargs)
+        pargs, pkwargs = fmt_docval_args(AttributeSpec.__init__, kwargs)
+        spec = AttributeSpec(*pargs, **pkwargs)
         self.set_attribute(spec)
         return spec
 
@@ -342,12 +351,14 @@ class BaseStorageSpec(Spec):
 _dataset_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
-        {'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset', 'default': None},
+        {'name': 'name', 'type': str, 'doc': 'The name of this dataset', 'default': None},
+        {'name': 'default_name', 'type': str, 'doc': 'The default name of this dataset', 'default': None},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
         {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
+        {'name': 'default_value', 'type': None, 'doc': 'a default value for this dataset', 'default': None},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
         {'name': 'data_type_inc', 'type': (str, 'DatasetSpec'), 'doc': 'the NWB type this specification extends', 'default': None},
 ]
@@ -357,7 +368,7 @@ class DatasetSpec(BaseStorageSpec):
 
     @docval(*deepcopy(_dataset_args))
     def __init__(self, **kwargs):
-        doc, shape, dims, dtype = popargs('doc', 'shape', 'dims', 'dtype', kwargs)
+        doc, shape, dims, dtype, default_value = popargs('doc', 'shape', 'dims', 'dtype', 'default_value', kwargs)
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if shape is not None:
             self['shape'] = shape
@@ -370,6 +381,13 @@ class DatasetSpec(BaseStorageSpec):
                     raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
             self['dtype'] = dtype
+        if default_value is not None:
+            self['default_value'] = default_value
+            if self.name is not None:
+                self.pop('quantity')
+            else:
+                self['quantity'] = ZERO_OR_MORE
+
 
     @property
     def dims(self):
@@ -422,11 +440,12 @@ class LinkSpec(Spec):
     @property
     def quantity(self):
         ''' The number of times the object being specified should be present '''
-        return self.get('quantity', 1)
+        return self.get('quantity', DEF_QUANTITY)
 
 _group_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'name', 'type': str, 'doc': 'the name of this group', 'default': None},
+        {'name': 'default_name', 'type': str, 'doc': 'The default name of this group', 'default': None},
         {'name': 'groups', 'type': list, 'doc': 'the subgroups in this group', 'default': list()},
         {'name': 'datasets', 'type': list, 'doc': 'the datasets in this group', 'default': list()},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},

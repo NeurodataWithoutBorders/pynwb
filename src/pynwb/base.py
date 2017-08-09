@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs, popargs
+from form.utils import docval, getargs, popargs, fmt_docval_args
 from form.data_utils import DataChunkIterator
 
 from . import register_class, CORE_NAMESPACE
@@ -10,93 +10,38 @@ from .core import  NWBContainer
 _default_conversion = 1.0
 _default_resolution = 0.0
 
-@register_class('Interface', CORE_NAMESPACE)
-class Interface(NWBContainer):
-    """ Interfaces represent particular processing tasks and they publish
-        (ie, make available) specific types of data. Each is required
-        to supply a minimum of specifically named data, but all can store
-        data beyond this minimum
-
-        Interfaces should be created through Module.create_interface().
-        They should not be created directly
-    """
-    __nwbfields__ = ("help",
-                     "neurodata_type",
-                     "source")
-
-    __neurodata_type = "Interface"
-
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Interface'},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
-    def __init__(self, **kwargs):
-        if self.__class__ == Interface:
-            raise NotImplementedError("Interface cannot by instantiated directly")
-        source = getargs('source', kwargs)
-        super(Interface, self).__init__(**kwargs)
-        self.source = source
-
-    @property
-    def name(self):
-        #name_attr_name = '_%s__name' % str(self.__class__.__name__).lstrip('_')
-        #if hasattr(self, name_attr_name):
-        #    return getattr(self, name_attr_name)
-        #else:
-        #    return self.__class__.__name__
-        return self.__class__.__name__
-        return None
-
-    @property
-    def help(self):
-        help_attr_name = '_%s__help' % str(self.__class__.__name__).lstrip('_')
-        if hasattr(self, help_attr_name):
-            return getattr(self, help_attr_name)
-        return None
-
-@register_class('Module', CORE_NAMESPACE)
-class Module(NWBContainer):
-    """ Processing module. This is a container for one or more interfaces
+@register_class('ProcessingModule', CORE_NAMESPACE)
+class ProcessingModule(NWBContainer):
+    """ Processing module. This is a container for one or more containers
         that provide data at intermediate levels of analysis
 
-        Modules should be created through calls to NWB.create_module().
+        ProcessingModules should be created through calls to NWB.create_module().
         They should not be instantiated directly
     """
 
-    __nwbfields__ = ('name',
-                     'description',
-                     'interfaces',
-                     'interface_names',
-                     'neurodata_type')
-
-    __neurodata_type = "Module"
+    __nwbfields__ = ('description',
+                     'containers')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
-            {'name': 'interfaces', 'type': list, 'doc': 'Interfaces that belong to this Modules', 'default': None},
+            {'name': 'containers', 'type': list, 'doc': 'NWBContainers that belong to this ProcessingModule', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, description, interfaces = popargs('name', 'description', 'interfaces', kwargs)
-        super(Module, self).__init__(**kwargs)
+        description, containers = popargs('description', 'containers', kwargs)
+        super(ProcessingModule, self).__init__(**kwargs)
         self.description = description
-        self.__name = name
-        self.__interfaces = list() if interfaces is None else interfaces
+        self.__containers = list() if containers is None else containers
 
     @property
-    def interfaces(self):
-        return tuple(self.__interfaces)
+    def containers(self):
+        return tuple(self.__containers)
 
-    @property
-    def name(self):
-        return self.__name
-
-    @property
-    def interface_names(self):
-        return tuple(i.name for i in self.__interfaces)
-
-    @docval({'name': 'interface', 'type': Interface, 'doc': 'the Interface to add to this Module'})
-    def add_interface(self, **kwargs):
-        interface = getargs('interface', kwargs)
-        self.__interfaces.append(interface)
-        interface.parent = self
+    @docval({'name': 'container', 'type': NWBContainer, 'doc': 'the NWBContainer to add to this Module'})
+    def add_container(self, **kwargs):
+        container = getargs('container', kwargs)
+        self.__containers.append(container)
+        container.parent = self
 
 @register_class('TimeSeries', CORE_NAMESPACE)
 class TimeSeries(NWBContainer):
@@ -105,16 +50,8 @@ class TimeSeries(NWBContainer):
         All time series are created by calls to  NWB.create_timeseries().
         They should not not be instantiated directly
     """
-        # if modality == "acquisition":
-        #     self.path = "/acquisition/timeseries/"
-        # elif modality == "stimulus":
-        #     self.path = "/stimulus/presentation/"
-        # elif modality == "template":
-        #     self.path = "/stimulus/templates/"
-    __nwbfields__ = ("name",
-                     "comments",
+    __nwbfields__ = ("comments",
                      "description",
-                     "source",
                      "data",
                      "resolution",
                      "conversion",
@@ -153,8 +90,8 @@ class TimeSeries(NWBContainer):
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':'no description'},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
@@ -162,18 +99,19 @@ class TimeSeries(NWBContainer):
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
-        super(TimeSeries, self).__init__(parent=kwargs.get('parent'))
-        keys = ("name",
-                "source",
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        super().__init__(*pargs, **pkwargs)
+        keys = ("resolution",
                 "comments",
                 "description",
-                "resolution",
                 "conversion",
                 "unit",
                 "control",
                 "control_description")
         for key in keys:
-            setattr(self, key, kwargs.get(key))
+            val = kwargs.get(key)
+            if val is not None:
+                setattr(self, key, val)
 
         data = getargs('data', kwargs)
         self.fields['data'] = data
@@ -203,14 +141,6 @@ class TimeSeries(NWBContainer):
 
         #self.fields['data_link'] = set()
         #self.fields['timestamp_link'] = set()
-
-    @property
-    def ancestry(self):
-        return self.__ancestry
-
-    @property
-    def neurodata_type(self):
-        return self.__neurodata_type
 
     @property
     def help(self):

@@ -153,7 +153,7 @@ class TestDynamicContainer(unittest.TestCase):
                              attributes=[AttributeSpec('attr3', 'float', 'an example float attribute'),
                                          AttributeSpec('attr4', 'float', 'another example float attribute')])
         self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
-        cls = self.type_map.create_container_cls(CORE_NAMESPACE, 'Baz')
+        cls = self.type_map.get_container_cls(CORE_NAMESPACE, 'Baz')
         expected_args = {'name', 'data', 'attr1', 'attr2', 'attr3', 'attr4'}
         received_args = set()
         for x in get_docval(cls.__init__):
@@ -169,7 +169,7 @@ class TestDynamicContainer(unittest.TestCase):
                              attributes=[AttributeSpec('attr3', 'float', 'an example float attribute'),
                                          AttributeSpec('attr4', 'float', 'another example float attribute')])
         self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
-        cls = self.type_map.create_container_cls(CORE_NAMESPACE, 'Baz')
+        cls = self.type_map.get_container_cls(CORE_NAMESPACE, 'Baz')
         expected_args = {'name', 'data', 'attr1', 'attr2', 'attr3', 'attr4'}
         received_args = set(map(lambda x: x['name'], get_docval(cls.__init__)))
         self.assertSetEqual(expected_args, received_args)
@@ -181,7 +181,7 @@ class TestDynamicContainer(unittest.TestCase):
                              attributes=[AttributeSpec('attr3', 'float', 'an example float attribute'),
                                          AttributeSpec('attr4', 'float', 'another example float attribute')])
         self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
-        cls = self.type_map.create_container_cls(CORE_NAMESPACE, 'Baz')
+        cls = self.type_map.get_container_cls(CORE_NAMESPACE, 'Baz')
         #TODO: test that constructor works!
         inst = cls('My Baz', [1,2,3,4], 'string attribute', 1000, attr3=98.6, attr4=1.0)
         self.assertEqual(inst.name, 'My Baz')

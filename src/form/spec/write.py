@@ -65,15 +65,15 @@ class NamespaceBuilder(object):
     def __dump_spec(self, specs, stream):
         yaml.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to write the spec to'})
+    @docval({'name': 'path', 'type': str, 'doc': 'the path to write the spec to'},
+            {'name': 'outdir', 'type': str, 'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'})
     def export(self, **kwargs):
         ''' Export the namespace to the given path.
 
         All new specification source files will be written in the same directory as the
         given path.
         '''
-        ns_path = getargs('path', kwargs)
-        outdir = os.path.dirname(ns_path)
+        ns_path, outdir = getargs('path', 'outdir', kwargs)
         ns_args = copy.copy(self.__ns_args)
         ns_args['schema'] = list()
         for ns, info in self.__namespaces.items():
@@ -97,5 +97,6 @@ class NamespaceBuilder(object):
                 with open(os.path.join(outdir, path), 'w') as stream:
                     self.__dump_spec(out, stream)
             ns_args['schema'].append(item)
+        ns_path = os.path.join(outdir, ns_path)
         with open(ns_path, 'w') as stream:
             self.__dump_spec({'namespaces': [SpecNamespace.build_namespace(**ns_args)]}, stream)

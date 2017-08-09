@@ -7,10 +7,6 @@ groups:
     value: Stores points in space over time. The data[] array structure is [num samples][num
       spatial dimensions]
   datasets:
-  - doc: Description defining what exactly 'straight-ahead' means.
-    dtype: text
-    name: reference_frame
-    quantity: '?'
   - attributes:
     - default_value: meter
       doc: "The base unit of measure used to store data. This should be in the SI\
@@ -19,6 +15,7 @@ groups:
         \ below describes how to convert the data to the specified SI unit."
       dtype: text
       name: unit
+      required: false
     dims:
     - num_times
     - num_features
@@ -28,6 +25,10 @@ groups:
     shape:
     - null
     - null
+  - doc: Description defining what exactly 'straight-ahead' means.
+    dtype: text
+    name: reference_frame
+    quantity: '?'
   doc: 'Direction, e.g., of gaze or travel, or position. The TimeSeries::data field
     is a 2D array storing position or direction relative to some reference frame.
     Array structure: [num measurements] [num dimensions]. Each SpatialSeries has a
@@ -62,7 +63,7 @@ groups:
     quantity: '*'
   name: BehavioralEpochs
   neurodata_type_def: BehavioralEpochs
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer
 - attributes:
   - doc: Value is 'Position data, whether along the x, xy or xyz axis'
     dtype: text
@@ -76,7 +77,7 @@ groups:
     quantity: '*'
   name: BehavioralEvents
   neurodata_type_def: BehavioralEvents
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer
 - attributes:
   - doc: Value is 'General container for storing continuously sampled behavioral data.'
     dtype: text
@@ -90,7 +91,7 @@ groups:
     quantity: '*'
   name: BehavioralTimeSeries
   neurodata_type_def: BehavioralTimeSeries
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer
 - attributes:
   - doc: Value is 'Eye-tracking data, representing pupil size'
     dtype: text
@@ -103,7 +104,7 @@ groups:
     quantity: +
   name: PupilTracking
   neurodata_type_def: PupilTracking
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer
 - attributes:
   - doc: Value is 'Eye-tracking data, representing direction of gaze'
     dtype: text
@@ -116,7 +117,7 @@ groups:
     quantity: '*'
   name: EyeTracking
   neurodata_type_def: EyeTracking
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer
 - attributes:
   - doc: Value is 'Direction as measured radially. Spatial series reference frame
       should indicate which direction corresponds to zero and what is the direction
@@ -136,7 +137,7 @@ groups:
     quantity: '*'
   name: CompassDirection
   neurodata_type_def: CompassDirection
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer
 - attributes:
   - doc: Value is 'Position data, whether along the x, xy or xyz axis'
     dtype: text
@@ -149,7 +150,7 @@ groups:
     quantity: +
   name: Position
   neurodata_type_def: Position
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer
 - attributes:
   - doc: Value is 'Image stacks whose frames have been shifted (registered) to account
       for motion'
@@ -161,11 +162,7 @@ groups:
     system, to account for movement and drift between frames. Note: each frame at
     each point in time is assumed to be 2-D (has only x & y dimensions).'
   groups:
-  - datasets:
-    - doc: Path to linked original timeseries
-      dtype: text
-      name: original_path
-    doc: One of possibly many.  Name should be informative.
+  - doc: One of possibly many.  Name should be informative.
     groups:
     - doc: Image stack with frames shifted to the common coordinates.
       neurodata_type_inc: ImageSeries
@@ -177,7 +174,8 @@ groups:
       name: original
       target_type: ImageSeries
     neurodata_type_def: CorrectedImageStack
+    neurodata_type_inc: NWBContainer
     quantity: +
   name: MotionCorrection
   neurodata_type_def: MotionCorrection
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer

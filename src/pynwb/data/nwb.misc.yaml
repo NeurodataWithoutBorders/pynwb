@@ -7,6 +7,24 @@ groups:
     value: Features of an applied stimulus. This is useful when storing the raw stimulus
       is impractical
   datasets:
+  - attributes:
+    - default_value: see 'feature_units'
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      dtype: None
+      name: unit
+      required: false
+    dims:
+    - num_times
+    - num_features
+    doc: Values of each feature at each time.
+    dtype: float32
+    name: data
+    shape:
+    - null
+    - null
   - dims:
     - num_features
     doc: Units of each feature.
@@ -21,23 +39,6 @@ groups:
     dtype: text
     name: features
     shape:
-    - null
-  - attributes:
-    - default_value: see 'feature_units'
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
-      dtype: None
-      name: unit
-    dims:
-    - num_times
-    - num_features
-    doc: Values of each feature at each time.
-    dtype: float32
-    name: data
-    shape:
-    - null
     - null
   doc: Abstract features, such as quantitative descriptions of sensory stimuli. The
     TimeSeries::data field is a 2D array, storing those features (e.g., for visual
@@ -60,14 +61,14 @@ groups:
       dtype: None
       name: conversion
       value: NaN
-    - doc: Value is 'n/a'
-      dtype: None
-      name: unit
-      value: n/a
     - doc: Value is 'float('NaN')'
       dtype: None
       name: resolution
       value: NaN
+    - doc: Value is 'n/a'
+      dtype: None
+      name: unit
+      value: n/a
     dims:
     - num_times
     doc: Annotations made during an experiment.
@@ -92,14 +93,14 @@ groups:
       dtype: None
       name: conversion
       value: NaN
-    - doc: Value is 'n/a'
-      dtype: None
-      name: unit
-      value: n/a
     - doc: Value is 'float('NaN')'
       dtype: None
       name: resolution
       value: NaN
+    - doc: Value is 'n/a'
+      dtype: None
+      name: unit
+      value: n/a
     dims:
     - num_times
     doc: '>0 if interval started, <0 if interval ended.'
@@ -121,20 +122,18 @@ groups:
     dtype: text
     name: help
     value: Estimated spike times from a single unit
-  datasets:
-  - dims:
-    - num_units
-    doc: List of units present.
-    dtype: text
-    name: unit_list
-    shape:
-    - null
   doc: Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group
     contains a group for each unit. The name of the group should match the value in
     the source module, if that is possible/relevant (e.g., name of ROIs from Segmentation
     module).
   groups:
   - datasets:
+    - doc: Name, path or description of where unit times originated. This is necessary
+        only if the info here differs from or is more fine-grained than the interface's
+        source field
+      dtype: text
+      name: source
+      quantity: '?'
     - dims:
       - num_events
       doc: Spike time for the units (exact or estimated)
@@ -142,18 +141,13 @@ groups:
       name: times
       shape:
       - null
-    - doc: Name, path or description of where unit times originated. This is necessary
-        only if the info here differs from or is more fine-grained than the interface's
-        source field
-      dtype: text
-      name: source
-      quantity: '?'
     - doc: Description of the unit (eg, cell type).
       dtype: text
       name: unit_description
     doc: Group storing times for &lt;unit_N&gt;.
     neurodata_type_def: SpikeUnit
+    neurodata_type_inc: NWBContainer
     quantity: +
   name: UnitTimes
   neurodata_type_def: UnitTimes
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer

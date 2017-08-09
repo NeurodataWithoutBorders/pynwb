@@ -19,7 +19,6 @@ class NWBFileMap(ObjectMapper):
 
         epochs_spec = self.spec.get_group('epochs')
         self.map_spec('epochs', epochs_spec.get_neurodata_type('Epoch'))
-        self.map_spec('epoch_tags', epochs_spec.get_attribute('tags'))
 
         general_spec = self.spec.get_group('general')
         self.map_spec('ic_electrodes', general_spec.get_group('intracellular_ephys').get_neurodata_type('IntracellularElectrode'))
@@ -27,7 +26,7 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('optogenetic_sites', general_spec.get_group('optogenetics').get_neurodata_type('OptogeneticStimulusSite'))
         self.map_spec('imaging_planes', general_spec.get_group('optophysiology').get_neurodata_type('ImagingPlane'))
 
-        self.map_spec('modules', self.spec.get_group('processing').get_neurodata_type('Module'))
+        self.map_spec('modules', self.spec.get_group('processing').get_neurodata_type('ProcessingModule'))
         self.unmap(general_spec.get_dataset('stimulus'))
 
 

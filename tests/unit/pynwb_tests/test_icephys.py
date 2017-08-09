@@ -6,7 +6,16 @@ from pynwb.icephys import PatchClampSeries, CurrentClampSeries, IZeroClampSeries
 import numpy as np
 
 def GetElectrode():
-        elec = IntracellularElectrode('slice', 'seal', 'description', 'location', 'resistance', 'filtering', 'initial_access_resistance', 'device')
+        elec = IntracellularElectrode('test_iS',
+                                      'a test source',
+                                       'slice',
+                                       'seal',
+                                       'description',
+                                       'location',
+                                       'resistance',
+                                       'filtering',
+                                       'initial_access_resistance',
+                                       'device')
         return elec
 
 class IntracellularElectrodeConstructor(unittest.TestCase):

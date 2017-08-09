@@ -1,9 +1,8 @@
 from collections import Iterable
 
-from form.utils import docval, popargs
+from form.utils import docval, popargs, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
-from .base import Interface
 from .core import NWBContainer
 
 #@register_class('ImageRetinotopy', CORE_NAMESPACE)    # make sure to uncomment this after this class is implemented
@@ -18,7 +17,8 @@ class aimage(NWBContainer):
                      'field_of_view',
                      'focal_depth')
 
-    @docval({'name': 'data', 'type': Iterable, 'doc': 'Data field.'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'data', 'type': Iterable, 'doc': 'Data field.'},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'Number of bits used to represent each value. This is necessary to determine maximum (white) pixel value.'},
             {'name': 'dimension', 'type': Iterable, 'doc': 'Number of rows and columns in the image.'},
             {'name': 'format', 'type': Iterable, 'doc': 'Format of image. Right now only "raw" supported.'},
@@ -26,7 +26,8 @@ class aimage(NWBContainer):
             {'name': 'focal_depth', 'type': float, 'doc': 'Focal depth offset, in meters.'})
     def __init__(self, **kwargs):
         data, bits_per_pixel, dimension, format, field_of_view = popargs('data', 'bits_per_pixel', 'dimension', 'format', 'field_of_view', kwargs)
-        super(aimage, self).__init__(**kwargs)
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        super().__init__(*pargs, **pkwargs)
         self.data = data
         self.bits_per_pixel = bits_per_pixel
         self.dimension = format
@@ -41,19 +42,21 @@ class amap(NWBContainer):
                      'unit',
                      'dimension')
 
-    @docval({'name': 'data', 'type': Iterable, 'doc': 'data field.'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'data', 'type': Iterable, 'doc': 'data field.'},
             {'name': 'field_of_view', 'type': Iterable, 'doc': 'Size of viewing area, in meters.'},
             {'name': 'unit', 'type': str, 'doc': 'Unit that axis data is stored in (e.g., degrees)'},
             {'name': 'dimension', 'type': Iterable, 'doc': 'Number of rows and columns in the image'})
     def __init__(self, **kwargs):
         data, field_of_view, unit, dimension = popargs('data', 'field_of_view', 'unit', 'dimension', kwargs)
-        super(amap, self).__init__(**kwargs)
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        super().__init__(*pargs, **pkwargs)
         self.data = data
         self.field_of_view = field_of_view
         self.unit = unit
         self.dimension = dimension
 
-class ImagingRetinotopy(Interface):
+class ImagingRetinotopy(NWBContainer):
     """
     Intrinsic signal optical imaging or widefield imaging for measuring retinotopy. Stores orthogonal
     maps (e.g., altitude/azimuth; radius/theta) of responses to specific stimuli and a combined
@@ -84,8 +87,9 @@ class ImagingRetinotopy(Interface):
             {'name': 'focal_depth_image', 'type': aimage, 'doc': 'Gray-scale image taken with same settings/parameters (e.g., focal depth, wavelength) as data collection. Array format: [rows][columns].'},
             {'name': 'vasculature_image', 'type': aimage, 'doc': 'Gray-scale anatomical image of cortical surface. Array structure: [rows][columns].'})
     def __init__(self, **kwargs):
-        source, axis_1_phase_map, axis_1_power_map, axis_2_phase_map, axis_2_power_map, axis_descriptions, focal_depth_image, sign_map, vasculature_image = popargs('source', 'axis_1_phase_map', 'axis_1_power_map', 'axis_2_phase_map', 'axis_2_power_map', 'axis_descriptions', 'focal_depth_image', 'sign_map', 'vasculature_image', kwargs)
-        super(ImagingRetinotopy, self).__init__(source, **kwargs)
+        axis_1_phase_map, axis_1_power_map, axis_2_phase_map, axis_2_power_map, axis_descriptions, focal_depth_image, sign_map, vasculature_image = popargs('axis_1_phase_map', 'axis_1_power_map', 'axis_2_phase_map', 'axis_2_power_map', 'axis_descriptions', 'focal_depth_image', 'sign_map', 'vasculature_image', kwargs)
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        super().__init__(*pargs, **pkwargs)
         self.axis_1_phase_map = axis_1_phase_map
         self.axis_1_power_map = axis_1_power_map
         self.axis_2_phase_map = axis_2_phase_map

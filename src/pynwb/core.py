@@ -1,7 +1,8 @@
 from form.utils import docval, getargs, ExtenderMeta
 from form import Container
+
+from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
-from . import CORE_NAMESPACE
 
 def set_parents(container, parent):
     if isinstance(container, list):
@@ -15,6 +16,7 @@ def set_parents(container, parent):
             container.parent = parent
     return ret
 
+@register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(with_metaclass(ExtenderMeta, Container)):
     '''The base class to any NWB types.
 
@@ -23,27 +25,30 @@ class NWBContainer(with_metaclass(ExtenderMeta, Container)):
     '''
 
 
-    __nwbfields__ = tuple()
+    __nwbfields__ = ('source',
+                     'help')
 
-
-    @docval({'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
-        parent, container_source = getargs('parent', 'container_source', kwargs)
+        parent, container_source, source, help = getargs('parent', 'container_source', 'source', 'help', kwargs)
+        super().__init__()
+
         self.__fields = dict()
         self.__subcontainers = list()
         self.__parent = None
+        self.__name = getargs('name', kwargs)
         if parent:
             self.parent = parent
         self.__container_source = container_source
 
-    @property
-    def neurodata_type(self):
-        return self.__class__.__name__
+        self.source = source
 
     @property
-    def namespace(cls):
-        return getattr(cls, '_%s__namespace' % cls.__name__)
+    def name(self):
+        return self.__name
 
     @property
     def container_source(self):
@@ -65,7 +70,6 @@ class NWBContainer(with_metaclass(ExtenderMeta, Container)):
         '''
         return self.__parent
 
-
     @parent.setter
     def parent(self, parent_container):
         if self.__parent is not None:
@@ -83,7 +87,8 @@ class NWBContainer(with_metaclass(ExtenderMeta, Container)):
     def __setter(nwbfield):
         def _func(self, val):
             if nwbfield in self.fields:
-                raise AttributeError("cannot set '%s' once it has been set" % nwbfield)
+                msg = "can't set attribute '%s' -- already set" % nwbfield
+                raise AttributeError(msg)
             self.fields[nwbfield] = val
         return _func
 
