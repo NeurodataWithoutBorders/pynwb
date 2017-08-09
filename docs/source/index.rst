@@ -20,6 +20,7 @@ breaking down the barriers to data sharing in neuroscience.
    :caption: Basics
 
    getting_started
+   architecture
    overview
 
 .. toctree::
