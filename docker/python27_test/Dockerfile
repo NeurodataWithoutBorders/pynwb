@@ -24,4 +24,3 @@ WORKDIR /pynwb
 RUN pip install -r 'requirements.txt'
 RUN python setup.py build
 RUN python setup.py install
-RUN python test.py
