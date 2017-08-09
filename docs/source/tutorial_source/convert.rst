@@ -8,7 +8,7 @@ The following are example Jupyter notebooks for converting custom lab data to NW
 crcns-ret-1: Meister lab retina data
 ------------------------------------
 
-* **Notebook:** http://nbviewer.jupyter.org/urls/bitbucket.org/lblneuro/pynwb/raw/dev/docs/notebooks/convert-crcns-ret-1-meisterlab-with-custom-extensions-and-external-stimulus.ipynb
+* **Notebook:** https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/docs/notebooks/convert-crcns-ret-1-meisterlab-with-custom-extensions-and-external-stimulus.ipynb
 * **Example:** This example shows:
 
     * Use of ``UnitTimes``, ``SpikeUnit``, ``ImageSeries``, ``ElectrodeGroup``, ``EpochTimeSeries``, ``Device``
@@ -28,10 +28,10 @@ crcns-ret-1: Meister lab retina data
 
 * **Previous/Alternative Variants:**
 
-    * http://nbviewer.jupyter.org/urls/bitbucket.org/lblneuro/pynwb/raw/dev/docs/notebooks/convert-crcns-ret-1-meisterlab-with-custom-extensions.ipynb :
+    * https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/docs/notebooks/convert-crcns-ret-1-meisterlab-with-custom-extensions.ipynb :
       This notebook is very similar but instead of storing stimuli in external HDF5 files that are linked to via
       external links we here store all data directly in the NWB file.
-    * http://nbviewer.jupyter.org/urls/bitbucket.org/lblneuro/pynwb/raw/dev/docs/notebooks/convert-crcns-ret-1-meisterlab-without-custom-extensions.ipynb :
+    * https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/docs/notebooks/convert-crcns-ret-1-meisterlab-without-custom-extensions.ipynb :
       This is an older variant of the notebook that shows the convert without the use of custom extensions
       (as well as no external links).
 
