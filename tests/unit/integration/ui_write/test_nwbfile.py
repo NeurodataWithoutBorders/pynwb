@@ -25,8 +25,8 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                  attributes={'source': 'example_source',
                                              'namespace': base.CORE_NAMESPACE,
                                              'neurodata_type': 'TimeSeries',
-                                             'data_link': list(),
-                                             'timestamp_link': list(),
+                                             'comments': 'no comments',
+                                             'description': 'no description',
                                              'help': 'General time series object'},
                                  datasets={'data': DatasetBuilder('data', list(range(100,200,10)),
                                                                   attributes={'unit': 'SIunit',
@@ -39,6 +39,7 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                  attributes={'namespace': base.CORE_NAMESPACE,
                                              'neurodata_type': 'ProcessingModule',
                                              'source': 'a test source for a ProcessingModule',
+                                             'help': 'A collection of analysis outputs from processing of data',
                                              'description': 'a test module'},
                                  groups={'Clustering': GroupBuilder('Clustering',
                                          attributes={
@@ -56,7 +57,7 @@ class TestNWBFileIO(base.TestNWBContainerIO):
         self.builder = GroupBuilder('root',
                                  groups={'acquisition': GroupBuilder('acquisition', groups={'timeseries': GroupBuilder('timeseries', groups={'test_timeseries': ts_builder}), 'images': GroupBuilder('images')}),
                                          'analysis': GroupBuilder('analysis'),
-                                         'epochs': GroupBuilder('epochs', attributes={'tags': list()}),
+                                         'epochs': GroupBuilder('epochs'),
                                          'general': GroupBuilder('general'),
                                          'processing': GroupBuilder('processing', groups={'test_module': module_builder}),
                                          'stimulus': GroupBuilder('stimulus', groups={'presentation': GroupBuilder('presentation'), 'templates': GroupBuilder('templates')})},
@@ -67,7 +68,7 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                            'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
                                  attributes={'namespace': base.CORE_NAMESPACE,
                                              'neurodata_type': 'NWBFile',
-                                             'help': 'A collection of analysis outputs from processing of data',
+                                             'help': 'an NWB:N file for storing cellular-based neurophysiology data',
                                              'source': 'a test source'})
 
     def setUpContainer(self):
