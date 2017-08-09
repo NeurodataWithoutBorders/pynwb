@@ -725,7 +725,7 @@ class TypeMap(object):
         ''' Get the class object for the given Builder '''
         builder = getargs('builder', kwargs)
         data_type = self.__get_builder_dt(builder)
-        namespace = self.__get_namespace(builder)
+        namespace = self.__get_builder_ns(builder)
         return self.get_container_cls(namespace, data_type)
 
     @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
