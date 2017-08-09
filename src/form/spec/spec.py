@@ -3,7 +3,7 @@ from datetime import datetime
 from copy import deepcopy, copy
 from itertools import chain
 
-from ..utils import docval, getargs, popargs, get_docval
+from ..utils import docval, getargs, popargs, get_docval, fmt_docval_args
 
 NAME_WILDCARD = None
 ZERO_OR_ONE = '?'
@@ -203,8 +203,14 @@ class BaseStorageSpec(Spec):
         for attribute in attributes:
             self.set_attribute(attribute)
         self.__new_attributes = set(self.__attributes.keys())
+        self.__resolved = False
         if resolve:
             self.resolve_spec(data_type_inc)
+            self.__resolved = True
+
+    @property
+    def resolved(self):
+        return self.__resolved
 
     @property
     def required(self):
@@ -299,8 +305,8 @@ class BaseStorageSpec(Spec):
     @docval(*deepcopy(_attr_args))
     def add_attribute(self, **kwargs):
         ''' Add an attribute to this specification '''
-        doc, name = kwargs.pop('doc', 'name')
-        spec = AttributeSpec(doc, name, **kwargs)
+        pargs, pkwargs = fmt_docval_args(AttributeSpec.__init__, kwargs)
+        spec = AttributeSpec(*pargs, **pkwargs)
         self.set_attribute(spec)
         return spec
 
