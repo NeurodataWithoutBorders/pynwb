@@ -3,5 +3,6 @@ numpy
 scipy
 ruamel.yaml
 python-dateutil
-urllib2
 unittest2
+six
+requests
