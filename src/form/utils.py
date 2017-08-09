@@ -106,14 +106,6 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
                 argval = args[argsi]
                 argval_set = True
 
-            # if type(argval) == unicode and arg['type'] == str:
-            #     if unicode_allowed:
-            #         arg['type'] = unicode
-            #     else:
-            #         import unicodedata
-            #         argval = unicodedata.normalize('NFKD', argval).encode('ascii','ignore')
-            #     argval_set = True
-
             if not argval_set:
                 errors.append("missing argument '%s'" % argname)
             else:
