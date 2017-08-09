@@ -10,7 +10,6 @@ from form.utils import docval, getargs
 from form.backends.io import FORMIO
 from form.validate import ValidatorMap
 
-from .core import NWBContainer
 from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
 
 
@@ -109,7 +108,7 @@ def get_class(**kwargs):
     """Get the class object of the NWBContainer subclass corresponding to a given neurdata_type.
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
-    return __TYPE_MAP.create_container_cls(namespace, neurodata_type)
+    return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
 
 @docval({'name': 'io', 'type': FORMIO, 'doc': 'the FORMIO object to read from'},
         {'name': 'namespace', 'type': str, 'doc': 'the namespace to validate against', 'default':CORE_NAMESPACE},
@@ -124,6 +123,6 @@ def validate(**kwargs):
 
 
 from . import io as __io
-from .base import TimeSeries, Module, Interface
+from .core import NWBContainer
+from .base import TimeSeries, ProcessingModule
 from .file import NWBFile
-

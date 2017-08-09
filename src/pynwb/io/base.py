@@ -1,16 +1,15 @@
 from form.build import ObjectMapper
 from .. import register_map
 
-from ..base import TimeSeries, Module
+from ..base import TimeSeries, ProcessingModule
 
-@register_map(Module)
+@register_map(ProcessingModule)
 class ModuleMap(ObjectMapper):
 
     def __init__(self, spec):
         super(ModuleMap, self).__init__(spec)
-        interfaces_spec = self.spec.get_neurodata_type('Interface')
-        self.map_spec('interfaces', interfaces_spec)
-        self.map_spec('interface_names', self.spec.get_attribute('interfaces'))
+        containers_spec = self.spec.get_neurodata_type('NWBContainer')
+        self.map_spec('containers', containers_spec)
 
     @constructor_arg('name')
     def name(self, builder):

@@ -1,11 +1,11 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs, popargs
+from form.utils import docval, getargs, popargs, call_docval_func
 from form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, Interface, _default_resolution, _default_conversion
+from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer, set_parents
 
 @register_class('Device', CORE_NAMESPACE)
@@ -16,11 +16,10 @@ class Device(NWBContainer):
     __nwbfields__ = ('name',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, parent = popargs("name", "parent", kwargs)
-        super(Device, self).__init__(parent=parent)
-        self.name = name
+        call_docval_func(super().__init__, kwargs)
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
 class ElectrodeGroup(NWBContainer):
@@ -38,6 +37,7 @@ class ElectrodeGroup(NWBContainer):
                      'device')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'channel_description', 'type': Iterable, 'doc': 'array with description for each channel'},
             {'name': 'channel_location', 'type': Iterable, 'doc': 'array with location description for each channel e.g. "CA1"'},
             {'name': 'channel_filtering', 'type': Iterable, 'doc': 'array with description of filtering applied to each channel'},
@@ -48,9 +48,8 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, description, location, device, parent = popargs("name", "channel_description", "channel_location", "channel_filtering", "channel_coordinates", "channel_impedance", "description", "location", "device", "parent", kwargs)
-        super(ElectrodeGroup, self).__init__(parent=parent)
-        self.name = name
+        channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, description, location, device = popargs("channel_description", "channel_location", "channel_filtering", "channel_coordinates", "channel_impedance", "description", "location", "device", kwargs)
+        call_docval_func(super().__init__, kwargs)
         self.channel_description = channel_description
         self.channel_location = channel_location
         self.channel_filtering = channel_filtering
@@ -88,8 +87,8 @@ class ElectricalSeries(TimeSeries):
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
@@ -128,8 +127,8 @@ class SpikeEventSeries(ElectricalSeries):
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
@@ -147,7 +146,7 @@ class SpikeEventSeries(ElectricalSeries):
         super(SpikeEventSeries, self).__init__(name, source, data, electrode_group, **kwargs)
 
 @register_class('EventDetection', CORE_NAMESPACE)
-class EventDetection(Interface):
+class EventDetection(NWBContainer):
     """
     Detected spike events from voltage trace(s).
     """
@@ -160,7 +159,7 @@ class EventDetection(Interface):
     _help_statement = ("Description of how events were detected, such as voltage "
                        "threshold, or dV/dT threshold, as well as relevant values.")
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'detection_method', 'type': str, 'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, as well as relevant values.'},
             {'name': 'source_electricalseries', 'type': ElectricalSeries, 'doc': 'The source electrophysiology data'},
             {'name': 'source_idx', 'type': Iterable, 'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding to time of event. Module description should define what is meant by time of event (e.g., .25msec before action potential peak, zero-crossing time, etc). The index points to each event from the raw data'},
@@ -176,7 +175,7 @@ class EventDetection(Interface):
         self.unit = 'Seconds'
 
 @register_class('EventWaveform', CORE_NAMESPACE)
-class EventWaveform(Interface):
+class EventWaveform(NWBContainer):
     """
     Spike data for spike events detected in raw data
     stored in this NWBFile, or events detect at acquisition
@@ -186,7 +185,7 @@ class EventWaveform(Interface):
 
     __help = "Waveform of detected extracellularly recorded spike events"
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'spike_event_series', 'type': (list, SpikeEventSeries), 'doc': 'spiking event data'})
     def __init__(self, **kwargs):
         source, spike_event_series = popargs('source', 'spike_event_series', kwargs)
@@ -194,7 +193,7 @@ class EventWaveform(Interface):
         self.spike_event_series = set_parents(spike_event_series, self)
 
 @register_class('Clustering', CORE_NAMESPACE)
-class Clustering(Interface):
+class Clustering(NWBContainer):
     """
     Specifies cluster event times and cluster metric for maximum ratio of waveform peak to RMS on any channel in cluster.
     """
@@ -208,7 +207,7 @@ class Clustering(Interface):
     __help = ("Clustered spike data, whether from automatic clustering "
              "tools (eg, klustakwik) or as a result of manual sorting.")
 
-    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface'},
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, clusters curated using Klusters, etc).'},
             {'name': 'num', 'type': Iterable, 'doc': 'Cluster number of each event.'},
             {'name': 'peak_over_rms', 'type': Iterable, 'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster(provides a basic clustering metric).'},
@@ -223,7 +222,7 @@ class Clustering(Interface):
         self.cluster_nums = list(set(num))
 
 @register_class('ClusterWaveforms', CORE_NAMESPACE)
-class ClusterWaveforms(Interface):
+class ClusterWaveforms(NWBContainer):
     """
     Describe cluster waveforms by mean and standard deviation for at each sample.
     """
@@ -237,7 +236,7 @@ class ClusterWaveforms(Interface):
              "high-pass filtered (ie, not the same bandpass filter "
              "used waveform analysis and clustering)")
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'clustering_interface', 'type': Clustering, 'doc': 'the clustered spike data used as input for computing waveforms'},
             {'name': 'waveform_filtering', 'type': str, 'doc': 'filter applied to data before calculating mean and standard deviation'},
             {'name': 'waveform_mean', 'type': Iterable, 'doc': 'the mean waveform for each cluster'},
@@ -251,7 +250,7 @@ class ClusterWaveforms(Interface):
         self.waveform_sd = waveform_sd
 
 @register_class('LFP', CORE_NAMESPACE)
-class LFP(Interface):
+class LFP(NWBContainer):
     """
     LFP data from one or more channels. The electrode map in each published ElectricalSeries will
     identify which channels are providing LFP data. Filter properties should be noted in the
@@ -263,7 +262,7 @@ class LFP(Interface):
     __help = ("LFP data from one or more channels. Filter properties "
              "should be noted in the ElectricalSeries")
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'LFP electrophysiology data'})
     def __init__(self, **kwargs):
         source, electrical_series = popargs('source', 'electrical_series', kwargs)
@@ -272,7 +271,7 @@ class LFP(Interface):
         self.electrical_series = electrical_series
 
 @register_class('FilteredEphys', CORE_NAMESPACE)
-class FilteredEphys(Interface):
+class FilteredEphys(NWBContainer):
     """
     Ephys data from one or more channels that has been subjected to filtering. Examples of filtered
     data include Theta and Gamma (LFP has its own interface). FilteredEphys modules publish an
@@ -290,7 +289,7 @@ class FilteredEphys(Interface):
              "for gamma or theta oscillations (LFP has its own interface). Filter properties should "
              "be noted in the ElectricalSeries")
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'filtered electrophysiology data'})
     def __init__(self, **kwargs):
         source, electrical_series = popargs('source', 'electrical_series', kwargs)
@@ -299,7 +298,7 @@ class FilteredEphys(Interface):
         self.electrical_series = electrical_series
 
 @register_class('FeatureExtraction', CORE_NAMESPACE)
-class FeatureExtraction(Interface):
+class FeatureExtraction(NWBContainer):
     """
     Features, such as PC1 and PC2, that are extracted from signals stored in a SpikeEvent
     TimeSeries or other source.
@@ -312,7 +311,7 @@ class FeatureExtraction(Interface):
 
     __help = "Container for salient features of detected events"
 
-    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface'},
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data'},
             {'name': 'electrode_group', 'type': ElectrodeGroup, 'doc': 'The electrode groups for each channel from which features were extracted', 'ndim': 1},
             {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'A description for each feature extracted', 'ndim': 1},
             {'name': 'times', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'The times of events that features correspond to', 'ndim': 1},

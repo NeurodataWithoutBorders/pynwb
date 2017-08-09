@@ -4,6 +4,9 @@ from pynwb.core import NWBContainer
 
 class MyTestClass(NWBContainer):
 
+    def __init__(self, src, parent=None):
+        super().__init__(src, parent=parent)
+
     def basic_add(self, **kwargs):
         return kwargs
 
@@ -28,23 +31,23 @@ class TestNWBContainer(unittest.TestCase):
         """Test that constructor properly sets parent
            and subcontainers called with parent
         """
-        parent_obj = MyTestClass()
-        child_obj = MyTestSubclass(parent=parent_obj)
+        parent_obj = MyTestClass('test source')
+        child_obj = MyTestSubclass('test source', parent=parent_obj)
         self.assertIs(child_obj.parent, parent_obj)
 
     def test_set_parent_parent(self):
         """Test that parent setter  properly sets parent
         """
-        parent_obj = MyTestClass()
-        child_obj = MyTestSubclass()
+        parent_obj = MyTestClass('test source')
+        child_obj = MyTestSubclass('test source')
         child_obj.parent = parent_obj
         self.assertIs(child_obj.parent, parent_obj)
 
     def test_set_parent_subcontainer(self):
         """Test that parent setter properly sets parent subcontainers
         """
-        parent_obj = MyTestClass()
-        child_obj = MyTestSubclass()
+        parent_obj = MyTestClass('test source')
+        child_obj = MyTestSubclass('test source')
         child_obj.parent = parent_obj
         self.assertListEqual(parent_obj.subcontainers, [child_obj])
 
