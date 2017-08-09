@@ -5,7 +5,7 @@ from pynwb.core import NWBContainer
 class MyTestClass(NWBContainer):
 
     def __init__(self, src, parent=None):
-        super().__init__(src, parent=parent)
+        super(MyTestClass, self).__init__(src, parent=parent)
 
     def basic_add(self, **kwargs):
         return kwargs

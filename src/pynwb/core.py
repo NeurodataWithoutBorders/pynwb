@@ -34,7 +34,7 @@ class NWBContainer(with_metaclass(ExtenderMeta, Container)):
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         parent, container_source, source, help = getargs('parent', 'container_source', 'source', 'help', kwargs)
-        super().__init__()
+        super(NWBContainer, self).__init__()
 
         self.__fields = dict()
         self.__subcontainers = list()

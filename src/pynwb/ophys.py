@@ -23,8 +23,8 @@ class OpticalChannel(NWBContainer):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         description, emission_lambda, parent = popargs("description", "emission_lambda", "parent", kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(OpticalChannel, self).__init__, kwargs)
+        super(OpticalChannel, self).__init__(*pargs, **pkwargs)
         self.description = description
         self.emission_lambda = emission_lambda
 
@@ -61,8 +61,8 @@ class ImagingPlane(NWBContainer):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, indicator, location, manifold, conversion, unit, reference_frame, parent = popargs('optical_channel', 'description', 'device', 'excitation_lambda', 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion', 'unit', 'reference_frame', 'parent', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(ImagingPlane, self).__init__, kwargs)
+        super(ImagingPlane, self).__init__(*pargs, **pkwargs)
         self.optical_channel = optical_channel if isinstance(optical_channel, list) else [optical_channel]
         self.description = description
         self.device = device
@@ -120,8 +120,8 @@ class TwoPhotonSeries(ImageSeries):
     )
     def __init__(self, **kwargs):
         field_of_view, imaging_plane, pmt_gain, scan_line_rate = popargs('field_of_view', 'imaging_plane', 'pmt_gain', 'scan_line_rate', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(TwoPhotonSeries, self).__init__, kwargs)
+        super(TwoPhotonSeries, self).__init__(*pargs, **pkwargs)
         self.field_of_view = field_of_view
         self.imaging_plane = imaging_plane
         self.pmt_gain = pmt_gain
@@ -147,8 +147,8 @@ class ROI(NWBContainer):
             {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
         name, roi_description, pix_mask, pix_mask_weight, img_mask = popargs('name', 'roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(ROI, self).__init__, kwargs)
+        super(ROI, self).__init__(*pargs, **pkwargs)
         self.roi_description = roi_description
         self.pix_mask = pix_mask
         self.pix_mask_weight = pix_mask_weight
@@ -173,8 +173,8 @@ class PlaneSegmentation(NWBContainer):
             {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
         name, description, roi_list, imaging_plane, reference_images = popargs('name', 'description', 'roi_list', 'imaging_plane', 'reference_images', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
+        super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
         self.description = description
         self.roi_list = roi_list
         self.imaging_plane = imaging_plane
@@ -200,8 +200,8 @@ class ImageSegmentation(NWBContainer):
             {'name': 'plane_segmentation', 'type': PlaneSegmentation, 'doc': 'ImagePlane class.'})
     def __init__(self, **kwargs):
         plane_segmentation = popargs('plane_segmentation', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(ImageSegmentation, self).__init__, kwargs)
+        super(ImageSegmentation, self).__init__(*pargs, **pkwargs)
         self.plane_segmentation = plane_segmentation
 
 @register_class('RoiResponseSeries', CORE_NAMESPACE)
@@ -241,8 +241,8 @@ class RoiResponseSeries(TimeSeries):
     )
     def __init__(self, **kwargs):
         roi_names, segmenttation_interface = popargs('roi_names', 'segmenttation_interface', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(RoiResponseSeries, self).__init__, kwargs)
+        super(RoiResponseSeries, self).__init__(*pargs, **pkwargs)
         self.roi_names = roi_names
         self.segmenttation_interface = segmenttation_interface
 
@@ -261,8 +261,8 @@ class DfOverF(NWBContainer):
             {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(DfOverF, self).__init__, kwargs)
+        super(DfOverF, self).__init__(*pargs, **pkwargs)
         self.roi_response_series = roi_response_series
 
 @register_class('Fluorescence', CORE_NAMESPACE)
@@ -280,6 +280,6 @@ class Fluorescence(NWBContainer):
             {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(Fluorescence, self).__init__, kwargs)
+        super(Fluorescence, self).__init__(*pargs, **pkwargs)
         self.roi_response_series = roi_response_series

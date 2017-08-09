@@ -4,6 +4,7 @@ import copy as _copy
 from collections import Iterable
 from abc import ABCMeta
 import six
+from six import raise_from
 import numpy as np
 
 def __type_okay(value, argtype, allow_none=False):
@@ -266,7 +267,7 @@ def docval(*validator, **options):
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
-                    raise TypeError(msg) from None
+                    raise_from(TypeError(msg), None)
                 return func(self, **parsed['args'])
         else:
             def func_call(*args, **kwargs):
@@ -274,7 +275,7 @@ def docval(*validator, **options):
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
-                    raise TypeError(msg) from None
+                    raise_from(TypeError(msg), None)
                 return func(**parsed['args'])
         _rtype = rtype
         if isinstance(rtype, type):
