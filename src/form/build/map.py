@@ -534,7 +534,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         try:
             obj = cls(*args, **kwargs)
         except Exception as ex:
-            raise Exception('Could not construct %s object' % (cls.__name__)) from ex
+            msg = 'Could not construct %s object' % (cls.__name__)
+            raise Exception(msg) from ex
         return obj
 
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container to get the Builder name for'})
