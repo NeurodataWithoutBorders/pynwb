@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs, popargs, DataChunkIterator, ShapeValidator
+from form.utils import docval, getargs, popargs, DataChunkIterator, ShapeValidator, fmt_docval_args, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -15,11 +15,12 @@ class Device(NWBContainer):
     __nwbfields__ = ('name',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, parent = popargs("name", "parent", kwargs)
-        super(Device, self).__init__(parent=parent)
-        self.name = name
+#        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+#        super().__init__(*pargs, **pkwargs)
+        call_docval_func(super().__init__, kwargs)
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
 class ElectrodeGroup(NWBContainer):
@@ -37,6 +38,7 @@ class ElectrodeGroup(NWBContainer):
                      'device')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'channel_description', 'type': Iterable, 'doc': 'array with description for each channel'},
             {'name': 'channel_location', 'type': Iterable, 'doc': 'array with location description for each channel e.g. "CA1"'},
             {'name': 'channel_filtering', 'type': Iterable, 'doc': 'array with description of filtering applied to each channel'},
@@ -47,9 +49,8 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, description, location, device, parent = popargs("name", "channel_description", "channel_location", "channel_filtering", "channel_coordinates", "channel_impedance", "description", "location", "device", "parent", kwargs)
-        super(ElectrodeGroup, self).__init__(parent=parent)
-        self.name = name
+        channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, description, location, device = popargs("channel_description", "channel_location", "channel_filtering", "channel_coordinates", "channel_impedance", "description", "location", "device", kwargs)
+        call_docval_func(super().__init__, kwargs)
         self.channel_description = channel_description
         self.channel_location = channel_location
         self.channel_filtering = channel_filtering

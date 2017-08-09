@@ -27,7 +27,7 @@ class SpatialSeries(TimeSeries):
 
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this SpatialSeries dataset'},
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
@@ -75,7 +75,8 @@ class BehavioralEpochs(NWBContainer):
 
     _help = "General container for storing behavorial epochs."
 
-    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this container.'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this BehavioralEpochs container', 'default': 'BehavioralEpochs'},
+            {'name': 'source', 'type': str, 'doc': 'The source of the data represented in this container.'},
             {'name': 'interval_series', 'type': (list, IntervalSeries), 'doc': 'IntervalSeries or any subtype.'})
     def __init__(self, **kwargs):
         source, interval_series = popargs('source', 'interval_series', kwargs)
@@ -92,7 +93,8 @@ class BehavioralEvents(NWBContainer):
 
     _help = "General container for storing event series."
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this BehavioralEvents container', 'default': 'BehavioralEvents'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'time_series', 'type': TimeSeries, 'doc': 'TimeSeries or any subtype.'})
     def __init__(self, **kwargs):
         source, time_series = popargs('source', 'time_series', kwargs)
@@ -102,7 +104,7 @@ class BehavioralEvents(NWBContainer):
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)
 class BehavioralTimeSeries(NWBContainer):
     """
-    TimeSeries for storing Behavoioral time series data.See description of BehavioralEpochs for
+    TimeSeries for storing Behavoioral time series data. See description of BehavioralEpochs for
     more details.
     """
 
@@ -110,7 +112,8 @@ class BehavioralTimeSeries(NWBContainer):
 
     _help = ""
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this BehavioralTimeSeries', 'default': 'BehavioralTimeSeries'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'time_series', 'type': TimeSeries, 'doc': '<TimeSeries> or any subtype.'})
     def __init__(self, **kwargs):
         source, time_series = popargs('source', 'time_series', kwargs)
@@ -127,7 +130,8 @@ class PupilTracking(NWBContainer):
 
     _help = "Eye-tracking data, representing pupil size"
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this PupilTracking container', 'default': 'PupilTracking'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'time_series', 'type': TimeSeries, 'doc': ''})
     def __init__(self, **kwargs):
         source, time_series = popargs('source', 'time_series', kwargs)
@@ -144,7 +148,8 @@ class EyeTracking(NWBContainer):
 
     _help = ""
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this EyeTracking container', 'default': 'EyeTracking'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': ''})
     def __init__(self, **kwargs):
         source, spatial_series = popargs('source', 'spatial_series', kwargs)
@@ -164,7 +169,8 @@ class CompassDirection(NWBContainer):
 
     _help = "Direction as measured radially. Spatial series reference frame should indicate which direction corresponds to zero and what is the direction of positive rotation."
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this CompassDirection container', 'default': 'CompassDirection'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': 'SpatialSeries or any subtype.'})
     def __init__(self, **kwargs):
         source, spatial_series = popargs('source', 'spatial_series', kwargs)
@@ -181,7 +187,8 @@ class Position(NWBContainer):
 
     _help = "Position data, whether along the x, xy or xyz axis"
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this Position container', 'default': 'Position'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': ''})
     def __init__(self, **kwargs):
         source, spatial_series = popargs('source', 'spatial_series', kwargs)
@@ -199,7 +206,8 @@ class CorrectedImageStack(NWBContainer):
 
     _help = ""
 
-    @docval({'name': 'corrected', 'type': ImageSeries, 'doc': 'Image stack with frames shifted to the common coordinates.'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
+            {'name': 'corrected', 'type': ImageSeries, 'doc': 'Image stack with frames shifted to the common coordinates.'},
             {'name': 'original', 'type': ImageSeries, 'doc': 'Link to image series that is being registered.'},
             {'name': 'xy_translation', 'type': TimeSeries, 'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates, for example, to align each frame to a reference image.'})
     def __init__(self, **kwargs):
@@ -221,8 +229,9 @@ class MotionCorrection(NWBContainer):
 
     _help = "Image stacks whose frames have been shifted (registered) to account for motion."
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'corrected_image_stack', 'type': CorrectedImageStack, 'doc': ''})
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this MotionCorrection container', 'default': 'MotionCorrection '},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'corrected_image_stack', 'type': CorrectedImageStack, 'doc': 'the corrected image stack in this Motion Correction analysis'})
     def __init__(self, **kwargs):
         source, corrected_image_stack = popargs('source', 'corrected_image_stack', kwargs)
         super(MotionCorrection, self).__init__(source, **kwargs)

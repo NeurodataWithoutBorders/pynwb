@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs, popargs, DataChunkIterator
+from form.utils import docval, getargs, popargs, DataChunkIterator, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
 from .core import  NWBContainer
@@ -64,6 +64,7 @@ class ProcessingModule(NWBContainer):
                      'containers')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
             {'name': 'containers', 'type': list, 'doc': 'NWBContainers that belong to this Modules', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
@@ -71,16 +72,11 @@ class ProcessingModule(NWBContainer):
         name, description, containers = popargs('name', 'description', 'containers', kwargs)
         super(Module, self).__init__(**kwargs)
         self.description = description
-        self.__name = name
         self.__containers = list() if containers is None else containers
 
     @property
     def containers(self):
         return tuple(self.__containers)
-
-    @property
-    def name(self):
-        return self.__name
 
     @docval({'name': 'container', 'type': NWBContainer, 'doc': 'the NWBContainer to add to this Module'})
     def add_container(self, **kwargs):
@@ -135,7 +131,7 @@ class TimeSeries(NWBContainer):
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':None},
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':None},
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
@@ -144,18 +140,19 @@ class TimeSeries(NWBContainer):
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
-        super(TimeSeries, self).__init__(parent=kwargs.get('parent'))
-        keys = ("name",
-                "source",
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        super().__init__(*pargs, **pkwargs)
+        keys = ("resolution",
                 "comments",
                 "description",
-                "resolution",
                 "conversion",
                 "unit",
                 "control",
                 "control_description")
         for key in keys:
-            setattr(self, key, kwargs.get(key))
+            val = kwargs.get(key)
+            if val is not None:
+                setattr(self, key, val)
 
         data = getargs('data', kwargs)
         self.fields['data'] = data
@@ -232,11 +229,11 @@ class TimeSeries(NWBContainer):
         """ Convenience function to set the description field of the
             *TimeSeries*
         """
-        self.description = kwargs['description']
+        self.fields['description'] = kwargs['description']
 
     @docval({'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset'})
     def set_comments(self, **kwargs):
         """ Convenience function to set the comments field of the
             *TimeSeries*
         """
-        self.comments = kwargs['comments']
+        self.fields['comments'] = kwargs['comments']

@@ -8,7 +8,6 @@ CORE_NAMESPACE = 'core'
 from form.spec import NamespaceCatalog
 from form.utils import docval, getargs
 
-from .core import NWBContainer
 from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
 
 
@@ -101,7 +100,7 @@ def get_class(**kwargs):
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
 
 
-from . import io as __io
+from .core import NWBContainer
 from .base import TimeSeries, ProcessingModule
 from .file import NWBFile
 

@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, popargs
+from form.utils import docval, popargs, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -17,13 +17,15 @@ class OptogeneticStimulusSite(NWBContainer):
                      'excitation_lambda',
                      'location')
 
-    @docval({'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
             {'name': 'description', 'type': str, 'doc': 'Description of site.'},
             {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
             {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})
     def __init__(self, **kwargs):
         device, description, excitation_lambda, location = popargs('device', 'description', 'excitation_lambda', 'location', kwargs)
-        super(OptogeneticStimulusSite, self).__init__(**kwargs)
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        super().__init__(*pargs, **pkwargs)
         self.device = device
         self.description = description
         self.excitation_lambda = excitation_lambda
@@ -62,7 +64,7 @@ class OptogeneticSeries(TimeSeries):
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         site = popargs('site', kwargs)
-        super(OptogeneticSeries, self).__init__(name, source, data, unit, **kwargs)
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        super().__init__(*pargs, **pkwargs)
         self.site = site

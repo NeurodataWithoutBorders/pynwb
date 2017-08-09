@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, popargs
+from form.utils import docval, popargs, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -21,7 +21,9 @@ class IntracellularElectrode(NWBContainer):
                      'initial_access_resistance',
                      'device')
 
-    @docval({'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.'},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.'},
             {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.'},
             {'name': 'description', 'type': str, 'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc)COMMENT: Free-form text (can be from Methods)'},
             {'name': 'location', 'type': str, 'doc': 'Area, layer, comments on estimation, stereotaxis coordinates (if in vivo, etc).'},
@@ -31,7 +33,8 @@ class IntracellularElectrode(NWBContainer):
             {'name': 'device', 'type': str, 'doc': 'Name(s) of devices in general/devices.'})
     def __init__(self, **kwargs):
         slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs('slice', 'seal', 'description', 'location', 'resistance', 'filtering', 'initial_access_resistance', 'device', kwargs)
-        super(IntracellularElectrode, self).__init__(**kwargs)
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        super().__init__(*pargs, **pkwargs)
         self.slice = slice
         self.seal = seal
         self.description = description

@@ -32,6 +32,7 @@ class Epoch(NWBContainer):
     #_neurodata_type = 'Epoch'
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the epoch, as it will appear in the file'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'start', 'type': float, 'doc': 'the starting time of the epoch'},
             {'name': 'stop', 'type': float, 'doc': 'the ending time of the epoch'},
             {'name': 'description', 'type': str, 'doc': 'a description of this epoch', 'default': None},
@@ -158,28 +159,21 @@ class EpochTimeSeries(NWBContainer):
                      'idx_start',
                      'timeseries')
 
-    @docval({'name': 'ts', 'type': TimeSeries, 'doc':'the TimeSeries object'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'ts', 'type': TimeSeries, 'doc':'the TimeSeries object'},
             {'name': 'start_time', 'type': float, 'doc':'the start time of the epoch'},
             {'name': 'stop_time', 'type': float, 'doc':'the stop time of the epoch'},
             {'name': 'name', 'type': str, 'doc':'the name of this alignment', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        ts, start_time, stop_time, name, parent = getargs('ts', 'start_time', 'stop_time', 'name', 'parent', kwargs)
-        super(EpochTimeSeries, self).__init__(parent=parent)
-        self.name = name if name else ts.name
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        ts, start_time, stop_time, parent = getargs('ts', 'start_time', 'stop_time', 'parent', kwargs)
+        pkwargs.setdefault('name', ts.name)
+        super().__init__(*pargs, **pkwargs)
         self.timeseries = ts
-        #TODO: do something to compute count and idx_start from start_time
-        # and stop_time
-        if ts.starting_time is not None and ts.rate:
-            #n = ts.num_samples
-            #t0 = ts.starting_time
-            #rate = ts.rate
-            #timestamps = t0 + np.arange(n) / rate
-            #BEGIN: AJTRITT
-            #delta = 1.0/rate
+        if ts.starting_time is not None and ts.rate is not None:
             start_idx = int((start_time - ts.starting_time)*ts.rate)
             stop_idx = int((stop_time - ts.starting_time)*ts.rate)
-            #END: AJTRITT
         elif len(ts.timestamps) > 0:
             timestamps = ts.timestamps
             #XXX This assume timestamps are sorted!

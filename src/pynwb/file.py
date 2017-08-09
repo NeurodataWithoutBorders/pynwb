@@ -35,7 +35,8 @@ class NWBFile(NWBContainer):
 
     __nwb_version = '1.0.6'
 
-    @docval({'name': 'file_name', 'type': str, 'doc': 'path to NWB file'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'file_name', 'type': str, 'doc': 'path to NWB file'},
             {'name': 'session_description', 'type': str, 'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
             {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
@@ -57,7 +58,8 @@ class NWBFile(NWBContainer):
             {'name': 'devices', 'type': (list, tuple), 'doc': 'Device objects belonging to this NWBFile', 'default': None},
     )
     def __init__(self, **kwargs):
-        super(NWBFile, self).__init__()
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        super().__init__(*pargs, **pkwargs)
         self.__filename = getargs('file_name', kwargs)
         self.__start_time = datetime.utcnow()
         self.__file_id = '%s %s' % (self.__filename, self.__start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))

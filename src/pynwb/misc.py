@@ -179,12 +179,11 @@ class SpikeUnit(NWBContainer):
             {'name': 'unit_description', 'type': str, 'doc': 'Description of the unit (eg, cell type).'},
             {'name': 'source', 'type': str, 'doc': 'Name, path or description of where unit times originated. This is necessary only if the info here differs from or is more fine-grained than the interfaces source field.', 'default': None})
     def __init__(self, **kwargs):
-        name, times, unit_description, source = popargs('name', 'times', 'unit_description', 'source', kwargs)
-        super(SpikeUnit, self).__init__(**kwargs)
+        times, unit_description = popargs('times', 'unit_description', kwargs)
+        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
+        super().__init__(*args, **kwargs)
         self.times = times
         self.unit_description = unit_description
-        self.source = source
-        self.name = name
 
 @register_class('UnitTimes', CORE_NAMESPACE)
 class UnitTimes(NWBContainer):

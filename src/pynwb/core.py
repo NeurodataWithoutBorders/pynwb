@@ -1,7 +1,7 @@
 from form.utils import docval, getargs, ExtenderMeta
 from form import Container
 
-from . import CORE_NAMESPACE
+from . import CORE_NAMESPACE, register_class
 
 def set_parents(container, parent):
     if isinstance(container, list):
@@ -24,16 +24,17 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
     '''
 
 
-    __nwbfields__ = ('source',)
+    __nwbfields__ = ('source',
+                     'help')
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
-        parent, container_source, source = getargs('parent', 'container_source', 'source', kwargs)
+        parent, container_source, source, help = getargs('parent', 'container_source', 'source', 'help', kwargs)
         super().__init__()
-        self.source = source
+
         self.__fields = dict()
         self.__subcontainers = list()
         self.__parent = None
@@ -41,6 +42,8 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
         if parent:
             self.parent = parent
         self.__container_source = container_source
+
+        self.source = source
 
     @property
     def name(self):
@@ -82,6 +85,9 @@ class NWBContainer(Container, metaclass=ExtenderMeta):
     @staticmethod
     def __setter(nwbfield):
         def _func(self, val):
+            if nwbfield in self.fields:
+                msg = "can't set attribute '%s' -- already set" % nwbfield
+                raise AttributeError(msg)
             self.fields[nwbfield] = val
         return _func
 
