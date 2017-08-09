@@ -185,6 +185,11 @@ def fmt_docval_args(func, kwargs):
             else:
                 ret_args.append(val)
     return (ret_args, ret_kwargs)
+
+def call_docval_func(func, kwargs):
+    fargs, fkwargs = fmt_docval_args(func, kwargs)
+    return func(*fargs, **fkwargs)
+
 def get_docval_args(func):
     '''get_docval_args(func)
     Like get_docval, but return only positional arguments
@@ -267,14 +272,16 @@ def docval(*validator, **options):
                 parsed = __parse_args(_copy.deepcopy(loc_val), args[1:], kwargs, enforce_type=enforce_type, enforce_ndim=enforce_ndim)
                 parse_err = parsed.get('errors')
                 if parse_err:
-                    raise TypeError(', '.join(parse_err)) from None
+                    msg = ', '.join(parse_err)
+                    raise TypeError(msg) from None
                 return func(self, **parsed['args'])
         else:
             def func_call(*args, **kwargs):
                 parsed = __parse_args(_copy.deepcopy(loc_val), args, kwargs, enforce_type=enforce_type)
                 parse_err = parsed.get('errors')
                 if parse_err:
-                    raise TypeError(', '.join(parse_err))
+                    msg = ', '.join(parse_err)
+                    raise TypeError(msg) from None
                 return func(**parsed['args'])
         _rtype = rtype
         if isinstance(rtype, type):
