@@ -20,8 +20,7 @@ class TestHDF5Writer(unittest.TestCase):
         self.container.add_raw_timeseries(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
-                                 attributes={'ancestry': 'TimeSeries',
-                                             'source': 'example_source',
+                                 attributes={'source': 'example_source',
                                              'neurodata_type': 'TimeSeries',
                                              'help': 'General purpose TimeSeries'},
                                  datasets={'data': DatasetBuilder('data', list(range(100,200,10)),

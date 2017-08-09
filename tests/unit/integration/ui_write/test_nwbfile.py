@@ -22,8 +22,7 @@ class TestNWBFileIO(base.TestNWBContainerIO):
 
     def setUpBuilder(self):
         ts_builder = GroupBuilder('test_timeseries',
-                                 attributes={'ancestry': 'TimeSeries',
-                                             'source': 'example_source',
+                                 attributes={'source': 'example_source',
                                              'namespace': base.CORE_NAMESPACE,
                                              'neurodata_type': 'TimeSeries',
                                              'data_link': list(),
@@ -33,14 +32,13 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                                                   attributes={'unit': 'SIunit',
                                                                               'conversion': 1.0,
                                                                               'resolution': 0.1}),
-                                           'num_samples': DatasetBuilder('num_samples', 10),
                                            'timestamps': DatasetBuilder('timestamps', list(range(10)),
                                                                   attributes={'unit': 'Seconds', 'interval': 1})})
 
         module_builder = GroupBuilder('test_module',
                                  attributes={'namespace': base.CORE_NAMESPACE,
-                                             'neurodata_type': 'Module',
-                                             'interfaces': ['Clustering'],
+                                             'neurodata_type': 'ProcessingModule',
+                                             'source': 'a test source for a ProcessingModule',
                                              'description': 'a test module'},
                                  groups={'Clustering': GroupBuilder('Clustering',
                                          attributes={
@@ -49,7 +47,6 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                             'neurodata_type': 'Clustering',
                                             'namespace': base.CORE_NAMESPACE},
                                          datasets={
-                                            'cluster_nums': DatasetBuilder('cluster_nums', [0,1,2]),
                                             'num': DatasetBuilder('num', [0, 1, 2, 0, 1, 2]),
                                             'times': DatasetBuilder('times', list(range(10,61,10))),
                                             'peak_over_rms': DatasetBuilder('peak_over_rms', [100, 101, 102]),
@@ -68,14 +65,17 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                            'session_description': DatasetBuilder('session_description', 'a test NWB File'),
                                            'nwb_version': DatasetBuilder('nwb_version', '1.0.6'),
                                            'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
-                                 attributes={'namespace': base.CORE_NAMESPACE, 'neurodata_type': 'NWBFile'})
+                                 attributes={'namespace': base.CORE_NAMESPACE,
+                                             'neurodata_type': 'NWBFile',
+                                             'help': 'A collection of analysis outputs from processing of data',
+                                             'source': 'a test source'})
 
     def setUpContainer(self):
-        self.container = NWBFile('test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
+        self.container = NWBFile('a test source', 'test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
         ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
         self.container.add_raw_timeseries(ts)
-        mod = self.container.create_processing_module('test_module', 'a test module')
-        mod.add_interface(Clustering("an example source for Clustering", "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10,61,10))))
+        mod = self.container.create_processing_module('test_module', 'a test source for a ProcessingModule', 'a test module')
+        mod.add_container(Clustering("an example source for Clustering", "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10,61,10))))
 
     def tearDown(self):
         if os.path.exists(self.path):

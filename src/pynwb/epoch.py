@@ -2,7 +2,7 @@ import copy
 import numpy as np
 from bisect import bisect_left
 
-from form.utils import docval, getargs
+from form.utils import docval, getargs, call_docval_func, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -39,15 +39,15 @@ class Epoch(NWBContainer):
             {'name': 'tags', 'type': (tuple, list), 'doc': 'tags for this epoch', 'default': list()},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, start, stop, description, tags, parent = getargs('name', 'start', 'stop', 'description', 'tags', 'parent', kwargs)
-        super(Epoch, self).__init__(parent=parent)
+        start, stop, description, tags = getargs('start', 'stop', 'description', 'tags', kwargs)
+        #super(Epoch, self).__init__(name=name, parent=parent)
+        call_docval_func(super().__init__, kwargs)
         # dict to keep track of which time series are linked to this epoch
         self._timeseries = dict()
         # start and stop time (in seconds)
         self.start_time = start
         self.stop_time = stop
         # name of epoch
-        self.name = name
         self.description = description
 
         self.tags = list({x for x in tags})
@@ -144,7 +144,7 @@ class Epoch(NWBContainer):
                 *nothing*
         """
         name = in_epoch_name if in_epoch_name else timeseries.name
-        self._timeseries[name] = EpochTimeSeries(timeseries,
+        self._timeseries[name] = EpochTimeSeries(self.source, timeseries,
                                                 self.start_time,
                                                 self.stop_time,
                                                 name=name,

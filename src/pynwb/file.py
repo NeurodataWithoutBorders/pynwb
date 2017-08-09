@@ -2,7 +2,7 @@ from datetime import datetime
 from dateutil.parser import parse as parse_date
 from collections import Iterable
 
-from form.utils import docval, getargs, fmt_docval_args
+from form.utils import docval, getargs, fmt_docval_args, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -181,6 +181,7 @@ class NWBFile(NWBContainer):
         return ts.name in d
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the epoch, as it will appear in the file'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'start', 'type': float, 'doc': 'the starting time of the epoch'},
             {'name': 'stop', 'type': float, 'doc': 'the ending time of the epoch'},
             {'name': 'tags', 'type': (tuple, list), 'doc': 'tags for this epoch', 'default': list()},
@@ -193,9 +194,9 @@ class NWBFile(NWBContainer):
         sparse noise) or a different paradigm (a rat exploring an
         enclosure versus sleeping between explorations)
         """
-        name, start, stop, tags, description = getargs('name', 'start', 'stop', 'tags', 'description', kwargs)
-        epoch = Epoch(name, start, stop, description=description, tags=tags, parent=self)
-        self.__epochs[name] = epoch
+        ep_args, ep_kwargs = fmt_docval_args(Epoch.__init__, kwargs)
+        epoch = Epoch(*ep_args, **ep_kwargs)
+        self.__epochs[epoch.name] = epoch
         return epoch
 
     def get_epoch(self, name):
@@ -278,6 +279,7 @@ class NWBFile(NWBContainer):
             self.set_epoch_timeseries(epoch, ts)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'channel_description', 'type': Iterable, 'doc': 'array with description for each channel'},
             {'name': 'channel_location', 'type': Iterable, 'doc': 'array with location description for each channel e.g. "CA1"'},
             {'name': 'channel_filtering', 'type': Iterable, 'doc': 'array with description of filtering applied to each channel'},
@@ -323,14 +325,15 @@ class NWBFile(NWBContainer):
         return self.__ec_electrodes.get(name)
 
     @docval({'name': 'name',  'type': str, 'doc': 'the name of the processing module'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description',  'type': str, 'doc': 'description of the processing module'},
             returns="a processing module", rtype=ProcessingModule)
     def create_processing_module(self, **kwargs):
         """ Creates a ProcessingModule object of the specified name. Interfaces can
             be created by the module and will be stored inside it
         """
-        name, description = getargs('name', 'description', kwargs)
-        ret = ProcessingModule(name, description)
+        cargs, ckwargs = fmt_docval_args(ProcessingModule.__init__, kwargs)
+        ret = ProcessingModule(*cargs, **ckwargs)
         self.add_processing_module(ret)
         return ret
 

@@ -10,7 +10,7 @@ class NWBFileTest(unittest.TestCase):
     def setUp(self):
         self.start = datetime(2017, 5, 1, 12, 0, 0)
         self.path = 'nwbfile_test.h5'
-        self.nwbfile = NWBFile(self.path, 'a test session description for a test NWBFile',
+        self.nwbfile = NWBFile('a fake source', self.path, 'a test session description for a test NWBFile',
                     'FILE123',
                     self.start,
                     experimenter='A test experimenter',
@@ -39,8 +39,8 @@ class NWBFileTest(unittest.TestCase):
         ch_imp = [-1, -1]
         desc = 'An example electrode'
         loc = 'an example location'
-        d = Device('a fake device')
-        elecgrp = self.nwbfile.create_electrode_group(name, ch_desc, ch_loc, ch_filt, ch_coord, ch_imp, desc, loc, d)
+        d = Device('a fake device', 'a fake source')
+        elecgrp = self.nwbfile.create_electrode_group(name, 'a fake source', ch_desc, ch_loc, ch_filt, ch_coord, ch_imp, desc, loc, d)
         self.assertEqual(elecgrp.channel_description, ch_desc)
         self.assertEqual(elecgrp.channel_coordinates, ch_coord)
         self.assertEqual(elecgrp.channel_filtering, ch_filt)
@@ -54,8 +54,8 @@ class NWBFileTest(unittest.TestCase):
         tags1 = ['t1', 't2']
         tags2 = ['t3', 't4']
         expected_tags = tags1 + tags2
-        self.nwbfile.create_epoch(name='test_epoch1', start=0.0, stop=1.0, tags=tags1, descrition='test epoch')
-        self.nwbfile.create_epoch(name='test_epoch2', start=0.0, stop=1.0, tags=tags2, descrition='test epoch')
+        self.nwbfile.create_epoch(source='a fake source', name='test_epoch1', start=0.0, stop=1.0, tags=tags1, descrition='test epoch')
+        self.nwbfile.create_epoch(source='a fake source', name='test_epoch2', start=0.0, stop=1.0, tags=tags2, descrition='test epoch')
         tags = self.nwbfile.epoch_tags
         self.assertCountEqual(expected_tags, tags)
 

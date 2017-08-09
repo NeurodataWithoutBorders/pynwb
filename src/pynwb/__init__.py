@@ -100,7 +100,7 @@ def get_class(**kwargs):
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
 
 
+from . import io as __io
 from .core import NWBContainer
 from .base import TimeSeries, ProcessingModule
 from .file import NWBFile
-

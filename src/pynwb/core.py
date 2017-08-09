@@ -15,7 +15,7 @@ def set_parents(container, parent):
             container.parent = parent
     return ret
 
-@register_class(CORE_NAMESPACE, 'NWBContainer')
+@register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(Container, metaclass=ExtenderMeta):
     '''The base class to any NWB types.
 

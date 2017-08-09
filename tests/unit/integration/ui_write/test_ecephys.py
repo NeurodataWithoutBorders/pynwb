@@ -31,10 +31,16 @@ class TestElectrodeGroup(base.TestNWBContainerIO):
 
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
-                            attributes={'neurodata_type': 'Device', 'namespace': 'core'},
+                            attributes={'neurodata_type': 'Device',
+                                        'namespace': 'core',
+                                        'help': 'A recording device e.g. amplifier',
+                                        'source': 'a test source'},
                          )
         self.builder = GroupBuilder('elec1',
-                            attributes={'neurodata_type': 'ElectrodeGroup', 'namespace': 'core', 'source': 'a test source'},
+                            attributes={'neurodata_type': 'ElectrodeGroup',
+                                        'namespace': 'core',
+                                        'help': 'A physical grouping of channels',
+                                        'source': 'a test source'},
                             datasets={
                                 'channel_description': DatasetBuilder('channel_description', ['ch1', 'ch2']),
                                 'channel_location': DatasetBuilder('channel_location', ['lo1', 'lo2']),
@@ -66,10 +72,16 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
 
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
-                            attributes={'neurodata_type': 'Device', 'namespace': 'core', 'source': 'a test source'},
+                            attributes={'neurodata_type': 'Device',
+                                        'namespace': 'core',
+                                        'help': 'A recording device e.g. amplifier',
+                                        'source': 'a test source'},
                          )
         elcgrp_builder = GroupBuilder('elec1',
-                            attributes={'neurodata_type': 'ElectrodeGroup', 'namespace': 'core', 'source': 'a test source'},
+                            attributes={'neurodata_type': 'ElectrodeGroup',
+                                        'namespace': 'core',
+                                        'help': 'A physical grouping of channels',
+                                        'source': 'a test source'},
                             datasets={
                                 'channel_description': DatasetBuilder('channel_description', ['ch1', 'ch2']),
                                 'channel_location': DatasetBuilder('channel_location', ['lo1', 'lo2']),
@@ -86,11 +98,10 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
         self.builder = GroupBuilder('test_eS',
-                                attributes={'ancestry': 'TimeSeries',
-                                            'source': 'a hypothetical source',
+                                attributes={'source': 'a hypothetical source',
                                             'namespace': base.CORE_NAMESPACE,
-                                            'data_link': list(),
-                                            'timestamp_link': list(),
+                                            'comments': 'no comments',
+                                            'description': 'no description',
                                             'neurodata_type': 'ElectricalSeries',
                                             'help': 'Stores acquired voltage data from extracellular recordings'},
                                 datasets={'data': DatasetBuilder('data', data,
