@@ -97,13 +97,13 @@ class GroupBuilder(BaseBuilder):
     __attribute = 'attributes'
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the group'},
-            {'name': 'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this group',
+            {'name': 'groups', 'type': (dict, list), 'doc': 'a dictionary of subgroups to create in this group',
              'default': dict()},
-            {'name': 'datasets', 'type': dict, 'doc': 'a dictionary of datasets to create in this group',
+            {'name': 'datasets', 'type': (dict, list), 'doc': 'a dictionary of datasets to create in this group',
              'default': dict()},
             {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this group',
              'default': dict()},
-            {'name': 'links', 'type': dict, 'doc': 'a dictionary of links to create in this group',
+            {'name': 'links', 'type': (dict, list), 'doc': 'a dictionary of links to create in this group',
              'default': dict()},
             {'name': 'parent', 'type': 'GroupBuilder', 'doc': 'the parent builder of this Builder', 'default': None},
             {'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Builder', 'default': None})
@@ -112,18 +112,26 @@ class GroupBuilder(BaseBuilder):
         Create a GroupBuilder object
         '''
         name, groups, datasets, links, attributes, parent, source = getargs('name', 'groups', 'datasets', 'links', 'attributes', 'parent', 'source', kwargs)
+        groups = self.__to_list(groups)
+        datasets = self.__to_list(datasets)
+        links = self.__to_list(links)
         self.obj_type = dict()
         super(GroupBuilder, self).__init__(name, attributes, parent, source)
         super().__setitem__(GroupBuilder.__group, dict())
         super().__setitem__(GroupBuilder.__dataset, dict())
         super().__setitem__(GroupBuilder.__link, dict())
         self.__name = name
-        for name, group in groups.items():
+        for group in groups:
             self.set_group(group)
-        for name, dataset in datasets.items():
+        for dataset in datasets:
             self.set_dataset(dataset)
-        for name, link in links.items():
+        for link in links:
             self.set_link(link)
+
+    def __to_list(self, d):
+        if isinstance(d, dict):
+            return list(d.values())
+        return d
 
     @property
     def source(self):

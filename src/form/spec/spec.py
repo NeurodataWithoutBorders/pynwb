@@ -712,10 +712,10 @@ class GroupSpec(BaseStorageSpec):
         spec.parent = self
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the link to the Spec for'})
-    def get_dataset(self, **kwargs):
-        ''' Get a specification for a dataset to this group specification '''
+    def get_link(self, **kwargs):
+        ''' Get a specification for a link to this group specification '''
         name = getargs('name', kwargs)
-        return self.__datasets.get(name, self.__links.get(name))
+        return self.__links.get(name)
 
     @classmethod
     def dataset_spec_cls(cls):

@@ -183,8 +183,31 @@ class EpochTimeSeries(NWBContainer):
             # assume exclusive for now - AJT 10/24/16
         else:
             raise ValueError("TimeSeries object must have timestamps or starting_time and rate")
-        self.count = stop_idx - start_idx
-        self.idx_start = start_idx
+        count = stop_idx - start_idx
+        idx_start = start_idx
+        return (int(idx_start), int(count))
+
+@register_class('EpochTimeSeries', CORE_NAMESPACE)
+class EpochTimeSeries(NWBContainer):
+    __nwbfields__ = ('name',
+                     'count',
+                     'idx_start',
+                     'timeseries')
+
+    @docval({'name': 'ts', 'type': TimeSeries, 'doc':'the TimeSeries object'},
+            {'name': 'idx_start', 'type': int, 'doc':'the index of the start time in this TimeSeries'},
+            {'name': 'count', 'type': int, 'doc': 'the number of samples available in the TimeSeries'},
+            {'name': 'name', 'type': str, 'doc':'the name of this alignment', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    def __init__(self, **kwargs):
+        ts, idx, count, name, parent = getargs('ts', 'idx_start', 'count', 'name', 'parent', kwargs)
+        super(EpochTimeSeries, self).__init__(parent=parent)
+        self.name = name if name else ts.name
+        self.timeseries = ts
+        #TODO: do something to compute count and idx_start from start_time
+        # and stop_time
+        self.count = count
+        self.idx_start = idx
 
 
 

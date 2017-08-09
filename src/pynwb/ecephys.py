@@ -1,7 +1,8 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs, popargs, DataChunkIterator, ShapeValidator, fmt_docval_args, call_docval_func, get_docval
+from form.utils import docval, getargs, popargs, call_docval_func
+from form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -18,8 +19,6 @@ class Device(NWBContainer):
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-#        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-#        super().__init__(*pargs, **pkwargs)
         call_docval_func(super().__init__, kwargs)
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)

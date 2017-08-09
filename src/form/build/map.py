@@ -86,8 +86,8 @@ class DecExtenderMeta(ExtenderMeta):
     @classmethod
     def __prepare__(metacls, name, bases, **kwargs):
         return {
-            'const_arg': metacls.const_arg,
-            'is_const_arg': metacls.is_const_arg,
+            'constructor_arg': metacls.constructor_arg,
+            'is_constructor_arg': metacls.is_constructor_arg,
             'get_cargname': metacls.get_cargname,
             'obj_attr': metacls.obj_attr,
             'is_attr': metacls.is_attr,
@@ -110,16 +110,16 @@ class DecExtenderMeta(ExtenderMeta):
     def get_obj_attr(cls, attr_val):
         return getattr(attr_val, cls.__obj_attr)
 
-    __const_arg = '__const_arg__'
+    __const_arg = '__constructor_arg'
     @classmethod
-    def const_arg(cls, name):
+    def constructor_arg(cls, name):
         def _dec(func):
             setattr(func, cls.__const_arg, name)
             return func
         return _dec
 
     @classmethod
-    def is_const_arg(cls, attr_val):
+    def is_constructor_arg(cls, attr_val):
         return hasattr(attr_val, cls.__const_arg)
 
     @classmethod
@@ -138,7 +138,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         cls.const_args = dict()
         cls.obj_attrs = dict()
         for name, func in cls.__dict__.items():
-            if cls.is_const_arg(func):
+            if cls.is_constructor_arg(func):
                 cls.const_args[cls.get_cargname(func)] = getattr(cls, name)
             elif cls.is_attr(func):
                 cls.obj_attrs[cls.get_obj_attr(func)] = getattr(cls, name)
@@ -160,7 +160,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         ''' the Spec used in this ObjectMapper '''
         return self.__spec
 
-    @const_arg('name')
+    @constructor_arg('name')
     def get_container_name(self, builder):
         return builder.name
 
@@ -585,7 +585,8 @@ class TypeMap(object):
         self.__default_mapper_cls = getargs('mapper_cls', kwargs)
 
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
-            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True})
+            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
+            returns="the namespaces loaded from the given file", rtype=tuple)
     def load_namespaces(self, **kwargs):
         '''Load namespaces from a namespace file.
 
@@ -602,6 +603,7 @@ class TypeMap(object):
                     if container_cls is None:
                         container_cls = TypeSource(src_ns, dt)
                     self.register_container_type(new_ns, dt, container_cls)
+        return tuple(deps.keys())
 
     _type_map = {
         'text': str,
@@ -702,8 +704,11 @@ class TypeMap(object):
             return None
         ret = self.__container_types[namespace][data_type]
         if isinstance(ret, TypeSource):
-            ret = self.__container_types[ret.namespace][ret.data_type]
-            self.register_container_type(namespace, data_type, ret)
+            #ret = self.__container_types[ret.namespace][ret.data_type]
+            #self.register_container_type(namespace, data_type, ret)
+            ret = self.__get_container_cls(ret.namespace, ret.data_type)
+            if ret is not None:
+                self.register_container_type(namespace, data_type, ret)
         return ret
 
     def __get_builder_dt(self, builder):
@@ -712,7 +717,7 @@ class TypeMap(object):
             raise ValueError("builder '%s' is does not have a data_type" % builder.name)
         return ret
 
-    def __get_namespace(self, bldr):
+    def __get_builder_ns(self, bldr):
         return bldr.get('namespace', self.__ns_catalog.default_namespace)
 
     @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder object to get the corresponding Container class for'})
@@ -746,7 +751,7 @@ class TypeMap(object):
                 dt = self.__get_builder_dt(builder)
             if dt is not None:
                 # TODO: this returns None when using subclasses
-                ns = self.__get_namespace(builder)
+                ns = self.__get_builder_ns(builder)
                 hierarchy = self.__ns_catalog.get_hierarchy(ns, dt)
                 for t in hierarchy:
                     subspec = spec.get_data_type(t)
@@ -775,7 +780,7 @@ class TypeMap(object):
                 raise ValueError("class %s does not mapped to a data_type" % container_cls)
         else:
             data_type = self.__get_builder_dt(obj)
-            namespace = self.__get_namespace(obj)
+            namespace = self.__get_builder_ns(obj)
             container_cls = self.get_cls(obj)
         # now build the ObjectMapper class
         spec = self.__ns_catalog.get_spec(namespace, data_type)

@@ -1,6 +1,6 @@
 import unittest
 
-from form.utils import ShapeValidator,ShapeValidatorResult, DataChunkIterator
+from form.data_utils import ShapeValidator,ShapeValidatorResult, DataChunkIterator
 import numpy as np
 
 

@@ -1,55 +1,14 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs, popargs, DataChunkIterator, fmt_docval_args
+from form.utils import docval, getargs, popargs, fmt_docval_args
+from form.data_utils import DataChunkIterator
 
 from . import register_class, CORE_NAMESPACE
 from .core import  NWBContainer
 
 _default_conversion = 1.0
 _default_resolution = 0.0
-
-#@register_class('Interface', CORE_NAMESPACE)
-#class Interface(NWBContainer):
-#    """ Interfaces represent particular processing tasks and they publish
-#        (ie, make available) specific types of data. Each is required
-#        to supply a minimum of specifically named data, but all can store
-#        data beyond this minimum
-#
-#        Interfaces should be created through Module.create_interface().
-#        They should not be created directly
-#    """
-#    __nwbfields__ = ("help",
-#                     "neurodata_type",
-#                     "source")
-#
-#    __neurodata_type = "Interface"
-#
-#    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Interface'},
-#            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
-#    def __init__(self, **kwargs):
-#        if self.__class__ == Interface:
-#            raise NotImplementedError("Interface cannot by instantiated directly")
-#        source = getargs('source', kwargs)
-#        super(Interface, self).__init__(**kwargs)
-#        self.source = source
-#
-#    @property
-#    def name(self):
-#        #name_attr_name = '_%s__name' % str(self.__class__.__name__).lstrip('_')
-#        #if hasattr(self, name_attr_name):
-#        #    return getattr(self, name_attr_name)
-#        #else:
-#        #    return self.__class__.__name__
-#        return self.__class__.__name__
-#        return None
-#
-#    @property
-#    def help(self):
-#        help_attr_name = '_%s__help' % str(self.__class__.__name__).lstrip('_')
-#        if hasattr(self, help_attr_name):
-#            return getattr(self, help_attr_name)
-#        return None
 
 @register_class('ProcessingModule', CORE_NAMESPACE)
 class ProcessingModule(NWBContainer):
@@ -223,17 +182,3 @@ class TimeSeries(NWBContainer):
     @property
     def time_unit(self):
         return self.__time_unit
-
-    @docval({'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset'})
-    def set_description(self, **kwargs):
-        """ Convenience function to set the description field of the
-            *TimeSeries*
-        """
-        self.fields['description'] = kwargs['description']
-
-    @docval({'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset'})
-    def set_comments(self, **kwargs):
-        """ Convenience function to set the comments field of the
-            *TimeSeries*
-        """
-        self.fields['comments'] = kwargs['comments']
