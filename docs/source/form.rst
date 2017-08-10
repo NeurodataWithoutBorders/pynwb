@@ -9,6 +9,7 @@ Subpackages
     form.backends
     form.build
     form.spec
+    form.validate
 
 Submodules
 ----------
@@ -16,6 +17,7 @@ Submodules
 .. toctree::
 
    form.container
+   form.data_utils
    form.monitor
    form.utils
 

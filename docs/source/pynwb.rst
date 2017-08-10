@@ -26,6 +26,7 @@ Submodules
    pynwb.ophys
    pynwb.retinotopy
    pynwb.spec
+   pynwb.validate
 
 Module contents
 ---------------
