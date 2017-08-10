@@ -8,6 +8,14 @@ from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_W
 from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
 
+__const_arg = '__constructor_arg'
+
+def constructor_arg(name):
+    def _dec(func):
+        setattr(func, __const_arg, name)
+        return func
+    return _dec
+
 class BuildManager(object):
     """
     A class for managing builds of Containers
@@ -83,17 +91,7 @@ class BuildManager(object):
 
 class DecExtenderMeta(ExtenderMeta):
 
-    @classmethod
-    def __prepare__(metacls, name, bases, **kwargs):
-        return {
-            'constructor_arg': metacls.constructor_arg,
-            'is_constructor_arg': metacls.is_constructor_arg,
-            'get_cargname': metacls.get_cargname,
-            'obj_attr': metacls.obj_attr,
-            'is_attr': metacls.is_attr,
-            'get_obj_attr': metacls.get_cargname
-        }
-
+    __const_arg = '__constructor_arg'
     __obj_attr = '__obj_attr__'
     @classmethod
     def obj_attr(cls, name):
@@ -109,14 +107,6 @@ class DecExtenderMeta(ExtenderMeta):
     @classmethod
     def get_obj_attr(cls, attr_val):
         return getattr(attr_val, cls.__obj_attr)
-
-    __const_arg = '__constructor_arg'
-    @classmethod
-    def constructor_arg(cls, name):
-        def _dec(func):
-            setattr(func, cls.__const_arg, name)
-            return func
-        return _dec
 
     @classmethod
     def is_constructor_arg(cls, attr_val):

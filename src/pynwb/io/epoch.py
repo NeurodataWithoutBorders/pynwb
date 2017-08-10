@@ -3,6 +3,8 @@ from .. import register_map
 
 from pynwb.epoch import Epoch, EpochTimeSeries
 
+from form.build.map import constructor_arg
+
 @register_map(Epoch)
 class EpochMap(ObjectMapper):
 

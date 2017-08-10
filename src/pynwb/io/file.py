@@ -2,6 +2,8 @@ from form.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile
 
+from form.build.map import constructor_arg
+
 @register_map(NWBFile)
 class NWBFileMap(ObjectMapper):
 
