@@ -23,7 +23,7 @@ class TimeSeriesConstructor(unittest.TestCase):
         self.assertEqual(len(ts.timestamp_link), 0)
 
     def test_init_no_parent(self):
-        parent = NWBContainer()
+        parent = NWBContainer('unit test: test_init_no_parent')
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list(), parent=parent)
         self.assertEqual(ts.name, 'test_ts')
         self.assertIs(ts.parent, parent)

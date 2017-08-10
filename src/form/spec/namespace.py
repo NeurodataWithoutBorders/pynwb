@@ -3,6 +3,8 @@ from copy import deepcopy, copy
 import ruamel.yaml as yaml
 import os.path
 import string
+from warnings import warn
+from itertools import chain
 
 from ..utils import docval, getargs, popargs, get_docval
 from .catalog import SpecCatalog
@@ -221,19 +223,33 @@ class NamespaceCatalog(object):
                     raise ValueError("no 'specs' found in %s" % spec_file_path)
                 for spec_dict in specs:
                     dt_def = spec_dict.get(self.__group_spec_cls.def_key())
+                    if dt_def is None:
+                        msg = 'skipping spec in %s, no %s found' % (spec_file_path, self.__group_spec_cls.def_key())
+                        warn(msg)
                     if dtypes and dt_def not in dtypes:
                         continue
                     if resolve:
-                        dt_inc = spec_dict.get(self.__group_spec_cls.inc_key())
-                        if dt_inc is not None:
-                            parent_spec = catalog.get_spec(dt_inc)
-                            if parent_spec is None:
-                                raise ValueError("Cannot resolve include spec '%s' for type '%s'" % (dt_inc, dt_def))
-                            spec_dict[self.__group_spec_cls.inc_key()] = parent_spec
+                        self.__resolve_includes(spec_dict, catalog, spec_file_path)
                     spec_obj = self.__group_spec_cls.build_spec(spec_dict)
                     catalog.auto_register(spec_obj, spec_file_path)
             self.__loaded_specs[spec_file_path] = ret
         return ret
+
+    def __resolve_includes(self, spec_dict, catalog, spec_file_path):
+        modified = False
+        dt_inc = spec_dict.get(self.__group_spec_cls.inc_key())
+        dt_def = spec_dict.get(self.__group_spec_cls.def_key())
+        if dt_inc is not None and dt_def is not None:
+            parent_spec = catalog.get_spec(dt_inc)
+            if parent_spec is None:
+                msg = "Cannot resolve include spec '%s' for type '%s'" % (dt_inc, dt_def)
+                raise ValueError(msg)
+            spec_dict[self.__group_spec_cls.inc_key()] = parent_spec
+            modified = True
+        it = chain(spec_dict.get('groups', list()), spec_dict.get('datasets', list()))
+        for subspec_dict in it:
+            sub_modified = self.__resolve_includes(subspec_dict, catalog, spec_file_path)
+        return modified
 
     @classmethod
     def __get_spec_path(cls, ns_path, spec_path):

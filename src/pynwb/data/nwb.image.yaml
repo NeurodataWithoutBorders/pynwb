@@ -5,26 +5,10 @@ groups:
     name: help
     value: Storage object for time-series 2-D image data
   datasets:
-  - doc: Format of image. If this is 'external' then the field external_file contains
-      the path or URL information to that file. For tiff, png, jpg, etc, the binary
-      representation of the image is stored in data. If the format is raw then the
-      fields bit_per_pixel and dimension are used. For raw images, only a single channel
-      is stored (eg, red).
-    dtype: text
-    name: format
-    quantity: '?'
   - doc: Number of bit per image pixel.
     dtype: int32
     name: bits_per_pixel
     quantity: '?'
-  - dims:
-    - rank
-    doc: Number of pixels on x, y, (and z) axes.
-    dtype: int32
-    name: dimension
-    quantity: '?'
-    shape:
-    - null
   - dims:
     - - x
       - y
@@ -48,6 +32,14 @@ groups:
       - null
       - null
       - null
+  - dims:
+    - rank
+    doc: Number of pixels on x, y, (and z) axes.
+    dtype: int32
+    name: dimension
+    quantity: '?'
+    shape:
+    - null
   - attributes:
     - dims:
       - num_files
@@ -70,6 +62,14 @@ groups:
     quantity: '?'
     shape:
     - null
+  - doc: Format of image. If this is 'external' then the field external_file contains
+      the path or URL information to that file. For tiff, png, jpg, etc, the binary
+      representation of the image is stored in data. If the format is raw then the
+      fields bit_per_pixel and dimension are used. For raw images, only a single channel
+      is stored (eg, red).
+    dtype: text
+    name: format
+    quantity: '?'
   doc: 'General image data that is common between acquisition and stimulus time series.
     Sometimes the image data is stored in the HDF5 file in a raw format while other
     times it will be stored as an external image file in the host file system. The
@@ -82,10 +82,6 @@ groups:
     dtype: text
     name: help
     value: An alpha mask that is applied to a presented visual stimulus
-  datasets:
-  - doc: Path to linked ImageSeries
-    dtype: text
-    name: masked_imageseries_path
   doc: An alpha mask that is applied to a presented visual stimulus. The data[] array
     contains an array of mask values that are applied to the displayed image. Mask
     values are stored as RGBA. Mask can vary with time. The timestamps array indicates
@@ -103,11 +99,6 @@ groups:
     name: help
     value: Time-series image stack for optical recording or stimulus
   datasets:
-  - doc: Description of image relative to some reference frame (e.g., which way is
-      up). Must also specify frame of reference.
-    dtype: text
-    name: orientation
-    quantity: '?'
   - doc: Distance from camera/monitor to target/eye.
     dtype: float32
     name: distance
@@ -121,6 +112,11 @@ groups:
     quantity: '?'
     shape:
     - 2
+  - doc: Description of image relative to some reference frame (e.g., which way is
+      up). Must also specify frame of reference.
+    dtype: text
+    name: orientation
+    quantity: '?'
   doc: Image data that is presented or recorded. A stimulus template movie will be
     stored only as an image. When the image is presented as stimulus, additional data
     is required, such as field of view (eg, how much of the visual field the image
@@ -145,9 +141,6 @@ groups:
     name: data
     shape:
     - null
-  - doc: Path to linked TimeSeries
-    dtype: text
-    name: indexed_timeseries_path
   doc: Stores indices to image frames stored in an ImageSeries. The purpose of the
     ImageIndexSeries is to allow a static image stack to be stored somewhere, and
     the images in the stack to be referenced out-of-order. This can be for the display

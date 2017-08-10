@@ -56,22 +56,22 @@ class DataChunkIteratorTests(unittest.TestCase):
     def test_standard_iterator_unbuffered(self):
         dci = DataChunkIterator(data=range(10), buffer_size=1)
         self.assertEqual(dci.dtype, np.dtype(int))
-        self.assertTupleEqual(dci.max_shape, (None,))
-        self.assertTupleEqual(dci.recommended_data_shape(), (1,)) # Test before and after iteration
+        self.assertTupleEqual(dci.max_shape, (10,))
+        self.assertTupleEqual(dci.recommended_data_shape(), (10,)) # Test before and after iteration
         count = 0
         for chunk in dci:
             self.assertEqual(chunk.data.shape[0], 1)
             count+=1
         self.assertEqual(count, 10)
-        self.assertTupleEqual(dci.recommended_data_shape(), (1,)) # Test before and after iteration
+        self.assertTupleEqual(dci.recommended_data_shape(), (10,)) # Test before and after iteration
         self.assertIsNone(dci.recommended_chunk_shape())
 
     def test_standard_iterator_unmatched_buffersized(self):
         dci = DataChunkIterator(data=range(10), buffer_size=3)
         self.assertEquals(dci.dtype, np.dtype(int))
-        self.assertTupleEqual(dci.max_shape, (None,))
+        self.assertTupleEqual(dci.max_shape, (10,))
         self.assertIsNone(dci.recommended_chunk_shape())
-        self.assertTupleEqual(dci.recommended_data_shape(), (3,)) # Test before and after iteration
+        self.assertTupleEqual(dci.recommended_data_shape(), (10,)) # Test before and after iteration
         count = 0
         for chunk in dci:
             if count < 3:
@@ -79,7 +79,7 @@ class DataChunkIteratorTests(unittest.TestCase):
             else:
                 self.assertEqual(chunk.data.shape[0], 1)
             count +=1
-        self.assertTupleEqual(dci.recommended_data_shape(), (3,)) # Test before and after iteration
+        self.assertTupleEqual(dci.recommended_data_shape(), (10,)) # Test before and after iteration
         self.assertEqual(count, 4)
 
     def test_multidimensional_list(self):

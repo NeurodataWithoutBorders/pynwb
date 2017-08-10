@@ -5,10 +5,6 @@ groups:
     name: help
     value: Image stack recorded from 2-photon microscope
   datasets:
-  - doc: Photomultiplier gain
-    dtype: float32
-    name: pmt_gain
-    quantity: '?'
   - dims:
     - width|height|depth
     doc: Width, height and depth of image, or imaged area (meters).
@@ -17,6 +13,10 @@ groups:
     quantity: '?'
     shape:
     - 3
+  - doc: Photomultiplier gain
+    dtype: float32
+    name: pmt_gain
+    quantity: '?'
   - doc: Lines imaged per second. This is also stored in /general/optophysiology but
       is kept here as it is useful information for analysis, and so good to be stored
       w/ the actual data.
@@ -39,16 +39,6 @@ groups:
       to the signal from one ROI
   datasets:
   - dims:
-    - num_ROIs
-    doc: List of ROIs represented, one name for each row of data[].
-    dtype: text
-    name: roi_names
-    shape:
-    - null
-  - doc: Path to segmentation module.
-    dtype: text
-    name: segmentation_interface_path
-  - dims:
     - num_times
     - num_ROIs
     doc: Signals from ROIs
@@ -56,6 +46,13 @@ groups:
     name: data
     shape:
     - null
+    - null
+  - dims:
+    - num_ROIs
+    doc: List of ROIs represented, one name for each row of data[].
+    dtype: text
+    name: roi_names
+    shape:
     - null
   doc: ROI responses over an imaging plane. Each row in data[] should correspond to
     the signal from one ROI.
@@ -81,7 +78,7 @@ groups:
     quantity: '*'
   name: DfOverF
   neurodata_type_def: DfOverF
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer
 - attributes:
   - doc: Value is 'Fluorescence over time of one or more ROIs. TimeSeries names should
       correspond to imaging plane names'
@@ -98,7 +95,7 @@ groups:
     quantity: +
   name: Fluorescence
   neurodata_type_def: Fluorescence
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer
 - attributes:
   - doc: Value is 'Stores groups of pixels that define regions of interest from one
       or more imaging planes'
@@ -119,13 +116,6 @@ groups:
       dtype: text
       name: description
       quantity: '?'
-    - dims:
-      - num_rois
-      doc: List of ROIs in this imaging plane
-      dtype: text
-      name: roi_list
-      shape:
-      - null
     doc: Group name is human-readable description of imaging plane
     groups:
     - datasets:
@@ -159,6 +149,7 @@ groups:
         name: roi_description
       doc: Name of ROI
       neurodata_type_def: ROI
+      neurodata_type_inc: NWBContainer
       quantity: '*'
     - doc: Stores image stacks segmentation mask apply to.
       groups:
@@ -171,28 +162,43 @@ groups:
       name: imaging_plane
       target_type: ImagingPlane
     neurodata_type_def: PlaneSegmentation
+    neurodata_type_inc: NWBContainer
     quantity: '*'
   name: ImageSegmentation
   neurodata_type_def: ImageSegmentation
-  neurodata_type_inc: Interface
+  neurodata_type_inc: NWBContainer
 - datasets:
-  - doc: Name of device in /general/devices
-    dtype: text
-    name: device
   - doc: Description of &lt;image_plane_X&gt;
     dtype: text
     name: description
     quantity: '?'
+  - doc: Name of device in /general/devices
+    dtype: text
+    name: device
+  - doc: Excitation wavelength
+    dtype: text
+    name: excitation_lambda
+  - doc: Rate images are acquired, in Hz.
+    dtype: text
+    name: imaging_rate
+  - doc: Calcium indicator
+    dtype: text
+    name: indicator
+  - doc: Location of image plane
+    dtype: text
+    name: location
   - attributes:
     - default_value: 1.0
       doc: Multiplier to get from stored values to specified unit (e.g., 1e-3 for
         millimeters)
       dtype: float
       name: conversion
+      required: false
     - default_value: Meter
       doc: Base unit that coordinates are stored in (e.g., Meters)
       dtype: text
       name: unit
+      required: false
     dims:
     - height
     - weight
@@ -212,18 +218,6 @@ groups:
       this field is not required'
     dtype: text
     name: reference_frame
-  - doc: Calcium indicator
-    dtype: text
-    name: indicator
-  - doc: Location of image plane
-    dtype: text
-    name: location
-  - doc: Rate images are acquired, in Hz.
-    dtype: text
-    name: imaging_rate
-  - doc: Excitation wavelength
-    dtype: text
-    name: excitation_lambda
   doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name is
     arbitrary but should be meaningful. It is referenced by TwoPhotonSeries and also
     ImageSegmentation and DfOverF interfaces'
@@ -238,5 +232,7 @@ groups:
     doc: 'One of possibly many groups storing channel-specific data COMMENT: Name
       is arbitrary but should be meaningful'
     neurodata_type_def: OpticalChannel
+    neurodata_type_inc: NWBContainer
   neurodata_type_def: ImagingPlane
+  neurodata_type_inc: NWBContainer
   quantity: '*'
