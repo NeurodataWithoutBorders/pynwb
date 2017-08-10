@@ -3,6 +3,8 @@ from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
 
+from form.build.map import constructor_arg
+
 @register_map(ProcessingModule)
 class ModuleMap(ObjectMapper):
 
