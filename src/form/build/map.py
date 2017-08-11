@@ -109,6 +109,13 @@ class DecExtenderMeta(ExtenderMeta):
         return getattr(attr_val, cls.__obj_attr)
 
     @classmethod
+    def constructor_arg(cls, name):
+        def _dec(func):
+            setattr(func, cls.__const_arg, name)
+            return func
+        return _dec
+
+    @classmethod
     def is_constructor_arg(cls, attr_val):
         return hasattr(attr_val, cls.__const_arg)
 
