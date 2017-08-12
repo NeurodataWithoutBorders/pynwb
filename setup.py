@@ -47,7 +47,7 @@ setup_args = {
     'long_description': readme,
     'author': 'Andrew Tritt',
     'author_email': 'ajtritt@lbl.gov',
-    'url': 'https://bitbucket.org/lblneuro/pynwb',
+    'url': 'https://github.com/NeurodataWithoutBorders/pynwb',
     'license': license,
     'packages': pkgs,
     'package_dir': {'': 'src'},

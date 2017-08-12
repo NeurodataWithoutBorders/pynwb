@@ -9,7 +9,7 @@ Contributing
 =======================
 Readme
 ------------
-To contribute to PyNWB, you must submit your changes to ``dev`` branch via a `Pull Request <https://www.atlassian.com/git/tutorials/making-a-pull-request>`_.
+To contribute to PyNWB, you must submit your changes to ``dev`` branch via a `Pull Request <https://help.github.com/articles/creating-a-pull-request>`_.
 
 From your local copy directory, use the following comands.
 
@@ -21,7 +21,7 @@ From your local copy directory, use the following comands.
 
 2) Make your changes.
 
-3) Push your feature branch to origin (i.e. bitbucket)
+3) Push your feature branch to origin (i.e. github)
 
 .. code-block:: bash
 
