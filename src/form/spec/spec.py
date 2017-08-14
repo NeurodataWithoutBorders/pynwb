@@ -440,6 +440,12 @@ class LinkSpec(Spec):
         ''' The number of times the object being specified should be present '''
         return self.get('quantity', DEF_QUANTITY)
 
+    @property
+    def required(self):
+        ''' Whether or not the this spec represents a required field '''
+        return self.quantity not in (ZERO_OR_ONE, ZERO_OR_MANY)
+
+
 _group_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'name', 'type': str, 'doc': 'the name of this group', 'default': None},
@@ -583,14 +589,16 @@ class GroupSpec(BaseStorageSpec):
                             return True
         return False
 
-    @docval({'name': 'spec', 'type': 'BaseStorageSpec', 'doc': 'the specification to check'})
+    @docval({'name': 'spec', 'type': (BaseStorageSpec, str), 'doc': 'the specification to check'})
     def is_inherited_type(self, **kwargs):
         ''' Returns True if `spec` represents a spec that was inherited from an included data_type '''
         spec = getargs('spec', kwargs)
-        if spec.data_type_def is None:
-            raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
+        if isinstance(spec, BaseStorageSpec):
+            if spec.data_type_def is None:
+                raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
+            spec = spec.data_type_def
         #return spec.data_type_def in self.__inherited_data_type_defs
-        return spec.data_type_def not in self.__new_data_types
+        return spec not in self.__new_data_types
 
     def __add_data_type_inc(self, spec):
         dt = None

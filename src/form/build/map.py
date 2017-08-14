@@ -378,7 +378,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
 
             if attr_value is None:
                 if spec.required:
-                    raise Warning("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
+                    raise Warning("missing required attribute '%s' for '%s' of type '%s'" % (spec.name, builder.name, self.spec.data_type_def))
                 continue
             builder.set_attribute(spec.name, attr_value)
 
