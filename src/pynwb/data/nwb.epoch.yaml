@@ -1,5 +1,10 @@
 groups:
-- datasets:
+- attributes:
+  - doc: Value is 'A general epoch object'
+    dtype: text
+    name: help
+    value: A general epoch object
+  datasets:
   - doc: Description of this epoch (&lt;epoch_X&gt;).
     dtype: text
     name: description
@@ -23,7 +28,12 @@ groups:
   doc: 'One of possibly many different experimental epochCOMMENT: Name is arbitrary
     but must be unique within the experiment.'
   groups:
-  - datasets:
+  - attributes:
+    - doc: Value is 'Data on how an epoch applies to a time series'
+      dtype: text
+      name: help
+      value: Data on how an epoch applies to a time series
+    datasets:
     - doc: Number of data samples available in this time series, during this epoch.
       dtype: int32
       name: count

@@ -181,7 +181,12 @@ groups:
     for machine (and human) readability of the file.
   neurodata_type_def: VoltageClampStimulusSeries
   neurodata_type_inc: PatchClampSeries
-- datasets:
+- attributes:
+  - doc: Value is 'Metadata about an intracellular electrode'
+    dtype: text
+    name: help
+    value: Metadata about an intracellular electrode
+  datasets:
   - doc: 'Recording description, description of electrode (e.g.,  whole-cell, sharp,
       etc)COMMENT: Free-form text (can be from Methods)'
     dtype: text

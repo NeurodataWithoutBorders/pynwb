@@ -198,7 +198,12 @@ groups:
   name: FeatureExtraction
   neurodata_type_def: FeatureExtraction
   neurodata_type_inc: NWBContainer
-- datasets:
+- attributes:
+  - doc: Value is 'Detected spike events from voltage trace(s)'
+    dtype: text
+    name: help
+    value: Detected spike events from voltage trace(s)
+  datasets:
   - doc: Description of how events were detected, such as voltage threshold, or dV/dT
       threshold, as well as relevant values.
     dtype: text
