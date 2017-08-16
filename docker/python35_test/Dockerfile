@@ -5,8 +5,9 @@
 # http://pynwb.readthedocs.io/en/latest/index.html
 #
 # To run:
-# - cd pynwb/docker
-# - docker build --tag neurodatawithoutborders/pynwb:python35_test -f ./python35_test/Dockerfile ..
+# - cd pynwb/docker/python35_test
+# - docker build --tag neurodatawithoutborders/pynwb:python35_test -f ./Dockerfile ../..
+# - docker run -it neurodatawithoutborders/pynwb:python35_test bash
 
 # Pull base image.
 FROM continuumio/miniconda3:latest
