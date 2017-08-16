@@ -1,13 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-from setuptools.command.build_py import build_py
 
-from urllib.request import urlretrieve
-import json
-import pickle
 import os
-from tarfile import TarFile
 
 
 schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
@@ -52,5 +47,3 @@ if __name__ == '__main__':
 
     #get_schema()
     setup(**setup_args)
-
-
