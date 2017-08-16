@@ -115,7 +115,7 @@ groups:
   - doc: HDF5 link to Clustering interface that was the source of the clustered data
     name: clustering_interface
     target_type: Clustering
-  name: ClusterWaveforms
+  default_name: ClusterWaveforms
   neurodata_type_def: ClusterWaveforms
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -155,7 +155,7 @@ groups:
     - null
   doc: Clustered spike data, whether from automatic clustering tools (e.g., klustakwik)
     or as a result of manual sorting.
-  name: Clustering
+  default_name: Clustering
   neurodata_type_def: Clustering
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -195,7 +195,7 @@ groups:
   - doc: link to ElectrodeGroup group that generated this TimeSeries data
     name: electrode_group
     target_type: ElectrodeGroup
-  name: FeatureExtraction
+  default_name: FeatureExtraction
   neurodata_type_def: FeatureExtraction
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -238,7 +238,7 @@ groups:
       it's not necessary to mandate that information be stored here
     name: source_electricalseries
     target_type: ElectricalSeries
-  name: EventDetection
+  default_name: EventDetection
   neurodata_type_def: EventDetection
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -253,7 +253,7 @@ groups:
   - doc: SpikeEventSeries object containing detected spike event waveforms
     neurodata_type_inc: SpikeEventSeries
     quantity: '*'
-  name: EventWaveform
+  default_name: EventWaveform
   neurodata_type_def: EventWaveform
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -278,7 +278,7 @@ groups:
   - doc: ElectricalSeries object containing filtered electrophysiology data
     neurodata_type_inc: ElectricalSeries
     quantity: +
-  name: FilteredEphys
+  default_name: FilteredEphys
   neurodata_type_def: FilteredEphys
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -295,7 +295,7 @@ groups:
   - doc: ElectricalSeries object containing LFP data for one or channels
     neurodata_type_inc: ElectricalSeries
     quantity: +
-  name: LFP
+  default_name: LFP
   neurodata_type_def: LFP
   neurodata_type_inc: NWBContainer
 - attributes:

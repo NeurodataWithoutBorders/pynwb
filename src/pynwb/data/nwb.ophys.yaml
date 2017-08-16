@@ -76,7 +76,7 @@ groups:
   - doc: RoiResponseSeries object containing dF/F for a ROI
     neurodata_type_inc: RoiResponseSeries
     quantity: '*'
-  name: DfOverF
+  default_name: DfOverF
   neurodata_type_def: DfOverF
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -93,7 +93,7 @@ groups:
   - doc: RoiResponseSeries object containing fluorescence data for a ROI
     neurodata_type_inc: RoiResponseSeries
     quantity: +
-  name: Fluorescence
+  default_name: Fluorescence
   neurodata_type_def: Fluorescence
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -174,7 +174,7 @@ groups:
     neurodata_type_def: PlaneSegmentation
     neurodata_type_inc: NWBContainer
     quantity: '*'
-  name: ImageSegmentation
+  default_name: ImageSegmentation
   neurodata_type_def: ImageSegmentation
   neurodata_type_inc: NWBContainer
 - attributes:

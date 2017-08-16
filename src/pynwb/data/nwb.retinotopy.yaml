@@ -230,6 +230,6 @@ groups:
     />Note: for data consistency, all images and arrays are stored in the format [row][column]
     and [row, col], which equates to [y][x]. Field of view and dimension arrays may
     appear backward (i.e., y before x).'
-  name: ImagingRetinotopy
+  default_name: ImagingRetinotopy
   neurodata_type_def: ImagingRetinotopy
   neurodata_type_inc: NWBContainer
