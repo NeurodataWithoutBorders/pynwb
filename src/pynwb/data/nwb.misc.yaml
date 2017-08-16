@@ -147,6 +147,6 @@ groups:
     neurodata_type_def: SpikeUnit
     neurodata_type_inc: NWBContainer
     quantity: +
-  name: UnitTimes
+  default_name: UnitTimes
   neurodata_type_def: UnitTimes
   neurodata_type_inc: NWBContainer

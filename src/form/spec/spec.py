@@ -180,6 +180,12 @@ class BaseStorageSpec(Spec):
         if name == NAME_WILDCARD and data_type_def is None and data_type_inc is None:
             raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'data_type_def' and/or 'data_type_inc'")
         super().__init__(doc, name=name, parent=parent)
+        default_name = getargs('default_name', kwargs)
+        if default_name:
+            if name is not None:
+                warn("found 'default_name' with 'name' - ignoring 'default_name'")
+            else:
+                self['default_name'] = default_name
         self.__attributes = dict()
         if quantity in (ONE_OR_MANY, ZERO_OR_MANY):
             if name != NAME_WILDCARD:
@@ -207,6 +213,11 @@ class BaseStorageSpec(Spec):
         if resolve:
             self.resolve_spec(data_type_inc)
             self.__resolved = True
+
+    @property
+    def default_name(self):
+        '''The default name for this spec'''
+        return self.get('default_name', None)
 
     @property
     def resolved(self):
