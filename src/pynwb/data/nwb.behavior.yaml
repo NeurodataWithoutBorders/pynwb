@@ -61,7 +61,7 @@ groups:
   - doc: IntervalSeries object containing start and stop times of epochs
     neurodata_type_inc: IntervalSeries
     quantity: '*'
-  name: BehavioralEpochs
+  defaul_name: BehavioralEpochs
   neurodata_type_def: BehavioralEpochs
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -75,7 +75,7 @@ groups:
   - doc: TimeSeries object containing irregular behavioral events
     neurodata_type_inc: TimeSeries
     quantity: '*'
-  name: BehavioralEvents
+  default_name: BehavioralEvents
   neurodata_type_def: BehavioralEvents
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -89,7 +89,7 @@ groups:
   - doc: TimeSeries object containing continuous behavioral data
     neurodata_type_inc: TimeSeries
     quantity: '*'
-  name: BehavioralTimeSeries
+  default_name: BehavioralTimeSeries
   neurodata_type_def: BehavioralTimeSeries
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -102,7 +102,7 @@ groups:
   - doc: TimeSeries object containing time series data on pupil size
     neurodata_type_inc: TimeSeries
     quantity: +
-  name: PupilTracking
+  default_name: PupilTracking
   neurodata_type_def: PupilTracking
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -115,7 +115,7 @@ groups:
   - doc: SpatialSeries object containing data measuring direction of gaze
     neurodata_type_inc: SpatialSeries
     quantity: '*'
-  name: EyeTracking
+  default_name: EyeTracking
   neurodata_type_def: EyeTracking
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -135,7 +135,7 @@ groups:
   - doc: SpatialSeries object containing direction of gaze travel
     neurodata_type_inc: SpatialSeries
     quantity: '*'
-  name: CompassDirection
+  default_name: CompassDirection
   neurodata_type_def: CompassDirection
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -148,7 +148,7 @@ groups:
   - doc: SpatialSeries object containing position data
     neurodata_type_inc: SpatialSeries
     quantity: +
-  name: Position
+  default_name: Position
   neurodata_type_def: Position
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -183,6 +183,6 @@ groups:
     neurodata_type_def: CorrectedImageStack
     neurodata_type_inc: NWBContainer
     quantity: +
-  name: MotionCorrection
+  default_name: MotionCorrection
   neurodata_type_def: MotionCorrection
   neurodata_type_inc: NWBContainer
