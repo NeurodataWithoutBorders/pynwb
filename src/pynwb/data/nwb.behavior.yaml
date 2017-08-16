@@ -61,7 +61,7 @@ groups:
   - doc: IntervalSeries object containing start and stop times of epochs
     neurodata_type_inc: IntervalSeries
     quantity: '*'
-  defaul_name: BehavioralEpochs
+  default_name: BehavioralEpochs
   neurodata_type_def: BehavioralEpochs
   neurodata_type_inc: NWBContainer
 - attributes:
