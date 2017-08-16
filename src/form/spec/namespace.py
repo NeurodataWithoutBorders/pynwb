@@ -214,24 +214,28 @@ class NamespaceCatalog(object):
 
     def __load_spec_file(self, spec_file_path, catalog, dtypes=None, resolve=True):
         ret = self.__loaded_specs.get(spec_file_path)
+        def __reg_spec(spec_cls, spec_dict):
+            dt_def = spec_dict.get(spec_cls.def_key())
+            if dt_def is None:
+                msg = 'skipping spec in %s, no %s found' % (spec_file_path, spec_cls.def_key())
+                warn(msg)
+                return
+            if dtypes and dt_def not in dtypes:
+                return
+            if resolve:
+                self.__resolve_includes(spec_dict, catalog, spec_file_path)
+            spec_obj = spec_cls.build_spec(spec_dict)
+            catalog.auto_register(spec_obj, spec_file_path)
         if ret is None:
             ret = dict()
             with open(spec_file_path, 'r') as stream:
                 d = yaml.safe_load(stream)
-                specs = d.get('groups')
-                if specs is None:
-                    raise ValueError("no 'specs' found in %s" % spec_file_path)
+                specs = d.get('groups', list())
                 for spec_dict in specs:
-                    dt_def = spec_dict.get(self.__group_spec_cls.def_key())
-                    if dt_def is None:
-                        msg = 'skipping spec in %s, no %s found' % (spec_file_path, self.__group_spec_cls.def_key())
-                        warn(msg)
-                    if dtypes and dt_def not in dtypes:
-                        continue
-                    if resolve:
-                        self.__resolve_includes(spec_dict, catalog, spec_file_path)
-                    spec_obj = self.__group_spec_cls.build_spec(spec_dict)
-                    catalog.auto_register(spec_obj, spec_file_path)
+                    __reg_spec(self.__group_spec_cls, spec_dict)
+                specs = d.get('datasets', list())
+                for spec_dict in specs:
+                    __reg_spec(self.__dataset_spec_cls, spec_dict)
             self.__loaded_specs[spec_file_path] = ret
         return ret
 
