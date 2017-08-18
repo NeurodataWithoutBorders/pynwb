@@ -168,8 +168,7 @@ class SpikeUnit(NWBContainer):
     For use in the UnitTimes class.
     """
 
-    __nwbfields__ = ('source',
-                     'times',
+    __nwbfields__ = ('times',
                      'unit_description')
 
     _help = "Estimated spike times from a single unit"
@@ -177,7 +176,7 @@ class SpikeUnit(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'Name of the SpikeUnit'},
             {'name': 'times', 'type': Iterable, 'doc': 'Spike time for the units (exact or estimated)'},
             {'name': 'unit_description', 'type': str, 'doc': 'Description of the unit (eg, cell type).'},
-            {'name': 'source', 'type': str, 'doc': 'Name, path or description of where unit times originated. This is necessary only if the info here differs from or is more fine-grained than the interfaces source field.', 'default': None})
+            {'name': 'source', 'type': str, 'doc': 'Name, path or description of where unit times originated. This is necessary only if the info here differs from or is more fine-grained than the interfaces source field.'})
     def __init__(self, **kwargs):
         times, unit_description = popargs('times', 'unit_description', kwargs)
         call_docval_func(super(SpikeUnit, self).__init__, kwargs)

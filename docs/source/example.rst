@@ -395,7 +395,7 @@ For the purpose of this example we assume that our current directory has the fol
 
 .. code-block:: text
 
-    - nwb_schema (cloned from `https://bitbucket.org/lblneuro/nwb-schema`)
+    - nwb_schema (cloned from `https://github.com/NeurodataWithoutBorders/nwb-schema`)
     - my_extension/
         - my_extension_source/
             - mylab.namespace.yaml

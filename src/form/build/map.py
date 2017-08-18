@@ -375,7 +375,7 @@ class ObjectMapper(with_metaclass(DecExtenderMeta, object)):
 
             if attr_value is None:
                 if spec.required:
-                    raise Warning("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
+                    raise Warning("missing required attribute '%s' for '%s' of type '%s'" % (spec.name, builder.name, self.spec.data_type_def))
                 continue
             builder.set_attribute(spec.name, attr_value)
 
@@ -539,10 +539,17 @@ class ObjectMapper(with_metaclass(DecExtenderMeta, object)):
     def get_builder_name(self, **kwargs):
         '''Get the name of a Builder that represents a Container'''
         container = getargs('container', kwargs)
-        if self.__spec.name != NAME_WILDCARD:
+        if self.__spec.name not in (NAME_WILDCARD, None):
             ret = self.__spec.name
         else:
-            ret = container.name
+            if container.name is None:
+                if self.__spec.default_name is not None:
+                    ret = self.__spec.default_name
+                else:
+                    msg = 'Unable to determine name of container type %s' % self.__spec.data_type_def
+                    raise ValueError(msg)
+            else:
+                ret = container.name
         return ret
 
 

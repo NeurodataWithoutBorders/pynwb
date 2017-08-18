@@ -2,42 +2,13 @@
 
 from setuptools import setup, find_packages
 from setuptools.command.build_py import build_py
-# import six
-# if six.PY3:
-#     from urllib import request
-#     urlretrieve = request.urlretrieve
-# else:
-#     from urllib2 import urlretrieve
-import requests
 
 import json
 import pickle
 import os
-from tarfile import TarFile
 
 
 schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
-class CustomBuild(build_py):
-    def run(self):
-        '''Here, we will do something to access a URL stored in the pynwb repo.
-        This URL will contain the source of the schema.
-        '''
-        # we should look this up in a config file somewhere
-        if not os.path.exists(schema_dir):
-            os.makedirs(schema_dir)
-        url = "https://bitbucket.org/lblneuro/nwb-schema/downloads/nwb_core.tar"
-        dest = "nwb_core.tar"
-        print('getting NWB specification')
-        r = requests.get(url)
-        with open(dest, "wb") as code:
-            code.write(r.content)
-
-        # schema = urlretrieve(url, dest)
-        tf = TarFile(dest, 'r')
-        tf.extractall(schema_dir)
-        super(CustomBuild, self).run()
-
-
 
 with open('README.rst') as f:
     readme = f.read()
@@ -57,7 +28,7 @@ setup_args = {
     'long_description': readme,
     'author': 'Andrew Tritt',
     'author_email': 'ajtritt@lbl.gov',
-    'url': 'https://bitbucket.org/lblneuro/pynwb',
+    'url': 'https://github.com/NeurodataWithoutBorders/pynwb',
     'license': license,
     'packages': pkgs,
     'package_dir': {'': 'src'},
