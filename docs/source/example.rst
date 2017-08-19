@@ -266,9 +266,93 @@ The NWB specification is designed to be extended. Extension for the NWB format c
 The classes :py:class:`~pynwb.spec.NWBGroupSpec`, :py:class:`~pynwb.spec.NWBDatasetSpec`, :py:class:`~pynwb.spec.NWBAttributeSpec`, and :py:class:`~pynwb.spec.NWBLinkSpec`
 can be used to define custom types.
 
+Attribute Specifications
+____________________________________________________
+
+Specifying attributes is done with :py:class:`~pynwb.spec.NWBAttributeSpec`.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBAttributeSpec
+
+    spec = NWBAttributeSpec('bar', 'float', 'a value for bar')
+
+Dataset Specifications
+____________________________________________________
+
+Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBDatasetSpec
+
+    spec = NWBDatasetSpec('A custom NWB type',
+                        attribute=[
+                            NWBAttributeSpec('baz', 'str', 'a value for baz'),
+                        ],
+                        shape=(None, None))
+
+
+Using datasets to specify tables
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Tables can be specified using :py:class:`~pynwb.spec.NWBDtypeSpec`. To specify a table, provide a
+list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
+
+    spec = NWBDatasetSpec('A custom NWB type',
+                        attribute=[
+                            NWBAttributeSpec('baz', 'str', 'a value for baz'),
+                        ],
+                        dtype=[
+                            NWBDtypeSpec('foo', column for foo', 'int'),
+                            NWBDtypeSpec('bar', 'a column for bar', 'float')
+                        ])
+
+Compound data types can be nested.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
+
+    spec = NWBDatasetSpec('A custom NWB type',
+                        attribute=[
+                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
+                        ],
+                        dtype=[
+                            NWBDtypeSpec('foo', 'a column for foo', 'int'),
+                            NWBDtypeSpec('bar', 'a column for bar', 'float')
+                        ])
+
+Group Specifications
+____________________________________________________
+
+Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBGroupSpec
+
+    # A list of NWBAttributeSpec objects to specify new attributes
+    addl_attributes = [...]
+    # A list of NWBDatasetSpec objects to specify new datasets
+    addl_datasets = [...]
+    # A list of NWBDatasetSpec objects to specify new groups
+    addl_groups = [...]
+    spec = NWBGroupSpec('A custom NWB type',
+                        attributes = addl_attributes,
+                        datasets = addl_datasets,
+                        groups = addl_groups)
+
+Neurodata Type Specifications
+____________________________________________________
+
 :py:class:`~pynwb.spec.NWBGroupSpec` and :py:class:`~pynwb.spec.NWBDatasetSpec` use the arguments `neurodata_type_inc` and `neurodata_type_def` for
 declaring new types and extending existing types. New types are specified by setting the argument `neurodata_type_def`. New types can extend an existing type
-by specifying the argument `neurodata_type_inc`. Specifications can instantiate existing types by only specifying the `neurodata_type_inc`.
+by specifying the argument `neurodata_type_inc`.
 
 Create a new type
 
@@ -307,7 +391,7 @@ Extend an existing type
                         neurodata_type_inc='Clustering',
                         neurodata_type_def='MyExtendedClustering')
 
-Use an existing type
+Existing types can be instantiate by specifying `neurodata_type_inc` alone.
 
 .. code-block:: python
 
