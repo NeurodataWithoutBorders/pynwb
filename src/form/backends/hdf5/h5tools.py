@@ -125,7 +125,7 @@ class HDF5IO(FORMIO):
         for name, gbldr in f_builder.groups.items():
             write_group(self.__file, name, gbldr.groups, gbldr.datasets, gbldr.attributes, gbldr.links)
         for name, dbldr in f_builder.datasets.items():
-            write_dataset(self.__file, name, dbldr.data, dbldr.attributes, default_dtype=dbldr.dtype)
+            write_dataset(self.__file, name, dbldr.data, dbldr.attributes, dtype=dbldr.dtype)
         set_attributes(self.__file, f_builder.attributes)
 
 def get_type(data):
@@ -148,18 +148,29 @@ __dtypes = {
     "int8": np.int8,
     "text": special_dtype(vlen=str),
     "uint16": np.uint16,
-    "uint8": np.uint8
+    "uint8": np.uint8,
 }
 
-def __resolve_dtype__(dtype):
+def __resolve_dtype__(dtype, data):
     # TODO: These values exist, but I haven't solved them yet
-    # any
     # binary
     # number
-    ret =  __dtypes.get(dtype)
-    if ret is None:
-        raise Exception("cannot resolve dtype '%s'" % str(dtype))
-    return ret
+    dtype = __resolve_dtype_helper__(dtype)
+    if dtype is None:
+        try:
+            dtype = get_type(data)
+        except Exception as exc:
+            msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)
+            raise Exception(msg) from exc
+    return dtype
+
+def __resolve_dtype_helper__(dtype):
+    if dtype is None:
+        return None
+    elif isinstance(dtype, str):
+        return __dtypes.get(dtype)
+    else:
+        return np.dtype([(x['name'], __resolve_dtype_helper__(x['dtype'])) for x in dtype])
 
 @docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
         {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Group, indexed by attribute name'},
@@ -186,7 +197,7 @@ def set_attributes(**kwargs):
         returns='the Group that was created', rtype='Group', is_method=False)
 def write_group(**kwargs):
     parent, name, subgroups, datasets, attributes, links = getargs('parent', 'name', 'subgroups', 'datasets', 'attributes', 'links', kwargs)
-    group = parent.require_group(name)
+    group = parent.create_group(name)
     # write all groups
     if subgroups:
         for subgroup_name, builder in subgroups.items():
@@ -204,7 +215,7 @@ def write_group(**kwargs):
                           dset_name,
                           builder.get('data'),
                           builder.get('attributes'),
-                          default_dtype=builder.dtype)
+                          dtype=builder.dtype)
     # write all links
     if links:
         for link_name, builder in links.items():
@@ -228,10 +239,8 @@ def write_link(**kwargs):
     path = "%s%s" % (delim, delim.join(reversed(names)))
     # source will indicate target_builder's location
     if parent.file.filename == target_builder.source:
-        #print('creating link %s in %s to %s' % (name, parent.name, path))
         link_obj = SoftLink(path)
     else:
-        #print('creating link %s in %s to %s:%s' % (name, parent.name, target_builder.source, path))
         link_obj = ExternalLink(target_builder.source, path)
     parent[name] = link_obj
     return link_obj
@@ -257,7 +266,7 @@ __data_types = (
         {'name': 'name', 'type': str, 'doc': 'the name of the Dataset to write'},
         {'name': 'data', 'type': __data_types, 'doc': 'the data object to be written'},
         {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Dataset, indexed by attribute name'},
-        {'name': 'default_dtype', 'type': (type, str), 'doc': 'the default dtype to use, if it cannot be inferred', 'default': None},
+        {'name': 'dtype', 'type': (type, str, list), 'doc': 'the default dtype to use, if it cannot be inferred', 'default': None},
         returns='the Dataset that was created', rtype=Dataset, is_method=False)
 def write_dataset(**kwargs):
     """ Write a dataset to HDF5
@@ -265,7 +274,7 @@ def write_dataset(**kwargs):
     The function uses other dataset-dependent write functions, e.g,
     __scalar_fill__, __list_fill__ and __chunked_iter_fill__ to write the data.
     """
-    parent, name, data, attributes, default_dtype = getargs('parent', 'name', 'data', 'attributes', 'default_dtype', kwargs)
+    parent, name, data, attributes, dtype = getargs('parent', 'name', 'data', 'attributes', 'dtype', kwargs)
     dset = None
     link = None
     if isinstance(data, str):
@@ -283,9 +292,9 @@ def write_dataset(**kwargs):
     elif isinstance(data, Iterable) and not isinstance_inmemory_array(data):
         dset = __chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
     elif hasattr(data, '__len__'):
-        dset = __list_fill__(parent, name, data, default_dtype=default_dtype)
+        dset = __list_fill__(parent, name, data, dtype=dtype)
     else:
-        dset = __scalar_fill__(parent, name, data, default_dtype=default_dtype)
+        dset = __scalar_fill__(parent, name, data, dtype=dtype)
     if link is None:
         set_attributes(dset, attributes)
     return dset
@@ -301,18 +310,14 @@ def __selection_max_bounds__(selection):
     elif isinstance(selection, tuple):
         return tuple([__selection_max_bounds__(i) for i in selection])
 
-def __scalar_fill__(parent, name, data, default_dtype=None):
+def __scalar_fill__(parent, name, data, dtype=None):
+    if not isinstance(dtype, type):
+        dtype = __resolve_dtype__(dtype, data)
     try:
-        dtype = get_type(data)
+        dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype)
     except Exception as exc:
-        if default_dtype is not None:
-            dtype = __resolve_dtype__(default_dtype)
-        if dtype is None:
-            raise Exception('cannot add %s to %s - could not determine type' % (name, parent.name)) from exc
-    try:
-        dset = parent.require_dataset(name, data=data, shape=None, dtype=dtype)
-    except Exception as exc:
-        raise Exception("Could not create scalar dataset %s in %s" % (name, parent.name)) from exc
+        msg = "Could not create scalar dataset %s in %s" % (name, parent.name)
+        raise Exception(msg) from exc
     return dset
 
 def __chunked_iter_fill__(parent, name, data):
@@ -331,7 +336,7 @@ def __chunked_iter_fill__(parent, name, data):
     chunks = True if recommended_chunks is None else recommended_chunks
     baseshape = data.recommended_data_shape()
     try:
-        dset = parent.require_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
+        dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
     except Exception as exc:
         raise Exception("Could not create scalar dataset %s in %s" % (name, parent.name)) from exc
     for chunk_i in data:
@@ -350,17 +355,12 @@ def __chunked_iter_fill__(parent, name, data):
         dset[chunk_i.selection] = chunk_i.data
     return dset
 
-def __list_fill__(parent, name, data, default_dtype=None):
+def __list_fill__(parent, name, data, dtype=None):
     data_shape = get_shape(data)
+    if not isinstance(dtype, type):
+        dtype = __resolve_dtype__(dtype, data)
     try:
-        dtype = get_type(data)
-    except Exception as exc:
-        if default_dtype is not None:
-            dtype = __resolve_dtype__(default_dtype)
-        if dtype is None:
-            raise Exception('cannot add %s to %s - could not determine type' % (name, parent.name)) from exc
-    try:
-        dset = parent.require_dataset(name, shape=data_shape, dtype=dtype)
+        dset = parent.create_dataset(name, shape=data_shape, dtype=dtype)
     except Exception as exc:
         raise Exception("Could not create scalar dataset %s in %s" % (name, parent.name)) from exc
     if len(data) > dset.shape[0]:
