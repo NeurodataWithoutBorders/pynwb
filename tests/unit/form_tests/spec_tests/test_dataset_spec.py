@@ -118,7 +118,7 @@ class DatasetSpecTests(unittest.TestCase):
         json.dumps(spec)
 
 
-    def test_datatype_extension(self):
+    def test_datatype_table_extension(self):
         dtype1 = DtypeSpec('the first column', 'column1', 'int')
         dtype2 = DtypeSpec('the second column', 'column2', 'float')
         base = DatasetSpec('my first table',
@@ -128,7 +128,6 @@ class DatasetSpecTests(unittest.TestCase):
                            data_type_def='SimpleTable')
         self.assertEqual(base['dtype'], [dtype1, dtype2])
         self.assertEqual(base['doc'], 'my first table')
-
         dtype3 = DtypeSpec('the third column', 'column3', 'str')
         ext = DatasetSpec('my first table extension',
                           [dtype3],
@@ -138,5 +137,57 @@ class DatasetSpecTests(unittest.TestCase):
         self.assertEqual(ext['dtype'], [dtype1, dtype2, dtype3])
         self.assertEqual(ext['doc'], 'my first table extension')
 
+    def test_datatype_table_extension_higher_precision(self):
+        dtype1 = DtypeSpec('the first column', 'column1', 'int')
+        dtype2 = DtypeSpec('the second column', 'column2', 'float32')
+        base = DatasetSpec('my first table',
+                           [dtype1, dtype2],
+                           attributes=self.attributes,
+                           namespace='core',
+                           data_type_def='SimpleTable')
+        self.assertEqual(base['dtype'], [dtype1, dtype2])
+        self.assertEqual(base['doc'], 'my first table')
+        dtype3 = DtypeSpec('the second column, with greater precision', 'column2', 'float64')
+        ext = DatasetSpec('my first table extension',
+                          [dtype3],
+                          namespace='core',
+                          data_type_inc=base,
+                          data_type_def='ExtendedTable')
+        self.assertEqual(ext['dtype'], [dtype1, dtype3])
+        self.assertEqual(ext['doc'], 'my first table extension')
 
+    def test_datatype_table_extension_lower_precision(self):
+        dtype1 = DtypeSpec('the first column', 'column1', 'int')
+        dtype2 = DtypeSpec('the second column', 'column2', 'float64')
+        base = DatasetSpec('my first table',
+                           [dtype1, dtype2],
+                           attributes=self.attributes,
+                           namespace='core',
+                           data_type_def='SimpleTable')
+        self.assertEqual(base['dtype'], [dtype1, dtype2])
+        self.assertEqual(base['doc'], 'my first table')
+        dtype3 = DtypeSpec('the second column, with greater precision', 'column2', 'float32')
+        with self.assertRaisesRegex(ValueError, 'Cannot extend float64 to float32'):
+            ext = DatasetSpec('my first table extension',
+                          [dtype3],
+                          namespace='core',
+                          data_type_inc=base,
+                          data_type_def='ExtendedTable')
 
+    def test_datatype_table_extension_diff_format(self):
+        dtype1 = DtypeSpec('the first column', 'column1', 'int')
+        dtype2 = DtypeSpec('the second column', 'column2', 'float64')
+        base = DatasetSpec('my first table',
+                           [dtype1, dtype2],
+                           attributes=self.attributes,
+                           namespace='core',
+                           data_type_def='SimpleTable')
+        self.assertEqual(base['dtype'], [dtype1, dtype2])
+        self.assertEqual(base['doc'], 'my first table')
+        dtype3 = DtypeSpec('the second column, with greater precision', 'column2', 'int32')
+        with self.assertRaisesRegex(ValueError, 'Cannot extend float64 to int32'):
+            ext = DatasetSpec('my first table extension',
+                          [dtype3],
+                          namespace='core',
+                          data_type_inc=base,
+                          data_type_def='ExtendedTable')
