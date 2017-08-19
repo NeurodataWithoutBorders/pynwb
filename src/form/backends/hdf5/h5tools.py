@@ -356,9 +356,12 @@ def __chunked_iter_fill__(parent, name, data):
     return dset
 
 def __list_fill__(parent, name, data, dtype=None):
-    data_shape = get_shape(data)
     if not isinstance(dtype, type):
         dtype = __resolve_dtype__(dtype, data)
+    if isinstance(dtype, np.dtype):
+        data_shape = (len(data),)
+    else:
+        data_shape = get_shape(data)
     try:
         dset = parent.create_dataset(name, shape=data_shape, dtype=dtype)
     except Exception as exc:
