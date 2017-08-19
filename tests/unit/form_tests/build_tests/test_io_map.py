@@ -135,8 +135,8 @@ class TestDynamicContainer(unittest.TestCase):
         self.bar_spec = GroupSpec('A test group specification with a data type',
                                  data_type_def='Bar',
                                  datasets=[DatasetSpec('an example dataset', 'int', name='data',
-                                                attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
-                                 attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
+                                                attributes=[AttributeSpec('attr2', 'an example integer attribute', 'int')])],
+                                 attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.bar_spec, 'test.yaml')
         self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
@@ -150,8 +150,8 @@ class TestDynamicContainer(unittest.TestCase):
 
     def test_dynamic_container_creation(self):
         baz_spec = GroupSpec('A test extension with no Container class', data_type_def='Baz', data_type_inc=self.bar_spec,
-                             attributes=[AttributeSpec('attr3', 'float', 'an example float attribute'),
-                                         AttributeSpec('attr4', 'float', 'another example float attribute')])
+                             attributes=[AttributeSpec('attr3', 'an example float attribute', 'float'),
+                                         AttributeSpec('attr4', 'another example float attribute', 'float')])
         self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
         cls = self.type_map.get_container_cls(CORE_NAMESPACE, 'Baz')
         expected_args = {'name', 'data', 'attr1', 'attr2', 'attr3', 'attr4'}
@@ -166,8 +166,8 @@ class TestDynamicContainer(unittest.TestCase):
 
     def test_dynamic_container_creation_defaults(self):
         baz_spec = GroupSpec('A test extension with no Container class', data_type_def='Baz', data_type_inc=self.bar_spec,
-                             attributes=[AttributeSpec('attr3', 'float', 'an example float attribute'),
-                                         AttributeSpec('attr4', 'float', 'another example float attribute')])
+                             attributes=[AttributeSpec('attr3', 'an example float attribute', 'float'),
+                                         AttributeSpec('attr4', 'another example float attribute', 'float')])
         self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
         cls = self.type_map.get_container_cls(CORE_NAMESPACE, 'Baz')
         expected_args = {'name', 'data', 'attr1', 'attr2', 'attr3', 'attr4'}
@@ -178,8 +178,8 @@ class TestDynamicContainer(unittest.TestCase):
 
     def test_dynamic_container_constructor(self):
         baz_spec = GroupSpec('A test extension with no Container class', data_type_def='Baz', data_type_inc=self.bar_spec,
-                             attributes=[AttributeSpec('attr3', 'float', 'an example float attribute'),
-                                         AttributeSpec('attr4', 'float', 'another example float attribute')])
+                             attributes=[AttributeSpec('attr3', 'an example float attribute', 'float'),
+                                         AttributeSpec('attr4', 'another example float attribute', 'float')])
         self.spec_catalog.register_spec(baz_spec, 'extension.yaml')
         cls = self.type_map.get_container_cls(CORE_NAMESPACE, 'Baz')
         #TODO: test that constructor works!
@@ -223,8 +223,8 @@ class TestObjectMapperNested(TestObjectMapper):
         self.bar_spec = GroupSpec('A test group specification with a data type',
                                  data_type_def='Bar',
                                  datasets=[DatasetSpec('an example dataset', 'int', name='data',
-                                                attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
-                                 attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
+                                                attributes=[AttributeSpec('attr2', 'an example integer attribute', 'int')])],
+                                 attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
 
     def test_build(self):
         ''' Test default mapping functionality when object attributes map to an attribute deeper than top-level Builder '''
@@ -254,8 +254,8 @@ class TestObjectMapperNoNesting(TestObjectMapper):
         self.bar_spec = GroupSpec('A test group specification with a data type',
                          data_type_def='Bar',
                          datasets=[DatasetSpec('an example dataset', 'int', name='data')],
-                         attributes=[AttributeSpec('attr1', 'str', 'an example string attribute'),
-                                     AttributeSpec('attr2', 'int', 'an example integer attribute')])
+                         attributes=[AttributeSpec('attr1', 'an example string attribute', 'str'),
+                                     AttributeSpec('attr2', 'an example integer attribute', 'int')])
 
 
     def test_build(self):
@@ -285,8 +285,8 @@ class TestObjectMapperContainer(TestObjectMapper):
         self.bar_spec = GroupSpec('A test group specification with a data type',
                          data_type_def='Bar',
                          groups=[GroupSpec('an example group', data_type_def='Foo')],
-                         attributes=[AttributeSpec('attr1', 'str', 'an example string attribute'),
-                                     AttributeSpec('attr2', 'int', 'an example integer attribute')])
+                         attributes=[AttributeSpec('attr1', 'an example string attribute', 'str'),
+                                     AttributeSpec('attr2', 'an example integer attribute', 'int')])
 
     def test_default_mapping_keys(self):
         attr_map = self.mapper.get_attr_names(self.bar_spec)

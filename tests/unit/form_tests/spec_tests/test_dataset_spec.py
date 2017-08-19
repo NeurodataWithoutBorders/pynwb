@@ -22,8 +22,8 @@ class DtypeSpecTests(unittest.TestCase):
 class DatasetSpecTests(unittest.TestCase):
     def setUp(self):
         self.attributes = [
-            AttributeSpec('attribute1', 'str', 'my first attribute'),
-            AttributeSpec('attribute2', 'str', 'my second attribute')
+            AttributeSpec('attribute1', 'my first attribute', 'str'),
+            AttributeSpec('attribute2', 'my second attribute', 'str')
         ]
 
     def test_constructor(self):
@@ -69,7 +69,7 @@ class DatasetSpecTests(unittest.TestCase):
                            namespace='core',
                            data_type_def='EphysData')
 
-        attributes = [AttributeSpec('attribute3', 'float', 'my first extending attribute')]
+        attributes = [AttributeSpec('attribute3', 'my first extending attribute', 'float')]
         ext = DatasetSpec('my first dataset extension',
                           'int',
                           name='dataset1',
