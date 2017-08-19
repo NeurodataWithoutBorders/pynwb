@@ -2,6 +2,7 @@ import abc
 from datetime import datetime
 from copy import deepcopy, copy
 from itertools import chain
+from collections import OrderedDict
 
 from ..utils import docval, getargs, popargs, get_docval, fmt_docval_args
 
@@ -357,9 +358,46 @@ class BaseStorageSpec(Spec):
             ret['attributes'] = [AttributeSpec.build_spec(sub_spec) for sub_spec in ret['attributes']]
         return ret
 
+_dt_args = [
+    {'name': 'doc', 'type': str, 'doc': 'a description about what this data type is'},
+    {'name': 'name', 'type': str, 'doc': 'the name of this column'},
+    {'name': 'dtype', 'type': (str, type, list), 'doc': 'the data type of this column'},
+]
+
+class DtypeSpec(ConstructableDict):
+    '''A class for specifying a component of a compound type'''
+
+    @docval(*_dt_args)
+    def __init__(self, **kwargs):
+        doc, name, dtype = getargs('doc', 'name', 'dtype', kwargs)
+        self['doc'] = doc
+        self['name'] = name
+        self['dtype'] = dtype
+
+    @property
+    def doc(self):
+        return self['doc']
+
+    @property
+    def name(self):
+        return self['name']
+
+    @property
+    def dtype(self):
+        return self['dtype']
+
+    @classmethod
+    def build_const_args(cls, spec_dict):
+        ''' Build constructor arguments for this Spec class from a dictionary '''
+        ret = super(DtypeSpec, cls).build_const_args(spec_dict)
+        if isinstance(ret['dtype'], list):
+            ret['dtype'] = list(map(cls.build_const_args, ret['dtype']))
+        return ret
+
+
 _dataset_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
+        {'name': 'dtype', 'type': (str, type, list), 'doc': 'The data type of this attribute. Use a list of DtypeSpecs to specify a compound data type.'},
         {'name': 'name', 'type': str, 'doc': 'The name of this dataset', 'default': None},
         {'name': 'default_name', 'type': str, 'doc': 'The default name of this dataset', 'default': None},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
@@ -373,12 +411,13 @@ _dataset_args = [
 ]
 class DatasetSpec(BaseStorageSpec):
     ''' Specification for datasets
+
+    To specify a table-like dataset i.e. a compound data type.
     '''
 
     @docval(*deepcopy(_dataset_args))
     def __init__(self, **kwargs):
         doc, shape, dims, dtype, default_value = popargs('doc', 'shape', 'dims', 'dtype', 'default_value', kwargs)
-        super(DatasetSpec, self).__init__(doc, **kwargs)
         if shape is not None:
             self['shape'] = shape
         if dims is not None:
@@ -390,6 +429,7 @@ class DatasetSpec(BaseStorageSpec):
                     raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
             self['dtype'] = dtype
+        super(DatasetSpec, self).__init__(doc, **kwargs)
         if default_value is not None:
             self['default_value'] = default_value
             if self.name is not None:
@@ -397,6 +437,49 @@ class DatasetSpec(BaseStorageSpec):
             else:
                 self['quantity'] = ZERO_OR_MORE
 
+    @classmethod
+    def __get_prec_level(cls, dtype):
+        if isinstance(dtype, type):
+            dtype = dtype.__name__
+        m = re.search('[0-9]+', dtype)
+        if m is not None:
+            prec = int(m.group())
+        else:
+            prec = 32
+        return (dtype[0], prec)
+
+    @classmethod
+    def __is_sub_dtype(cls, orig, new):
+        orig_prec = cls.__get_prec_level(orig)
+        new_prec = cls.__get_prec_level(new)
+        if orig_prec[0] != new_prec[0]:
+            # cannot extend int to float and vice-versa
+            return False
+        return new_prec >= orig_prec
+
+    @docval({'name': 'inc_spec', 'type': 'DatasetSpec', 'doc': 'the data type this specification represents'})
+    def resolve_spec(self, **kwargs):
+        inc_spec = getargs('inc_spec', kwargs)
+        if isinstance(self.dtype, list):
+            # merge the new types
+            inc_dtype = inc_spec.dtype
+            if not isinstance(inc_dtype, list):
+                msg = 'Cannot extend simple data type to compound data type'
+                raise ValueError(msg)
+            order = OrderedDict((dt['name'], dt) for dt in inc_dtype)
+            for dt in self.dtype:
+                name = dt['name']
+                if name in order:
+                    # verify that the exension has supplied
+                    # a valid subtyping of existing type
+                    orig = order[name].dtype
+                    new = dt.dtype
+                    if not self.__is_sub_dtype(orig, new):
+                        msg = 'Cannot extend %s to %s' % (str(orig), str(new))
+                        raise ValueError(msg)
+                order[name] = dt
+            self['dtype'] = list(order.values())
+        super(DatasetSpec, self).resolve_spec(inc_spec)
 
     @property
     def dims(self):
@@ -416,6 +499,24 @@ class DatasetSpec(BaseStorageSpec):
     @classmethod
     def __check_dim(cls, dim, data):
         return True
+
+    @classmethod
+    def dtype_spec_cls(cls):
+        ''' The class to use when constructing DtypeSpec objects
+
+            Override this if extending to use a class other than DtypeSpec to build
+            dataset specifications
+        '''
+        return DtypeSpec
+
+    @classmethod
+    def build_const_args(cls, spec_dict):
+        ''' Build constructor arguments for this Spec class from a dictionary '''
+        ret = super().build_const_args(spec_dict)
+        if 'dtype' in ret:
+            if isinstance(ret['dtype'], list):
+                ret['dtype'] = list(map(cls.dtype_spec_cls.build_spec, ret['dtype']))
+        return ret
 
 _link_args = [
     {'name': 'doc', 'type': str, 'doc': 'a description about what this link represents'},
