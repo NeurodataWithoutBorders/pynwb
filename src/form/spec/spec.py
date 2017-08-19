@@ -360,8 +360,8 @@ class BaseStorageSpec(Spec):
         return ret
 
 _dt_args = [
-    {'name': 'doc', 'type': str, 'doc': 'a description about what this data type is'},
     {'name': 'name', 'type': str, 'doc': 'the name of this column'},
+    {'name': 'doc', 'type': str, 'doc': 'a description about what this data type is'},
     {'name': 'dtype', 'type': (str, type, list), 'doc': 'the data type of this column'},
 ]
 
@@ -377,14 +377,17 @@ class DtypeSpec(ConstructableDict):
 
     @property
     def doc(self):
+        '''Documentation about this component'''
         return self['doc']
 
     @property
     def name(self):
+        '''The name of this component'''
         return self['name']
 
     @property
     def dtype(self):
+        ''' The data type of this component'''
         return self['dtype']
 
     @classmethod
@@ -489,7 +492,7 @@ class DatasetSpec(BaseStorageSpec):
 
     @property
     def dtype(self):
-        ''' The data type of the attribute '''
+        ''' The data type of the Dataset '''
         return self.get('dtype', None)
 
     @property
@@ -869,3 +872,4 @@ class GroupSpec(BaseStorageSpec):
             ret['links'] = list(map(cls.link_spec_cls().build_spec, ret['links']))
         return ret
 
+        ''' The data type of the Dataset '''
