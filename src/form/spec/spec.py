@@ -91,8 +91,8 @@ class Spec(ConstructableDict):
 
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
-        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
+        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
         {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
@@ -260,11 +260,11 @@ class BaseStorageSpec(Spec):
 
     @classmethod
     def get_data_type_spec(cls, data_type_def):
-        return AttributeSpec(cls.type_key(), 'text', 'the data type of this object', value=data_type_def)
+        return AttributeSpec(cls.type_key(), 'the data type of this object', 'text', value=data_type_def)
 
     @classmethod
     def get_namespace_spec(cls):
-        return AttributeSpec('namespace', 'text', 'the namespace for the data type of this object', required=False)
+        return AttributeSpec('namespace', 'the namespace for the data type of this object', 'text', required=False)
 
     @property
     def attributes(self):
