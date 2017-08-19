@@ -3,6 +3,7 @@ from datetime import datetime
 from copy import deepcopy, copy
 from itertools import chain
 from collections import OrderedDict
+import re
 
 from ..utils import docval, getargs, popargs, get_docval, fmt_docval_args
 
