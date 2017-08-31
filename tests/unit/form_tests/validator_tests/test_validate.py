@@ -45,8 +45,8 @@ class TestBasicSpec(ValidatorTestBase):
         ret = GroupSpec('A test group specification with a data type',
                          data_type_def='Bar',
                          datasets=[DatasetSpec('an example dataset', 'int', name='data',
-                                        attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
-                         attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
+                                        attributes=[AttributeSpec('attr2', 'an example integer attribute', 'int')])],
+                         attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
         return (ret,)
 
     def test_invalid_missing(self):
@@ -92,12 +92,12 @@ class TestNestedTypes(ValidatorTestBase):
         bar = GroupSpec('A test group specification with a data type',
                         data_type_def='Bar',
                         datasets=[DatasetSpec('an example dataset', 'int', name='data',
-                                       attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
-                        attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
+                                       attributes=[AttributeSpec('attr2', 'an example integer attribute', 'int')])],
+                        attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
         foo = GroupSpec('A test group that contains a data type',
                         data_type_def='Foo',
                         groups=[GroupSpec('A Bar group for Foos', name='my_bar', data_type_inc='Bar')],
-                        attributes=[AttributeSpec('foo_attr', 'text', 'a string attribute specified as text', required=False)])
+                        attributes=[AttributeSpec('foo_attr', 'a string attribute specified as text', 'text', required=False)])
 
         return (bar, foo)
 

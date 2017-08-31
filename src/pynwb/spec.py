@@ -1,7 +1,7 @@
 from copy import copy, deepcopy
 from datetime import datetime
 
-from form.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder, AttributeSpec
+from form.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder, AttributeSpec, DtypeSpec
 from form.utils import docval, get_docval, getargs, fmt_docval_args
 
 from . import CORE_NAMESPACE
@@ -82,6 +82,13 @@ class BaseStorageOverride(object):
     def neurodata_type_def(self):
         return self.data_type_def
 
+_dtype_docval = __swap_inc_def(DtypeSpec)
+class NWBDtypeSpec(DtypeSpec):
+
+    @docval(*_dtype_docval)
+    def __init__(self, **kwargs):
+        args, kwargs = fmt_docval_args(DtypeSpec.__init__, kwargs)
+        super(NWBDtypeSpec, self).__init__(*args, **kwargs)
 
 _dataset_docval = __swap_inc_def(DatasetSpec)
 class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
@@ -98,7 +105,6 @@ class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
     def __init__(self, **kwargs):
         args, kwargs = self.__translate_kwargs(kwargs)
         super(NWBDatasetSpec, self).__init__(*args, **kwargs)
-
 
 _group_docval = __swap_inc_def(GroupSpec)
 class NWBGroupSpec(BaseStorageOverride, GroupSpec):

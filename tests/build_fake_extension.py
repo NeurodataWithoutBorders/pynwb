@@ -4,7 +4,7 @@ ns_builder = NWBNamespaceBuilder('Extension for us in my Lab', "mylab")
 
 
 ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                    attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
+                    attributes=[NWBAttributeSpec('trode_id', 'the tetrode id', 'int')],
                     neurodata_type_inc='ElectricalSeries',
                     neurodata_type_def='TetrodeSeries')
 

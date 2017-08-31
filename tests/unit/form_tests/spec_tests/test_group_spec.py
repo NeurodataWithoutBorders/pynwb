@@ -6,18 +6,18 @@ from form.spec import GroupSpec, DatasetSpec, AttributeSpec, Spec, SpecCatalog
 class GroupSpecTests(unittest.TestCase):
     def setUp(self):
         self.attributes = [
-            AttributeSpec('attribute1', 'str', 'my first attribute'),
-            AttributeSpec('attribute2', 'str', 'my second attribute')
+            AttributeSpec('attribute1', 'my first attribute', 'str'),
+            AttributeSpec('attribute2', 'my second attribute', 'str')
         ]
 
         self.dset1_attributes = [
-            AttributeSpec('attribute3', 'str', 'my third attribute'),
-            AttributeSpec('attribute4', 'str', 'my fourth attribute')
+            AttributeSpec('attribute3', 'my third attribute', 'str'),
+            AttributeSpec('attribute4', 'my fourth attribute', 'str')
         ]
 
         self.dset2_attributes = [
-            AttributeSpec('attribute5', 'str', 'my fifth attribute'),
-            AttributeSpec('attribute6', 'str', 'my sixth attribute')
+            AttributeSpec('attribute5', 'my fifth attribute', 'str'),
+            AttributeSpec('attribute6', 'my sixth attribute', 'str')
         ]
 
         self.datasets = [
@@ -45,8 +45,8 @@ class GroupSpecTests(unittest.TestCase):
                       linkable=False)
 
         ]
-        self.ndt_attr_spec = AttributeSpec('data_type', 'text', 'the data type of this object', value='EphysData')
-        self.ns_attr_spec = AttributeSpec('namespace', 'text', 'the namespace for the data type of this object', required=False)
+        self.ndt_attr_spec = AttributeSpec('data_type', 'the data type of this object', 'text', value='EphysData')
+        self.ns_attr_spec = AttributeSpec('namespace', 'the namespace for the data type of this object', 'text', required=False)
 
     def test_constructor(self):
         spec = GroupSpec('A test group',
@@ -118,7 +118,7 @@ class GroupSpecTests(unittest.TestCase):
                          namespace='core',
                          data_type_def='EphysData')
         dset1_attributes_ext = [
-            AttributeSpec('dset1_extra_attribute', 'str', 'an extra attribute for the first dataset')
+            AttributeSpec('dset1_extra_attribute', 'an extra attribute for the first dataset', 'str')
         ]
         ext_datasets = [
             DatasetSpec('my first dataset extension',
@@ -128,7 +128,7 @@ class GroupSpecTests(unittest.TestCase):
                         linkable=True),
         ]
         ext_attributes = [
-            AttributeSpec('ext_extra_attribute', 'str', 'an extra attribute for the group'),
+            AttributeSpec('ext_extra_attribute', 'an extra attribute for the group', 'str'),
         ]
         ext =  GroupSpec('A test group extension',
                          name='child_type',
@@ -153,7 +153,7 @@ class GroupSpecTests(unittest.TestCase):
         self.assertAttributesEqual(ext_dset2, self.datasets[1])
 
         #self.ns_attr_spec
-        ndt_attr_spec = AttributeSpec('data_type', 'text', 'the data type of this object', value='SpikeData')
+        ndt_attr_spec = AttributeSpec('data_type', 'the data type of this object', 'text', value='SpikeData')
 
         res_attrs = ext.attributes
         self.assertDictEqual(res_attrs[0], ext_attributes[0])

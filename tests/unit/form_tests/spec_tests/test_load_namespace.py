@@ -10,16 +10,16 @@ class TestSpecLoad(unittest.TestCase):
 
     def setUp(self):
         self.attributes = [
-            AttributeSpec('attribute1', 'str', 'my first attribute'),
-            AttributeSpec('attribute2', 'str', 'my second attribute')
+            AttributeSpec('attribute1', 'my first attribute', 'str'),
+            AttributeSpec('attribute2', 'my second attribute', 'str')
         ]
         self.dset1_attributes = [
-            AttributeSpec('attribute3', 'str', 'my third attribute'),
-            AttributeSpec('attribute4', 'str', 'my fourth attribute')
+            AttributeSpec('attribute3', 'my third attribute', 'str'),
+            AttributeSpec('attribute4', 'my fourth attribute', 'str')
         ]
         self.dset2_attributes = [
-            AttributeSpec('attribute5', 'str', 'my fifth attribute'),
-            AttributeSpec('attribute6', 'str', 'my sixth attribute')
+            AttributeSpec('attribute5', 'my fifth attribute', 'str'),
+            AttributeSpec('attribute6', 'my sixth attribute', 'str')
         ]
         self.datasets = [
             DatasetSpec('my first dataset',
@@ -42,7 +42,7 @@ class TestSpecLoad(unittest.TestCase):
                          linkable=False,
                          data_type_def='EphysData')
         dset1_attributes_ext = [
-            AttributeSpec('dset1_extra_attribute', 'str', 'an extra attribute for the first dataset')
+            AttributeSpec('dset1_extra_attribute', 'an extra attribute for the first dataset', 'str')
         ]
         self.ext_datasets = [
             DatasetSpec('my first dataset extension',
@@ -52,7 +52,7 @@ class TestSpecLoad(unittest.TestCase):
                         linkable=True),
         ]
         self.ext_attributes = [
-            AttributeSpec('ext_extra_attribute', 'str', 'an extra attribute for the group'),
+            AttributeSpec('ext_extra_attribute', 'an extra attribute for the group', 'str'),
         ]
         self.ext_spec =  GroupSpec('A test group extension',
                             name='root_constructor_nwbtype',
