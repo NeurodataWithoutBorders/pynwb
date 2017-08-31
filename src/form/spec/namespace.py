@@ -230,12 +230,12 @@ class NamespaceCatalog(object):
             ret = dict()
             with open(spec_file_path, 'r') as stream:
                 d = yaml.safe_load(stream)
-                specs = d.get('groups', list())
-                for spec_dict in specs:
-                    __reg_spec(self.__group_spec_cls, spec_dict)
                 specs = d.get('datasets', list())
                 for spec_dict in specs:
                     __reg_spec(self.__dataset_spec_cls, spec_dict)
+                specs = d.get('groups', list())
+                for spec_dict in specs:
+                    __reg_spec(self.__group_spec_cls, spec_dict)
             self.__loaded_specs[spec_file_path] = ret
         return ret
 
