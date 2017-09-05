@@ -127,7 +127,7 @@ types of :ref:`timeseries_overview` objects directly, and adding them with :py:m
                                 resolution=0.001,
                                 comments="This data was randomly generated with numpy, using 1234 as the seed",
                                 description="Random numbers generated with numpy.randon.rand")
-    f.add_raw_timeseries(ts, [ep1, ep2])
+    f.add_raw_timeseries(ephys_ts, [ep1, ep2])
 
     spatial_ts = SpatialSeries('test_spatial_timeseries',
                                'a stumbling rat',
@@ -202,7 +202,7 @@ to implement and register a custom :py:class:`~form.build.map.ObjectMapper`. :py
     register_map(MyExtensionContainer, MyExtensionMapper)
 
 
-If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your exentsion specification, a dynamically created class is created by default.
+If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your extension specification, a dynamically created class is created by default.
 To use the dynamic class, you will need to retrieve the class object using the function :py:func:`~pynwb.get_class`. Once you have retrieved the class object, you can
 use it just like you would a statically defined class.
 
