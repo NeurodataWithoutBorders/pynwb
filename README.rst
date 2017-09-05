@@ -1,4 +1,4 @@
-.. image:: https://travis-ci.org/NeurodataWithoutBorders/pynwb.svg?branch=fix_ci
+.. image:: https://travis-ci.org/NeurodataWithoutBorders/pynwb.svg?branch=dev
     :target: https://travis-ci.org/NeurodataWithoutBorders/pynwb
 
 NWB Format API
