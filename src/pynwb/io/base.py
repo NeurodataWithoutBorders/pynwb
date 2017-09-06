@@ -1,4 +1,4 @@
-from form.build import ObjectMapper
+from form.build import ObjectMapper, constructor_arg
 from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
