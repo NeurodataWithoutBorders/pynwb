@@ -81,67 +81,71 @@ class BuildManager(object):
         spec, builder = getargs('spec', 'builder', kwargs)
         return self.__type_map.get_subspec(spec, builder)
 
-class DecExtenderMeta(ExtenderMeta):
+_const_arg = '__constructor_arg'
+@docval({'name': 'name', 'type': str, 'doc': 'the name of the constructor argument'},
+        is_method=False)
+def constructor_arg(**kwargs):
+    '''Decorator to override the default mapping scheme for a given constructor argument.
 
-    @classmethod
-    def __prepare__(metacls, name, bases, **kwargs):
-        return {
-            'constructor_arg': metacls.constructor_arg,
-            'is_constructor_arg': metacls.is_constructor_arg,
-            'get_cargname': metacls.get_cargname,
-            'obj_attr': metacls.obj_attr,
-            'is_attr': metacls.is_attr,
-            'get_obj_attr': metacls.get_cargname
-        }
+    Decorate ObjectMapper methods with this function when extending ObjectMapper to override the default
+    scheme for mapping between Container and Builder objects. The decorated method should accept as its
+    first argument the Builder object that is being mapped. The method should return the value to be passed
+    to the target Container class constructor argument given by *name*.
+    '''
+    name = getargs('name', kwargs)
+    def _dec(func):
+        setattr(func, _const_arg, name)
+        return func
+    return _dec
 
-    __obj_attr = '__obj_attr__'
-    @classmethod
-    def obj_attr(cls, name):
-        def _dec(func):
-            setattr(func, cls.__obj_attr, name)
-            return func
-        return _dec
+_obj_attr = '__object_attr'
+@docval({'name': 'name', 'type': str, 'doc': 'the name of the constructor argument'},
+        is_method=False)
+def object_attr(**kwargs):
+    '''Decorator to override the default mapping scheme for a given object attribute.
 
-    @classmethod
-    def is_attr(cls, attr_val):
-        return hasattr(attr_val, cls.__obj_attr)
+    Decorate ObjectMapper methods with this function when extending ObjectMapper to override the default
+    scheme for mapping between Container and Builder objects. The decorated method should accept as its
+    first argument the Container object that is being mapped. The method should return the child Builder
+    object (or scalar if the object attribute corresponds to an AttributeSpec) that represents the
+    attribute given by *name*.
+    '''
+    name = getargs('name', kwargs)
+    def _dec(func):
+        setattr(func, _obj_attr, name)
+        return func
+    return _dec
 
-    @classmethod
-    def get_obj_attr(cls, attr_val):
-        return getattr(attr_val, cls.__obj_attr)
-
-    __const_arg = '__constructor_arg'
-    @classmethod
-    def constructor_arg(cls, name):
-        def _dec(func):
-            setattr(func, cls.__const_arg, name)
-            return func
-        return _dec
-
-    @classmethod
-    def is_constructor_arg(cls, attr_val):
-        return hasattr(attr_val, cls.__const_arg)
-
-    @classmethod
-    def get_cargname(cls, attr_val):
-        return getattr(attr_val, cls.__const_arg)
-
-class ObjectMapper(object, metaclass=DecExtenderMeta):
+class ObjectMapper(object, metaclass=ExtenderMeta):
     '''A class for mapping between Spec objects and Container attributes
-
-
 
     '''
 
+    @staticmethod
+    def __is_attr(attr_val):
+        return hasattr(attr_val, _obj_attr)
+
+    @staticmethod
+    def __get_obj_attr(attr_val):
+        return getattr(attr_val, _obj_attr)
+
+    @staticmethod
+    def __is_constructor_arg(attr_val):
+        return hasattr(attr_val, _const_arg)
+
+    @staticmethod
+    def __get_cargname(attr_val):
+        return getattr(attr_val, _const_arg)
+
     @ExtenderMeta.post_init
     def __gather_procedures(cls, name, bases, classdict):
-        cls.const_args = dict()
+        cls.constructor_args = dict()
         cls.obj_attrs = dict()
         for name, func in cls.__dict__.items():
-            if cls.is_constructor_arg(func):
-                cls.const_args[cls.get_cargname(func)] = getattr(cls, name)
-            elif cls.is_attr(func):
-                cls.obj_attrs[cls.get_obj_attr(func)] = getattr(cls, name)
+            if cls.__is_constructor_arg(func):
+                cls.constructor_args[cls.__get_cargname(func)] = getattr(cls, name)
+            elif cls.__is_attr(func):
+                cls.obj_attrs[cls.__get_obj_attr(func)] = getattr(cls, name)
 
     @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'The specification for mapping objects to builders'})
     def __init__(self, **kwargs):
@@ -283,8 +287,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         self.map_attr(attr_carg, spec)
 
     def __get_override_carg(self, name, builder):
-        if name in self.const_args:
-            func = self.const_args[name]
+        if name in self.constructor_args:
+            func = self.constructor_args[name]
             return func(self, builder)
         return None
 
