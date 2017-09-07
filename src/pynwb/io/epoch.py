@@ -1,9 +1,7 @@
-from form.build import ObjectMapper, constructor_arg
+from form.build import ObjectMapper
 from .. import register_map
 
 from pynwb.epoch import Epoch, EpochTimeSeries
-
-from form.build.map import constructor_arg
 
 @register_map(Epoch)
 class EpochMap(ObjectMapper):

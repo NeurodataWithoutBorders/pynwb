@@ -1,8 +1,6 @@
-from form.build import ObjectMapper, constructor_arg
+from form.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile
-
-from form.build.map import constructor_arg
 
 @register_map(NWBFile)
 class NWBFileMap(ObjectMapper):
@@ -33,5 +31,5 @@ class NWBFileMap(ObjectMapper):
 
 
     @ObjectMapper.constructor_arg('file_name')
-    def name(self, h5group):
-        return h5group.name
+    def name(self, builder):
+        return builder.name
