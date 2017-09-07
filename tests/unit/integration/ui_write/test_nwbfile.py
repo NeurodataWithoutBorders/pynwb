@@ -12,7 +12,7 @@ from pynwb.ecephys import Clustering
 
 from .  import base
 
-class TestNWBFileIO(base.TestNWBContainerIO):
+class TestNWBFileIO(base.TestMapNWBContainer):
 
     def setUp(self):
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)

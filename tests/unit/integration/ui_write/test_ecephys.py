@@ -10,7 +10,7 @@ from pynwb.ecephys import *
 
 from . import base
 
-class TestElectrodeGroup(base.TestSubNWBContainerIO):
+class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         dev1 = Device('dev1', 'a test source')
@@ -56,7 +56,7 @@ class TestElectrodeGroup(base.TestSubNWBContainerIO):
                         )
 
 
-class TestElectricalSeriesIO(base.TestSubNWBContainerIO):
+class TestElectricalSeriesIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         dev1 = Device('dev1', 'a test source')
@@ -112,7 +112,7 @@ class TestElectricalSeriesIO(base.TestSubNWBContainerIO):
                                                                  attributes={'unit': 'Seconds', 'interval': 1})},
                                 links={'electrode_group': LinkBuilder('electrode_group', elcgrp_builder)})
 
-class TestClusteringIO(base.TestSubNWBContainerIO):
+class TestClusteringIO(base.TestMapRoundTrip):
 
     def setUpBuilder(self):
         return GroupBuilder('Clustering',

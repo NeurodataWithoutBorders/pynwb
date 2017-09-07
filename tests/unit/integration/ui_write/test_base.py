@@ -10,7 +10,7 @@ from pynwb import TimeSeries
 
 from . import base
 
-class TestTimeSeriesIO(base.TestSubNWBContainerIO):
+class TestTimeSeriesIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         return TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)

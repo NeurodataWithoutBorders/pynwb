@@ -6,7 +6,7 @@ from pynwb import NWBContainer, get_build_manager, NWBFile
 
 CORE_NAMESPACE = 'core'
 
-class TestNWBContainerIO(unittest.TestCase):
+class TestMapNWBContainer(unittest.TestCase):
 
     def setUp(self):
         self.__manager = get_build_manager()
@@ -71,10 +71,10 @@ class TestNWBContainerIO(unittest.TestCase):
                 else:
                     self.assertEqual(f1, f2)
 
-class TestSubNWBContainerIO(TestNWBContainerIO):
+class TestMapRoundTrip(TestMapNWBContainer):
 
     def setUp(self):
-        super(TestSubNWBContainerIO, self).setUp()
+        super(TestMapRoundTrip, self).setUp()
         self.start_time = datetime(1971, 1, 1, 12, 0, 0)
         self.create_date = datetime(2018, 4, 15, 12, 0, 0)
         self.container_type = self.container.__class__.__name__
