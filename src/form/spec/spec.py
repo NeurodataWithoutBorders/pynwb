@@ -518,7 +518,7 @@ class DatasetSpec(BaseStorageSpec):
     @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
-        ret = super().build_const_args(spec_dict)
+        ret = super(DatasetSpec, cls).build_const_args(spec_dict)
         if 'dtype' in ret:
             if isinstance(ret['dtype'], list):
                 ret['dtype'] = list(map(cls.dtype_spec_cls.build_spec, ret['dtype']))
