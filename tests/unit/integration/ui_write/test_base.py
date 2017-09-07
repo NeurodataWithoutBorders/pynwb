@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 import numpy as np
 import json
 from datetime import datetime
@@ -29,4 +29,3 @@ class TestTimeSeriesIO(base.TestNWBContainerIO):
                                                                              'resolution': 0.1}),
                                           'timestamps': DatasetBuilder('timestamps', list(range(10)),
                                                                  attributes={'unit': 'Seconds', 'interval': 1})})
-

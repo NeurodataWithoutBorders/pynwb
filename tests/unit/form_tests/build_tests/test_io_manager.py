@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 from abc import ABCMeta, abstractmethod
 
 from pynwb.core import Container

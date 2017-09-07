@@ -3,6 +3,8 @@ from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
 
+from form.build.map import constructor_arg
+
 @register_map(ProcessingModule)
 class ModuleMap(ObjectMapper):
 
@@ -11,7 +13,7 @@ class ModuleMap(ObjectMapper):
         containers_spec = self.spec.get_neurodata_type('NWBContainer')
         self.map_spec('containers', containers_spec)
 
-    @constructor_arg('name')
+    @ObjectMapper.constructor_arg('name')
     def name(self, builder):
         return builder.name
 
@@ -32,6 +34,6 @@ class TimeSeriesMap(ObjectMapper):
         self.map_attr('rate_unit', startingtime_spec.get_attribute('unit'))
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))
 
-    @constructor_arg('name')
+    @ObjectMapper.constructor_arg('name')
     def name(self, builder):
         return builder.name

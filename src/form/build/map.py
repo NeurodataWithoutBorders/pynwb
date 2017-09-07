@@ -1,12 +1,20 @@
 import re
 import sys
 from collections import OrderedDict
-
+from six import with_metaclass, raise_from
 from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog
 from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
+
+__const_arg = '__constructor_arg'
+
+def constructor_arg(name):
+    def _dec(func):
+        setattr(func, __const_arg, name)
+        return func
+    return _dec
 
 class BuildManager(object):
     """
@@ -164,7 +172,7 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
         ''' the Spec used in this ObjectMapper '''
         return self.__spec
 
-    @constructor_arg('name')
+    @DecExtenderMeta.constructor_arg('name')
     def get_container_name(self, builder):
         return builder.name
 
@@ -539,7 +547,7 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
             obj = cls(*args, **kwargs)
         except Exception as ex:
             msg = 'Could not construct %s object' % (cls.__name__)
-            raise Exception(msg) from ex
+            raise_from(Exception(msg), ex)
         return obj
 
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container to get the Builder name for'})
@@ -868,4 +876,3 @@ class TypeMap(object):
             raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
             return attr_map.get_builder_name(container)
-

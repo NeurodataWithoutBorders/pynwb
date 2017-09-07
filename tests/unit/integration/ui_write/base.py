@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 
 from pynwb import NWBContainer, get_build_manager
 
@@ -14,6 +14,7 @@ class TestNWBContainerIO(unittest.TestCase):
         self.setUpBuilder()
 
     def test_build(self):
+        # raise Exception
         self.maxDiff = None
         result = self.manager.build(self.container)
         self.assertDictEqual(result, self.builder)
@@ -58,4 +59,3 @@ class TestNWBContainerIO(unittest.TestCase):
                     self.assertContainerEqual(f1, f2)
                 else:
                     self.assertEqual(f1, f2)
-

@@ -58,8 +58,8 @@ class NWBFile(NWBContainer):
             {'name': 'devices', 'type': (list, tuple), 'doc': 'Device objects belonging to this NWBFile', 'default': None},
     )
     def __init__(self, **kwargs):
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
+        super(NWBFile, self).__init__(*pargs, **pkwargs)
         self.__filename = getargs('file_name', kwargs)
         self.__start_time = datetime.utcnow()
         self.__file_id = '%s %s' % (self.__filename, self.__start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))

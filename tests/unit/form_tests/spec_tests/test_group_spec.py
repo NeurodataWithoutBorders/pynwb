@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 import json
 
 from form.spec import GroupSpec, DatasetSpec, AttributeSpec, Spec, SpecCatalog
@@ -185,4 +185,3 @@ class GroupSpecTests(unittest.TestCase):
         else:
             for i in range(len(spec1_attr)):
                 self.assertDictEqual(spec1_attr[i], spec2_attr[i])
-

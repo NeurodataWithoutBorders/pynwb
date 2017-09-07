@@ -3,8 +3,9 @@ from ..build import BuildManager
 from ..build import GroupBuilder
 from ..utils import docval, popargs, getargs
 from ..container import Container
+from six import with_metaclass
 
-class FORMIO(object, metaclass=ABCMeta):
+class FORMIO(with_metaclass(ABCMeta, object)):
     @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'},
             {"name": "source", "type": str, "doc": "the source of container being built i.e. file path", 'default': None})
     def __init__(self, **kwargs):
@@ -35,4 +36,3 @@ class FORMIO(object, metaclass=ABCMeta):
     def write_builder(self, **kwargs):
         ''' Write a GroupBuilder representing an Container object '''
         pass
-
