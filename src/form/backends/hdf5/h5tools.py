@@ -161,7 +161,7 @@ def __resolve_dtype__(dtype, data):
             dtype = get_type(data)
         except Exception as exc:
             msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)
-            raise Exception(msg) from exc
+            raise_from(Exception(msg), exc)
     return dtype
 
 def __resolve_dtype_helper__(dtype):
