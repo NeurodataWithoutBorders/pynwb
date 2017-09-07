@@ -2,7 +2,7 @@ from collections import Iterable
 import numpy as np
 import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink
-from six import raise_from
+from six import raise_from, text_type, string_types
 from form.utils import docval, getargs, popargs
 from form.data_utils import DataChunkIterator, get_shape
 
@@ -129,8 +129,8 @@ class HDF5IO(FORMIO):
         set_attributes(self.__file, f_builder.attributes)
 
 def get_type(data):
-    if isinstance(data, str):
-        return special_dtype(vlen=str)
+    if isinstance(data, text_type) or isinstance(data, string_types):
+        return special_dtype(vlen=text_type)
     elif not hasattr(data, '__len__'):
         return type(data)
     else:
