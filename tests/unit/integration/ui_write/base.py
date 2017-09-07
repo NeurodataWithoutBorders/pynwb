@@ -17,12 +17,29 @@ class TestNWBContainerIO(unittest.TestCase):
         # raise Exception
         self.maxDiff = None
         result = self.manager.build(self.container)
+        # do something here to validate the result Builder against the spec
         self.assertDictEqual(result, self.builder)
 
     def test_construct(self):
         result = self.manager.construct(self.builder)
         self.assertContainerEqual(result, self.container)
 
+#    def test_write(self):
+#        nwbfile = NWBFile(...)
+#        self.addContainer(nwbfile)
+#        io = HDF5IO(...)
+#        io.write(nwbfile)
+#        builder = self.getBuilder(io.read())
+#        # do something here to validate against spec
+#
+#    def getBuilder(self, root_builder):
+#        if isinstance(self, TestNWBContainerIO):
+#            raise unittest.SkipTest('Cannot run test unless addContainer is implemented')
+#
+#    def addContainer(self, nwbfile):
+#        if isinstance(self, TestNWBContainerIO):
+#            raise unittest.SkipTest('Cannot run test unless addContainer is implemented')
+#
     def setUpBuilder(self):
         ''' Should set the attribute 'builder' on self '''
         if isinstance(self, TestNWBContainerIO):
