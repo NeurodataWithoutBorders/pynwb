@@ -2,6 +2,7 @@ import unittest
 from datetime import datetime
 import os
 from h5py import File, Dataset
+from six import text_type
 
 from form.backends.hdf5 import HDF5IO
 from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
@@ -41,7 +42,7 @@ class GroupBuilderTestCase(unittest.TestCase):
         if hasattr(obj, 'shape'):
             return len(obj.shape) == 0
         else:
-            if any(isinstance(obj, t) for t in (int, str, float, bytes)):
+            if any(isinstance(obj, t) for t in (int, str, float, bytes, text_type)):
                 return True
         return False
 
