@@ -8,13 +8,6 @@ from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_W
 from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
 
-__const_arg = '__constructor_arg'
-
-def constructor_arg(name):
-    def _dec(func):
-        setattr(func, __const_arg, name)
-        return func
-    return _dec
 
 class BuildManager(object):
     """
@@ -92,7 +85,7 @@ class BuildManager(object):
 _const_arg = '__constructor_arg'
 @docval({'name': 'name', 'type': str, 'doc': 'the name of the constructor argument'},
         is_method=False)
-def constructor_arg(**kwargs):
+def _constructor_arg(**kwargs):
     '''Decorator to override the default mapping scheme for a given constructor argument.
 
     Decorate ObjectMapper methods with this function when extending ObjectMapper to override the default
@@ -109,7 +102,7 @@ def constructor_arg(**kwargs):
 _obj_attr = '__object_attr'
 @docval({'name': 'name', 'type': str, 'doc': 'the name of the constructor argument'},
         is_method=False)
-def object_attr(**kwargs):
+def _object_attr(**kwargs):
     '''Decorator to override the default mapping scheme for a given object attribute.
 
     Decorate ObjectMapper methods with this function when extending ObjectMapper to override the default
@@ -124,10 +117,41 @@ def object_attr(**kwargs):
         return func
     return _dec
 
-class ObjectMapper(object, metaclass=ExtenderMeta):
+class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     '''A class for mapping between Spec objects and Container attributes
 
     '''
+
+    _const_arg = '__constructor_arg'
+    @staticmethod
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the constructor argument'},
+            is_method=False)
+    def constructor_arg(**kwargs):
+        '''Decorator to override the default mapping scheme for a given constructor argument.
+
+        Decorate ObjectMapper methods with this function when extending ObjectMapper to override the default
+        scheme for mapping between Container and Builder objects. The decorated method should accept as its
+        first argument the Builder object that is being mapped. The method should return the value to be passed
+        to the target Container class constructor argument given by *name*.
+        '''
+        name = getargs('name', kwargs)
+        return _constructor_arg(name)
+
+    _obj_attr = '__object_attr'
+    @staticmethod
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the constructor argument'},
+            is_method=False)
+    def object_attr(**kwargs):
+        '''Decorator to override the default mapping scheme for a given object attribute.
+
+        Decorate ObjectMapper methods with this function when extending ObjectMapper to override the default
+        scheme for mapping between Container and Builder objects. The decorated method should accept as its
+        first argument the Container object that is being mapped. The method should return the child Builder
+        object (or scalar if the object attribute corresponds to an AttributeSpec) that represents the
+        attribute given by *name*.
+        '''
+        name = getargs('name', kwargs)
+        return _object_attr(name)
 
     @staticmethod
     def __is_attr(attr_val):
@@ -172,7 +196,7 @@ class ObjectMapper(object, metaclass=ExtenderMeta):
         ''' the Spec used in this ObjectMapper '''
         return self.__spec
 
-    @DecExtenderMeta.constructor_arg('name')
+    @_constructor_arg('name')
     def get_container_name(self, builder):
         return builder.name
 
