@@ -1,17 +1,29 @@
 import unittest2 as unittest
+from datetime import datetime
+import os
 
-from pynwb import NWBContainer, get_build_manager
+from pynwb import NWBContainer, get_build_manager, NWBFile
 
 CORE_NAMESPACE = 'core'
 
 class TestNWBContainerIO(unittest.TestCase):
 
     def setUp(self):
-        if type(self) == TestNWBContainerIO:
-            raise unittest.SkipTest('TestNWBContainerIO must be extended with setUpBuilder and setUpContainer implemented')
-        self.manager = get_build_manager()
-        self.setUpContainer()
-        self.setUpBuilder()
+        self.__manager = get_build_manager()
+        self.__container = self.setUpContainer()
+        self.__builder = self.setUpBuilder()
+
+    @property
+    def manager(self):
+        return self.__manager
+
+    @property
+    def container(self):
+        return self.__container
+
+    @property
+    def builder(self):
+        return self.__builder
 
     def test_build(self):
         # raise Exception
@@ -24,31 +36,13 @@ class TestNWBContainerIO(unittest.TestCase):
         result = self.manager.construct(self.builder)
         self.assertContainerEqual(result, self.container)
 
-#    def test_write(self):
-#        nwbfile = NWBFile(...)
-#        self.addContainer(nwbfile)
-#        io = HDF5IO(...)
-#        io.write(nwbfile)
-#        builder = self.getBuilder(io.read())
-#        # do something here to validate against spec
-#
-#    def getBuilder(self, root_builder):
-#        if isinstance(self, TestNWBContainerIO):
-#            raise unittest.SkipTest('Cannot run test unless addContainer is implemented')
-#
-#    def addContainer(self, nwbfile):
-#        if isinstance(self, TestNWBContainerIO):
-#            raise unittest.SkipTest('Cannot run test unless addContainer is implemented')
-#
     def setUpBuilder(self):
-        ''' Should set the attribute 'builder' on self '''
-        if isinstance(self, TestNWBContainerIO):
-            raise unittest.SkipTest('Cannot run test unless setUpBuilder is implemented')
+        ''' Should return the Builder that represents the Container'''
+        raise unittest.SkipTest('Cannot run test unless setUpBuilder is implemented')
 
     def setUpContainer(self):
-        ''' Should set the attribute 'container' on self '''
-        if isinstance(self, TestNWBContainerIO):
-            raise unittest.SkipTest('Cannot run test unless setUpContainer is implemented')
+        ''' Should return the Container to build and read/write'''
+        raise unittest.SkipTest('Cannot run test unless setUpContainer is implemented')
 
     def assertContainerEqual(self, container1, container2):
         type1 = type(container1)
@@ -76,3 +70,39 @@ class TestNWBContainerIO(unittest.TestCase):
                     self.assertContainerEqual(f1, f2)
                 else:
                     self.assertEqual(f1, f2)
+
+class TestSubNWBContainerIO(TestNWBContainerIO):
+
+    def setUp(self):
+        super(TestSubNWBContainerIO, self).setUp()
+        self.start_time = datetime(1971, 1, 1, 12, 0, 0)
+        self.create_date = datetime(2018, 4, 15, 12, 0, 0)
+        self.container_type = self.container.__class__.__name__
+        self.filename = 'test_%s.nwb' % self.container_type
+
+    def tearDown(self):
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
+
+    def test_roundtrip(self):
+        description = 'a file to test writing and reading a %s' % self.container_type
+        source = 'test_roundtrip for %s' % self.container_type
+        identifier = 'TEST_%s' % self.container_type
+        nwbfile = NWBFile(source, self.filename, description, identifier, self.start_time, file_create_date=self.create_date)
+        self.addContainer(nwbfile)
+        io = HDF5IO(self.filename, self.manager)
+        io.write(nwbfile)
+        read_nwbfile = io.read()
+        read_container = self.getContainer(read_nwbfile)
+        self.assertContainerEqual(self.container, read_container)
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        raise unittest.SkipTest('Cannot run test unless addContainer is implemented')
+
+    def getContainer(self, nwbfile):
+        ''' Should take an NWBFile object and return the Container'''
+        raise unittest.SkipTest('Cannot run test unless getContainer is implemented')
+
+
+
