@@ -34,8 +34,9 @@ def __type_okay(value, argtype, allow_none=False):
             return __is_int(value) or __is_float(value)
         return argtype in [cls.__name__ for cls in value.__class__.__mro__]
     elif isinstance(argtype, type):
-
-        if argtype == str:
+        if argtype == six.text_type:
+            return isinstance(value, six.text_type) or isinstance(value, six.string_types)
+        elif argtype == str:
             return isinstance(value, six.string_types)
         elif argtype is int:
             return __is_int(value)
