@@ -5,7 +5,6 @@ from form.utils import docval, popargs, fmt_docval_args
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
 
-#@register_class('ImageRetinotopy', CORE_NAMESPACE)    # make sure to uncomment this after this class is implemented
 class aimage(NWBContainer):
     """
     """
@@ -56,6 +55,7 @@ class amap(NWBContainer):
         self.unit = unit
         self.dimension = dimension
 
+@register_class('ImageRetinotopy', CORE_NAMESPACE)    # make sure to uncomment this after this class is implemented
 class ImagingRetinotopy(NWBContainer):
     """
     Intrinsic signal optical imaging or widefield imaging for measuring retinotopy. Stores orthogonal

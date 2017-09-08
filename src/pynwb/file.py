@@ -3,12 +3,23 @@ from dateutil.parser import parse as parse_date
 from collections import Iterable
 
 from form.utils import docval, getargs, fmt_docval_args, call_docval_func
+from form import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
 from .epoch import Epoch
 from .ecephys import ElectrodeGroup, Device
 from .core import NWBContainer
+
+@register_class('Image', CORE_NAMESPACE)
+class Image(Container):
+    #TODO: Implement this
+    pass
+
+@register_class('SpecFile', CORE_NAMESPACE)
+class SpecFile(Container):
+    #TODO: Implement this
+    pass
 
 @register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(NWBContainer):
