@@ -810,8 +810,13 @@ class TypeMap(object):
     def __get_container_cls_dt(self, cls):
         return self.__data_types.get(cls, (None, None))
 
-    def get_container_classes(self):
-        return  list(self.__data_types.keys())
+    @docval({'name': 'namespace', 'type': str, 'doc': 'the namespace to get the container classes for', 'default': None})
+    def get_container_classes(self, **kwargs):
+        namespace = getargs('namespace', kwargs)
+        ret = self.__data_types.keys()
+        if namespace is not None:
+            ret = filter(lambda x: self.__data_types[x][0] == namespace, ret)
+        return list(ret)
 
     @docval({'name': 'obj', 'type': (Container, Builder), 'doc': 'the object to get the ObjectMapper for'},
             returns='the ObjectMapper to use for mapping the given object', rtype='ObjectMapper')
