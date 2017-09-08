@@ -36,6 +36,11 @@ def get_type_map():
 # a global type map
 __TYPE_MAP = get_type_map()
 
+def get_global_type_map():
+    #ret = __TypeMap(__NS_CATALOG)
+    ret = __TYPE_MAP
+    return ret
+
 @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
