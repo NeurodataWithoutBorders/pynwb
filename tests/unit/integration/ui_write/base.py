@@ -1,6 +1,7 @@
 import unittest2 as unittest
 from datetime import datetime
 import os
+import numpy as np
 
 from pynwb import NWBContainer, get_build_manager, NWBFile
 from form.backends.hdf5 import HDF5IO
@@ -53,13 +54,13 @@ class TestMapNWBContainer(unittest.TestCase):
             with self.subTest(nwbfield=nwbfield, container_type=type1.__name__):
                 f1 = getattr(container1, nwbfield)
                 f2 = getattr(container2, nwbfield)
-                if isinstance(f1, tuple) or isinstance(f1, list):
+                if isinstance(f1, (tuple, list, np.ndarray)):
                     if len(f1) > 0 and isinstance(f1[0], NWBContainer):
                         for sub1, sub2 in zip(f1,f2):
                             self.assertContainerEqual(sub1, sub2)
                         continue
                     else:
-                        self.assertSequenceEqual(f1, f2)
+                        self.assertTrue(np.array_equal(f1, f2))
                 elif isinstance(f1, dict) and len(f1) and isinstance(next(iter(f1.values())), NWBContainer):
                     f1_keys = set(f1.keys())
                     f2_keys = set(f2.keys())
