@@ -3,12 +3,23 @@ from dateutil.parser import parse as parse_date
 from collections import Iterable
 
 from form.utils import docval, getargs, fmt_docval_args, call_docval_func
+from form import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
 from .epoch import Epoch
 from .ecephys import ElectrodeGroup, Device
 from .core import NWBContainer
+
+@register_class('Image', CORE_NAMESPACE)
+class Image(Container):
+    #TODO: Implement this
+    pass
+
+@register_class('SpecFile', CORE_NAMESPACE)
+class SpecFile(Container):
+    #TODO: Implement this
+    pass
 
 @register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(NWBContainer):
@@ -257,12 +268,22 @@ class NWBFile(NWBContainer):
         ts, epoch = getargs('ts', 'epoch', kwargs)
         self.__set_timeseries(self.__raw_timeseries, ts, epoch)
 
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
+    def get_raw_timeseries(self, **kwargs):
+        name = getargs('name', kwargs)
+        return self.__get_timeseries(self.__raw_timeseries, name)
+
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
     def add_stimulus(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', kwargs)
         self.__set_timeseries(self.__stimulus, ts, epoch)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
+    def get_stimulus(self, **kwargs):
+        name = getargs('name', kwargs)
+        return self.__get_timeseries(self.__stimulus, name)
 
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
@@ -271,12 +292,24 @@ class NWBFile(NWBContainer):
         ts, epoch = getargs('ts', 'epoch', kwargs)
         self.__set_timeseries(self.__stimulus_template, ts, epoch)
 
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
+    def get_stimulus_template(self, **kwargs):
+        name = getargs('name', kwargs)
+        return self.__get_timeseries(self.__stimulus_template, name)
+
     def __set_timeseries(self, ts_dict, ts, epoch=None):
         ts_dict[ts.name] = ts
         if ts.parent is None:
             ts.parent = self
         if epoch:
             self.set_epoch_timeseries(epoch, ts)
+
+    def __get_timeseries(self, ts_dict, name):
+        ret = ts_dict.get(name)
+        if ret is None:
+            msg = "no TimeSeries named '%s' found" % name
+            raise ValueError(msg)
+        return ret
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},

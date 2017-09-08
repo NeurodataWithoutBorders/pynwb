@@ -12,7 +12,7 @@ from pynwb.ecephys import Clustering
 
 from .  import base
 
-class TestNWBFileIO(base.TestNWBContainerIO):
+class TestNWBFileIO(base.TestMapNWBContainer):
 
     def setUp(self):
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
@@ -54,7 +54,7 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                             'description': DatasetBuilder('description', "A fake Clustering interface")})})
 
 
-        self.builder = GroupBuilder('root',
+        return GroupBuilder('root',
                                  groups={'acquisition': GroupBuilder('acquisition', groups={'timeseries': GroupBuilder('timeseries', groups={'test_timeseries': ts_builder}), 'images': GroupBuilder('images')}),
                                          'analysis': GroupBuilder('analysis'),
                                          'epochs': GroupBuilder('epochs'),
@@ -72,11 +72,12 @@ class TestNWBFileIO(base.TestNWBContainerIO):
                                              'source': 'a test source'})
 
     def setUpContainer(self):
-        self.container = NWBFile('a test source', 'test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
+        container = NWBFile('a test source', 'test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
         ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
-        self.container.add_raw_timeseries(ts)
-        mod = self.container.create_processing_module('test_module', 'a test source for a ProcessingModule', 'a test module')
+        container.add_raw_timeseries(ts)
+        mod = container.create_processing_module('test_module', 'a test source for a ProcessingModule', 'a test module')
         mod.add_container(Clustering("an example source for Clustering", "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10,61,10))))
+        return container
 
     def tearDown(self):
         if os.path.exists(self.path):

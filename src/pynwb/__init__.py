@@ -36,6 +36,11 @@ def get_type_map():
 # a global type map
 __TYPE_MAP = get_type_map()
 
+def get_global_type_map():
+    #ret = __TypeMap(__NS_CATALOG)
+    ret = __TYPE_MAP
+    return ret
+
 @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
@@ -126,3 +131,13 @@ from . import io as __io
 from .core import NWBContainer
 from .base import TimeSeries, ProcessingModule
 from .file import NWBFile
+
+from . import behavior
+from . import ecephys
+from . import epoch
+from . import icephys
+from . import image
+from . import misc
+from . import ogen
+from . import ophys
+from . import retinotopy

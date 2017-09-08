@@ -10,16 +10,16 @@ from pynwb.ecephys import *
 
 from . import base
 
-class TestElectrodeGroup(base.TestNWBContainerIO):
+class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        dev1 = Device('dev1', 'a test source')
+        self.dev1 = Device('dev1', 'a test source')
         channel_description = ['ch1', 'ch2']
         channel_location = ['lo1', 'lo2']
         channel_filtering = ['fi1', 'fi2']
         channel_coordinates = ['co1', 'co2']
         channel_impedance = ['im1', 'im2']
-        self.container = ElectrodeGroup('elec1', 'a test source',
+        return ElectrodeGroup('elec1', 'a test source',
                                         channel_description,
                                         channel_location,
                                         channel_filtering,
@@ -27,7 +27,7 @@ class TestElectrodeGroup(base.TestNWBContainerIO):
                                         channel_impedance,
                                         'desc1',
                                         'loc1',
-                                        dev1)
+                                        self.dev1)
 
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
@@ -36,7 +36,7 @@ class TestElectrodeGroup(base.TestNWBContainerIO):
                                         'help': 'A recording device e.g. amplifier',
                                         'source': 'a test source'},
                          )
-        self.builder = GroupBuilder('elec1',
+        return GroupBuilder('elec1',
                             attributes={'neurodata_type': 'ElectrodeGroup',
                                         'namespace': 'core',
                                         'help': 'A physical grouping of channels',
@@ -55,20 +55,28 @@ class TestElectrodeGroup(base.TestNWBContainerIO):
                             }
                         )
 
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.set_device(self.dev1)
+        nwbfile.set_electrode_group(self.container)
 
-class TestElectricalSeriesIO(base.TestNWBContainerIO):
+    def getContainer(self, nwbfile):
+        ''' Should take an NWBFile object and return the Container'''
+        return nwbfile.get_electrode_group(self.container.name)
+
+class TestElectricalSeriesIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        dev1 = Device('dev1', 'a test source')
+        self.dev1 = Device('dev1', 'a test source')
         channel_description = ('ch1', 'ch2')
         channel_location = ('lo1', 'lo2')
         channel_filtering = ('fi1', 'fi2')
         channel_coordinates = ('co1', 'co2')
         channel_impedance = ('im1', 'im2')
-        elec1 = ElectrodeGroup('elec1', 'a test source', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
+        self.elec1 = ElectrodeGroup('elec1', 'a test source', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', self.dev1)
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
-        self.container = ElectricalSeries('test_eS', 'a hypothetical source', data, elec1, timestamps=timestamps)
+        return ElectricalSeries('test_eS', 'a hypothetical source', data, self.elec1, timestamps=timestamps)
 
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
@@ -97,7 +105,7 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
                         )
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
-        self.builder = GroupBuilder('test_eS',
+        return GroupBuilder('test_eS',
                                 attributes={'source': 'a hypothetical source',
                                             'namespace': base.CORE_NAMESPACE,
                                             'comments': 'no comments',
@@ -112,10 +120,21 @@ class TestElectricalSeriesIO(base.TestNWBContainerIO):
                                                                  attributes={'unit': 'Seconds', 'interval': 1})},
                                 links={'electrode_group': LinkBuilder('electrode_group', elcgrp_builder)})
 
-class TestClusteringIO(base.TestNWBContainerIO):
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.set_device(self.dev1)
+        nwbfile.set_electrode_group(self.elec1)
+        nwbfile.add_raw_timeseries(self.container)
+
+    def getContainer(self, nwbfile):
+        ''' Should take an NWBFile object and return the Container'''
+        return nwbfile.get_raw_timeseries(self.container.name)
+
+
+class TestClusteringIO(base.TestMapRoundTrip):
 
     def setUpBuilder(self):
-        self.builder = GroupBuilder('Clustering',
+        return GroupBuilder('Clustering',
             attributes={
                'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',
                'source': "an example source for Clustering",
@@ -129,4 +148,4 @@ class TestClusteringIO(base.TestNWBContainerIO):
         )
 
     def setUpContainer(self):
-        self.container = Clustering("an example source for Clustering", "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10,61,10)))
+        return Clustering("an example source for Clustering", "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10,61,10)))
