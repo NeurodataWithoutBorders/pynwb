@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 
 from pynwb import NWBContainer, get_build_manager, NWBFile
+from form.backends.hdf5 import HDF5IO
 
 CORE_NAMESPACE = 'core'
 
