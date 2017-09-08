@@ -131,3 +131,13 @@ from . import io as __io
 from .core import NWBContainer
 from .base import TimeSeries, ProcessingModule
 from .file import NWBFile
+
+from . import behavior
+from . import ecephys
+from . import epoch
+from . import icephys
+from . import image
+from . import misc
+from . import ogen
+from . import ophys
+from . import retinotopy
