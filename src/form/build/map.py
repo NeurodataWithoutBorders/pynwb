@@ -810,6 +810,9 @@ class TypeMap(object):
     def __get_container_cls_dt(self, cls):
         return self.__data_types.get(cls, (None, None))
 
+    def get_container_classes(self):
+        return  list(self.__data_types.keys())
+
     @docval({'name': 'obj', 'type': (Container, Builder), 'doc': 'the object to get the ObjectMapper for'},
             returns='the ObjectMapper to use for mapping the given object', rtype='ObjectMapper')
     def get_map(self, **kwargs):
