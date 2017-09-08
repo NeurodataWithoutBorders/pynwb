@@ -32,6 +32,8 @@ test:
 test_docker:
 	docker build --quiet --no-cache --tag neurodatawithoutborders/pynwb:python35_test -f ./docker/python35_test/Dockerfile .
 	docker run --rm -it neurodatawithoutborders/pynwb:python35_test bash -c 'python test.py'
+	docker build --quiet --no-cache --tag neurodatawithoutborders/pynwb:python36_test -f ./docker/python36_test/Dockerfile .
+	docker run --rm -it neurodatawithoutborders/pynwb:python36_test bash -c 'python test.py'
 
 apidoc:
 	cd docs && $(MAKE) apidoc
