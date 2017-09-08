@@ -8,6 +8,15 @@ from form.backends.hdf5 import HDF5IO
 
 CORE_NAMESPACE = 'core'
 
+container_tests = dict()
+
+def container_test(container):
+    global container_tests
+    def _dec(cls):
+        container_tests[container] = cls
+        return cls
+    return _dec
+
 class TestMapNWBContainer(unittest.TestCase):
 
     def setUp(self):
