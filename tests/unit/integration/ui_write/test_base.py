@@ -10,6 +10,7 @@ from pynwb import TimeSeries
 
 from . import base
 
+@base.container_test(TimeSeries)
 class TestTimeSeriesIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
