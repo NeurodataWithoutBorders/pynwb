@@ -67,16 +67,16 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
 class TestElectricalSeriesIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        dev1 = Device('dev1', 'a test source')
+        self.dev1 = Device('dev1', 'a test source')
         channel_description = ('ch1', 'ch2')
         channel_location = ('lo1', 'lo2')
         channel_filtering = ('fi1', 'fi2')
         channel_coordinates = ('co1', 'co2')
         channel_impedance = ('im1', 'im2')
-        elec1 = ElectrodeGroup('elec1', 'a test source', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', dev1)
+        self.elec1 = ElectrodeGroup('elec1', 'a test source', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', self.dev1)
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
-        return ElectricalSeries('test_eS', 'a hypothetical source', data, elec1, timestamps=timestamps)
+        return ElectricalSeries('test_eS', 'a hypothetical source', data, self.elec1, timestamps=timestamps)
 
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
@@ -119,6 +119,17 @@ class TestElectricalSeriesIO(base.TestMapRoundTrip):
                                           'timestamps': DatasetBuilder('timestamps', timestamps,
                                                                  attributes={'unit': 'Seconds', 'interval': 1})},
                                 links={'electrode_group': LinkBuilder('electrode_group', elcgrp_builder)})
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.set_device(self.dev1)
+        nwbfile.set_electrode_group(self.elec1)
+        nwbfile.add_raw_timeseries(self.container)
+
+    def getContainer(self, nwbfile):
+        ''' Should take an NWBFile object and return the Container'''
+        return nwbfile.get_raw_timeseries(self.container.name)
+
 
 class TestClusteringIO(base.TestMapRoundTrip):
 
