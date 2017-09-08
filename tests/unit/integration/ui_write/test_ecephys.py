@@ -13,7 +13,7 @@ from . import base
 class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        dev1 = Device('dev1', 'a test source')
+        self.dev1 = Device('dev1', 'a test source')
         channel_description = ['ch1', 'ch2']
         channel_location = ['lo1', 'lo2']
         channel_filtering = ['fi1', 'fi2']
@@ -27,7 +27,7 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
                                         channel_impedance,
                                         'desc1',
                                         'loc1',
-                                        dev1)
+                                        self.dev1)
 
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
@@ -55,6 +55,14 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
                             }
                         )
 
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.set_device(self.dev1)
+        nwbfile.set_electrode_group(self.container)
+
+    def getContainer(self, nwbfile):
+        ''' Should take an NWBFile object and return the Container'''
+        return nwbfile.get_electrode_group(self.container.name)
 
 class TestElectricalSeriesIO(base.TestMapRoundTrip):
 
