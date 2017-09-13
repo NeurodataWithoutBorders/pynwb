@@ -614,6 +614,21 @@ class TypeSource(object):
         return self.__data_type
 
 class TypeMap(object):
+    ''' A class to maintain the map between ObjectMappers and Container classes
+    '''
+
+    __default = None
+
+    @classmethod
+    @docval({'name': 'default_map', 'type': 'TypeMap', 'doc': 'the default TypeMap instance to use'})
+    def register_default(cls, **kwargs):
+        '''Register a default TypeMap for FORM to use'''
+        cls.__default = getargs('default_map', kwargs)
+
+    @classmethod
+    def default(cls):
+        '''The default TypeMap for FORM to use'''
+        return cls.__default
 
     @docval({'name': 'namespaces', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use'},
             {'name': 'mapper_cls', 'type': type, 'doc': 'the ObjectMapper class to use', 'default': ObjectMapper})

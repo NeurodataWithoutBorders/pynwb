@@ -170,10 +170,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
         if os.path.exists(self.path):
             os.remove(self.path)
 
-    def test_write_builder(self):
-        writer = HDF5IO(self.path, self.manager)
-        writer.write_builder(self.builder)
-        writer.close()
+    def check_fields(self):
         f = File(self.path)
         self.assertIn('acquisition', f)
         self.assertIn('analysis', f)
@@ -191,9 +188,22 @@ class TestHDF5Writer(GroupBuilderTestCase):
         ts = acq.get('timeseries')
         self.assertIn('test_timeseries', ts)
 
+    def test_write_builder(self):
+        writer = HDF5IO(self.path, self.manager)
+        writer.write_builder(self.builder)
+        writer.close()
+        self.check_fields()
+
     def test_write_context_manager(self):
         with HDF5IO(self.path, self.manager) as writer:
             writer.write_builder(self.builder)
+        self.check_fields()
+
+    def test_default_manager(self):
+        writer = HDF5IO(self.path)
+        writer.write_builder(self.builder)
+        writer.close()
+        self.check_fields()
 
     def test_read_builder(self):
         self.maxDiff = None

@@ -141,3 +141,5 @@ from . import misc
 from . import ogen
 from . import ophys
 from . import retinotopy
+
+__TypeMap.register_default(__TYPE_MAP)
