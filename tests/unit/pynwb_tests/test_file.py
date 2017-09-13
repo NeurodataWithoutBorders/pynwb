@@ -11,7 +11,7 @@ class NWBFileTest(unittest.TestCase):
     def setUp(self):
         self.start = datetime(2017, 5, 1, 12, 0, 0)
         self.path = 'nwbfile_test.h5'
-        self.nwbfile = NWBFile('a fake source', self.path, 'a test session description for a test NWBFile',
+        self.nwbfile = NWBFile('a fake source', 'a test session description for a test NWBFile',
                     'FILE123',
                     self.start,
                     experimenter='A test experimenter',

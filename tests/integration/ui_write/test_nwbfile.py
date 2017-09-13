@@ -72,7 +72,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                              'source': 'a test source'})
 
     def setUpContainer(self):
-        container = NWBFile('a test source', 'test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
+        container = NWBFile('a test source', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
         ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
         container.add_raw_timeseries(ts)
         mod = container.create_processing_module('test_module', 'a test source for a ProcessingModule', 'a test module')
