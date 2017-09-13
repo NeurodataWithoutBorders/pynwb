@@ -191,6 +191,10 @@ class TestHDF5Writer(GroupBuilderTestCase):
         ts = acq.get('timeseries')
         self.assertIn('test_timeseries', ts)
 
+    def test_write_context_manager(self):
+        with HDF5IO(self.path, self.manager) as writer:
+            writer.write_builder(self.builder)
+
     def test_read_builder(self):
         self.maxDiff = None
         io = HDF5IO(self.path, self.manager)
