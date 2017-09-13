@@ -30,7 +30,7 @@ argument is the name of the NWB file, and the second argument is a brief descrip
     from datetime import datetime
     from pynwb import NWBFile
 
-    f = NWBFile(filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+    f = NWBFile('the PyNWB tutorial', filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
                 experimenter='Dr. Bilbo Baggins',
                 lab='Bag End Labatory',
                 institution='University of Middle Earth at the Shire',
@@ -233,7 +233,7 @@ that manages objects to be read and written from disk. A PyNWB-specific BuildMan
     # make an NWBFile
     start_time = datetime(1970, 1, 1, 12, 0, 0)
     create_date = datetime(2017, 4, 15, 12, 0, 0)
-    nwbfile = NWBFile('test.nwb', 'a test NWB File', 'TEST123', start_time, file_create_date=create_date)
+    nwbfile = NWBFile('the PyNWB tutorial', 'test.nwb', 'a test NWB File', 'TEST123', start_time, file_create_date=create_date)
     ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
     nwbfile.add_raw_timeseries(ts)
 
