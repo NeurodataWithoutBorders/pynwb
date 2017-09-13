@@ -36,3 +36,20 @@ class FORMIO(with_metaclass(ABCMeta, object)):
     def write_builder(self, **kwargs):
         ''' Write a GroupBuilder representing an Container object '''
         pass
+
+    @abstractmethod
+    def open(self):
+        ''' Open this FORMIO object for writing of the builder '''
+        pass
+
+    @abstractmethod
+    def close(self):
+        ''' Close this FORMIO object to further reading/writing'''
+        pass
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()
