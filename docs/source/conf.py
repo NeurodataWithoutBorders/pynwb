@@ -111,8 +111,6 @@ def run_apidoc(_):
     to_append = os.path.join(os.path.dirname(__file__), '../../src')
     sys.stderr.write("appending %s\n" % to_append)
     sys.path.append(to_append)
-    #cur_dir = os.path.abspath(os.path.dirname(__file__))
-    #module = os.path.join(cur_dir,"..","labbookdb")
     main(['-f', '-e', '-o', 'source', '../src'])
 
 def setup(app):
