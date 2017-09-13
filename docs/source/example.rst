@@ -30,7 +30,7 @@ argument is the name of the NWB file, and the second argument is a brief descrip
     from datetime import datetime
     from pynwb import NWBFile
 
-    f = NWBFile(filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+    f = NWBFile('the PyNWB tutorial', filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
                 experimenter='Dr. Bilbo Baggins',
                 lab='Bag End Labatory',
                 institution='University of Middle Earth at the Shire',
@@ -43,10 +43,8 @@ the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` class.
 .. code-block:: python
 
     from form.backends.hdf5 import HDF5IO
-    from pynwb import get_build_manager
 
-    manager = get_build_manager()
-    io = HDF5IO(filename, manager, mode='w')
+    io = HDF5IO(filename, mode='w')
     io.write(f)
     io.close()
 
@@ -220,29 +218,35 @@ If using iPython, you can access documentation for the class's constructor using
 Write an NWBFile
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Writing NWB files to disk is handled by the :py:mod:`form` package, which :py:mod:`pynwb` depends. Currently, the only storage format supported by
-:py:mod:`form` is HDF5. Reading and writing to and from HDF5 is handled by the class :py:class:`~form.backends.hdf5.h5tools.HDF5IO`. The first argument to this
-is the path of the HDF5, and the second is the :py:class:`~form.build.map.BuildManager` to use for IO. Briefly, the :py:class:`~form.build.map.BuildManager` is a class
-that manages objects to be read and written from disk. A PyNWB-specific BuildManager can be retrieved using the module-level function :py:func:`~pynwb.get_build_manager`.
+Writing NWB files to disk is handled by the :py:mod:`form` package, which :py:mod:`pynwb` depends on. Currently, the only storage format supported by
+:py:mod:`form` is HDF5. Reading and writing to and from HDF5 is handled by the class :py:class:`~form.backends.hdf5.h5tools.HDF5IO`. The only required argument to this
+is the path of the HDF5 file. An second, optional argument is the :py:class:`~form.build.map.BuildManager` to use for IO. Briefly, the :py:class:`~form.build.map.BuildManager` is a class
+that manages objects to be read and written from disk. A PyNWB-specific BuildManager can be retrieved using the module-level function :py:func:`~pynwb.get_build_manager`. Alternatively,
+the :py:class:`~form.build.map.BuildManager` that a :py:class:`~form.backends.io.FORMIO` used can be retrieved from the :py:attr:`~form.backends.io.FORMIO.manager` attribute.
 
 .. code-block:: python
 
-    from pynwb import NWBFile, get_build_manager
+    from pynwb import NWBFile
     from form.backends.hdf5 import HDF5IO
 
     # make an NWBFile
     start_time = datetime(1970, 1, 1, 12, 0, 0)
     create_date = datetime(2017, 4, 15, 12, 0, 0)
-    nwbfile = NWBFile('test.nwb', 'a test NWB File', 'TEST123', start_time, file_create_date=create_date)
+    nwbfile = NWBFile('the PyNWB tutorial', 'test.nwb', 'a test NWB File', 'TEST123', start_time, file_create_date=create_date)
     ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
     nwbfile.add_raw_timeseries(ts)
 
-    manager = get_build_manager()
     path = "test_pynwb_io_hdf5.h5"
 
-    io = HDF5IO(path, manager, mode='w')
+    io = HDF5IO(path, mode='w')
     io.write(nwbfile)
     io.close()
+
+
+
+.. note::
+    All :py:class:`~form.backends.io.FORMIO` objects are context managers.
+
 
 The third argument to the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` constructor is the mode for opening the HDF5 file. Valid modes are:
 
@@ -556,4 +560,21 @@ Further Reading
 
 * **Using Extensions:** See :ref:`useextension` for an example on how to use extensions during read and write.
 * **Specification Language:** For a detailed overview of the specification language itself see http://schema-language.readthedocs.io/en/latest/
+
+Validating NWB files
+-----------------------------------------------------
+
+Validating NWB files is handled by a command-line tool availble in :py:mod:`~pynwb`. The validator can be invoked like so:
+
+.. code-block:: bash
+
+    python -m pynwb.validate test.nwb
+
+This will validate the file ``test.nwb`` against the *core* NWB specification. Validating against other specifications i.e. extensions
+can be done using the ``-p`` and ``-n`` flags. For example, the following command will validate against the specifications referenced in the namespace
+file ``mylab.namespace.yaml`` in addition to the core specification.
+
+.. code-block:: bash
+
+    python -m pynwb.validate -p mylab.namespace.yaml test.nwb
 
