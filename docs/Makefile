@@ -9,7 +9,7 @@ PAPER          =
 BUILDDIR       = _build
 SRCDIR         = ../src
 RSTDIR         = source
-PKGNAME        = pynwb
+PKGNAME        = {pynwb,form}
 
 # Internal variables.
 PAPEROPT_a4     = -D latex_paper_size=a4
@@ -44,7 +44,7 @@ help:
 	@echo "  apidoc     to to build RST from source code"
 
 clean:
-	-rm -rf $(BUILDDIR)/* $(RSTDIR)/$(PKGNAME)* $(RSTDIR)/modules.rst
+	-rm -rf $(BUILDDIR)/* $(RSTDIR)/$(PKGNAME)*.rst $(RSTDIR)/modules.rst
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
