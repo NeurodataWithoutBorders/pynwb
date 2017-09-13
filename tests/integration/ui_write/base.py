@@ -99,7 +99,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
         description = 'a file to test writing and reading a %s' % self.container_type
         source = 'test_roundtrip for %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
-        nwbfile = NWBFile(source, self.filename, description, identifier, self.start_time, file_create_date=self.create_date)
+        nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
         io = HDF5IO(self.filename, self.manager)
         io.write(nwbfile)
