@@ -2,7 +2,6 @@ from collections import Iterable
 import numpy as np
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
-import six
 from .utils import docval, getargs, popargs
 
 def __get_shape_helper(data):

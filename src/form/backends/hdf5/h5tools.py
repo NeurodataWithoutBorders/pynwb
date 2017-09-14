@@ -129,7 +129,7 @@ class HDF5IO(FORMIO):
         set_attributes(self.__file, f_builder.attributes)
 
 def get_type(data):
-    if isinstance(data, text_type) or isinstance(data, string_types):
+    if isinstance(data, (text_type, string_types)):
         return special_dtype(vlen=text_type)
     elif not hasattr(data, '__len__'):
         return type(data)
