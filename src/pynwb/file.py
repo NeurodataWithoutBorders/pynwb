@@ -174,6 +174,10 @@ class NWBFile(NWBContainer):
     def ec_electrodes(self):
         return tuple(self.__ec_electrodes.values())
 
+    @property
+    def ic_electrodes(self):
+        return tuple(self.__ec_electrodes.values())
+
     def is_raw_timeseries(self, ts):
         return self.__exists(ts, self.__raw_timeseries)
 
