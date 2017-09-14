@@ -1,4 +1,5 @@
 import unittest
+import six
 from datetime import datetime
 import os
 from h5py import File
@@ -15,7 +16,7 @@ class TestHDF5Writer(unittest.TestCase):
         self.path = "test_pynwb_io_hdf5.h5"
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)
-        self.container = NWBFile('a test source', 'test.nwb', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
+        self.container = NWBFile('a test source', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
         ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
         self.container.add_raw_timeseries(ts)
 
@@ -72,7 +73,13 @@ class TestHDF5Writer(unittest.TestCase):
         io.write(self.container)
         io.close()
         f = File(self.path)
-        with self.assertRaises(OSError):
+
+        if six.PY2:
+            assert_file_exists = IOError
+        elif six.PY3:
+            assert_file_exists = OSError
+
+        with self.assertRaises(assert_file_exists):
             io = HDF5IO(self.path, self.manager, mode='w-')
             io.write(self.container)
             io.close()

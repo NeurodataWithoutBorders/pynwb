@@ -179,7 +179,7 @@ class SpikeUnit(NWBContainer):
             {'name': 'source', 'type': str, 'doc': 'Name, path or description of where unit times originated. This is necessary only if the info here differs from or is more fine-grained than the interfaces source field.'})
     def __init__(self, **kwargs):
         times, unit_description = popargs('times', 'unit_description', kwargs)
-        call_docval_func(super().__init__, kwargs)
+        call_docval_func(super(SpikeUnit, self).__init__, kwargs)
         self.times = times
         self.unit_description = unit_description
 
@@ -208,4 +208,3 @@ class UnitTimes(NWBContainer):
     @property
     def unit_list(self):
         return [si.name for si in self.spike_units]
-

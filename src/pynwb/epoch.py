@@ -40,7 +40,7 @@ class Epoch(NWBContainer):
     def __init__(self, **kwargs):
         start, stop, description, tags = getargs('start', 'stop', 'description', 'tags', kwargs)
         #super(Epoch, self).__init__(name=name, parent=parent)
-        call_docval_func(super().__init__, kwargs)
+        call_docval_func(super(Epoch, self).__init__, kwargs)
         # dict to keep track of which time series are linked to this epoch
         self._timeseries = dict()
         # start and stop time (in seconds)
@@ -189,6 +189,3 @@ class EpochTimeSeries(NWBContainer):
         # and stop_time
         self.count = count
         self.idx_start = idx
-
-
-

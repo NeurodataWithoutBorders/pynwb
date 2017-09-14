@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 from abc import ABCMeta, abstractmethod
 
 from pynwb.core import Container
@@ -9,7 +9,7 @@ from form.build import GroupBuilder, DatasetBuilder
 from form.utils import docval, getargs
 from form.build import ObjectMapper, BuildManager, TypeMap
 
-CORE_NAMESPACE = 'core'
+CORE_NAMESPACE = 'test_core'
 
 class Foo(Container):
 

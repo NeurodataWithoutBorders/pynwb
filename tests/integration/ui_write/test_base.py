@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 import numpy as np
 import json
 from datetime import datetime
@@ -10,13 +10,14 @@ from pynwb import TimeSeries
 
 from . import base
 
-class TestTimeSeriesIO(base.TestNWBContainerIO):
+@base.container_test(TimeSeries)
+class TestTimeSeriesIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        self.container = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
+        return TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
 
     def setUpBuilder(self):
-        self.builder = GroupBuilder('test_timeseries',
+        return GroupBuilder('test_timeseries',
                                 attributes={'source': 'example_source',
                                             'namespace': base.CORE_NAMESPACE,
                                             'neurodata_type': 'TimeSeries',
@@ -29,4 +30,5 @@ class TestTimeSeriesIO(base.TestNWBContainerIO):
                                                                              'resolution': 0.1}),
                                           'timestamps': DatasetBuilder('timestamps', list(range(10)),
                                                                  attributes={'unit': 'Seconds', 'interval': 1})})
+
 

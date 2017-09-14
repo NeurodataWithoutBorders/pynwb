@@ -310,8 +310,6 @@ class NamespaceCatalog(object):
                     included_types[s['namespace']] = tuple(types)
             ret[ns['name']] = included_types
             # construct namespace
-            self.add_namespace(ns['name'], self.__spec_namespace_cls.build_namespace(**ns, catalog=catalog))
+            self.add_namespace(ns['name'], self.__spec_namespace_cls.build_namespace(catalog=catalog, **ns))
         self.__loaded_ns_files[namespace_path] = ret
         return ret
-
-

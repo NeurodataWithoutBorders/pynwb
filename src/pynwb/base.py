@@ -99,8 +99,8 @@ class TimeSeries(NWBContainer):
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(TimeSeries, self).__init__, kwargs)
+        super(TimeSeries, self).__init__(*pargs, **pkwargs)
         keys = ("resolution",
                 "comments",
                 "description",
