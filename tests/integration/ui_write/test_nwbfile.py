@@ -64,7 +64,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                  datasets={'file_create_date': DatasetBuilder('file_create_date', [str(self.create_date)]),
                                            'identifier': DatasetBuilder('identifier', 'TEST123'),
                                            'session_description': DatasetBuilder('session_description', 'a test NWB File'),
-                                           'nwb_version': DatasetBuilder('nwb_version', '1.0.6'),
+                                           'nwb_version': DatasetBuilder('nwb_version', '1.2.0'),
                                            'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
                                  attributes={'namespace': base.CORE_NAMESPACE,
                                              'neurodata_type': 'NWBFile',
