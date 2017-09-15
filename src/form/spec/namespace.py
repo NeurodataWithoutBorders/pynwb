@@ -79,7 +79,7 @@ class SpecNamespace(dict):
     @property
     def version(self):
         """String, list, or tuple with the version or None """
-        return self.get('author', None)
+        return self.get('version', None)
 
     @property
     def date(self):

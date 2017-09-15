@@ -132,6 +132,8 @@ from .core import NWBContainer
 from .base import TimeSeries, ProcessingModule
 from .file import NWBFile
 
+NWBFile.set_version(__NS_CATALOG.get_namespace(CORE_NAMESPACE).version)
+
 from . import behavior
 from . import ecephys
 from . import epoch

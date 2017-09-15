@@ -108,10 +108,10 @@ def run_apidoc(_):
     from sphinx.apidoc import main
     import os
     import sys
-    to_append = os.path.join(os.path.dirname(__file__), '../../src')
-    sys.stderr.write("appending %s\n" % to_append)
-    sys.path.append(to_append)
-    main(['-f', '-e', '-o', 'source', '../src'])
+    out_dir = os.path.dirname(__file__)
+    src_dir = os.path.join(out_dir, '../../src')
+    sys.path.append(src_dir)
+    main(['-f', '-e', '-o', out_dir, src_dir])
 
 def setup(app):
     app.connect('builder-inited', run_apidoc)
