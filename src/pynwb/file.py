@@ -285,6 +285,7 @@ class NWBFile(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
     def get_raw_timeseries(self, **kwargs):
+        '''Retrieve acquisition TimeSeries data'''
         name = getargs('name', kwargs)
         return self.__get_timeseries(self.__raw_timeseries, name)
 
@@ -297,6 +298,7 @@ class NWBFile(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
     def get_stimulus(self, **kwargs):
+        '''Retrieve stimiulus TimeSeries data'''
         name = getargs('name', kwargs)
         return self.__get_timeseries(self.__stimulus, name)
 
@@ -309,6 +311,7 @@ class NWBFile(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
     def get_stimulus_template(self, **kwargs):
+        '''Retrieve stimiulus template TimeSeries data'''
         name = getargs('name', kwargs)
         return self.__get_timeseries(self.__stimulus_template, name)
 
