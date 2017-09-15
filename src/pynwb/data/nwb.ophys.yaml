@@ -76,7 +76,7 @@ groups:
   - doc: RoiResponseSeries object containing dF/F for a ROI
     neurodata_type_inc: RoiResponseSeries
     quantity: '*'
-  name: DfOverF
+  default_name: DfOverF
   neurodata_type_def: DfOverF
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -93,7 +93,7 @@ groups:
   - doc: RoiResponseSeries object containing fluorescence data for a ROI
     neurodata_type_inc: RoiResponseSeries
     quantity: +
-  name: Fluorescence
+  default_name: Fluorescence
   neurodata_type_def: Fluorescence
   neurodata_type_inc: NWBContainer
 - attributes:
@@ -111,14 +111,24 @@ groups:
     is allowed to change with time, a new imaging plane (or module) is required and
     ROI names should remain consistent between them.
   groups:
-  - datasets:
+  - attributes:
+    - doc: Value is 'Results from segmentation of an imaging plane'
+      dtype: text
+      name: help
+      value: 'Results from segmentation of an imaging plane'
+    datasets:
     - doc: Description of image plane, recording wavelength, depth, etc
       dtype: text
       name: description
       quantity: '?'
     doc: Group name is human-readable description of imaging plane
     groups:
-    - datasets:
+    - attributes:
+      - doc: Value is 'Region of interest, as determined by image segmentation'
+        dtype: text
+        name: help
+        value: 'Region of interest, as determined by image segmentation'
+      datasets:
       - dims:
         - num_x
         - num_y
@@ -164,10 +174,15 @@ groups:
     neurodata_type_def: PlaneSegmentation
     neurodata_type_inc: NWBContainer
     quantity: '*'
-  name: ImageSegmentation
+  default_name: ImageSegmentation
   neurodata_type_def: ImageSegmentation
   neurodata_type_inc: NWBContainer
-- datasets:
+- attributes:
+  - doc: Value is 'Metadata about an imaging plane'
+    dtype: text
+    name: help
+    value: Metadata about an imaging plane
+  datasets:
   - doc: Description of &lt;image_plane_X&gt;
     dtype: text
     name: description
@@ -222,7 +237,12 @@ groups:
     arbitrary but should be meaningful. It is referenced by TwoPhotonSeries and also
     ImageSegmentation and DfOverF interfaces'
   groups:
-  - datasets:
+  - attributes:
+    - doc: Value is 'Metadata about an optical channel used to record from an imaging plane'
+      dtype: text
+      name: help
+      value: Metadata about an optical channel used to record from an imaging plane
+    datasets:
     - doc: Any notes or comments about the channel
       dtype: text
       name: description

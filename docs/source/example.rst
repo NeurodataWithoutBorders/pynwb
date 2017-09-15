@@ -30,7 +30,7 @@ argument is the name of the NWB file, and the second argument is a brief descrip
     from datetime import datetime
     from pynwb import NWBFile
 
-    f = NWBFile(filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+    f = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
                 experimenter='Dr. Bilbo Baggins',
                 lab='Bag End Labatory',
                 institution='University of Middle Earth at the Shire',
@@ -43,10 +43,8 @@ the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` class.
 .. code-block:: python
 
     from form.backends.hdf5 import HDF5IO
-    from pynwb import get_build_manager
 
-    manager = get_build_manager()
-    io = HDF5IO(filename, manager, mode='w')
+    io = HDF5IO(filename, mode='w')
     io.write(f)
     io.close()
 
@@ -127,7 +125,7 @@ types of :ref:`timeseries_overview` objects directly, and adding them with :py:m
                                 resolution=0.001,
                                 comments="This data was randomly generated with numpy, using 1234 as the seed",
                                 description="Random numbers generated with numpy.randon.rand")
-    f.add_raw_timeseries(ts, [ep1, ep2])
+    f.add_raw_timeseries(ephys_ts, [ep1, ep2])
 
     spatial_ts = SpatialSeries('test_spatial_timeseries',
                                'a stumbling rat',
@@ -202,7 +200,7 @@ to implement and register a custom :py:class:`~form.build.map.ObjectMapper`. :py
     register_map(MyExtensionContainer, MyExtensionMapper)
 
 
-If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your exentsion specification, a dynamically created class is created by default.
+If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your extension specification, a dynamically created class is created by default.
 To use the dynamic class, you will need to retrieve the class object using the function :py:func:`~pynwb.get_class`. Once you have retrieved the class object, you can
 use it just like you would a statically defined class.
 
@@ -220,29 +218,35 @@ If using iPython, you can access documentation for the class's constructor using
 Write an NWBFile
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Writing NWB files to disk is handled by the :py:mod:`form` package, which :py:mod:`pynwb` depends. Currently, the only storage format supported by
-:py:mod:`form` is HDF5. Reading and writing to and from HDF5 is handled by the class :py:class:`~form.backends.hdf5.h5tools.HDF5IO`. The first argument to this
-is the path of the HDF5, and the second is the :py:class:`~form.build.map.BuildManager` to use for IO. Briefly, the :py:class:`~form.build.map.BuildManager` is a class
-that manages objects to be read and written from disk. A PyNWB-specific BuildManager can be retrieved using the module-level function :py:func:`~pynwb.get_build_manager`.
+Writing NWB files to disk is handled by the :py:mod:`form` package, which :py:mod:`pynwb` depends on. Currently, the only storage format supported by
+:py:mod:`form` is HDF5. Reading and writing to and from HDF5 is handled by the class :py:class:`~form.backends.hdf5.h5tools.HDF5IO`. The only required argument to this
+is the path of the HDF5 file. An second, optional argument is the :py:class:`~form.build.map.BuildManager` to use for IO. Briefly, the :py:class:`~form.build.map.BuildManager` is a class
+that manages objects to be read and written from disk. A PyNWB-specific BuildManager can be retrieved using the module-level function :py:func:`~pynwb.get_build_manager`. Alternatively,
+the :py:class:`~form.build.map.BuildManager` that a :py:class:`~form.backends.io.FORMIO` used can be retrieved from the :py:attr:`~form.backends.io.FORMIO.manager` attribute.
 
 .. code-block:: python
 
-    from pynwb import NWBFile, get_build_manager
+    from pynwb import NWBFile
     from form.backends.hdf5 import HDF5IO
 
     # make an NWBFile
     start_time = datetime(1970, 1, 1, 12, 0, 0)
     create_date = datetime(2017, 4, 15, 12, 0, 0)
-    nwbfile = NWBFile('test.nwb', 'a test NWB File', 'TEST123', start_time, file_create_date=create_date)
+    nwbfile = NWBFile('the PyNWB tutorial', 'test.nwb', 'a test NWB File', 'TEST123', start_time, file_create_date=create_date)
     ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
     nwbfile.add_raw_timeseries(ts)
 
-    manager = get_build_manager()
     path = "test_pynwb_io_hdf5.h5"
 
-    io = HDF5IO(path, manager, mode='w')
+    io = HDF5IO(path, mode='w')
     io.write(nwbfile)
     io.close()
+
+
+
+.. note::
+    All :py:class:`~form.backends.io.FORMIO` objects are context managers.
+
 
 The third argument to the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` constructor is the mode for opening the HDF5 file. Valid modes are:
 
@@ -266,9 +270,93 @@ The NWB specification is designed to be extended. Extension for the NWB format c
 The classes :py:class:`~pynwb.spec.NWBGroupSpec`, :py:class:`~pynwb.spec.NWBDatasetSpec`, :py:class:`~pynwb.spec.NWBAttributeSpec`, and :py:class:`~pynwb.spec.NWBLinkSpec`
 can be used to define custom types.
 
+Attribute Specifications
+____________________________________________________
+
+Specifying attributes is done with :py:class:`~pynwb.spec.NWBAttributeSpec`.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBAttributeSpec
+
+    spec = NWBAttributeSpec('bar', 'float', 'a value for bar')
+
+Dataset Specifications
+____________________________________________________
+
+Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBDatasetSpec
+
+    spec = NWBDatasetSpec('A custom NWB type',
+                        attribute=[
+                            NWBAttributeSpec('baz', 'str', 'a value for baz'),
+                        ],
+                        shape=(None, None))
+
+
+Using datasets to specify tables
+++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+Tables can be specified using :py:class:`~pynwb.spec.NWBDtypeSpec`. To specify a table, provide a
+list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
+
+    spec = NWBDatasetSpec('A custom NWB type',
+                        attribute=[
+                            NWBAttributeSpec('baz', 'str', 'a value for baz'),
+                        ],
+                        dtype=[
+                            NWBDtypeSpec('foo', column for foo', 'int'),
+                            NWBDtypeSpec('bar', 'a column for bar', 'float')
+                        ])
+
+Compound data types can be nested.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
+
+    spec = NWBDatasetSpec('A custom NWB type',
+                        attribute=[
+                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
+                        ],
+                        dtype=[
+                            NWBDtypeSpec('foo', 'a column for foo', 'int'),
+                            NWBDtypeSpec('bar', 'a column for bar', 'float')
+                        ])
+
+Group Specifications
+____________________________________________________
+
+Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBGroupSpec
+
+    # A list of NWBAttributeSpec objects to specify new attributes
+    addl_attributes = [...]
+    # A list of NWBDatasetSpec objects to specify new datasets
+    addl_datasets = [...]
+    # A list of NWBDatasetSpec objects to specify new groups
+    addl_groups = [...]
+    spec = NWBGroupSpec('A custom NWB type',
+                        attributes = addl_attributes,
+                        datasets = addl_datasets,
+                        groups = addl_groups)
+
+Neurodata Type Specifications
+____________________________________________________
+
 :py:class:`~pynwb.spec.NWBGroupSpec` and :py:class:`~pynwb.spec.NWBDatasetSpec` use the arguments `neurodata_type_inc` and `neurodata_type_def` for
 declaring new types and extending existing types. New types are specified by setting the argument `neurodata_type_def`. New types can extend an existing type
-by specifying the argument `neurodata_type_inc`. Specifications can instantiate existing types by only specifying the `neurodata_type_inc`.
+by specifying the argument `neurodata_type_inc`.
 
 Create a new type
 
@@ -307,7 +395,7 @@ Extend an existing type
                         neurodata_type_inc='Clustering',
                         neurodata_type_def='MyExtendedClustering')
 
-Use an existing type
+Existing types can be instantiate by specifying `neurodata_type_inc` alone.
 
 .. code-block:: python
 
@@ -472,4 +560,21 @@ Further Reading
 
 * **Using Extensions:** See :ref:`useextension` for an example on how to use extensions during read and write.
 * **Specification Language:** For a detailed overview of the specification language itself see http://schema-language.readthedocs.io/en/latest/
+
+Validating NWB files
+-----------------------------------------------------
+
+Validating NWB files is handled by a command-line tool availble in :py:mod:`~pynwb`. The validator can be invoked like so:
+
+.. code-block:: bash
+
+    python -m pynwb.validate test.nwb
+
+This will validate the file ``test.nwb`` against the *core* NWB specification. Validating against other specifications i.e. extensions
+can be done using the ``-p`` and ``-n`` flags. For example, the following command will validate against the specifications referenced in the namespace
+file ``mylab.namespace.yaml`` in addition to the core specification.
+
+.. code-block:: bash
+
+    python -m pynwb.validate -p mylab.namespace.yaml test.nwb
 

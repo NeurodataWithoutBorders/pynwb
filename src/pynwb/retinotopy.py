@@ -5,8 +5,7 @@ from form.utils import docval, popargs, fmt_docval_args
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
 
-#@register_class('ImageRetinotopy', CORE_NAMESPACE)    # make sure to uncomment this after this class is implemented
-class aimage(NWBContainer):
+class AImage(NWBContainer):
     """
     """
 
@@ -26,14 +25,14 @@ class aimage(NWBContainer):
             {'name': 'focal_depth', 'type': float, 'doc': 'Focal depth offset, in meters.'})
     def __init__(self, **kwargs):
         data, bits_per_pixel, dimension, format, field_of_view = popargs('data', 'bits_per_pixel', 'dimension', 'format', 'field_of_view', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(AImage, self).__init__, kwargs)
+        super(AImage, self).__init__(*pargs, **pkwargs)
         self.data = data
         self.bits_per_pixel = bits_per_pixel
         self.dimension = format
         self.field_of_view = field_of_view
 
-class amap(NWBContainer):
+class AxisMap(NWBContainer):
     """
     """
 
@@ -49,13 +48,14 @@ class amap(NWBContainer):
             {'name': 'dimension', 'type': Iterable, 'doc': 'Number of rows and columns in the image'})
     def __init__(self, **kwargs):
         data, field_of_view, unit, dimension = popargs('data', 'field_of_view', 'unit', 'dimension', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(AxisMap, self).__init__, kwargs)
+        super(AxisMap, self).__init__(*pargs, **pkwargs)
         self.data = data
         self.field_of_view = field_of_view
         self.unit = unit
         self.dimension = dimension
 
+@register_class('ImageRetinotopy', CORE_NAMESPACE)    # make sure to uncomment this after this class is implemented
 class ImagingRetinotopy(NWBContainer):
     """
     Intrinsic signal optical imaging or widefield imaging for measuring retinotopy. Stores orthogonal
@@ -78,18 +78,18 @@ class ImagingRetinotopy(NWBContainer):
     _help = "Intrinsic signal optical imaging or Widefield imaging for measuring retinotopy."
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'sign_map', 'type': amap, 'doc': 'Sine of the angle between the direction of the gradient in axis_1 and axis_2.'},
-            {'name': 'axis_1_phase_map', 'type': amap, 'doc': 'Phase response to stimulus on the first measured axis.'},
-            {'name': 'axis_1_power_map', 'type': amap, 'doc': 'Power response on the first measured axis. Response is scaled so 0.0 is no power in the response and 1.0 is maximum relative power.'},
-            {'name': 'axis_2_phase_map', 'type': amap, 'doc': 'Phase response to stimulus on the second measured axis.'},
-            {'name': 'axis_2_power_map', 'type': amap, 'doc': 'Power response on the second measured axis. Response is scaled so 0.0 is no power in the response and 1.0 is maximum relative power.'},
+            {'name': 'sign_map', 'type': AxisMap, 'doc': 'Sine of the angle between the direction of the gradient in axis_1 and axis_2.'},
+            {'name': 'axis_1_phase_map', 'type': AxisMap, 'doc': 'Phase response to stimulus on the first measured axis.'},
+            {'name': 'axis_1_power_map', 'type': AxisMap, 'doc': 'Power response on the first measured axis. Response is scaled so 0.0 is no power in the response and 1.0 is maximum relative power.'},
+            {'name': 'axis_2_phase_map', 'type': AxisMap, 'doc': 'Phase response to stimulus on the second measured axis.'},
+            {'name': 'axis_2_power_map', 'type': AxisMap, 'doc': 'Power response on the second measured axis. Response is scaled so 0.0 is no power in the response and 1.0 is maximum relative power.'},
             {'name': 'axis_descriptions', 'type': Iterable, 'doc': 'Two-element array describing the contents of the two response axis fields. Description should be something like ["altitude", "azimuth"] or ["radius", "theta"].'},
-            {'name': 'focal_depth_image', 'type': aimage, 'doc': 'Gray-scale image taken with same settings/parameters (e.g., focal depth, wavelength) as data collection. Array format: [rows][columns].'},
-            {'name': 'vasculature_image', 'type': aimage, 'doc': 'Gray-scale anatomical image of cortical surface. Array structure: [rows][columns].'})
+            {'name': 'focal_depth_image', 'type': AImage, 'doc': 'Gray-scale image taken with same settings/parameters (e.g., focal depth, wavelength) as data collection. Array format: [rows][columns].'},
+            {'name': 'vasculature_image', 'type': AImage, 'doc': 'Gray-scale anatomical image of cortical surface. Array structure: [rows][columns].'})
     def __init__(self, **kwargs):
         axis_1_phase_map, axis_1_power_map, axis_2_phase_map, axis_2_power_map, axis_descriptions, focal_depth_image, sign_map, vasculature_image = popargs('axis_1_phase_map', 'axis_1_power_map', 'axis_2_phase_map', 'axis_2_power_map', 'axis_descriptions', 'focal_depth_image', 'sign_map', 'vasculature_image', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(ImagingRetinotopy, self).__init__, kwargs)
+        super(ImagingRetinotopy, self).__init__(*pargs, **pkwargs)
         self.axis_1_phase_map = axis_1_phase_map
         self.axis_1_power_map = axis_1_power_map
         self.axis_2_phase_map = axis_2_phase_map
@@ -98,4 +98,3 @@ class ImagingRetinotopy(NWBContainer):
         self.focal_depth_image = focal_depth_image
         self.sign_map = sign_map
         self.vasculature_image = vasculature_image
-

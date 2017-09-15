@@ -1,16 +1,27 @@
 from abc import ABCMeta, abstractmethod
-from ..build import BuildManager
+from ..build import BuildManager, TypeMap
 from ..build import GroupBuilder
 from ..utils import docval, popargs, getargs
 from ..container import Container
+from six import with_metaclass
 
-class FORMIO(object, metaclass=ABCMeta):
-    @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'},
+class FORMIO(with_metaclass(ABCMeta, object)):
+    @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {"name": "source", "type": str, "doc": "the source of container being built i.e. file path", 'default': None})
     def __init__(self, **kwargs):
         self.__manager = getargs('manager', kwargs)
+        if self.__manager is None:
+            type_map = TypeMap.default()
+            if type_map is None:
+                raise RuntimeError('No default TypeMap specified')
+            self.__manager = BuildManager(type_map)
         self.__built = dict()
         self.__source = getargs('source', kwargs)
+
+    @property
+    def manager(self):
+        '''The BuildManager this FORMIO is using'''
+        return self.__manager
 
     @docval(returns='the Container object that was read in', rtype=Container)
     def read(self, **kwargs):
@@ -36,3 +47,19 @@ class FORMIO(object, metaclass=ABCMeta):
         ''' Write a GroupBuilder representing an Container object '''
         pass
 
+    @abstractmethod
+    def open(self):
+        ''' Open this FORMIO object for writing of the builder '''
+        pass
+
+    @abstractmethod
+    def close(self):
+        ''' Close this FORMIO object to further reading/writing'''
+        pass
+
+    def __enter__(self):
+        self.open()
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self.close()

@@ -24,8 +24,8 @@ class OptogeneticStimulusSite(NWBContainer):
             {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})
     def __init__(self, **kwargs):
         device, description, excitation_lambda, location = popargs('device', 'description', 'excitation_lambda', 'location', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(OptogeneticStimulusSite, self).__init__, kwargs)
+        super(OptogeneticStimulusSite, self).__init__(*pargs, **pkwargs)
         self.device = device
         self.description = description
         self.excitation_lambda = excitation_lambda
@@ -65,6 +65,6 @@ class OptogeneticSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         site = popargs('site', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(OptogeneticSeries, self).__init__, kwargs)
+        super(OptogeneticSeries, self).__init__(*pargs, **pkwargs)
         self.site = site

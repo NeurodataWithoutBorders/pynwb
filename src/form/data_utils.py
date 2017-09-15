@@ -1,7 +1,7 @@
 from collections import Iterable
 import numpy as np
 from abc import ABCMeta, abstractmethod
-
+from six import with_metaclass
 from .utils import docval, getargs, popargs
 
 def __get_shape_helper(data):
@@ -28,8 +28,7 @@ def get_type(data):
             raise ValueError('cannot determine type for empty data')
         return get_type(data[0])
 
-
-class AbstractDataChunkIterator(object, metaclass=ABCMeta):
+class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
     def __iter__(self):
@@ -179,6 +178,8 @@ class DataChunkIterator(AbstractDataChunkIterator):
         self.__next_chunk.data = None
         # Return the current next chunk
         return curr_chunk
+
+    next = __next__
 
     @docval(returns='Tuple with the recommended chunk shape or None if no particular shape is recommended.')
     def recommended_chunk_shape(self):
@@ -425,4 +426,3 @@ class ShapeValidatorResult(object):
          if item == 'default_message':
              return self.SHAPE_ERROR[self.error]
          return self.__getattribute__(item)
-

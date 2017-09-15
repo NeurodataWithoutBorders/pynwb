@@ -1,3 +1,4 @@
+import sys
 
 from form.validate import ValidatorMap
 
@@ -13,13 +14,16 @@ if __name__ == '__main__':
     validate against all namespaces in namespace file.
     """
 
+    def write_out(s):
+        sys.out.write('%s\n' % s)
+
     def print_errors(errors):
         if len(errors) > 0:
-            print(' - found the following errors:')
+            write(' - found the following errors:')
             for err in errors:
-                print('%s - %s' % (err.name, err.reason))
+                write('%s - %s' % (err.name, err.reason))
         else:
-            print(' - no errors found.')
+            write(' - no errors found.')
 
     parser = ArgumentParser(description="Validate an NWB file")
     parser.add_argument("path", type=str, help="the path to the NWB file")
@@ -29,7 +33,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not os.path.exists(args.path):
-        print('%s not found' % path, file=sys.stderr)
+        write('%s not found' % path, file=sys.stderr)
         sys.exit(1)
 
     io = HDF5IO(args.path, get_build_manager())
@@ -37,14 +41,14 @@ if __name__ == '__main__':
     if args.nspath is not None:
         namespaces = load_namespaces(args.nspath)
         if args.ns is not None:
-            print('Validating against %s from %s.' % (args.ns, args.ns_path), end='')
+            write('Validating against %s from %s.' % (args.ns, args.ns_path), end='')
         else:
-            print('Validating using namespaces in %s.' % args.nspath)
+            write('Validating using namespaces in %s.' % args.nspath)
             for ns in namespaces:
-                print('Validating against %s' % ns, end='')
+                write('Validating against %s' % ns, end='')
                 errors = validate(io, ns)
                 print_errors(errors)
     else:
         errors = validate(io)
-        print('Validating against core namespace' % ns, end='')
+        write('Validating against core namespace' % ns, end='')
         print_errors(errors)

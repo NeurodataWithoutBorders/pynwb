@@ -127,13 +127,12 @@ groups:
     the source module, if that is possible/relevant (e.g., name of ROIs from Segmentation
     module).
   groups:
-  - datasets:
-    - doc: Name, path or description of where unit times originated. This is necessary
-        only if the info here differs from or is more fine-grained than the interface's
-        source field
+  - attributes:
+    - doc: Store times for a particulare UnitTime
       dtype: text
-      name: source
-      quantity: '?'
+      name: help
+      value: Times for a particular UnitTime object
+    datasets:
     - dims:
       - num_events
       doc: Spike time for the units (exact or estimated)
@@ -148,6 +147,6 @@ groups:
     neurodata_type_def: SpikeUnit
     neurodata_type_inc: NWBContainer
     quantity: +
-  name: UnitTimes
+  default_name: UnitTimes
   neurodata_type_def: UnitTimes
   neurodata_type_inc: NWBContainer

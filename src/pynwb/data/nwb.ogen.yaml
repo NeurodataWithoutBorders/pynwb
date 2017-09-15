@@ -29,7 +29,12 @@ groups:
     target_type: OptogeneticStimulusSite
   neurodata_type_def: OptogeneticSeries
   neurodata_type_inc: TimeSeries
-- datasets:
+- attributes:
+  - doc: Value is 'Metadata about an optogenetic stimulus site'
+    dtype: text
+    name: help
+    value: Metadata about an optogenetic stimulus site
+  datasets:
   - doc: Description of site
     dtype: text
     name: description

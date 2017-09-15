@@ -1,4 +1,4 @@
-from .spec import BaseStorageSpec
+from .spec import BaseStorageSpec, GroupSpec
 from ..utils import docval, getargs, popargs, get_docval
 
 class SpecCatalog(object):
@@ -80,12 +80,13 @@ class SpecCatalog(object):
         ndt = spec.data_type_def
         if ndt is not None:
             self.register_spec(spec, source_file)
-        for dataset_spec in spec.datasets:
-            dset_ndt = dataset_spec.data_type_def
-            if dset_ndt is not None and not spec.is_inherited_type(dataset_spec):
-                self.register_spec(dataset_spec, source_file)
-        for group_spec in spec.groups:
-            self.auto_register(group_spec, source_file)
+        if isinstance(spec, GroupSpec):
+            for dataset_spec in spec.datasets:
+                dset_ndt = dataset_spec.data_type_def
+                if dset_ndt is not None and not spec.is_inherited_type(dataset_spec):
+                    self.register_spec(dataset_spec, source_file)
+            for group_spec in spec.groups:
+                self.auto_register(group_spec, source_file)
 
 
     @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the hierarchy of'})

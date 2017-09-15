@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 from abc import ABCMeta, abstractmethod
 
 from pynwb.core import Container
@@ -9,7 +9,7 @@ from form.build import GroupBuilder, DatasetBuilder
 from form.utils import docval, getargs
 from form.build import ObjectMapper, BuildManager, TypeMap
 
-CORE_NAMESPACE = 'core'
+CORE_NAMESPACE = 'test_core'
 
 class Foo(Container):
 
@@ -90,8 +90,8 @@ class TestBase(unittest.TestCase):
                                  namespace=CORE_NAMESPACE,
                                  data_type_def='Foo',
                                  datasets=[DatasetSpec('an example dataset', 'int', name='my_data',
-                                                       attributes=[AttributeSpec('attr2', 'int', 'an example integer attribute')])],
-                                 attributes=[AttributeSpec('attr1', 'str', 'an example string attribute')])
+                                                       attributes=[AttributeSpec('attr2', 'an example integer attribute', 'int')])],
+                                 attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
 
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.foo_spec, 'test.yaml')

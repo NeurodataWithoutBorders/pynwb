@@ -19,7 +19,7 @@ class Device(NWBContainer):
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        call_docval_func(super().__init__, kwargs)
+        call_docval_func(super(Device, self).__init__, kwargs)
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
 class ElectrodeGroup(NWBContainer):
@@ -49,7 +49,7 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, description, location, device = popargs("channel_description", "channel_location", "channel_filtering", "channel_coordinates", "channel_impedance", "description", "location", "device", kwargs)
-        call_docval_func(super().__init__, kwargs)
+        call_docval_func(super(ElectrodeGroup, self).__init__, kwargs)
         self.channel_description = channel_description
         self.channel_location = channel_location
         self.channel_filtering = channel_filtering
@@ -363,4 +363,3 @@ class FeatureExtraction(NWBContainer):
         self.fields['description'] = description
         self.fields['times'] = list(times)
         self.fields['features'] = features
-

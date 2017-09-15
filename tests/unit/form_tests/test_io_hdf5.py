@@ -2,6 +2,7 @@ import unittest
 from datetime import datetime
 import os
 from h5py import File, Dataset
+from six import text_type
 
 from form.backends.hdf5 import HDF5IO
 from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
@@ -41,7 +42,7 @@ class GroupBuilderTestCase(unittest.TestCase):
         if hasattr(obj, 'shape'):
             return len(obj.shape) == 0
         else:
-            if any(isinstance(obj, t) for t in (int, str, float, bytes)):
+            if any(isinstance(obj, t) for t in (int, str, float, bytes, text_type)):
                 return True
         return False
 
@@ -169,10 +170,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
         if os.path.exists(self.path):
             os.remove(self.path)
 
-    def test_write_builder(self):
-        writer = HDF5IO(self.path, self.manager)
-        writer.write_builder(self.builder)
-        writer.close()
+    def check_fields(self):
         f = File(self.path)
         self.assertIn('acquisition', f)
         self.assertIn('analysis', f)
@@ -189,6 +187,23 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.assertIn('timeseries', acq)
         ts = acq.get('timeseries')
         self.assertIn('test_timeseries', ts)
+
+    def test_write_builder(self):
+        writer = HDF5IO(self.path, self.manager)
+        writer.write_builder(self.builder)
+        writer.close()
+        self.check_fields()
+
+    def test_write_context_manager(self):
+        with HDF5IO(self.path, self.manager) as writer:
+            writer.write_builder(self.builder)
+        self.check_fields()
+
+    def test_default_manager(self):
+        writer = HDF5IO(self.path)
+        writer.write_builder(self.builder)
+        writer.close()
+        self.check_fields()
 
     def test_read_builder(self):
         self.maxDiff = None

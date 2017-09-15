@@ -86,6 +86,34 @@ class H5IOTest(unittest.TestCase):
         dset = self.f['test_dataset']
         self.assertTrue(np.all(dset[:] == a))
 
+    def test_write_table(self):
+        cmpd_dt = np.dtype([('a', int), ('b', float)])
+        data = np.zeros(10, dtype=cmpd_dt)
+        data['a'][1] = 101
+        data['b'][1] = 10.1
+        dt = [{'name': 'a', 'dtype': 'int'  , 'doc': 'a column'},
+              {'name': 'b', 'dtype': 'float', 'doc': 'b column'}]
+        write_dataset(self.f, 'test_dataset', data, {}, dtype=dt)
+        dset = self.f['test_dataset']
+        self.assertEqual(dset['a'].tolist(), data['a'].tolist())
+        self.assertEqual(dset['b'].tolist(), data['b'].tolist())
+
+    def test_write_table_nested(self):
+        b_cmpd_dt = np.dtype([('c', int), ('d', float)])
+        cmpd_dt = np.dtype([('a', int), ('b', b_cmpd_dt)])
+        data = np.zeros(10, dtype=cmpd_dt)
+        data['a'][1] = 101
+        data['b']['c'] = 202
+        data['b']['d'] = 10.1
+        b_dt = [{'name': 'c', 'dtype': 'int'  , 'doc': 'c column'},
+                {'name': 'd', 'dtype': 'float', 'doc': 'd column'}]
+        dt = [{'name': 'a', 'dtype': 'int', 'doc': 'a column'},
+              {'name': 'b', 'dtype': b_dt , 'doc': 'b column'}]
+        write_dataset(self.f, 'test_dataset', data, {}, dtype=dt)
+        dset = self.f['test_dataset']
+        self.assertEqual(dset['a'].tolist(), data['a'].tolist())
+        self.assertEqual(dset['b'].tolist(), data['b'].tolist())
+
     def test_write_dataset_iterable(self):
         write_dataset(self.f, 'test_dataset', range(10), {})
         dset = self.f['test_dataset']

@@ -1,5 +1,6 @@
 ''' Tests for NWBFile '''
 import unittest
+import six
 
 from datetime import datetime
 
@@ -10,7 +11,7 @@ class NWBFileTest(unittest.TestCase):
     def setUp(self):
         self.start = datetime(2017, 5, 1, 12, 0, 0)
         self.path = 'nwbfile_test.h5'
-        self.nwbfile = NWBFile('a fake source', self.path, 'a test session description for a test NWBFile',
+        self.nwbfile = NWBFile('a fake source', 'a test session description for a test NWBFile',
                     'FILE123',
                     self.start,
                     experimenter='A test experimenter',
@@ -57,9 +58,4 @@ class NWBFileTest(unittest.TestCase):
         self.nwbfile.create_epoch(source='a fake source', name='test_epoch1', start=0.0, stop=1.0, tags=tags1, descrition='test epoch')
         self.nwbfile.create_epoch(source='a fake source', name='test_epoch2', start=0.0, stop=1.0, tags=tags2, descrition='test epoch')
         tags = self.nwbfile.epoch_tags
-        self.assertCountEqual(expected_tags, tags)
-
-
-
-
-
+        six.assertCountEqual(self, expected_tags, tags)

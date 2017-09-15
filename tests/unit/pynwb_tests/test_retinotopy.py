@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.retinotopy import ImagingRetinotopy, amap, aimage
+from pynwb.retinotopy import ImagingRetinotopy, AxisMap, AImage
 
 import numpy as np
 
@@ -11,11 +11,11 @@ class ImageRetinotopyConstructor(unittest.TestCase):
         data = list()
         field_of_view = [1, 2, 3]
         dimension = [1, 2, 3]
-        sign_map = amap('test source', data, field_of_view, 'unit', dimension)
-        axis_1_phase_map = amap('test source', data, field_of_view, 'unit', dimension)
-        axis_1_power_map = amap('test source', data, field_of_view, 'unit', dimension)
-        axis_2_phase_map = amap('test source', data, field_of_view, 'unit', dimension)
-        axis_2_power_map = amap('test source', data, field_of_view, 'unit', dimension)
+        sign_map = AxisMap('test source', data, field_of_view, 'unit', dimension)
+        axis_1_phase_map = AxisMap('test source', data, field_of_view, 'unit', dimension)
+        axis_1_power_map = AxisMap('test source', data, field_of_view, 'unit', dimension)
+        axis_2_phase_map = AxisMap('test source', data, field_of_view, 'unit', dimension)
+        axis_2_power_map = AxisMap('test source', data, field_of_view, 'unit', dimension)
         axis_descriptions = ['altitude', 'azimuth']
 
         data = list()
@@ -24,8 +24,8 @@ class ImageRetinotopyConstructor(unittest.TestCase):
         format = 'raw'
         field_of_view = [1, 2, 3]
         focal_depth = 1.0
-        focal_depth_image = aimage('test source', data, bits_per_pixel, dimension, format, field_of_view, focal_depth)
-        vasculature_image = aimage('test source', data, bits_per_pixel, dimension, format, field_of_view, focal_depth)
+        focal_depth_image = AImage('test source', data, bits_per_pixel, dimension, format, field_of_view, focal_depth)
+        vasculature_image = AImage('test source', data, bits_per_pixel, dimension, format, field_of_view, focal_depth)
 
         ir = ImagingRetinotopy('test_ir', sign_map, axis_1_phase_map, axis_1_power_map, axis_2_phase_map, axis_2_power_map, axis_descriptions, focal_depth_image, vasculature_image)
         self.assertEqual(ir.source, 'test_ir')

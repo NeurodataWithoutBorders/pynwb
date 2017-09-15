@@ -1,4 +1,4 @@
-.. _getting_started:
+..  _getting_started:
 
 ===============
 Getting Started
@@ -27,7 +27,7 @@ Installation
 ---------------
 
 PyNWB can be obtained by checking out the Git repository hosted on GitHub `here <https://github.com/NeurodataWithoutBorders/pynwb>`_.
-Execute the following commands should install PyNWB.
+Execute the following commands to install PyNWB:
 
 .. code-block:: console
 
