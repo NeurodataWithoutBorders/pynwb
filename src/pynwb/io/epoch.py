@@ -7,7 +7,7 @@ from pynwb.epoch import Epoch, EpochTimeSeries
 class EpochMap(ObjectMapper):
 
     def __init__(self, spec):
-        super().__init__(spec)
+        super(EpochMap, self).__init__(spec)
         start_spec = self.spec.get_dataset('start_time')
         stop_spec = self.spec.get_dataset('stop_time')
         self.map_const_arg('start', start_spec)
@@ -15,7 +15,7 @@ class EpochMap(ObjectMapper):
         epts_spec = self.spec.get_neurodata_type('EpochTimeSeries')
         self.map_spec('timeseries', epts_spec)
 
-    @constructor_arg('name')
+    @ObjectMapper.constructor_arg('name')
     def name(self, builder):
         return builder.name
 
@@ -23,6 +23,6 @@ class EpochMap(ObjectMapper):
 class EpochTimeSeriesMap(ObjectMapper):
 
     def __init__(self, spec):
-        super().__init__(spec)
+        super(EpochTimeSeriesMap, self).__init__(spec)
         ts_spec = self.spec.get_link('timeseries')
         self.map_const_arg('ts', ts_spec)

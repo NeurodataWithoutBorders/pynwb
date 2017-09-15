@@ -2,7 +2,7 @@ from collections import Iterable
 import numpy as np
 import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink
-
+from six import raise_from, text_type, string_types
 from form.utils import docval, getargs, popargs
 from form.data_utils import DataChunkIterator, get_shape
 
@@ -14,7 +14,7 @@ ROOT_NAME = 'root'
 class HDF5IO(FORMIO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
-            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'},
+            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'mode', 'type': str, 'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'})
     def __init__(self, **kwargs):
         '''Open an HDF5 file for IO
@@ -129,8 +129,8 @@ class HDF5IO(FORMIO):
         set_attributes(self.__file, f_builder.attributes)
 
 def get_type(data):
-    if isinstance(data, str):
-        return special_dtype(vlen=str)
+    if isinstance(data, (text_type, string_types)):
+        return special_dtype(vlen=text_type)
     elif not hasattr(data, '__len__'):
         return type(data)
     else:
@@ -161,7 +161,7 @@ def __resolve_dtype__(dtype, data):
             dtype = get_type(data)
         except Exception as exc:
             msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)
-            raise Exception(msg) from exc
+            raise_from(Exception(msg), exc)
     return dtype
 
 def __resolve_dtype_helper__(dtype):
@@ -320,7 +320,7 @@ def __scalar_fill__(parent, name, data, dtype=None):
         dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype)
     except Exception as exc:
         msg = "Could not create scalar dataset %s in %s" % (name, parent.name)
-        raise Exception(msg) from exc
+        raise_from(Exception(msg), exc)
     return dset
 
 def __chunked_iter_fill__(parent, name, data):
@@ -341,7 +341,7 @@ def __chunked_iter_fill__(parent, name, data):
     try:
         dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
     except Exception as exc:
-        raise Exception("Could not create scalar dataset %s in %s" % (name, parent.name)) from exc
+        raise_from(Exception("Could not create scalar dataset %s in %s" % (name, parent.name)), exc)
     for chunk_i in data:
         # Determine the minimum array dimensions to fit the chunk selection
         max_bounds = __selection_max_bounds__(chunk_i.selection)
@@ -368,7 +368,7 @@ def __list_fill__(parent, name, data, dtype=None):
     try:
         dset = parent.create_dataset(name, shape=data_shape, dtype=dtype)
     except Exception as exc:
-        raise Exception("Could not create scalar dataset %s in %s" % (name, parent.name)) from exc
+        raise_from(Exception("Could not create scalar dataset %s in %s" % (name, parent.name)), exc)
     if len(data) > dset.shape[0]:
         new_shape = list(dset.shape)
         new_shape[0] = len(data)

@@ -33,8 +33,8 @@ class IntracellularElectrode(NWBContainer):
             {'name': 'device', 'type': str, 'doc': 'Name(s) of devices in general/devices.'})
     def __init__(self, **kwargs):
         slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs('slice', 'seal', 'description', 'location', 'resistance', 'filtering', 'initial_access_resistance', 'device', kwargs)
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
+        pargs, pkwargs = fmt_docval_args(super(IntracellularElectrode, self).__init__, kwargs)
+        super(IntracellularElectrode, self).__init__(*pargs, **pkwargs)
         self.slice = slice
         self.seal = seal
         self.description = description

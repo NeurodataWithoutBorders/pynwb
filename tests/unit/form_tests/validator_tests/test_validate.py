@@ -1,6 +1,6 @@
-import unittest
+import unittest2 as unittest
 from abc import ABCMeta, abstractmethod
-
+from six import with_metaclass
 from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
 from form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap
 
@@ -9,7 +9,7 @@ from form.validate.errors import *
 
 CORE_NAMESPACE = 'test_core'
 
-class ValidatorTestBase(unittest.TestCase, metaclass=ABCMeta):
+class ValidatorTestBase(with_metaclass(ABCMeta, unittest.TestCase)):
 
     def setUp(self):
         spec_catalog = SpecCatalog()

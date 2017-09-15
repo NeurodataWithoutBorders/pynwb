@@ -1,12 +1,13 @@
 import re
 import sys
 from collections import OrderedDict
-
+from six import with_metaclass, raise_from
 from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog
 from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
+
 
 class BuildManager(object):
     """
@@ -81,67 +82,102 @@ class BuildManager(object):
         spec, builder = getargs('spec', 'builder', kwargs)
         return self.__type_map.get_subspec(spec, builder)
 
-class DecExtenderMeta(ExtenderMeta):
+_const_arg = '__constructor_arg'
+@docval({'name': 'name', 'type': str, 'doc': 'the name of the constructor argument'},
+        is_method=False)
+def _constructor_arg(**kwargs):
+    '''Decorator to override the default mapping scheme for a given constructor argument.
 
-    @classmethod
-    def __prepare__(metacls, name, bases, **kwargs):
-        return {
-            'constructor_arg': metacls.constructor_arg,
-            'is_constructor_arg': metacls.is_constructor_arg,
-            'get_cargname': metacls.get_cargname,
-            'obj_attr': metacls.obj_attr,
-            'is_attr': metacls.is_attr,
-            'get_obj_attr': metacls.get_cargname
-        }
+    Decorate ObjectMapper methods with this function when extending ObjectMapper to override the default
+    scheme for mapping between Container and Builder objects. The decorated method should accept as its
+    first argument the Builder object that is being mapped. The method should return the value to be passed
+    to the target Container class constructor argument given by *name*.
+    '''
+    name = getargs('name', kwargs)
+    def _dec(func):
+        setattr(func, _const_arg, name)
+        return func
+    return _dec
 
-    __obj_attr = '__obj_attr__'
-    @classmethod
-    def obj_attr(cls, name):
-        def _dec(func):
-            setattr(func, cls.__obj_attr, name)
-            return func
-        return _dec
+_obj_attr = '__object_attr'
+@docval({'name': 'name', 'type': str, 'doc': 'the name of the constructor argument'},
+        is_method=False)
+def _object_attr(**kwargs):
+    '''Decorator to override the default mapping scheme for a given object attribute.
 
-    @classmethod
-    def is_attr(cls, attr_val):
-        return hasattr(attr_val, cls.__obj_attr)
+    Decorate ObjectMapper methods with this function when extending ObjectMapper to override the default
+    scheme for mapping between Container and Builder objects. The decorated method should accept as its
+    first argument the Container object that is being mapped. The method should return the child Builder
+    object (or scalar if the object attribute corresponds to an AttributeSpec) that represents the
+    attribute given by *name*.
+    '''
+    name = getargs('name', kwargs)
+    def _dec(func):
+        setattr(func, _obj_attr, name)
+        return func
+    return _dec
 
-    @classmethod
-    def get_obj_attr(cls, attr_val):
-        return getattr(attr_val, cls.__obj_attr)
-
-    __const_arg = '__constructor_arg'
-    @classmethod
-    def constructor_arg(cls, name):
-        def _dec(func):
-            setattr(func, cls.__const_arg, name)
-            return func
-        return _dec
-
-    @classmethod
-    def is_constructor_arg(cls, attr_val):
-        return hasattr(attr_val, cls.__const_arg)
-
-    @classmethod
-    def get_cargname(cls, attr_val):
-        return getattr(attr_val, cls.__const_arg)
-
-class ObjectMapper(object, metaclass=DecExtenderMeta):
+class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     '''A class for mapping between Spec objects and Container attributes
-
-
 
     '''
 
+    _const_arg = '__constructor_arg'
+    @staticmethod
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the constructor argument'},
+            is_method=False)
+    def constructor_arg(**kwargs):
+        '''Decorator to override the default mapping scheme for a given constructor argument.
+
+        Decorate ObjectMapper methods with this function when extending ObjectMapper to override the default
+        scheme for mapping between Container and Builder objects. The decorated method should accept as its
+        first argument the Builder object that is being mapped. The method should return the value to be passed
+        to the target Container class constructor argument given by *name*.
+        '''
+        name = getargs('name', kwargs)
+        return _constructor_arg(name)
+
+    _obj_attr = '__object_attr'
+    @staticmethod
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the constructor argument'},
+            is_method=False)
+    def object_attr(**kwargs):
+        '''Decorator to override the default mapping scheme for a given object attribute.
+
+        Decorate ObjectMapper methods with this function when extending ObjectMapper to override the default
+        scheme for mapping between Container and Builder objects. The decorated method should accept as its
+        first argument the Container object that is being mapped. The method should return the child Builder
+        object (or scalar if the object attribute corresponds to an AttributeSpec) that represents the
+        attribute given by *name*.
+        '''
+        name = getargs('name', kwargs)
+        return _object_attr(name)
+
+    @staticmethod
+    def __is_attr(attr_val):
+        return hasattr(attr_val, _obj_attr)
+
+    @staticmethod
+    def __get_obj_attr(attr_val):
+        return getattr(attr_val, _obj_attr)
+
+    @staticmethod
+    def __is_constructor_arg(attr_val):
+        return hasattr(attr_val, _const_arg)
+
+    @staticmethod
+    def __get_cargname(attr_val):
+        return getattr(attr_val, _const_arg)
+
     @ExtenderMeta.post_init
     def __gather_procedures(cls, name, bases, classdict):
-        cls.const_args = dict()
+        cls.constructor_args = dict()
         cls.obj_attrs = dict()
         for name, func in cls.__dict__.items():
-            if cls.is_constructor_arg(func):
-                cls.const_args[cls.get_cargname(func)] = getattr(cls, name)
-            elif cls.is_attr(func):
-                cls.obj_attrs[cls.get_obj_attr(func)] = getattr(cls, name)
+            if cls.__is_constructor_arg(func):
+                cls.constructor_args[cls.__get_cargname(func)] = getattr(cls, name)
+            elif cls.__is_attr(func):
+                cls.obj_attrs[cls.__get_obj_attr(func)] = getattr(cls, name)
 
     @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'The specification for mapping objects to builders'})
     def __init__(self, **kwargs):
@@ -160,7 +196,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         ''' the Spec used in this ObjectMapper '''
         return self.__spec
 
-    @constructor_arg('name')
+    @_constructor_arg('name')
     def get_container_name(self, builder):
         return builder.name
 
@@ -283,8 +319,8 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
         self.map_attr(attr_carg, spec)
 
     def __get_override_carg(self, name, builder):
-        if name in self.const_args:
-            func = self.const_args[name]
+        if name in self.constructor_args:
+            func = self.constructor_args[name]
             return func(self, builder)
         return None
 
@@ -535,7 +571,7 @@ class ObjectMapper(object, metaclass=DecExtenderMeta):
             obj = cls(*args, **kwargs)
         except Exception as ex:
             msg = 'Could not construct %s object' % (cls.__name__)
-            raise Exception(msg) from ex
+            raise_from(Exception(msg), ex)
         return obj
 
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container to get the Builder name for'})
@@ -578,6 +614,21 @@ class TypeSource(object):
         return self.__data_type
 
 class TypeMap(object):
+    ''' A class to maintain the map between ObjectMappers and Container classes
+    '''
+
+    __default = None
+
+    @classmethod
+    @docval({'name': 'default_map', 'type': 'TypeMap', 'doc': 'the default TypeMap instance to use'})
+    def register_default(cls, **kwargs):
+        '''Register a default TypeMap for FORM to use'''
+        cls.__default = getargs('default_map', kwargs)
+
+    @classmethod
+    def default(cls):
+        '''The default TypeMap for FORM to use'''
+        return cls.__default
 
     @docval({'name': 'namespaces', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use'},
             {'name': 'mapper_cls', 'type': type, 'doc': 'the ObjectMapper class to use', 'default': ObjectMapper})
@@ -774,6 +825,14 @@ class TypeMap(object):
     def __get_container_cls_dt(self, cls):
         return self.__data_types.get(cls, (None, None))
 
+    @docval({'name': 'namespace', 'type': str, 'doc': 'the namespace to get the container classes for', 'default': None})
+    def get_container_classes(self, **kwargs):
+        namespace = getargs('namespace', kwargs)
+        ret = self.__data_types.keys()
+        if namespace is not None:
+            ret = filter(lambda x: self.__data_types[x][0] == namespace, ret)
+        return list(ret)
+
     @docval({'name': 'obj', 'type': (Container, Builder), 'doc': 'the object to get the ObjectMapper for'},
             returns='the ObjectMapper to use for mapping the given object', rtype='ObjectMapper')
     def get_map(self, **kwargs):
@@ -864,4 +923,3 @@ class TypeMap(object):
             raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
             return attr_map.get_builder_name(container)
-

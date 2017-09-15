@@ -3,6 +3,7 @@ from dateutil.parser import parse as parse_date
 from collections import Iterable
 
 from form.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
+from form import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -13,6 +14,15 @@ from .core import NWBContainer
 
 def _not_parent(arg):
     return arg['name'] != 'parent'
+@register_class('Image', CORE_NAMESPACE)
+class Image(Container):
+    #TODO: Implement this
+    pass
+
+@register_class('SpecFile', CORE_NAMESPACE)
+class SpecFile(Container):
+    #TODO: Implement this
+    pass
 
 @register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(NWBContainer):
@@ -37,14 +47,21 @@ class NWBFile(NWBContainer):
                      'epoch_tags',
                      'devices')
 
-    __nwb_version = '1.0.6'
+    __current_version = None
+
+    @classmethod
+    def set_version(cls, version):
+        if cls.__current_version is not None:
+            msg = 'version already set'
+            raise ValueError(msg)
+        cls.__current_version = version
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'file_name', 'type': str, 'doc': 'path to NWB file'},
             {'name': 'session_description', 'type': str, 'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
             {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
             {'name': 'file_create_date', 'type': (list, datetime, str), 'doc': 'the time the file was created and subsequenct modifications made', 'default': None},
+            {'name': 'version', 'type': str, 'doc': 'the NWB version', 'default': None},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str, 'doc': 'general description of the experiment', 'default': None},
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
@@ -62,11 +79,14 @@ class NWBFile(NWBContainer):
             {'name': 'devices', 'type': (list, tuple), 'doc': 'Device objects belonging to this NWBFile', 'default': None},
     )
     def __init__(self, **kwargs):
-        pargs, pkwargs = fmt_docval_args(super().__init__, kwargs)
-        super().__init__(*pargs, **pkwargs)
-        self.__filename = getargs('file_name', kwargs)
+        pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
+        super(NWBFile, self).__init__(*pargs, **pkwargs)
         self.__start_time = datetime.utcnow()
-        self.__file_id = '%s %s' % (self.__filename, self.__start_time.strftime('%Y-%m-%dT%H:%M:%SZ'))
+        # set version
+        version = getargs('version', kwargs)
+        if version is None:
+            version = self.__current_version
+        self.__nwb_version = version
         self.__session_description = getargs('session_description', kwargs)
         self.__identifier = getargs('identifier', kwargs)
         self.__session_start_time = getargs('session_start_time', kwargs)
@@ -141,10 +161,6 @@ class NWBFile(NWBContainer):
     @property
     def nwb_version(self):
         return self.__nwb_version
-
-    @property
-    def filename(self):
-        return self.__filename
 
     @property
     def session_description(self):
@@ -225,9 +241,9 @@ class NWBFile(NWBContainer):
             ep_objs = [self.__get_epoch(epoch)]
 
         if isinstance(timeseries, list):
-            ts_objs = [self.__get_timeseries(ts) for ts in timeseries]
+            ts_objs = [self.__get_timeseries_obj(ts) for ts in timeseries]
         else:
-            ts_objs = [self.__get_timeseries(timeseries)]
+            ts_objs = [self.__get_timeseries_obj(timeseries)]
 
         for ep in ep_objs:
             for ts in ts_objs:
@@ -244,7 +260,7 @@ class NWBFile(NWBContainer):
             raise TypeError(type(epoch))
         return ep
 
-    def __get_timeseries(self, timeseries):
+    def __get_timeseries_obj(self, timeseries):
         if isinstance(timeseries, TimeSeries):
             ts = timeseries
         elif isinstance(timeseries, str):
@@ -267,12 +283,22 @@ class NWBFile(NWBContainer):
         ts, epoch = getargs('ts', 'epoch', kwargs)
         self.__set_timeseries(self.__raw_timeseries, ts, epoch)
 
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
+    def get_raw_timeseries(self, **kwargs):
+        name = getargs('name', kwargs)
+        return self.__get_timeseries(self.__raw_timeseries, name)
+
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
     def add_stimulus(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', kwargs)
         self.__set_timeseries(self.__stimulus, ts, epoch)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
+    def get_stimulus(self, **kwargs):
+        name = getargs('name', kwargs)
+        return self.__get_timeseries(self.__stimulus, name)
 
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
@@ -281,12 +307,24 @@ class NWBFile(NWBContainer):
         ts, epoch = getargs('ts', 'epoch', kwargs)
         self.__set_timeseries(self.__stimulus_template, ts, epoch)
 
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
+    def get_stimulus_template(self, **kwargs):
+        name = getargs('name', kwargs)
+        return self.__get_timeseries(self.__stimulus_template, name)
+
     def __set_timeseries(self, ts_dict, ts, epoch=None):
         ts_dict[ts.name] = ts
         if ts.parent is None:
             ts.parent = self
         if epoch:
             self.set_epoch_timeseries(epoch, ts)
+
+    def __get_timeseries(self, ts_dict, name):
+        ret = ts_dict.get(name)
+        if ret is None:
+            msg = "no TimeSeries named '%s' found" % name
+            raise ValueError(msg)
+        return ret
 
     @docval(*filter(_not_parent, get_docval(ElectrodeGroup.__init__)),
             returns='the electrode group', rtype=ElectrodeGroup)

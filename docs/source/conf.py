@@ -104,8 +104,18 @@ pygments_style = 'sphinx'
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
+def run_apidoc(_):
+    from sphinx.apidoc import main
+    import os
+    import sys
+    out_dir = os.path.dirname(__file__)
+    src_dir = os.path.join(out_dir, '../../src')
+    sys.path.append(src_dir)
+    main(['-f', '-e', '-o', out_dir, src_dir])
+
 def setup(app):
-   app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
+    app.connect('builder-inited', run_apidoc)
+    app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

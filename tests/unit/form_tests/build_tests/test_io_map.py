@@ -1,11 +1,11 @@
-import unittest
+import unittest2 as unittest
 
 from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
 from form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap
 from form import Container
 from form.utils import docval, getargs, get_docval
 
-CORE_NAMESPACE = 'core'
+CORE_NAMESPACE = 'test_core'
 
 class Bar(Container):
 
