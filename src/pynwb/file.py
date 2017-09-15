@@ -44,13 +44,21 @@ class NWBFile(NWBContainer):
                      'epoch_tags',
                      'devices')
 
-    __nwb_version = '1.0.6'
+    __current_version = None
+
+    @classmethod
+    def set_version(cls, version):
+        if cls.__current_version is not None:
+            msg = 'version already set'
+            raise ValueError(msg)
+        cls.__current_version = version
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'session_description', 'type': str, 'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
             {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
             {'name': 'file_create_date', 'type': (list, datetime, str), 'doc': 'the time the file was created and subsequenct modifications made', 'default': None},
+            {'name': 'version', 'type': str, 'doc': 'the NWB version', 'default': None},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str, 'doc': 'general description of the experiment', 'default': None},
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
@@ -71,6 +79,11 @@ class NWBFile(NWBContainer):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
         super(NWBFile, self).__init__(*pargs, **pkwargs)
         self.__start_time = datetime.utcnow()
+        # set version
+        version = getargs('version', kwargs)
+        if version is None:
+            version = self.__current_version
+        self.__nwb_version = version
         self.__session_description = getargs('session_description', kwargs)
         self.__identifier = getargs('identifier', kwargs)
         self.__session_start_time = getargs('session_start_time', kwargs)
