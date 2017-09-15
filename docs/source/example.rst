@@ -30,7 +30,7 @@ argument is the name of the NWB file, and the second argument is a brief descrip
     from datetime import datetime
     from pynwb import NWBFile
 
-    f = NWBFile('the PyNWB tutorial', filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+    f = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
                 experimenter='Dr. Bilbo Baggins',
                 lab='Bag End Labatory',
                 institution='University of Middle Earth at the Shire',
