@@ -108,7 +108,7 @@ def run_apidoc(_):
     from sphinx.apidoc import main
     import os
     import sys
-    main(['-f', '-e', '-o', 'source', '../src'])
+    main(['-f', '-e', '-o', 'source', '../../src'])
 
 def setup(app):
     app.connect('builder-inited', run_apidoc)
