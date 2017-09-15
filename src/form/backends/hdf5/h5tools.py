@@ -240,8 +240,11 @@ def write_link(**kwargs):
     # source will indicate target_builder's location
     if parent.file.filename == target_builder.source:
         link_obj = SoftLink(path)
-    else:
+    elif target_builder.source is not None:
         link_obj = ExternalLink(target_builder.source, path)
+    else:
+        msg = 'cannot create external link to %s' % path
+        raise ValueError(msg)
     parent[name] = link_obj
     return link_obj
 

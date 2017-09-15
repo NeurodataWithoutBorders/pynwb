@@ -2,15 +2,18 @@ from datetime import datetime
 from dateutil.parser import parse as parse_date
 from collections import Iterable
 
-from form.utils import docval, getargs, fmt_docval_args, call_docval_func
+from form.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
 from form import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
 from .epoch import Epoch
 from .ecephys import ElectrodeGroup, Device
+from .icephys import IntracellularElectrode
 from .core import NWBContainer
 
+def _not_parent(arg):
+    return arg['name'] != 'parent'
 @register_class('Image', CORE_NAMESPACE)
 class Image(Container):
     #TODO: Implement this
@@ -106,6 +109,8 @@ class NWBFile(NWBContainer):
         self.__ec_electrodes = self.__to_dict(getargs('ec_electrodes', kwargs))
         self.__devices = self.__to_dict(getargs('devices', kwargs))
 
+        self.__ic_electrodes = self.__to_dict(getargs('ic_electrodes', kwargs))
+
         recommended = [
             'experimenter',
             'experiment_description',
@@ -185,6 +190,10 @@ class NWBFile(NWBContainer):
     def ec_electrodes(self):
         return tuple(self.__ec_electrodes.values())
 
+    @property
+    def ic_electrodes(self):
+        return tuple(self.__ec_electrodes.values())
+
     def is_raw_timeseries(self, ts):
         return self.__exists(ts, self.__raw_timeseries)
 
@@ -232,9 +241,9 @@ class NWBFile(NWBContainer):
             ep_objs = [self.__get_epoch(epoch)]
 
         if isinstance(timeseries, list):
-            ts_objs = [self.__get_timeseries(ts) for ts in timeseries]
+            ts_objs = [self.__get_timeseries_obj(ts) for ts in timeseries]
         else:
-            ts_objs = [self.__get_timeseries(timeseries)]
+            ts_objs = [self.__get_timeseries_obj(timeseries)]
 
         for ep in ep_objs:
             for ts in ts_objs:
@@ -251,7 +260,7 @@ class NWBFile(NWBContainer):
             raise TypeError(type(epoch))
         return ep
 
-    def __get_timeseries(self, timeseries):
+    def __get_timeseries_obj(self, timeseries):
         if isinstance(timeseries, TimeSeries):
             ts = timeseries
         elif isinstance(timeseries, str):
@@ -317,16 +326,7 @@ class NWBFile(NWBContainer):
             raise ValueError(msg)
         return ret
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'channel_description', 'type': Iterable, 'doc': 'array with description for each channel'},
-            {'name': 'channel_location', 'type': Iterable, 'doc': 'array with location description for each channel e.g. "CA1"'},
-            {'name': 'channel_filtering', 'type': Iterable, 'doc': 'array with description of filtering applied to each channel'},
-            {'name': 'channel_coordinates', 'type': Iterable, 'doc': 'xyz-coordinates for each channel. use NaN for unknown dimensions'},
-            {'name': 'channel_impedance', 'type': Iterable, 'doc': 'float array with impedance used on each channel. Can be 2D matrix to store a range'},
-            {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
-            {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
-            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
+    @docval(*filter(_not_parent, get_docval(ElectrodeGroup.__init__)),
             returns='the electrode group', rtype=ElectrodeGroup)
     def create_electrode_group(self, **kwargs):
         """Add an electrode group (e.g. a probe, shank, tetrode).
@@ -335,7 +335,6 @@ class NWBFile(NWBContainer):
         elec_grp = ElectrodeGroup(*eg_args, **eg_kwargs)
         self.set_electrode_group(elec_grp)
         return elec_grp
-
 
     @docval({'name': 'elec_grp', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'})
     def set_electrode_group(self, **kwargs):
@@ -360,9 +359,31 @@ class NWBFile(NWBContainer):
         name = device.name
         self.__devices[name] = device
 
-    @docval({'name': 'name', 'type': (ElectrodeGroup, str), 'doc': 'the name of the electrode group'})
-    def get_electrode_group(self, name):
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the electrode group'})
+    def get_electrode_group(self, **kwargs):
+        name = getargs('name', kwargs)
         return self.__ec_electrodes.get(name)
+
+    @docval(*filter(_not_parent, get_docval(IntracellularElectrode.__init__)),
+            returns='the intracellular electrode', rtype=IntracellularElectrode)
+    def create_intracellular_electrode(self, **kwargs):
+        ie_args, ie_kwargs = fmt_docval_args(IntracellularElectrode.__init__, kwargs)
+        ic_elec = IntracellularElectrode(*ie_args, **ie_kwargs)
+        self.set_intracellular_electrode(ic_elec)
+        return ic_elec
+
+    @docval({'name': 'ic_elec', 'type': IntracellularElectrode, 'doc': 'the IntracellularElectrode object to add to this NWBFile'})
+    def set_intracellular_electrode(self, **kwargs):
+        ic_elec = getargs('ic_elec', kwargs)
+        ic_elec.parent = self
+        name = ic_elec.name
+        self.__ic_electrodes[name] = ic_elec
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the intracellular electrode'})
+    def get_intracellular_electrode(self, **kwargs):
+        '''Retrieve an IntracellularElectrode'''
+        name = getargs('name', kwargs)
+        return self.__ic_electrodes.get(name)
 
     @docval({'name': 'name',  'type': str, 'doc': 'the name of the processing module'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
@@ -374,12 +395,19 @@ class NWBFile(NWBContainer):
         """
         cargs, ckwargs = fmt_docval_args(ProcessingModule.__init__, kwargs)
         ret = ProcessingModule(*cargs, **ckwargs)
-        self.add_processing_module(ret)
+        self.set_processing_module(ret)
         return ret
 
     @docval({'name': 'module',  'type': ProcessingModule, 'doc': 'the processing module to add to this file'})
-    def add_processing_module(self, **kwargs):
+    def set_processing_module(self, **kwargs):
+        '''Add a ProcessingModule to this NWBFile'''
         module = getargs('module', kwargs)
         if module.parent is None:
             module.parent = self
         self.__modules[module.name] = module
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the processing module'})
+    def get_processing_module(self, **kwargs):
+        '''Retrieve a ProcessingModule'''
+        name = getargs('name', kwargs)
+        return self.__modules.get(name)
