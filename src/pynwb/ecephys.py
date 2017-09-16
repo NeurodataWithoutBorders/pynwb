@@ -163,7 +163,8 @@ class EventDetection(NWBContainer):
             {'name': 'detection_method', 'type': str, 'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, as well as relevant values.'},
             {'name': 'source_electricalseries', 'type': ElectricalSeries, 'doc': 'The source electrophysiology data'},
             {'name': 'source_idx', 'type': Iterable, 'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding to time of event. Module description should define what is meant by time of event (e.g., .25msec before action potential peak, zero-crossing time, etc). The index points to each event from the raw data'},
-            {'name': 'times', 'type': Iterable, 'doc': 'Timestamps of events, in Seconds'})
+            {'name': 'times', 'type': Iterable, 'doc': 'Timestamps of events, in Seconds'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'})
     def __init__(self, **kwargs):
         source, detection_method, source_electricalseries, source_idx, times = popargs('source', 'detection_method', 'source_electricalseries', 'source_idx', 'times', kwargs)
         super(EventDetection, self).__init__(source, **kwargs)
@@ -186,7 +187,8 @@ class EventWaveform(NWBContainer):
     __help = "Waveform of detected extracellularly recorded spike events"
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'spike_event_series', 'type': (list, SpikeEventSeries), 'doc': 'spiking event data'})
+            {'name': 'spike_event_series', 'type': (list, SpikeEventSeries), 'doc': 'spiking event data'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventWaveform'})
     def __init__(self, **kwargs):
         source, spike_event_series = popargs('source', 'spike_event_series', kwargs)
         super(EventWaveform, self).__init__(source, **kwargs)
@@ -211,7 +213,8 @@ class Clustering(NWBContainer):
             {'name': 'description', 'type': str, 'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, clusters curated using Klusters, etc).'},
             {'name': 'num', 'type': Iterable, 'doc': 'Cluster number of each event.'},
             {'name': 'peak_over_rms', 'type': Iterable, 'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster(provides a basic clustering metric).'},
-            {'name': 'times', 'type': Iterable, 'doc': 'Times of clustered events, in seconds.'})
+            {'name': 'times', 'type': Iterable, 'doc': 'Times of clustered events, in seconds.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
         source, description, num, peak_over_rms, times = popargs('source', 'description', 'num', 'peak_over_rms', 'times', kwargs)
         super(Clustering, self).__init__(source, **kwargs)
@@ -240,7 +243,8 @@ class ClusterWaveforms(NWBContainer):
             {'name': 'clustering_interface', 'type': Clustering, 'doc': 'the clustered spike data used as input for computing waveforms'},
             {'name': 'waveform_filtering', 'type': str, 'doc': 'filter applied to data before calculating mean and standard deviation'},
             {'name': 'waveform_mean', 'type': Iterable, 'doc': 'the mean waveform for each cluster'},
-            {'name': 'waveform_sd', 'type': Iterable, 'doc': 'the standard deviations of waveforms for each cluster'})
+            {'name': 'waveform_sd', 'type': Iterable, 'doc': 'the standard deviations of waveforms for each cluster'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ClusterWaveforms'})
     def __init__(self, **kwargs):
         source, clustering_interface, waveform_filtering, waveform_mean, waveform_sd = popargs('source', 'clustering_interface', 'waveform_filtering', 'waveform_mean', 'waveform_sd', kwargs)
         super(ClusterWaveforms, self).__init__(source, **kwargs)
@@ -263,7 +267,8 @@ class LFP(NWBContainer):
              "should be noted in the ElectricalSeries")
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'LFP electrophysiology data'})
+            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'LFP electrophysiology data'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'LFP'})
     def __init__(self, **kwargs):
         source, electrical_series = popargs('source', 'electrical_series', kwargs)
         super(LFP, self).__init__(source, **kwargs)
@@ -290,7 +295,8 @@ class FilteredEphys(NWBContainer):
              "be noted in the ElectricalSeries")
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'filtered electrophysiology data'})
+            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'filtered electrophysiology data'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FilteredEphys'})
     def __init__(self, **kwargs):
         source, electrical_series = popargs('source', 'electrical_series', kwargs)
         super(FilteredEphys, self).__init__(source, **kwargs)
@@ -315,7 +321,8 @@ class FeatureExtraction(NWBContainer):
             {'name': 'electrode_group', 'type': ElectrodeGroup, 'doc': 'The electrode groups for each channel from which features were extracted', 'ndim': 1},
             {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'A description for each feature extracted', 'ndim': 1},
             {'name': 'times', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'The times of events that features correspond to', 'ndim': 1},
-            {'name': 'features', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'Features for each channel', 'ndim': 3})
+            {'name': 'features', 'type': (list, tuple, np.ndarray, DataChunkIterator), 'doc': 'Features for each channel', 'ndim': 3},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'})
     def __init__(self, **kwargs):
         # get the inputs
         source, electrode_group, description, times, features = popargs('source', 'electrode_group', 'description', 'times', 'features', kwargs)

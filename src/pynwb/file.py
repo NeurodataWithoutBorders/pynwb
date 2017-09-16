@@ -285,6 +285,9 @@ class NWBFile(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
     def get_raw_timeseries(self, **kwargs):
+        '''
+        Retrieve acquisition TimeSeries data
+        '''
         name = getargs('name', kwargs)
         return self.__get_timeseries(self.__raw_timeseries, name)
 
@@ -297,6 +300,9 @@ class NWBFile(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
     def get_stimulus(self, **kwargs):
+        '''
+        Retrieve stimiulus TimeSeries data
+        '''
         name = getargs('name', kwargs)
         return self.__get_timeseries(self.__stimulus, name)
 
@@ -309,6 +315,9 @@ class NWBFile(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
     def get_stimulus_template(self, **kwargs):
+        '''
+        Retrieve stimiulus template TimeSeries data
+        '''
         name = getargs('name', kwargs)
         return self.__get_timeseries(self.__stimulus_template, name)
 
@@ -329,7 +338,8 @@ class NWBFile(NWBContainer):
     @docval(*filter(_not_parent, get_docval(ElectrodeGroup.__init__)),
             returns='the electrode group', rtype=ElectrodeGroup)
     def create_electrode_group(self, **kwargs):
-        """Add an electrode group (e.g. a probe, shank, tetrode).
+        """
+        Add an electrode group (e.g. a probe, shank, tetrode).
         """
         eg_args, eg_kwargs = fmt_docval_args(ElectrodeGroup.__init__, kwargs)
         elec_grp = ElectrodeGroup(*eg_args, **eg_kwargs)
@@ -381,7 +391,9 @@ class NWBFile(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the intracellular electrode'})
     def get_intracellular_electrode(self, **kwargs):
-        '''Retrieve an IntracellularElectrode'''
+        '''
+        Retrieve an IntracellularElectrode
+        '''
         name = getargs('name', kwargs)
         return self.__ic_electrodes.get(name)
 
@@ -390,9 +402,10 @@ class NWBFile(NWBContainer):
             {'name': 'description',  'type': str, 'doc': 'description of the processing module'},
             returns="a processing module", rtype=ProcessingModule)
     def create_processing_module(self, **kwargs):
-        """ Creates a ProcessingModule object of the specified name. Interfaces can
-            be created by the module and will be stored inside it
-        """
+        '''
+        Creates a ProcessingModule object of the specified name. NWBContainers can
+        be created by the module and will be stored inside it
+        '''
         cargs, ckwargs = fmt_docval_args(ProcessingModule.__init__, kwargs)
         ret = ProcessingModule(*cargs, **ckwargs)
         self.set_processing_module(ret)
@@ -400,7 +413,9 @@ class NWBFile(NWBContainer):
 
     @docval({'name': 'module',  'type': ProcessingModule, 'doc': 'the processing module to add to this file'})
     def set_processing_module(self, **kwargs):
-        '''Add a ProcessingModule to this NWBFile'''
+        '''
+        Add a ProcessingModule to this NWBFile
+        '''
         module = getargs('module', kwargs)
         if module.parent is None:
             module.parent = self
@@ -408,6 +423,8 @@ class NWBFile(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the processing module'})
     def get_processing_module(self, **kwargs):
-        '''Retrieve a ProcessingModule'''
+        '''
+        Retrieve a ProcessingModule
+        '''
         name = getargs('name', kwargs)
         return self.__modules.get(name)

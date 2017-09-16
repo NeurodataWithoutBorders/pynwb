@@ -25,23 +25,40 @@ class ProcessingModule(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
-            {'name': 'containers', 'type': list, 'doc': 'NWBContainers that belong to this ProcessingModule', 'default': None},
+            {'name': 'containers', 'type': (list, dict), 'doc': 'NWBContainers that belong to this ProcessingModule', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         description, containers = popargs('description', 'containers', kwargs)
         super(ProcessingModule, self).__init__(**kwargs)
         self.description = description
-        self.__containers = list() if containers is None else containers
+        self.__containers = self.__to_dict(containers)
+
+    def __to_dict(self, arg):
+        if arg is None:
+            return dict()
+        else:
+            return {i.name: i for i in arg}
 
     @property
     def containers(self):
-        return tuple(self.__containers)
+        return tuple(self.__containers.values())
 
     @docval({'name': 'container', 'type': NWBContainer, 'doc': 'the NWBContainer to add to this Module'})
     def add_container(self, **kwargs):
+        '''
+        Add an NWBContainer to this ProcessingModule
+        '''
         container = getargs('container', kwargs)
-        self.__containers.append(container)
+        self.__containers[container.name] = container
         container.parent = self
+
+    @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
+    def get_container(self, **kwargs):
+        '''
+        Retrieve an NWBContainer from this ProcessingModule
+        '''
+        container_name = getargs('container_name', kwargs)
+        return self.__containers.get(container_name)
 
 @register_class('TimeSeries', CORE_NAMESPACE)
 class TimeSeries(NWBContainer):
