@@ -14,7 +14,7 @@ ROOT_NAME = 'root'
 class HDF5IO(FORMIO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
-            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
+            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'},
             {'name': 'mode', 'type': str, 'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'})
     def __init__(self, **kwargs):
         '''Open an HDF5 file for IO
