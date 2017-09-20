@@ -1,6 +1,11 @@
 .. image:: https://travis-ci.org/NeurodataWithoutBorders/pynwb.svg?branch=dev
     :target: https://travis-ci.org/NeurodataWithoutBorders/pynwb
 
+.. image:: https://circleci.com/gh/NeurodataWithoutBorders/pynwb.svg?style=shield
+    :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb
+
+
+
 NWB Format API
 ========================
 

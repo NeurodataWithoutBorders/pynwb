@@ -6,3 +6,4 @@ python-dateutil
 unittest2
 six
 requests
+tox
