@@ -136,7 +136,7 @@ class GroupBuilderTestCase(unittest.TestCase):
 class TestHDF5Writer(GroupBuilderTestCase):
 
     def setUp(self):
-        self.manager = BuildManager(TypeMap(NamespaceCatalog('core')))
+        self.manager = BuildManager(TypeMap(NamespaceCatalog()))
         self.path = "test_pynwb_io_hdf5.h5"
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)
@@ -197,12 +197,6 @@ class TestHDF5Writer(GroupBuilderTestCase):
     def test_write_context_manager(self):
         with HDF5IO(self.path, self.manager) as writer:
             writer.write_builder(self.builder)
-        self.check_fields()
-
-    def test_default_manager(self):
-        writer = HDF5IO(self.path)
-        writer.write_builder(self.builder)
-        writer.close()
         self.check_fields()
 
     def test_read_builder(self):

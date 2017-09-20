@@ -96,7 +96,7 @@ class TestBase(unittest.TestCase):
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.foo_spec, 'test.yaml')
         self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
-        self.namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
+        self.namespace_catalog = NamespaceCatalog()
         self.namespace_catalog.add_namespace(CORE_NAMESPACE, self.namespace)
         self.type_map = TypeMap(self.namespace_catalog)
         self.type_map.register_container_type(CORE_NAMESPACE, 'Foo', Foo)
