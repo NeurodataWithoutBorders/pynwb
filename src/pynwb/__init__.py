@@ -2,13 +2,16 @@
 for reading and writing data in NWB format
 '''
 import os.path
+from copy import copy
 
 CORE_NAMESPACE = 'core'
 
 from form.spec import NamespaceCatalog
 from form.utils import docval, getargs
 from form.backends.io import FORMIO
+from form.backends.hdf5 import HDF5IO
 from form.validate import ValidatorMap
+from form.build import BuildManager
 
 from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
 
@@ -25,27 +28,52 @@ def __get_resources():
 global __NS_CATALOG
 global __TYPE_MAP
 
-__NS_CATALOG = NamespaceCatalog(CORE_NAMESPACE, NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+__NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-from form.build import TypeMap as __TypeMap
+from form.build import TypeMap as TypeMap
 from form.build import ObjectMapper as __ObjectMapper
+__TYPE_MAP = TypeMap(__NS_CATALOG)
 def get_type_map():
-    ret = __TypeMap(__NS_CATALOG)
+    ret = copy(__TYPE_MAP)
     return ret
 
-# a global type map
-__TYPE_MAP = get_type_map()
-
-def get_global_type_map():
-    #ret = __TypeMap(__NS_CATALOG)
-    ret = __TYPE_MAP
-    return ret
+@docval({'name': 'extensions', 'type': (str, TypeMap, list), 'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps', 'default': None},
+        returns="the namespaces loaded from the given file", rtype=tuple,
+        is_method=False)
+def get_manager(**kwargs):
+    '''
+    Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
+    return a BuildManager that uses the core namespace
+    '''
+    extensions = getargs('extensions', kwargs)
+    type_map = None
+    if extensions is None:
+        type_map = __TYPE_MAP
+    else:
+        type_map = get_type_map()
+        if isinstance(extensions, list):
+            for ext in extensions:
+                if isinstance(ext, str):
+                    type_map.load_namespace(ext)
+                elif isinstance(ext, TypeMap):
+                    type_map.merge(ext)
+                else:
+                    msg = 'extensions must be a list of paths to namespace specs or a TypeMaps'
+                    raise ValueError(msg)
+        elif isinstance(extensions, str):
+            type_map.load_namespace(extensions)
+        elif isinstance(extensions, TypeMap):
+            type_map.merge(extensions)
+    manager = BuildManager(type_map)
+    return manager
 
 @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
 def load_namespaces(**kwargs):
-    '''Load namespaces from file'''
+    '''
+    Load namespaces from file
+    '''
     namespace_path = getargs('namespace_path', kwargs)
     return __TYPE_MAP.load_namespaces(namespace_path)
 
@@ -53,16 +81,6 @@ def load_namespaces(**kwargs):
 __resources = __get_resources()
 if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
-
-# added here for convenience to users
-from form.build import BuildManager as __BuildManager
-@docval({'name': 'type_map', 'type': __TypeMap, 'doc': 'the path to the YAML with the namespace definition', 'default': None},
-        is_method=False)
-def get_build_manager(**kwargs):
-    type_map = getargs('type_map', kwargs)
-    if type_map is None:
-        type_map = __TYPE_MAP
-    return __BuildManager(type_map)
 
 @docval(returns="a tuple of the available namespaces", rtype=tuple)
 def available_namespaces(**kwargs):
@@ -126,6 +144,17 @@ def validate(**kwargs):
     validator = ValidatorMap(__NS_CATALOG.get_namespace(namespace))
     return validator.validate(builder)
 
+class NWBHDF5IO(HDF5IO):
+
+    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
+            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
+            {'name': 'mode', 'type': str, 'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'})
+    def __init__(self, **kwargs):
+        path, manager, mode = popargs('path', 'manager', 'mode', kwargs)
+        if manager is None:
+            manager = get_manager()
+        super(NWBHDF5IO, self).__init__(path, manager, mode=mode)
+
 
 from . import io as __io
 from .core import NWBContainer
@@ -143,5 +172,3 @@ from . import misc
 from . import ogen
 from . import ophys
 from . import retinotopy
-
-__TypeMap.register_default(__TYPE_MAP)
