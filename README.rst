@@ -4,7 +4,8 @@
 .. image:: https://circleci.com/gh/NeurodataWithoutBorders/pynwb.svg?style=shield
     :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb
 
-
+.. image:: https://ci.appveyor.com/api/projects/status/9y808ua44yldy5n3?svg=true
+    :target: https://ci.appveyor.com/project/NeurodataWithoutBorders/pynwb
 
 NWB Format API
 ========================
