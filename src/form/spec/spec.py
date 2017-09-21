@@ -403,7 +403,7 @@ class DtypeSpec(ConstructableDict):
 
 _dataset_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'dtype', 'type': (str, type, list), 'doc': 'The data type of this attribute. Use a list of DtypeSpecs to specify a compound data type.'},
+        {'name': 'dtype', 'type': (str, list), 'doc': 'The data type of this attribute. Use a list of DtypeSpecs to specify a compound data type.'},
         {'name': 'name', 'type': str, 'doc': 'The name of this dataset', 'default': None},
         {'name': 'default_name', 'type': str, 'doc': 'The default name of this dataset', 'default': None},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
@@ -445,8 +445,6 @@ class DatasetSpec(BaseStorageSpec):
 
     @classmethod
     def __get_prec_level(cls, dtype):
-        if isinstance(dtype, type):
-            dtype = dtype.__name__
         m = re.search('[0-9]+', dtype)
         if m is not None:
             prec = int(m.group())
