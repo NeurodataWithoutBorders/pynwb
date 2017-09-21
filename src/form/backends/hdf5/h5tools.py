@@ -1,7 +1,7 @@
 from collections import Iterable
 import numpy as np
 import os.path
-from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink
+from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference
 from six import raise_from, text_type, string_types
 from form.utils import docval, getargs, popargs
 from form.data_utils import DataChunkIterator, get_shape
@@ -149,6 +149,8 @@ __dtypes = {
     "text": special_dtype(vlen=str),
     "uint16": np.uint16,
     "uint8": np.uint8,
+    "ref": special_dtype(ref=Reference),
+    "reference": special_dtype(ref=Reference)
 }
 
 def __resolve_dtype__(dtype, data):
