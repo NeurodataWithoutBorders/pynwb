@@ -8,6 +8,30 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer, set_parents
 
+_et_docval = [
+    {'name': 'id', 'type': ElectrodeGroup, 'doc': 'a unique identifier for the electrode'},
+    {'name': 'x', 'type': float, 'doc': 'the x coordinate of the position'},
+    {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position'},
+    {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position'},
+    {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode'},
+    {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
+    {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
+    {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
+    {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'}
+]
+@register_class('ElectrodeTable', CORE_NAMESPACE)
+class ElectrodeTable(NWBTable):
+
+    @docval({'name': 'data', 'type': Iterable, 'doc': 'the source of the data', 'default': list()},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None})
+    def __init__(self, **kwargs):
+        data, name = getargs('data', 'name', kwargs)
+        super(ElectrodeTable, self).__init__([i['name'] for i in _et_docval])
+
+    @docval(*_et_docval)
+    def add_row(self, **kwargs):
+        super(ElectrodeTable, self).add_row(kwargs)
+
 @register_class('Device', CORE_NAMESPACE)
 class Device(NWBContainer):
     """
