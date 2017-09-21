@@ -1,9 +1,12 @@
 from datetime import datetime
 from dateutil.parser import parse as parse_date
 from collections import Iterable
+from inspect import getmembers, ismodule
 
 from .form.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
 from .form import Container
+from .form import backends
+from .form.backends.io import FORMIO
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -145,6 +148,31 @@ class NWBFile(NWBContainer):
         ]
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
+
+        io_to_wrap = []
+        for name, obj in getmembers(backends):
+            # find the backend modules
+            if ismodule(obj) & hasattr(obj, '__path__'):
+                # find the backend IO classes
+                for name2, obj2 in getmembers(obj):
+                    try:
+                        if issubclass(obj2, FORMIO):
+                            io_to_wrap.append((name, obj2))
+                    except TypeError:
+                        pass
+
+        def add_io(name, IO):
+            def fn(self, *args, **kwargs):
+                if 'manager' not in kwargs:
+                    from pynwb import get_manager
+                    kwargs['manager'] = get_manager()
+                io = IO(*args, **kwargs)
+                io.write(self)
+                io.close()
+            setattr(NWBFile, 'to_{}'.format(name), fn)
+
+        for name, IO in io_to_wrap:
+            add_io(name, IO)
 
     def __to_dict(self, arg):
         if arg is None:
