@@ -1,3 +1,5 @@
+from collections import Iterable
+
 from form.utils import docval, getargs, ExtenderMeta, call_docval_func
 from form import Container
 
@@ -22,6 +24,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     The purpose of this class is to provide a mechanism for representing hierarchical
     relationships in neurodata.
     '''
+
+    __nwbfields__ = tuple()
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
@@ -147,6 +151,6 @@ class NWBTable(NWBData):
     @docval({'name': 'values', 'type': dict, 'doc': 'the values for each column'})
     def add_row(self, **kwargs):
         if not isinstance(self.data, list):
-            msg = 'Cannot append row to %s' $ type(self.data)
+            msg = 'Cannot append row to %s' % type(self.data)
             raise ValueError(msg)
         self.data.append(tuple(values[col] for col in self.columns))

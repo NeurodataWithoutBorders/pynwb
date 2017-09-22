@@ -335,14 +335,14 @@ class NWBFile(NWBContainer):
             raise ValueError(msg)
         return ret
 
-    @docval({'name': 'id', 'type': ElectrodeGroup, 'doc': 'a unique identifier for the electrode'},
-            {'name': 'x', 'type': float, 'doc': 'the x coordinate of the position'})
-            {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position'})
-            {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position'})
-            {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode'})
-            {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'})
-            {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'})
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'})
+    @docval({'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode'},
+            {'name': 'x', 'type': float, 'doc': 'the x coordinate of the position'},
+            {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position'},
+            {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position'},
+            {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode'},
+            {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
+            {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
+            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'})
     def add_electrode(self, **kwargs):
         '''
