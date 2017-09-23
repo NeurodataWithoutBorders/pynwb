@@ -3,11 +3,12 @@ import numpy as np
 import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference
 from six import raise_from, text_type, string_types
+from functools import partial
+
 from form.utils import docval, getargs, popargs
 from form.data_utils import DataChunkIterator, get_shape
-
-from ..io import FORMIO
 from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager
+from ..io import FORMIO
 
 ROOT_NAME = 'root'
 
@@ -141,7 +142,7 @@ class HDF5IO(FORMIO):
         else:
             if len(data) == 0:
                 raise ValueError('cannot determine type for empty data')
-            return get_type(data[0])
+            return self.get_type(data[0])
 
     __dtypes = {
         "float": float,
@@ -162,10 +163,10 @@ class HDF5IO(FORMIO):
         # TODO: These values exist, but I haven't solved them yet
         # binary
         # number
-        dtype = __resolve_dtype_helper__(dtype)
+        dtype = self.__resolve_dtype_helper__(dtype)
         if dtype is None:
             try:
-                dtype = get_type(data)
+                dtype = self.get_type(data)
             except Exception as exc:
                 msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)
                 raise_from(Exception(msg), exc)
@@ -175,13 +176,12 @@ class HDF5IO(FORMIO):
         if dtype is None:
             return None
         elif isinstance(dtype, str):
-            return __dtypes.get(dtype)
+            return self.__dtypes.get(dtype)
         else:
-            return np.dtype([(x['name'], __resolve_dtype_helper__(x['dtype'])) for x in dtype])
+            return np.dtype([(x['name'], self.__resolve_dtype_helper__(x['dtype'])) for x in dtype])
 
     @docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
-            {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Group, indexed by attribute name'},
-            is_method=False)
+            {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Group, indexed by attribute name'})
     def set_attributes(self, **kwargs):
         obj, attributes = getargs('obj', 'attributes', kwargs)
         for key, value in attributes.items():
@@ -197,42 +197,34 @@ class HDF5IO(FORMIO):
 
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
             {'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder to write'},
-    #        {'name': 'name', 'type': str, 'doc': 'the name of the Dataset to write'},
-    #        {'name': 'subgroups', 'type': dict, 'doc': 'a dict containing GroupBuilders for subgroups in this group, indexed by group name'},
-    #        {'name': 'datasets', 'type': dict, 'doc': 'a dict containing DatasetBuilders for datasets in this group, indexed by dataset name'},
-    #        {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Group, indexed by attribute name'},
-    #        {'name': 'links', 'type': dict, 'doc': 'a dict containing LinkBuilders for links in this group, indexed by link name'},
-            returns='the Group that was created', rtype='Group', is_method=False)
+            returns='the Group that was created', rtype='Group')
     def write_group(self, **kwargs):
 
         parent, builder = getargs('parent', 'builder', kwargs)
-        group = parent.create_group(builder)
+        group = parent.create_group(builder.name)
         # write all groups
         subgroups = builder.groups
         if subgroups:
-            for subgroup_name, builder in subgroups.items():
+            for subgroup_name, sub_builder in subgroups.items():
                 # do not create an empty group without attributes or links
-                tmp_links = self.write_group(group, builder)
+                self.write_group(group, sub_builder)
         # write all datasets
         datasets = builder.datasets
         if datasets:
-            for dset_name, builder in datasets.items():
-                self.write_dataset(group, builder)
-                              #dset_name,
-                              #builder.get('data'),
-                              #builder.get('attributes'),
-                              #dtype=builder.dtype)
+            for dset_name, sub_builder in datasets.items():
+                self.write_dataset(group, sub_builder)
         # write all links
         links = builder.links
         if links:
-            for link_name, builder in links.items():
-                self.write_link(builder)
+            for link_name, sub_builder in links.items():
+                self.write_link(group, sub_builder)
         attributes = builder.attributes
         self.set_attributes(group, attributes)
         return group
 
     def __get_path(self, builder):
         curr = builder
+        names = list()
         while curr is not None and curr.name != ROOT_NAME:
             names.append(curr.name)
             curr = curr.parent
@@ -242,11 +234,9 @@ class HDF5IO(FORMIO):
 
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
             {'name': 'builder', 'type': LinkBuilder, 'doc': 'the LinkBuilder to write'},
-    #        {'name': 'name', 'type': str, 'doc': 'the name of the Link to write'},
-    #        {'name': 'target_builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the Builder representing the target'},
-            returns='the Link that was created', rtype='Link', is_method=False)
+            returns='the Link that was created', rtype='Link')
     def write_link(self, **kwargs):
-        parent, builder = getargs('parent', 'name', 'target_builder', kwargs)
+        parent, builder = getargs('parent', 'builder', kwargs)
         name = builder.name
         target_builder = builder.builder
         path = self.__get_path(target_builder)
@@ -270,21 +260,9 @@ class HDF5IO(FORMIO):
                isinstance(data, str) or \
                isinstance(data, frozenset)
 
-    __data_types = (
-        str,
-        DataChunkIterator,
-        float,
-        int,
-        Iterable
-    )
-
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
             {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the DatasetBuilder to write'},
-    #        {'name': 'name', 'type': str, 'doc': 'the name of the Dataset to write'},
-    #        {'name': 'data', 'type': __data_types, 'doc': 'the data object to be written'},
-    #        {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Dataset, indexed by attribute name'},
-    #        {'name': 'dtype', 'type': (type, str, list), 'doc': 'the default dtype to use, if it cannot be inferred', 'default': None},
-            returns='the Dataset that was created', rtype=Dataset, is_method=False)
+            returns='the Dataset that was created', rtype=Dataset)
     def write_dataset(self, **kwargs):
         """ Write a dataset to HDF5
 
@@ -299,9 +277,9 @@ class HDF5IO(FORMIO):
         dset = None
         link = None
         if isinstance(data, str):
-            dset = __scalar_fill__(parent, name, data)
+            dset = self.__scalar_fill__(parent, name, data)
         elif isinstance(data, DataChunkIterator):
-            dset = __chunked_iter_fill__(parent, name, data)
+            dset = self.__chunked_iter_fill__(parent, name, data)
         elif isinstance(data, Dataset):
             data_filename = os.path.abspath(data.file.filename)
             parent_filename = os.path.abspath(parent.file.filename)
@@ -310,14 +288,14 @@ class HDF5IO(FORMIO):
             else:
                 link = SoftLink(data.name)
             parent[name] = link
-        elif isinstance(data, Iterable) and not isinstance_inmemory_array(data):
-            dset = __chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
+        elif isinstance(data, Iterable) and not self.isinstance_inmemory_array(data):
+            dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
         elif hasattr(data, '__len__'):
-            dset = __list_fill__(parent, name, data, dtype_spec=dtype)
+            dset = self.__list_fill__(parent, name, data, dtype_spec=dtype)
         else:
-            dset = __scalar_fill__(parent, name, data, dtype=dtype)
+            dset = self.__scalar_fill__(parent, name, data, dtype=dtype)
         if link is None:
-            set_attributes(dset, attributes)
+            self.set_attributes(dset, attributes)
         return dset
 
     def __selection_max_bounds__(self, selection):
@@ -329,17 +307,18 @@ class HDF5IO(FORMIO):
         elif isinstance(selection, list) or isinstance(selection, np.ndarray):
             return np.nonzero(selection)[0][-1]+1
         elif isinstance(selection, tuple):
-            return tuple([__selection_max_bounds__(i) for i in selection])
+            return tuple([self.__selection_max_bounds__(i) for i in selection])
 
     def __scalar_fill__(self, parent, name, data, dtype=None):
         if not isinstance(dtype, type):
-            dtype = __resolve_dtype__(dtype, data)
+            dtype = self.__resolve_dtype__(dtype, data)
         try:
             func = partial(parent.create_dataset, name, shape=None, dtype=dtype)
             if dtype is Reference:
                 self.add_ref(data, func)
             else:
-                dset = func(data=data)
+                #dset = func(data=data)
+                dset = parent.create_dataset(name, data=data,shape=None, dtype=dtype)
         except Exception as exc:
             msg = "Could not create scalar dataset %s in %s" % (name, parent.name)
             raise_from(Exception(msg), exc)
@@ -366,7 +345,7 @@ class HDF5IO(FORMIO):
             raise_from(Exception("Could not create scalar dataset %s in %s" % (name, parent.name)), exc)
         for chunk_i in data:
             # Determine the minimum array dimensions to fit the chunk selection
-            max_bounds = __selection_max_bounds__(chunk_i.selection)
+            max_bounds = self.__selection_max_bounds__(chunk_i.selection)
             if not hasattr(max_bounds, '__len__'):
                 max_bounds = (max_bounds,)
             # Determine if we need to expand any of the data dimensions
@@ -381,8 +360,8 @@ class HDF5IO(FORMIO):
         return dset
 
     def __list_fill__(self, parent, name, data, dtype_spec=None):
-        if not isinstance(dtype, type):
-            dtype = __resolve_dtype__(dtype_spec, data)
+        if not isinstance(dtype_spec, type):
+            dtype = self.__resolve_dtype__(dtype_spec, data)
         if isinstance(dtype, np.dtype):
             data_shape = (len(data),)
         else:
