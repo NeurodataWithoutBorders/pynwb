@@ -1,7 +1,8 @@
 import unittest
 
 from form.data_utils import DataChunkIterator
-from form.backends.hdf5.h5tools import __chunked_iter_fill__, write_dataset
+from form.backends.hdf5.h5tools import HDF5IO
+from form.build import DatasetBuilder
 
 import h5py
 import tempfile
@@ -14,6 +15,7 @@ class H5IOTest(unittest.TestCase):
     def setUp(self):
         self.test_temp_file = tempfile.NamedTemporaryFile()
         self.f = h5py.File(self.test_temp_file.name, 'w')
+        self.io = HDF5IO(self.test_temp_file.name)
 
     def tearDown(self):
         del self.f
@@ -26,39 +28,39 @@ class H5IOTest(unittest.TestCase):
     ##########################################
     def test__chunked_iter_fill_iterator_matched_buffer_size(self):
         dci = DataChunkIterator(data=range(10), buffer_size=2)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertListEqual(my_dset[:].tolist(), list(range(10)))
 
     def test__chunked_iter_fill_iterator_unmatched_buffer_size(self):
         dci = DataChunkIterator(data=range(10), buffer_size=3)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertListEqual(my_dset[:].tolist(), list(range(10)))
 
     def test__chunked_iter_fill_numpy_matched_buffer_size(self):
         a = np.arange(30).reshape(5,2,3)
         dci = DataChunkIterator(data=a, buffer_size=1)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
     def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):
         a = np.arange(30).reshape(5,2,3)
         dci = DataChunkIterator(data=a, buffer_size=3)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
     def test__chunked_iter_fill_list_matched_buffer_size(self):
         a = np.arange(30).reshape(5,2,3)
         dci = DataChunkIterator(data=a.tolist(), buffer_size=1)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
     def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):
         a = np.arange(30).reshape(5,2,3)
         dci = DataChunkIterator(data=a.tolist(), buffer_size=3)
-        my_dset = __chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
@@ -67,14 +69,14 @@ class H5IOTest(unittest.TestCase):
     ##########################################
     def test_write_dataset_scalar(self):
         a = 10
-        write_dataset(self.f, 'test_dataset', a, {})
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
         dset = self.f['test_dataset']
         self.assertTupleEqual(dset.shape, ())
         self.assertEqual(dset[()], a)
 
     def test_write_dataset_string(self):
         a = 'test string'
-        write_dataset(self.f, 'test_dataset', a, {})
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
         dset = self.f['test_dataset']
         self.assertTupleEqual(dset.shape, ())
         #self.assertEqual(dset[()].decode('utf-8'), a)
@@ -82,7 +84,7 @@ class H5IOTest(unittest.TestCase):
 
     def test_write_dataset_list(self):
         a = np.arange(30).reshape(5,2,3)
-        write_dataset(self.f, 'test_dataset', a.tolist(), {})
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a.tolist(), attributes={}))
         dset = self.f['test_dataset']
         self.assertTrue(np.all(dset[:] == a))
 
@@ -93,7 +95,7 @@ class H5IOTest(unittest.TestCase):
         data['b'][1] = 10.1
         dt = [{'name': 'a', 'dtype': 'int'  , 'doc': 'a column'},
               {'name': 'b', 'dtype': 'float', 'doc': 'b column'}]
-        write_dataset(self.f, 'test_dataset', data, {}, dtype=dt)
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', data, attributes={}, dtype=dt))
         dset = self.f['test_dataset']
         self.assertEqual(dset['a'].tolist(), data['a'].tolist())
         self.assertEqual(dset['b'].tolist(), data['b'].tolist())
@@ -109,26 +111,26 @@ class H5IOTest(unittest.TestCase):
                 {'name': 'd', 'dtype': 'float', 'doc': 'd column'}]
         dt = [{'name': 'a', 'dtype': 'int', 'doc': 'a column'},
               {'name': 'b', 'dtype': b_dt , 'doc': 'b column'}]
-        write_dataset(self.f, 'test_dataset', data, {}, dtype=dt)
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', data, attributes={}, dtype=dt))
         dset = self.f['test_dataset']
         self.assertEqual(dset['a'].tolist(), data['a'].tolist())
         self.assertEqual(dset['b'].tolist(), data['b'].tolist())
 
     def test_write_dataset_iterable(self):
-        write_dataset(self.f, 'test_dataset', range(10), {})
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', range(10), attributes={}))
         dset = self.f['test_dataset']
         self.assertListEqual(dset[:].tolist(), list(range(10)))
 
     def test_write_dataset_iterable_multidimensional_array(self):
         a = np.arange(30).reshape(5, 2, 3)
         aiter = iter(a)
-        write_dataset(self.f, 'test_dataset', aiter, {})
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', aiter, attributes={}))
         dset = self.f['test_dataset']
         self.assertListEqual(dset[:].tolist(), a.tolist())
 
     def test_write_dataset_data_chunk_iterator(self):
         dci = DataChunkIterator(data=np.arange(10), buffer_size=2)
-        write_dataset(self.f, 'test_dataset', dci, {})
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', dci, attributes={}))
         dset = self.f['test_dataset']
         self.assertListEqual(dset[:].tolist(), list(range(10)))
 
