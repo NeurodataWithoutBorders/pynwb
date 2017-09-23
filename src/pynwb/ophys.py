@@ -197,7 +197,7 @@ class ImageSegmentation(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
             {'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentation', 'type': PlaneSegmentation, 'doc': 'ImagePlane class.'})
+            {'name': 'plane_segmentation', 'type': PlaneSegmentation, 'doc': 'PlaneSegmentation with the description of the image plane.'})
     def __init__(self, **kwargs):
         plane_segmentation = popargs('plane_segmentation', kwargs)
         pargs, pkwargs = fmt_docval_args(super(ImageSegmentation, self).__init__, kwargs)
