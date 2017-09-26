@@ -7,14 +7,13 @@ from copy import copy
 CORE_NAMESPACE = 'core'
 
 from form.spec import NamespaceCatalog
-from form.utils import docval, getargs
+from form.utils import docval, getargs, popargs
 from form.backends.io import FORMIO
 from form.backends.hdf5 import HDF5IO
 from form.validate import ValidatorMap
 from form.build import BuildManager
 
 from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
-
 
 __core_ns_file_name = 'nwb.namespace.yaml'
 def __get_resources():
