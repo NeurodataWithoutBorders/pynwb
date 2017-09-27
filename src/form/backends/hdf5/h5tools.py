@@ -8,6 +8,7 @@ from functools import partial
 from form.utils import docval, getargs, popargs
 from form.data_utils import DataChunkIterator, get_shape
 from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager
+from form.spec import DtypeSpec
 from ..io import FORMIO
 
 ROOT_NAME = 'root'
@@ -29,7 +30,7 @@ class HDF5IO(FORMIO):
         self.__built = dict()
         self.__file = None
         self.__read = dict()
-        self.__refs = list()
+        self.__ref_queue = list()
 
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
@@ -129,10 +130,7 @@ class HDF5IO(FORMIO):
         for name, dbldr in f_builder.datasets.items():
             self.write_dataset(self.__file, dbldr)
         self.set_attributes(self.__file, f_builder.attributes)
-        while len(self.__refs):
-            func, target = self.__refs.pop()
-            path = self.__get_path(target)
-            func(self.__file[path].ref)
+        self.__add_refs()
 
     def get_type(self, data):
         if isinstance(data, (text_type, string_types)):
@@ -374,10 +372,68 @@ class HDF5IO(FORMIO):
             new_shape = list(dset.shape)
             new_shape[0] = len(data)
             dset.resize(new_shape)
-        if isinstance(dtype_spec, list):
-            # do some stuff to figure out what data is a reference
-            pass
-        elif dtype_spec == 'reference':
-            pass
-        dset[:] = data
+        func = None
+        if dtype_spec is not None:
+            if isinstance(dtype_spec, list):
+                # do some stuff to figure out what data is a reference
+                refs = list()
+                for i, dts in enumerate(dtype_spec):
+                    if self.__is_ref(dts):
+                        refs.append(i)
+                if len(refs) > 0:
+                    func = partial(self.__resolve_refs, refs, data)
+            elif self.__is_ref(dtype_spec):
+                func = partial(self.__rec_get_ref, data)
+        if func is None:
+            dset[:] = data
+        else:
+            print('queueing reference resolution for', dset.name, ', ', dtype_spec, ' is the dtype_spec')
+            self.__queue_ref(dset, np.s_[:], func)
         return dset
+
+    def __get_ref(self, builder):
+        path = self.__get_path(builder)
+        return self.__file[path].ref
+
+    def __is_ref(self, dtype_spec):
+        return DtypeSpec.is_ref(dtype_spec)
+
+    def __queue_ref(self, dset, sl, func):
+        '''Set aside filling dset with references
+
+        dest[sl] = func()
+
+        Args:
+           dset: the h5py.Dataset that the references need to be added to
+           sl: the np.s_ (slice) object for indexing into dset
+           func: a function to call to return the chunk of data, with
+                 references filled in
+        '''
+        self.__ref_queue.append((dset, sl, func))
+
+    def __add_refs(self):
+        '''Add all references'''
+        while len(self.__ref_queue) > 0:
+            dset, sl, func = self.__ref_queue.pop()
+            dset[sl] = func()
+
+    def __rec_get_ref(self, l):
+        ret = list()
+        for elem in l:
+            if isinstance(elem, list, tuple):
+                ret.append(self.__rec_get_ref(elem))
+            else:
+                ret.append(self.__get_ref(elem))
+        return ret
+
+    def __resolve_refs(self, ref_idx, l):
+        ret = list()
+        for item in l:
+            new_item = list(item)
+            for i in ref_idx:
+                new_item[i] = self.__get_ref(item[i])
+            ret.append(tuple(new_item))
+        return ret
+
+
+
