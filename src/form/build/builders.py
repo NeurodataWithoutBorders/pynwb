@@ -349,7 +349,7 @@ class GroupBuilder(BaseBuilder):
 class DatasetBuilder(BaseBuilder):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
             {'name': 'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
-            {'name': 'dtype', 'type': (type, np.dtype, str), 'doc': 'the datatype of this dataset', 'default': None},
+            {'name': 'dtype', 'type': (type, np.dtype, str, list), 'doc': 'the datatype of this dataset', 'default': None},
             {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name': 'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
             {'name': 'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False},
