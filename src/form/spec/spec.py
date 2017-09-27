@@ -392,6 +392,14 @@ class DtypeSpec(ConstructableDict):
         ''' The data type of this component'''
         return self['dtype']
 
+    @staticmethod
+    @docval({'name': 'spec', 'type': (str, dict), 'doc': 'the spec object to check'}, is_method=False)
+    def is_ref(**kwargs):
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, dict):
+            return 'target_type' in spec
+        return False
+
     @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
