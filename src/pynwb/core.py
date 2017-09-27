@@ -34,7 +34,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         parent, container_source = getargs('parent', 'container_source', kwargs)
         super(NWBBaseType, self).__init__()
         self.__fields = dict()
-        self.__subcontainers = list()
         self.__parent = None
         self.__name = getargs('name', kwargs)
         if parent:
@@ -56,10 +55,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         return self.__fields
 
     @property
-    def subcontainers(self):
-        return self.__subcontainers
-
-    @property
     def parent(self):
         '''The parent NWBContainer of this NWBContainer
         '''
@@ -70,7 +65,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         if self.__parent is not None:
             raise Exception('cannot reassign parent')
         self.__parent = parent_container
-        parent_container.__subcontainers.append(self)
 
     @staticmethod
     def __getter(nwbfield):
@@ -127,7 +121,7 @@ class NWBData(NWBBaseType):
     def __init__(self, **kwargs):
         call_docval_func(super(NWBData, self).__init__, kwargs)
         self.__data = getargs('data', kwargs)
-        super(NWBContainer, self).__init__()
+        super(NWBData, self).__init__()
 
     @property
     def data(self):
