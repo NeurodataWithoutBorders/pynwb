@@ -371,6 +371,12 @@ class DatasetBuilder(BaseBuilder):
         ''' The data stored in the dataset represented by this builder '''
         return self['data']
 
+    @data.setter
+    def data(self, val):
+        if self['data'] is not None:
+            raise AttributeError("'data' already set")
+        self['data'] = val
+
     @property
     def chunks(self):
         ''' Whether or not this dataset is chunked '''
