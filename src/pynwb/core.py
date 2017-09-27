@@ -1,7 +1,7 @@
 from collections import Iterable
 
 from form.utils import docval, getargs, ExtenderMeta, call_docval_func
-from form import Container
+from form import Container, Data
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
@@ -18,7 +18,7 @@ def set_parents(container, parent):
             container.parent = parent
     return ret
 
-class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
+class NWBBaseType(with_metaclass(ExtenderMeta)):
     '''The base class to any NWB types.
 
     The purpose of this class is to provide a mechanism for representing hierarchical
@@ -99,7 +99,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
                 setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
 
 @register_class('NWBContainer', CORE_NAMESPACE)
-class NWBContainer(NWBBaseType):
+class NWBContainer(NWBBaseType, Container):
 
     __nwbfields__ = ('source',
                      'help')
@@ -112,7 +112,7 @@ class NWBContainer(NWBBaseType):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
         self.source = getargs('source', kwargs)
 
-class NWBData(NWBBaseType):
+class NWBData(NWBBaseType, Data):
 
     @docval({'name': 'data', 'type': Iterable, 'doc': 'the source of the data'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
