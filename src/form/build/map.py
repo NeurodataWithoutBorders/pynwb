@@ -3,7 +3,7 @@ import sys
 from collections import OrderedDict
 from six import with_metaclass, raise_from
 from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
-from ..container import Container
+from ..container import Container, Data
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog
 from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
@@ -391,7 +391,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             self.__add_groups(builder, self.__spec.groups, container, manager)
             self.__add_links(builder, self.__spec.links, container, manager)
         else:
-            builder = DatasetBuilder(name, parent=parent, dtype=self.__spec.dtype)
+            if not isinstance(container, Data):
+                msg = "'container' must be of type Data with DatasetSpec"
+                raise ValueError(msg)
+            builder = DatasetBuilder(name, data=container.data, parent=parent, dtype=self.__spec.dtype)
         self.__add_attributes(builder, self.__spec.attributes, container)
         return builder
 
