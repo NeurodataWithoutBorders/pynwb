@@ -29,7 +29,6 @@ class TestNWBContainer(unittest.TestCase):
 
     def test_constructor(self):
         """Test that constructor properly sets parent
-           and subcontainers called with parent
         """
         parent_obj = MyTestClass('test source')
         child_obj = MyTestSubclass('test source', parent=parent_obj)
@@ -42,15 +41,6 @@ class TestNWBContainer(unittest.TestCase):
         child_obj = MyTestSubclass('test source')
         child_obj.parent = parent_obj
         self.assertIs(child_obj.parent, parent_obj)
-
-    def test_set_parent_subcontainer(self):
-        """Test that parent setter properly sets parent subcontainers
-        """
-        parent_obj = MyTestClass('test source')
-        child_obj = MyTestSubclass('test source')
-        child_obj.parent = parent_obj
-        self.assertListEqual(parent_obj.subcontainers, [child_obj])
-
 
 if __name__ == '__main__':
     unittest.main()
