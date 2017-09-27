@@ -6,3 +6,9 @@ class Container(with_metaclass(abc.ABCMeta, object)):
     @classmethod
     def type_hierarchy(cls):
         return cls.__mro__
+
+class Data(Container):
+
+    @abc.abstractproperty
+    def data(self):
+        ...
