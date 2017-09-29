@@ -14,17 +14,7 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         self.dev1 = Device('dev1', 'a test source')
-        channel_description = ['ch1', 'ch2']
-        channel_location = ['lo1', 'lo2']
-        channel_filtering = ['fi1', 'fi2']
-        channel_coordinates = ['co1', 'co2']
-        channel_impedance = ['im1', 'im2']
         return ElectrodeGroup('elec1', 'a test source',
-                                        channel_description,
-                                        channel_location,
-                                        channel_filtering,
-                                        channel_coordinates,
-                                        channel_impedance,
                                         'desc1',
                                         'loc1',
                                         self.dev1)
@@ -42,11 +32,6 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
                                         'help': 'A physical grouping of channels',
                                         'source': 'a test source'},
                             datasets={
-                                'channel_description': DatasetBuilder('channel_description', ['ch1', 'ch2']),
-                                'channel_location': DatasetBuilder('channel_location', ['lo1', 'lo2']),
-                                'channel_filtering': DatasetBuilder('channel_filtering', ['fi1', 'fi2']),
-                                'channel_coordinates': DatasetBuilder('channel_coordinates', ['co1', 'co2']),
-                                'channel_impedance': DatasetBuilder('channel_impedance', ['im1', 'im2']),
                                 'description': DatasetBuilder('description', 'desc1'),
                                 'location': DatasetBuilder('location', 'loc1')
                             },
@@ -64,19 +49,24 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
         ''' Should take an NWBFile object and return the Container'''
         return nwbfile.get_electrode_group(self.container.name)
 
+def make_electrode_table():
+    table = ElectrodeTable()
+    dev1 = Device('dev1', 'a test source')
+    group = ElectrodeGroup('tetrode1', 'a test source', 'tetrode description', 'tetrode location', dev1)
+    table.add_row(1, 1.0, 2.0, 3.0, -1.0, 'CA1', 'none', 'first channel of tetrode', group)
+    table.add_row(2, 1.0, 2.0, 3.0, -2.0, 'CA1', 'none', 'second channel of tetrode', group)
+    table.add_row(3, 1.0, 2.0, 3.0, -3.0, 'CA1', 'none', 'third channel of tetrode', group)
+    table.add_row(4, 1.0, 2.0, 3.0, -4.0, 'CA1', 'none', 'fourth channel of tetrode', group)
+    return table
+
 class TestElectricalSeriesIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        self.dev1 = Device('dev1', 'a test source')
-        channel_description = ('ch1', 'ch2')
-        channel_location = ('lo1', 'lo2')
-        channel_filtering = ('fi1', 'fi2')
-        channel_coordinates = ('co1', 'co2')
-        channel_impedance = ('im1', 'im2')
-        self.elec1 = ElectrodeGroup('elec1', 'a test source', channel_description, channel_location, channel_filtering, channel_coordinates, channel_impedance, 'desc1', 'loc1', self.dev1)
+        table = make_electrode_table()
+        region = ElectrodTableRegion(table, [0,2])
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
-        return ElectricalSeries('test_eS', 'a hypothetical source', data, self.elec1, timestamps=timestamps)
+        return ElectricalSeries('test_eS', 'a hypothetical source', data, region, timestamps=timestamps)
 
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
@@ -91,11 +81,6 @@ class TestElectricalSeriesIO(base.TestMapRoundTrip):
                                         'help': 'A physical grouping of channels',
                                         'source': 'a test source'},
                             datasets={
-                                'channel_description': DatasetBuilder('channel_description', ['ch1', 'ch2']),
-                                'channel_location': DatasetBuilder('channel_location', ['lo1', 'lo2']),
-                                'channel_filtering': DatasetBuilder('channel_filtering', ['fi1', 'fi2']),
-                                'channel_coordinates': DatasetBuilder('channel_coordinates', ['co1', 'co2']),
-                                'channel_impedance': DatasetBuilder('channel_impedance', ['im1', 'im2']),
                                 'description': DatasetBuilder('description', 'desc1'),
                                 'location': DatasetBuilder('location', 'loc1')
                             },
