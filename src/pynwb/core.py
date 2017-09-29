@@ -1,6 +1,6 @@
 from collections import Iterable
 
-from form.utils import docval, getargs, ExtenderMeta, call_docval_func
+from form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
 from form import Container, Data
 
 from . import CORE_NAMESPACE, register_class
@@ -112,6 +112,7 @@ class NWBContainer(NWBBaseType, Container):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
         self.source = getargs('source', kwargs)
 
+@register_class('NWBData', CORE_NAMESPACE)
 class NWBData(NWBBaseType, Data):
 
     @docval({'name': 'data', 'type': Iterable, 'doc': 'the source of the data'},
@@ -144,7 +145,43 @@ class NWBTable(NWBData):
 
     @docval({'name': 'values', 'type': dict, 'doc': 'the values for each column'})
     def add_row(self, **kwargs):
+        values = getargs('values', kwargs)
         if not isinstance(self.data, list):
             msg = 'Cannot append row to %s' % type(self.data)
             raise ValueError(msg)
         self.data.append(tuple(values[col] for col in self.columns))
+
+    @docval({'name': 'kwargs', 'type': dict, 'doc': 'the column to query by'})
+    def query(self, **kwargs):
+        '''
+        Query a table
+        '''
+        raise NotImplementedError('query')
+
+class NWBTableRegion(NWBData):
+    '''
+    A class for representing regions i.e. slices or indices into an NWBTable
+    '''
+
+    @docval({'name': 'table', 'type': NWBTable, 'doc': 'the ElectrodeTable this region applies to'},
+            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'})
+    def __init__(self, **kwargs):
+        table, region = getargs('table', 'region', kwargs)
+        self.__table = table
+        self.__region = region
+
+    @property
+    def table(self):
+        '''The ElectrodeTable this region applies to'''
+        return self.__table
+
+    @property
+    def region(self):
+        '''The indices into table'''
+        return self.__region
+
+    def __len__(self):
+        return len(self.__region)
+
+    def __getitem__(self, idx):
+        return self.__table[self.__region[idx]]
