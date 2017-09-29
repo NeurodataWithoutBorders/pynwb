@@ -209,7 +209,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.maxDiff = None
         io = HDF5IO(self.path, self.manager)
         io.write_builder(self.builder)
-        io.close()
         builder = io.read_builder()
         #print('RECEIVED:', json.dumps(builder,indent=2, cls=HDF5Encoder))
         self.assertBuilderEqual(builder, self.builder)
+        io.close()

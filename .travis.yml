@@ -1,13 +1,25 @@
-language: python
+os: osx
+
+language: generic
+
+branches:
+ only:
+  - dev
+
 sudo: false
 
 python:
 - '2.7'
 - '3.6'
 
+before_install:
+  - brew outdated pyenv || brew upgrade pyenv
+  - pyenv install 3.6.2
+  - pyenv global 3.6.2
+
 install:
-- travis_retry pip install -r requirements.txt
-- travis_retry pip install -e .
+- pip install tox-travis tox-pyenv
 
 script:
-- make test
+- tox -e py27
+- tox -e py36

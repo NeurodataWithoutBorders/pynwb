@@ -1,3 +1,4 @@
+import os
 import unittest
 
 from form.data_utils import DataChunkIterator
@@ -13,9 +14,17 @@ class H5IOTest(unittest.TestCase):
 
     def setUp(self):
         self.test_temp_file = tempfile.NamedTemporaryFile()
-        self.f = h5py.File(self.test_temp_file.name, 'w')
+        # On Windows h5py cannot truncate an open file in write mode.
+        # The temp file will be closed before h5py truncates it
+        # and will be removed during the tearDown step.
+        name = self.test_temp_file.name
+        self.test_temp_file.close()
+        self.f = h5py.File(name, 'w')
 
     def tearDown(self):
+        path = self.f.filename
+        self.f.close()
+        os.remove(path)
         del self.f
         del self.test_temp_file
         self.f = None
@@ -135,4 +144,3 @@ class H5IOTest(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
