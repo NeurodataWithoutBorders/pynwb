@@ -348,7 +348,7 @@ class GroupBuilder(BaseBuilder):
 
 class DatasetBuilder(BaseBuilder):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
+            {'name': 'data', 'type': None, 'doc': 'the data in this dataset', 'default': None},
             {'name': 'dtype', 'type': (type, np.dtype, str, list), 'doc': 'the datatype of this dataset', 'default': None},
             {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name': 'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
@@ -415,3 +415,24 @@ class LinkBuilder(Builder):
     def builder(self):
         ''' The target builder object '''
         return self['builder']
+
+class RegionBuilder(DatasetBuilder):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
+            {'name': 'region', 'type': (slice, tuple, list), 'doc': 'the region i.e. slice or indices into the target Dataset'},
+            {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the Dataset this region applies to'},
+            {'name': 'parent', 'type': GroupBuilder, 'doc': 'the parent builder of this Builder', 'default': None},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
+    def __init__(self, **kwargs):
+        region, builder = getargs('region', 'builder', kwargs)
+        skwargs = {'data': builder}
+        for key in ('name', 'parent', 'source'):
+            skwargs[key] = kwargs[k]
+        skwargs['dtype'] =
+        call_docval_func(super(RegionBuilder, self).__init__, skwargs)
+        self['region'] = region
+
+    @property
+    def region(self):
+        ''' The target builder object '''
+        return self['region']
