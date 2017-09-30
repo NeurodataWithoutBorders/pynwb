@@ -1,4 +1,4 @@
- codecov
- coverage
- tox
- unittest2
+codecov
+coverage
+tox
+unittest2

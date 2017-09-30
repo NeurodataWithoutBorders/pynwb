@@ -15,7 +15,7 @@ jobs:
            command: |
              add-apt-repository ppa:jonathonf/python-3.6
              apt-get update
-             apt-get install -y python-pip python3.6
+             apt-get install -y python-pip python3.6 python3-pip
        - run:
            name: Install tox
            command: |
@@ -28,3 +28,11 @@ jobs:
            name: Run the tests for Python 3.6
            command: |
              tox -e py36
+       - run:
+           name: Report coverage
+           command: |
+             pip3 install -r requirements.txt
+             pip3 install -r requirements-dev.txt
+             pip3 install -e .
+             coverage run --source src test.py
+             codecov
