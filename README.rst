@@ -1,15 +1,23 @@
-.. image:: https://travis-ci.org/NeurodataWithoutBorders/pynwb.svg?branch=dev
-    :target: https://travis-ci.org/NeurodataWithoutBorders/pynwb
+===============================
+pynwb
+===============================
 
-.. image:: https://circleci.com/gh/NeurodataWithoutBorders/pynwb.svg?style=shield
-    :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb
-
-.. image:: https://ci.appveyor.com/api/projects/status/9y808ua44yldy5n3?svg=true
-    :target: https://ci.appveyor.com/project/NeurodataWithoutBorders/pynwb
 
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
+
+Build Status
+------------
+
+.. table::
+
++-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------+
+| Linux                                                                                   | MacOSX                                                                                  | Windows                                                                               |
++=========================================================================================+=========================================================================================+=======================================================================================+
+| .. image:: https://circleci.com/gh/NeurodataWithoutBorders/pynwb.svg?style=shield       | .. image:: https://travis-ci.org/NeurodataWithoutBorders/pynwb.svg?branch=dev           | .. image:: https://ci.appveyor.com/api/projects/status/9y808ua44yldy5n3?svg=true      |
+|     :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb                      |     :target: https://travis-ci.org/NeurodataWithoutBorders/pynwb                        |     :target: https://ci.appveyor.com/project/NeurodataWithoutBorders/pynwb            |
++-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------+
 
 NWB Format API
 ========================
