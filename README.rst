@@ -7,6 +7,8 @@
 .. image:: https://ci.appveyor.com/api/projects/status/9y808ua44yldy5n3?svg=true
     :target: https://ci.appveyor.com/project/NeurodataWithoutBorders/pynwb
 
+Purpose of this PR is to check if Appveyor is triggered when a PR is submitted.
+
 NWB Format API
 ========================
 
