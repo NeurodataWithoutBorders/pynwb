@@ -22,6 +22,7 @@ install:
   - "conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy"
   - activate test-environment
   - pip install -r %APPVEYOR_BUILD_FOLDER%\requirements.txt
+  - pip install -r %APPVEYOR_BUILD_FOLDER%\requirements-dev.txt
   - pip install %APPVEYOR_BUILD_FOLDER%\
 
 test_script:
