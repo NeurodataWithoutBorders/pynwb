@@ -13,6 +13,8 @@ Test that CircleCI is triggered from PR submitted from fork
 
 Tweak AppVeyor permissions
 
+Setup sync of GitHub team with Appveyor one
+
 NWB Format API
 ========================
 
