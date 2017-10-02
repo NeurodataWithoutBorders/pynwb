@@ -9,6 +9,8 @@
 
 Purpose of this PR is to check if Appveyor is triggered when a PR is submitted.
 
+Test that CircleCI is triggered from PR submitted from fork
+
 NWB Format API
 ========================
 
