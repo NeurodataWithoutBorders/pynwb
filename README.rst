@@ -15,6 +15,8 @@ Tweak AppVeyor permissions
 
 Setup sync of GitHub team with Appveyor one
 
+appveyor Webhook (found under Settings->General) was explicitly added to the pywnb project
+
 NWB Format API
 ========================
 
