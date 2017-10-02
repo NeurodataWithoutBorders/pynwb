@@ -27,3 +27,7 @@ install:
 
 test_script:
   - python %APPVEYOR_BUILD_FOLDER%\test.py
+
+after_test:
+  - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py
+  - codecov
