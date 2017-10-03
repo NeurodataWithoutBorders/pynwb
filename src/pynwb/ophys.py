@@ -130,10 +130,10 @@ class TwoPhotonSeries(ImageSeries):
 @register_class('ROI', CORE_NAMESPACE)
 class ROI(NWBContainer):
     """
+    A class for defining a region of interest (ROI)
     """
 
-    __nwbfields__ = ('name',
-                     'roi_description',
+    __nwbfields__ = ('roi_description',
                      'pix_mask',
                      'pix_mask_weight',
                      'img_mask')
@@ -146,7 +146,7 @@ class ROI(NWBContainer):
             {'name': 'img_mask', 'type': Iterable, 'doc': 'ROI mask, represented in 2D ([y][x]) intensity image.'},
             {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
-        name, roi_description, pix_mask, pix_mask_weight, img_mask = popargs('name', 'roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
+        roi_description, pix_mask, pix_mask_weight, img_mask = popargs('roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
         pargs, pkwargs = fmt_docval_args(super(ROI, self).__init__, kwargs)
         super(ROI, self).__init__(*pargs, **pkwargs)
         self.roi_description = roi_description
@@ -159,8 +159,7 @@ class PlaneSegmentation(NWBContainer):
     """
     """
 
-    __nwbfields__ = ('name',
-                     'description',
+    __nwbfields__ = ('description',
                      'roi_list',
                      'imaging_plane',
                      'reference_images')
@@ -172,7 +171,7 @@ class PlaneSegmentation(NWBContainer):
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'link to ImagingPlane group from which this TimeSeries data was generated.'},
             {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
-        name, description, roi_list, imaging_plane, reference_images = popargs('name', 'description', 'roi_list', 'imaging_plane', 'reference_images', kwargs)
+        description, roi_list, imaging_plane, reference_images = popargs('description', 'roi_list', 'imaging_plane', 'reference_images', kwargs)
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
         super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
         self.description = description
