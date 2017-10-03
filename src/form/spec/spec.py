@@ -361,13 +361,41 @@ class BaseStorageSpec(Spec):
             ret['attributes'] = [AttributeSpec.build_spec(sub_spec) for sub_spec in ret['attributes']]
         return ret
 
+_target_type_key = 'target_type'
+
+_ref_args = [
+    {'name': _target_type_key, 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
+    {'name': 'reftype', 'type': str, 'doc': 'the type of references this is i.e. region or object'},
+]
+
+class RefSpec(ConstructableDict):
+
+    __allowable_types = ('object', 'region')
+
+    @docval(*_def_args)
+    def __init__(self, **kwargs):
+        target_type, reftype = getargs(_target_type_key, 'reftype', kwargs)
+        self[_target_type_key] = target_type
+        if reftype not in self.__allowable_types:
+            msg = "reftype must be one of the following: %s" % ", ".join(self.__allowable_types)
+            raise ValueError(msg)
+        self['reftype'] = reftype
+
+    @property
+    def target_type(self):
+        '''The data_type of the target of the reference'''
+        return self[_target_type_key]
+
+    @property
+    def reftype(self):
+        '''The type of reference'''
+        return self['reftype']
+
 _dt_args = [
     {'name': 'name', 'type': str, 'doc': 'the name of this column'},
     {'name': 'doc', 'type': str, 'doc': 'a description about what this data type is'},
-    {'name': 'dtype', 'type': (str, list, dict), 'doc': 'the data type of this column'},
+    {'name': 'dtype', 'type': (str, list, RefSpec), 'doc': 'the data type of this column'},
 ]
-
-_target_type_key = 'target_type'
 
 class DtypeSpec(ConstructableDict):
     '''A class for specifying a component of a compound type'''
@@ -417,12 +445,15 @@ class DtypeSpec(ConstructableDict):
         ret = super(DtypeSpec, cls).build_const_args(spec_dict)
         if isinstance(ret['dtype'], list):
             ret['dtype'] = list(map(cls.build_const_args, ret['dtype']))
+        elif isinstance(ret['dtype'], dict):
+            ret['dtype'] = RefSpec.build_spec(ret['dtype'])
         return ret
+
 
 
 _dataset_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'dtype', 'type': (str, list, dict), 'doc': 'The data type of this attribute. Use a list of DtypeSpecs to specify a compound data type.', 'default': None},
+        {'name': 'dtype', 'type': (str, list, RefSpec), 'doc': 'The data type of this attribute. Use a list of DtypeSpecs to specify a compound data type.', 'default': None},
         {'name': 'name', 'type': str, 'doc': 'The name of this dataset', 'default': None},
         {'name': 'default_name', 'type': str, 'doc': 'The default name of this dataset', 'default': None},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
@@ -453,7 +484,6 @@ class DatasetSpec(BaseStorageSpec):
                 if len(self['dims']) != len(self['shape']):
                     raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
-            DtypeSpec.assertValidDtype(dtype)
             self['dtype'] = dtype
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if default_value is not None:
@@ -543,6 +573,8 @@ class DatasetSpec(BaseStorageSpec):
         if 'dtype' in ret:
             if isinstance(ret['dtype'], list):
                 ret['dtype'] = list(map(cls.dtype_spec_cls().build_spec, ret['dtype']))
+            elif isinstance(ret['dtype'], dict):
+                ret['dtype'] = RefSpec.build_spec(ret['dtype'])
         return ret
 
 _link_args = [
