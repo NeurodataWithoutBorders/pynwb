@@ -35,7 +35,7 @@ class NWBFile(NWBContainer):
                      'session_id',
                      'lab',
                      'institution',
-                     'raw_timeseries',
+                     'acquisition',
                      'stimulus',
                      'stimulus_template',
                      'ec_electrodes',
@@ -67,7 +67,7 @@ class NWBFile(NWBContainer):
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
             {'name': 'institution', 'type': str, 'doc': 'institution(s) where experiment is performed', 'default': None},
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
-            {'name': 'raw_timeseries', 'type': (list, tuple), 'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
+            {'name': 'acquisition', 'type': (list, tuple), 'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'stimulus', 'type': (list, tuple), 'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'stimulus_template', 'type': (list, tuple), 'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'epochs', 'type': (list, tuple), 'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
@@ -100,7 +100,7 @@ class NWBFile(NWBContainer):
         elif isinstance(self.__file_create_date, str):
             self.__file_create_date = [parse_date(self.__file_create_date)]
 
-        self.__raw_timeseries = self.__build_ts(getargs('raw_timeseries', kwargs))
+        self.__acquisition = self.__build_ts(getargs('acquisition', kwargs))
         self.__stimulus = self.__build_ts(getargs('stimulus', kwargs))
         self.__stimulus_template = self.__build_ts(getargs('stimulus_template', kwargs))
 
@@ -175,8 +175,8 @@ class NWBFile(NWBContainer):
         return self.__session_start_time
 
     @property
-    def raw_timeseries(self):
-        return tuple(self.__raw_timeseries.values())
+    def acquisition(self):
+        return tuple(self.__acquisition.values())
 
     @property
     def stimulus(self):
@@ -194,8 +194,8 @@ class NWBFile(NWBContainer):
     def ic_electrodes(self):
         return tuple(self.__ec_electrodes.values())
 
-    def is_raw_timeseries(self, ts):
-        return self.__exists(ts, self.__raw_timeseries)
+    def is_acquisition(self, ts):
+        return self.__exists(ts, self.__acquisition)
 
     def is_stimulus(self, ts):
         return self.__exists(ts, self.__stimulus)
@@ -264,7 +264,7 @@ class NWBFile(NWBContainer):
         if isinstance(timeseries, TimeSeries):
             ts = timeseries
         elif isinstance(timeseries, str):
-            ts = self.__raw_timeseries.get(timeseries,
+            ts = self.__acquisition.get(timeseries,
                     self.__stimulus.get(timeseries,
                         self.__stimulus_template.get(timeseries, None)))
             if not ts:
@@ -279,17 +279,17 @@ class NWBFile(NWBContainer):
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
-    def add_raw_timeseries(self, **kwargs):
+    def add_acquisition(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', kwargs)
-        self.__set_timeseries(self.__raw_timeseries, ts, epoch)
+        self.__set_timeseries(self.__acquisition, ts, epoch)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
-    def get_raw_timeseries(self, **kwargs):
+    def get_acquisition(self, **kwargs):
         '''
         Retrieve acquisition TimeSeries data
         '''
         name = getargs('name', kwargs)
-        return self.__get_timeseries(self.__raw_timeseries, name)
+        return self.__get_timeseries(self.__acquisition, name)
 
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
