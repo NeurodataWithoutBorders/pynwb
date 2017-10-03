@@ -27,7 +27,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
 
     __nwbfields__ = tuple()
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
