@@ -14,6 +14,14 @@ Build Status
 |     :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb                      |     :target: https://travis-ci.org/NeurodataWithoutBorders/pynwb                        |     :target: https://ci.appveyor.com/project/NeurodataWithoutBorders/pynwb            |
 +-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------+
 
+
+Overall Health
+--------------
+
+.. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
+    :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
+
+
 NWB Format API
 ========================
 

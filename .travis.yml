@@ -4,13 +4,13 @@ language: generic
 
 branches:
  only:
-  - dev
+   - dev
 
 sudo: false
 
 python:
-- '2.7'
-- '3.6'
+  - '2.7'
+  - '3.6'
 
 before_install:
   - brew outdated pyenv || brew upgrade pyenv
@@ -18,8 +18,15 @@ before_install:
   - pyenv global 3.6.2
 
 install:
-- pip install tox-travis tox-pyenv
+  - pip install tox-travis tox-pyenv
 
 script:
-- tox -e py27
-- tox -e py36
+  - tox -e py27
+  - tox -e py36
+
+after_success:
+  - pip install -r requirements.txt
+  - pip install -r requirements-dev.txt
+  - pip install -e .
+  - coverage run --source src test.py
+  - codecov
