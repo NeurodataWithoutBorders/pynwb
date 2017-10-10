@@ -9,8 +9,13 @@ from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog, RefSpec
 from ..spec.spec import BaseStorageSpec
+<<<<<<< 2ff4a14de0a25db66d6bce1cd906ddabcc56186b:src/pynwb/form/build/map.py
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, RegionBuilder
 
+=======
+from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
+import warnings
+>>>>>>> major changes to map to get a file read in:src/form/build/map.py
 
 class BuildManager(object):
     """
@@ -596,6 +601,18 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 kwargs[argname] = val
             else:
                 args.append(val)
+        
+        warnings.warn('HACK')
+        if args[0] in ['natural_movie_one_image_stack', 'natural_scenes_image_stack']:
+            kwargs['starting_time'] = -1.
+            kwargs['rate'] = -1.
+        elif args[0] == '2p_image_series':
+            kwargs['data'] = []
+            kwargs['unit'] = 'None'
+
+        if builder.name == 'root':
+            kwargs['session_start_time'] = args[2]
+
         try:
             obj = cls(*args, **kwargs)
         except Exception as ex:
@@ -801,17 +818,101 @@ class TypeMap(object):
         return ret
 
     def get_builder_dt(self, builder):
+<<<<<<< 2ff4a14de0a25db66d6bce1cd906ddabcc56186b:src/pynwb/form/build/map.py
         ret = builder.attributes.get(self.__ns_catalog.group_spec_cls.type_key())
         if ret is None:
             msg = "builder '%s' does not have a data_type" % builder.name
             raise ValueError(msg)
+=======
+        tmp = self.__ns_catalog
+        tmp2 = tmp.group_spec_cls
+        tmp3 = tmp2.type_key()
+        print  'builder._Builder__name', builder._Builder__name
+        ret = builder.get(tmp3)
+        if ret is None:
+
+            if builder.name == 'root':
+                warnings.warn('HACK: setting root neurodata_type to NWBFile')
+                ret = 'NWBFile'
+            elif builder.name in ['field_of_view', 
+                                  'bits_per_pixel', 
+                                  'dimension', 
+                                  'format', 
+                                  'frame_duration',
+                                  'indexed_timeseries_path',
+                                  'num_samples',
+                                  'features',
+                                  'imaging_plane_1',
+                                  'imaging_plane',
+                                  'display monitor',
+                                  '2-photon microscope',
+                                  'eye-tracking camera',
+                                  'fov',
+                                  'ophys_experiment_id',
+                                  'ophys_experiment_name',
+                                  'session_type',
+                                  'generated_by',
+                                  'experiment_container_id',
+                                  'targeted_structure',
+                                  'For more information',
+                                  'specimen_name',
+                                  'pixel_size']:
+                warnings.warn('HACK: setting field_of_view neurodata_type to NWBContainer')
+                ret = 'NWBContainer'
+            else:
+                msg = "builder '%s' is does not have a data_type" % builder.name
+                raise ValueError(msg)
+>>>>>>> major changes to map to get a file read in:src/form/build/map.py
         return ret
 
     def get_builder_ns(self, builder):
         ret = builder.attributes.get('namespace')
         if ret is None:
+<<<<<<< 2ff4a14de0a25db66d6bce1cd906ddabcc56186b:src/pynwb/form/build/map.py
             msg = "builder '%s' does not have a namespace" % builder.name
             raise ValueError(msg)
+=======
+
+            if builder.name in ['root', 
+                                'natural_movie_one_image_stack', 
+                                'field_of_view', 
+                                'bits_per_pixel', 
+                                'dimension', 
+                                'format', 
+                                'natural_scenes_image_stack', 
+                                'natural_movie_one_stimulus',
+                                'frame_duration',
+                                'indexed_timeseries_path',
+                                'num_samples',
+                                'indexed_timeseries',
+                                'natural_scenes_stimulus',
+                                'static_gratings_stimulus',
+                                'features',
+                                'spontaneous_stimulus',
+                                'brain_observatory_pipeline',
+                                'imaging_plane_1',
+                                'imaging_plane',
+                                'display monitor',
+                                '2-photon microscope',
+                                'eye-tracking camera',
+                                'fov',
+                                'ophys_experiment_id',
+                                'ophys_experiment_name',
+                                'session_type',
+                                'generated_by',
+                                'experiment_container_id',
+                                'targeted_structure',
+                                'For more information',
+                                'specimen_name',
+                                  'pixel_size',
+                                  '2p_image_series']:
+                warnings.warn('HACK: setting namespace to core')
+                ret = 'core'
+            else:
+                msg = "builder '%s' is does not have a namespace" % builder.name
+                raise ValueError(msg)
+
+>>>>>>> major changes to map to get a file read in:src/form/build/map.py
         return ret
 
     @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder object to get the corresponding Container class for'})
