@@ -13,6 +13,7 @@ python:
   - '3.6'
 
 before_install:
+  - brew update
   - brew outdated pyenv || brew upgrade pyenv
   - pyenv install 3.6.2
   - pyenv global 3.6.2
@@ -23,6 +24,8 @@ install:
 script:
   - tox -e py27
   - tox -e py36
+  - tox -e py27 recreate --installpkg dist/pynwb-0.1-py2-none-any.whl
+  - tox -e py36 recreate --installpkg dist/pynwb-0.1-py3-none-any.whl
 
 after_success:
   - pip install -r requirements.txt
