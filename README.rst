@@ -29,6 +29,11 @@ A Python API for working with Neurodata stored in the NWB Format
 
 -`Learn more <http://www.nwb.org/>`_.
 
+Code of Conduct
+=======================
+
+This project and everyone participating in it is governed by our [code of conduct guidelines](docs/CODE_OF_CONDUCT.md. By participating, you are expected to uphold this code.
+
 Contributing
 =======================
 Readme
