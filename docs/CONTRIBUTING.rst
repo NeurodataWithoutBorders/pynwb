@@ -43,6 +43,16 @@ Did you fix whitespace, format code, or make a purely cosmetic patch in source c
 
 Source code changes that are purely cosmetic in nature and do not add anything substantial to the stability, functionality, or testability will generally not be accepted unless they have been approved beforehand. One of the main reasons is that there are a lot of hidden cost in addition to writing the code itself, and with the limited resources of the project, we need to optimize developer time. E.g,. someone needs to test and review PRs, backporting of bug fixes gets harder, it creates noise and pollutes the git repo and many other cost factors.
 
+Do you have questions about NWB:N?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Try the general NWB:N google group, which is intended to allow users to help users.
+
+Informal discussions between developers, users, and team?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The https://nwb-users.slack.com slack is currently used  mainly for internal discussions between developers, users, and teams.
+
 
 .. _sec-contributing:
 
@@ -73,7 +83,6 @@ From your local copy directory, use the following commands.
     * Include the relevant issue number if applicable.
     * Before submitting, please ensure that the code follows the standard coding style of the repsective repository.
     * **NOTE:** Contributed branches will be removed by the development team after the merge is complete and should, hence, not be used after the pull request is complete.
-
 
 
 .. _sec-issue-labels:
@@ -124,12 +133,12 @@ All documentations is written in reStrcuturedText (RST) using Sphinx.
 Format Specification Styleguide
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Coming soon
+**Coming soon**
 
 Python Code Styleguide
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Coming soon
+**Coming soon**
 
 
 
