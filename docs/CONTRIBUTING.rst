@@ -1,15 +1,6 @@
 How to contribute to NWB:N software and documents
 =================================================
 
-**Table of contents**
-
-* :ref:`code-of-conduct`
-* :ref:`sec-contribution-types`
-* :ref:`sec-contributing`
-* :ref:`sec-issue-labels`
-* :ref:`sec-styleguides`
-
-
 .. _sec-code-of-conduct:
 
 Code of Conduct
@@ -42,9 +33,9 @@ Did you find a bug? or Do you intend to add a new feature or change an existing 
 
 * NWB:N is currently being developed primarily by staff at scientific research institutions and industry, most of which work on many different research projects. Please be patient, if our development team may not be able to respond immediately to your issues. In particular issues that belong to later project milestones may not be reviewed or processed until work on that milestone begins.
 
-Did you write a patch that fixes a bug?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-See the :ref:`sec-contributing`
+Did you write a patch that fixes a bug or implements a new feature?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+See the ``Contributing Patches and Changes`` section below for details.
 
 
 Did you fix whitespace, format code, or make a purely cosmetic patch in source code?
