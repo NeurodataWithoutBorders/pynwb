@@ -372,7 +372,7 @@ class RefSpec(ConstructableDict):
 
     __allowable_types = ('object', 'region')
 
-    @docval(*_def_args)
+    @docval(*_ref_args)
     def __init__(self, **kwargs):
         target_type, reftype = getargs(_target_type_key, 'reftype', kwargs)
         self[_target_type_key] = target_type
