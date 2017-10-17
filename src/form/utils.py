@@ -164,6 +164,19 @@ def get_docval(func):
     else:
         return tuple()
 
+#def docval_wrap(func, is_method=True):
+#    if is_method:
+#        @docval(*get_docval(func))
+#        def method(self, **kwargs):
+#
+#            return call_docval_args(func, kwargs)
+#        return method
+#    else:
+#        @docval(*get_docval(func))
+#        def static_method(**kwargs):
+#            return call_docval_args(func, kwargs)
+#        return method
+
 def fmt_docval_args(func, kwargs):
     ''' Separate positional and keyword arguments
 
@@ -176,7 +189,8 @@ def fmt_docval_args(func, kwargs):
         for arg in func_docval[__docval_args_loc]:
             val = kwargs.get(arg['name'])
             if 'default' in arg:
-                ret_kwargs[arg['name']] = val
+                if val is not None:
+                    ret_kwargs[arg['name']] = val
             else:
                 ret_args.append(val)
     return (ret_args, ret_kwargs)
