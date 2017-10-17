@@ -105,7 +105,7 @@ class NWBContainer(NWBBaseType, Container):
                      'help')
 
     @docval({'name': 'source', 'type': str, 'doc': 'a description of where this NWBContainer came from'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
@@ -115,14 +115,15 @@ class NWBContainer(NWBBaseType, Container):
 @register_class('NWBData', CORE_NAMESPACE)
 class NWBData(NWBBaseType, Data):
 
-    @docval({'name': 'data', 'type': Iterable, 'doc': 'the source of the data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
+    __nwbfields__ = ('help',)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'data', 'type': Iterable, 'doc': 'the source of the data'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBData, self).__init__, kwargs)
         self.__data = getargs('data', kwargs)
-        super(NWBData, self).__init__()
 
     @property
     def data(self):
@@ -131,8 +132,8 @@ class NWBData(NWBBaseType, Data):
 class NWBTable(NWBData):
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': Iterable, 'doc': 'the source of the data', 'default': list()},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
@@ -158,17 +159,26 @@ class NWBTable(NWBData):
         '''
         raise NotImplementedError('query')
 
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx]
+
 class NWBTableRegion(NWBData):
     '''
     A class for representing regions i.e. slices or indices into an NWBTable
     '''
 
-    @docval({'name': 'table', 'type': NWBTable, 'doc': 'the ElectrodeTable this region applies to'},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'table', 'type': NWBTable, 'doc': 'the ElectrodeTable this region applies to'},
             {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'})
     def __init__(self, **kwargs):
         table, region = getargs('table', 'region', kwargs)
         self.__table = table
         self.__region = region
+        name = getargs('name', kwargs)
+        super(NWBTableRegion, self).__init__(name, region)
 
     @property
     def table(self):
