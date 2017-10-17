@@ -32,34 +32,12 @@ A Python API for working with Neurodata stored in the NWB Format
 Code of Conduct
 =======================
 
-This project and everyone participating in it is governed by our `code of conduct guidelines <docs/CODE_OF_CONDUCT.md>`_ . By participating, you are expected to uphold this code.
+This project and everyone participating in it is governed by our `code of conduct guidelines <docs/CODE_OF_CONDUCT.rst>`_ . By participating, you are expected to uphold this code.
 
 Contributing
 =======================
-Readme
-------------
-To contribute to PyNWB, you must submit your changes to ``dev`` branch via a `Pull Request <https://help.github.com/articles/creating-a-pull-request>`_.
 
-From your local copy directory, use the following comands.
-
-1) First create a new branch to work on
-
-.. code-block:: bash
-
-    $ git checkout -b <new_branch>
-
-2) Make your changes.
-
-3) Push your feature branch to origin (i.e. github)
-
-.. code-block:: bash
-
-    $ git push origin <new_branch>
-
-4) Once you have tested and finalized your changes, create a pull request to dev.
-
-   - **When creating the pull request, please check the box to close the branch after your pull request is merged if you do not intend to do any more development on that branch.**
-
+For details on how to contribute to PyNWB see our `contribution guidelines <docs/CONTRIBUTING.rst>`_ .
 
 LICENSE
 =======================
