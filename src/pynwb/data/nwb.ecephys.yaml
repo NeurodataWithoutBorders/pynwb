@@ -350,6 +350,11 @@ datasets:
         target_type: ElectrodeGroup
         reftype: object
     doc: a reference to the ElectrodeGroup this electrode is a part of
+  attributes:
+    - doc: Value is 'a table for storing data about extracellular electrodes'
+      dtype: text
+      name: help
+      value: a table for storing data about extracellular electrodes
   neurodata_type_inc: NWBData
   neurodata_type_def: ElectrodeTable
 - doc: 'a dataset for subsetting the ElectrodeTables'
@@ -362,3 +367,7 @@ datasets:
     - name: description
       doc: 'a description of this subset of electrodes'
       dtype: utf8
+    - doc: Value is 'a subset (i.e. slice or region) of an ElectrodeTable'
+      dtype: text
+      name: help
+      value: a subset (i.e. slice or region) of an ElectrodeTable
