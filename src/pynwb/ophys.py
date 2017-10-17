@@ -194,9 +194,9 @@ class ImageSegmentation(NWBContainer):
 
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
-            {'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentation', 'type': PlaneSegmentation, 'doc': 'PlaneSegmentation with the description of the image plane.'})
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
+            {'name': 'plane_segmentation', 'type': PlaneSegmentation, 'doc': 'PlaneSegmentation with the description of the image plane.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ImageSegmentation'})
     def __init__(self, **kwargs):
         plane_segmentation = popargs('plane_segmentation', kwargs)
         pargs, pkwargs = fmt_docval_args(super(ImageSegmentation, self).__init__, kwargs)
@@ -257,7 +257,8 @@ class DfOverF(NWBContainer):
     _help = "Df/f over time of one or more ROIs. TimeSeries names should correspond to imaging plane names"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'})
+            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'DfOverF'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(DfOverF, self).__init__, kwargs)
@@ -276,7 +277,8 @@ class Fluorescence(NWBContainer):
     _help = "Fluorescence over time of one or more ROIs. TimeSeries names should correspond to imaging plane names."
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'})
+            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Fluorescence'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(Fluorescence, self).__init__, kwargs)
