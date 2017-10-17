@@ -46,7 +46,7 @@ Source code changes that are purely cosmetic in nature and do not add anything s
 Do you have questions about NWB:N?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Try the general NWB:N google group, which is intended to allow users to help users.
+Coming Soon (Google Group?)
 
 Informal discussions between developers, users, and team?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
