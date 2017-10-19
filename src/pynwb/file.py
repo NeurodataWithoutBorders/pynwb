@@ -8,7 +8,7 @@ from form import Container
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
 from .epoch import Epoch
-from .ecephys import ElectrodeGroup, Device
+from .ecephys import ElectrodeTable, ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .core import NWBContainer
 
@@ -39,6 +39,7 @@ class NWBFile(NWBContainer):
                      'stimulus',
                      'stimulus_template',
                      'ec_electrodes',
+                     'ec_electrode_groups',
                      'ic_electrodes',
                      'imaging_planes',
                      'optogenetic_sites',
@@ -72,7 +73,8 @@ class NWBFile(NWBContainer):
             {'name': 'stimulus_template', 'type': (list, tuple), 'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'epochs', 'type': (list, tuple), 'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
             {'name': 'modules', 'type': (list, tuple), 'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
-            {'name': 'ec_electrodes', 'type': (list, tuple), 'doc': 'ElectrodeGroups that belong to this NWBFile', 'default': None},
+            {'name': 'ec_electrodes', 'type': (ElectrodeTable, Iterable), 'doc': 'the ElectrodeTable that belongs to this NWBFile', 'default': None},
+            {'name': 'ec_electrode_groups', 'type': Iterable, 'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
             {'name': 'ic_electrodes', 'type': (list, tuple), 'doc': 'IntracellularElectrodes that belong to this NWBFile', 'default': None},
             {'name': 'imaging_planes', 'type': (list, tuple), 'doc': 'ImagingPlanes that belong to this NWBFile', 'default': None},
             {'name': 'optogenetic_sites', 'type': (list, tuple), 'doc': 'OptogeneticStimulusSites that belong to this NWBFile', 'default': None},
@@ -80,6 +82,7 @@ class NWBFile(NWBContainer):
     )
     def __init__(self, **kwargs):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
+        pkwargs['name'] = 'root'
         super(NWBFile, self).__init__(*pargs, **pkwargs)
         self.__start_time = datetime.utcnow()
         # set version
@@ -106,10 +109,13 @@ class NWBFile(NWBContainer):
 
         self.__modules = self.__to_dict(getargs('modules', kwargs))
         self.__epochs = self.__to_dict(getargs('epochs', kwargs))
-        self.__ec_electrodes = self.__to_dict(getargs('ec_electrodes', kwargs))
+        self.__ec_electrodes = getargs('ec_electrodes', kwargs)
+        self.__ec_electrode_groups = self.__to_dict(getargs('ec_electrode_groups', kwargs))
         self.__devices = self.__to_dict(getargs('devices', kwargs))
 
         self.__ic_electrodes = self.__to_dict(getargs('ic_electrodes', kwargs))
+
+        self.__imaging_planes = self.__to_dict(getargs('imaging_planes', kwargs))
 
         recommended = [
             'experimenter',
@@ -188,11 +194,25 @@ class NWBFile(NWBContainer):
 
     @property
     def ec_electrodes(self):
-        return tuple(self.__ec_electrodes.values())
+        return self.__ec_electrodes
+
+    @docval(*get_docval(ElectrodeTable.add_row))
+    def add_electrode(self, **kwargs):
+        if self.__ec_electrodes is None:
+            self.__ec_electrodes = ElectrodeTable('electrodes')
+        call_docval_func(self.__ec_electrodes.add_row, kwargs)
+
+    @property
+    def ec_electrode_groups(self):
+        return tuple(self.__ec_electrode_groups.values())
 
     @property
     def ic_electrodes(self):
-        return tuple(self.__ec_electrodes.values())
+        return tuple(self.__ic_electrodes.values())
+
+    @property
+    def imaging_planes(self):
+        return tuple(self.__imaging_planes.values())
 
     def is_acquisition(self, ts):
         return self.__exists(ts, self.__acquisition)
@@ -273,9 +293,6 @@ class NWBFile(NWBContainer):
             raise TypeError(type(timeseries))
         return ts
 
-    def link_timeseries(self, ts):
-        pass
-
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
             {'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
@@ -335,20 +352,12 @@ class NWBFile(NWBContainer):
             raise ValueError(msg)
         return ret
 
-    @docval({'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode'},
-            {'name': 'x', 'type': float, 'doc': 'the x coordinate of the position'},
-            {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position'},
-            {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position'},
-            {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode'},
-            {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
-            {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'})
+    @docval(*get_docval(ElectrodeTable.add_row))
     def add_electrode(self, **kwargs):
         '''
         Add an electrode to this NWBFile
         '''
-        call_docval_func(self.electrodes.add, kwargs)
+        call_docval_func(self.electrodes.add_row, kwargs)
 
     @docval(*filter(_not_parent, get_docval(ElectrodeGroup.__init__)),
             returns='the electrode group', rtype=ElectrodeGroup)
@@ -361,12 +370,20 @@ class NWBFile(NWBContainer):
         self.set_electrode_group(elec_grp)
         return elec_grp
 
-    @docval({'name': 'elec_grp', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'})
+    @docval({'name': 'electrode_grp', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'})
     def set_electrode_group(self, **kwargs):
-        elec_grp = getargs('elec_grp', kwargs)
+        elec_grp = getargs('electrode_grp', kwargs)
         elec_grp.parent = self
         name = elec_grp.name
-        self.__ec_electrodes[name] = elec_grp
+        self.__ec_electrode_groups[name] = elec_grp
+
+    @docval({'name': 'electrode_table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable for this file'})
+    def set_electrode_table(self, **kwargs):
+        if self.__ec_electrodes is not None:
+            msg = 'ElectrodeTable already exists, cannot overwrite'
+            raise ValueError(msg)
+        electrode_table = getargs('electrode_table', kwargs)
+        self.__ec_electrodes = electrode_table
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
@@ -387,7 +404,7 @@ class NWBFile(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the electrode group'})
     def get_electrode_group(self, **kwargs):
         name = getargs('name', kwargs)
-        return self.__ec_electrodes.get(name)
+        return self.__ec_electrode_groups.get(name)
 
     @docval(*filter(_not_parent, get_docval(IntracellularElectrode.__init__)),
             returns='the intracellular electrode', rtype=IntracellularElectrode)

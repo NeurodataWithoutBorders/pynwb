@@ -1,7 +1,7 @@
 from collections import Iterable
 
 from form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
-from form import Container, Data
+from form import Container, Data, DataRegion
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
@@ -118,7 +118,7 @@ class NWBData(NWBBaseType, Data):
     __nwbfields__ = ('help',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': Iterable, 'doc': 'the source of the data'},
+            {'name': 'data', 'type': (Iterable, Data), 'doc': 'the source of the data'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
@@ -165,7 +165,8 @@ class NWBTable(NWBData):
     def __getitem__(self, idx):
         return self.data[idx]
 
-class NWBTableRegion(NWBData):
+# diamond inheritence
+class NWBTableRegion(NWBData, DataRegion):
     '''
     A class for representing regions i.e. slices or indices into an NWBTable
     '''
@@ -178,7 +179,7 @@ class NWBTableRegion(NWBData):
         self.__table = table
         self.__region = region
         name = getargs('name', kwargs)
-        super(NWBTableRegion, self).__init__(name, region)
+        super(NWBTableRegion, self).__init__(name, table)
 
     @property
     def table(self):
