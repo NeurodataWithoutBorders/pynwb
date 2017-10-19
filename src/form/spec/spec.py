@@ -391,6 +391,10 @@ class RefSpec(ConstructableDict):
         '''The type of reference'''
         return self['reftype']
 
+    @docval(rtype=bool, returns='True if this RefSpec specifies a region reference, False otherwise')
+    def is_region(self):
+        return self['reftype'] == 'region'
+
 _dt_args = [
     {'name': 'name', 'type': str, 'doc': 'the name of this column'},
     {'name': 'doc', 'type': str, 'doc': 'a description about what this data type is'},
