@@ -110,6 +110,7 @@ groups:
       and all timestamps are relative to experiment start time.'
     dtype: float64!
     name: timestamps
+    quantity: '?'
     shape:
     - null
   doc: General purpose time series.
