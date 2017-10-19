@@ -357,7 +357,7 @@ datasets:
       value: a table for storing data about extracellular electrodes
   neurodata_type_inc: NWBData
   neurodata_type_def: ElectrodeTable
-- doc: 'a dataset for subsetting the ElectrodeTables'
+- doc: 'a dataset for subsetting ElectrodeTables'
   neurodata_type_def: ElectrodeTableRegion
   neurodata_type_inc: NWBData
   dtype:
