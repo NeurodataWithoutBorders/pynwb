@@ -74,7 +74,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
     def setUpContainer(self):
         container = NWBFile('a test source', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
         ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
-        container.add_raw_timeseries(ts)
+        container.add_acquisition(ts)
         mod = container.create_processing_module('test_module', 'a test source for a ProcessingModule', 'a test module')
         mod.add_container(Clustering("an example source for Clustering", "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10,61,10))))
         return container
@@ -95,7 +95,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         hdf5io.close()
         container = hdf5io.read()
         self.assertIsInstance(container, NWBFile)
-        raw_ts = container.raw_timeseries
+        raw_ts = container.acquisition
         self.assertEqual(len(raw_ts), 1)
         self.assertIsInstance(raw_ts[0], TimeSeries)
         hdf5io.close()
