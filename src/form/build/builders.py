@@ -4,7 +4,7 @@ import itertools as _itertools
 import posixpath as _posixpath
 from abc import ABCMeta
 
-from form.utils import docval, getargs
+from form.utils import docval, getargs, call_docval_func, fmt_docval_args
 from six import with_metaclass
 
 class Builder(with_metaclass(ABCMeta, dict)):
@@ -198,8 +198,10 @@ class GroupBuilder(BaseBuilder):
             returns='the DatasetBuilder object for the dataset', rtype='DatasetBuilder')
     def add_dataset(self, **kwargs):
         ''' Create a dataset and add it to this group '''
-        name = kwargs.pop('name')
-        builder = DatasetBuilder(name, self, **kwargs)
+        pargs, pkwargs = fmt_docval_args(DatasetBuilder.__init__, kwargs)
+        pkwargs['parent'] = self
+        pkwargs['source'] = self.source
+        builder = DatasetBuilder(*pargs, **pkwargs)
         self.set_dataset(builder)
         return builder
 
@@ -347,6 +349,9 @@ class GroupBuilder(BaseBuilder):
                                 super(GroupBuilder, self).__getitem__(GroupBuilder.__link).values())
 
 class DatasetBuilder(BaseBuilder):
+    OBJECT_REF_TYPE = 'object'
+    REGION_REF_TYPE = 'region'
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
             {'name': 'data', 'type': None, 'doc': 'the data in this dataset', 'default': None},
             {'name': 'dtype', 'type': (type, np.dtype, str, list), 'doc': 'the datatype of this dataset', 'default': None},
@@ -363,6 +368,8 @@ class DatasetBuilder(BaseBuilder):
         self['attributes'] = _copy.deepcopy(attributes)
         self.__chunks = chunks
         self.__maxshape = maxshape
+        if isinstance(data, BaseBuilder):
+            dtype = self.OBJECT_REF_TYPE
         self.__dtype = dtype
         self.__name = name
 
@@ -421,15 +428,17 @@ class RegionBuilder(DatasetBuilder):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
             {'name': 'region', 'type': (slice, tuple, list), 'doc': 'the region i.e. slice or indices into the target Dataset'},
             {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the Dataset this region applies to'},
+            {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name': 'parent', 'type': GroupBuilder, 'doc': 'the parent builder of this Builder', 'default': None},
             {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
     def __init__(self, **kwargs):
         region, builder = getargs('region', 'builder', kwargs)
         skwargs = {'data': builder}
         for key in ('name', 'parent', 'source'):
-            skwargs[key] = kwargs[k]
-        skwargs['dtype'] =
+            skwargs[key] = kwargs[key]
+        skwargs['attributes'] = getargs('attributes', kwargs)
         call_docval_func(super(RegionBuilder, self).__init__, skwargs)
+        self['dtype'] = self.REGION_REF_TYPE
         self['region'] = region
 
     @property
