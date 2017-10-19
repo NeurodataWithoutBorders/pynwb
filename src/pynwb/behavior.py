@@ -231,7 +231,7 @@ class MotionCorrection(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this MotionCorrection container', 'default': 'MotionCorrection '},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'corrected_image_stack', 'type': CorrectedImageStack, 'doc': 'the corrected image stack in this Motion Correction analysis'})
+            {'name': 'corrected_image_stacks', 'type': CorrectedImageStack, 'doc': 'the corrected image stack in this Motion Correction analysis'})
     def __init__(self, **kwargs):
         source, corrected_image_stack = popargs('source', 'corrected_image_stack', kwargs)
         super(MotionCorrection, self).__init__(source, **kwargs)
