@@ -457,7 +457,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
-                self.add_attributes(sub_builder, spec.attributes, container)
+                self.__add_attributes(sub_builder, spec.attributes, container)
             else:
                 self.__add_containers(builder, spec, attr_value, build_manager, source)
 
@@ -467,7 +467,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 # we don't need to get attr_name since any named
                 # group does not have the concept of value
                 sub_builder = GroupBuilder(spec.name)
-                self.add_attributes(sub_builder, spec.attributes, container)
+                self.__add_attributes(sub_builder, spec.attributes, container)
                 self.__add_datasets(sub_builder, spec.datasets, container, build_manager, source)
 
                 # handle subgroups that are not Containers
