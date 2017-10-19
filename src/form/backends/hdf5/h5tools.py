@@ -137,9 +137,16 @@ def get_type(data):
     elif not hasattr(data, '__len__'):
         return type(data)
     else:
-        if len(data) == 0:
-            raise ValueError('cannot determine type for empty data')
-        return get_type(data[0])
+        if len(data) > 0:
+            return get_type(data[0])
+        else:
+    
+            try:
+                return data.dtype    
+            except:
+                raise ValueError('cannot determine type for empty data')
+        
+
 
 __dtypes = {
     "float": float,
