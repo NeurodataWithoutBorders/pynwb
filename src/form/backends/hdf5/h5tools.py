@@ -2,13 +2,14 @@ from collections import Iterable
 import numpy as np
 import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference
-from six import raise_from, text_type, string_types
+from six import raise_from, text_type, string_types, binary_type
 from functools import partial
 
+from form import Container
 from form.utils import docval, getargs, popargs
 from form.data_utils import DataChunkIterator, get_shape
-from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager
-from form.spec import DtypeSpec
+from form.build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
+from form.spec import RefSpec, DtypeSpec
 from ..io import FORMIO
 
 ROOT_NAME = 'root'
@@ -77,7 +78,7 @@ class HDF5IO(FORMIO):
                     else:
                         builder = self.__read_group(sub_h5obj, builder_name)
                     self.__set_built(sub_h5obj.file.filename, target_path, builder)
-                kwargs['links'][builder_name] = LinkBuilder(k, builder)
+                kwargs['links'][builder_name] = LinkBuilder(k, builder, source=self.__path)
             else:
                 builder = self.__get_built(sub_h5obj.file.filename, sub_h5obj.name)
                 obj_type = None
@@ -92,6 +93,7 @@ class HDF5IO(FORMIO):
                     builder = read_method(sub_h5obj)
                     self.__set_built(sub_h5obj.file.filename, sub_h5obj.name, builder)
                 obj_type[builder.name] = builder
+        kwargs['source'] = self.__path
         ret = GroupBuilder(name, **kwargs)
         return ret
 
@@ -111,6 +113,7 @@ class HDF5IO(FORMIO):
             kwargs["data"] = h5obj
         if name is None:
             name = os.path.basename(h5obj.name)
+        kwargs['source'] = self.__path
         ret = DatasetBuilder(name, **kwargs)
         return ret
 
@@ -132,6 +135,19 @@ class HDF5IO(FORMIO):
         self.set_attributes(self.__file, f_builder.attributes)
         self.__add_refs()
 
+    def __add_refs(self):
+        '''
+        Add all references in the file.
+
+        References get queued to be added at the end of write. This is because
+        the current traversal algorithm (i.e. iterating over GroupBuilder items)
+        does not happen in a guaranteed order. We need to figure out what objects
+        will be references, and then write them after we write everything else.
+        '''
+        while len(self.__ref_queue) > 0:
+            call = self.__ref_queue.pop()
+            call()
+
     def get_type(self, data):
         if isinstance(data, (text_type, string_types)):
             return special_dtype(vlen=text_type)
@@ -143,18 +159,29 @@ class HDF5IO(FORMIO):
             return self.get_type(data[0])
 
     __dtypes = {
-        "float": float,
+        "float": np.float32,
         "float32": np.float32,
         "float32!": np.float32,
         "float64!": np.float64,
-        "int": int,
+        "float64": np.float64,
+        "int": np.int32,
         "int32": np.int32,
+        "int16": np.int16,
         "int8": np.int8,
-        "text": special_dtype(vlen=str),
+        "text": special_dtype(vlen=text_type),
+        "utf": special_dtype(vlen=text_type),
+        "utf8": special_dtype(vlen=text_type),
+        "utf-8": special_dtype(vlen=text_type),
+        "ascii": special_dtype(vlen=binary_type),
+        "str": special_dtype(vlen=binary_type),
+        "uint32": np.uint32,
         "uint16": np.uint16,
+        "int16": np.int16,
         "uint8": np.uint8,
         "ref": special_dtype(ref=Reference),
-        "reference": special_dtype(ref=Reference)
+        "reference": special_dtype(ref=Reference),
+        "object": special_dtype(ref=Reference),
+        "region": special_dtype(ref=RegionReference)
     }
 
     def __resolve_dtype__(self, dtype, data):
@@ -175,6 +202,8 @@ class HDF5IO(FORMIO):
             return None
         elif isinstance(dtype, str):
             return self.__dtypes.get(dtype)
+        elif isinstance(dtype, dict):
+            return self.__dtypes.get(dtype['reftype'])
         else:
             return np.dtype([(x['name'], self.__resolve_dtype_helper__(x['dtype'])) for x in dtype])
 
@@ -286,9 +315,24 @@ class HDF5IO(FORMIO):
             else:
                 link = SoftLink(data.name)
             parent[name] = link
+        elif isinstance(data, Builder):
+            _dtype = self.__dtypes[dtype]
+            if dtype == 'region':
+                def _filler():
+                    ref = self.__get_ref(data, builder.region)
+                    parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                self.__queue_ref(_filler)
+            else:
+                def _filler():
+                    ref = self.__get_ref(data)
+                    parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                self.__queue_ref(_filler)
+            return None
         elif isinstance(data, Iterable) and not self.isinstance_inmemory_array(data):
+            if name == 'electrodes':
             dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
         elif hasattr(data, '__len__'):
+            if name == 'electrodes':
             dset = self.__list_fill__(parent, name, data, dtype_spec=dtype)
         else:
             dset = self.__scalar_fill__(parent, name, data, dtype=dtype)
@@ -311,12 +355,7 @@ class HDF5IO(FORMIO):
         if not isinstance(dtype, type):
             dtype = self.__resolve_dtype__(dtype, data)
         try:
-            func = partial(parent.create_dataset, name, shape=None, dtype=dtype)
-            if dtype is Reference:
-                self.add_ref(data, func)
-            else:
-                #dset = func(data=data)
-                dset = parent.create_dataset(name, data=data,shape=None, dtype=dtype)
+            dset = parent.create_dataset(name, data=data,shape=None, dtype=dtype)
         except Exception as exc:
             msg = "Could not create scalar dataset %s in %s" % (name, parent.name)
             raise_from(Exception(msg), exc)
@@ -340,7 +379,7 @@ class HDF5IO(FORMIO):
         try:
             dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
         except Exception as exc:
-            raise_from(Exception("Could not create scalar dataset %s in %s" % (name, parent.name)), exc)
+            raise_from(Exception("Could not create dataset %s in %s" % (name, parent.name)), exc)
         for chunk_i in data:
             # Determine the minimum array dimensions to fit the chunk selection
             max_bounds = self.__selection_max_bounds__(chunk_i.selection)
@@ -360,6 +399,8 @@ class HDF5IO(FORMIO):
     def __list_fill__(self, parent, name, data, dtype_spec=None):
         if not isinstance(dtype_spec, type):
             dtype = self.__resolve_dtype__(dtype_spec, data)
+        else:
+            dtype = dtype_spec
         if isinstance(dtype, np.dtype):
             data_shape = (len(data),)
         else:
@@ -367,12 +408,15 @@ class HDF5IO(FORMIO):
         try:
             dset = parent.create_dataset(name, shape=data_shape, dtype=dtype)
         except Exception as exc:
-            raise_from(Exception("Could not create scalar dataset %s in %s" % (name, parent.name)), exc)
+            msg = "Could not create dataset %s in %s" % (name, parent.name)
+            msg = "%s dtype_spec = %s" % (msg, dtype_spec)
+            raise_from(Exception(msg), exc)
         if len(data) > dset.shape[0]:
             new_shape = list(dset.shape)
             new_shape[0] = len(data)
             dset.resize(new_shape)
         func = None
+        refs = None
         if dtype_spec is not None:
             if isinstance(dtype_spec, list):
                 # do some stuff to figure out what data is a reference
@@ -385,20 +429,46 @@ class HDF5IO(FORMIO):
             elif self.__is_ref(dtype_spec):
                 func = partial(self.__rec_get_ref, data)
         if func is None:
-            dset[:] = data
+            try:
+                dset[:] = data
+            except Exception as e:
+                raise e
         else:
-            print('queueing reference resolution for', dset.name, ', ', dtype_spec, ' is the dtype_spec')
-            self.__queue_ref(dset, np.s_[:], func)
+            self.__queue_ref(self.__get_ref_filler(dset, np.s_[:], func))
         return dset
 
-    def __get_ref(self, builder):
+    def __get_ref_filler(self, dset, sl, f):
+        def _call():
+           dset[sl] = f()
+        return _call
+
+    def __get_ref(self, container, region=None):
+        if isinstance(container, Container):
+            builder = self.manager.build(container)
+        else:
+            if isinstance(container, Builder):
+                if isinstance(container, LinkBuilder):
+                    builder = container.target_builder
+                else:
+                    builder = container
         path = self.__get_path(builder)
-        return self.__file[path].ref
+        if region is not None:
+            dset = self.__file[path]
+            if not isinstance(dset, Dataset):
+                raise ValueError('cannot create region reference without Dataset')
+            return self.__file[path].regionref[region]
+        else:
+            return self.__file[path].ref
 
-    def __is_ref(self, dtype_spec):
-        return DtypeSpec.is_ref(dtype_spec)
+    def __is_ref(self, dtype):
+        if isinstance(dtype, DtypeSpec):
+            return self.__is_ref(dtype.dtype)
+        elif isinstance(dtype, RefSpec):
+            return True
+        else:
+            return dtype == DatasetBuilder.OBJECT_REF_TYPE or dtype == DatasetBuilder.REGION_REF_TYPE
 
-    def __queue_ref(self, dset, sl, func):
+    def __queue_ref(self, func):
         '''Set aside filling dset with references
 
         dest[sl] = func()
@@ -409,21 +479,17 @@ class HDF5IO(FORMIO):
            func: a function to call to return the chunk of data, with
                  references filled in
         '''
-        self.__ref_queue.append((dset, sl, func))
-
-    def __add_refs(self):
-        '''Add all references'''
-        while len(self.__ref_queue) > 0:
-            dset, sl, func = self.__ref_queue.pop()
-            dset[sl] = func()
+        self.__ref_queue.append(func)
 
     def __rec_get_ref(self, l):
         ret = list()
         for elem in l:
-            if isinstance(elem, list, tuple):
+            if isinstance(elem, (list, tuple)):
                 ret.append(self.__rec_get_ref(elem))
-            else:
+            elif isinstance(elem, (Builder, Container)):
                 ret.append(self.__get_ref(elem))
+            else:
+                ret.append(elem)
         return ret
 
     def __resolve_refs(self, ref_idx, l):
