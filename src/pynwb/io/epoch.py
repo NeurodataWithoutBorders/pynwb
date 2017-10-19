@@ -16,7 +16,7 @@ class EpochMap(ObjectMapper):
         self.map_spec('timeseries', epts_spec)
 
     @ObjectMapper.constructor_arg('name')
-    def name(self, builder):
+    def name(self, builder, manager):
         return builder.name
 
 @register_map(EpochTimeSeries)
