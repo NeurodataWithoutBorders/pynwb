@@ -11,4 +11,23 @@ class Data(Container):
 
     @abc.abstractproperty
     def data(self):
+        '''
+        The data that is held by this Container
+        '''
+        ...
+
+class DataRegion(Data):
+
+    @abc.abstractproperty
+    def data(self):
+        '''
+        The target data that this region applies to
+        '''
+        ...
+
+    @abc.abstractproperty
+    def region(self):
+        '''
+        The region that indexes into data e.g. slice or list of indices
+        '''
         ...
