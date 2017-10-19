@@ -111,6 +111,8 @@ class NWBFile(NWBContainer):
 
         self.__ic_electrodes = self.__to_dict(getargs('ic_electrodes', kwargs))
 
+        self.__imaging_planes = self.__to_dict(getargs('imaging_planes', kwargs))
+
         recommended = [
             'experimenter',
             'experiment_description',
@@ -193,6 +195,10 @@ class NWBFile(NWBContainer):
     @property
     def ic_electrodes(self):
         return tuple(self.__ec_electrodes.values())
+
+    @property
+    def imaging_planes(self):
+        return tuple(self.__imaging_planes.values())
 
     def is_raw_timeseries(self, ts):
         return self.__exists(ts, self.__raw_timeseries)

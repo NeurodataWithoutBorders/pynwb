@@ -67,7 +67,7 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
         self.assertEqual(ts.source, 'a hypothetical source')
         self.assertEqual(ts.unit, 'unit')
         self.assertEqual(ts.roi_names, ['name1'])
-        self.assertEqual(ts.segmenttation_interface, iS)
+        self.assertEqual(ts.segmentation_interface, iS)
 
 class DfOverFConstructor(unittest.TestCase):
     def test_init(self):
