@@ -1,3 +1,34 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 from form.build.map import ObjectMapper, TypeMap
 from form.utils import docval
 from form.build.builders import DatasetBuilder, GroupBuilder
@@ -11,6 +42,10 @@ class ObjectMapperLegacy(ObjectMapper):
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
     def construct(self, **kwargs):
         ''' Construct an Container from the given Builder '''
+
+
+        print 'legacy_construct'
+
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
         if cls.__name__ in ('OpticalChannel', 'ImagingPlane', 'NWBFile', 'ROI', 'ProcessingModule',
@@ -75,6 +110,9 @@ class ObjectMapperLegacy(ObjectMapper):
 class TypeMapLegacy(TypeMap):
     
     def get_builder_dt(self, builder):
+
+        print 'Legacy_builder'
+
         if builder.name == 'roi_ids':
             pass
         elif builder.name == 'root':

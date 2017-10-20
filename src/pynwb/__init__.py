@@ -23,6 +23,9 @@ def __get_resources():
     ret['namespace_path'] = join(resource_filename(__name__, 'data'), __core_ns_file_name)
     return ret
 
+def _get_resources():
+    return __get_resources()
+
 # a global namespace catalog
 global __NS_CATALOG
 global __TYPE_MAP
