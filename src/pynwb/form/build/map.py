@@ -1041,7 +1041,7 @@ class TypeMap(object):
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for constructing', 'default': None})
     def construct(self, **kwargs):
         """ Construct the Container represented by the given builder """
-        builder, build_manager = getargs('builder', 'build_manager', kwargs)
+        builder, build_manager = getargs('builder', 'manager', kwargs)
         if build_manager is None:
             build_manager = BuildManager(self)
         attr_map = self.get_map(builder)
