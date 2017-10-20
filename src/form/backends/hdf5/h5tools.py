@@ -103,18 +103,29 @@ class HDF5IO(FORMIO):
             "dtype": h5obj.dtype,
             "maxshape": h5obj.maxshape
         }
-        #kwargs["data"] = h5obj
+        if name is None:
+            name = os.path.basename(h5obj.name)
+        kwargs['source'] = self.__path
         ndims = len(h5obj.shape)
+        cls = DatasetBuilder
         if ndims == 0:                                       # read scalar
-            kwargs["data"] = h5obj[()]
+            scalar = h5obj[()]
+            if isinstance(scalar, RegionReference):
+                cls = RegionBuilder
+                target = h5obj.file[scalar]
+                target_builder = self.__read_dataset(target)
+                self.__set_built(target.file.filename, target.name, target_builder)
+                kwargs['builder'] = target_builder
+                kwargs['region'] = scalar
+                kwargs.pop('dtype')
+                kwargs.pop('maxshape')
+            else:
+                kwargs["data"] = scalar
         elif ndims == 1 and h5obj.dtype == np.dtype('O'):    # read list of strings
             kwargs["data"] = list(h5obj[()])
         else:
             kwargs["data"] = h5obj
-        if name is None:
-            name = os.path.basename(h5obj.name)
-        kwargs['source'] = self.__path
-        ret = DatasetBuilder(name, **kwargs)
+        ret = cls(name, **kwargs)
         return ret
 
     def open(self):
@@ -320,19 +331,19 @@ class HDF5IO(FORMIO):
             if dtype == 'region':
                 def _filler():
                     ref = self.__get_ref(data, builder.region)
-                    parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    dset = parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    self.set_attributes(dset, attributes)
                 self.__queue_ref(_filler)
             else:
                 def _filler():
                     ref = self.__get_ref(data)
-                    parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    dset = parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    self.set_attributes(dset, attributes)
                 self.__queue_ref(_filler)
-            return None
+            return
         elif isinstance(data, Iterable) and not self.isinstance_inmemory_array(data):
-            if name == 'electrodes':
             dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
         elif hasattr(data, '__len__'):
-            if name == 'electrodes':
             dset = self.__list_fill__(parent, name, data, dtype_spec=dtype)
         else:
             dset = self.__scalar_fill__(parent, name, data, dtype=dtype)
