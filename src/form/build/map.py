@@ -387,9 +387,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         name = manager.get_builder_name(container)
         if isinstance(self.__spec, GroupSpec):
             builder = GroupBuilder(name, parent=parent, source=source)
-            self.__add_datasets(builder, self.__spec.datasets, container, manager)
-            self.__add_groups(builder, self.__spec.groups, container, manager)
-            self.__add_links(builder, self.__spec.links, container, manager)
+            self.__add_datasets(builder, self.__spec.datasets, container, manager, source)
+            self.__add_groups(builder, self.__spec.groups, container, manager, source)
+            self.__add_links(builder, self.__spec.links, container, manager, source)
         else:
             builder = DatasetBuilder(name, parent=parent, dtype=self.__spec.dtype)
         self.__add_attributes(builder, self.__spec.attributes, container)
@@ -418,14 +418,14 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 continue
             builder.set_attribute(spec.name, attr_value)
 
-    def __add_links(self, builder, links, container, build_manager):
+    def __add_links(self, builder, links, container, build_manager, source):
         for spec in links:
             attr_value = self.get_attr_value(spec, container)
             if not attr_value:
                 continue
-            self.__add_containers(builder, spec, attr_value, build_manager)
+            self.__add_containers(builder, spec, attr_value, build_manager, source)
 
-    def __add_datasets(self, builder, datasets, container, build_manager):
+    def __add_datasets(self, builder, datasets, container, build_manager, source):
         for spec in datasets:
             attr_value = self.get_attr_value(spec, container)
             #TODO: add check for required datasets
@@ -437,16 +437,16 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 sub_builder = builder.add_dataset(spec.name, attr_value, dtype=spec.dtype)
                 self.__add_attributes(sub_builder, spec.attributes, container)
             else:
-                self.__add_containers(builder, spec, attr_value, build_manager)
+                self.__add_containers(builder, spec, attr_value, build_manager, source)
 
-    def __add_groups(self, builder, groups, container, build_manager):
+    def __add_groups(self, builder, groups, container, build_manager, source):
         for spec in groups:
             if spec.data_type_def is None and spec.data_type_inc is None:
                 # we don't need to get attr_name since any named
                 # group does not have the concept of value
                 sub_builder = GroupBuilder(spec.name)
                 self.__add_attributes(sub_builder, spec.attributes, container)
-                self.__add_datasets(sub_builder, spec.datasets, container, build_manager)
+                self.__add_datasets(sub_builder, spec.datasets, container, build_manager, source)
 
                 # handle subgroups that are not Containers
                 attr_name = self.get_attribute(spec)
@@ -459,8 +459,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                             it = iter(attr_value.values())
                         for item in it:
                             if isinstance(item, Container):
-                                self.__add_containers(sub_builder, spec, item, build_manager)
-                self.__add_groups(sub_builder, spec.groups, container, build_manager)
+                                self.__add_containers(sub_builder, spec, item, build_manager, source)
+                self.__add_groups(sub_builder, spec.groups, container, build_manager, source)
                 empty = sub_builder.is_empty()
                 if not empty or (empty and isinstance(spec.quantity, int)):
                     builder.set_group(sub_builder)
@@ -470,16 +470,16 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     if attr_name is not None:
                         attr_value = getattr(container, attr_name, None)
                         if attr_value is not None:
-                            self.__add_containers(builder, spec, attr_value, build_manager)
+                        self.__add_containers(builder, spec, attr_value, build_manager, source)
                 else:
                     attr_name = self.get_attribute(spec)
                     attr_value = getattr(container, attr_name, None)
                     if attr_value is not None:
-                        self.__add_containers(builder, spec, attr_value, build_manager)
+                    self.__add_containers(builder, spec, attr_value, build_manager, source)
 
-    def __add_containers(self, builder, spec, value, build_manager):
+    def __add_containers(self, builder, spec, value, build_manager, source):
         if isinstance(value, Container):
-            rendered_obj = build_manager.build(value)
+            rendered_obj = build_manager.build(value, source)
             # use spec to determine what kind of HDF5
             # object this Container corresponds to
             if isinstance(spec, LinkSpec):
@@ -500,7 +500,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                        "Containers if 'spec' is a GroupSpec")
                 raise ValueError(msg % value.__class__.__name__)
             for container in values:
-                self.__add_containers(builder, spec, container, build_manager)
+                self.__add_containers(builder, spec, container, build_manager, source)
 
     def __get_subspec_values(self, builder, spec, manager):
         ret = dict()
