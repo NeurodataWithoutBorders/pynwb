@@ -1,4 +1,5 @@
 from collections import Iterable
+from h5py import RegionReference
 
 from form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
 from form import Container, Data, DataRegion
@@ -173,7 +174,7 @@ class NWBTableRegion(NWBData, DataRegion):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'table', 'type': NWBTable, 'doc': 'the ElectrodeTable this region applies to'},
-            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'})
+            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'})
     def __init__(self, **kwargs):
         table, region = getargs('table', 'region', kwargs)
         self.__table = table
