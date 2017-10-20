@@ -1,5 +1,7 @@
 from form.build.map import ObjectMapper, TypeMap
-
+from form.utils import docval
+from form.build.builders import DatasetBuilder, GroupBuilder
+from form.build.map import BuildManager
 import numpy as np
 
 class ObjectMapperLegacy(ObjectMapper):
@@ -75,13 +77,13 @@ class TypeMapLegacy(TypeMap):
     def get_builder_dt(self, builder):
         if builder.name == 'roi_ids':
             pass
-            if builder.name == 'root':
+        elif builder.name == 'root':
             return 'NWBFile'
         attrs = builder.attributes
         ndt = attrs.get('neurodata_type')
         if ndt == 'Module':
             return 'ProcessingModule'
-        if ndt == 'TimeSeries':
+        elif ndt == 'TimeSeries':
             ancestry = attrs['ancestry']
             if ancestry[-1] == 'TwoPhotonSeries' and builder.name == 'corrected':
                 return 'ImageSeries'
@@ -110,7 +112,7 @@ class TypeMapLegacy(TypeMap):
                 if parent_ndt == 'PlaneSegmentation':
                     if builder.name in ('roi_list', 'imaging_plane_name'):
                         return None
-            else:
+                    else:
                         return 'ROI'
 
                 parent_names = {'extracellular_ephys': 'ElectrodeGroup','intracellular_ephys': 'IntracellularElectrodeGroup',
