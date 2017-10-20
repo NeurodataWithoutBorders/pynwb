@@ -470,12 +470,12 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     if attr_name is not None:
                         attr_value = getattr(container, attr_name, None)
                         if attr_value is not None:
-                        self.__add_containers(builder, spec, attr_value, build_manager, source)
+                            self.__add_containers(builder, spec, attr_value, build_manager, source)
                 else:
                     attr_name = self.get_attribute(spec)
                     attr_value = getattr(container, attr_name, None)
                     if attr_value is not None:
-                    self.__add_containers(builder, spec, attr_value, build_manager, source)
+                        self.__add_containers(builder, spec, attr_value, build_manager, source)
 
     def __add_containers(self, builder, spec, value, build_manager, source):
         if isinstance(value, Container):
@@ -523,7 +523,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                         if isinstance(sub_builder, DatasetBuilder):
                             continue
                         else:
-                        sub_builder = sub_builder.builder
+                            sub_builder = sub_builder.builder
                     if self.__data_type_key in sub_builder.attributes or not (subspec.data_type_inc is None and subspec.data_type_def is None):
                         val = manager.construct(sub_builder)
                         if subspec.is_many():
