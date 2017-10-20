@@ -414,7 +414,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
             if attr_value is None:
                 if spec.required:
-                    raise Warning("missing required attribute '%s' for '%s' of type '%s'" % (spec.name, builder.name, self.spec.data_type_def))
+                    warnings.warn("missing required attribute '%s' for '%s' of type '%s'" % (spec.name, builder.name, self.spec.data_type_def))
                 continue
             builder.set_attribute(spec.name, attr_value)
 
@@ -431,7 +431,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             #TODO: add check for required datasets
             if attr_value is None:
                 if spec.required:
-                    raise Warning("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
+                    warnings.warn("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value, dtype=spec.dtype)
