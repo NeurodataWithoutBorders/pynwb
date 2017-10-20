@@ -549,7 +549,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 subspec = manager.get_subspec(spec, sub_builder)
                 if subspec is not None:
                     if isinstance(subspec, LinkSpec):
-                        sub_builder = sub_builder.builder
+                        if isinstance(sub_builder, DatasetBuilder):
+                            continue
+                        else:
+                            sub_builder = sub_builder.builder
                     if self.__data_type_key in sub_builder.attributes or not (subspec.data_type_inc is None and subspec.data_type_def is None):
                         val = manager.construct(sub_builder)
                         if subspec.is_many():
