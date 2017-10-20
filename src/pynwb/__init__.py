@@ -176,3 +176,4 @@ from . import misc
 from . import ogen
 from . import ophys
 from . import retinotopy
+from . import legacy
