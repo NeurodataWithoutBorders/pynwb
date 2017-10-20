@@ -33,8 +33,12 @@ test_script:
   - python %APPVEYOR_BUILD_FOLDER%\test.py
 
 after_test:
-  - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py
-  - codecov
+  - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py --pynwb
+  - codecov -F pynwb
+  - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py --integration
+  - codecov -F integration
+  - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py --form
+  - codecov -F form
   - pip install -U %APPVEYOR_BUILD_FOLDER%\dist\%WHEEL%
   - python %APPVEYOR_BUILD_FOLDER%\test.py
   - pip install -U %APPVEYOR_BUILD_FOLDER%\dist\pynwb-0.1.tar.gz
