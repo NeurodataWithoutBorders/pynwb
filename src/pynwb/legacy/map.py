@@ -47,7 +47,7 @@ class ObjectMapperLegacy(ObjectMapper):
 
     @ObjectMapper.constructor_arg('source')
     def source_gettr(self, builder):
-        
+
         if 'source' in builder.attributes:
             return builder.attributes['source']
         else:
@@ -78,10 +78,10 @@ class ObjectMapperLegacy(ObjectMapper):
             if const_arg is not None:
                 const_args[const_arg] = value
 
-        if cls.__name__ == 'PlaneSegmentation':
-            const_args['roi_list'] = const_args.pop('rois')
-            const_args['imaging_plane'] = 'imaging_plane_1'
-            const_args['reference_images'] = const_args.pop('image_series')
+        #if cls.__name__ == 'PlaneSegmentation':
+        #    const_args['roi_list'] = const_args.pop('rois')
+        #    const_args['imaging_plane'] = 'imaging_plane_1'
+        #    const_args['reference_images'] = const_args.pop('image_series')
         args = list()
         kwargs = dict()
         for const_arg in get_docval(cls.__init__):
@@ -97,7 +97,7 @@ class ObjectMapperLegacy(ObjectMapper):
                 kwargs[argname] = val
             else:
                 args.append(val)
-        
+
         warnings.warn('HACK')
         if builder.name in ('natural_movie_one_image_stack', 'natural_scenes_image_stack'):
             kwargs['starting_time'] = -1.0
@@ -124,7 +124,7 @@ class ObjectMapperLegacy(ObjectMapper):
         return obj
 
 class TypeMapLegacy(TypeMap):
-    
+
     def get_builder_dt(self, builder):
 
         print 'Legacy_builder'
