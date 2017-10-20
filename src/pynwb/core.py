@@ -2,7 +2,7 @@ from collections import Iterable
 from h5py import RegionReference
 
 from form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
-from form import Container, Data, DataRegion
+from form import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
@@ -181,6 +181,7 @@ class NWBTableRegion(NWBData, DataRegion):
         self.__region = region
         name = getargs('name', kwargs)
         super(NWBTableRegion, self).__init__(name, table)
+        self.__regionslicer = get_region_slicer(self.__table.data, self.__region)
 
     @property
     def table(self):
@@ -193,7 +194,7 @@ class NWBTableRegion(NWBData, DataRegion):
         return self.__region
 
     def __len__(self):
-        return len(self.__region)
+        return len(self.__regionslicer)
 
     def __getitem__(self, idx):
-        return self.__table[self.__region[idx]]
+        return self.__regionslicer[idx]
