@@ -67,27 +67,12 @@ class TestElectricalSeriesIO(base.TestMapRoundTrip):
         return ret
 
     def setUpBuilder(self):
-        #TODO: This needs to be updated
         device_builder = GroupBuilder('dev1',
                             attributes={'neurodata_type': 'Device',
                                         'namespace': 'core',
                                         'help': 'A recording device e.g. amplifier',
                                         'source': 'a test source'},
                          )
-        #TODO: this needs to be made into a DatasetBuilder that represents the ElectrodeTable
-        #group_builder = GroupBuilder('elec1',
-        #                    attributes={'neurodata_type': 'ElectrodeGroup',
-        #                                'namespace': 'core',
-        #                                'help': 'A physical grouping of channels',
-        #                                'source': 'a test source'},
-        #                    datasets={
-        #                        'description': DatasetBuilder('description', 'desc1'),
-        #                        'location': DatasetBuilder('location', 'loc1'),
-        #                    },
-        #                    links={
-        #                        'device': LinkBuilder('device', device_builder)
-        #                    }
-        #                )
 
         table_builder = DatasetBuilder('electrodes', self.table.data,
                              attributes={'neurodata_type': 'ElectrodeTable',
