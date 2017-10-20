@@ -544,6 +544,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
     def construct(self, **kwargs):
         ''' Construct an Container from the given Builder '''
+
+
+        print 'old_construct'
+
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
         # gather all subspecs
@@ -787,6 +791,10 @@ class TypeMap(object):
         return ret
 
     def get_builder_dt(self, builder):
+        
+
+        print 'Old_builder'
+
         ret = builder.get(self.__ns_catalog.group_spec_cls.type_key())
         if ret is None:
             msg = "builder '%s' is does not have a data_type" % builder.name

@@ -30,10 +30,16 @@
 
 
 
-from form.build import ObjectMapper
-from .. import register_map
 
-from ..base import TimeSeries, ProcessingModule
+
+
+
+
+
+
+from .. import ObjectMapper
+from pynwb.legacy import register_map
+from pynwb.base import TimeSeries, ProcessingModule
 
 @register_map(ProcessingModule)
 class ModuleMap(ObjectMapper):
