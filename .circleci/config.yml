@@ -36,3 +36,11 @@ jobs:
              pip3 install -e .
              coverage run --source src test.py
              codecov
+       - run:
+           name: Test installation from a wheel for Python 2.7
+           command: |
+             tox -e py27 recreate --installpkg dist/pynwb-0.1-py2-none-any.whl
+       - run:
+           name: Test installation from a wheel for Python 3.6
+           command: |
+             tox -e py36 recreate --installpkg dist/pynwb-0.1-py3-none-any.whl
