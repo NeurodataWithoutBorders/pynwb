@@ -29,13 +29,29 @@
 
 
 
+
+
+
+
+
 from form.build.map import ObjectMapper, TypeMap
-from form.utils import docval
+# from form.utils import docval
 from form.build.builders import DatasetBuilder, GroupBuilder
 from form.build.map import BuildManager
 import numpy as np
+import os
+from form.utils import docval, getargs, popargs
 
 class ObjectMapperLegacy(ObjectMapper):
+
+
+    @ObjectMapper.constructor_arg('source')
+    def source_gettr(self, builder):
+        
+        if 'source' in builder.attributes:
+            return builder.attributes['source']
+        else:
+            return 'None'
 
 
     @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'},
@@ -48,13 +64,13 @@ class ObjectMapperLegacy(ObjectMapper):
 
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
-        if cls.__name__ in ('OpticalChannel', 'ImagingPlane', 'NWBFile', 'ROI', 'ProcessingModule',
-                            'IntracellularElectrode', 'ElectrodeGroup', 'OptogeneticStimulusSite',
-                            'PlaneSegmentation', 'Device', 'TwoPhotonSeries', 'ImageSeries',
-                            'CorrectedImageStack', 'DfOverF'):
-            builder.set_attribute('source', 'None')
-        if builder.name == 'MotionCorrection':
-            pass
+        # if cls.__name__ in ('OpticalChannel', 'ImagingPlane', 'NWBFile', 'ROI', 'ProcessingModule',
+        #                     'IntracellularElectrode', 'ElectrodeGroup', 'OptogeneticStimulusSite',
+        #                     'PlaneSegmentation', 'Device', 'TwoPhotonSeries', 'ImageSeries',
+        #                     'CorrectedImageStack', 'DfOverF'):
+        #     builder.set_attribute('source', 'None')
+        # if builder.name == 'MotionCorrection':
+        #     pass
         subspecs = self.__get_subspec_values(builder, self.spec, manager)
         const_args = dict()
         for subspec, value in subspecs.items():

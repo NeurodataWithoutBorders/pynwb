@@ -74,3 +74,5 @@ def register_map(**kwargs):
         return _dec
     else:
         _dec(mapper_cls)
+
+from . import io
