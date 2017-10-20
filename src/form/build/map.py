@@ -191,6 +191,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         self.__carg2spec = dict()
         self.__map_spec(spec)
 
+
+    def hack_get_subspec_values(self, *args, **kwargs):
+        return self.__get_subspec_values(*args, **kwargs)
+
     @property
     def spec(self):
         ''' the Spec used in this ObjectMapper '''
@@ -317,6 +321,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         spec, attr_carg = getargs('spec', 'attr_carg', kwargs)
         self.map_const_arg(attr_carg, spec)
         self.map_attr(attr_carg, spec)
+
+    def hack_get_override_carg(self, *args, **kwargs):
+        return self.__get_override_carg(*args, **kwargs)
 
     def __get_override_carg(self, name, builder):
         if name in self.constructor_args:
@@ -544,10 +551,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
     def construct(self, **kwargs):
         ''' Construct an Container from the given Builder '''
-
-
-        print 'old_construct'
-
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
         # gather all subspecs
@@ -574,18 +577,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 kwargs[argname] = val
             else:
                 args.append(val)
-        
-        warnings.warn('HACK')
-        if args[0] in ['natural_movie_one_image_stack', 'natural_scenes_image_stack']:
-            kwargs['starting_time'] = -1.
-            kwargs['rate'] = -1.
-        elif args[0] == '2p_image_series':
-            kwargs['data'] = []
-            kwargs['unit'] = 'None'
-
-        if builder.name == 'root':
-            kwargs['session_start_time'] = args[2]
-
         try:
             obj = cls(*args, **kwargs)
         except Exception as ex:

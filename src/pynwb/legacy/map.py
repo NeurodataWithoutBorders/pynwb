@@ -40,7 +40,8 @@ from form.build.builders import DatasetBuilder, GroupBuilder
 from form.build.map import BuildManager
 import numpy as np
 import os
-from form.utils import docval, getargs, popargs
+from form.utils import docval, getargs, popargs, get_docval
+from six import raise_from
 
 class ObjectMapperLegacy(ObjectMapper):
 
@@ -59,9 +60,6 @@ class ObjectMapperLegacy(ObjectMapper):
     def construct(self, **kwargs):
         ''' Construct an Container from the given Builder '''
 
-
-        print 'legacy_construct'
-
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
         # if cls.__name__ in ('OpticalChannel', 'ImagingPlane', 'NWBFile', 'ROI', 'ProcessingModule',
@@ -71,7 +69,7 @@ class ObjectMapperLegacy(ObjectMapper):
         #     builder.set_attribute('source', 'None')
         # if builder.name == 'MotionCorrection':
         #     pass
-        subspecs = self.__get_subspec_values(builder, self.spec, manager)
+        subspecs = self.hack_get_subspec_values(builder, self.spec, manager)
         const_args = dict()
         for subspec, value in subspecs.items():
             const_arg = self.get_const_arg(subspec)
@@ -98,23 +96,27 @@ class ObjectMapperLegacy(ObjectMapper):
             else:
                 args.append(val)
 
-        warnings.warn('HACK')
         if builder.name in ('natural_movie_one_image_stack', 'natural_scenes_image_stack'):
             kwargs['starting_time'] = -1.0
             kwargs['rate'] = -1.0
         elif builder.name == 'corrected':
             kwargs['data'] = np.array([])
+
         if args[0] == '2p_image_series':
             args.append(np.array([]))
             kwargs['unit'] = 'None'
         elif args[0] == 'brain_observatory_pipeline':
             kwargs['description'] = 'None'
+
         if builder.name == 'static_gratings_stimulus':
             args.insert(2, ['', '', ''])
         elif builder.name == 'BehavioralTimeSeries':
             args[1] = [ x for x in args[1] if x.name == 'running_speed' ][0]
-        if cls.__name__ == 'ROI' and len(args) == 6:
-            kwargs['reference_images'] = 'None'
+
+        # if cls.__name__ == 'ROI' and len(args) == 6:
+        #     kwargs['reference_images'] = 'None'
+
+
         try:
             obj = cls(*args, **kwargs)
         except Exception as ex:
@@ -122,6 +124,9 @@ class ObjectMapperLegacy(ObjectMapper):
             raise_from(Exception(msg), ex)
 
         return obj
+
+    def __get_override_carg(self, *args, **kwargs):
+        return self.hack_get_override_carg(*args, **kwargs)
 
 class TypeMapLegacy(TypeMap):
 
