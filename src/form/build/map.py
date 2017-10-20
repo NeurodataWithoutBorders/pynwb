@@ -171,8 +171,14 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
     @ExtenderMeta.post_init
     def __gather_procedures(cls, name, bases, classdict):
-        cls.constructor_args = dict()
-        cls.obj_attrs = dict()
+        if hasattr(cls, 'constructor_args'):
+            cls.constructor_args = copy(cls.constructor_args)
+        else:
+            cls.constructor_args = dict()
+        if hasattr(cls, 'obj_attrs'):
+            cls.obj_attrs = copy(cls.obj_attrs)
+        else:
+            cls.obj_attrs = dict()
         for name, func in cls.__dict__.items():
             if cls.__is_constructor_arg(func):
                 cls.constructor_args[cls.__get_cargname(func)] = getattr(cls, name)
@@ -574,7 +580,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 kwargs[argname] = val
             else:
                 args.append(val)
-        
+
         warnings.warn('HACK')
         if args[0] in ['natural_movie_one_image_stack', 'natural_scenes_image_stack']:
             kwargs['starting_time'] = -1.
@@ -791,7 +797,7 @@ class TypeMap(object):
         return ret
 
     def get_builder_dt(self, builder):
-        
+
 
         print 'Old_builder'
 
