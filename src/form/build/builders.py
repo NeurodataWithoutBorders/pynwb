@@ -1,4 +1,5 @@
 import numpy as np
+from h5py import RegionReference
 import copy as _copy
 import itertools as _itertools
 import posixpath as _posixpath
@@ -369,7 +370,8 @@ class DatasetBuilder(BaseBuilder):
         self.__chunks = chunks
         self.__maxshape = maxshape
         if isinstance(data, BaseBuilder):
-            dtype = self.OBJECT_REF_TYPE
+            if dtype is None:
+                dtype = self.OBJECT_REF_TYPE
         self.__dtype = dtype
         self.__name = name
 
@@ -426,7 +428,7 @@ class LinkBuilder(Builder):
 class RegionBuilder(DatasetBuilder):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'region', 'type': (slice, tuple, list), 'doc': 'the region i.e. slice or indices into the target Dataset'},
+            {'name': 'region', 'type': (slice, tuple, list, RegionReference), 'doc': 'the region i.e. slice or indices into the target Dataset'},
             {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the Dataset this region applies to'},
             {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name': 'parent', 'type': GroupBuilder, 'doc': 'the parent builder of this Builder', 'default': None},
@@ -437,8 +439,8 @@ class RegionBuilder(DatasetBuilder):
         for key in ('name', 'parent', 'source'):
             skwargs[key] = kwargs[key]
         skwargs['attributes'] = getargs('attributes', kwargs)
+        skwargs['dtype'] = self.REGION_REF_TYPE
         call_docval_func(super(RegionBuilder, self).__init__, skwargs)
-        self['dtype'] = self.REGION_REF_TYPE
         self['region'] = region
 
     @property
