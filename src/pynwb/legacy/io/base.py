@@ -73,3 +73,7 @@ class TimeSeriesMap(ObjectMapper):
     @ObjectMapper.constructor_arg('name')
     def name(self, builder):
         return builder.name
+
+
+    def __get_override_carg(self, *args, **kwargs):
+        return self.hack_get_override_carg(*args, **kwargs)
