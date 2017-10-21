@@ -1,10 +1,6 @@
 from .. import ObjectMapper
 from pynwb.legacy import register_map
-<<<<<<< HEAD
-from pynwb.ophys import PlaneSegmentation, ROI
-=======
 from pynwb.ophys import PlaneSegmentation, ImageSegmentation
->>>>>>> 46f87d3f519eb81b400a5db465b7ebff1dfc0d71
 
 @register_map(PlaneSegmentation)
 class PlaneSegmentationMap(ObjectMapper):
