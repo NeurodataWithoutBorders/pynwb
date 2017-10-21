@@ -196,7 +196,8 @@ class UnitTimes(NWBContainer):
     _help = "Estimated spike times from a single unit"
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'spike_units', 'type': Iterable, 'doc': 'The SpikeUnits contained in this Interface'})
+            {'name': 'spike_units', 'type': Iterable, 'doc': 'The SpikeUnits contained in this Interface'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this Container', 'default': 'UnitTimes'})
     def __init__(self, **kwargs):
         source, spike_units = popargs('source', 'spike_units', kwargs)
         super(UnitTimes, self).__init__(source, **kwargs)

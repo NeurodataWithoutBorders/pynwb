@@ -4,6 +4,7 @@ from .spec import NAME_WILDCARD
 from .spec import Spec
 from .spec import AttributeSpec
 from .spec import DtypeSpec
+from .spec import RefSpec
 from .spec import DatasetSpec
 from .spec import LinkSpec
 from .spec import GroupSpec

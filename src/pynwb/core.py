@@ -1,5 +1,8 @@
-from form.utils import docval, getargs, ExtenderMeta
-from form import Container
+from collections import Iterable
+from h5py import RegionReference
+
+from form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
+from form import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
@@ -16,35 +19,27 @@ def set_parents(container, parent):
             container.parent = parent
     return ret
 
-@register_class('NWBContainer', CORE_NAMESPACE)
-class NWBContainer(with_metaclass(ExtenderMeta, Container)):
+class NWBBaseType(with_metaclass(ExtenderMeta)):
     '''The base class to any NWB types.
 
     The purpose of this class is to provide a mechanism for representing hierarchical
     relationships in neurodata.
     '''
 
+    __nwbfields__ = tuple()
 
-    __nwbfields__ = ('source',
-                     'help')
-
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
-        parent, container_source, source, help = getargs('parent', 'container_source', 'source', 'help', kwargs)
-        super(NWBContainer, self).__init__()
-
+        parent, container_source = getargs('parent', 'container_source', kwargs)
+        super(NWBBaseType, self).__init__()
         self.__fields = dict()
-        self.__subcontainers = list()
         self.__parent = None
         self.__name = getargs('name', kwargs)
         if parent:
             self.parent = parent
         self.__container_source = container_source
-
-        self.source = source
 
     @property
     def name(self):
@@ -61,10 +56,6 @@ class NWBContainer(with_metaclass(ExtenderMeta, Container)):
         return self.__fields
 
     @property
-    def subcontainers(self):
-        return self.__subcontainers
-
-    @property
     def parent(self):
         '''The parent NWBContainer of this NWBContainer
         '''
@@ -75,7 +66,6 @@ class NWBContainer(with_metaclass(ExtenderMeta, Container)):
         if self.__parent is not None:
             raise Exception('cannot reassign parent')
         self.__parent = parent_container
-        parent_container.__subcontainers.append(self)
 
     @staticmethod
     def __getter(nwbfield):
@@ -108,3 +98,103 @@ class NWBContainer(with_metaclass(ExtenderMeta, Container)):
         for f in cls.__nwbfields__:
             if not hasattr(cls, f):
                 setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
+
+@register_class('NWBContainer', CORE_NAMESPACE)
+class NWBContainer(NWBBaseType, Container):
+
+    __nwbfields__ = ('source',
+                     'help')
+
+    @docval({'name': 'source', 'type': str, 'doc': 'a description of where this NWBContainer came from'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(NWBContainer, self).__init__, kwargs)
+        self.source = getargs('source', kwargs)
+
+@register_class('NWBData', CORE_NAMESPACE)
+class NWBData(NWBBaseType, Data):
+
+    __nwbfields__ = ('help',)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'data', 'type': (Iterable, Data), 'doc': 'the source of the data'},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(NWBData, self).__init__, kwargs)
+        self.__data = getargs('data', kwargs)
+
+    @property
+    def data(self):
+        return self.__data
+
+class NWBTable(NWBData):
+
+    @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'data', 'type': Iterable, 'doc': 'the source of the data', 'default': list()},
+            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        self.__columns = tuple(popargs('columns', kwargs))
+        call_docval_func(super(NWBTable, self).__init__, kwargs)
+
+    @property
+    def columns(self):
+        return self.__columns
+
+    @docval({'name': 'values', 'type': dict, 'doc': 'the values for each column'})
+    def add_row(self, **kwargs):
+        values = getargs('values', kwargs)
+        if not isinstance(self.data, list):
+            msg = 'Cannot append row to %s' % type(self.data)
+            raise ValueError(msg)
+        self.data.append(tuple(values[col] for col in self.columns))
+
+    @docval({'name': 'kwargs', 'type': dict, 'doc': 'the column to query by'})
+    def query(self, **kwargs):
+        '''
+        Query a table
+        '''
+        raise NotImplementedError('query')
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return self.data[idx]
+
+# diamond inheritence
+class NWBTableRegion(NWBData, DataRegion):
+    '''
+    A class for representing regions i.e. slices or indices into an NWBTable
+    '''
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'table', 'type': NWBTable, 'doc': 'the ElectrodeTable this region applies to'},
+            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'})
+    def __init__(self, **kwargs):
+        table, region = getargs('table', 'region', kwargs)
+        self.__table = table
+        self.__region = region
+        name = getargs('name', kwargs)
+        super(NWBTableRegion, self).__init__(name, table)
+        self.__regionslicer = get_region_slicer(self.__table.data, self.__region)
+
+    @property
+    def table(self):
+        '''The ElectrodeTable this region applies to'''
+        return self.__table
+
+    @property
+    def region(self):
+        '''The indices into table'''
+        return self.__region
+
+    def __len__(self):
+        return len(self.__regionslicer)
+
+    def __getitem__(self, idx):
+        return self.__regionslicer[idx]

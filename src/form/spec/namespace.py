@@ -240,6 +240,9 @@ class NamespaceCatalog(object):
         return ret
 
     def __resolve_includes(self, spec_dict, catalog, spec_file_path):
+        """
+            Pull in any attributes, datasets, or groups included
+        """
         modified = False
         dt_inc = spec_dict.get(self.__group_spec_cls.inc_key())
         dt_def = spec_dict.get(self.__group_spec_cls.def_key())
