@@ -1,6 +1,8 @@
 import re
 import sys
 from collections import OrderedDict
+from copy import copy
+
 from six import with_metaclass, raise_from
 from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container, Data, DataRegion
@@ -171,9 +173,13 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
     @ExtenderMeta.post_init
     def __gather_procedures(cls, name, bases, classdict):
-        if not hasattr(cls, 'constructor_args'):
+        if hasattr(cls, 'constructor_args'):
+            cls.constructor_args = copy(cls.constructor_args)
+        else:
             cls.constructor_args = dict()
-        if not hasattr(cls, 'obj_attrs'):
+        if hasattr(cls, 'obj_attrs'):
+            cls.obj_attrs = copy(cls.obj_attrs)
+        else:
             cls.obj_attrs = dict()
         for name, func in cls.__dict__.items():
             if cls.__is_constructor_arg(func):
