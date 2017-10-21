@@ -5,6 +5,11 @@ from pynwb.ophys import PlaneSegmentation
 @register_map(PlaneSegmentation)
 class PlaneSegmentationMap(ObjectMapper):
 
+    def __init__(self, spec):
+        super(PlaneSegmentationMap, self).__init__(spec)
+        roi_spec = self.spec.get_neurodata_type('ROI')
+        self.map_const_arg('roi_list', roi_spec)
+
     @ObjectMapper.constructor_arg('roi_list')
     def carg_roi_list(self, builder):
         return builder.get('rois')
