@@ -52,7 +52,7 @@ class ObjectMapperLegacy(ObjectMapper):
         if 'source' in builder.attributes:
             return builder.attributes['source']
         else:
-            return 'None2'
+            return 'No known source'
 
 
     @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'},

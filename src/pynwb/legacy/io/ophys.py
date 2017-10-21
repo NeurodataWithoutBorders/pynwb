@@ -10,9 +10,12 @@ class PlaneSegmentationMap(ObjectMapper):
         roi_spec = self.spec.get_neurodata_type('ROI')
         self.map_const_arg('roi_list', roi_spec)
 
-    @ObjectMapper.constructor_arg('roi_list')
-    def carg_roi_list(self, builder):
-        return builder.get('rois')
+        reference_images_spec = self.spec.get_neurodata_type('ImageSeries')
+        self.map_const_arg('reference_images', reference_images_spec)
+
+    # @ObjectMapper.constructor_arg('roi_list')
+    # def carg_roi_list(self, builder):
+    #     return builder.get('rois')
 
     @ObjectMapper.constructor_arg('imaging_plane')
     def carg_imaging_plane(self, *args):
@@ -30,9 +33,9 @@ class PlaneSegmentationMap(ObjectMapper):
         imaging_plane = manager.construct(ip_builder)
         return imaging_plane
 
-    @ObjectMapper.constructor_arg('reference_images')
-    def carg_reference_images(self, builder):
-        return builder.get('image_series') # builder.get('reference_images')
+    # @ObjectMapper.constructor_arg('reference_images')
+    # def carg_reference_images(self, builder):
+    #     return builder.get('image_series') # builder.get('reference_images')
 
     # @ObjectMapper.constructor_arg('reference_images')
     # def carg_reference_images(self, builder):
