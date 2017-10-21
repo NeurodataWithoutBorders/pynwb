@@ -15,7 +15,11 @@ class PlaneSegmentationMap(ObjectMapper):
         return builder.get('rois')
 
     @ObjectMapper.constructor_arg('imaging_plane')
-    def carg_imaging_plane(self, builder, manager):
+    def carg_imaging_plane(self, *args):
+        builder = args[0]
+        if len(args) < 2:
+            return builder.name # I think this is the hack you had in there before
+        manager = args[1]
         root = builder
         parent = root.parent
         while parent is not None:
