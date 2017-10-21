@@ -15,8 +15,16 @@ class PlaneSegmentationMap(ObjectMapper):
         return builder.get('rois')
 
     @ObjectMapper.constructor_arg('imaging_plane')
-    def carg_imaging_plane(self, builder):
-        return 'imaging_plane_1' #builder.get('imaging_plane')
+    def carg_imaging_plane(self, builder, manager):
+        root = builder
+        parent = root.parent
+        while parent is not None:
+            root = parent
+            parent = root.parent
+        ip_name = builder['imaging_plane_name']
+        ip_builder = root['general/optophysiology/%s' % ip_name]
+        imaging_plane = manager.construct(ip_builder)
+        return imaging_plane
 
     @ObjectMapper.constructor_arg('reference_images')
     def carg_reference_images(self, builder):
