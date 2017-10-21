@@ -110,9 +110,12 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.addContainer(nwbfile)
         io = HDF5IO(self.filename, self.manager)
         io.write(nwbfile)
-        read_nwbfile = io.read()
-        read_container = self.getContainer(read_nwbfile)
-        self.assertContainerEqual(self.container, read_container)
+        try:
+            read_nwbfile = io.read()
+            read_container = self.getContainer(read_nwbfile)
+            self.assertContainerEqual(self.container, read_container)
+        finally:
+            io.close()
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
@@ -121,6 +124,3 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
         raise unittest.SkipTest('Cannot run test unless getContainer is implemented')
-
-
-

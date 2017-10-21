@@ -54,7 +54,10 @@ def __is_int(value):
     return any(isinstance(value, i) for i in (int, np.int8, np.int16, np.int32, np.int64))
 
 def __is_float(value):
-    return any(isinstance(value, i) for i in (float, np.float16, np.float32, np.float64, np.float128))
+    SUPPORTED_FLOAT_TYPES = [float, np.float16, np.float32, np.float64]
+    if hasattr(np, "float128"):
+        SUPPORTED_FLOAT_TYPES.append(np.float128)
+    return any(isinstance(value, i) for i in SUPPORTED_FLOAT_TYPES)
 
 def __format_type(argtype):
     if isinstance(argtype, str):

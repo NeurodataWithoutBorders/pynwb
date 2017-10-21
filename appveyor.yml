@@ -1,0 +1,41 @@
+build: false
+
+branches:
+ only:
+  - dev
+
+environment:
+  matrix:
+    - PYTHON_VERSION: 2.7
+      MINICONDA: C:\Miniconda-x64
+      WHEEL: pynwb-0.1-py2-none-any.whl
+    - PYTHON_VERSION: 3.6
+      MINICONDA: C:\Miniconda36-x64
+      WHEEL: pynwb-0.1-py3-none-any.whl
+
+init:
+  - "ECHO %PYTHON_VERSION% %MINICONDA%"
+
+install:
+  - "set PATH=%MINICONDA%;%MINICONDA%\\Scripts;%PATH%"
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - "conda create -q -n test-environment python=%PYTHON_VERSION% numpy scipy"
+  - activate test-environment
+  - pip install -r %APPVEYOR_BUILD_FOLDER%\requirements.txt
+  - pip install -r %APPVEYOR_BUILD_FOLDER%\requirements-dev.txt
+  - python %APPVEYOR_BUILD_FOLDER%\setup.py sdist
+  - python %APPVEYOR_BUILD_FOLDER%\setup.py bdist_wheel
+  - pip install %APPVEYOR_BUILD_FOLDER%\
+
+test_script:
+  - python %APPVEYOR_BUILD_FOLDER%\test.py
+
+after_test:
+  - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py
+  - codecov
+  - pip install -U %APPVEYOR_BUILD_FOLDER%\dist\%WHEEL%
+  - python %APPVEYOR_BUILD_FOLDER%\test.py
+  - pip install -U %APPVEYOR_BUILD_FOLDER%\dist\pynwb-0.1.tar.gz
+  - python %APPVEYOR_BUILD_FOLDER%\test.py

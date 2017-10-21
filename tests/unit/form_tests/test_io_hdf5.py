@@ -209,6 +209,6 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.maxDiff = None
         io = HDF5IO(self.path, self.manager)
         io.write_builder(self.builder)
-        io.close()
         builder = io.read_builder()
         self.assertBuilderEqual(builder, self.builder)
+        io.close()
