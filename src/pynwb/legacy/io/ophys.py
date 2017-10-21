@@ -10,7 +10,7 @@ class PlaneSegmentationMap(ObjectMapper):
         roi_spec = self.spec.get_neurodata_type('ROI')
         self.map_const_arg('roi_list', roi_spec)
 
-        reference_images_spec = self.spec.get_neurodata_type('ImageSeries')
+        reference_images_spec = self.spec.get_group('reference_images').get_neurodata_type('ImageSeries')
         self.map_const_arg('reference_images', reference_images_spec)
 
     # @ObjectMapper.constructor_arg('roi_list')
