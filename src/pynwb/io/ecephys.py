@@ -2,10 +2,10 @@ from form.build import ObjectMapper
 from .. import register_map
 
 from ..ecephys import ElectrodeTable, ElectrodeTableRegion
-from .core import NWBTableRegionMap
+from .core import NWBDataMap, NWBTableRegionMap
 
 @register_map(ElectrodeTable)
-class ElectrodeTableMap(ObjectMapper):
+class ElectrodeTableMap(NWBDataMap):
     def __init__(self, spec):
         super(ElectrodeTableMap, self).__init__(spec)
 
