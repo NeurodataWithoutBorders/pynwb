@@ -1,6 +1,6 @@
 from .. import ObjectMapper
 from pynwb.legacy import register_map
-from pynwb.ophys import PlaneSegmentation
+from pynwb.ophys import PlaneSegmentation, ROI
 
 @register_map(PlaneSegmentation)
 class PlaneSegmentationMap(ObjectMapper):
@@ -22,8 +22,12 @@ class PlaneSegmentationMap(ObjectMapper):
     def carg_reference_images(self, builder):
         return builder.get('image_series') # builder.get('reference_images')
 
+    # @ObjectMapper.constructor_arg('reference_images')
+    # def carg_reference_images(self, builder):
+    #     return builder.get('image_series') # builder.get('reference_images')
 
-@register_map(PlaneSegmentation)
+
+@register_map(ROI)
 class ROIMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('reference_images')
@@ -32,7 +36,19 @@ class ROIMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('name')
     def carg_name(self, builder):
-        return builder.get('name')
+        return builder.name
+
+    # @ObjectMapper.constructor_arg('source')
+    # def source_gettr(self, builder):
+
+    #     if 'source' in builder.attributes:
+    #         return builder.attributes['source']
+    #     else:
+    #         return 'None2'
+
+
+    # def __get_override_carg(self, *args, **kwargs):
+    #     return self.hack_get_override_carg(*args, **kwargs)
 
     # @ObjectMapper.constructor_arg('imaging_plane')
     # def carg_imaging_plane(self, builder):

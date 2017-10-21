@@ -11,6 +11,7 @@ from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_W
 from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, RegionBuilder
 import warnings
+from copy import copy
 
 class BuildManager(object):
     """
