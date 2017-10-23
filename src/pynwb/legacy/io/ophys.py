@@ -30,21 +30,14 @@ class PlaneSegmentationMap(ObjectMapper):
         while parent is not None:
             root = parent
             parent = root.parent
-        ip_name = builder['imaging_plane_name']
+        ip_name = builder['imaging_plane_name']['data']
         ip_builder = root['general/optophysiology/%s' % ip_name]
         imaging_plane = manager.construct(ip_builder)
         return imaging_plane
 
-<<<<<<< 52774fa12262af4d44939041e100037c32dc7bce
     # @ObjectMapper.constructor_arg('reference_images')
     # def carg_reference_images(self, builder):
     #     return builder.get('image_series') # builder.get('reference_images')
-=======
-#    I think we can delete this, too
-#    @ObjectMapper.constructor_arg('reference_images')
-#    def carg_reference_images(self, builder):
-#        return builder.get('image_series') # builder.get('reference_images')
->>>>>>> mapped reference_images and ROI specs in PlaneSegmentation constructor im both directions
 
     # @ObjectMapper.constructor_arg('reference_images')
     # def carg_reference_images(self, builder):
@@ -55,11 +48,12 @@ class PlaneSegmentationMap(ObjectMapper):
 class ROIMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('reference_images')
-    def carg_reference_images(self, builder):
+    def carg_reference_images(self, *args):
         return 'None'
 
     @ObjectMapper.constructor_arg('name')
-    def carg_name(self, builder):
+    def carg_name(self, *args):
+        builder = args[0]
         return builder.name
 
     # @ObjectMapper.constructor_arg('source')

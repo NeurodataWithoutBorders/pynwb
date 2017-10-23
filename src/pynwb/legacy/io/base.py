@@ -71,7 +71,8 @@ class TimeSeriesMap(ObjectMapper):
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))
 
     @ObjectMapper.constructor_arg('name')
-    def name(self, builder):
+    def name(self, *args):
+        builder = args[0]
         return builder.name
 
     # def __get_override_carg(self, *args, **kwargs):

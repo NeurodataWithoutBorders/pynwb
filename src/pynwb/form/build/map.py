@@ -211,7 +211,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         return self.__spec
 
     @_constructor_arg('name')
-    def get_container_name(self, builder, manager):
+    def get_container_name(self, *args):
+        builder = args[0]
         return builder.name
 
     @classmethod
@@ -335,10 +336,15 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     def hack_get_override_carg(self, *args, **kwargs):
         return self.__get_override_carg(*args, **kwargs)
 
-    def __get_override_carg(self, name, builder):
+    def __get_override_carg(self, *args):
+        name = args[0]
+        remaining_args = tuple(args[1:])
         if name in self.constructor_args:
             func = self.constructor_args[name]
-            return func(self, builder, manager)
+            try:
+                return func(self, *remaining_args)
+            except TypeError:
+                return func(self, *remaining_args[:-1])
         return None
 
     def __get_override_attr(self, name, container, manager):
