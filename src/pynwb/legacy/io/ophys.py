@@ -5,17 +5,19 @@ from pynwb.ophys import PlaneSegmentation, ROI
 @register_map(PlaneSegmentation)
 class PlaneSegmentationMap(ObjectMapper):
 
+    # This might be needed for 2.0 as well
     def __init__(self, spec):
         super(PlaneSegmentationMap, self).__init__(spec)
         roi_spec = self.spec.get_neurodata_type('ROI')
-        self.map_const_arg('roi_list', roi_spec)
+        self.map_spec('roi_list', roi_spec)
 
         reference_images_spec = self.spec.get_group('reference_images').get_neurodata_type('ImageSeries')
-        self.map_const_arg('reference_images', reference_images_spec)
+        self.map_spec('reference_images', reference_images_spec)
 
-    # @ObjectMapper.constructor_arg('roi_list')
-    # def carg_roi_list(self, builder):
-    #     return builder.get('rois')
+#    I think we can delete this
+#    @ObjectMapper.constructor_arg('roi_list')
+#    def carg_roi_list(self, builder):
+#        return builder.get('rois')
 
     @ObjectMapper.constructor_arg('imaging_plane')
     def carg_imaging_plane(self, *args):
@@ -33,9 +35,16 @@ class PlaneSegmentationMap(ObjectMapper):
         imaging_plane = manager.construct(ip_builder)
         return imaging_plane
 
+<<<<<<< 52774fa12262af4d44939041e100037c32dc7bce
     # @ObjectMapper.constructor_arg('reference_images')
     # def carg_reference_images(self, builder):
     #     return builder.get('image_series') # builder.get('reference_images')
+=======
+#    I think we can delete this, too
+#    @ObjectMapper.constructor_arg('reference_images')
+#    def carg_reference_images(self, builder):
+#        return builder.get('image_series') # builder.get('reference_images')
+>>>>>>> mapped reference_images and ROI specs in PlaneSegmentation constructor im both directions
 
     # @ObjectMapper.constructor_arg('reference_images')
     # def carg_reference_images(self, builder):
