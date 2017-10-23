@@ -21,6 +21,7 @@ pkgs = find_packages('src', exclude=['data'])
 print('found these packages:', pkgs)
 
 schema_dir = 'data'
+
 setup_args = {
     'name': 'pynwb',
     'version': '0.1',
@@ -30,6 +31,17 @@ setup_args = {
     'author_email': 'ajtritt@lbl.gov',
     'url': 'https://github.com/NeurodataWithoutBorders/pynwb',
     'license': license,
+    'setup_requires': ['numpy'],
+    'install_requires':
+    [
+        'numpy',
+        'scipy',
+        'h5py',
+        'ruamel.yaml',
+        'python-dateutil',
+        'six',
+        'requests'
+    ],
     'packages': pkgs,
     'package_dir': {'': 'src'},
     'package_data': {'pynwb':["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
