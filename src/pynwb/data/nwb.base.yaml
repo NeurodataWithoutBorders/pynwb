@@ -1,3 +1,10 @@
+datasets:
+- attributes:
+  - doc: Short description of what this type of Interface contains.
+    dtype: text
+    name: help
+  doc: The attributes specified here are included in all interfaces.
+  neurodata_type_def: NWBData
 groups:
 - attributes:
   - doc: Short description of what this type of Interface contains.
@@ -110,6 +117,7 @@ groups:
       and all timestamps are relative to experiment start time.'
     dtype: float64!
     name: timestamps
+    quantity: '?'
     shape:
     - null
   doc: General purpose time series.

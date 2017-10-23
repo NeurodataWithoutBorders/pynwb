@@ -361,10 +361,44 @@ class BaseStorageSpec(Spec):
             ret['attributes'] = [AttributeSpec.build_spec(sub_spec) for sub_spec in ret['attributes']]
         return ret
 
+_target_type_key = 'target_type'
+
+_ref_args = [
+    {'name': _target_type_key, 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
+    {'name': 'reftype', 'type': str, 'doc': 'the type of references this is i.e. region or object'},
+]
+
+class RefSpec(ConstructableDict):
+
+    __allowable_types = ('object', 'region')
+
+    @docval(*_ref_args)
+    def __init__(self, **kwargs):
+        target_type, reftype = getargs(_target_type_key, 'reftype', kwargs)
+        self[_target_type_key] = target_type
+        if reftype not in self.__allowable_types:
+            msg = "reftype must be one of the following: %s" % ", ".join(self.__allowable_types)
+            raise ValueError(msg)
+        self['reftype'] = reftype
+
+    @property
+    def target_type(self):
+        '''The data_type of the target of the reference'''
+        return self[_target_type_key]
+
+    @property
+    def reftype(self):
+        '''The type of reference'''
+        return self['reftype']
+
+    @docval(rtype=bool, returns='True if this RefSpec specifies a region reference, False otherwise')
+    def is_region(self):
+        return self['reftype'] == 'region'
+
 _dt_args = [
     {'name': 'name', 'type': str, 'doc': 'the name of this column'},
     {'name': 'doc', 'type': str, 'doc': 'a description about what this data type is'},
-    {'name': 'dtype', 'type': (str, type, list), 'doc': 'the data type of this column'},
+    {'name': 'dtype', 'type': (str, list, RefSpec), 'doc': 'the data type of this column'},
 ]
 
 class DtypeSpec(ConstructableDict):
@@ -375,6 +409,7 @@ class DtypeSpec(ConstructableDict):
         doc, name, dtype = getargs('doc', 'name', 'dtype', kwargs)
         self['doc'] = doc
         self['name'] = name
+        self.assertValidDtype(dtype)
         self['dtype'] = dtype
 
     @property
@@ -392,18 +427,37 @@ class DtypeSpec(ConstructableDict):
         ''' The data type of this component'''
         return self['dtype']
 
+    @staticmethod
+    def assertValidDtype(dtype):
+        if isinstance(dtype, dict):
+            if _target_type_key not in dtype:
+                msg = "'dtype' must have the key '%s'" % _target_type_key
+                raise AssertionError(msg)
+        return True
+
+    @staticmethod
+    @docval({'name': 'spec', 'type': (str, dict), 'doc': 'the spec object to check'}, is_method=False)
+    def is_ref(**kwargs):
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, dict):
+            return _target_type_key in spec
+        return False
+
     @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
         ret = super(DtypeSpec, cls).build_const_args(spec_dict)
         if isinstance(ret['dtype'], list):
             ret['dtype'] = list(map(cls.build_const_args, ret['dtype']))
+        elif isinstance(ret['dtype'], dict):
+            ret['dtype'] = RefSpec.build_spec(ret['dtype'])
         return ret
+
 
 
 _dataset_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'dtype', 'type': (str, type, list), 'doc': 'The data type of this attribute. Use a list of DtypeSpecs to specify a compound data type.'},
+        {'name': 'dtype', 'type': (str, list, RefSpec), 'doc': 'The data type of this attribute. Use a list of DtypeSpecs to specify a compound data type.', 'default': None},
         {'name': 'name', 'type': str, 'doc': 'The name of this dataset', 'default': None},
         {'name': 'default_name', 'type': str, 'doc': 'The default name of this dataset', 'default': None},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
@@ -445,8 +499,6 @@ class DatasetSpec(BaseStorageSpec):
 
     @classmethod
     def __get_prec_level(cls, dtype):
-        if isinstance(dtype, type):
-            dtype = dtype.__name__
         m = re.search('[0-9]+', dtype)
         if m is not None:
             prec = int(m.group())
@@ -469,10 +521,13 @@ class DatasetSpec(BaseStorageSpec):
         if isinstance(self.dtype, list):
             # merge the new types
             inc_dtype = inc_spec.dtype
-            if not isinstance(inc_dtype, list):
+            if isinstance(inc_dtype, str):
                 msg = 'Cannot extend simple data type to compound data type'
                 raise ValueError(msg)
-            order = OrderedDict((dt['name'], dt) for dt in inc_dtype)
+            order = OrderedDict()
+            if inc_dtype is not None:
+                for dt in inc_dtype:
+                    order[dt['name']] = dt
             for dt in self.dtype:
                 name = dt['name']
                 if name in order:
@@ -521,12 +576,14 @@ class DatasetSpec(BaseStorageSpec):
         ret = super(DatasetSpec, cls).build_const_args(spec_dict)
         if 'dtype' in ret:
             if isinstance(ret['dtype'], list):
-                ret['dtype'] = list(map(cls.dtype_spec_cls.build_spec, ret['dtype']))
+                ret['dtype'] = list(map(cls.dtype_spec_cls().build_spec, ret['dtype']))
+            elif isinstance(ret['dtype'], dict):
+                ret['dtype'] = RefSpec.build_spec(ret['dtype'])
         return ret
 
 _link_args = [
     {'name': 'doc', 'type': str, 'doc': 'a description about what this link represents'},
-    {'name': 'target_type', 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
+    {'name': _target_type_key, 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
     {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
     {'name': 'name', 'type': str, 'doc': 'the name of this link', 'default': None}
 ]
@@ -534,21 +591,21 @@ class LinkSpec(Spec):
 
     @docval(*_link_args)
     def __init__(self, **kwargs):
-        doc, target_type, name, quantity = popargs('doc', 'target_type', 'name', 'quantity', kwargs)
+        doc, target_type, name, quantity = popargs('doc', _target_type_key, 'name', 'quantity', kwargs)
         super(LinkSpec, self).__init__(doc, name, **kwargs)
-        self['target_type'] = target_type
+        self[_target_type_key] = target_type
         if quantity != 1:
             self['quantity'] = quantity
 
     @property
     def target_type(self):
         ''' The data type of target specification '''
-        return self.get('target_type')
+        return self.get(_target_type_key)
 
     @property
     def data_type_inc(self):
         ''' The data type of target specification '''
-        return self.get('target_type')
+        return self.get(_target_type_key)
 
     def is_many(self):
         return self.quantity not in (1, ZERO_OR_ONE)
@@ -816,7 +873,7 @@ class GroupSpec(BaseStorageSpec):
     @docval(*_link_args)
     def add_link(self, **kwargs):
         ''' Add a new specification for a link to this group specification '''
-        doc, target_type = popargs('doc', 'target_type', kwargs)
+        doc, target_type = popargs('doc', _target_type_key, kwargs)
         spec = LinkSpec(doc, target_type, **kwargs)
         self.set_link(spec)
         return spec

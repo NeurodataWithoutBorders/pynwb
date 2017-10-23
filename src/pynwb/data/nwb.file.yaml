@@ -313,6 +313,11 @@ groups:
       - doc: One of possibly many groups, one for each electrode group.
         neurodata_type_inc: ElectrodeGroup
         quantity: '*'
+      datasets:
+      - doc: 'A table of all electrodes (i.e. channels) used for recording'
+        name: electrodes
+        neurodata_type_inc: ElectrodeTable
+        quantity: '?'
       name: extracellular_ephys
       quantity: '?'
     - datasets:

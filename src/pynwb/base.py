@@ -62,11 +62,7 @@ class ProcessingModule(NWBContainer):
 
 @register_class('TimeSeries', CORE_NAMESPACE)
 class TimeSeries(NWBContainer):
-    """ Standard TimeSeries constructor
-
-        All time series are created by calls to  NWB.create_timeseries().
-        They should not not be instantiated directly
-    """
+    """A generic base class for time series data"""
     __nwbfields__ = ("comments",
                      "description",
                      "data",

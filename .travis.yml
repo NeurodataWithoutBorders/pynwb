@@ -31,5 +31,9 @@ after_success:
   - pip install -r requirements.txt
   - pip install -r requirements-dev.txt
   - pip install -e .
-  - coverage run --source src test.py
-  - codecov
+  - coverage run --source src test.py --pynwb
+  - codecov -F pynwb
+  - coverage run --source src test.py --integration
+  - codecov -F integration
+  - coverage run --source src test.py --form
+  - codecov -F form
