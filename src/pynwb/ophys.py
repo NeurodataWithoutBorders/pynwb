@@ -77,7 +77,7 @@ class ImagingPlane(NWBContainer):
 
 @register_class('TwoPhotonSeries', CORE_NAMESPACE)
 class TwoPhotonSeries(ImageSeries):
-    """ 
+    """
     A special case of optical imaging.
     """
 
@@ -167,7 +167,7 @@ class PlaneSegmentation(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of image plane, recording wavelength, depth, etc.'},
-            {'name': 'roi_list', 'type': Iterable, 'doc': 'List of ROIs in this imaging plane.'},
+            {'name': 'roi_list', 'type': (Iterable, ROI), 'doc': 'List of ROIs in this imaging plane.'},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'link to ImagingPlane group from which this TimeSeries data was generated.'},
             {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
@@ -194,9 +194,9 @@ class ImageSegmentation(NWBContainer):
 
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
-            {'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentations', 'type': (PlaneSegmentation, list), 'doc': 'ImagePlane class.'})
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
+            {'name': 'plane_segmentations', 'type': (PlaneSegmentation, list), 'doc': 'ImagePlane class.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this ImageSegmentation container', 'default': 'ImageSegmentation'})
     def __init__(self, **kwargs):
         plane_segmentations = popargs('plane_segmentations', kwargs)
 
@@ -262,7 +262,7 @@ class DfOverF(NWBContainer):
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
             {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'DfOverF'})
+            {'name': 'name', 'type': str, 'doc': 'the name of this DfOverF container', 'default': 'DfOverF'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(DfOverF, self).__init__, kwargs)
@@ -282,7 +282,7 @@ class Fluorescence(NWBContainer):
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
             {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Fluorescence'})
+            {'name': 'name', 'type': str, 'doc': 'the name of this Fluorescence container', 'default': 'Fluorescence'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(Fluorescence, self).__init__, kwargs)
