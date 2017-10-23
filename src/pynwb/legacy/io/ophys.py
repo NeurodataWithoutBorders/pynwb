@@ -1,6 +1,6 @@
 from .. import ObjectMapper
 from pynwb.legacy import register_map
-from pynwb.ophys import PlaneSegmentation, ImageSegmentation
+from pynwb.ophys import PlaneSegmentation, ImageSegmentation, ROI
 
 @register_map(PlaneSegmentation)
 class PlaneSegmentationMap(ObjectMapper):
@@ -28,7 +28,7 @@ class PlaneSegmentationMap(ObjectMapper):
         while parent is not None:
             root = parent
             parent = root.parent
-        ip_name = builder['imaging_plane_name']
+        ip_name = builder['imaging_plane_name']['data']
         ip_builder = root['general/optophysiology/%s' % ip_name]
         imaging_plane = manager.construct(ip_builder)
         return imaging_plane
@@ -46,11 +46,12 @@ class PlaneSegmentationMap(ObjectMapper):
 class ROIMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('reference_images')
-    def carg_reference_images(self, builder):
+    def carg_reference_images(self, *args):
         return 'None'
 
     @ObjectMapper.constructor_arg('name')
-    def carg_name(self, builder):
+    def carg_name(self, *args):
+        builder = args[0]
         return builder.name
 
     # @ObjectMapper.constructor_arg('source')

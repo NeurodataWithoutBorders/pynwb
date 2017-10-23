@@ -47,7 +47,7 @@ class ObjectMapperLegacy(ObjectMapper):
 
 
     @ObjectMapper.constructor_arg('source')
-    def source_gettr(self, builder):
+    def source_gettr(self, builder, manager):
 
         if 'source' in builder.attributes:
             return builder.attributes['source']
@@ -69,6 +69,11 @@ class ObjectMapperLegacy(ObjectMapper):
         #     builder.set_attribute('source', 'None')
         # if builder.name == 'MotionCorrection':
         #     pass
+
+
+        if cls.__name__ == 'DfOverF':
+            pass
+
         subspecs = self.hack_get_subspec_values(builder, self.spec, manager)
         const_args = dict()
         for subspec, value in subspecs.items():
@@ -84,7 +89,7 @@ class ObjectMapperLegacy(ObjectMapper):
         kwargs = dict()
         for const_arg in get_docval(cls.__init__):
             argname = const_arg['name']
-            override = self.__get_override_carg(argname, builder)
+            override = self.__get_override_carg(argname, builder, manager)
             if override:
                 val = override
             elif argname in const_args:

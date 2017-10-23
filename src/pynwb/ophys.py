@@ -261,7 +261,8 @@ class DfOverF(NWBContainer):
 
     _help = "Df/f over time of one or more ROIs. TimeSeries names should correspond to imaging plane names"
 
-    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
             {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
@@ -280,7 +281,8 @@ class Fluorescence(NWBContainer):
 
     _help = "Fluorescence over time of one or more ROIs. TimeSeries names should correspond to imaging plane names."
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
             {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
