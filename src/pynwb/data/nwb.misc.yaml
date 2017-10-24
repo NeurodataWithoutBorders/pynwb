@@ -136,7 +136,7 @@ groups:
     - dims:
       - num_events
       doc: Spike time for the units (exact or estimated)
-      dtype: float64!
+      dtype: float64
       name: times
       shape:
       - null
