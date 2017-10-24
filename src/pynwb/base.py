@@ -40,6 +40,7 @@ class ProcessingModule(NWBContainer):
             return_dict = {}
             for i in arg:
                 assert not i.name is None # If a container doesn't have a name, it gets lost!
+                assert not i.name in return_dict
                 return_dict[i.name] = i
             return return_dict
 

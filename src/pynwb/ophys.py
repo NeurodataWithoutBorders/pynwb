@@ -146,7 +146,7 @@ class ROI(NWBContainer):
             {'name': 'img_mask', 'type': Iterable, 'doc': 'ROI mask, represented in 2D ([y][x]) intensity image.'},
             {'name': 'reference_images', 'type': (ImageSeries, str), 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
-        name, roi_description, pix_mask, pix_mask_weight, img_mask = popargs('name', 'roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
+        roi_description, pix_mask, pix_mask_weight, img_mask = popargs('roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
         pargs, pkwargs = fmt_docval_args(super(ROI, self).__init__, kwargs)
         super(ROI, self).__init__(*pargs, **pkwargs)
         self.roi_description = roi_description

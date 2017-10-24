@@ -560,6 +560,55 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             ret[spec] = builder.data
         return ret
 
+    # @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'},
+    #         {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
+    # def construct(self, **kwargs):
+    #     ''' Construct an Container from the given Builder '''
+    #     builder, manager = getargs('builder', 'manager', kwargs)
+    #     cls = manager.get_cls(builder)
+    #     # gather all subspecs
+    #     subspecs = self.__get_subspec_values(builder, self.spec, manager)
+    #     # get the constructor argument each specification corresponds to
+    #     const_args = dict()
+    #     for subspec, value in subspecs.items():
+    #         const_arg = self.get_const_arg(subspec)
+    #         if const_arg is not None:
+    #             const_args[const_arg] = value
+    #     # build args and kwargs for the constructor
+    #     args = list()
+    #     kwargs = dict()
+    #     for const_arg in get_docval(cls.__init__):
+    #         argname = const_arg['name']
+    #         override = self.__get_override_carg(argname, builder)
+    #         if override:
+    #             val = override
+    #         elif argname in const_args:
+    #             val = const_args[argname]
+    #         else:
+    #             continue
+    #         if 'default' in const_arg:
+    #             kwargs[argname] = val
+    #         else:
+    #             args.append(val)
+
+    #     warnings.warn('HACK')
+    #     if args[0] in ['natural_movie_one_image_stack', 'natural_scenes_image_stack']:
+    #         kwargs['starting_time'] = -1.
+    #         kwargs['rate'] = -1.
+    #     elif args[0] == '2p_image_series':
+    #         kwargs['data'] = []
+    #         kwargs['unit'] = 'None'
+
+    #     if builder.name == 'root':
+    #         kwargs['session_start_time'] = args[2]
+
+    #     try:
+    #         obj = cls(*args, **kwargs)
+    #     except Exception as ex:
+    #         msg = 'Could not construct %s object' % (cls.__name__)
+    #         raise_from(Exception(msg), ex)
+    #     return obj
+
     @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
     def construct(self, **kwargs):
@@ -579,8 +628,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         kwargs = dict()
         for const_arg in get_docval(cls.__init__):
             argname = const_arg['name']
-            override = self.__get_override_carg(argname, builder)
-            if override:
+            override = self.__get_override_carg(argname, builder, manager)
+            if override is not None:
                 val = override
             elif argname in const_args:
                 val = const_args[argname]
@@ -590,18 +639,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 kwargs[argname] = val
             else:
                 args.append(val)
-
-        warnings.warn('HACK')
-        if args[0] in ['natural_movie_one_image_stack', 'natural_scenes_image_stack']:
-            kwargs['starting_time'] = -1.
-            kwargs['rate'] = -1.
-        elif args[0] == '2p_image_series':
-            kwargs['data'] = []
-            kwargs['unit'] = 'None'
-
-        if builder.name == 'root':
-            kwargs['session_start_time'] = args[2]
-
         try:
             obj = cls(*args, **kwargs)
         except Exception as ex:
@@ -807,10 +844,6 @@ class TypeMap(object):
         return ret
 
     def get_builder_dt(self, builder):
-
-
-        print 'Old_builder'
-
         ret = builder.get(self.__ns_catalog.group_spec_cls.type_key())
         if ret is None:
             msg = "builder '%s' is does not have a data_type" % builder.name
