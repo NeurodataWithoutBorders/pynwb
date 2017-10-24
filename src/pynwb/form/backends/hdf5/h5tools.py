@@ -14,6 +14,7 @@ from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader
 from ...spec import NamespaceBuilder
 
 from ..io import FORMIO
+from ..dataio import DataIO
 
 ROOT_NAME = 'root'
 SPEC_LOC_ATTR = '.specloc'
