@@ -172,9 +172,10 @@ class HDF5IO(FORMIO):
     __dtypes = {
         "float": np.float32,
         "float32": np.float32,
-        "float32!": np.float32,
-        "float64!": np.float64,
+        "double" : np.float64,
         "float64": np.float64,
+        "long" : np.int64,
+        "int64" : np.int64,
         "int": np.int32,
         "int32": np.int32,
         "int16": np.int16,
