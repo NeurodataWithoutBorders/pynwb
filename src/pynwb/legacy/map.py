@@ -1,41 +1,4 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from form.build.map import ObjectMapper, TypeMap
-# from form.utils import docval
 from form.build.builders import DatasetBuilder, GroupBuilder
 from form.build.map import BuildManager
 import numpy as np
@@ -62,17 +25,6 @@ class ObjectMapperLegacy(ObjectMapper):
 
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
-        # if cls.__name__ in ('OpticalChannel', 'ImagingPlane', 'NWBFile', 'ROI', 'ProcessingModule',
-        #                     'IntracellularElectrode', 'ElectrodeGroup', 'OptogeneticStimulusSite',
-        #                     'PlaneSegmentation', 'Device', 'TwoPhotonSeries', 'ImageSeries',
-        #                     'CorrectedImageStack', 'DfOverF'):
-        #     builder.set_attribute('source', 'None')
-        # if builder.name == 'MotionCorrection':
-        #     pass
-
-
-        if cls.__name__ == 'DfOverF':
-            pass
 
         subspecs = self.hack_get_subspec_values(builder, self.spec, manager)
         const_args = dict()
@@ -81,10 +33,6 @@ class ObjectMapperLegacy(ObjectMapper):
             if const_arg is not None:
                 const_args[const_arg] = value
 
-        #if cls.__name__ == 'PlaneSegmentation':
-        #    const_args['roi_list'] = const_args.pop('rois')
-        #    const_args['imaging_plane'] = 'imaging_plane_1'
-        #    const_args['reference_images'] = const_args.pop('image_series')
         args = list()
         kwargs = dict()
         for const_arg in get_docval(cls.__init__):
@@ -101,27 +49,6 @@ class ObjectMapperLegacy(ObjectMapper):
             else:
                 args.append(val)
 
-        if builder.name in ('natural_movie_one_image_stack', 'natural_scenes_image_stack'):
-            kwargs['starting_time'] = -1.0
-            kwargs['rate'] = -1.0
-        elif builder.name == 'corrected':
-            kwargs['data'] = np.array([])
-
-        if args[0] == '2p_image_series':
-            args.append(np.array([]))
-            kwargs['unit'] = 'None'
-        elif args[0] == 'brain_observatory_pipeline':
-            kwargs['description'] = 'None'
-
-        if builder.name == 'static_gratings_stimulus':
-            args.insert(2, ['', '', ''])
-        elif builder.name == 'BehavioralTimeSeries':
-            args[1] = [ x for x in args[1] if x.name == 'running_speed' ][0]
-
-        # if cls.__name__ == 'ROI' and len(args) == 6:
-        #     kwargs['reference_images'] = 'None'
-
-
         try:
             obj = cls(*args, **kwargs)
         except Exception as ex:
@@ -135,9 +62,7 @@ class ObjectMapperLegacy(ObjectMapper):
 
 class TypeMapLegacy(TypeMap):
 
-    def get_builder_dt(self, builder):
-
-        print 'Legacy_builder'
+    def get_builder_dt(self, builder):    
 
         if builder.name == 'roi_ids':
             pass

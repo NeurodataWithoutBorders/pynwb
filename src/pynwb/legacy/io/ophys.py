@@ -1,6 +1,7 @@
 from .. import ObjectMapper
 from pynwb.legacy import register_map
-from pynwb.ophys import PlaneSegmentation, ROI
+from pynwb.ophys import PlaneSegmentation, ImageSegmentation, ROI, TwoPhotonSeries
+import numpy as np
 
 @register_map(PlaneSegmentation)
 class PlaneSegmentationMap(ObjectMapper):
@@ -42,6 +43,21 @@ class PlaneSegmentationMap(ObjectMapper):
     # @ObjectMapper.constructor_arg('reference_images')
     # def carg_reference_images(self, builder):
     #     return builder.get('image_series') # builder.get('reference_images')
+
+@register_map(TwoPhotonSeries)
+class TwoPhotonSeriesMap(ObjectMapper):
+
+    @ObjectMapper.constructor_arg('data')
+    def carg_data(self, *args):
+        builder = args[0]
+        if builder.name in ('2p_image_series',):
+            return np.array([-1.])
+
+    @ObjectMapper.constructor_arg('unit')
+    def carg_unit(self, *args):
+        builder = args[0]
+        if builder.name in ('2p_image_series',):
+            return 'None'
 
 
 @register_map(ROI)
