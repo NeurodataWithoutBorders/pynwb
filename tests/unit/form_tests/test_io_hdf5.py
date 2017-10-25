@@ -4,9 +4,9 @@ import os
 from h5py import File, Dataset
 from six import text_type
 
-from form.backends.hdf5 import HDF5IO
-from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
-from form.spec import NamespaceCatalog
+from pynwb.form.backends.hdf5 import HDF5IO
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
+from pynwb.form.spec import NamespaceCatalog
 
 from numbers import Number
 

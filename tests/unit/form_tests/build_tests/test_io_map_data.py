@@ -1,9 +1,9 @@
 import unittest2 as unittest
 
-from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
-from form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap
-from form import Data
-from form.utils import docval, getargs, get_docval
+from pynwb.form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
+from pynwb.form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap
+from pynwb.form import Data
+from pynwb.form.utils import docval, getargs, get_docval
 
 CORE_NAMESPACE = 'test_core'
 

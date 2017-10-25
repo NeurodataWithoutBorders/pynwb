@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 import os
 
-from form.build import GroupBuilder, DatasetBuilder
+from pynwb.form.build import GroupBuilder, DatasetBuilder
 
 from pynwb import TimeSeries
 
