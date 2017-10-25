@@ -5,11 +5,18 @@ from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Re
 from six import raise_from, text_type, string_types, binary_type
 from functools import partial
 
-from form import Container
-from form.utils import docval, getargs, popargs
-from form.data_utils import DataChunkIterator, get_shape
-from form.build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
-from form.spec import RefSpec, DtypeSpec
+from ...container import Container
+
+from ...utils import docval, getargs, popargs
+from ...data_utils import DataChunkIterator, get_shape
+from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
+from ...spec import RefSpec, DtypeSpec
+
+#from form import Container
+#from form.utils import docval, getargs, popargs
+#from form.data_utils import DataChunkIterator, get_shape
+#from form.build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
+#from form.spec import RefSpec, DtypeSpec
 from ..io import FORMIO
 
 ROOT_NAME = 'root'
