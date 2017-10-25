@@ -33,6 +33,20 @@ setup_args = {
     'packages': pkgs,
     'package_dir': {'': 'src'},
     'package_data': {'pynwb':["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
+    'classifiers': [
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3.6",
+        "License :: OSI Approved :: BSD License",
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Developers",
+        "Intended Audience :: Science/Research",
+        "Operating System :: Microsoft :: Windows",
+        "Operating System :: MacOS",
+        "Operating System :: Unix",
+        "Topic :: Scientific/Engineering :: Medical Science Apps."
+    ],
+    'keywords':'PyNWB NWB Neuroscience HDF NeurodataWithoutBorders',
     #'package_data': {'pynwb':["data/*.yaml"]},
     #'cmdclass':{
     #    'build_py': CustomBuild,
