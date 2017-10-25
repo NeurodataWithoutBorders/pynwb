@@ -164,7 +164,7 @@ class NWBHDF5IO(HDF5IO):
 
 
 from . import io as __io
-from .core import NWBContainer
+from .core import NWBContainer, NWBData
 from .base import TimeSeries, ProcessingModule
 from .file import NWBFile
 

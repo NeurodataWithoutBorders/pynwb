@@ -9,7 +9,8 @@ import numpy as np
 class OptogeneticSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        oS = OptogeneticStimulusSite('a test source', 'device', 'description', 'excitation_lambda', 'location')
+        oS = OptogeneticStimulusSite('site1', 'a test source', 'device', 'description', 'excitation_lambda', 'location')
+        self.assertEqual(oS.name, 'site1')
         self.assertEqual(oS.device, 'device')
         self.assertEqual(oS.description, 'description')
         self.assertEqual(oS.excitation_lambda, 'excitation_lambda')

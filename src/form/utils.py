@@ -54,7 +54,10 @@ def __is_int(value):
     return any(isinstance(value, i) for i in (int, np.int8, np.int16, np.int32, np.int64))
 
 def __is_float(value):
-    return any(isinstance(value, i) for i in (float, np.float16, np.float32, np.float64, np.float128))
+    SUPPORTED_FLOAT_TYPES = [float, np.float16, np.float32, np.float64]
+    if hasattr(np, "float128"):
+        SUPPORTED_FLOAT_TYPES.append(np.float128)
+    return any(isinstance(value, i) for i in SUPPORTED_FLOAT_TYPES)
 
 def __format_type(argtype):
     if isinstance(argtype, str):
@@ -164,6 +167,19 @@ def get_docval(func):
     else:
         return tuple()
 
+#def docval_wrap(func, is_method=True):
+#    if is_method:
+#        @docval(*get_docval(func))
+#        def method(self, **kwargs):
+#
+#            return call_docval_args(func, kwargs)
+#        return method
+#    else:
+#        @docval(*get_docval(func))
+#        def static_method(**kwargs):
+#            return call_docval_args(func, kwargs)
+#        return method
+
 def fmt_docval_args(func, kwargs):
     ''' Separate positional and keyword arguments
 
@@ -176,7 +192,8 @@ def fmt_docval_args(func, kwargs):
         for arg in func_docval[__docval_args_loc]:
             val = kwargs.get(arg['name'])
             if 'default' in arg:
-                ret_kwargs[arg['name']] = val
+                if val is not None:
+                    ret_kwargs[arg['name']] = val
             else:
                 ret_args.append(val)
     return (ret_args, ret_kwargs)
@@ -207,27 +224,20 @@ def get_docval_kwargs(func):
 
 def docval(*validator, **options):
     '''A decorator for documenting and enforcing type for instance method arguments.
-
     This decorator takes a list of dictionaries that specify the method parameters. These
     dictionaries are used for enforcing type and building a Sphinx docstring.
-
     The first arguments are dictionaries that specify the positional
     arguments and keyword arguments of the decorated function. These dictionaries
     must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a
     positional argument. To define a keyword argument, specify a default value
     using the key ``'default'``. To validate the number of dimensions of an input array
     add the optional ``'ndim'`` parameter.
-
     The decorated method must take ``self`` and ``**kwargs`` as arguments.
-
     When using this decorator, the functions :py:func:`getargs` and
     :py:func:`popargs` can be used for easily extracting arguments from
     kwargs.
-
     The following code example demonstrates the use of this decorator:
-
     .. code-block:: python
-
        @docval({'name': 'arg1':,   'type': str,           'doc': 'this is the first positional argument'},
                {'name': 'arg2':,   'type': int,           'doc': 'this is the second positional argument'},
                {'name': 'kwarg1':, 'type': (list, tuple), 'doc': 'this is a keyword argument', 'default': list()},
@@ -235,7 +245,6 @@ def docval(*validator, **options):
        def foo(self, **kwargs):
            arg1, arg2, kwarg1 = getargs('arg1', 'arg2', 'kwarg1', **kwargs)
            ...
-
     :param enforce_type: Enforce types of input parameters (Default=True)
     :param returns: String describing the return values
     :param rtype: String describing the data type of the return values

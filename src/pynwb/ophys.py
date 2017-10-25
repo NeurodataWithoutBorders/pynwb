@@ -130,10 +130,10 @@ class TwoPhotonSeries(ImageSeries):
 @register_class('ROI', CORE_NAMESPACE)
 class ROI(NWBContainer):
     """
+    A class for defining a region of interest (ROI)
     """
 
-    __nwbfields__ = ('name',
-                     'roi_description',
+    __nwbfields__ = ('roi_description',
                      'pix_mask',
                      'pix_mask_weight',
                      'img_mask')
@@ -146,7 +146,7 @@ class ROI(NWBContainer):
             {'name': 'img_mask', 'type': Iterable, 'doc': 'ROI mask, represented in 2D ([y][x]) intensity image.'},
             {'name': 'reference_images', 'type': (ImageSeries, str), 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
-        name, roi_description, pix_mask, pix_mask_weight, img_mask = popargs('name', 'roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
+        roi_description, pix_mask, pix_mask_weight, img_mask = popargs('roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
         pargs, pkwargs = fmt_docval_args(super(ROI, self).__init__, kwargs)
         super(ROI, self).__init__(*pargs, **pkwargs)
         self.roi_description = roi_description
@@ -159,8 +159,7 @@ class PlaneSegmentation(NWBContainer):
     """
     """
 
-    __nwbfields__ = ('name',
-                     'description',
+    __nwbfields__ = ('description',
                      'roi_list',
                      'imaging_plane',
                      'reference_images')
@@ -195,9 +194,9 @@ class ImageSegmentation(NWBContainer):
 
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
-            {'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentations', 'type': (PlaneSegmentation, list), 'doc': 'ImagePlane class.'})
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
+            {'name': 'plane_segmentation', 'type': (PlaneSegmentation, list), 'doc': 'PlaneSegmentation with the description of the image plane.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ImageSegmentation'})
     def __init__(self, **kwargs):
         plane_segmentations = popargs('plane_segmentations', kwargs)
 
@@ -262,7 +261,8 @@ class DfOverF(NWBContainer):
     _help = "Df/f over time of one or more ROIs. TimeSeries names should correspond to imaging plane names"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'})
+            {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'DfOverF'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(DfOverF, self).__init__, kwargs)
@@ -281,7 +281,8 @@ class Fluorescence(NWBContainer):
     _help = "Fluorescence over time of one or more ROIs. TimeSeries names should correspond to imaging plane names."
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'})
+            {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Fluorescence'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(Fluorescence, self).__init__, kwargs)

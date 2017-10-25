@@ -10,11 +10,11 @@ import os
 
 schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
 
-with open('README.rst') as f:
-    readme = f.read()
+with open('README.rst', 'rb') as f:
+    readme = str(f.read())
 
-with open('license.txt') as f:
-    license = f.read()
+with open('license.txt', 'rb') as f:
+    license = str(f.read())
 
 
 pkgs = find_packages('src', exclude=['data'])

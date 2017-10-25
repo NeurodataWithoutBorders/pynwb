@@ -60,7 +60,7 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
 class RoiResponseSeriesConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
-        iS = ImageSegmentation('test_iS', 'test source', ip)
+        iS = ImageSegmentation('test source', ip, name='test_iS')
 
         ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', ['name1'], iS, timestamps=list())
         self.assertEqual(ts.name, 'test_ts')
@@ -72,7 +72,7 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
 class DfOverFConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
-        iS = ImageSegmentation('test_iS', 'test source', ip)
+        iS = ImageSegmentation('test source', ip, name='test_iS')
 
         rrs = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', ['name1'], iS, timestamps=list())
 
@@ -83,7 +83,7 @@ class DfOverFConstructor(unittest.TestCase):
 class FluorescenceConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
-        iS = ImageSegmentation('test_iS', 'test source', ip)
+        iS = ImageSegmentation('test source', ip, name='test_iS')
 
         ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', ['name1'], iS, timestamps=list())
 
@@ -110,9 +110,9 @@ class ImageSegmentationConstructor(unittest.TestCase):
 
         ps = PlaneSegmentation('name', 'test source', 'description', roi_list, ip, iSS)
 
-        iS = ImageSegmentation('test_iS', 'test source', ps)
+        iS = ImageSegmentation('test_source', ps, name='test_iS')
         self.assertEqual(iS.name, 'test_iS')
-        self.assertEqual(iS.source, 'test source')
+        self.assertEqual(iS.source, 'test_source')
         self.assertEqual(iS.plane_segmentation, ps)
 
 class PlaneSegmentationConstructor(unittest.TestCase):

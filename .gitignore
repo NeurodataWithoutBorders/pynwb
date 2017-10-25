@@ -31,3 +31,6 @@ docs/tmpl.index.rst
 # coverage output
 tests/coverage/htmlcov
 .coverage
+
+# tox
+.tox
