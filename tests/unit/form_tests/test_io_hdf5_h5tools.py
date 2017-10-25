@@ -1,9 +1,9 @@
 import os
 import unittest
 
-from form.data_utils import DataChunkIterator
-from form.backends.hdf5.h5tools import HDF5IO
-from form.build import DatasetBuilder
+from pynwb.form.data_utils import DataChunkIterator
+from pynwb.form.backends.hdf5.h5tools import HDF5IO
+from pynwb.form.build import DatasetBuilder
 
 import h5py
 import tempfile

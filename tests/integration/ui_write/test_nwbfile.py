@@ -4,8 +4,8 @@ import json
 from datetime import datetime
 import os
 
-from form.build import GroupBuilder, DatasetBuilder
-from form.backends.hdf5 import HDF5IO
+from pynwb.form.build import GroupBuilder, DatasetBuilder
+from pynwb.form.backends.hdf5 import HDF5IO
 
 from pynwb import NWBFile, TimeSeries
 from pynwb.ecephys import Clustering

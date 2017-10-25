@@ -5,10 +5,10 @@ import os.path
 
 CORE_NAMESPACE = 'core'
 
-from form.spec import NamespaceCatalog
-from form.utils import docval, getargs
-from form.backends.io import FORMIO
-from form.validate import ValidatorMap
+from .form.spec import NamespaceCatalog
+from .form.utils import docval, getargs
+from .form.backends.io import FORMIO
+from .form.validate import ValidatorMap
 
 from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
 
@@ -27,8 +27,8 @@ global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(CORE_NAMESPACE, NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-from form.build import TypeMap as __TypeMap
-from form.build import ObjectMapper as __ObjectMapper
+from .form.build import TypeMap as __TypeMap
+from .form.build import ObjectMapper as __ObjectMapper
 def get_type_map():
     ret = __TypeMap(__NS_CATALOG)
     return ret
@@ -55,7 +55,7 @@ if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
 
 # added here for convenience to users
-from form.build import BuildManager as __BuildManager
+from .form.build import BuildManager as __BuildManager
 @docval({'name': 'type_map', 'type': __TypeMap, 'doc': 'the path to the YAML with the namespace definition', 'default': None},
         is_method=False)
 def get_build_manager(**kwargs):

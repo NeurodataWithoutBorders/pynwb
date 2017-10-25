@@ -6,8 +6,8 @@ from h5py import File
 
 from pynwb import NWBFile, TimeSeries, get_build_manager
 
-from form.backends.hdf5 import HDF5IO
-from form.build import GroupBuilder, DatasetBuilder
+from pynwb.form.backends.hdf5 import HDF5IO
+from pynwb.form.build import GroupBuilder, DatasetBuilder
 
 class TestHDF5Writer(unittest.TestCase):
 

@@ -2,8 +2,8 @@ from datetime import datetime
 from dateutil.parser import parse as parse_date
 from collections import Iterable
 
-from form.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
-from form import Container
+from .form.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
+from .form import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule

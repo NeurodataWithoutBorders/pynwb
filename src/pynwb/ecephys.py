@@ -2,8 +2,8 @@ import numpy as np
 from h5py import RegionReference
 from collections import Iterable
 
-from form.utils import docval, getargs, popargs, call_docval_func
-from form.data_utils import DataChunkIterator, ShapeValidator
+from .form.utils import docval, getargs, popargs, call_docval_func
+from .form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion

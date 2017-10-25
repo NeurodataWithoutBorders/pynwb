@@ -4,7 +4,7 @@ import json
 from datetime import datetime
 import os
 
-from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder
 
 from pynwb.ecephys import *
 
