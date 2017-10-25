@@ -30,7 +30,7 @@ def _get_resources():
 global __NS_CATALOG
 global __TYPE_MAP
 
-__NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+__NS_CATALOG = NamespaceCatalog(CORE_NAMESPACE, NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 from form.build import TypeMap as TypeMap
 from form.build import ObjectMapper as __ObjectMapper
@@ -80,6 +80,7 @@ def load_namespaces(**kwargs):
     Load namespaces from file
     '''
     namespace_path = getargs('namespace_path', kwargs)
+    print 'HI'
     return __TYPE_MAP.load_namespaces(namespace_path)
 
 # load the core namespace i.e. base NWB specification
