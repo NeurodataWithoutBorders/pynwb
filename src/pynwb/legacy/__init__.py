@@ -1,34 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from .map import ObjectMapperLegacy as ObjectMapper
 from .map import TypeMapLegacy as TypeMap
 from ..spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace

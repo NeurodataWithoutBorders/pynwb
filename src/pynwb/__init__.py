@@ -65,6 +65,7 @@ def get_global_type_map():
 def load_namespaces(**kwargs):
     '''Load namespaces from file'''
     namespace_path = getargs('namespace_path', kwargs)
+    print 'HI'
     return __TYPE_MAP.load_namespaces(namespace_path)
 
 # load the core namespace i.e. base NWB specification
