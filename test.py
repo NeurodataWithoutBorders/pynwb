@@ -58,7 +58,7 @@ if flags['integration'] in args.suites:
     FAILURES += len(integration_test_result.failures)
     ERRORS += len(integration_test_result.errors)
 
-    type_map = pynwb.get_global_type_map()
+    type_map = pynwb.get_type_map()
     import imp
     name = 'integration'
     imp_result = imp.find_module(name, ['tests'])

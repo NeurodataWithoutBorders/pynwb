@@ -199,12 +199,6 @@ class TestHDF5Writer(GroupBuilderTestCase):
             writer.write_builder(self.builder)
         self.check_fields()
 
-    def test_default_manager(self):
-        writer = HDF5IO(self.path)
-        writer.write_builder(self.builder)
-        writer.close()
-        self.check_fields()
-
     def test_read_builder(self):
         self.maxDiff = None
         io = HDF5IO(self.path, self.manager)

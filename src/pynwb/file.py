@@ -214,6 +214,10 @@ class NWBFile(NWBContainer):
     def imaging_planes(self):
         return tuple(self.__imaging_planes.values())
 
+    @property
+    def imaging_planes(self):
+        return tuple(self.__imaging_planes.values())
+
     def is_acquisition(self, ts):
         return self.__exists(ts, self.__acquisition)
 

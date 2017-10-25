@@ -8,6 +8,7 @@ from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog, RefSpec
 from ..spec.spec import BaseStorageSpec
+import warnings
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, RegionBuilder
 
 
@@ -442,7 +443,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
             if attr_value is None:
                 if spec.required:
-                    raise Warning("missing required attribute '%s' for '%s' of type '%s'" % (spec.name, builder.name, self.spec.data_type_def))
+                    warnings.warn("missing required attribute '%s' for '%s' of type '%s'" % (spec.name, builder.name, self.spec.data_type_def))
                 continue
             builder.set_attribute(spec.name, attr_value)
 
@@ -459,7 +460,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             #TODO: add check for required datasets
             if attr_value is None:
                 if spec.required:
-                    raise Warning("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
+                    warnings.warn("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
                 sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
@@ -662,13 +663,28 @@ class TypeMap(object):
             {'name': 'mapper_cls', 'type': type, 'doc': 'the ObjectMapper class to use', 'default': ObjectMapper})
     def __init__(self, **kwargs):
         namespaces = getargs('namespaces', kwargs)
-        self.__map_types = dict()
         self.__ns_catalog = namespaces
         self.__mappers = dict()     ## already constructed ObjectMapper classes
         self.__mapper_cls = dict()  ## the ObjectMapper class to use for each container type
         self.__container_types = dict()
         self.__data_types = dict()
         self.__default_mapper_cls = getargs('mapper_cls', kwargs)
+
+    def __copy__(self):
+        ret = TypeMap(self.__ns_catalog, self.__default_mapper_cls)
+        ret.merge(self)
+        return ret
+
+    def __deepcopy__(self):
+        return self.__copy__()
+
+    def merge(self, type_map):
+        for namespace in type_map.__container_types:
+            for data_type in type_map.__container_types[namespace]:
+                container_cls = type_map.__container_types[namespace][data_type]
+                self.register_container_type(namespace, data_type, container_cls)
+        for container_cls in type_map.__mapper_cls:
+            self.register_map(container_cls, type_map.__mapper_cls[container_cls])
 
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
             {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
@@ -800,19 +816,23 @@ class TypeMap(object):
     def __get_builder_dt(self, builder):
         ret = builder.attributes.get(self.__ns_catalog.group_spec_cls.type_key())
         if ret is None:
-            msg = "builder '%s' is does not have a data_type" % builder.name
+            msg = "builder '%s' does not have a data_type" % builder.name
             raise ValueError(msg)
         return ret
 
-    def __get_builder_ns(self, bldr):
-        return bldr.get('namespace', self.__ns_catalog.default_namespace)
+    def get_builder_ns(self, builder):
+        ret = builder.attributes.get('namespace')
+        if ret is None:
+            msg = "builder '%s' does not have a namespace" % builder.name
+            raise ValueError(msg)
+        return ret
 
     @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder object to get the corresponding Container class for'})
     def get_cls(self, **kwargs):
         ''' Get the class object for the given Builder '''
         builder = getargs('builder', kwargs)
         data_type = self.__get_builder_dt(builder)
-        namespace = self.__get_builder_ns(builder)
+        namespace = self.get_builder_ns(builder)
         return self.get_container_cls(namespace, data_type)
 
     @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
@@ -838,7 +858,7 @@ class TypeMap(object):
                 dt = self.__get_builder_dt(builder)
             if dt is not None:
                 # TODO: this returns None when using subclasses
-                ns = self.__get_builder_ns(builder)
+                ns = self.get_builder_ns(builder)
                 hierarchy = self.__ns_catalog.get_hierarchy(ns, dt)
                 for t in hierarchy:
                     subspec = spec.get_data_type(t)
@@ -875,7 +895,7 @@ class TypeMap(object):
                 raise ValueError("class %s does not mapped to a data_type" % container_cls)
         else:
             data_type = self.__get_builder_dt(obj)
-            namespace = self.__get_builder_ns(obj)
+            namespace = self.get_builder_ns(obj)
             container_cls = self.get_cls(obj)
         # now build the ObjectMapper class
         spec = self.__ns_catalog.get_spec(namespace, data_type)
@@ -933,7 +953,7 @@ class TypeMap(object):
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for constructing', 'default': None})
     def construct(self, **kwargs):
         """ Construct the Container represented by the given builder """
-        builder, build_manager = getargs('builder', 'build_manager', kwargs)
+        builder, build_manager = getargs('builder', 'manager', kwargs)
         if build_manager is None:
             build_manager = BuildManager(self)
         attr_map = self.get_map(builder)
