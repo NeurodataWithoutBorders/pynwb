@@ -64,8 +64,6 @@ def register_map(**kwargs):
     as the mapper for container_cls. If mapper_cls specified, register the class as the mapper for container_cls
     """
 
-    print'LEGACY REGISTERED'
-
     container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
     def _dec(cls):
         __TYPE_MAP.register_map(container_cls, cls)
