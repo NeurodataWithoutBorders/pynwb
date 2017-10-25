@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from form.data_utils import ShapeValidator,ShapeValidatorResult, DataChunkIterator
+from pynwb.form.data_utils import ShapeValidator,ShapeValidatorResult, DataChunkIterator
 import numpy as np
 
 

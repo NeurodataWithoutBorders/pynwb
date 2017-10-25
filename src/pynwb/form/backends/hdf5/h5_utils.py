@@ -1,7 +1,7 @@
 import h5py
 
-from form.utils import docval, getargs
-from form.data_utils import RegionSlicer
+from ...utils import docval, getargs
+from ...data_utils import RegionSlicer
 
 class H5RegionSlicer(RegionSlicer):
 

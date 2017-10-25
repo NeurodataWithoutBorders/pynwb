@@ -1,8 +1,8 @@
 from collections import Iterable
 from h5py import RegionReference
 
-from form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
-from form import Container, Data, DataRegion, get_region_slicer
+from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
+from .form import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass

@@ -2,7 +2,7 @@ import unittest2 as unittest
 import sys
 from six import text_type, PY2
 
-from form.utils import *
+from pynwb.form.utils import *
 
 class MyTestClass(object):
 
