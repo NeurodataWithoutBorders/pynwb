@@ -195,7 +195,7 @@ class ImageSegmentation(NWBContainer):
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentations', 'type': (PlaneSegmentation, list), 'doc': 'ImagePlane class.'},
+            {'name': 'plane_segmentations', 'type': (PlaneSegmentation, list), 'doc': 'PlaneSegmentation with the description of the image plane.'},
             {'name': 'name', 'type': str, 'doc': 'the name of this ImageSegmentation container', 'default': 'ImageSegmentation'})
     def __init__(self, **kwargs):
         plane_segmentations = popargs('plane_segmentations', kwargs)
