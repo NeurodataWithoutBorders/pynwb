@@ -25,10 +25,14 @@ jobs:
            name: Run the tests for Python 2.7
            command: |
              tox -e py27
+           # Install is expected to be quick. Increase timeout in case there are some network issues.
+           # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
+           no_output_timeout: 30m
        - run:
            name: Run the tests for Python 3.6
            command: |
              tox -e py36
+           no_output_timeout: 30m
        - run:
            name: Report coverage
            command: |
