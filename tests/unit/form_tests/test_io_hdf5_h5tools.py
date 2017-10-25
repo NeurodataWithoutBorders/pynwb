@@ -9,7 +9,7 @@ import h5py
 import tempfile
 import numpy as np
 
-class H5IOTest():
+class H5IOTest(unittest.TestCase):
     """Tests for h5tools IO tools"""
 
 
@@ -146,8 +146,4 @@ class H5IOTest():
 
 
 if __name__ == '__main__':
-    # unittest.main()
-
-    T = H5IOTest()
-    T.setUp()
-    T.test_write_dataset_scalar()
+    unittest.main()

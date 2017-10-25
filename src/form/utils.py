@@ -78,7 +78,6 @@ def __format_type(argtype):
 def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     """
     Internal helper function used by the docval decroator to parse and validate function arguments
-
     :param validator: List of dicts from docval with the description of the arguments
     :param args: List of the values of positional arguments supplied by the caller
     :param kwargs: Dict keyword arguments supplied by the caller where keys are the argument name and
@@ -86,7 +85,6 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     :param enforce_type: Boolean indicating whether the type of arguments should be enforced
     :param enforce_ndim: Boolean indicating whether the number of dimensions of array arguments
                          should be enforced if possible.
-
     :return: Dict with:
         * 'args' : Dict all arguments where keys are the names and values are the values of the arguments.
         * 'errors' : List of string with error messages

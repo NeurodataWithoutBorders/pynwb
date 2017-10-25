@@ -130,7 +130,8 @@ class SpecNamespace(dict):
 
 class NamespaceCatalog(object):
 
-    @docval({'name': 'group_spec_cls', 'type': type, 'doc': 'the class to use for group specifications', 'default': GroupSpec},
+    @docval({'name': 'default_namespace', 'type': str, 'doc': 'the name of the default Namespace'},
+            {'name': 'group_spec_cls', 'type': type, 'doc': 'the class to use for group specifications', 'default': GroupSpec},
             {'name': 'dataset_spec_cls', 'type': type, 'doc': 'the class to use for dataset specifications', 'default': DatasetSpec},
             {'name': 'spec_namespace_cls', 'type': type, 'doc': 'the class to use for specification namespaces', 'default': SpecNamespace},)
     def __init__(self, **kwargs):

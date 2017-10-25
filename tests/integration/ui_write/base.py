@@ -20,7 +20,7 @@ def container_test(container):
 class TestMapNWBContainer(unittest.TestCase):
 
     def setUp(self):
-        self.__manager = get_manager()
+        self.__manager = get_build_manager()
         self.__container = self.setUpContainer()
         self.__builder = self.setUpBuilder()
 
