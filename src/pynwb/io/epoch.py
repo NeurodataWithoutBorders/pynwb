@@ -1,4 +1,4 @@
-from form.build import ObjectMapper
+from ..form.build import ObjectMapper
 from .. import register_map
 
 from pynwb.epoch import Epoch, EpochTimeSeries
