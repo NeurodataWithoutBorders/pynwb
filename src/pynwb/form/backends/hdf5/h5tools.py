@@ -12,11 +12,6 @@ from ...data_utils import DataChunkIterator, get_shape
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
 from ...spec import RefSpec, DtypeSpec
 
-#from form import Container
-#from form.utils import docval, getargs, popargs
-#from form.data_utils import DataChunkIterator, get_shape
-#from form.build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
-#from form.spec import RefSpec, DtypeSpec
 from ..io import FORMIO
 
 ROOT_NAME = 'root'
@@ -43,7 +38,6 @@ class HDF5IO(FORMIO):
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
         self.open()
-        #f = File(self.__path, 'r+')
         f_builder = self.__read.get(self.__file)
         if f_builder is None:
             f_builder = self.__read_group(self.__file, ROOT_NAME)
