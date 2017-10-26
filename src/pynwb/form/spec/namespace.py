@@ -5,6 +5,9 @@ import os.path
 import string
 from warnings import warn
 from itertools import chain
+from abc import ABCMeta, abstractmethod
+from six import with_metaclass
+
 
 from ..utils import docval, getargs, popargs, get_docval
 from .catalog import SpecCatalog
@@ -128,12 +131,51 @@ class SpecNamespace(dict):
             raise KeyError("'%s' not found in %s" % (e.args[0], str(spec_dict)))
         return cls(*args, **kwargs)
 
+class SpecReader(with_metaclass(ABCMeta, object)):
+
+    @abstractmethod
+    def read_spec(self):
+        pass
+
+    @abstractmethod
+    def read_namespace(self):
+        pass
+
+class YAMLSpecReader(SpecReader):
+
+    @docval({'name': 'indir', 'type': str, 'doc': 'the path spec files are relative to', 'default': '.'})
+    def __init__(self, **kwargs):
+        self.__indir = getargs('indir', kwargs)
+
+    def read_namespace(self, namespace_path):
+        namespaces = None
+        with open(namespace_path, 'r') as stream:
+            d = yaml.safe_load(stream)
+            namespaces = d.get('namespaces')
+            if namespaces == None:
+                raise ValueError("no 'namespaces' found in %s" % namespace_path)
+        return namespaces
+
+    def read_spec(self, spec_path):
+        specs = None
+        with open(self.__get_spec_path(spec_path), 'r') as stream:
+            specs = yaml.safe_load(stream)
+            if not ('datasets' in specs or 'groups' in specs):
+                raise ValueError("no 'groups' or 'datasets' found in %s" % namespace_path)
+        return specs
+
+    def __get_spec_path(self, spec_path):
+        if os.path.isabs(spec_path):
+            return spec_path
+        return os.path.join(self.__indir, spec_path)
+
+
 class NamespaceCatalog(object):
 
     @docval({'name': 'default_namespace', 'type': str, 'doc': 'the name of the default Namespace'},
             {'name': 'group_spec_cls', 'type': type, 'doc': 'the class to use for group specifications', 'default': GroupSpec},
             {'name': 'dataset_spec_cls', 'type': type, 'doc': 'the class to use for dataset specifications', 'default': DatasetSpec},
-            {'name': 'spec_namespace_cls', 'type': type, 'doc': 'the class to use for specification namespaces', 'default': SpecNamespace},)
+            {'name': 'spec_namespace_cls', 'type': type, 'doc': 'the class to use for specification namespaces', 'default': SpecNamespace})
     def __init__(self, **kwargs):
         """Create a catalog for storing  multiple Namespaces"""
         self.__default_namespace = getargs('default_namespace', kwargs)
@@ -212,34 +254,33 @@ class NamespaceCatalog(object):
             raise KeyError("'%s' not a namespace" % namespace)
         return spec_ns.get_hierarchy(data_type)
 
-    def __load_spec_file(self, spec_file_path, catalog, dtypes=None, resolve=True):
-        ret = self.__loaded_specs.get(spec_file_path)
+    def __load_spec_file(self, reader, spec_source, catalog, dtypes=None, resolve=True):
+        ret = self.__loaded_specs.get(spec_source)
         def __reg_spec(spec_cls, spec_dict):
             dt_def = spec_dict.get(spec_cls.def_key())
             if dt_def is None:
-                msg = 'skipping spec in %s, no %s found' % (spec_file_path, spec_cls.def_key())
+                msg = 'skipping spec in %s, no %s found' % (spec_source, spec_cls.def_key())
                 warn(msg)
                 return
             if dtypes and dt_def not in dtypes:
                 return
             if resolve:
-                self.__resolve_includes(spec_dict, catalog, spec_file_path)
+                self.__resolve_includes(spec_dict, catalog)
             spec_obj = spec_cls.build_spec(spec_dict)
-            catalog.auto_register(spec_obj, spec_file_path)
+            catalog.auto_register(spec_obj, spec_source)
         if ret is None:
             ret = dict()
-            with open(spec_file_path, 'r') as stream:
-                d = yaml.safe_load(stream)
-                specs = d.get('datasets', list())
-                for spec_dict in specs:
-                    __reg_spec(self.__dataset_spec_cls, spec_dict)
-                specs = d.get('groups', list())
-                for spec_dict in specs:
-                    __reg_spec(self.__group_spec_cls, spec_dict)
-            self.__loaded_specs[spec_file_path] = ret
+            d = reader.read_spec(spec_source)
+            specs = d.get('datasets', list())
+            for spec_dict in specs:
+                __reg_spec(self.__dataset_spec_cls, spec_dict)
+            specs = d.get('groups', list())
+            for spec_dict in specs:
+                __reg_spec(self.__group_spec_cls, spec_dict)
+            self.__loaded_specs[spec_source] = ret
         return ret
 
-    def __resolve_includes(self, spec_dict, catalog, spec_file_path):
+    def __resolve_includes(self, spec_dict, catalog):
         """
             Pull in any attributes, datasets, or groups included
         """
@@ -255,21 +296,18 @@ class NamespaceCatalog(object):
             modified = True
         it = chain(spec_dict.get('groups', list()), spec_dict.get('datasets', list()))
         for subspec_dict in it:
-            sub_modified = self.__resolve_includes(subspec_dict, catalog, spec_file_path)
+            sub_modified = self.__resolve_includes(subspec_dict, catalog)
         return modified
-
-    @classmethod
-    def __get_spec_path(cls, ns_path, spec_path):
-        if os.path.isabs(spec_path):
-            return spec_path
-        return os.path.join(os.path.dirname(ns_path), spec_path)
 
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
             {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
+            {'name': 'reader', 'type': SpecReader, 'doc': 'the class to user for reading specifications', 'default': None},
             returns='a dictionary describing the dependencies of loaded namespaces', rtype=dict)
     def load_namespaces(self, **kwargs):
         """Load the namespaces in the given file"""
-        namespace_path, resolve = getargs('namespace_path', 'resolve', kwargs)
+        namespace_path, resolve, reader = getargs('namespace_path', 'resolve', 'reader', kwargs)
+        if reader is None:
+            reader = YAMLSpecReader(indir=os.path.dirname(namespace_path))
         # load namespace definition from file
         if not os.path.exists(namespace_path):
             raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
@@ -278,11 +316,7 @@ class NamespaceCatalog(object):
             ret = dict()
         else:
             return ret
-        with open(namespace_path, 'r') as stream:
-            d = yaml.safe_load(stream)
-            namespaces = d.get('namespaces')
-            if namespaces == None:
-                raise ValueError("no 'namespaces' found in %s" % namespace_path)
+        namespaces = reader.read_namespace(namespace_path)
         types_key = self.__spec_namespace_cls.types_key()
         # now load specs into namespace
         for ns in namespaces:
@@ -291,11 +325,10 @@ class NamespaceCatalog(object):
             for s in ns['schema']:
                 if 'source' in s:
                     # read specs from file
-                    spec_file = self.__get_spec_path(namespace_path, s['source'])
                     dtypes = None
                     if types_key in s:
                         dtypes = set(s[types_key])
-                    ndts = self.__load_spec_file(spec_file, catalog, dtypes=dtypes, resolve=resolve)
+                    ndts = self.__load_spec_file(reader, s['source'], catalog, dtypes=dtypes, resolve=resolve)
                 elif 'namespace' in s:
                     # load specs from namespace
                     try:
