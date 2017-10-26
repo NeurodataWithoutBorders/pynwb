@@ -5,7 +5,6 @@ from pynwb import NWBFile, get_build_manager
 from form.backends.hdf5 import HDF5IO
 
 import numpy as np
-import scipy.stats as sps
 import os
 from datetime import datetime
 
@@ -55,7 +54,7 @@ np.random.seed(1234)
 ephys_data = np.random.rand(data_len)
 ephys_timestamps = np.arange(data_len) / rate
 spatial_timestamps = ephys_timestamps[::10]
-spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T
+spatial_data = np.cumsum(np.random.normal(size=(2,len(spatial_timestamps))), axis=-1).T
 
 ephys_ts = ElectricalSeries('test_ephys_data',
                             'test_source',
@@ -76,7 +75,7 @@ spatial_ts = SpatialSeries('test_spatial_data',
                            timestamps=spatial_timestamps,
                            resolution=0.1,
                            comments="This data was generated with numpy, using 1234 as the seed",
-                           description="This 2D Brownian process generated with numpy.cumsum(scipy.stats.norm.rvs(size=(2,len(timestamps))), axis=-1).T")
+                           description="This 2D Brownian process generated with numpy.cumsum(numpy.random.normal(size=(2,len(spatial_timestamps))), axis=-1).T"
 
 # Create experimental epochs
 epoch_tags = ('test_example',)
@@ -96,4 +95,3 @@ io.close()
 io = HDF5IO(filename, manager, mode='r')
 io.read()
 io.close()
-

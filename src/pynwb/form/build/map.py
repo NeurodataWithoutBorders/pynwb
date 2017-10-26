@@ -813,7 +813,7 @@ class TypeMap(object):
                 self.register_container_type(namespace, data_type, ret)
         return ret
 
-    def __get_builder_dt(self, builder):
+    def get_builder_dt(self, builder):
         ret = builder.attributes.get(self.__ns_catalog.group_spec_cls.type_key())
         if ret is None:
             msg = "builder '%s' does not have a data_type" % builder.name

@@ -9,8 +9,8 @@ from ...container import Container
 
 from ...utils import docval, getargs, popargs
 from ...data_utils import DataChunkIterator, get_shape
-from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
-from ...spec import RefSpec, DtypeSpec
+from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder, TypeMap
+from ...spec import RefSpec, DtypeSpec, NamespaceCatalog
 
 #from form import Container
 #from form.utils import docval, getargs, popargs
@@ -32,6 +32,8 @@ class HDF5IO(FORMIO):
         For `mode`, see :ref:`write_nwbfile`
         '''
         path, manager, mode = popargs('path', 'manager', 'mode', kwargs)
+        if manager is None:
+            manager = BuildManager(TypeMap(NamespaceCatalog()))
         super(HDF5IO, self).__init__(manager, source=path)
         self.__path = path
         self.__mode = mode
