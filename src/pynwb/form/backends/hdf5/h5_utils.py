@@ -1,7 +1,7 @@
 import h5py
 
 from ...utils import docval, getargs
-from ...data_utils import RegionSlicer
+from ...data_utils import RegionSlicer, DataIO
 
 
 class H5RegionSlicer(RegionSlicer):
@@ -23,3 +23,17 @@ class H5RegionSlicer(RegionSlicer):
 
     def __len__(self):
         return self.__len
+
+
+class H5DataIO(DataIO):
+
+    @docval({'name': 'data', 'type': 'array_data', 'doc': 'the data to be written'},
+            {'name': 'compress', 'type': bool, 'doc': 'Flag to use gzip compression filter on dataset', 'default': False})
+    def __init__(self, **kwargs):
+        compress = popargs('compress', kwargs)
+        call_docval_func(super(H5DataIO, self).__init__, kwargs)
+        self.__compress = compress
+
+    @property
+    def compress(self):
+        return self.__compress

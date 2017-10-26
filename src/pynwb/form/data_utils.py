@@ -450,24 +450,16 @@ class ShapeValidatorResult(object):
         return self.__getattribute__(item)
 
 @docval_macro('data')
-class DataIO:
+class DataIO(with_metaclass(ABCMeta, object)):
 
-    @docval({'name': 'data', 'type': 'array_data', 'doc': 'the data to be written'},
-            {'name': 'compress', 'type': bool, 'doc': 'Flag to use gzip compression filter on dataset', 'default': False}
-            )
+    @docval({'name': 'data', 'type': 'array_data', 'doc': 'the data to be written'})
     def __init__(self, **kwargs):
-        data, compress = popargs('data', 'compress', kwargs)
+        data = popargs('data', kwargs)
         self.__data = data
-        self.__compress = compress
 
     @property
     def data(self):
         return self.__data
-
-    @property
-    def compress(self):
-        return self.__compress
-
 
 class RegionSlicer(with_metaclass(ABCMeta, object)):
     '''

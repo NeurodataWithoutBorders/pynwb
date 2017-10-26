@@ -8,10 +8,12 @@ import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
-from ...data_utils import DataChunkIterator, get_shape, DataIO
+from ...data_utils import DataChunkIterator, get_shape
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder, TypeMap
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, GroupSpec
 from ...spec import NamespaceBuilder
+
+from .h5_utils import H5DataIO
 
 from ..io import FORMIO
 
@@ -447,7 +449,7 @@ class HDF5IO(FORMIO):
         name = builder.name
         data = builder.data
         options = dict()
-        if isinstance(data, DataIO):
+        if isinstance(data, H5DataIO):
             options['compress'] = 'gzip' if data.compress else None
             data = data.data
         attributes = builder.attributes
