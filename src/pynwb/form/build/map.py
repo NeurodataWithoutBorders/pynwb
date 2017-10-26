@@ -646,19 +646,6 @@ class TypeMap(object):
     ''' A class to maintain the map between ObjectMappers and Container classes
     '''
 
-    __default = None
-
-    @classmethod
-    @docval({'name': 'default_map', 'type': 'TypeMap', 'doc': 'the default TypeMap instance to use'})
-    def register_default(cls, **kwargs):
-        '''Register a default TypeMap for FORM to use'''
-        cls.__default = getargs('default_map', kwargs)
-
-    @classmethod
-    def default(cls):
-        '''The default TypeMap for FORM to use'''
-        return cls.__default
-
     @docval({'name': 'namespaces', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use'},
             {'name': 'mapper_cls', 'type': type, 'doc': 'the ObjectMapper class to use', 'default': ObjectMapper})
     def __init__(self, **kwargs):
@@ -831,7 +818,7 @@ class TypeMap(object):
     def get_cls(self, **kwargs):
         ''' Get the class object for the given Builder '''
         builder = getargs('builder', kwargs)
-        data_type = self.__get_builder_dt(builder)
+        data_type = self.get_builder_dt(builder)
         namespace = self.get_builder_ns(builder)
         return self.get_container_cls(namespace, data_type)
 
@@ -853,9 +840,9 @@ class TypeMap(object):
         if subspec is None:
             # builder was generated from something with a data_type and a wildcard name
             if isinstance(builder, LinkBuilder):
-                dt = self.__get_builder_dt(builder.builder)
+                dt = self.get_builder_dt(builder.builder)
             else:
-                dt = self.__get_builder_dt(builder)
+                dt = self.get_builder_dt(builder)
             if dt is not None:
                 # TODO: this returns None when using subclasses
                 ns = self.get_builder_ns(builder)
@@ -894,7 +881,7 @@ class TypeMap(object):
             if namespace is None:
                 raise ValueError("class %s does not mapped to a data_type" % container_cls)
         else:
-            data_type = self.__get_builder_dt(obj)
+            data_type = self.get_builder_dt(obj)
             namespace = self.get_builder_ns(obj)
             container_cls = self.get_cls(obj)
         # now build the ObjectMapper class
