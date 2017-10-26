@@ -3,6 +3,7 @@ import numpy as np
 from abc import ABCMeta, abstractmethod, abstractproperty
 from six import with_metaclass
 from .utils import docval, getargs
+from .utils import docval, getargs, popargs, docval_macro
 from operator import itemgetter
 
 
@@ -52,6 +53,7 @@ class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
         pass
 
 
+@docval_macro('array_data')
 class DataChunkIterator(AbstractDataChunkIterator):
     """Custom iterator class used to iterate over chunks of data.
 
@@ -446,6 +448,25 @@ class ShapeValidatorResult(object):
         if item == 'default_message':
             return self.SHAPE_ERROR[self.error]
         return self.__getattribute__(item)
+
+@docval_macro('data')
+class DataIO:
+
+    @docval({'name': 'data', 'type': 'array_data', 'doc': 'the data to be written'},
+            {'name': 'compress', 'type': bool, 'doc': 'Flag to use gzip compression filter on dataset', 'default': False}
+            )
+    def __init__(self, **kwargs):
+        data, compress = popargs('data', 'compress', kwargs)
+        self.__data = data
+        self.__compress = compress
+
+    @property
+    def data(self):
+        return self.__data
+
+    @property
+    def compress(self):
+        return self.__compress
 
 
 class RegionSlicer(with_metaclass(ABCMeta, object)):
