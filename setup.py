@@ -31,11 +31,9 @@ setup_args = {
     'author_email': 'ajtritt@lbl.gov',
     'url': 'https://github.com/NeurodataWithoutBorders/pynwb',
     'license': license,
-    'setup_requires': ['numpy'],
     'install_requires':
     [
         'numpy',
-        'scipy',
         'h5py',
         'ruamel.yaml',
         'python-dateutil',
