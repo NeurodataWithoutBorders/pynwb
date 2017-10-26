@@ -65,14 +65,14 @@ class TestGetSubSpec(unittest.TestCase):
         spec_catalog = SpecCatalog()
         spec_catalog.register_spec(self.bar_spec, 'test.yaml')
         namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=spec_catalog)
-        namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
+        namespace_catalog = NamespaceCatalog()
         namespace_catalog.add_namespace(CORE_NAMESPACE, namespace)
         self.type_map = TypeMap(namespace_catalog)
         self.type_map.register_container_type(CORE_NAMESPACE, 'Bar', Bar)
 
     def test_get_subspec_data_type_noname(self):
         parent_spec = GroupSpec('Something to hold a Bar', 'bar_bucket', groups=[self.bar_spec])
-        sub_builder = GroupBuilder('my_bar', attributes={'data_type': 'Bar'})
+        sub_builder = GroupBuilder('my_bar', attributes={'data_type': 'Bar', 'namespace': CORE_NAMESPACE})
         builder = GroupBuilder('bar_bucket', groups={'my_bar': sub_builder})
         result = self.type_map.get_subspec(parent_spec, sub_builder)
         self.assertIs(result, self.bar_spec)
@@ -80,7 +80,7 @@ class TestGetSubSpec(unittest.TestCase):
     def test_get_subspec_named(self):
         child_spec = GroupSpec('A test group specification with a data type', 'my_subgroup')
         parent_spec = GroupSpec('Something to hold a Bar', 'my_group', groups=[child_spec])
-        sub_builder = GroupBuilder('my_subgroup', attributes={'data_type': 'Bar'})
+        sub_builder = GroupBuilder('my_subgroup', attributes={'data_type': 'Bar', 'namespace': CORE_NAMESPACE})
         builder = GroupBuilder('my_group', groups={'my_bar': sub_builder})
         result = self.type_map.get_subspec(parent_spec, sub_builder)
         self.assertIs(result, child_spec)
@@ -94,7 +94,7 @@ class TestTypeMap(unittest.TestCase):
         self.spec_catalog.register_spec(self.bar_spec, 'test.yaml')
         self.spec_catalog.register_spec(self.foo_spec, 'test.yaml')
         self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
-        self.namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
+        self.namespace_catalog = NamespaceCatalog()
         self.namespace_catalog.add_namespace(CORE_NAMESPACE, self.namespace)
         self.type_map = TypeMap(self.namespace_catalog)
         self.type_map.register_container_type(CORE_NAMESPACE, 'Bar', Bar)
@@ -140,7 +140,7 @@ class TestDynamicContainer(unittest.TestCase):
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.bar_spec, 'test.yaml')
         self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
-        self.namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
+        self.namespace_catalog = NamespaceCatalog()
         self.namespace_catalog.add_namespace(CORE_NAMESPACE, self.namespace)
         self.type_map = TypeMap(self.namespace_catalog)
         self.type_map.register_container_type(CORE_NAMESPACE, 'Bar', Bar)
@@ -198,7 +198,7 @@ class TestObjectMapper(unittest.TestCase):
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.bar_spec, 'test.yaml')
         self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
-        self.namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
+        self.namespace_catalog = NamespaceCatalog()
         self.namespace_catalog.add_namespace(CORE_NAMESPACE, self.namespace)
         self.type_map = TypeMap(self.namespace_catalog)
         self.type_map.register_container_type(CORE_NAMESPACE, 'Bar', Bar)
@@ -237,7 +237,7 @@ class TestObjectMapperNested(TestObjectMapper):
     def test_construct(self):
         ''' Test default mapping functionality when object attributes map to an attribute deeper than top-level Builder '''
         builder = GroupBuilder('my_bar', datasets={'data': DatasetBuilder('data', list(range(10)), attributes={'attr2': 10})},
-                                attributes={'attr1': 'value1', 'data_type': 'Bar'})
+                                attributes={'attr1': 'value1', 'data_type': 'Bar', 'namespace': CORE_NAMESPACE})
         expected = Bar('my_bar', list(range(10)), 'value1', 10)
         container = self.mapper.construct(builder, self.manager)
         self.assertEqual(container, expected)
@@ -268,7 +268,7 @@ class TestObjectMapperNoNesting(TestObjectMapper):
 
     def test_construct(self):
         builder = GroupBuilder('my_bar', datasets={'data': DatasetBuilder('data', list(range(10)))},
-                               attributes={'attr1': 'value1', 'attr2': 10, 'data_type': 'Bar'})
+                               attributes={'attr1': 'value1', 'attr2': 10, 'data_type': 'Bar', 'namespace': CORE_NAMESPACE})
         expected = Bar('my_bar', list(range(10)), 'value1', 10)
         container = self.mapper.construct(builder, self.manager)
         self.assertEqual(container, expected)

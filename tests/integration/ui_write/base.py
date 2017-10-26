@@ -3,7 +3,7 @@ from datetime import datetime
 import os
 import numpy as np
 
-from pynwb import NWBContainer, get_build_manager, NWBFile, NWBData
+from pynwb import NWBContainer, get_manager, NWBFile, NWBData
 from pynwb.form.backends.hdf5 import HDF5IO
 
 CORE_NAMESPACE = 'core'
@@ -20,7 +20,7 @@ def container_test(container):
 class TestMapNWBContainer(unittest.TestCase):
 
     def setUp(self):
-        self.__manager = get_build_manager()
+        self.__manager = get_manager()
         self.__container = self.setUpContainer()
         self.__builder = self.setUpBuilder()
 
