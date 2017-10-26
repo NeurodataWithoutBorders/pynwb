@@ -27,7 +27,7 @@ def __get_resources():
 global __NS_CATALOG
 global __TYPE_MAP
 
-__NS_CATALOG = NamespaceCatalog(CORE_NAMESPACE, NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+__NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 from .form.build import TypeMap as TypeMap
 from .form.build import ObjectMapper as __ObjectMapper
@@ -70,7 +70,9 @@ def get_manager(**kwargs):
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
 def load_namespaces(**kwargs):
-    '''Load namespaces from file'''
+    '''
+    Load namespaces from file
+    '''
     namespace_path = getargs('namespace_path', kwargs)
     return __TYPE_MAP.load_namespaces(namespace_path)
 
@@ -174,5 +176,3 @@ from . import misc
 from . import ogen
 from . import ophys
 from . import retinotopy
-
-__TypeMap.register_default(__TYPE_MAP)
