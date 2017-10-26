@@ -30,7 +30,7 @@ def _get_resources():
 global __NS_CATALOG
 global __TYPE_MAP
 
-__NS_CATALOG = NamespaceCatalog(CORE_NAMESPACE, NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+__NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 from form.build import TypeMap as TypeMap
 from form.build import ObjectMapper as __ObjectMapper
