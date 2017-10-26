@@ -807,7 +807,7 @@ class TypeMap(object):
         return ret
 
     def get_builder_ns(self, builder):
-        ret = builder.get('namespace')
+        ret = builder.attributes.get('namespace')
         if ret is None:
             msg = "builder '%s' is does not have a namespace" % builder.name
             raise ValueError(msg)

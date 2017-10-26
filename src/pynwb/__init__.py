@@ -147,10 +147,15 @@ class NWBHDF5IO(HDF5IO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
+            {'name': 'extensions', 'type': (str, TypeMap, list), 'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps', 'default': None},
             {'name': 'mode', 'type': str, 'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'})
     def __init__(self, **kwargs):
-        path, manager, mode = popargs('path', 'manager', 'mode', kwargs)
-        if manager is None:
+        path, manager, mode, extensions = popargs('path', 'manager', 'mode', 'extensions', kwargs)
+        if manager is not None and extensions is not None:
+            raise ValueError("'manager' and 'extensions' cannot be specified together")
+        elif extensions is not None:
+            manager = get_manager(extensions=extensions)
+        elif manager is None:
             manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager, mode=mode)
 
