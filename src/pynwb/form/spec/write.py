@@ -3,12 +3,41 @@ import json
 import ruamel.yaml as yaml
 import os.path
 from collections import OrderedDict
+from six import with_metaclass
+from abc import ABCMeta, abstractmethod
 
 from .namespace import SpecNamespace
 from .spec import GroupSpec, DatasetSpec
 
 from ..utils import docval, getargs, popargs
 
+
+class SpecWriter(with_metaclass(ABCMeta, object)):
+
+    @abstractmethod
+    def write_spec(self, spec, path):
+        pass
+
+    @abstractmethod
+    def write_namespace(self, namespace, path):
+        pass
+
+class YAMLSpecWriter(SpecWriter):
+
+    @docval({'name': 'outdir', 'type': str, 'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'})
+    def __init__(self, **kwargs):
+        self.__outdir = getargs('outdir', kwargs)
+
+    def __dump_spec(self, specs, stream):
+        yaml.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
+
+    def write_spec(self, spec, path):
+        with open(os.path.join(self.__outdir, path), 'w') as stream:
+            self.__dump_spec(spec, stream)
+
+    def write_namespace(self, namespace, path):
+        with open(os.path.join(self.__outdir, path), 'w') as stream:
+            self.__dump_spec({'namespaces': [namespace]}, stream)
 
 class NamespaceBuilder(object):
     ''' A class for building namespace and spec files '''
@@ -62,18 +91,18 @@ class NamespaceBuilder(object):
         namespace = getargs('namespace', kwargs)
         self.__namespaces.setdefault(namespace, {'namespace': namespace})
 
-    def __dump_spec(self, specs, stream):
-        yaml.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
-
     @docval({'name': 'path', 'type': str, 'doc': 'the path to write the spec to'},
-            {'name': 'outdir', 'type': str, 'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'})
+            {'name': 'outdir', 'type': str, 'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'},
+            {'name': 'writer', 'type': SpecWriter, 'doc': 'the SpecWriter to use to write the namespace', 'default': None})
     def export(self, **kwargs):
         ''' Export the namespace to the given path.
 
         All new specification source files will be written in the same directory as the
         given path.
         '''
-        ns_path, outdir = getargs('path', 'outdir', kwargs)
+        ns_path, writer = getargs('path', 'writer', kwargs)
+        if writer is None:
+            writer = YAMLSpecWriter(outdir=getargs('outdir', kwargs))
         ns_args = copy.copy(self.__ns_args)
         ns_args['schema'] = list()
         for ns, info in self.__namespaces.items():
@@ -94,9 +123,7 @@ class NamespaceBuilder(object):
             elif dts:
                 item[self.__dt_key] = dts
             elif out:
-                with open(os.path.join(outdir, path), 'w') as stream:
-                    self.__dump_spec(out, stream)
+                writer.write_spec(out, path)
             ns_args['schema'].append(item)
-        ns_path = os.path.join(outdir, ns_path)
-        with open(ns_path, 'w') as stream:
-            self.__dump_spec({'namespaces': [SpecNamespace.build_namespace(**ns_args)]}, stream)
+        namespace = SpecNamespace.build_namespace(**ns_args)
+        writer.write_namespace(namespace, ns_path)
