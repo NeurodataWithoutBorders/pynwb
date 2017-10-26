@@ -1,7 +1,7 @@
 from collections import Iterable
 import numpy as np
 
-from form.utils import docval, popargs, fmt_docval_args
+from .form.utils import docval, popargs, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -130,10 +130,10 @@ class TwoPhotonSeries(ImageSeries):
 @register_class('ROI', CORE_NAMESPACE)
 class ROI(NWBContainer):
     """
+    A class for defining a region of interest (ROI)
     """
 
-    __nwbfields__ = ('name',
-                     'roi_description',
+    __nwbfields__ = ('roi_description',
                      'pix_mask',
                      'pix_mask_weight',
                      'img_mask')
@@ -146,7 +146,7 @@ class ROI(NWBContainer):
             {'name': 'img_mask', 'type': Iterable, 'doc': 'ROI mask, represented in 2D ([y][x]) intensity image.'},
             {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
-        name, roi_description, pix_mask, pix_mask_weight, img_mask = popargs('name', 'roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
+        roi_description, pix_mask, pix_mask_weight, img_mask = popargs('roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
         pargs, pkwargs = fmt_docval_args(super(ROI, self).__init__, kwargs)
         super(ROI, self).__init__(*pargs, **pkwargs)
         self.roi_description = roi_description
@@ -159,8 +159,7 @@ class PlaneSegmentation(NWBContainer):
     """
     """
 
-    __nwbfields__ = ('name',
-                     'description',
+    __nwbfields__ = ('description',
                      'roi_list',
                      'imaging_plane',
                      'reference_images')
@@ -172,7 +171,7 @@ class PlaneSegmentation(NWBContainer):
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'link to ImagingPlane group from which this TimeSeries data was generated.'},
             {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
-        name, description, roi_list, imaging_plane, reference_images = popargs('name', 'description', 'roi_list', 'imaging_plane', 'reference_images', kwargs)
+        description, roi_list, imaging_plane, reference_images = popargs('description', 'roi_list', 'imaging_plane', 'reference_images', kwargs)
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
         super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
         self.description = description
@@ -195,9 +194,9 @@ class ImageSegmentation(NWBContainer):
 
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
-            {'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentation', 'type': PlaneSegmentation, 'doc': 'ImagePlane class.'})
+    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
+            {'name': 'plane_segmentation', 'type': PlaneSegmentation, 'doc': 'PlaneSegmentation with the description of the image plane.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ImageSegmentation'})
     def __init__(self, **kwargs):
         plane_segmentation = popargs('plane_segmentation', kwargs)
         pargs, pkwargs = fmt_docval_args(super(ImageSegmentation, self).__init__, kwargs)
@@ -258,7 +257,8 @@ class DfOverF(NWBContainer):
     _help = "Df/f over time of one or more ROIs. TimeSeries names should correspond to imaging plane names"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'})
+            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'DfOverF'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(DfOverF, self).__init__, kwargs)
@@ -277,7 +277,8 @@ class Fluorescence(NWBContainer):
     _help = "Fluorescence over time of one or more ROIs. TimeSeries names should correspond to imaging plane names."
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'})
+            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Fluorescence'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(Fluorescence, self).__init__, kwargs)

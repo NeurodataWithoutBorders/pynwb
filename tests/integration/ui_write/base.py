@@ -3,8 +3,8 @@ from datetime import datetime
 import os
 import numpy as np
 
-from pynwb import NWBContainer, get_manager, NWBFile
-from form.backends.hdf5 import HDF5IO
+from pynwb import NWBContainer, get_build_manager, NWBFile, NWBData
+from pynwb.form.backends.hdf5 import HDF5IO
 
 CORE_NAMESPACE = 'core'
 
@@ -79,8 +79,15 @@ class TestMapNWBContainer(unittest.TestCase):
                             self.assertContainerEqual(f1[k], f2[k])
                 elif isinstance(f1, NWBContainer):
                     self.assertContainerEqual(f1, f2)
+                elif isinstance(f1, NWBData):
+                    self.assertDataEqual(f1, f2)
                 else:
                     self.assertEqual(f1, f2)
+
+    def assertDataEqual(self, data1, data2):
+        self.assertEqual(type(data1), type(data2))
+        self.assertEqual(len(data1), len(data2))
+
 
 class TestMapRoundTrip(TestMapNWBContainer):
 
@@ -103,9 +110,12 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.addContainer(nwbfile)
         io = HDF5IO(self.filename, self.manager)
         io.write(nwbfile)
-        read_nwbfile = io.read()
-        read_container = self.getContainer(read_nwbfile)
-        self.assertContainerEqual(self.container, read_container)
+        try:
+            read_nwbfile = io.read()
+            read_container = self.getContainer(read_nwbfile)
+            self.assertContainerEqual(self.container, read_container)
+        finally:
+            io.close()
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
@@ -114,6 +124,3 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
         raise unittest.SkipTest('Cannot run test unless getContainer is implemented')
-
-
-

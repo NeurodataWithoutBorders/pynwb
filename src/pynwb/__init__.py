@@ -6,12 +6,12 @@ from copy import copy
 
 CORE_NAMESPACE = 'core'
 
-from form.spec import NamespaceCatalog
-from form.utils import docval, getargs, popargs
-from form.backends.io import FORMIO
-from form.backends.hdf5 import HDF5IO
-from form.validate import ValidatorMap
-from form.build import BuildManager
+from .form.spec import NamespaceCatalog
+from .form.utils import docval, getargs, popargs
+from .form.backends.io import FORMIO
+from .form.backends.hdf5 import HDF5IO
+from .form.validate import ValidatorMap
+from .form.build import BuildManager
 
 from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
 
@@ -29,8 +29,8 @@ global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-from form.build import TypeMap as TypeMap
-from form.build import ObjectMapper as __ObjectMapper
+from .form.build import TypeMap as TypeMap
+from .form.build import ObjectMapper as __ObjectMapper
 __TYPE_MAP = TypeMap(__NS_CATALOG)
 def get_type_map():
     ret = copy(__TYPE_MAP)
@@ -156,7 +156,7 @@ class NWBHDF5IO(HDF5IO):
 
 
 from . import io as __io
-from .core import NWBContainer
+from .core import NWBContainer, NWBData
 from .base import TimeSeries, ProcessingModule
 from .file import NWBFile
 

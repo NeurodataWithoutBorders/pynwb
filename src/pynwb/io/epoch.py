@@ -1,4 +1,4 @@
-from form.build import ObjectMapper
+from ..form.build import ObjectMapper
 from .. import register_map
 
 from pynwb.epoch import Epoch, EpochTimeSeries
@@ -16,7 +16,7 @@ class EpochMap(ObjectMapper):
         self.map_spec('timeseries', epts_spec)
 
     @ObjectMapper.constructor_arg('name')
-    def name(self, builder):
+    def name(self, builder, manager):
         return builder.name
 
 @register_map(EpochTimeSeries)

@@ -54,7 +54,10 @@ def __is_int(value):
     return any(isinstance(value, i) for i in (int, np.int8, np.int16, np.int32, np.int64))
 
 def __is_float(value):
-    return any(isinstance(value, i) for i in (float, np.float16, np.float32, np.float64, np.float128))
+    SUPPORTED_FLOAT_TYPES = [float, np.float16, np.float32, np.float64]
+    if hasattr(np, "float128"):
+        SUPPORTED_FLOAT_TYPES.append(np.float128)
+    return any(isinstance(value, i) for i in SUPPORTED_FLOAT_TYPES)
 
 def __format_type(argtype):
     if isinstance(argtype, str):
@@ -164,6 +167,19 @@ def get_docval(func):
     else:
         return tuple()
 
+#def docval_wrap(func, is_method=True):
+#    if is_method:
+#        @docval(*get_docval(func))
+#        def method(self, **kwargs):
+#
+#            return call_docval_args(func, kwargs)
+#        return method
+#    else:
+#        @docval(*get_docval(func))
+#        def static_method(**kwargs):
+#            return call_docval_args(func, kwargs)
+#        return method
+
 def fmt_docval_args(func, kwargs):
     ''' Separate positional and keyword arguments
 
@@ -176,7 +192,8 @@ def fmt_docval_args(func, kwargs):
         for arg in func_docval[__docval_args_loc]:
             val = kwargs.get(arg['name'])
             if 'default' in arg:
-                ret_kwargs[arg['name']] = val
+                if val is not None:
+                    ret_kwargs[arg['name']] = val
             else:
                 ret_args.append(val)
     return (ret_args, ret_kwargs)

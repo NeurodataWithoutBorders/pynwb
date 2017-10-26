@@ -6,8 +6,8 @@ from h5py import File
 
 from pynwb import NWBFile, TimeSeries, get_manager
 
-from form.backends.hdf5 import HDF5IO
-from form.build import GroupBuilder, DatasetBuilder
+from pynwb.form.backends.hdf5 import HDF5IO
+from pynwb.form.build import GroupBuilder, DatasetBuilder
 
 class TestHDF5Writer(unittest.TestCase):
 
@@ -18,7 +18,7 @@ class TestHDF5Writer(unittest.TestCase):
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)
         self.container = NWBFile('a test source', 'a test NWB File', 'TEST123', self.start_time, file_create_date=self.create_date)
         ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
-        self.container.add_raw_timeseries(ts)
+        self.container.add_acquisition(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
                                  attributes={'source': 'example_source',

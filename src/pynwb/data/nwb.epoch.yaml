@@ -10,10 +10,10 @@ groups:
     name: description
     quantity: '?'
   - doc: Start time of epoch, in seconds
-    dtype: float64!
+    dtype: float64
     name: start_time
   - doc: Stop time of epoch, in seconds
-    dtype: float64!
+    dtype: float64
     name: stop_time
   - dims:
     - num_tags

@@ -1,6 +1,6 @@
 import sys
 
-from form.validate import ValidatorMap
+from .form.validate import ValidatorMap
 
 
 if __name__ == '__main__':

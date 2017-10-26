@@ -1,4 +1,4 @@
-from form.build import ObjectMapper
+from ..form.build import ObjectMapper
 from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
@@ -12,7 +12,7 @@ class ModuleMap(ObjectMapper):
         self.map_spec('containers', containers_spec)
 
     @ObjectMapper.constructor_arg('name')
-    def name(self, builder):
+    def name(self, builder, manager):
         return builder.name
 
 @register_map(TimeSeries)
@@ -33,5 +33,5 @@ class TimeSeriesMap(ObjectMapper):
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))
 
     @ObjectMapper.constructor_arg('name')
-    def name(self, builder):
+    def name(self, builder, manager):
         return builder.name

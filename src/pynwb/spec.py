@@ -1,8 +1,8 @@
 from copy import copy, deepcopy
 from datetime import datetime
 
-from form.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder, AttributeSpec, DtypeSpec
-from form.utils import docval, get_docval, getargs, fmt_docval_args
+from .form.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder, AttributeSpec, DtypeSpec
+from .form.utils import docval, get_docval, getargs, fmt_docval_args
 
 from . import CORE_NAMESPACE
 

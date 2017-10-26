@@ -1,4 +1,4 @@
-from form.build import ObjectMapper
+from ..form.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile
 
@@ -8,13 +8,13 @@ class NWBFileMap(ObjectMapper):
     def __init__(self, spec):
         super(NWBFileMap, self).__init__(spec)
         raw_ts_spec = self.spec.get_group('acquisition').get_group('timeseries').get_neurodata_type('TimeSeries')
-        self.map_spec('raw_timeseries', raw_ts_spec)
+        self.map_spec('acquisition', raw_ts_spec)
 
         stimulus_spec = self.spec.get_group('stimulus')
         presentation_ts_spec = stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries')
         self.map_spec('stimulus', presentation_ts_spec)
         stimulus_ts_spec = stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries')
-        self.map_spec('stimulus_templates', stimulus_ts_spec)
+        self.map_spec('stimulus_template', stimulus_ts_spec)
 
 
         epochs_spec = self.spec.get_group('epochs')
@@ -22,7 +22,9 @@ class NWBFileMap(ObjectMapper):
 
         general_spec = self.spec.get_group('general')
         self.map_spec('ic_electrodes', general_spec.get_group('intracellular_ephys').get_neurodata_type('IntracellularElectrode'))
-        self.map_spec('ec_electrodes', general_spec.get_group('extracellular_ephys').get_neurodata_type('ElectrodeGroup'))
+        ecephys_spec = general_spec.get_group('extracellular_ephys')
+        self.map_spec('ec_electrodes', ecephys_spec.get_dataset('electrodes'))
+        self.map_spec('ec_electrode_groups', ecephys_spec.get_neurodata_type('ElectrodeGroup'))
         self.map_spec('optogenetic_sites', general_spec.get_group('optogenetics').get_neurodata_type('OptogeneticStimulusSite'))
         self.map_spec('imaging_planes', general_spec.get_group('optophysiology').get_neurodata_type('ImagingPlane'))
 
@@ -31,5 +33,5 @@ class NWBFileMap(ObjectMapper):
 
 
     @ObjectMapper.constructor_arg('file_name')
-    def name(self, builder):
+    def name(self, builder, manager):
         return builder.name

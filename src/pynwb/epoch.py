@@ -2,7 +2,7 @@ import copy
 import numpy as np
 from bisect import bisect_left
 
-from form.utils import docval, getargs, call_docval_func, fmt_docval_args
+from .form.utils import docval, getargs, call_docval_func, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
