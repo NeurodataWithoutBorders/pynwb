@@ -6,6 +6,7 @@ from setuptools.command.build_py import build_py
 import json
 import pickle
 import os
+import versioneer
 
 
 schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
@@ -24,7 +25,8 @@ schema_dir = 'data'
 
 setup_args = {
     'name': 'pynwb',
-    'version': '0.1',
+    'version': versioneer.get_version(),
+    'cmdclass': versioneer.get_cmdclass(),
     'description': 'Package for working with Neurodata stored in the NWB format',
     'long_description': readme,
     'author': 'Andrew Tritt',
