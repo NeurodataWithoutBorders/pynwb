@@ -9,6 +9,7 @@ import h5py
 
 __macros = {
     'array_data': [np.ndarray, list, tuple, h5py.Dataset],
+    'scalar_data': [str, int, float],
 }
 
 def docval_macro(macro):
