@@ -101,8 +101,7 @@ class TimeSeries(NWBContainer):
              'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
              'default': _default_conversion},
 
-            # time related data is optional, but one is required -- this will have to be enforced in the constructor
-            {'name': 'timestamps', 'type': (Iterable, 'TimeSeries', DataChunkIterator),
+            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
