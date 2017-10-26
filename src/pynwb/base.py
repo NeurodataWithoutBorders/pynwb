@@ -1,7 +1,7 @@
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, fmt_docval_args
-from .form.data_utils import DataChunkIterator
+from .form.data_utils import DataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
@@ -90,7 +90,7 @@ class TimeSeries(NWBContainer):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (Iterable, 'TimeSeries', DataChunkIterator),
+            {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'resolution', 'type': (str, float),

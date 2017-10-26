@@ -1,7 +1,7 @@
 from bisect import bisect_left
 
 from .form.utils import docval, getargs, call_docval_func, fmt_docval_args
-from .form.backends.dataio import DataIO
+from .form.data_utils import DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
