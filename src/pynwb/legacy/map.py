@@ -1,10 +1,9 @@
-from form.build.map import ObjectMapper, TypeMap
-from form.build.builders import DatasetBuilder, GroupBuilder
-from form.build.map import BuildManager
-import numpy as np
-import os
-from form.utils import docval, getargs, popargs, get_docval
 from six import raise_from
+
+from ..form.build.map import ObjectMapper, TypeMap
+from ..form.build.builders import DatasetBuilder, GroupBuilder
+from ..form.build.map import BuildManager
+from ..form.utils import docval, getargs, popargs, get_docval
 
 class ObjectMapperLegacy(ObjectMapper):
 
@@ -62,7 +61,7 @@ class ObjectMapperLegacy(ObjectMapper):
 
 class TypeMapLegacy(TypeMap):
 
-    def get_builder_dt(self, builder):    
+    def get_builder_dt(self, builder):
 
         if builder.name == 'roi_ids':
             pass

@@ -1,10 +1,13 @@
+import pynwb
+
+from ..form.spec import NamespaceCatalog
+from ..form.utils import docval, getargs, popargs
+
+from ..spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
+
 from .map import ObjectMapperLegacy as ObjectMapper
 from .map import TypeMapLegacy as TypeMap
-from ..spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
-from form.spec import NamespaceCatalog
-import pynwb
-import os
-from form.utils import docval, getargs, popargs
+
 
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 __TYPE_MAP = TypeMap(__NS_CATALOG)
@@ -12,7 +15,7 @@ __TYPE_MAP = TypeMap(__NS_CATALOG)
 # load the core namespace i.e. base NWB specification
 __resources = pynwb._get_resources()
 __TYPE_MAP.load_namespaces(__resources['namespace_path'])
-__TYPE_MAP.merge(pynwb.get_type_map())    
+__TYPE_MAP.merge(pynwb.get_type_map())
 
 # Register new objectmapper with the new typemap:
 __TYPE_MAP.register_map(pynwb.NWBContainer, ObjectMapper)

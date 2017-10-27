@@ -1,11 +1,11 @@
-from form.build import ObjectMapper
+from ..form.build import ObjectMapper
 from .. import register_map
 
 from ..ophys import PlaneSegmentation
 
 @register_map(PlaneSegmentation)
 class PlaneSegmentationMap(ObjectMapper):
-    
+
     # This might be needed for 2.0 as well
     def __init__(self, spec):
         super(PlaneSegmentationMap, self).__init__(spec)
