@@ -14,7 +14,7 @@ Types of Contributions
 ----------------------
 
 Did you find a bug? or Do you intend to add a new feature or change an existing one?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * **Identify the approbritate repository** for the change you are suggesting:
 
@@ -46,7 +46,8 @@ Source code changes that are purely cosmetic in nature and do not add anything s
 Do you have questions about NWB:N?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Coming Soon (Google Group?)
+Join the `NWB:N mailing list <http://visitor.r20.constantcontact.com/manage/optin?v=001nQUq2GTjwCjZxK_V2-6RLElLJO1HMVtoNLJ-wGyDCukZQZxu2AFJmNh6NS0_lGMsWc2w9hZpeNn74HuWdv5RtLX9qX0o0Hy1P0hOgMrkm2NoGAX3VoY25wx8HAtIZwredcCuM0nCUGodpvoaue3SzQ%3D%3D>`_ for updates or ask questions on our `google group <https://groups.google.com/forum/#!forum/neurodatawithoutborders>`_.
+
 
 Informal discussions between developers, users, and team?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
