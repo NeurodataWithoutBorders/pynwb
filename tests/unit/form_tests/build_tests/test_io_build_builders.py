@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from form.build import GroupBuilder, DatasetBuilder, LinkBuilder
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder
 import json
 
 

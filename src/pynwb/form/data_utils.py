@@ -1,8 +1,9 @@
 from collections import Iterable
 import numpy as np
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 from six import with_metaclass
 from .utils import docval, getargs, popargs
+from operator import itemgetter
 
 def __get_shape_helper(data):
     shape = list()
@@ -426,3 +427,64 @@ class ShapeValidatorResult(object):
          if item == 'default_message':
              return self.SHAPE_ERROR[self.error]
          return self.__getattribute__(item)
+
+
+class RegionSlicer(with_metaclass(ABCMeta, object)):
+    '''
+    A class to control getting using a region
+    '''
+
+    @abstractproperty
+    def __getitem__(self, idx):
+        pass
+
+    @abstractproperty
+    def __len__(self):
+        pass
+
+
+class ListSlicer(RegionSlicer):
+
+    @docval({'name': 'dataset', 'type': (list, tuple), 'doc': 'the HDF5 dataset to slice'},
+            {'name': 'region', 'type': (list, tuple, slice), 'doc': 'the region reference to use to slice'})
+    def __init__(self, **kwargs):
+        self.__dataset, self.__region = getargs('dataset', 'region', kwargs)
+        if isinstance(self.__region, slice):
+            self.__getter = itemgetter(self.__region)
+            self.__len = slice_len(self.__region)
+        else:
+            self.__getter = itemgetter(*self.__region)
+            self.__len = len(self.__region)
+
+    def __read_region(self):
+        if not hasattr(self, '_read'):
+            self._read = self.__getter(self.__dataset)
+            del self.__getter
+
+    def __getitem__(self, idx):
+        self.__read_region()
+        getter = None
+        if isinstance(idx, (list, tuple)):
+            getter = itemgetter(*idx)
+        else:
+            return itemgetter(idx)
+        return getter(self._read)
+
+    def __len__(self):
+        return self.__len
+
+from .backends.hdf5 import H5RegionSlicer
+import h5py
+@docval({'name': 'dataset', 'type': None, 'doc': 'the HDF5 dataset to slice'},
+        {'name': 'region', 'type': None, 'doc': 'the region reference to use to slice'},
+        is_method=False)
+def get_region_slicer(**kwargs):
+    dataset, region = getargs('dataset', 'region', kwargs)
+    if isinstance(dataset, (list, tuple)):
+        if not isinstance(region, list):
+            import pdb
+            pdb.set_trace()
+        return ListSlicer(dataset, region)
+    elif isinstance(dataset, h5py.Dataset):
+        return H5RegionSlicer(dataset, region)
+    return None

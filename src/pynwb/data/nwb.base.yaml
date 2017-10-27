@@ -1,3 +1,10 @@
+datasets:
+- attributes:
+  - doc: Short description of what this type of Interface contains.
+    dtype: text
+    name: help
+  doc: The attributes specified here are included in all interfaces.
+  neurodata_type_def: NWBData
 groups:
 - attributes:
   - doc: Short description of what this type of Interface contains.
@@ -54,7 +61,7 @@ groups:
     - default_value: 1.0
       doc: Scalar to multiply each element in data to convert it to the specified
         unit
-      dtype: float32!
+      dtype: float32
       name: conversion
       required: false
     - default_value: 0.0
@@ -62,7 +69,7 @@ groups:
         by unit. COMMENT: E.g., the change in value of the least significant bit,
         or a larger number if signal noise is known to be present. If unknown, use
         NaN'
-      dtype: float32!
+      dtype: float32
       name: resolution
       required: false
     - doc: "The base unit of measure used to store data. This should be in the SI\
@@ -82,7 +89,7 @@ groups:
     - null
   - attributes:
     - doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
-      dtype: float32!
+      dtype: float32
       name: rate
     - doc: Value is 'Seconds'
       dtype: text
@@ -91,7 +98,7 @@ groups:
     doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
       spaced, the timestamp of the first sample can be specified and all subsequent
       ones calculated from the sampling rate.'
-    dtype: float64!
+    dtype: float64
     name: starting_time
     quantity: '?'
   - attributes:
@@ -108,7 +115,7 @@ groups:
     doc: 'Timestamps for samples stored in data.COMMENT: Timestamps here have all
       been corrected to the common experiment master-clock. Time is stored as seconds
       and all timestamps are relative to experiment start time.'
-    dtype: float64!
+    dtype: float64
     name: timestamps
     quantity: '?'
     shape:

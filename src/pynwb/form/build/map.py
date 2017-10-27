@@ -1,14 +1,15 @@
 import re
 import sys
 from collections import OrderedDict
+from copy import copy
+
 from six import with_metaclass, raise_from
 from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
-from ..container import Container
-from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog
+from ..container import Container, Data, DataRegion
+from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, SpecCatalog, NamespaceCatalog, RefSpec
 from ..spec.spec import BaseStorageSpec
-from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder
 import warnings
-from copy import copy
+from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, RegionBuilder
 
 class BuildManager(object):
     """
@@ -208,8 +209,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         return self.__spec
 
     @_constructor_arg('name')
-    def get_container_name(self, *args):
-        builder = args[0]
+    def get_container_name(self, builder, manager):
         return builder.name
 
     @classmethod
@@ -333,21 +333,16 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     def hack_get_override_carg(self, *args, **kwargs):
         return self.__get_override_carg(*args, **kwargs)
 
-    def __get_override_carg(self, *args):
-        name = args[0]
-        remaining_args = tuple(args[1:])
+    def __get_override_carg(self, name, builder, manager):
         if name in self.constructor_args:
             func = self.constructor_args[name]
-            try:
-                return func(self, *remaining_args)
-            except TypeError:
-                return func(self, *remaining_args[:-1])
+            return func(self, builder, manager)
         return None
 
-    def __get_override_attr(self, name, container):
+    def __get_override_attr(self, name, container, manager):
         if name in self.obj_attrs:
             func = self.obj_attrs[name]
-            return func(self, container)
+            return func(self, container, manager)
         return None
 
     @docval({"name": "spec", "type": Spec, "doc": "the spec to get the attribute for"},
@@ -382,11 +377,22 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 else:
                     ret = str(value)
         elif isinstance(spec, DatasetSpec):
-            if 'text' in spec.dtype:
-                if spec.dims is not None:
-                    ret =  list(map(str, value))
-                else:
-                    ret = str(value)
+            # TODO: make sure we can handle specs with data_type_inc set
+            if spec.data_type_inc is not None:
+                ret = value
+            else:
+                if 'text' in spec.dtype:
+                    if spec.dims is not None:
+                        ret =  list(map(str, value))
+                    else:
+                        ret = str(value)
+        return ret
+
+    @classmethod
+    def convert_dtype(self, dtype_spec):
+        ret = dtype_spec
+        if isinstance(dtype_spec, RefSpec):
+            ret = dtype_spec.reftype
         return ret
 
     @docval({"name": "spec", "type": Spec, "doc": "the spec to get the constructor argument for"},
@@ -411,7 +417,16 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             self.__add_groups(builder, self.__spec.groups, container, manager, source)
             self.__add_links(builder, self.__spec.links, container, manager, source)
         else:
-            builder = DatasetBuilder(name, parent=parent, dtype=self.__spec.dtype)
+            if not isinstance(container, Data):
+                msg = "'container' must be of type Data with DatasetSpec"
+                raise ValueError(msg)
+            if isinstance(self.spec.dtype, RefSpec) and self.spec.dtype.is_region():
+                if not isinstance(container, DataRegion):
+                    msg = "'container' must be of type DataRegion if spec represents region reference"
+                    raise ValueError(msg)
+                builder = RegionBuilder(name, container.region, manager.build(container.data))
+            else:
+                builder = DatasetBuilder(name, data=container.data, parent=parent, dtype=self.convert_dtype(self.__spec.dtype), source=source)
         self.__add_attributes(builder, self.__spec.attributes, container)
         return builder
 
@@ -454,7 +469,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     warnings.warn("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
-                sub_builder = builder.add_dataset(spec.name, attr_value, dtype=spec.dtype)
+                sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
                 self.__add_attributes(sub_builder, spec.attributes, container)
             else:
                 self.__add_containers(builder, spec, attr_value, build_manager, source)
@@ -499,7 +514,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
     def __add_containers(self, builder, spec, value, build_manager, source):
         if isinstance(value, Container):
-            rendered_obj = build_manager.build(value, source)
+            rendered_obj = build_manager.build(value, source=source)
             # use spec to determine what kind of HDF5
             # object this Container corresponds to
             if isinstance(spec, LinkSpec):
@@ -540,10 +555,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 subspec = manager.get_subspec(spec, sub_builder)
                 if subspec is not None:
                     if isinstance(subspec, LinkSpec):
-                        if isinstance(sub_builder, DatasetBuilder):
-                            continue
-                        else:
-                            sub_builder = sub_builder.builder
+                        sub_builder = sub_builder.builder
                     if self.__data_type_key in sub_builder.attributes or not (subspec.data_type_inc is None and subspec.data_type_def is None):
                         val = manager.construct(sub_builder)
                         if subspec.is_many():
@@ -844,16 +856,16 @@ class TypeMap(object):
         return ret
 
     def get_builder_dt(self, builder):
-        ret = builder.get(self.__ns_catalog.group_spec_cls.type_key())
+        ret = builder.attributes.get(self.__ns_catalog.group_spec_cls.type_key())
         if ret is None:
-            msg = "builder '%s' is does not have a data_type" % builder.name
+            msg = "builder '%s' does not have a data_type" % builder.name
             raise ValueError(msg)
         return ret
 
     def get_builder_ns(self, builder):
-        ret = builder.get('namespace')
+        ret = builder.attributes.get('namespace')
         if ret is None:
-            msg = "builder '%s' is does not have a namespace" % builder.name
+            msg = "builder '%s' does not have a namespace" % builder.name
             raise ValueError(msg)
         return ret
 
@@ -876,7 +888,7 @@ class TypeMap(object):
             builder_type = type(builder.builder)
         else:
             builder_type = type(builder)
-        if builder_type == DatasetBuilder:
+        if issubclass(builder_type, DatasetBuilder):
             subspec = spec.get_dataset(builder.name)
         else:
             subspec = spec.get_group(builder.name)

@@ -1,8 +1,8 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, getargs, popargs, fmt_docval_args
-from form.data_utils import DataChunkIterator
+from .form.utils import docval, getargs, popargs, fmt_docval_args
+from .form.data_utils import DataChunkIterator
 
 from . import register_class, CORE_NAMESPACE
 from .core import  NWBContainer
@@ -67,11 +67,7 @@ class ProcessingModule(NWBContainer):
 
 @register_class('TimeSeries', CORE_NAMESPACE)
 class TimeSeries(NWBContainer):
-    """ Standard TimeSeries constructor
-
-        All time series are created by calls to  NWB.create_timeseries().
-        They should not not be instantiated directly
-    """
+    """A generic base class for time series data"""
     __nwbfields__ = ("comments",
                      "description",
                      "data",

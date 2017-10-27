@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, popargs
+from .form.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion

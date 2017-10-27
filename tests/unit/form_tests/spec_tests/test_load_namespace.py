@@ -3,7 +3,7 @@ import tempfile
 import ruamel.yaml as yaml
 import json
 
-from form.spec import *
+from pynwb.form.spec import *
 
 class TestSpecLoad(unittest.TestCase):
     NS_NAME = 'test_ns'

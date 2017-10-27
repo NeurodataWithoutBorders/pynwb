@@ -1,7 +1,7 @@
 import unittest2 as unittest
 import json
 
-from form.spec import GroupSpec, DatasetSpec, AttributeSpec, Spec, SpecCatalog
+from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, Spec, SpecCatalog
 
 class SpecCatalogTest(unittest.TestCase):
 

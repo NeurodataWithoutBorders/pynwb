@@ -4,9 +4,9 @@ import os
 from h5py import File, Dataset
 from six import text_type
 
-from form.backends.hdf5 import HDF5IO
-from form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
-from form.spec import NamespaceCatalog
+from pynwb.form.backends.hdf5 import HDF5IO
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
+from pynwb.form.spec import NamespaceCatalog
 
 from numbers import Number
 
@@ -203,7 +203,6 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.maxDiff = None
         io = HDF5IO(self.path, self.manager)
         io.write_builder(self.builder)
-        io.close()
         builder = io.read_builder()
-        #print('RECEIVED:', json.dumps(builder,indent=2, cls=HDF5Encoder))
         self.assertBuilderEqual(builder, self.builder)
+        io.close()

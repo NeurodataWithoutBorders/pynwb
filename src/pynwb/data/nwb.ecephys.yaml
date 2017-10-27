@@ -25,14 +25,13 @@ groups:
     - - null
     - - null
       - null
+  - name: electrodes
+    doc: 'the electrodes that this series was generated from'
+    neurodata_type_inc: ElectrodeTableRegion
   doc: 'Stores acquired voltage data from extracellular recordings. The data field
     of an ElectricalSeries is an int or float array storing data in Volts. TimeSeries::data
     array structure: :blue:`[num times] [num channels] (or [num_times] for single
     electrode).`'
-  links:
-  - doc: link to ElectrodeGroup group that generated this TimeSeries data
-    name: electrode_group
-    target_type: ElectrodeGroup
   neurodata_type_def: ElectricalSeries
   neurodata_type_inc: TimeSeries
 - attributes:
@@ -149,7 +148,7 @@ groups:
     - num_events
     doc: Times of clustered events, in seconds. This may be a link to times field
       in associated FeatureExtraction module.
-    dtype: float64!
+    dtype: float64
     name: times
     shape:
     - null
@@ -185,16 +184,15 @@ groups:
   - dims:
     - num_events
     doc: Times of events that features correspond to (can be a link).
-    dtype: float64!
+    dtype: float64
     name: times
     shape:
     - null
+  - name: electrodes
+    doc: 'the electrodes that this series was generated from'
+    neurodata_type_inc: ElectrodeTableRegion
   doc: Features, such as PC1 and PC2, that are extracted from signals stored in a
     SpikeEvent TimeSeries or other source.
-  links:
-  - doc: link to ElectrodeGroup group that generated this TimeSeries data
-    name: electrode_group
-    target_type: ElectrodeGroup
   default_name: FeatureExtraction
   neurodata_type_def: FeatureExtraction
   neurodata_type_inc: NWBContainer
@@ -227,7 +225,7 @@ groups:
     dims:
     - num_events
     doc: Timestamps of events, in Seconds
-    dtype: float64!
+    dtype: float64
     name: times
     shape:
     - null
@@ -265,7 +263,7 @@ groups:
     value: Ephys data from one or more channels that is subjected to filtering, such
       as for gamma or theta oscillations (LFP has its own interface). Filter properties
       should be noted in the ElectricalSeries
-  doc: Ephys data from one or more channels that has been subjected to filtering.
+  doc: "Ephys data from one or more channels that has been subjected to filtering.
     Examples of filtered data include Theta and Gamma (LFP has its own interface).
     FilteredEphys modules publish an ElectricalSeries for each filtered channel or
     set of channels. The name of each ElectricalSeries is arbitrary but should be
@@ -273,7 +271,7 @@ groups:
     another time series or as acquired by hardware, should be noted in each's TimeSeries::description
     field. There is no assumed 1::1 correspondence between filtered ephys signals
     and electrodes, as a single signal can apply to many nearby electrodes, and one
-    electrode may have different filtered (e.g., theta and/or gamma) signals represented.
+    electrode may have different filtered (e.g., theta and/or gamma) signals represented."
   groups:
   - doc: ElectricalSeries object containing filtered electrophysiology data
     neurodata_type_inc: ElectricalSeries
@@ -299,49 +297,10 @@ groups:
   neurodata_type_def: LFP
   neurodata_type_inc: NWBContainer
 - attributes:
-  - doc: Value is 'A physical grouping of channels'
+  - doc: Value is 'Metadata about a physical grouping of channels'
     dtype: str
     name: help
     value: A physical grouping of channels
-  datasets:
-  - dims:
-    - num_channels
-    doc: array with description for each channel
-    dtype: text
-    name: channel_description
-    shape:
-    - null
-  - dims:
-    - num_channels
-    doc: array with location description for each channel e.g. "CA1"
-    dtype: text
-    name: channel_location
-    shape:
-    - null
-  - dims:
-    - num_channels
-    doc: array with description of filtering applied to each channel
-    dtype: text
-    name: channel_filtering
-    shape:
-    - null
-  - dims:
-    - num_channels
-    - dimensions
-    doc: xyz-coordinates for each channel. use NaN for unknown dimensions
-    dtype: text
-    name: channel_coordinates
-    shape:
-    - null
-    - 3
-  - dims:
-    - num_channels
-    doc: float array with impedance used on each channel. Can be 2D matrix to store
-      a range
-    dtype: text
-    name: channel_impedance
-    shape:
-    - null
   - doc: description of this electrode group
     dtype: text
     name: description
@@ -356,3 +315,59 @@ groups:
     target_type: Device
   neurodata_type_def: ElectrodeGroup
   neurodata_type_inc: NWBContainer
+datasets:
+- doc: 'a table for storing queryable information about electrodes in a single table'
+  dtype:
+  - name: id
+    dtype: int
+    doc: a user-specified unique identifier
+  - name: x
+    dtype: float
+    doc: the x coordinate of the channels location
+  - name: y
+    dtype: float
+    doc: the y coordinate of the channels location
+  - name: z
+    dtype: float
+    doc: the z coordinate of the channels location
+  - name: imp
+    dtype: float
+    doc: the impedance of the channel
+  - name: location
+    dtype: ascii
+    doc: the location of channel within the subject e.g. brain region
+  - name: filtering
+    dtype: ascii
+    doc: description of hardware filtering
+  - name: description
+    dtype: utf8
+    doc: a brief description of what this electrode is
+  - name: group
+    dtype: ascii
+    doc: the name of the ElectrodeGroup this electrode is a part of
+  - name: group_ref
+    dtype:
+        target_type: ElectrodeGroup
+        reftype: object
+    doc: a reference to the ElectrodeGroup this electrode is a part of
+  attributes:
+    - doc: Value is 'a table for storing data about extracellular electrodes'
+      dtype: text
+      name: help
+      value: a table for storing data about extracellular electrodes
+  neurodata_type_inc: NWBData
+  neurodata_type_def: ElectrodeTable
+- doc: 'a dataset for subsetting ElectrodeTables'
+  neurodata_type_def: ElectrodeTableRegion
+  neurodata_type_inc: NWBData
+  dtype:
+    target_type: ElectrodeTable
+    reftype: region
+  attributes:
+    - name: description
+      doc: 'a description of this subset of electrodes'
+      dtype: utf8
+    - doc: Value is 'a subset (i.e. slice or region) of an ElectrodeTable'
+      dtype: text
+      name: help
+      value: a subset (i.e. slice or region) of an ElectrodeTable

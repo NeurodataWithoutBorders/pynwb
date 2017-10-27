@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from form.utils import docval, popargs, fmt_docval_args
+from .form.utils import docval, popargs, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -17,7 +17,8 @@ class OptogeneticStimulusSite(NWBContainer):
                      'excitation_lambda',
                      'location')
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this stimulus site'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
             {'name': 'description', 'type': str, 'doc': 'Description of site.'},
             {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},

@@ -1,7 +1,7 @@
 from collections import Iterable
 import numpy as np
 
-from form.utils import docval, popargs, fmt_docval_args
+from .form.utils import docval, popargs, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -130,10 +130,10 @@ class TwoPhotonSeries(ImageSeries):
 @register_class('ROI', CORE_NAMESPACE)
 class ROI(NWBContainer):
     """
+    A class for defining a region of interest (ROI)
     """
 
-    __nwbfields__ = ('name',
-                     'roi_description',
+    __nwbfields__ = ('roi_description',
                      'pix_mask',
                      'pix_mask_weight',
                      'img_mask')
@@ -159,8 +159,7 @@ class PlaneSegmentation(NWBContainer):
     """
     """
 
-    __nwbfields__ = ('name',
-                     'description',
+    __nwbfields__ = ('description',
                      'roi_list',
                      'imaging_plane',
                      'reference_images')
@@ -196,7 +195,7 @@ class ImageSegmentation(NWBContainer):
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentations', 'type': (PlaneSegmentation, list), 'doc': 'ImagePlane class.'},
+            {'name': 'plane_segmentations', 'type': (PlaneSegmentation, list), 'doc': 'PlaneSegmentation with the description of the image plane.'},
             {'name': 'name', 'type': str, 'doc': 'the name of this ImageSegmentation container', 'default': 'ImageSegmentation'})
     def __init__(self, **kwargs):
         plane_segmentations = popargs('plane_segmentations', kwargs)
