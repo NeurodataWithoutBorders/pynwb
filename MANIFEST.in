@@ -1,1 +1,3 @@
 include license.txt
+include versioneer.py
+include src/pynwb/_version.py

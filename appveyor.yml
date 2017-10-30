@@ -8,19 +8,19 @@ environment:
   matrix:
     - PYTHON_VERSION: 2.7
       PYTHON: C:\Miniconda-x64
-      EXPECTED_WHEEL: pynwb-0.1-py2-none-any.whl
+      EXPECTED_WHEEL: py2-none-any.whl
       ENV: miniconda
     - PYTHON_VERSION: 3.6
       PYTHON: C:\Miniconda36-x64
-      EXPECTED_WHEEL: pynwb-0.1-py3-none-any.whl
+      EXPECTED_WHEEL: py3-none-any.whl
       ENV: miniconda
     - PYTHON_VERSION: 2.7
       PYTHON: C:\\Python27-x64
-      EXPECTED_WHEEL: pynwb-0.1-py2-none-any.whl
+      EXPECTED_WHEEL: py2-none-any.whl
       ENV: python
     - PYTHON_VERSION: 3.6
       PYTHON: C:\\Python36-x64
-      EXPECTED_WHEEL: pynwb-0.1-py3-none-any.whl
+      EXPECTED_WHEEL: py3-none-any.whl
       ENV: python
 
 init:
@@ -38,7 +38,7 @@ install:
   - pip install -r %APPVEYOR_BUILD_FOLDER%\requirements.txt
   - pip install -r %APPVEYOR_BUILD_FOLDER%\requirements-dev.txt
   - python %APPVEYOR_BUILD_FOLDER%\setup.py sdist
-  - python %APPVEYOR_BUILD_FOLDER%\setup.py bdist_wheel
+  - python %APPVEYOR_BUILD_FOLDER%\setup.py bdist_wheel -d %APPVEYOR_BUILD_FOLDER%\dist
   - pip install %APPVEYOR_BUILD_FOLDER%\
 
 test_script:
@@ -51,7 +51,7 @@ after_test:
   - codecov -F integration
   - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py --form
   - codecov -F form
-  - pip install -U %APPVEYOR_BUILD_FOLDER%\dist\%EXPECTED_WHEEL%
+  - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*$env:EXPECTED_WHEEL).Name | ForEach-Object {pip install -U $env:APPVEYOR_BUILD_FOLDER\dist\$_}
   - python %APPVEYOR_BUILD_FOLDER%\test.py
-  - pip install -U %APPVEYOR_BUILD_FOLDER%\dist\pynwb-0.1.tar.gz
+  - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*.tar.gz).Name | ForEach-Object {pip install -U $env:APPVEYOR_BUILD_FOLDER\dist\$_}
   - python %APPVEYOR_BUILD_FOLDER%\test.py
