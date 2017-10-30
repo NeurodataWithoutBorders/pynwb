@@ -16,7 +16,7 @@ from ..io import FORMIO
 
 ROOT_NAME = 'root'
 
-class HDF5IO(FORMIO):
+class HDF5IO(FORMIO, ):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
@@ -162,7 +162,8 @@ class HDF5IO(FORMIO):
             call = self.__ref_queue.pop()
             call()
 
-    def get_type(self, data):
+    @classmethod
+    def get_type(cls, data):
         if isinstance(data, (text_type, string_types)):
             return special_dtype(vlen=text_type)
         elif not hasattr(data, '__len__'):
@@ -170,7 +171,7 @@ class HDF5IO(FORMIO):
         else:
             if len(data) == 0:
                 raise ValueError('cannot determine type for empty data')
-            return self.get_type(data[0])
+            return cls.get_type(data[0])
 
     __dtypes = {
         "float": np.float32,
@@ -199,32 +200,35 @@ class HDF5IO(FORMIO):
         "region": special_dtype(ref=RegionReference)
     }
 
-    def __resolve_dtype__(self, dtype, data):
+    @classmethod
+    def __resolve_dtype__(cls, dtype, data):
         # TODO: These values exist, but I haven't solved them yet
         # binary
         # number
-        dtype = self.__resolve_dtype_helper__(dtype)
+        dtype = cls.__resolve_dtype_helper__(dtype)
         if dtype is None:
             try:
-                dtype = self.get_type(data)
+                dtype = cls.get_type(data)
             except Exception as exc:
                 msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)
                 raise_from(Exception(msg), exc)
         return dtype
 
-    def __resolve_dtype_helper__(self, dtype):
+    @classmethod
+    def __resolve_dtype_helper__(cls, dtype):
         if dtype is None:
             return None
         elif isinstance(dtype, str):
-            return self.__dtypes.get(dtype)
+            return cls.__dtypes.get(dtype)
         elif isinstance(dtype, dict):
-            return self.__dtypes.get(dtype['reftype'])
+            return cls.__dtypes.get(dtype['reftype'])
         else:
-            return np.dtype([(x['name'], self.__resolve_dtype_helper__(x['dtype'])) for x in dtype])
+            return np.dtype([(x['name'], cls.__resolve_dtype_helper__(x['dtype'])) for x in dtype])
 
+    @classmethod
     @docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
             {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Group, indexed by attribute name'})
-    def set_attributes(self, **kwargs):
+    def set_attributes(cls, **kwargs):
         obj, attributes = getargs('obj', 'attributes', kwargs)
         for key, value in attributes.items():
             if any(isinstance(value, t) for t in (set, list, tuple)):
@@ -293,7 +297,8 @@ class HDF5IO(FORMIO):
         parent[name] = link_obj
         return link_obj
 
-    def isinstance_inmemory_array(self, data):
+    @classmethod
+    def isinstance_inmemory_array(cls, data):
         """Check if an object is a common in-memory data structure"""
         return isinstance(data, list) or \
                isinstance(data, np.ndarray) or \
@@ -318,44 +323,69 @@ class HDF5IO(FORMIO):
         dtype = builder.dtype
         dset = None
         link = None
-        if isinstance(data, str):
-            dset = self.__scalar_fill__(parent, name, data)
-        elif isinstance(data, DataChunkIterator):
-            dset = self.__chunked_iter_fill__(parent, name, data)
-        elif isinstance(data, Dataset):
-            data_filename = os.path.abspath(data.file.filename)
-            parent_filename = os.path.abspath(parent.file.filename)
-            if data_filename != parent_filename:
-                link = ExternalLink(os.path.relpath(data_filename, os.path.dirname(parent_filename)), data.name)
-            else:
-                link = SoftLink(data.name)
-            parent[name] = link
-        elif isinstance(data, Builder):
-            _dtype = self.__dtypes[dtype]
-            if dtype == 'region':
+        if isinstance(dtype, list):
+            # do some stuff to figure out what data is a reference
+            refs = list()
+            for i, dts in enumerate(dtype):
+                if self.__is_ref(dts):
+                    refs.append(i)
+            if len(refs) > 0:
+                _dtype = self.__resolve_dtype__(dtype, data)
                 def _filler():
-                    ref = self.__get_ref(data, builder.region)
-                    dset = parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    #dset = parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    ret = list()
+                    for item in data:
+                        new_item = list(item)
+                        for i in refs:
+                            new_item[i] = self.__get_ref(item[i])
+                        ret.append(tuple(new_item))
+                    dset = parent.create_dataset(name, shape=(len(ret),), dtype=_dtype)
+                    dset[:] = ret
                     self.set_attributes(dset, attributes)
                 self.__queue_ref(_filler)
+                return
             else:
-                def _filler():
-                    ref = self.__get_ref(data)
-                    dset = parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
-                    self.set_attributes(dset, attributes)
-                self.__queue_ref(_filler)
-            return
-        elif isinstance(data, Iterable) and not self.isinstance_inmemory_array(data):
-            dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
-        elif hasattr(data, '__len__'):
-            dset = self.__list_fill__(parent, name, data, dtype_spec=dtype)
+                dset = self.__list_fill__(parent, name, data, dtype)
         else:
-            dset = self.__scalar_fill__(parent, name, data, dtype=dtype)
+            if isinstance(data, str):
+                dset = self.__scalar_fill__(parent, name, data)
+            elif isinstance(data, DataChunkIterator):
+                dset = self.__chunked_iter_fill__(parent, name, data)
+            elif isinstance(data, Dataset):
+                data_filename = os.path.abspath(data.file.filename)
+                parent_filename = os.path.abspath(parent.file.filename)
+                if data_filename != parent_filename:
+                    link = ExternalLink(os.path.relpath(data_filename, os.path.dirname(parent_filename)), data.name)
+                else:
+                    link = SoftLink(data.name)
+                parent[name] = link
+            elif isinstance(data, Builder):
+                _dtype = self.__dtypes[dtype]
+                if dtype == 'region':
+                    def _filler():
+                        ref = self.__get_ref(data, builder.region)
+                        dset = parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                        self.set_attributes(dset, attributes)
+                    self.__queue_ref(_filler)
+                else:
+                    def _filler():
+                        ref = self.__get_ref(data)
+                        dset = parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                        self.set_attributes(dset, attributes)
+                    self.__queue_ref(_filler)
+                return
+            elif isinstance(data, Iterable) and not self.isinstance_inmemory_array(data):
+                dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
+            elif hasattr(data, '__len__'):
+                dset = self.__list_fill__(parent, name, data, dtype_spec=dtype)
+            else:
+                dset = self.__scalar_fill__(parent, name, data, dtype=dtype)
         if link is None:
             self.set_attributes(dset, attributes)
         return dset
 
-    def __selection_max_bounds__(self, selection):
+    @classmethod
+    def __selection_max_bounds__(cls, selection):
         """Determine the bounds of a numpy selection index tuple"""
         if isinstance(selection, int):
             return selection+1
@@ -364,11 +394,12 @@ class HDF5IO(FORMIO):
         elif isinstance(selection, list) or isinstance(selection, np.ndarray):
             return np.nonzero(selection)[0][-1]+1
         elif isinstance(selection, tuple):
-            return tuple([self.__selection_max_bounds__(i) for i in selection])
+            return tuple([cls.__selection_max_bounds__(i) for i in selection])
 
-    def __scalar_fill__(self, parent, name, data, dtype=None):
+    @classmethod
+    def __scalar_fill__(cls, parent, name, data, dtype=None):
         if not isinstance(dtype, type):
-            dtype = self.__resolve_dtype__(dtype, data)
+            dtype = cls.__resolve_dtype__(dtype, data)
         try:
             dset = parent.create_dataset(name, data=data,shape=None, dtype=dtype)
         except Exception as exc:
@@ -376,7 +407,8 @@ class HDF5IO(FORMIO):
             raise_from(Exception(msg), exc)
         return dset
 
-    def __chunked_iter_fill__(self, parent, name, data):
+    @classmethod
+    def __chunked_iter_fill__(cls, parent, name, data):
         """
         Write data to a dataset one-chunk-at-a-time based on the given DataChunkIterator
 
@@ -397,7 +429,7 @@ class HDF5IO(FORMIO):
             raise_from(Exception("Could not create dataset %s in %s" % (name, parent.name)), exc)
         for chunk_i in data:
             # Determine the minimum array dimensions to fit the chunk selection
-            max_bounds = self.__selection_max_bounds__(chunk_i.selection)
+            max_bounds = cls.__selection_max_bounds__(chunk_i.selection)
             if not hasattr(max_bounds, '__len__'):
                 max_bounds = (max_bounds,)
             # Determine if we need to expand any of the data dimensions
@@ -411,9 +443,10 @@ class HDF5IO(FORMIO):
             dset[chunk_i.selection] = chunk_i.data
         return dset
 
-    def __list_fill__(self, parent, name, data, dtype_spec=None):
+    @classmethod
+    def __list_fill__(cls, parent, name, data, dtype_spec=None):
         if not isinstance(dtype_spec, type):
-            dtype = self.__resolve_dtype__(dtype_spec, data)
+            dtype = cls.__resolve_dtype__(dtype_spec, data)
         else:
             dtype = dtype_spec
         if isinstance(dtype, np.dtype):
@@ -430,26 +463,26 @@ class HDF5IO(FORMIO):
             new_shape = list(dset.shape)
             new_shape[0] = len(data)
             dset.resize(new_shape)
-        func = None
-        refs = None
-        if dtype_spec is not None:
-            if isinstance(dtype_spec, list):
-                # do some stuff to figure out what data is a reference
-                refs = list()
-                for i, dts in enumerate(dtype_spec):
-                    if self.__is_ref(dts):
-                        refs.append(i)
-                if len(refs) > 0:
-                    func = partial(self.__resolve_refs, refs, data)
-            elif self.__is_ref(dtype_spec):
-                func = partial(self.__rec_get_ref, data)
-        if func is None:
-            try:
-                dset[:] = data
-            except Exception as e:
-                raise e
-        else:
-            self.__queue_ref(self.__get_ref_filler(dset, np.s_[:], func))
+        try:
+            dset[:] = data
+        except Exception as e:
+            raise e
+#        func = None
+#        refs = None
+#        if dtype_spec is not None:
+#            if isinstance(dtype_spec, list):
+#                # do some stuff to figure out what data is a reference
+#                refs = list()
+#                for i, dts in enumerate(dtype_spec):
+#                    if self.__is_ref(dts):
+#                        refs.append(i)
+#                if len(refs) > 0:
+#                    func = partial(self.__resolve_refs, refs, data)
+#            elif self.__is_ref(dtype_spec):
+#                func = partial(self.__rec_get_ref, data)
+#        if func is None:
+#        else:
+#            self.__queue_ref(self.__get_ref_filler(dset, np.s_[:], func))
         return dset
 
     def __get_ref_filler(self, dset, sl, f):
@@ -507,13 +540,5 @@ class HDF5IO(FORMIO):
                 ret.append(elem)
         return ret
 
-    def __resolve_refs(self, ref_idx, l):
-        ret = list()
-        for item in l:
-            new_item = list(item)
-            for i in ref_idx:
-                new_item[i] = self.__get_ref(item[i])
-            ret.append(tuple(new_item))
-        return ret
 
 
