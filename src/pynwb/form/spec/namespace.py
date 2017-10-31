@@ -1,3 +1,4 @@
+from collections import OrderedDict
 from datetime import datetime
 from copy import deepcopy, copy
 import ruamel.yaml as yaml
@@ -177,7 +178,7 @@ class NamespaceCatalog(object):
             {'name': 'spec_namespace_cls', 'type': type, 'doc': 'the class to use for specification namespaces', 'default': SpecNamespace})
     def __init__(self, **kwargs):
         """Create a catalog for storing  multiple Namespaces"""
-        self.__namespaces = dict()
+        self.__namespaces = OrderedDict()
         self.__dataset_spec_cls = getargs('dataset_spec_cls', kwargs)
         self.__group_spec_cls = getargs('group_spec_cls', kwargs)
         self.__spec_namespace_cls = getargs('spec_namespace_cls', kwargs)

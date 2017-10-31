@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 from .spec import BaseStorageSpec, GroupSpec
 from ..utils import docval, getargs, popargs, get_docval
 
@@ -17,7 +19,7 @@ class SpecCatalog(object):
                     as this dictionary is used like a cache, i.e., to avoid repeated calcuation
                     of the hierarchy but the contents are computed on first request by SpecCatalog.get_hierarchy(...)
         '''
-        self.__specs = dict()
+        self.__specs = OrderedDict()
         self.__parent_types = dict()
         self.__hierarchy = dict()
         self.__spec_source_files = dict()
