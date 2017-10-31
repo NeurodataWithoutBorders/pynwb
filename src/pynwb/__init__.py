@@ -52,7 +52,10 @@ def get_manager(**kwargs):
     if extensions is None:
         type_map = __TYPE_MAP
     else:
-        type_map = get_type_map()
+        if isinstance(extensions, TypeMap):
+            type_map = extensions
+        else:
+            type_map = get_type_map()
         if isinstance(extensions, list):
             for ext in extensions:
                 if isinstance(ext, str):
@@ -77,7 +80,6 @@ def load_namespaces(**kwargs):
     Load namespaces from file
     '''
     namespace_path = getargs('namespace_path', kwargs)
-    print 'HI'
     return __TYPE_MAP.load_namespaces(namespace_path)
 
 # load the core namespace i.e. base NWB specification
