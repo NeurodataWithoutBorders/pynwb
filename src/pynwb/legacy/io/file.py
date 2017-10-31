@@ -1,50 +1,7 @@
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from .. import ObjectMapper
 from pynwb.legacy import register_map
 from pynwb.file import NWBFile
-
-
-
-
 
 @register_map(NWBFile)
 class NWBFileMap(ObjectMapper):
@@ -52,7 +9,7 @@ class NWBFileMap(ObjectMapper):
     def __init__(self, spec):
         super(NWBFileMap, self).__init__(spec)
         raw_ts_spec = self.spec.get_group('acquisition').get_group('timeseries').get_neurodata_type('TimeSeries')
-        self.map_spec('raw_timeseries', raw_ts_spec)
+        self.map_spec('acquisition', raw_ts_spec)
 
         stimulus_spec = self.spec.get_group('stimulus')
         presentation_ts_spec = stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries')

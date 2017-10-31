@@ -127,7 +127,8 @@ class GroupBuilder(BaseBuilder):
         for group in groups:
             self.set_group(group)
         for dataset in datasets:
-            self.set_dataset(dataset)
+            if not (dataset is None):
+                self.set_dataset(dataset)
         for link in links:
             self.set_link(link)
 

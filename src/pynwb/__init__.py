@@ -5,19 +5,12 @@ import os.path
 
 CORE_NAMESPACE = 'core'
 
-<<<<<<< 6acf1392fdf6e23dfacbad0061d75f726b12217e
 from .form.spec import NamespaceCatalog
 from .form.utils import docval, getargs, popargs
 from .form.backends.io import FORMIO
 from .form.backends.hdf5 import HDF5IO
 from .form.validate import ValidatorMap
 from .form.build import BuildManager
-=======
-from form.spec import NamespaceCatalog
-from form.utils import docval, getargs
-from form.backends.io import FORMIO
-from form.validate import ValidatorMap
->>>>>>> WIP, all but one integration test passing
 
 from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
 
@@ -39,14 +32,9 @@ global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-<<<<<<< 6acf1392fdf6e23dfacbad0061d75f726b12217e
 from .form.build import TypeMap as TypeMap
 from .form.build import ObjectMapper as __ObjectMapper
 __TYPE_MAP = TypeMap(__NS_CATALOG)
-=======
-from form.build import TypeMap as __TypeMap
-from form.build import ObjectMapper as __ObjectMapper
->>>>>>> WIP, all but one integration test passing
 def get_type_map():
     ret = __TypeMap(__NS_CATALOG)
     return ret
@@ -54,10 +42,38 @@ def get_type_map():
 # a global type map
 __TYPE_MAP = get_type_map()
 
-def get_global_type_map():
-    #ret = __TypeMap(__NS_CATALOG)
-    ret = __TYPE_MAP
-    return ret
+@docval({'name': 'extensions', 'type': (str, TypeMap, list), 'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps', 'default': None},
+        returns="the namespaces loaded from the given file", rtype=tuple,
+        is_method=False)
+def get_manager(**kwargs):
+    '''
+    Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
+    return a BuildManager that uses the core namespace
+    '''
+    extensions = getargs('extensions', kwargs)
+    type_map = None
+    if extensions is None:
+        type_map = __TYPE_MAP
+    else:
+        if isinstance(extensions, TypeMap):
+            type_map = extensions
+        else:
+            type_map = get_type_map()
+        if isinstance(extensions, list):
+            for ext in extensions:
+                if isinstance(ext, str):
+                    type_map.load_namespace(ext)
+                elif isinstance(ext, TypeMap):
+                    type_map.merge(ext)
+                else:
+                    msg = 'extensions must be a list of paths to namespace specs or a TypeMaps'
+                    raise ValueError(msg)
+        elif isinstance(extensions, str):
+            type_map.load_namespace(extensions)
+        elif isinstance(extensions, TypeMap):
+            type_map.merge(extensions)
+    manager = BuildManager(type_map)
+    return manager
 
 @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
         returns="the namespaces loaded from the given file", rtype=tuple,
@@ -67,7 +83,6 @@ def load_namespaces(**kwargs):
     Load namespaces from file
     '''
     namespace_path = getargs('namespace_path', kwargs)
-    print 'HI'
     return __TYPE_MAP.load_namespaces(namespace_path)
 
 # load the core namespace i.e. base NWB specification
