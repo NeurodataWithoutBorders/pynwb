@@ -15,7 +15,7 @@ from ..utils import docval, getargs, popargs
 class SpecWriter(with_metaclass(ABCMeta, object)):
 
     @abstractmethod
-    def write_spec(self, spec, path):
+    def write_spec(self, spec_file_dict, path):
         pass
 
     @abstractmethod
@@ -31,9 +31,9 @@ class YAMLSpecWriter(SpecWriter):
     def __dump_spec(self, specs, stream):
         yaml.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
 
-    def write_spec(self, spec, path):
+    def write_spec(self, spec_file_dict, path):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
-            self.__dump_spec(spec, stream)
+            self.__dump_spec(spec_file_dict, stream)
 
     def write_namespace(self, namespace, path):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
@@ -108,15 +108,13 @@ class NamespaceBuilder(object):
         for ns, info in self.__namespaces.items():
             ns_args['schema'].append(info)
         for path, info  in self.__sources.items():
-            out = dict()
+            out = SpecFileBuilder()
             dts = list()
             for spec in info[self.__dt_key]:
-                if isinstance(spec, GroupSpec):
-                    out.setdefault('groups', list()).append(spec)
-                elif isinstance(spec, DatasetSpec):
-                    out.setdefault('datasets', list()).append(spec)
-                else:
+                if isinstance(spec, str):
                     dts.append(spec)
+                else:
+                    out.add_spec(spec)
             item = {'source': path}
             if out and dts:
                 raise ValueError('cannot include from source if writing to source')
@@ -127,3 +125,13 @@ class NamespaceBuilder(object):
             ns_args['schema'].append(item)
         namespace = SpecNamespace.build_namespace(**ns_args)
         writer.write_namespace(namespace, ns_path)
+
+class SpecFileBuilder(dict):
+
+    @docval({'name': 'spec', 'type': (GroupSpec, DatasetSpec), 'doc': 'the Spec to add'})
+    def add_spec(self, **kwargs):
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, GroupSpec):
+            self.setdefault('groups', list()).append(spec)
+        elif isinstance(spec, DatasetSpec):
+            self.setdefault('datasets', list()).append(spec)
