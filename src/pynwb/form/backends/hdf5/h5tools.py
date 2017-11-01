@@ -4,7 +4,7 @@ import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference
 from six import raise_from, text_type, string_types, binary_type
 from functools import partial
-
+import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs
@@ -104,6 +104,7 @@ class HDF5IO(FORMIO):
                         self.__set_built(sub_h5obj.file.filename, sub_h5obj.name, builder)
                     obj_type[builder.name] = builder
             else:
+                warnings.warn('Broken Link: %s' % os.path.join(h5obj.name, k))
                 kwargs['datasets'][k] = None
                 continue
         kwargs['source'] = self.__path
