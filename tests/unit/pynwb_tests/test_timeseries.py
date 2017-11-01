@@ -3,7 +3,6 @@ import unittest
 from pynwb import TimeSeries
 from pynwb.core import NWBContainer
 
-import math
 
 class TimeSeriesConstructor(unittest.TestCase):
 
@@ -22,7 +21,7 @@ class TimeSeriesConstructor(unittest.TestCase):
         self.assertIsInstance(ts.timestamp_link, set)
         self.assertEqual(len(ts.timestamp_link), 0)
 
-    def test_init_no_parent(self):
+    def test_init_no_parent(self):  # noqa: F811
         parent = NWBContainer('unit test: test_init_no_parent', 'test_parent_container')
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list(), parent=parent)
         self.assertEqual(ts.name, 'test_ts')
@@ -30,7 +29,7 @@ class TimeSeriesConstructor(unittest.TestCase):
 
     def test_init_data(self):
         dat = [0, 1, 2, 3, 4]
-        tstamps = [0, 1, 2, 3, 4]
+        tstamps = [0, 1, 2, 3, 4]  # noqa: F841
         ts = TimeSeries('test_ts', 'a hypothetical source', dat, 'Volts', timestamps=[0.1, 0.2, 0.3, 0.4])
         self.assertIs(ts.data, dat)
         self.assertEqual(ts.conversion, 1.0)
@@ -41,7 +40,7 @@ class TimeSeriesConstructor(unittest.TestCase):
         dat = [0, 1, 2, 3, 4]
         tstamps = [0.1, 0.2, 0.3, 0.4]
         ts = TimeSeries('test_ts', 'a hypothetical source', dat, 'unit', timestamps=tstamps)
-        self.assertIs(ts.timestamps , tstamps)
+        self.assertIs(ts.timestamps, tstamps)
         self.assertEqual(ts.interval, 1)
         self.assertEqual(ts.time_unit, "Seconds")
 

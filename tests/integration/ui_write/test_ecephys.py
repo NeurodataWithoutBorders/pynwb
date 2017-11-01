@@ -1,31 +1,25 @@
-import unittest2 as unittest
-import numpy as np
-import json
-from datetime import datetime
-import os
-
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder
 
-from pynwb.ecephys import *
+from pynwb.ecephys import *  # noqa: F403
 
 from . import base
+
 
 class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        self.dev1 = Device('dev1', 'a test source')
-        return ElectrodeGroup('elec1', 'a test source',
+        self.dev1 = Device('dev1', 'a test source')  # noqa: F405
+        return ElectrodeGroup('elec1', 'a test source',  # noqa: F405
                                         'a test ElectrodeGroup',
                                         'a nonexistent place',
                                         self.dev1)
 
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
-                            attributes={'neurodata_type': 'Device',
-                                        'namespace': 'core',
-                                        'help': 'A recording device e.g. amplifier',
-                                        'source': 'a test source'},
-                         )
+                                      attributes={'neurodata_type': 'Device',
+                                                  'namespace': 'core',
+                                                  'help': 'A recording device e.g. amplifier',
+                                                  'source': 'a test source'})
         return GroupBuilder('elec1',
                             attributes={'neurodata_type': 'ElectrodeGroup',
                                         'namespace': 'core',
@@ -35,8 +29,7 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
                                         'source': 'a test source'},
                             links={
                                 'device': LinkBuilder('device', device_builder)
-                            }
-                        )
+                            })
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
@@ -47,62 +40,67 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
         ''' Should take an NWBFile object and return the Container'''
         return nwbfile.get_electrode_group(self.container.name)
 
+
 def make_electrode_table(self):
-    self.table = ElectrodeTable('electrodes')
-    self.dev1 = Device('dev1', 'a test source')
-    self.group = ElectrodeGroup('tetrode1', 'a test source', 'tetrode description', 'tetrode location', self.dev1)
+    self.table = ElectrodeTable('electrodes')  # noqa: F405
+    self.dev1 = Device('dev1', 'a test source')  # noqa: F405
+    self.group = ElectrodeGroup('tetrode1', 'a test source',  # noqa: F405
+                                'tetrode description', 'tetrode location', self.dev1)
     self.table.add_row(1, 1.0, 2.0, 3.0, -1.0, 'CA1', 'none', 'first channel of tetrode', self.group)
     self.table.add_row(2, 1.0, 2.0, 3.0, -2.0, 'CA1', 'none', 'second channel of tetrode', self.group)
     self.table.add_row(3, 1.0, 2.0, 3.0, -3.0, 'CA1', 'none', 'third channel of tetrode', self.group)
     self.table.add_row(4, 1.0, 2.0, 3.0, -4.0, 'CA1', 'none', 'fourth channel of tetrode', self.group)
 
+
 class TestElectricalSeriesIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         make_electrode_table(self)
-        region = ElectrodeTableRegion(self.table, [0,2], 'the first and third electrodes')
+        region = ElectrodeTableRegion(self.table, [0, 2], 'the first and third electrodes')  # noqa: F405
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
-        ret = ElectricalSeries('test_eS', 'a hypothetical source', data, region, timestamps=timestamps)
+        ret = ElectricalSeries('test_eS', 'a hypothetical source', data, region, timestamps=timestamps)  # noqa: F405
         return ret
 
     def setUpBuilder(self):
-        device_builder = GroupBuilder('dev1',
-                            attributes={'neurodata_type': 'Device',
-                                        'namespace': 'core',
-                                        'help': 'A recording device e.g. amplifier',
-                                        'source': 'a test source'},
-                         )
+        device_builder = GroupBuilder('dev1',  # noqa: F841
+                                      attributes={'neurodata_type': 'Device',
+                                                  'namespace': 'core',
+                                                  'help': 'A recording device e.g. amplifier',
+                                                  'source': 'a test source'})
 
         table_builder = DatasetBuilder('electrodes', self.table.data,
-                             attributes={'neurodata_type': 'ElectrodeTable',
-                                         'namespace': 'core',
-                                         'help': 'a table for storing data about extracellular electrodes'})
+                                       attributes={'neurodata_type': 'ElectrodeTable',
+                                                   'namespace': 'core',
+                                                   'help': 'a table for storing data about extracellular electrodes'})
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
         return GroupBuilder('test_eS',
-                                attributes={'source': 'a hypothetical source',
-                                            'namespace': base.CORE_NAMESPACE,
-                                            'comments': 'no comments',
-                                            'description': 'no description',
-                                            'neurodata_type': 'ElectricalSeries',
-                                            'help': 'Stores acquired voltage data from extracellular recordings'},
-                                datasets={'data': DatasetBuilder('data', data,
-                                                                 attributes={'unit': 'volt',
-                                                                             'conversion': 1.0,
-                                                                             'resolution': 0.0}),
-                                          'timestamps': DatasetBuilder('timestamps', timestamps,
-                                                                 attributes={'unit': 'Seconds', 'interval': 1}),
-                                          'electrodes': RegionBuilder('electrodes', [0,2], table_builder,
-                                                                      attributes={'neurodata_type': 'ElectrodeTableRegion',
-                                                                                  'namespace': 'core',
-                                                                                  'description': 'the first and third electrodes',
-                                                                                  'help': 'a subset (i.e. slice or region) of an ElectrodeTable'})
-                                          })
+                            attributes={'source': 'a hypothetical source',
+                                        'namespace': base.CORE_NAMESPACE,
+                                        'comments': 'no comments',
+                                        'description': 'no description',
+                                        'neurodata_type': 'ElectricalSeries',
+                                        'help': 'Stores acquired voltage data from extracellular recordings'},
+                            datasets={'data': DatasetBuilder('data',
+                                                             data,
+                                                             attributes={'unit': 'volt',
+                                                                         'conversion': 1.0,
+                                                                         'resolution': 0.0}),
+                                      'timestamps': DatasetBuilder('timestamps',
+                                                                   timestamps,
+                                                                   attributes={'unit': 'Seconds', 'interval': 1}),
+                                      'electrodes': RegionBuilder('electrodes', [0, 2],
+                                                                  table_builder,
+                                                                  attributes={
+                                                                      'neurodata_type': 'ElectrodeTableRegion',
+                                                                      'namespace': 'core',
+                                                                      'description': 'the first and third electrodes',
+                                                                      'help': 'a subset (i.e. slice or region) of an ElectrodeTable'})})  # noqa: E501
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
-        #TODO: this might need to do somethign to add the electrode table
+        # TODO: this might need to do somethign to add the electrode table
         nwbfile.set_device(self.dev1)
         nwbfile.set_electrode_group(self.group)
         nwbfile.set_electrode_table(self.table)
@@ -117,17 +115,17 @@ class TestClusteringIO(base.TestMapRoundTrip):
 
     def setUpBuilder(self):
         return GroupBuilder('Clustering',
-            attributes={
-               'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',
-               'source': "an example source for Clustering",
-               'neurodata_type': 'Clustering',
-               'namespace': base.CORE_NAMESPACE},
-            datasets={
-               'num': DatasetBuilder('num', [0, 1, 2, 0, 1, 2]),
-               'times': DatasetBuilder('times', list(range(10,61,10))),
-               'peak_over_rms': DatasetBuilder('peak_over_rms', [100, 101, 102]),
-               'description': DatasetBuilder('description', "A fake Clustering interface")}
-        )
+                            attributes={
+                                'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',  # noqa: E501
+                                'source': "an example source for Clustering",
+                                'neurodata_type': 'Clustering',
+                                'namespace': base.CORE_NAMESPACE},
+                            datasets={
+                                'num': DatasetBuilder('num', [0, 1, 2, 0, 1, 2]),
+                                'times': DatasetBuilder('times', list(range(10, 61, 10))),
+                                'peak_over_rms': DatasetBuilder('peak_over_rms', [100, 101, 102]),
+                                'description': DatasetBuilder('description', "A fake Clustering interface")})
 
     def setUpContainer(self):
-        return Clustering("an example source for Clustering", "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10,61,10)))
+        return Clustering("an example source for Clustering", "A fake Clustering interface",  # noqa: F405
+                          [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10, 61, 10)))

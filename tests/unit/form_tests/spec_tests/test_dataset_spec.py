@@ -1,7 +1,8 @@
 import unittest2 as unittest
 import json
 
-from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, Spec, SpecCatalog, DtypeSpec
+from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, DtypeSpec
+
 
 class DtypeSpecTests(unittest.TestCase):
     def setUp(self):
@@ -14,10 +15,11 @@ class DtypeSpecTests(unittest.TestCase):
         self.assertEqual(spec.dtype, 'int')
 
     def test_build_spec(self):
-        spec = DtypeSpec.build_spec({'doc':'an example column', 'name': 'column1', 'dtype': 'int'})
+        spec = DtypeSpec.build_spec({'doc': 'an example column', 'name': 'column1', 'dtype': 'int'})
         self.assertEqual(spec.doc, 'an example column')
         self.assertEqual(spec.name, 'column1')
         self.assertEqual(spec.dtype, 'int')
+
 
 class DatasetSpecTests(unittest.TestCase):
     def setUp(self):
@@ -90,15 +92,15 @@ class DatasetSpecTests(unittest.TestCase):
     def test_datatype_extension_groupspec(self):
         '''Test to make sure DatasetSpec catches when a GroupSpec used as data_type_inc'''
         base = GroupSpec('a fake grop',
-                           namespace='core',
-                           data_type_def='EphysData')
+                         namespace='core',
+                         data_type_def='EphysData')
         with self.assertRaises(TypeError):
-            ext = DatasetSpec('my first dataset extension',
-                          'int',
-                          name='dataset1',
-                          namespace='core',
-                          data_type_inc=base,
-                          data_type_def='SpikeData')
+            ext = DatasetSpec('my first dataset extension',  # noqa: F841
+                              'int',
+                              name='dataset1',
+                              namespace='core',
+                              data_type_inc=base,
+                              data_type_def='SpikeData')
 
     def test_constructor_table(self):
         dtype1 = DtypeSpec('column1', 'the first column', 'int')
@@ -116,7 +118,6 @@ class DatasetSpecTests(unittest.TestCase):
         self.assertIs(spec, self.attributes[0].parent)
         self.assertIs(spec, self.attributes[1].parent)
         json.dumps(spec)
-
 
     def test_datatype_table_extension(self):
         dtype1 = DtypeSpec('column1', 'the first column', 'int')
@@ -168,11 +169,11 @@ class DatasetSpecTests(unittest.TestCase):
         self.assertEqual(base['doc'], 'my first table')
         dtype3 = DtypeSpec('column2', 'the second column, with greater precision', 'float32')
         with self.assertRaisesRegex(ValueError, 'Cannot extend float64 to float32'):
-            ext = DatasetSpec('my first table extension',
-                          [dtype3],
-                          namespace='core',
-                          data_type_inc=base,
-                          data_type_def='ExtendedTable')
+            ext = DatasetSpec('my first table extension',  # noqa: F841
+                              [dtype3],
+                              namespace='core',
+                              data_type_inc=base,
+                              data_type_def='ExtendedTable')
 
     def test_datatype_table_extension_diff_format(self):
         dtype1 = DtypeSpec('column1', 'the first column', 'int')
@@ -186,7 +187,7 @@ class DatasetSpecTests(unittest.TestCase):
         self.assertEqual(base['doc'], 'my first table')
         dtype3 = DtypeSpec('column2', 'the second column, with greater precision', 'int32')
         with self.assertRaisesRegex(ValueError, 'Cannot extend float64 to int32'):
-            ext = DatasetSpec('my first table extension',
+            ext = DatasetSpec('my first table extension',  # noqa: F841
                           [dtype3],
                           namespace='core',
                           data_type_inc=base,

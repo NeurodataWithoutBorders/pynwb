@@ -1,10 +1,10 @@
 from copy import copy, deepcopy
-from datetime import datetime
 
 from .form.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder, AttributeSpec, DtypeSpec
-from .form.utils import docval, get_docval, getargs, fmt_docval_args
+from .form.utils import docval, get_docval, fmt_docval_args
 
 from . import CORE_NAMESPACE
+
 
 def __swap_inc_def(cls):
     args = get_docval(cls.__init__)
@@ -12,14 +12,19 @@ def __swap_inc_def(cls):
     ret = list()
     for arg in args:
         if arg['name'] == 'data_type_def':
-            ret.append({'name': 'neurodata_type_def', 'type': str, 'doc': 'the NWB data type this spec defines', 'default': None})
+            ret.append({'name': 'neurodata_type_def', 'type': str,
+                        'doc': 'the NWB data type this spec defines', 'default': None})
         elif arg['name'] == 'data_type_inc':
-            ret.append({'name': 'neurodata_type_inc', 'type': (clsname, str), 'doc': 'the NWB data type this spec includes', 'default': None})
+            ret.append({'name': 'neurodata_type_inc', 'type': (clsname, str),
+                        'doc': 'the NWB data type this spec includes', 'default': None})
         else:
             ret.append(copy(arg))
     return ret
 
+
 _attr_docval = __swap_inc_def(AttributeSpec)
+
+
 class NWBAttributeSpec(AttributeSpec):
 
     @docval(*_attr_docval)
@@ -27,7 +32,10 @@ class NWBAttributeSpec(AttributeSpec):
         args, kwargs = fmt_docval_args(AttributeSpec.__init__, kwargs)
         super(NWBAttributeSpec, self).__init__(*args, **kwargs)
 
+
 _link_docval = __swap_inc_def(LinkSpec)
+
+
 class NWBLinkSpec(LinkSpec):
 
     @docval(*_link_docval)
@@ -39,6 +47,7 @@ class NWBLinkSpec(LinkSpec):
     def neurodata_type_inc(self):
         ''' The neurodata type of target specification '''
         return self.data_type_inc
+
 
 class BaseStorageOverride(object):
     ''' This class is used for the purpose of overriding
@@ -82,7 +91,10 @@ class BaseStorageOverride(object):
     def neurodata_type_def(self):
         return self.data_type_def
 
+
 _dtype_docval = __swap_inc_def(DtypeSpec)
+
+
 class NWBDtypeSpec(DtypeSpec):
 
     @docval(*_dtype_docval)
@@ -90,7 +102,10 @@ class NWBDtypeSpec(DtypeSpec):
         args, kwargs = fmt_docval_args(DtypeSpec.__init__, kwargs)
         super(NWBDtypeSpec, self).__init__(*args, **kwargs)
 
+
 _dataset_docval = __swap_inc_def(DatasetSpec)
+
+
 class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
     ''' The Spec class to use for NWB specifications '''
 
@@ -106,10 +121,13 @@ class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
         args, kwargs = self.__translate_kwargs(kwargs)
         super(NWBDatasetSpec, self).__init__(*args, **kwargs)
 
+
 _group_docval = __swap_inc_def(GroupSpec)
+
+
 class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     ''' The Spec class to use for NWB specifications '''
-    #TODO: add unit tests for this
+    # TODO: add unit tests for this
 
     @staticmethod
     def __translate_kwargs(kwargs):
@@ -150,6 +168,7 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
         self.set_dataset(spec)
         return spec
 
+
 class NWBNamespace(SpecNamespace):
     '''
     A Namespace class for NWB
@@ -160,6 +179,7 @@ class NWBNamespace(SpecNamespace):
     @classmethod
     def types_key(cls):
         return cls.__types_key
+
 
 class NWBNamespaceBuilder(NamespaceBuilder):
     '''
@@ -172,7 +192,8 @@ class NWBNamespaceBuilder(NamespaceBuilder):
             {'name': 'full_name', 'type': str, 'doc': 'extended full name of this namespace', 'default': None},
             {'name': 'version', 'type': (str, tuple, list), 'doc': 'Version number of the namespace', 'default': None},
             {'name': 'author', 'type': (str, list), 'doc': 'Author or list of authors.', 'default': None},
-            {'name': 'contact', 'type': (str, list), 'doc': 'List of emails. Ordering should be the same as for author', 'default': None})
+            {'name': 'contact', 'type': (str, list),
+             'doc': 'List of emails. Ordering should be the same as for author', 'default': None})
     def __init__(self, **kwargs):
         ''' Create a NWBNamespaceBuilder '''
         args, vargs = fmt_docval_args(NamespaceBuilder.__init__, kwargs)

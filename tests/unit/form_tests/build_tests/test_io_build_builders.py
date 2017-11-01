@@ -1,7 +1,6 @@
 import unittest2 as unittest
 
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder
-import json
 
 
 class GroupBuilderSetterTests(unittest.TestCase):
@@ -45,11 +44,11 @@ class GroupBuilderSetterTests(unittest.TestCase):
         self.assertIs(self.gb, el.parent)
         self.assertIs(self.gb2, gp.parent)
 
-    #@unittest.expectedFailure
+    # @unittest.expectedFailure
     def test_set_attribute(self):
         self.gb.set_attribute('key', 'value')
         self.assertIn('key', self.gb.obj_type)
-        #self.assertEqual(dict.__getitem__(self.gb, 'attributes')['key'], 'value')
+        # self.assertEqual(dict.__getitem__(self.gb, 'attributes')['key'], 'value')
         self.assertEqual(self.gb['key'], 'value')
 
     def test_parent_constructor(self):
@@ -60,6 +59,7 @@ class GroupBuilderSetterTests(unittest.TestCase):
         self.gb.set_group(self.gb2)
         self.assertIs(self.gb2.parent, self.gb)
 
+
 class GroupBuilderGetterTests(unittest.TestCase):
 
     def setUp(self):
@@ -69,14 +69,14 @@ class GroupBuilderGetterTests(unittest.TestCase):
         self.int_attr = 1
         self.str_attr = "my_str"
 
-        self.group1 = GroupBuilder('group1', {'subgroup1':self.subgroup1})
+        self.group1 = GroupBuilder('group1', {'subgroup1': self.subgroup1})
         self.gb = GroupBuilder('gb', {'group1': self.group1},
-                                         {'dataset1': self.dataset1},
-                                         {'int_attr': self.int_attr,
-                                          'str_attr': self.str_attr},
-                                         {'soft_link1': self.soft_link1})
-                                         #{'soft_link1': self.soft_link1,
-                                         # 'external_link1': self.external_link1}))
+                               {'dataset1': self.dataset1},
+                               {'int_attr': self.int_attr,
+                                'str_attr': self.str_attr},
+                               {'soft_link1': self.soft_link1})
+        # {'soft_link1': self.soft_link1,
+        #  'external_link1': self.external_link1}))
 
     def tearDown(self):
         pass
@@ -130,7 +130,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
         """Test get() for attributes"""
         self.assertEqual(self.gb.get('str_attr'), self.str_attr)
 
-    def test_get_item_soft_link(self):
+    def test_get_item_soft_link(self):  # noqa: F811
         """Test get() for soft links"""
         self.assertIs(self.gb.get('soft_link1'), self.soft_link1)
 
@@ -146,9 +146,9 @@ class GroupBuilderGetterTests(unittest.TestCase):
             ('int_attr', self.int_attr),
             ('str_attr', self.str_attr),
             ('soft_link1', self.soft_link1),
-            #('external_link1', self.external_link1)
+            # ('external_link1', self.external_link1)
         )
-        #self.assertSetEqual(items, set(self.gb.items()))
+        # self.assertSetEqual(items, set(self.gb.items()))
         try:
             self.assertCountEqual(items, self.gb.items())
         except AttributeError:
@@ -162,7 +162,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
             'int_attr',
             'str_attr',
             'soft_link1',
-            #'external_link1',
+            # 'external_link1',
         )
         try:
             self.assertCountEqual(keys, self.gb.keys())
@@ -176,12 +176,13 @@ class GroupBuilderGetterTests(unittest.TestCase):
             self.dataset1,
             self.int_attr, self.str_attr,
             self.soft_link1,
-            #self.external_link1,
+            # self.external_link1,
         )
         try:
             self.assertCountEqual(values, self.gb.values())
         except AttributeError:
             self.assertItemsEqual(values, self.gb.values())
+
 
 class GroupBuilderIsEmptyTests(unittest.TestCase):
 
@@ -202,7 +203,12 @@ class GroupBuilderIsEmptyTests(unittest.TestCase):
 
     def test_is_empty_false_group_dataset(self):
         """Test is_empty() when group has a subgroup with a dataset"""
-        gb = GroupBuilder('gb', {'my_subgroup': GroupBuilder('my_subgroup', datasets={'my_dataset': DatasetBuilder('my_dataset')})})
+        gb = GroupBuilder(
+            'gb',
+            {'my_subgroup':
+             GroupBuilder(
+                 'my_subgroup',
+                 datasets={'my_dataset': DatasetBuilder('my_dataset')})})
         self.assertEqual(gb.is_empty(), False)
 
     def test_is_empty_false_attribute(self):
@@ -214,6 +220,7 @@ class GroupBuilderIsEmptyTests(unittest.TestCase):
         """Test is_empty() when group has subgroup with an attribute"""
         gb = GroupBuilder('gb', {'my_subgroup': GroupBuilder('my_subgroup', attributes={'my_attr': 'attr_value'})})
         self.assertEqual(gb.is_empty(), False)
+
 
 class GroupBuilderDeepUpdateTests(unittest.TestCase):
 
@@ -227,11 +234,11 @@ class GroupBuilderDeepUpdateTests(unittest.TestCase):
         self.assertIs(gb1sg, gb2sg)
 
     def test_mutually_exclusive_datasets(self):
-        gb1 = GroupBuilder('gb1', datasets={'dataset1': DatasetBuilder('dataset1', [1,2,3])})
-        gb2 = GroupBuilder('gb2', datasets={'dataset2': DatasetBuilder('dataset2', [4,5,6])})
+        gb1 = GroupBuilder('gb1', datasets={'dataset1': DatasetBuilder('dataset1', [1, 2, 3])})
+        gb2 = GroupBuilder('gb2', datasets={'dataset2': DatasetBuilder('dataset2', [4, 5, 6])})
         gb1.deep_update(gb2)
         self.assertIn('dataset2', gb1)
-        #self.assertIs(gb1['dataset2'], gb2['dataset2'])
+        # self.assertIs(gb1['dataset2'], gb2['dataset2'])
         self.assertListEqual(gb1['dataset2'].data, gb2['dataset2'].data)
 
     def test_mutually_exclusive_attributes(self):
@@ -258,15 +265,15 @@ class GroupBuilderDeepUpdateTests(unittest.TestCase):
         self.assertIs(gb1['subgroup2'], subgroup2)
 
     def test_intersecting_datasets(self):
-        gb1 = GroupBuilder('gb1', datasets={'dataset2': DatasetBuilder('dataset2', [1,2,3])})
-        gb2 = GroupBuilder('gb2', datasets={'dataset2': DatasetBuilder('dataset2', [4,5,6])})
+        gb1 = GroupBuilder('gb1', datasets={'dataset2': DatasetBuilder('dataset2', [1, 2, 3])})
+        gb2 = GroupBuilder('gb2', datasets={'dataset2': DatasetBuilder('dataset2', [4, 5, 6])})
         gb1.deep_update(gb2)
         self.assertIn('dataset2', gb1)
         self.assertListEqual(gb1['dataset2'].data, gb2['dataset2'].data)
 
     def test_intersecting_attributes(self):
-        gb1 = GroupBuilder('gb1', attributes={'attr2':'my_attribute1'})
-        gb2 = GroupBuilder('gb2', attributes={'attr2':'my_attribute2'})
+        gb1 = GroupBuilder('gb1', attributes={'attr2': 'my_attribute1'})
+        gb2 = GroupBuilder('gb2', attributes={'attr2': 'my_attribute2'})
         gb1.deep_update(gb2)
         self.assertIn('attr2', gb2)
         self.assertEqual(gb2['attr2'], 'my_attribute2')
@@ -278,17 +285,18 @@ class GroupBuilderDeepUpdateTests(unittest.TestCase):
         self.assertIn('link2', gb2)
         self.assertEqual(gb1['link2'], gb2['link2'])
 
+
 class DatasetBuilderDeepUpdateTests(unittest.TestCase):
 
     def test_overwrite(self):
-        db1 = DatasetBuilder('db1', [1,2,3])
-        db2 = DatasetBuilder('db2', [4,5,6])
+        db1 = DatasetBuilder('db1', [1, 2, 3])
+        db2 = DatasetBuilder('db2', [4, 5, 6])
         db1.deep_update(db2)
         self.assertListEqual(db1.data, db2.data)
 
     def test_no_overwrite(self):
-        db1 = DatasetBuilder('db1', [1,2,3])
-        db2 = DatasetBuilder('db2', [4,5,6], attributes={'attr1': 'va1'})
+        db1 = DatasetBuilder('db1', [1, 2, 3])
+        db2 = DatasetBuilder('db2', [4, 5, 6], attributes={'attr1': 'va1'})
         db1.deep_update(db2)
         self.assertListEqual(db1.data, db2.data)
         self.assertIn('attr1', db1.attributes)

@@ -1,7 +1,5 @@
 import abc
-from datetime import datetime
-from copy import deepcopy, copy
-from itertools import chain
+from copy import deepcopy
 from collections import OrderedDict
 import re
 
@@ -18,13 +16,14 @@ FLAGS = {
     'one_or_many': ONE_OR_MANY
 }
 
-from six import with_metaclass
+from six import with_metaclass  # noqa: E402
+
 
 class ConstructableDict(with_metaclass(abc.ABCMeta, dict)):
     @classmethod
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this ConstructableDict class from a dictionary '''
-        return deepcopy(spec_dict)
+        return deepcopy(spec_dict)  # noqa: F821
 
     @classmethod
     def build_spec(cls, spec_dict):
@@ -35,6 +34,7 @@ class ConstructableDict(with_metaclass(abc.ABCMeta, dict)):
         except KeyError as e:
             raise KeyError("'%s' not found in %s" % (e.args[0], str(spec_dict)))
         return cls(*args, **kwargs)
+
 
 class Spec(ConstructableDict):
     ''' A base specification class
@@ -91,24 +91,29 @@ class Spec(ConstructableDict):
     def __eq__(self, other):
         return id(self) == id(other)
 
+
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
         {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
-        {'name': 'required', 'type': bool, 'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
+        {'name': 'required', 'type': bool,
+         'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
         {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
         {'name': 'value', 'type': None, 'doc': 'a constant value for this attribute', 'default': None},
         {'name': 'default_value', 'type': None, 'doc': 'a default value for this attribute', 'default': None}
 ]
+
+
 class AttributeSpec(Spec):
     ''' Specification for attributes
     '''
 
     @docval(*_attr_args)
     def __init__(self, **kwargs):
-        name, dtype, doc, dims, shape, required, parent, value, default_value = getargs('name', 'dtype', 'doc', 'dims', 'shape', 'required', 'parent', 'value', 'default_value', kwargs)
+        name, dtype, doc, dims, shape, required, parent, value, default_value = getargs(
+            'name', 'dtype', 'doc', 'dims', 'shape', 'required', 'parent', 'value', 'default_value', kwargs)
         super(AttributeSpec, self).__init__(doc, name=name, required=required, parent=parent)
         if isinstance(dtype, type):
             self['dtype'] = dtype.__name__
@@ -160,16 +165,21 @@ class AttributeSpec(Spec):
         ''' The shape of this attribute's value '''
         return self.get('shape', None)
 
+
 _attrbl_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'name', 'type': str, 'doc': 'the name of this base storage container', 'default': None},
-        {'name': 'default_name', 'type': str, 'doc': 'The default name of this base storage container', 'default': None},
+        {'name': 'default_name', 'type': str,
+         'doc': 'The default name of this base storage container', 'default': None},
         {'name': 'attributes', 'type': list, 'doc': 'the attributes on this group', 'default': list()},
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'data_type_inc', 'type': (str, 'BaseStorageSpec'), 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'data_type_inc', 'type': (str, 'BaseStorageSpec'),
+         'doc': 'the NWB type this specification extends', 'default': None},
 ]
+
+
 class BaseStorageSpec(Spec):
     ''' A specification for any object that can hold attributes. '''
 
@@ -177,17 +187,19 @@ class BaseStorageSpec(Spec):
     __def_key = 'data_type_def'
     __type_key = 'data_type'
 
-    @docval(*deepcopy(_attrbl_args))
+    @docval(*deepcopy(_attrbl_args))  # noqa: F821
     def __init__(self, **kwargs):
         name, doc, parent, quantity, attributes, linkable, data_type_def, data_type_inc =\
-             getargs('name', 'doc', 'parent', 'quantity', 'attributes', 'linkable', 'data_type_def', 'data_type_inc', kwargs)
+             getargs('name', 'doc', 'parent', 'quantity', 'attributes',
+                     'linkable', 'data_type_def', 'data_type_inc', kwargs)
         if name == NAME_WILDCARD and data_type_def is None and data_type_inc is None:
-            raise ValueError("Cannot create Group or Dataset spec with wildcard name without specifying 'data_type_def' and/or 'data_type_inc'")
+            raise ValueError("Cannot create Group or Dataset spec with wildcard name \
+            without specifying 'data_type_def' and/or 'data_type_inc'")
         super(BaseStorageSpec, self).__init__(doc, name=name, parent=parent)
         default_name = getargs('default_name', kwargs)
         if default_name:
             if name is not None:
-                warn("found 'default_name' with 'name' - ignoring 'default_name'")
+                warn("found 'default_name' with 'name' - ignoring 'default_name'")  # noqa: F821
             else:
                 self['default_name'] = default_name
         self.__attributes = dict()
@@ -317,7 +329,7 @@ class BaseStorageSpec(Spec):
         ''' The number of times the object being specified should be present '''
         return self.get('quantity', DEF_QUANTITY)
 
-    @docval(*deepcopy(_attr_args))
+    @docval(*deepcopy(_attr_args))  # noqa: F821
     def add_attribute(self, **kwargs):
         ''' Add an attribute to this specification '''
         pargs, pkwargs = fmt_docval_args(AttributeSpec.__init__, kwargs)
@@ -361,12 +373,14 @@ class BaseStorageSpec(Spec):
             ret['attributes'] = [AttributeSpec.build_spec(sub_spec) for sub_spec in ret['attributes']]
         return ret
 
+
 _target_type_key = 'target_type'
 
 _ref_args = [
     {'name': _target_type_key, 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
     {'name': 'reftype', 'type': str, 'doc': 'the type of references this is i.e. region or object'},
 ]
+
 
 class RefSpec(ConstructableDict):
 
@@ -395,11 +409,13 @@ class RefSpec(ConstructableDict):
     def is_region(self):
         return self['reftype'] == 'region'
 
+
 _dt_args = [
     {'name': 'name', 'type': str, 'doc': 'the name of this column'},
     {'name': 'doc', 'type': str, 'doc': 'a description about what this data type is'},
     {'name': 'dtype', 'type': (str, list, RefSpec), 'doc': 'the data type of this column'},
 ]
+
 
 class DtypeSpec(ConstructableDict):
     '''A class for specifying a component of a compound type'''
@@ -454,10 +470,11 @@ class DtypeSpec(ConstructableDict):
         return ret
 
 
-
 _dataset_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'dtype', 'type': (str, list, RefSpec), 'doc': 'The data type of this attribute. Use a list of DtypeSpecs to specify a compound data type.', 'default': None},
+        {'name': 'dtype', 'type': (str, list, RefSpec),
+         'doc': 'The data type of this attribute. Use a list of DtypeSpecs to specify a compound data type.',
+         'default': None},
         {'name': 'name', 'type': str, 'doc': 'The name of this dataset', 'default': None},
         {'name': 'default_name', 'type': str, 'doc': 'The default name of this dataset', 'default': None},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
@@ -467,15 +484,18 @@ _dataset_args = [
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'default_value', 'type': None, 'doc': 'a default value for this dataset', 'default': None},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'data_type_inc', 'type': (str, 'DatasetSpec'), 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'data_type_inc', 'type': (str, 'DatasetSpec'),
+         'doc': 'the NWB type this specification extends', 'default': None},
 ]
+
+
 class DatasetSpec(BaseStorageSpec):
     ''' Specification for datasets
 
     To specify a table-like dataset i.e. a compound data type.
     '''
 
-    @docval(*deepcopy(_dataset_args))
+    @docval(*deepcopy(_dataset_args))  # noqa: F821
     def __init__(self, **kwargs):
         doc, shape, dims, dtype, default_value = popargs('doc', 'shape', 'dims', 'dtype', 'default_value', kwargs)
         if shape is not None:
@@ -495,7 +515,7 @@ class DatasetSpec(BaseStorageSpec):
             if self.name is not None:
                 self.pop('quantity')
             else:
-                self['quantity'] = ZERO_OR_MORE
+                self['quantity'] = ZERO_OR_MORE  # noqa: F821
 
     @classmethod
     def __get_prec_level(cls, dtype):
@@ -581,12 +601,15 @@ class DatasetSpec(BaseStorageSpec):
                 ret['dtype'] = RefSpec.build_spec(ret['dtype'])
         return ret
 
+
 _link_args = [
     {'name': 'doc', 'type': str, 'doc': 'a description about what this link represents'},
     {'name': _target_type_key, 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
     {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
     {'name': 'name', 'type': str, 'doc': 'the name of this link', 'default': None}
 ]
+
+
 class LinkSpec(Spec):
 
     @docval(*_link_args)
@@ -632,13 +655,16 @@ _group_args = [
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'data_type_inc', 'type': (str, 'GroupSpec'), 'doc': 'the NWB type this specification data_type_inc', 'default': None},
+        {'name': 'data_type_inc', 'type': (str, 'GroupSpec'),
+         'doc': 'the NWB type this specification data_type_inc', 'default': None},
 ]
+
+
 class GroupSpec(BaseStorageSpec):
     ''' Specification for groups
     '''
 
-    @docval(*deepcopy(_group_args))
+    @docval(*deepcopy(_group_args))  # noqa: F821
     def __init__(self, **kwargs):
         doc, groups, datasets, links = popargs('doc', 'groups', 'datasets', 'links', kwargs)
         self.__data_types = dict()
@@ -663,7 +689,7 @@ class GroupSpec(BaseStorageSpec):
         data_types = list()
         # resolve inherited datasets
         for dataset in inc_spec.datasets:
-            #if not (dataset.data_type_def is None and dataset.data_type_inc is None):
+            # if not (dataset.data_type_def is None and dataset.data_type_inc is None):
             if dataset.name is None:
                 data_types.append(dataset)
                 continue
@@ -674,7 +700,7 @@ class GroupSpec(BaseStorageSpec):
                 self.set_dataset(dataset)
         # resolve inherited groups
         for group in inc_spec.groups:
-            #if not (group.data_type_def is None and group.data_type_inc is None):
+            # if not (group.data_type_def is None and group.data_type_inc is None):
             if group.name is None:
                 data_types.append(group)
                 continue
@@ -772,7 +798,7 @@ class GroupSpec(BaseStorageSpec):
             if spec.data_type_def is None:
                 raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
             spec = spec.data_type_def
-        #return spec.data_type_def in self.__inherited_data_type_defs
+        # return spec.data_type_def in self.__inherited_data_type_defs
         return spec not in self.__new_data_types
 
     def __add_data_type_inc(self, spec):
@@ -810,7 +836,7 @@ class GroupSpec(BaseStorageSpec):
         ''' The links specificed in this GroupSpec '''
         return tuple(self.get('links', tuple()))
 
-    @docval(*deepcopy(_group_args))
+    @docval(*deepcopy(_group_args))  # noqa: F821
     def add_group(self, **kwargs):
         ''' Add a new specification for a subgroup to this group specification '''
         doc = kwargs.pop('doc')
@@ -840,7 +866,7 @@ class GroupSpec(BaseStorageSpec):
         name = getargs('name', kwargs)
         return self.__groups.get(name, self.__links.get(name))
 
-    @docval(*deepcopy(_dataset_args))
+    @docval(*deepcopy(_dataset_args))  # noqa: F821
     def add_dataset(self, **kwargs):
         ''' Add a new specification for a dataset to this group specification '''
         doc = kwargs.pop('doc')
@@ -908,7 +934,6 @@ class GroupSpec(BaseStorageSpec):
             dataset specifications
         '''
         return DatasetSpec
-
 
     @classmethod
     def link_spec_cls(cls):

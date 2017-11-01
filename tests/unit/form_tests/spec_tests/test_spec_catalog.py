@@ -1,7 +1,7 @@
 import unittest2 as unittest
-import json
 
-from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, Spec, SpecCatalog
+from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, SpecCatalog
+
 
 class SpecCatalogTest(unittest.TestCase):
 
@@ -12,13 +12,13 @@ class SpecCatalogTest(unittest.TestCase):
             AttributeSpec('attribute2', 'my second attribute', 'str')
         ]
         self.spec = DatasetSpec('my first dataset',
-                           'int',
-                           name='dataset1',
-                           dimension=(None, None),
-                           attributes=self.attributes,
-                           linkable=False,
-                           namespace='core',
-                           data_type_def='EphysData')
+                                'int',
+                                name='dataset1',
+                                dimension=(None, None),
+                                attributes=self.attributes,
+                                linkable=False,
+                                namespace='core',
+                                data_type_def='EphysData')
 
     def test_register_spec(self):
         self.catalog.register_spec(self.spec, 'test.yaml')
@@ -27,14 +27,14 @@ class SpecCatalogTest(unittest.TestCase):
 
     def test_hierarchy(self):
         spikes_spec = DatasetSpec('my extending dataset', 'int',
-                                namespace='core',
-                                data_type_inc='EphysData',
-                                data_type_def='SpikeData')
+                                  namespace='core',
+                                  data_type_inc='EphysData',
+                                  data_type_def='SpikeData')
 
         lfp_spec = DatasetSpec('my second extending dataset', 'int',
-                                namespace='core',
-                                data_type_inc='EphysData',
-                                data_type_def='LFPData')
+                               namespace='core',
+                               data_type_inc='EphysData',
+                               data_type_def='LFPData')
 
         self.catalog.register_spec(self.spec, 'test.yaml')
         self.catalog.register_spec(spikes_spec, 'test.yaml')
@@ -55,6 +55,7 @@ class SpecCatalogTest(unittest.TestCase):
         self.catalog.auto_register(spikes_spec, source_file_path)
         recorded_source_file_path = self.catalog.get_spec_source_file('SpikeData')
         self.assertEqual(recorded_source_file_path, source_file_path)
+
 
 if __name__ == '__main__':
     unittest.main()

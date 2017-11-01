@@ -33,7 +33,8 @@ class TestExtension(unittest.TestCase):
 
     def test_get_class(self):
         self.test_load_namespace()
-        TetrodeSeries = get_class('TetrodeSeries', 'pynwb_test_extension')
+        TetrodeSeries = get_class('TetrodeSeries', 'pynwb_test_extension')  # noqa: F841
+
 
 class TestCatchDupNS(unittest.TestCase):
 
@@ -52,7 +53,6 @@ class TestCatchDupNS(unittest.TestCase):
         for f in files:
             path = os.path.join(self.tempdir, f)
             os.remove(path)
-
 
     def test_catch_dup_name(self):
         ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1")

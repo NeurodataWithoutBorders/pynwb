@@ -12,20 +12,22 @@ from ...data_utils import DataChunkIterator, get_shape
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder, TypeMap
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog
 
-#from form import Container
-#from form.utils import docval, getargs, popargs
-#from form.data_utils import DataChunkIterator, get_shape
-#from form.build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
-#from form.spec import RefSpec, DtypeSpec
+# from form import Container
+# from form.utils import docval, getargs, popargs
+# from form.data_utils import DataChunkIterator, get_shape
+# from form.build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder
+# from form.spec import RefSpec, DtypeSpec
 from ..io import FORMIO
 
 ROOT_NAME = 'root'
+
 
 class HDF5IO(FORMIO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
-            {'name': 'mode', 'type': str, 'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'})
+            {'name': 'mode', 'type': str,
+             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'})
     def __init__(self, **kwargs):
         '''Open an HDF5 file for IO
 
@@ -45,7 +47,7 @@ class HDF5IO(FORMIO):
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
         self.open()
-        #f = File(self.__path, 'r+')
+        # f = File(self.__path, 'r+')
         f_builder = self.__read.get(self.__file)
         if f_builder is None:
             f_builder = self.__read_group(self.__file, ROOT_NAME)
@@ -181,10 +183,10 @@ class HDF5IO(FORMIO):
     __dtypes = {
         "float": np.float32,
         "float32": np.float32,
-        "double" : np.float64,
+        "double": np.float64,
         "float64": np.float64,
-        "long" : np.int64,
-        "int64" : np.int64,
+        "long": np.int64,
+        "int64": np.int64,
         "int": np.int32,
         "int32": np.int32,
         "int16": np.int16,
@@ -197,7 +199,6 @@ class HDF5IO(FORMIO):
         "str": special_dtype(vlen=binary_type),
         "uint32": np.uint32,
         "uint16": np.uint16,
-        "int16": np.int16,
         "uint8": np.uint8,
         "ref": special_dtype(ref=Reference),
         "reference": special_dtype(ref=Reference),
@@ -214,7 +215,7 @@ class HDF5IO(FORMIO):
             try:
                 dtype = self.get_type(data)
             except Exception as exc:
-                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)
+                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
                 raise_from(Exception(msg), exc)
         return dtype
 
@@ -229,7 +230,8 @@ class HDF5IO(FORMIO):
             return np.dtype([(x['name'], self.__resolve_dtype_helper__(x['dtype'])) for x in dtype])
 
     @docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
-            {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Group, indexed by attribute name'})
+            {'name': 'attributes', 'type': dict,
+             'doc': 'a dict containing the attributes on the Group, indexed by attribute name'})
     def set_attributes(self, **kwargs):
         obj, attributes = getargs('obj', 'attributes', kwargs)
         for key, value in attributes.items():
@@ -302,11 +304,11 @@ class HDF5IO(FORMIO):
     def isinstance_inmemory_array(self, data):
         """Check if an object is a common in-memory data structure"""
         return isinstance(data, list) or \
-               isinstance(data, np.ndarray) or \
-               isinstance(data, tuple) or \
-               isinstance(data, set) or \
-               isinstance(data, str) or \
-               isinstance(data, frozenset)
+            isinstance(data, np.ndarray) or \
+            isinstance(data, tuple) or \
+            isinstance(data, set) or \
+            isinstance(data, str) or \
+            isinstance(data, frozenset)
 
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
             {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the DatasetBuilder to write'},
@@ -376,7 +378,7 @@ class HDF5IO(FORMIO):
         if not isinstance(dtype, type):
             dtype = self.__resolve_dtype__(dtype, data)
         try:
-            dset = parent.create_dataset(name, data=data,shape=None, dtype=dtype)
+            dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype)
         except Exception as exc:
             msg = "Could not create scalar dataset %s in %s" % (name, parent.name)
             raise_from(Exception(msg), exc)
@@ -398,7 +400,8 @@ class HDF5IO(FORMIO):
         chunks = True if recommended_chunks is None else recommended_chunks
         baseshape = data.recommended_data_shape()
         try:
-            dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype, maxshape=data.max_shape, chunks=chunks)
+            dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype,
+                                         maxshape=data.max_shape, chunks=chunks)
         except Exception as exc:
             raise_from(Exception("Could not create dataset %s in %s" % (name, parent.name)), exc)
         for chunk_i in data:
@@ -460,7 +463,7 @@ class HDF5IO(FORMIO):
 
     def __get_ref_filler(self, dset, sl, f):
         def _call():
-           dset[sl] = f()
+            dset[sl] = f()
         return _call
 
     def __get_ref(self, container, region=None):
@@ -521,5 +524,3 @@ class HDF5IO(FORMIO):
                 new_item[i] = self.__get_ref(item[i])
             ret.append(tuple(new_item))
         return ret
-
-
