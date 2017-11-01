@@ -185,7 +185,8 @@ class NamespaceCatalog(object):
         # keep track of all spec objects ever loaded, so we don't have
         # multiple object instances of a spec
         self.__loaded_specs = dict()
-        self.__loaded_ns_files = dict()
+        self.__included_specs = dict()
+        self.__included_sources = dict()
 
     @property
     @docval(returns='a tuple of the availble namespaces', rtype=tuple)
@@ -202,6 +203,11 @@ class NamespaceCatalog(object):
     def group_spec_cls(self):
         """The GroupSpec class used in this NamespaceCatalog"""
         return self.__group_spec_cls
+
+    @property
+    def spec_namespace_cls(self):
+        """The SpecNamespace class used in this NamespaceCatalog"""
+        return self.__spec_namespace_cls
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
             {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'})
@@ -247,6 +253,33 @@ class NamespaceCatalog(object):
             raise KeyError("'%s' not a namespace" % namespace)
         return spec_ns.get_hierarchy(data_type)
 
+    @docval(rtype=tuple)
+    def get_sources(self, **kwargs):
+        '''
+        Get all the source specification files that were loaded in this catalog
+        '''
+        return tuple(self.__loaded_specs.keys())
+
+    @docval({'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
+            rtype=tuple)
+    def get_namespace_sources(self, **kwargs):
+        '''
+        Get all the source specifications that were loaded for a given namespace
+        '''
+        return tuple(self.__included_sources.keys())
+
+    @docval({'name': 'source', 'type': str, 'doc': 'the name of the source'},
+            rtype=tuple)
+    def get_types(self, **kwargs):
+        '''
+        Get the types that were loaded from a given source
+        '''
+        source = getargs('source', kwargs)
+        ret = self.__loaded_specs.get(source)
+        if ret is not None:
+            ret = tuple(l)
+        return ret
+
     def __load_spec_file(self, reader, spec_source, catalog, dtypes=None, resolve=True):
         ret = self.__loaded_specs.get(spec_source)
         def __reg_spec(spec_cls, spec_dict):
@@ -260,16 +293,16 @@ class NamespaceCatalog(object):
             if resolve:
                 self.__resolve_includes(spec_dict, catalog)
             spec_obj = spec_cls.build_spec(spec_dict)
-            catalog.auto_register(spec_obj, spec_source)
+            return catalog.auto_register(spec_obj, spec_source)
         if ret is None:
-            ret = dict()
+            ret = list()
             d = reader.read_spec(spec_source)
             specs = d.get('datasets', list())
             for spec_dict in specs:
-                __reg_spec(self.__dataset_spec_cls, spec_dict)
+                ret.extend(__reg_spec(self.__dataset_spec_cls, spec_dict))
             specs = d.get('groups', list())
             for spec_dict in specs:
-                __reg_spec(self.__group_spec_cls, spec_dict)
+                ret.extend(__reg_spec(self.__group_spec_cls, spec_dict))
             self.__loaded_specs[spec_source] = ret
         return ret
 
@@ -304,7 +337,7 @@ class NamespaceCatalog(object):
         # load namespace definition from file
         if not os.path.exists(namespace_path):
             raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
-        ret = self.__loaded_ns_files.get(namespace_path)
+        ret = self.__included_specs.get(namespace_path)
         if ret is None:
             ret = dict()
         else:
@@ -322,6 +355,7 @@ class NamespaceCatalog(object):
                     if types_key in s:
                         dtypes = set(s[types_key])
                     ndts = self.__load_spec_file(reader, s['source'], catalog, dtypes=dtypes, resolve=resolve)
+                    self.__included_sources.setdefault(ns['name'], list()).append(s['source'])
                 elif 'namespace' in s:
                     # load specs from namespace
                     try:
@@ -340,5 +374,5 @@ class NamespaceCatalog(object):
             ret[ns['name']] = included_types
             # construct namespace
             self.add_namespace(ns['name'], self.__spec_namespace_cls.build_namespace(catalog=catalog, **ns))
-        self.__loaded_ns_files[namespace_path] = ret
+        self.__included_specs[namespace_path] = ret
         return ret
