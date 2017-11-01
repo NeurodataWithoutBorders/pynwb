@@ -516,9 +516,6 @@ import h5py  # noqa: E402
 def get_region_slicer(**kwargs):
     dataset, region = getargs('dataset', 'region', kwargs)
     if isinstance(dataset, (list, tuple)):
-        if not isinstance(region, list):
-            import pdb
-            pdb.set_trace()
         return ListSlicer(dataset, region)
     elif isinstance(dataset, h5py.Dataset):
         return H5RegionSlicer(dataset, region)
