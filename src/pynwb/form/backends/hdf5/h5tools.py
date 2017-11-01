@@ -7,14 +7,15 @@ from functools import partial
 
 from ...container import Container
 
-from ...utils import docval, getargs, popargs
+from ...utils import docval, getargs, popargs, call_docval_func
 from ...data_utils import DataChunkIterator, get_shape
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder, TypeMap
-from ...spec import RefSpec, DtypeSpec, NamespaceCatalog
+from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader
 
 from ..io import FORMIO
 
 ROOT_NAME = 'root'
+SPEC_LOC_ATTR = '.specloc'
 
 class HDF5IO(FORMIO, ):
 
@@ -36,6 +37,49 @@ class HDF5IO(FORMIO, ):
         self.__file = None
         self.__read = dict()
         self.__ref_queue = list()
+
+    @classmethod
+    @docval({'name': 'group', 'type': Group, 'doc': 'the group to write the namespace to'},
+            {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the namespace to write'},
+            {'name': 'data_types', 'type': Iterable, 'doc': 'the data types to write', 'default': None},
+            {'name': 'ns_dset_name', 'type': str, 'doc': 'the name of the namespace dataset', 'default': 'namespace'})
+    def cache_spec(cls, group, namespace, dataset_name='namespace'):
+        '''
+        Write a specification namespace to the underlying HDF5 file.
+
+        Each type will be written as JSON formatted string in a scalar dataset named
+        using the type's data_type_def.
+        '''
+        group, namespace, data_types, ns_dset_name = getargs('group', 'namespace', 'data_types', 'ns_dset_name', kwargs)
+        if data_types is None:
+            data_types = namespace.get_registered_types()
+        writer = H5SpecWriter(group)
+        writer.write_namespace(namespace, ns_dset_name)
+        for spec_name in data_types:
+            spec = namespace.get_spec(spec_name)
+            writer.write_spec(spec, spec.data_type_def)
+
+    @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'},
+            {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False}) # TODO: make this True by default
+    def write(self, **kwargs):
+        call_docval_func(super(HDF5IO, self).write, kwargs)
+        cache_spec = getargs('cach_spec', kwargs)
+        if cache_spec:
+            ref = self.__file.attrs.get(SPEC_LOC_ATTR)
+            spec_group = None
+            if ref is not None:
+                spec_group = self.__file[ref]
+            else:
+                path = 'specifications' # do something to figure out where the specifications should go
+                spec_group = self.__file.require_group(path)
+                self.__file.attrs[SPEC_LOC_ATTR] = spec_group.ref
+            ns_catalog = self.__manager.ns_catalog
+            for ns_name in ns_catalog.namespaces:
+                namespace = ns_catalog.get_namespace(ns_name)
+                group_name = '%s/%s' % (ns.name, namespace.version)
+                ns_group = spec_group.require_group(group_name)
+                it = chain(*(nsc.get_types(f) for f in nsc.get_namespace_sources(ns_name)))
+                self.cache_spec(ns_group, namespace, data_types=it)
 
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
@@ -467,22 +511,6 @@ class HDF5IO(FORMIO, ):
             dset[:] = data
         except Exception as e:
             raise e
-#        func = None
-#        refs = None
-#        if dtype_spec is not None:
-#            if isinstance(dtype_spec, list):
-#                # do some stuff to figure out what data is a reference
-#                refs = list()
-#                for i, dts in enumerate(dtype_spec):
-#                    if self.__is_ref(dts):
-#                        refs.append(i)
-#                if len(refs) > 0:
-#                    func = partial(self.__resolve_refs, refs, data)
-#            elif self.__is_ref(dtype_spec):
-#                func = partial(self.__rec_get_ref, data)
-#        if func is None:
-#        else:
-#            self.__queue_ref(self.__get_ref_filler(dset, np.s_[:], func))
         return dset
 
     def __get_ref_filler(self, dset, sl, f):
@@ -541,4 +569,47 @@ class HDF5IO(FORMIO, ):
         return ret
 
 
+
+class H5SpecWriter(SpecWriter):
+
+    __str_type = special_dtype(vlen=binary_type)
+
+    @docval({'name': 'group', 'type': Group, 'doc': 'the HDF5 file to write specs to'})
+    def __init__(self, **kwargs):
+        self.__group = getargs('group', kwargs)
+
+    @staticmethod
+    def stringify(spec):
+        '''
+        Converts a spec into a JSON string to write to a dataset
+        '''
+        return json.dumps(spec, separators=(',', ':'))
+
+    def __write(self, d, name):
+        data = self.stringify(spec)
+        dset = self.__group.create_dataset(name, data=data, dtype=self.__str_type)
+        return dset
+
+    def write_spec(self, spec, path):
+        return self.__write(spec, path)
+
+    def write_namespace(self, namespace, path):
+        return self.__write({'namespaces': namespace}, path)
+
+class H5SpecReader(SpecReader):
+
+    @docval({'name': 'group', 'type': Group, 'doc': 'the HDF5 file to read specs from'})
+    def __init__(self, **kwargs):
+        self.__group = getargs('group', kwargs)
+
+    def __read(self, path):
+        s = self.__group[path][()]
+        d = json.loads(s)
+        return d
+
+    def read_spec(self, spec_path):
+        return self.__read(spec_path)
+
+    def read_namespace(self, ns_path):
+        return self.__read(ns_path)
 
