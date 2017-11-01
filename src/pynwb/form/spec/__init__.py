@@ -11,7 +11,9 @@ from .spec import GroupSpec
 from .catalog import SpecCatalog
 from .namespace import SpecNamespace
 from .namespace import NamespaceCatalog
+from .namespace import SpecReader
 from .write import NamespaceBuilder
+from .write import SpecWriter
 
 from ..utils import docval
 
