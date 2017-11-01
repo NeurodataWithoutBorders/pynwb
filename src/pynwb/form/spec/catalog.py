@@ -73,22 +73,27 @@ class SpecCatalog(object):
         return self.__spec_source_files.get(data_type, None)
 
     @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'the Spec object to register'},
-            {'name': 'source_file', 'type': str, 'doc': 'path to the source file from which the spec was loaded', 'default': None})
+            {'name': 'source_file', 'type': str, 'doc': 'path to the source file from which the spec was loaded', 'default': None},
+            rtype=tuple, returns='the types that were registered with this spec')
     def auto_register(self, **kwargs):
         '''
         Register this specification and all sub-specification using data_type as object type name
         '''
         spec, source_file = getargs('spec', 'source_file', kwargs)
         ndt = spec.data_type_def
+        ret = list()
         if ndt is not None:
             self.register_spec(spec, source_file)
+            ret.append(ndt)
         if isinstance(spec, GroupSpec):
             for dataset_spec in spec.datasets:
                 dset_ndt = dataset_spec.data_type_def
                 if dset_ndt is not None and not spec.is_inherited_type(dataset_spec):
+                    ret.append(dset_ndt)
                     self.register_spec(dataset_spec, source_file)
             for group_spec in spec.groups:
-                self.auto_register(group_spec, source_file)
+                ret.extend(self.auto_register(group_spec, source_file))
+        return tuple(ret)
 
 
     @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the hierarchy of'})
