@@ -28,7 +28,7 @@ class IndexSeriesConstructor(unittest.TestCase):
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.source, 'a hypothetical source')
         self.assertEqual(iS.unit, 'unit')
-        self.assertEqual(iS.index_timeseries, ts)
+        self.assertEqual(iS.indexed_timeseries, ts)
 
 class ImageMaskSeriesConstructor(unittest.TestCase):
 

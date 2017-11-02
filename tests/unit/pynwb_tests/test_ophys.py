@@ -67,7 +67,7 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
         self.assertEqual(ts.source, 'a hypothetical source')
         self.assertEqual(ts.unit, 'unit')
         self.assertEqual(ts.roi_names, ['name1'])
-        self.assertEqual(ts.segmenttation_interface, iS)
+        self.assertEqual(ts.segmentation_interface, iS)
 
 class DfOverFConstructor(unittest.TestCase):
     def test_init(self):
@@ -113,7 +113,7 @@ class ImageSegmentationConstructor(unittest.TestCase):
         iS = ImageSegmentation('test_source', ps, name='test_iS')
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.source, 'test_source')
-        self.assertEqual(iS.plane_segmentation, ps)
+        self.assertEqual(iS.plane_segmentations, [ps])
 
 class PlaneSegmentationConstructor(unittest.TestCase):
     def test_init(self):

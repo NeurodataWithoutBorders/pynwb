@@ -54,10 +54,10 @@ class ImagingPlane(NWBContainer):
             {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
-            {'name': 'manifold', 'type': Iterable, 'doc': 'Physical position of each pixel. height, weight, x, y, z.'},
-            {'name': 'conversion', 'type': float, 'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)'},
-            {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).'},
-            {'name': 'reference_frame', 'type': str, 'doc': 'Describes position and reference frame of manifold based on position of first element in manifold.'},
+            {'name': 'manifold', 'type': Iterable, 'doc': 'Physical position of each pixel. height, weight, x, y, z.', 'default':None},
+            {'name': 'conversion', 'type': float, 'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)', 'default':1.},
+            {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).', 'default':None},
+            {'name': 'reference_frame', 'type': str, 'doc': 'Describes position and reference frame of manifold based on position of first element in manifold.',  'default':None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, indicator, location, manifold, conversion, unit, reference_frame, parent = popargs('optical_channel', 'description', 'device', 'excitation_lambda', 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion', 'unit', 'reference_frame', 'parent', kwargs)
@@ -93,13 +93,13 @@ class TwoPhotonSeries(ImageSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'format', 'type': str, 'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
-            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'doc': 'Width, height and depth of image, or imaged area (meters).'},
+            {'name': 'data', 'type': (Iterable, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},
-            {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.'},
-            {'name': 'scan_line_rate', 'type': float, 'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept here as it is useful information for analysis, and so good to be stored w/ the actual data.'},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default':None},
+            {'name': 'format', 'type': str, 'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.', 'default':None},
+            {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'doc': 'Width, height and depth of image, or imaged area (meters).', 'default':None},
+            {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.', 'default':None},
+            {'name': 'scan_line_rate', 'type': float, 'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept here as it is useful information for analysis, and so good to be stored w/ the actual data.', 'default':None},
             {'name': 'external_file', 'type': Iterable, 'doc': 'Path or URL to one or more external file(s). Field only present if format=external. Either external_file or data must be specified, but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable, 'doc': 'Each entry is the frame number in the corresponding external_file variable. This serves as an index to what frames each file contains.', 'default': None},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'Number of bit per image pixel', 'default': None},
@@ -108,7 +108,7 @@ class TwoPhotonSeries(ImageSeries):
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': (TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
@@ -144,7 +144,7 @@ class ROI(NWBContainer):
             {'name': 'pix_mask', 'type': Iterable, 'doc': 'List of pixels (x,y) that compose the mask.'},
             {'name': 'pix_mask_weight', 'type': Iterable, 'doc': 'Weight of each pixel listed in pix_mask.'},
             {'name': 'img_mask', 'type': Iterable, 'doc': 'ROI mask, represented in 2D ([y][x]) intensity image.'},
-            {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
+            {'name': 'reference_images', 'type': (ImageSeries, str), 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
         roi_description, pix_mask, pix_mask_weight, img_mask = popargs('roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
         pargs, pkwargs = fmt_docval_args(super(ROI, self).__init__, kwargs)
@@ -167,7 +167,7 @@ class PlaneSegmentation(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of image plane, recording wavelength, depth, etc.'},
-            {'name': 'roi_list', 'type': Iterable, 'doc': 'List of ROIs in this imaging plane.'},
+            {'name': 'roi_list', 'type': (Iterable, ROI), 'doc': 'List of ROIs in this imaging plane.'},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'link to ImagingPlane group from which this TimeSeries data was generated.'},
             {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
@@ -190,18 +190,22 @@ class ImageSegmentation(NWBContainer):
     (or module) is required and ROI names should remain consistent between them.
     """
 
-    __nwbfields__ = ('plane_segmentation',)
+    __nwbfields__ = ('plane_segmentations',)
 
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentation', 'type': PlaneSegmentation, 'doc': 'PlaneSegmentation with the description of the image plane.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ImageSegmentation'})
+            {'name': 'plane_segmentations', 'type': (PlaneSegmentation, list), 'doc': 'PlaneSegmentation with the description of the image plane.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this ImageSegmentation container', 'default': 'ImageSegmentation'})
     def __init__(self, **kwargs):
-        plane_segmentation = popargs('plane_segmentation', kwargs)
+        plane_segmentations = popargs('plane_segmentations', kwargs)
+
+        if isinstance(plane_segmentations, PlaneSegmentation):
+            plane_segmentations = [plane_segmentations]
+
         pargs, pkwargs = fmt_docval_args(super(ImageSegmentation, self).__init__, kwargs)
         super(ImageSegmentation, self).__init__(*pargs, **pkwargs)
-        self.plane_segmentation = plane_segmentation
+        self.plane_segmentations = plane_segmentations
 
 @register_class('RoiResponseSeries', CORE_NAMESPACE)
 class RoiResponseSeries(TimeSeries):
@@ -210,7 +214,7 @@ class RoiResponseSeries(TimeSeries):
     '''
 
     __nwbfields__ = ('roi_names',
-                     'segmenttation_interface')
+                     'segmentation_interface')
 
     _ancestry = "TimeSeries,ImageSeries,ImageMaskSeries"
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
@@ -219,16 +223,16 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'data', 'type': (Iterable, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
             {'name': 'roi_names', 'type': Iterable, 'doc': 'List of ROIs represented, one name for each row of data[].'},
-            {'name': 'segmenttation_interface', 'type': ImageSegmentation, 'doc': 'Link to ImageSegmentation.'},
+            {'name': 'segmentation_interface', 'type': ImageSegmentation, 'doc': 'Link to ImageSegmentation.'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': (Iterable, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
@@ -239,11 +243,11 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        roi_names, segmenttation_interface = popargs('roi_names', 'segmenttation_interface', kwargs)
+        roi_names, segmentation_interface = popargs('roi_names', 'segmentation_interface', kwargs)
         pargs, pkwargs = fmt_docval_args(super(RoiResponseSeries, self).__init__, kwargs)
         super(RoiResponseSeries, self).__init__(*pargs, **pkwargs)
         self.roi_names = roi_names
-        self.segmenttation_interface = segmenttation_interface
+        self.segmentation_interface = segmentation_interface
 
 @register_class('DfOverF', CORE_NAMESPACE)
 class DfOverF(NWBContainer):
@@ -256,9 +260,10 @@ class DfOverF(NWBContainer):
 
     _help = "Df/f over time of one or more ROIs. TimeSeries names should correspond to imaging plane names"
 
+
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'DfOverF'})
+            {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this DfOverF container', 'default': 'DfOverF'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(DfOverF, self).__init__, kwargs)
@@ -277,8 +282,8 @@ class Fluorescence(NWBContainer):
     _help = "Fluorescence over time of one or more ROIs. TimeSeries names should correspond to imaging plane names."
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Fluorescence'})
+            {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this Fluorescence container', 'default': 'Fluorescence'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(Fluorescence, self).__init__, kwargs)
