@@ -68,6 +68,8 @@ class NamespaceBuilder(object):
     def add_source(self, **kwargs):
         ''' Add a source file to the namespace '''
         source = getargs('source', kwargs)
+        if '/' in source or source[0] == '.':
+            raise ValueError('source must be a base file')
         self.__sources.setdefault(source, {'source': source})
 
     @docval({'name': 'data_type', 'type': str, 'doc': 'the data type to include'},
