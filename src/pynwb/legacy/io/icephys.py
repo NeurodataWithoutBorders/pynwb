@@ -6,7 +6,7 @@ from pynwb.icephys import PatchClampSeries
 class PatchClampSeriesMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('electrode')
-    def carg_imaging_plane(self, *args):
+    def carg_electrode(self, *args):
         builder = args[0]
         manager = args[1]
         root = builder
