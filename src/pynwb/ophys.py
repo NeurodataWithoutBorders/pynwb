@@ -210,7 +210,7 @@ class RoiResponseSeries(TimeSeries):
     '''
 
     __nwbfields__ = ('roi_names',
-                     'segmenttation_interface')
+                     'segmentation_interface')
 
     _ancestry = "TimeSeries,ImageSeries,ImageMaskSeries"
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
@@ -223,7 +223,7 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
             {'name': 'roi_names', 'type': Iterable, 'doc': 'List of ROIs represented, one name for each row of data[].'},
-            {'name': 'segmenttation_interface', 'type': ImageSegmentation, 'doc': 'Link to ImageSegmentation.'},
+            {'name': 'segmentation_interface', 'type': ImageSegmentation, 'doc': 'Link to ImageSegmentation.'},
 
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
@@ -239,11 +239,11 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
     )
     def __init__(self, **kwargs):
-        roi_names, segmenttation_interface = popargs('roi_names', 'segmenttation_interface', kwargs)
+        roi_names, segmentation_interface = popargs('roi_names', 'segmentation_interface', kwargs)
         pargs, pkwargs = fmt_docval_args(super(RoiResponseSeries, self).__init__, kwargs)
         super(RoiResponseSeries, self).__init__(*pargs, **pkwargs)
         self.roi_names = roi_names
-        self.segmenttation_interface = segmenttation_interface
+        self.segmentation_interface = segmentation_interface
 
 @register_class('DfOverF', CORE_NAMESPACE)
 class DfOverF(NWBContainer):
