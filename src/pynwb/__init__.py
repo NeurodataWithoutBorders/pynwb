@@ -26,6 +26,11 @@ def __get_resources():
     return ret
 
 
+def _get_resources():
+    # LEGACY: Needed to support legacy implementation.
+    return __get_resources()
+
+
 # a global namespace catalog
 global __NS_CATALOG
 global __TYPE_MAP
@@ -57,7 +62,10 @@ def get_manager(**kwargs):
     if extensions is None:
         type_map = __TYPE_MAP
     else:
-        type_map = get_type_map()
+        if isinstance(extensions, TypeMap):
+            type_map = extensions
+        else:
+            type_map = get_type_map()
         if isinstance(extensions, list):
             for ext in extensions:
                 if isinstance(ext, str):

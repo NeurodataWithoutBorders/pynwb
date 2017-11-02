@@ -71,8 +71,13 @@ class HDF5IO(FORMIO):
             "datasets": dict(),
             "links": dict()
         }
+
+        for key, val in kwargs['attributes'].items():
+            if isinstance(val, bytes):
+                kwargs['attributes'][key] = val.decode('UTF-8')
+
         if name is None:
-            name = os.path.basename(h5obj.name)
+            name = str(os.path.basename(h5obj.name))
         for k in h5obj:
             sub_h5obj = h5obj.get(k)
             if not (sub_h5obj is None):
@@ -119,13 +124,22 @@ class HDF5IO(FORMIO):
             "dtype": h5obj.dtype,
             "maxshape": h5obj.maxshape
         }
+
+        for key, val in kwargs['attributes'].items():
+            if isinstance(val, bytes):
+                kwargs['attributes'][key] = val.decode('UTF-8')
+
         if name is None:
-            name = os.path.basename(h5obj.name)
+            name = str(os.path.basename(h5obj.name))
         kwargs['source'] = self.__path
         ndims = len(h5obj.shape)
         cls = DatasetBuilder
         if ndims == 0:                                       # read scalar
             scalar = h5obj[()]
+            if isinstance(scalar, bytes):
+                scalar = scalar.decode('UTF-8')
+
+            # print scalar, isinstance(scalar, bytes)
             if isinstance(scalar, RegionReference):
                 cls = RegionBuilder
                 target = h5obj.file[scalar]
