@@ -93,13 +93,13 @@ class TwoPhotonSeries(ImageSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'data', 'type': (Iterable, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'format', 'type': str, 'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
-            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},
             {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.'},
             {'name': 'scan_line_rate', 'type': float, 'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept here as it is useful information for analysis, and so good to be stored w/ the actual data.'},
+            {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'doc': 'Width, height and depth of image, or imaged area (meters).', 'default':None},
             {'name': 'external_file', 'type': Iterable, 'doc': 'Path or URL to one or more external file(s). Field only present if format=external. Either external_file or data must be specified, but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable, 'doc': 'Each entry is the frame number in the corresponding external_file variable. This serves as an index to what frames each file contains.', 'default': None},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'Number of bit per image pixel', 'default': None},
@@ -108,7 +108,7 @@ class TwoPhotonSeries(ImageSeries):
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': (TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
@@ -167,7 +167,7 @@ class PlaneSegmentation(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of image plane, recording wavelength, depth, etc.'},
-            {'name': 'roi_list', 'type': Iterable, 'doc': 'List of ROIs in this imaging plane.'},
+            {'name': 'roi_list', 'type': (Iterable, ROI), 'doc': 'List of ROIs in this imaging plane.'},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'link to ImagingPlane group from which this TimeSeries data was generated.'},
             {'name': 'reference_images', 'type': ImageSeries, 'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
@@ -190,18 +190,22 @@ class ImageSegmentation(NWBContainer):
     (or module) is required and ROI names should remain consistent between them.
     """
 
-    __nwbfields__ = ('plane_segmentation',)
+    __nwbfields__ = ('plane_segmentations',)
 
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentation', 'type': PlaneSegmentation, 'doc': 'PlaneSegmentation with the description of the image plane.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ImageSegmentation'})
+            {'name': 'plane_segmentations', 'type': (PlaneSegmentation, list), 'doc': 'PlaneSegmentation with the description of the image plane.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this ImageSegmentation container', 'default': 'ImageSegmentation'})
     def __init__(self, **kwargs):
-        plane_segmentation = popargs('plane_segmentation', kwargs)
+        plane_segmentations = popargs('plane_segmentations', kwargs)
+
+        if isinstance(plane_segmentations, PlaneSegmentation):
+            plane_segmentations = [plane_segmentations]
+
         pargs, pkwargs = fmt_docval_args(super(ImageSegmentation, self).__init__, kwargs)
         super(ImageSegmentation, self).__init__(*pargs, **pkwargs)
-        self.plane_segmentation = plane_segmentation
+        self.plane_segmentations = plane_segmentations
 
 @register_class('RoiResponseSeries', CORE_NAMESPACE)
 class RoiResponseSeries(TimeSeries):
@@ -219,7 +223,7 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'data', 'type': (Iterable, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
             {'name': 'roi_names', 'type': Iterable, 'doc': 'List of ROIs represented, one name for each row of data[].'},
@@ -228,7 +232,7 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': (Iterable, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
@@ -256,9 +260,10 @@ class DfOverF(NWBContainer):
 
     _help = "Df/f over time of one or more ROIs. TimeSeries names should correspond to imaging plane names"
 
+
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'DfOverF'})
+            {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this DfOverF container', 'default': 'DfOverF'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(DfOverF, self).__init__, kwargs)
@@ -277,8 +282,8 @@ class Fluorescence(NWBContainer):
     _help = "Fluorescence over time of one or more ROIs. TimeSeries names should correspond to imaging plane names."
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'roi_response_series', 'type': RoiResponseSeries, 'doc': 'RoiResponseSeries or any subtype.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Fluorescence'})
+            {'name': 'roi_response_series', 'type': (RoiResponseSeries, list), 'doc': 'RoiResponseSeries or any subtype.'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this Fluorescence container', 'default': 'Fluorescence'})
     def __init__(self, **kwargs):
         roi_response_series = popargs('roi_response_series', kwargs)
         pargs, pkwargs = fmt_docval_args(super(Fluorescence, self).__init__, kwargs)
