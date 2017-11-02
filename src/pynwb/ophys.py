@@ -54,10 +54,10 @@ class ImagingPlane(NWBContainer):
             {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
-            {'name': 'manifold', 'type': Iterable, 'doc': 'Physical position of each pixel. height, weight, x, y, z.'},
-            {'name': 'conversion', 'type': float, 'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)'},
-            {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).'},
-            {'name': 'reference_frame', 'type': str, 'doc': 'Describes position and reference frame of manifold based on position of first element in manifold.'},
+            {'name': 'manifold', 'type': Iterable, 'doc': 'Physical position of each pixel. height, weight, x, y, z.', 'default':None},
+            {'name': 'conversion', 'type': float, 'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)', 'default':1.},
+            {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).', 'default':None},
+            {'name': 'reference_frame', 'type': str, 'doc': 'Describes position and reference frame of manifold based on position of first element in manifold.',  'default':None},
             {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, indicator, location, manifold, conversion, unit, reference_frame, parent = popargs('optical_channel', 'description', 'device', 'excitation_lambda', 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion', 'unit', 'reference_frame', 'parent', kwargs)
@@ -94,12 +94,12 @@ class TwoPhotonSeries(ImageSeries):
                                                    'contained here. It can also be the name of a device, for stimulus or '
                                                    'acquisition data')},
             {'name': 'data', 'type': (Iterable, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'format', 'type': str, 'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},
-            {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.'},
-            {'name': 'scan_line_rate', 'type': float, 'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept here as it is useful information for analysis, and so good to be stored w/ the actual data.'},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default':None},
+            {'name': 'format', 'type': str, 'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.', 'default':None},
             {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'doc': 'Width, height and depth of image, or imaged area (meters).', 'default':None},
+            {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.', 'default':None},
+            {'name': 'scan_line_rate', 'type': float, 'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept here as it is useful information for analysis, and so good to be stored w/ the actual data.', 'default':None},
             {'name': 'external_file', 'type': Iterable, 'doc': 'Path or URL to one or more external file(s). Field only present if format=external. Either external_file or data must be specified, but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable, 'doc': 'Each entry is the frame number in the corresponding external_file variable. This serves as an index to what frames each file contains.', 'default': None},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'Number of bit per image pixel', 'default': None},
