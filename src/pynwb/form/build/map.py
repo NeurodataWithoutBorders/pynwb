@@ -823,6 +823,10 @@ class TypeMap(object):
         if ret is None:
             msg = "builder '%s' does not have a data_type" % builder.name
             raise ValueError(msg)
+
+        if isinstance(ret, bytes): 
+            ret = ret.decode('UTF-8')
+
         return ret
 
     def get_builder_ns(self, builder):

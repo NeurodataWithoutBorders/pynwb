@@ -30,10 +30,10 @@ class TypeMapLegacy(TypeMap):
             return 'ProcessingModule'
         elif ndt == 'TimeSeries':
             ancestry = attrs['ancestry']
-            if ancestry[-1] == 'TwoPhotonSeries' and builder.name == 'corrected':
+            if decode(ancestry[-1]) == 'TwoPhotonSeries' and decode(builder.name) == 'corrected':
                 return 'ImageSeries'
             else:
-                return ancestry[-1]
+                return decode(ancestry[-1])
 
         elif ndt == 'Interface':
             return builder.name
@@ -64,7 +64,7 @@ class TypeMapLegacy(TypeMap):
                    'optophysiology': 'ImagingPlane',
                    'optogenetics': 'OptogeneticStimulusSite'
                    }
-                return parent_names.get(builder.parent.name)
+                return decode(parent_names.get(builder.parent.name))
             return None
 
     def get_builder_ns(self, builder):
