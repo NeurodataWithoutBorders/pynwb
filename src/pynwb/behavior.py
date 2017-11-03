@@ -207,6 +207,7 @@ class CorrectedImageStack(NWBContainer):
     _help = ""
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'corrected', 'type': ImageSeries, 'doc': 'Image stack with frames shifted to the common coordinates.'},
             {'name': 'original', 'type': ImageSeries, 'doc': 'Link to image series that is being registered.'},
             {'name': 'xy_translation', 'type': TimeSeries, 'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates, for example, to align each frame to a reference image.'})
