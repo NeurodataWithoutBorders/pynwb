@@ -39,7 +39,12 @@ class ProcessingModule(NWBContainer):
         if arg is None:
             return dict()
         else:
-            return {i.name: i for i in arg}
+            return_dict = {}
+            for i in arg:
+                assert i.name is not None  # If a container doesn't have a name, it gets lost!
+                assert i.name not in return_dict
+                return_dict[i.name] = i
+            return return_dict
 
     @property
     def containers(self):
