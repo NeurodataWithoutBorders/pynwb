@@ -2,6 +2,7 @@
 for reading and writing data in NWB format
 '''
 import os.path
+from copy import copy
 
 CORE_NAMESPACE = 'core'
 
@@ -36,11 +37,8 @@ from .form.build import TypeMap as TypeMap
 from .form.build import ObjectMapper as __ObjectMapper
 __TYPE_MAP = TypeMap(__NS_CATALOG)
 def get_type_map():
-    ret = __TypeMap(__NS_CATALOG)
+    ret = copy(__TYPE_MAP)
     return ret
-
-# a global type map
-__TYPE_MAP = get_type_map()
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list), 'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps', 'default': None},
         returns="the namespaces loaded from the given file", rtype=tuple,
@@ -91,8 +89,8 @@ if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
 
 # added here for convenience to users
-from form.build import BuildManager as __BuildManager
-@docval({'name': 'type_map', 'type': __TypeMap, 'doc': 'the path to the YAML with the namespace definition', 'default': None},
+from .form.build import BuildManager as __BuildManager
+@docval({'name': 'type_map', 'type': __TYPE_MAP, 'doc': 'the path to the YAML with the namespace definition', 'default': None},
         is_method=False)
 def get_build_manager(**kwargs):
     type_map = getargs('type_map', kwargs)

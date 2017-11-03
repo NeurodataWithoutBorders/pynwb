@@ -730,7 +730,7 @@ class TypeMap(object):
         ret.merge(self)
         return ret
 
-    def __deepcopy__(self):
+    def __deepcopy__(self, memo):
         return self.__copy__()
 
     def merge(self, type_map):

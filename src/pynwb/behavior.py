@@ -232,11 +232,7 @@ class MotionCorrection(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this MotionCorrection container', 'default': 'MotionCorrection '},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-<<<<<<< fc2f84c363d131e454392b11bd0813ba29786997
-            {'name': 'corrected_image_stacks', 'type': CorrectedImageStack, 'doc': 'the corrected image stack in this Motion Correction analysis'})
-=======
             {'name': 'corrected_image_stacks', 'type': (list, CorrectedImageStack), 'doc': 'the corrected image stack in this Motion Correction analysis'})
->>>>>>> changes to docval decorators of constructors, cleaning up typos.  segmentattion_interface was a typo that found its way into a test too, so corrected in this commit also. Corrected pluralization for MotionCorrection and ImageSegmentation.  In many places changed list/np.ndarray to Iterable, to allow h5 datasets as inputs
     def __init__(self, **kwargs):
         source, corrected_image_stacks = popargs('source', 'corrected_image_stacks', kwargs)
 
