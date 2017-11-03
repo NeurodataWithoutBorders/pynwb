@@ -333,8 +333,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         self.map_const_arg(attr_carg, spec)
         self.map_attr(attr_carg, spec)
 
-    def hack_get_override_carg(self, *args, **kwargs):
-        return self.__get_override_carg(*args, **kwargs)
+    # def hack_get_override_carg(self, *args, **kwargs):
+    #     return self.__get_override_carg(*args, **kwargs)
 
     def __get_override_carg(self, *args):
         name = args[0]

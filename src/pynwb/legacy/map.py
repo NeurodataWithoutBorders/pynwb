@@ -16,49 +16,6 @@ class ObjectMapperLegacy(ObjectMapper):
         else:
             return 'No known source'
 
-
-    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the builder to construct the Container from'},
-            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
-    def construct(self, **kwargs):
-        ''' Construct an Container from the given Builder '''
-
-        builder, manager = getargs('builder', 'manager', kwargs)
-        cls = manager.get_cls(builder)
-
-        subspecs = self.hack_get_subspec_values(builder, self.spec, manager)
-        const_args = dict()
-        for subspec, value in subspecs.items():
-            const_arg = self.get_const_arg(subspec)
-            if const_arg is not None:
-                const_args[const_arg] = value
-
-        args = list()
-        kwargs = dict()
-        for const_arg in get_docval(cls.__init__):
-            argname = const_arg['name']
-            override = self.__get_override_carg(argname, builder, manager)
-            if override:
-                val = override
-            elif argname in const_args:
-                val = const_args[argname]
-            else:
-                continue
-            if 'default' in const_arg:
-                kwargs[argname] = val
-            else:
-                args.append(val)
-
-        try:
-            obj = cls(*args, **kwargs)
-        except Exception as ex:
-            msg = 'Could not construct %s object' % cls.__name__
-            raise_from(Exception(msg), ex)
-
-        return obj
-
-    def __get_override_carg(self, *args, **kwargs):
-        return self.hack_get_override_carg(*args, **kwargs)
-
 class TypeMapLegacy(TypeMap):
 
     def get_builder_dt(self, builder):
