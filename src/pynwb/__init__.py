@@ -15,6 +15,7 @@ from .form.build import BuildManager
 
 from .spec import NWBAttributeSpec, NWBLinkSpec, NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
 
+
 __core_ns_file_name = 'nwb.namespace.yaml'
 def __get_resources():
     from pkg_resources import resource_filename
@@ -22,6 +23,10 @@ def __get_resources():
     ret = dict()
     ret['namespace_path'] = join(resource_filename(__name__, 'data'), __core_ns_file_name)
     return ret
+
+def _get_resources():
+    # LEGACY: Needed to support legacy implementation.
+    return __get_resources()
 
 # a global namespace catalog
 global __NS_CATALOG
@@ -49,7 +54,10 @@ def get_manager(**kwargs):
     if extensions is None:
         type_map = __TYPE_MAP
     else:
-        type_map = get_type_map()
+        if isinstance(extensions, TypeMap):
+            type_map = extensions
+        else:
+            type_map = get_type_map()
         if isinstance(extensions, list):
             for ext in extensions:
                 if isinstance(ext, str):
@@ -80,6 +88,16 @@ def load_namespaces(**kwargs):
 __resources = __get_resources()
 if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
+
+# added here for convenience to users
+from .form.build import BuildManager as __BuildManager
+@docval({'name': 'type_map', 'type': __TYPE_MAP, 'doc': 'the path to the YAML with the namespace definition', 'default': None},
+        is_method=False)
+def get_build_manager(**kwargs):
+    type_map = getargs('type_map', kwargs)
+    if type_map is None:
+        type_map = __TYPE_MAP
+    return __BuildManager(type_map)
 
 @docval(returns="a tuple of the available namespaces", rtype=tuple)
 def available_namespaces(**kwargs):
