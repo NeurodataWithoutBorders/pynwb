@@ -70,7 +70,7 @@ class HDF5IO(FORMIO):
             "links": dict()
         }
         if name is None:
-            name = str(os.path.basename(h5obj.name))
+            name = os.path.basename(h5obj.name)
         for k in h5obj:
             sub_h5obj = h5obj.get(k)
             if not (sub_h5obj is None):
@@ -118,7 +118,7 @@ class HDF5IO(FORMIO):
             "maxshape": h5obj.maxshape
         }
         if name is None:
-            name = str(os.path.basename(h5obj.name))
+            name = os.path.basename(h5obj.name)
         kwargs['source'] = self.__path
         ndims = len(h5obj.shape)
         cls = DatasetBuilder
