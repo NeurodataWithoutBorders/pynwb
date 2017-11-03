@@ -1,3 +1,6 @@
+#vscode local history recovery file dir
+.history
+
 ### VisualStudioCode ###
 .vscode/*
 !.vscode/settings.json

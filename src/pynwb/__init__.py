@@ -23,6 +23,9 @@ def __get_resources():
     ret['namespace_path'] = join(resource_filename(__name__, 'data'), __core_ns_file_name)
     return ret
 
+def _get_resources():
+    return __get_resources()
+
 # a global namespace catalog
 global __NS_CATALOG
 global __TYPE_MAP
@@ -49,7 +52,10 @@ def get_manager(**kwargs):
     if extensions is None:
         type_map = __TYPE_MAP
     else:
-        type_map = get_type_map()
+        if isinstance(extensions, TypeMap):
+            type_map = extensions
+        else:
+            type_map = get_type_map()
         if isinstance(extensions, list):
             for ext in extensions:
                 if isinstance(ext, str):
@@ -180,3 +186,4 @@ from . import retinotopy
 from ._version import get_versions
 __version__ = get_versions()['version']
 del get_versions
+from . import legacy

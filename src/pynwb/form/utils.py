@@ -78,7 +78,6 @@ def __format_type(argtype):
 def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     """
     Internal helper function used by the docval decroator to parse and validate function arguments
-
     :param validator: List of dicts from docval with the description of the arguments
     :param args: List of the values of positional arguments supplied by the caller
     :param kwargs: Dict keyword arguments supplied by the caller where keys are the argument name and
@@ -86,7 +85,6 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     :param enforce_type: Boolean indicating whether the type of arguments should be enforced
     :param enforce_ndim: Boolean indicating whether the number of dimensions of array arguments
                          should be enforced if possible.
-
     :return: Dict with:
         * 'args' : Dict all arguments where keys are the names and values are the values of the arguments.
         * 'errors' : List of string with error messages
@@ -224,27 +222,20 @@ def get_docval_kwargs(func):
 
 def docval(*validator, **options):
     '''A decorator for documenting and enforcing type for instance method arguments.
-
     This decorator takes a list of dictionaries that specify the method parameters. These
     dictionaries are used for enforcing type and building a Sphinx docstring.
-
     The first arguments are dictionaries that specify the positional
     arguments and keyword arguments of the decorated function. These dictionaries
     must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a
     positional argument. To define a keyword argument, specify a default value
     using the key ``'default'``. To validate the number of dimensions of an input array
     add the optional ``'ndim'`` parameter.
-
     The decorated method must take ``self`` and ``**kwargs`` as arguments.
-
     When using this decorator, the functions :py:func:`getargs` and
     :py:func:`popargs` can be used for easily extracting arguments from
     kwargs.
-
     The following code example demonstrates the use of this decorator:
-
     .. code-block:: python
-
        @docval({'name': 'arg1':,   'type': str,           'doc': 'this is the first positional argument'},
                {'name': 'arg2':,   'type': int,           'doc': 'this is the second positional argument'},
                {'name': 'kwarg1':, 'type': (list, tuple), 'doc': 'this is a keyword argument', 'default': list()},
@@ -252,7 +243,6 @@ def docval(*validator, **options):
        def foo(self, **kwargs):
            arg1, arg2, kwarg1 = getargs('arg1', 'arg2', 'kwarg1', **kwargs)
            ...
-
     :param enforce_type: Enforce types of input parameters (Default=True)
     :param returns: String describing the return values
     :param rtype: String describing the data type of the return values
