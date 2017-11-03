@@ -211,6 +211,7 @@ from . import misc  # noqa: F401,E402
 from . import ogen  # noqa: F401,E402
 from . import ophys  # noqa: F401,E402
 from . import retinotopy  # noqa: F401,E402
+from . import legacy  # noqa: F401,E402
 
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
