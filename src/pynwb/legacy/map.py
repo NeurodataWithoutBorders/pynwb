@@ -5,6 +5,12 @@ from ..form.build.builders import DatasetBuilder, GroupBuilder
 from ..form.build.map import BuildManager
 from ..form.utils import docval, getargs, popargs, get_docval
 
+def decode(val):
+    if isinstance(val, bytes):
+        return val.decode('UTF-8')
+    else:
+        return val
+
 class ObjectMapperLegacy(ObjectMapper):
 
 
