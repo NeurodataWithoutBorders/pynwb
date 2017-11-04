@@ -1,35 +1,3 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 from .. import ObjectMapper
 from pynwb.legacy import register_map
 from pynwb.epoch import Epoch, EpochTimeSeries

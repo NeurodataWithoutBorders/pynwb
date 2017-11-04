@@ -2,6 +2,14 @@ from .. import ObjectMapper
 from pynwb.legacy import register_map
 from pynwb.base import TimeSeries, ProcessingModule
 
+legacy_TimeSeries_missing_time_info_name_list = ('natural_movie_one_image_stack',
+                                                 'natural_movie_two_image_stack',
+                                                 'natural_movie_three_image_stack', 
+                                                 'natural_scenes_image_stack',
+                                                 'locally_sparse_noise_image_stack',
+                                                 'locally_sparse_noise_8deg_image_stack',
+                                                 'locally_sparse_noise_4deg_image_stack')
+
 @register_map(ProcessingModule)
 class ModuleMap(ObjectMapper):
 
@@ -45,13 +53,13 @@ class TimeSeriesMap(ObjectMapper):
     @ObjectMapper.constructor_arg('starting_time')
     def carg_starting_time(self, *args):
         builder = args[0]
-        if builder.name in ('natural_movie_one_image_stack', 'natural_scenes_image_stack'):
+        if builder.name in legacy_TimeSeries_missing_time_info_name_list:
             return -1.0
 
     @ObjectMapper.constructor_arg('rate')
     def carg_rate(self, *args):
         builder = args[0]
-        if builder.name in ('natural_movie_one_image_stack', 'natural_scenes_image_stack'):
+        if builder.name in legacy_TimeSeries_missing_time_info_name_list:
             return -1.0
 
     # @ObjectMapper.constructor_arg('data')

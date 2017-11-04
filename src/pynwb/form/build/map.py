@@ -618,7 +618,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         try:
             obj = cls(*args, **kwargs)
         except Exception as ex:
-            msg = 'Could not construct %s object' % (cls.__name__)
+            msg = 'Could not construct %s object\n    %s' % (cls.__name__, '%s: %s (%s)' % (ex, cls.__name__, builder.name))
             raise_from(Exception(msg), ex)
         return obj
 
