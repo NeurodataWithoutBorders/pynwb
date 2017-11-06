@@ -21,6 +21,9 @@ Overall Health
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
+.. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
+     :target: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
+     :alt: Requirements Status
 
 NWB Format API
 ========================

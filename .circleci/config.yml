@@ -9,7 +9,7 @@ jobs:
            name: Install system requirements
            command: |
              apt-get update
-             apt-get install -y software-properties-common python-software-properties
+             apt-get install -y software-properties-common python-software-properties git
        - run:
            name: Install python3.6 and pip
            command: |
@@ -24,10 +24,14 @@ jobs:
            name: Run the tests for Python 2.7
            command: |
              tox -e py27
+           # Install is expected to be quick. Increase timeout in case there are some network issues.
+           # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
+           no_output_timeout: 30m
        - run:
            name: Run the tests for Python 3.6
            command: |
              tox -e py36
+           no_output_timeout: 30m
        - run:
            name: Report coverage
            command: |
@@ -43,8 +47,16 @@ jobs:
        - run:
            name: Test installation from a wheel for Python 2.7
            command: |
-             tox -e py27 recreate --installpkg dist/pynwb-0.1-py2-none-any.whl
+             tox -e py27 recreate --installpkg dist/*py2-none-any.whl
        - run:
            name: Test installation from a wheel for Python 3.6
            command: |
-             tox -e py36 recreate --installpkg dist/pynwb-0.1-py3-none-any.whl
+             tox -e py36 recreate --installpkg dist/*py3-none-any.whl
+       - run:
+           name: Publish wheel and source distribution on github
+           command: |
+             if [ "${CIRCLE_BRANCH}" == "dev" ]; then
+               pip install scikit-ci-addons
+               ci_addons publish_github_release NeurodataWithoutBorders/pynwb \
+                 --prerelease-packages "dist/*" --exit-success-if-missing-token
+             fi

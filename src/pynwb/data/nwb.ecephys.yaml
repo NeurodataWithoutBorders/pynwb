@@ -148,7 +148,7 @@ groups:
     - num_events
     doc: Times of clustered events, in seconds. This may be a link to times field
       in associated FeatureExtraction module.
-    dtype: float64!
+    dtype: float64
     name: times
     shape:
     - null
@@ -184,7 +184,7 @@ groups:
   - dims:
     - num_events
     doc: Times of events that features correspond to (can be a link).
-    dtype: float64!
+    dtype: float64
     name: times
     shape:
     - null
@@ -225,7 +225,7 @@ groups:
     dims:
     - num_events
     doc: Timestamps of events, in Seconds
-    dtype: float64!
+    dtype: float64
     name: times
     shape:
     - null

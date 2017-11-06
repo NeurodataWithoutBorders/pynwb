@@ -1,11 +1,11 @@
 import unittest2 as unittest
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
-from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
-from form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap
 
-from form.validate import ValidatorMap
-from form.validate.errors import *
+from pynwb.form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
+from pynwb.form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap
+from pynwb.form.validate import ValidatorMap
+from pynwb.form.validate.errors import *
 
 CORE_NAMESPACE = 'test_core'
 

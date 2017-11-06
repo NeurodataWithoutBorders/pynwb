@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from form.data_utils import DataChunkIterator, DataChunk
+from pynwb.form.data_utils import DataChunkIterator, DataChunk
 import numpy as np
 
 

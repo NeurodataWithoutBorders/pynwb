@@ -3,7 +3,7 @@ import tempfile
 import ruamel.yaml as yaml
 import json
 
-from form.spec import *
+from pynwb.form.spec import *
 
 class TestSpecLoad(unittest.TestCase):
     NS_NAME = 'test_ns'
@@ -77,7 +77,7 @@ class TestSpecLoad(unittest.TestCase):
         to_dump = {'namespaces': [self.namespace]}
         with open(self.namespace_path, 'w') as tmp:
             yaml.safe_dump(json.loads(json.dumps(to_dump)), tmp, default_flow_style=False)
-        self.ns_catalog = NamespaceCatalog(self.NS_NAME)
+        self.ns_catalog = NamespaceCatalog()
 
     def tearDown(self):
         if os.path.exists(self.namespace_path):

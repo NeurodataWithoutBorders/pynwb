@@ -5,7 +5,7 @@ import itertools as _itertools
 import posixpath as _posixpath
 from abc import ABCMeta
 
-from form.utils import docval, getargs, call_docval_func, fmt_docval_args
+from ..utils import docval, getargs, call_docval_func, fmt_docval_args
 from six import with_metaclass
 
 class Builder(with_metaclass(ABCMeta, dict)):

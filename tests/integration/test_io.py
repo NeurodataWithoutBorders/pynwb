@@ -4,15 +4,15 @@ from datetime import datetime
 import os
 from h5py import File
 
-from pynwb import NWBFile, TimeSeries, get_build_manager
+from pynwb import NWBFile, TimeSeries, get_manager
 
-from form.backends.hdf5 import HDF5IO
-from form.build import GroupBuilder, DatasetBuilder
+from pynwb.form.backends.hdf5 import HDF5IO
+from pynwb.form.build import GroupBuilder, DatasetBuilder
 
 class TestHDF5Writer(unittest.TestCase):
 
     def setUp(self):
-        self.manager = get_build_manager()
+        self.manager = get_manager()
         self.path = "test_pynwb_io_hdf5.h5"
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)

@@ -1,4 +1,4 @@
-from form.build import ObjectMapper, RegionBuilder, DatasetBuilder
+from ..form.build import ObjectMapper, RegionBuilder, DatasetBuilder
 from .. import register_map
 
 from pynwb.core import NWBData, NWBTableRegion

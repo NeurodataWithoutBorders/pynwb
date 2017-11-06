@@ -1,13 +1,12 @@
 import unittest2 as unittest
 from abc import ABCMeta, abstractmethod
 
-from pynwb.core import Container
-
-from form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
-from form.spec.spec import ZERO_OR_MANY
-from form.build import GroupBuilder, DatasetBuilder
-from form.utils import docval, getargs
-from form.build import ObjectMapper, BuildManager, TypeMap
+from pynwb.form import Container
+from pynwb.form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
+from pynwb.form.spec.spec import ZERO_OR_MANY
+from pynwb.form.build import GroupBuilder, DatasetBuilder
+from pynwb.form.utils import docval, getargs
+from pynwb.form.build import ObjectMapper, BuildManager, TypeMap
 
 CORE_NAMESPACE = 'test_core'
 
@@ -96,7 +95,7 @@ class TestBase(unittest.TestCase):
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.foo_spec, 'test.yaml')
         self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
-        self.namespace_catalog = NamespaceCatalog(CORE_NAMESPACE)
+        self.namespace_catalog = NamespaceCatalog()
         self.namespace_catalog.add_namespace(CORE_NAMESPACE, self.namespace)
         self.type_map = TypeMap(self.namespace_catalog)
         self.type_map.register_container_type(CORE_NAMESPACE, 'Foo', Foo)

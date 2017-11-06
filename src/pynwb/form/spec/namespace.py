@@ -130,13 +130,11 @@ class SpecNamespace(dict):
 
 class NamespaceCatalog(object):
 
-    @docval({'name': 'default_namespace', 'type': str, 'doc': 'the name of the default Namespace'},
-            {'name': 'group_spec_cls', 'type': type, 'doc': 'the class to use for group specifications', 'default': GroupSpec},
+    @docval({'name': 'group_spec_cls', 'type': type, 'doc': 'the class to use for group specifications', 'default': GroupSpec},
             {'name': 'dataset_spec_cls', 'type': type, 'doc': 'the class to use for dataset specifications', 'default': DatasetSpec},
             {'name': 'spec_namespace_cls', 'type': type, 'doc': 'the class to use for specification namespaces', 'default': SpecNamespace},)
     def __init__(self, **kwargs):
         """Create a catalog for storing  multiple Namespaces"""
-        self.__default_namespace = getargs('default_namespace', kwargs)
         self.__namespaces = dict()
         self.__dataset_spec_cls = getargs('dataset_spec_cls', kwargs)
         self.__group_spec_cls = getargs('group_spec_cls', kwargs)
@@ -145,7 +143,6 @@ class NamespaceCatalog(object):
         # multiple object instances of a spec
         self.__loaded_specs = dict()
         self.__loaded_ns_files = dict()
-
 
     @property
     @docval(returns='a tuple of the availble namespaces', rtype=tuple)
@@ -162,11 +159,6 @@ class NamespaceCatalog(object):
     def group_spec_cls(self):
         """The GroupSpec class used in this NamespaceCatalog"""
         return self.__group_spec_cls
-
-    @property
-    def default_namespace(self):
-        """The name of the default namespace"""
-        return self.__default_namespace
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this namespace'},
             {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the SpecNamespace object'})

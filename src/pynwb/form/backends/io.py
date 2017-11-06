@@ -6,15 +6,10 @@ from ..container import Container
 from six import with_metaclass
 
 class FORMIO(with_metaclass(ABCMeta, object)):
-    @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
+    @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'},
             {"name": "source", "type": str, "doc": "the source of container being built i.e. file path", 'default': None})
     def __init__(self, **kwargs):
         self.__manager = getargs('manager', kwargs)
-        if self.__manager is None:
-            type_map = TypeMap.default()
-            if type_map is None:
-                raise RuntimeError('No default TypeMap specified')
-            self.__manager = BuildManager(type_map)
         self.__built = dict()
         self.__source = getargs('source', kwargs)
 
