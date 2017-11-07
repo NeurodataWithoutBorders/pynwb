@@ -87,23 +87,3 @@ class ROIMap(ObjectMapper):
     def carg_name(self, *args):
         builder = args[0]
         return builder.name
-
-    # @ObjectMapper.constructor_arg('source')
-    # def source_gettr(self, builder):
-
-    #     if 'source' in builder.attributes:
-    #         return builder.attributes['source']
-    #     else:
-    #         return 'None2'
-
-
-    # def __get_override_carg(self, *args, **kwargs):
-    #     return self.hack_get_override_carg(*args, **kwargs)
-
-    # @ObjectMapper.constructor_arg('imaging_plane')
-    # def carg_imaging_plane(self, builder):
-    #     return 'imaging_plane_1' #builder.get('imaging_plane')
-
-    # @ObjectMapper.constructor_arg('reference_images')
-    # def carg_reference_images(self, builder):
-    #     return builder.get('image_series') # builder.get('reference_images')
