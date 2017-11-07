@@ -3,6 +3,7 @@ from .. import register_map
 
 from ..ophys import PlaneSegmentation
 
+
 @register_map(PlaneSegmentation)
 class PlaneSegmentationMap(ObjectMapper):
 
