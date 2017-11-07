@@ -168,7 +168,7 @@ _attrbl_args = [
         {'name': 'linkable', 'type': bool, 'doc': 'whether or not this group can be linked', 'default': True},
         {'name': 'quantity', 'type': (str, int), 'doc': 'the required number of allowed instance', 'default': 1},
         {'name': 'data_type_def', 'type': str, 'doc': 'the NWB type this specification represents', 'default': None},
-        {'name': 'data_type_inc', 'type': 'BaseStorageSpec', 'doc': 'the NWB type this specification extends', 'default': None},
+        {'name': 'data_type_inc', 'type': (str, 'BaseStorageSpec'), 'doc': 'the NWB type this specification extends', 'default': None},
 ]
 class BaseStorageSpec(Spec):
     ''' A specification for any object that can hold attributes. '''
