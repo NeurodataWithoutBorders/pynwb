@@ -846,7 +846,7 @@ class TypeMap(object):
             msg = "builder '%s' does not have a data_type" % builder.name
             raise ValueError(msg)
 
-        if isinstance(ret, bytes): 
+        if isinstance(ret, bytes):
             ret = ret.decode('UTF-8')
 
         return ret
