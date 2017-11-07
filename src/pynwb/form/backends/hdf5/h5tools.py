@@ -10,7 +10,7 @@ from ...container import Container
 from ...utils import docval, getargs, popargs, call_docval_func
 from ...data_utils import DataChunkIterator, get_shape
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder, TypeMap
-from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader
+from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, SpecNamespace
 
 from ..io import FORMIO
 
