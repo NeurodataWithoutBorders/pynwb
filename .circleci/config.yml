@@ -17,6 +17,11 @@ jobs:
              apt-get update
              apt-get install -y python-pip python3.6 python3-pip
        - run:
+           name: Test flake8
+           command: |
+             pip install flake8
+             flake8
+       - run:
            name: Install tox
            command: |
              pip install tox
