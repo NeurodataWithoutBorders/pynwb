@@ -7,6 +7,7 @@ import json
 from datetime import datetime
 import os
 
+
 class TestLegacy(unittest.TestCase):
 
     def setUp(self):
