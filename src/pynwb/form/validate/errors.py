@@ -9,6 +9,7 @@ __all__ = [
     "MissingDataType",
 ]
 
+
 class Error(object):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
@@ -31,6 +32,7 @@ class Error(object):
     def __repr__(self):
         return self.__str__()
 
+
 class DtypeError(Error):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
@@ -43,12 +45,14 @@ class DtypeError(Error):
         reason = "incorrect type: expected '%s', got'%s'" % (expected, received)
         super(DtypeError, self).__init__(name, reason)
 
+
 class MissingError(Error):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'})
     def __init__(self, **kwargs):
         name = getargs('name', kwargs)
         reason = "argument missing"
         super(MissingError, self).__init__(name, reason)
+
 
 class MissingDataType(Error):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
@@ -62,6 +66,7 @@ class MissingDataType(Error):
     @property
     def data_type(self):
         return self.__data_type
+
 
 class ShapeError(object):
 

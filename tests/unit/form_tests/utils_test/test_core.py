@@ -1,44 +1,45 @@
 import unittest2 as unittest
-import sys
-from six import text_type, PY2
+from six import text_type
 
-from pynwb.form.utils import *
+from pynwb.form.utils import *  # noqa: F403
+
 
 class MyTestClass(object):
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'})
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'})  # noqa: F405
     def basic_add(self, **kwargs):
         return kwargs
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},  # noqa: F405
             {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int'})
     def basic_add2(self, **kwargs):
         return kwargs
 
-    @docval({'name': 'arg1', 'type': text_type, 'doc': 'argument1 is a str'},
+    @docval({'name': 'arg1', 'type': text_type, 'doc': 'argument1 is a str'},  # noqa: F40
             {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int'})
     def basic_add2_text_type(self, **kwargs):
         return kwargs
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},  # noqa: F405
             {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int'},
             {'name': 'arg3', 'type': bool, 'doc': 'argument3 is a bool. it defaults to False', 'default': False})
     def basic_add2_kw(self, **kwargs):
         return kwargs
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str', 'default': 'a'},
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str', 'default': 'a'},  # noqa: F405
             {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int', 'default': 1})
     def basic_only_kw(self, **kwargs):
         return kwargs
 
+
 class MyTestSubclass(MyTestClass):
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},  # noqa: F405
             {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int'})
     def basic_add(self, **kwargs):
         return kwargs
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},  # noqa: F405
             {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int'},
             {'name': 'arg3', 'type': bool, 'doc': 'argument3 is a bool. it defaults to False', 'default': False},
             {'name': 'arg4', 'type': str, 'doc': 'argument4 is a str'},
@@ -46,6 +47,7 @@ class MyTestSubclass(MyTestClass):
             {'name': 'arg6', 'type': bool, 'doc': 'argument6 is a bool. it defaults to False', 'default': None})
     def basic_add2_kw(self, **kwargs):
         return kwargs
+
 
 class TestDocValidator(unittest.TestCase):
 
@@ -60,7 +62,7 @@ class TestDocValidator(unittest.TestCase):
             'arg2': 1,
             'arg3': True,
         }
-        rec_args, rec_kwargs = fmt_docval_args(self.test_obj.basic_add2_kw, test_kwargs)
+        rec_args, rec_kwargs = fmt_docval_args(self.test_obj.basic_add2_kw, test_kwargs)  # noqa: F405
         exp_args = ['a string', 1]
         self.assertListEqual(rec_args, exp_args)
         exp_kwargs = {'arg3': True}
@@ -85,8 +87,8 @@ class TestDocValidator(unittest.TestCase):
            with a single positional argument
         """
         with self.assertRaises(TypeError) as cm:
-            kwargs = self.test_obj.basic_add()
-        msg="missing argument 'arg1'"
+            kwargs = self.test_obj.basic_add()  # noqa: F841
+        msg = "missing argument 'arg1'"
         self.assertEqual(cm.exception.args[0], msg)
 
     def test_docval_add2(self):
@@ -157,7 +159,7 @@ class TestDocValidator(unittest.TestCase):
            keyword argument value with positional syntax
         """
         with self.assertRaises(TypeError) as cm:
-            kwargs = self.test_obj.basic_add2_kw('a string', 'bad string')
+            kwargs = self.test_obj.basic_add2_kw('a string', 'bad string')  # noqa: F841
 
         self.assertEqual(cm.exception.args[0], u"incorrect type for 'arg2' (got 'str', expected 'int')")
 
@@ -187,8 +189,8 @@ class TestDocValidator(unittest.TestCase):
            when using default values for keyword arguments
         """
         with self.assertRaises(TypeError) as cm:
-            kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string')
-        msg="missing argument 'arg5'"
+            kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string')  # noqa: F841
+        msg = "missing argument 'arg5'"
         self.assertEqual(cm.exception.args[0], msg)
 
     def test_docval_add2_kw_kwsyntax_sub(self):
@@ -209,8 +211,8 @@ class TestDocValidator(unittest.TestCase):
            argument is specified in both the parent and sublcass implementations
         """
         with self.assertRaises(TypeError) as cm:
-            kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', arg6=True)
-        msg="missing argument 'arg5'"
+            kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', arg6=True)  # noqa: F841
+        msg = "missing argument 'arg5'"
         self.assertEqual(cm.exception.args[0], msg)
 
     def test_docval_add2_kw_kwsyntax_sub_nonetype_arg(self):
@@ -219,7 +221,7 @@ class TestDocValidator(unittest.TestCase):
            argument is specified in both the parent and sublcass implementations
         """
         with self.assertRaises(TypeError) as cm:
-            kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', None, arg6=True)
+            kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', None, arg6=True)  # noqa: F841
         msg = "incorrect type for 'arg5' (got 'NoneType', expected 'int')"
         self.assertEqual(cm.exception.args[0], msg)
 
@@ -269,7 +271,6 @@ class TestDocValidator(unittest.TestCase):
         """
         kwargs = self.test_obj.basic_only_kw('b', 2)
         self.assertDictEqual(kwargs, {'arg1': 'b', 'arg2': 2})
-
 
 
 if __name__ == '__main__':

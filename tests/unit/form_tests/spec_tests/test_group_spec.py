@@ -1,7 +1,8 @@
 import unittest2 as unittest
 import json
 
-from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, Spec, SpecCatalog
+from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec
+
 
 class GroupSpecTests(unittest.TestCase):
     def setUp(self):
@@ -46,11 +47,12 @@ class GroupSpecTests(unittest.TestCase):
 
         ]
         self.ndt_attr_spec = AttributeSpec('data_type', 'the data type of this object', 'text', value='EphysData')
-        self.ns_attr_spec = AttributeSpec('namespace', 'the namespace for the data type of this object', 'text', required=False)
+        self.ns_attr_spec = AttributeSpec('namespace', 'the namespace for the data type of this object',
+                                          'text', required=False)
 
     def test_constructor(self):
         spec = GroupSpec('A test group',
-                          name='root_constructor',
+                         name='root_constructor',
                          groups=self.subgroups,
                          datasets=self.datasets,
                          attributes=self.attributes,
@@ -130,14 +132,14 @@ class GroupSpecTests(unittest.TestCase):
         ext_attributes = [
             AttributeSpec('ext_extra_attribute', 'an extra attribute for the group', 'str'),
         ]
-        ext =  GroupSpec('A test group extension',
-                         name='child_type',
-                         datasets=ext_datasets,
-                         attributes=ext_attributes,
-                         linkable=False,
-                         namespace='core',
-                         data_type_inc=spec,
-                         data_type_def='SpikeData')
+        ext = GroupSpec('A test group extension',
+                        name='child_type',
+                        datasets=ext_datasets,
+                        attributes=ext_attributes,
+                        linkable=False,
+                        namespace='core',
+                        data_type_inc=spec,
+                        data_type_def='SpikeData')
         ext_dset1 = ext.get_dataset('dataset1')
         ext_dset1_attrs = ext_dset1.attributes
         self.assertDictEqual(ext_dset1_attrs[0], dset1_attributes_ext[0])
@@ -146,14 +148,15 @@ class GroupSpecTests(unittest.TestCase):
         self.assertEqual(ext.data_type_def, 'SpikeData')
         self.assertEqual(ext.data_type_inc, 'EphysData')
 
-
         ext_dset2 = ext.get_dataset('dataset2')
         self.maxDiff = None
-        self.assertEqual(str(ext_dset2), str(self.datasets[1])) # this will suffice for now,  assertDictEqual doesn't do deep equality checks
+        # this will suffice for now,  assertDictEqual doesn't do deep equality checks
+        self.assertEqual(str(ext_dset2), str(self.datasets[1]))
         self.assertAttributesEqual(ext_dset2, self.datasets[1])
 
-        #self.ns_attr_spec
-        ndt_attr_spec = AttributeSpec('data_type', 'the data type of this object', 'text', value='SpikeData')
+        # self.ns_attr_spec
+        ndt_attr_spec = AttributeSpec('data_type', 'the data type of this object',  # noqa: F841
+                                      'text', value='SpikeData')
 
         res_attrs = ext.attributes
         self.assertDictEqual(res_attrs[0], ext_attributes[0])

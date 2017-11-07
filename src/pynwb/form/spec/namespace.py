@@ -17,12 +17,16 @@ _namespace_args = [
     {'name': 'schema', 'type': list, 'doc': 'location of schema specification files or other Namespaces'},
     {'name': 'full_name', 'type': str, 'doc': 'extended full name of this namespace', 'default': None},
     {'name': 'version', 'type': (str, tuple, list), 'doc': 'Version number of the namespace', 'default': None},
-    {'name': 'date', 'type': (datetime, str), 'doc': "Date last modified or released. Formatting is %Y-%m-%d %H:%M:%S, e.g, 2017-04-25 17:14:13",
+    {'name': 'date', 'type': (datetime, str),
+     'doc': "Date last modified or released. Formatting is %Y-%m-%d %H:%M:%S, e.g, 2017-04-25 17:14:13",
      'default': None},
     {'name': 'author', 'type': (str, list), 'doc': 'Author or list of authors.', 'default': None},
-    {'name': 'contact', 'type': (str, list), 'doc': 'List of emails. Ordering should be the same as for author', 'default': None},
+    {'name': 'contact', 'type': (str, list),
+     'doc': 'List of emails. Ordering should be the same as for author', 'default': None},
     {'name': 'catalog', 'type': SpecCatalog, 'doc': 'The SpecCatalog object for this SpecNamespace', 'default': None}
 ]
+
+
 class SpecNamespace(dict):
     """
     A namespace for specifications
@@ -32,7 +36,7 @@ class SpecNamespace(dict):
 
     @docval(*deepcopy(_namespace_args))
     def __init__(self, **kwargs):
-        doc, full_name, name, version, date, author, contact, schema, catalog  = \
+        doc, full_name, name, version, date, author, contact, schema, catalog = \
             popargs('doc', 'full_name', 'name', 'version', 'date', 'author', 'contact', 'schema', 'catalog', kwargs)
         super(SpecNamespace, self).__init__()
         self['doc'] = doc
@@ -51,7 +55,6 @@ class SpecNamespace(dict):
         if contact is not None:
             self['contact'] = contact
         self.__catalog = catalog if catalog is not None else SpecCatalog()
-
 
     @classmethod
     def types_key(cls):
@@ -128,11 +131,15 @@ class SpecNamespace(dict):
             raise KeyError("'%s' not found in %s" % (e.args[0], str(spec_dict)))
         return cls(*args, **kwargs)
 
+
 class NamespaceCatalog(object):
 
-    @docval({'name': 'group_spec_cls', 'type': type, 'doc': 'the class to use for group specifications', 'default': GroupSpec},
-            {'name': 'dataset_spec_cls', 'type': type, 'doc': 'the class to use for dataset specifications', 'default': DatasetSpec},
-            {'name': 'spec_namespace_cls', 'type': type, 'doc': 'the class to use for specification namespaces', 'default': SpecNamespace},)
+    @docval({'name': 'group_spec_cls', 'type': type,
+             'doc': 'the class to use for group specifications', 'default': GroupSpec},
+            {'name': 'dataset_spec_cls', 'type': type,
+             'doc': 'the class to use for dataset specifications', 'default': DatasetSpec},
+            {'name': 'spec_namespace_cls', 'type': type,
+             'doc': 'the class to use for specification namespaces', 'default': SpecNamespace},)
     def __init__(self, **kwargs):
         """Create a catalog for storing  multiple Namespaces"""
         self.__namespaces = dict()
@@ -206,6 +213,7 @@ class NamespaceCatalog(object):
 
     def __load_spec_file(self, spec_file_path, catalog, dtypes=None, resolve=True):
         ret = self.__loaded_specs.get(spec_file_path)
+
         def __reg_spec(spec_cls, spec_dict):
             dt_def = spec_dict.get(spec_cls.def_key())
             if dt_def is None:
@@ -247,7 +255,7 @@ class NamespaceCatalog(object):
             modified = True
         it = chain(spec_dict.get('groups', list()), spec_dict.get('datasets', list()))
         for subspec_dict in it:
-            sub_modified = self.__resolve_includes(subspec_dict, catalog, spec_file_path)
+            sub_modified = self.__resolve_includes(subspec_dict, catalog, spec_file_path)  # noqa: F841
         return modified
 
     @classmethod
@@ -257,14 +265,17 @@ class NamespaceCatalog(object):
         return os.path.join(os.path.dirname(ns_path), spec_path)
 
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
-            {'name': 'resolve', 'type': bool, 'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
+            {'name': 'resolve', 'type': bool,
+             'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
             returns='a dictionary describing the dependencies of loaded namespaces', rtype=dict)
     def load_namespaces(self, **kwargs):
         """Load the namespaces in the given file"""
         namespace_path, resolve = getargs('namespace_path', 'resolve', kwargs)
         # load namespace definition from file
         if not os.path.exists(namespace_path):
-            raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
+            # TODO: Fix this line for Python2
+            # Raise OSError maybe?
+            raise FileNotFoundError("namespace file '%s' not found" % namespace_path)  # noqa: F821
         ret = self.__loaded_ns_files.get(namespace_path)
         if ret is None:
             ret = dict()
@@ -273,7 +284,7 @@ class NamespaceCatalog(object):
         with open(namespace_path, 'r') as stream:
             d = yaml.safe_load(stream)
             namespaces = d.get('namespaces')
-            if namespaces == None:
+            if namespaces is None:
                 raise ValueError("no 'namespaces' found in %s" % namespace_path)
         types_key = self.__spec_namespace_cls.types_key()
         # now load specs into namespace
@@ -287,7 +298,7 @@ class NamespaceCatalog(object):
                     dtypes = None
                     if types_key in s:
                         dtypes = set(s[types_key])
-                    ndts = self.__load_spec_file(spec_file, catalog, dtypes=dtypes, resolve=resolve)
+                    ndts = self.__load_spec_file(spec_file, catalog, dtypes=dtypes, resolve=resolve)  # noqa: F841
                 elif 'namespace' in s:
                     # load specs from namespace
                     try:

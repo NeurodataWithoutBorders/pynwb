@@ -1,11 +1,12 @@
 import unittest2 as unittest
 
-from pynwb.form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
-from pynwb.form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildManager, TypeMap
+from pynwb.form.spec import AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace, NamespaceCatalog
+from pynwb.form.build import DatasetBuilder, ObjectMapper, BuildManager, TypeMap
 from pynwb.form import Data
-from pynwb.form.utils import docval, getargs, get_docval
+from pynwb.form.utils import docval, getargs
 
 CORE_NAMESPACE = 'test_core'
+
 
 class Baz(Data):
 
@@ -27,13 +28,15 @@ class Baz(Data):
     def baz_attr(self):
         return self.__baz_attr
 
+
 class TestDataMap(unittest.TestCase):
 
     def setUp(self):
         self.setUpBazSpec()
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.baz_spec, 'test.yaml')
-        self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}], catalog=self.spec_catalog)
+        self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE, [{'source': 'test.yaml'}],
+                                       catalog=self.spec_catalog)
         self.namespace_catalog = NamespaceCatalog()
         self.namespace_catalog.add_namespace(CORE_NAMESPACE, self.namespace)
         self.type_map = TypeMap(self.namespace_catalog)

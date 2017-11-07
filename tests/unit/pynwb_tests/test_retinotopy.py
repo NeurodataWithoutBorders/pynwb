@@ -2,8 +2,6 @@ import unittest
 
 from pynwb.retinotopy import ImagingRetinotopy, AxisMap, AImage
 
-import numpy as np
-
 
 class ImageRetinotopyConstructor(unittest.TestCase):
 
@@ -24,10 +22,13 @@ class ImageRetinotopyConstructor(unittest.TestCase):
         format = 'raw'
         field_of_view = [1, 2, 3]
         focal_depth = 1.0
-        focal_depth_image = AImage('focal_depth_image', 'test source', data, bits_per_pixel, dimension, format, field_of_view, focal_depth)
-        vasculature_image = AImage('vasculature', 'test source', data, bits_per_pixel, dimension, format, field_of_view, focal_depth)
+        focal_depth_image = AImage('focal_depth_image', 'test source', data, bits_per_pixel,
+                                   dimension, format, field_of_view, focal_depth)
+        vasculature_image = AImage('vasculature', 'test source', data, bits_per_pixel,
+                                   dimension, format, field_of_view, focal_depth)
 
-        ir = ImagingRetinotopy('test_ir', sign_map, axis_1_phase_map, axis_1_power_map, axis_2_phase_map, axis_2_power_map, axis_descriptions, focal_depth_image, vasculature_image)
+        ir = ImagingRetinotopy('test_ir', sign_map, axis_1_phase_map, axis_1_power_map, axis_2_phase_map,
+                               axis_2_power_map, axis_descriptions, focal_depth_image, vasculature_image)
         self.assertEqual(ir.source, 'test_ir')
         self.assertEqual(ir.sign_map, sign_map)
         self.assertEqual(ir.axis_1_phase_map, axis_1_phase_map)
@@ -38,6 +39,6 @@ class ImageRetinotopyConstructor(unittest.TestCase):
         self.assertEqual(ir.focal_depth_image, focal_depth_image)
         self.assertEqual(ir.vasculature_image, vasculature_image)
 
+
 if __name__ == '__main__':
     unittest.main()
-

@@ -1,11 +1,11 @@
 import collections as _collections
 import itertools as _itertools
 import copy as _copy
-from collections import Iterable
 from abc import ABCMeta
 import six
 from six import raise_from
 import numpy as np
+
 
 def __type_okay(value, argtype, allow_none=False):
     """Check a value against a type
@@ -50,14 +50,17 @@ def __type_okay(value, argtype, allow_none=False):
     else:
         raise ValueError("argtype must be a type, a str, a list, a tuple, or None")
 
+
 def __is_int(value):
     return any(isinstance(value, i) for i in (int, np.int8, np.int16, np.int32, np.int64))
+
 
 def __is_float(value):
     SUPPORTED_FLOAT_TYPES = [float, np.float16, np.float32, np.float64]
     if hasattr(np, "float128"):
         SUPPORTED_FLOAT_TYPES.append(np.float128)
     return any(isinstance(value, i) for i in SUPPORTED_FLOAT_TYPES)
+
 
 def __format_type(argtype):
     if isinstance(argtype, str):
@@ -74,6 +77,7 @@ def __format_type(argtype):
         return "NoneType"
     else:
         raise ValueError("argtype must be a type, str, list, or tuple")
+
 
 def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     """
@@ -97,7 +101,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     try:
         it = iter(validator)
         arg = next(it)
-        #process positional arguments
+        # process positional arguments
         while True:
             #
             if 'default' in arg:
@@ -143,6 +147,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
         pass
     return {'args': ret, 'errors': errors}
 
+
 def __sort_args(validator):
     pos = list()
     kw = list()
@@ -151,10 +156,12 @@ def __sort_args(validator):
             kw.append(arg)
         else:
             pos.append(arg)
-    return list(_itertools.chain(pos,kw))
+    return list(_itertools.chain(pos, kw))
+
 
 docval_attr_name = '__docval__'
 __docval_args_loc = 'args'
+
 
 # TODO: write unit tests for get_docval* functions
 def get_docval(func):
@@ -167,7 +174,7 @@ def get_docval(func):
     else:
         return tuple()
 
-#def docval_wrap(func, is_method=True):
+# def docval_wrap(func, is_method=True):
 #    if is_method:
 #        @docval(*get_docval(func))
 #        def method(self, **kwargs):
@@ -179,6 +186,7 @@ def get_docval(func):
 #        def static_method(**kwargs):
 #            return call_docval_args(func, kwargs)
 #        return method
+
 
 def fmt_docval_args(func, kwargs):
     ''' Separate positional and keyword arguments
@@ -198,9 +206,11 @@ def fmt_docval_args(func, kwargs):
                 ret_args.append(val)
     return (ret_args, ret_kwargs)
 
+
 def call_docval_func(func, kwargs):
     fargs, fkwargs = fmt_docval_args(func, kwargs)
     return func(*fargs, **fkwargs)
+
 
 def get_docval_args(func):
     '''get_docval_args(func)
@@ -212,6 +222,7 @@ def get_docval_args(func):
     else:
         return tuple()
 
+
 def get_docval_kwargs(func):
     '''get_docval_kwargs(func)
     Like get_docval, but return only keyword arguments
@@ -221,6 +232,7 @@ def get_docval_kwargs(func):
         return tuple(a for a in func_docval[__docval_args_loc] if 'default' in a)
     else:
         return tuple()
+
 
 def docval(*validator, **options):
     '''A decorator for documenting and enforcing type for instance method arguments.
@@ -267,6 +279,7 @@ def docval(*validator, **options):
     rtype = options.pop('rtype', None)
     is_method = options.pop('is_method', True)
     val_copy = __sort_args(_copy.deepcopy(validator))
+
     def dec(func):
         _docval = _copy.copy(options)
         pos = list()
@@ -281,7 +294,11 @@ def docval(*validator, **options):
         if is_method:
             def func_call(*args, **kwargs):
                 self = args[0]
-                parsed = __parse_args(_copy.deepcopy(loc_val), args[1:], kwargs, enforce_type=enforce_type, enforce_ndim=enforce_ndim)
+                parsed = __parse_args(
+                    _copy.deepcopy(
+                        loc_val), args[1:], kwargs,
+                    enforce_type=enforce_type,
+                    enforce_ndim=enforce_ndim)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
@@ -306,12 +323,13 @@ def docval(*validator, **options):
         return func_call
     return dec
 
+
 def __builddoc(func, validator, docstring_fmt, arg_fmt, ret_fmt=None, returns=None, rtype=None):
     '''Generate a Spinxy docstring'''
     def to_str(argtype):
         if isinstance(argtype, type):
             return argtype.__name__
-        return  argtype
+        return argtype
 
     def __sphinx_arg(arg):
         fmt = dict()
@@ -330,13 +348,14 @@ def __builddoc(func, validator, docstring_fmt, arg_fmt, ret_fmt=None, returns=No
         else:
             return argval['name']
 
-    sig =  "%s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator)))
+    sig = "%s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator)))
     desc = func.__doc__.strip() if func.__doc__ is not None else ""
     sig += docstring_fmt.format(description=desc, args="\n".join(map(__sphinx_arg, validator)))
 
     if not (ret_fmt is None or returns is None or rtype is None):
         sig += ret_fmt.format(returns=returns, rtype=rtype)
     return sig
+
 
 def __sphinxdoc(func, validator, returns=None, rtype=None):
     arg_fmt = (":param {name}: {doc}\n"
@@ -347,6 +366,7 @@ def __sphinxdoc(func, validator, returns=None, rtype=None):
                ":rtype: {rtype}")
     return __builddoc(func, validator, docstring_fmt, arg_fmt, ret_fmt=ret_fmt, returns=returns, rtype=rtype)
 
+
 def __googledoc(func, validator, returns=None, rtype=None):
     arg_fmt = "    {name} ({type}): {doc}"
     docstring_fmt = "{description}\n\n"
@@ -355,6 +375,7 @@ def __googledoc(func, validator, returns=None, rtype=None):
     ret_fmt = ("\nReturns:\n"
                "    {rtype}: {returns}")
     return __builddoc(func, validator, docstring_fmt, arg_fmt, ret_fmt=ret_fmt, returns=returns, rtype=rtype)
+
 
 def getargs(*argnames):
     '''getargs(*argnames, argdict)
@@ -371,6 +392,7 @@ def getargs(*argnames):
         return kwargs.get(argnames[0])
     return [kwargs.get(arg) for arg in argnames[:-1]]
 
+
 def popargs(*argnames):
     '''popargs(*argnames, argdict)
     Convenience function to retrieve and remove arguments from a dictionary in batch
@@ -386,6 +408,7 @@ def popargs(*argnames):
         return kwargs.pop(argnames[0])
     return [kwargs.pop(arg) for arg in argnames[:-1]]
 
+
 class ExtenderMeta(ABCMeta):
     """A metaclass that will extend the base class initialization
        routine by executing additional functions defined in
@@ -395,12 +418,14 @@ class ExtenderMeta(ABCMeta):
     """
 
     __preinit = '__preinit'
+
     @classmethod
     def pre_init(cls, func):
         setattr(func, cls.__preinit, True)
         return classmethod(func)
 
     __postinit = '__postinit'
+
     @classmethod
     def post_init(cls, func):
         '''A decorator for defining a routine to run after creation of a type object.
@@ -422,6 +447,7 @@ class ExtenderMeta(ABCMeta):
         it = (a for a in it if hasattr(a, cls.__postinit))
         for func in it:
             func(name, bases, classdict)
+
 
 class frozendict(_collections.Mapping):
     '''An immutable dict

@@ -1,7 +1,7 @@
 import unittest2 as unittest
 import json
 
-from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, Spec, SpecCatalog
+from pynwb.form.spec import AttributeSpec
 
 
 class AttributeSpecTests(unittest.TestCase):
@@ -14,4 +14,4 @@ class AttributeSpecTests(unittest.TestCase):
         self.assertEqual(spec['dtype'], 'str')
         self.assertEqual(spec['doc'], 'my first attribute')
         self.assertIsNone(spec.parent)
-        json.dumps(spec) # to ensure there are no circular links
+        json.dumps(spec)  # to ensure there are no circular links

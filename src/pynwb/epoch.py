@@ -1,5 +1,3 @@
-import copy
-import numpy as np
 from bisect import bisect_left
 
 from .form.utils import docval, getargs, call_docval_func, fmt_docval_args
@@ -8,7 +6,8 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer
 
-#@nwbproperties(*__std_fields, neurodata_type='Epoch')
+
+# @nwbproperties(*__std_fields, neurodata_type='Epoch')
 @register_class('Epoch', CORE_NAMESPACE)
 class Epoch(NWBContainer):
     """ Epoch object
@@ -27,8 +26,7 @@ class Epoch(NWBContainer):
                      'stop_time',
                      'tags')
 
-
-    #_neurodata_type = 'Epoch'
+    # _neurodata_type = 'Epoch'
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the epoch, as it will appear in the file'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
@@ -36,10 +34,11 @@ class Epoch(NWBContainer):
             {'name': 'stop', 'type': float, 'doc': 'the ending time of the epoch'},
             {'name': 'description', 'type': str, 'doc': 'a description of this epoch', 'default': None},
             {'name': 'tags', 'type': (tuple, list), 'doc': 'tags for this epoch', 'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         start, stop, description, tags = getargs('start', 'stop', 'description', 'tags', kwargs)
-        #super(Epoch, self).__init__(name=name, parent=parent)
+        # super(Epoch, self).__init__(name=name, parent=parent)
         call_docval_func(super(Epoch, self).__init__, kwargs)
         # dict to keep track of which time series are linked to this epoch
         self._timeseries = dict()
@@ -63,7 +62,6 @@ class Epoch(NWBContainer):
             return ts
         else:
             raise KeyError("TimeSeries '%s' not found in Epoch '%s'" % (name, self.name))
-
 
     def set_description(self, desc):
         """ Convenience function to set the value of the 'description'
@@ -93,7 +91,6 @@ class Epoch(NWBContainer):
         i = bisect_left(self.tags, tag)
         if i == len(self.tags) or self.tags[i] != tag:
             self.tags.insert(i, tag)
-
 
     # limit intervals to time boundary of epoch, but don't perform
     #   additional logic (ie, if user supplies overlapping intervals,
@@ -138,17 +135,17 @@ class Epoch(NWBContainer):
             Returns:
                 *nothing*
         """
-        #name = in_epoch_name if in_epoch_name else timeseries.name
-        #self._timeseries[name] = EpochTimeSeries(self.source, timeseries,
+        # name = in_epoch_name if in_epoch_name else timeseries.name
+        # self._timeseries[name] = EpochTimeSeries(self.source, timeseries,
         #                                        self.start_time,
         #                                        self.stop_time,
         #                                        name=name,
         #                                        parent=self)
-        #return self._timeseries[name]
+        # return self._timeseries[name]
 
         name = in_epoch_name if in_epoch_name else timeseries.name
         idx, count = self.__calculate_idx_count(self.start_time, self.stop_time, timeseries)
-        self._timeseries[name] = EpochTimeSeries(self.source, timeseries, idx, count, name=name,parent=self)
+        self._timeseries[name] = EpochTimeSeries(self. source, timeseries, idx, count, name=name, parent=self)
         return self._timeseries[name]
 
     def __calculate_idx_count(self, start_time, stop_time, ts):
@@ -165,6 +162,7 @@ class Epoch(NWBContainer):
         idx_start = start_idx
         return (int(idx_start), int(count))
 
+
 @register_class('EpochTimeSeries', CORE_NAMESPACE)
 class EpochTimeSeries(NWBContainer):
     __nwbfields__ = ('name',
@@ -173,19 +171,20 @@ class EpochTimeSeries(NWBContainer):
                      'timeseries')
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'ts', 'type': TimeSeries, 'doc':'the TimeSeries object'},
-            {'name': 'idx_start', 'type': int, 'doc':'the index of the start time in this TimeSeries'},
+            {'name': 'ts', 'type': TimeSeries, 'doc': 'the TimeSeries object'},
+            {'name': 'idx_start', 'type': int, 'doc': 'the index of the start time in this TimeSeries'},
             {'name': 'count', 'type': int, 'doc': 'the number of samples available in the TimeSeries'},
-            {'name': 'name', 'type': str, 'doc':'the name of this alignment', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'name', 'type': str, 'doc': 'the name of this alignment', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         ts, idx, count = getargs('ts', 'idx_start', 'count', kwargs)
-        if kwargs.get('name') == None:
+        if kwargs.get('name') is None:
             kwargs['name'] = ts.name
         pargs, pkwargs = fmt_docval_args(super(EpochTimeSeries, self).__init__, kwargs)
         super(EpochTimeSeries, self).__init__(*pargs, **pkwargs)
         self.timeseries = ts
-        #TODO: do something to compute count and idx_start from start_time
+        # TODO: do something to compute count and idx_start from start_time
         # and stop_time
         self.count = count
         self.idx_start = idx

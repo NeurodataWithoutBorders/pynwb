@@ -18,7 +18,8 @@ class NamespaceBuilder(object):
             {'name': 'full_name', 'type': str, 'doc': 'extended full name of name namespace', 'default': None},
             {'name': 'version', 'type': (str, tuple, list), 'doc': 'Version number of the namespace', 'default': None},
             {'name': 'author', 'type': (str, list), 'doc': 'Author or list of authors.', 'default': None},
-            {'name': 'contact', 'type': (str, list), 'doc': 'List of emails. Ordering should be the same as for author', 'default': None},
+            {'name': 'contact', 'type': (str, list),
+             'doc': 'List of emails. Ordering should be the same as for author', 'default': None},
             {'name': 'namespace_cls', 'type': type, 'doc': 'the SpecNamespace type', 'default': SpecNamespace})
     def __init__(self, **kwargs):
         ns_cls = popargs('namespace_cls', kwargs)
@@ -43,13 +44,14 @@ class NamespaceBuilder(object):
 
     @docval({'name': 'data_type', 'type': str, 'doc': 'the data type to include'},
             {'name': 'source', 'type': str, 'doc': 'the source file to include the type from', 'default': None},
-            {'name': 'namespace', 'type': str, 'doc': 'the namespace from which to include the data type', 'default': None})
+            {'name': 'namespace', 'type': str,
+             'doc': 'the namespace from which to include the data type', 'default': None})
     def include_type(self, **kwargs):
         ''' Include a data type from an existing namespace or source '''
         dt, src, ns = getargs('data_type', 'source', 'namespace', kwargs)
         if src is not None:
-            self.add_source(source)
-            self.__sources[path].setdefault(self.__dt_key, list()).append(dt)
+            self.add_source(source)  # noqa: F821
+            self.__sources[path].setdefault(self.__dt_key, list()).append(dt)  # noqa: F821
         elif ns is not None:
             self.include_namespace(ns)
             self.__namespaces[ns].setdefault(self.__dt_key, list()).append(dt)
@@ -66,7 +68,8 @@ class NamespaceBuilder(object):
         yaml.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to write the spec to'},
-            {'name': 'outdir', 'type': str, 'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'})
+            {'name': 'outdir', 'type': str,
+             'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'})
     def export(self, **kwargs):
         ''' Export the namespace to the given path.
 
@@ -78,7 +81,7 @@ class NamespaceBuilder(object):
         ns_args['schema'] = list()
         for ns, info in self.__namespaces.items():
             ns_args['schema'].append(info)
-        for path, info  in self.__sources.items():
+        for path, info in self.__sources.items():
             out = dict()
             dts = list()
             for spec in info[self.__dt_key]:

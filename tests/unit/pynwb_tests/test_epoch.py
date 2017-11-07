@@ -5,6 +5,7 @@ from pynwb import TimeSeries
 
 import numpy as np
 
+
 class EpochTimeSeriesConstructor(unittest.TestCase):
 
     def test_init_timestamps(self):
@@ -15,11 +16,12 @@ class EpochTimeSeriesConstructor(unittest.TestCase):
         self.assertEqual(epoch_ts.idx_start, 40)
 
     def test_init_sample_rate(self):
-        #self.ts.set_time_by_rate(1.0, 10.0)
+        # self.ts.set_time_by_rate(1.0, 10.0)
         ts = TimeSeries("test_ts", "a hypothetical source", list(range(200)), 'unit', starting_time=1.0, rate=10.0)
         epoch_ts = EpochTimeSeries('a fake source', ts, 40, 105)
         self.assertEqual(epoch_ts.count, 105)
         self.assertEqual(epoch_ts.idx_start, 40)
+
 
 class EpochConstructor(unittest.TestCase):
 
@@ -29,6 +31,7 @@ class EpochConstructor(unittest.TestCase):
         self.assertEqual(epoch.start_time, 100.0)
         self.assertEqual(epoch.stop_time, 200.0)
         self.assertEqual(epoch.description, "this is an epoch")
+
 
 class EpochSetters(unittest.TestCase):
 
