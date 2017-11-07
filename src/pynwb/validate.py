@@ -5,7 +5,7 @@ if __name__ == '__main__':
     from argparse import ArgumentParser
     import os
     from form.backends.hdf5 import HDF5IO
-    from . import validate, load_namespaces, get_build_manager
+    from pynwb import validate, load_namespaces, get_manager
 
     ep = """
     use --nspath to validate against an extension. If --ns is not specified,
@@ -34,7 +34,7 @@ if __name__ == '__main__':
         write('%s not found' % path, file=sys.stderr)  # noqa: F821
         sys.exit(1)
 
-    io = HDF5IO(args.path, get_build_manager())
+    io = HDF5IO(args.path, get_manager())
 
     if args.nspath is not None:
         namespaces = load_namespaces(args.nspath)
