@@ -18,7 +18,7 @@ class TestLegacy(unittest.TestCase):
             os.remove(self.filename)
 
     def test_roundtrip(self):
-        
+
         legacy_map = pynwb.legacy.get_type_map()
         io2 = pynwb.NWBHDF5IO(self.src_filename, extensions=legacy_map, mode='r')
         read_data = io2.read()
