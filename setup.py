@@ -5,7 +5,6 @@ from setuptools import setup, find_packages
 import os
 import versioneer
 
-
 schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
 
 with open('README.rst', 'rb') as f:
