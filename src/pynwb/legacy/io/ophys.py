@@ -3,6 +3,7 @@ from pynwb.legacy import register_map
 from pynwb.ophys import PlaneSegmentation, ImageSegmentation, ROI, TwoPhotonSeries
 import numpy as np
 
+
 @register_map(PlaneSegmentation)
 class PlaneSegmentationMap(ObjectMapper):
 
@@ -24,7 +25,7 @@ class PlaneSegmentationMap(ObjectMapper):
     def carg_imaging_plane(self, *args):
         builder = args[0]
         if len(args) < 2:
-            return builder.name # I think this is the hack you had in there before
+            return builder.name
         manager = args[1]
         root = builder
         parent = root.parent
@@ -63,7 +64,7 @@ class TwoPhotonSeriesMap(ObjectMapper):
     def carg_imaging_plane(self, *args):
         builder = args[0]
         if len(args) < 2:
-            return builder.name # I think this is the hack you had in there before
+            return builder.name
         manager = args[1]
         root = builder
         parent = root.parent
