@@ -120,8 +120,7 @@ class TestTwoPhotonSeries(base.TestMapRoundTrip):
                                           'pmt_gain': DatasetBuilder('pmt_gain', 1.7),
                                           'scan_line_rate': DatasetBuilder('scan_line_rate', 3.4),
                                           },
-                                links = {'imaging_plane': LinkBuilder('imaging_plane', imgpln_builder)
-                                          })
+                                links = {'imaging_plane': LinkBuilder('imaging_plane', imgpln_builder)})
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
