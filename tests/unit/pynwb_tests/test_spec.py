@@ -6,9 +6,10 @@ gets mapped appropriately when constructors and methods are invoked
 '''
 import unittest
 
-from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace, NWBNamespaceBuilder
+from pynwb.spec import NWBNamespaceBuilder
 
 # create a builder for the namespace
+
 
 class NWBNamespaceTest(unittest.TestCase):
 

@@ -2,6 +2,7 @@ import unittest2 as unittest
 
 from pynwb.core import NWBContainer
 
+
 class MyTestClass(NWBContainer):
 
     def __init__(self, src, name, parent=None):
@@ -15,6 +16,7 @@ class MyTestClass(NWBContainer):
 
     def basic_add2_kw(self, **kwargs):
         return kwargs
+
 
 class MyTestSubclass(MyTestClass):
 
@@ -41,6 +43,7 @@ class TestNWBContainer(unittest.TestCase):
         child_obj = MyTestSubclass('test source', 'obj2')
         child_obj.parent = parent_obj
         self.assertIs(child_obj.parent, parent_obj)
+
 
 if __name__ == '__main__':
     unittest.main()

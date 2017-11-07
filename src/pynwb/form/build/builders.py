@@ -9,11 +9,13 @@ import warnings
 from ..utils import docval, getargs, call_docval_func, fmt_docval_args
 from six import with_metaclass
 
+
 class Builder(with_metaclass(ABCMeta, dict)):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the group'},
             {'name': 'parent', 'type': 'Builder', 'doc': 'the parent builder of this Builder', 'default': None},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder e.g. file name', 'default': None})
+            {'name': 'source', 'type': str,
+             'doc': 'the source of the data in this builder e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         name, parent, source = getargs('name', 'parent', 'source', kwargs)
         super(Builder, self).__init__()
@@ -53,9 +55,10 @@ class Builder(with_metaclass(ABCMeta, dict)):
         if self.__parent is None:
             self.__parent = p
             if self.__source is None:
-                self.source =  p.source
+                self.source = p.source
         else:
             raise ValueError('Cannot reset parent once it is specified')
+
 
 class BaseBuilder(Builder):
     __attribute = 'attributes'
@@ -64,7 +67,8 @@ class BaseBuilder(Builder):
             {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this group',
              'default': dict()},
             {'name': 'parent', 'type': 'GroupBuilder', 'doc': 'the parent builder of this Builder', 'default': None},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Builder', 'default': None})
+            {'name': 'source', 'type': str,
+             'doc': 'the source of the data represented in this Builder', 'default': None})
     def __init__(self, **kwargs):
         name, attributes, parent, source = getargs('name', 'attributes', 'parent', 'source', kwargs)
         super(BaseBuilder, self).__init__(name, parent, source)
@@ -77,13 +81,13 @@ class BaseBuilder(Builder):
         ''' The attributes stored in this Builder object '''
         return super(BaseBuilder, self).__getitem__(BaseBuilder.__attribute)
 
-    @docval({'name':'name', 'type': str, 'doc': 'the name of the attribute'},
-            {'name':'value', 'type': None, 'doc': 'the attribute value'})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute'},
+            {'name': 'value', 'type': None, 'doc': 'the attribute value'})
     def set_attribute(self, **kwargs):
         ''' Set an attribute for this group. '''
         name, value = getargs('name', 'value', kwargs)
         super(BaseBuilder, self).__getitem__(BaseBuilder.__attribute)[name] = value
-        #self.obj_type[name] = BaseBuilder.__attribute
+        # self.obj_type[name] = BaseBuilder.__attribute
 
     @docval({'name': 'builder', 'type': 'BaseBuilder', 'doc': 'the BaseBuilder to merge attributes from '})
     def deep_update(self, **kwargs):
@@ -92,6 +96,7 @@ class BaseBuilder(Builder):
         # merge attributes
         for name, value in super(BaseBuilder, builder).__getitem__(BaseBuilder.__attribute).items():
             self.set_attribute(name, value)
+
 
 class GroupBuilder(BaseBuilder):
     __link = 'links'
@@ -109,12 +114,14 @@ class GroupBuilder(BaseBuilder):
             {'name': 'links', 'type': (dict, list), 'doc': 'a dictionary of links to create in this group',
              'default': dict()},
             {'name': 'parent', 'type': 'GroupBuilder', 'doc': 'the parent builder of this Builder', 'default': None},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Builder', 'default': None})
+            {'name': 'source', 'type': str,
+             'doc': 'the source of the data represented in this Builder', 'default': None})
     def __init__(self, **kwargs):
         '''
         Create a GroupBuilder object
         '''
-        name, groups, datasets, links, attributes, parent, source = getargs('name', 'groups', 'datasets', 'links', 'attributes', 'parent', 'source', kwargs)
+        name, groups, datasets, links, attributes, parent, source = getargs(
+            'name', 'groups', 'datasets', 'links', 'attributes', 'parent', 'source', kwargs)
         groups = self.__to_list(groups)
         datasets = self.__to_list(datasets)
         links = self.__to_list(links)
@@ -174,8 +181,8 @@ class GroupBuilder(BaseBuilder):
         ''' The datasets contained in this GroupBuilder '''
         return super(GroupBuilder, self).__getitem__(GroupBuilder.__link)
 
-    @docval({'name':'name', 'type': str, 'doc': 'the name of the attribute'},
-            {'name':'value', 'type': None, 'doc': 'the attribute value'})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute'},
+            {'name': 'value', 'type': None, 'doc': 'the attribute value'})
     def set_attribute(self, **kwargs):
         ''' Set an attribute for this group '''
         name, value = getargs('name', 'value', kwargs)
@@ -199,12 +206,16 @@ class GroupBuilder(BaseBuilder):
         if builder.parent is None:
             builder.parent = self
 
-    @docval({'name':'name', 'type': str, 'doc': 'the name of this dataset'},
-            {'name':'data', 'type': None, 'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
-            {'name':'dtype', 'type': (type, np.dtype, str, list), 'doc': 'the datatype of this dataset', 'default': None},
-            {'name':'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
-            {'name':'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
-            {'name':'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this dataset'},
+            {'name': 'data', 'type': None,
+             'doc': 'a dictionary of datasets to create in this dataset', 'default': None},
+            {'name': 'dtype', 'type': (type, np.dtype, str, list),
+             'doc': 'the datatype of this dataset', 'default': None},
+            {'name': 'attributes', 'type': dict,
+             'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
+            {'name': 'maxshape', 'type': (int, tuple),
+             'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
+            {'name': 'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False},
             returns='the DatasetBuilder object for the dataset', rtype='DatasetBuilder')
     def add_dataset(self, **kwargs):
         ''' Create a dataset and add it to this group '''
@@ -222,10 +233,14 @@ class GroupBuilder(BaseBuilder):
         self.__set_builder(builder, GroupBuilder.__dataset)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this subgroup'},
-            {'name': 'groups', 'type': dict, 'doc': 'a dictionary of subgroups to create in this subgroup', 'default': dict()},
-            {'name': 'datasets', 'type': dict, 'doc': 'a dictionary of datasets to create in this subgroup', 'default': dict()},
-            {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this subgroup', 'default': dict()},
-            {'name': 'links', 'type': dict, 'doc': 'a dictionary of links to create in this subgroup', 'default': dict()},
+            {'name': 'groups', 'type': dict,
+             'doc': 'a dictionary of subgroups to create in this subgroup', 'default': dict()},
+            {'name': 'datasets', 'type': dict,
+             'doc': 'a dictionary of datasets to create in this subgroup', 'default': dict()},
+            {'name': 'attributes', 'type': dict,
+             'doc': 'a dictionary of attributes to create in this subgroup', 'default': dict()},
+            {'name': 'links', 'type': dict,
+             'doc': 'a dictionary of links to create in this subgroup', 'default': dict()},
             returns='the GroupBuilder object for the subgroup', rtype='GroupBuilder')
     def add_group(self, **kwargs):
         ''' Add a subgroup with the given data to this group '''
@@ -250,13 +265,13 @@ class GroupBuilder(BaseBuilder):
         self.set_link(builder)
         return builder
 
-    @docval({'name':'builder', 'type': 'LinkBuilder', 'doc': 'the LinkBuilder that represents this link'})
+    @docval({'name': 'builder', 'type': 'LinkBuilder', 'doc': 'the LinkBuilder that represents this link'})
     def set_link(self, **kwargs):
         ''' Add a link to this group '''
         builder = getargs('builder', kwargs)
         self.__set_builder(builder, GroupBuilder.__link)
 
-    #TODO: write unittests for this method
+    # TODO: write unittests for this method
     def deep_update(self, builder):
         ''' Recursively update subgroups in this group '''
         super(GroupBuilder, self).deep_update(builder)
@@ -272,10 +287,10 @@ class GroupBuilder(BaseBuilder):
         datasets = super(GroupBuilder, builder).__getitem__(GroupBuilder.__dataset)
         self_datasets = super(GroupBuilder, self).__getitem__(GroupBuilder.__dataset)
         for name, dataset in datasets.items():
-            #self.add_dataset(name, dataset)
+            # self.add_dataset(name, dataset)
             if name in self_datasets:
                 self_datasets[name].deep_update(dataset)
-                #super().__getitem__(GroupBuilder.__dataset)[name] = dataset
+                # super().__getitem__(GroupBuilder.__dataset)[name] = dataset
             else:
                 self.set_dataset(dataset)
         # merge links
@@ -288,7 +303,7 @@ class GroupBuilder(BaseBuilder):
         '''
         if (len(super(GroupBuilder, self).__getitem__(GroupBuilder.__dataset)) or
             len(super(GroupBuilder, self).__getitem__(GroupBuilder.__attribute)) or
-            len(super(GroupBuilder, self).__getitem__(GroupBuilder.__link))):
+            len(super(GroupBuilder, self).__getitem__(GroupBuilder.__link))):  # noqa: E129
             return False
         elif len(super(GroupBuilder, self).__getitem__(GroupBuilder.__group)):
             return all(g.is_empty() for g in super(GroupBuilder, self).__getitem__(GroupBuilder.__group).values())
@@ -324,7 +339,6 @@ class GroupBuilder(BaseBuilder):
                 return super(GroupBuilder, self).__getitem__(GroupBuilder.__group)[key_ar[0]].__get_rec(key_ar[1:])
         raise KeyError(key_ar[0])
 
-
     def __setitem__(self, args, val):
         raise NotImplementedError('__setitem__')
 
@@ -358,21 +372,26 @@ class GroupBuilder(BaseBuilder):
                                 super(GroupBuilder, self).__getitem__(GroupBuilder.__attribute).values(),
                                 super(GroupBuilder, self).__getitem__(GroupBuilder.__link).values())
 
+
 class DatasetBuilder(BaseBuilder):
     OBJECT_REF_TYPE = 'object'
     REGION_REF_TYPE = 'region'
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
             {'name': 'data', 'type': None, 'doc': 'the data in this dataset', 'default': None},
-            {'name': 'dtype', 'type': (type, np.dtype, str, list), 'doc': 'the datatype of this dataset', 'default': None},
-            {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
-            {'name': 'maxshape', 'type': (int, tuple), 'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
+            {'name': 'dtype', 'type': (type, np.dtype, str, list),
+             'doc': 'the datatype of this dataset', 'default': None},
+            {'name': 'attributes', 'type': dict,
+             'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
+            {'name': 'maxshape', 'type': (int, tuple),
+             'doc': 'the shape of this dataset. Use None for scalars', 'default': None},
             {'name': 'chunks', 'type': bool, 'doc': 'whether or not to chunk this dataset', 'default': False},
             {'name': 'parent', 'type': GroupBuilder, 'doc': 'the parent builder of this Builder', 'default': None},
             {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
     def __init__(self, **kwargs):
         ''' Create a Builder object for a dataset '''
-        name, data, dtype, attributes, maxshape, chunks, parent, source = getargs('name', 'data', 'dtype', 'attributes', 'maxshape', 'chunks', 'parent', 'source', kwargs)
+        name, data, dtype, attributes, maxshape, chunks, parent, source = getargs(
+            'name', 'data', 'dtype', 'attributes', 'maxshape', 'chunks', 'parent', 'source', kwargs)
         super(DatasetBuilder, self).__init__(name, attributes, parent, source)
         self['data'] = data
         self['attributes'] = _copy.deepcopy(attributes)
@@ -410,13 +429,15 @@ class DatasetBuilder(BaseBuilder):
         ''' The data type of this object '''
         return self.__dtype
 
-    @docval({'name':'dataset', 'type': 'DatasetBuilder', 'doc': 'the DatasetBuilder to merge into this DatasetBuilder'})
+    @docval({'name': 'dataset', 'type': 'DatasetBuilder',
+             'doc': 'the DatasetBuilder to merge into this DatasetBuilder'})
     def deep_update(self, **kwargs):
         '''Merge data and attributes from given DatasetBuilder into this DatasetBuilder'''
         dataset = getargs('dataset', kwargs)
         if dataset.data:
-            self['data'] = dataset.data #TODO: figure out if we want to add a check for overwrite
+            self['data'] = dataset.data  # TODO: figure out if we want to add a check for overwrite
         self['attributes'].update(dataset.attributes)
+
 
 class LinkBuilder(Builder):
 
@@ -434,12 +455,15 @@ class LinkBuilder(Builder):
         ''' The target builder object '''
         return self['builder']
 
+
 class RegionBuilder(DatasetBuilder):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'region', 'type': (slice, tuple, list, RegionReference), 'doc': 'the region i.e. slice or indices into the target Dataset'},
+            {'name': 'region', 'type': (slice, tuple, list, RegionReference),
+             'doc': 'the region i.e. slice or indices into the target Dataset'},
             {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the Dataset this region applies to'},
-            {'name': 'attributes', 'type': dict, 'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
+            {'name': 'attributes', 'type': dict,
+             'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
             {'name': 'parent', 'type': GroupBuilder, 'doc': 'the parent builder of this Builder', 'default': None},
             {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
     def __init__(self, **kwargs):

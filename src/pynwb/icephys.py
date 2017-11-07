@@ -7,6 +7,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer
 
+
 @register_class('IntracellularElectrode', CORE_NAMESPACE)
 class IntracellularElectrode(NWBContainer):
     '''
@@ -25,14 +26,19 @@ class IntracellularElectrode(NWBContainer):
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.'},
             {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.'},
-            {'name': 'description', 'type': str, 'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc)COMMENT: Free-form text (can be from Methods)'},
-            {'name': 'location', 'type': str, 'doc': 'Area, layer, comments on estimation, stereotaxis coordinates (if in vivo, etc).'},
+            {'name': 'description', 'type': str,
+             'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc) \
+             COMMENT: Free-form text (can be from Methods)'},
+            {'name': 'location', 'type': str,
+             'doc': 'Area, layer, comments on estimation, stereotaxis coordinates (if in vivo, etc).'},
             {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance COMMENT: unit: Ohm.'},
             {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.'},
             {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.'},
             {'name': 'device', 'type': str, 'doc': 'Name(s) of devices in general/devices.'})
     def __init__(self, **kwargs):
-        slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs('slice', 'seal', 'description', 'location', 'resistance', 'filtering', 'initial_access_resistance', 'device', kwargs)
+        slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs(
+            'slice', 'seal', 'description', 'location', 'resistance',
+            'filtering', 'initial_access_resistance', 'device', kwargs)
         pargs, pkwargs = fmt_docval_args(super(IntracellularElectrode, self).__init__, kwargs)
         super(IntracellularElectrode, self).__init__(*pargs, **pkwargs)
         self.slice = slice
@@ -43,6 +49,7 @@ class IntracellularElectrode(NWBContainer):
         self.filtering = filtering
         self.initial_access_resistance = initial_access_resistance
         self.device = device
+
 
 @register_class('PatchClampSeries', CORE_NAMESPACE)
 class PatchClampSeries(TimeSeries):
@@ -58,33 +65,47 @@ class PatchClampSeries(TimeSeries):
     _help = "Superclass definition for patch-clamp data."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                                                   'contained here. It can also be the name of a device, for stimulus or '
-                                                   'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'source', 'type': str,
+             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                     'contained here. It can also be the name of a device, for stimulus or '
+                     'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
+            {'name': 'electrode', 'type': IntracellularElectrode,
+             'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
+             or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
 
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+            {'name': 'resolution', 'type': float,
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': _default_resolution},
+            {'name': 'conversion', 'type': float,
+             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'comments', 'type': str,
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
         super(PatchClampSeries, self).__init__(name, source, data, unit, **kwargs)
         self.electrode = electrode
         self.gain = gain
+
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)
 class CurrentClampSeries(PatchClampSeries):
@@ -102,39 +123,54 @@ class CurrentClampSeries(PatchClampSeries):
     _help = "Voltage recorded from cell during current-clamprecording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                                                   'contained here. It can also be the name of a device, for stimulus or '
-                                                   'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'source', 'type': str,
+             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                     'contained here. It can also be the name of a device, for stimulus or '
+                     'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
+            {'name': 'electrode', 'type': IntracellularElectrode,
+             'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or \
+             record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
 
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp'},
             {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm'},
             {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad'},
 
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+            {'name': 'resolution', 'type': float,
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': _default_resolution},
+            {'name': 'conversion', 'type': float,
+             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'comments', 'type': str,
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
-        bias_current, bridge_balance, capacitance_compensation = popargs('bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
+        bias_current, bridge_balance, capacitance_compensation = popargs(
+            'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
         super(CurrentClampSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
         self.bias_current = bias_current
         self.bridge_balance = bridge_balance
         self.capacitance_compensation = capacitance_compensation
+
 
 @register_class('IZeroClampSeries', CORE_NAMESPACE)
 class IZeroClampSeries(CurrentClampSeries):
@@ -151,36 +187,48 @@ class IZeroClampSeries(CurrentClampSeries):
     _help = "Voltage from intracellular recordings when all current and amplifier settings are off,"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                                                   'contained here. It can also be the name of a device, for stimulus or '
-                                                   'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'source', 'type': str,
+             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                     'contained here. It can also be the name of a device, for stimulus or '
+                     'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-
-            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
+            {'name': 'electrode', 'type': IntracellularElectrode,
+             'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
+             or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
 
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': 0.0},
             {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': 0.0},
             {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad', 'default': 0.0},
 
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'resolution', 'type': float,
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': _default_resolution},
+            {'name': 'conversion', 'type': float,
+             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'comments', 'type': str,
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
-        bias_current, bridge_balance, capacitance_compensation = popargs('bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
-        super(IZeroClampSeries, self).__init__(name, source, data, unit, electrode, gain, bias_current, bridge_balance, capacitance_compensation, **kwargs)
+        bias_current, bridge_balance, capacitance_compensation = popargs(
+            'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
+        super(IZeroClampSeries, self).__init__(name, source, data, unit, electrode, gain, bias_current,
+                                               bridge_balance, capacitance_compensation, **kwargs)
 
 
 @register_class('CurrentClampStimulusSeries', CORE_NAMESPACE)
@@ -196,31 +244,44 @@ class CurrentClampStimulusSeries(PatchClampSeries):
     _help = "Stimulus current applied during current clamp recording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                                                   'contained here. It can also be the name of a device, for stimulus or '
-                                                   'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'source', 'type': str,
+             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                     'contained here. It can also be the name of a device, for stimulus or '
+                     'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
+            {'name': 'electrode', 'type': IntracellularElectrode,
+             'doc': 'IntracellularElectrode group that describes the electrode that was used to \
+             apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
 
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'resolution', 'type': float,
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': _default_resolution},
+            {'name': 'conversion', 'type': float,
+             'doc': 'Scalar to multiply each element by to conver to volts',
+             'default': _default_conversion},
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'comments', 'type': str,
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
         super(CurrentClampStimulusSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
+
 
 @register_class('VoltageClampSeries', CORE_NAMESPACE)
 class VoltageClampSeries(PatchClampSeries):
@@ -242,15 +303,18 @@ class VoltageClampSeries(PatchClampSeries):
     _help = "Current recorded from cell during voltage-clamp recording"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                                                   'contained here. It can also be the name of a device, for stimulus or '
-                                                   'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'source', 'type': str,
+             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                     'contained here. It can also be the name of a device, for stimulus or '
+                     'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
+            {'name': 'electrode', 'type': IntracellularElectrode,
+             'doc': 'IntracellularElectrode group that describes the electrode that was used to \
+             apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-
             {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad'},
             {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad'},
             {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz'},
@@ -258,23 +322,34 @@ class VoltageClampSeries(PatchClampSeries):
             {'name': 'resistance_comp_prediction', 'type': float, 'doc': 'Unit: %'},
             {'name': 'whole_cell_capacitance_comp', 'type': float, 'doc': 'Unit: Farad'},
             {'name': 'whole_cell_series_resistance_comp', 'type': float, 'doc': 'Unit: Ohm'},
-
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'resolution', 'type': float,
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': _default_resolution},
+            {'name': 'conversion', 'type': float,
+             'doc': 'Scalar to multiply each element by to conver to volts',
+             'default': _default_conversion},
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'comments', 'type': str,
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
-        capacitance_fast, capacitance_slow, resistance_comp_bandwidth, resistance_comp_correction, resistance_comp_prediction, whole_cell_capacitance_comp, whole_cell_series_resistance_comp = popargs('capacitance_fast', 'capacitance_slow', 'resistance_comp_bandwidth', 'resistance_comp_correction', 'resistance_comp_prediction', 'whole_cell_capacitance_comp', 'whole_cell_series_resistance_comp', kwargs)
+        capacitance_fast, capacitance_slow, resistance_comp_bandwidth, resistance_comp_correction, \
+            resistance_comp_prediction, whole_cell_capacitance_comp, whole_cell_series_resistance_comp = popargs(
+                'capacitance_fast', 'capacitance_slow', 'resistance_comp_bandwidth',
+                'resistance_comp_correction', 'resistance_comp_prediction', 'whole_cell_capacitance_comp',
+                'whole_cell_series_resistance_comp', kwargs)
         super(VoltageClampSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
         self.capacitance_fast = capacitance_fast
         self.capacitance_slow = capacitance_slow
@@ -283,6 +358,7 @@ class VoltageClampSeries(PatchClampSeries):
         self.resistance_comp_prediction = resistance_comp_prediction
         self.whole_cell_capacitance_comp = whole_cell_capacitance_comp
         self.whole_cell_series_resistance_comp = whole_cell_series_resistance_comp
+
 
 @register_class('VoltageClampStimulusSeries', CORE_NAMESPACE)
 class VoltageClampStimulusSeries(PatchClampSeries):
@@ -297,27 +373,37 @@ class VoltageClampStimulusSeries(PatchClampSeries):
     _help = "Stimulus voltage applied during voltage clamp recording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                                                   'contained here. It can also be the name of a device, for stimulus or '
-                                                   'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'source', 'type': str,
+             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                     'contained here. It can also be the name of a device, for stimulus or '
+                     'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-
-            {'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or record this data.'},
+            {'name': 'electrode', 'type': IntracellularElectrode,
+             'doc': 'IntracellularElectrode group that describes the electrode that was \
+             used to apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'resolution', 'type': float,
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': _default_resolution},
+            {'name': 'conversion', 'type': float,
+             'doc': 'Scalar to multiply each element by to conver to volts',
+             'default': _default_conversion},
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'comments', 'type': str,
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)

@@ -7,13 +7,15 @@ from .data_utils import AbstractDataChunkIterator, DataChunkIterator, DataChunk
 class NotYetExhausted(Exception):
     pass
 
-class DataChunkProcessor(AbstractDataChunkIterator, metaclass=ABCMeta):
 
-    @docval({'name': 'data', 'type': DataChunkIterator, 'doc': 'the DataChunkIterator to analyze',})
+# https://stackoverflow.com/questions/35673474/using-abc-abcmeta-in-a-way-it-is-compatible-both-with-python-2-7-and-python-3-5
+class DataChunkProcessor(AbstractDataChunkIterator, metaclass=ABCMeta):  # noqa: E999
+
+    @docval({'name': 'data', 'type': DataChunkIterator, 'doc': 'the DataChunkIterator to analyze'})
     def __init__(self, **kwargs):
         """Initalize the DataChunkIterator"""
         # Get the user parameters
-        self.__dci = getargs('data', kwargs)
+        self.__dci = getargs('data', kwargs)  # noqa: F821
 
     def __next__(self):
         try:
@@ -55,16 +57,17 @@ class DataChunkProcessor(AbstractDataChunkIterator, metaclass=ABCMeta):
         '''
         pass
 
+
 class NumSampleCounter(DataChunkProcessor):
 
     def __init__(self, **kwargs):
-        args, kwargs = fmt_docval_args(DataChunkProcessor.__init__, kwargs)
+        args, kwargs = fmt_docval_args(DataChunkProcessor.__init__, kwargs)  # noqa: F821
         super(NumSampleCounter, self).__init__(*args, **kwargs)
         self.__sample_count = 0
 
     @docval({'name': 'data_chunk', 'type': DataChunk, 'doc': 'a chunk to process'})
     def process_data_chunk(self, **kwargs):
-        dc = getargs('data_chunk', kwargs)
+        dc = getargs('data_chunk', kwargs)  # noqa: F821
         self.__sample_count += len(dc)
 
     @docval(returns='the result of processing this stream')

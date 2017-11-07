@@ -2,8 +2,9 @@ from collections import Iterable
 import numpy as np
 from abc import ABCMeta, abstractmethod, abstractproperty
 from six import with_metaclass
-from .utils import docval, getargs, popargs
+from .utils import docval, getargs
 from operator import itemgetter
+
 
 def __get_shape_helper(data):
     shape = list()
@@ -13,11 +14,13 @@ def __get_shape_helper(data):
             shape.extend(__get_shape_helper(data[0]))
     return tuple(shape)
 
+
 def get_shape(data):
     if hasattr(data, '__len__') and not isinstance(data, str):
         return __get_shape_helper(data)
     else:
         return None
+
 
 def get_type(data):
     if isinstance(data, str):
@@ -28,6 +31,7 @@ def get_type(data):
         if len(data) == 0:
             raise ValueError('cannot determine type for empty data')
         return get_type(data[0])
+
 
 class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
 
@@ -47,6 +51,7 @@ class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
     def recommended_data_shape(self):
         pass
 
+
 class DataChunkIterator(AbstractDataChunkIterator):
     """Custom iterator class used to iterate over chunks of data.
 
@@ -55,10 +60,12 @@ class DataChunkIterator(AbstractDataChunkIterator):
     In addition, derived classes must implement the __next__ method (or overwrite _read_next_chunk
     if the default behavior of __next__ should be reused). The __next__ method must return
     in each iteration 1) a numpy array with the data values for the chunk and 2) a numpy-compliant index tuple
-    describing where the chunk is located within the complete data.  HINT: `numpy.s_ <https://docs.scipy.org/doc/numpy/reference/generated/numpy.s_.html>`_ provides a
+    describing where the chunk is located within the complete data.
+    HINT: `numpy.s_ <https://docs.scipy.org/doc/numpy/reference/generated/numpy.s_.html>`_ provides a
     convenient way to generate index tuples using standard array slicing. There are
     a number of additional functions that one can overwrite to customize behavior, e.g,
-    the :py:func:`~form.utils.DataChunkIterator.recommended_chunk_shape` or :py:func:`~form.utils.DataChunkIterator.recommended_data_shape`
+    the :py:func:`~form.utils.DataChunkIterator.recommended_chunk_shape` or
+    :py:func:`~form.utils.DataChunkIterator.recommended_data_shape`
 
     The default implementation accepts any iterable and assumes that we iterate over
     the first dimension of the data array. The default implemention supports buffered read,
@@ -101,7 +108,7 @@ class DataChunkIterator(AbstractDataChunkIterator):
                 self.max_shape = ShapeValidator.get_data_shape(self.data, strict_no_data_load=True)
 
         # If we have a data iterator, then read the first chunk
-        if self.__data_iter is not None: # and(self.max_shape is None or self.dtype is None):
+        if self.__data_iter is not None:  # and(self.max_shape is None or self.dtype is None):
             self._read_next_chunk()
 
         # If we still don't know the shape then try to determine the shape from the first chunk
@@ -211,8 +218,10 @@ class DataChunk(object):
     :ivar data: Numpy ndarray with the data value(s) of the chunk
     :ivar selection: Numpy index tuple describing the location of the chunk
     """
-    @docval({'name': 'data', 'type': np.ndarray, 'doc': 'Numpy array with the data value(s) of the chunk', 'default': None},
-            {'name':'selection', 'type': None, 'doc': 'Numpy index tuple describing the location of the chunk', 'default': None})
+    @docval({'name': 'data', 'type': np.ndarray,
+             'doc': 'Numpy array with the data value(s) of the chunk', 'default': None},
+            {'name': 'selection', 'type': None,
+             'doc': 'Numpy index tuple describing the location of the chunk', 'default': None})
     def __init__(self, **kwargs):
         self.data, self.selection = getargs('data', 'selection', kwargs)
 
@@ -221,6 +230,7 @@ class DataChunk(object):
             return len(self.data)
         else:
             return 0
+
 
 class ShapeValidator(object):
     """
@@ -317,8 +327,8 @@ class ShapeValidator(object):
         if (response.axes1 is None and response.axes2 is None) and num_dims_1 != num_dims_2:
             response.result = False
             response.error = 'NUM_DIMS_ERROR'
-            response.message =response.SHAPE_ERROR[response.error]
-            response.message += " %s is %sD and %s is %sD" %(n1, num_dims_1, n2, num_dims_2)
+            response.message = response.SHAPE_ERROR[response.error]
+            response.message += " %s is %sD and %s is %sD" % (n1, num_dims_1, n2, num_dims_2)
         # 2) Check that we have the same number of dimensions to compare on both arrays
         elif len(response.axes1) != len(response.axes2):
             response.result = False
@@ -393,18 +403,26 @@ class ShapeValidatorResult(object):
     """
 
     @docval({'name': 'result', 'type': bool, 'doc': 'Result of the shape validation', 'default': False},
-            {'name': 'message', 'type': str, 'doc': 'Message describing the result of the shape validation', 'default': None},
-            {'name': 'ignored', 'type': tuple, 'doc': 'Axes that have been ignored in the validaton process', 'default': tuple(), 'ndim': 1},
-            {'name': 'unmatched', 'type': tuple, 'doc': 'List of axes that did not match during shape validation', 'default': tuple(), 'ndim': 1},
+            {'name': 'message', 'type': str,
+             'doc': 'Message describing the result of the shape validation', 'default': None},
+            {'name': 'ignored', 'type': tuple,
+             'doc': 'Axes that have been ignored in the validaton process', 'default': tuple(), 'ndim': 1},
+            {'name': 'unmatched', 'type': tuple,
+             'doc': 'List of axes that did not match during shape validation', 'default': tuple(), 'ndim': 1},
             {'name': 'error', 'type': str, 'doc': 'Error that may have occurred. One of ERROR_TYPE', 'default': None},
-            {'name': 'shape1', 'type': tuple, 'doc': 'Shape of the first array for comparison', 'default': tuple(), 'ndim': 1},
-            {'name': 'shape2', 'type': tuple, 'doc': 'Shape of the second array for comparison', 'default': tuple(), 'ndim': 1},
-            {'name': 'axes1', 'type': tuple, 'doc': 'Axes for the first array that should match', 'default': tuple(), 'ndim': 1},
-            {'name': 'axes2', 'type': tuple, 'doc': 'Axes for the second array that should match', 'default': tuple(), 'ndim': 1},
+            {'name': 'shape1', 'type': tuple,
+             'doc': 'Shape of the first array for comparison', 'default': tuple(), 'ndim': 1},
+            {'name': 'shape2', 'type': tuple,
+             'doc': 'Shape of the second array for comparison', 'default': tuple(), 'ndim': 1},
+            {'name': 'axes1', 'type': tuple,
+             'doc': 'Axes for the first array that should match', 'default': tuple(), 'ndim': 1},
+            {'name': 'axes2', 'type': tuple,
+             'doc': 'Axes for the second array that should match', 'default': tuple(), 'ndim': 1},
             )
     def __init__(self, **kwargs):
-        self.result, self.message, self.ignored, self.unmatched, self.error, self.shape1, self.shape2, self.axes1, self.axes2 = \
-            getargs('result', 'message', 'ignored', 'unmatched', 'error', 'shape1', 'shape2', 'axes1', 'axes2', kwargs)
+        self.result, self.message, self.ignored, self.unmatched, \
+            self.error, self.shape1, self.shape2, self.axes1, self.axes2 = getargs(
+                'result', 'message', 'ignored', 'unmatched', 'error', 'shape1', 'shape2', 'axes1', 'axes2', kwargs)
 
     def __setattr__(self, key, value):
         """
@@ -412,21 +430,22 @@ class ShapeValidatorResult(object):
         """
         if key == 'error':
             if value not in self.SHAPE_ERROR.keys():
-                raise ValueError("Illegal error type. Error must be one of ShapeValidatorResult.SHAPE_ERROR: %s" % str(self.SHAPE_ERROR))
+                raise ValueError("Illegal error type. Error must be one of ShapeValidatorResult.SHAPE_ERROR: %s"
+                                 % str(self.SHAPE_ERROR))
             else:
                 super(ShapeValidatorResult, self).__setattr__(key, value)
-        elif key in ['shape1', 'shape2', 'axes1', 'axes2', 'ignored', 'unmatched']: # Make sure we sore tuples
+        elif key in ['shape1', 'shape2', 'axes1', 'axes2', 'ignored', 'unmatched']:  # Make sure we sore tuples
             super(ShapeValidatorResult, self).__setattr__(key, tuple(value))
         else:
             super(ShapeValidatorResult, self).__setattr__(key, value)
 
     def __getattr__(self, item):
-         """
-         Overwrite to allow dynamic retrival of the default message
-         """
-         if item == 'default_message':
-             return self.SHAPE_ERROR[self.error]
-         return self.__getattribute__(item)
+        """
+        Overwrite to allow dynamic retrival of the default message
+        """
+        if item == 'default_message':
+            return self.SHAPE_ERROR[self.error]
+        return self.__getattribute__(item)
 
 
 class RegionSlicer(with_metaclass(ABCMeta, object)):
@@ -451,7 +470,7 @@ class ListSlicer(RegionSlicer):
         self.__dataset, self.__region = getargs('dataset', 'region', kwargs)
         if isinstance(self.__region, slice):
             self.__getter = itemgetter(self.__region)
-            self.__len = slice_len(self.__region)
+            self.__len = slice_len(self.__region)  # noqa: F821
         else:
             self.__getter = itemgetter(*self.__region)
             self.__len = len(self.__region)
@@ -473,8 +492,11 @@ class ListSlicer(RegionSlicer):
     def __len__(self):
         return self.__len
 
-from .backends.hdf5 import H5RegionSlicer
-import h5py
+
+from .backends.hdf5 import H5RegionSlicer  # noqa: E402
+import h5py  # noqa: E402
+
+
 @docval({'name': 'dataset', 'type': None, 'doc': 'the HDF5 dataset to slice'},
         {'name': 'region', 'type': None, 'doc': 'the region reference to use to slice'},
         is_method=False)

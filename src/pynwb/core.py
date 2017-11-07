@@ -7,6 +7,7 @@ from .form import Container, Data, DataRegion, get_region_slicer
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
 
+
 def set_parents(container, parent):
     if isinstance(container, list):
         for c in container:
@@ -19,6 +20,7 @@ def set_parents(container, parent):
             container.parent = parent
     return ret
 
+
 class NWBBaseType(with_metaclass(ExtenderMeta)):
     '''The base class to any NWB types.
 
@@ -29,8 +31,10 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
     __nwbfields__ = tuple()
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+             'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         parent, container_source = getargs('parent', 'container_source', kwargs)
         super(NWBBaseType, self).__init__()
@@ -91,13 +95,15 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
         if not isinstance(cls.__nwbfields__, tuple):
             raise TypeError("'__nwbfields__' must be of type tuple")
 
-        if len(bases) and 'NWBContainer' in globals() and issubclass(bases[-1], NWBContainer) and bases[-1].__nwbfields__ is not cls.__nwbfields__:
+        if len(bases) and 'NWBContainer' in globals() and issubclass(bases[-1], NWBContainer) \
+           and bases[-1].__nwbfields__ is not cls.__nwbfields__:
                 new_nwbfields = list(cls.__nwbfields__)
                 new_nwbfields[0:0] = bases[-1].__nwbfields__
                 cls.__nwbfields__ = tuple(new_nwbfields)
         for f in cls.__nwbfields__:
             if not hasattr(cls, f):
                 setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
+
 
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBBaseType, Container):
@@ -107,11 +113,14 @@ class NWBContainer(NWBBaseType, Container):
 
     @docval({'name': 'source', 'type': str, 'doc': 'a description of where this NWBContainer came from'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+             'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
         self.source = getargs('source', kwargs)
+
 
 @register_class('NWBData', CORE_NAMESPACE)
 class NWBData(NWBBaseType, Data):
@@ -120,8 +129,10 @@ class NWBData(NWBBaseType, Data):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': (Iterable, Data), 'doc': 'the source of the data'},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBData, self).__init__, kwargs)
         self.__data = getargs('data', kwargs)
@@ -130,13 +141,16 @@ class NWBData(NWBBaseType, Data):
     def data(self):
         return self.__data
 
+
 class NWBTable(NWBData):
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': Iterable, 'doc': 'the source of the data', 'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object, 'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+             'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         self.__columns = tuple(popargs('columns', kwargs))
         call_docval_func(super(NWBTable, self).__init__, kwargs)
@@ -165,6 +179,7 @@ class NWBTable(NWBData):
 
     def __getitem__(self, idx):
         return self.data[idx]
+
 
 # diamond inheritence
 class NWBTableRegion(NWBData, DataRegion):

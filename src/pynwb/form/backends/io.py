@@ -1,9 +1,10 @@
 from abc import ABCMeta, abstractmethod
-from ..build import BuildManager, TypeMap
+from ..build import BuildManager
 from ..build import GroupBuilder
-from ..utils import docval, popargs, getargs
+from ..utils import docval, getargs
 from ..container import Container
 from six import with_metaclass
+
 
 class FORMIO(with_metaclass(ABCMeta, object)):
     @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default':None},

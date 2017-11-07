@@ -13,9 +13,12 @@ parser = argparse.ArgumentParser('python test.py [options]')
 parser.set_defaults(verbosity=1, suites=[])
 parser.add_argument('-v', '--verbose', const=2, dest='verbosity', action='store_const', help='run in verbose mode')
 parser.add_argument('-q', '--quiet', const=0, dest='verbosity', action='store_const', help='run in verbose mode')
-parser.add_argument('-f', '--form', action='append_const', const=flags['form'], dest='suites', help='run in verbose mode')
-parser.add_argument('-p', '--pynwb', action='append_const', const=flags['pynwb'], dest='suites', help='run in verbose mode')
-parser.add_argument('-i', '--integration', action='append_const', const=flags['integration'], dest='suites', help='run in verbose mode')
+parser.add_argument('-f', '--form', action='append_const', const=flags['form'], dest='suites',
+                    help='run in verbose mode')
+parser.add_argument('-p', '--pynwb', action='append_const', const=flags['pynwb'], dest='suites',
+                    help='run in verbose mode')
+parser.add_argument('-i', '--integration', action='append_const', const=flags['integration'], dest='suites',
+                    help='run in verbose mode')
 args = parser.parse_args()
 if not args.suites:
     args.suites = list(flags.values())
@@ -25,7 +28,7 @@ root = logging.getLogger()
 root.setLevel(logging.DEBUG)
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('======================================================================\n%(asctime)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter('======================================================================\n%(asctime)s - %(levelname)s - %(message)s')  # noqa: E501
 ch.setFormatter(formatter)
 root.addHandler(ch)
 
@@ -37,7 +40,8 @@ ERRORS = 0
 # Run unit tests for form package
 if flags['form'] in args.suites:
     logging.info('running form unit tests')
-    form_test_result = unittest.TextTestRunner(verbosity=args.verbosity).run(unittest.TestLoader().discover("tests/unit/form_tests"))
+    form_test_result = unittest.TextTestRunner(verbosity=args.verbosity).run(
+        unittest.TestLoader().discover("tests/unit/form_tests"))
     TOTAL += form_test_result.testsRun
     FAILURES += len(form_test_result.failures)
     ERRORS += len(form_test_result.errors)
@@ -45,7 +49,8 @@ if flags['form'] in args.suites:
 # Run unit tests for pynwb package
 if flags['pynwb'] in args.suites:
     logging.info('running pynwb unit tests')
-    pynwb_test_result = unittest.TextTestRunner(verbosity=args.verbosity).run(unittest.TestLoader().discover("tests/unit/pynwb_tests"))
+    pynwb_test_result = unittest.TextTestRunner(verbosity=args.verbosity).run(
+        unittest.TestLoader().discover("tests/unit/pynwb_tests"))
     TOTAL += pynwb_test_result.testsRun
     FAILURES += len(pynwb_test_result.failures)
     ERRORS += len(pynwb_test_result.errors)
@@ -53,7 +58,8 @@ if flags['pynwb'] in args.suites:
 # Run integration tests
 if flags['integration'] in args.suites:
     logging.info('running integration tests')
-    integration_test_result = unittest.TextTestRunner(verbosity=args.verbosity).run(unittest.TestLoader().discover("tests/integration"))
+    integration_test_result = unittest.TextTestRunner(verbosity=args.verbosity).run(
+        unittest.TestLoader().discover("tests/integration"))
     TOTAL += integration_test_result.testsRun
     FAILURES += len(integration_test_result.failures)
     ERRORS += len(integration_test_result.errors)
@@ -82,12 +88,12 @@ final_message = 'Ran %s tests' % TOTAL
 exitcode = 0
 if ERRORS > 0 or FAILURES > 0:
     exitcode = 1
-    l = list()
+    _list = list()
     if ERRORS > 0:
-        l.append('errors=%d' % ERRORS)
+        _list.append('errors=%d' % ERRORS)
     if FAILURES > 0:
-        l.append('failures=%d' % FAILURES)
-    final_message = '%s - FAILED (%s)' % (final_message, ','.join(l))
+        _list.append('failures=%d' % FAILURES)
+    final_message = '%s - FAILED (%s)' % (final_message, ','.join(_list))
 else:
     final_message = '%s - OK' % final_message
 

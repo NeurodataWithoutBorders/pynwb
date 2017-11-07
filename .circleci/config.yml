@@ -17,6 +17,11 @@ jobs:
              apt-get update
              apt-get install -y python-pip python3.6 python3-pip
        - run:
+           name: Test flake8
+           command: |
+             pip install flake8
+             flake8
+       - run:
            name: Install tox
            command: |
              pip install tox
@@ -58,5 +63,5 @@ jobs:
              if [ "${CIRCLE_BRANCH}" == "dev" ]; then
                pip install scikit-ci-addons
                ci_addons publish_github_release NeurodataWithoutBorders/pynwb \
-                 --prerelease-packages "dist/*" --exit-success-if-missing-token
+                 --prerelease-packages "dist/*" --exit-success-if-missing-token --re-upload
              fi

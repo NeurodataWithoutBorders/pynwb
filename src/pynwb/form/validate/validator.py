@@ -1,4 +1,3 @@
-from warnings import warn
 import numpy as np
 from abc import ABCMeta, abstractmethod
 from itertools import chain
@@ -13,7 +12,7 @@ from ..spec import SpecNamespace
 from ..build import GroupBuilder, DatasetBuilder, LinkBuilder
 from ..build.builders import BaseBuilder
 
-from .errors import *
+from .errors import *  # noqa: F403
 from six import with_metaclass, raise_from
 
 __valid_dtypes = {
@@ -27,11 +26,13 @@ __valid_dtypes = {
     'str': str
 }
 
+
 def check_type(expected, received):
     expected_type = __valid_dtypes.get(expected)
     if expected_type is None:
         raise ValueError("Unrecognized type: '%s'" % expected)
     return expected_type is received
+
 
 def check_shape(expected, received):
     ret = False
@@ -40,6 +41,7 @@ def check_shape(expected, received):
     elif received in expected:
         ret = True
     return ret
+
 
 class Validator(with_metaclass(ABCMeta, object)):
     '''A base class for classes that will be used to validate against Spec subclasses'''
@@ -58,6 +60,7 @@ class Validator(with_metaclass(ABCMeta, object)):
     def validate(self, **kwargs):
         pass
 
+
 class AttributeValidator(Validator):
     '''A class for validating values against AttributeSpecs'''
 
@@ -72,15 +75,16 @@ class AttributeValidator(Validator):
         spec = self.spec
         ret = list()
         if spec.required and value is None:
-            ret.append(MissingError(spec.name))
+            ret.append(MissingError(spec.name))  # noqa: F405
         else:
             dtype = get_type(value)
             if not check_type(spec.dtype, dtype):
-                ret.append(DtypeError(spec.name, spec.dtype, dtype))
+                ret.append(DtypeError(spec.name, spec.dtype, dtype))  # noqa: F405
             shape = get_shape(value)
             if not check_shape(spec.shape, shape):
-                ret.append(ShapeError(spec.name, spec.shape, shape))
+                ret.append(ShapeError(spec.name, spec.shape, shape))  # noqa: F405
         return ret
+
 
 class BaseStorageValidator(Validator):
     '''A base class for validating against Spec objects that have attributes i.e. BaseStorageSpec'''
@@ -102,10 +106,11 @@ class BaseStorageValidator(Validator):
             attr_val = attributes.get(attr)
             if attr_val is None:
                 if validator.spec.required:
-                    ret.append(MissingError(attr))
+                    ret.append(MissingError(attr))  # noqa: F405
             else:
                 ret.extend(validator.validate(attr_val))
         return ret
+
 
 class ValidatorMap(object):
     """A class for keeping track of Validator objects for all data types in a namespace"""
@@ -129,7 +134,7 @@ class ValidatorMap(object):
         self.__valid_types = dict()
         self.__validators = dict()
         for dt, children in tree.items():
-            l = list()
+            _list = list()
             for t in children:
                 spec = self.__ns.get_spec(dt)
                 if isinstance(spec, GroupSpec):
@@ -138,8 +143,8 @@ class ValidatorMap(object):
                     val = DatasetValidator(spec)
                 if t == dt:
                     self.__validators[t] = val
-                l.append(val)
-            self.__valid_types[t] = tuple(l)
+                _list.append(val)
+            self.__valid_types[t] = tuple(_list)
 
     def __rec(self, tree, node):
         if isinstance(tree[node], tuple):
@@ -162,8 +167,8 @@ class ValidatorMap(object):
         except KeyError:
             raise_from(ValueError("no children for '%s'" % spec), None)
 
-
-    @docval({'name': 'data_type', 'type': (BaseStorageSpec, str), 'doc': 'the data type to get the validator for'},
+    @docval({'name': 'data_type', 'type': (BaseStorageSpec, str),
+             'doc': 'the data type to get the validator for'},
             returns='the validator ``data_type``', rtype=BaseStorageValidator)
     def get_validator(self, **kwargs):
         """Return the validator for a given data type"""
@@ -195,6 +200,7 @@ class ValidatorMap(object):
         validator = self.get_validator(dt)
         return validator.validate(builder)
 
+
 class DatasetValidator(BaseStorageValidator):
     '''A class for validating DatasetBuilders against DatasetSpecs'''
 
@@ -210,11 +216,12 @@ class DatasetValidator(BaseStorageValidator):
         data = builder.data
         dtype = get_type(data)
         if not check_type(self.spec.dtype, dtype):
-            ret.append(DtypeError(builder.name, self.spec.dtype, dtype))
+            ret.append(DtypeError(builder.name, self.spec.dtype, dtype))  # noqa: F405
         shape = get_shape(data)
         if not check_shape(self.spec.shape, shape):
-            ret.append(ShapeError(builder.name, self.spec.shape, shape))
+            ret.append(ShapeError(builder.name, self.spec.shape, shape))  # noqa: F405
         return ret
+
 
 class GroupValidator(BaseStorageValidator):
     '''A class for validating GroupBuilders against GroupSpecs'''
@@ -244,7 +251,7 @@ class GroupValidator(BaseStorageValidator):
                 self.__include_dts.append(spec.data_type_def)
             if dt is not None:
                 if spec.name is not None:
-                    #validator = self.__vmap.get_validator(dt)
+                    # validator = self.__vmap.get_validator(dt)
                     if isinstance(spec, GroupSpec):
                         self.__group_validators[spec.name] = spec
                     else:
@@ -275,12 +282,12 @@ class GroupValidator(BaseStorageValidator):
                 dt_builders = data_types.get(sub_dt)
                 if dt_builders is not None:
                     if spec.name is not None:
-                        dt_builders = filter(lambda x: x.name == spec.name, dt_builder)
+                        dt_builders = filter(lambda x: x.name == spec.name, dt_builder)  # noqa: F405
                     for bldr in dt_builders:
                         sub_val.validate(bldr)
                     found = True
             if not found:
-                ret.append(MissingDataType(builder.name, dt))
+                ret.append(MissingDataType(builder.name, dt))  # noqa: F405
         it = chain(self.__dataset_validators.items(),
                    self.__group_validators.items())
         for name, validator in it:
@@ -291,7 +298,7 @@ class GroupValidator(BaseStorageValidator):
                 def_spec = validator.spec
                 if sub_builder is None:
                     if inc_spec.required:
-                        ret.append(MissingDataType(builder.name, def_spec.data_type_def))
+                        ret.append(MissingDataType(builder.name, def_spec.data_type_def))  # noqa: F405
                 else:
                     ret.extend(validator.validate(sub_builder))
 
@@ -299,7 +306,7 @@ class GroupValidator(BaseStorageValidator):
                 spec = validator.spec
                 if sub_builder is None:
                     if spec.required:
-                        ret.append(MissingError(spec.name))
+                        ret.append(MissingError(spec.name))  # noqa: F405
                 else:
                     ret.extend(validator.validate(sub_builder))
 

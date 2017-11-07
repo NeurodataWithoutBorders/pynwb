@@ -9,9 +9,9 @@ import h5py
 import tempfile
 import numpy as np
 
+
 class H5IOTest(unittest.TestCase):
     """Tests for h5tools IO tools"""
-
 
     def setUp(self):
         self.test_temp_file = tempfile.NamedTemporaryFile()
@@ -47,28 +47,28 @@ class H5IOTest(unittest.TestCase):
         self.assertListEqual(my_dset[:].tolist(), list(range(10)))
 
     def test__chunked_iter_fill_numpy_matched_buffer_size(self):
-        a = np.arange(30).reshape(5,2,3)
+        a = np.arange(30).reshape(5, 2, 3)
         dci = DataChunkIterator(data=a, buffer_size=1)
         my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
     def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):
-        a = np.arange(30).reshape(5,2,3)
+        a = np.arange(30).reshape(5, 2, 3)
         dci = DataChunkIterator(data=a, buffer_size=3)
         my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
     def test__chunked_iter_fill_list_matched_buffer_size(self):
-        a = np.arange(30).reshape(5,2,3)
+        a = np.arange(30).reshape(5, 2, 3)
         dci = DataChunkIterator(data=a.tolist(), buffer_size=1)
         my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
-    def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):
-        a = np.arange(30).reshape(5,2,3)
+    def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):  # noqa: F811
+        a = np.arange(30).reshape(5, 2, 3)
         dci = DataChunkIterator(data=a.tolist(), buffer_size=3)
         my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
@@ -89,11 +89,11 @@ class H5IOTest(unittest.TestCase):
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
         dset = self.f['test_dataset']
         self.assertTupleEqual(dset.shape, ())
-        #self.assertEqual(dset[()].decode('utf-8'), a)
+        # self.assertEqual(dset[()].decode('utf-8'), a)
         self.assertEqual(dset[()], a)
 
     def test_write_dataset_list(self):
-        a = np.arange(30).reshape(5,2,3)
+        a = np.arange(30).reshape(5, 2, 3)
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a.tolist(), attributes={}))
         dset = self.f['test_dataset']
         self.assertTrue(np.all(dset[:] == a))
@@ -103,7 +103,7 @@ class H5IOTest(unittest.TestCase):
         data = np.zeros(10, dtype=cmpd_dt)
         data['a'][1] = 101
         data['b'][1] = 0.1
-        dt = [{'name': 'a', 'dtype': 'int32'  , 'doc': 'a column'},
+        dt = [{'name': 'a', 'dtype': 'int32', 'doc': 'a column'},
               {'name': 'b', 'dtype': 'float64', 'doc': 'b column'}]
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', data, attributes={}, dtype=dt))
         dset = self.f['test_dataset']
@@ -117,10 +117,10 @@ class H5IOTest(unittest.TestCase):
         data['a'][1] = 101
         data['b']['c'] = 202
         data['b']['d'] = 10.1
-        b_dt = [{'name': 'c', 'dtype': 'int32'  , 'doc': 'c column'},
+        b_dt = [{'name': 'c', 'dtype': 'int32', 'doc': 'c column'},
                 {'name': 'd', 'dtype': 'float64', 'doc': 'd column'}]
         dt = [{'name': 'a', 'dtype': 'int32', 'doc': 'a column'},
-              {'name': 'b', 'dtype': b_dt , 'doc': 'b column'}]
+              {'name': 'b', 'dtype': b_dt, 'doc': 'b column'}]
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', data, attributes={}, dtype=dt))
         dset = self.f['test_dataset']
         self.assertEqual(dset['a'].tolist(), data['a'].tolist())

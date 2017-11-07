@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-from setuptools.command.build_py import build_py
 
-import json
-import pickle
 import os
 import versioneer
-
 
 schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
 
@@ -44,7 +40,7 @@ setup_args = {
     ],
     'packages': pkgs,
     'package_dir': {'': 'src'},
-    'package_data': {'pynwb':["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
+    'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
     'classifiers': [
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
@@ -58,11 +54,11 @@ setup_args = {
         "Operating System :: Unix",
         "Topic :: Scientific/Engineering :: Medical Science Apps."
     ],
-    'keywords':'PyNWB NWB Neuroscience HDF NeurodataWithoutBorders',
-    #'package_data': {'pynwb':["data/*.yaml"]},
-    #'cmdclass':{
+    'keywords': 'PyNWB NWB Neuroscience HDF NeurodataWithoutBorders',
+    # 'package_data': {'pynwb':["data/*.yaml"]},
+    # 'cmdclass':{
     #    'build_py': CustomBuild,
-    #}
+    # }
 }
 
 if __name__ == '__main__':
@@ -74,5 +70,5 @@ if __name__ == '__main__':
     rebuilding the package, and the schema will be hardcoded.
     '''
 
-    #get_schema()
+    # get_schema()
     setup(**setup_args)

@@ -1,11 +1,12 @@
 import numpy as np
 from collections import Iterable
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
 from .core import NWBContainer
+
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
 class AnnotationSeries(TimeSeries):
@@ -26,19 +27,26 @@ class AnnotationSeries(TimeSeries):
     _help = "Time-stamped annotations about an experiment."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                                                   'contained here. It can also be the name of a device, for stimulus or '
-                                                   'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames', 'default': list()},
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
-
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'parent', 'type': NWBContainer, 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'source', 'type': str,
+             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                     'contained here. It can also be the name of a device, for stimulus or '
+                     'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'default': list()},
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'comments', 'type': str,
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str, 'doc':
+             'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'parent', 'type': NWBContainer,
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, timestamps = popargs('name', 'source', 'data', 'timestamps', kwargs)
-        super(AnnotationSeries, self).__init__(name, source, data, 'n/a', resolution=np.nan, conversion=np.nan, timestamps=timestamps, **kwargs)
+        super(AnnotationSeries, self).__init__(name, source, data, 'n/a',
+                                               resolution=np.nan, conversion=np.nan,
+                                               timestamps=timestamps, **kwargs)
 
     @docval({'name': 'time', 'type': float, 'doc': 'The time for the anotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
@@ -49,6 +57,7 @@ class AnnotationSeries(TimeSeries):
         time, annotation = getargs('time', 'annotation', kwargs)
         self.fields['timestamps'].append(time)
         self.fields['data'].append(annotation)
+
 
 @register_class('AbstractFeatureSeries', CORE_NAMESPACE)
 class AbstractFeatureSeries(TimeSeries):
@@ -84,13 +93,16 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'timestamps', 'type': (list, np.ndarray, Iterable, TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': NWBContainer, 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset',
+             'default': 'no comments'},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': NWBContainer,
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data = popargs('name', 'source', 'data', kwargs)
         super(AbstractFeatureSeries, self).__init__(name, source, data, "see 'feature_units'", **kwargs)
@@ -103,6 +115,7 @@ class AbstractFeatureSeries(TimeSeries):
         time, features = getargs('time', 'features', kwargs)
         self.timestamps.append(time)
         self.data.append(features)
+
 
 @register_class('IntervalSeries', CORE_NAMESPACE)
 class IntervalSeries(TimeSeries):
@@ -121,18 +134,24 @@ class IntervalSeries(TimeSeries):
     _help = "Stores the start and stop times for events."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                                                   'contained here. It can also be the name of a device, for stimulus or '
-                                                   'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
-
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': list()},
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default':  'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default':  'no description'},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': NWBContainer, 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-    )
+            {'name': 'source', 'type': str,
+             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                     'contained here. It can also be the name of a device, for stimulus or '
+                     'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
+            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries, Iterable),
+             'doc': 'Timestamps for samples stored in data', 'default': list()},
+            {'name': 'comments', 'type': str,
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default':  'no comments'},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default':  'no description'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': NWBContainer,
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, source, data, timestamps = popargs('name', 'source', 'data', 'timestamps', kwargs)
         unit = 'n/a'
@@ -145,8 +164,7 @@ class IntervalSeries(TimeSeries):
                                              **kwargs)
 
     @docval({'name': 'start', 'type': float, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'stop', 'type': float, 'doc': 'The name of this TimeSeries dataset'}
-    )
+            {'name': 'stop', 'type': float, 'doc': 'The name of this TimeSeries dataset'})
     def add_interval(self, **kwargs):
         start, stop = getargs('start', 'stop', kwargs)
         self.__interval_timestamps.append(start)
@@ -162,6 +180,7 @@ class IntervalSeries(TimeSeries):
     def timestamps(self):
         return self.__interval_timestamps
 
+
 @register_class('SpikeUnit', CORE_NAMESPACE)
 class SpikeUnit(NWBContainer):
     """
@@ -176,12 +195,16 @@ class SpikeUnit(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'Name of the SpikeUnit'},
             {'name': 'times', 'type': Iterable, 'doc': 'Spike time for the units (exact or estimated)'},
             {'name': 'unit_description', 'type': str, 'doc': 'Description of the unit (eg, cell type).'},
-            {'name': 'source', 'type': str, 'doc': 'Name, path or description of where unit times originated. This is necessary only if the info here differs from or is more fine-grained than the interfaces source field.'})
+            {'name': 'source', 'type': str,
+             'doc': 'Name, path or description of where unit times originated. \
+             This is necessary only if the info here differs from or is more fine-grained \
+             than the interfaces source field.'})
     def __init__(self, **kwargs):
         times, unit_description = popargs('times', 'unit_description', kwargs)
         call_docval_func(super(SpikeUnit, self).__init__, kwargs)
         self.times = times
         self.unit_description = unit_description
+
 
 @register_class('UnitTimes', CORE_NAMESPACE)
 class UnitTimes(NWBContainer):

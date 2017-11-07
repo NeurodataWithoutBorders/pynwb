@@ -1,7 +1,5 @@
 import sys
 
-from .form.validate import ValidatorMap
-
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
@@ -19,11 +17,11 @@ if __name__ == '__main__':
 
     def print_errors(errors):
         if len(errors) > 0:
-            write(' - found the following errors:')
+            write(' - found the following errors:')  # noqa: F821
             for err in errors:
-                write('%s - %s' % (err.name, err.reason))
+                write('%s - %s' % (err.name, err.reason))  # noqa: F821
         else:
-            write(' - no errors found.')
+            write(' - no errors found.')  # noqa: F821
 
     parser = ArgumentParser(description="Validate an NWB file")
     parser.add_argument("path", type=str, help="the path to the NWB file")
@@ -33,7 +31,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not os.path.exists(args.path):
-        write('%s not found' % path, file=sys.stderr)
+        write('%s not found' % path, file=sys.stderr)  # noqa: F821
         sys.exit(1)
 
     io = HDF5IO(args.path, get_build_manager())
@@ -41,14 +39,14 @@ if __name__ == '__main__':
     if args.nspath is not None:
         namespaces = load_namespaces(args.nspath)
         if args.ns is not None:
-            write('Validating against %s from %s.' % (args.ns, args.ns_path), end='')
+            write('Validating against %s from %s.' % (args.ns, args.ns_path), end='')  # noqa: F821
         else:
-            write('Validating using namespaces in %s.' % args.nspath)
+            write('Validating using namespaces in %s.' % args.nspath)  # noqa: F821
             for ns in namespaces:
-                write('Validating against %s' % ns, end='')
+                write('Validating against %s' % ns, end='')  # noqa: F821
                 errors = validate(io, ns)
                 print_errors(errors)
     else:
         errors = validate(io)
-        write('Validating against core namespace' % ns, end='')
+        write('Validating against core namespace' % ns, end='')  # noqa: F821
         print_errors(errors)
