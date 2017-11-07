@@ -63,5 +63,5 @@ jobs:
              if [ "${CIRCLE_BRANCH}" == "dev" ]; then
                pip install scikit-ci-addons
                ci_addons publish_github_release NeurodataWithoutBorders/pynwb \
-                 --prerelease-packages "dist/*" --exit-success-if-missing-token
+                 --prerelease-packages "dist/*" --exit-success-if-missing-token --re-upload
              fi
