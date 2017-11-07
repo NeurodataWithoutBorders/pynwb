@@ -98,16 +98,6 @@ __resources = __get_resources()
 if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
 
-# added here for convenience to users
-from .form.build import BuildManager as __BuildManager
-@docval({'name': 'type_map', 'type': __TYPE_MAP, 'doc': 'the path to the YAML with the namespace definition', 'default': None},
-        is_method=False)
-def get_build_manager(**kwargs):
-    type_map = getargs('type_map', kwargs)
-    if type_map is None:
-        type_map = __TYPE_MAP
-    return __BuildManager(type_map)
-
 @docval(returns="a tuple of the available namespaces", rtype=tuple)
 def available_namespaces(**kwargs):
     return tuple(__NS_CATALOG.namespaces.keys())
