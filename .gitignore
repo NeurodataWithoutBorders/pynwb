@@ -6,6 +6,9 @@
 !.vscode/extensions.json
 .history
 
+### PyNWB###
+docs/notebooks/boc/
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/

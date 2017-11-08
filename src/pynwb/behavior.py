@@ -232,6 +232,7 @@ class CorrectedImageStack(NWBContainer):
 
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'corrected', 'type': ImageSeries,
              'doc': 'Image stack with frames shifted to the common coordinates.'},
             {'name': 'original', 'type': ImageSeries,
@@ -255,16 +256,20 @@ class MotionCorrection(NWBContainer):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ('corrected_image_stack',)
+    __nwbfields__ = ('corrected_image_stacks',)
 
     _help = "Image stacks whose frames have been shifted (registered) to account for motion."
 
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this MotionCorrection container', 'default': 'MotionCorrection '},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'corrected_image_stacks', 'type': CorrectedImageStack,
+            {'name': 'corrected_image_stacks', 'type': (list, CorrectedImageStack),
              'doc': 'the corrected image stack in this Motion Correction analysis'})
     def __init__(self, **kwargs):
-        source, corrected_image_stack = popargs('source', 'corrected_image_stack', kwargs)
+        source, corrected_image_stacks = popargs('source', 'corrected_image_stacks', kwargs)
+
+        if isinstance(corrected_image_stacks, CorrectedImageStack):
+            corrected_image_stacks = [corrected_image_stacks]
+
         super(MotionCorrection, self).__init__(source, **kwargs)
-        self.corrected_image_stack = corrected_image_stack
+        self.corrected_image_stacks = corrected_image_stacks
