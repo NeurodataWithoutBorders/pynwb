@@ -30,9 +30,11 @@ class ImageSeries(TimeSeries):
                      'acquisition data')},
             {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
+            {'name': 'unit', 'type': str,
+             'doc': 'The base unit of measurement (should be SI unit)', 'default': 'None'},
             {'name': 'format', 'type': str,
-             'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
+             'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
+             'default': 'None'},
             {'name': 'external_file', 'type': Iterable,
              'doc': 'Path or URL to one or more external file(s). Field only present if format=external. \
              Either external_file or data must be specified, but not both.', 'default': None},
