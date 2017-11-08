@@ -1,4 +1,5 @@
 from collections import Iterable
+import json
 import numpy as np
 import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference
@@ -10,7 +11,8 @@ from ...container import Container
 from ...utils import docval, getargs, popargs, call_docval_func
 from ...data_utils import DataChunkIterator, get_shape
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder, TypeMap
-from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, SpecNamespace
+from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, SpecNamespace, GroupSpec, DatasetSpec
+from ...spec import NamespaceBuilder
 
 from ..io import FORMIO
 
@@ -38,32 +40,68 @@ class HDF5IO(FORMIO, ):
         self.__read = dict()
         self.__ref_queue = list()
 
-    @classmethod
-    @docval({'name': 'group', 'type': Group, 'doc': 'the group to write the namespace to'},
-            {'name': 'namespace', 'type': SpecNamespace, 'doc': 'the namespace to write'},
-            {'name': 'data_types', 'type': Iterable, 'doc': 'the data types to write', 'default': None},
-            {'name': 'ns_dset_name', 'type': str, 'doc': 'the name of the namespace dataset', 'default': 'namespace'})
-    def cache_spec(cls, group, namespace, dataset_name='namespace'):
-        '''
-        Write a specification namespace to the underlying HDF5 file.
+    @staticmethod
+    def get_name(path):
+        return os.path.splitext(path)[0]
 
-        Each type will be written as JSON formatted string in a scalar dataset named
-        using the type's data_type_def.
-        '''
-        group, namespace, data_types, ns_dset_name = getargs('group', 'namespace', 'data_types', 'ns_dset_name', kwargs)
-        if data_types is None:
-            data_types = namespace.get_registered_types()
-        writer = H5SpecWriter(group)
-        writer.write_namespace(namespace, ns_dset_name)
-        for spec_name in data_types:
-            spec = namespace.get_spec(spec_name)
-            writer.write_spec(spec, spec.data_type_def)
+    @staticmethod
+    def copy_spec(spec):
+        #TODO: implement spec
+        kwargs = dict()
+        kwargs['attributes'] = list()
+        for subspec in spec.attributes:
+            if not spec.is_inherited_spec(subspec):
+                kwargs['attributes'].append(subspec)
+        to_copy = ['doc', 'name', 'default_name', 'linkable', 'quantity', spec.inc_key(), spec.def_key()]
+        if isinstance(spec, GroupSpec):
+            for subspec in spec.datasets:
+                if not spec.is_inherited_spec(subspec):
+                    if 'datasets' not in kwargs:
+                        kwargs['datasets'] = list()
+                    kwargs['datasets'].append(subspec)
+            for subspec in spec.groups:
+                if not spec.is_inherited_spec(subspec):
+                    if 'groups' not in kwargs:
+                        kwargs['groups'] = list()
+                    kwargs['groups'].append(subspec)
+            for subspec in spec.links:
+                if not spec.is_inherited_spec(subspec):
+                    if 'links' not in kwargs:
+                        kwargs['links'] = list()
+                    kwargs['links'].append(subspec)
+        else:
+            to_copy.append('dtype')
+            to_copy.append('shape')
+            to_copy.append('dims')
+        for key in to_copy:
+            val = getattr(spec, key)
+            if val is not None:
+                kwargs[key] = val
+        ret = spec.build_spec(kwargs)
+        return ret
+
+    def convert_namespace(self, ns_catalog, namespace):
+        ns = ns_catalog.get_namespace(namespace)
+        builder = NamespaceBuilder(ns.doc, ns.name,
+                                   full_name=ns.full_name,
+                                   version=ns.version,
+                                   author=ns.author,
+                                   contact=ns.contact)
+        source_files = ns_catalog.get_namespace_sources(namespace)
+        for source in source_files:
+            for dt in ns_catalog.get_types(source):
+                spec = ns_catalog.get_spec(namespace, dt)
+                h5_source = self.get_name(source)
+                spec = self.copy_spec(spec)
+                builder.add_spec(h5_source, spec)
+        return builder
 
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'},
-            {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False}) # TODO: make this True by default
+            {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False})
     def write(self, **kwargs):
         call_docval_func(super(HDF5IO, self).write, kwargs)
-        cache_spec = getargs('cach_spec', kwargs)
+        cache_spec = getargs('cache_spec', kwargs)
+        print('calling write, cache_spec =', cache_spec)
         if cache_spec:
             ref = self.__file.attrs.get(SPEC_LOC_ATTR)
             spec_group = None
@@ -73,13 +111,14 @@ class HDF5IO(FORMIO, ):
                 path = 'specifications' # do something to figure out where the specifications should go
                 spec_group = self.__file.require_group(path)
                 self.__file.attrs[SPEC_LOC_ATTR] = spec_group.ref
-            ns_catalog = self.__manager.ns_catalog
+            ns_catalog = self.manager.namespace_catalog
             for ns_name in ns_catalog.namespaces:
+                ns_builder = self.convert_namespace(ns_catalog, ns_name)
                 namespace = ns_catalog.get_namespace(ns_name)
-                group_name = '%s/%s' % (ns.name, namespace.version)
+                group_name = '%s/%s' % (ns_name, namespace.version)
                 ns_group = spec_group.require_group(group_name)
-                it = chain(*(nsc.get_types(f) for f in nsc.get_namespace_sources(ns_name)))
-                self.cache_spec(ns_group, namespace, data_types=it)
+                writer = H5SpecWriter(ns_group)
+                ns_builder.export('namespace', writer=writer)
 
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
@@ -586,7 +625,7 @@ class H5SpecWriter(SpecWriter):
         return json.dumps(spec, separators=(',', ':'))
 
     def __write(self, d, name):
-        data = self.stringify(spec)
+        data = self.stringify(d)
         dset = self.__group.create_dataset(name, data=data, dtype=self.__str_type)
         return dset
 
