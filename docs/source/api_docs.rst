@@ -19,6 +19,7 @@ API Documentation
    NWB Base Classes <pynwb.base>
    Miscellaneous <pynwb.misc>
    Epoch <pynwb.epoch>
+   Form <pynwb.form>
    PyNWB <pynwb>
    Flexible Object-Relational Mapping <form>
 
