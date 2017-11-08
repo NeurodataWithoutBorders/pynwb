@@ -98,6 +98,10 @@ class SpecNamespace(dict):
         return self.get('name', None)
 
     @property
+    def doc(self):
+        return self['doc']
+
+    @property
     def catalog(self):
         """The SpecCatalog containing all the Specs"""
         return self.__catalog
@@ -266,7 +270,8 @@ class NamespaceCatalog(object):
         '''
         Get all the source specifications that were loaded for a given namespace
         '''
-        return tuple(self.__included_sources.keys())
+        namespace = getargs('namespace', kwargs)
+        return tuple(self.__included_sources[namespace])
 
     @docval({'name': 'source', 'type': str, 'doc': 'the name of the source'},
             rtype=tuple)
@@ -277,7 +282,7 @@ class NamespaceCatalog(object):
         source = getargs('source', kwargs)
         ret = self.__loaded_specs.get(source)
         if ret is not None:
-            ret = tuple(l)
+            ret = tuple(ret)
         return ret
 
     def __load_spec_file(self, reader, spec_source, catalog, dtypes=None, resolve=True):
@@ -333,10 +338,10 @@ class NamespaceCatalog(object):
         """Load the namespaces in the given file"""
         namespace_path, resolve, reader = getargs('namespace_path', 'resolve', 'reader', kwargs)
         if reader is None:
+            # load namespace definition from file
+            if not os.path.exists(namespace_path):
+                raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
             reader = YAMLSpecReader(indir=os.path.dirname(namespace_path))
-        # load namespace definition from file
-        if not os.path.exists(namespace_path):
-            raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
         ret = self.__included_specs.get(namespace_path)
         if ret is None:
             ret = dict()
