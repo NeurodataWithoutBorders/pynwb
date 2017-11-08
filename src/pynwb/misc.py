@@ -84,10 +84,10 @@ class AbstractFeatureSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'feature_units', 'type': str, 'doc': 'The unit of each feature'},
-            {'name': 'features', 'type': str, 'doc': 'Description of each feature'},
+            {'name': 'feature_units', 'type': (str, Iterable), 'doc': 'The unit of each feature'},
+            {'name': 'features', 'type': (str, Iterable), 'doc': 'Description of each feature'},
 
-            {'name': 'data', 'type': (list, np.ndarray),
+            {'name': 'data', 'type': (list, np.ndarray, Iterable, TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': list()},
             {'name': 'resolution', 'type': float,
@@ -96,7 +96,7 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
              'default': _default_conversion},
-            {'name': 'timestamps', 'type': (list, np.ndarray),
+            {'name': 'timestamps', 'type': (list, np.ndarray, Iterable, TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},

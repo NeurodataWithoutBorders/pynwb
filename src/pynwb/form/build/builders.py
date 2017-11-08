@@ -4,6 +4,7 @@ import copy as _copy
 import itertools as _itertools
 import posixpath as _posixpath
 from abc import ABCMeta
+import warnings
 
 from ..utils import docval, getargs, call_docval_func, fmt_docval_args
 from six import with_metaclass
@@ -133,7 +134,8 @@ class GroupBuilder(BaseBuilder):
         for group in groups:
             self.set_group(group)
         for dataset in datasets:
-            self.set_dataset(dataset)
+            if not (dataset is None):
+                self.set_dataset(dataset)
         for link in links:
             self.set_link(link)
 
@@ -191,7 +193,13 @@ class GroupBuilder(BaseBuilder):
         name = builder.name
         if name in self.obj_type:
             if self.obj_type[name] != obj_type:
-                raise KeyError("'%s' already exists as %s" % (name, self.obj_type[name]))
+                if name == 'comments':
+                    # LEGACY: Support legacy files where "comments" exists as both an attribute and as dataset
+                    #         in some groups.
+                    #         To allow read to get past this special case, this will skip the issue.
+                    warnings.warn("'%s' already exists as %s; skipping..." % (name, self.obj_type[name]))
+                else:
+                    raise KeyError("'%s' already exists as %s" % (name, self.obj_type[name]))
         super(GroupBuilder, self).__getitem__(obj_type)[name] = builder
         self.obj_type[name] = obj_type
         if builder.parent is None:

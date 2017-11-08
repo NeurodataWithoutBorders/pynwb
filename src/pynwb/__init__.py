@@ -26,6 +26,11 @@ def __get_resources():
     return ret
 
 
+def _get_resources():
+    # LEGACY: Needed to support legacy implementation.
+    return __get_resources()
+
+
 # a global namespace catalog
 global __NS_CATALOG
 global __TYPE_MAP
@@ -57,7 +62,10 @@ def get_manager(**kwargs):
     if extensions is None:
         type_map = __TYPE_MAP
     else:
-        type_map = get_type_map()
+        if isinstance(extensions, TypeMap):
+            type_map = extensions
+        else:
+            type_map = get_type_map()
         if isinstance(extensions, list):
             for ext in extensions:
                 if isinstance(ext, str):
@@ -203,6 +211,7 @@ from . import misc  # noqa: F401,E402
 from . import ogen  # noqa: F401,E402
 from . import ophys  # noqa: F401,E402
 from . import retinotopy  # noqa: F401,E402
+from . import legacy  # noqa: F401,E402
 
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
