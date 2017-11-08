@@ -21,6 +21,7 @@ breaking down the barriers to data sharing in neuroscience.
 
    getting_started
    architecture
+   software_process
    overview
 
 .. toctree::
@@ -43,5 +44,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-
