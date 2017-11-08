@@ -7,9 +7,8 @@ from six import with_metaclass
 
 
 class FORMIO(with_metaclass(ABCMeta, object)):
-    @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O'},
-            {"name": "source", "type": str,
-             "doc": "the source of container being built i.e. file path", 'default': None})
+    @docval({'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default':None},
+            {"name": "source", "type": str, "doc": "the source of container being built i.e. file path", 'default': None})
     def __init__(self, **kwargs):
         self.__manager = getargs('manager', kwargs)
         self.__built = dict()

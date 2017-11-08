@@ -10,6 +10,7 @@ from .base import TimeSeries, ProcessingModule
 from .epoch import Epoch
 from .ecephys import ElectrodeTable, ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
+from .ophys import ImagingPlane
 from .core import NWBContainer
 
 
@@ -231,6 +232,35 @@ class NWBFile(NWBContainer):
     @property
     def imaging_planes(self):
         return tuple(self.__imaging_planes.values())
+
+    @docval(*filter(_not_parent, get_docval(ImagingPlane.__init__)),
+            returns='the imaging plane', rtype=ImagingPlane)
+    def create_imaging_plane(self, **kwargs):
+        """
+        Add metadata about an imaging plane
+        """
+        ip_args, ip_kwargs = fmt_docval_args(ImagingPlane.__init__, kwargs)
+        img_pln = ImagingPlane(*ip_args, **ip_kwargs)
+        self.set_imaging_plane(img_pln)
+        return img_pln
+
+    @docval({'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'the ImagingPlane object to add to this NWBFile'})
+    def set_imaging_plane(self, **kwargs):
+        '''
+        Add an ImagingPlane object to this file
+        '''
+        img_pln = getargs('imaging_plane', kwargs)
+        img_pln.parent = self
+        name = img_pln.name
+        self.__imaging_planes[name] = img_pln
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the imaging plane'})
+    def get_imaging_plane(self, **kwargs):
+        '''
+        Get an ImagingPlane object from this file
+        '''
+        name = getargs('name', kwargs)
+        return self.__imaging_planes.get(name)
 
     def is_acquisition(self, ts):
         return self.__exists(ts, self.__acquisition)

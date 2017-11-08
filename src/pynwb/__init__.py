@@ -15,6 +15,7 @@ from .form.build import BuildManager  # noqa: E402
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa: E402
 
+
 __core_ns_file_name = 'nwb.namespace.yaml'
 
 
@@ -25,6 +26,8 @@ def __get_resources():
     ret['namespace_path'] = join(resource_filename(__name__, 'data'), __core_ns_file_name)
     return ret
 
+def _get_resources():
+    return __get_resources()
 
 # a global namespace catalog
 global __NS_CATALOG
@@ -57,7 +60,10 @@ def get_manager(**kwargs):
     if extensions is None:
         type_map = __TYPE_MAP
     else:
-        type_map = get_type_map()
+        if isinstance(extensions, TypeMap):
+            type_map = extensions
+        else:
+            type_map = get_type_map()
         if isinstance(extensions, list):
             for ext in extensions:
                 if isinstance(ext, str):
@@ -91,7 +97,6 @@ def load_namespaces(**kwargs):
 __resources = __get_resources()
 if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
-
 
 @docval(returns="a tuple of the available namespaces", rtype=tuple)
 def available_namespaces(**kwargs):
@@ -168,7 +173,6 @@ def validate(**kwargs):
 
 
 class NWBHDF5IO(HDF5IO):
-
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
@@ -207,3 +211,4 @@ from . import retinotopy  # noqa: F401,E402
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
 del get_versions
+from . import legacy

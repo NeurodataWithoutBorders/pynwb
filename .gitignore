@@ -4,7 +4,11 @@
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+.vscode
 .history
+
+### Brain Observatory Demo ###
+docs/notebooks/boc
 
 ### Python ###
 # Byte-compiled / optimized / DLL files

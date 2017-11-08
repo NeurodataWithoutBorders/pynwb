@@ -9,7 +9,8 @@ from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec
 from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, RegionBuilder
-
+import warnings
+from copy import copy
 
 class BuildManager(object):
     """
@@ -215,13 +216,18 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         self.__carg2spec = dict()
         self.__map_spec(spec)
 
+
+    def hack_get_subspec_values(self, *args, **kwargs):
+        return self.__get_subspec_values(*args, **kwargs)
+
     @property
     def spec(self):
         ''' the Spec used in this ObjectMapper '''
         return self.__spec
 
     @_constructor_arg('name')
-    def get_container_name(self, builder, manager):
+    def get_container_name(self, *args):
+        builder = args[0]
         return builder.name
 
     @classmethod
@@ -342,10 +348,18 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         self.map_const_arg(attr_carg, spec)
         self.map_attr(attr_carg, spec)
 
-    def __get_override_carg(self, name, builder, manager):
+    # def hack_get_override_carg(self, *args, **kwargs):
+    #     return self.__get_override_carg(*args, **kwargs)
+
+    def __get_override_carg(self, *args):
+        name = args[0]
+        remaining_args = tuple(args[1:])
         if name in self.constructor_args:
             func = self.constructor_args[name]
-            return func(self, builder, manager)
+            try:
+                return func(self, *remaining_args)
+            except TypeError:
+                return func(self, *remaining_args[:-1])
         return None
 
     def __get_override_attr(self, name, container, manager):
@@ -567,9 +581,13 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 subspec = manager.get_subspec(spec, sub_builder)
                 if subspec is not None:
                     if isinstance(subspec, LinkSpec):
-                        sub_builder = sub_builder.builder
-                    if self.__data_type_key in sub_builder.attributes or \
-                       not (subspec.data_type_inc is None and subspec.data_type_def is None):
+                        if isinstance(sub_builder, LinkBuilder):
+                            sub_builder = sub_builder.builder
+                        else:
+                            msg = 'expected LinkBuilder, got %s' % type(sub_builder).__name__
+                            warnings.warn(msg)
+                            continue
+                    if self.__data_type_key in sub_builder.attributes or not (subspec.data_type_inc is None and subspec.data_type_def is None):
                         val = manager.construct(sub_builder)
                         if subspec.is_many():
                             if subspec in ret:
@@ -619,7 +637,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         try:
             obj = cls(*args, **kwargs)
         except Exception as ex:
-            msg = 'Could not construct %s object' % (cls.__name__)
+            msg = 'Could not construct %s object\n    %s' % (cls.__name__, '%s: %s (%s)' % (ex, cls.__name__, builder.name))
             raise_from(Exception(msg), ex)
         return obj
 
@@ -639,7 +657,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             else:
                 ret = container.name
         return ret
-
 
 class TypeSource(object):
     '''A class to indicate the source of a data_type in a namespace.
@@ -683,7 +700,7 @@ class TypeMap(object):
         ret.merge(self)
         return ret
 
-    def __deepcopy__(self):
+    def __deepcopy__(self, memo):
         return self.__copy__()
 
     def merge(self, type_map):
@@ -828,6 +845,10 @@ class TypeMap(object):
         if ret is None:
             msg = "builder '%s' does not have a data_type" % builder.name
             raise ValueError(msg)
+
+        if isinstance(ret, bytes):
+            ret = ret.decode('UTF-8')
+
         return ret
 
     def get_builder_ns(self, builder):
