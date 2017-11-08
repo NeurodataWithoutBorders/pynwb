@@ -4,7 +4,7 @@ import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference
 from six import raise_from, text_type, string_types, binary_type
 from functools import partial
-
+import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs
@@ -75,35 +75,40 @@ class HDF5IO(FORMIO):
             name = os.path.basename(h5obj.name)
         for k in h5obj:
             sub_h5obj = h5obj.get(k)
-            link_type = h5obj.get(k, getlink=True)
-            if isinstance(link_type, SoftLink) or isinstance(link_type, ExternalLink):
-                # get path of link (the key used for tracking what's been built)
-                target_path = link_type.path
-                builder_name = os.path.basename(target_path)
-                # get builder if already read, else build it
-                builder = self.__get_built(sub_h5obj.file.filename, target_path)
-                if builder is None:
-                    # NOTE: all links must have absolute paths
-                    if isinstance(sub_h5obj, Dataset):
-                        builder = self.__read_dataset(sub_h5obj, builder_name)
-                    else:
-                        builder = self.__read_group(sub_h5obj, builder_name)
-                    self.__set_built(sub_h5obj.file.filename, target_path, builder)
-                kwargs['links'][builder_name] = LinkBuilder(k, builder, source=self.__path)
-            else:
-                builder = self.__get_built(sub_h5obj.file.filename, sub_h5obj.name)
-                obj_type = None
-                read_method = None
-                if isinstance(sub_h5obj, Dataset):
-                    read_method = self.__read_dataset
-                    obj_type = kwargs['datasets']
+            if not (sub_h5obj is None):
+                link_type = h5obj.get(k, getlink=True)
+                if isinstance(link_type, SoftLink) or isinstance(link_type, ExternalLink):
+                    # get path of link (the key used for tracking what's been built)
+                    target_path = link_type.path
+                    builder_name = os.path.basename(target_path)
+                    # get builder if already read, else build it
+                    builder = self.__get_built(sub_h5obj.file.filename, target_path)
+                    if builder is None:
+                        # NOTE: all links must have absolute paths
+                        if isinstance(sub_h5obj, Dataset):
+                            builder = self.__read_dataset(sub_h5obj, builder_name)
+                        else:
+                            builder = self.__read_group(sub_h5obj, builder_name)
+                        self.__set_built(sub_h5obj.file.filename, target_path, builder)
+                    kwargs['links'][builder_name] = LinkBuilder(k, builder, source=self.__path)
                 else:
-                    read_method = self.__read_group
-                    obj_type = kwargs['groups']
-                if builder is None:
-                    builder = read_method(sub_h5obj)
-                    self.__set_built(sub_h5obj.file.filename, sub_h5obj.name, builder)
-                obj_type[builder.name] = builder
+                    builder = self.__get_built(sub_h5obj.file.filename, sub_h5obj.name)
+                    obj_type = None
+                    read_method = None
+                    if isinstance(sub_h5obj, Dataset):
+                        read_method = self.__read_dataset
+                        obj_type = kwargs['datasets']
+                    else:
+                        read_method = self.__read_group
+                        obj_type = kwargs['groups']
+                    if builder is None:
+                        builder = read_method(sub_h5obj)
+                        self.__set_built(sub_h5obj.file.filename, sub_h5obj.name, builder)
+                    obj_type[builder.name] = builder
+            else:
+                warnings.warn('Broken Link: %s' % os.path.join(h5obj.name, k))
+                kwargs['datasets'][k] = None
+                continue
         kwargs['source'] = self.__path
         ret = GroupBuilder(name, **kwargs)
         return ret

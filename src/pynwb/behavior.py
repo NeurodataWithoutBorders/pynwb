@@ -255,7 +255,7 @@ class MotionCorrection(NWBContainer):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ('corrected_image_stack',)
+    __nwbfields__ = ('corrected_image_stacks',)
 
     _help = "Image stacks whose frames have been shifted (registered) to account for motion."
 
@@ -265,6 +265,6 @@ class MotionCorrection(NWBContainer):
             {'name': 'corrected_image_stacks', 'type': CorrectedImageStack,
              'doc': 'the corrected image stack in this Motion Correction analysis'})
     def __init__(self, **kwargs):
-        source, corrected_image_stack = popargs('source', 'corrected_image_stack', kwargs)
+        source, corrected_image_stacks = popargs('source', 'corrected_image_stacks', kwargs)
         super(MotionCorrection, self).__init__(source, **kwargs)
-        self.corrected_image_stack = corrected_image_stack
+        self.corrected_image_stacks = corrected_image_stacks
