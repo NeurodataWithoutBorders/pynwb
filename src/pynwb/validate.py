@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import sys
 
 
@@ -12,16 +14,13 @@ if __name__ == '__main__':
     validate against all namespaces in namespace file.
     """
 
-    def write_out(s):
-        sys.out.write('%s\n' % s)
-
     def print_errors(errors):
         if len(errors) > 0:
-            write(' - found the following errors:')  # noqa: F821
+            print(' - found the following errors:', file=sys.stderr)
             for err in errors:
-                write('%s - %s' % (err.name, err.reason))  # noqa: F821
+                print('%s - %s' % (err.name, err.reason), file=sys.stderr)
         else:
-            write(' - no errors found.')  # noqa: F821
+            print(' - no errors found.')
 
     parser = ArgumentParser(description="Validate an NWB file")
     parser.add_argument("path", type=str, help="the path to the NWB file")
@@ -31,7 +30,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if not os.path.exists(args.path):
-        write('%s not found' % path, file=sys.stderr)  # noqa: F821
+        print('%s not found' % args.path, file=sys.stderr)
         sys.exit(1)
 
     io = HDF5IO(args.path, get_manager())
@@ -39,14 +38,14 @@ if __name__ == '__main__':
     if args.nspath is not None:
         namespaces = load_namespaces(args.nspath)
         if args.ns is not None:
-            write('Validating against %s from %s.' % (args.ns, args.ns_path), end='')  # noqa: F821
+            print('Validating against %s from %s.' % (args.ns, args.ns_path))
         else:
-            write('Validating using namespaces in %s.' % args.nspath)  # noqa: F821
+            print('Validating using namespaces in %s.' % args.nspath)
             for ns in namespaces:
-                write('Validating against %s' % ns, end='')  # noqa: F821
+                print('Validating against %s' % ns)
                 errors = validate(io, ns)
                 print_errors(errors)
     else:
         errors = validate(io)
-        write('Validating against core namespace' % ns, end='')  # noqa: F821
+        print('Validating against core namespace' % ns)
         print_errors(errors)
