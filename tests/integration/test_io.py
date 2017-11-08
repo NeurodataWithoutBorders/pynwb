@@ -8,6 +8,9 @@ from pynwb import NWBFile, TimeSeries, get_manager
 
 from pynwb.form.backends.hdf5 import HDF5IO
 from pynwb.form.build import GroupBuilder, DatasetBuilder
+from pynwb.form.spec import NamespaceCatalog
+from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
+from pynwb.form.backends.hdf5 import H5SpecReader
 
 class TestHDF5Writer(unittest.TestCase):
 
@@ -83,3 +86,17 @@ class TestHDF5Writer(unittest.TestCase):
             io = HDF5IO(self.path, self.manager, mode='w-')
             io.write(self.container)
             io.close()
+
+    def test_write_cache_spec(self):
+        io = HDF5IO(self.path, self.manager)
+        io.write(self.container, cache_spec=True)
+        io.close()
+        f = File(self.path)
+        self.assertIn('specifications', f)
+        spec_group = f['specifications/core/1.2.0']
+        reader = H5SpecReader(spec_group)
+        ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+        ns_catalog.load_namespaces('namespace', reader=reader)
+
+
+
