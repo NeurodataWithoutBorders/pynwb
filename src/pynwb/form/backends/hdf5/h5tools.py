@@ -40,35 +40,58 @@ class HDF5IO(FORMIO, ):
         self.__read = dict()
         self.__ref_queue = list()
 
-    @staticmethod
-    def get_name(path):
+    @classmethod
+    @docval({'name': 'namespace_catalog', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to load namespaces into'},
+            {'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
+            {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': list})
+    def load_namespaces(cls, namespace_catalog, path, namespaces=None):
+        '''
+        Load cached namespaces from a file.
+        '''
+        f = File(path, 'r')
+        spec_group = f[f.attrs[SPEC_LOC_ATTR]]
+        if namespaces is None:
+            namespaces = list(spec_group.keys())
+        for ns in namespaces:
+            ns_group = spec_group[ns]
+            latest_version = list(ns_group.keys())[-1]
+            ns_group = ns_group[latest_version]
+            reader = H5SpecReader(ns_group)
+            namespace_catalog.load_namespaces('namespace', reader=reader)
+        f.close()
+
+    @classmethod
+    def __convert_namespace(cls, ns_catalog, namespace):
+        ns = ns_catalog.get_namespace(namespace)
+        builder = NamespaceBuilder(ns.doc, ns.name,
+                                   full_name=ns.full_name,
+                                   version=ns.version,
+                                   author=ns.author,
+                                   contact=ns.contact)
+        source_files = ns_catalog.get_namespace_sources(namespace)
+        for source in source_files:
+            for dt in ns_catalog.get_types(source):
+                spec = ns_catalog.get_spec(namespace, dt)
+                if spec.parent is not None:
+                    continue
+                h5_source = cls.__get_name(source)
+                spec = cls.__copy_spec(spec)
+                builder.add_spec(h5_source, spec)
+        return builder
+
+    @classmethod
+    def __get_name(cls, path):
         return os.path.splitext(path)[0]
 
-    @staticmethod
-    def copy_spec(spec):
-        #TODO: implement spec
+    @classmethod
+    def __copy_spec(cls, spec):
         kwargs = dict()
-        kwargs['attributes'] = list()
-        for subspec in spec.attributes:
-            if not spec.is_inherited_spec(subspec):
-                kwargs['attributes'].append(subspec)
+        kwargs['attributes'] = cls.__get_new_specs(spec.attributes, spec)
         to_copy = ['doc', 'name', 'default_name', 'linkable', 'quantity', spec.inc_key(), spec.def_key()]
         if isinstance(spec, GroupSpec):
-            for subspec in spec.datasets:
-                if not spec.is_inherited_spec(subspec):
-                    if 'datasets' not in kwargs:
-                        kwargs['datasets'] = list()
-                    kwargs['datasets'].append(subspec)
-            for subspec in spec.groups:
-                if not spec.is_inherited_spec(subspec):
-                    if 'groups' not in kwargs:
-                        kwargs['groups'] = list()
-                    kwargs['groups'].append(subspec)
-            for subspec in spec.links:
-                if not spec.is_inherited_spec(subspec):
-                    if 'links' not in kwargs:
-                        kwargs['links'] = list()
-                    kwargs['links'].append(subspec)
+            kwargs['datasets'] = cls.__get_new_specs(spec.datasets, spec)
+            kwargs['groups'] = cls.__get_new_specs(spec.groups, spec)
+            kwargs['links'] = cls.__get_new_specs(spec.links, spec)
         else:
             to_copy.append('dtype')
             to_copy.append('shape')
@@ -80,28 +103,19 @@ class HDF5IO(FORMIO, ):
         ret = spec.build_spec(kwargs)
         return ret
 
-    def convert_namespace(self, ns_catalog, namespace):
-        ns = ns_catalog.get_namespace(namespace)
-        builder = NamespaceBuilder(ns.doc, ns.name,
-                                   full_name=ns.full_name,
-                                   version=ns.version,
-                                   author=ns.author,
-                                   contact=ns.contact)
-        source_files = ns_catalog.get_namespace_sources(namespace)
-        for source in source_files:
-            for dt in ns_catalog.get_types(source):
-                spec = ns_catalog.get_spec(namespace, dt)
-                h5_source = self.get_name(source)
-                spec = self.copy_spec(spec)
-                builder.add_spec(h5_source, spec)
-        return builder
+    @classmethod
+    def __get_new_specs(cls, subspecs, spec):
+        ret = list()
+        for subspec in subspecs:
+            if not spec.is_inherited_spec(subspec) or spec.is_overridden_spec(subspec):
+                ret.append(subspec)
+        return ret
 
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'},
             {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False})
     def write(self, **kwargs):
-        call_docval_func(super(HDF5IO, self).write, kwargs)
         cache_spec = getargs('cache_spec', kwargs)
-        print('calling write, cache_spec =', cache_spec)
+        call_docval_func(super(HDF5IO, self).write, kwargs)
         if cache_spec:
             ref = self.__file.attrs.get(SPEC_LOC_ATTR)
             spec_group = None
@@ -113,7 +127,7 @@ class HDF5IO(FORMIO, ):
                 self.__file.attrs[SPEC_LOC_ATTR] = spec_group.ref
             ns_catalog = self.manager.namespace_catalog
             for ns_name in ns_catalog.namespaces:
-                ns_builder = self.convert_namespace(ns_catalog, ns_name)
+                ns_builder = self.__convert_namespace(ns_catalog, ns_name)
                 namespace = ns_catalog.get_namespace(ns_name)
                 group_name = '%s/%s' % (ns_name, namespace.version)
                 ns_group = spec_group.require_group(group_name)
@@ -633,7 +647,7 @@ class H5SpecWriter(SpecWriter):
         return self.__write(spec, path)
 
     def write_namespace(self, namespace, path):
-        return self.__write({'namespaces': namespace}, path)
+        return self.__write({'namespaces': [namespace]}, path)
 
 class H5SpecReader(SpecReader):
 
@@ -650,5 +664,7 @@ class H5SpecReader(SpecReader):
         return self.__read(spec_path)
 
     def read_namespace(self, ns_path):
-        return self.__read(ns_path)
+        ret = self.__read(ns_path)
+        ret = ret['namespaces']
+        return ret
 
