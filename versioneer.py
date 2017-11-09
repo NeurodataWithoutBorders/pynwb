@@ -282,6 +282,7 @@ try:
 except ImportError:
     import ConfigParser as configparser
 import errno
+import fnmatch  # PYNWB
 import json
 import os
 import re
@@ -431,6 +432,7 @@ LONG_VERSION_PY['git'] = '''
 """Git implementation of _version.py."""
 
 import errno
+import fnmatch  # PYNWB
 import os
 import re
 import subprocess
@@ -617,14 +619,26 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
         print("likely tags: %%s" %% ",".join(sorted(tags)))
     for ref in sorted(tags):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
-        if ref.startswith(tag_prefix):
-            r = ref[len(tag_prefix):]
-            if verbose:
-                print("picking %%s" %% r)
-            return {"version": r,
-                    "full-revisionid": keywords["full"].strip(),
-                    "dirty": False, "error": None,
-                    "date": date}
+        # PYNWB: Support tag_prefix specified as a glob pattern
+        tag_is_glob_pattern = "*" in tag_prefix
+        if tag_is_glob_pattern:
+            if fnmatch.fnmatch(ref, tag_prefix):
+                r = ref
+                if verbose:
+                    print("picking %s" % r)
+                return {"version": r,
+                        "full-revisionid": keywords["full"].strip(),
+                        "dirty": False, "error": None,
+                        "date": date}
+        else:
+            if ref.startswith(tag_prefix):
+                r = ref[len(tag_prefix):]
+                if verbose:
+                    print("picking %s" % r)
+                return {"version": r,
+                        "full-revisionid": keywords["full"].strip(),
+                        "dirty": False, "error": None,
+                        "date": date}
     # no suitable tags, so version is "0+unknown", but full hex is still there
     if verbose:
         print("no suitable tags, using unknown + full revision id")
@@ -652,11 +666,17 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
             print("Directory %%s not under git control" %% root)
         raise NotThisMethod("'git rev-parse --git-dir' returned error")
 
+    # PYNWB: Support tag_prefix specified as a glob pattern
+    tag_is_glob_pattern = "*" in tag_prefix
+    match_argument = tag_prefix
+    if not tag_is_glob_pattern:
+        match_argument = tag_prefix + "*"
+
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = run_command(GITS, ["describe", "--tags", "--dirty",
                                           "--always", "--long",
-                                          "--match", "%%s*" %% tag_prefix],
+                                          "--match", "%%s" %% match_argument],
                                    cwd=root)
     # --long was added in git-1.5.5
     if describe_out is None:
@@ -695,14 +715,25 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
 
         # tag
         full_tag = mo.group(1)
-        if not full_tag.startswith(tag_prefix):
-            if verbose:
-                fmt = "tag '%%s' doesn't start with prefix '%%s'"
-                print(fmt %% (full_tag, tag_prefix))
-            pieces["error"] = ("tag '%%s' doesn't start with prefix '%%s'"
-                               %% (full_tag, tag_prefix))
-            return pieces
-        pieces["closest-tag"] = full_tag[len(tag_prefix):]
+        # PYNWB: Support tag_prefix specified as a glob pattern
+        if tag_is_glob_pattern:
+            if not fnmatch.fnmatch(full_tag, tag_prefix):
+                if verbose:
+                    fmt = "tag '%%s' doesn't match glob pattern '%%s'"
+                    print(fmt %% (full_tag, tag_prefix))
+                pieces["error"] = ("tag '%%s' doesn't match glob pattern '%%s'"
+                                   %% (full_tag, tag_prefix))
+                return pieces
+            pieces["closest-tag"] = full_tag
+        else:
+            if not full_tag.startswith(tag_prefix):
+                if verbose:
+                    fmt = "tag '%%s' doesn't start with prefix '%%s'"
+                    print(fmt %% (full_tag, tag_prefix))
+                pieces["error"] = ("tag '%%s' doesn't start with prefix '%%s'"
+                                   %% (full_tag, tag_prefix))
+                return pieces
+            pieces["closest-tag"] = full_tag[len(tag_prefix):]
 
         # distance: number of commits since tag
         pieces["distance"] = int(mo.group(2))
@@ -1009,14 +1040,26 @@ def git_versions_from_keywords(keywords, tag_prefix, verbose):
         print("likely tags: %s" % ",".join(sorted(tags)))
     for ref in sorted(tags):
         # sorting will prefer e.g. "2.0" over "2.0rc1"
-        if ref.startswith(tag_prefix):
-            r = ref[len(tag_prefix):]
-            if verbose:
-                print("picking %s" % r)
-            return {"version": r,
-                    "full-revisionid": keywords["full"].strip(),
-                    "dirty": False, "error": None,
-                    "date": date}
+        # PYNWB: Support tag_prefix specified as a glob pattern
+        tag_is_glob_pattern = "*" in tag_prefix
+        if tag_is_glob_pattern:
+            if fnmatch.fnmatch(ref, tag_prefix):
+                r = ref
+                if verbose:
+                    print("picking %s" % r)
+                return {"version": r,
+                        "full-revisionid": keywords["full"].strip(),
+                        "dirty": False, "error": None,
+                        "date": date}
+        else:
+            if ref.startswith(tag_prefix):
+                r = ref[len(tag_prefix):]
+                if verbose:
+                    print("picking %s" % r)
+                return {"version": r,
+                        "full-revisionid": keywords["full"].strip(),
+                        "dirty": False, "error": None,
+                        "date": date}
     # no suitable tags, so version is "0+unknown", but full hex is still there
     if verbose:
         print("no suitable tags, using unknown + full revision id")
@@ -1044,11 +1087,16 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
             print("Directory %s not under git control" % root)
         raise NotThisMethod("'git rev-parse --git-dir' returned error")
 
+    # PYNWB: Support tag_prefix specified as a glob pattern
+    tag_is_glob_pattern = "*" in tag_prefix
+    match_argument = tag_prefix
+    if not tag_is_glob_pattern:
+        match_argument = tag_prefix + "*"
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = run_command(GITS, ["describe", "--tags", "--dirty",
                                           "--always", "--long",
-                                          "--match", "%s*" % tag_prefix],
+                                          "--match", "%s" % match_argument],
                                    cwd=root)
     # --long was added in git-1.5.5
     if describe_out is None:
@@ -1087,14 +1135,25 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
 
         # tag
         full_tag = mo.group(1)
-        if not full_tag.startswith(tag_prefix):
-            if verbose:
-                fmt = "tag '%s' doesn't start with prefix '%s'"
-                print(fmt % (full_tag, tag_prefix))
-            pieces["error"] = ("tag '%s' doesn't start with prefix '%s'"
-                               % (full_tag, tag_prefix))
-            return pieces
-        pieces["closest-tag"] = full_tag[len(tag_prefix):]
+        # PYNWB: Support tag_prefix specified as a glob pattern
+        if tag_is_glob_pattern:
+            if not fnmatch.fnmatch(full_tag, tag_prefix):
+                if verbose:
+                    fmt = "tag '%s' doesn't match glob pattern '%s'"
+                    print(fmt % (full_tag, tag_prefix))
+                pieces["error"] = ("tag '%s' doesn't match glob pattern '%s'"
+                                   % (full_tag, tag_prefix))
+                return pieces
+            pieces["closest-tag"] = full_tag
+        else:
+            if not full_tag.startswith(tag_prefix):
+                if verbose:
+                    fmt = "tag '%s' doesn't start with prefix '%s'"
+                    print(fmt % (full_tag, tag_prefix))
+                pieces["error"] = ("tag '%s' doesn't start with prefix '%s'"
+                                   % (full_tag, tag_prefix))
+                return pieces
+            pieces["closest-tag"] = full_tag[len(tag_prefix):]
 
         # distance: number of commits since tag
         pieces["distance"] = int(mo.group(2))
