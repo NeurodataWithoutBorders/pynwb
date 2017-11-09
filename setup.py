@@ -54,7 +54,20 @@ setup_args = {
         "Operating System :: Unix",
         "Topic :: Scientific/Engineering :: Medical Science Apps."
     ],
-    'keywords': 'PyNWB NWB Neuroscience HDF NeurodataWithoutBorders',
+    'keywords': 'Neuroscience '
+                'python '
+                'HDF '
+                'HDF5 '
+                'cross-platform '
+                'open-data '
+                'data-format '
+                'open-source '
+                'open-science '
+                'reproducible-research '
+                'PyNWB '
+                'NWB '
+                'NWB:N '
+                'NeurodataWithoutBorders',
     # 'package_data': {'pynwb':["data/*.yaml"]},
     # 'cmdclass':{
     #    'build_py': CustomBuild,
