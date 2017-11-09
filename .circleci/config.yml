@@ -62,6 +62,11 @@ jobs:
            command: |
              if [ "${CIRCLE_BRANCH}" == "dev" ]; then
                pip install scikit-ci-addons
-               ci_addons publish_github_release NeurodataWithoutBorders/pynwb \
-                 --prerelease-packages "dist/*" --exit-success-if-missing-token --re-upload
+               ci_addons publish_github_release NeurodataWithoutBorders/pynwb  \
+                 --prerelease-packages "dist/*" \
+                 --prerelease-sha dev \
+                 --prerelease-packages-clear-pattern "*" \
+                 --prerelease-packages-keep-pattern "*g<COMMIT_SHORT_SHA>*" \
+                 --re-upload \
+                 --exit-success-if-missing-token
              fi
