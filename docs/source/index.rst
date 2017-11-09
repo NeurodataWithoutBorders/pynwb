@@ -34,6 +34,12 @@ breaking down the barriers to data sharing in neuroscience.
 
 .. toctree::
    :maxdepth: 2
+   :caption: Maintainer
+
+   make_a_release
+
+.. toctree::
+   :maxdepth: 2
    :caption: Legal
 
    legal
