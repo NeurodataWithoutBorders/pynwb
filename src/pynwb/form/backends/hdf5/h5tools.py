@@ -282,7 +282,7 @@ class HDF5IO(FORMIO):
             call = self.__ref_queue.popleft()
             try:
                 call()
-            except KeyError as ke:
+            except KeyError:
                 if id(call) in failed:
                     raise RuntimeError('Unable to resolve reference')
                 failed.add(id(call))

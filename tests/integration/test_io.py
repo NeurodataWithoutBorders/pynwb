@@ -10,7 +10,6 @@ from pynwb.form.backends.hdf5 import HDF5IO
 from pynwb.form.build import GroupBuilder, DatasetBuilder
 from pynwb.form.spec import NamespaceCatalog
 from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
-from pynwb.form.backends.hdf5 import H5SpecReader
 
 
 class TestHDF5Writer(unittest.TestCase):

@@ -351,7 +351,8 @@ class NamespaceCatalog(object):
         if reader is None:
             # load namespace definition from file
             if not os.path.exists(namespace_path):
-                raise FileNotFoundError("namespace file '%s' not found" % namespace_path)
+                msg = "namespace file '%s' not found" % namespace_path
+                raise IOError(msg)
             reader = YAMLSpecReader(indir=os.path.dirname(namespace_path))
         ret = self.__included_specs.get(namespace_path)
         if ret is None:
