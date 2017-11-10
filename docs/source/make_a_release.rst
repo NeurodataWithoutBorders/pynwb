@@ -156,9 +156,9 @@ Step-by-step
 
 11. Create GitHub release and upload packages::
 
-   $ pip install githubrelease
-   $ export GITHUB_TOKEN=<NWBOT_API_KEY>
-   $ githubrelease release NeurodataWithoutBorders/pynwb create ${release} --name ${release} --publish ./dist/*
+    $ pip install githubrelease
+    $ export GITHUB_TOKEN=<NWBOT_API_KEY>
+    $ githubrelease release NeurodataWithoutBorders/pynwb create ${release} --name ${release} --publish ./dist/*
 
 
 12. Cleanup::
@@ -167,4 +167,3 @@ Step-by-step
     $ rm -rf dist/*
     $ rmvirtualenv pynwb-${release}-release
     $ rmvirtualenv pynwb-${release}-install-test
-
