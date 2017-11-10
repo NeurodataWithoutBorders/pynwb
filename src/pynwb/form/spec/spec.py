@@ -875,7 +875,7 @@ class GroupSpec(BaseStorageSpec):
         elif spec in self.__data_types:
             return self.is_overridden_type(spec)
         else:
-            if super(GroupSpec, self).is_overridden_spec(spec): # check if overridden attribute
+            if super(GroupSpec, self).is_overridden_spec(spec):  # check if overridden attribute
                 return True
             else:
                 for s in self.__datasets:

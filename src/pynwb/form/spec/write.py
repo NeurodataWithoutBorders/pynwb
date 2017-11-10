@@ -22,9 +22,12 @@ class SpecWriter(with_metaclass(ABCMeta, object)):
     def write_namespace(self, namespace, path):
         pass
 
+
 class YAMLSpecWriter(SpecWriter):
 
-    @docval({'name': 'outdir', 'type': str, 'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'})
+    @docval({'name': 'outdir',
+             'type': str,
+             'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'})
     def __init__(self, **kwargs):
         self.__outdir = getargs('outdir', kwargs)
 
@@ -38,6 +41,7 @@ class YAMLSpecWriter(SpecWriter):
     def write_namespace(self, namespace, path):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
             self.__dump_spec({'namespaces': [namespace]}, stream)
+
 
 class NamespaceBuilder(object):
     ''' A class for building namespace and spec files '''
@@ -96,8 +100,12 @@ class NamespaceBuilder(object):
         self.__namespaces.setdefault(namespace, {'namespace': namespace})
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to write the spec to'},
-            {'name': 'outdir', 'type': str, 'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'},
-            {'name': 'writer', 'type': SpecWriter, 'doc': 'the SpecWriter to use to write the namespace', 'default': None})
+            {'name': 'outdir',
+             'type': str,
+             'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'},
+            {'name': 'writer',
+             'type': SpecWriter,
+             'doc': 'the SpecWriter to use to write the namespace', 'default': None})
     def export(self, **kwargs):
         ''' Export the namespace to the given path.
 
@@ -111,7 +119,7 @@ class NamespaceBuilder(object):
         ns_args['schema'] = list()
         for ns, info in self.__namespaces.items():
             ns_args['schema'].append(info)
-        for path, info  in self.__sources.items():
+        for path, info in self.__sources.items():
             out = SpecFileBuilder()
             dts = list()
             for spec in info[self.__dt_key]:
@@ -129,6 +137,7 @@ class NamespaceBuilder(object):
             ns_args['schema'].append(item)
         namespace = SpecNamespace.build_namespace(**ns_args)
         writer.write_namespace(namespace, ns_path)
+
 
 class SpecFileBuilder(dict):
 

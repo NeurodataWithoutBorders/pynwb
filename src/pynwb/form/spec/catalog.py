@@ -75,7 +75,9 @@ class SpecCatalog(object):
         return self.__spec_source_files.get(data_type, None)
 
     @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'the Spec object to register'},
-            {'name': 'source_file', 'type': str, 'doc': 'path to the source file from which the spec was loaded', 'default': None},
+            {'name': 'source_file',
+             'type': str,
+             'doc': 'path to the source file from which the spec was loaded', 'default': None},
             rtype=tuple, returns='the types that were registered with this spec')
     def auto_register(self, **kwargs):
         '''

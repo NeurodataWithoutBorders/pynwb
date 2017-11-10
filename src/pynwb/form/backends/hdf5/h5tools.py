@@ -4,14 +4,13 @@ import numpy as np
 import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference
 from six import raise_from, text_type, string_types, binary_type
-from functools import partial
 import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
 from ...data_utils import DataChunkIterator, get_shape
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder, TypeMap
-from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, SpecNamespace, GroupSpec, DatasetSpec
+from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, GroupSpec
 from ...spec import NamespaceBuilder
 
 from ..io import FORMIO
@@ -43,7 +42,9 @@ class HDF5IO(FORMIO):
         self.__ref_queue = deque()
 
     @classmethod
-    @docval({'name': 'namespace_catalog', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to load namespaces into'},
+    @docval({'name': 'namespace_catalog',
+             'type': NamespaceCatalog,
+             'doc': 'the NamespaceCatalog to load namespaces into'},
             {'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
             {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': list})
     def load_namespaces(cls, namespace_catalog, path, namespaces=None):
@@ -124,7 +125,7 @@ class HDF5IO(FORMIO):
             if ref is not None:
                 spec_group = self.__file[ref]
             else:
-                path = 'specifications' # do something to figure out where the specifications should go
+                path = 'specifications'  # do something to figure out where the specifications should go
                 spec_group = self.__file.require_group(path)
                 self.__file.attrs[SPEC_LOC_ATTR] = spec_group.ref
             ns_catalog = self.manager.namespace_catalog
@@ -281,7 +282,7 @@ class HDF5IO(FORMIO):
             call = self.__ref_queue.popleft()
             try:
                 call()
-            except:
+            except KeyError as ke:
                 if id(call) in failed:
                     raise RuntimeError('Unable to resolve reference')
                 failed.add(id(call))
@@ -351,7 +352,9 @@ class HDF5IO(FORMIO):
 
     @classmethod
     @docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
-            {'name': 'attributes', 'type': dict, 'doc': 'a dict containing the attributes on the Group, indexed by attribute name'})
+            {'name': 'attributes',
+             'type': dict,
+             'doc': 'a dict containing the attributes on the Group, indexed by attribute name'})
     def set_attributes(cls, **kwargs):
         obj, attributes = getargs('obj', 'attributes', kwargs)
         for key, value in attributes.items():
@@ -431,7 +434,7 @@ class HDF5IO(FORMIO):
             isinstance(data, str) or \
             isinstance(data, frozenset)
 
-    @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
+    @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},  # noqa
             {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the DatasetBuilder to write'},
             returns='the Dataset that was created', rtype=Dataset)
     def write_dataset(self, **kwargs):
@@ -455,6 +458,7 @@ class HDF5IO(FORMIO):
                     refs.append(i)
             if len(refs) > 0:
                 _dtype = self.__resolve_dtype__(dtype, data)
+
                 def _filler():
                     ret = list()
                     for item in data:
@@ -485,12 +489,14 @@ class HDF5IO(FORMIO):
             elif isinstance(data, Builder):
                 _dtype = self.__dtypes[dtype]
                 if dtype == 'region':
+
                     def _filler():
                         ref = self.__get_ref(data, builder.region)
                         dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
                         self.set_attributes(dset, attributes)
                     self.__queue_ref(_filler)
                 else:
+
                     def _filler():
                         ref = self.__get_ref(data)
                         dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
@@ -635,7 +641,7 @@ class HDF5IO(FORMIO):
            func: a function to call to return the chunk of data, with
                  references filled in
         '''
-        #TODO: come up with more intelligent way of
+        # TODO: come up with more intelligent way of
         # queueing reference resolution, based on reference
         # dependency
         self.__ref_queue.append(func)
@@ -650,6 +656,7 @@ class HDF5IO(FORMIO):
             else:
                 ret.append(elem)
         return ret
+
 
 class H5SpecWriter(SpecWriter):
 
@@ -677,6 +684,7 @@ class H5SpecWriter(SpecWriter):
     def write_namespace(self, namespace, path):
         return self.__write({'namespaces': [namespace]}, path)
 
+
 class H5SpecReader(SpecReader):
 
     @docval({'name': 'group', 'type': Group, 'doc': 'the HDF5 file to read specs from'})
@@ -695,4 +703,3 @@ class H5SpecReader(SpecReader):
         ret = self.__read(ns_path)
         ret = ret['namespaces']
         return ret
-
