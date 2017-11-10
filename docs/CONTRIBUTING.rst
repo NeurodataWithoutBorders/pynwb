@@ -16,7 +16,7 @@ Types of Contributions
 Did you find a bug? or Do you intend to add a new feature or change an existing one?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* **Identify the approbritate repository** for the change you are suggesting:
+* **Identify the appropriate repository** for the change you are suggesting:
 
     * Use `nwb_schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_ for any changes to the NWB:N format schema, schema language, storage and other NWB:N related documents
     * Use `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_  for any changes regarding the PyNWB API and the corresponding documentation
@@ -26,12 +26,12 @@ Did you find a bug? or Do you intend to add a new feature or change an existing 
 * If you are unable to find an open issue addressing the problem then open a new issue on the respective repository. Be sure to include:
 
     * **brief and descriptive title**
-    * **clear description of the problem you are trying to solve***. Describing the use case is often more important than proposing a specific solution. By describing the use case and problem you are trying to solve gives the development team and ultimately the NWB:N community a better understanding for the reasons of changes and enables other to suggest solutions.
+    * **clear description of the problem you are trying to solve***. Describing the use case is often more important than proposing a specific solution. By describing the use case and problem you are trying to solve gives the development team and ultimately the NWB:N community a better understanding for the reasons of changes and enables others to suggest solutions.
     * **context** providing as much relevant information as possible and if available a **code sample** or an **executable test case** demonstrating the expected behavior and/or problem.
 
-* Be sure to select the approbritate labels (see :ref:`sec-issue-labels`) for your tickets so that they can be processed accordingly.
+* Be sure to select the appropriate labels (see :ref:`sec-issue-labels`) for your tickets so that they can be processed accordingly.
 
-* NWB:N is currently being developed primarily by staff at scientific research institutions and industry, most of which work on many different research projects. Please be patient, if our development team may not be able to respond immediately to your issues. In particular issues that belong to later project milestones may not be reviewed or processed until work on that milestone begins.
+* NWB:N is currently being developed primarily by staff at scientific research institutions and industry, most of which work on many different research projects. Please be patient, if our development team is not able to respond immediately to your issues. In particular issues that belong to later project milestones may not be reviewed or processed until work on that milestone begins.
 
 Did you write a patch that fixes a bug or implements a new feature?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -41,7 +41,7 @@ See the ``Contributing Patches and Changes`` section below for details.
 Did you fix whitespace, format code, or make a purely cosmetic patch in source code?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Source code changes that are purely cosmetic in nature and do not add anything substantial to the stability, functionality, or testability will generally not be accepted unless they have been approved beforehand. One of the main reasons is that there are a lot of hidden cost in addition to writing the code itself, and with the limited resources of the project, we need to optimize developer time. E.g,. someone needs to test and review PRs, backporting of bug fixes gets harder, it creates noise and pollutes the git repo and many other cost factors.
+Source code changes that are purely cosmetic in nature and do not add anything substantial to the stability, functionality, or testability will generally not be accepted unless they have been approved beforehand. One of the main reasons is that there are a lot of hidden costs in addition to writing the code itself, and with the limited resources of the project, we need to optimize developer time. E.g,. someone needs to test and review PRs, backporting of bug fixes gets harder, it creates noise and pollutes the git repo and many other cost factors.
 
 Do you have questions about NWB:N?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -78,7 +78,7 @@ From your local copy directory, use the following commands.
 
     $ git push origin <new_branch>
 
-4) Once you have tested and finalized your changes, create a pull request to dev:
+4) Once you have tested and finalized your changes, create a pull request targeting ``dev`` as the base branch:
 
     * Ensure the PR description clearly describes the problem and solution.
     * Include the relevant issue number if applicable.
@@ -94,7 +94,7 @@ Issue Labels, Projects, and Milestones
 Labels
 ^^^^^^
 
-Labels are used to describe the general scope of an issues, e.g., whether it describes a bug or feature request etc. Please review and select the approbritate labels for the respective Git repository:
+Labels are used to describe the general scope of an issue, e.g., whether it describes a bug or feature request etc. Please review and select the appropriate labels for the respective Git repository:
 
     * `PyNWB issue labels  <https://github.com/NeurodataWithoutBorders/pynwb/labels>`_
     * `nwb-schema issue labels  <https://github.com/NeurodataWithoutBorders/nwb-schema/labels>`_
@@ -102,7 +102,7 @@ Labels are used to describe the general scope of an issues, e.g., whether it des
 Milestones
 ^^^^^^^^^^
 
-Milestones are used to define the scope and general timeline for issues. Please review and select the approbritate milestones for the respective Git repository:
+Milestones are used to define the scope and general timeline for issues. Please review and select the appropriate milestones for the respective Git repository:
 
     * `PyNWB milestones <https://github.com/NeurodataWithoutBorders/pynwb/milestones>`_
     * `nwb-schema milestones <https://github.com/NeurodataWithoutBorders/nwb-schema/milestones>`_
@@ -110,7 +110,7 @@ Milestones are used to define the scope and general timeline for issues. Please 
 Projects
 ^^^^^^^^
 
-Projects are currently used mainly on the NeurodataWithoutBorders organization level and are only accessible to members of organization. Projects are use to plan and organize developments across repositories. We currently do not use projects on the individual repository level, although that might change in the future.
+Projects are currently used mainly on the NeurodataWithoutBorders organization level and are only accessible to members of the organization. Projects are used to plan and organize developments across repositories. We currently do not use projects on the individual repository level, although that might change in the future.
 
 .. _sec-styleguides:
 
