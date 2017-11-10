@@ -1,4 +1,5 @@
 .. _copyright:
+
 ---------------
 Copyright
 ---------------
@@ -6,13 +7,9 @@ Copyright
 .. include:: ../../Legal.txt
 
 .. _license:
+
 ---------------
 License
 ---------------
 
 .. include:: ../../license.txt
-
-
-
-
-

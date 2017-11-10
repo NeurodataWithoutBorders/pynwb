@@ -61,7 +61,7 @@ class DataChunkIterator(AbstractDataChunkIterator):
     if the default behavior of __next__ should be reused). The __next__ method must return
     in each iteration 1) a numpy array with the data values for the chunk and 2) a numpy-compliant index tuple
     describing where the chunk is located within the complete data.
-    HINT: `numpy.s_ <https://docs.scipy.org/doc/numpy/reference/generated/numpy.s_.html>`_ provides a
+    HINT: `numpy.s <https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.s_.html>`_ provides a
     convenient way to generate index tuples using standard array slicing. There are
     a number of additional functions that one can overwrite to customize behavior, e.g,
     the :py:func:`~form.utils.DataChunkIterator.recommended_chunk_shape` or

@@ -14,6 +14,8 @@
 
 import sys, os
 import sphinx_rtd_theme
+from sphinx.domains.python import PythonDomain
+
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -266,3 +268,14 @@ latex_elements = {
 
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 #texinfo_show_urls = 'footnote'
+
+# https://github.com/sphinx-doc/sphinx/issues/3866
+class PatchedPythonDomain(PythonDomain):
+    def resolve_xref(self, env, fromdocname, builder, typ, target, node, contnode):
+        if 'refspecific' in node:
+            del node['refspecific']
+        return super(PatchedPythonDomain, self).resolve_xref(
+            env, fromdocname, builder, typ, target, node, contnode)
+
+def setup(sphinx):
+    sphinx.override_domain(PatchedPythonDomain)
