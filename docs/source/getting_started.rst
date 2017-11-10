@@ -4,42 +4,80 @@
 Getting Started
 ===============
 
-
----------------
-Prerequisites
----------------
+------------
+Dependencies
+------------
 
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
-#. Python 3.x
-
-   * Before moving forward, make sure `setuptools <https://pypi.python.org/pypi/setuptools>`_ is installed with your version of Python.
-
-#. HDF5
-#. MPI
-
+#. Python 2.7 or Python 3.6
+#. pip
 
 The NWB format provides a formal specification for storing neurophysiology data in HDF5. HDF5 provides support
 for parallel I/O using MPI-IO, and therefore requires MPI.
 
----------------
+------------
 Installation
----------------
+------------
 
-PyNWB can be obtained by checking out the Git repository hosted on GitHub `here <https://github.com/NeurodataWithoutBorders/pynwb>`_.
-Execute the following commands to install PyNWB:
+Install from pypi
+-----------------
 
-.. code-block:: console
+To install or update PyNWB distribution from PyPI simply run:
 
-    $ git clone https://github.com/NeurodataWithoutBorders/pynwb.git
-    $ cd pynwb
-    $ git checkout dev              # This will not be required in the long-term
-    $ python setup.py build
-    $ python setup.py install
+.. code::
+
+   $ pip install -U pynwb
+
+This will automatically install the following required dependencies:
+
+ #. h5py
+ #. numpy
+ #. python-dateutil
+ #. requests
+ #. ruamel.yaml
+ #. six
+
+Install latest dev version
+--------------------------
+
+.. note::
+
+  This is useful to tryout the latest features and also setup automatic build of your
+  own project against the latest version of pynwb.
+
+.. code::
+
+   $ pip install pynwb --find-links https://github.com/NeurodataWithoutBorders/pynwb/releases/tag/latest  --no-index
+
+Install from Git repository (for development)
+---------------------------------------------
+
+For development an editable install is recommended.
+
+.. code::
+
+   $ pip install -U virtualenv
+   $ virtualenv ~/pynwb
+   $ ~/pynwb/bin/activate
+   $ git clone git@github.com:NeurodataWithoutBorders/pynwb.git
+   $ cd pynwb
+   $ pip install -r requirements.txt -r requirements-dev.txt
+   $ pip install -e .
 
 
-Once installed, run the following tests to ensure that the installation worked.
+Run tests
+---------
 
-.. code-block:: console
+For running the tests, it is required to install the development requirements.
 
-    $ python test.py
+.. code::
+
+   $ pip install -U virtualenv
+   $ virtualenv ~/pynwb
+   $ ~/pynwb/bin/activate
+   $ git clone git@github.com:NeurodataWithoutBorders/pynwb.git
+   $ cd pynwb
+   $ pip install -r requirements.txt -r requirements-dev.txt
+   $ pip install -e .
+   $ tox
