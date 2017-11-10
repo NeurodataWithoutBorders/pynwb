@@ -8,6 +8,9 @@ from pynwb import NWBFile, TimeSeries, get_manager
 
 from pynwb.form.backends.hdf5 import HDF5IO
 from pynwb.form.build import GroupBuilder, DatasetBuilder
+from pynwb.form.spec import NamespaceCatalog
+from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
+from pynwb.form.backends.hdf5 import H5SpecReader
 
 
 class TestHDF5Writer(unittest.TestCase):
@@ -92,3 +95,28 @@ class TestHDF5Writer(unittest.TestCase):
             io = HDF5IO(self.path, self.manager, mode='w-')
             io.write(self.container)
             io.close()
+
+    def test_write_cache_spec(self):
+        '''
+        Round-trip test for writing spec and reading it back in
+        '''
+        io = HDF5IO(self.path, self.manager)
+        io.write(self.container, cache_spec=True)
+        io.close()
+        f = File(self.path)
+        self.assertIn('specifications', f)
+        ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+        HDF5IO.load_namespaces(ns_catalog, self.path, namespaces=['core'])
+        original_ns = self.manager.namespace_catalog.get_namespace('core')
+        cached_ns = ns_catalog.get_namespace('core')
+        for key in ('author', 'contact', 'doc', 'full_name', 'name'):
+            with self.subTest(namespace_field=key):
+                self.assertEqual(original_ns[key], cached_ns[key])
+        for dt in original_ns.get_registered_types():
+            with self.subTest(neurodata_type=dt):
+                original_spec = original_ns.get_spec(dt)
+                cached_spec = cached_ns.get_spec(dt)
+                with self.subTest(test='data_type spec read back in'):
+                    self.assertIsNotNone(cached_spec)
+                with self.subTest(test='cached spec preserved original spec'):
+                    self.assertDictEqual(original_spec, cached_spec)

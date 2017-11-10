@@ -38,39 +38,39 @@ class H5IOTest(unittest.TestCase):
     ##########################################
     def test__chunked_iter_fill_iterator_matched_buffer_size(self):
         dci = DataChunkIterator(data=range(10), buffer_size=2)
-        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = HDF5IO.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertListEqual(my_dset[:].tolist(), list(range(10)))
 
     def test__chunked_iter_fill_iterator_unmatched_buffer_size(self):
         dci = DataChunkIterator(data=range(10), buffer_size=3)
-        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = HDF5IO.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertListEqual(my_dset[:].tolist(), list(range(10)))
 
     def test__chunked_iter_fill_numpy_matched_buffer_size(self):
         a = np.arange(30).reshape(5, 2, 3)
         dci = DataChunkIterator(data=a, buffer_size=1)
-        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = HDF5IO.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
     def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):
         a = np.arange(30).reshape(5, 2, 3)
         dci = DataChunkIterator(data=a, buffer_size=3)
-        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = HDF5IO.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
     def test__chunked_iter_fill_list_matched_buffer_size(self):
         a = np.arange(30).reshape(5, 2, 3)
         dci = DataChunkIterator(data=a.tolist(), buffer_size=1)
-        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = HDF5IO.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
     def test__chunked_iter_fill_numpy_unmatched_buffer_size(self):  # noqa: F811
         a = np.arange(30).reshape(5, 2, 3)
         dci = DataChunkIterator(data=a.tolist(), buffer_size=3)
-        my_dset = self.io.__chunked_iter_fill__(self.f, 'test_dataset', dci)
+        my_dset = HDF5IO.__chunked_iter_fill__(self.f, 'test_dataset', dci)
         self.assertTrue(np.all(my_dset[:] == a))
         self.assertTupleEqual(my_dset.shape, a.shape)
 
