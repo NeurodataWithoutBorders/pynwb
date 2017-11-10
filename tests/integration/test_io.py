@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 import six
 from datetime import datetime
 import os
