@@ -81,3 +81,14 @@ For running the tests, it is required to install the development requirements.
    $ pip install -r requirements.txt -r requirements-dev.txt
    $ pip install -e .
    $ tox
+
+
+Following PyNWB Style Guide
+---------------------------
+
+Before you create a Pull Request, make sure you are following PyNWB style guide (`PEP8 <https://www.python.org/dev/peps/pep-0008/>`_). To do that simply run
+the following command in the project's root directory.
+
+.. code::
+
+   $ flake8
