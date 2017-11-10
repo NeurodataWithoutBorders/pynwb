@@ -1,9 +1,6 @@
 import unittest
 
-from pynwb import TimeSeries
 from pynwb.ogen import OptogeneticSeries, OptogeneticStimulusSite
-
-import numpy as np
 
 
 class OptogeneticSeriesConstructor(unittest.TestCase):
@@ -22,6 +19,6 @@ class OptogeneticSeriesConstructor(unittest.TestCase):
         self.assertEqual(iS.unit, 'Watt')
         self.assertEqual(iS.site, oS)
 
+
 if __name__ == '__main__':
     unittest.main()
-

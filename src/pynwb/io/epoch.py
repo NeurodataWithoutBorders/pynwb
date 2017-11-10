@@ -3,6 +3,7 @@ from .. import register_map
 
 from pynwb.epoch import Epoch, EpochTimeSeries
 
+
 @register_map(Epoch)
 class EpochMap(ObjectMapper):
 
@@ -18,6 +19,7 @@ class EpochMap(ObjectMapper):
     @ObjectMapper.constructor_arg('name')
     def name(self, builder, manager):
         return builder.name
+
 
 @register_map(EpochTimeSeries)
 class EpochTimeSeriesMap(ObjectMapper):

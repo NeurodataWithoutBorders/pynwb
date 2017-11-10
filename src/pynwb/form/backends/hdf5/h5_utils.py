@@ -3,6 +3,7 @@ import h5py
 from ...utils import docval, getargs
 from ...data_utils import RegionSlicer
 
+
 class H5RegionSlicer(RegionSlicer):
 
     @docval({'name': 'dataset', 'type': h5py.Dataset, 'doc': 'the HDF5 dataset to slice'},
@@ -22,4 +23,3 @@ class H5RegionSlicer(RegionSlicer):
 
     def __len__(self):
         return self.__len
-

@@ -3,6 +3,7 @@ from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
 
+
 @register_map(ProcessingModule)
 class ModuleMap(ObjectMapper):
 
@@ -14,6 +15,7 @@ class ModuleMap(ObjectMapper):
     @ObjectMapper.constructor_arg('name')
     def name(self, builder, manager):
         return builder.name
+
 
 @register_map(TimeSeries)
 class TimeSeriesMap(ObjectMapper):
@@ -27,7 +29,7 @@ class TimeSeriesMap(ObjectMapper):
         self.map_attr('conversion', data_spec.get_attribute('conversion'))
         timestamps_spec = self.spec.get_dataset('timestamps')
         self.map_attr('timestamps_unit', timestamps_spec.get_attribute('unit'))
-        #self.map_attr('interval', timestamps_spec.get_attribute('interval'))
+        # self.map_attr('interval', timestamps_spec.get_attribute('interval'))
         startingtime_spec = self.spec.get_dataset('starting_time')
         self.map_attr('rate_unit', startingtime_spec.get_attribute('unit'))
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))

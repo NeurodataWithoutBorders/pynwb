@@ -1,9 +1,6 @@
 import unittest
 
-from pynwb import TimeSeries
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, SpikeUnit, UnitTimes
-
-import numpy as np
 
 
 class AnnotationSeriesConstructor(unittest.TestCase):
@@ -14,6 +11,7 @@ class AnnotationSeriesConstructor(unittest.TestCase):
 
         aS.add_annotation(2.0, 'comment')
 
+
 class AbstractFeatureSeriesConstructor(unittest.TestCase):
     def test_init(self):
         aFS = AbstractFeatureSeries('test_aFS', 'a hypothetical source', 'feature units', 'features', timestamps=list())
@@ -23,6 +21,7 @@ class AbstractFeatureSeriesConstructor(unittest.TestCase):
         self.assertEqual(aFS.features, 'features')
 
         aFS.add_features(2.0, list())
+
 
 class IntervalSeriesConstructor(unittest.TestCase):
     def test_init(self):
@@ -46,6 +45,7 @@ class IntervalSeriesConstructor(unittest.TestCase):
         self.assertEqual(iS.data, data)
         self.assertEqual(iS.timestamps, timestamps)
 
+
 class UnitTimesConstructor(unittest.TestCase):
     def test_init(self):
         unit_times = [1.0, 2.0]
@@ -65,6 +65,6 @@ class UnitTimesConstructor(unittest.TestCase):
         self.assertEqual(ut.source, 'test_ut')
         self.assertEqual(ut.spike_units, sul)
 
+
 if __name__ == '__main__':
     unittest.main()
-

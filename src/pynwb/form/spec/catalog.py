@@ -1,7 +1,8 @@
 from collections import OrderedDict
 
 from .spec import BaseStorageSpec, GroupSpec
-from ..utils import docval, getargs, popargs, get_docval
+from ..utils import docval, getargs
+
 
 class SpecCatalog(object):
 
@@ -25,7 +26,8 @@ class SpecCatalog(object):
         self.__spec_source_files = dict()
 
     @docval({'name': 'spec', 'type': BaseStorageSpec, 'doc': 'a Spec object'},
-            {'name': 'source_file', 'type': str, 'doc': 'path to the source file from which the spec was loaded', 'default': None})
+            {'name': 'source_file', 'type': str,
+             'doc': 'path to the source file from which the spec was loaded', 'default': None})
     def register_spec(self, **kwargs):
         '''
         Associate a specified object type with an HDF5 specification
@@ -95,8 +97,8 @@ class SpecCatalog(object):
                 ret.extend(self.auto_register(group_spec, source_file))
         return tuple(ret)
 
-
-    @docval({'name': 'data_type', 'type': (str, type), 'doc': 'the data_type to get the hierarchy of'})
+    @docval({'name': 'data_type', 'type': (str, type),
+             'doc': 'the data_type to get the hierarchy of'})
     def get_hierarchy(self, **kwargs):
         ''' Get the extension hierarchy for the given data_type '''
         data_type = getargs('data_type', kwargs)
@@ -119,11 +121,10 @@ class SpecCatalog(object):
 
     def __copy__(self):
         ret = SpecCatalog()
-        ret.__specs = copy.copy(spec)
+        ret.__specs = copy.copy(spec)  # noqa: F821
         return ret
 
     def __deepcopy__(self):
         ret = SpecCatalog()
-        ret.__specs = copy.deepcopy(spec)
+        ret.__specs = copy.deepcopy(spec)  # noqa: F821
         return ret
-

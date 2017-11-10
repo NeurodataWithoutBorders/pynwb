@@ -1,7 +1,8 @@
-from ..form.build import ObjectMapper, RegionBuilder, DatasetBuilder
+from ..form.build import ObjectMapper, RegionBuilder
 from .. import register_map
 
-from pynwb.core import NWBData, NWBTableRegion
+from pynwb.core import NWBData
+
 
 @register_map(NWBData)
 class NWBDataMap(ObjectMapper):
@@ -11,8 +12,9 @@ class NWBDataMap(ObjectMapper):
         return builder.name
 
     @ObjectMapper.constructor_arg('data')
-    def carg_name(self, builder, manager):
+    def carg_data(self, builder, manager):
         return builder.data
+
 
 class NWBTableRegionMap(NWBDataMap):
 

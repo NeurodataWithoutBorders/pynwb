@@ -9,6 +9,7 @@ from .misc import IntervalSeries
 from .base import TimeSeries, _default_conversion, _default_resolution
 from .image import ImageSeries
 
+
 @register_class('SpatialSeries', CORE_NAMESPACE)
 class SpatialSeries(TimeSeries):
     """
@@ -28,25 +29,34 @@ class SpatialSeries(TimeSeries):
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this SpatialSeries dataset'},
-            {'name': 'source', 'type': str, 'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                                                   'contained here. It can also be the name of a device, for stimulus or '
-                                                   'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, Iterable), 'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-
+            {'name': 'source', 'type': str,
+             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
+                     'contained here. It can also be the name of a device, for stimulus or '
+                     'acquisition data')},
+            {'name': 'data', 'type': (list, np.ndarray, Iterable),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
-
-            {'name': 'conversion', 'type': float, 'doc': 'Scalar to multiply each element by to conver to meters', 'default': _default_conversion},
-            {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': _default_resolution},
-
-            {'name': 'timestamps', 'type': (list, np.ndarray, Iterable), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'conversion', 'type': float,
+             'doc': 'Scalar to multiply each element by to conver to meters',
+             'default': _default_conversion},
+            {'name': 'resolution', 'type': float,
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': _default_resolution},
+            {'name': 'timestamps', 'type': (list, np.ndarray, Iterable),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'parent', 'type': 'NWBContainer', 'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value', 'default': None},
+            {'name': 'comments', 'type': str,
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
             )
     def __init__(self, **kwargs):
         """
@@ -55,6 +65,7 @@ class SpatialSeries(TimeSeries):
         name, source, data, reference_frame = popargs('name', 'source', 'data', 'reference_frame', kwargs)
         super(SpatialSeries, self).__init__(name, source, data, 'meters', **kwargs)
         self.reference_frame = reference_frame
+
 
 @register_class('BehavioralEpochs', CORE_NAMESPACE)
 class BehavioralEpochs(NWBContainer):
@@ -75,13 +86,15 @@ class BehavioralEpochs(NWBContainer):
 
     _help = "General container for storing behavorial epochs."
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this BehavioralEpochs container', 'default': 'BehavioralEpochs'},
+    @docval({'name': 'name', 'type': str,
+             'doc': 'The name of this BehavioralEpochs container', 'default': 'BehavioralEpochs'},
             {'name': 'source', 'type': str, 'doc': 'The source of the data represented in this container.'},
             {'name': 'interval_series', 'type': (list, IntervalSeries), 'doc': 'IntervalSeries or any subtype.'})
     def __init__(self, **kwargs):
         source, interval_series = popargs('source', 'interval_series', kwargs)
         super(BehavioralEpochs, self).__init__(source, **kwargs)
         self.interval_series = set_parents(interval_series, self)
+
 
 @register_class('BehavioralEvents', CORE_NAMESPACE)
 class BehavioralEvents(NWBContainer):
@@ -93,13 +106,15 @@ class BehavioralEvents(NWBContainer):
 
     _help = "General container for storing event series."
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this BehavioralEvents container', 'default': 'BehavioralEvents'},
+    @docval({'name': 'name', 'type': str,
+             'doc': 'The name of this BehavioralEvents container', 'default': 'BehavioralEvents'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'time_series', 'type': TimeSeries, 'doc': 'TimeSeries or any subtype.'})
     def __init__(self, **kwargs):
         source, time_series = popargs('source', 'time_series', kwargs)
         super(BehavioralEvents, self).__init__(source, **kwargs)
         self.time_series = time_series
+
 
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)
 class BehavioralTimeSeries(NWBContainer):
@@ -112,13 +127,15 @@ class BehavioralTimeSeries(NWBContainer):
 
     _help = ""
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this BehavioralTimeSeries', 'default': 'BehavioralTimeSeries'},
+    @docval({'name': 'name', 'type': str,
+             'doc': 'The name of this BehavioralTimeSeries', 'default': 'BehavioralTimeSeries'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'time_series', 'type': TimeSeries, 'doc': '<TimeSeries> or any subtype.'})
     def __init__(self, **kwargs):
         source, time_series = popargs('source', 'time_series', kwargs)
         super(BehavioralTimeSeries, self).__init__(source, **kwargs)
         self.time_series = time_series
+
 
 @register_class('PupilTracking', CORE_NAMESPACE)
 class PupilTracking(NWBContainer):
@@ -130,13 +147,15 @@ class PupilTracking(NWBContainer):
 
     _help = "Eye-tracking data, representing pupil size"
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this PupilTracking container', 'default': 'PupilTracking'},
+    @docval({'name': 'name', 'type': str,
+             'doc': 'The name of this PupilTracking container', 'default': 'PupilTracking'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'time_series', 'type': TimeSeries, 'doc': ''})
     def __init__(self, **kwargs):
         source, time_series = popargs('source', 'time_series', kwargs)
         super(PupilTracking, self).__init__(source, **kwargs)
         self.time_series = time_series
+
 
 @register_class('EyeTracking', CORE_NAMESPACE)
 class EyeTracking(NWBContainer):
@@ -156,6 +175,7 @@ class EyeTracking(NWBContainer):
         super(EyeTracking, self).__init__(source, **kwargs)
         self.spatial_series = set_parents(spatial_series, self)
 
+
 @register_class('CompassDirection', CORE_NAMESPACE)
 class CompassDirection(NWBContainer):
     """
@@ -167,15 +187,18 @@ class CompassDirection(NWBContainer):
 
     __nwbfields__ = ('spatial_series',)
 
-    _help = "Direction as measured radially. Spatial series reference frame should indicate which direction corresponds to zero and what is the direction of positive rotation."
+    _help = "Direction as measured radially. Spatial series reference frame \
+    should indicate which direction corresponds to zero and what is the direction of positive rotation."
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this CompassDirection container', 'default': 'CompassDirection'},
+    @docval({'name': 'name', 'type': str,
+            'doc': 'The name of this CompassDirection container', 'default': 'CompassDirection'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': 'SpatialSeries or any subtype.'})
     def __init__(self, **kwargs):
         source, spatial_series = popargs('source', 'spatial_series', kwargs)
         super(CompassDirection, self).__init__(source, **kwargs)
         self.spatial_series = set_parents(spatial_series, self)
+
 
 @register_class('Position', CORE_NAMESPACE)
 class Position(NWBContainer):
@@ -195,6 +218,7 @@ class Position(NWBContainer):
         super(Position, self).__init__(source, **kwargs)
         self.spatial_series = set_parents(spatial_series, self)
 
+
 @register_class('CorrectedImageStack', CORE_NAMESPACE)
 class CorrectedImageStack(NWBContainer):
     """
@@ -206,16 +230,23 @@ class CorrectedImageStack(NWBContainer):
 
     _help = ""
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
-            {'name': 'corrected', 'type': ImageSeries, 'doc': 'Image stack with frames shifted to the common coordinates.'},
-            {'name': 'original', 'type': ImageSeries, 'doc': 'Link to image series that is being registered.'},
-            {'name': 'xy_translation', 'type': TimeSeries, 'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates, for example, to align each frame to a reference image.'})
+    @docval({'name': 'name', 'type': str,
+             'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'corrected', 'type': ImageSeries,
+             'doc': 'Image stack with frames shifted to the common coordinates.'},
+            {'name': 'original', 'type': ImageSeries,
+             'doc': 'Link to image series that is being registered.'},
+            {'name': 'xy_translation', 'type': TimeSeries,
+             'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates,\
+             for example, to align each frame to a reference image.'})
     def __init__(self, **kwargs):
         corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
         super(CorrectedImageStack, self).__init__(**kwargs)
         self.corrected = corrected
         self.original = original
         self.xy_translation = xy_translation
+
 
 @register_class('MotionCorrection', CORE_NAMESPACE)
 class MotionCorrection(NWBContainer):
@@ -225,15 +256,20 @@ class MotionCorrection(NWBContainer):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ('corrected_image_stack',)
+    __nwbfields__ = ('corrected_image_stacks',)
 
     _help = "Image stacks whose frames have been shifted (registered) to account for motion."
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this MotionCorrection container', 'default': 'MotionCorrection '},
+    @docval({'name': 'name', 'type': str,
+             'doc': 'The name of this MotionCorrection container', 'default': 'MotionCorrection '},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'corrected_image_stacks', 'type': CorrectedImageStack, 'doc': 'the corrected image stack in this Motion Correction analysis'})
+            {'name': 'corrected_image_stacks', 'type': (list, CorrectedImageStack),
+             'doc': 'the corrected image stack in this Motion Correction analysis'})
     def __init__(self, **kwargs):
-        source, corrected_image_stack = popargs('source', 'corrected_image_stack', kwargs)
-        super(MotionCorrection, self).__init__(source, **kwargs)
-        self.corrected_image_stack = corrected_image_stack
+        source, corrected_image_stacks = popargs('source', 'corrected_image_stacks', kwargs)
 
+        if isinstance(corrected_image_stacks, CorrectedImageStack):
+            corrected_image_stacks = [corrected_image_stacks]
+
+        super(MotionCorrection, self).__init__(source, **kwargs)
+        self.corrected_image_stacks = corrected_image_stacks

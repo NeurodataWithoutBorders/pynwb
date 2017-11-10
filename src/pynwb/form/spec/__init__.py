@@ -1,3 +1,4 @@
+# flake8: noqa: F401
 import os.path
 
 from .spec import NAME_WILDCARD
@@ -16,4 +17,3 @@ from .write import NamespaceBuilder
 from .write import SpecWriter
 
 from ..utils import docval
-

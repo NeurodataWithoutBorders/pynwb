@@ -21,12 +21,16 @@ _namespace_args = [
     {'name': 'schema', 'type': list, 'doc': 'location of schema specification files or other Namespaces'},
     {'name': 'full_name', 'type': str, 'doc': 'extended full name of this namespace', 'default': None},
     {'name': 'version', 'type': (str, tuple, list), 'doc': 'Version number of the namespace', 'default': None},
-    {'name': 'date', 'type': (datetime, str), 'doc': "Date last modified or released. Formatting is %Y-%m-%d %H:%M:%S, e.g, 2017-04-25 17:14:13",
+    {'name': 'date', 'type': (datetime, str),
+     'doc': "Date last modified or released. Formatting is %Y-%m-%d %H:%M:%S, e.g, 2017-04-25 17:14:13",
      'default': None},
     {'name': 'author', 'type': (str, list), 'doc': 'Author or list of authors.', 'default': None},
-    {'name': 'contact', 'type': (str, list), 'doc': 'List of emails. Ordering should be the same as for author', 'default': None},
+    {'name': 'contact', 'type': (str, list),
+     'doc': 'List of emails. Ordering should be the same as for author', 'default': None},
     {'name': 'catalog', 'type': SpecCatalog, 'doc': 'The SpecCatalog object for this SpecNamespace', 'default': None}
 ]
+
+
 class SpecNamespace(dict):
     """
     A namespace for specifications
@@ -36,7 +40,7 @@ class SpecNamespace(dict):
 
     @docval(*deepcopy(_namespace_args))
     def __init__(self, **kwargs):
-        doc, full_name, name, version, date, author, contact, schema, catalog  = \
+        doc, full_name, name, version, date, author, contact, schema, catalog = \
             popargs('doc', 'full_name', 'name', 'version', 'date', 'author', 'contact', 'schema', 'catalog', kwargs)
         super(SpecNamespace, self).__init__()
         self['doc'] = doc
@@ -55,7 +59,6 @@ class SpecNamespace(dict):
         if contact is not None:
             self['contact'] = contact
         self.__catalog = catalog if catalog is not None else SpecCatalog()
-
 
     @classmethod
     def types_key(cls):
@@ -177,9 +180,12 @@ class YAMLSpecReader(SpecReader):
 
 class NamespaceCatalog(object):
 
-    @docval({'name': 'group_spec_cls', 'type': type, 'doc': 'the class to use for group specifications', 'default': GroupSpec},
-            {'name': 'dataset_spec_cls', 'type': type, 'doc': 'the class to use for dataset specifications', 'default': DatasetSpec},
-            {'name': 'spec_namespace_cls', 'type': type, 'doc': 'the class to use for specification namespaces', 'default': SpecNamespace})
+    @docval({'name': 'group_spec_cls', 'type': type,
+             'doc': 'the class to use for group specifications', 'default': GroupSpec},
+            {'name': 'dataset_spec_cls', 'type': type,
+             'doc': 'the class to use for dataset specifications', 'default': DatasetSpec},
+            {'name': 'spec_namespace_cls', 'type': type,
+             'doc': 'the class to use for specification namespaces', 'default': SpecNamespace},)
     def __init__(self, **kwargs):
         """Create a catalog for storing  multiple Namespaces"""
         self.__namespaces = OrderedDict()

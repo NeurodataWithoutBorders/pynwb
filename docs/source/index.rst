@@ -21,6 +21,7 @@ breaking down the barriers to data sharing in neuroscience.
 
    getting_started
    architecture
+   software_process
    overview
 
 .. toctree::
@@ -30,6 +31,12 @@ breaking down the barriers to data sharing in neuroscience.
    example
    tutorials
    api_docs
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Maintainer
+
+   make_a_release
 
 .. toctree::
    :maxdepth: 2
@@ -43,5 +50,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
-

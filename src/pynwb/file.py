@@ -10,19 +10,25 @@ from .base import TimeSeries, ProcessingModule
 from .epoch import Epoch
 from .ecephys import ElectrodeTable, ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
+from .ophys import ImagingPlane
 from .core import NWBContainer
+
 
 def _not_parent(arg):
     return arg['name'] != 'parent'
+
+
 @register_class('Image', CORE_NAMESPACE)
 class Image(Container):
-    #TODO: Implement this
+    # TODO: Implement this
     pass
+
 
 @register_class('SpecFile', CORE_NAMESPACE)
 class SpecFile(Container):
-    #TODO: Implement this
+    # TODO: Implement this
     pass
+
 
 @register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(NWBContainer):
@@ -58,28 +64,42 @@ class NWBFile(NWBContainer):
         cls.__current_version = version
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'session_description', 'type': str, 'doc': 'a description of the session where this data was generated'},
+            {'name': 'session_description', 'type': str,
+             'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
             {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
-            {'name': 'file_create_date', 'type': (list, datetime, str), 'doc': 'the time the file was created and subsequenct modifications made', 'default': None},
+            {'name': 'file_create_date', 'type': (list, datetime, str),
+             'doc': 'the time the file was created and subsequenct modifications made', 'default': None},
             {'name': 'version', 'type': str, 'doc': 'the NWB version', 'default': None},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
-            {'name': 'experiment_description', 'type': str, 'doc': 'general description of the experiment', 'default': None},
+            {'name': 'experiment_description', 'type': str,
+             'doc': 'general description of the experiment', 'default': None},
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
-            {'name': 'institution', 'type': str, 'doc': 'institution(s) where experiment is performed', 'default': None},
+            {'name': 'institution', 'type': str,
+             'doc': 'institution(s) where experiment is performed', 'default': None},
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
-            {'name': 'acquisition', 'type': (list, tuple), 'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
-            {'name': 'stimulus', 'type': (list, tuple), 'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
-            {'name': 'stimulus_template', 'type': (list, tuple), 'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
-            {'name': 'epochs', 'type': (list, tuple), 'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
-            {'name': 'modules', 'type': (list, tuple), 'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
-            {'name': 'ec_electrodes', 'type': (ElectrodeTable, Iterable), 'doc': 'the ElectrodeTable that belongs to this NWBFile', 'default': None},
-            {'name': 'ec_electrode_groups', 'type': Iterable, 'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
-            {'name': 'ic_electrodes', 'type': (list, tuple), 'doc': 'IntracellularElectrodes that belong to this NWBFile', 'default': None},
-            {'name': 'imaging_planes', 'type': (list, tuple), 'doc': 'ImagingPlanes that belong to this NWBFile', 'default': None},
-            {'name': 'optogenetic_sites', 'type': (list, tuple), 'doc': 'OptogeneticStimulusSites that belong to this NWBFile', 'default': None},
-            {'name': 'devices', 'type': (list, tuple), 'doc': 'Device objects belonging to this NWBFile', 'default': None},
-    )
+            {'name': 'acquisition', 'type': (list, tuple),
+             'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
+            {'name': 'stimulus', 'type': (list, tuple),
+             'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
+            {'name': 'stimulus_template', 'type': (list, tuple),
+             'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
+            {'name': 'epochs', 'type': (list, tuple),
+             'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
+            {'name': 'modules', 'type': (list, tuple),
+             'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
+            {'name': 'ec_electrodes', 'type': (ElectrodeTable, Iterable),
+             'doc': 'the ElectrodeTable that belongs to this NWBFile', 'default': None},
+            {'name': 'ec_electrode_groups', 'type': Iterable,
+             'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
+            {'name': 'ic_electrodes', 'type': (list, tuple),
+             'doc': 'IntracellularElectrodes that belong to this NWBFile', 'default': None},
+            {'name': 'imaging_planes', 'type': (list, tuple),
+             'doc': 'ImagingPlanes that belong to this NWBFile', 'default': None},
+            {'name': 'optogenetic_sites', 'type': (list, tuple),
+             'doc': 'OptogeneticStimulusSites that belong to this NWBFile', 'default': None},
+            {'name': 'devices', 'type': (list, tuple),
+             'doc': 'Device objects belonging to this NWBFile', 'default': None})
     def __init__(self, **kwargs):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
         pkwargs['name'] = 'root'
@@ -132,7 +152,6 @@ class NWBFile(NWBContainer):
             return dict()
         else:
             return {i.name: i for i in arg}
-
 
     def __build_ts(self, const_arg):
         ret = dict()
@@ -214,6 +233,35 @@ class NWBFile(NWBContainer):
     def imaging_planes(self):
         return tuple(self.__imaging_planes.values())
 
+    @docval(*filter(_not_parent, get_docval(ImagingPlane.__init__)),
+            returns='the imaging plane', rtype=ImagingPlane)
+    def create_imaging_plane(self, **kwargs):
+        """
+        Add metadata about an imaging plane
+        """
+        ip_args, ip_kwargs = fmt_docval_args(ImagingPlane.__init__, kwargs)
+        img_pln = ImagingPlane(*ip_args, **ip_kwargs)
+        self.set_imaging_plane(img_pln)
+        return img_pln
+
+    @docval({'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'the ImagingPlane object to add to this NWBFile'})
+    def set_imaging_plane(self, **kwargs):
+        """
+        Add an ImagingPlane object to this file
+        """
+        img_pln = getargs('imaging_plane', kwargs)
+        img_pln.parent = self
+        name = img_pln.name
+        self.__imaging_planes[name] = img_pln
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the imaging plane'})
+    def get_imaging_plane(self, **kwargs):
+        """
+        Get an ImagingPlane object from this file
+        """
+        name = getargs('name', kwargs)
+        return self.__imaging_planes.get(name)
+
     def is_acquisition(self, ts):
         return self.__exists(ts, self.__acquisition)
 
@@ -248,8 +296,11 @@ class NWBFile(NWBContainer):
     def get_epoch(self, name):
         return self.__get_epoch(name)
 
-    @docval({'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
-            {'name': 'timeseries', 'type': (str, TimeSeries, list, tuple), 'doc': 'the name of a timeseries or a TimeSeries object or a list of names of timeseries or TimeSeries objects'})
+    @docval({'name': 'epoch', 'type': (str, Epoch, list, tuple),
+             'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
+            {'name': 'timeseries', 'type': (str, TimeSeries, list, tuple),
+             'doc': 'the name of a timeseries or a TimeSeries object or a list of \
+             names of timeseries or TimeSeries objects'})
     def set_epoch_timeseries(self, **kwargs):
         """
         Add one or more TimSeries datasets to one or more Epochs
@@ -285,8 +336,8 @@ class NWBFile(NWBContainer):
             ts = timeseries
         elif isinstance(timeseries, str):
             ts = self.__acquisition.get(timeseries,
-                    self.__stimulus.get(timeseries,
-                        self.__stimulus_template.get(timeseries, None)))
+                                        self.__stimulus.get(timeseries,
+                                                            self.__stimulus_template.get(timeseries, None)))
             if not ts:
                 raise KeyError("TimeSeries '%s' not found" % timeseries)
         else:
@@ -294,7 +345,8 @@ class NWBFile(NWBContainer):
         return ts
 
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
-            {'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
+            {'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch \
+            or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
     def add_acquisition(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', kwargs)
@@ -309,7 +361,9 @@ class NWBFile(NWBContainer):
         return self.__get_timeseries(self.__acquisition, name)
 
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
-            {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
+            {'name': 'epoch', 'type': (str, Epoch),
+             'doc': 'the name of an epoch or an Epoch object or a list of names of \
+             epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
     def add_stimulus(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', kwargs)
@@ -324,7 +378,9 @@ class NWBFile(NWBContainer):
         return self.__get_timeseries(self.__stimulus, name)
 
     @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
-            {'name': 'epoch', 'type': (str, Epoch), 'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
+            {'name': 'epoch', 'type': (str, Epoch),
+             'doc': 'the name of an epoch or an Epoch object or a list of names of \
+             epochs or Epoch objects', 'default': None},
             returns="the TimeSeries object")
     def add_stimulus_template(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', kwargs)
@@ -352,13 +408,6 @@ class NWBFile(NWBContainer):
             raise ValueError(msg)
         return ret
 
-    @docval(*get_docval(ElectrodeTable.add_row))
-    def add_electrode(self, **kwargs):
-        '''
-        Add an electrode to this NWBFile
-        '''
-        call_docval_func(self.electrodes.add_row, kwargs)
-
     @docval(*filter(_not_parent, get_docval(ElectrodeGroup.__init__)),
             returns='the electrode group', rtype=ElectrodeGroup)
     def create_electrode_group(self, **kwargs):
@@ -370,7 +419,8 @@ class NWBFile(NWBContainer):
         self.set_electrode_group(elec_grp)
         return elec_grp
 
-    @docval({'name': 'electrode_grp', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'})
+    @docval({'name': 'electrode_grp', 'type': ElectrodeGroup,
+             'doc': 'the ElectrodeGroup object to add to this NWBFile'})
     def set_electrode_group(self, **kwargs):
         elec_grp = getargs('electrode_grp', kwargs)
         elec_grp.parent = self
@@ -414,7 +464,8 @@ class NWBFile(NWBContainer):
         self.set_intracellular_electrode(ic_elec)
         return ic_elec
 
-    @docval({'name': 'ic_elec', 'type': IntracellularElectrode, 'doc': 'the IntracellularElectrode object to add to this NWBFile'})
+    @docval({'name': 'ic_elec', 'type': IntracellularElectrode,
+             'doc': 'the IntracellularElectrode object to add to this NWBFile'})
     def set_intracellular_electrode(self, **kwargs):
         ic_elec = getargs('ic_elec', kwargs)
         ic_elec.parent = self

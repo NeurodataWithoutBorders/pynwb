@@ -1,11 +1,13 @@
 import abc
 from six import with_metaclass
 
+
 class Container(with_metaclass(abc.ABCMeta, object)):
 
     @classmethod
     def type_hierarchy(cls):
         return cls.__mro__
+
 
 class Data(Container):
 
@@ -15,6 +17,7 @@ class Data(Container):
         The data that is held by this Container
         '''
         pass
+
 
 class DataRegion(Data):
 

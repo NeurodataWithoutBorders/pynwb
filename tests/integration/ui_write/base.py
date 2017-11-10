@@ -10,12 +10,15 @@ CORE_NAMESPACE = 'core'
 
 container_tests = dict()
 
+
 def container_test(container):
     global container_tests
+
     def _dec(cls):
         container_tests[container] = cls
         return cls
     return _dec
+
 
 class TestMapNWBContainer(unittest.TestCase):
 
@@ -65,7 +68,7 @@ class TestMapNWBContainer(unittest.TestCase):
                 f2 = getattr(container2, nwbfield)
                 if isinstance(f1, (tuple, list, np.ndarray)):
                     if len(f1) > 0 and isinstance(f1[0], NWBContainer):
-                        for sub1, sub2 in zip(f1,f2):
+                        for sub1, sub2 in zip(f1, f2):
                             self.assertContainerEqual(sub1, sub2)
                         continue
                     else:

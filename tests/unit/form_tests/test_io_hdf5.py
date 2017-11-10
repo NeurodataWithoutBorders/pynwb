@@ -13,6 +13,7 @@ from numbers import Number
 import json
 import numpy as np
 
+
 class HDF5Encoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, Dataset):
@@ -21,7 +22,7 @@ class HDF5Encoder(json.JSONEncoder):
                 try:
                     ret = t(obj)
                     break
-                except:
+                except:  # noqa: F722
                     pass
             if ret is None:
                 return obj
@@ -32,6 +33,7 @@ class HDF5Encoder(json.JSONEncoder):
         elif isinstance(obj, bytes):
             return str(obj)
         return json.JSONEncoder.default(self, obj)
+
 
 class GroupBuilderTestCase(unittest.TestCase):
     '''
@@ -65,13 +67,11 @@ class GroupBuilderTestCase(unittest.TestCase):
             reasons.append("'%s' attribute missing from first dataset" % k)
         return reasons
 
-
     def __compare_dataset(self, a, b):
         reasons = self.__compare_attr_dicts(a.attributes, b.attributes)
         if not self.__compare_data(a.data, b.data):
             reasons.append("dataset '%s' not equal" % a.name)
         return reasons
-
 
     def __compare_data(self, a, b):
         if isinstance(a, Number) and isinstance(b, Number):
@@ -93,7 +93,6 @@ class GroupBuilderTestCase(unittest.TestCase):
                 return False
         return True
 
-
     def __fmt(self, val):
         return "%s (%s)" % (val, type(val))
 
@@ -110,7 +109,7 @@ class GroupBuilderTestCase(unittest.TestCase):
                 elif isinstance(a_sub, LinkBuilder) != isinstance(a_sub, LinkBuilder):
                     reasons.append('%s != %s' % (a_sub, b_sub))
                 if isinstance(a_sub, DatasetBuilder) and isinstance(a_sub, DatasetBuilder):
-                    #if not self.__compare_dataset(a_sub, b_sub):
+                    # if not self.__compare_dataset(a_sub, b_sub):
                     #    reasons.append('%s != %s' % (a_sub, b_sub))
                     reasons.extend(self.__compare_dataset(a_sub, b_sub))
                 elif isinstance(a_sub, GroupBuilder) and isinstance(a_sub, GroupBuilder):
@@ -124,10 +123,9 @@ class GroupBuilderTestCase(unittest.TestCase):
             reasons.append("'%s' not in both" % k)
         return reasons
 
-
     def assertBuilderEqual(self, a, b):
         ''' Tests that two GroupBuilders are equal '''
-        reasons = self.__assert_helper(a,b)
+        reasons = self.__assert_helper(a, b)
         if len(reasons):
             raise AssertionError(', '.join(reasons))
         return True
@@ -142,29 +140,40 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)
 
         ts_builder = GroupBuilder('test_timeseries',
-                                 attributes={'ancestry': 'TimeSeries',
-                                             'source': 'example_source',
-                                             'neurodata_type': 'TimeSeries',
-                                             'help': 'General purpose TimeSeries'},
-                                 datasets={'data': DatasetBuilder('data', list(range(100,200,10)),
-                                                                  attributes={'unit': 'SIunit',
-                                                                              'conversion': 1.0,
-                                                                              'resolution': 0.1}),
-                                           'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                  attributes={'unit': 'Seconds', 'interval': 1})})
-        self.builder = GroupBuilder('root',
-                                 groups={'acquisition': GroupBuilder('acquisition', groups={'timeseries': GroupBuilder('timeseries', groups={'test_timeseries': ts_builder}), 'images': GroupBuilder('images')}),
-                                         'analysis': GroupBuilder('analysis'),
-                                         'epochs': GroupBuilder('epochs'),
-                                         'general': GroupBuilder('general'),
-                                         'processing': GroupBuilder('processing'),
-                                         'stimulus': GroupBuilder('stimulus', groups={'presentation': GroupBuilder('presentation'), 'templates': GroupBuilder('templates')})},
-                                 datasets={'file_create_date': DatasetBuilder('file_create_date', [str(self.create_date)]),
-                                           'identifier': DatasetBuilder('identifier', 'TEST123'),
-                                           'session_description': DatasetBuilder('session_description', 'a test NWB File'),
-                                           'nwb_version': DatasetBuilder('nwb_version', '1.0.6'),
-                                           'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
-                                 attributes={'neurodata_type': 'NWBFile'})
+                                  attributes={'ancestry': 'TimeSeries',
+                                              'source': 'example_source',
+                                              'neurodata_type': 'TimeSeries',
+                                              'help': 'General purpose TimeSeries'},
+                                  datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
+                                                                   attributes={'unit': 'SIunit',
+                                                                               'conversion': 1.0,
+                                                                               'resolution': 0.1}),
+                                            'timestamps': DatasetBuilder(
+                                                'timestamps', list(range(10)),
+                                                attributes={'unit': 'Seconds', 'interval': 1})})
+        self.builder = GroupBuilder(
+            'root',
+            groups={'acquisition':
+                    GroupBuilder('acquisition',
+                                 groups={'timeseries':
+                                         GroupBuilder('timeseries',
+                                                      groups={'test_timeseries': ts_builder}),
+                                         'images': GroupBuilder('images')}),
+                    'analysis': GroupBuilder('analysis'),
+                    'epochs': GroupBuilder('epochs'),
+                    'general': GroupBuilder('general'),
+                    'processing': GroupBuilder('processing'),
+                    'stimulus': GroupBuilder(
+                        'stimulus',
+                        groups={'presentation':
+                                GroupBuilder('presentation'),
+                                'templates': GroupBuilder('templates')})},
+            datasets={'file_create_date': DatasetBuilder('file_create_date', [str(self.create_date)]),
+                      'identifier': DatasetBuilder('identifier', 'TEST123'),
+                      'session_description': DatasetBuilder('session_description', 'a test NWB File'),
+                      'nwb_version': DatasetBuilder('nwb_version', '1.0.6'),
+                      'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
+            attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
         if os.path.exists(self.path):
