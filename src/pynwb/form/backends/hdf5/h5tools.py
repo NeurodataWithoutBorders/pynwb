@@ -1,4 +1,4 @@
-from collections import Iterable
+from collections import Iterable, deque
 import json
 import numpy as np
 import os.path
@@ -40,7 +40,7 @@ class HDF5IO(FORMIO):
         self.__built = dict()
         self.__file = None
         self.__read = dict()
-        self.__ref_queue = list()
+        self.__ref_queue = deque()
 
     @classmethod
     @docval({'name': 'namespace_catalog', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to load namespaces into'},
@@ -276,9 +276,16 @@ class HDF5IO(FORMIO):
         does not happen in a guaranteed order. We need to figure out what objects
         will be references, and then write them after we write everything else.
         '''
+        failed = set()
         while len(self.__ref_queue) > 0:
-            call = self.__ref_queue.pop()
-            call()
+            call = self.__ref_queue.popleft()
+            try:
+                call()
+            except:
+                if id(call) in failed:
+                    raise RuntimeError('Unable to resolve reference')
+                failed.add(id(call))
+                self.__ref_queue.append(call)
 
     @classmethod
     def get_type(cls, data):
@@ -449,14 +456,13 @@ class HDF5IO(FORMIO):
             if len(refs) > 0:
                 _dtype = self.__resolve_dtype__(dtype, data)
                 def _filler():
-                    #dset = parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
                     ret = list()
                     for item in data:
                         new_item = list(item)
                         for i in refs:
                             new_item[i] = self.__get_ref(item[i])
                         ret.append(tuple(new_item))
-                    dset = parent.create_dataset(name, shape=(len(ret),), dtype=_dtype)
+                    dset = parent.require_dataset(name, shape=(len(ret),), dtype=_dtype)
                     dset[:] = ret
                     self.set_attributes(dset, attributes)
                 self.__queue_ref(_filler)
@@ -481,13 +487,13 @@ class HDF5IO(FORMIO):
                 if dtype == 'region':
                     def _filler():
                         ref = self.__get_ref(data, builder.region)
-                        dset = parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                        dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
                         self.set_attributes(dset, attributes)
                     self.__queue_ref(_filler)
                 else:
                     def _filler():
                         ref = self.__get_ref(data)
-                        dset = parent.create_dataset(name, data=ref, shape=None, dtype=_dtype)
+                        dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
                         self.set_attributes(dset, attributes)
                     self.__queue_ref(_filler)
                 return
@@ -629,6 +635,9 @@ class HDF5IO(FORMIO):
            func: a function to call to return the chunk of data, with
                  references filled in
         '''
+        #TODO: come up with more intelligent way of
+        # queueing reference resolution, based on reference
+        # dependency
         self.__ref_queue.append(func)
 
     def __rec_get_ref(self, l):
