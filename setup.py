@@ -7,10 +7,6 @@ import versioneer
 with open('README.rst', 'rb') as f:
     readme = str(f.read())
 
-with open('license.txt', 'rb') as f:
-    license = str(f.read())
-
-
 pkgs = find_packages('src', exclude=['data'])
 print('found these packages:', pkgs)
 
@@ -25,7 +21,7 @@ setup_args = {
     'author': 'Andrew Tritt',
     'author_email': 'ajtritt@lbl.gov',
     'url': 'https://github.com/NeurodataWithoutBorders/pynwb',
-    'license': license,
+    'license': "BSD",
     'install_requires':
     [
         'numpy',
