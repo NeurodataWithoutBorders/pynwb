@@ -1,9 +1,5 @@
 ..  _getting_started:
 
-===============
-Getting Started
-===============
-
 ------------
 Dependencies
 ------------
@@ -13,15 +9,14 @@ PyNWB has the following minimum requirements, which must be installed before you
 #. Python 2.7 or Python 3.6
 #. pip
 
-The NWB format provides a formal specification for storing neurophysiology data in HDF5. HDF5 provides support
-for parallel I/O using MPI-IO, and therefore requires MPI.
-
 ------------
 Installation
 ------------
 
-Install from pypi
------------------
+Install release from PyPI
+-------------------------
+
+The `Python Package Index (PyPI) <https://pypi.org>`_ is a repository of software for the Python programming language.
 
 To install or update PyNWB distribution from PyPI simply run:
 
@@ -38,20 +33,24 @@ This will automatically install the following required dependencies:
  #. ruamel.yaml
  #. six
 
-Install latest dev version
+
+Install latest pre-release
 --------------------------
 
-.. note::
-
-  This is useful to tryout the latest features and also setup automatic build of your
-  own project against the latest version of pynwb.
+This is useful to tryout the latest features and also setup continuous integration of your
+own project against the latest version of PyNWB.
 
 .. code::
 
-   $ pip install pynwb --find-links https://github.com/NeurodataWithoutBorders/pynwb/releases/tag/latest  --no-index
+   $ pip install -U pynwb --find-links https://github.com/NeurodataWithoutBorders/pynwb/releases/tag/latest  --no-index
 
-Install from Git repository (for development)
----------------------------------------------
+
+--------------
+For developers
+--------------
+
+Install from Git repository
+---------------------------
 
 For development an editable install is recommended.
 

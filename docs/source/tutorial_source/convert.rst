@@ -1,7 +1,7 @@
 .. _tutorial_convert:
 
-Convert
-=========================
+Converting data to NWB
+======================
 
 The following are example Jupyter notebooks for converting custom lab data to NWB:
 

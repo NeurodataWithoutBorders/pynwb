@@ -26,24 +26,24 @@ Overall Health
      :alt: Requirements Status
 
 NWB Format API
-========================
+==============
 
 A Python API for working with Neurodata stored in the NWB Format
 
 -`Learn more <http://www.nwb.org/>`_.
 
 Code of Conduct
-=======================
+===============
 
 This project and everyone participating in it is governed by our `code of conduct guidelines <docs/CODE_OF_CONDUCT.rst>`_ . By participating, you are expected to uphold this code.
 
 Contributing
-=======================
+============
 
 For details on how to contribute to PyNWB see our `contribution guidelines <docs/CONTRIBUTING.rst>`_ .
 
 LICENSE
-=======================
+=======
 
 "pynwb" Copyright (c) 2017, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -59,7 +59,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 You are under no obligation whatsoever to provide any bug fixes, patches, or upgrades to the features, functionality or performance of the source code ("Enhancements") to anyone; however, if you choose to make your Enhancements available either publicly, or directly to Lawrence Berkeley National Laboratory, without imposing a separate written license agreement for such Enhancements, then you hereby grant the following license: a  non-exclusive, royalty-free perpetual license to install, use, modify, prepare derivative works, incorporate into other computer software, distribute, and sublicense such enhancements or derivative works thereof, in binary and source code form.
 
 COPYRIGHT
-=======================
+=========
 
 "pynwb" Copyright (c) 2017, The Regents of the University of California, through Lawrence Berkeley National Laboratory (subject to receipt of any required approvals from the U.S. Dept. of Energy).  All rights reserved.
 If you have questions about your rights to use or distribute this software, please contact Berkeley Lab's Innovation & Partnerships ce at  IPO@lbl.gov.
