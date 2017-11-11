@@ -1,5 +1,3 @@
-.. _tutorial_convert:
-
 Converting data to NWB
 ======================
 
