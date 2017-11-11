@@ -16,7 +16,7 @@ import sys
 import os
 import sphinx_rtd_theme
 from sphinx.domains.python import PythonDomain
-from .pynwb._version import get_versions
+from pynwb._version import get_versions
 
 
 # If extensions (or modules to document with autodoc) are in another directory,

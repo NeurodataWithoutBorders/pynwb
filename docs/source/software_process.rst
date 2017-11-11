@@ -17,51 +17,52 @@ The project has both unit and integration tests.
 
 Each time a PR is published or updated, the project is built, packaged and tested on all support operating systems and python distributions. That way, as a contributor you know if you introduced regressions or coding style inconsistencies.
 
-There are badges in the readme_ file which shows the current condition of the dev branch.
+There are badges in the README_ file which shows the current condition of the dev branch.
 
-.. _readme: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/README.rst
+.. _README: https://github.com/NeurodataWithoutBorders/pynwb#readme
+
 
 --------
 Coverage
 --------
 
-Coverage is computed and reported using the coverage_ tool. There is a badge in the readme file which
+Coverage is computed and reported using the coverage_ tool. There is a badge in the README_ file which
 shows percentage coverage. A detailed report can be found on codecov_ which shows line by line which
 lines are covered by the tests.
 
 .. _coverage: https://coverage.readthedocs.io
 .. _codecov: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/tree/dev/src/pynwb
 
-------------
-Requirements
-------------
+..  _software_process_requirement_specifications:
 
-There are 2 kinds of requirements specification in PyNWB. The first one is the dependencies_
-in the setup.py file which lists the abstract dependencies for the PyNWB project.
-Note that there should not be specific versions of packages in the setup.py file.
 
-.. _dependencies: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/setup.py#L32-L40
+--------------------------
+Requirement Specifications
+--------------------------
 
-requirements.txt_ file on the other hand lists pinned (concrete) dependencies to reproduce an entire development
-environment to work with PyNWB. That is why specific versions are pinned in the requirements.txt.
+There are 2 kinds of requirements specification in PyNWB.
 
-.. _requirements.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements.txt
+Setup.py Dependencies
+---------------------
 
-Requirements.txt of the project can be created and captured by following the code snippet below:
+The first one is the dependencies_ in the `setup.py` file which lists the abstract dependencies for
+the PyNWB project. Note that there should not be specific versions of packages in the `setup.py` file.
 
-.. code::
+Requirements.txt Dependencies
+-----------------------------
 
-   cd pynwb
-   mkvirtualenv pynwb
-   pip install .
-   pip freeze > requirements.txt
+The second one is `requirements.txt` which contain a list of pinned (concrete) dependencies to reproduce
+an entire development environment to work with PyNWB.
 
-In order to check the status of the required packages requires.io_ is used.
+In order to check the status of the required packages requires.io_ is used to create a badge on the project
+README_. If all the required packages are up to date,
+a green badge appears.
 
+If some of the packages are outdated, see :ref:`update_requirements_files`.
+
+.. _dependencies: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/setup.py
 .. _requires.io: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
 
-Requires.io also creates a badge on the project readme. If all the required packages are up to date,
-a green badge will appear.
 
 -------------------------
 Versioning and Releasing

@@ -22,9 +22,9 @@ Prerequisites
 
 * You have the API key associated with `<https://github.com/nwb-bot>`_.
 
-----------
-Convention
-----------
+-------------------------
+Documentation conventions
+-------------------------
 
 The commands reported below should be evaluated in the same terminal session.
 
@@ -133,7 +133,7 @@ Step-by-step
 
 8. Upload the packages to the production PyPI server::
 
-    $ twine upload dist/*
+    $ twine upload --sign dist/*
 
   .. warning::
 

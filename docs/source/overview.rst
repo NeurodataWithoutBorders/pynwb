@@ -1,27 +1,50 @@
 .. _overview:
 
-Overview
-===============
+Introduction
+============
 
 PyNWB provides a high-level Python API for reading and writing NWB formatted HDF5 files. This section will provide
 a broad overview of the functionality provided for reading and writing neurophysiology data into NWB files.
 
 
-The NWB format is built around two concepts: *TimeSeries* and *Modules*. :ref:`timeseries_overview` are objects for storing time series
-data, and :ref:`modules_overview` are objects for storing and grouping analyses. The following sections describe these classes in further detail.
+.. _software-architecture:
+
+Software Architecture
+=====================
+
+.. _fig-software-architecture:
+
+.. figure:: figures/software_architecture.*
+   :scale: 100 %
+   :alt: PyNWB Software Architecture
+
+   Overview of the high-level software architecture of PyNWB.
+
+
+.. _nwb_format_overview:
+
+NWB Format
+==========
+
+The `NWB Format <http://nwb-schema.readthedocs.io>`_ is built around two concepts: *TimeSeries* and *Modules*.
+
+:ref:`timeseries_overview` are objects for storing time series data, and :ref:`modules_overview` are objects
+for storing and grouping analyses. The following sections describe these classes in further detail.
+
 
 .. _file_overview:
 
 NWBFile
----------------
+=======
 
-NWB files are represented in PyNWB with *NWBFile* objects. :py:class:`~pynwb.file.NWBFile` objects provide functionality for creating :ref:`timeseries_overview` datasets
-and :ref:`modules_overview`, as well as functionality for storing experimental metadata and other metadata related to data provenance.
+NWB files are represented in PyNWB with *NWBFile* objects. :py:class:`~pynwb.file.NWBFile` objects provide functionality
+for creating :ref:`timeseries_overview` datasets and :ref:`modules_overview`, as well as functionality for storing
+experimental metadata and other metadata related to data provenance.
 
 .. _timeseries_overview:
 
 TimeSeries
----------------
+----------
 
 TimeSeries objects store time series data. These Python objects correspond to TimeSeries specifications
 provided by the NWB format specification. Like the NWB specification, TimeSeries Python objects follow an object-oriented inheritance
@@ -64,7 +87,7 @@ The following TimeSeries objects are provided by the API and NWB specification:
 .. _modules_overview:
 
 Modules
----------------
+-------
 
 Modules are objects that group together common analyses done during processing of data. Module objects are unique collections of
 analysis results. To standardize the storage of common analyses, NWB provides the concept of an *Interface*, where the output of
