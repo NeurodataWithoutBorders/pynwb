@@ -4,8 +4,8 @@ from setuptools import setup, find_packages
 
 import versioneer
 
-with open('README.rst', 'rb') as f:
-    readme = str(f.read())
+with open('README.rst', 'r') as fp:
+    readme = fp.read()
 
 pkgs = find_packages('src', exclude=['data'])
 print('found these packages:', pkgs)
@@ -18,6 +18,7 @@ setup_args = {
     'cmdclass': versioneer.get_cmdclass(),
     'description': 'Package for working with Neurodata stored in the NWB format',
     'long_description': readme,
+    'long_description_content_type': 'text/x-rst; charset=UTF-8',
     'author': 'Andrew Tritt',
     'author_email': 'ajtritt@lbl.gov',
     'url': 'https://github.com/NeurodataWithoutBorders/pynwb',
