@@ -37,18 +37,18 @@ jobs:
            command: |
              tox -e py36
            no_output_timeout: 30m
-       - run:
-           name: Report coverage
-           command: |
-             pip3 install -r requirements.txt
-             pip3 install -r requirements-dev.txt
-             pip3 install -e .
-             coverage run --source src test.py --pynwb
-             codecov -F pynwb
-             coverage run --source src test.py --integration
-             codecov -F integration
-             coverage run --source src test.py --form
-             codecov -F form
+#       - run:
+#           name: Report coverage
+#           command: |
+#             pip3 install -r requirements.txt
+#             pip3 install -r requirements-dev.txt
+#             pip3 install -e .
+#             coverage run --source src test.py --pynwb
+#             codecov -F pynwb
+#             coverage run --source src test.py --integration
+#             codecov -F integration
+#             coverage run --source src test.py --form
+#             codecov -F form
        - run:
            name: Test installation from a wheel for Python 2.7
            command: |
