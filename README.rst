@@ -2,7 +2,7 @@
 PyNWB
 =====
 
-Documentation of PyNWB can be found at http://pynwb.readthedocs.io/.
+Documentation of PyNWB can be found at https://pynwb.readthedocs.io
 
 Build Status
 ------------
