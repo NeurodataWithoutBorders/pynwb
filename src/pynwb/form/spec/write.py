@@ -3,11 +3,44 @@ import json
 import ruamel.yaml as yaml
 import os.path
 from collections import OrderedDict
+from six import with_metaclass
+from abc import ABCMeta, abstractmethod
 
 from .namespace import SpecNamespace
 from .spec import GroupSpec, DatasetSpec
 
 from ..utils import docval, getargs, popargs
+
+
+class SpecWriter(with_metaclass(ABCMeta, object)):
+
+    @abstractmethod
+    def write_spec(self, spec_file_dict, path):
+        pass
+
+    @abstractmethod
+    def write_namespace(self, namespace, path):
+        pass
+
+
+class YAMLSpecWriter(SpecWriter):
+
+    @docval({'name': 'outdir',
+             'type': str,
+             'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'})
+    def __init__(self, **kwargs):
+        self.__outdir = getargs('outdir', kwargs)
+
+    def __dump_spec(self, specs, stream):
+        yaml.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
+
+    def write_spec(self, spec_file_dict, path):
+        with open(os.path.join(self.__outdir, path), 'w') as stream:
+            self.__dump_spec(spec_file_dict, stream)
+
+    def write_namespace(self, namespace, path):
+        with open(os.path.join(self.__outdir, path), 'w') as stream:
+            self.__dump_spec({'namespaces': [namespace]}, stream)
 
 
 class NamespaceBuilder(object):
@@ -40,6 +73,8 @@ class NamespaceBuilder(object):
     def add_source(self, **kwargs):
         ''' Add a source file to the namespace '''
         source = getargs('source', kwargs)
+        if '/' in source or source[0] == '.':
+            raise ValueError('source must be a base file')
         self.__sources.setdefault(source, {'source': source})
 
     @docval({'name': 'data_type', 'type': str, 'doc': 'the data type to include'},
@@ -64,42 +99,52 @@ class NamespaceBuilder(object):
         namespace = getargs('namespace', kwargs)
         self.__namespaces.setdefault(namespace, {'namespace': namespace})
 
-    def __dump_spec(self, specs, stream):
-        yaml.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
-
     @docval({'name': 'path', 'type': str, 'doc': 'the path to write the spec to'},
-            {'name': 'outdir', 'type': str,
-             'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'})
+            {'name': 'outdir',
+             'type': str,
+             'doc': 'the path to write the directory to output the namespace and specs too', 'default': '.'},
+            {'name': 'writer',
+             'type': SpecWriter,
+             'doc': 'the SpecWriter to use to write the namespace', 'default': None})
     def export(self, **kwargs):
         ''' Export the namespace to the given path.
 
         All new specification source files will be written in the same directory as the
         given path.
         '''
-        ns_path, outdir = getargs('path', 'outdir', kwargs)
+        ns_path, writer = getargs('path', 'writer', kwargs)
+        if writer is None:
+            writer = YAMLSpecWriter(outdir=getargs('outdir', kwargs))
         ns_args = copy.copy(self.__ns_args)
         ns_args['schema'] = list()
         for ns, info in self.__namespaces.items():
             ns_args['schema'].append(info)
         for path, info in self.__sources.items():
-            out = dict()
+            out = SpecFileBuilder()
             dts = list()
             for spec in info[self.__dt_key]:
-                if isinstance(spec, GroupSpec):
-                    out.setdefault('groups', list()).append(spec)
-                elif isinstance(spec, DatasetSpec):
-                    out.setdefault('datasets', list()).append(spec)
-                else:
+                if isinstance(spec, str):
                     dts.append(spec)
+                else:
+                    out.add_spec(spec)
             item = {'source': path}
             if out and dts:
                 raise ValueError('cannot include from source if writing to source')
             elif dts:
                 item[self.__dt_key] = dts
             elif out:
-                with open(os.path.join(outdir, path), 'w') as stream:
-                    self.__dump_spec(out, stream)
+                writer.write_spec(out, path)
             ns_args['schema'].append(item)
-        ns_path = os.path.join(outdir, ns_path)
-        with open(ns_path, 'w') as stream:
-            self.__dump_spec({'namespaces': [SpecNamespace.build_namespace(**ns_args)]}, stream)
+        namespace = SpecNamespace.build_namespace(**ns_args)
+        writer.write_namespace(namespace, ns_path)
+
+
+class SpecFileBuilder(dict):
+
+    @docval({'name': 'spec', 'type': (GroupSpec, DatasetSpec), 'doc': 'the Spec to add'})
+    def add_spec(self, **kwargs):
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, GroupSpec):
+            self.setdefault('groups', list()).append(spec)
+        elif isinstance(spec, DatasetSpec):
+            self.setdefault('datasets', list()).append(spec)

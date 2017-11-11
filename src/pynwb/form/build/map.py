@@ -21,6 +21,10 @@ class BuildManager(object):
         self.__containers = dict()
         self.__type_map = type_map
 
+    @property
+    def namespace_catalog(self):
+        return self.__type_map.namespace_catalog
+
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             {"name": "source", "type": str,
              "doc": "the source of container being built i.e. file path", 'default': None})
@@ -695,6 +699,10 @@ class TypeMap(object):
         self.__container_types = dict()
         self.__data_types = dict()
         self.__default_mapper_cls = getargs('mapper_cls', kwargs)
+
+    @property
+    def namespace_catalog(self):
+        return self.__ns_catalog
 
     def __copy__(self):
         ret = TypeMap(self.__ns_catalog, self.__default_mapper_cls)

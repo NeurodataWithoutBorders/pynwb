@@ -21,6 +21,11 @@ class FORMIO(with_metaclass(ABCMeta, object)):
         '''The BuildManager this FORMIO is using'''
         return self.__manager
 
+    @property
+    def source(self):
+        '''The source of the container being read/written i.e. file path'''
+        return self.__source
+
     @docval(returns='the Container object that was read in', rtype=Container)
     def read(self, **kwargs):
         f_builder = self.read_builder()
