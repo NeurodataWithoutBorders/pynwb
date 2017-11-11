@@ -1,18 +1,20 @@
-===============================
-pynwb
-===============================
+=====
+PyNWB
+=====
 
-Documentation of PyNWB can be found at http://pynwb.readthedocs.io/.
+Documentation of PyNWB can be found at https://pynwb.readthedocs.io
 
 Build Status
 ------------
 
-+-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------+
-| Linux                                                                                   | macOS                                                                                   | Windows                                                                               |
-+=========================================================================================+=========================================================================================+=======================================================================================+
-| .. image:: https://circleci.com/gh/NeurodataWithoutBorders/pynwb.svg?style=shield       | .. image:: https://travis-ci.org/NeurodataWithoutBorders/pynwb.svg?branch=dev           | .. image:: https://ci.appveyor.com/api/projects/status/9y808ua44yldy5n3?svg=true      |
-|     :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb                      |     :target: https://travis-ci.org/NeurodataWithoutBorders/pynwb                        |     :target: https://ci.appveyor.com/project/NeurodataWithoutBorders/pynwb            |
-+-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------+
+.. table::
+
+  +-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------+
+  | Linux                                                                                   | macOS                                                                                   | Windows                                                                               |
+  +=========================================================================================+=========================================================================================+=======================================================================================+
+  | .. image:: https://circleci.com/gh/NeurodataWithoutBorders/pynwb.svg?style=shield       | .. image:: https://travis-ci.org/NeurodataWithoutBorders/pynwb.svg?branch=dev           | .. image:: https://ci.appveyor.com/api/projects/status/9y808ua44yldy5n3?svg=true      |
+  |     :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb                      |     :target: https://travis-ci.org/NeurodataWithoutBorders/pynwb                        |     :target: https://ci.appveyor.com/project/NeurodataWithoutBorders/pynwb            |
+  +-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------+
 
 
 Overall Health
@@ -28,9 +30,17 @@ Overall Health
 NWB Format API
 ==============
 
-A Python API for working with Neurodata stored in the NWB Format
+PyNWB is a Python package for working with NWB files. It provides a high-level API for
+efficiently working with Neurodata stored in the `NWB format <https://nwb-schema.readthedocs.io>`_.
 
--`Learn more <http://www.nwb.org/>`_.
+`Neurodata Without Borders: Neurophysiology (NWB:N) <http://www.nwb.org/>`_ is a project to develop a
+unified data format for cellular-based neurophysiology data, focused on the
+dynamics of groups of neurons measured under a large range of experimental
+conditions.
+
+The NWB:N team consists of neuroscientists and software developers
+who recognize that adoption of a unified data format is an important step toward
+breaking down the barriers to data sharing in neuroscience.
 
 Code of Conduct
 ===============

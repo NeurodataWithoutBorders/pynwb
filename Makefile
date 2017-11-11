@@ -39,18 +39,19 @@ test_docker:
 
 apidoc:
 	cd docs && $(MAKE) apidoc
-	@echo ""
-	@echo "To view the PDF documentation open: docs/_build/html/index.html"
 
-htmldoc:
+htmldoc-only: apidoc
 	cd docs && $(MAKE) html
+
+htmlclean:
+	cd docs && $(MAKE) clean
+
+htmldoc-open:
 	@echo ""
-	@echo "To view the PDF documentation open: docs/_build/html/index.html"
-
-docs-only: htmldoc
-
-docs: docs-only
+	@echo "To view the HTML documentation open: docs/_build/html/index.html"
 	open docs/_build/html/index.html || xdg-open docs/_build/html/index.html
+
+htmldoc: htmldoc-only htmldoc-open
 
 pdfdoc:
 	cd docs && $(MAKE) latexpdf

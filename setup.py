@@ -2,17 +2,10 @@
 
 from setuptools import setup, find_packages
 
-import os
 import versioneer
 
-schema_dir = '%s/src/pynwb/data' % os.path.abspath(os.path.dirname(__file__))
-
-with open('README.rst', 'rb') as f:
-    readme = str(f.read())
-
-with open('license.txt', 'rb') as f:
-    license = str(f.read())
-
+with open('README.rst', 'r') as fp:
+    readme = fp.read()
 
 pkgs = find_packages('src', exclude=['data'])
 print('found these packages:', pkgs)
@@ -25,10 +18,11 @@ setup_args = {
     'cmdclass': versioneer.get_cmdclass(),
     'description': 'Package for working with Neurodata stored in the NWB format',
     'long_description': readme,
+    'long_description_content_type': 'text/x-rst; charset=UTF-8',
     'author': 'Andrew Tritt',
     'author_email': 'ajtritt@lbl.gov',
     'url': 'https://github.com/NeurodataWithoutBorders/pynwb',
-    'license': license,
+    'license': "BSD",
     'install_requires':
     [
         'numpy',
@@ -68,20 +62,8 @@ setup_args = {
                 'NWB '
                 'NWB:N '
                 'NeurodataWithoutBorders',
-    # 'package_data': {'pynwb':["data/*.yaml"]},
-    # 'cmdclass':{
-    #    'build_py': CustomBuild,
-    # }
+    'zip_safe': False
 }
 
 if __name__ == '__main__':
-    '''
-    Do some stuff here to retrieve (download from centralized location, or parse
-    from a location in the repo directory) the schema. Once retrieved write to
-    to Python code somewhere. This could be pickling it, or writing it to a
-    Python file as an ecoded string. This way, modifying the schema will require
-    rebuilding the package, and the schema will be hardcoded.
-    '''
-
-    # get_schema()
     setup(**setup_args)

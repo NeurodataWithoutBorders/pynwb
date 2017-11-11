@@ -26,7 +26,7 @@ Software Architecture
 NWB Format
 ==========
 
-The `NWB Format <http://nwb-schema.readthedocs.io>`_ is built around two concepts: *TimeSeries* and *Modules*.
+The `NWB Format <https://nwb-schema.readthedocs.io>`_ is built around two concepts: *TimeSeries* and *Modules*.
 
 :ref:`timeseries_overview` are objects for storing time series data, and :ref:`modules_overview` are objects
 for storing and grouping analyses. The following sections describe these classes in further detail.

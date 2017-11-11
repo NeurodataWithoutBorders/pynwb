@@ -469,14 +469,14 @@ Create a new namespace with extensions
     Using the API to generate extensions (rather than writing YAML sources directly) helps avoid errors in the specification
     (e.g., due to missing required keys or invalid values) and ensure compliance of the extension definition with the
     NWB specification language. It also helps with maintanence of extensions, e.g., if extensions have to be ported to
-    newer versions of the `specification language <http://schema-language.readthedocs.io/en/latest/>`_
+    newer versions of the `specification language <https://schema-language.readthedocs.io/en/latest/>`_
     in the future.
 
 
 Documenting Extensions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Using the same tools used to generate the documentation for the `NWB-N core format <http://nwb-schema.readthedocs.io/en/latest/>`_
+Using the same tools used to generate the documentation for the `NWB-N core format <https://nwb-schema.readthedocs.io/en/latest/>`_
 one can easily generate documentation in HTML, PDF, ePub and many other format for extensions as well.
 
 For the purpose of this example we assume that our current directory has the following structure.
@@ -559,7 +559,7 @@ Further Reading
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * **Using Extensions:** See :ref:`useextension` for an example on how to use extensions during read and write.
-* **Specification Language:** For a detailed overview of the specification language itself see http://schema-language.readthedocs.io/en/latest/
+* **Specification Language:** For a detailed overview of the specification language itself see https://schema-language.readthedocs.io/en/latest/
 
 Validating NWB files
 -----------------------------------------------------

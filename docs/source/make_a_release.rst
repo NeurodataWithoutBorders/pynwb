@@ -76,14 +76,14 @@ Step-by-step
 
 2. Download latest sources::
 
-    $ cd /tmp && git clone git@github.com:NeurodataWithoutBorders/pynwb
+    $ cd /tmp && git clone git@github.com:NeurodataWithoutBorders/pynwb && cd pynwb
 
 
 3. Tag the release::
 
     $ git tag -s -m "pynwb ${release}" ${release} origin/dev
 
-    *Requires a GPG signing key*
+   *Requires a GPG signing key*
 
 
 4. Create a new virtual environment and install release requirements::
