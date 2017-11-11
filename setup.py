@@ -62,6 +62,7 @@ setup_args = {
                 'NWB '
                 'NWB:N '
                 'NeurodataWithoutBorders',
+    'zip_safe': False
 }
 
 if __name__ == '__main__':
