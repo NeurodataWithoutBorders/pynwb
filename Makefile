@@ -47,6 +47,11 @@ htmldoc:
 	@echo ""
 	@echo "To view the PDF documentation open: docs/_build/html/index.html"
 
+docs-only: htmldoc
+
+docs: docs-only
+	open docs/_build/html/index.html || xdg-open docs/_build/html/index.html
+
 pdfdoc:
 	cd docs && $(MAKE) latexpdf
 	@echo ""
