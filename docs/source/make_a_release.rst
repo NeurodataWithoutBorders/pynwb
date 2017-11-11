@@ -86,10 +86,12 @@ Step-by-step
    *Requires a GPG signing key*
 
 
-4. Create a new virtual environment and install release requirements::
+4. Create a new virtual environment and install release requirements:
 
-    $ mkvirtualenv pynwb-${release}-release
-    $ pip install tox twine
+  .. code::
+
+    $ mkvirtualenv pynwb-${release}-release && \
+      pip install tox twine
 
 
 5. Create source distribution and wheels::
@@ -107,7 +109,9 @@ Step-by-step
      abort the release process and report the problem.
 
 
-6. Confirm that expected packages have been generated::
+6. Confirm that expected packages have been generated:
+
+  .. code::
 
     $ ls -1 dist/*
     pynwb-X.Y.Z-py2-none-any.whl
@@ -127,7 +131,7 @@ Step-by-step
 
     Confirm that the packages are available on both testing servers:
 
-    - pre-production: `<https://test.pypi.org/project/pynwb/>`_
+    - new: `<https://test.pypi.org/project/pynwb/>`_
     - legacy: `<https://testpypi.python.org/pypi/pynwb>`_.
 
 
@@ -139,31 +143,39 @@ Step-by-step
 
     Confirm that the packages are available on both servers:
 
-    - pre-production: `<https://pypi.org/project/pynwb/>`_
+    - new: `<https://pypi.org/project/pynwb/>`_
     - legacy: `<https://pypi.python.org/pypi/pynwb>`_
 
 
-9. Create a clean testing environment to test installation::
+9. Create a clean testing environment to test installation:
 
-    $ mkvirtualenv pynwb-${release}-install-test
-    $ pip install pynwb
+  .. code::
+
+    $ mkvirtualenv pynwb-${release}-install-test && \
+      pip install pynwb
 
 
-10. Publish the release tag::
+10. Publish the release tag:
+
+  .. code::
 
     $ git push origin ${release}
 
 
-11. Create GitHub release and upload packages::
+11. Create GitHub release and upload packages:
+
+  .. code::
 
     $ pip install githubrelease
     $ export GITHUB_TOKEN=<NWBOT_API_KEY>
     $ githubrelease release NeurodataWithoutBorders/pynwb create ${release} --name ${release} --publish ./dist/*
 
 
-12. Cleanup::
+12. Cleanup
 
-    $ deactivate
-    $ rm -rf dist/*
-    $ rmvirtualenv pynwb-${release}-release
-    $ rmvirtualenv pynwb-${release}-install-test
+  .. code::
+
+    $ deactivate  && \
+      rm -rf dist/* && \
+      rmvirtualenv pynwb-${release}-release && \
+      rmvirtualenv pynwb-${release}-install-test
