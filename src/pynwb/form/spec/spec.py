@@ -89,8 +89,8 @@ class Spec(ConstructableDict):
     def __hash__(self):
         return id(self)
 
-    def __eq__(self, other):
-        return id(self) == id(other)
+#    def __eq__(self, other):
+#        return id(self) == id(other)
 
 
 _attr_args = [
@@ -226,6 +226,7 @@ class BaseStorageSpec(Spec):
         for attribute in attributes:
             self.set_attribute(attribute)
         self.__new_attributes = set(self.__attributes.keys())
+        self.__overridden_attributes = set()
         self.__resolved = False
         if resolve:
             self.resolve_spec(data_type_inc)
@@ -251,11 +252,15 @@ class BaseStorageSpec(Spec):
         for attribute in inc_spec.attributes:
             self.__new_attributes.discard(attribute)
             if attribute.name in self.__attributes:
+                self.__overridden_attributes.add(attribute.name)
                 continue
             self.set_attribute(attribute)
 
     @docval({'name': 'spec', 'type': (Spec, str), 'doc': 'the specification to check'})
     def is_inherited_spec(self, **kwargs):
+        '''
+        Return True if this spec was inherited from the parent type, False otherwise
+        '''
         spec = getargs('spec', kwargs)
         if isinstance(spec, Spec):
             spec = spec.name
@@ -263,12 +268,37 @@ class BaseStorageSpec(Spec):
             return self.is_inherited_attribute(spec)
         return False
 
+    @docval({'name': 'spec', 'type': (Spec, str), 'doc': 'the specification to check'})
+    def is_overridden_spec(self, **kwargs):
+        '''
+        Return True if this spec overrides a specification from the parent type, False otherwise
+        '''
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, Spec):
+            spec = spec.name
+        if spec in self.__attributes:
+            return self.is_overridden_attribute(spec)
+        return False
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute to the Spec for'})
     def is_inherited_attribute(self, **kwargs):
+        '''
+        Return True if the attribute was inherited from the parent type, False otherwise
+        '''
         name = getargs('name', kwargs)
         if name not in self.__attributes:
             raise ValueError("Attribute '%s' not found" % name)
         return name not in self.__new_attributes
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the attribute to the Spec for'})
+    def is_overridden_attribute(self, **kwargs):
+        '''
+        Return True if the given attribute overrides the specification from the parent, False otherwise
+        '''
+        name = getargs('name', kwargs)
+        if name not in self.__attributes:
+            raise ValueError("Attribute '%s' not found" % name)
+        return name not in self.__overridden_attributes
 
     def is_many(self):
         return self.quantity not in (1, ZERO_OR_ONE)
@@ -680,8 +710,11 @@ class GroupSpec(BaseStorageSpec):
             self.set_link(link)
         self.__new_data_types = set(self.__data_types.keys())
         self.__new_datasets = set(self.__datasets.keys())
+        self.__overridden_datasets = set()
         self.__new_links = set(self.__links.keys())
+        self.__overridden_links = set()
         self.__new_groups = set(self.__groups.keys())
+        self.__overridden_groups = set()
         super(GroupSpec, self).__init__(doc, **kwargs)
 
     @docval({'name': 'inc_spec', 'type': 'GroupSpec', 'doc': 'the data type this specification represents'})
@@ -697,6 +730,7 @@ class GroupSpec(BaseStorageSpec):
             self.__new_datasets.discard(dataset.name)
             if dataset.name in self.__datasets:
                 self.__datasets[dataset.name].resolve_spec(dataset)
+                self.__overridden_datasets.add(dataset.name)
             else:
                 self.set_dataset(dataset)
         # resolve inherited groups
@@ -708,6 +742,7 @@ class GroupSpec(BaseStorageSpec):
             self.__new_groups.discard(group.name)
             if group.name in self.__groups:
                 self.__groups[group.name].resolve_spec(group)
+                self.__overridden_groups.add(group.name)
             else:
                 self.set_group(group)
         # resolve inherited links
@@ -717,6 +752,7 @@ class GroupSpec(BaseStorageSpec):
                 continue
             self.__new_links.discard(link.name)
             if link.name in self.__links:
+                self.__overridden_links.add(link.name)
                 continue
             self.set_link(link)
         # resolve inherited data_types
@@ -726,35 +762,61 @@ class GroupSpec(BaseStorageSpec):
             self.__new_data_types.discard(dt)
             if dt not in self.__data_types:
                 self.__add_data_type_inc(dt_spec)
-
         super(GroupSpec, self).resolve_spec(inc_spec)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
             raises="ValueError, if 'name' is not part of this spec")
     def is_inherited_dataset(self, **kwargs):
-        '''Return true of a dataset with the given name was inherited'''
+        '''Return true if a dataset with the given name was inherited'''
         name = getargs('name', kwargs)
         if name not in self.__datasets:
             raise ValueError("Dataset '%s' not found in spec" % name)
         return name not in self.__new_datasets
 
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
+            raises="ValueError, if 'name' is not part of this spec")
+    def is_overridden_dataset(self, **kwargs):
+        '''Return true if a dataset with the given name overrides a specification from the parent type'''
+        name = getargs('name', kwargs)
+        if name not in self.__datasets:
+            raise ValueError("Dataset '%s' not found in spec" % name)
+        return name in self.__overridden_datasets
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the group'},
             raises="ValueError, if 'name' is not part of this spec")
     def is_inherited_group(self, **kwargs):
-        '''Return true of a group with the given name was inherited'''
+        '''Return true if a group with the given name was inherited'''
         name = getargs('name', kwargs)
         if name not in self.__groups:
             raise ValueError("Group '%s' not found in spec" % name)
         return name not in self.__new_groups
 
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the group'},
+            raises="ValueError, if 'name' is not part of this spec")
+    def is_overridden_group(self, **kwargs):
+        '''Return true if a group with the given name overrides a specification from the parent type'''
+        name = getargs('name', kwargs)
+        if name not in self.__groups:
+            raise ValueError("Group '%s' not found in spec" % name)
+        return name in self.__overridden_groups
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the link'},
             raises="ValueError, if 'name' is not part of this spec")
     def is_inherited_link(self, **kwargs):
-        '''Return true of a link with the given name was inherited'''
+        '''Return true if a link with the given name was inherited'''
         name = getargs('name', kwargs)
         if name not in self.__links:
             raise ValueError("Link '%s' not found in spec" % name)
         return name not in self.__new_links
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the link'},
+            raises="ValueError, if 'name' is not part of this spec")
+    def is_overridden_link(self, **kwargs):
+        '''Return true if a link with the given name overrides a specification from the parent type'''
+        name = getargs('name', kwargs)
+        if name not in self.__links:
+            raise ValueError("Link '%s' not found in spec" % name)
+        return name in self.__overridden_links
 
     @docval({'name': 'spec', 'type': (Spec, str), 'doc': 'the specification to check'})
     def is_inherited_spec(self, **kwargs):
@@ -788,6 +850,41 @@ class GroupSpec(BaseStorageSpec):
                 for s in self.__groups:
                     if self.is_inherited_group(s):
                         if self.__groups[s].get_attribute(spec) is not None:
+                            return True
+        return False
+
+    @docval({'name': 'spec', 'type': (Spec, str), 'doc': 'the specification to check'})
+    def is_overridden_spec(self, **kwargs):
+        ''' Returns 'True' if specification was inherited from a parent type '''
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, Spec):
+            name = spec.name
+            if name is None:
+                name = spec.data_type_def
+            if name is None:
+                name = spec.data_type_inc
+            if name is None:
+                raise ValueError('received Spec with wildcard name but no data_type_inc or data_type_def')
+            spec = name
+        if spec in self.__links:
+            return self.is_overridden_link(spec)
+        elif spec in self.__groups:
+            return self.is_overridden_group(spec)
+        elif spec in self.__datasets:
+            return self.is_overridden_dataset(spec)
+        elif spec in self.__data_types:
+            return self.is_overridden_type(spec)
+        else:
+            if super(GroupSpec, self).is_overridden_spec(spec):  # check if overridden attribute
+                return True
+            else:
+                for s in self.__datasets:
+                    if self.is_overridden_dataset(s):
+                        if self.__datasets[s].is_overridden_spec(spec):
+                            return True
+                for s in self.__groups:
+                    if self.is_overridden_group(s):
+                        if self.__groups[s].is_overridden_spec(spec):
                             return True
         return False
 

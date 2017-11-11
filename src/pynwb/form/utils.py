@@ -324,6 +324,18 @@ def docval(*validator, **options):
     return dec
 
 
+def __sig_arg(argval):
+    if 'default' in argval:
+        default = argval['default']
+        if isinstance(default, str):
+            default = "'%s'" % default
+        else:
+            default = str(default)
+        return "%s=%s" % (argval['name'], default)
+    else:
+        return argval['name']
+
+
 def __builddoc(func, validator, docstring_fmt, arg_fmt, ret_fmt=None, returns=None, rtype=None):
     '''Generate a Spinxy docstring'''
     def to_str(argtype):
@@ -339,14 +351,7 @@ def __builddoc(func, validator, docstring_fmt, arg_fmt, ret_fmt=None, returns=No
             fmt['type'] = " or ".join(map(to_str, arg['type']))
         else:
             fmt['type'] = to_str(arg['type'])
-
         return arg_fmt.format(**fmt)
-
-    def __sig_arg(argval):
-        if 'default' in argval:
-            return "%s=%s" % (argval['name'], str(argval['default']))
-        else:
-            return argval['name']
 
     sig = "%s(%s)\n\n" % (func.__name__, ", ".join(map(__sig_arg, validator)))
     desc = func.__doc__.strip() if func.__doc__ is not None else ""
