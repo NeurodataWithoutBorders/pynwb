@@ -5,6 +5,6 @@ idna==2.6
 numpy==1.13.3
 python-dateutil==2.6.1
 requests==2.18.4
-ruamel.yaml==0.15.34
+ruamel.yaml==0.14.12
 six==1.11.0
 urllib3==1.22

@@ -26,8 +26,8 @@ the following script:
    mkvirtualenv pynwb-requirements
 
    cd pynwb
-   pip install .
-   pip freeze > requirements.txt
+   pip install -U -e . -c constraints.txt
+   pip freeze | grep -v 'pynwb' > requirements.txt
 
    deactivate
    rmvirtualenv pynwb-requirements
