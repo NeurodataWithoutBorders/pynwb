@@ -693,6 +693,8 @@ class H5SpecReader(SpecReader):
 
     def __read(self, path):
         s = self.__group[path][()]
+        if isinstance(s, bytes):
+            s = s.decode('UTF-8')
         d = json.loads(s)
         return d
 
