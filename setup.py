@@ -27,7 +27,7 @@ setup_args = {
     [
         'numpy',
         'h5py',
-        'ruamel.yaml',
+        'ruamel.yaml<0.15',
         'python-dateutil',
         'six',
         'requests'
