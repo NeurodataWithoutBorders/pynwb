@@ -1,6 +1,3 @@
-os: osx
-
-language: generic
 
 branches:
  only:
@@ -8,32 +5,51 @@ branches:
 
 sudo: false
 
-python:
-  - '2.7'
-  - '3.6'
+matrix:
+  include:
+
+    - os: osx
+      language: generic
+      env:
+        - TRAVIS_PYTHON_VERSION=3.6.3
+
+    - os: osx
+      language: generic
+      env:
+        - TRAVIS_PYTHON_VERSION=3.5.4
+
+    - os: osx
+      language: generic
+      env:
+        - TRAVIS_PYTHON_VERSION=2.7.14
+
+cache:
+  directories:
+    - $HOME/.pyenv/versions/3.6.3
+    - $HOME/.pyenv/versions/3.5.4
+    - $HOME/.pyenv/versions/2.7.14
 
 before_install:
-  - brew update
-  - brew outdated pyenv || brew upgrade pyenv
-  - pyenv install 3.6.2
-  - pyenv global 3.6.2
+  - pip install -U scikit-ci-addons
+  - ci_addons --install ../addons
+  - export PYTHON_VERSION=$TRAVIS_PYTHON_VERSION
+  - python ../addons/travis/install_pyenv.py
+  - pyenv global $TRAVIS_PYTHON_VERSION
 
 install:
   - pip install tox-travis tox-pyenv
 
 script:
-  - tox -e py27
-  - tox -e py36
-  - tox -e py27 recreate --installpkg dist/*py2-none-any.whl
-  - tox -e py36 recreate --installpkg dist/*py3-none-any.whl
+  - tox
+  - tox recreate --installpkg dist/*-none-any.whl
 
-after_success:
-  - pip install -r requirements.txt
-  - pip install -r requirements-dev.txt
-  - pip install -e .
-  - coverage run --source src test.py --pynwb
-  - codecov -F pynwb
-  - coverage run --source src test.py --integration
-  - codecov -F integration
-  - coverage run --source src test.py --form
-  - codecov -F form
+#after_success:
+#  - pip install -r requirements.txt
+#  - pip install -r requirements-dev.txt
+#  - pip install -e .
+#  - coverage run --source src test.py --pynwb
+#  - codecov -F pynwb
+#  - coverage run --source src test.py --integration
+#  - codecov -F integration
+#  - coverage run --source src test.py --form
+#  - codecov -F form
