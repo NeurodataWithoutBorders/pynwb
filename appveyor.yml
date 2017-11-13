@@ -8,27 +8,21 @@ environment:
   matrix:
     - PYTHON_VERSION: 2.7
       PYTHON: C:\Miniconda-x64
-      EXPECTED_WHEEL: py2-none-any.whl
       ENV: miniconda
     - PYTHON_VERSION: 3.5
       PYTHON: C:\Miniconda35-x64
-      EXPECTED_WHEEL: py3-none-any.whl
       ENV: miniconda
     - PYTHON_VERSION: 3.6
       PYTHON: C:\Miniconda36-x64
-      EXPECTED_WHEEL: py3-none-any.whl
       ENV: miniconda
     - PYTHON_VERSION: 2.7
       PYTHON: C:\\Python27-x64
-      EXPECTED_WHEEL: py2-none-any.whl
       ENV: python
     - PYTHON_VERSION: 3.5
       PYTHON: C:\\Python35-x64
-      EXPECTED_WHEEL: py3-none-any.whl
       ENV: python
     - PYTHON_VERSION: 3.6
       PYTHON: C:\\Python36-x64
-      EXPECTED_WHEEL: py3-none-any.whl
       ENV: python
 
 init:
@@ -59,7 +53,7 @@ after_test:
   - codecov -F integration
   - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py --form
   - codecov -F form
-  - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*$env:EXPECTED_WHEEL).Name | ForEach-Object {pip install -U $env:APPVEYOR_BUILD_FOLDER\dist\$_}
+  - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*none-any.whl).Name | ForEach-Object {pip install -U $env:APPVEYOR_BUILD_FOLDER\dist\$_}
   - python %APPVEYOR_BUILD_FOLDER%\test.py
   - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*.tar.gz).Name | ForEach-Object {pip install -U $env:APPVEYOR_BUILD_FOLDER\dist\$_}
   - python %APPVEYOR_BUILD_FOLDER%\test.py
