@@ -65,9 +65,9 @@ Setting up environment
   where ``<your-username>`` and ``<your-password>`` correspond to your PyPI account.
 
 
-------------
-Step-by-step
-------------
+------------------
+PyPI: Step-by-step
+------------------
 
 1. Choose the next release version number::
 
@@ -179,3 +179,48 @@ Step-by-step
       rm -rf dist/* && \
       rmvirtualenv pynwb-${release}-release && \
       rmvirtualenv pynwb-${release}-install-test
+
+-------------------
+Conda: Step-by-step
+-------------------
+
+In order to release a new version on conda-forge, follow the steps below:
+
+1. Clone feedstock
+
+   .. code::
+
+      $ cd /tmp && \
+        git clone git@github.com:conda-forge/pynwb-feedstock.git
+
+
+2. Create a new branch
+
+   .. code::
+
+      $ cd pynwb-feedstok && \
+        git checkout -b $release
+
+
+3. Modify meta.yaml
+
+   Update the `version string <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml#L2>`_ and
+   `sha256 <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml#L3>`_.
+
+   .. code::
+
+      $ sed -i "2s/.*/{% set version = \"$release\" %}/" recipe/meta.yaml
+      $ sha=$(openssl sha256 ../pynwb/dist/*.tar.gz | awk '{print $2}')
+      $ sed -i "3s/.*/{$ set sha256 = \"$sha\" %}/" recipe/meta.yaml
+
+
+4. Push the changes
+
+   .. code::
+
+      $ git push origin $release
+
+5. Create a Pull Request
+
+   Create a pull request against the `main repository <https://github.com/conda-forge/pynwb-feedstock/pulls>`_. If the tests are passed
+   a new release will be published on Anaconda cloud.

@@ -33,6 +33,15 @@ This will automatically install the following required dependencies:
  #. ruamel.yaml
  #. six
 
+Install from Conda
+------------------
+
+Conda users can install pynwb through conda-forge. To install with conda run:
+
+.. code::
+
+   $ conda install -c conda-forge pynwb
+
 
 Install latest pre-release
 --------------------------
