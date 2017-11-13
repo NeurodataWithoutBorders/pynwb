@@ -1,0 +1,10 @@
+# Common dependencies
+pynwb
+matplotlib
+
+# convert-crcns-ret-1-meisterlab
+h5py
+scipy
+
+# read-Allen-Brain-Observatory
+allensdk
