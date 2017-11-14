@@ -63,21 +63,21 @@ jobs:
     docker:
       - image: circleci/python:2.7.14-jessie
     environment:
-     - TOX_ENV: "py27"
+     - TOX_ENV: "py27,CI-py27"
     <<: *ci-steps
 
   python35:
     docker:
       - image: circleci/python:3.5.4-jessie
     environment:
-     - TOX_ENV: "py35"
+     - TOX_ENV: "py35,CI-py35"
     <<: *ci-steps
 
   python36:
     docker:
       - image: circleci/python:3.6.3-jessie
     environment:
-     - TOX_ENV: "py36"
+     - TOX_ENV: "py36,CI-py36"
     <<: *ci-steps
 
 workflows:
