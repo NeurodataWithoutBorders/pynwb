@@ -27,7 +27,8 @@ develop: build
 	$(PYTHON) setup.py develop
 
 test:
-	$(PYTHON) test.py
+	pip install -r requirements-dev.txt
+	tox
 
 test_docker:
 	docker build --quiet --no-cache --tag neurodatawithoutborders/pynwb:python27_test -f ./docker/python27_test/Dockerfile .
@@ -38,6 +39,7 @@ test_docker:
 	docker run --rm -it neurodatawithoutborders/pynwb:python36_test bash -c 'python test.py'
 
 apidoc:
+	pip install -r requirements-doc.txt
 	cd docs && $(MAKE) apidoc
 
 htmldoc-only: apidoc
@@ -59,9 +61,8 @@ pdfdoc:
 	@echo "To view the PDF documentation open: docs/_build/latex/PyNWB.pdf"
 
 coverage:
-	$(COVERAGE) run --source=. test.py
+	tox -e coverage
 
-coverage_html: coverage
-	$(COVERAGE) html -d tests/coverage/htmlcov
-	@echo ""
-	@echo "To view coverage data open: tests/coverage/htmlcov/index.html"
+coverage-open:
+	@echo "To view coverage data open: ./tests/coverage/htmlcov/index.html"
+	open ./tests/coverage/htmlcov/index.html || xdg-open ./tests/coverage/htmlcov/index.html
