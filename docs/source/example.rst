@@ -1,69 +1,55 @@
 .. _examples:
 
 Examples
-===========
+========
 
 The following examples will reference variables that may not be defined within the block they are used in. For
-clarity, we define them here.
+clarity, we define them here:
 
-.. code-block:: python
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: prerequisites: start
+   :end-before: prerequisites: end
+   :dedent: 4
 
-    import numpy as np
-    import scipy.stats as sps
-
-    electrode_name = 'tetrode1'
-    rate = 10.0
-    np.random.seed(1234)
-    ephys_data = np.random.rand(data_len)
-    ephys_timestamps = np.arange(data_len) / rate
-    spatial_timestamps = ephys_timestamps[::10]
-    spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T
 
 Creating and Writing NWB files
------------------------------------------------------
+------------------------------
 
-When creating an NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
+When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
 argument is the name of the NWB file, and the second argument is a brief description of the dataset.
 
-.. code-block:: python
-
-    from datetime import datetime
-    from pynwb import NWBFile
-
-    f = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
-                experimenter='Dr. Bilbo Baggins',
-                lab='Bag End Labatory',
-                institution='University of Middle Earth at the Shire',
-                experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-                session_id='LONELYMTN')
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-nwbfile: start
+   :end-before: create-nwbfile: end
+   :dedent: 4
 
 Once you have created your NWB and added all of your data and other necessary metadata, you can write it to disk using
-the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` class.
+the :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` class.
 
-.. code-block:: python
-
-    from form.backends.hdf5 import HDF5IO
-
-    io = HDF5IO(filename, mode='w')
-    io.write(f)
-    io.close()
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: save-nwbfile: start
+   :end-before: save-nwbfile: end
+   :dedent: 4
 
 
 Creating Epochs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 Experimental epochs are represented with :py:class:`~pynwb.epoch.Epoch` objects. To create epochs for an NWB file,
 you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_epoch`.
 
-.. code-block:: python
-
-    epoch_tags = ('example_epoch',)
-    ep1 = f.create_epoch('epoch1', timestamps[100], timestamps[200], tags=epoch_tags, description="the first test epoch")
-    ep2 = f.create_epoch('epoch2', timestamps[600], timestamps[700], tags=epoch_tags, description="the second test epoch")
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-epochs: start
+   :end-before: create-epochs: end
+   :dedent: 4
 
 
 Creating Electrode Groups
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Electrode groups (i.e. experimentally relevant groupings of channels) are represented by :py:class:`~pynwb.ecephys.ElectrodeGroup` objects. To create
 an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_electrode_group`.
@@ -71,76 +57,51 @@ an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance met
 Before creating an :py:class:`~pynwb.ecephys.ElectrodeGroup`, you need to provide some information about the device that was used to record from the electrode.
 This is done by creating a :py:class:`~pynwb.ecephys.Device` object using the instance method :py:meth:`~pynwb.file.NWBFile.create_device`.
 
-.. code-block:: python
-
-    device = f.create_device('trodes_rig123')
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-device: start
+   :end-before: create-device: end
+   :dedent: 4
 
 
 Once you have created the :py:class:`~pynwb.ecephys.Device`, you can create the :py:class:`~pynwb.ecephys.ElectrodeGroup`.
 
-.. code-block:: python
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-electrode-groups: start
+   :end-before: create-electrode-groups: end
+   :dedent: 4
 
-    channel_description = ['channel1', 'channel2', 'channel3', 'channel4']
-    num_channels = len(channel_description)
-    channel_location = ['CA1'] * num_channels
-    channel_filtering = ['no filtering'] * num_channels
-    channel_coordinates = [(2.0,2.0,2.0)] * num_channels
-    channel_impedance = [-1] * num_channels
-    description = "an example tetrode"
-    location = "somewhere in the hippocampus"
 
-    electrode_group = f.create_electrode_group(electrode_name,
-                                               channel_description,
-                                               channel_location,
-                                               channel_filtering,
-                                               channel_coordinates,
-                                               channel_impedance,
-                                               description,
-                                               location,
-                                               device)
+Finally, you can then create the associated :py:class:`~pynwb.ecephys.ElectrodeTable` and :py:class:`~pynwb.ecephys.ElectrodeTableRegion`.
 
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-electrode-table-region: start
+   :end-before: create-electrode-table-region: end
+   :dedent: 4
 
 
 Creating TimeSeries
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
-TimeSeries objects can be created in two ways. The first way is by instantiating :ref:`timeseries_overview` objects directly and then adding them to
-the :ref:`file_overview` using the instance method :py:func:`~pynwb.file.NWBFile.add_raw_timeseries`. The second way is by calling the :py:class:`~pynwb.file.NWBFile`
-instance method :py:func:`~pynwb.file.NWBFile.create_timeseries`. This first example will demonstrate instatiating two different
-types of :ref:`timeseries_overview` objects directly, and adding them with :py:meth:`~pynwb.file.NWBFile.add_raw_timeseries`.
+TimeSeries objects can be created by instantiating :ref:`timeseries_overview` objects directly and then adding them to
+the :ref:`file_overview` using the instance method :py:func:`~pynwb.file.NWBFile.add_acquisition`.
 
-.. code-block:: python
+This first example will demonstrate instantiating two different types of :ref:`timeseries_overview` objects directly,
+and adding them with :py:meth:`~pynwb.file.NWBFile.add_acquisition`.
 
-    from pynwb.ecephys import ElectricalSeries
-    from pynwb.behavior import SpatialSeries
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-timeseries: start
+   :end-before: create-timeseries: end
+   :dedent: 4
 
-    ephys_ts = ElectricalSeries('test_ephys_data',
-                                'test_source',
-                                ephys_data,
-                                electrode_group,
-                                timestamps=ephys_timestamps,
-                                # Alternatively, could specify starting_time and rate as follows
-                                #starting_time=ephys_timestamps[0],
-                                #rate=rate,
-                                resolution=0.001,
-                                comments="This data was randomly generated with numpy, using 1234 as the seed",
-                                description="Random numbers generated with numpy.randon.rand")
-    f.add_raw_timeseries(ephys_ts, [ep1, ep2])
-
-    spatial_ts = SpatialSeries('test_spatial_timeseries',
-                               'a stumbling rat',
-                               spatial_data,
-                               'origin on x,y-plane',
-                               timestamps=spatial_timestamps,
-                               resolution=0.1,
-                               comments="This data was generated with numpy, using 1234 as the seed",
-                               description="This 2D Brownian process generated with numpy.cumsum(scipy.stats.norm.rvs(size=(2,len(timestamps))), axis=-1).T")
-    f.add_raw_timeseries(spatial_ts, [ep1, ep2])
 
 .. _useextension:
 
 Using Extensions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 The NWB file format supports extending existing data types (See :ref:`extending-nwb` for more details on creating extensions).
 Extensions must be registered with PyNWB to be used for reading and writing of custom neurodata types.
@@ -178,8 +139,10 @@ The following code demonstrates how to associate a specification with the :py:cl
         ...
     register_class('my_namespace', 'MyExtension', MyExtensionContainer)
 
-If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer` class for reading and writing, you will need
-to implement and register a custom :py:class:`~form.build.map.ObjectMapper`. :py:class:`~form.build.map.ObjectMapper` extensions are registerd with the decorator :py:func:`~pynwb.register_map`.
+If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer`
+class for reading and writing, you will need to implement and register a custom :py:class:`~pynwb.form.build.map.ObjectMapper`.
+
+:py:class:`~pynwb.form.build.map.ObjectMapper` extensions are registered with the decorator :py:func:`~pynwb.register_map`.
 
 .. code-block:: python
 
@@ -200,9 +163,11 @@ to implement and register a custom :py:class:`~form.build.map.ObjectMapper`. :py
     register_map(MyExtensionContainer, MyExtensionMapper)
 
 
-If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your extension specification, a dynamically created class is created by default.
-To use the dynamic class, you will need to retrieve the class object using the function :py:func:`~pynwb.get_class`. Once you have retrieved the class object, you can
-use it just like you would a statically defined class.
+If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your extension specification,
+a dynamically created class is created by default.
+
+To use the dynamic class, you will need to retrieve the class object using the function :py:func:`~pynwb.get_class`.
+Once you have retrieved the class object, you can use it just like you would a statically defined class.
 
 .. code-block:: python
 
@@ -216,39 +181,34 @@ If using iPython, you can access documentation for the class's constructor using
 .. _write_nwbfile:
 
 Write an NWBFile
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
-Writing NWB files to disk is handled by the :py:mod:`form` package, which :py:mod:`pynwb` depends on. Currently, the only storage format supported by
-:py:mod:`form` is HDF5. Reading and writing to and from HDF5 is handled by the class :py:class:`~form.backends.hdf5.h5tools.HDF5IO`. The only required argument to this
-is the path of the HDF5 file. An second, optional argument is the :py:class:`~form.build.map.BuildManager` to use for IO. Briefly, the :py:class:`~form.build.map.BuildManager` is a class
-that manages objects to be read and written from disk. A PyNWB-specific BuildManager can be retrieved using the module-level function :py:func:`~pynwb.get_build_manager`. Alternatively,
-the :py:class:`~form.build.map.BuildManager` that a :py:class:`~form.backends.io.FORMIO` used can be retrieved from the :py:attr:`~form.backends.io.FORMIO.manager` attribute.
+Writing NWB files to disk is handled by the :py:mod:`pynwb.form` package. Currently,
+the only storage format supported by :py:mod:`pynwb.form` is HDF5.
 
-.. code-block:: python
+Reading and writing to and from HDF5 is handled by the class :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO`. The
+only required argument to this is the path of the HDF5 file. A second, optional argument is the
+:py:class:`~pynwb.form.build.map.BuildManager` to use for IO.
 
-    from pynwb import NWBFile
-    from form.backends.hdf5 import HDF5IO
+Briefly, the :py:class:`~pynwb.form.build.map.BuildManager` is a class that manages objects to be read and written
+from disk. A PyNWB-specific BuildManager can be retrieved using the module-level function :py:func:`~pynwb.get_manager`.
 
-    # make an NWBFile
-    start_time = datetime(1970, 1, 1, 12, 0, 0)
-    create_date = datetime(2017, 4, 15, 12, 0, 0)
-    nwbfile = NWBFile('the PyNWB tutorial', 'test.nwb', 'a test NWB File', 'TEST123', start_time, file_create_date=create_date)
-    ts = TimeSeries('test_timeseries', 'example_source', list(range(100,200,10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
-    nwbfile.add_raw_timeseries(ts)
+Alternatively, the :py:class:`~pynwb.form.build.map.BuildManager` that a :py:class:`~pynwb.form.backends.io.FORMIO` used
+can be retrieved from the :py:attr:`~pynwb.form.backends.io.FORMIO.manager` attribute.
 
-    path = "test_pynwb_io_hdf5.h5"
 
-    io = HDF5IO(path, mode='w')
-    io.write(nwbfile)
-    io.close()
-
+.. literalinclude:: ../code/creating-and-writing-nwbfile-2.py
+   :language: python
+   :start-after: example: start
+   :end-before: example: end
+   :dedent: 4
 
 
 .. note::
-    All :py:class:`~form.backends.io.FORMIO` objects are context managers.
+    All :py:class:`~pynwb.form.backends.io.FORMIO` objects are context managers.
 
 
-The third argument to the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` constructor is the mode for opening the HDF5 file. Valid modes are:
+The third argument to the :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` constructor is the mode for opening the HDF5 file. Valid modes are:
 
     ========  ================================================
      r        Readonly, file must exist
@@ -261,17 +221,17 @@ The third argument to the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` constru
 .. _extending-nwb:
 
 Extending NWB
------------------------------------------------------
+-------------
 
 Creating new Extensions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 The NWB specification is designed to be extended. Extension for the NWB format can be done so using classes provided in the :py:mod:`pynwb.spec` module.
 The classes :py:class:`~pynwb.spec.NWBGroupSpec`, :py:class:`~pynwb.spec.NWBDatasetSpec`, :py:class:`~pynwb.spec.NWBAttributeSpec`, and :py:class:`~pynwb.spec.NWBLinkSpec`
 can be used to define custom types.
 
 Attribute Specifications
-____________________________________________________
+________________________
 
 Specifying attributes is done with :py:class:`~pynwb.spec.NWBAttributeSpec`.
 
@@ -282,7 +242,7 @@ Specifying attributes is done with :py:class:`~pynwb.spec.NWBAttributeSpec`.
     spec = NWBAttributeSpec('bar', 'float', 'a value for bar')
 
 Dataset Specifications
-____________________________________________________
+______________________
 
 Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
 
@@ -298,7 +258,7 @@ Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
 
 
 Using datasets to specify tables
-++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++
 
 Tables can be specified using :py:class:`~pynwb.spec.NWBDtypeSpec`. To specify a table, provide a
 list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
@@ -332,7 +292,7 @@ Compound data types can be nested.
                         ])
 
 Group Specifications
-____________________________________________________
+____________________
 
 Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
 
@@ -352,7 +312,7 @@ Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
                         groups = addl_groups)
 
 Neurodata Type Specifications
-____________________________________________________
+_____________________________
 
 :py:class:`~pynwb.spec.NWBGroupSpec` and :py:class:`~pynwb.spec.NWBDatasetSpec` use the arguments `neurodata_type_inc` and `neurodata_type_def` for
 declaring new types and extending existing types. New types are specified by setting the argument `neurodata_type_def`. New types can extend an existing type
@@ -416,7 +376,7 @@ Datasets can be extended in the same manner (with regard to `neurodata_type_inc`
 by using the class :py:class:`~pynwb.spec.NWBDatasetSpec`.
 
 Saving Extensions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
 Extensions are used by including them in a loaded namespace. Namespaces and extensions need to be saved to file
 for downstream use. The class :py:class:`~pynwb.spec.NWBNamespaceBuilder` can be used to create new namespace and
@@ -474,7 +434,7 @@ Create a new namespace with extensions
 
 
 Documenting Extensions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
 Using the same tools used to generate the documentation for the `NWB-N core format <https://nwb-schema.readthedocs.io/en/latest/>`_
 one can easily generate documentation in HTML, PDF, ePub and many other format for extensions as well.
@@ -556,13 +516,13 @@ Finally, to generate the HTML version of the docs run:
 
 
 Further Reading
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 * **Using Extensions:** See :ref:`useextension` for an example on how to use extensions during read and write.
 * **Specification Language:** For a detailed overview of the specification language itself see https://schema-language.readthedocs.io/en/latest/
 
 Validating NWB files
------------------------------------------------------
+--------------------
 
 Validating NWB files is handled by a command-line tool availble in :py:mod:`~pynwb`. The validator can be invoked like so:
 
