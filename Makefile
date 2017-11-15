@@ -7,15 +7,21 @@ help:
 	@echo "  build          to build the python package(s)"
 	@echo "  install        to build and install the python package(s)"
 	@echo "  develop        to build and install the python package(s) for development"
-	@echo "  test           to run all unit tests"
-	@echo "  htmldoc        to make the HTML documentation"
-	@echo "  pdfdoc         to make the LaTeX sources and build the PDF of the documentation"
-	@echo "  coverage       to run coverage"
-	@echo "  coverage_html  to run coverage and build the coverage report in HTML"
+	@echo "  test           to run all integration and unit tests"
+	@echo "  htmldoc        to make the HTML documentation and open it with the default browser"
+	@echo "  coverage       to run tests, build coverage HTML report and open it with the default browser"
 	@echo ""
+	@echo "Advanced targets"
+	@echo "  apidoc         to generate API docs *.rst files from sources"
+	@echo "  coverage-only  to run tests and build coverage report"
+	@echo "  coverage-open  to open coverage HTML report in the default browser"
+	@echo "  htmlclean      to remove all generated documentation"
+	@echo "  htmldoc-only   to make the HTML documentation"
+	@echo "  htmldoc-open   to open the HTML documentation with the default browser"
+	@echo "  pdfdoc         to make the LaTeX sources and build the PDF of the documentation"
 
 init:
-	pip install -r requirements.txt
+	pip install -r requirements.txt -r requirements-dev.txt -r requirements-doc.txt
 
 build:
 	$(PYTHON) setup.py build
@@ -27,7 +33,8 @@ develop: build
 	$(PYTHON) setup.py develop
 
 test:
-	$(PYTHON) test.py
+	pip install -r requirements-dev.txt
+	tox
 
 test_docker:
 	docker build --quiet --no-cache --tag neurodatawithoutborders/pynwb:python27_test -f ./docker/python27_test/Dockerfile .
@@ -38,6 +45,7 @@ test_docker:
 	docker run --rm -it neurodatawithoutborders/pynwb:python36_test bash -c 'python test.py'
 
 apidoc:
+	pip install -r requirements-doc.txt
 	cd docs && $(MAKE) apidoc
 
 htmldoc-only: apidoc
@@ -58,10 +66,11 @@ pdfdoc:
 	@echo ""
 	@echo "To view the PDF documentation open: docs/_build/latex/PyNWB.pdf"
 
-coverage:
-	$(COVERAGE) run --source=. test.py
+coverage-only:
+	tox -e coverage
 
-coverage_html: coverage
-	$(COVERAGE) html -d tests/coverage/htmlcov
-	@echo ""
-	@echo "To view coverage data open: tests/coverage/htmlcov/index.html"
+coverage-open:
+	@echo "To view coverage data open: ./tests/coverage/htmlcov/index.html"
+	open ./tests/coverage/htmlcov/index.html || xdg-open ./tests/coverage/htmlcov/index.html
+
+coverage: coverage-only coverage-open
