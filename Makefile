@@ -7,12 +7,18 @@ help:
 	@echo "  build          to build the python package(s)"
 	@echo "  install        to build and install the python package(s)"
 	@echo "  develop        to build and install the python package(s) for development"
-	@echo "  test           to run all unit tests"
-	@echo "  htmldoc        to make the HTML documentation"
-	@echo "  pdfdoc         to make the LaTeX sources and build the PDF of the documentation"
-	@echo "  coverage       to run coverage"
-	@echo "  coverage_html  to run coverage and build the coverage report in HTML"
+	@echo "  test           to run all integration and unit tests"
+	@echo "  htmldoc        to make the HTML documentation and open it with the default browser"
+	@echo "  coverage       to run tests, build coverage HTML report and open it with the default browser"
 	@echo ""
+	@echo "Advanced targets"
+	@echo "  apidoc         to generate API docs *.rst files from sources"
+	@echo "  coverage-only  to run tests and build coverage report"
+	@echo "  coverage-open  to open coverage HTML report in the default browser"
+	@echo "  htmlclean      to remove all generated documentation"
+	@echo "  htmldoc-only   to make the HTML documentation"
+	@echo "  htmldoc-open   to open the HTML documentation with the default browser"
+	@echo "  pdfdoc         to make the LaTeX sources and build the PDF of the documentation"
 
 init:
 	pip install -r requirements.txt -r requirements-dev.txt -r requirements-doc.txt
