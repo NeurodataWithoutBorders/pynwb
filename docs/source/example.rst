@@ -1,7 +1,7 @@
 .. _examples:
 
 Examples
-===========
+========
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here.
@@ -20,7 +20,7 @@ clarity, we define them here.
     spatial_data = np.cumsum(sps.norm.rvs(size=(2,len(spatial_timestamps))), axis=-1).T
 
 Creating and Writing NWB files
------------------------------------------------------
+------------------------------
 
 When creating an NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
 argument is the name of the NWB file, and the second argument is a brief description of the dataset.
@@ -50,7 +50,7 @@ the :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` class.
 
 
 Creating Epochs
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 Experimental epochs are represented with :py:class:`~pynwb.epoch.Epoch` objects. To create epochs for an NWB file,
 you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_epoch`.
@@ -63,7 +63,7 @@ you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb
 
 
 Creating Electrode Groups
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Electrode groups (i.e. experimentally relevant groupings of channels) are represented by :py:class:`~pynwb.ecephys.ElectrodeGroup` objects. To create
 an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_electrode_group`.
@@ -102,7 +102,7 @@ Once you have created the :py:class:`~pynwb.ecephys.Device`, you can create the 
 
 
 Creating TimeSeries
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^
 
 TimeSeries objects can be created in two ways. The first way is by instantiating :ref:`timeseries_overview` objects directly and then adding them to
 the :ref:`file_overview` using the instance method :py:func:`~pynwb.file.NWBFile.add_raw_timeseries`. The second way is by calling the :py:class:`~pynwb.file.NWBFile`
@@ -140,7 +140,7 @@ types of :ref:`timeseries_overview` objects directly, and adding them with :py:m
 .. _useextension:
 
 Using Extensions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 The NWB file format supports extending existing data types (See :ref:`extending-nwb` for more details on creating extensions).
 Extensions must be registered with PyNWB to be used for reading and writing of custom neurodata types.
@@ -216,7 +216,7 @@ If using iPython, you can access documentation for the class's constructor using
 .. _write_nwbfile:
 
 Write an NWBFile
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^
 
 Writing NWB files to disk is handled by the :py:mod:`pynwb.form` package, which :py:mod:`pynwb` depends on. Currently, the only storage format supported by
 :py:mod:`pynwb.form` is HDF5. Reading and writing to and from HDF5 is handled by the class :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO`. The only required argument to this
@@ -261,17 +261,17 @@ The third argument to the :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` c
 .. _extending-nwb:
 
 Extending NWB
------------------------------------------------------
+-------------
 
 Creating new Extensions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^
 
 The NWB specification is designed to be extended. Extension for the NWB format can be done so using classes provided in the :py:mod:`pynwb.spec` module.
 The classes :py:class:`~pynwb.spec.NWBGroupSpec`, :py:class:`~pynwb.spec.NWBDatasetSpec`, :py:class:`~pynwb.spec.NWBAttributeSpec`, and :py:class:`~pynwb.spec.NWBLinkSpec`
 can be used to define custom types.
 
 Attribute Specifications
-____________________________________________________
+________________________
 
 Specifying attributes is done with :py:class:`~pynwb.spec.NWBAttributeSpec`.
 
@@ -282,7 +282,7 @@ Specifying attributes is done with :py:class:`~pynwb.spec.NWBAttributeSpec`.
     spec = NWBAttributeSpec('bar', 'float', 'a value for bar')
 
 Dataset Specifications
-____________________________________________________
+______________________
 
 Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
 
@@ -298,7 +298,7 @@ Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
 
 
 Using datasets to specify tables
-++++++++++++++++++++++++++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++
 
 Tables can be specified using :py:class:`~pynwb.spec.NWBDtypeSpec`. To specify a table, provide a
 list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
@@ -332,7 +332,7 @@ Compound data types can be nested.
                         ])
 
 Group Specifications
-____________________________________________________
+____________________
 
 Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
 
@@ -352,7 +352,7 @@ Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
                         groups = addl_groups)
 
 Neurodata Type Specifications
-____________________________________________________
+_____________________________
 
 :py:class:`~pynwb.spec.NWBGroupSpec` and :py:class:`~pynwb.spec.NWBDatasetSpec` use the arguments `neurodata_type_inc` and `neurodata_type_def` for
 declaring new types and extending existing types. New types are specified by setting the argument `neurodata_type_def`. New types can extend an existing type
@@ -416,7 +416,7 @@ Datasets can be extended in the same manner (with regard to `neurodata_type_inc`
 by using the class :py:class:`~pynwb.spec.NWBDatasetSpec`.
 
 Saving Extensions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^
 
 Extensions are used by including them in a loaded namespace. Namespaces and extensions need to be saved to file
 for downstream use. The class :py:class:`~pynwb.spec.NWBNamespaceBuilder` can be used to create new namespace and
@@ -474,7 +474,7 @@ Create a new namespace with extensions
 
 
 Documenting Extensions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^
 
 Using the same tools used to generate the documentation for the `NWB-N core format <https://nwb-schema.readthedocs.io/en/latest/>`_
 one can easily generate documentation in HTML, PDF, ePub and many other format for extensions as well.
@@ -556,13 +556,13 @@ Finally, to generate the HTML version of the docs run:
 
 
 Further Reading
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^
 
 * **Using Extensions:** See :ref:`useextension` for an example on how to use extensions during read and write.
 * **Specification Language:** For a detailed overview of the specification language itself see https://schema-language.readthedocs.io/en/latest/
 
 Validating NWB files
------------------------------------------------------
+--------------------
 
 Validating NWB files is handled by a command-line tool availble in :py:mod:`~pynwb`. The validator can be invoked like so:
 
