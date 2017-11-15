@@ -60,9 +60,11 @@ pdfdoc:
 	@echo ""
 	@echo "To view the PDF documentation open: docs/_build/latex/PyNWB.pdf"
 
-coverage:
+coverage-only:
 	tox -e coverage
 
 coverage-open:
 	@echo "To view coverage data open: ./tests/coverage/htmlcov/index.html"
 	open ./tests/coverage/htmlcov/index.html || xdg-open ./tests/coverage/htmlcov/index.html
+
+coverage: coverage-only coverage-open
