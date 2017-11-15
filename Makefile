@@ -15,7 +15,7 @@ help:
 	@echo ""
 
 init:
-	pip install -r requirements.txt
+	pip install -r requirements.txt -r requirements-dev.txt -r requirements-doc.txt
 
 build:
 	$(PYTHON) setup.py build
