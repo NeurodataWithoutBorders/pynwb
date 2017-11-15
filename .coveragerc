@@ -1,4 +1,4 @@
 [run]
 branch = True
-source = src/
+source = src/pynwb
 omit = src/pynwb/_version.py
