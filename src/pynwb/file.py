@@ -69,7 +69,7 @@ class NWBFile(NWBContainer):
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
             {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
             {'name': 'file_create_date', 'type': (list, datetime, str),
-             'doc': 'the time the file was created and subsequenct modifications made', 'default': None},
+             'doc': 'the time the file was created and subsequent modifications made', 'default': None},
             {'name': 'version', 'type': str, 'doc': 'the NWB version', 'default': None},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str,
