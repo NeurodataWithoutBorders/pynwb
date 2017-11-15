@@ -12,13 +12,13 @@ flags = {'form': 1, 'pynwb': 2, 'integration': 3}
 parser = argparse.ArgumentParser('python test.py [options]')
 parser.set_defaults(verbosity=1, suites=[])
 parser.add_argument('-v', '--verbose', const=2, dest='verbosity', action='store_const', help='run in verbose mode')
-parser.add_argument('-q', '--quiet', const=0, dest='verbosity', action='store_const', help='run in verbose mode')
+parser.add_argument('-q', '--quiet', const=0, dest='verbosity', action='store_const', help='run disabling output')
 parser.add_argument('-f', '--form', action='append_const', const=flags['form'], dest='suites',
-                    help='run in verbose mode')
+                    help='run unit tests for form package')
 parser.add_argument('-p', '--pynwb', action='append_const', const=flags['pynwb'], dest='suites',
-                    help='run in verbose mode')
+                    help='run unit tests for pynwb package')
 parser.add_argument('-i', '--integration', action='append_const', const=flags['integration'], dest='suites',
-                    help='run in verbose mode')
+                    help='run integration tests')
 args = parser.parse_args()
 if not args.suites:
     args.suites = list(flags.values())
@@ -28,7 +28,8 @@ root = logging.getLogger()
 root.setLevel(logging.DEBUG)
 ch = logging.StreamHandler(sys.stdout)
 ch.setLevel(logging.DEBUG)
-formatter = logging.Formatter('======================================================================\n%(asctime)s - %(levelname)s - %(message)s')  # noqa: E501
+formatter = logging.Formatter('======================================================================\n'
+                              '%(asctime)s - %(levelname)s - %(message)s')
 ch.setFormatter(formatter)
 root.addHandler(ch)
 
