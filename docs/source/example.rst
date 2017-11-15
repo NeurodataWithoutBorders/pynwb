@@ -38,7 +38,7 @@ argument is the name of the NWB file, and the second argument is a brief descrip
                 session_id='LONELYMTN')
 
 Once you have created your NWB and added all of your data and other necessary metadata, you can write it to disk using
-the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` class.
+the :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` class.
 
 .. code-block:: python
 
@@ -179,7 +179,7 @@ The following code demonstrates how to associate a specification with the :py:cl
     register_class('my_namespace', 'MyExtension', MyExtensionContainer)
 
 If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer` class for reading and writing, you will need
-to implement and register a custom :py:class:`~form.build.map.ObjectMapper`. :py:class:`~form.build.map.ObjectMapper` extensions are registerd with the decorator :py:func:`~pynwb.register_map`.
+to implement and register a custom :py:class:`~pynwb.form.build.map.ObjectMapper`. :py:class:`~pynwb.form.build.map.ObjectMapper` extensions are registerd with the decorator :py:func:`~pynwb.register_map`.
 
 .. code-block:: python
 
@@ -218,11 +218,11 @@ If using iPython, you can access documentation for the class's constructor using
 Write an NWBFile
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Writing NWB files to disk is handled by the :py:mod:`form` package, which :py:mod:`pynwb` depends on. Currently, the only storage format supported by
-:py:mod:`form` is HDF5. Reading and writing to and from HDF5 is handled by the class :py:class:`~form.backends.hdf5.h5tools.HDF5IO`. The only required argument to this
-is the path of the HDF5 file. An second, optional argument is the :py:class:`~form.build.map.BuildManager` to use for IO. Briefly, the :py:class:`~form.build.map.BuildManager` is a class
+Writing NWB files to disk is handled by the :py:mod:`pynwb.form` package, which :py:mod:`pynwb` depends on. Currently, the only storage format supported by
+:py:mod:`pynwb.form` is HDF5. Reading and writing to and from HDF5 is handled by the class :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO`. The only required argument to this
+is the path of the HDF5 file. An second, optional argument is the :py:class:`~pynwb.form.build.map.BuildManager` to use for IO. Briefly, the :py:class:`~pynwb.form.build.map.BuildManager` is a class
 that manages objects to be read and written from disk. A PyNWB-specific BuildManager can be retrieved using the module-level function :py:func:`~pynwb.get_build_manager`. Alternatively,
-the :py:class:`~form.build.map.BuildManager` that a :py:class:`~form.backends.io.FORMIO` used can be retrieved from the :py:attr:`~form.backends.io.FORMIO.manager` attribute.
+the :py:class:`~pynwb.form.build.map.BuildManager` that a :py:class:`~pynwb.form.backends.io.FORMIO` used can be retrieved from the :py:attr:`~pynwb.form.backends.io.FORMIO.manager` attribute.
 
 .. code-block:: python
 
@@ -245,10 +245,10 @@ the :py:class:`~form.build.map.BuildManager` that a :py:class:`~form.backends.io
 
 
 .. note::
-    All :py:class:`~form.backends.io.FORMIO` objects are context managers.
+    All :py:class:`~pynwb.form.backends.io.FORMIO` objects are context managers.
 
 
-The third argument to the :py:class:`~form.backends.hdf5.h5tools.HDF5IO` constructor is the mode for opening the HDF5 file. Valid modes are:
+The third argument to the :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` constructor is the mode for opening the HDF5 file. Valid modes are:
 
     ========  ================================================
      r        Readonly, file must exist
