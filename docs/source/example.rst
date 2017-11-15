@@ -73,16 +73,23 @@ Once you have created the :py:class:`~pynwb.ecephys.Device`, you can create the 
    :dedent: 4
 
 
+Finally, you can then create the associated :py:class:`~pynwb.ecephys.ElectrodeTable` and :py:class:`~pynwb.ecephys.ElectrodeTableRegion`.
+
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-electrode-table-region: start
+   :end-before: create-electrode-table-region: end
+   :dedent: 4
+
+
 Creating TimeSeries
 ^^^^^^^^^^^^^^^^^^^
 
-TimeSeries objects can be created in two ways. The first way is by instantiating :ref:`timeseries_overview` objects directly
-and then adding them to the :ref:`file_overview` using the instance method :py:func:`~pynwb.file.NWBFile.add_raw_timeseries`.
-
-The second way is by calling the :py:class:`~pynwb.file.NWBFile` instance method :py:func:`~pynwb.file.NWBFile.create_timeseries`.
+TimeSeries objects can be created by instantiating :ref:`timeseries_overview` objects directly and then adding them to
+the :ref:`file_overview` using the instance method :py:func:`~pynwb.file.NWBFile.add_acquisition`.
 
 This first example will demonstrate instantiating two different types of :ref:`timeseries_overview` objects directly,
-and adding them with :py:meth:`~pynwb.file.NWBFile.add_raw_timeseries`.
+and adding them with :py:meth:`~pynwb.file.NWBFile.add_acquisition`.
 
 .. literalinclude:: ../code/creating-and-writing-nwbfile.py
    :language: python

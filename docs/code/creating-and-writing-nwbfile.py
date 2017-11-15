@@ -1,10 +1,11 @@
 
 def main():
 
+    import os.path
+
     # prerequisites: start
     import numpy as np
 
-    electrode_name = 'tetrode1'
     rate = 10.0
     np.random.seed(1234)
     data_len = 1000
@@ -27,60 +28,69 @@ def main():
     # create-nwbfile: end
 
     # save-nwbfile: start
+    from pynwb import get_manager
     from pynwb.form.backends.hdf5 import HDF5IO
 
     filename = "example.h5"
-    io = HDF5IO(filename, mode='w')
+    io = HDF5IO(filename, manager=get_manager(), mode='w')
     io.write(f)
     io.close()
     # save-nwbfile: end
 
+    os.remove(filename)
+
     # create-epochs: start
     epoch_tags = ('example_epoch',)
 
-    ep1 = f.create_epoch('epoch1', ephys_timestamps[100], ephys_timestamps[200],
+    ep1 = f.create_epoch(source='an hypothetical source', name='epoch1', start=0.0, stop=1.0,
                          tags=epoch_tags,
                          description="the first test epoch")
 
-    ep2 = f.create_epoch('epoch2', ephys_timestamps[600], ephys_timestamps[700],
+    ep2 = f.create_epoch(source='an hypothetical source', name='epoch2', start=0.0, stop=1.0,
                          tags=epoch_tags,
                          description="the second test epoch")
     # create-epochs: end
 
-
     # create-device: start
-    device = f.create_device('trodes_rig123')
+    device = f.create_device(name='trodes_rig123', source="a source")
     # create-device: end
 
     # create-electrode-groups: start
-    channel_description = ['channel1', 'channel2', 'channel3', 'channel4']
-    num_channels = len(channel_description)
-    channel_location = ['CA1'] * num_channels
-    channel_filtering = ['no filtering'] * num_channels
-    channel_coordinates = [(2.0, 2.0, 2.0)] * num_channels
-    channel_impedance = [-1] * num_channels
+    electrode_name = 'tetrode1'
+    source = "an hypothetical source"
     description = "an example tetrode"
     location = "somewhere in the hippocampus"
 
     electrode_group = f.create_electrode_group(electrode_name,
-                                               channel_description,
-                                               channel_location,
-                                               channel_filtering,
-                                               channel_coordinates,
-                                               channel_impedance,
-                                               description,
-                                               location,
-                                               device)
+                                               source=source,
+                                               description=description,
+                                               location=location,
+                                               device=device)
+
     # create-electrode-groups: end
+
+    # create-electrode-table-region: start
+    from pynwb.ecephys import ElectrodeTable, ElectrodeTableRegion
+
+    electrode_table = ElectrodeTable('electrodes')
+    for idx in [1, 2, 3, 4]:
+        electrode_table.add_row(idx,
+                                x=1.0, y=2.0, z=3.0,
+                                imp=float(-idx),
+                                location='CA1', filtering='none',
+                                description='channel %s' % idx, group=electrode_group)
+
+    electrode_table_region = ElectrodeTableRegion(electrode_table, [0, 2], 'the first and third electrodes')
+    # create-electrode-table-region: end
 
     # create-timeseries: start
     from pynwb.ecephys import ElectricalSeries
     from pynwb.behavior import SpatialSeries
 
     ephys_ts = ElectricalSeries('test_ephys_data',
-                                'test_source',
+                                'an hypothetical source',
                                 ephys_data,
-                                electrode_group,
+                                electrode_table_region,
                                 timestamps=ephys_timestamps,
                                 # Alternatively, could specify starting_time and rate as follows
                                 # starting_time=ephys_timestamps[0],
@@ -88,7 +98,7 @@ def main():
                                 resolution=0.001,
                                 comments="This data was randomly generated with numpy, using 1234 as the seed",
                                 description="Random numbers generated with numpy.random.rand")
-    f.add_raw_timeseries(ephys_ts, [ep1, ep2])
+    f.add_acquisition(ephys_ts, [ep1, ep2])
 
     spatial_ts = SpatialSeries('test_spatial_timeseries',
                                'a stumbling rat',
@@ -99,8 +109,9 @@ def main():
                                comments="This data was generated with numpy, using 1234 as the seed",
                                description="This 2D Brownian process generated with "
                                            "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")
-    f.add_raw_timeseries(spatial_ts, [ep1, ep2])
+    f.add_acquisition(spatial_ts, [ep1, ep2])
     # create-timeseries: end
+
 
 if __name__ == "__main__":
     main()
