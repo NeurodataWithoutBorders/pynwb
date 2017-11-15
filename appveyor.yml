@@ -47,11 +47,11 @@ test_script:
   - python %APPVEYOR_BUILD_FOLDER%\test.py
 
 after_test:
-  - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py --pynwb
+  - coverage run %APPVEYOR_BUILD_FOLDER%\test.py --pynwb
   - codecov -F pynwb
-  - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py --integration
+  - coverage run  %APPVEYOR_BUILD_FOLDER%\test.py --integration
   - codecov -F integration
-  - coverage run --source %APPVEYOR_BUILD_FOLDER%\src %APPVEYOR_BUILD_FOLDER%\test.py --form
+  - coverage run %APPVEYOR_BUILD_FOLDER%\test.py --form
   - codecov -F form
   - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*none-any.whl).Name | ForEach-Object {pip install -U $env:APPVEYOR_BUILD_FOLDER\dist\$_}
   - python %APPVEYOR_BUILD_FOLDER%\test.py
