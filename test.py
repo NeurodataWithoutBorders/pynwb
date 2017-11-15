@@ -6,8 +6,6 @@ import logging
 import sys
 import unittest2 as unittest
 
-import pynwb
-
 flags = {'form': 1, 'pynwb': 2, 'integration': 3}
 
 TOTAL = 0
@@ -28,7 +26,9 @@ def run_test_suite(directory, description="", verbose=True):
 def run_integration_tests(verbose=True):
     run_test_suite("tests/integration", "integration tests", verbose=verbose)
 
+    import pynwb
     type_map = pynwb.get_type_map()
+
     import imp
     name = 'integration'
     imp_result = imp.find_module(name, ['tests'])
