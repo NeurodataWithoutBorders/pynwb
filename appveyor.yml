@@ -49,7 +49,7 @@ test_script:
 after_test:
   - coverage run %APPVEYOR_BUILD_FOLDER%\test.py --pynwb
   - codecov -F pynwb
-  - coverage run  %APPVEYOR_BUILD_FOLDER%\test.py --integration
+  - coverage run  %APPVEYOR_BUILD_FOLDER%\test.py --example --integration
   - codecov -F integration
   - coverage run %APPVEYOR_BUILD_FOLDER%\test.py --form
   - codecov -F form

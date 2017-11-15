@@ -3,10 +3,12 @@
 import argparse
 import inspect
 import logging
+import os.path
 import sys
+import traceback
 import unittest2 as unittest
 
-flags = {'form': 1, 'pynwb': 2, 'integration': 3}
+flags = {'form': 1, 'pynwb': 2, 'integration': 3, 'example': 4}
 
 TOTAL = 0
 FAILURES = 0
@@ -21,6 +23,29 @@ def run_test_suite(directory, description="", verbose=True):
     TOTAL += pynwb_test_result.testsRun
     FAILURES += len(pynwb_test_result.failures)
     ERRORS += len(pynwb_test_result.errors)
+
+
+def _import_from_file(script):
+    import imp
+    return imp.load_source(os.path.basename(script), script)
+
+
+def run_example_tests():
+    global TOTAL, FAILURES, ERRORS
+    logging.info('running example tests')
+    examples_dir = os.path.join(os.path.dirname(__file__), "docs", "code")
+    examples_scripts = [
+        os.path.join(examples_dir, script) for script in os.listdir(examples_dir) if script.endswith(".py")]
+    TOTAL += len(examples_scripts)
+    for script in examples_scripts:
+        try:
+            logging.info("Executing %s" % script)
+            example = _import_from_file(script)
+            example.main()
+        except Exception:
+            print(traceback.format_exc())
+            FAILURES += 1
+            ERRORS += 1
 
 
 def run_integration_tests(verbose=True):
@@ -61,6 +86,8 @@ def main():
                         help='run unit tests for pynwb package')
     parser.add_argument('-i', '--integration', action='append_const', const=flags['integration'], dest='suites',
                         help='run integration tests')
+    parser.add_argument('-e', '--example', action='append_const', const=flags['example'], dest='suites',
+                        help='run example tests')
     args = parser.parse_args()
     if not args.suites:
         args.suites = list(flags.values())
@@ -82,6 +109,10 @@ def main():
     # Run unit tests for pynwb package
     if flags['pynwb'] in args.suites:
         run_test_suite("tests/unit/pynwb_tests", "pynwb unit tests", verbose=args.verbosity)
+
+    # Run example tests
+    if flags['example'] in args.suites:
+        run_example_tests()
 
     # Run integration tests
     if flags['integration'] in args.suites:
