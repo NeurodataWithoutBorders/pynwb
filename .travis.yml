@@ -12,16 +12,24 @@ matrix:
       language: generic
       env:
         - TRAVIS_PYTHON_VERSION=3.6.3
+        - TEST_TOX_ENV=py36
+        - COVERAGE_TOX_ENV=coverage-py36
+        - BUILD_TOX_ENV=build-py36
 
     - os: osx
       language: generic
       env:
         - TRAVIS_PYTHON_VERSION=3.5.4
-
+        - TEST_TOX_ENV=py35
+        - COVERAGE_TOX_ENV=coverage-py35
+        - BUILD_TOX_ENV=build-py35
     - os: osx
       language: generic
       env:
         - TRAVIS_PYTHON_VERSION=2.7.14
+        - TEST_TOX_ENV=py27
+        - COVERAGE_TOX_ENV=coverage-py27
+        - BUILD_TOX_ENV=build-py27
 
 cache:
   directories:
@@ -40,6 +48,7 @@ install:
   - pip install tox-travis tox-pyenv
 
 script:
-  - tox
-  - tox -e CI-py27, CI-py35, CI-py36
-  - tox recreate --installpkg dist/*-none-any.whl
+  - tox -e $TEST_TOX_ENV
+  - tox -e $COVERAGE_TOX_ENV
+  - tox -e $BUILD_TOX_ENV
+  - tox -e $TEST_TOX_ENV recreate --installpkg dist/*-none-any.whl

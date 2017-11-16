@@ -9,21 +9,44 @@ environment:
     - PYTHON_VERSION: 2.7
       PYTHON: C:\Miniconda-x64
       ENV: miniconda
+      TEST_TOX_ENV: py27
+      COVERAGE_TOX_ENV: coverage-py27
+      BUILD_TOX_ENV: build-py27
+
     - PYTHON_VERSION: 3.5
       PYTHON: C:\Miniconda35-x64
       ENV: miniconda
+      TEST_TOX_ENV: py35
+      COVERAGE_TOX_ENV: coverage-py35
+      BUILD_TOX_ENV: build-py35
+
     - PYTHON_VERSION: 3.6
       PYTHON: C:\Miniconda36-x64
       ENV: miniconda
+      TEST_TOX_ENV: py36
+      COVERAGE_TOX_ENV: coverage-py36
+      BUILD_TOX_ENV: build-py36
+
     - PYTHON_VERSION: 2.7
       PYTHON: C:\\Python27-x64
       ENV: python
+      TEST_TOX_ENV: py27
+      COVERAGE_TOX_ENV: coverage-py27
+      BUILD_TOX_ENV: build-py27
+
     - PYTHON_VERSION: 3.5
       PYTHON: C:\\Python35-x64
       ENV: python
+      TEST_TOX_ENV: py35
+      COVERAGE_TOX_ENV: coverage-py35
+      BUILD_TOX_ENV: build-py35
+
     - PYTHON_VERSION: 3.6
       PYTHON: C:\\Python36-x64
       ENV: python
+      TEST_TOX_ENV: py36
+      COVERAGE_TOX_ENV: coverage-py36
+      BUILD_TOX_ENV: build-py36
 
 init:
   - "ECHO %PYTHON% %PYTHON_VERSION%"
@@ -35,25 +58,13 @@ init:
       conda install -c anaconda numpy)
   - if [%ENV%]==[python] (
       pip install wheel)
-
-install:
-  - pip install -r %APPVEYOR_BUILD_FOLDER%\requirements.txt
-  - pip install -r %APPVEYOR_BUILD_FOLDER%\requirements-dev.txt
-  - python %APPVEYOR_BUILD_FOLDER%\setup.py sdist
-  - python %APPVEYOR_BUILD_FOLDER%\setup.py bdist_wheel -d %APPVEYOR_BUILD_FOLDER%\dist
-  - pip install %APPVEYOR_BUILD_FOLDER%\
+  - pip install tox
 
 test_script:
-  - python %APPVEYOR_BUILD_FOLDER%\test.py
+  - cd %APPVEYOR_BUILD_FOLDER%
+  - tox -e %TEST_TOX_ENV%
+  - tox -e %BUILD_TOX_ENV%
+  - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*none-any.whl).Name | ForEach-Object {tox -e $env:TEST_TOX_ENV recreate --installpkg $env:APPVEYOR_BUILD_FOLDER\dist\$_}
 
 after_test:
-  - coverage run %APPVEYOR_BUILD_FOLDER%\test.py --pynwb
-  - codecov -F pynwb
-  - coverage run  %APPVEYOR_BUILD_FOLDER%\test.py --example --integration
-  - codecov -F integration
-  - coverage run %APPVEYOR_BUILD_FOLDER%\test.py --form
-  - codecov -F form
-  - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*none-any.whl).Name | ForEach-Object {pip install -U $env:APPVEYOR_BUILD_FOLDER\dist\$_}
-  - python %APPVEYOR_BUILD_FOLDER%\test.py
-  - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*.tar.gz).Name | ForEach-Object {pip install -U $env:APPVEYOR_BUILD_FOLDER\dist\$_}
-  - python %APPVEYOR_BUILD_FOLDER%\test.py
+  - tox -e %COVERAGE_TOX_ENV%
