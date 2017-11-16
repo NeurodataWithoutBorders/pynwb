@@ -48,10 +48,13 @@ test_script:
 
 after_test:
   - coverage run %APPVEYOR_BUILD_FOLDER%\test.py --pynwb
+  - coverage report -m
   - codecov -F pynwb
   - coverage run  %APPVEYOR_BUILD_FOLDER%\test.py --example --integration
+  - coverage report -m
   - codecov -F integration
   - coverage run %APPVEYOR_BUILD_FOLDER%\test.py --form
+  - coverage report -m
   - codecov -F form
   - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*none-any.whl).Name | ForEach-Object {pip install -U $env:APPVEYOR_BUILD_FOLDER\dist\$_}
   - python %APPVEYOR_BUILD_FOLDER%\test.py

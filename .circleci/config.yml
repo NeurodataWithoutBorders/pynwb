@@ -36,15 +36,25 @@ ci-steps: &ci-steps
         command: |
           . ../venv/bin/activate
           pip install tox
-          tox -e $TOX_ENV
+          tox -e $TEST_TOX_ENV
         # Install is expected to be quick. Increase timeout in case there are some network issues.
         # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
         no_output_timeout: 30m
     - run:
+        name: Run coverage and submit to codecov-io
+        command: |
+          . ../venv/bin/activate
+          tox -e $COVERAGE_TOX_ENV
+    - run:
+        name: Build wheel and source distribution
+        command: |
+          . ../venv/bin/activate
+          tox -e $BUILD_TOX_ENV
+    - run:
         name: Test installation from a wheel
         command: |
           . ../venv/bin/activate
-          tox -e $TOX_ENV recreate --installpkg dist/*-none-any.whl
+          tox -e $TEST_TOX_ENV recreate --installpkg dist/*-none-any.whl
     - run:
         <<: *publish-prerelease-on-github
 
@@ -63,21 +73,27 @@ jobs:
     docker:
       - image: circleci/python:2.7.14-jessie
     environment:
-     - TOX_ENV: "py27,CI-py27"
+     - TEST_TOX_ENV: "py27"
+     - COVERAGE_TOX_ENV: "coverage-py27"
+     - BUILD_TOX_ENV: "build-py27"
     <<: *ci-steps
 
   python35:
     docker:
       - image: circleci/python:3.5.4-jessie
     environment:
-     - TOX_ENV: "py35,CI-py35"
+     - TEST_TOX_ENV: "py35"
+     - COVERAGE_TOX_ENV: "coverage-py35"
+     - BUILD_TOX_ENV: "build-py35"
     <<: *ci-steps
 
   python36:
     docker:
       - image: circleci/python:3.6.3-jessie
     environment:
-     - TOX_ENV: "py36,CI-py36"
+     - TEST_TOX_ENV: "py36"
+     - COVERAGE_TOX_ENV: "coverage-py36"
+     - BUILD_TOX_ENV: "build-py36"
     <<: *ci-steps
 
 workflows:
