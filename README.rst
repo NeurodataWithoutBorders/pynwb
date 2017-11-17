@@ -4,6 +4,16 @@ PyNWB
 
 Documentation of PyNWB can be found at https://pynwb.readthedocs.io
 
+Latest Release
+--------------
+
+.. image:: https://badge.fury.io/py/pynwb.svg
+     :target: https://badge.fury.io/py/pynwb
+
+.. image:: https://anaconda.org/conda-forge/pynwb/badges/version.svg
+     :target: https://anaconda.org/conda-forge/pynwb
+
+
 Build Status
 ------------
 
@@ -15,6 +25,13 @@ Build Status
   | .. image:: https://circleci.com/gh/NeurodataWithoutBorders/pynwb.svg?style=shield       | .. image:: https://travis-ci.org/NeurodataWithoutBorders/pynwb.svg?branch=dev           | .. image:: https://ci.appveyor.com/api/projects/status/9y808ua44yldy5n3?svg=true      |
   |     :target: https://circleci.com/gh/NeurodataWithoutBorders/pynwb                      |     :target: https://travis-ci.org/NeurodataWithoutBorders/pynwb                        |     :target: https://ci.appveyor.com/project/NeurodataWithoutBorders/pynwb            |
   +-----------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------+---------------------------------------------------------------------------------------+
+
+
+**Conda**
+
+
+.. image:: https://circleci.com/gh/conda-forge/pynwb-feedstock.svg?style=shield
+     :target: https://circleci.com/gh/conda-forge/pynwb-feedstocks
 
 
 Overall Health
