@@ -33,10 +33,13 @@ This will automatically install the following required dependencies:
  #. ruamel.yaml
  #. six
 
-Install from Conda
-------------------
+Install release from Conda-forge
+--------------------------------
 
-Conda users can install pynwb through conda-forge. To install with conda run:
+`Conda-forge <https://conda-forge.org/#about>`_ is a community led collection of recipes, build infrastructure
+and distributions for the `conda <https://conda.io/docs/>`_ package manager.
+
+To install or update PyNWB distribution from conda-forge using conda simply run:
 
 .. code::
 
