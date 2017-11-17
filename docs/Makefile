@@ -158,6 +158,6 @@ doctest:
 	      "results in $(BUILDDIR)/doctest/output.txt."
 
 apidoc:
-	$(SPHINXAPIDOC) -f -e -o $(RSTDIR)  $(SRCDIR)
+	$(SPHINXAPIDOC) -f -e --no-toc -o $(RSTDIR)  $(SRCDIR)
 	@echo "Build rst docs from source code."
 
