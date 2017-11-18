@@ -268,6 +268,7 @@ def run_apidoc(_):
     sys.path.append(src_dir)
     main(['-f', '-e', '-o', out_dir, src_dir])
 
+
 # https://github.com/sphinx-doc/sphinx/issues/3866
 class PatchedPythonDomain(PythonDomain):
     def resolve_xref(self, env, fromdocname, builder, typ, target, node, contnode):
@@ -275,6 +276,7 @@ class PatchedPythonDomain(PythonDomain):
             del node['refspecific']
         return super(PatchedPythonDomain, self).resolve_xref(
             env, fromdocname, builder, typ, target, node, contnode)
+
 
 def setup(app):
     app.connect('builder-inited', run_apidoc)
