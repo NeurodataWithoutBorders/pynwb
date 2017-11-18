@@ -9,10 +9,6 @@
 
 docs/notebooks/boc/
 
-# Auto-generated apidocs RST files
-docs/source/pynwb*.rst
-docs/source/modules.rst
-
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
