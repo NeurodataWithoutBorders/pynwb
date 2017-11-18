@@ -109,22 +109,6 @@ pygments_style = 'sphinx'
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-
-def run_apidoc(_):
-    from sphinx.apidoc import main
-    import os
-    import sys
-    out_dir = os.path.dirname(__file__)
-    src_dir = os.path.join(out_dir, '../../src')
-    sys.path.append(src_dir)
-    main(['-f', '-e', '-o', out_dir, src_dir])
-
-
-def setup(app):
-    app.connect('builder-inited', run_apidoc)
-    app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
-
-
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -274,6 +258,17 @@ latex_elements = {
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 # texinfo_show_urls = 'footnote'
 
+
+def run_apidoc(_):
+    from sphinx.apidoc import main
+    import os
+    import sys
+    out_dir = os.path.dirname(__file__)
+    src_dir = os.path.join(out_dir, '../../src')
+    sys.path.append(src_dir)
+    main(['-f', '-e', '-o', out_dir, src_dir])
+
+
 # https://github.com/sphinx-doc/sphinx/issues/3866
 class PatchedPythonDomain(PythonDomain):
     def resolve_xref(self, env, fromdocname, builder, typ, target, node, contnode):
@@ -283,5 +278,7 @@ class PatchedPythonDomain(PythonDomain):
             env, fromdocname, builder, typ, target, node, contnode)
 
 
-def setup(sphinx):
-    sphinx.override_domain(PatchedPythonDomain)
+def setup(app):
+    app.connect('builder-inited', run_apidoc)
+    app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
+    app.override_domain(PatchedPythonDomain)
