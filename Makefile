@@ -36,14 +36,6 @@ test:
 	pip install -r requirements-dev.txt
 	tox
 
-test_docker:
-	docker build --quiet --no-cache --tag neurodatawithoutborders/pynwb:python27_test -f ./docker/python27_test/Dockerfile .
-	docker run --rm -it neurodatawithoutborders/pynwb:python27_test bash -c 'python test.py'
-	docker build --quiet --no-cache --tag neurodatawithoutborders/pynwb:python35_test -f ./docker/python35_test/Dockerfile .
-	docker run --rm -it neurodatawithoutborders/pynwb:python35_test bash -c 'python test.py'
-	docker build --quiet --no-cache --tag neurodatawithoutborders/pynwb:python36_test -f ./docker/python36_test/Dockerfile .
-	docker run --rm -it neurodatawithoutborders/pynwb:python36_test bash -c 'python test.py'
-
 apidoc:
 	pip install -r requirements-doc.txt
 	cd docs && $(MAKE) apidoc
