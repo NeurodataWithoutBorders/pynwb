@@ -59,6 +59,11 @@ The NWB:N team consists of neuroscientists and software developers
 who recognize that adoption of a unified data format is an important step toward
 breaking down the barriers to data sharing in neuroscience.
 
+Installation
+============
+
+See the PyNWB documentation for details http://pynwb.readthedocs.io/en/latest/getting_started.html#installation
+
 Code of Conduct
 ===============
 
