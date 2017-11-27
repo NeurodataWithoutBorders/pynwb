@@ -15,6 +15,7 @@ from .core import NWBContainer
 
 from h5py import RegionReference
 
+
 def _not_parent(arg):
     return arg['name'] != 'parent'
 
