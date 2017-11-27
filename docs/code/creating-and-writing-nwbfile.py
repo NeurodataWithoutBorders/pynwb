@@ -70,17 +70,14 @@ def main():
     # create-electrode-groups: end
 
     # create-electrode-table-region: start
-    from pynwb.ecephys import ElectrodeTable, ElectrodeTableRegion
-
-    electrode_table = ElectrodeTable('electrodes')
     for idx in [1, 2, 3, 4]:
-        electrode_table.add_row(idx,
-                                x=1.0, y=2.0, z=3.0,
-                                imp=float(-idx),
-                                location='CA1', filtering='none',
-                                description='channel %s' % idx, group=electrode_group)
+        f.add_electrode(idx,
+                        x=1.0, y=2.0, z=3.0,
+                        imp=float(-idx),
+                        location='CA1', filtering='none',
+                        description='channel %s' % idx, group=electrode_group)
 
-    electrode_table_region = ElectrodeTableRegion(electrode_table, [0, 2], 'the first and third electrodes')
+    electrode_table_region = f.create_electrode_table_region([0, 2], 'the first and third electrodes')
     # create-electrode-table-region: end
 
     # create-timeseries: start

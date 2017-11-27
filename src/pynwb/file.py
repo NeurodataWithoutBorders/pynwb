@@ -8,10 +8,12 @@ from .form import Container
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
 from .epoch import Epoch
-from .ecephys import ElectrodeTable, ElectrodeGroup, Device
+from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
 from .core import NWBContainer
+
+from h5py import RegionReference
 
 
 def _not_parent(arg):
@@ -220,6 +222,18 @@ class NWBFile(NWBContainer):
         if self.__ec_electrodes is None:
             self.__ec_electrodes = ElectrodeTable('electrodes')
         call_docval_func(self.__ec_electrodes.add_row, kwargs)
+
+    @docval({'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
+            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
+    def create_electrode_table_region(self, **kwargs):
+        if self.__ec_electrodes is None:
+            msg = "no electrodes available. add electrodes before creating a region"
+            raise RuntimeError(msg)
+        region = getargs('region', kwargs)
+        desc = getargs('description', kwargs)
+        name = getargs('name', kwargs)
+        return ElectrodeTableRegion(self.__ec_electrodes, region, desc, name)
 
     @property
     def ec_electrode_groups(self):
