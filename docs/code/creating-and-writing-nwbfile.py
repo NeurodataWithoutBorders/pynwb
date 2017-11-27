@@ -70,7 +70,7 @@ def main():
     # create-electrode-groups: end
 
     # create-electrode-table-region: start
-    from pynwb.ecephys import ElectrodeTable, ElectrodeTableRegion
+    from pynwb.ecephys import ElectrodeTable
 
     for idx in [1, 2, 3, 4]:
         f.add_electrode(idx,
