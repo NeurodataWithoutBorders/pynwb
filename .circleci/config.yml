@@ -14,7 +14,7 @@ initialize-venv: &initialize-venv
 publish-prerelease-on-github: &publish-prerelease-on-github
   name: Publish wheel and source distribution on github
   command: |
-    if [ "${CIRCLE_BRANCH}" == "dev" ]; then
+    if [[ "${CIRCLE_BRANCH}" == "dev" && "${PUBLISH_RELEASE}" == "true" ]]; then
       . ../venv/bin/activate
       pip install -U scikit-ci-addons
       ci_addons publish_github_release NeurodataWithoutBorders/pynwb  \
@@ -94,6 +94,7 @@ jobs:
      - TEST_TOX_ENV: "py36"
      - COVERAGE_TOX_ENV: "coverage-py36"
      - BUILD_TOX_ENV: "build-py36"
+     - PUBLISH_RELEASE: "true"
     <<: *ci-steps
 
 workflows:
