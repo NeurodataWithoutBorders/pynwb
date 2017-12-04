@@ -23,6 +23,7 @@ matrix:
         - TEST_TOX_ENV=py35
         - COVERAGE_TOX_ENV=coverage-py35
         - BUILD_TOX_ENV=build-py35
+
     - os: osx
       language: generic
       env:
@@ -38,14 +39,9 @@ cache:
     - $HOME/.pyenv/versions/2.7.14
 
 before_install:
-  - pip install -U scikit-ci-addons
-  - ci_addons --install ../addons
-  - export PYTHON_VERSION=$TRAVIS_PYTHON_VERSION
-  - python ../addons/travis/install_pyenv.py
+  - export PATH=$HOME/.pyenv/versions/$TRAVIS_PYTHON_VERSION/bin:$PATH
+  - pyenv install -s $TRAVIS_PYTHON_VERSION
   - pyenv global $TRAVIS_PYTHON_VERSION
-
-install:
-  - pip install tox-travis tox-pyenv
 
 script:
   - tox -e $TEST_TOX_ENV
