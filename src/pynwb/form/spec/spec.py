@@ -749,7 +749,6 @@ class GroupSpec(BaseStorageSpec):
         for link in inc_spec.links:
             if link.data_type_inc is not None:
                 data_types.append(link)
-                continue
             self.__new_links.discard(link.name)
             if link.name in self.__links:
                 self.__overridden_links.add(link.name)
