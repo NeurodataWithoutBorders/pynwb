@@ -47,6 +47,7 @@ class TimeSeriesDict(dict):
     def ts_type(self):
         return self.__ts_type
 
+
 @register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(NWBContainer):
     """
