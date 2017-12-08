@@ -33,18 +33,7 @@ class ProcessingModule(NWBContainer):
         description, containers = popargs('description', 'containers', kwargs)
         super(ProcessingModule, self).__init__(**kwargs)
         self.description = description
-        self.__containers = self.__to_dict(containers)
-
-    def __to_dict(self, arg):
-        if arg is None:
-            return dict()
-        else:
-            return_dict = {}
-            for i in arg:
-                assert i.name is not None  # If a container doesn't have a name, it gets lost!
-                assert i.name not in return_dict
-                return_dict[i.name] = i
-            return return_dict
+        self.__containers = self._to_dict(containers, 'module_containers')
 
     @property
     def containers(self):
