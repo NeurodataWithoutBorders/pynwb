@@ -17,14 +17,14 @@ it calls :py:meth:`~form.spec.write.NamespaceBuilder.export` to save the extensi
 
 .. code-block:: python
 
-    from pynwb import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
+    from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 
     ns_path = "mylab.namespace.yaml"
     ext_source = "mylab.extensions.yaml"
 
     ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "mylab")
     ext = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                       attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
+                       attributes=[NWBAttributeSpec('trode_id', 'the tetrode id', 'int')],
                        neurodata_type_inc='ElectricalSeries',
                        neurodata_type_def='TetrodeSeries')
 
