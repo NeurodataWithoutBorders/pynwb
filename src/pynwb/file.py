@@ -11,7 +11,7 @@ from .epoch import Epoch
 from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
-from .core import NWBContainer
+from .core import NWBContainer, LabelledDict
 
 from h5py import RegionReference
 
@@ -125,19 +125,19 @@ class NWBFile(NWBContainer):
         elif isinstance(self.__file_create_date, str):
             self.__file_create_date = [parse_date(self.__file_create_date)]
 
-        self.__acquisition = self.__build_ts(getargs('acquisition', kwargs))
-        self.__stimulus = self.__build_ts(getargs('stimulus', kwargs))
-        self.__stimulus_template = self.__build_ts(getargs('stimulus_template', kwargs))
+        self.__acquisition = self.__build_ts('acquisition', kwargs)
+        self.__stimulus = self.__build_ts('stimulus', kwargs)
+        self.__stimulus_template = self.__build_ts('stimulus_template', kwargs)
 
-        self.__modules = self.__to_dict(getargs('modules', kwargs))
-        self.__epochs = self.__to_dict(getargs('epochs', kwargs))
+        self.__modules = self._to_dict('modules', kwargs)
+        self.__epochs = self._to_dict('epochs', kwargs)
         self.__ec_electrodes = getargs('ec_electrodes', kwargs)
-        self.__ec_electrode_groups = self.__to_dict(getargs('ec_electrode_groups', kwargs))
-        self.__devices = self.__to_dict(getargs('devices', kwargs))
+        self.__ec_electrode_groups = self._to_dict('ec_electrode_groups', kwargs)
+        self.__devices = self._to_dict('devices', kwargs)
 
-        self.__ic_electrodes = self.__to_dict(getargs('ic_electrodes', kwargs))
+        self.__ic_electrodes = self._to_dict('ic_electrodes', kwargs)
 
-        self.__imaging_planes = self.__to_dict(getargs('imaging_planes', kwargs))
+        self.__imaging_planes = self._to_dict('imaging_planes', kwargs)
 
         recommended = [
             'experimenter',
@@ -149,14 +149,12 @@ class NWBFile(NWBContainer):
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
 
-    def __to_dict(self, arg):
-        if arg is None:
-            return dict()
-        else:
-            return {i.name: i for i in arg}
+    def _to_dict(self, label, const_args):
+        return super(NWBFile, self)._to_dict(getargs(label, const_args), label)
 
-    def __build_ts(self, const_arg):
-        ret = dict()
+    def __build_ts(self, ts_type, kwargs):
+        ret = LabelledDict(ts_type)
+        const_arg = getargs(ts_type, kwargs)
         if const_arg:
             for ts in const_arg:
                 self.__set_timeseries(ret, ts)
@@ -409,6 +407,9 @@ class NWBFile(NWBContainer):
         return self.__get_timeseries(self.__stimulus_template, name)
 
     def __set_timeseries(self, ts_dict, ts, epoch=None):
+        if ts.name in ts_dict:
+            msg = "%s already exists in %s" % (ts.name, ts_dict.label)
+            raise ValueError(msg)
         ts_dict[ts.name] = ts
         if ts.parent is None:
             ts.parent = self
