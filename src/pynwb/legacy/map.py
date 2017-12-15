@@ -76,6 +76,8 @@ class TypeMapLegacy(TypeMap):
                                                                             'rmse',
                                                                             'comments'):
                     return None
+                elif parent_ndt == 'SpatialSeries' and builder.name in ('features'):
+                    return None
                 else:
                     raise RuntimeError(('Unable to determine neurodata_type: attrs["neurodata_type"]: "Custom",'
                                         'parent.neurodata_type: %s' % parent_ndt))
@@ -115,7 +117,11 @@ class TypeMapLegacy(TypeMap):
                         'imaging_plane_1_neuropil_response': None,
                         'imaging_plane_1_demixed_signal': None,
                         'corrected': None,
-                        'running_speed_index': None
+                        'running_speed_index': None,
+                        'pupil_size_index': None,
+                        'pupil_size': None,
+                        'pupil_location': None,
+                        'pupil_location_spherical': None
                     }
                     return decode(parent_names[builder.parent.name])
 
