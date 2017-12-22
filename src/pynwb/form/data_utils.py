@@ -1,9 +1,8 @@
-from collections import Iterable, deque
-import functools
+from collections import Iterable
 import numpy as np
 from abc import ABCMeta, abstractmethod, abstractproperty
 from six import with_metaclass
-from .utils import docval, getargs
+from .utils import docval, getargs, popargs
 from operator import itemgetter
 
 
@@ -214,61 +213,70 @@ class DataChunkIterator(AbstractDataChunkIterator):
 
 class DataChunkStream(AbstractDataChunkIterator):
 
-    @docval({'name': 'initial_data', 'type': None, 'doc': 'The initial data array, can be empty or None', 'default': None},
-            {'name': 'data_shape', 'type': tuple,
-             'doc': 'The maximum shape of the full data array. Use None for each dimension'
-                    ' to indicate unlimited dimensions. Defaults to None for all dimensions',
-             'default': None},
+    @docval({'name': 'initial_data', 'type': None,
+             'doc': 'The initial data array. Can be empty along the appendable'
+                    ' dimension, but otherwise provides the data shape',
+             'default': []},
+            {'name': 'append_dim', 'type': int,
+             'doc': 'The dimension along which data is appended', 'default': 0},
             {'name': 'dtype', 'type': np.dtype,
-             'doc': 'The Numpy data type for the array. `initial_data` type is used if not None', 'default': None},
+             'doc': 'The Numpy data type for the array. `initial_data` type is '
+                    'used if None', 'default': None},
             {'name': 'min_buffer_size', 'type': int,
-             'doc': 'Minimum amount of data along the first dim to be buffered in a chunk before writing', 'default': 1},
+             'doc': 'Minimum amount of data (along the appendedable dim) to be '
+                    'buffered in a chunk before writing', 'default': 1},
             )
     def __init__(self, **kwargs):
-        initial_data, data_shape, self.dtype, self.min_buffer_size = getargs(
-            'initial_data', 'data_shape', 'dtype', 'min_buffer_size', kwargs)
+        initial_data, append_dim, dtype, self.min_buffer_size = popargs(
+            'initial_data', 'append_dim', 'dtype', 'min_buffer_size', kwargs)
         super(DataChunkStream, self).__init__(**kwargs)
         self.queue = []
+        initial_data = np.asarray(initial_data)
+        self.dtype = dtype or initial_data.dtype
+        self.append_dim = append_dim
 
-        if initial_data is None:
-            if data_shape is None:
-                initial_shape = (0, )
-                data_shape = (None, )
-            else:
-                initial_shape = [v if v else 0 for v in self.max_shape]
-        else:
-            initial_data = np.asarray(initial_data)
-            if data_shape is None:
-                initial_shape = initial_data.shape
-                data_shape = (None, ) * len(initial_data.shape)
-            else:
-                initial_shape = initial_data.shape
-                for i in range(max(len(data_shape), len(initial_shape))):
-                    if (data_shape[i] is not None and
-                            data_shape[i] != initial_shape[i]):
-                        raise ValueError('Initial data shape must match '
-                                         'data_shape for non-None dimensions')
+        self.initial_shape = list(initial_data.shape)
+        self.initial_shape[append_dim] = 0
+        self.max_shape = list(initial_data.shape)
+        self.max_shape[append_dim] = None
+        if initial_data.shape[append_dim]:
+            self.queue.append(initial_data)
 
-        self.initial_shape = initial_shape
-        self.max_shape = data_shape
-        if functools.reduce(
-                lambda a, b: a * b, initial_shape, initial_shape[0]):
-            self.queue.append((initial_data, None))
+        self.total_size = 0
 
-    @docval({'name': 'data', 'type': None, 'doc': 'The data array'},
-            {'name': 'append_dim', 'type': int,
-             'doc': 'The dimension along which to append the data',
-             'default': 0},
-            )
+    @docval({'name': 'data', 'type': None, 'doc': 'The data array'})
     def append_data(self, **kwargs):
-        pass
+        data = popargs('data', kwargs)
+        self.queue.append(np.asarray(data))
+
+    def flush_data(self):
+        self.queue.append('flush')
 
     def __iter__(self):
-        items = self.queue[:]
-        del self.queue[:]
-        for item in items:
-            for chunk in item:
-                yield chunk
+        queue = self.queue
+        dim = self.append_dim
+
+        count = sum((v.shape[dim] for v in queue if v is not 'flush'))
+        if (count < self.min_buffer_size and
+                not any((True for v in queue if v is 'flush'))):
+            # not flushed and too little
+            return
+
+        items = queue[:]
+        del queue[:]
+        size = self.total_size
+        self.total_size += count
+        count += size
+
+        # reverse so that we'll resize underlying data to total # of data
+        for item in reversed(items):
+            if item is 'flush':
+                continue
+
+            chunk = DataChunk(
+                data=item, selection=slice(count - item.shape[dim], count))
+            count -= item.shape[dim]
+            yield chunk
 
     def __next__(self):
         raise NotImplementedError
