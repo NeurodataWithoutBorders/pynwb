@@ -8,7 +8,7 @@ import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
-from ...data_utils import AbstractDataChunkIterator, get_shape
+from ...data_utils import AbstractDataChunkIterator, get_shape, DataChunkIterator
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder, TypeMap
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, GroupSpec
 from ...spec import NamespaceBuilder
@@ -291,9 +291,6 @@ class HDF5IO(FORMIO):
                 datas.append((self.__file.get(dbldr.name), dbldr.data))
 
         for dset, data in datas:
-            recommended_chunks = data.recommended_chunk_shape()
-            chunks = True if recommended_chunks is None else recommended_chunks
-            baseshape = data.recommended_data_shape()
             for chunk_i in data:
                 # Determine the minimum array dimensions to fit the chunk selection
                 max_bounds = self.__selection_max_bounds__(chunk_i.selection)
@@ -545,7 +542,7 @@ class HDF5IO(FORMIO):
                     self.__queue_ref(_filler)
                 return
             elif isinstance(data, Iterable) and not self.isinstance_inmemory_array(data):
-                dset = self.__chunked_iter_fill__(parent, name, AbstractDataChunkIterator(data=data, buffer_size=100))
+                dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
             elif hasattr(data, '__len__'):
                 dset = self.__list_fill__(parent, name, data, dtype_spec=dtype)
             else:
