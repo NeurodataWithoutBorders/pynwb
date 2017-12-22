@@ -3,7 +3,7 @@ from h5py import RegionReference
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, call_docval_func
-from .form.data_utils import DataChunkIterator, ShapeValidator
+from .form.data_utils import AbstractDataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -115,7 +115,7 @@ class ElectricalSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable),
+            {'name': 'data', 'type': (list, np.ndarray, AbstractDataChunkIterator, TimeSeries, Iterable),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
             {'name': 'electrodes', 'type': ElectrodeTableRegion,
@@ -126,7 +126,7 @@ class ElectricalSeries(TimeSeries):
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable),
+            {'name': 'timestamps', 'type': (list, np.ndarray, AbstractDataChunkIterator, TimeSeries, Iterable),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -169,9 +169,9 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable),
+            {'name': 'data', 'type': (list, np.ndarray, AbstractDataChunkIterator, TimeSeries, Iterable),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable),
+            {'name': 'timestamps', 'type': (list, np.ndarray, AbstractDataChunkIterator, TimeSeries, Iterable),
              'doc': 'Timestamps for samples stored in data'},
             {'name': 'electrodes', 'type': ElectrodeTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
@@ -194,11 +194,11 @@ class SpikeEventSeries(ElectricalSeries):
         name, source, data, electrodes = popargs('name', 'source', 'data', 'electrodes', kwargs)
         timestamps = getargs('timestamps', kwargs)
         if not (isinstance(data, TimeSeries) and isinstance(timestamps, TimeSeries)):
-            if not (isinstance(data, DataChunkIterator) and isinstance(timestamps, DataChunkIterator)):
+            if not (isinstance(data, AbstractDataChunkIterator) and isinstance(timestamps, AbstractDataChunkIterator)):
                 if len(data) != len(timestamps):
                     raise Exception('Must provide the same number of timestamps and spike events')
             else:
-                # TODO: add check when we have DataChunkIterators
+                # TODO: add check when we have AbstractDataChunkIterators
                 pass
         super(SpikeEventSeries, self).__init__(name, source, data, electrodes, **kwargs)
 
@@ -400,11 +400,11 @@ class FeatureExtraction(NWBContainer):
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data'},
             {'name': 'electrodes', 'type': ElectrodeTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
-            {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator),
+            {'name': 'description', 'type': (list, tuple, np.ndarray, AbstractDataChunkIterator),
              'doc': 'A description for each feature extracted', 'ndim': 1},
-            {'name': 'times', 'type': (list, tuple, np.ndarray, DataChunkIterator),
+            {'name': 'times', 'type': (list, tuple, np.ndarray, AbstractDataChunkIterator),
              'doc': 'The times of events that features correspond to', 'ndim': 1},
-            {'name': 'features', 'type': (list, tuple, np.ndarray, DataChunkIterator),
+            {'name': 'features', 'type': (list, tuple, np.ndarray, AbstractDataChunkIterator),
              'doc': 'Features for each channel', 'ndim': 3},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'})
     def __init__(self, **kwargs):

@@ -1,7 +1,7 @@
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, fmt_docval_args
-from .form.data_utils import DataChunkIterator
+from .form.data_utils import AbstractDataChunkIterator
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
@@ -90,7 +90,7 @@ class TimeSeries(NWBContainer):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (Iterable, 'TimeSeries', DataChunkIterator),
+            {'name': 'data', 'type': (Iterable, 'TimeSeries', AbstractDataChunkIterator),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'resolution', 'type': (str, float),
@@ -102,7 +102,7 @@ class TimeSeries(NWBContainer):
              'default': _default_conversion},
 
             # time related data is optional, but one is required -- this will have to be enforced in the constructor
-            {'name': 'timestamps', 'type': (Iterable, 'TimeSeries', DataChunkIterator),
+            {'name': 'timestamps', 'type': (Iterable, 'TimeSeries', AbstractDataChunkIterator),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -139,7 +139,7 @@ class TimeSeries(NWBContainer):
         if isinstance(data, TimeSeries):
             data.fields['data_link'].append(self)
             self.fields['num_samples'] = data.num_samples
-        elif isinstance(data, DataChunkIterator):
+        elif isinstance(data, AbstractDataChunkIterator):
             self.fields['num_samples'] = -1
         else:
             self.fields['num_samples'] = len(data)

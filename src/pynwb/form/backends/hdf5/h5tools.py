@@ -8,7 +8,7 @@ import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
-from ...data_utils import DataChunkIterator, get_shape
+from ...data_utils import AbstractDataChunkIterator, get_shape
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder, TypeMap
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, GroupSpec
 from ...spec import NamespaceBuilder
@@ -281,13 +281,13 @@ class HDF5IO(FORMIO):
                 # do not create an empty group without attributes or links
                 walk_groups(group, sub_builder)
             for dset_name, sub_builder in builder.datasets.items():
-                if isinstance(sub_builder.data, DataChunkIterator):
+                if isinstance(sub_builder.data, AbstractDataChunkIterator):
                     datas.append((group.get(sub_builder.name), sub_builder.data))
 
         for name, gbldr in f_builder.groups.items():
             walk_groups(self.__file, gbldr)
         for name, dbldr in f_builder.datasets.items():
-            if isinstance(dbldr.data, DataChunkIterator):
+            if isinstance(dbldr.data, AbstractDataChunkIterator):
                 datas.append((self.__file.get(dbldr.name), dbldr.data))
 
         for dset, data in datas:
@@ -517,7 +517,7 @@ class HDF5IO(FORMIO):
         else:
             if isinstance(data, str):
                 dset = self.__scalar_fill__(parent, name, data)
-            elif isinstance(data, DataChunkIterator):
+            elif isinstance(data, AbstractDataChunkIterator):
                 dset = self.__chunked_iter_fill__(parent, name, data)
             elif isinstance(data, Dataset):
                 data_filename = os.path.abspath(data.file.filename)
@@ -545,7 +545,7 @@ class HDF5IO(FORMIO):
                     self.__queue_ref(_filler)
                 return
             elif isinstance(data, Iterable) and not self.isinstance_inmemory_array(data):
-                dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
+                dset = self.__chunked_iter_fill__(parent, name, AbstractDataChunkIterator(data=data, buffer_size=100))
             elif hasattr(data, '__len__'):
                 dset = self.__list_fill__(parent, name, data, dtype_spec=dtype)
             else:
@@ -580,14 +580,14 @@ class HDF5IO(FORMIO):
     @classmethod
     def __chunked_iter_fill__(cls, parent, name, data):
         """
-        Write data to a dataset one-chunk-at-a-time based on the given DataChunkIterator
+        Write data to a dataset one-chunk-at-a-time based on the given AbstractDataChunkIterator
 
         :param parent: The parent object to which the dataset should be added
         :type parent: h5py.Group, h5py.File
         :param name: The name of the dataset
         :type name: str
         :param data: The data to be written.
-        :type data: DataChunkIterator
+        :type data: AbstractDataChunkIterator
 
         """
         recommended_chunks = data.recommended_chunk_shape()
