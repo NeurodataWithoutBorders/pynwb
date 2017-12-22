@@ -1,4 +1,5 @@
-from collections import Iterable
+from collections import Iterable, deque
+import functools
 import numpy as np
 from abc import ABCMeta, abstractmethod, abstractproperty
 from six import with_metaclass
@@ -209,6 +210,74 @@ class DataChunkIterator(AbstractDataChunkIterator):
             if np.all([i is not None for i in self.max_shape]):
                 return self.max_shape
         return self.__first_chunk_shape
+
+
+class DataChunkStream(AbstractDataChunkIterator):
+
+    @docval({'name': 'initial_data', 'type': None, 'doc': 'The initial data array, can be empty or None', 'default': None},
+            {'name': 'data_shape', 'type': tuple,
+             'doc': 'The maximum shape of the full data array. Use None for each dimension'
+                    ' to indicate unlimited dimensions. Defaults to None for all dimensions',
+             'default': None},
+            {'name': 'dtype', 'type': np.dtype,
+             'doc': 'The Numpy data type for the array. `initial_data` type is used if not None', 'default': None},
+            {'name': 'min_buffer_size', 'type': int,
+             'doc': 'Minimum amount of data along the first dim to be buffered in a chunk before writing', 'default': 1},
+            )
+    def __init__(self, **kwargs):
+        initial_data, data_shape, self.dtype, self.min_buffer_size = getargs(
+            'initial_data', 'data_shape', 'dtype', 'min_buffer_size', kwargs)
+        super(DataChunkStream, self).__init__(**kwargs)
+        self.queue = []
+
+        if initial_data is None:
+            if data_shape is None:
+                initial_shape = (0, )
+                data_shape = (None, )
+            else:
+                initial_shape = [v if v else 0 for v in self.max_shape]
+        else:
+            initial_data = np.asarray(initial_data)
+            if data_shape is None:
+                initial_shape = initial_data.shape
+                data_shape = (None, ) * len(initial_data.shape)
+            else:
+                initial_shape = initial_data.shape
+                for i in range(max(len(data_shape), len(initial_shape))):
+                    if (data_shape[i] is not None and
+                            data_shape[i] != initial_shape[i]):
+                        raise ValueError('Initial data shape must match '
+                                         'data_shape for non-None dimensions')
+
+        self.initial_shape = initial_shape
+        self.max_shape = data_shape
+        if functools.reduce(
+                lambda a, b: a * b, initial_shape, initial_shape[0]):
+            self.queue.append((initial_data, None))
+
+    @docval({'name': 'data', 'type': None, 'doc': 'The data array'},
+            {'name': 'append_dim', 'type': int,
+             'doc': 'The dimension along which to append the data',
+             'default': 0},
+            )
+    def append_data(self, **kwargs):
+        pass
+
+    def __iter__(self):
+        items = self.queue[:]
+        del self.queue[:]
+        for item in items:
+            for chunk in item:
+                yield chunk
+
+    def __next__(self):
+        raise NotImplementedError
+
+    def recommended_chunk_shape(self):
+        return None
+
+    def recommended_data_shape(self):
+        return self.initial_shape
 
 
 class DataChunk(object):

@@ -268,6 +268,47 @@ class HDF5IO(FORMIO):
         self.set_attributes(self.__file, f_builder.attributes)
         self.__add_refs()
 
+    @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
+    def write_plumb_data(self, **kwargs):
+        f_builder = getargs('builder', kwargs)
+        datas = []
+
+        def walk_groups(parent, builder):
+            if not builder:
+                return
+            group = parent.get(builder.name)
+            for subgroup_name, sub_builder in builder.groups.items():
+                # do not create an empty group without attributes or links
+                walk_groups(group, sub_builder)
+            for dset_name, sub_builder in builder.datasets.items():
+                if isinstance(sub_builder.data, DataChunkIterator):
+                    datas.append((group.get(sub_builder.name), sub_builder.data))
+
+        for name, gbldr in f_builder.groups.items():
+            walk_groups(self.__file, gbldr)
+        for name, dbldr in f_builder.datasets.items():
+            if isinstance(dbldr.data, DataChunkIterator):
+                datas.append((self.__file.get(dbldr.name), dbldr.data))
+
+        for dset, data in datas:
+            recommended_chunks = data.recommended_chunk_shape()
+            chunks = True if recommended_chunks is None else recommended_chunks
+            baseshape = data.recommended_data_shape()
+            for chunk_i in data:
+                # Determine the minimum array dimensions to fit the chunk selection
+                max_bounds = self.__selection_max_bounds__(chunk_i.selection)
+                if not hasattr(max_bounds, '__len__'):
+                    max_bounds = (max_bounds,)
+                # Determine if we need to expand any of the data dimensions
+                expand_dims = [i for i, v in enumerate(max_bounds) if v is not None and v > dset.shape[i]]
+                # Expand the dataset if needed
+                if len(expand_dims) > 0:
+                    new_shape = np.asarray(dset.shape)
+                    new_shape[expand_dims] = np.asarray(max_bounds)[expand_dims]
+                    dset.resize(new_shape)
+                # Process and write the data
+                dset[chunk_i.selection] = chunk_i.data
+
     def __add_refs(self):
         '''
         Add all references in the file.

@@ -38,10 +38,21 @@ class FORMIO(with_metaclass(ABCMeta, object)):
         f_builder = self.__manager.build(container, source=self.__source)
         self.write_builder(f_builder)
 
+    @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'})
+    def plumb_data(self, **kwargs):
+        container = getargs('container', kwargs)
+        f_builder = self.__manager.build(container, source=self.__source)
+        self.write_plumb_data(f_builder)
+
     @abstractmethod
     @docval(returns='a GroupBuilder representing the read data', rtype='GroupBuilder')
     def read_builder(self):
         ''' Read data and return the GroupBuilder represention '''
+        pass
+
+    @abstractmethod
+    @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the Container'})
+    def write_plumb_data(self, **kwargs):
         pass
 
     @abstractmethod
