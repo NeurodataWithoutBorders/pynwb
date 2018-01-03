@@ -5,7 +5,7 @@ from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
 from .form import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
-from six import with_metaclass
+from six import with_metaclass, iteritems
 
 
 def set_parents(container, parent):
@@ -35,6 +35,31 @@ class LabelledDict(dict):
     @property
     def label(self):
         return self.__label
+
+
+def prepend_string(string,prepend='    '):
+    return prepend + prepend.join(string.splitlines(True))
+
+def nwb_repr(nwb_object,verbose=True):
+    try:
+        template = "{} {}\nFields:\n""".format(getattr(nwb_object,'name'),type(nwb_object))
+
+        if verbose:
+            for k,v in iteritems(nwb_object.fields):
+                template += "  {}:\n".format(k)
+                if isinstance(v,list):
+                    for item in v:
+                        template += prepend_string(nwb_repr(item,verbose=False))+'\n'
+                else:
+                    template += prepend_string(str(v))+'\n'
+        else:
+            for field in ('description',):
+                template += "  {}:\n".format(field)
+                template += prepend_string(str(getattr(nwb_object,field)))+'\n'
+
+        return template
+    except AttributeError:
+        return str(nwb_object)
 
 
 class NWBBaseType(with_metaclass(ExtenderMeta)):
@@ -119,6 +144,12 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
         for f in cls.__nwbfields__:
             if not hasattr(cls, f):
                 setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
+
+    def __str__(self):
+        return nwb_repr(self)
+
+    def __repr__(self):
+        return str(self)
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)
