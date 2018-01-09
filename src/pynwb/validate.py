@@ -50,7 +50,7 @@ def main():
                 _print_errors(errors)
     else:
         errors = validate(io)
-        print('Validating against core namespace' % args.ns)
+        print('Validating against core namespace')
         _print_errors(errors)
 
 
