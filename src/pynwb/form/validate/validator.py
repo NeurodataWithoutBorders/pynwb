@@ -263,7 +263,6 @@ class GroupValidator(BaseStorageValidator):
         self.__group_validators = dict()
         it = chain(self.spec.datasets, self.spec.groups)
         for spec in it:
-            dt = None
             if spec.data_type_def is None:
                 if spec.data_type_inc is None:
                     if isinstance(spec, GroupSpec):
@@ -271,10 +270,8 @@ class GroupValidator(BaseStorageValidator):
                     else:
                         self.__dataset_validators[spec.name] = DatasetValidator(spec)
                 else:
-                    dt = spec.data_type_inc
                     self.__include_dts[spec.data_type_inc] = spec
             else:
-                dt = spec.data_type_def
                 self.__include_dts[spec.data_type_def] = spec
 
     @docval({"name": "builder", "type": GroupBuilder, "doc": "the builder to validate"},
@@ -292,7 +289,6 @@ class GroupValidator(BaseStorageValidator):
                 dt = v_builder.attributes.get(self.spec.type_key())
                 if dt is not None:
                     data_types.setdefault(dt, list()).append(value)
-        inc_dts = self.__include_dts
         for dt in self.__include_dts:
             found = False
             for sub_val in self.__vmap.valid_types(dt):
