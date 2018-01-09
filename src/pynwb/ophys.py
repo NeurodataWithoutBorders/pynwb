@@ -348,6 +348,7 @@ class Fluorescence(NWBContainer):
         super(Fluorescence, self).__init__(*pargs, **pkwargs)
         self.roi_response_series = roi_response_series
 
+
 @register_class('CorrectedImageStack', CORE_NAMESPACE)
 class CorrectedImageStack(NWBContainer):
     """
@@ -375,6 +376,7 @@ class CorrectedImageStack(NWBContainer):
         self.corrected = corrected
         self.original = original
         self.xy_translation = xy_translation
+
 
 @register_class('MotionCorrection', CORE_NAMESPACE)
 class MotionCorrection(NWBContainer):

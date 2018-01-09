@@ -7,7 +7,6 @@ from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer, set_parents
 from .misc import IntervalSeries
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .image import ImageSeries
 
 
 @register_class('SpatialSeries', CORE_NAMESPACE)
