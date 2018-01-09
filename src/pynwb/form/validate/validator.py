@@ -158,7 +158,6 @@ class ValidatorMap(object):
         for t in tree:
             self.__rec(tree, t)
         self.__valid_types = dict()
-        self._valid_types = self.__valid_types
         self.__validators = dict()
         for dt, children in tree.items():
             _list = list()
