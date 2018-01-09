@@ -255,7 +255,7 @@ class GroupValidator(BaseStorageValidator):
     def __init__(self, **kwargs):
         super(GroupValidator, self).__init__(getargs('spec', kwargs))
         self.__vmap = getargs('validator_map', kwargs)
-        self.__include_dts = list()
+        self.__include_dts = dict()
         self.__dataset_validators = dict()
         self.__group_validators = dict()
         it = chain(self.spec.datasets, self.spec.groups)
@@ -269,10 +269,10 @@ class GroupValidator(BaseStorageValidator):
                         self.__dataset_validators[spec.name] = DatasetValidator(spec)
                 else:
                     dt = spec.data_type_inc
-                    self.__include_dts.append(spec.data_type_inc)
+                    self.__include_dts[spec.data_type_inc] = spec.required
             else:
                 dt = spec.data_type_def
-                self.__include_dts.append(spec.data_type_def)
+                self.__include_dts[spec.data_type_def] = spec.required
 
     @docval({"name": "builder", "type": GroupBuilder, "doc": "the builder to validate"},
             returns='a list of Errors', rtype=list)
@@ -302,7 +302,7 @@ class GroupValidator(BaseStorageValidator):
                     for bldr in dt_builders:
                         sub_val.validate(bldr)
                     found = True
-            if not found:
+            if not found and self.__include_dts[dt]:
                 ret.append(MissingDataType(self.get_builder_loc(builder), dt))  # noqa: F405
         it = chain(self.__dataset_validators.items(),
                    self.__group_validators.items())
