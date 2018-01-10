@@ -7,7 +7,7 @@ from ..data_utils import get_type, get_shape
 
 from ..spec import Spec, AttributeSpec, GroupSpec, DatasetSpec
 from ..spec.spec import BaseStorageSpec
-from ..spec import SpecNamespace
+from ..spec import SpecNamespace, NamespaceCatalog
 
 from ..build import GroupBuilder, DatasetBuilder, LinkBuilder
 from ..build.builders import BaseBuilder
@@ -326,3 +326,35 @@ class GroupValidator(BaseStorageValidator):
                     ret.extend(validator.validate(sub_builder))
 
         return ret
+
+
+class NamespaceCatalogValidator(object):
+
+    @docval({'name': 'namespace_catalog', 'type': NamespaceCatalog, 'doc': 'the NamespaceCatalog to use for validation'})
+    def __init__(self, **kwargs):
+        ns_catalog = getargs('namespace_catalog', kwargs)
+        self.__ns_catalog = ns_catalog
+        self.__vmaps = dict()
+        for ns_name in self.__ns_catalog.namespaces:
+            ns = self.__ns_catalog.get_namespace(ns_name)
+            self.__vmaps[ns_name] = ValidatorMap(ns)
+
+    @property
+    def namespace_catalog(self):
+        return self.__ns_catalog
+
+    @docval({'name': 'builder', 'type': BaseBuilder, 'doc': 'the builder to validate'},
+            returns="a list of errors found", rtype=list)
+    def validate(self, **kwargs):
+        """Validate a builder against a Spec
+
+        ``builder`` must have the attribute used to specify namespace
+        by the SpecNamespace class used to construct ``namespace_catalog``
+        """
+        builder = getargs('builder', kwargs)
+        ns = builder.attributes.get(self.__ns_catalog.spec_namespace_cls.namespace_key())
+        vmap = self.__vmaps.get(ns)
+        if vmap is None:
+            msg = "'builder' missing attribute %s" % self.__ns_catalog.spec_namespace_cls.namespace_key()
+            raise ValueError(msg)
+        return vmap.validate(builder)
