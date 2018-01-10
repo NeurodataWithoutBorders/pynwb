@@ -14,6 +14,12 @@ from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
 
 class TestHDF5Writer(unittest.TestCase):
 
+    _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec')
+
+    @property
+    def required_tests(self):
+        return self._required_tests
+
     def setUp(self):
         self.manager = get_manager()
         self.path = "test_pynwb_io_hdf5.h5"

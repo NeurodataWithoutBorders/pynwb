@@ -21,11 +21,17 @@ def container_test(container):
 
 
 class TestMapNWBContainer(unittest.TestCase):
+ 
+    _required_tests = ('test_build', 'test_construct')
 
     def setUp(self):
         self.__manager = get_manager()
         self.__container = self.setUpContainer()
         self.__builder = self.setUpBuilder()
+
+    @property
+    def required_tests(self):
+        return self._required_tests
 
     @property
     def manager(self):
@@ -93,6 +99,8 @@ class TestMapNWBContainer(unittest.TestCase):
 
 
 class TestMapRoundTrip(TestMapNWBContainer):
+
+    _required_tests = ('test_build', 'test_construct', 'test_roundtrip')
 
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
