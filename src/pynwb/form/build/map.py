@@ -8,6 +8,7 @@ from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec
 from ..spec.spec import BaseStorageSpec
+from ..validate.validator import NamespaceCatalogValidator
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, RegionBuilder
 
 
@@ -16,10 +17,13 @@ class BuildManager(object):
     A class for managing builds of Containers
     """
 
-    def __init__(self, type_map):
+    def __init__(self, type_map, validate=True, force=False):
         self.__builders = dict()
         self.__containers = dict()
         self.__type_map = type_map
+        self.__validator = NamespaceCatalogValidator(self.__type_map.namespace_catalog)
+        self.__validate = validate
+        self.__force = force
 
     @property
     def namespace_catalog(self):
@@ -32,11 +36,12 @@ class BuildManager(object):
         """ Build the GroupBuilder for the given Container"""
         container = getargs('container', kwargs)
         container_id = self.__conthash__(container)
-        result = self.__builders.get(container_id)
-        if result is None:
-            result = self.__type_map.build(container, self, source=getargs('source', kwargs))
-            self.prebuilt(container, result)
-        return result
+        builder = self.__builders.get(container_id)
+        if builder is None:
+            builder = self.__type_map.build(container, self, source=getargs('source', kwargs))
+            result = self.__validator.validate(builder)
+            self.prebuilt(container, builder)
+        return builder
 
     @docval({"name": "container", "type": Container, "doc": "the Container to save as prebuilt"},
             {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder),
@@ -699,6 +704,7 @@ class TypeMap(object):
         self.__container_types = dict()
         self.__data_types = dict()
         self.__default_mapper_cls = getargs('mapper_cls', kwargs)
+        self.__ns_key = namespaces.spec_namespace_cls.namespace_key()
 
     @property
     def namespace_catalog(self):
@@ -863,7 +869,7 @@ class TypeMap(object):
         return ret
 
     def get_builder_ns(self, builder):
-        ret = builder.attributes.get('namespace')
+        ret = builder.attributes.get(self.__ns_key)
         if ret is None:
             msg = "builder '%s' does not have a namespace" % builder.name
             raise ValueError(msg)
@@ -993,7 +999,7 @@ class TypeMap(object):
         else:
             builder = attr_map.build(container, manager, source=getargs('source', kwargs))
         namespace, data_type = self.__get_container_ns_dt(container)
-        builder.set_attribute('namespace', namespace)
+        builder.set_attribute(self.__ns_key, namespace)
         builder.set_attribute(attr_map.spec.type_key(), data_type)
         return builder
 
