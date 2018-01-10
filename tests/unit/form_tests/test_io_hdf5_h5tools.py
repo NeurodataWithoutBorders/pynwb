@@ -99,7 +99,7 @@ class H5IOTest(unittest.TestCase):
         dset = self.f['test_dataset']
         self.assertTrue(np.all(dset[:] == a))
 
-    def test_write_dataset_list(self):
+    def test_write_dataset_list_compress(self):
         a = H5DataIO(np.arange(30).reshape(5, 2, 3), compress=True)
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
         dset = self.f['test_dataset']
