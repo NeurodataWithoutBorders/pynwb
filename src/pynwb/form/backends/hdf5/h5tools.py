@@ -13,6 +13,8 @@ from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildMa
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, GroupSpec
 from ...spec import NamespaceBuilder
 
+from .h5_utils import H5DataIO
+
 from ..io import FORMIO
 
 ROOT_NAME = 'root'
@@ -446,18 +448,23 @@ class HDF5IO(FORMIO):
         parent, builder = getargs('parent', 'builder', kwargs)
         name = builder.name
         data = builder.data
+        options = dict()
+        if isinstance(data, H5DataIO):
+            options['compression'] = 'gzip' if data.compress else None
+            data = data.data
         attributes = builder.attributes
-        dtype = builder.dtype
+        options['dtype'] = builder.dtype
+        dtype = options['dtype']
         dset = None
         link = None
-        if isinstance(dtype, list):
+        if isinstance(options['dtype'], list):
             # do some stuff to figure out what data is a reference
             refs = list()
-            for i, dts in enumerate(dtype):
+            for i, dts in enumerate(options['dtype']):
                 if self.__is_ref(dts):
                     refs.append(i)
             if len(refs) > 0:
-                _dtype = self.__resolve_dtype__(dtype, data)
+                _dtype = self.__resolve_dtype__(options['dtype'], data)
 
                 def _filler():
                     ret = list()
@@ -472,12 +479,12 @@ class HDF5IO(FORMIO):
                 self.__queue_ref(_filler)
                 return
             else:
-                dset = self.__list_fill__(parent, name, data, dtype)
+                dset = self.__list_fill__(parent, name, data, options)
         else:
             if isinstance(data, str):
-                dset = self.__scalar_fill__(parent, name, data)
+                dset = self.__scalar_fill__(parent, name, data, options)
             elif isinstance(data, DataChunkIterator):
-                dset = self.__chunked_iter_fill__(parent, name, data)
+                dset = self.__chunked_iter_fill__(parent, name, data, options)
             elif isinstance(data, Dataset):
                 data_filename = os.path.abspath(data.file.filename)
                 parent_filename = os.path.abspath(parent.file.filename)
@@ -487,7 +494,7 @@ class HDF5IO(FORMIO):
                     link = SoftLink(data.name)
                 parent[name] = link
             elif isinstance(data, Builder):
-                _dtype = self.__dtypes[dtype]
+                _dtype = self.__dtypes[options['dtype']]
                 if dtype == 'region':
 
                     def _filler():
@@ -504,11 +511,11 @@ class HDF5IO(FORMIO):
                     self.__queue_ref(_filler)
                 return
             elif isinstance(data, Iterable) and not self.isinstance_inmemory_array(data):
-                dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100))
+                dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100), options)
             elif hasattr(data, '__len__'):
-                dset = self.__list_fill__(parent, name, data, dtype_spec=dtype)
+                dset = self.__list_fill__(parent, name, data, options)
             else:
-                dset = self.__scalar_fill__(parent, name, data, dtype=dtype)
+                dset = self.__scalar_fill__(parent, name, data, options)
         if link is None:
             self.set_attributes(dset, attributes)
         return dset
@@ -526,18 +533,23 @@ class HDF5IO(FORMIO):
             return tuple([cls.__selection_max_bounds__(i) for i in selection])
 
     @classmethod
-    def __scalar_fill__(cls, parent, name, data, dtype=None):
+    def __scalar_fill__(cls, parent, name, data, options=None):
+        dtype = None
+        compression = None
+        if options is not None:
+            dtype = options.get('dtype')
+            compression = options.get('compression')
         if not isinstance(dtype, type):
             dtype = cls.__resolve_dtype__(dtype, data)
         try:
-            dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype)
+            dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype, compression=compression)
         except Exception as exc:
             msg = "Could not create scalar dataset %s in %s" % (name, parent.name)
             raise_from(Exception(msg), exc)
         return dset
 
     @classmethod
-    def __chunked_iter_fill__(cls, parent, name, data):
+    def __chunked_iter_fill__(cls, parent, name, data, options=None):
         """
         Write data to a dataset one-chunk-at-a-time based on the given DataChunkIterator
 
@@ -547,14 +559,19 @@ class HDF5IO(FORMIO):
         :type name: str
         :param data: The data to be written.
         :type data: DataChunkIterator
+        :param options: options for creating a dataset. available options are 'dtype' and 'compression'
+        :type data: dict
 
         """
+        compression = None
+        if options is not None:
+            compression = options.get('compression')
         recommended_chunks = data.recommended_chunk_shape()
         chunks = True if recommended_chunks is None else recommended_chunks
         baseshape = data.recommended_data_shape()
         try:
             dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype,
-                                         maxshape=data.max_shape, chunks=chunks)
+                                         maxshape=data.max_shape, chunks=chunks, compression=compression)
         except Exception as exc:
             raise_from(Exception("Could not create dataset %s in %s" % (name, parent.name)), exc)
         for chunk_i in data:
@@ -574,20 +591,22 @@ class HDF5IO(FORMIO):
         return dset
 
     @classmethod
-    def __list_fill__(cls, parent, name, data, dtype_spec=None):
-        if not isinstance(dtype_spec, type):
-            dtype = cls.__resolve_dtype__(dtype_spec, data)
-        else:
-            dtype = dtype_spec
+    def __list_fill__(cls, parent, name, data, options=None):
+        compression = None
+        dtype = None
+        if options is not None:
+            dtype = options.get('dtype')
+            compression = options.get('compression')
+        if not isinstance(dtype, type):
+            dtype = cls.__resolve_dtype__(dtype, data)
         if isinstance(dtype, np.dtype):
             data_shape = (len(data),)
         else:
             data_shape = get_shape(data)
         try:
-            dset = parent.create_dataset(name, shape=data_shape, dtype=dtype)
+            dset = parent.create_dataset(name, shape=data_shape, dtype=dtype, compression=compression)
         except Exception as exc:
             msg = "Could not create dataset %s in %s" % (name, parent.name)
-            msg = "%s dtype_spec = %s" % (msg, dtype_spec)
             raise_from(Exception(msg), exc)
         if len(data) > dset.shape[0]:
             new_shape = list(dset.shape)
