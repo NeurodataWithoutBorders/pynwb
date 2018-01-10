@@ -1,6 +1,6 @@
 import h5py
 
-from ...utils import docval, getargs
+from ...utils import docval, getargs, popargs, call_docval_func
 from ...data_utils import RegionSlicer, DataIO
 
 
