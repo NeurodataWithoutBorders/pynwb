@@ -37,6 +37,7 @@ class SpecNamespace(dict):
     """
 
     __types_key = 'data_types'
+    __ns_key = 'namespace'
 
     @docval(*deepcopy(_namespace_args))
     def __init__(self, **kwargs):
@@ -67,6 +68,15 @@ class SpecNamespace(dict):
         Override this method to use a different name for 'data_types'
         '''
         return cls.__types_key
+
+    @classmethod
+    def namespace_key(cls):
+        ''' Get the key used for storing namespace Groups and Datasets with data_type.
+        Returns 'namespace' by default
+
+        Override this method to use a different name for namespace
+        '''
+        return cls.__ns_key
 
     @property
     def full_name(self):
