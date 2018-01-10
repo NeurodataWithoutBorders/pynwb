@@ -494,7 +494,7 @@ class HDF5IO(FORMIO):
                 parent[name] = link
             elif isinstance(data, Builder):
                 _dtype = self.__dtypes[options['dtype']]
-                if _dtype == 'region':
+                if dtype == 'region':
 
                     def _filler():
                         ref = self.__get_ref(data, builder.region)
