@@ -15,14 +15,41 @@ FAILURES = 0
 ERRORS = 0
 
 
+class SuccessRecordingResult(unittest.TextTestResult):
+    '''A unittest test result class that stores successful test cases as well
+    as failures and skips.
+    '''
+
+    def addSuccess(self, test):
+        if not hasattr(self, 'successes'):
+            self.successes = [test]
+        else:
+            self.successes.append(test)
+
+    def get_all_cases_run(self):
+        '''Return a list of each test case which failed or succeeded
+        '''
+
+        cases = []
+
+        cases.extend(self.successes)
+        cases.extend([failure[0] for failure in self.failures])
+
+        return cases
+
+
 def run_test_suite(directory, description="", verbose=True):
     global TOTAL, FAILURES, ERRORS
     logging.info("running %s" % description)
-    pynwb_test_result = unittest.TextTestRunner(verbosity=verbose).run(
-        unittest.TestLoader().discover(directory))
+
+    runner = unittest.TextTestRunner(verbosity=verbose, resultclass=SuccessRecordingResult)
+    pynwb_test_result = runner.run(unittest.TestLoader().discover(directory))
+
     TOTAL += pynwb_test_result.testsRun
     FAILURES += len(pynwb_test_result.failures)
     ERRORS += len(pynwb_test_result.errors)
+
+    return pynwb_test_result
 
 
 def _import_from_file(script):
@@ -49,20 +76,16 @@ def run_example_tests():
 
 
 def run_integration_tests(verbose=True):
-    run_test_suite("tests/integration", "integration tests", verbose=verbose)
+    pynwb_test_result = run_test_suite("tests/integration", "integration tests", verbose=verbose)
+    cases = pynwb_test_result.get_all_cases_run()
+    container_classes = [case.container.__class__ for case in cases if hasattr(case, 'container')]
 
     import pynwb
     type_map = pynwb.get_type_map()
 
-    import imp
-    name = 'integration'
-    imp_result = imp.find_module(name, ['tests'])
-    mod = imp.load_module(name, imp_result[0], imp_result[1], imp_result[2])
-
-    d = mod.ui_write.base.container_tests
     MISSING_INT = list()
     for cls in type_map.get_container_classes('core'):
-        if cls not in d:
+        if cls not in container_classes:
             MISSING_INT.append(cls)
 
     if len(MISSING_INT) > 0:
