@@ -85,7 +85,8 @@ def run_integration_tests(verbose=True):
     tested_containers = {}
     required_tests = {}
     for test_case in test_cases:
-        if not hasattr(test_case, 'container'): continue
+        if not hasattr(test_case, 'container'):
+            continue
         container_class = test_case.container.__class__
 
         if container_class not in tested_containers:
@@ -104,7 +105,8 @@ def run_integration_tests(verbose=True):
         if container_class not in tested_containers:
             count_missing += 1
             if verbose > 1:
-                logging.info('%s missing test case; should define in %s' % (container_class, inspect.getfile(container_class)))
+                logging.info('%s missing test case; should define in %s' % (container_class,
+                                                                            inspect.getfile(container_class)))
             continue
 
         test_methods = tested_containers[container_class]
@@ -114,9 +116,8 @@ def run_integration_tests(verbose=True):
         if methods_missing != set([]):
             count_missing += 1
             if verbose > 1:
-                logging.info('%s missing test method(s) \"%s\"; should define in %s' % (container_class, 
-                                                                                        ', '.join(methods_missing), 
-                                                                                        inspect.getfile(container_class)))
+                logging.info('%s missing test method(s) \"%s\"; should define in %s' % (
+                    container_class, ', '.join(methods_missing), inspect.getfile(container_class)))
 
     if count_missing > 0:
         logging.info('%d classes missing integration tests in ui_write' % count_missing)
