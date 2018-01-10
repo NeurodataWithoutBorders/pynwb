@@ -450,7 +450,7 @@ class HDF5IO(FORMIO):
         data = builder.data
         options = dict()
         if isinstance(data, H5DataIO):
-            options['compress'] = 'gzip' if data.compress else None
+            options['compression'] = 'gzip' if data.compress else None
             data = data.data
         attributes = builder.attributes
         options['dtype'] = builder.dtype
