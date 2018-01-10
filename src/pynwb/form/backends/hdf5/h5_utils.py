@@ -28,7 +28,8 @@ class H5RegionSlicer(RegionSlicer):
 class H5DataIO(DataIO):
 
     @docval({'name': 'data', 'type': 'array_data', 'doc': 'the data to be written'},
-            {'name': 'compress', 'type': bool, 'doc': 'Flag to use gzip compression filter on dataset', 'default': False})
+            {'name': 'compress', 'type': bool,
+             'doc': 'Flag to use gzip compression filter on dataset', 'default': False})
     def __init__(self, **kwargs):
         compress = popargs('compress', kwargs)
         call_docval_func(super(H5DataIO, self).__init__, kwargs)

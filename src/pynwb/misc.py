@@ -200,7 +200,8 @@ class SpikeUnit(NWBContainer):
     _help = "Estimated spike times from a single unit"
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of the SpikeUnit'},
-            {'name': 'times', 'type': ('array_data', 'data', TimeSeries), 'doc': 'Spike time for the units (exact or estimated)'},
+            {'name': 'times', 'type': ('array_data', 'data', TimeSeries),
+             'doc': 'Spike time for the units (exact or estimated)'},
             {'name': 'unit_description', 'type': str, 'doc': 'Description of the unit (eg, cell type).'},
             {'name': 'source', 'type': str,
              'doc': 'Name, path or description of where unit times originated. \

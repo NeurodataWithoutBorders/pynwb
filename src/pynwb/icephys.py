@@ -1,8 +1,6 @@
-import numpy as np
 from collections import Iterable
 
 from .form.utils import docval, popargs, fmt_docval_args
-from .form.data_utils import DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -149,7 +147,8 @@ class CurrentClampSeries(PatchClampSeries):
 
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 

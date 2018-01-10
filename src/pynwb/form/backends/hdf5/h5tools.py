@@ -465,6 +465,7 @@ class HDF5IO(FORMIO):
                     refs.append(i)
             if len(refs) > 0:
                 _dtype = self.__resolve_dtype__(options['dtype'], data)
+
                 def _filler():
                     ret = list()
                     for item in data:

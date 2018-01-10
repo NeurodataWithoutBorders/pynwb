@@ -2,7 +2,6 @@ from collections import Iterable
 import numpy as np
 from abc import ABCMeta, abstractmethod, abstractproperty
 from six import with_metaclass
-from .utils import docval, getargs
 from .utils import docval, getargs, popargs, docval_macro
 from operator import itemgetter
 
@@ -449,6 +448,7 @@ class ShapeValidatorResult(object):
             return self.SHAPE_ERROR[self.error]
         return self.__getattribute__(item)
 
+
 @docval_macro('data')
 class DataIO(with_metaclass(ABCMeta, object)):
 
@@ -460,6 +460,7 @@ class DataIO(with_metaclass(ABCMeta, object)):
     @property
     def data(self):
         return self.__data
+
 
 class RegionSlicer(with_metaclass(ABCMeta, object)):
     '''

@@ -1,4 +1,3 @@
-import numpy as np
 from collections import Iterable
 
 from .form.utils import docval, popargs

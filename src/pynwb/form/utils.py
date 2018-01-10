@@ -12,6 +12,7 @@ __macros = {
     'scalar_data': [str, int, float],
 }
 
+
 def docval_macro(macro):
     def _dec(cls):
         if macro not in __macros:
@@ -250,6 +251,7 @@ def get_docval_kwargs(func):
     else:
         return tuple()
 
+
 def __resolve_macros(t):
     if t is None:
         return t
@@ -269,6 +271,7 @@ def __resolve_macros(t):
             else:
                 ret.append(resolved)
         return tuple(ret)
+
 
 def docval(*validator, **options):
     '''A decorator for documenting and enforcing type for instance method arguments.
