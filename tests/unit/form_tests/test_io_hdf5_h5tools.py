@@ -3,6 +3,7 @@ import unittest
 
 from pynwb.form.data_utils import DataChunkIterator
 from pynwb.form.backends.hdf5.h5tools import HDF5IO
+from pynwb.form.backends.hdf5 import H5DataIO
 from pynwb.form.build import DatasetBuilder
 
 import h5py
@@ -97,6 +98,13 @@ class H5IOTest(unittest.TestCase):
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a.tolist(), attributes={}))
         dset = self.f['test_dataset']
         self.assertTrue(np.all(dset[:] == a))
+
+    def test_write_dataset_list(self):
+        a = H5DataIO(np.arange(30).reshape(5, 2, 3), compress=True)
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
+        dset = self.f['test_dataset']
+        self.assertTrue(np.all(dset[:] == a.data))
+        self.assertEqual(dset.compression, 'gzip')
 
     def test_write_table(self):
         cmpd_dt = np.dtype([('a', np.int32), ('b', np.float64)])
