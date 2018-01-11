@@ -21,7 +21,7 @@ def container_test(container):
 
 
 class TestMapNWBContainer(unittest.TestCase):
- 
+
     _required_tests = ('test_build', 'test_construct')
 
     def setUp(self):
