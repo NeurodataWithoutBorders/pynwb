@@ -1,6 +1,6 @@
 certifi==2017.11.5
 chardet==3.0.4
-codecov==2.0.10
+codecov==2.0.13
 configparser==3.5.0
 coverage==4.4.2
 enum34==1.1.6
