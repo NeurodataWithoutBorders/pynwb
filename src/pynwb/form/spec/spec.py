@@ -1006,7 +1006,7 @@ class GroupSpec(BaseStorageSpec):
         ''' Add a given specification for a link to this group specification '''
         spec = getargs('spec', kwargs)
         if spec.parent is not None:
-            spec = LinkSpec.build_spec(spec)
+            spec = self.link_spec_cls().build_spec(spec)
         if spec.name == NAME_WILDCARD:
             if spec.data_type_inc is not None or spec.data_type_def is not None:
                 self.__add_data_type_inc(spec)
