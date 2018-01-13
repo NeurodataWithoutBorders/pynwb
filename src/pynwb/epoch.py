@@ -1,6 +1,7 @@
 from bisect import bisect_left
 
 from .form.utils import docval, getargs, call_docval_func, fmt_docval_args
+from .form.data_utils import DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -148,12 +149,21 @@ class Epoch(NWBContainer):
         self._timeseries[name] = EpochTimeSeries(self. source, timeseries, idx, count, name=name, parent=self)
         return self._timeseries[name]
 
-    def __calculate_idx_count(self, start_time, stop_time, ts):
-        if ts.starting_time is not None and ts.rate:
-            start_idx = int((start_time - ts.starting_time)*ts.rate)
-            stop_idx = int((stop_time - ts.starting_time)*ts.rate)
-        elif len(ts.timestamps) > 0:
-            timestamps = ts.timestamps
+    def __calculate_idx_count(self, start_time, stop_time, ts_data):
+        if isinstance(ts_data.timestamps, DataIO):
+            ts_timestamps = ts_data.timestamps.getdata()
+            ts_starting_time = ts_data.starting_time
+            ts_rate = ts_data.rate
+        else:
+            ts = ts_data
+            ts_timestamps = ts.timestamps
+            ts_starting_time = ts.starting_time
+            ts_rate = ts.rate
+        if ts_starting_time is not None and ts_rate:
+            start_idx = int((start_time - ts_starting_time)*ts_rate)
+            stop_idx = int((stop_time - ts_starting_time)*ts_rate)
+        elif len(ts_timestamps) > 0:
+            timestamps = ts_timestamps
             start_idx = bisect_left(timestamps, start_time)
             stop_idx = bisect_left(timestamps, stop_time)
         else:
