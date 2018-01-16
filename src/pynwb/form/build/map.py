@@ -718,7 +718,7 @@ class TypeMap(object):
 
         for namespace in type_map.__container_types:
             for data_type in type_map.__container_types[namespace]:
-                
+
                 container_cls = type_map.__container_types[namespace][data_type]
                 self.register_container_type(namespace, data_type, container_cls)
 
