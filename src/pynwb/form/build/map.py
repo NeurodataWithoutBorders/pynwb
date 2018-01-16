@@ -696,7 +696,7 @@ class TypeMap(object):
         self.__ns_catalog = namespaces
         self.__mappers = dict()     # already constructed ObjectMapper classes
         self.__mapper_cls = dict()  # the ObjectMapper class to use for each container type
-        self.__container_types = dict()
+        self.__container_types = OrderedDict()
         self.__data_types = dict()
         self.__default_mapper_cls = getargs('mapper_cls', kwargs)
 
@@ -715,10 +715,13 @@ class TypeMap(object):
         return self.__copy__()
 
     def merge(self, type_map):
+
         for namespace in type_map.__container_types:
             for data_type in type_map.__container_types[namespace]:
+                
                 container_cls = type_map.__container_types[namespace][data_type]
                 self.register_container_type(namespace, data_type, container_cls)
+
         for container_cls in type_map.__mapper_cls:
             self.register_map(container_cls, type_map.__mapper_cls[container_cls])
 
