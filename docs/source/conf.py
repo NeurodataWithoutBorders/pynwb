@@ -45,9 +45,9 @@ extensions = [
 
 sphinx_gallery_conf = {
     # path to your examples scripts
-    'examples_dirs' : '../examples',
+    'examples_dirs' : '../gallery/examples',
     # path where to save gallery generated examples
-    'gallery_dirs'  : 'auto_examples'
+    'gallery_dirs'  : 'examples'
 }
 
 intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None)}
