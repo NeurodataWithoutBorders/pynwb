@@ -2,7 +2,7 @@ certifi==2017.11.5
 chardet==3.0.4
 h5py==2.7.1
 idna==2.6
-numpy==1.13.3
+numpy==1.14.0
 python-dateutil==2.6.1
 requests==2.18.4
 ruamel.yaml==0.15.35
