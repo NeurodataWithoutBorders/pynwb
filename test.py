@@ -15,14 +15,41 @@ FAILURES = 0
 ERRORS = 0
 
 
+class SuccessRecordingResult(unittest.TextTestResult):
+    '''A unittest test result class that stores successful test cases as well
+    as failures and skips.
+    '''
+
+    def addSuccess(self, test):
+        if not hasattr(self, 'successes'):
+            self.successes = [test]
+        else:
+            self.successes.append(test)
+
+    def get_all_cases_run(self):
+        '''Return a list of each test case which failed or succeeded
+        '''
+
+        cases = []
+
+        cases.extend(self.successes)
+        cases.extend([failure[0] for failure in self.failures])
+
+        return cases
+
+
 def run_test_suite(directory, description="", verbose=True):
     global TOTAL, FAILURES, ERRORS
     logging.info("running %s" % description)
-    pynwb_test_result = unittest.TextTestRunner(verbosity=verbose).run(
-        unittest.TestLoader().discover(directory))
+
+    runner = unittest.TextTestRunner(verbosity=verbose, resultclass=SuccessRecordingResult)
+    pynwb_test_result = runner.run(unittest.TestLoader().discover(directory))
+
     TOTAL += pynwb_test_result.testsRun
     FAILURES += len(pynwb_test_result.failures)
     ERRORS += len(pynwb_test_result.errors)
+
+    return pynwb_test_result
 
 
 def _import_from_file(script):
@@ -49,29 +76,53 @@ def run_example_tests():
 
 
 def run_integration_tests(verbose=True):
-    run_test_suite("tests/integration", "integration tests", verbose=verbose)
+    pynwb_test_result = run_test_suite("tests/integration", "integration tests", verbose=verbose)
+    test_cases = pynwb_test_result.get_all_cases_run()
 
     import pynwb
     type_map = pynwb.get_type_map()
 
-    import imp
-    name = 'integration'
-    imp_result = imp.find_module(name, ['tests'])
-    mod = imp.load_module(name, imp_result[0], imp_result[1], imp_result[2])
+    tested_containers = {}
+    required_tests = {}
+    for test_case in test_cases:
+        if not hasattr(test_case, 'container'):
+            continue
+        container_class = test_case.container.__class__
 
-    d = mod.ui_write.base.container_tests
-    MISSING_INT = list()
-    for cls in type_map.get_container_classes('core'):
-        if cls not in d:
-            MISSING_INT.append(cls)
+        if container_class not in tested_containers:
+            tested_containers[container_class] = [test_case._testMethodName]
+        else:
+            tested_containers[container_class].append(test_case._testMethodName)
 
-    if len(MISSING_INT) > 0:
-        logging.info('%d classes missing integration tests in ui_write' % len(MISSING_INT))
+        if container_class not in required_tests:
+            required_tests[container_class] = list(test_case.required_tests)
+        else:
+            required_tests[container_class].extend(test_case.required_tests)
+
+    count_missing = 0
+    for container_class in type_map.get_container_classes('core'):
+
+        if container_class not in tested_containers:
+            count_missing += 1
+            if verbose > 1:
+                logging.info('%s missing test case; should define in %s' % (container_class,
+                                                                            inspect.getfile(container_class)))
+            continue
+
+        test_methods = tested_containers[container_class]
+        required = required_tests[container_class]
+        methods_missing = set(required) - set(test_methods)
+
+        if methods_missing != set([]):
+            count_missing += 1
+            if verbose > 1:
+                logging.info('%s missing test method(s) \"%s\"; should define in %s' % (
+                    container_class, ', '.join(methods_missing), inspect.getfile(container_class)))
+
+    if count_missing > 0:
+        logging.info('%d classes missing integration tests in ui_write' % count_missing)
     else:
         logging.info('all classes have integration tests')
-    if verbose > 1:
-        for cls in MISSING_INT:
-            logging.info('%s missing integration tests defined in %s' % (cls, inspect.getfile(cls)))
 
 
 def main():
