@@ -768,7 +768,7 @@ class TypeMap(object):
                 else:
                     return Container
             else:
-                return (list, tuple, dict, set)
+                return ('array_data',)
 
     @classmethod
     def __get_constructor(self, base, addl_fields):
