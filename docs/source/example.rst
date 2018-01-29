@@ -269,10 +269,10 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
 
     spec = NWBDatasetSpec('A custom NWB type',
                         attribute=[
-                            NWBAttributeSpec('baz', 'str', 'a value for baz'),
+                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
                         ],
                         dtype=[
-                            NWBDtypeSpec('foo', column for foo', 'int'),
+                            NWBDtypeSpec('foo', 'column for foo', 'int'),
                             NWBDtypeSpec('bar', 'a column for bar', 'float')
                         ])
 
