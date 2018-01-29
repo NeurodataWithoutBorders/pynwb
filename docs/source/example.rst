@@ -324,16 +324,10 @@ Create a new type
 
     from pynwb.spec import NWBGroupSpec
 
-    # A list of NWBAttributeSpec objects to specify new attributes
-    addl_attributes = [...]
-    # A list of NWBDatasetSpec objects to specify new datasets
-    addl_datasets = [...]
-    # A list of NWBDatasetSpec objects to specify new groups
-    addl_groups = [...]
     spec = NWBGroupSpec('A custom NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
-                        groups = addl_groups,
+                        attributes = [...],
+                        datasets = [...],
+                        groups = [...],
                         neurodata_type_def='MyNewNWBType')
 
 Extend an existing type
