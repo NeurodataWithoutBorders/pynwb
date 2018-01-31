@@ -109,6 +109,36 @@ def main():
     f.add_acquisition(spatial_ts, [ep1, ep2])
     # create-timeseries: end
 
+    # create-compressed-timeseries: start
+    from pynwb.ecephys import ElectricalSeries
+    from pynwb.behavior import SpatialSeries
+    from pynwb.form.backends.hdf5 import H5DataIO
+
+    ephys_ts = ElectricalSeries('test_ephys_data',
+                                'an hypothetical source',
+                                H5DataIO(ephys_data, compress=True),
+                                electrode_table_region,
+                                timestamps=H5DataIO(ephys_timestamps, compress=True),
+                                # Alternatively, could specify starting_time and rate as follows
+                                # starting_time=ephys_timestamps[0],
+                                # rate=rate,
+                                resolution=0.001,
+                                comments="This data was randomly generated with numpy, using 1234 as the seed",
+                                description="Random numbers generated with numpy.random.rand")
+    f.add_acquisition(ephys_ts, [ep1, ep2])
+
+    spatial_ts = SpatialSeries('test_spatial_timeseries',
+                               'a stumbling rat',
+                               H5DataIO(spatial_data, compress=True),
+                               'origin on x,y-plane',
+                               timestamps=H5DataIO(spatial_timestamps, compress=True),
+                               resolution=0.1,
+                               comments="This data was generated with numpy, using 1234 as the seed",
+                               description="This 2D Brownian process generated with "
+                                           "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")
+    f.add_acquisition(spatial_ts, [ep1, ep2])
+    # create-compressed-timeseries: end
+
 
 if __name__ == "__main__":
     main()
