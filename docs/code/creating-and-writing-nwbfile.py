@@ -114,7 +114,7 @@ def main():
     from pynwb.behavior import SpatialSeries
     from pynwb.form.backends.hdf5 import H5DataIO
 
-    ephys_ts = ElectricalSeries('test_ephys_data',
+    ephys_ts = ElectricalSeries('test_compressed_ephys_data',
                                 'an hypothetical source',
                                 H5DataIO(ephys_data, compress=True),
                                 electrode_table_region,
@@ -127,7 +127,7 @@ def main():
                                 description="Random numbers generated with numpy.random.rand")
     f.add_acquisition(ephys_ts, [ep1, ep2])
 
-    spatial_ts = SpatialSeries('test_spatial_timeseries',
+    spatial_ts = SpatialSeries('test_compressed_spatial_timeseries',
                                'a stumbling rat',
                                H5DataIO(spatial_data, compress=True),
                                'origin on x,y-plane',
