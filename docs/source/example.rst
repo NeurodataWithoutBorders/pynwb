@@ -100,6 +100,16 @@ and adding them with :py:meth:`~pynwb.file.NWBFile.add_acquisition`.
 
 .. _useextension:
 
+Creating Compressed TimeSeries
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-compressed-timeseries: start
+   :end-before: create-compressed-timeseries: end
+   :dedent: 4
+
+
 Using Extensions
 ^^^^^^^^^^^^^^^^
 
