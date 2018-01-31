@@ -28,7 +28,7 @@ class ImageSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries, Iterable),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str,
              'doc': 'The base unit of measurement (should be SI unit)', 'default': 'None'},
@@ -49,7 +49,7 @@ class ImageSeries(TimeSeries):
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': (Iterable, TimeSeries),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -96,7 +96,7 @@ class IndexSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (Iterable, TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
@@ -107,7 +107,7 @@ class IndexSeries(TimeSeries):
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': (Iterable, TimeSeries),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -147,7 +147,7 @@ class ImageMaskSeries(ImageSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'masked_imageseries', 'type': ImageSeries,
@@ -169,7 +169,7 @@ class ImageMaskSeries(ImageSeries):
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -216,7 +216,7 @@ class OpticalSeries(ImageSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'format', 'type': str,
@@ -242,7 +242,7 @@ class OpticalSeries(ImageSeries):
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': (list, np.ndarray, TimeSeries),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},

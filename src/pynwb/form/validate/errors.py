@@ -68,7 +68,7 @@ class MissingDataType(Error):
         return self.__data_type
 
 
-class ShapeError(object):
+class ShapeError(Error):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
             {'name': 'expected', 'type': (tuple, list), 'doc': 'the expected shape'},

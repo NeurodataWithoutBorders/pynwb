@@ -21,6 +21,22 @@ def set_parents(container, parent):
     return ret
 
 
+class LabelledDict(dict):
+    '''
+    A dict wrapper class for aggregating Timeseries
+    from the standard locations
+    '''
+
+    @docval({'name': 'label', 'type': str, 'doc': 'the TimeSeries type ('})
+    def __init__(self, **kwargs):
+        label = getargs('label', kwargs)
+        self.__label = label
+
+    @property
+    def label(self):
+        return self.__label
+
+
 class NWBBaseType(with_metaclass(ExtenderMeta)):
     '''The base class to any NWB types.
 
@@ -120,6 +136,17 @@ class NWBContainer(NWBBaseType, Container):
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
         self.source = getargs('source', kwargs)
+
+    def _to_dict(self, arg, label="NULL"):
+        return_dict = LabelledDict(label)
+        if arg is None:
+            return return_dict
+        else:
+            for i in arg:
+                assert i.name is not None  # If a container doesn't have a name, it gets lost!
+                assert i.name not in return_dict
+                return_dict[i.name] = i
+            return return_dict
 
 
 @register_class('NWBData', CORE_NAMESPACE)

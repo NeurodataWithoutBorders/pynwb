@@ -4,7 +4,7 @@ import six
 
 from datetime import datetime
 
-from pynwb import NWBFile
+from pynwb import NWBFile, TimeSeries
 from pynwb.ecephys import Device
 
 
@@ -51,3 +51,25 @@ class NWBFileTest(unittest.TestCase):
                                   tags=tags2, descrition='test epoch')
         tags = self.nwbfile.epoch_tags
         six.assertCountEqual(self, expected_tags, tags)
+
+    def test_add_acquisition(self):
+        self.nwbfile.add_acquisition(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+                                                'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.assertEqual(len(self.nwbfile.acquisition), 1)
+
+    def test_add_stimulus(self):
+        self.nwbfile.add_stimulus(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+                                             'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.assertEqual(len(self.nwbfile.stimulus), 1)
+
+    def test_add_stimulus_template(self):
+        self.nwbfile.add_stimulus_template(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+                                                      'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.assertEqual(len(self.nwbfile.stimulus_template), 1)
+
+    def test_add_acquisition_check_dups(self):
+        self.nwbfile.add_acquisition(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+                                                'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        with self.assertRaises(ValueError):
+            self.nwbfile.add_acquisition(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+                                                    'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))

@@ -26,3 +26,11 @@ class TestTimeSeriesIO(base.TestMapRoundTrip):
                                                                          'resolution': 0.1}),
                                       'timestamps': DatasetBuilder('timestamps', list(range(10)),
                                                                    attributes={'unit': 'Seconds', 'interval': 1})})
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.add_acquisition(self.container)
+
+    def getContainer(self, nwbfile):
+        ''' Should take an NWBFile object and return the Container'''
+        return nwbfile.get_acquisition(self.container.name)

@@ -110,7 +110,7 @@ class TwoPhotonSeries(ImageSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (Iterable, TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
@@ -137,7 +137,7 @@ class TwoPhotonSeries(ImageSeries):
             between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': (TimeSeries, Iterable),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -179,8 +179,7 @@ class ROI(NWBContainer):
             {'name': 'pix_mask', 'type': Iterable, 'doc': 'List of pixels (x,y) that compose the mask.'},
             {'name': 'pix_mask_weight', 'type': Iterable, 'doc': 'Weight of each pixel listed in pix_mask.'},
             {'name': 'img_mask', 'type': Iterable, 'doc': 'ROI mask, represented in 2D ([y][x]) intensity image.'},
-            {'name': 'reference_images', 'type': (ImageSeries, str),
-             'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
+            )
     def __init__(self, **kwargs):
         roi_description, pix_mask, pix_mask_weight, img_mask = popargs(
             'roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
@@ -270,7 +269,7 @@ class RoiResponseSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (Iterable, TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
@@ -283,7 +282,7 @@ class RoiResponseSeries(TimeSeries):
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': (TimeSeries, Iterable),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},

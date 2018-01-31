@@ -1,7 +1,7 @@
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, fmt_docval_args
-from .form.data_utils import DataChunkIterator
+from .form.data_utils import DataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
@@ -33,18 +33,7 @@ class ProcessingModule(NWBContainer):
         description, containers = popargs('description', 'containers', kwargs)
         super(ProcessingModule, self).__init__(**kwargs)
         self.description = description
-        self.__containers = self.__to_dict(containers)
-
-    def __to_dict(self, arg):
-        if arg is None:
-            return dict()
-        else:
-            return_dict = {}
-            for i in arg:
-                assert i.name is not None  # If a container doesn't have a name, it gets lost!
-                assert i.name not in return_dict
-                return_dict[i.name] = i
-            return return_dict
+        self.__containers = self._to_dict(containers, 'module_containers')
 
     @property
     def containers(self):
@@ -101,7 +90,7 @@ class TimeSeries(NWBContainer):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': (Iterable, 'TimeSeries', DataChunkIterator),
+            {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'resolution', 'type': (str, float),
@@ -112,8 +101,7 @@ class TimeSeries(NWBContainer):
              'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
              'default': _default_conversion},
 
-            # time related data is optional, but one is required -- this will have to be enforced in the constructor
-            {'name': 'timestamps', 'type': (Iterable, 'TimeSeries', DataChunkIterator),
+            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -152,6 +140,9 @@ class TimeSeries(NWBContainer):
             self.fields['num_samples'] = data.num_samples
         elif isinstance(data, DataChunkIterator):
             self.fields['num_samples'] = -1
+        elif isinstance(data, DataIO):
+            this_data = data.getdata()
+            self.fields['num_samples'] = len(this_data)
         else:
             self.fields['num_samples'] = len(data)
 

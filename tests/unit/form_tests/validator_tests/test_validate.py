@@ -60,9 +60,9 @@ class TestBasicSpec(ValidatorTestBase):
         result = validator.validate(builder)
         self.assertEqual(len(result), 2)
         self.assertIsInstance(result[0], MissingError)  # noqa: F405
-        self.assertEqual(result[0].name, 'attr1')
+        self.assertEqual(result[0].name, 'Bar/attr1')
         self.assertIsInstance(result[1], MissingError)  # noqa: F405
-        self.assertEqual(result[1].name, 'data')
+        self.assertEqual(result[1].name, 'Bar/data')
 
     def test_invalid_incorrect_type_get_validator(self):
         builder = GroupBuilder('my_bar', attributes={'data_type': 'Bar', 'attr1': 10})
@@ -70,18 +70,18 @@ class TestBasicSpec(ValidatorTestBase):
         result = validator.validate(builder)
         self.assertEqual(len(result), 2)
         self.assertIsInstance(result[0], DtypeError)  # noqa: F405
-        self.assertEqual(result[0].name, 'attr1')
+        self.assertEqual(result[0].name, 'Bar/attr1')
         self.assertIsInstance(result[1], MissingError)  # noqa: F405
-        self.assertEqual(result[1].name, 'data')
+        self.assertEqual(result[1].name, 'Bar/data')
 
     def test_invalid_incorrect_type_validate(self):
         builder = GroupBuilder('my_bar', attributes={'data_type': 'Bar', 'attr1': 10})
         result = self.vmap.validate(builder)
         self.assertEqual(len(result), 2)
         self.assertIsInstance(result[0], DtypeError)  # noqa: F405
-        self.assertEqual(result[0].name, 'attr1')
+        self.assertEqual(result[0].name, 'Bar/attr1')
         self.assertIsInstance(result[1], MissingError)  # noqa: F405
-        self.assertEqual(result[1].name, 'data')
+        self.assertEqual(result[1].name, 'Bar/data')
 
     def test_valid(self):
         builder = GroupBuilder('my_bar',

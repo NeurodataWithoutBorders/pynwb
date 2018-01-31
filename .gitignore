@@ -22,6 +22,7 @@ __pycache__/
 # Sphinx documentation
 docs/_build/
 docs/build/
+docs/source/pynwb.*.rst
 
 
 # setuptools

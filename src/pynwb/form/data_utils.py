@@ -2,7 +2,7 @@ from collections import Iterable
 import numpy as np
 from abc import ABCMeta, abstractmethod, abstractproperty
 from six import with_metaclass
-from .utils import docval, getargs
+from .utils import docval, getargs, popargs, docval_macro
 from operator import itemgetter
 
 
@@ -52,6 +52,7 @@ class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
         pass
 
 
+@docval_macro('array_data')
 class DataChunkIterator(AbstractDataChunkIterator):
     """Custom iterator class used to iterate over chunks of data.
 
@@ -448,6 +449,19 @@ class ShapeValidatorResult(object):
         return self.__getattribute__(item)
 
 
+@docval_macro('data')
+class DataIO(with_metaclass(ABCMeta, object)):
+
+    @docval({'name': 'data', 'type': 'array_data', 'doc': 'the data to be written'})
+    def __init__(self, **kwargs):
+        data = popargs('data', kwargs)
+        self.__data = data
+
+    @property
+    def data(self):
+        return self.__data
+
+
 class RegionSlicer(with_metaclass(ABCMeta, object)):
     '''
     A class to control getting using a region
@@ -503,9 +517,6 @@ import h5py  # noqa: E402
 def get_region_slicer(**kwargs):
     dataset, region = getargs('dataset', 'region', kwargs)
     if isinstance(dataset, (list, tuple)):
-        if not isinstance(region, list):
-            import pdb
-            pdb.set_trace()
         return ListSlicer(dataset, region)
     elif isinstance(dataset, h5py.Dataset):
         return H5RegionSlicer(dataset, region)
