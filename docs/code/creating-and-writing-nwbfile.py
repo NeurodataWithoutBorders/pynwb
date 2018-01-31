@@ -108,7 +108,7 @@ def main():
                                            "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")
     f.add_acquisition(spatial_ts, [ep1, ep2])
     # create-timeseries: end
-    
+
     # create-compressed-timeseries: start
     from pynwb.ecephys import ElectricalSeries
     from pynwb.behavior import SpatialSeries
