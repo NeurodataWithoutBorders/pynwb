@@ -141,7 +141,7 @@ class TimeSeries(NWBContainer):
         elif isinstance(data, DataChunkIterator):
             self.fields['num_samples'] = -1
         elif isinstance(data, DataIO):
-            this_data = data.getdata()
+            this_data = data.data
             self.fields['num_samples'] = len(this_data)
         else:
             self.fields['num_samples'] = len(data)
