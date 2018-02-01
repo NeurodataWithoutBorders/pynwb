@@ -115,6 +115,20 @@ The follow example shows how to do this with two container types that hold :py:c
 
 For additional :py:class:`~pynwb.core.NWBDataInterface` classes that can be added as acquisition, see the :ref:`ProcessingModules overview <modules_overview>`.
 
+Adding other acquisition data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Subclasses of :py:class:`~pynwb.core.NWBDataInterface` can also be added as acquisition data.
+
+The follow example shows how to do this with two container types that hold :py:class:`~pynwb.base.TimeSeries`.
+
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-data-interface: start
+   :end-before: create-data-interface: end
+   :dedent: 4
+
+
 .. _useextension:
 
 Compressing datasets
