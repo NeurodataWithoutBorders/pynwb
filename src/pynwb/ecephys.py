@@ -7,7 +7,7 @@ from .form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, set_parents, NWBTable, NWBTableRegion
+from .core import NWBContainer, set_parents, NWBTable, NWBTableRegion, NWBDataInterface
 
 
 @register_class('Device', CORE_NAMESPACE)
@@ -204,7 +204,7 @@ class SpikeEventSeries(ElectricalSeries):
 
 
 @register_class('EventDetection', CORE_NAMESPACE)
-class EventDetection(NWBContainer):
+class EventDetection(NWBDataInterface):
     """
     Detected spike events from voltage trace(s).
     """
@@ -242,7 +242,7 @@ class EventDetection(NWBContainer):
 
 
 @register_class('EventWaveform', CORE_NAMESPACE)
-class EventWaveform(NWBContainer):
+class EventWaveform(NWBDataInterface):
     """
     Spike data for spike events detected in raw data
     stored in this NWBFile, or events detect at acquisition
@@ -262,7 +262,7 @@ class EventWaveform(NWBContainer):
 
 
 @register_class('Clustering', CORE_NAMESPACE)
-class Clustering(NWBContainer):
+class Clustering(NWBDataInterface):
     """
     Specifies cluster event times and cluster metric for maximum ratio of
     waveform peak to RMS on any channel in cluster.
@@ -299,7 +299,7 @@ class Clustering(NWBContainer):
 
 
 @register_class('ClusterWaveforms', CORE_NAMESPACE)
-class ClusterWaveforms(NWBContainer):
+class ClusterWaveforms(NWBDataInterface):
     """
     Describe cluster waveforms by mean and standard deviation for at each sample.
     """
@@ -332,7 +332,7 @@ class ClusterWaveforms(NWBContainer):
 
 
 @register_class('LFP', CORE_NAMESPACE)
-class LFP(NWBContainer):
+class LFP(NWBDataInterface):
     """
     LFP data from one or more channels. The electrode map in each published ElectricalSeries will
     identify which channels are providing LFP data. Filter properties should be noted in the
@@ -345,7 +345,7 @@ class LFP(NWBContainer):
               "should be noted in the ElectricalSeries")
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'LFP electrophysiology data'},
+            {'name': 'electrical_series', 'type': (list, ElectricalSeries), 'doc': 'LFP electrophysiology data'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'LFP'})
     def __init__(self, **kwargs):
         source, electrical_series = popargs('source', 'electrical_series', kwargs)
@@ -355,7 +355,7 @@ class LFP(NWBContainer):
 
 
 @register_class('FilteredEphys', CORE_NAMESPACE)
-class FilteredEphys(NWBContainer):
+class FilteredEphys(NWBDataInterface):
     """
     Ephys data from one or more channels that has been subjected to filtering. Examples of filtered
     data include Theta and Gamma (LFP has its own interface). FilteredEphys modules publish an
@@ -374,7 +374,7 @@ class FilteredEphys(NWBContainer):
               "be noted in the ElectricalSeries")
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'filtered electrophysiology data'},
+            {'name': 'electrical_series', 'type': (list, ElectricalSeries), 'doc': 'filtered electrophysiology data'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FilteredEphys'})
     def __init__(self, **kwargs):
         source, electrical_series = popargs('source', 'electrical_series', kwargs)
@@ -384,7 +384,7 @@ class FilteredEphys(NWBContainer):
 
 
 @register_class('FeatureExtraction', CORE_NAMESPACE)
-class FeatureExtraction(NWBContainer):
+class FeatureExtraction(NWBDataInterface):
     """
     Features, such as PC1 and PC2, that are extracted from signals stored in a SpikeEvent
     TimeSeries or other source.
