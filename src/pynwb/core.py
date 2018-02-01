@@ -283,7 +283,7 @@ class MultiTSInterface(NWBDataInterface):
                 func_name='__init__')
         def _func(self, **kwargs):
             source, ts = popargs('source', attr_name, kwargs)
-            super(MultiESInterface, self).__init__(source, **kwargs)
+            super(MultiTSInterface, self).__init__(source, **kwargs)
             setattr(self, attr_name, dict())
             add = getattr(self, add_name)
             if isinstance(ts, ts_type):
