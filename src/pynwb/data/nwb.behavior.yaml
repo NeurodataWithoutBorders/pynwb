@@ -181,7 +181,7 @@ groups:
       name: original
       target_type: ImageSeries
     neurodata_type_def: CorrectedImageStack
-    neurodata_type_inc: NWBDataInterface
+    neurodata_type_inc: NWBContainer
     quantity: +
   default_name: MotionCorrection
   neurodata_type_def: MotionCorrection

@@ -159,7 +159,7 @@ groups:
         name: roi_description
       doc: Name of ROI
       neurodata_type_def: ROI
-      neurodata_type_inc: NWBDataInterface
+      neurodata_type_inc: NWBContainer
       quantity: '*'
     - doc: Stores image stacks segmentation mask apply to.
       groups:
@@ -172,7 +172,7 @@ groups:
       name: imaging_plane
       target_type: ImagingPlane
     neurodata_type_def: PlaneSegmentation
-    neurodata_type_inc: NWBDataInterface
+    neurodata_type_inc: NWBContainer
     quantity: '*'
   default_name: ImageSegmentation
   neurodata_type_def: ImageSegmentation
