@@ -50,7 +50,7 @@ class SpatialSeries(TimeSeries):
              'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
             {'name': 'description', 'type': str,
              'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'parent', 'type': 'NWBContainer',
+            {'name': 'parent', 'type': NWBContainer,
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
             {'name': 'control', 'type': Iterable,
              'doc': 'Numerical labels that apply to each element in data', 'default': None},

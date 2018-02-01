@@ -15,7 +15,6 @@ class TestLegacy(unittest.TestCase):
         if os.path.exists(self.filename):
             os.remove(self.filename)
 
-    #@unittest.skipTest('This is not a real test')
     def test_roundtrip(self):
 
         legacy_map = pynwb.legacy.get_type_map()
