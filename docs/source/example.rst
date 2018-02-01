@@ -97,17 +97,53 @@ and adding them with :py:meth:`~pynwb.file.NWBFile.add_acquisition`.
    :end-before: create-timeseries: end
    :dedent: 4
 
+For additional :py:class:`~pynwb.base.TimeSeries` classes that can be added as acquisition, see the :ref:`TimeSeries overview <timeseries_overview>`.
+
+
+Adding other acquisition data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Subclasses of :py:class:`~pynwb.core.NWBDataInterface` can also be added as acquisition data.
+
+The follow example shows how to do this with two container types that hold :py:class:`~pynwb.base.TimeSeries`.
+
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-data-interface: start
+   :end-before: create-data-interface: end
+   :dedent: 4
+
+For additional :py:class:`~pynwb.core.NWBDataInterface` classes that can be added as acquisition, see the :ref:`ProcessingModules overview <modules_overview>`.
+
+Adding other acquisition data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Subclasses of :py:class:`~pynwb.core.NWBDataInterface` can also be added as acquisition data.
+
+The follow example shows how to do this with two container types that hold :py:class:`~pynwb.base.TimeSeries`.
+
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-data-interface: start
+   :end-before: create-data-interface: end
+   :dedent: 4
+
 
 .. _useextension:
 
-Creating Compressed TimeSeries
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Compressing datasets
+^^^^^^^^^^^^^^^^^^^^
+
+HDF5 allows for compression of dataset. This is controled on a per-dataset basis [#]_. To compress a dataset,
+wrap the data object (e.g. a :py:class:`list` or :py:class:`~numpy.ndarray`) with :py:class:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`.
 
 .. literalinclude:: ../code/creating-and-writing-nwbfile.py
    :language: python
    :start-after: create-compressed-timeseries: start
    :end-before: create-compressed-timeseries: end
    :dedent: 4
+
+.. [#] Global compression of all datasets is not allowed for performance reasons.
 
 
 Using Extensions

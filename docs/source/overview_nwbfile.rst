@@ -33,8 +33,6 @@ serves as the base class for all other TimeSeries types.
 
 The following TimeSeries objects are provided by the API and NWB specification:
 
-* :py:class:`~pynwb.base.TimeSeries` - a general
-
   * :py:class:`~pynwb.ecephys.ElectricalSeries`
 
     * :py:class:`~pynwb.ecephys.SpikeEventSeries`
@@ -71,17 +69,15 @@ Processing Modules
 
 Processing modules are objects that group together common analyses done during processing of data.
 Processing module objects are unique collections of analysis results. To standardize the storage of
-common analyses, NWB provides the concept of an * NWBContaine*, where the output of
-common analyses are represented as objects that extend the :py:class:`~pynwb.base.NWBContainer` class.
-In most cases, you will not need to interact with the :py:class:`~pynwb.base. NWBContaine` class directly.
+common analyses, NWB provides the concept of an *NWBDataInterface*, where the output of
+common analyses are represented as objects that extend the :py:class:`~pynwb.core.NWBDataInterface` class.
+In most cases, you will not need to interact with the :py:class:`~pynwb.core.NWBDataInterface` class directly.
 More commonly, you will be creating instances of classes that extend this class. For example, a common
 analysis step for spike data (represented in NWB as a :py:class:`~pynwb.ecephys.SpikeEventSeries` object)
-is spike clustering. In NWB, the result of this kind of analysis will be represented with a :
-py:class:`~pynwb.ecephys.Clustering` object.
+is spike clustering. In NWB, the result of this kind of analysis will be represented with a
+:py:class:`~pynwb.ecephys.Clustering` object.
 
-The following analysis NWBContainer objects are provided by the API and NWB specification:
-
-* :py:class:`~pynwb.ui.iface.Interface`
+The following analysis :py:class:`~pynwb.core.NWBDataInterface` objects are provided by the API and NWB specification:
 
   * :py:class:`~pynwb.behavior.BehavioralEpochs`
   * :py:class:`~pynwb.behavior.BehavioralEvents`
@@ -101,6 +97,10 @@ The following analysis NWBContainer objects are provided by the API and NWB spec
   * :py:class:`~pynwb.ecephys.LFP`
   * :py:class:`~pynwb.behavior.MotionCorrection`
   * :py:class:`~pynwb.behavior.Position`
+
+Additionally, the :py:class:`~pynwb.base.TimeSeries` described :ref:`above <timeseries_overview>`
+are also subclasses of :py:class:`~pynwb.core.NWBDataInterface`, and can therefore be used anywhere
+:py:class:`~pynwb.core.NWBDataInterface` is allowed.
 
 .. note::
 
