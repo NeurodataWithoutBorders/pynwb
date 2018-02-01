@@ -6,7 +6,7 @@ from .form.utils import docval, popargs, fmt_docval_args
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer
+from .core import NWBContainer, NWBDataInterface, MultiTSInterface
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -222,7 +222,7 @@ class PlaneSegmentation(NWBContainer):
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
-class ImageSegmentation(NWBContainer):
+class ImageSegmentation(NWBDataInterface):
     """
     Stores pixels in an image that represent different regions of interest (ROIs) or masks. All
     segmentation for a given imaging plane is stored together, with storage for multiple imaging
@@ -305,44 +305,34 @@ class RoiResponseSeries(TimeSeries):
 
 
 @register_class('DfOverF', CORE_NAMESPACE)
-class DfOverF(NWBContainer):
+class DfOverF(MultiTSInterface):
     """
     dF/F information about a region of interest (ROI). Storage hierarchy of dF/F should be the same
     as for segmentation (ie, same names for ROIs and for image planes).
     """
 
-    __nwbfields__ = ('roi_response_series',)
+    __clsconf__ = {
+        'ts_attr': 'roi_response_series',
+        'ts_type': RoiResponseSeries,
+        'add': 'add_roi_response_series',
+        'create': 'create_roi_response_series'
+    }
 
     _help = "Df/f over time of one or more ROIs. TimeSeries names should correspond to imaging plane names"
 
-    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'roi_response_series', 'type': (RoiResponseSeries, list),
-             'doc': 'RoiResponseSeries or any subtype.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this DfOverF container', 'default': 'DfOverF'})
-    def __init__(self, **kwargs):
-        roi_response_series = popargs('roi_response_series', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(DfOverF, self).__init__, kwargs)
-        super(DfOverF, self).__init__(*pargs, **pkwargs)
-        self.roi_response_series = roi_response_series
-
 
 @register_class('Fluorescence', CORE_NAMESPACE)
-class Fluorescence(NWBContainer):
+class Fluorescence(MultiTSInterface):
     """
     Fluorescence information about a region of interest (ROI). Storage hierarchy of fluorescence
     should be the same as for segmentation (ie, same names for ROIs and for image planes).
     """
 
-    __nwbfields__ = ('roi_response_series',)
+    __clsconf__ = {
+        'ts_attr': 'roi_response_series',
+        'ts_type': RoiResponseSeries,
+        'add': 'add_roi_response_series',
+        'create': 'create_roi_response_series'
+    }
 
     _help = "Fluorescence over time of one or more ROIs. TimeSeries names should correspond to imaging plane names."
-
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'roi_response_series', 'type': (RoiResponseSeries, list),
-             'doc': 'RoiResponseSeries or any subtype.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this Fluorescence container', 'default': 'Fluorescence'})
-    def __init__(self, **kwargs):
-        roi_response_series = popargs('roi_response_series', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(Fluorescence, self).__init__, kwargs)
-        super(Fluorescence, self).__init__(*pargs, **pkwargs)
-        self.roi_response_series = roi_response_series

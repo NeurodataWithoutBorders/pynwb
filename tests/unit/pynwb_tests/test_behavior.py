@@ -73,7 +73,7 @@ class PositionConstructor(unittest.TestCase):
         sS = SpatialSeries('test_sS', 'a hypothetical source', list(), 'reference_frame', timestamps=list())
         pc = Position('test_pc', sS)
         self.assertEqual(pc.source, 'test_pc')
-        self.assertEqual(pc.spatial_series, [sS])
+        self.assertEqual(pc.spatial_series.get('test_sS'), sS)
 
 
 class MotionCorrectionConstructor(unittest.TestCase):

@@ -60,9 +60,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         return GroupBuilder('root',
                             groups={'acquisition': GroupBuilder(
                                 'acquisition',
-                                groups={'timeseries': GroupBuilder('timeseries',
-                                                                   groups={'test_timeseries': ts_builder}),
-                                        'images': GroupBuilder('images')}),
+                                groups={'test_timeseries': ts_builder}),
                                     'analysis': GroupBuilder('analysis'),
                                     'epochs': GroupBuilder('epochs'),
                                     'general': GroupBuilder('general'),

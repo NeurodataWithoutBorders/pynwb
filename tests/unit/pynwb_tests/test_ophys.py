@@ -87,7 +87,7 @@ class DfOverFConstructor(unittest.TestCase):
 
         dof = DfOverF('test_dof', rrs)
         self.assertEqual(dof.source, 'test_dof')
-        self.assertEqual(dof.roi_response_series, rrs)
+        self.assertEqual(dof.roi_response_series['test_ts'], rrs)
 
 
 class FluorescenceConstructor(unittest.TestCase):
@@ -99,7 +99,7 @@ class FluorescenceConstructor(unittest.TestCase):
 
         ff = Fluorescence('test_ff', ts)
         self.assertEqual(ff.source, 'test_ff')
-        self.assertEqual(ff.roi_response_series, ts)
+        self.assertEqual(ff.roi_response_series['test_ts'], ts)
 
 
 class ImageSegmentationConstructor(unittest.TestCase):

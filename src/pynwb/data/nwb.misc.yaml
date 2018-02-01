@@ -145,8 +145,8 @@ groups:
       name: unit_description
     doc: Group storing times for &lt;unit_N&gt;.
     neurodata_type_def: SpikeUnit
-    neurodata_type_inc: NWBContainer
+    neurodata_type_inc: NWBDataInterface
     quantity: +
   default_name: UnitTimes
   neurodata_type_def: UnitTimes
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface

@@ -1,11 +1,15 @@
 from collections import Iterable
 from h5py import RegionReference
 
-from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
+from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
+
+
+def _not_parent(arg):
+    return arg['name'] != 'parent'
 
 
 def set_parents(container, parent):
@@ -88,13 +92,13 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
         self.__parent = parent_container
 
     @staticmethod
-    def __getter(nwbfield):
+    def _getter(nwbfield):
         def _func(self):
             return self.fields.get(nwbfield)
         return _func
 
     @staticmethod
-    def __setter(nwbfield):
+    def _setter(nwbfield):
         def _func(self, val):
             if nwbfield in self.fields:
                 msg = "can't set attribute '%s' -- already set" % nwbfield
@@ -118,7 +122,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
                 cls.__nwbfields__ = tuple(new_nwbfields)
         for f in cls.__nwbfields__:
             if not hasattr(cls, f):
-                setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
+                setattr(cls, f, property(cls._getter(f), cls._setter(f)))
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)
@@ -147,6 +151,11 @@ class NWBContainer(NWBBaseType, Container):
                 assert i.name not in return_dict
                 return_dict[i.name] = i
             return return_dict
+
+
+@register_class('NWBDataInterface', CORE_NAMESPACE)
+class NWBDataInterface(NWBContainer):
+    pass
 
 
 @register_class('NWBData', CORE_NAMESPACE)
@@ -240,3 +249,102 @@ class NWBTableRegion(NWBData, DataRegion):
 
     def __getitem__(self, idx):
         return self.__regionslicer[idx]
+
+
+class MultiTSInterface(NWBDataInterface):
+    '''
+    A class for dynamically defining a API classes that
+    represent NWBDataInterfaces that contain multiple TimeSeries
+    of the same type
+
+    To use, extend this class, and create a dictionary as a class
+    attribute with the following keys:
+
+    'add' to name the method for adding TimeSeries instances
+    'create' to name the method fo creating TimeSeries instances
+    'ts_attr' to name the attribute that stores the TimeSeries instances
+    'ts_type' to provide the TimeSeries object type
+
+    See LFP or Position for an example of how to use this.
+    '''
+
+    @staticmethod
+    def __add_article(noun):
+        if noun[0] in ('aeiouAEIOU'):
+            return 'an %s' % noun
+        return 'a %s' % noun
+
+    @classmethod
+    def __make_add(cls, func_name, attr_name, ts_type):
+        doc = "Add %s to this %s" % (cls.__add_article(ts_type.__name__), cls.__name__)
+
+        @docval({'name': attr_name, 'type': ts_type, 'doc': 'the %s to add' % ts_type.__name__},
+                func_name=func_name, doc=doc)
+        def _func(self, **kwargs):
+            ts = getargs(attr_name, kwargs)
+            ts.parent = self
+            d = getattr(self, attr_name)
+            if ts.name in d:
+                msg = "'%s' already exists" % ts.name
+                raise ValueError(msg)
+            d[ts.name] = ts
+        return _func
+
+    @classmethod
+    def __make_create(cls, func_name, add_name, ts_type):
+        doc = "Create %s and add it to this %s" % \
+                       (cls.__add_article(ts_type.__name__), cls.__name__)
+
+        @docval(*filter(_not_parent, get_docval(ts_type.__init__)), func_name=func_name, doc=doc,
+                returns="the %s object that was created" % ts_type.__name__, rtype=ts_type)
+        def _func(self, **kwargs):
+            cargs, ckwargs = fmt_docval_args(ts_type.__init__, kwargs)
+            ret = ts_type(*cargs, **ckwargs)
+            getattr(self, add_name)(ret)
+            return ret
+        return _func
+
+    @classmethod
+    def __make_constructor(cls, attr_name, add_name, ts_type):
+        @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+                {'name': attr_name, 'type': (list, dict, ts_type),
+                 'doc': '%s to store in this interface' % ts_type.__name__, 'default': dict()},
+                {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__},
+                func_name='__init__')
+        def _func(self, **kwargs):
+            source, ts = popargs('source', attr_name, kwargs)
+            super(MultiTSInterface, self).__init__(source, **kwargs)
+            setattr(self, attr_name, dict())
+            add = getattr(self, add_name)
+            if isinstance(ts, ts_type):
+                add(ts)
+            elif isinstance(ts, list):
+                for tmp in ts:
+                    add(tmp)
+            else:
+                for tmp in ts.values():
+                    add(tmp)
+        return _func
+
+    @ExtenderMeta.pre_init
+    def __build_class(cls, name, bases, classdict):
+        '''
+        This classmethod will be called during class declaration in the metaclass to automatically
+        create setters and getters for NWB fields that need to be exported
+        '''
+        if not hasattr(cls, '__clsconf__'):
+            return
+        if not isinstance(cls.__clsconf__, dict):
+            raise TypeError("'__clsconf__' must be of type dict")
+
+        add = cls.__clsconf__['add']
+        create = cls.__clsconf__['create']
+        ts_attr = cls.__clsconf__['ts_attr']
+        ts_type = cls.__clsconf__['ts_type']
+        if not hasattr(cls, ts_attr):
+            getter = cls._getter(ts_attr)
+            doc = "a dictionary containing the %s in this %s" % (ts_type.__name__, cls.__name__)
+            setattr(cls, ts_attr, property(getter, cls._setter(ts_attr), None, doc))
+        setattr(cls, add, cls.__make_add(add, ts_attr, ts_type))
+        setattr(cls, create, cls.__make_create(create, add, ts_type))
+        setattr(cls, '__init__', cls.__make_constructor(ts_attr, add, ts_type))
