@@ -148,7 +148,7 @@ groups:
     to a particular type of data.
   groups:
   - doc: Interface objects containing data output from processing steps
-    neurodata_type_inc: NWBContainer
+    neurodata_type_inc: NWBDataInterface
     quantity: '*'
   neurodata_type_def: ProcessingModule
   neurodata_type_inc: NWBContainer
