@@ -123,7 +123,7 @@ def main():
                                             # starting_time=ephys_timestamps[0],
                                             # rate=rate,
                                             resolution=0.001,
-                                            comments="This data was randomly generated with numpy, using 1234 as the seed",
+                                            comments="This data was randomly generated with numpy, using 1234 as the seed",  # noqa: E501
                                             description="Random numbers generated with numpy.random.rand")
     f.set_epoch_timeseries([ep1, ep2], ephys_ts)
 
@@ -136,7 +136,7 @@ def main():
                                            resolution=0.1,
                                            comments="This data was generated with numpy, using 1234 as the seed",
                                            description="This 2D Brownian process generated with "
-                                                       "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")
+                                                       "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")  # noqa: E501
     f.set_epoch_timeseries([ep1, ep2], spatial_ts)
     # create-data-interface: end
 
