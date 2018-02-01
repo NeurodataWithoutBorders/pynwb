@@ -11,7 +11,7 @@ from .epoch import Epoch
 from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
-from .core import NWBContainer, LabelledDict, NWBData
+from .core import NWBContainer, LabelledDict, NWBData, NWBDataInterface
 
 from h5py import RegionReference
 
@@ -356,18 +356,18 @@ class NWBFile(NWBContainer):
             raise TypeError(type(timeseries))
         return ts
 
-    @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
+    @docval({'name': 'ts', 'type': NWBDataInterface, 'doc': 'the  NWBDataInterface object to add'},
             {'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch \
             or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
-            returns="the TimeSeries object")
+            returns="the NWBDataInterface object")
     def add_acquisition(self, **kwargs):
         ts, epoch = getargs('ts', 'epoch', kwargs)
         self.__set_timeseries(self.__acquisition, ts, epoch)
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this NWBDataInterface'})
     def get_acquisition(self, **kwargs):
         '''
-        Retrieve acquisition TimeSeries data
+        Retrieve acquisition NWBDataInterface data
         '''
         name = getargs('name', kwargs)
         return self.__get_timeseries(self.__acquisition, name)
@@ -495,9 +495,7 @@ class NWBFile(NWBContainer):
         name = getargs('name', kwargs)
         return self.__ic_electrodes.get(name)
 
-    @docval({'name': 'name',  'type': str, 'doc': 'the name of the processing module'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'description',  'type': str, 'doc': 'description of the processing module'},
+    @docval(*filter(_not_parent, get_docval(ProcessingModule.__init__)),
             returns="a processing module", rtype=ProcessingModule)
     def create_processing_module(self, **kwargs):
         '''
