@@ -3,7 +3,7 @@ from collections import Iterable
 from .form.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer, set_parents, NWBDataInterface, MultiTSInterface
+from .core import NWBContainer, MultiTSInterface
 from .misc import IntervalSeries
 from .base import TimeSeries, _default_conversion, _default_resolution
 from .image import ImageSeries
@@ -105,7 +105,6 @@ class BehavioralEvents(MultiTSInterface):
     }
 
 
-
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)
 class BehavioralTimeSeries(MultiTSInterface):
     """
@@ -121,7 +120,6 @@ class BehavioralTimeSeries(MultiTSInterface):
         'ts_type': TimeSeries,
         'ts_attr': 'timeseries'
     }
-
 
 
 @register_class('PupilTracking', CORE_NAMESPACE)
@@ -236,4 +234,3 @@ class MotionCorrection(MultiTSInterface):
     }
 
     _help = "Image stacks whose frames have been shifted (registered) to account for motion."
-
