@@ -322,6 +322,7 @@ def docval(*validator, **options):
     def dec(func):
         _docval = _copy.copy(options)
         func.__name__ = _docval.get('func_name', func.__name__)
+        func.__doc__ = _docval.get('doc', func.__doc__)
         pos = list()
         kw = list()
         for a in val_copy:
