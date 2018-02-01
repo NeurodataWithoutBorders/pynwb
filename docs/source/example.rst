@@ -98,6 +98,20 @@ and adding them with :py:meth:`~pynwb.file.NWBFile.add_acquisition`.
    :dedent: 4
 
 
+Adding other acquisition data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Subclasses of :py:class:`~pynwb.core.NWBDataInterface` can also be added as acquisition data.
+
+The follow example shows how to do this with two container types that hold :py:class:`~pynwb.base.TimeSeries`.
+
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: create-data-interface: start
+   :end-before: create-data-interface: end
+   :dedent: 4
+
+
 .. _useextension:
 
 Creating Compressed TimeSeries
