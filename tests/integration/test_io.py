@@ -43,7 +43,7 @@ class TestHDF5Writer(unittest.TestCase):
                                                                          attributes={'unit': 'Seconds',
                                                                                      'interval': 1})})
         self.builder = GroupBuilder(
-            'root', groups={'acquisition': GroupBuilder('acquisition'),
+            'root', groups={'acquisition': GroupBuilder('acquisition', groups={'test_timeseries': ts_builder}),
                             'analysis': GroupBuilder('analysis'),
                             'epochs': GroupBuilder('epochs'),
                             'general': GroupBuilder('general'),

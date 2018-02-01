@@ -148,9 +148,11 @@ class NWBContainer(NWBBaseType, Container):
                 return_dict[i.name] = i
             return return_dict
 
+
 @register_class('NWBDataInterface', CORE_NAMESPACE)
 class NWBDataInterface(NWBContainer):
     pass
+
 
 @register_class('NWBData', CORE_NAMESPACE)
 class NWBData(NWBBaseType, Data):
