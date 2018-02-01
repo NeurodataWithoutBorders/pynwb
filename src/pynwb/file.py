@@ -11,7 +11,7 @@ from .epoch import Epoch
 from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
-from .core import NWBContainer, LabelledDict
+from .core import NWBContainer, LabelledDict, NWBData
 
 from h5py import RegionReference
 
@@ -21,7 +21,7 @@ def _not_parent(arg):
 
 
 @register_class('Image', CORE_NAMESPACE)
-class Image(Container):
+class Image(NWBData):
     # TODO: Implement this
     pass
 
