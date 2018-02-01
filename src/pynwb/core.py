@@ -245,3 +245,81 @@ class NWBTableRegion(NWBData, DataRegion):
 
     def __getitem__(self, idx):
         return self.__regionslicer[idx]
+
+
+class MultiTSInterface(NWBDataInterface):
+
+    @classmethod
+    def __make_add(cls, func_name, attr_name, ts_type):
+        @docval({'name': attr_name, 'type': ts_type, 'doc': 'the %s to add' % ts_type.__name__},
+                func_name=func_name)
+        def _func(self, **kwargs):
+            ts = getargs(attr_name, kwargs)
+            ts.parent = self
+            d = getattr(self, attr_name)
+            if ts.name in d:
+                msg = "'%s' already exists" % ts.name
+                raise ValueError(msg)
+            d[ts.name] = ts
+        return _func
+
+    @classmethod
+    def __make_create(cls, func_name, add_name, ts_type):
+        @docval(*filter(_not_parent, get_docval(ts_type.__init__)), func_name=func_name,
+                returns="the %s object that was created" % ts_type.__name__, rtype=ts_type)
+        def _func(self, **kwargs):
+            cargs, ckwargs = fmt_docval_args(ts_type.__init__, kwargs)
+            ret = ts_type(*cargs, **ckwargs)
+            getattr(self, add_name)(ret)
+            return ret
+        return _func
+
+    @classmethod
+    def __make_constructor(cls, attr_name, add_name, ts_type):
+        @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+                {'name': attr_name, 'type': (list, dict, ts_type),
+                 'doc': '%s to store in this interface' % ts_type.__name__, 'default': dict()},
+                {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__},
+                func_name='__init__')
+        def _func(self, **kwargs):
+            source, ts = popargs('source', attr_name, kwargs)
+            super(MultiESInterface, self).__init__(source, **kwargs)
+            setattr(self, attr_name, dict())
+            add = getattr(self, add_name)
+            if isinstance(ts, ts_type):
+                add(ts)
+            elif isinstance(ts, list):
+                for tmp in ts:
+                    add(tmp)
+            else:
+                for tmp in ts.values():
+                    add(tmp)
+        return _func
+
+    @ExtenderMeta.pre_init
+    def __build_class(cls, name, bases, classdict):
+        '''
+        This classmethod will be called during class declaration in the metaclass to automatically
+        create setters and getters for NWB fields that need to be exported
+        '''
+        if not hasattr(cls, '__clsconf__'):
+            return
+        if not isinstance(cls.__clsconf__, dict):
+            raise TypeError("'__clsconf__' must be of type dict")
+
+        if len(bases) and 'MultiTSInterface' in globals() and issubclass(bases[-1], MultiTSInterface) \
+           and bases[-1].__clsconf__ is not cls.__clsconf__:
+                new_nwbfields = list(cls.__nwbfields__)
+                new_nwbfields[0:0] = bases[-1].__nwbfields__
+                cls.__nwbfields__ = tuple(new_nwbfields)
+        add = cls.__clsconf__['add']
+        create = cls.__clsconf__['create']
+        ts_attr = cls.__clsconf__['ts_attr']
+        ts_type = cls.__clsconf__['ts_type']
+        f = cls.__make_add(add, ts_attr, ts_type)
+        f.__name__ = add
+        setattr(cls, add, f)
+        setattr(cls, create, cls.__make_create(create, add, ts_type))
+        setattr(cls, '__init__', cls.__make_constructor(ts_attr, add, ts_type))
+
+
