@@ -32,7 +32,8 @@ class SuccessRecordingResult(unittest.TextTestResult):
 
         cases = []
 
-        cases.extend(self.successes)
+        if hasattr(self, 'successes'):
+            cases.extend(self.successes)
         cases.extend([failure[0] for failure in self.failures])
 
         return cases
