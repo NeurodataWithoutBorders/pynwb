@@ -3,7 +3,7 @@ from collections import Iterable
 from .form.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer, set_parents
+from .core import NWBContainer, set_parents, NWBDataInterface
 from .misc import IntervalSeries
 from .base import TimeSeries, _default_conversion, _default_resolution
 from .image import ImageSeries
@@ -67,7 +67,7 @@ class SpatialSeries(TimeSeries):
 
 
 @register_class('BehavioralEpochs', CORE_NAMESPACE)
-class BehavioralEpochs(NWBContainer):
+class BehavioralEpochs(NWBDataInterface):
     """
     TimeSeries for storing behavoioral epochs. The objective of this and the other two Behavioral
     interfaces (e.g. BehavioralEvents and BehavioralTimeSeries) is to provide generic hooks for
@@ -96,7 +96,7 @@ class BehavioralEpochs(NWBContainer):
 
 
 @register_class('BehavioralEvents', CORE_NAMESPACE)
-class BehavioralEvents(NWBContainer):
+class BehavioralEvents(NWBDataInterface):
     """
     TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
     """
@@ -116,7 +116,7 @@ class BehavioralEvents(NWBContainer):
 
 
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)
-class BehavioralTimeSeries(NWBContainer):
+class BehavioralTimeSeries(NWBDataInterface):
     """
     TimeSeries for storing Behavoioral time series data. See description of BehavioralEpochs for
     more details.
@@ -137,7 +137,7 @@ class BehavioralTimeSeries(NWBContainer):
 
 
 @register_class('PupilTracking', CORE_NAMESPACE)
-class PupilTracking(NWBContainer):
+class PupilTracking(NWBDataInterface):
     """
     Eye-tracking data, representing pupil size.
     """
@@ -157,7 +157,7 @@ class PupilTracking(NWBContainer):
 
 
 @register_class('EyeTracking', CORE_NAMESPACE)
-class EyeTracking(NWBContainer):
+class EyeTracking(NWBDataInterface):
     """
     Eye-tracking data, representing direction of gaze.
     """
@@ -176,7 +176,7 @@ class EyeTracking(NWBContainer):
 
 
 @register_class('CompassDirection', CORE_NAMESPACE)
-class CompassDirection(NWBContainer):
+class CompassDirection(NWBDataInterface):
     """
     With a CompassDirection interface, a module publishes a SpatialSeries object representing a
     floating point value for theta. The SpatialSeries::reference_frame field should indicate what
@@ -200,7 +200,7 @@ class CompassDirection(NWBContainer):
 
 
 @register_class('Position', CORE_NAMESPACE)
-class Position(NWBContainer):
+class Position(NWBDataInterface):
     """
     Position data, whether along the x, x/y or x/y/z axis.
     """
@@ -219,7 +219,7 @@ class Position(NWBContainer):
 
 
 @register_class('CorrectedImageStack', CORE_NAMESPACE)
-class CorrectedImageStack(NWBContainer):
+class CorrectedImageStack(NWBDataInterface):
     """
     """
 
@@ -248,7 +248,7 @@ class CorrectedImageStack(NWBContainer):
 
 
 @register_class('MotionCorrection', CORE_NAMESPACE)
-class MotionCorrection(NWBContainer):
+class MotionCorrection(NWBDataInterface):
     """
     An image stack where all frames are shifted (registered) to a common coordinate system, to
     account for movement and drift between frames. Note: each frame at each point in time is

@@ -6,7 +6,7 @@ from .form.utils import docval, popargs, fmt_docval_args
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer
+from .core import NWBContainer, NWBDataInterface
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -222,7 +222,7 @@ class PlaneSegmentation(NWBContainer):
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
-class ImageSegmentation(NWBContainer):
+class ImageSegmentation(NWBDataInterface):
     """
     Stores pixels in an image that represent different regions of interest (ROIs) or masks. All
     segmentation for a given imaging plane is stored together, with storage for multiple imaging
@@ -305,7 +305,7 @@ class RoiResponseSeries(TimeSeries):
 
 
 @register_class('DfOverF', CORE_NAMESPACE)
-class DfOverF(NWBContainer):
+class DfOverF(NWBDataInterface):
     """
     dF/F information about a region of interest (ROI). Storage hierarchy of dF/F should be the same
     as for segmentation (ie, same names for ROIs and for image planes).
@@ -327,7 +327,7 @@ class DfOverF(NWBContainer):
 
 
 @register_class('Fluorescence', CORE_NAMESPACE)
-class Fluorescence(NWBContainer):
+class Fluorescence(NWBDataInterface):
     """
     Fluorescence information about a region of interest (ROI). Storage hierarchy of fluorescence
     should be the same as for segmentation (ie, same names for ROIs and for image planes).
