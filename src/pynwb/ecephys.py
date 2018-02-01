@@ -340,7 +340,8 @@ class MultiESInterface(NWBDataInterface):
     __nwbfields__ = ('electrical_series',)
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': (list, dict, ElectricalSeries), 'doc': 'LFP electrophysiology data', 'default': dict()},
+            {'name': 'electrical_series', 'type': (list, dict, ElectricalSeries),
+             'doc': 'LFP electrophysiology data', 'default': dict()},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'LFP'})
     def __init__(self, **kwargs):
         source, electrical_series = popargs('source', 'electrical_series', kwargs)
@@ -391,7 +392,8 @@ class LFP(MultiESInterface):
               "should be noted in the ElectricalSeries")
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': (list, dict, ElectricalSeries), 'doc': 'LFP electrophysiology data', 'default': dict()},
+            {'name': 'electrical_series', 'type': (list, dict, ElectricalSeries),
+             'doc': 'LFP electrophysiology data', 'default': dict()},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'LFP'})
     def __init__(self, **kwargs):
         cargs, ckwargs = fmt_docval_args(MultiESInterface.__init__, kwargs)
@@ -416,7 +418,8 @@ class FilteredEphys(MultiESInterface):
               "be noted in the ElectricalSeries")
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': (list, dict, ElectricalSeries), 'doc': 'filtered electrophysiology data', 'default': dict()},
+            {'name': 'electrical_series', 'type': (list, dict, ElectricalSeries),
+             'doc': 'filtered electrophysiology data', 'default': dict()},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FilteredEphys'})
     def __init__(self, **kwargs):
         cargs, ckwargs = fmt_docval_args(MultiESInterface.__init__, kwargs)
