@@ -2,16 +2,12 @@ import numpy as np
 from h5py import RegionReference
 from collections import Iterable
 
-from .form.utils import docval, getargs, popargs, call_docval_func, get_docval, fmt_docval_args
+from .form.utils import docval, getargs, popargs, call_docval_func
 from .form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, set_parents, NWBTable, NWBTableRegion, NWBDataInterface
-
-
-def _not_parent(arg):
-    return arg['name'] != 'parent'
+from .core import NWBContainer, NWBTable, NWBTableRegion, NWBDataInterface, MultiTSInterface
 
 
 @register_class('Device', CORE_NAMESPACE)
@@ -246,23 +242,20 @@ class EventDetection(NWBDataInterface):
 
 
 @register_class('EventWaveform', CORE_NAMESPACE)
-class EventWaveform(NWBDataInterface):
+class EventWaveform(MultiTSInterface):
     """
     Spike data for spike events detected in raw data
     stored in this NWBFile, or events detect at acquisition
     """
 
-    __nwbfields__ = ('spike_event_series',)
+    __clsconf__ = {
+        'ts_attr': 'spike_event_series',
+        'ts_type': SpikeEventSeries,
+        'add': 'add_spike_event_series',
+        'create': 'create_spike_event_series'
+    }
 
     __help = "Waveform of detected extracellularly recorded spike events"
-
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'spike_event_series', 'type': (list, SpikeEventSeries), 'doc': 'spiking event data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventWaveform'})
-    def __init__(self, **kwargs):
-        source, spike_event_series = popargs('source', 'spike_event_series', kwargs)
-        super(EventWaveform, self).__init__(source, **kwargs)
-        self.spike_event_series = set_parents(spike_event_series, self)
 
 
 @register_class('Clustering', CORE_NAMESPACE)
@@ -272,11 +265,13 @@ class Clustering(NWBDataInterface):
     waveform peak to RMS on any channel in cluster.
     """
 
-    __nwbfields_ = ('cluster_nums',
-                    'description',
-                    'num',
-                    'peak_over_rms',
-                    'times')
+    __nwbfields__ = (
+        'cluster_nums',
+        'description',
+        'num',
+        'peak_over_rms',
+        'times'
+    )
 
     __help = ("Clustered spike data, whether from automatic clustering "
               "tools (eg, klustakwik) or as a result of manual sorting.")
@@ -335,73 +330,27 @@ class ClusterWaveforms(NWBDataInterface):
         self.waveform_sd = waveform_sd
 
 
-class MultiESInterface(NWBDataInterface):
-
-    __nwbfields__ = ('electrical_series',)
-
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': (list, dict, ElectricalSeries),
-             'doc': 'LFP electrophysiology data', 'default': dict()},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'LFP'})
-    def __init__(self, **kwargs):
-        source, electrical_series = popargs('source', 'electrical_series', kwargs)
-        super(MultiESInterface, self).__init__(source, **kwargs)
-        self.electrical_series = dict()
-        if isinstance(electrical_series, ElectricalSeries):
-            self.add_electrical_series(electrical_series)
-        elif isinstance(electrical_series, list):
-            for es in electrical_series:
-                self.self.add_electrical_series(es)
-        else:
-            for es in electrical_series.values():
-                self.self.add_electrical_series(es)
-
-    @docval({'name': 'electrical_series',  'type': ElectricalSeries, 'doc': 'the ElectricalSeries to add'})
-    def add_electrical_series(self, **kwargs):
-        '''
-        Add an ElectricalSeries to this interface
-        '''
-        es = getargs('electrical_series', kwargs)
-        es.parent = self
-        if es.name in self.electrical_series:
-            msg = "'%s' already exists" % es.name
-            raise ValueError(msg)
-        self.electrical_series[es.name] = es
-
-    @docval(*filter(_not_parent, get_docval(ElectricalSeries.__init__)),
-            returns="the ElectricalSeries object that was created", rtype=ElectricalSeries)
-    def create_electrical_series(self, **kwargs):
-        '''
-        Create an ElectricalSeries and add it to this interface
-        '''
-        cargs, ckwargs = fmt_docval_args(ElectricalSeries.__init__, kwargs)
-        ret = ElectricalSeries(*cargs, **ckwargs)
-        self.add_electrical_series(ret)
-        return ret
-
-
 @register_class('LFP', CORE_NAMESPACE)
-class LFP(MultiESInterface):
+class LFP(MultiTSInterface):
     """
     LFP data from one or more channels. The electrode map in each published ElectricalSeries will
     identify which channels are providing LFP data. Filter properties should be noted in the
     ElectricalSeries description or comments field.
     """
 
+    __clsconf__ = {
+        'ts_attr': 'electrical_series',
+        'ts_type': ElectricalSeries,
+        'add': 'add_electrical_series',
+        'create': 'create_electrical_series'
+    }
+
     __help = ("LFP data from one or more channels. Filter properties "
               "should be noted in the ElectricalSeries")
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': (list, dict, ElectricalSeries),
-             'doc': 'LFP electrophysiology data', 'default': dict()},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'LFP'})
-    def __init__(self, **kwargs):
-        cargs, ckwargs = fmt_docval_args(MultiESInterface.__init__, kwargs)
-        super(LFP, self).__init__(*cargs, **ckwargs)
-
 
 @register_class('FilteredEphys', CORE_NAMESPACE)
-class FilteredEphys(MultiESInterface):
+class FilteredEphys(MultiTSInterface):
     """
     Ephys data from one or more channels that has been subjected to filtering. Examples of filtered
     data include Theta and Gamma (LFP has its own interface). FilteredEphys modules publish an
@@ -417,13 +366,12 @@ class FilteredEphys(MultiESInterface):
               "for gamma or theta oscillations (LFP has its own interface). Filter properties should "
               "be noted in the ElectricalSeries")
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': (list, dict, ElectricalSeries),
-             'doc': 'filtered electrophysiology data', 'default': dict()},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FilteredEphys'})
-    def __init__(self, **kwargs):
-        cargs, ckwargs = fmt_docval_args(MultiESInterface.__init__, kwargs)
-        super(FilteredEphys, self).__init__(*cargs, **ckwargs)
+    __clsconf__ = {
+        'ts_attr': 'electrical_series',
+        'ts_type': ElectricalSeries,
+        'add': 'add_electrical_series',
+        'create': 'create_electrical_series'
+    }
 
 
 @register_class('FeatureExtraction', CORE_NAMESPACE)

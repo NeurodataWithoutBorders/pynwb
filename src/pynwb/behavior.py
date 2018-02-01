@@ -3,7 +3,7 @@ from collections import Iterable
 from .form.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer, set_parents, NWBDataInterface
+from .core import NWBContainer, set_parents, NWBDataInterface, MultiTSInterface
 from .misc import IntervalSeries
 from .base import TimeSeries, _default_conversion, _default_resolution
 from .image import ImageSeries
@@ -200,26 +200,23 @@ class CompassDirection(NWBDataInterface):
 
 
 @register_class('Position', CORE_NAMESPACE)
-class Position(NWBDataInterface):
+class Position(MultiTSInterface):
     """
     Position data, whether along the x, x/y or x/y/z axis.
     """
 
-    __nwbfields__ = ('spatial_series',)
+    __clsconf__ = {
+        'add': 'add_spatial_series',
+        'create': 'create_spatial_series',
+        'ts_type': SpatialSeries,
+        'ts_attr': 'spatial_series'
+    }
 
     _help = "Position data, whether along the x, xy or xyz axis"
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this Position container', 'default': 'Position'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': ''})
-    def __init__(self, **kwargs):
-        source, spatial_series = popargs('source', 'spatial_series', kwargs)
-        super(Position, self).__init__(source, **kwargs)
-        self.spatial_series = set_parents(spatial_series, self)
-
 
 @register_class('CorrectedImageStack', CORE_NAMESPACE)
-class CorrectedImageStack(NWBDataInterface):
+class CorrectedImageStack(NWBContainer):
     """
     """
 
