@@ -119,9 +119,6 @@ def main():
                                             ephys_data,
                                             electrode_table_region,
                                             timestamps=ephys_timestamps,
-                                            # Alternatively, could specify starting_time and rate as follows
-                                            # starting_time=ephys_timestamps[0],
-                                            # rate=rate,
                                             resolution=0.001,
                                             comments="This data was randomly generated with numpy, using 1234 as the seed",  # noqa: E501
                                             description="Random numbers generated with numpy.random.rand")
@@ -150,9 +147,6 @@ def main():
                                 H5DataIO(ephys_data, compress=True),
                                 electrode_table_region,
                                 timestamps=H5DataIO(ephys_timestamps, compress=True),
-                                # Alternatively, could specify starting_time and rate as follows
-                                # starting_time=ephys_timestamps[0],
-                                # rate=rate,
                                 resolution=0.001,
                                 comments="This data was randomly generated with numpy, using 1234 as the seed",
                                 description="Random numbers generated with numpy.random.rand")
