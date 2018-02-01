@@ -82,7 +82,7 @@ class EventWaveformConstructor(unittest.TestCase):
 
         ew = EventWaveform('test_ew', sES)  # noqa: F405
         self.assertEqual(ew.source, 'test_ew')
-        self.assertEqual(ew.spike_event_series, [sES])
+        self.assertEqual(ew.spike_event_series['test_sES'], sES)
 
 
 class ClusteringConstructor(unittest.TestCase):
@@ -117,7 +117,7 @@ class ClusterWaveformsConstructor(unittest.TestCase):
         self.assertEqual(cw.waveform_sd, stdevs)
 
 
-class LFPConstructor(unittest.TestCase):
+class LFPTest(unittest.TestCase):
     def test_init(self):
         dev1 = Device('dev1', 'a test source')  # noqa: F405
         group = ElectrodeGroup(  # noqa: F405, F841
@@ -128,10 +128,22 @@ class LFPConstructor(unittest.TestCase):
             'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         lfp = LFP('test_lfp', eS)  # noqa: F405
         self.assertEqual(lfp.source, 'test_lfp')
-        self.assertEqual(lfp.electrical_series, eS)
+        self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
+
+    def test_add_electrical_series(self):
+        lfp = LFP('test_lfp')  # noqa: F405
+        dev1 = Device('dev1', 'a test source')  # noqa: F405
+        group = ElectrodeGroup(  # noqa: F405, F841
+            'tetrode1', 'a test source', 'tetrode description', 'tetrode location', dev1)
+        table = make_electrode_table()
+        region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
+        eS = ElectricalSeries(  # noqa: F405
+            'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        lfp.add_electrical_series(eS)
+        self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
 
 
-class FilteredEphysConstructor(unittest.TestCase):
+class FilteredEphysTest(unittest.TestCase):
     def test_init(self):
         dev1 = Device('dev1', 'a test source')  # noqa: F405
         group = ElectrodeGroup(  # noqa: F405, F841
@@ -142,7 +154,19 @@ class FilteredEphysConstructor(unittest.TestCase):
             'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         fe = FilteredEphys('test_fe', eS)  # noqa: F405
         self.assertEqual(fe.source, 'test_fe')
-        self.assertEqual(fe.electrical_series, eS)
+        self.assertEqual(fe.electrical_series.get('test_eS'), eS)
+
+    def test_add_electrical_series(self):
+        fe = FilteredEphys('test_fe')  # noqa: F405
+        dev1 = Device('dev1', 'a test source')  # noqa: F405
+        group = ElectrodeGroup(  # noqa: F405, F841
+            'tetrode1', 'a test source', 'tetrode description', 'tetrode location', dev1)
+        table = make_electrode_table()
+        region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
+        eS = ElectricalSeries(  # noqa: F405
+            'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+        fe.add_electrical_series(eS)
+        self.assertEqual(fe.electrical_series.get('test_eS'), eS)
 
 
 class FeatureExtractionConstructor(unittest.TestCase):
