@@ -109,6 +109,37 @@ def main():
     f.add_acquisition(spatial_ts, [ep1, ep2])
     # create-timeseries: end
 
+    # create-data-interface: start
+    from pynwb.ecephys import LFP
+    from pynwb.behavior import Position
+
+    lfp = f.add_acquisition(LFP('a hypothetical source'))
+    ephys_ts = lfp.create_electrical_series('test_ephys_data',
+                                            'an hypothetical source',
+                                            ephys_data,
+                                            electrode_table_region,
+                                            timestamps=ephys_timestamps,
+                                            # Alternatively, could specify starting_time and rate as follows
+                                            # starting_time=ephys_timestamps[0],
+                                            # rate=rate,
+                                            resolution=0.001,
+                                            comments="This data was randomly generated with numpy, using 1234 as the seed",
+                                            description="Random numbers generated with numpy.random.rand")
+    f.set_epoch_timeseries([ep1, ep2], ephys_ts)
+
+    pos = f.add_acquisition(Position('a hypothetical source'))
+    spatial_ts = pos.create_spatial_series('test_spatial_timeseries',
+                                           'a stumbling rat',
+                                           spatial_data,
+                                           'origin on x,y-plane',
+                                           timestamps=spatial_timestamps,
+                                           resolution=0.1,
+                                           comments="This data was generated with numpy, using 1234 as the seed",
+                                           description="This 2D Brownian process generated with "
+                                                       "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")
+    f.set_epoch_timeseries([ep1, ep2], spatial_ts)
+    # create-data-interface: end
+
 
 if __name__ == "__main__":
     main()
