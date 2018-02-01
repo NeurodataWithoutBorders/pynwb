@@ -1,11 +1,15 @@
 from collections import Iterable
 from h5py import RegionReference
 
-from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
+from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
+
+
+def _not_parent(arg):
+    return arg['name'] != 'parent'
 
 
 def set_parents(container, parent):
@@ -88,13 +92,13 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
         self.__parent = parent_container
 
     @staticmethod
-    def __getter(nwbfield):
+    def _getter(nwbfield):
         def _func(self):
             return self.fields.get(nwbfield)
         return _func
 
     @staticmethod
-    def __setter(nwbfield):
+    def _setter(nwbfield):
         def _func(self, val):
             if nwbfield in self.fields:
                 msg = "can't set attribute '%s' -- already set" % nwbfield
@@ -118,7 +122,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
                 cls.__nwbfields__ = tuple(new_nwbfields)
         for f in cls.__nwbfields__:
             if not hasattr(cls, f):
-                setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
+                setattr(cls, f, property(cls._getter(f), cls._setter(f)))
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)
@@ -248,11 +252,34 @@ class NWBTableRegion(NWBData, DataRegion):
 
 
 class MultiTSInterface(NWBDataInterface):
+    '''
+    A class for dynamically defining a API classes that
+    represent NWBDataInterfaces that contain multiple TimeSeries
+    of the same type
+
+    To use, extend this class, and create a dictionary as a class
+    attribute with the following keys:
+
+    'add' to name the method for adding TimeSeries instances
+    'create' to name the method fo creating TimeSeries instances
+    'ts_attr' to name the attribute that stores the TimeSeries instances
+    'ts_type' to provide the TimeSeries object type
+
+    See LFP or Position for an example of how to use this.
+    '''
+
+    @staticmethod
+    def __add_article(noun):
+        if noun[0] in ('aeiouAEIOU'):
+            return 'an %s' % noun
+        return 'a %s' % noun
 
     @classmethod
     def __make_add(cls, func_name, attr_name, ts_type):
+        doc = "Add %s to this %s" % (cls.__add_article(ts_type.__name__), cls.__name__)
+
         @docval({'name': attr_name, 'type': ts_type, 'doc': 'the %s to add' % ts_type.__name__},
-                func_name=func_name)
+                func_name=func_name, doc=doc)
         def _func(self, **kwargs):
             ts = getargs(attr_name, kwargs)
             ts.parent = self
@@ -265,7 +292,10 @@ class MultiTSInterface(NWBDataInterface):
 
     @classmethod
     def __make_create(cls, func_name, add_name, ts_type):
-        @docval(*filter(_not_parent, get_docval(ts_type.__init__)), func_name=func_name,
+        doc = "Create %s and add it to this %s" % \
+                       (cls.__add_article(ts_type.__name__), cls.__name__)
+
+        @docval(*filter(_not_parent, get_docval(ts_type.__init__)), func_name=func_name, doc=doc,
                 returns="the %s object that was created" % ts_type.__name__, rtype=ts_type)
         def _func(self, **kwargs):
             cargs, ckwargs = fmt_docval_args(ts_type.__init__, kwargs)
@@ -307,19 +337,14 @@ class MultiTSInterface(NWBDataInterface):
         if not isinstance(cls.__clsconf__, dict):
             raise TypeError("'__clsconf__' must be of type dict")
 
-        if len(bases) and 'MultiTSInterface' in globals() and issubclass(bases[-1], MultiTSInterface) \
-           and bases[-1].__clsconf__ is not cls.__clsconf__:
-                new_nwbfields = list(cls.__nwbfields__)
-                new_nwbfields[0:0] = bases[-1].__nwbfields__
-                cls.__nwbfields__ = tuple(new_nwbfields)
         add = cls.__clsconf__['add']
         create = cls.__clsconf__['create']
         ts_attr = cls.__clsconf__['ts_attr']
         ts_type = cls.__clsconf__['ts_type']
-        f = cls.__make_add(add, ts_attr, ts_type)
-        f.__name__ = add
-        setattr(cls, add, f)
+        if not hasattr(cls, ts_attr):
+            getter = cls._getter(ts_attr)
+            doc = "a dictionary containing the %s in this %s" % (ts_type.__name__, cls.__name__)
+            setattr(cls, ts_attr, property(getter, cls._setter(ts_attr), None, doc))
+        setattr(cls, add, cls.__make_add(add, ts_attr, ts_type))
         setattr(cls, create, cls.__make_create(create, add, ts_type))
         setattr(cls, '__init__', cls.__make_constructor(ts_attr, add, ts_type))
-
-
