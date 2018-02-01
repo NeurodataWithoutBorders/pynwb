@@ -78,7 +78,7 @@ groups:
     quantity: '*'
   default_name: DfOverF
   neurodata_type_def: DfOverF
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Fluorescence over time of one or more ROIs. TimeSeries names should
       correspond to imaging plane names'
@@ -95,7 +95,7 @@ groups:
     quantity: +
   default_name: Fluorescence
   neurodata_type_def: Fluorescence
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Stores groups of pixels that define regions of interest from one
       or more imaging planes'
@@ -159,7 +159,7 @@ groups:
         name: roi_description
       doc: Name of ROI
       neurodata_type_def: ROI
-      neurodata_type_inc: NWBContainer
+      neurodata_type_inc: NWBDataInterface
       quantity: '*'
     - doc: Stores image stacks segmentation mask apply to.
       groups:
@@ -172,11 +172,11 @@ groups:
       name: imaging_plane
       target_type: ImagingPlane
     neurodata_type_def: PlaneSegmentation
-    neurodata_type_inc: NWBContainer
+    neurodata_type_inc: NWBDataInterface
     quantity: '*'
   default_name: ImageSegmentation
   neurodata_type_def: ImageSegmentation
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Metadata about an imaging plane'
     dtype: text

@@ -116,7 +116,7 @@ groups:
     target_type: Clustering
   default_name: ClusterWaveforms
   neurodata_type_def: ClusterWaveforms
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Clustered spike data, whether from automatic clustering tools (eg,
       klustakwik) or as a result of manual sorting'
@@ -156,7 +156,7 @@ groups:
     or as a result of manual sorting.
   default_name: Clustering
   neurodata_type_def: Clustering
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Container for salient features of detected events'
     dtype: text
@@ -195,7 +195,7 @@ groups:
     SpikeEvent TimeSeries or other source.
   default_name: FeatureExtraction
   neurodata_type_def: FeatureExtraction
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Detected spike events from voltage trace(s)'
     dtype: text
@@ -238,7 +238,7 @@ groups:
     target_type: ElectricalSeries
   default_name: EventDetection
   neurodata_type_def: EventDetection
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Waveform of detected extracellularly recorded spike events'
     dtype: text
@@ -253,7 +253,7 @@ groups:
     quantity: '*'
   default_name: EventWaveform
   neurodata_type_def: EventWaveform
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Ephys data from one or more channels that is subjected to filtering,
       such as for gamma or theta oscillations (LFP has its own interface). Filter
@@ -278,7 +278,7 @@ groups:
     quantity: +
   default_name: FilteredEphys
   neurodata_type_def: FilteredEphys
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'LFP data from one or more channels. Filter properties should be
       noted in the ElectricalSeries'
@@ -295,7 +295,7 @@ groups:
     quantity: +
   default_name: LFP
   neurodata_type_def: LFP
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Metadata about a physical grouping of channels'
     dtype: str
