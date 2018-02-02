@@ -21,7 +21,7 @@ class BehavioralEpochsConstructor(unittest.TestCase):
 
         bE = BehavioralEpochs('test_bE', iS)
         self.assertEqual(bE.source, 'test_bE')
-        self.assertEqual(bE.interval_series, [iS])
+        self.assertEqual(bE.interval_series['test_iS'], iS)
 
 
 class BehavioralEventsConstructor(unittest.TestCase):
@@ -30,7 +30,7 @@ class BehavioralEventsConstructor(unittest.TestCase):
 
         bE = BehavioralEvents('test_bE', ts)
         self.assertEqual(bE.source, 'test_bE')
-        self.assertEqual(bE.time_series, ts)
+        self.assertEqual(bE.timeseries['test_ts'], ts)
 
 
 class BehavioralTimeSeriesConstructor(unittest.TestCase):
@@ -39,7 +39,7 @@ class BehavioralTimeSeriesConstructor(unittest.TestCase):
 
         bts = BehavioralTimeSeries('test_bts', ts)
         self.assertEqual(bts.source, 'test_bts')
-        self.assertEqual(bts.time_series, ts)
+        self.assertEqual(bts.timeseries['test_ts'], ts)
 
 
 class PupilTrackingConstructor(unittest.TestCase):
@@ -48,7 +48,7 @@ class PupilTrackingConstructor(unittest.TestCase):
 
         pt = PupilTracking('test_pt', ts)
         self.assertEqual(pt.source, 'test_pt')
-        self.assertEqual(pt.time_series, ts)
+        self.assertEqual(pt.timeseries['test_ts'], ts)
 
 
 class EyeTrackingConstructor(unittest.TestCase):
@@ -57,7 +57,7 @@ class EyeTrackingConstructor(unittest.TestCase):
 
         et = EyeTracking('test_et', sS)
         self.assertEqual(et.source, 'test_et')
-        self.assertEqual(et.spatial_series, [sS])
+        self.assertEqual(et.spatial_series['test_sS'], sS)
 
 
 class CompassDirectionConstructor(unittest.TestCase):
@@ -65,7 +65,7 @@ class CompassDirectionConstructor(unittest.TestCase):
         sS = SpatialSeries('test_sS', 'a hypothetical source', list(), 'reference_frame', timestamps=list())
         cd = CompassDirection('test_cd', sS)
         self.assertEqual(cd.source, 'test_cd')
-        self.assertEqual(cd.spatial_series, [sS])
+        self.assertEqual(cd.spatial_series['test_sS'], sS)
 
 
 class PositionConstructor(unittest.TestCase):
