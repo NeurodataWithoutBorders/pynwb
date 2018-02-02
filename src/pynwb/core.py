@@ -251,7 +251,7 @@ class NWBTableRegion(NWBData, DataRegion):
         return self.__regionslicer[idx]
 
 
-class MultiTSInterface(NWBDataInterface):
+class MultiContainerInterface(NWBDataInterface):
     '''
     A class for dynamically defining a API classes that
     represent NWBDataInterfaces that contain multiple TimeSeries
@@ -262,8 +262,8 @@ class MultiTSInterface(NWBDataInterface):
 
     'add' to name the method for adding TimeSeries instances
     'create' to name the method fo creating TimeSeries instances
-    'ts_attr' to name the attribute that stores the TimeSeries instances
-    'ts_type' to provide the TimeSeries object type
+    'attr' to name the attribute that stores the TimeSeries instances
+    'type' to provide the TimeSeries object type
 
     See LFP or Position for an example of how to use this.
     '''
@@ -275,10 +275,39 @@ class MultiTSInterface(NWBDataInterface):
         return 'a %s' % noun
 
     @classmethod
-    def __make_add(cls, func_name, attr_name, ts_type):
-        doc = "Add %s to this %s" % (cls.__add_article(ts_type.__name__), cls.__name__)
+    def __make_get(cls, func_name, attr_name, container_type):
+        doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
 
-        @docval({'name': attr_name, 'type': ts_type, 'doc': 'the %s to add' % ts_type.__name__},
+
+        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
+                 'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
+                func_name=func_name, doc=doc)
+        def _func(self, **kwargs):
+            name = getargs('name', kwargs)
+            d = getattr(self, attr_name)
+            if len(d) == 0:
+                msg = "%s '%s' is empty" % (cls.__name__, self.name)
+                raise ValueError(msg)
+            if len(d) > 1 and name is None:
+                msg = "more than one %s in this %s -- must specify a name" % container_type.__name__, cls.__name__
+                raise ValueError(msg)
+            ret = None
+            if len(d) == 1:
+                for v in d.values():
+                    ret = v
+            else:
+                ret = d.get(name)
+                if ret is None:
+                    msg = "'%s' not found in %s '%s'" % (name, cls.__name__, self.name)
+                    raise KeyError(msg)
+            return ret
+
+        return _func
+    @classmethod
+    def __make_add(cls, func_name, attr_name, container_type):
+        doc = "Add %s to this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+
+        @docval({'name': attr_name, 'type': container_type, 'doc': 'the %s to add' % container_type.__name__},
                 func_name=func_name, doc=doc)
         def _func(self, **kwargs):
             ts = getargs(attr_name, kwargs)
@@ -291,32 +320,32 @@ class MultiTSInterface(NWBDataInterface):
         return _func
 
     @classmethod
-    def __make_create(cls, func_name, add_name, ts_type):
+    def __make_create(cls, func_name, add_name, container_type):
         doc = "Create %s and add it to this %s" % \
-                       (cls.__add_article(ts_type.__name__), cls.__name__)
+                       (cls.__add_article(container_type.__name__), cls.__name__)
 
-        @docval(*filter(_not_parent, get_docval(ts_type.__init__)), func_name=func_name, doc=doc,
-                returns="the %s object that was created" % ts_type.__name__, rtype=ts_type)
+        @docval(*filter(_not_parent, get_docval(container_type.__init__)), func_name=func_name, doc=doc,
+                returns="the %s object that was created" % container_type.__name__, rtype=container_type)
         def _func(self, **kwargs):
-            cargs, ckwargs = fmt_docval_args(ts_type.__init__, kwargs)
-            ret = ts_type(*cargs, **ckwargs)
+            cargs, ckwargs = fmt_docval_args(container_type.__init__, kwargs)
+            ret = container_type(*cargs, **ckwargs)
             getattr(self, add_name)(ret)
             return ret
         return _func
 
     @classmethod
-    def __make_constructor(cls, attr_name, add_name, ts_type):
+    def __make_constructor(cls, attr_name, add_name, container_type):
         @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-                {'name': attr_name, 'type': (list, dict, ts_type),
-                 'doc': '%s to store in this interface' % ts_type.__name__, 'default': dict()},
+                {'name': attr_name, 'type': (list, dict, container_type),
+                 'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()},
                 {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__},
                 func_name='__init__')
         def _func(self, **kwargs):
             source, ts = popargs('source', attr_name, kwargs)
-            super(MultiTSInterface, self).__init__(source, **kwargs)
+            super(MultiContainerInterface, self).__init__(source, **kwargs)
             setattr(self, attr_name, dict())
             add = getattr(self, add_name)
-            if isinstance(ts, ts_type):
+            if isinstance(ts, container_type):
                 add(ts)
             elif isinstance(ts, list):
                 for tmp in ts:
@@ -337,14 +366,35 @@ class MultiTSInterface(NWBDataInterface):
         if not isinstance(cls.__clsconf__, dict):
             raise TypeError("'__clsconf__' must be of type dict")
 
-        add = cls.__clsconf__['add']
-        create = cls.__clsconf__['create']
-        ts_attr = cls.__clsconf__['ts_attr']
-        ts_type = cls.__clsconf__['ts_type']
-        if not hasattr(cls, ts_attr):
-            getter = cls._getter(ts_attr)
-            doc = "a dictionary containing the %s in this %s" % (ts_type.__name__, cls.__name__)
-            setattr(cls, ts_attr, property(getter, cls._setter(ts_attr), None, doc))
-        setattr(cls, add, cls.__make_add(add, ts_attr, ts_type))
-        setattr(cls, create, cls.__make_create(create, add, ts_type))
-        setattr(cls, '__init__', cls.__make_constructor(ts_attr, add, ts_type))
+        # get add method name
+        add = cls.__clsconf__.get('add')
+        if add is None:
+            msg = "MultiContainerInterface subclass '%s' is missing 'add' key in __clsconf__" % cls.__name__
+            raise ValueError(msg)
+
+        # get container attribute name
+        attr = cls.__clsconf__.get('attr')
+        if attr is None:
+            msg = "MultiContainerInterface subclass '%s' is missing 'attr' key in __clsconf__" % cls.__name__
+            raise ValueError(msg)
+
+        # get container type
+        container_type = cls.__clsconf__.get('type')
+        if container_type is None:
+            msg = "MultiContainerInterface subclass '%s' is missing 'type' key in __clsconf__" % cls.__name__
+            raise ValueError(msg)
+        if not hasattr(cls, attr):
+            getter = cls._getter(attr)
+            doc = "a dictionary containing the %s in this %s container" % (container_type.__name__, cls.__name__)
+            setattr(cls, attr, property(getter, cls._setter(attr), None, doc))
+        setattr(cls, add, cls.__make_add(add, attr, container_type))
+        setattr(cls, '__init__', cls.__make_constructor(attr, add, container_type))
+
+        # get create method name
+        create = cls.__clsconf__.get('create')
+        if create is not None:
+            setattr(cls, create, cls.__make_create(create, add, container_type))
+
+        get = cls.__clsconf__.get('get')
+        if get is not None:
+            setattr(cls, get, cls.__make_get(get, attr, container_type))
