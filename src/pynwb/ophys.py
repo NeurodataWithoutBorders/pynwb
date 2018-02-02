@@ -207,12 +207,12 @@ class PlaneSegmentation(MultiContainerInterface):
                      'imaging_plane',
                      'reference_images')
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.'},
             {'name': 'imaging_plane', 'type': ImagingPlane,
              'doc': 'link to ImagingPlane group from which this TimeSeries data was generated.'},
+            {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None},
             {'name': 'roi', 'type': (Iterable, ROI), 'doc': 'List of ROIs in this imaging plane.',
              'default': list()},
             {'name': 'reference_images', 'type': ImageSeries, 'default': None,
@@ -220,6 +220,8 @@ class PlaneSegmentation(MultiContainerInterface):
     def __init__(self, **kwargs):
         description, roi, imaging_plane, reference_images = popargs(
             'description', 'roi', 'imaging_plane', 'reference_images', kwargs)
+        if kwargs.get('name') is None:
+            kwargs['name'] = imaging_plane.name
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
         super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
         self.description = description

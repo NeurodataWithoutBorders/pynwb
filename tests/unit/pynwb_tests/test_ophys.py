@@ -26,7 +26,7 @@ def CreatePlaneSegmentation():
         'test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
         'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
-    ps = PlaneSegmentation('name', 'test source', 'description', ip, roi_list, iSS)
+    ps = PlaneSegmentation('test source', 'description', ip, 'name', roi_list, iSS)
     return ps
 
 
@@ -122,7 +122,7 @@ class ImageSegmentationConstructor(unittest.TestCase):
         ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', 'device', 'excitation_lambda',
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
-        ps = PlaneSegmentation('name', 'test source', 'description', ip, rois, iSS)
+        ps = PlaneSegmentation('test source', 'description', ip, 'name', rois, iSS)
 
         iS = ImageSegmentation('test_source', ps, name='test_iS')
         self.assertEqual(iS.name, 'test_iS')
@@ -148,7 +148,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
-        iS = PlaneSegmentation('test_name', 'test source', 'description', ip, rois.values(), iSS)
+        iS = PlaneSegmentation('test source', 'description', ip, 'test_name', rois.values(), iSS)
         self.assertEqual(iS.description, 'description')
         self.assertEqual(iS.source, 'test source')
         self.assertEqual(iS.roi, rois)
