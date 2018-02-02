@@ -151,7 +151,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         iS = PlaneSegmentation('test_name', 'test source', 'description', ip, rois.values(), iSS)
         self.assertEqual(iS.description, 'description')
         self.assertEqual(iS.source, 'test source')
-        self.assertEqual(iS.rois, rois)
+        self.assertEqual(iS.roi, rois)
         self.assertEqual(iS.imaging_plane, ip)
         self.assertEqual(iS.reference_images, iSS)
 
