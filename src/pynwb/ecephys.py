@@ -252,6 +252,7 @@ class EventWaveform(MultiContainerInterface):
         'attr': 'spike_event_series',
         'type': SpikeEventSeries,
         'add': 'add_spike_event_series',
+        'get': 'get_spike_event_series',
         'create': 'create_spike_event_series'
     }
 
@@ -342,6 +343,7 @@ class LFP(MultiContainerInterface):
         'attr': 'electrical_series',
         'type': ElectricalSeries,
         'add': 'add_electrical_series',
+        'get': 'get_electrical_series',
         'create': 'create_electrical_series',
         'get': 'get_electrical_series'
     }
@@ -371,6 +373,7 @@ class FilteredEphys(MultiContainerInterface):
         'attr': 'electrical_series',
         'type': ElectricalSeries,
         'add': 'add_electrical_series',
+        'get': 'get_electrical_series',
         'create': 'create_electrical_series'
     }
 

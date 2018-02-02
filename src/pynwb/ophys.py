@@ -315,6 +315,7 @@ class DfOverF(MultiContainerInterface):
         'attr': 'roi_response_series',
         'type': RoiResponseSeries,
         'add': 'add_roi_response_series',
+        'get': 'get_roi_response_series',
         'create': 'create_roi_response_series'
     }
 
@@ -332,6 +333,7 @@ class Fluorescence(MultiContainerInterface):
         'attr': 'roi_response_series',
         'type': RoiResponseSeries,
         'add': 'add_roi_response_series',
+        'get': 'get_roi_response_series',
         'create': 'create_roi_response_series'
     }
 

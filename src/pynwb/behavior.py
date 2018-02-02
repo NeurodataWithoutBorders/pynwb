@@ -83,6 +83,7 @@ class BehavioralEpochs(MultiContainerInterface):
 
     __clsconf__ = {
         'add': 'add_interval_series',
+        'get': 'get_interval_series',
         'create': 'create_interval_series',
         'type': IntervalSeries,
         'attr': 'interval_series'
@@ -99,6 +100,7 @@ class BehavioralEvents(MultiContainerInterface):
 
     __clsconf__ = {
         'add': 'add_timeseries',
+        'get': 'get_timeseries',
         'create': 'create_timeseries',
         'type': TimeSeries,
         'attr': 'timeseries'
@@ -116,6 +118,7 @@ class BehavioralTimeSeries(MultiContainerInterface):
 
     __clsconf__ = {
         'add': 'add_timeseries',
+        'get': 'get_timeseries',
         'create': 'create_timeseries',
         'type': TimeSeries,
         'attr': 'timeseries'
@@ -130,6 +133,7 @@ class PupilTracking(MultiContainerInterface):
 
     __clsconf__ = {
         'add': 'add_timeseries',
+        'get': 'get_timeseries',
         'create': 'create_timeseries',
         'type': TimeSeries,
         'attr': 'timeseries'
@@ -144,6 +148,7 @@ class EyeTracking(MultiContainerInterface):
 
     __clsconf__ = {
         'add': 'add_spatial_series',
+        'get': 'get_spatial_series',
         'create': 'create_spatial_series',
         'type': SpatialSeries,
         'attr': 'spatial_series'
@@ -163,6 +168,7 @@ class CompassDirection(MultiContainerInterface):
 
     __clsconf__ = {
         'add': 'add_spatial_series',
+        'get': 'get_spatial_series',
         'create': 'create_spatial_series',
         'type': SpatialSeries,
         'attr': 'spatial_series'
@@ -180,6 +186,7 @@ class Position(MultiContainerInterface):
 
     __clsconf__ = {
         'add': 'add_spatial_series',
+        'get': 'get_spatial_series',
         'create': 'create_spatial_series',
         'type': SpatialSeries,
         'attr': 'spatial_series'
@@ -228,6 +235,7 @@ class MotionCorrection(MultiContainerInterface):
 
     __clsconf__ = {
         'add': 'add_corrected_image_stack',
+        'get': 'get_corrected_image_stack',
         'create': 'create_corrected_image_stack',
         'type': CorrectedImageStack,
         'attr': 'corrected_images_stacks'
