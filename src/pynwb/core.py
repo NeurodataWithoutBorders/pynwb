@@ -278,7 +278,6 @@ class MultiContainerInterface(NWBDataInterface):
     def __make_get(cls, func_name, attr_name, container_type):
         doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
 
-
         @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
                  'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
                 func_name=func_name, doc=doc)
@@ -303,6 +302,7 @@ class MultiContainerInterface(NWBDataInterface):
             return ret
 
         return _func
+
     @classmethod
     def __make_add(cls, func_name, attr_name, container_type):
         doc = "Add %s to this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
