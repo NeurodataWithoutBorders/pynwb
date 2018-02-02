@@ -192,12 +192,18 @@ class ROI(NWBContainer):
 
 
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
-class PlaneSegmentation(NWBContainer):
+class PlaneSegmentation(MultiContainerInterface):
     """
     """
+    __clsconf__ = {
+        'attr': 'roi',
+        'type': ROI,
+        'add': 'add_roi',
+        'get': 'get_roi',
+        'create': 'create_roi'
+    }
 
     __nwbfields__ = ('description',
-                     'roi_list',
                      'imaging_plane',
                      'reference_images')
 
@@ -205,24 +211,27 @@ class PlaneSegmentation(NWBContainer):
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.'},
-            {'name': 'roi_list', 'type': (Iterable, ROI), 'doc': 'List of ROIs in this imaging plane.'},
             {'name': 'imaging_plane', 'type': ImagingPlane,
              'doc': 'link to ImagingPlane group from which this TimeSeries data was generated.'},
-            {'name': 'reference_images', 'type': ImageSeries,
+            {'name': 'roi', 'type': (Iterable, ROI), 'doc': 'List of ROIs in this imaging plane.',
+             'default': list()},
+            {'name': 'reference_images', 'type': ImageSeries, 'default': None,
              'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
     def __init__(self, **kwargs):
-        description, roi_list, imaging_plane, reference_images = popargs(
-            'description', 'roi_list', 'imaging_plane', 'reference_images', kwargs)
+        description, roi, imaging_plane, reference_images = popargs(
+            'description', 'roi', 'imaging_plane', 'reference_images', kwargs)
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
         super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
         self.description = description
-        self.roi_list = roi_list
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
+        self.roi = dict()
+        for roi in roi:
+            self.add_roi(roi)
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
-class ImageSegmentation(NWBDataInterface):
+class ImageSegmentation(MultiContainerInterface):
     """
     Stores pixels in an image that represent different regions of interest (ROIs) or masks. All
     segmentation for a given imaging plane is stored together, with storage for multiple imaging
@@ -231,25 +240,15 @@ class ImageSegmentation(NWBDataInterface):
     used for masking neuropil. If segmentation is allowed to change with time, a new imaging plane
     (or module) is required and ROI names should remain consistent between them.
     """
-
-    __nwbfields__ = ('plane_segmentations',)
+    __clsconf__ = {
+        'attr': 'plane_segmentations',
+        'type': PlaneSegmentation,
+        'add': 'add_plane_segmentation',
+        'get': 'get_plane_segmentation',
+        'create': 'create_plane_segmentation'
+    }
 
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
-
-    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'plane_segmentations', 'type': (PlaneSegmentation, list),
-             'doc': 'PlaneSegmentation with the description of the image plane.'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this ImageSegmentation container',
-             'default': 'ImageSegmentation'})
-    def __init__(self, **kwargs):
-        plane_segmentations = popargs('plane_segmentations', kwargs)
-
-        if isinstance(plane_segmentations, PlaneSegmentation):
-            plane_segmentations = [plane_segmentations]
-
-        pargs, pkwargs = fmt_docval_args(super(ImageSegmentation, self).__init__, kwargs)
-        super(ImageSegmentation, self).__init__(*pargs, **pkwargs)
-        self.plane_segmentations = plane_segmentations
 
 
 @register_class('RoiResponseSeries', CORE_NAMESPACE)
