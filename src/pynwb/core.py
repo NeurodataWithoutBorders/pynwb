@@ -393,7 +393,8 @@ class MultiContainerInterface(NWBDataInterface):
             doc = "a dictionary containing the %s in this %s container" % (container_type.__name__, cls.__name__)
             setattr(cls, attr, property(getter, cls._setter(attr), None, doc))
         setattr(cls, add, cls.__make_add(add, attr, container_type))
-        setattr(cls, '__init__', cls.__make_constructor(attr, add, container_type))
+        if cls.__init__ is MultiContainerInterface.__init__:
+            setattr(cls, '__init__', cls.__make_constructor(attr, add, container_type))
 
         # get create method name
         create = cls.__clsconf__.get('create')
