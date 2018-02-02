@@ -3,7 +3,7 @@ from collections import Iterable
 from .form.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer, MultiTSInterface
+from .core import NWBContainer, MultiContainerInterface
 from .misc import IntervalSeries
 from .base import TimeSeries, _default_conversion, _default_resolution
 from .image import ImageSeries
@@ -67,7 +67,7 @@ class SpatialSeries(TimeSeries):
 
 
 @register_class('BehavioralEpochs', CORE_NAMESPACE)
-class BehavioralEpochs(MultiTSInterface):
+class BehavioralEpochs(MultiContainerInterface):
     """
     TimeSeries for storing behavoioral epochs. The objective of this and the other two Behavioral
     interfaces (e.g. BehavioralEvents and BehavioralTimeSeries) is to provide generic hooks for
@@ -84,13 +84,13 @@ class BehavioralEpochs(MultiTSInterface):
     __clsconf__ = {
         'add': 'add_interval_series',
         'create': 'create_interval_series',
-        'ts_type': IntervalSeries,
-        'ts_attr': 'interval_series'
+        'type': IntervalSeries,
+        'attr': 'interval_series'
     }
 
 
 @register_class('BehavioralEvents', CORE_NAMESPACE)
-class BehavioralEvents(MultiTSInterface):
+class BehavioralEvents(MultiContainerInterface):
     """
     TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
     """
@@ -100,13 +100,13 @@ class BehavioralEvents(MultiTSInterface):
     __clsconf__ = {
         'add': 'add_timeseries',
         'create': 'create_timeseries',
-        'ts_type': TimeSeries,
-        'ts_attr': 'timeseries'
+        'type': TimeSeries,
+        'attr': 'timeseries'
     }
 
 
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)
-class BehavioralTimeSeries(MultiTSInterface):
+class BehavioralTimeSeries(MultiContainerInterface):
     """
     TimeSeries for storing Behavoioral time series data. See description of BehavioralEpochs for
     more details.
@@ -117,13 +117,13 @@ class BehavioralTimeSeries(MultiTSInterface):
     __clsconf__ = {
         'add': 'add_timeseries',
         'create': 'create_timeseries',
-        'ts_type': TimeSeries,
-        'ts_attr': 'timeseries'
+        'type': TimeSeries,
+        'attr': 'timeseries'
     }
 
 
 @register_class('PupilTracking', CORE_NAMESPACE)
-class PupilTracking(MultiTSInterface):
+class PupilTracking(MultiContainerInterface):
     """
     Eye-tracking data, representing pupil size.
     """
@@ -131,13 +131,13 @@ class PupilTracking(MultiTSInterface):
     __clsconf__ = {
         'add': 'add_timeseries',
         'create': 'create_timeseries',
-        'ts_type': TimeSeries,
-        'ts_attr': 'timeseries'
+        'type': TimeSeries,
+        'attr': 'timeseries'
     }
 
 
 @register_class('EyeTracking', CORE_NAMESPACE)
-class EyeTracking(MultiTSInterface):
+class EyeTracking(MultiContainerInterface):
     """
     Eye-tracking data, representing direction of gaze.
     """
@@ -145,15 +145,15 @@ class EyeTracking(MultiTSInterface):
     __clsconf__ = {
         'add': 'add_spatial_series',
         'create': 'create_spatial_series',
-        'ts_type': SpatialSeries,
-        'ts_attr': 'spatial_series'
+        'type': SpatialSeries,
+        'attr': 'spatial_series'
     }
 
     _help = "Eye-tracking data, representing direction of gaze"
 
 
 @register_class('CompassDirection', CORE_NAMESPACE)
-class CompassDirection(MultiTSInterface):
+class CompassDirection(MultiContainerInterface):
     """
     With a CompassDirection interface, a module publishes a SpatialSeries object representing a
     floating point value for theta. The SpatialSeries::reference_frame field should indicate what
@@ -164,8 +164,8 @@ class CompassDirection(MultiTSInterface):
     __clsconf__ = {
         'add': 'add_spatial_series',
         'create': 'create_spatial_series',
-        'ts_type': SpatialSeries,
-        'ts_attr': 'spatial_series'
+        'type': SpatialSeries,
+        'attr': 'spatial_series'
     }
 
     _help = "Direction as measured radially. Spatial series reference frame \
@@ -173,7 +173,7 @@ class CompassDirection(MultiTSInterface):
 
 
 @register_class('Position', CORE_NAMESPACE)
-class Position(MultiTSInterface):
+class Position(MultiContainerInterface):
     """
     Position data, whether along the x, x/y or x/y/z axis.
     """
@@ -181,8 +181,8 @@ class Position(MultiTSInterface):
     __clsconf__ = {
         'add': 'add_spatial_series',
         'create': 'create_spatial_series',
-        'ts_type': SpatialSeries,
-        'ts_attr': 'spatial_series'
+        'type': SpatialSeries,
+        'attr': 'spatial_series'
     }
 
     _help = "Position data, whether along the x, xy or xyz axis"
@@ -221,7 +221,7 @@ class CorrectedImageStack(NWBContainer):
 
 
 @register_class('MotionCorrection', CORE_NAMESPACE)
-class MotionCorrection(MultiTSInterface):
+class MotionCorrection(MultiContainerInterface):
     """
     A collection of corrected images stacks.
     """
@@ -229,8 +229,8 @@ class MotionCorrection(MultiTSInterface):
     __clsconf__ = {
         'add': 'add_corrected_image_stack',
         'create': 'create_corrected_image_stack',
-        'ts_type': CorrectedImageStack,
-        'ts_attr': 'corrected_images_stacks'
+        'type': CorrectedImageStack,
+        'attr': 'corrected_images_stacks'
     }
 
     _help = "Image stacks whose frames have been shifted (registered) to account for motion."

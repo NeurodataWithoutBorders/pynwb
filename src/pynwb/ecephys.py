@@ -7,7 +7,7 @@ from .form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, NWBTable, NWBTableRegion, NWBDataInterface, MultiTSInterface
+from .core import NWBContainer, NWBTable, NWBTableRegion, NWBDataInterface, MultiContainerInterface
 
 
 @register_class('Device', CORE_NAMESPACE)
@@ -242,15 +242,15 @@ class EventDetection(NWBDataInterface):
 
 
 @register_class('EventWaveform', CORE_NAMESPACE)
-class EventWaveform(MultiTSInterface):
+class EventWaveform(MultiContainerInterface):
     """
     Spike data for spike events detected in raw data
     stored in this NWBFile, or events detect at acquisition
     """
 
     __clsconf__ = {
-        'ts_attr': 'spike_event_series',
-        'ts_type': SpikeEventSeries,
+        'attr': 'spike_event_series',
+        'type': SpikeEventSeries,
         'add': 'add_spike_event_series',
         'create': 'create_spike_event_series'
     }
@@ -331,7 +331,7 @@ class ClusterWaveforms(NWBDataInterface):
 
 
 @register_class('LFP', CORE_NAMESPACE)
-class LFP(MultiTSInterface):
+class LFP(MultiContainerInterface):
     """
     LFP data from one or more channels. The electrode map in each published ElectricalSeries will
     identify which channels are providing LFP data. Filter properties should be noted in the
@@ -339,10 +339,11 @@ class LFP(MultiTSInterface):
     """
 
     __clsconf__ = {
-        'ts_attr': 'electrical_series',
-        'ts_type': ElectricalSeries,
+        'attr': 'electrical_series',
+        'type': ElectricalSeries,
         'add': 'add_electrical_series',
-        'create': 'create_electrical_series'
+        'create': 'create_electrical_series',
+        'get': 'get_electrical_series'
     }
 
     __help = ("LFP data from one or more channels. Filter properties "
@@ -350,7 +351,7 @@ class LFP(MultiTSInterface):
 
 
 @register_class('FilteredEphys', CORE_NAMESPACE)
-class FilteredEphys(MultiTSInterface):
+class FilteredEphys(MultiContainerInterface):
     """
     Ephys data from one or more channels that has been subjected to filtering. Examples of filtered
     data include Theta and Gamma (LFP has its own interface). FilteredEphys modules publish an
@@ -367,8 +368,8 @@ class FilteredEphys(MultiTSInterface):
               "be noted in the ElectricalSeries")
 
     __clsconf__ = {
-        'ts_attr': 'electrical_series',
-        'ts_type': ElectricalSeries,
+        'attr': 'electrical_series',
+        'type': ElectricalSeries,
         'add': 'add_electrical_series',
         'create': 'create_electrical_series'
     }

@@ -6,7 +6,7 @@ from .form.utils import docval, popargs, fmt_docval_args
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, NWBDataInterface, MultiTSInterface
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -305,15 +305,15 @@ class RoiResponseSeries(TimeSeries):
 
 
 @register_class('DfOverF', CORE_NAMESPACE)
-class DfOverF(MultiTSInterface):
+class DfOverF(MultiContainerInterface):
     """
     dF/F information about a region of interest (ROI). Storage hierarchy of dF/F should be the same
     as for segmentation (ie, same names for ROIs and for image planes).
     """
 
     __clsconf__ = {
-        'ts_attr': 'roi_response_series',
-        'ts_type': RoiResponseSeries,
+        'attr': 'roi_response_series',
+        'type': RoiResponseSeries,
         'add': 'add_roi_response_series',
         'create': 'create_roi_response_series'
     }
@@ -322,15 +322,15 @@ class DfOverF(MultiTSInterface):
 
 
 @register_class('Fluorescence', CORE_NAMESPACE)
-class Fluorescence(MultiTSInterface):
+class Fluorescence(MultiContainerInterface):
     """
     Fluorescence information about a region of interest (ROI). Storage hierarchy of fluorescence
     should be the same as for segmentation (ie, same names for ROIs and for image planes).
     """
 
     __clsconf__ = {
-        'ts_attr': 'roi_response_series',
-        'ts_type': RoiResponseSeries,
+        'attr': 'roi_response_series',
+        'type': RoiResponseSeries,
         'add': 'add_roi_response_series',
         'create': 'create_roi_response_series'
     }
