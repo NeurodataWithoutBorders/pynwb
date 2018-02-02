@@ -254,16 +254,21 @@ class NWBTableRegion(NWBData, DataRegion):
 class MultiContainerInterface(NWBDataInterface):
     '''
     A class for dynamically defining a API classes that
-    represent NWBDataInterfaces that contain multiple TimeSeries
+    represent NWBDataInterfaces that contain multiple Containers
     of the same type
 
     To use, extend this class, and create a dictionary as a class
     attribute with the following keys:
 
-    'add' to name the method for adding TimeSeries instances
-    'create' to name the method fo creating TimeSeries instances
-    'attr' to name the attribute that stores the TimeSeries instances
-    'type' to provide the TimeSeries object type
+    * 'add' to name the method for adding Container instances
+
+    * 'create' to name the method fo creating Container instances
+
+    * 'get' to name the method for getting Container instances
+
+    * 'attr' to name the attribute that stores the Container instances
+
+    * 'type' to provide the Container object type
 
     See LFP or Position for an example of how to use this.
     '''
