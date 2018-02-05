@@ -60,17 +60,17 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         return nwbfile.get_imaging_plane(self.container.name)
 
 
-def make_imaging_plane(self, source):
-    self.optical_channel = OpticalChannel('optchan1', source, 'a fake OpticalChannel', '3.14')
-    self.imaging_plane = ImagingPlane('imgpln1', source, self.optical_channel,
-                                      'a fake ImagingPlane',
-                                      'imaging_device_1', '6.28', '2.718', 'GFP', 'somewhere in the brain')
 
+class TestTwoPhotonSeries(base.TestDataInterfaceIO):
 
-class TestTwoPhotonSeries(base.TestMapRoundTrip):
+    def make_imaging_plane(self, source):
+        self.optical_channel = OpticalChannel('optchan1', source, 'a fake OpticalChannel', '3.14')
+        self.imaging_plane = ImagingPlane('imgpln1', source, self.optical_channel,
+                                          'a fake ImagingPlane',
+                                          'imaging_device_1', '6.28', '2.718', 'GFP', 'somewhere in the brain')
 
     def setUpContainer(self):
-        make_imaging_plane(self, 'unit test TestTwoPhotonSeries')
+        self.make_imaging_plane('unit test TestTwoPhotonSeries')
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
         fov = [2.0, 2.0, 5.0]
@@ -116,6 +116,8 @@ class TestTwoPhotonSeries(base.TestMapRoundTrip):
             'test_2ps',
             attributes={
                 'source': 'unit test TestTwoPhotonSeries',
+                'pmt_gain':  1.7,
+                'scan_line_rate':  3.4,
                 'namespace': base.CORE_NAMESPACE,
                 'comments': 'no comments',
                 'description': 'no description',
@@ -134,8 +136,6 @@ class TestTwoPhotonSeries(base.TestMapRoundTrip):
                 'format': DatasetBuilder('format', 'raw'),
                 'dimension': DatasetBuilder('dimension', [2]),
                 'field_of_view': DatasetBuilder('field_of_view', [2.0, 2.0, 5.0]),
-                'pmt_gain': DatasetBuilder('pmt_gain', 1.7),
-                'scan_line_rate': DatasetBuilder('scan_line_rate', 3.4),
             },
             links={
                 'imaging_plane': LinkBuilder('imaging_plane', imgpln_builder)
