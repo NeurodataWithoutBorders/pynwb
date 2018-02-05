@@ -5,7 +5,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer
+from .core import NWBContainer, NWBDataInterface
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -215,7 +215,7 @@ class SpikeUnit(NWBContainer):
 
 
 @register_class('UnitTimes', CORE_NAMESPACE)
-class UnitTimes(NWBContainer):
+class UnitTimes(NWBDataInterface):
     """
     Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group contains a group
     for each unit. The name of the group should match the value in the source module, if that is
