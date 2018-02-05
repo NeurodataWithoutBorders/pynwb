@@ -1,9 +1,41 @@
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder
 
 from pynwb.ecephys import *  # noqa: F403
+from pynwb.misc import UnitTimes, SpikeUnit
 
 from . import base
 
+
+class TestUnitTimesIO(base.TestDataInterfaceIO):
+
+    def setUpContainer(self):
+        self.spike_unit1 = SpikeUnit('unit1', [0,1,2], 'spike unit1 description', 'spike units source')
+        self.spike_unit2 = SpikeUnit('unit2', [3,4,5], 'spike unit2 description', 'spike units source')
+        return UnitTimes('unit times source', [self.spike_unit1, self.spike_unit2], name='UnitTimesTest')
+
+    def setUpBuilder(self):
+        su1_builder = GroupBuilder('unit1',
+                                   datasets={'times': DatasetBuilder('times', [0,1,2])},
+                                   attributes={'neurodata_type': 'SpikeUnit',
+                                               'namespace': 'core',
+                                               'unit_description': 'spike unit1 description',
+                                               'help': 'Times for a particular UnitTime object',
+                                               'source': 'spike units source'})
+
+        su2_builder = GroupBuilder('unit2',
+                                   datasets={'times': DatasetBuilder('times', [3,4,5])},
+                                   attributes={'neurodata_type': 'SpikeUnit',
+                                               'namespace': 'core',
+                                               'unit_description': 'spike unit2 description',
+                                               'help': 'Times for a particular UnitTime object',
+                                               'source': 'spike units source'})
+
+        return GroupBuilder('UnitTimesTest',
+                            attributes={'neurodata_type': 'UnitTimes',
+                                        'namespace': 'core',
+                                        'help': 'Estimated spike times from a single unit',
+                                        'source': 'unit times source'},
+                            groups={'unit1': su1_builder, 'unit2': su2_builder})
 
 class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
@@ -41,21 +73,26 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
         return nwbfile.get_electrode_group(self.container.name)
 
 
-def make_electrode_table(self):
-    self.table = ElectrodeTable('electrodes')  # noqa: F405
-    self.dev1 = Device('dev1', 'a test source')  # noqa: F405
-    self.group = ElectrodeGroup('tetrode1', 'a test source',  # noqa: F405
-                                'tetrode description', 'tetrode location', self.dev1)
-    self.table.add_row(1, 1.0, 2.0, 3.0, -1.0, 'CA1', 'none', 'first channel of tetrode', self.group)
-    self.table.add_row(2, 1.0, 2.0, 3.0, -2.0, 'CA1', 'none', 'second channel of tetrode', self.group)
-    self.table.add_row(3, 1.0, 2.0, 3.0, -3.0, 'CA1', 'none', 'third channel of tetrode', self.group)
-    self.table.add_row(4, 1.0, 2.0, 3.0, -4.0, 'CA1', 'none', 'fourth channel of tetrode', self.group)
+class TestElectricalSeriesIO(base.TestDataInterfaceIO):
 
+    def make_electrode_table(self):
+        self.table = ElectrodeTable('electrodes')  # noqa: F405
+        self.dev1 = Device('dev1', 'a test source')  # noqa: F405
+        self.group = ElectrodeGroup('tetrode1', 'a test source',  # noqa: F405
+                                    'tetrode description', 'tetrode location', self.dev1)
+        self.table.add_row(1, 1.0, 2.0, 3.0, -1.0, 'CA1', 'none', 'first channel of tetrode', self.group)
+        self.table.add_row(2, 1.0, 2.0, 3.0, -2.0, 'CA1', 'none', 'second channel of tetrode', self.group)
+        self.table.add_row(3, 1.0, 2.0, 3.0, -3.0, 'CA1', 'none', 'third channel of tetrode', self.group)
+        self.table.add_row(4, 1.0, 2.0, 3.0, -4.0, 'CA1', 'none', 'fourth channel of tetrode', self.group)
 
-class TestElectricalSeriesIO(base.TestMapRoundTrip):
+    def get_table_builder(self):
+        return DatasetBuilder('electrodes', self.table.data,
+                              attributes={'neurodata_type': 'ElectrodeTable',
+                                          'namespace': 'core',
+                                          'help': 'a table for storing data about extracellular electrodes'})
 
     def setUpContainer(self):
-        make_electrode_table(self)
+        self.make_electrode_table()
         region = ElectrodeTableRegion(self.table, [0, 2], 'the first and third electrodes')  # noqa: F405
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
@@ -63,16 +100,7 @@ class TestElectricalSeriesIO(base.TestMapRoundTrip):
         return ret
 
     def setUpBuilder(self):
-        device_builder = GroupBuilder('dev1',  # noqa: F841
-                                      attributes={'neurodata_type': 'Device',
-                                                  'namespace': 'core',
-                                                  'help': 'A recording device e.g. amplifier',
-                                                  'source': 'a test source'})
-
-        table_builder = DatasetBuilder('electrodes', self.table.data,
-                                       attributes={'neurodata_type': 'ElectrodeTable',
-                                                   'namespace': 'core',
-                                                   'help': 'a table for storing data about extracellular electrodes'})
+        table_builder = self.get_table_builder()
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
         return GroupBuilder('test_eS',
@@ -100,18 +128,13 @@ class TestElectricalSeriesIO(base.TestMapRoundTrip):
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
-        # TODO: this might need to do somethign to add the electrode table
         nwbfile.set_device(self.dev1)
         nwbfile.set_electrode_group(self.group)
         nwbfile.set_electrode_table(self.table)
         nwbfile.add_acquisition(self.container)
 
-    def getContainer(self, nwbfile):
-        ''' Should take an NWBFile object and return the Container'''
-        return nwbfile.get_acquisition(self.container.name)
 
-
-class TestClusteringIO(base.TestMapRoundTrip):
+class TestClusteringIO(base.TestDataInterfaceIO):
 
     def setUpBuilder(self):
         return GroupBuilder('Clustering',
