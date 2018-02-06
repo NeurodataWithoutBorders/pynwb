@@ -9,13 +9,13 @@ from . import base
 class TestUnitTimesIO(base.TestDataInterfaceIO):
 
     def setUpContainer(self):
-        self.spike_unit1 = SpikeUnit('unit1', [0,1,2], 'spike unit1 description', 'spike units source')
-        self.spike_unit2 = SpikeUnit('unit2', [3,4,5], 'spike unit2 description', 'spike units source')
+        self.spike_unit1 = SpikeUnit('unit1', [0, 1, 2], 'spike unit1 description', 'spike units source')
+        self.spike_unit2 = SpikeUnit('unit2', [3, 4, 5], 'spike unit2 description', 'spike units source')
         return UnitTimes('unit times source', [self.spike_unit1, self.spike_unit2], name='UnitTimesTest')
 
     def setUpBuilder(self):
         su1_builder = GroupBuilder('unit1',
-                                   datasets={'times': DatasetBuilder('times', [0,1,2])},
+                                   datasets={'times': DatasetBuilder('times', [0, 1, 2])},
                                    attributes={'neurodata_type': 'SpikeUnit',
                                                'namespace': 'core',
                                                'unit_description': 'spike unit1 description',
@@ -23,7 +23,7 @@ class TestUnitTimesIO(base.TestDataInterfaceIO):
                                                'source': 'spike units source'})
 
         su2_builder = GroupBuilder('unit2',
-                                   datasets={'times': DatasetBuilder('times', [3,4,5])},
+                                   datasets={'times': DatasetBuilder('times', [3, 4, 5])},
                                    attributes={'neurodata_type': 'SpikeUnit',
                                                'namespace': 'core',
                                                'unit_description': 'spike unit2 description',
@@ -36,6 +36,7 @@ class TestUnitTimesIO(base.TestDataInterfaceIO):
                                         'help': 'Estimated spike times from a single unit',
                                         'source': 'unit times source'},
                             groups={'unit1': su1_builder, 'unit2': su2_builder})
+
 
 class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
