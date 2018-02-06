@@ -60,7 +60,6 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         return nwbfile.get_imaging_plane(self.container.name)
 
 
-
 class TestTwoPhotonSeries(base.TestDataInterfaceIO):
 
     def make_imaging_plane(self, source):
