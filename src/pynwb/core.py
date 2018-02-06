@@ -312,16 +312,21 @@ class MultiContainerInterface(NWBDataInterface):
     def __make_add(cls, func_name, attr_name, container_type):
         doc = "Add %s to this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
 
-        @docval({'name': attr_name, 'type': container_type, 'doc': 'the %s to add' % container_type.__name__},
+        @docval({'name': attr_name, 'type': (list, tuple, dict, container_type), 'doc': 'the %s to add' % container_type.__name__},
                 func_name=func_name, doc=doc)
         def _func(self, **kwargs):
-            ts = getargs(attr_name, kwargs)
-            ts.parent = self
+            container = getargs(attr_name, kwargs)
+            if isinstance(container, container_type):
+                container = [container,]
+            elif isinstance(container, dict):
+                container = container.values()
             d = getattr(self, attr_name)
-            if ts.name in d:
-                msg = "'%s' already exists" % ts.name
-                raise ValueError(msg)
-            d[ts.name] = ts
+            for tmp in container:
+                tmp.parent = self
+                if tmp.name in d:
+                    msg = "'%s' already exists in '%s'" % (tmp.name, self.name)
+                    raise ValueError(msg)
+                d[tmp.name] = tmp
         return _func
 
     @classmethod
@@ -341,23 +346,16 @@ class MultiContainerInterface(NWBDataInterface):
     @classmethod
     def __make_constructor(cls, attr_name, add_name, container_type):
         @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-                {'name': attr_name, 'type': (list, dict, container_type),
+                {'name': attr_name, 'type': (list, tuple, dict, container_type),
                  'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()},
                 {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__},
                 func_name='__init__')
         def _func(self, **kwargs):
-            source, ts = popargs('source', attr_name, kwargs)
+            source, container = popargs('source', attr_name, kwargs)
             super(MultiContainerInterface, self).__init__(source, **kwargs)
             setattr(self, attr_name, dict())
             add = getattr(self, add_name)
-            if isinstance(ts, container_type):
-                add(ts)
-            elif isinstance(ts, list):
-                for tmp in ts:
-                    add(tmp)
-            else:
-                for tmp in ts.values():
-                    add(tmp)
+            add(container)
         return _func
 
     @ExtenderMeta.pre_init
