@@ -312,12 +312,13 @@ class MultiContainerInterface(NWBDataInterface):
     def __make_add(cls, func_name, attr_name, container_type):
         doc = "Add %s to this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
 
-        @docval({'name': attr_name, 'type': (list, tuple, dict, container_type), 'doc': 'the %s to add' % container_type.__name__},
+        @docval({'name': attr_name, 'type': (list, tuple, dict, container_type),
+                 'doc': 'the %s to add' % container_type.__name__},
                 func_name=func_name, doc=doc)
         def _func(self, **kwargs):
             container = getargs(attr_name, kwargs)
             if isinstance(container, container_type):
-                container = [container,]
+                container = [container]
             elif isinstance(container, dict):
                 container = container.values()
             d = getattr(self, attr_name)
