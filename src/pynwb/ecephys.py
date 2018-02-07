@@ -7,7 +7,7 @@ from .form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, set_parents, NWBTable, NWBTableRegion
+from .core import NWBContainer, NWBTable, NWBTableRegion, NWBDataInterface, MultiContainerInterface
 
 
 @register_class('Device', CORE_NAMESPACE)
@@ -204,7 +204,7 @@ class SpikeEventSeries(ElectricalSeries):
 
 
 @register_class('EventDetection', CORE_NAMESPACE)
-class EventDetection(NWBContainer):
+class EventDetection(NWBDataInterface):
     """
     Detected spike events from voltage trace(s).
     """
@@ -242,37 +242,37 @@ class EventDetection(NWBContainer):
 
 
 @register_class('EventWaveform', CORE_NAMESPACE)
-class EventWaveform(NWBContainer):
+class EventWaveform(MultiContainerInterface):
     """
     Spike data for spike events detected in raw data
     stored in this NWBFile, or events detect at acquisition
     """
 
-    __nwbfields__ = ('spike_event_series',)
+    __clsconf__ = {
+        'attr': 'spike_event_series',
+        'type': SpikeEventSeries,
+        'add': 'add_spike_event_series',
+        'get': 'get_spike_event_series',
+        'create': 'create_spike_event_series'
+    }
 
     __help = "Waveform of detected extracellularly recorded spike events"
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'spike_event_series', 'type': (list, SpikeEventSeries), 'doc': 'spiking event data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventWaveform'})
-    def __init__(self, **kwargs):
-        source, spike_event_series = popargs('source', 'spike_event_series', kwargs)
-        super(EventWaveform, self).__init__(source, **kwargs)
-        self.spike_event_series = set_parents(spike_event_series, self)
-
 
 @register_class('Clustering', CORE_NAMESPACE)
-class Clustering(NWBContainer):
+class Clustering(NWBDataInterface):
     """
     Specifies cluster event times and cluster metric for maximum ratio of
     waveform peak to RMS on any channel in cluster.
     """
 
-    __nwbfields_ = ('cluster_nums',
-                    'description',
-                    'num',
-                    'peak_over_rms',
-                    'times')
+    __nwbfields__ = (
+        'cluster_nums',
+        'description',
+        'num',
+        'peak_over_rms',
+        'times'
+    )
 
     __help = ("Clustered spike data, whether from automatic clustering "
               "tools (eg, klustakwik) or as a result of manual sorting.")
@@ -299,7 +299,7 @@ class Clustering(NWBContainer):
 
 
 @register_class('ClusterWaveforms', CORE_NAMESPACE)
-class ClusterWaveforms(NWBContainer):
+class ClusterWaveforms(NWBDataInterface):
     """
     Describe cluster waveforms by mean and standard deviation for at each sample.
     """
@@ -332,30 +332,28 @@ class ClusterWaveforms(NWBContainer):
 
 
 @register_class('LFP', CORE_NAMESPACE)
-class LFP(NWBContainer):
+class LFP(MultiContainerInterface):
     """
     LFP data from one or more channels. The electrode map in each published ElectricalSeries will
     identify which channels are providing LFP data. Filter properties should be noted in the
     ElectricalSeries description or comments field.
     """
 
-    __nwbfields__ = ('electrical_series',)
+    __clsconf__ = {
+        'attr': 'electrical_series',
+        'type': ElectricalSeries,
+        'add': 'add_electrical_series',
+        'get': 'get_electrical_series',
+        'create': 'create_electrical_series',
+        'get': 'get_electrical_series'
+    }
 
     __help = ("LFP data from one or more channels. Filter properties "
               "should be noted in the ElectricalSeries")
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'LFP electrophysiology data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'LFP'})
-    def __init__(self, **kwargs):
-        source, electrical_series = popargs('source', 'electrical_series', kwargs)
-        super(LFP, self).__init__(source, **kwargs)
-        electrical_series.parent = self
-        self.electrical_series = electrical_series
-
 
 @register_class('FilteredEphys', CORE_NAMESPACE)
-class FilteredEphys(NWBContainer):
+class FilteredEphys(MultiContainerInterface):
     """
     Ephys data from one or more channels that has been subjected to filtering. Examples of filtered
     data include Theta and Gamma (LFP has its own interface). FilteredEphys modules publish an
@@ -367,24 +365,21 @@ class FilteredEphys(NWBContainer):
     electrode may have different filtered (e.g., theta and/or gamma) signals represented.
     """
 
-    __nwbfields__ = ('electrical_series',)
-
     __help = ("Ephys data from one or more channels that is subjected to filtering, such as "
               "for gamma or theta oscillations (LFP has its own interface). Filter properties should "
               "be noted in the ElectricalSeries")
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'filtered electrophysiology data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FilteredEphys'})
-    def __init__(self, **kwargs):
-        source, electrical_series = popargs('source', 'electrical_series', kwargs)
-        super(FilteredEphys, self).__init__(source, **kwargs)
-        electrical_series.parent = self
-        self.electrical_series = electrical_series
+    __clsconf__ = {
+        'attr': 'electrical_series',
+        'type': ElectricalSeries,
+        'add': 'add_electrical_series',
+        'get': 'get_electrical_series',
+        'create': 'create_electrical_series'
+    }
 
 
 @register_class('FeatureExtraction', CORE_NAMESPACE)
-class FeatureExtraction(NWBContainer):
+class FeatureExtraction(NWBDataInterface):
     """
     Features, such as PC1 and PC2, that are extracted from signals stored in a SpikeEvent
     TimeSeries or other source.

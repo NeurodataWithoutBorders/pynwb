@@ -14,6 +14,12 @@ from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
 
 class TestHDF5Writer(unittest.TestCase):
 
+    _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec')
+
+    @property
+    def required_tests(self):
+        return self._required_tests
+
     def setUp(self):
         self.manager = get_manager()
         self.path = "test_pynwb_io_hdf5.h5"
@@ -37,9 +43,7 @@ class TestHDF5Writer(unittest.TestCase):
                                                                          attributes={'unit': 'Seconds',
                                                                                      'interval': 1})})
         self.builder = GroupBuilder(
-            'root', groups={'acquisition': GroupBuilder(
-                'acquisition', groups={'timeseries': GroupBuilder('timeseries', groups={'test_timeseries': ts_builder}),
-                                       'images': GroupBuilder('images')}),
+            'root', groups={'acquisition': GroupBuilder('acquisition', groups={'test_timeseries': ts_builder}),
                             'analysis': GroupBuilder('analysis'),
                             'epochs': GroupBuilder('epochs'),
                             'general': GroupBuilder('general'),
@@ -74,10 +78,7 @@ class TestHDF5Writer(unittest.TestCase):
         self.assertIn('nwb_version', f)
         self.assertIn('session_start_time', f)
         acq = f.get('acquisition')
-        self.assertIn('images', acq)
-        self.assertIn('timeseries', acq)
-        ts = acq.get('timeseries')
-        self.assertIn('test_timeseries', ts)
+        self.assertIn('test_timeseries', acq)
 
     def test_write_clobber(self):
         io = HDF5IO(self.path, self.manager)

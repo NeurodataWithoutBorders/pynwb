@@ -3,7 +3,7 @@ from collections import Iterable
 from .form.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer, set_parents
+from .core import NWBContainer, MultiContainerInterface
 from .misc import IntervalSeries
 from .base import TimeSeries, _default_conversion, _default_resolution
 from .image import ImageSeries
@@ -50,7 +50,7 @@ class SpatialSeries(TimeSeries):
              'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
             {'name': 'description', 'type': str,
              'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'parent', 'type': 'NWBContainer',
+            {'name': 'parent', 'type': NWBContainer,
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
             {'name': 'control', 'type': Iterable,
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
@@ -67,7 +67,7 @@ class SpatialSeries(TimeSeries):
 
 
 @register_class('BehavioralEpochs', CORE_NAMESPACE)
-class BehavioralEpochs(NWBContainer):
+class BehavioralEpochs(MultiContainerInterface):
     """
     TimeSeries for storing behavoioral epochs. The objective of this and the other two Behavioral
     interfaces (e.g. BehavioralEvents and BehavioralTimeSeries) is to provide generic hooks for
@@ -81,102 +81,84 @@ class BehavioralEpochs(NWBContainer):
     for irregular events. BehavioralTimeSeries is for continuous data.
     """
 
-    __nwbfields__ = ('interval_series',)
-
-    _help = "General container for storing behavorial epochs."
-
-    @docval({'name': 'name', 'type': str,
-             'doc': 'The name of this BehavioralEpochs container', 'default': 'BehavioralEpochs'},
-            {'name': 'source', 'type': str, 'doc': 'The source of the data represented in this container.'},
-            {'name': 'interval_series', 'type': (list, IntervalSeries), 'doc': 'IntervalSeries or any subtype.'})
-    def __init__(self, **kwargs):
-        source, interval_series = popargs('source', 'interval_series', kwargs)
-        super(BehavioralEpochs, self).__init__(source, **kwargs)
-        self.interval_series = set_parents(interval_series, self)
+    __clsconf__ = {
+        'add': 'add_interval_series',
+        'get': 'get_interval_series',
+        'create': 'create_interval_series',
+        'type': IntervalSeries,
+        'attr': 'interval_series'
+    }
 
 
 @register_class('BehavioralEvents', CORE_NAMESPACE)
-class BehavioralEvents(NWBContainer):
+class BehavioralEvents(MultiContainerInterface):
     """
     TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
     """
 
-    __nwbfields__ = ('time_series',)
-
     _help = "General container for storing event series."
 
-    @docval({'name': 'name', 'type': str,
-             'doc': 'The name of this BehavioralEvents container', 'default': 'BehavioralEvents'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'time_series', 'type': TimeSeries, 'doc': 'TimeSeries or any subtype.'})
-    def __init__(self, **kwargs):
-        source, time_series = popargs('source', 'time_series', kwargs)
-        super(BehavioralEvents, self).__init__(source, **kwargs)
-        self.time_series = time_series
+    __clsconf__ = {
+        'add': 'add_timeseries',
+        'get': 'get_timeseries',
+        'create': 'create_timeseries',
+        'type': TimeSeries,
+        'attr': 'timeseries'
+    }
 
 
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)
-class BehavioralTimeSeries(NWBContainer):
+class BehavioralTimeSeries(MultiContainerInterface):
     """
     TimeSeries for storing Behavoioral time series data. See description of BehavioralEpochs for
     more details.
     """
 
-    __nwbfields__ = ('time_series',)
+    _help = "General container for storing continuously sampled behavioral data"
 
-    _help = ""
-
-    @docval({'name': 'name', 'type': str,
-             'doc': 'The name of this BehavioralTimeSeries', 'default': 'BehavioralTimeSeries'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'time_series', 'type': TimeSeries, 'doc': '<TimeSeries> or any subtype.'})
-    def __init__(self, **kwargs):
-        source, time_series = popargs('source', 'time_series', kwargs)
-        super(BehavioralTimeSeries, self).__init__(source, **kwargs)
-        self.time_series = time_series
+    __clsconf__ = {
+        'add': 'add_timeseries',
+        'get': 'get_timeseries',
+        'create': 'create_timeseries',
+        'type': TimeSeries,
+        'attr': 'timeseries'
+    }
 
 
 @register_class('PupilTracking', CORE_NAMESPACE)
-class PupilTracking(NWBContainer):
+class PupilTracking(MultiContainerInterface):
     """
     Eye-tracking data, representing pupil size.
     """
 
-    __nwbfields__ = ('time_series',)
-
-    _help = "Eye-tracking data, representing pupil size"
-
-    @docval({'name': 'name', 'type': str,
-             'doc': 'The name of this PupilTracking container', 'default': 'PupilTracking'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'time_series', 'type': TimeSeries, 'doc': ''})
-    def __init__(self, **kwargs):
-        source, time_series = popargs('source', 'time_series', kwargs)
-        super(PupilTracking, self).__init__(source, **kwargs)
-        self.time_series = time_series
+    __clsconf__ = {
+        'add': 'add_timeseries',
+        'get': 'get_timeseries',
+        'create': 'create_timeseries',
+        'type': TimeSeries,
+        'attr': 'timeseries'
+    }
 
 
 @register_class('EyeTracking', CORE_NAMESPACE)
-class EyeTracking(NWBContainer):
+class EyeTracking(MultiContainerInterface):
     """
     Eye-tracking data, representing direction of gaze.
     """
 
-    __nwbfields__ = ('spatial_series',)
+    __clsconf__ = {
+        'add': 'add_spatial_series',
+        'get': 'get_spatial_series',
+        'create': 'create_spatial_series',
+        'type': SpatialSeries,
+        'attr': 'spatial_series'
+    }
 
-    _help = ""
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this EyeTracking container', 'default': 'EyeTracking'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': ''})
-    def __init__(self, **kwargs):
-        source, spatial_series = popargs('source', 'spatial_series', kwargs)
-        super(EyeTracking, self).__init__(source, **kwargs)
-        self.spatial_series = set_parents(spatial_series, self)
+    _help = "Eye-tracking data, representing direction of gaze"
 
 
 @register_class('CompassDirection', CORE_NAMESPACE)
-class CompassDirection(NWBContainer):
+class CompassDirection(MultiContainerInterface):
     """
     With a CompassDirection interface, a module publishes a SpatialSeries object representing a
     floating point value for theta. The SpatialSeries::reference_frame field should indicate what
@@ -184,43 +166,41 @@ class CompassDirection(NWBContainer):
     si_unit for the SpatialSeries should be radians or degrees.
     """
 
-    __nwbfields__ = ('spatial_series',)
+    __clsconf__ = {
+        'add': 'add_spatial_series',
+        'get': 'get_spatial_series',
+        'create': 'create_spatial_series',
+        'type': SpatialSeries,
+        'attr': 'spatial_series'
+    }
 
     _help = "Direction as measured radially. Spatial series reference frame \
     should indicate which direction corresponds to zero and what is the direction of positive rotation."
 
-    @docval({'name': 'name', 'type': str,
-            'doc': 'The name of this CompassDirection container', 'default': 'CompassDirection'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': 'SpatialSeries or any subtype.'})
-    def __init__(self, **kwargs):
-        source, spatial_series = popargs('source', 'spatial_series', kwargs)
-        super(CompassDirection, self).__init__(source, **kwargs)
-        self.spatial_series = set_parents(spatial_series, self)
-
 
 @register_class('Position', CORE_NAMESPACE)
-class Position(NWBContainer):
+class Position(MultiContainerInterface):
     """
     Position data, whether along the x, x/y or x/y/z axis.
     """
 
-    __nwbfields__ = ('spatial_series',)
+    __clsconf__ = {
+        'add': 'add_spatial_series',
+        'get': 'get_spatial_series',
+        'create': 'create_spatial_series',
+        'type': SpatialSeries,
+        'attr': 'spatial_series'
+    }
 
     _help = "Position data, whether along the x, xy or xyz axis"
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this Position container', 'default': 'Position'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'spatial_series', 'type': (list, SpatialSeries), 'doc': ''})
-    def __init__(self, **kwargs):
-        source, spatial_series = popargs('source', 'spatial_series', kwargs)
-        super(Position, self).__init__(source, **kwargs)
-        self.spatial_series = set_parents(spatial_series, self)
 
 
 @register_class('CorrectedImageStack', CORE_NAMESPACE)
 class CorrectedImageStack(NWBContainer):
     """
+    An image stack where all frames are shifted (registered) to a common coordinate system, to
+    account for movement and drift between frames. Note: each frame at each point in time is
+    assumed to be 2-D (has only x & y dimensions).
     """
 
     __nwbfields__ = ('corrected',
@@ -248,27 +228,17 @@ class CorrectedImageStack(NWBContainer):
 
 
 @register_class('MotionCorrection', CORE_NAMESPACE)
-class MotionCorrection(NWBContainer):
+class MotionCorrection(MultiContainerInterface):
     """
-    An image stack where all frames are shifted (registered) to a common coordinate system, to
-    account for movement and drift between frames. Note: each frame at each point in time is
-    assumed to be 2-D (has only x & y dimensions).
+    A collection of corrected images stacks.
     """
 
-    __nwbfields__ = ('corrected_image_stacks',)
+    __clsconf__ = {
+        'add': 'add_corrected_image_stack',
+        'get': 'get_corrected_image_stack',
+        'create': 'create_corrected_image_stack',
+        'type': CorrectedImageStack,
+        'attr': 'corrected_images_stacks'
+    }
 
     _help = "Image stacks whose frames have been shifted (registered) to account for motion."
-
-    @docval({'name': 'name', 'type': str,
-             'doc': 'The name of this MotionCorrection container', 'default': 'MotionCorrection '},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'corrected_image_stacks', 'type': (list, CorrectedImageStack),
-             'doc': 'the corrected image stack in this Motion Correction analysis'})
-    def __init__(self, **kwargs):
-        source, corrected_image_stacks = popargs('source', 'corrected_image_stacks', kwargs)
-
-        if isinstance(corrected_image_stacks, CorrectedImageStack):
-            corrected_image_stacks = [corrected_image_stacks]
-
-        super(MotionCorrection, self).__init__(source, **kwargs)
-        self.corrected_image_stacks = corrected_image_stacks

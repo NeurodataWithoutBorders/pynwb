@@ -4,15 +4,6 @@ groups:
     dtype: text
     name: help
     value: Image stack recorded from 2-photon microscope
-  datasets:
-  - dims:
-    - width|height|depth
-    doc: Width, height and depth of image, or imaged area (meters).
-    dtype: float32
-    name: field_of_view
-    quantity: '?'
-    shape:
-    - 3
   - doc: Photomultiplier gain
     dtype: float32
     name: pmt_gain
@@ -23,6 +14,15 @@ groups:
     dtype: float32
     name: scan_line_rate
     quantity: '?'
+  datasets:
+  - dims:
+    - width|height|depth
+    doc: Width, height and depth of image, or imaged area (meters).
+    dtype: float32
+    name: field_of_view
+    quantity: '?'
+    shape:
+    - 3
   doc: A special case of optical imaging.
   links:
   - doc: link to ImagingPlane group from which this TimeSeries data was generated
@@ -78,7 +78,7 @@ groups:
     quantity: '*'
   default_name: DfOverF
   neurodata_type_def: DfOverF
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Fluorescence over time of one or more ROIs. TimeSeries names should
       correspond to imaging plane names'
@@ -95,7 +95,7 @@ groups:
     quantity: +
   default_name: Fluorescence
   neurodata_type_def: Fluorescence
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Stores groups of pixels that define regions of interest from one
       or more imaging planes'
@@ -176,7 +176,7 @@ groups:
     quantity: '*'
   default_name: ImageSegmentation
   neurodata_type_def: ImageSegmentation
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Metadata about an imaging plane'
     dtype: text
