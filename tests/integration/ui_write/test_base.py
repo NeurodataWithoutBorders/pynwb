@@ -5,8 +5,7 @@ from pynwb import TimeSeries
 from . import base
 
 
-@base.container_test(TimeSeries)
-class TestTimeSeriesIO(base.TestMapRoundTrip):
+class TestTimeSeriesIO(base.TestDataInterfaceIO):
 
     def setUpContainer(self):
         return TimeSeries('test_timeseries', 'example_source', list(range(100, 200, 10)),

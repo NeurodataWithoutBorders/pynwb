@@ -132,6 +132,9 @@ groups:
       dtype: text
       name: help
       value: Times for a particular UnitTime object
+    - doc: Description of the unit (eg, cell type).
+      dtype: text
+      name: unit_description
     datasets:
     - dims:
       - num_events
@@ -140,9 +143,6 @@ groups:
       name: times
       shape:
       - null
-    - doc: Description of the unit (eg, cell type).
-      dtype: text
-      name: unit_description
     doc: Group storing times for &lt;unit_N&gt;.
     neurodata_type_def: SpikeUnit
     neurodata_type_inc: NWBDataInterface
