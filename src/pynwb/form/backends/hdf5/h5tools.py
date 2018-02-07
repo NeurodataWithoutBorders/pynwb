@@ -352,23 +352,35 @@ class HDF5IO(FORMIO):
         else:
             return np.dtype([(x['name'], cls.__resolve_dtype_helper__(x['dtype'])) for x in dtype])
 
-    @classmethod
     @docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
             {'name': 'attributes',
              'type': dict,
              'doc': 'a dict containing the attributes on the Group, indexed by attribute name'})
-    def set_attributes(cls, **kwargs):
+    def set_attributes(self, **kwargs):
         obj, attributes = getargs('obj', 'attributes', kwargs)
         for key, value in attributes.items():
-            if any(isinstance(value, t) for t in (set, list, tuple)):
+            if isinstance(value, (set, list, tuple)):
                 tmp = tuple(value)
                 if len(tmp) > 0:
-                    if isinstance(tmp[0], str):
+                    if isinstance(tmp[0], str):          # a list of strings will need a special type
                         max_len = max(len(s) for s in tmp)
                         dt = '|S%d' % max_len
                         value = np.array(tmp, dtype=dt)
-                    value = np.array(value)
-            obj.attrs[key] = value
+                    elif isinstance(tmp[0], Container):  # a list of references
+                        def _filler():
+                            ret = list()
+                            for item in tmp:
+                                ret.append(self.__get_ref(item))
+                            obj.attrs[key] = ret
+                        self.__queue_ref(_filler)
+                    else:
+                        value = np.array(value)
+            elif isinstance(value, (Container, Builder)):           # a reference
+                def _filler():
+                    obj.attrs[key] = self.__get_ref(value)
+                self.__queue_ref(_filler)
+            else:
+                obj.attrs[key] = value                   # a regular scalar
 
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
             {'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder to write'},
