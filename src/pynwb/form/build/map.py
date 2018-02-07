@@ -219,9 +219,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         self.__carg2spec = dict()
         self.__map_spec(spec)
 
-    def hack_get_subspec_values(self, *args, **kwargs):
-        return self.__get_subspec_values(*args, **kwargs)
-
     @property
     def spec(self):
         ''' the Spec used in this ObjectMapper '''
