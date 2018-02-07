@@ -37,25 +37,26 @@ class LabelledDict(dict):
         return self.__label
 
 
-def prepend_string(string,prepend='    '):
+def prepend_string(string, prepend='    '):
     return prepend + prepend.join(string.splitlines(True))
 
-def nwb_repr(nwb_object,verbose=True):
+
+def nwb_repr(nwb_object, verbose=True):
     try:
-        template = "{} {}\nFields:\n""".format(getattr(nwb_object,'name'),type(nwb_object))
+        template = "{} {}\nFields:\n""".format(getattr(nwb_object, 'name'), type(nwb_object))
 
         if verbose:
-            for k,v in iteritems(nwb_object.fields):
+            for k, v in iteritems(nwb_object.fields):
                 template += "  {}:\n".format(k)
-                if isinstance(v,list):
+                if isinstance(v, list):
                     for item in v:
-                        template += prepend_string(nwb_repr(item,verbose=False))+'\n'
+                        template += prepend_string(nwb_repr(item, verbose=False)) + '\n'
                 else:
-                    template += prepend_string(str(v))+'\n'
+                    template += prepend_string(str(v)) + '\n'
         else:
-            for field in ('description',):
+            for field in ('description', ):
                 template += "  {}:\n".format(field)
-                template += prepend_string(str(getattr(nwb_object,field)))+'\n'
+                template += prepend_string(str(getattr(nwb_object, field)))+'\n'
 
         return template
     except AttributeError:
