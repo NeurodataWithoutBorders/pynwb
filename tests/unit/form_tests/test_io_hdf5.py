@@ -1,12 +1,14 @@
 import unittest
 from datetime import datetime
 import os
-from h5py import File, Dataset
+from h5py import File, Dataset, Reference
 from six import text_type
 
 from pynwb.form.backends.hdf5 import HDF5IO
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
 from pynwb.form.spec import NamespaceCatalog
+
+from pynwb import TimeSeries
 
 from numbers import Number
 
@@ -139,25 +141,28 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)
 
-        ts_builder = GroupBuilder('test_timeseries',
-                                  attributes={'ancestry': 'TimeSeries',
-                                              'source': 'example_source',
-                                              'neurodata_type': 'TimeSeries',
-                                              'help': 'General purpose TimeSeries'},
-                                  datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
-                                                                   attributes={'unit': 'SIunit',
-                                                                               'conversion': 1.0,
-                                                                               'resolution': 0.1}),
-                                            'timestamps': DatasetBuilder(
-                                                'timestamps', list(range(10)),
-                                                attributes={'unit': 'Seconds', 'interval': 1})})
+        self.ts_builder = GroupBuilder('test_timeseries',
+                                       attributes={'ancestry': 'TimeSeries',
+                                                   'source': 'example_source',
+                                                   'neurodata_type': 'TimeSeries',
+                                                   'help': 'General purpose TimeSeries'},
+                                       datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
+                                                                        attributes={'unit': 'SIunit',
+                                                                                    'conversion': 1.0,
+                                                                                    'resolution': 0.1}),
+                                                 'timestamps': DatasetBuilder(
+                                                     'timestamps', list(range(10)),
+                                                     attributes={'unit': 'Seconds', 'interval': 1})})
+        self.ts = TimeSeries('test_timeseries', 'example_source', list(range(100, 200, 10)),
+                             unit='SIunit', resolution=0.1, timestamps=list(range(10)))
+        self.manager.prebuilt(self.ts, self.ts_builder)
         self.builder = GroupBuilder(
             'root',
             groups={'acquisition':
                     GroupBuilder('acquisition',
                                  groups={'timeseries':
                                          GroupBuilder('timeseries',
-                                                      groups={'test_timeseries': ts_builder}),
+                                                      groups={'test_timeseries': self.ts_builder}),
                                          'images': GroupBuilder('images')}),
                     'analysis': GroupBuilder('analysis'),
                     'epochs': GroupBuilder('epochs'),
@@ -196,12 +201,31 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.assertIn('timeseries', acq)
         ts = acq.get('timeseries')
         self.assertIn('test_timeseries', ts)
+        return f
 
     def test_write_builder(self):
         writer = HDF5IO(self.path, self.manager)
         writer.write_builder(self.builder)
         writer.close()
         self.check_fields()
+
+    def test_write_attribute_reference_container(self):
+        writer = HDF5IO(self.path, self.manager)
+        self.builder.set_attribute('ref_attribute', self.ts)
+        writer.write_builder(self.builder)
+        writer.close()
+        f = self.check_fields()
+        self.assertIsInstance(f.attrs['ref_attribute'], Reference)
+        self.assertEqual(f['acquisition/timeseries/test_timeseries'], f[f.attrs['ref_attribute']])
+
+    def test_write_attribute_reference_builder(self):
+        writer = HDF5IO(self.path, self.manager)
+        self.builder.set_attribute('ref_attribute', self.ts_builder)
+        writer.write_builder(self.builder)
+        writer.close()
+        f = self.check_fields()
+        self.assertIsInstance(f.attrs['ref_attribute'], Reference)
+        self.assertEqual(f['acquisition/timeseries/test_timeseries'], f[f.attrs['ref_attribute']])
 
     def test_write_context_manager(self):
         with HDF5IO(self.path, self.manager) as writer:
