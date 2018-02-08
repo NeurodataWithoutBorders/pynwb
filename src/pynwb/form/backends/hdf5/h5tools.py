@@ -367,20 +367,32 @@ class HDF5IO(FORMIO):
                         dt = '|S%d' % max_len
                         value = np.array(tmp, dtype=dt)
                     elif isinstance(tmp[0], Container):  # a list of references
-                        def _filler():
-                            ret = list()
-                            for item in tmp:
-                                ret.append(self.__get_ref(item))
-                            obj.attrs[key] = ret
-                        self.__queue_ref(_filler)
+                        self.__queue_ref(self._make_attr_ref_filler(obj, key, tmp))
                     else:
                         value = np.array(value)
+                else:
+                    msg = "ignoring attribute '%s' from '%s' - value is empty list" % (key, obj.name)
+                    warnings.warn(msg)
             elif isinstance(value, (Container, Builder)):           # a reference
-                def _filler():
-                    obj.attrs[key] = self.__get_ref(value)
-                self.__queue_ref(_filler)
+                self.__queue_ref(self._make_attr_ref_filler(obj, key, value))
             else:
                 obj.attrs[key] = value                   # a regular scalar
+
+
+    def _make_attr_ref_filler(self, obj, key, value):
+        '''
+            Make the callable for setting references to attributes
+        '''
+        if isinstance(value, (tuple, list)):
+            def _filler():
+                ret = list()
+                for item in value:
+                    ret.append(self.__get_ref(item))
+                obj.attrs[key] = ret
+        else:
+            def _filler():
+                obj.attrs[key] = self.__get_ref(value)
+        return _filler
 
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
             {'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder to write'},
