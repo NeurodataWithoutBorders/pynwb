@@ -318,16 +318,19 @@ class MultiContainerInterface(NWBDataInterface):
         def _func(self, **kwargs):
             container = getargs(attr_name, kwargs)
             if isinstance(container, container_type):
-                container = [container]
+                containers = [container]
             elif isinstance(container, dict):
-                container = container.values()
+                containers = container.values()
+            else:
+                containers = container
             d = getattr(self, attr_name)
-            for tmp in container:
+            for tmp in containers:
                 tmp.parent = self
                 if tmp.name in d:
                     msg = "'%s' already exists in '%s'" % (tmp.name, self.name)
                     raise ValueError(msg)
                 d[tmp.name] = tmp
+            return container
         return _func
 
     @classmethod
@@ -367,7 +370,7 @@ class MultiContainerInterface(NWBDataInterface):
         '''
         if not hasattr(cls, '__clsconf__'):
             return
-        multi=False
+        multi = False
         if isinstance(cls.__clsconf__, dict):
             clsconf = [cls.__clsconf__]
         elif isinstance(cls.__clsconf__, list):
@@ -378,7 +381,7 @@ class MultiContainerInterface(NWBDataInterface):
 
         for i, d in enumerate(clsconf):
             # get add method name
-            add = cls.__clsconf__.get('add')
+            add = d.get('add')
             if add is None:
                 msg = "MultiContainerInterface subclass '%s' is missing 'add' key in __clsconf__" % cls.__name__
                 if multi:
@@ -386,7 +389,7 @@ class MultiContainerInterface(NWBDataInterface):
                 raise ValueError(msg)
 
             # get container attribute name
-            attr = cls.__clsconf__.get('attr')
+            attr = d.get('attr')
             if attr is None:
                 msg = "MultiContainerInterface subclass '%s' is missing 'attr' key in __clsconf__" % cls.__name__
                 if multi:
@@ -394,7 +397,7 @@ class MultiContainerInterface(NWBDataInterface):
                 raise ValueError(msg)
 
             # get container type
-            container_type = cls.__clsconf__.get('type')
+            container_type = d.get('type')
             if container_type is None:
                 msg = "MultiContainerInterface subclass '%s' is missing 'type' key in __clsconf__" % cls.__name__
                 if multi:
@@ -416,10 +419,10 @@ class MultiContainerInterface(NWBDataInterface):
                 setattr(cls, '__init__', cls.__make_constructor(attr, add, container_type))
 
             # get create method name
-            create = cls.__clsconf__.get('create')
+            create = d.get('create')
             if create is not None:
                 setattr(cls, create, cls.__make_create(create, add, container_type))
 
-            get = cls.__clsconf__.get('get')
+            get = d.get('get')
             if get is not None:
                 setattr(cls, get, cls.__make_get(get, attr, container_type))
