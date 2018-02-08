@@ -53,7 +53,7 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
 
     def addContainer(self, nwbfile):
         """Should take an NWBFile object and add the container to it"""
-        nwbfile.set_imaging_plane(self.container)
+        nwbfile.add_imaging_plane(self.container)
 
     def getContainer(self, nwbfile):
         """Should take an NWBFile object and return the Container"""
@@ -142,5 +142,5 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
 
     def addContainer(self, nwbfile):
         """Should take an NWBFile object and add the container to it"""
-        nwbfile.set_imaging_plane(self.imaging_plane)
+        nwbfile.add_imaging_plane(self.imaging_plane)
         nwbfile.add_acquisition(self.container)

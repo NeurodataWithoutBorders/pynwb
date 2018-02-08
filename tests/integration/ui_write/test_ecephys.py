@@ -66,8 +66,8 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
-        nwbfile.set_device(self.dev1)
-        nwbfile.set_electrode_group(self.container)
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_electrode_group(self.container)
 
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
@@ -129,8 +129,8 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
-        nwbfile.set_device(self.dev1)
-        nwbfile.set_electrode_group(self.group)
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_electrode_group(self.group)
         nwbfile.set_electrode_table(self.table)
         nwbfile.add_acquisition(self.container)
 
