@@ -5,7 +5,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer
+from .core import NWBContainer, MultiContainerInterface
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -215,28 +215,25 @@ class SpikeUnit(NWBContainer):
 
 
 @register_class('UnitTimes', CORE_NAMESPACE)
-class UnitTimes(NWBContainer):
+class UnitTimes(MultiContainerInterface):
     """
     Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group contains a group
     for each unit. The name of the group should match the value in the source module, if that is
     possible/relevant (e.g., name of ROIs from Segmentation module).
     """
 
-    __nwbfields__ = ('spike_units', 'unit_list')
+    __nwbfields__ = ('unit_list', )
+
+    __clsconf__ = {
+        'attr': 'spike_units',
+        'type': SpikeUnit,
+        'add': 'add_spike_unit',
+        'get': 'get_spike_unit',
+        'create': 'create_spike_unit'
+    }
 
     _help = "Estimated spike times from a single unit"
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data represented in this Module Interface'},
-            {'name': 'spike_units', 'type': Iterable, 'doc': 'The SpikeUnits contained in this Interface'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this Container', 'default': 'UnitTimes'})
-    def __init__(self, **kwargs):
-        source, spike_units = popargs('source', 'spike_units', kwargs)
-        super(UnitTimes, self).__init__(source, **kwargs)
-        self.spike_units = spike_units
-        # self.unit_list = [si.name for si in self.spike_units]
-        # if len(self.unit_list) != len (self.spike_units):
-        #    raise ValueError("Length of unit_list does not match length of spike_unit")
-
     @property
     def unit_list(self):
-        return [si.name for si in self.spike_units]
+        return list(sorted(si.name for si in self.spike_units.values()))

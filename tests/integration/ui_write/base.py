@@ -135,3 +135,14 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
         raise unittest.SkipTest('Cannot run test unless getContainer is implemented')
+
+
+class TestDataInterfaceIO(TestMapRoundTrip):
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.add_acquisition(self.container)
+
+    def getContainer(self, nwbfile):
+        ''' Should take an NWBFile object and return the Container'''
+        return nwbfile.get_acquisition(self.container.name)

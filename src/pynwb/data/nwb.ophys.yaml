@@ -4,15 +4,6 @@ groups:
     dtype: text
     name: help
     value: Image stack recorded from 2-photon microscope
-  datasets:
-  - dims:
-    - width|height|depth
-    doc: Width, height and depth of image, or imaged area (meters).
-    dtype: float32
-    name: field_of_view
-    quantity: '?'
-    shape:
-    - 3
   - doc: Photomultiplier gain
     dtype: float32
     name: pmt_gain
@@ -23,6 +14,15 @@ groups:
     dtype: float32
     name: scan_line_rate
     quantity: '?'
+  datasets:
+  - dims:
+    - width|height|depth
+    doc: Width, height and depth of image, or imaged area (meters).
+    dtype: float32
+    name: field_of_view
+    quantity: '?'
+    shape:
+    - 3
   doc: A special case of optical imaging.
   links:
   - doc: link to ImagingPlane group from which this TimeSeries data was generated
