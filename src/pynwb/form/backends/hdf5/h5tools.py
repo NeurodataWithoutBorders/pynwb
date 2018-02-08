@@ -630,20 +630,19 @@ class HDF5IO(FORMIO):
             raise e
         return dset
 
-    def __get_ref_filler(self, dset, sl, f):
-        def _call():
-            dset[sl] = f()
-        return _call
-
-    def __get_ref(self, container, region=None):
-        if isinstance(container, Container):
-            builder = self.manager.build(container)
+    @docval({'name': 'container', 'type': (Builder, Container), 'doc': 'the object to reference'},
+            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the region reference indexing object',
+             'default': None},
+            returns='the reference', rtype=Reference)
+    def __get_ref(self, **kwargs):
+        container, region = getargs('container', 'region', kwargs)
+        if isinstance(container, Builder):
+            if isinstance(container, LinkBuilder):
+                builder = container.target_builder
+            else:
+                builder = container
         else:
-            if isinstance(container, Builder):
-                if isinstance(container, LinkBuilder):
-                    builder = container.target_builder
-                else:
-                    builder = container
+            builder = self.manager.build(container)
         path = self.__get_path(builder)
         if region is not None:
             dset = self.__file[path]
