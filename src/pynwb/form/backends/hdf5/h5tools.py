@@ -378,7 +378,6 @@ class HDF5IO(FORMIO):
             else:
                 obj.attrs[key] = value                   # a regular scalar
 
-
     def _make_attr_ref_filler(self, obj, key, value):
         '''
             Make the callable for setting references to attributes
