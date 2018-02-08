@@ -7,7 +7,7 @@ datasets:
   neurodata_type_def: NWBData
 groups:
 - attributes:
-  - doc: Short description of what this type of Interface contains.
+  - doc: Short description of what this type of NWBContainer contains.
     dtype: text
     name: help
   - doc: Path to the origin of the data represented in this interface.
@@ -15,6 +15,9 @@ groups:
     name: source
   doc: The attributes specified here are included in all interfaces.
   neurodata_type_def: NWBContainer
+- doc: An abstract data type for differentiating experimental data from metadata
+  neurodata_type_inc: NWBContainer
+  neurodata_type_def: NWBDataInterface
 - attributes:
   - default_value: no comments
     doc: Human-readable comments about the TimeSeries. This second descriptive field
@@ -131,7 +134,7 @@ groups:
     name: sync
     quantity: '?'
   neurodata_type_def: TimeSeries
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Description of Module
     dtype: text
@@ -145,7 +148,23 @@ groups:
     to a particular type of data.
   groups:
   - doc: Interface objects containing data output from processing steps
-    neurodata_type_inc: NWBContainer
+    neurodata_type_inc: NWBDataInterface
     quantity: '*'
   neurodata_type_def: ProcessingModule
   neurodata_type_inc: NWBContainer
+- attributes:
+  - doc: Description of images in this container
+    dtype: text
+    name: description
+  - doc: Value is 'A collection of images that have some meaningful relationship'
+    dtype: text
+    name: help
+    value: A collection of images that have some meaningful relationship
+  datasets:
+    - doc: Images stored in this NWBDataInterface
+      neurodata_type_inc: Image
+      quantity: '+'
+  default_name: Images
+  doc: A NWBDataInterface for storing images that have some relationship
+  neurodata_type_def: Images
+  neurodata_type_inc: NWBDataInterface

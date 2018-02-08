@@ -63,7 +63,7 @@ groups:
     quantity: '*'
   default_name: BehavioralEpochs
   neurodata_type_def: BehavioralEpochs
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Position data, whether along the x, xy or xyz axis'
     dtype: text
@@ -77,7 +77,7 @@ groups:
     quantity: '*'
   default_name: BehavioralEvents
   neurodata_type_def: BehavioralEvents
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'General container for storing continuously sampled behavioral data.'
     dtype: text
@@ -91,7 +91,7 @@ groups:
     quantity: '*'
   default_name: BehavioralTimeSeries
   neurodata_type_def: BehavioralTimeSeries
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Eye-tracking data, representing pupil size'
     dtype: text
@@ -104,7 +104,7 @@ groups:
     quantity: +
   default_name: PupilTracking
   neurodata_type_def: PupilTracking
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Eye-tracking data, representing direction of gaze'
     dtype: text
@@ -117,7 +117,7 @@ groups:
     quantity: '*'
   default_name: EyeTracking
   neurodata_type_def: EyeTracking
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Direction as measured radially. Spatial series reference frame
       should indicate which direction corresponds to zero and what is the direction
@@ -137,7 +137,7 @@ groups:
     quantity: '*'
   default_name: CompassDirection
   neurodata_type_def: CompassDirection
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Position data, whether along the x, xy or xyz axis'
     dtype: text
@@ -150,7 +150,7 @@ groups:
     quantity: +
   default_name: Position
   neurodata_type_def: Position
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface
 - attributes:
   - doc: Value is 'Image stacks whose frames have been shifted (registered) to account
       for motion'
@@ -185,4 +185,4 @@ groups:
     quantity: +
   default_name: MotionCorrection
   neurodata_type_def: MotionCorrection
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: NWBDataInterface

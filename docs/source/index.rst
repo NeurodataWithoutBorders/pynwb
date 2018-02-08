@@ -29,7 +29,9 @@ breaking down the barriers to data sharing in neuroscience.
    :maxdepth: 2
    :caption: Overview
 
-   overview
+   overview_intro
+   overview_software_architecture
+   overview_nwbfile
 
 .. toctree::
    :maxdepth: 2

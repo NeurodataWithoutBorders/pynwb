@@ -45,32 +45,9 @@ groups:
       group, the data can exist in a separate HDF5 file that is linked to by the file
       being used for processing and analysis.'
     groups:
-    - datasets:
-      - attributes:
-        - doc: 'Human description of image. COMMENT: If image is of slice data, include
-            slice thickness and orientation, and reference to appropriate entry in
-            /general/slices'
-          dtype: text
-          name: description
-        - doc: 'Format of the image.  COMMENT: eg, jpg, png, mpeg'
-          dtype: text
-          name: format
-        doc: 'Photograph of experiment or experimental setup (video also OK). COMMENT:
-          Name is arbitrary.  Data is stored as a single binary object (HDF5 opaque
-          type).'
-        dtype: binary
-        neurodata_type_def: Image
-        quantity: '*'
-      doc: Acquired images
-      name: images
-    - doc: 'Acquired TimeSeries.COMMENT: When importing acquisition data to an NWB
-        file, all acquisition/tracking/stimulus data must already be aligned to a
-        common time frame. It is assumed that this task has already been performed.'
-      groups:
-      - doc: TimeSeries object containing data generated during data acquisition
-        neurodata_type_inc: TimeSeries
-        quantity: '*'
-      name: timeseries
+    - doc: Any objects representing acquired data
+      neurodata_type_inc: NWBDataInterface
+      quantity: '*'
     name: acquisition
   - doc: 'Lab-specific and custom scientific analysis of data. There is no defined
       format for the content of this group - the format is up to the individual user/lab.

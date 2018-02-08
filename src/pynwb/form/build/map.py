@@ -219,9 +219,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         self.__carg2spec = dict()
         self.__map_spec(spec)
 
-    def hack_get_subspec_values(self, *args, **kwargs):
-        return self.__get_subspec_values(*args, **kwargs)
-
     @property
     def spec(self):
         ''' the Spec used in this ObjectMapper '''
@@ -475,8 +472,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
             if attr_value is None:
                 if spec.required:
-                    warnings.warn("missing required attribute '%s' for '%s' of type '%s'"
-                                  % (spec.name, builder.name, self.spec.data_type_def))
+                    msg = "missing required attribute '%s' for '%s' of type '%s'"\
+                                  % (spec.name, builder.name, self.spec.data_type_def)
+                    warnings.warn(msg)
                 continue
             builder.set_attribute(spec.name, attr_value)
 
@@ -696,7 +694,7 @@ class TypeMap(object):
         self.__ns_catalog = namespaces
         self.__mappers = dict()     # already constructed ObjectMapper classes
         self.__mapper_cls = dict()  # the ObjectMapper class to use for each container type
-        self.__container_types = dict()
+        self.__container_types = OrderedDict()
         self.__data_types = dict()
         self.__default_mapper_cls = getargs('mapper_cls', kwargs)
 
@@ -715,10 +713,13 @@ class TypeMap(object):
         return self.__copy__()
 
     def merge(self, type_map):
+
         for namespace in type_map.__container_types:
             for data_type in type_map.__container_types[namespace]:
+
                 container_cls = type_map.__container_types[namespace][data_type]
                 self.register_container_type(namespace, data_type, container_cls)
+
         for container_cls in type_map.__mapper_cls:
             self.register_map(container_cls, type_map.__mapper_cls[container_cls])
 
@@ -765,7 +766,7 @@ class TypeMap(object):
                 else:
                     return Container
             else:
-                return (list, tuple, dict, set)
+                return ('array_data', 'data',)
 
     @classmethod
     def __get_constructor(self, base, addl_fields):

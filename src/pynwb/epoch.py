@@ -151,7 +151,7 @@ class Epoch(NWBContainer):
 
     def __calculate_idx_count(self, start_time, stop_time, ts_data):
         if isinstance(ts_data.timestamps, DataIO):
-            ts_timestamps = ts_data.timestamps.getdata()
+            ts_timestamps = ts_data.timestamps.data
             ts_starting_time = ts_data.starting_time
             ts_rate = ts_data.rate
         else:

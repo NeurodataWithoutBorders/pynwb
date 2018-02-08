@@ -60,7 +60,7 @@ class UnitTimesConstructor(unittest.TestCase):
         self.assertEqual(su2.unit_description, 'unit_description_2')
         self.assertEqual(su2.source, 'unit_source_2')
 
-        sul = [su1, su2]
+        sul = {'su1': su1, 'su2': su2}
         ut = UnitTimes('test_ut', sul)
         self.assertEqual(ut.source, 'test_ut')
         self.assertEqual(ut.spike_units, sul)
