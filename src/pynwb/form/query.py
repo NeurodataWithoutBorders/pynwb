@@ -1,5 +1,9 @@
 from six import with_metaclass
-from .core import ExtenderMeta
+from abc import abstractmethod
+import numpy as np
+
+from .utils import ExtenderMeta, docval_macro
+
 
 class Query(with_metaclass(ExtenderMeta, object)):
 
@@ -22,7 +26,7 @@ class Query(with_metaclass(ExtenderMeta, object)):
         if not isinstance(cls.__operations__, tuple):
             raise TypeError("'__operations__' must be of type tuple")
         # add any new operations
-        if len(bases) and 'Query' in globals() and issubclass(bases[-1], NWBContainer) \
+        if len(bases) and 'Query' in globals() and issubclass(bases[-1], Query) \
            and bases[-1].__operations__ is not cls.__operations__:
                 new_operations = list(cls.__operations__)
                 new_operations[0:0] = bases[-1].__operations__
@@ -56,11 +60,12 @@ class Query(with_metaclass(ExtenderMeta, object)):
     def __xor__(self, other):
         pass
 
-    def __contains__(self, other)
+    def __contains__(self, other):
         pass
 
 
-class AbstractDataset(with_metaclass(ABCMeta, object)):
+@docval_macro('data')
+class AbstractDataset(with_metaclass(ExtenderMeta, object)):
 
     __operations__ = (
         '__lt__',
@@ -69,35 +74,53 @@ class AbstractDataset(with_metaclass(ABCMeta, object)):
         '__ge__',
         '__eq__',
         '__ne__',
+        '__len__',
     )
 
     @classmethod
     def __build_operation(cls, op):
         def __func(self, arg):
             return Query(self, op, arg)
+        setattr(__func, '__name__', op)
+        return __func
 
     @ExtenderMeta.pre_init
     def __make_operators(cls, name, bases, classdict):
         if not isinstance(cls.__operations__, tuple):
             raise TypeError("'__operations__' must be of type tuple")
         # add any new operations
-        if len(bases) and 'Query' in globals() and issubclass(bases[-1], NWBContainer) \
+        if len(bases) and 'Query' in globals() and issubclass(bases[-1], Query) \
            and bases[-1].__operations__ is not cls.__operations__:
                 new_operations = list(cls.__operations__)
                 new_operations[0:0] = bases[-1].__operations__
                 cls.__operations__ = tuple(new_operations)
         for op in cls.__operations__:
-            if not hasattr(cls, op):
-                setattr(cls, op, cls.__build_operation(op))
+            setattr(cls, op, cls.__build_operation(op))
 
     @abstractmethod
     def get_array(self):
         pass
 
+    def __evaluate_key(self, key):
+        if isinstance(key, (tuple, list, np.ndarray)):
+            return tuple(map(self.__evaluate_key, key))
+        else:
+            if isinstance(key, Query):
+                return key.evaluate()
+            return key
+
+    def __getitem__(self, key):
+        idx = self.__evaluate_key(key)
+        return self.get_array()[idx]
+
+
 class H5Dataset(AbstractDataset):
 
+    def __init__(self, h5_dataset):
+        self.data = h5_dataset
+        self.cache = None
+
     def get_array(self):
-        if not self.cache:
+        if self.cache is None:
             self.cache = self.data[:]
         return self.cache
-
