@@ -112,5 +112,6 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         self.assertIsInstance(container, NWBFile)
         raw_ts = container.acquisition
         self.assertEqual(len(raw_ts), 1)
-        self.assertIsInstance(raw_ts[0], TimeSeries)
+        for v in raw_ts.values():
+            self.assertIsInstance(v, TimeSeries)
         hdf5io.close()
