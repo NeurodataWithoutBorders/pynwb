@@ -29,6 +29,9 @@ class QueryTest(unittest.TestCase):
         self.assertTrue(np.array_equal(array, self.d))
 
     def test___gt__(self):
+        '''
+        Test wrapper greater than magic method
+        '''
         q = self.wrapper > 5
         self.assertIsInstance(q, Query)
         result = q.evaluate()
@@ -37,6 +40,9 @@ class QueryTest(unittest.TestCase):
         self.assertTrue(np.array_equal(result, expected))
 
     def test___ge__(self):
+        '''
+        Test wrapper greater than or equal magic method
+        '''
         q = self.wrapper >= 5
         self.assertIsInstance(q, Query)
         result = q.evaluate()
@@ -45,6 +51,9 @@ class QueryTest(unittest.TestCase):
         self.assertTrue(np.array_equal(result, expected))
 
     def test___lt__(self):
+        '''
+        Test wrapper less than magic method
+        '''
         q = self.wrapper < 5
         self.assertIsInstance(q, Query)
         result = q.evaluate()
@@ -53,6 +62,9 @@ class QueryTest(unittest.TestCase):
         self.assertTrue(np.array_equal(result, expected))
 
     def test___le__(self):
+        '''
+        Test wrapper less than or equal magic method
+        '''
         q = self.wrapper <= 5
         self.assertIsInstance(q, Query)
         result = q.evaluate()
@@ -61,6 +73,9 @@ class QueryTest(unittest.TestCase):
         self.assertTrue(np.array_equal(result, expected))
 
     def test___eq__(self):
+        '''
+        Test wrapper equals magic method
+        '''
         q = self.wrapper == 5
         self.assertIsInstance(q, Query)
         result = q.evaluate()
@@ -69,6 +84,9 @@ class QueryTest(unittest.TestCase):
         self.assertTrue(np.array_equal(result, expected))
 
     def test___ne__(self):
+        '''
+        Test wrapper not equal magic method
+        '''
         q = self.wrapper != 5
         self.assertIsInstance(q, Query)
         result = q.evaluate()
@@ -76,7 +94,19 @@ class QueryTest(unittest.TestCase):
                     False, True, True, True, True]
         self.assertTrue(np.array_equal(result, expected))
 
+    def test___getitem__(self):
+        '''
+        Test wrapper getitem using slice
+        '''
+        q = self.wrapper < 5
+        result = self.wrapper[0:5]
+        expected = [0, 1, 2, 3, 4]
+        self.assertTrue(np.array_equal(result, expected))
+
     def test___getitem__query(self):
+        '''
+        Test wrapper getitem using query
+        '''
         q = self.wrapper < 5
         result = self.wrapper[q]
         expected = [0, 1, 2, 3, 4]
