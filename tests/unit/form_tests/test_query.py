@@ -1,11 +1,10 @@
 import unittest
-from datetime import datetime
 import os
-from h5py import File, Dataset, Reference
+from h5py import File
 import numpy as np
-from six import text_type
 
 from pynwb.form.query import Query, H5Dataset
+
 
 class QueryTest(unittest.TestCase):
 
@@ -18,7 +17,6 @@ class QueryTest(unittest.TestCase):
         # self.f = File(self.path, 'r')
         # self.d = self.f['dset']
         self.wrapper = H5Dataset(self.d)
-
 
     def tearDown(self):
         self.f.close()
@@ -83,4 +81,3 @@ class QueryTest(unittest.TestCase):
         result = self.wrapper[q]
         expected = [0, 1, 2, 3, 4]
         self.assertTrue(np.array_equal(result, expected))
-
