@@ -161,6 +161,5 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS.get_roi('roi1'), pS['roi1'])
 
 
-
 if __name__ == '__main__':
     unittest.main()
