@@ -136,6 +136,7 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
         nwbfile.set_electrode_table(self.table)
         nwbfile.add_acquisition(self.container)
 
+
 class TestMultiElectricalSeries(TestElectricalSeriesIO):
 
     def setUpElectricalSeriesContainers(self):
@@ -211,7 +212,7 @@ class TestLFP(TestMultiElectricalSeries):
 
     def setUpContainer(self):
         es = self.setUpElectricalSeriesContainers()
-        ret = LFP('LFP roundtrip test', es)
+        ret = LFP('LFP roundtrip test', es)  # noqa: F405
         return ret
 
     def setUpBuilder(self):
@@ -220,8 +221,8 @@ class TestLFP(TestMultiElectricalSeries):
                            attributes={'source': 'LFP roundtrip test',
                                        'namespace': base.CORE_NAMESPACE,
                                        'neurodata_type': 'LFP',
-                                       'help': ('LFP data from one or more channels. Filter properties should be noted in '
-                                                'the ElectricalSeries')},
+                                       'help': ('LFP data from one or more channels. Filter properties should be '
+                                                'noted in the ElectricalSeries')},
                            groups={'test_es1': es[0], 'test_es2': es[1]})
         return ret
 
@@ -230,7 +231,7 @@ class TestFilteredEphys(TestMultiElectricalSeries):
 
     def setUpContainer(self):
         es = self.setUpElectricalSeriesContainers()
-        ret = FilteredEphys('FilteredEphys roundtrip test', es)
+        ret = FilteredEphys('FilteredEphys roundtrip test', es)  # noqa: F405
         return ret
 
     def setUpBuilder(self):
@@ -239,9 +240,9 @@ class TestFilteredEphys(TestMultiElectricalSeries):
                            attributes={'source': 'FilteredEphys roundtrip test',
                                        'namespace': base.CORE_NAMESPACE,
                                        'neurodata_type': 'FilteredEphys',
-                                       'help': ('Ephys data from one or more channels that is subjected to filtering, such '
-                                                'as for gamma or theta oscillations (LFP has its own interface). Filter properties '
-                                                'should be noted in the ElectricalSeries')},
+                                       'help': ('Ephys data from one or more channels that is subjected to filtering, '
+                                                'such as for gamma or theta oscillations (LFP has its own interface). '
+                                                'Filter properties should be noted in the ElectricalSeries')},
                            groups={'test_es1': es[0], 'test_es2': es[1]})
         return ret
 
