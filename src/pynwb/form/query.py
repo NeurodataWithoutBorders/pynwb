@@ -124,3 +124,70 @@ class H5Dataset(AbstractDataset):
         if self.cache is None:
             self.cache = self.data[:]
         return self.cache
+
+class AbstractSortedDataset(AbstractDataset):
+
+    @abstractmethod
+    def find_point(self, val):
+        ...
+
+    def __lower(self, other):
+        ins = self.find_point(other)
+        return ins
+
+    def __upper(self, other):
+        ins = self.__lower(other)
+        while d[ins] == other:
+            ins += 1
+        return ins
+
+    def __lt__(self, other):
+        ins = self.__lower(other)
+        return (0, ins)
+
+    def __le__(self, other):
+        ins = self.__upper(other)
+        return (0, ins)
+
+    def __gt__(self, other):
+        ins = self.__upper(other)
+        return (ins, len(self))
+
+    def __ge__(self, other):
+        ins = self.__lower(other)
+        return (ins, len(self))
+
+
+class SortedDataset(AbstractSortedDataset):
+
+    def find_point(self, val):
+        return np.searchsorted(self.get_array())
+
+
+class LinSpace(AbstractSortedDataset):
+
+    def find_point(self, val):
+        nsteps = (val-self.start)/self.step
+        fl = math.floor(nsteps)
+        if fl == nsteps:
+            return fl
+        else:
+            return fl+1
+
+    def __calcidx(self, arg):
+        return self.start + self.step*arg
+
+    def __gendata(self, arg):
+        for i in arg:
+            if isinstance(i, tuple):
+                yield from range(*i)
+            elif isinstance(i, int):
+                yield self.__calcidx(i)
+
+    def __getitem__(self, arg):
+        if isinstance(arg, int):
+            return self.__calcidx(arg)
+        elif isinstance(arg, list):
+            return np.fromiter(self.__gendata(arg), self.dtype)
+
+
