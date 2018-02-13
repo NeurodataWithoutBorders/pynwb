@@ -362,6 +362,35 @@ class MultiContainerInterface(NWBDataInterface):
             add(container)
         return _func
 
+    @classmethod
+    def __make_getitem(cls, attr_name, container_type):
+        doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+
+        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
+                 'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
+                func_name='__getitem__', doc=doc)
+        def _func(self, **kwargs):
+            name = getargs('name', kwargs)
+            d = getattr(self, attr_name)
+            if len(d) == 0:
+                msg = "%s '%s' is empty" % (cls.__name__, self.name)
+                raise ValueError(msg)
+            if len(d) > 1 and name is None:
+                msg = "more than one %s in this %s -- must specify a name" % container_type.__name__, cls.__name__
+                raise ValueError(msg)
+            ret = None
+            if len(d) == 1:
+                for v in d.values():
+                    ret = v
+            else:
+                ret = d.get(name)
+                if ret is None:
+                    msg = "'%s' not found in %s '%s'" % (name, cls.__name__, self.name)
+                    raise KeyError(msg)
+            return ret
+
+        return _func
+
     @ExtenderMeta.pre_init
     def __build_class(cls, name, bases, classdict):
         '''
@@ -426,3 +455,6 @@ class MultiContainerInterface(NWBDataInterface):
             get = d.get('get')
             if get is not None:
                 setattr(cls, get, cls.__make_get(get, attr, container_type))
+
+        if len(clsconf) == 1:
+            setattr(cls, '__getitem__', cls.__make_getitem(attr, container_type))
