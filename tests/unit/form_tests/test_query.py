@@ -4,6 +4,7 @@ from h5py import File
 import numpy as np
 
 from pynwb.form.query import *  # noqa: F403
+from pynwb.form.array import *  # noqa: F403
 
 
 class AbstractQueryTest(unittest.TestCase):
@@ -15,9 +16,9 @@ class AbstractQueryTest(unittest.TestCase):
         self.dset = self.getDataset()
         self.wrapper = FORMDataset(self.dset)  # noqa: F405
 
-    def test_get_array(self):
-        array = self.wrapper.get_array()
-        self.assertIsInstance(array, SortedDataset)  # noqa: F405
+    def test_get_dataset(self):
+        array = self.wrapper.get_dataset()
+        self.assertIsInstance(array, SortedArray)  # noqa: F405
 
     def test___gt__(self):
         '''
@@ -117,7 +118,7 @@ class SortedQueryTest(AbstractQueryTest):
         self.f = File(self.path, 'w')
         self.input = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         self.d = self.f.create_dataset('dset', data=self.input)
-        return SortedDataset(self.d)  # noqa: F405
+        return SortedArray(self.d)  # noqa: F405
 
     def tearDown(self):
         self.f.close()
