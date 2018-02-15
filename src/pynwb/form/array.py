@@ -28,17 +28,22 @@ class Array(object):
     def __getidx__(self, arg):
         return self.__data[arg]
 
+    def __sliceiter(self, arg):
+        return (x for x in range(*arg.indices(len(self))))
+
     def __getitem__(self, arg):
         if isinstance(arg, list):
             idx = list()
             for i in arg:
                 if isinstance(i, slice):
-                    idx.extend()
+                    idx.extend(x for x in self.__sliceiter(i))
                 else:
                     idx.append(i)
             return np.fromiter((self.__getidx__(x) for x in idx), dtype=self.dtype)
         elif isinstance(arg, slice):
-            return np.fromiter((self.__getidx__(x) for x in range(*arg.indices(len(self)))), dtype=self.dtype)
+            return np.fromiter((self.__getidx__(x) for x in self.__sliceiter(arg)), dtype=self.dtype)
+        elif isinstance(arg, tuple):
+            return (self.__getidx__(arg[0]), self.__getidx__(arg[1]))
         else:
             return self.__getidx__(arg)
 
@@ -127,14 +132,14 @@ class AbstractSortedArray(with_metaclass(ABCMeta, Array)):
             ret = tmp
             return ret
         elif isinstance(other, tuple):
-            ge = self >= other
-            ge = ge[0]
-            lt = self < other
-            lt = lt[1]
+            ge = self >= other[0]
+            ge = ge.start
+            lt = self < other[1]
+            lt = lt.stop
             if ge == lt:
                 return ge
             else:
-                return (ge, lt)
+                return slice(ge, lt)
         else:
             lower = self.__lower(other)
             upper = self.__upper(other)
@@ -144,7 +149,7 @@ class AbstractSortedArray(with_metaclass(ABCMeta, Array)):
             elif d == 0:
                 return None
             else:
-                return (lower, upper)
+                return slice(lower, upper)
 
     def __ne__(self, other):
         eq = self == other

@@ -38,20 +38,44 @@ class Query(with_metaclass(ExtenderMeta, object)):
         self.obj = obj
         self.op = op
         self.arg = arg
-        self.result = None
+        self.collapsed = None
+        self.expanded = None
 
-    def evaluate(self):
-        if self.result is None:
-            obj = self.obj
-            arg = self.arg
-            if isinstance(obj, Query):
-                obj = obj.evaluate()
-            elif isinstance(obj, FORMDataset):
-                obj = obj.get_dataset()
-            if isinstance(arg, Query):
-                arg = self.arg.evaluate()
-            self.result = getattr(obj, self.op)(self.arg)
-        return self.result
+    def evaluate(self, expand=True):
+        if expand:
+            if self.expanded is None:
+                self.expanded = self.__evalhelper()
+            return self.expanded
+        else:
+            if self.collapsed is None:
+                self.collapsed = self.__collapse(self.__evalhelper())
+            return self.collapsed
+
+    def __evalhelper(self):
+        obj = self.obj
+        arg = self.arg
+        if isinstance(obj, Query):
+            obj = obj.evaluate()
+        elif isinstance(obj, FORMDataset):
+            obj = obj.get_dataset()
+        if isinstance(arg, Query):
+            arg = self.arg.evaluate()
+        return getattr(obj, self.op)(self.arg)
+
+    def __collapse(self, result):
+        if isinstance(result, slice):
+            return (result.start, result.stop)
+        elif isinstance(result, list):
+            ret = list()
+            for idx in result:
+                if isinstance(idx, slice) and (idx.step is None or idx.step == 1):
+                    ret.append((idx.start, idx,stop))
+                else:
+                    ret.append(idx)
+            return ret
+        else:
+            return result
+
 
     def __and__(self, other):
         pass
