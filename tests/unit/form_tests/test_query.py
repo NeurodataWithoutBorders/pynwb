@@ -3,8 +3,8 @@ import os
 from h5py import File
 import numpy as np
 
-from pynwb.form.query import *  # noqa: F403
-from pynwb.form.array import *  # noqa: F403
+from pynwb.form.query import FORMDataset, Query
+from pynwb.form.array import SortedArray, LinSpace
 
 
 class AbstractQueryTest(unittest.TestCase):
@@ -132,3 +132,36 @@ class LinspaceQueryTest(AbstractQueryTest):
 
     def getDataset(self):
         return LinSpace(0, 10, 1)  # noqa: F405
+
+class CompoundQueryTest(unittest.TestCase):
+
+    def getM(self):
+        print("M: %s" % str(np.arange(10, 20, 1)))
+        return SortedArray(np.arange(10, 20, 1))
+
+    def getN(self):
+        print("N: %s" % (np.arange(10.0, 20.0, 0.5)))
+        return SortedArray(np.arange(10.0, 20.0, 0.5))
+
+    def setUp(self):
+        print("\n\n")
+        self.m = FORMDataset(self.getM())
+        self.n = FORMDataset(self.getN())
+
+    def test_map(self):
+        q = self.m == (12,16)            # IN operation
+        q.evaluate()      # [2,3,4,5]
+        q.evaluate(False) # RangeResult(2,6)
+        print('expanded: %s' % str(q.evaluate()))
+        print('collapsed: %s' % str(q.evaluate(False)))
+        r = self.m[q]
+        r = self.m[q.evaluate()]
+        print('expanded getitem: %s' % str(r))
+        r = self.m[q.evaluate(False)]
+        print('collapsed getitem: %s' % str(r))
+        print(r)
+
+    def tearDown(self):
+        print("\n\n")
+
+
