@@ -1,3 +1,5 @@
+import unittest2 as unittest
+
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder
 
 from pynwb.ecephys import *  # noqa: F403
@@ -66,8 +68,8 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
-        nwbfile.set_device(self.dev1)
-        nwbfile.set_electrode_group(self.container)
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_electrode_group(self.container)
 
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
@@ -129,10 +131,120 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
-        nwbfile.set_device(self.dev1)
-        nwbfile.set_electrode_group(self.group)
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_electrode_group(self.group)
         nwbfile.set_electrode_table(self.table)
         nwbfile.add_acquisition(self.container)
+
+
+class TestMultiElectricalSeries(TestElectricalSeriesIO):
+
+    def setUpElectricalSeriesContainers(self):
+        self.make_electrode_table()
+        region1 = ElectrodeTableRegion(self.table, [0, 2], 'the first and third electrodes')  # noqa: F405
+        region2 = ElectrodeTableRegion(self.table, [1, 3], 'the second and fourth electrodes')  # noqa: F405
+        data1 = list(zip(range(10), range(10, 20)))
+        data2 = list(zip(reversed(range(10)), reversed(range(10, 20))))
+        timestamps = list(map(lambda x: x/10, range(10)))
+        es1 = ElectricalSeries('test_eS1', 'a hypothetical source', data1, region1, timestamps=timestamps)  # noqa: F405
+        es2 = ElectricalSeries('test_eS2', 'a hypothetical source', data2, region2, timestamps=timestamps)  # noqa: F405
+        return (es1, es2)
+
+    def setUpElectricalSeriesBuilders(self):
+        table_builder = self.get_table_builder()
+        data = list(zip(range(10), range(10, 20)))
+        timestamps = list(map(lambda x: x/10, range(10)))
+        es1 = GroupBuilder('test_eS1',
+                            attributes={'source': 'a hypothetical source',
+                                        'namespace': base.CORE_NAMESPACE,
+                                        'comments': 'no comments',
+                                        'description': 'no description',
+                                        'neurodata_type': 'ElectricalSeries',
+                                        'help': 'Stores acquired voltage data from extracellular recordings'},
+                            datasets={'data': DatasetBuilder('data',
+                                                             data,
+                                                             attributes={'unit': 'volt',
+                                                                         'conversion': 1.0,
+                                                                         'resolution': 0.0}),
+                                      'timestamps': DatasetBuilder('timestamps',
+                                                                   timestamps,
+                                                                   attributes={'unit': 'Seconds', 'interval': 1}),
+                                      'electrodes': RegionBuilder('electrodes', [0, 2],
+                                                                  table_builder,
+                                                                  attributes={
+                                                                      'neurodata_type': 'ElectrodeTableRegion',
+                                                                      'namespace': 'core',
+                                                                      'description': 'the first and third electrodes',
+                                                                      'help': 'a subset (i.e. slice or region) of an ElectrodeTable'})})  # noqa: E501
+        data = list(zip(reversed(range(10)), reversed(range(10, 20))))
+        es2 = GroupBuilder('test_eS2',
+                            attributes={'source': 'a hypothetical source',
+                                        'namespace': base.CORE_NAMESPACE,
+                                        'comments': 'no comments',
+                                        'description': 'no description',
+                                        'neurodata_type': 'ElectricalSeries',
+                                        'help': 'Stores acquired voltage data from extracellular recordings'},
+                            datasets={'data': DatasetBuilder('data',
+                                                             data,
+                                                             attributes={'unit': 'volt',
+                                                                         'conversion': 1.0,
+                                                                         'resolution': 0.0}),
+                                      'timestamps': DatasetBuilder('timestamps',
+                                                                   timestamps,
+                                                                   attributes={'unit': 'Seconds', 'interval': 1}),
+                                      'electrodes': RegionBuilder('electrodes', [1, 3],
+                                                                  table_builder,
+                                                                  attributes={
+                                                                      'neurodata_type': 'ElectrodeTableRegion',
+                                                                      'namespace': 'core',
+                                                                      'description': 'the second and fourth electrodes',
+                                                                      'help': 'a subset (i.e. slice or region) of an ElectrodeTable'})})  # noqa: E501
+        return (es1, es2)
+
+    def setUpContainer(self):
+        raise unittest.SkipTest('Cannot run test unless addContainer is implemented')
+
+    def setUpBuilder(self):
+        raise unittest.SkipTest('Cannot run test unless addContainer is implemented')
+
+
+class TestLFP(TestMultiElectricalSeries):
+
+    def setUpContainer(self):
+        es = self.setUpElectricalSeriesContainers()
+        ret = LFP('LFP roundtrip test', es)  # noqa: F405
+        return ret
+
+    def setUpBuilder(self):
+        es = self.setUpElectricalSeriesBuilders()
+        ret = GroupBuilder('LFP',
+                           attributes={'source': 'LFP roundtrip test',
+                                       'namespace': base.CORE_NAMESPACE,
+                                       'neurodata_type': 'LFP',
+                                       'help': ('LFP data from one or more channels. Filter properties should be '
+                                                'noted in the ElectricalSeries')},
+                           groups={'test_es1': es[0], 'test_es2': es[1]})
+        return ret
+
+
+class TestFilteredEphys(TestMultiElectricalSeries):
+
+    def setUpContainer(self):
+        es = self.setUpElectricalSeriesContainers()
+        ret = FilteredEphys('FilteredEphys roundtrip test', es)  # noqa: F405
+        return ret
+
+    def setUpBuilder(self):
+        es = self.setUpElectricalSeriesBuilders()
+        ret = GroupBuilder('FilteredEphys',
+                           attributes={'source': 'FilteredEphys roundtrip test',
+                                       'namespace': base.CORE_NAMESPACE,
+                                       'neurodata_type': 'FilteredEphys',
+                                       'help': ('Ephys data from one or more channels that is subjected to filtering, '
+                                                'such as for gamma or theta oscillations (LFP has its own interface). '
+                                                'Filter properties should be noted in the ElectricalSeries')},
+                           groups={'test_es1': es[0], 'test_es2': es[1]})
+        return ret
 
 
 class TestClusteringIO(base.TestDataInterfaceIO):

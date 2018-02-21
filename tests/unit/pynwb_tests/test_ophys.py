@@ -100,6 +100,7 @@ class FluorescenceConstructor(unittest.TestCase):
         ff = Fluorescence('test_ff', ts)
         self.assertEqual(ff.source, 'test_ff')
         self.assertEqual(ff.roi_response_series['test_ts'], ts)
+        self.assertEqual(ff.roi_response_series['test_ts'], ts)
 
 
 class ImageSegmentationConstructor(unittest.TestCase):
@@ -122,12 +123,13 @@ class ImageSegmentationConstructor(unittest.TestCase):
         ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', 'device', 'excitation_lambda',
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
-        ps = PlaneSegmentation('test source', 'description', ip, 'name', rois, iSS)
+        ps = PlaneSegmentation('test source', 'description', ip, 'test_pS', rois, iSS)
 
         iS = ImageSegmentation('test_source', ps, name='test_iS')
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.source, 'test_source')
-        self.assertEqual(iS.plane_segmentations['name'], ps)
+        self.assertEqual(iS.plane_segmentations['test_pS'], ps)
+        self.assertEqual(iS['test_pS'], iS.plane_segmentations['test_pS'])
 
 
 class PlaneSegmentationConstructor(unittest.TestCase):
@@ -148,12 +150,15 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
-        iS = PlaneSegmentation('test source', 'description', ip, 'test_name', rois.values(), iSS)
-        self.assertEqual(iS.description, 'description')
-        self.assertEqual(iS.source, 'test source')
-        self.assertEqual(iS.roi, rois)
-        self.assertEqual(iS.imaging_plane, ip)
-        self.assertEqual(iS.reference_images, iSS)
+        pS = PlaneSegmentation('test source', 'description', ip, 'test_name', rois.values(), iSS)
+        self.assertEqual(pS.description, 'description')
+        self.assertEqual(pS.source, 'test source')
+        self.assertEqual(pS.roi, rois)
+        self.assertEqual(pS.imaging_plane, ip)
+        self.assertEqual(pS.reference_images, iSS)
+        self.assertEqual(pS.get_roi('roi1'), roi1)
+        self.assertEqual(pS.get_roi('roi1'), pS.roi['roi1'])
+        self.assertEqual(pS.get_roi('roi1'), pS['roi1'])
 
 
 if __name__ == '__main__':

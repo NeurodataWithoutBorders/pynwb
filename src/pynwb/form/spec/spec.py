@@ -539,6 +539,12 @@ class DatasetSpec(BaseStorageSpec):
                 if len(self['dims']) != len(self['shape']):
                     raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
+            if isinstance(dtype, list):
+                for _i, col in enumerate(dtype):
+                    if not isinstance(col, DtypeSpec):
+                        msg = 'must use DtypeSpec if defining compound dtype - found %s at element %d' % \
+                                (type(col), _i)
+                        raise ValueError(msg)
             self['dtype'] = dtype
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if default_value is not None:

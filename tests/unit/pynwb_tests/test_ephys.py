@@ -83,6 +83,7 @@ class EventWaveformConstructor(unittest.TestCase):
         ew = EventWaveform('test_ew', sES)  # noqa: F405
         self.assertEqual(ew.source, 'test_ew')
         self.assertEqual(ew.spike_event_series['test_sES'], sES)
+        self.assertEqual(ew['test_sES'], ew.spike_event_series['test_sES'])
 
 
 class ClusteringConstructor(unittest.TestCase):
@@ -129,6 +130,7 @@ class LFPTest(unittest.TestCase):
         lfp = LFP('test_lfp', eS)  # noqa: F405
         self.assertEqual(lfp.source, 'test_lfp')
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
+        self.assertEqual(lfp['test_eS'], lfp.electrical_series.get('test_eS'))
 
     def test_add_electrical_series(self):
         lfp = LFP('test_lfp')  # noqa: F405
@@ -141,6 +143,7 @@ class LFPTest(unittest.TestCase):
             'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
+        self.assertEqual(lfp['test_eS'], lfp.electrical_series.get('test_eS'))
 
 
 class FilteredEphysTest(unittest.TestCase):
@@ -155,6 +158,7 @@ class FilteredEphysTest(unittest.TestCase):
         fe = FilteredEphys('test_fe', eS)  # noqa: F405
         self.assertEqual(fe.source, 'test_fe')
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
+        self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))
 
     def test_add_electrical_series(self):
         fe = FilteredEphys('test_fe')  # noqa: F405
@@ -167,6 +171,7 @@ class FilteredEphysTest(unittest.TestCase):
             'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         fe.add_electrical_series(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
+        self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))
 
 
 class FeatureExtractionConstructor(unittest.TestCase):
