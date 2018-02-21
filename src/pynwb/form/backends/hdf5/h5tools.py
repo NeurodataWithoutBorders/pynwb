@@ -35,13 +35,13 @@ class HDF5IO(FORMIO):
         path, manager, mode = popargs('path', 'manager', 'mode', kwargs)
         if manager is None:
             manager = BuildManager(TypeMap(NamespaceCatalog()))
-        super(HDF5IO, self).__init__(manager, source=path)
-        self.__path = path
         self.__mode = mode
-        self.__built = dict()
+        self.__path = path
         self.__file = None
-        self.__read = dict()
-        self.__ref_queue = deque()
+        super(HDF5IO, self).__init__(manager, source=path)
+        self.__built = dict()       # keep track of which files have been read
+        self.__read = dict()        # keep track of each builder for each dataset/group/link
+        self.__ref_queue = deque()  # a queue of the references that need to be added
 
     @classmethod
     @docval({'name': 'namespace_catalog',
@@ -141,7 +141,6 @@ class HDF5IO(FORMIO):
 
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
-        self.open()
         f_builder = self.__read.get(self.__file)
         if f_builder is None:
             f_builder = self.__read_group(self.__file, ROOT_NAME)
@@ -262,7 +261,6 @@ class HDF5IO(FORMIO):
     @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
     def write_builder(self, **kwargs):
         f_builder = getargs('builder', kwargs)
-        self.open()
         for name, gbldr in f_builder.groups.items():
             self.write_group(self.__file, gbldr)
         for name, dbldr in f_builder.datasets.items():
