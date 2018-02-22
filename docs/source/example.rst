@@ -26,12 +26,20 @@ argument is the name of the NWB file, and the second argument is a brief descrip
    :dedent: 4
 
 Once you have created your NWB and added all of your data and other necessary metadata, you can write it to disk using
-the :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` class.
+the :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` class as a context:
 
 .. literalinclude:: ../code/creating-and-writing-nwbfile.py
    :language: python
    :start-after: save-nwbfile: start
    :end-before: save-nwbfile: end
+   :dedent: 4
+   
+or not:
+
+.. literalinclude:: ../code/creating-and-writing-nwbfile.py
+   :language: python
+   :start-after: save-nwbfile2: start
+   :end-before: save-nwbfile2: end
    :dedent: 4
 
 
