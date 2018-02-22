@@ -5,6 +5,7 @@ import six
 from datetime import datetime
 
 from pynwb import NWBFile, TimeSeries
+from pynwb.file import Subject
 from pynwb.ecephys import Device
 
 
@@ -73,3 +74,39 @@ class NWBFileTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.nwbfile.add_acquisition(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
                                                     'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+
+
+class SubjectTest(unittest.TestCase):
+    def setUp(self):
+        self.subject = Subject(age='12 mo',
+                               description='An unfortunate rat',
+                               genotype='WT',
+                               sex='M',
+                               species='Rattus norvegicus',
+                               subject_id='RAT123',
+                               weight='2 lbs',
+                               source='Subject unittest')
+        self.start = datetime(2017, 5, 1, 12, 0, 0)
+        self.path = 'nwbfile_test.h5'
+        self.nwbfile = NWBFile('a fake source', 'a test session description for a test NWBFile',
+                               'FILE123',
+                               self.start,
+                               experimenter='A test experimenter',
+                               lab='a test lab',
+                               institution='a test institution',
+                               experiment_description='a test experiment description',
+                               session_id='test1',
+                               subject=self.subject)
+
+    def test_constructor(self):
+        self.assertEqual(self.subject.age, '12 mo')
+        self.assertEqual(self.subject.description, 'An unfortunate rat')
+        self.assertEqual(self.subject.genotype, 'WT')
+        self.assertEqual(self.subject.sex, 'M')
+        self.assertEqual(self.subject.species, 'Rattus norvegicus')
+        self.assertEqual(self.subject.subject_id, 'RAT123')
+        self.assertEqual(self.subject.weight, '2 lbs')
+        self.assertEqual(self.subject.source, 'Subject unittest')
+
+    def test_nwbfile_constructor(self):
+        self.assertIs(self.nwbfile.subject, self.subject)
