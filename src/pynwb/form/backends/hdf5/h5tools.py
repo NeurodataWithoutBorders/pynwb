@@ -43,6 +43,10 @@ class HDF5IO(FORMIO):
         self.__read = dict()        # keep track of each builder for each dataset/group/link
         self.__ref_queue = deque()  # a queue of the references that need to be added
 
+    @property
+    def _file(self):
+        return self.__file
+
     @classmethod
     @docval({'name': 'namespace_catalog',
              'type': NamespaceCatalog,
