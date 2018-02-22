@@ -30,12 +30,12 @@ def main():
     # save-nwbfile: start
     from pynwb import NWBHDF5IO
     
+    filename = "example.h5"
     with NWBHDF5IO(filename, mode='w') as io:
         io.write(f)
-        
+
     # or
-   
-    filename = "example.h5"
+
     io = NWBHDF5IO(filename, mode='w')
     io.write(f)
     io.close()
