@@ -267,7 +267,6 @@ class Clustering(NWBDataInterface):
     """
 
     __nwbfields__ = (
-        'cluster_nums',
         'description',
         'num',
         'peak_over_rms',
@@ -295,7 +294,6 @@ class Clustering(NWBDataInterface):
         self.num = num
         self.peak_over_rms = list(peak_over_rms)
         self.times = times
-        self.cluster_nums = list(set(num))
 
 
 @register_class('ClusterWaveforms', CORE_NAMESPACE)
