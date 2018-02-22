@@ -108,6 +108,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         hdf5io = HDF5IO(self.path, self.manager)
         hdf5io.write(self.container)
         hdf5io.close()
+        hdf5io = HDF5IO(self.path, self.manager)
         container = hdf5io.read()
         self.assertIsInstance(container, NWBFile)
         raw_ts = container.acquisition
