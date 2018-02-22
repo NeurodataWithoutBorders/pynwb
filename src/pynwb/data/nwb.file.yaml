@@ -284,6 +284,8 @@ groups:
         quantity: '?'
       doc: Information about the animal or person from which the data was measured.
       name: subject
+      neurodata_type_def: Subject
+      neurodata_type_inc: NWBContainer
       quantity: '?'
     - doc: Metadata related to extracellular electrophysiology.
       groups:
