@@ -251,7 +251,12 @@ groups:
       doc: Group for storing format specification files.
       name: specifications
       quantity: '?'
-    - datasets:
+    - attributes:
+      - doc: Value is 'Information about the subject'
+        dtype: str
+        name: help
+        value: Information about the subject
+      datasets:
       - doc: Age of subject
         dtype: text
         name: age
