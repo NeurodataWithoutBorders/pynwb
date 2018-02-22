@@ -964,6 +964,7 @@ class TypeMap(object):
     def register_container_type(self, **kwargs):
         ''' Map a container class to a data_type '''
         namespace, data_type, container_cls = getargs('namespace', 'data_type', 'container_cls', kwargs)
+        self.__ns_catalog.get_spec(namespace, data_type)    # make sure the spec exists
         self.__container_types.setdefault(namespace, dict())
         self.__container_types[namespace][data_type] = container_cls
         self.__data_types.setdefault(container_cls, (namespace, data_type))
