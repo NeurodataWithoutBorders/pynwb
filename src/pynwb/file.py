@@ -21,7 +21,7 @@ def _not_parent(arg):
     return arg['name'] != 'parent'
 
 
-@register_class('Image', CORE_NAMESPACE)
+# @register_class('Image', CORE_NAMESPACE)
 class Image(NWBData):
     # TODO: Implement this
     pass
