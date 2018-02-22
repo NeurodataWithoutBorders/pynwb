@@ -41,6 +41,9 @@ class NWBFileMap(ObjectMapper):
             self.spec.get_group('processing').get_neurodata_type('ProcessingModule'))
         self.unmap(general_spec.get_dataset('stimulus'))
 
+        subject_spec = general_spec.get_group('subject')
+        self.map_spec('subject', subject_spec)
+
     @ObjectMapper.constructor_arg('file_name')
     def name(self, builder, manager):
         return builder.name
