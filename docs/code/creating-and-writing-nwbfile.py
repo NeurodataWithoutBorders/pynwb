@@ -33,13 +33,15 @@ def main():
     filename = "example.h5"
     with NWBHDF5IO(filename, mode='w') as io:
         io.write(f)
+    # save-nwbfile: end
+    os.remove(filename)
 
-    # or
-
+    # save-nwbfile2: start
+    filename = "example.h5"
     io = NWBHDF5IO(filename, mode='w')
     io.write(f)
     io.close()
-    # save-nwbfile: end
+    # save-nwbfile2: end
 
     os.remove(filename)
 
