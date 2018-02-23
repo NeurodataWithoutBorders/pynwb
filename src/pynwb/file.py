@@ -12,7 +12,7 @@ from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Devic
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
-from .core import LabelledDict, NWBData, NWBDataInterface, MultiContainerInterface
+from .core import LabelledDict, NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface
 
 from h5py import RegionReference
 
@@ -21,7 +21,7 @@ def _not_parent(arg):
     return arg['name'] != 'parent'
 
 
-@register_class('Image', CORE_NAMESPACE)
+# @register_class('Image', CORE_NAMESPACE)
 class Image(NWBData):
     # TODO: Implement this
     pass
@@ -31,6 +31,41 @@ class Image(NWBData):
 class SpecFile(Container):
     # TODO: Implement this
     pass
+
+
+@register_class('Subject', CORE_NAMESPACE)
+class Subject(NWBContainer):
+
+    __nwbfields__ = (
+        'age',
+        'description',
+        'genotype',
+        'sex',
+        'species',
+        'subject_id',
+        'weight',
+    )
+
+    @docval({'name': 'age', 'type': str, 'doc': 'the age of the subject', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'a description of the subject', 'default': None},
+            {'name': 'genotype', 'type': str, 'doc': 'the genotype of the subject', 'default': None},
+            {'name': 'sex', 'type': str, 'doc': 'the sex of the subject', 'default': None},
+            {'name': 'species', 'type': str, 'doc': 'the species of the subject', 'default': None},
+            {'name': 'subject_id', 'type': str, 'doc': 'a unique identifier for the subject', 'default': None},
+            {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None},
+            {'name': 'source', 'type': str, 'doc': 'the source of this information', 'default': None})
+    def __init__(self, **kwargs):
+        kwargs['name'] = 'subject'
+        kwargs['source'] = getargs('source', kwargs)
+        pargs, pkwargs = fmt_docval_args(super(Subject, self).__init__, kwargs)
+        super(Subject, self).__init__(*pargs, **pkwargs)
+        self.age = getargs('age', kwargs)
+        self.description = getargs('description', kwargs)
+        self.genotype = getargs('genotype', kwargs)
+        self.sex = getargs('sex', kwargs)
+        self.species = getargs('species', kwargs)
+        self.subject_id = getargs('subject_id', kwargs)
+        self.weight = getargs('weight', kwargs)
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
@@ -110,6 +145,7 @@ class NWBFile(MultiContainerInterface):
                      'institution',
                      'ec_electrodes',
                      'epochs',
+                     'subject',
                      'epoch_tags',)
 
     __current_version = None
@@ -157,7 +193,9 @@ class NWBFile(MultiContainerInterface):
             {'name': 'ogen_sites', 'type': (list, tuple),
              'doc': 'OptogeneticStimulusSites that belong to this NWBFile', 'default': None},
             {'name': 'devices', 'type': (list, tuple),
-             'doc': 'Device objects belonging to this NWBFile', 'default': None})
+             'doc': 'Device objects belonging to this NWBFile', 'default': None},
+            {'name': 'subject', 'type': Subject,
+             'doc': 'subject metadata', 'default': None})
     def __init__(self, **kwargs):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
         pkwargs['name'] = 'root'
@@ -194,6 +232,8 @@ class NWBFile(MultiContainerInterface):
         self.ic_electrodes = self._to_dict('ic_electrodes', kwargs)
         self.imaging_planes = self._to_dict('imaging_planes', kwargs)
         self.ogen_sites = self._to_dict('ogen_sites', kwargs)
+
+        self.subject = getargs('subject', kwargs)
 
         recommended = [
             'experimenter',

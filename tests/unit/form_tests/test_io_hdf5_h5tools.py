@@ -6,7 +6,6 @@ from pynwb.form.backends.hdf5.h5tools import HDF5IO
 from pynwb.form.backends.hdf5 import H5DataIO
 from pynwb.form.build import DatasetBuilder
 
-import h5py
 import tempfile
 import numpy as np
 
@@ -20,10 +19,9 @@ class H5IOTest(unittest.TestCase):
         # On Windows h5py cannot truncate an open file in write mode.
         # The temp file will be closed before h5py truncates it
         # and will be removed during the tearDown step.
-        name = self.test_temp_file.name
         self.test_temp_file.close()
-        self.f = h5py.File(name, 'w')
         self.io = HDF5IO(self.test_temp_file.name)
+        self.f = self.io._file
 
     def tearDown(self):
         path = self.f.filename

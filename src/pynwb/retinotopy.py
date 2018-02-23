@@ -63,7 +63,7 @@ class AxisMap(NWBContainer):
         self.dimension = dimension
 
 
-@register_class('ImageRetinotopy', CORE_NAMESPACE)    # make sure to uncomment this after this class is implemented
+@register_class('ImagingRetinotopy', CORE_NAMESPACE)
 class ImagingRetinotopy(NWBDataInterface):
     """
     Intrinsic signal optical imaging or widefield imaging for measuring retinotopy. Stores orthogonal
