@@ -219,9 +219,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         self.__carg2spec = dict()
         self.__map_spec(spec)
 
-    def hack_get_subspec_values(self, *args, **kwargs):
-        return self.__get_subspec_values(*args, **kwargs)
-
     @property
     def spec(self):
         ''' the Spec used in this ObjectMapper '''
@@ -475,8 +472,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
             if attr_value is None:
                 if spec.required:
-                    warnings.warn("missing required attribute '%s' for '%s' of type '%s'"
-                                  % (spec.name, builder.name, self.spec.data_type_def))
+                    msg = "missing required attribute '%s' for '%s' of type '%s'"\
+                                  % (spec.name, builder.name, self.spec.data_type_def)
+                    warnings.warn(msg)
                 continue
             builder.set_attribute(spec.name, attr_value)
 
@@ -768,7 +766,7 @@ class TypeMap(object):
                 else:
                     return Container
             else:
-                return ('array_data',)
+                return ('array_data', 'data',)
 
     @classmethod
     def __get_constructor(self, base, addl_fields):
@@ -966,6 +964,7 @@ class TypeMap(object):
     def register_container_type(self, **kwargs):
         ''' Map a container class to a data_type '''
         namespace, data_type, container_cls = getargs('namespace', 'data_type', 'container_cls', kwargs)
+        self.__ns_catalog.get_spec(namespace, data_type)    # make sure the spec exists
         self.__container_types.setdefault(namespace, dict())
         self.__container_types[namespace][data_type] = container_cls
         self.__data_types.setdefault(container_cls, (namespace, data_type))

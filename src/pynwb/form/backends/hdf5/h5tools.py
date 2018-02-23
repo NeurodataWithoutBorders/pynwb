@@ -35,13 +35,17 @@ class HDF5IO(FORMIO):
         path, manager, mode = popargs('path', 'manager', 'mode', kwargs)
         if manager is None:
             manager = BuildManager(TypeMap(NamespaceCatalog()))
-        super(HDF5IO, self).__init__(manager, source=path)
-        self.__path = path
         self.__mode = mode
-        self.__built = dict()
+        self.__path = path
         self.__file = None
-        self.__read = dict()
-        self.__ref_queue = deque()
+        super(HDF5IO, self).__init__(manager, source=path)
+        self.__built = dict()       # keep track of which files have been read
+        self.__read = dict()        # keep track of each builder for each dataset/group/link
+        self.__ref_queue = deque()  # a queue of the references that need to be added
+
+    @property
+    def _file(self):
+        return self.__file
 
     @classmethod
     @docval({'name': 'namespace_catalog',
@@ -141,7 +145,6 @@ class HDF5IO(FORMIO):
 
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
-        self.open()
         f_builder = self.__read.get(self.__file)
         if f_builder is None:
             f_builder = self.__read_group(self.__file, ROOT_NAME)
@@ -262,7 +265,6 @@ class HDF5IO(FORMIO):
     @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
     def write_builder(self, **kwargs):
         f_builder = getargs('builder', kwargs)
-        self.open()
         for name, gbldr in f_builder.groups.items():
             self.write_group(self.__file, gbldr)
         for name, dbldr in f_builder.datasets.items():
@@ -352,23 +354,46 @@ class HDF5IO(FORMIO):
         else:
             return np.dtype([(x['name'], cls.__resolve_dtype_helper__(x['dtype'])) for x in dtype])
 
-    @classmethod
     @docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
             {'name': 'attributes',
              'type': dict,
              'doc': 'a dict containing the attributes on the Group, indexed by attribute name'})
-    def set_attributes(cls, **kwargs):
+    def set_attributes(self, **kwargs):
         obj, attributes = getargs('obj', 'attributes', kwargs)
         for key, value in attributes.items():
-            if any(isinstance(value, t) for t in (set, list, tuple)):
+            if isinstance(value, (set, list, tuple)):
                 tmp = tuple(value)
                 if len(tmp) > 0:
-                    if isinstance(tmp[0], str):
+                    if isinstance(tmp[0], str):          # a list of strings will need a special type
                         max_len = max(len(s) for s in tmp)
                         dt = '|S%d' % max_len
                         value = np.array(tmp, dtype=dt)
-                    value = np.array(value)
-            obj.attrs[key] = value
+                    elif isinstance(tmp[0], Container):  # a list of references
+                        self.__queue_ref(self._make_attr_ref_filler(obj, key, tmp))
+                    else:
+                        value = np.array(value)
+                else:
+                    msg = "ignoring attribute '%s' from '%s' - value is empty list" % (key, obj.name)
+                    warnings.warn(msg)
+            elif isinstance(value, (Container, Builder)):           # a reference
+                self.__queue_ref(self._make_attr_ref_filler(obj, key, value))
+            else:
+                obj.attrs[key] = value                   # a regular scalar
+
+    def _make_attr_ref_filler(self, obj, key, value):
+        '''
+            Make the callable for setting references to attributes
+        '''
+        if isinstance(value, (tuple, list)):
+            def _filler():
+                ret = list()
+                for item in value:
+                    ret.append(self.__get_ref(item))
+                obj.attrs[key] = ret
+        else:
+            def _filler():
+                obj.attrs[key] = self.__get_ref(value)
+        return _filler
 
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},
             {'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder to write'},
@@ -618,20 +643,19 @@ class HDF5IO(FORMIO):
             raise e
         return dset
 
-    def __get_ref_filler(self, dset, sl, f):
-        def _call():
-            dset[sl] = f()
-        return _call
-
-    def __get_ref(self, container, region=None):
-        if isinstance(container, Container):
-            builder = self.manager.build(container)
+    @docval({'name': 'container', 'type': (Builder, Container), 'doc': 'the object to reference'},
+            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the region reference indexing object',
+             'default': None},
+            returns='the reference', rtype=Reference)
+    def __get_ref(self, **kwargs):
+        container, region = getargs('container', 'region', kwargs)
+        if isinstance(container, Builder):
+            if isinstance(container, LinkBuilder):
+                builder = container.target_builder
+            else:
+                builder = container
         else:
-            if isinstance(container, Builder):
-                if isinstance(container, LinkBuilder):
-                    builder = container.target_builder
-                else:
-                    builder = container
+            builder = self.manager.build(container)
         path = self.__get_path(builder)
         if region is not None:
             dset = self.__file[path]

@@ -464,7 +464,9 @@ class DataIO(with_metaclass(ABCMeta, object)):
 
 class RegionSlicer(with_metaclass(ABCMeta, object)):
     '''
-    A class to control getting using a region
+    A abstract base class to control getting using a region
+
+    Subclasses must implement `__getitem__` and `__len__`
     '''
 
     @abstractproperty

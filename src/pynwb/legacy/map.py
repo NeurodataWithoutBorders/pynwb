@@ -32,6 +32,8 @@ class TypeMapLegacy(TypeMap):
 
         if builder.name == 'root':
             return 'NWBFile'
+        elif builder.name == 'subject' and builder.parent.name == 'general':
+            return 'Subject'
         else:
 
             attrs = builder.attributes
