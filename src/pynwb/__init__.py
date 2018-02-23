@@ -69,14 +69,14 @@ def get_manager(**kwargs):
         if isinstance(extensions, list):
             for ext in extensions:
                 if isinstance(ext, str):
-                    type_map.load_namespace(ext)
+                    type_map.load_namespaces(ext)
                 elif isinstance(ext, TypeMap):
                     type_map.merge(ext)
                 else:
                     msg = 'extensions must be a list of paths to namespace specs or a TypeMaps'
                     raise ValueError(msg)
         elif isinstance(extensions, str):
-            type_map.load_namespace(extensions)
+            type_map.load_namespaces(extensions)
         elif isinstance(extensions, TypeMap):
             type_map.merge(extensions)
     manager = BuildManager(type_map)
