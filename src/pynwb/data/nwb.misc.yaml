@@ -117,36 +117,20 @@ groups:
     a machine-readable way.
   neurodata_type_def: IntervalSeries
   neurodata_type_inc: TimeSeries
-- attributes:
-  - doc: Value is 'Estimated spike times from a single unit'
-    dtype: text
-    name: help
-    value: Estimated spike times from a single unit
+- datasets:
+  - name: unit_ids
+    doc: a unique identifier for each element
+    neurodata_type_inc: ElementIdentifiers
+  - name: spike_times_index
+    doc: the index into the spike times dataset
+    neurodata_type_inc: VectorIndex
+  - name: spike_times
+    doc: the index into the vector data
+    neurodata_type_inc: VectorData
   doc: Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group
     contains a group for each unit. The name of the group should match the value in
     the source module, if that is possible/relevant (e.g., name of ROIs from Segmentation
     module).
-  groups:
-  - attributes:
-    - doc: Store times for a particulare UnitTime
-      dtype: text
-      name: help
-      value: Times for a particular UnitTime object
-    - doc: Description of the unit (eg, cell type).
-      dtype: text
-      name: unit_description
-    datasets:
-    - dims:
-      - num_events
-      doc: Spike time for the units (exact or estimated)
-      dtype: float64
-      name: times
-      shape:
-      - null
-    doc: Group storing times for &lt;unit_N&gt;.
-    neurodata_type_def: SpikeUnit
-    neurodata_type_inc: NWBDataInterface
-    quantity: +
   default_name: UnitTimes
   neurodata_type_def: UnitTimes
   neurodata_type_inc: NWBDataInterface

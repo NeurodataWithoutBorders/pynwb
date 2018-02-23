@@ -5,6 +5,42 @@ datasets:
     name: help
   doc: The attributes specified here are included in all interfaces.
   neurodata_type_def: NWBData
+- default_name: vector_data
+  attributes:
+  - doc: a help string
+    dtype: text
+    name: help
+    value: Values for each element in id
+  doc: Data values indexed by pointer
+  dtype: any
+  neurodata_type_def: VectorData
+  neurodata_type_inc: NWBData
+- default_name: vector_index
+  attributes:
+  - doc: a help string
+    dtype: text
+    name: help
+    value: reference for each item in id into data
+  doc: Pointers that index data values
+  dtype:
+    target_type: VectorData
+    reftype: region
+  shape:
+  - null
+  neurodata_type_def: VectorIndex
+  neurodata_type_inc: NWBData
+- default_name: element_id
+  attributes:
+  - doc: a help string
+    dtype: text
+    name: help
+    value: identifiers for each element stored VectorDataInterface
+  doc: a unique identifier for each element
+  dtype: int
+  shape:
+  - null
+  neurodata_type_def: ElementIdentifiers
+  neurodata_type_inc: NWBData
 groups:
 - attributes:
   - doc: Short description of what this type of NWBContainer contains.
