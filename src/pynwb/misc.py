@@ -1,11 +1,12 @@
 import numpy as np
 from collections import Iterable
 
+from .form import get_region_slicer
 from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer, MultiContainerInterface
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -203,7 +204,9 @@ class UnitTimes(NWBDataInterface):
         )
 
 
-    @docval({'name': 'unit_ids', 'type': ('array_data', 'data'),
+    @docval({'name': 'source', 'type': str,
+             'doc': 'Name, path or description of where unit times originated.'},
+            {'name': 'unit_ids', 'type': ('array_data', 'data'),
              'doc': 'the identifiers for the units stored in this interface', 'default': list()},
             {'name': 'spike_times', 'type': ('array_data', 'data'),
              'doc': 'a concatenated list of spike times for the units stored in this interface',
@@ -211,11 +214,9 @@ class UnitTimes(NWBDataInterface):
             {'name': 'spike_times_idx', 'type': ('array_data', 'data'),
              'doc': 'the indices in spike_times that correspond to each unit in unit_ids',
              'default': list()},
-            {'name': 'source', 'type': str,
-             'doc': 'Name, path or description of where unit times originated.'},
             {'name': 'name', 'type': str, 'doc': 'Name of this UnitTimes interface', 'default': 'UnitTimes'})
     def __init__(self, **kwargs):
-        unit_ids, spike_times, spike_times_idx = popargs('spike_times', 'spike_times', 'spike_times_idx', kwargs)
+        unit_ids, spike_times, spike_times_idx = popargs('unit_ids', 'spike_times', 'spike_times_idx', kwargs)
         call_docval_func(super(UnitTimes, self).__init__, kwargs)
         self.unit_ids = unit_ids
         self.spike_times = spike_times
@@ -231,9 +232,9 @@ class UnitTimes(NWBDataInterface):
 
     @docval({'name': 'unit_id', 'type': int, 'doc': 'the unit to add spike times for'},
             {'name': 'spike_times', 'type': ('array_data',), 'doc': 'the spike times for the unit'})
-    def add_spike_times(self, **kwarg):
+    def add_spike_times(self, **kwargs):
         unit_id, spike_times = getargs('unit_id', 'spike_times', kwargs)
         self.unit_ids.append(unit_id)
         l = len(self.spike_times)
         self.spike_times_idx.append(get_region_slicer(self.spike_times, slice(l, l+len(spike_times))))
-        self.spike_times.append(spike_times)
+        self.spike_times.extend(spike_times)
