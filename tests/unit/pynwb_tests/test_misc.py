@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, SpikeUnit, UnitTimes
+from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, UnitTimes
 
 
 class AnnotationSeriesConstructor(unittest.TestCase):
@@ -48,23 +48,24 @@ class IntervalSeriesConstructor(unittest.TestCase):
 
 class UnitTimesConstructor(unittest.TestCase):
     def test_init(self):
-        unit_times = [1.0, 2.0]
+        ut = UnitTimes('UnitTimes constructor unit test')
+        self.assertEqual(ut.source, 'UnitTimes constructor unit test')
+        self.assertEqual(ut.name, 'UnitTimes')
+        self.assertEqual(ut.unit_ids, list())
+        self.assertEqual(ut.spike_times, list())
+        self.assertEqual(ut.spike_times_idx, list())
 
-        su1 = SpikeUnit('su1', unit_times, 'unit_description_1', 'unit_source_1')
-        self.assertEqual(su1.times, unit_times)
-        self.assertEqual(su1.unit_description, 'unit_description_1')
-        self.assertEqual(su1.source, 'unit_source_1')
-
-        su2 = SpikeUnit('su2', unit_times, 'unit_description_2', 'unit_source_2')
-        self.assertEqual(su2.times, unit_times)
-        self.assertEqual(su2.unit_description, 'unit_description_2')
-        self.assertEqual(su2.source, 'unit_source_2')
-
-        sul = {'su1': su1, 'su2': su2}
-        ut = UnitTimes('test_ut', sul)
-        self.assertEqual(ut.source, 'test_ut')
-        self.assertEqual(ut.spike_units, sul)
-
+    def test_add_spike_times(self):
+        ut = UnitTimes('UnitTimes add_spike_times unit test')
+        ut.add_spike_times(0, [0, 1, 2])
+        ut.add_spike_times(1, [3, 4, 5])
+        self.assertEqual(ut.unit_ids, [0, 1])
+        self.assertEqual(ut.spike_times, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(len(ut.spike_times_idx), 2)
+        self.assertEqual(ut.spike_times_idx[0].target, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(ut.spike_times_idx[0].slice, slice(0,3))
+        self.assertEqual(ut.spike_times_idx[1].target, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(ut.spike_times_idx[1].slice, slice(3,6))
 
 if __name__ == '__main__':
     unittest.main()
