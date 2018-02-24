@@ -469,6 +469,20 @@ class RegionSlicer(with_metaclass(ABCMeta, object)):
     Subclasses must implement `__getitem__` and `__len__`
     '''
 
+    @docval({'name': 'target', 'type': None, 'doc': 'the target to slice'},
+            {'name': 'slice', 'type': None, 'doc': 'the region to slice'})
+    def __init__(self, **kwargs):
+        self.__target = getargs('target', kwargs)
+        self.__slice = getargs('slice', kwargs)
+
+    @property
+    def target(self):
+        return self.__target
+
+    @property
+    def slice(self):
+        return self.__slice
+
     @abstractproperty
     def __getitem__(self, idx):
         pass
@@ -484,9 +498,10 @@ class ListSlicer(RegionSlicer):
             {'name': 'region', 'type': (list, tuple, slice), 'doc': 'the region reference to use to slice'})
     def __init__(self, **kwargs):
         self.__dataset, self.__region = getargs('dataset', 'region', kwargs)
+        super(ListSlicer, self).__init__(self.__dataset, self.__region)
         if isinstance(self.__region, slice):
             self.__getter = itemgetter(self.__region)
-            self.__len = slice_len(self.__region)  # noqa: F821
+            self.__len = len(range(*self.__region.indices(len(self.__dataset))))
         else:
             self.__getter = itemgetter(*self.__region)
             self.__len = len(self.__region)
