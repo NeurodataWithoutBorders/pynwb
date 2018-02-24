@@ -238,12 +238,10 @@ class HDF5IO(FORMIO):
 
             # print scalar, isinstance(scalar, bytes)
             if isinstance(scalar, RegionReference):
-                cls = RegionBuilder
                 target = h5obj.file[scalar]
                 target_builder = self.__read_dataset(target)
                 self.__set_built(target.file.filename, target.name, target_builder)
-                kwargs['builder'] = target_builder
-                kwargs['region'] = scalar
+                kwargs['data'] = RegionBuilder(scalar, target_builder)
                 kwargs.pop('dtype')
                 kwargs.pop('maxshape')
             else:

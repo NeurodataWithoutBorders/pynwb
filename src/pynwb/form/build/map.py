@@ -446,7 +446,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 if not isinstance(container, DataRegion):
                     msg = "'container' must be of type DataRegion if spec represents region reference"
                     raise ValueError(msg)
-                builder = RegionBuilder(name, container.region, manager.build(container.data))
+                builder = DatasetBuilder(name, RegionBuilder(container.region, manager.build(container.data)),
+                                         parent=parent, source=source)
             else:
                 builder = DatasetBuilder(name, data=container.data, parent=parent,
                                          dtype=self.convert_dtype(self.__spec.dtype), source=source)
