@@ -10,7 +10,7 @@ datasets:
   - doc: a help string
     dtype: text
     name: help
-    value: Values for each element in id
+    value: Values for a list of elements
   doc: Data values indexed by pointer
   dtype: any
   neurodata_type_def: VectorData
@@ -20,7 +20,7 @@ datasets:
   - doc: a help string
     dtype: text
     name: help
-    value: reference for each item in id into data
+    value: indexes into a list of values for a list of elements
   doc: Pointers that index data values
   dtype:
     target_type: VectorData
@@ -34,7 +34,7 @@ datasets:
   - doc: a help string
     dtype: text
     name: help
-    value: identifiers for each element stored VectorDataInterface
+    value: unique identifiers for a list of elements
   doc: a unique identifier for each element
   dtype: int
   shape:
