@@ -188,52 +188,52 @@ class IntervalSeries(TimeSeries):
         return self.__interval_timestamps
 
 
-@register_class('SpikeUnit', CORE_NAMESPACE)
-class SpikeUnit(NWBContainer):
-    """
-    For use in the UnitTimes class.
-    """
-
-    __nwbfields__ = ('times',
-                     'unit_description')
-
-    _help = "Estimated spike times from a single unit"
-
-    @docval({'name': 'name', 'type': str, 'doc': 'Name of the SpikeUnit'},
-            {'name': 'times', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Spike time for the units (exact or estimated)'},
-            {'name': 'unit_description', 'type': str, 'doc': 'Description of the unit (eg, cell type).'},
-            {'name': 'source', 'type': str,
-             'doc': 'Name, path or description of where unit times originated. \
-             This is necessary only if the info here differs from or is more fine-grained \
-             than the interfaces source field.'})
-    def __init__(self, **kwargs):
-        times, unit_description = popargs('times', 'unit_description', kwargs)
-        call_docval_func(super(SpikeUnit, self).__init__, kwargs)
-        self.times = times
-        self.unit_description = unit_description
-
-
 @register_class('UnitTimes', CORE_NAMESPACE)
-class UnitTimes(MultiContainerInterface):
+class UnitTimes(NWBDataInterface):
     """
     Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group contains a group
     for each unit. The name of the group should match the value in the source module, if that is
     possible/relevant (e.g., name of ROIs from Segmentation module).
     """
 
-    __nwbfields__ = ('unit_list', )
+    __nwbfields__ = (
+        'unit_ids',
+        'spike_times_idx',
+        'spike_times',
+        )
 
-    __clsconf__ = {
-        'attr': 'spike_units',
-        'type': SpikeUnit,
-        'add': 'add_spike_unit',
-        'get': 'get_spike_unit',
-        'create': 'create_spike_unit'
-    }
 
-    _help = "Estimated spike times from a single unit"
+    @docval({'name': 'unit_ids', 'type': ('array_data', 'data'),
+             'doc': 'the identifiers for the units stored in this interface', 'default': list()},
+            {'name': 'spike_times', 'type': ('array_data', 'data'),
+             'doc': 'a concatenated list of spike times for the units stored in this interface',
+             'default': list()},
+            {'name': 'spike_times_idx', 'type': ('array_data', 'data'),
+             'doc': 'the indices in spike_times that correspond to each unit in unit_ids',
+             'default': list()},
+            {'name': 'source', 'type': str,
+             'doc': 'Name, path or description of where unit times originated.'},
+            {'name': 'name', 'type': str, 'doc': 'Name of this UnitTimes interface', 'default': 'UnitTimes'})
+    def __init__(self, **kwargs):
+        unit_ids, spike_times, spike_times_idx = popargs('spike_times', 'spike_times', 'spike_times_idx', kwargs)
+        call_docval_func(super(UnitTimes, self).__init__, kwargs)
+        self.unit_ids = unit_ids
+        self.spike_times = spike_times
+        self.spike_times_idx = spike_times_idx
 
-    @property
-    def unit_list(self):
-        return list(sorted(si.name for si in self.spike_units.values()))
+    @docval({'name': 'unit_id', 'type': int,
+             'doc': 'the unit to retrieve spike times for', 'default': None},
+            {'name': 'index', 'type': int,
+             'doc': 'the index of the unit in unit_ids to retrieve spike times for', 'default': None})
+    def get_unit_spike_times(self, **kwarg):
+        unit_id, index = getargs('unit_id', 'index', kwargs)
+        self.spike_times_idx[index]
+
+    @docval({'name': 'unit_id', 'type': int, 'doc': 'the unit to add spike times for'},
+            {'name': 'spike_times', 'type': ('array_data',), 'doc': 'the spike times for the unit'})
+    def add_spike_times(self, **kwarg):
+        unit_id, spike_times = getargs('unit_id', 'spike_times', kwargs)
+        self.unit_ids.append(unit_id)
+        l = len(self.spike_times)
+        self.spike_times_idx.append(get_region_slicer(self.spike_times, slice(l, l+len(spike_times))))
+        self.spike_times.append(spike_times)
