@@ -88,8 +88,13 @@ class TestMapNWBContainer(unittest.TestCase):
                             self.assertContainerEqual(f1[k], f2[k])
                 elif isinstance(f1, NWBContainer):
                     self.assertContainerEqual(f1, f2)
-                elif isinstance(f1, NWBData):
-                    self.assertDataEqual(f1, f2)
+                elif isinstance(f1, NWBData) or isinstance(f2, NWBData):
+                    if isinstance(f1, NWBData) and isinstance(f2, NWBData):
+                        self.assertDataEqual(f1, f2)
+                    elif isinstance(f1, NWBData):
+                        self.assertTrue(np.array_equal(f1.data, f2))
+                    elif isinstance(f2, NWBData):
+                        self.assertTrue(np.array_equal(f1.data, f2))
                 else:
                     self.assertEqual(f1, f2)
 
