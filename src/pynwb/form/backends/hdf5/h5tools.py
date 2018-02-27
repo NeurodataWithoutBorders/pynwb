@@ -9,7 +9,8 @@ from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
 from ...data_utils import DataChunkIterator, get_shape
-from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, RegionBuilder, TypeMap
+from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager,\
+                     RegionBuilder, ReferenceBuilder, TypeMap
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, GroupSpec
 from ...spec import NamespaceBuilder
 
@@ -230,27 +231,27 @@ class HDF5IO(FORMIO):
             name = str(os.path.basename(h5obj.name))
         kwargs['source'] = self.__path
         ndims = len(h5obj.shape)
-        cls = DatasetBuilder
         if ndims == 0:                                       # read scalar
             scalar = h5obj[()]
             if isinstance(scalar, bytes):
                 scalar = scalar.decode('UTF-8')
 
             # print scalar, isinstance(scalar, bytes)
-            if isinstance(scalar, RegionReference):
+            if isinstance(scalar, Reference):
                 target = h5obj.file[scalar]
                 target_builder = self.__read_dataset(target)
                 self.__set_built(target.file.filename, target.name, target_builder)
-                kwargs['data'] = RegionBuilder(scalar, target_builder)
-                kwargs.pop('dtype')
-                kwargs.pop('maxshape')
+                if isinstance(scalar, RegionReference):
+                    kwargs['data'] = RegionBuilder(scalar, target_builder)
+                else:
+                    kwargs['data'] = ReferenceBuilder(target_builder)
             else:
                 kwargs["data"] = scalar
         elif ndims == 1 and h5obj.dtype == np.dtype('O'):    # read list of strings
             kwargs["data"] = list(h5obj[()])
         else:
             kwargs["data"] = h5obj
-        ret = cls(name, **kwargs)
+        ret = DatasetBuilder(name, **kwargs)
         return ret
 
     def open(self):
@@ -477,7 +478,6 @@ class HDF5IO(FORMIO):
             data = data.data
         attributes = builder.attributes
         options['dtype'] = builder.dtype
-        dtype = options['dtype']
         dset = None
         link = None
         if isinstance(options['dtype'], list):
@@ -489,6 +489,7 @@ class HDF5IO(FORMIO):
             if len(refs) > 0:
                 _dtype = self.__resolve_dtype__(options['dtype'], data)
 
+                @self.__queue_ref
                 def _filler():
                     ret = list()
                     for item in data:
@@ -499,10 +500,46 @@ class HDF5IO(FORMIO):
                     dset = parent.require_dataset(name, shape=(len(ret),), dtype=_dtype)
                     dset[:] = ret
                     self.set_attributes(dset, attributes)
-                self.__queue_ref(_filler)
                 return
             else:
                 dset = self.__list_fill__(parent, name, data, options)
+        elif self.__is_ref(options['dtype']):
+            _dtype = self.__dtypes[options['dtype']]
+            if isinstance(data, RegionBuilder):
+
+                @self.__queue_ref
+                def _filler():
+                    ref = self.__get_ref(data.builder, data.region)
+                    dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    self.set_attributes(dset, attributes)
+
+            elif isinstance(data, ReferenceBuilder):
+
+                @self.__queue_ref
+                def _filler():
+                    ref = self.__get_ref(data.builder)
+                    dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    self.set_attributes(dset, attributes)
+            else:
+                if options['dtype'] == 'region':
+
+                    @self.__queue_ref
+                    def _filler():
+                        refs = list()
+                        for item in data:
+                            refs.append(self.__get_ref(item.builder, item.region))
+                        dset = parent.require_dataset(name, data=refs, shape=None, dtype=_dtype)
+                        self.set_attributes(dset, attributes)
+                else:
+
+                    @self.__queue_ref
+                    def _filler():
+                        refs = list()
+                        for item in data:
+                            refs.append(self.__get_ref(item.builder))
+                        dset = parent.require_dataset(name, data=refs, shape=None, dtype=_dtype)
+                        self.set_attributes(dset, attributes)
+            return
         else:
             if isinstance(data, str):
                 dset = self.__scalar_fill__(parent, name, data, options)
@@ -516,23 +553,6 @@ class HDF5IO(FORMIO):
                 else:
                     link = SoftLink(data.name)
                 parent[name] = link
-            elif isinstance(data, Builder):
-                _dtype = self.__dtypes[options['dtype']]
-                if dtype == 'region':
-
-                    def _filler():
-                        ref = self.__get_ref(data, builder.region)
-                        dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
-                        self.set_attributes(dset, attributes)
-                    self.__queue_ref(_filler)
-                else:
-
-                    def _filler():
-                        ref = self.__get_ref(data)
-                        dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
-                        self.set_attributes(dset, attributes)
-                    self.__queue_ref(_filler)
-                return
             elif isinstance(data, Iterable) and not self.isinstance_inmemory_array(data):
                 dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100), options)
             elif hasattr(data, '__len__'):
@@ -641,7 +661,7 @@ class HDF5IO(FORMIO):
             raise e
         return dset
 
-    @docval({'name': 'container', 'type': (Builder, Container), 'doc': 'the object to reference'},
+    @docval({'name': 'container', 'type': (Builder, Container, ReferenceBuilder), 'doc': 'the object to reference'},
             {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the region reference indexing object',
              'default': None},
             returns='the reference', rtype=Reference)
