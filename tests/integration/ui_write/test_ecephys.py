@@ -18,7 +18,6 @@ class TestUnitTimesIO(base.TestDataInterfaceIO):
         ut.add_spike_times(1, [3, 4, 5])
         return ut
 
-
     def setUpBuilder(self):
         ids_builder = DatasetBuilder('unit_ids', [0, 1],
                                      attributes={'neurodata_type': 'ElementIdentifiers',
@@ -28,7 +27,8 @@ class TestUnitTimesIO(base.TestDataInterfaceIO):
                                     attributes={'neurodata_type': 'VectorData',
                                                 'namespace': 'core',
                                                 'help': 'Values for a list of elements'})
-        sti_builder = DatasetBuilder('spike_times_index', [RegionBuilder(slice(0,3), st_builder), RegionBuilder(slice(3,6), st_builder)],
+        sti_builder = DatasetBuilder('spike_times_index',
+                                     [RegionBuilder(slice(0, 3), st_builder), RegionBuilder(slice(3, 6), st_builder)],
                                      attributes={'neurodata_type': 'VectorIndex',
                                                  'namespace': 'core',
                                                  'help': 'indexes into a list of values for a list of elements'})
@@ -36,7 +36,7 @@ class TestUnitTimesIO(base.TestDataInterfaceIO):
                             attributes={'neurodata_type': 'UnitTimes',
                                         'namespace': 'core',
                                         'help': 'Estimated spike times from a single unit',
-                                        'source': 'unit times source'},
+                                        'source': 'UnitTimes integration test'},
                             datasets={'unit_ids': ids_builder,
                                       'spike_times': st_builder,
                                       'spike_times_index': sti_builder})
@@ -123,8 +123,7 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
                                       'timestamps': DatasetBuilder('timestamps',
                                                                    timestamps,
                                                                    attributes={'unit': 'Seconds', 'interval': 1}),
-                                      'electrodes': RegionBuilder('electrodes', [0, 2],
-                                                                  table_builder,
+                                      'electrodes': DatasetBuilder('electrodes', RegionBuilder([0, 2], table_builder),
                                                                   attributes={
                                                                       'neurodata_type': 'ElectrodeTableRegion',
                                                                       'namespace': 'core',
@@ -171,9 +170,8 @@ class TestMultiElectricalSeries(TestElectricalSeriesIO):
                                       'timestamps': DatasetBuilder('timestamps',
                                                                    timestamps,
                                                                    attributes={'unit': 'Seconds', 'interval': 1}),
-                                      'electrodes': RegionBuilder('electrodes', [0, 2],
-                                                                  table_builder,
-                                                                  attributes={
+                                      'electrodes': DatasetBuilder('electrodes', RegionBuilder([0, 2], table_builder),
+                                                                   attributes={
                                                                       'neurodata_type': 'ElectrodeTableRegion',
                                                                       'namespace': 'core',
                                                                       'description': 'the first and third electrodes',
@@ -194,9 +192,8 @@ class TestMultiElectricalSeries(TestElectricalSeriesIO):
                                       'timestamps': DatasetBuilder('timestamps',
                                                                    timestamps,
                                                                    attributes={'unit': 'Seconds', 'interval': 1}),
-                                      'electrodes': RegionBuilder('electrodes', [1, 3],
-                                                                  table_builder,
-                                                                  attributes={
+                                      'electrodes': DatasetBuilder('electrodes', RegionBuilder([1, 3], table_builder),
+                                                                   attributes={
                                                                       'neurodata_type': 'ElectrodeTableRegion',
                                                                       'namespace': 'core',
                                                                       'description': 'the second and fourth electrodes',
