@@ -117,7 +117,12 @@ groups:
     a machine-readable way.
   neurodata_type_def: IntervalSeries
   neurodata_type_inc: TimeSeries
-- datasets:
+- attributes:
+  - doc: Value is 'Estimated spike times from a single unit'
+    dtype: text
+    name: help
+    value: Estimated spike times from a single unit
+  datasets:
   - name: unit_ids
     doc: a unique identifier for each element
     neurodata_type_inc: ElementIdentifiers
