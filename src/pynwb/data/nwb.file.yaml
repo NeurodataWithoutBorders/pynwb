@@ -227,6 +227,7 @@ groups:
         doc: One of possibly many. Information about device and device description.
         neurodata_type_def: Device
         neurodata_type_inc: NWBContainer
+        quantity: '+'
       name: devices
       quantity: '?'
     - datasets:
