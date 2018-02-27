@@ -231,8 +231,7 @@ class UnitTimes(NWBDataInterface):
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
     def get_unit_spike_times(self, **kwargs):
         index = getargs('index', kwargs)
-        idx = self.spike_times_index[index]
-        return self.spike_times[idx]
+        return self.spike_times_index[index][:]
 
     @docval({'name': 'unit_id', 'type': int, 'doc': 'the unit to add spike times for'},
             {'name': 'spike_times', 'type': ('array_data',), 'doc': 'the spike times for the unit'})
