@@ -1,5 +1,6 @@
 from collections import Iterable
 from h5py import RegionReference
+import numpy as np
 
 from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
@@ -178,6 +179,71 @@ class NWBData(NWBBaseType, Data):
     @property
     def data(self):
         return self.__data
+
+    def __len__(self):
+        return len(self.__data)
+
+    def __getitem__(self, args):
+        return self.data[args]
+
+    def append(self, arg):
+        if isinstance(self.data, list):
+            self.data.append(arg)
+        elif isinstance(self.data, np.ndarray):
+            self.__data = np.append(self.__data, [arg])
+        else:
+            msg = "NWBData cannot append to object of type '%s'" % type(self.__data)
+            raise ValueError(msg)
+
+    def extend(self, arg):
+        if isinstance(self.data, list):
+            self.data.extend(arg)
+        elif isinstance(self.data, np.ndarray):
+            self.__data = np.append(self.__data, [arg])
+        else:
+            msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
+            raise ValueError(msg)
+
+
+@register_class('VectorData', CORE_NAMESPACE)
+class VectorData(NWBData):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(VectorData, self).__init__, kwargs)
+
+
+@register_class('VectorIndex', CORE_NAMESPACE)
+class VectorIndex(NWBData):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorIndex'},
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'a 1D dataset containing indexes that apply to VectorData object'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(VectorIndex, self).__init__, kwargs)
+
+
+@register_class('ElementIdentifiers', CORE_NAMESPACE)
+class ElementIdentifiers(NWBData):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this ElementIdentifiers'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'a 1D dataset containing identifiers'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(ElementIdentifiers, self).__init__, kwargs)
 
 
 class NWBTable(NWBData):
