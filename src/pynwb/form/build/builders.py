@@ -7,7 +7,7 @@ from abc import ABCMeta
 import warnings
 from collections import Iterable
 
-from ..utils import docval, getargs, call_docval_func, fmt_docval_args
+from ..utils import docval, getargs, popargs, call_docval_func, fmt_docval_args
 from six import with_metaclass
 
 
@@ -378,7 +378,7 @@ class DatasetBuilder(BaseBuilder):
     REGION_REF_TYPE = 'region'
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'data', 'type': ('array_data', 'scalar_data', 'data', 'DatasetBuilder', Iterable),
+            {'name': 'data', 'type': ('array_data', 'scalar_data', 'data', 'DatasetBuilder', 'RegionBuilder', Iterable),
              'doc': 'the data in this dataset', 'default': None},
             {'name': 'dtype', 'type': (type, np.dtype, str, list),
              'doc': 'the datatype of this dataset', 'default': None},
@@ -457,13 +457,27 @@ class LinkBuilder(Builder):
         return self['builder']
 
 
-class RegionBuilder(dict):
+class ReferenceBuilder(dict):
+
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the Dataset this region applies to'})
+    def __init__(self, **kwargs):
+        builder = getargs('builder', kwargs)
+        self['builder'] = builder
+
+    @property
+    def builder(self):
+        ''' The target builder object '''
+        return self['builder']
+
+
+class RegionBuilder(ReferenceBuilder):
 
     @docval({'name': 'region', 'type': (slice, tuple, list, RegionReference),
              'doc': 'the region i.e. slice or indices into the target Dataset'},
             {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the Dataset this region applies to'})
     def __init__(self, **kwargs):
-        region, builder = getargs('region', 'builder', kwargs)
+        region = popargs('region', kwargs)
+        call_docval_func(super(RegionBuilder, self).__init__, kwargs)
         self['region'] = region
 
     @property
