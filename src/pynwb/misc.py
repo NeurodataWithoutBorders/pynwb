@@ -6,7 +6,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
+from .core import NWBContainer, NWBDataInterface, ElementIdentifiers, VectorData, VectorIndex
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -199,42 +199,47 @@ class UnitTimes(NWBDataInterface):
 
     __nwbfields__ = (
         'unit_ids',
-        'spike_times_idx',
+        'spike_times_index',
         'spike_times',
         )
 
-
     @docval({'name': 'source', 'type': str,
              'doc': 'Name, path or description of where unit times originated.'},
-            {'name': 'unit_ids', 'type': ('array_data', 'data'),
+            {'name': 'unit_ids', 'type': ('array_data', 'data', ElementIdentifiers),
              'doc': 'the identifiers for the units stored in this interface', 'default': list()},
-            {'name': 'spike_times', 'type': ('array_data', 'data'),
+            {'name': 'spike_times', 'type': ('array_data', 'data', VectorData),
              'doc': 'a concatenated list of spike times for the units stored in this interface',
              'default': list()},
-            {'name': 'spike_times_idx', 'type': ('array_data', 'data'),
+            {'name': 'spike_times_index', 'type': ('array_data', 'data', VectorIndex),
              'doc': 'the indices in spike_times that correspond to each unit in unit_ids',
              'default': list()},
             {'name': 'name', 'type': str, 'doc': 'Name of this UnitTimes interface', 'default': 'UnitTimes'})
     def __init__(self, **kwargs):
-        unit_ids, spike_times, spike_times_idx = popargs('unit_ids', 'spike_times', 'spike_times_idx', kwargs)
+        unit_ids, spike_times, spike_times_index = popargs('unit_ids', 'spike_times', 'spike_times_index', kwargs)
         call_docval_func(super(UnitTimes, self).__init__, kwargs)
+        if not isinstance(unit_ids, ElementIdentifiers):
+            unit_ids = ElementIdentifiers('unit_ids', unit_ids)
+        if not isinstance(spike_times, VectorData):
+            spike_times = VectorData('spike_times', spike_times)
+        if not isinstance(spike_times_index, VectorIndex):
+            spike_times_index = VectorIndex('spike_times_index', spike_times_index)
         self.unit_ids = unit_ids
         self.spike_times = spike_times
-        self.spike_times_idx = spike_times_idx
+        self.spike_times_index = spike_times_index
 
-    @docval({'name': 'unit_id', 'type': int,
-             'doc': 'the unit to retrieve spike times for', 'default': None},
-            {'name': 'index', 'type': int,
-             'doc': 'the index of the unit in unit_ids to retrieve spike times for', 'default': None})
-    def get_unit_spike_times(self, **kwarg):
-        unit_id, index = getargs('unit_id', 'index', kwargs)
-        self.spike_times_idx[index]
+    @docval({'name': 'index', 'type': int,
+             'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
+    def get_unit_spike_times(self, **kwargs):
+        index = getargs('index', kwargs)
+        idx = self.spike_times_index[index]
+        return self.spike_times[idx]
 
     @docval({'name': 'unit_id', 'type': int, 'doc': 'the unit to add spike times for'},
             {'name': 'spike_times', 'type': ('array_data',), 'doc': 'the spike times for the unit'})
     def add_spike_times(self, **kwargs):
         unit_id, spike_times = getargs('unit_id', 'spike_times', kwargs)
         self.unit_ids.append(unit_id)
-        l = len(self.spike_times)
-        self.spike_times_idx.append(get_region_slicer(self.spike_times, slice(l, l+len(spike_times))))
+        ntimes = len(self.spike_times)
+        rs = get_region_slicer(self.spike_times, slice(ntimes, ntimes+len(spike_times)))
+        self.spike_times_index.append(rs)
         self.spike_times.extend(spike_times)
