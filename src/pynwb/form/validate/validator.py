@@ -65,9 +65,6 @@ class Validator(with_metaclass(ABCMeta, object)):
         stack = list()
         tmp = spec
         while tmp is not None:
-            if isinstance(tmp, str):
-                import pdb
-                pdb.set_trace()
             name = tmp.name
             if name is None:
                 name = tmp.data_type_def
