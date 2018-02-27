@@ -8,7 +8,7 @@ from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec
 from ..spec.spec import BaseStorageSpec
-from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, RegionBuilder
+from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, ReferenceBuilder, RegionBuilder
 
 
 class BuildManager(object):
@@ -442,15 +442,30 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             if not isinstance(container, Data):
                 msg = "'container' must be of type Data with DatasetSpec"
                 raise ValueError(msg)
-            if isinstance(self.spec.dtype, RefSpec) and self.spec.dtype.is_region():
-                if not isinstance(container, DataRegion):
-                    msg = "'container' must be of type DataRegion if spec represents region reference"
-                    raise ValueError(msg)
-                builder = DatasetBuilder(name, RegionBuilder(container.region, manager.build(container.data)),
-                                         parent=parent, source=source)
+            if isinstance(self.spec.dtype, RefSpec):
+                bldr_data = None
+                if self.spec.dtype.is_region():
+                    if self.spec.shape is None:
+                        if not isinstance(container, DataRegion):
+                            msg = "'container' must be of type DataRegion if spec represents region reference"
+                            raise ValueError(msg)
+                        bldr_data = RegionBuilder(container.region, manager.build(container.data))
+                    else:
+                        bldr_data = list()
+                        for d in container.data:
+                            bldr_data.append(RegionBuilder(d.slice, manager.build(d.target)))
+                else:
+                    if self.spec.shape is None:
+                        bldr_data = ReferenceBuilder(manager.build(container.data))
+                    else:
+                        bldr_data = list()
+                        for d in container.data:
+                            bldr_data.append(ReferenceBuilder(manager.build(d.target)))
+                builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
+                                         dtype=self.convert_dtype(self.__spec.dtype))
             else:
-                builder = DatasetBuilder(name, data=container.data, parent=parent,
-                                         dtype=self.convert_dtype(self.__spec.dtype), source=source)
+                builder = DatasetBuilder(name, container.data, parent=parent, source=source,
+                                         dtype=self.convert_dtype(self.__spec.dtype))
         self.__add_attributes(builder, self.__spec.attributes, container)
         return builder
 
