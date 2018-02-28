@@ -1,9 +1,11 @@
 import unittest2 as unittest
 
+import numpy as np
+
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder
 
 from pynwb.ecephys import *  # noqa: F403
-from pynwb.misc import UnitTimes, SpikeUnit
+from pynwb.misc import UnitTimes
 
 from . import base
 
@@ -11,33 +13,42 @@ from . import base
 class TestUnitTimesIO(base.TestDataInterfaceIO):
 
     def setUpContainer(self):
-        self.spike_unit1 = SpikeUnit('unit1', [0, 1, 2], 'spike unit1 description', 'spike units source')
-        self.spike_unit2 = SpikeUnit('unit2', [3, 4, 5], 'spike unit2 description', 'spike units source')
-        return UnitTimes('unit times source', [self.spike_unit1, self.spike_unit2], name='UnitTimesTest')
+        # self.spike_unit1 = SpikeUnit('unit1', [0, 1, 2], 'spike unit1 description', 'spike units source')
+        # self.spike_unit2 = SpikeUnit('unit2', [3, 4, 5], 'spike unit2 description', 'spike units source')
+        ut = UnitTimes('UnitTimes integration test', name='UnitTimesTest')
+        ut.add_spike_times(0, [0, 1, 2])
+        ut.add_spike_times(1, [3, 4, 5])
+        return ut
 
     def setUpBuilder(self):
-        su1_builder = GroupBuilder('unit1',
-                                   datasets={'times': DatasetBuilder('times', [0, 1, 2])},
-                                   attributes={'neurodata_type': 'SpikeUnit',
-                                               'namespace': 'core',
-                                               'unit_description': 'spike unit1 description',
-                                               'help': 'Times for a particular UnitTime object',
-                                               'source': 'spike units source'})
-
-        su2_builder = GroupBuilder('unit2',
-                                   datasets={'times': DatasetBuilder('times', [3, 4, 5])},
-                                   attributes={'neurodata_type': 'SpikeUnit',
-                                               'namespace': 'core',
-                                               'unit_description': 'spike unit2 description',
-                                               'help': 'Times for a particular UnitTime object',
-                                               'source': 'spike units source'})
-
+        ids_builder = DatasetBuilder('unit_ids', [0, 1],
+                                     attributes={'neurodata_type': 'ElementIdentifiers',
+                                                 'namespace': 'core',
+                                                 'help': 'unique identifiers for a list of elements'})
+        st_builder = DatasetBuilder('spike_times', [0, 1, 2, 3, 4, 5],
+                                    attributes={'neurodata_type': 'VectorData',
+                                                'namespace': 'core',
+                                                'help': 'Values for a list of elements'})
+        sti_builder = DatasetBuilder('spike_times_index',
+                                     [RegionBuilder(slice(0, 3), st_builder), RegionBuilder(slice(3, 6), st_builder)],
+                                     attributes={'neurodata_type': 'VectorIndex',
+                                                 'namespace': 'core',
+                                                 'help': 'indexes into a list of values for a list of elements'})
         return GroupBuilder('UnitTimesTest',
                             attributes={'neurodata_type': 'UnitTimes',
                                         'namespace': 'core',
                                         'help': 'Estimated spike times from a single unit',
-                                        'source': 'unit times source'},
-                            groups={'unit1': su1_builder, 'unit2': su2_builder})
+                                        'source': 'UnitTimes integration test'},
+                            datasets={'unit_ids': ids_builder,
+                                      'spike_times': st_builder,
+                                      'spike_times_index': sti_builder})
+
+    def test_get_spike_times(self):
+        ut = self.roundtripContainer()
+        received = ut.get_unit_spike_times(0)
+        self.assertTrue(np.array_equal(received, [0, 1, 2]))
+        received = ut.get_unit_spike_times(1)
+        self.assertTrue(np.array_equal(received, [3, 4, 5]))
 
 
 class TestElectrodeGroupIO(base.TestMapRoundTrip):
@@ -121,8 +132,7 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
                                       'timestamps': DatasetBuilder('timestamps',
                                                                    timestamps,
                                                                    attributes={'unit': 'Seconds', 'interval': 1}),
-                                      'electrodes': RegionBuilder('electrodes', [0, 2],
-                                                                  table_builder,
+                                      'electrodes': DatasetBuilder('electrodes', RegionBuilder([0, 2], table_builder),
                                                                   attributes={
                                                                       'neurodata_type': 'ElectrodeTableRegion',
                                                                       'namespace': 'core',
@@ -169,9 +179,8 @@ class TestMultiElectricalSeries(TestElectricalSeriesIO):
                                       'timestamps': DatasetBuilder('timestamps',
                                                                    timestamps,
                                                                    attributes={'unit': 'Seconds', 'interval': 1}),
-                                      'electrodes': RegionBuilder('electrodes', [0, 2],
-                                                                  table_builder,
-                                                                  attributes={
+                                      'electrodes': DatasetBuilder('electrodes', RegionBuilder([0, 2], table_builder),
+                                                                   attributes={
                                                                       'neurodata_type': 'ElectrodeTableRegion',
                                                                       'namespace': 'core',
                                                                       'description': 'the first and third electrodes',
@@ -192,9 +201,8 @@ class TestMultiElectricalSeries(TestElectricalSeriesIO):
                                       'timestamps': DatasetBuilder('timestamps',
                                                                    timestamps,
                                                                    attributes={'unit': 'Seconds', 'interval': 1}),
-                                      'electrodes': RegionBuilder('electrodes', [1, 3],
-                                                                  table_builder,
-                                                                  attributes={
+                                      'electrodes': DatasetBuilder('electrodes', RegionBuilder([1, 3], table_builder),
+                                                                   attributes={
                                                                       'neurodata_type': 'ElectrodeTableRegion',
                                                                       'namespace': 'core',
                                                                       'description': 'the second and fourth electrodes',
