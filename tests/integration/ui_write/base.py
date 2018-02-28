@@ -116,10 +116,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.io = None
 
     def tearDown(self):
-        if os.path.exists(self.filename):
-            os.remove(self.filename)
         if self.io is not None:
             self.io.close()
+        if os.path.exists(self.filename):
+            os.remove(self.filename)
 
     def roundtripContainer(self):
         description = 'a file to test writing and reading a %s' % self.container_type
