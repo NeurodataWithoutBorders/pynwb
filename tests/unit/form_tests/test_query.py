@@ -17,7 +17,7 @@ class AbstractQueryTest(unittest.TestCase):
         self.wrapper = FORMDataset(self.dset)  # noqa: F405
 
     def test_get_dataset(self):
-        array = self.wrapper.get_dataset()
+        array = self.wrapper.dataset
         self.assertIsInstance(array, SortedArray)  # noqa: F405
 
     def test___gt__(self):
