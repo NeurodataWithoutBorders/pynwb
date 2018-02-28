@@ -3,7 +3,7 @@ from dateutil.parser import parse as parse_date
 from collections import Iterable
 
 from .form.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
-from .form.data_utils import JITDataset
+from .form.query import FORMDataset
 from .form import Container
 
 from . import register_class, CORE_NAMESPACE
@@ -163,7 +163,7 @@ class NWBFile(MultiContainerInterface):
              'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
             {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
-            {'name': 'file_create_date', 'type': (list, datetime, str, JITDataset),
+            {'name': 'file_create_date', 'type': (list, datetime, str, FORMDataset),
              'doc': 'the time the file was created and subsequent modifications made', 'default': None},
             {'name': 'version', 'type': str, 'doc': 'the NWB version', 'default': None},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},

@@ -8,7 +8,8 @@ import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
-from ...data_utils import DataChunkIterator, get_shape, JITDataset
+from ...data_utils import DataChunkIterator, get_shape
+from ...query import FORMDataset
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager,\
                      RegionBuilder, ReferenceBuilder, TypeMap
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, GroupSpec
@@ -262,11 +263,11 @@ class HDF5IO(FORMIO):
             elem1 = h5obj[0]
             d = None
             if isinstance(elem1, text_type):
-                d = JITDataset(h5obj)
+                d = FORMDataset(h5obj)
             elif isinstance(elem1, RegionReference):
-                d = JITRegionDataset(h5obj, self)
+                d = H5RegionDataset(h5obj, self)
             elif isinstance(elem1, Reference):
-                d = JITReferenceDataset(h5obj, self)
+                d = H5ReferenceDataset(h5obj, self)
             kwargs["data"] = d
         else:
             kwargs["data"] = h5obj
@@ -738,32 +739,32 @@ class HDF5IO(FORMIO):
         return ret
 
 
-class JITReferenceDataset(JITDataset):
+class H5ReferenceDataset(FORMDataset):
 
     @docval({'name': 'dataset', 'type': Dataset, 'doc': 'the HDF5 file lazily evaluate'},
             {'name': 'io', 'type': FORMIO, 'doc': 'the IO object that was used to read the underlying dataset'})
     def __init__(self, **kwargs):
         self.__io = popargs('io', kwargs)
-        call_docval_func(super(JITReferenceDataset, self).__init__, kwargs)
+        call_docval_func(super(H5ReferenceDataset, self).__init__, kwargs)
 
     @property
     def io(self):
         return self.__io
 
     def __getitem__(self, arg):
-        ref = super(JITReferenceDataset, self).__getitem__(arg)
+        ref = super(H5ReferenceDataset, self).__getitem__(arg)
         return self.__io.get_container(self.dataset.file[ref])
 
 
-class JITRegionDataset(JITReferenceDataset):
+class H5RegionDataset(H5ReferenceDataset):
 
     @docval({'name': 'dataset', 'type': Dataset, 'doc': 'the HDF5 file lazily evaluate'},
             {'name': 'io', 'type': FORMIO, 'doc': 'the IO object that was used to read the underlying dataset'})
     def __init__(self, **kwargs):
-        call_docval_func(super(JITRegionDataset, self).__init__, kwargs)
+        call_docval_func(super(H5RegionDataset, self).__init__, kwargs)
 
     def __getitem__(self, arg):
-        obj = super(JITRegionDataset, self).__getitem__(arg)
+        obj = super(H5RegionDataset, self).__getitem__(arg)
         ref = self.dataset[arg]
         return obj[ref]
 

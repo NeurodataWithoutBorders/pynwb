@@ -463,25 +463,6 @@ class DataIO(with_metaclass(ABCMeta, object)):
         return self.__data
 
 
-@docval_macro('data')
-class JITDataset(object):
-
-    @docval({'name': 'dataset', 'type': 'array_data', 'doc': 'the HDF5 file lazily evaluate'})
-    def __init__(self, **kwargs):
-        super(JITDataset, self).__init__()
-        self.__dataset = getargs('dataset', kwargs)
-
-    @property
-    def dataset(self):
-        return self.__dataset
-
-    def __getitem__(self, arg):
-        return self.__dataset[arg]
-
-    def __len__(self):
-        return len(self.__dataset)
-
-
 class RegionSlicer(with_metaclass(ABCMeta, object)):
     '''
     A abstract base class to control getting using a region
