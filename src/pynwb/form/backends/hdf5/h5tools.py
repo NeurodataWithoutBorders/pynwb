@@ -10,6 +10,7 @@ from ...container import Container
 from ...utils import docval, getargs, popargs, call_docval_func
 from ...data_utils import DataChunkIterator, get_shape
 from ...query import FORMDataset
+from ...array import Array
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager,\
                      RegionBuilder, ReferenceBuilder, TypeMap
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, GroupSpec
@@ -28,15 +29,18 @@ class HDF5IO(FORMIO):
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'mode', 'type': str,
-             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'})
+             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'},
+            {'name': 'comm', 'type': 'Intracom',
+             'doc': 'the MPI communicator to use for parallel I/O', 'default': None})
     def __init__(self, **kwargs):
         '''Open an HDF5 file for IO
 
         For `mode`, see :ref:`write_nwbfile`
         '''
-        path, manager, mode = popargs('path', 'manager', 'mode', kwargs)
+        path, manager, mode, comm = popargs('path', 'manager', 'mode', 'comm', kwargs)
         if manager is None:
             manager = BuildManager(TypeMap(NamespaceCatalog()))
+        self.__comm = comm
         self.__mode = mode
         self.__path = path
         self.__file = None
@@ -44,6 +48,10 @@ class HDF5IO(FORMIO):
         self.__built = dict()       # keep track of which files have been read
         self.__read = dict()        # keep track of each builder for each dataset/group/link
         self.__ref_queue = deque()  # a queue of the references that need to be added
+
+    @property
+    def comm(self):
+        return self.__comm
 
     @property
     def _file(self):
@@ -263,7 +271,7 @@ class HDF5IO(FORMIO):
             elem1 = h5obj[0]
             d = None
             if isinstance(elem1, text_type):
-                d = FORMDataset(h5obj)
+                d = H5Dataset(h5obj, self)
             elif isinstance(elem1, RegionReference):
                 d = H5RegionDataset(h5obj, self)
             elif isinstance(elem1, Reference):
@@ -739,29 +747,26 @@ class HDF5IO(FORMIO):
         return ret
 
 
-class H5ReferenceDataset(FORMDataset):
-
-    @docval({'name': 'dataset', 'type': Dataset, 'doc': 'the HDF5 file lazily evaluate'},
+class H5Dataset(FORMDataset):
+    @docval({'name': 'dataset', 'type': (Dataset, Array), 'doc': 'the HDF5 file lazily evaluate'},
             {'name': 'io', 'type': FORMIO, 'doc': 'the IO object that was used to read the underlying dataset'})
     def __init__(self, **kwargs):
         self.__io = popargs('io', kwargs)
-        call_docval_func(super(H5ReferenceDataset, self).__init__, kwargs)
+        call_docval_func(super(H5Dataset, self).__init__, kwargs)
 
     @property
     def io(self):
         return self.__io
 
+
+class H5ReferenceDataset(H5Dataset):
+
     def __getitem__(self, arg):
         ref = super(H5ReferenceDataset, self).__getitem__(arg)
-        return self.__io.get_container(self.dataset.file[ref])
+        return self.io.get_container(self.dataset.file[ref])
 
 
 class H5RegionDataset(H5ReferenceDataset):
-
-    @docval({'name': 'dataset', 'type': Dataset, 'doc': 'the HDF5 file lazily evaluate'},
-            {'name': 'io', 'type': FORMIO, 'doc': 'the IO object that was used to read the underlying dataset'})
-    def __init__(self, **kwargs):
-        call_docval_func(super(H5RegionDataset, self).__init__, kwargs)
 
     def __getitem__(self, arg):
         obj = super(H5RegionDataset, self).__getitem__(arg)
