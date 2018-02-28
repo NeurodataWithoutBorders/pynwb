@@ -113,25 +113,34 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.create_date = datetime(2018, 4, 15, 12, 0, 0)
         self.container_type = self.container.__class__.__name__
         self.filename = 'test_%s.nwb' % self.container_type
+        self.io = None
 
     def tearDown(self):
         if os.path.exists(self.filename):
             os.remove(self.filename)
+        if self.io is not None:
+            self.io.close()
 
-    def test_roundtrip(self):
+    def roundtripContainer(self):
         description = 'a file to test writing and reading a %s' % self.container_type
         source = 'test_roundtrip for %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
-        io = HDF5IO(self.filename, self.manager)
-        io.write(nwbfile)
+        self.io = HDF5IO(self.filename, self.manager)
+        self.io.write(nwbfile)
+        read_nwbfile = self.io.read()
         try:
-            read_nwbfile = io.read()
-            read_container = self.getContainer(read_nwbfile)
-            self.assertContainerEqual(self.container, read_container)
-        finally:
-            io.close()
+            tmp = self.getContainer(read_nwbfile)
+            return tmp
+        except Exception as e:
+            self.io.close()
+            self.io = None
+            raise e
+
+    def test_roundtrip(self):
+        read_container = self.roundtripContainer()
+        self.assertContainerEqual(self.container, read_container)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
