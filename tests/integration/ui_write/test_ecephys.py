@@ -1,5 +1,7 @@
 import unittest2 as unittest
 
+import numpy as np
+
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder
 
 from pynwb.ecephys import *  # noqa: F403
@@ -40,6 +42,13 @@ class TestUnitTimesIO(base.TestDataInterfaceIO):
                             datasets={'unit_ids': ids_builder,
                                       'spike_times': st_builder,
                                       'spike_times_index': sti_builder})
+
+    def test_get_spike_times(self):
+        ut = self.roundtripContainer()
+        received = ut.get_unit_spike_times(0)
+        self.assertTrue(np.array_equal(received, [0, 1, 2]))
+        received = ut.get_unit_spike_times(1)
+        self.assertTrue(np.array_equal(received, [3, 4, 5]))
 
 
 class TestElectrodeGroupIO(base.TestMapRoundTrip):
