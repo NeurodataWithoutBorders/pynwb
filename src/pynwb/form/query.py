@@ -1,7 +1,8 @@
 from six import with_metaclass
 import numpy as np
 
-from .utils import ExtenderMeta, docval_macro
+from .utils import ExtenderMeta, docval_macro, docval, getargs
+from .array import Array
 
 
 class Query(with_metaclass(ExtenderMeta, object)):
@@ -41,7 +42,9 @@ class Query(with_metaclass(ExtenderMeta, object)):
         self.collapsed = None
         self.expanded = None
 
-    def evaluate(self, expand=True):
+    @docval({'name': 'expand', 'type': bool, 'help': 'whether or not to expand result', 'default': True})
+    def evaluate(self, **kwargs):
+        expand = getargs('expand', kwargs)
         if expand:
             if self.expanded is None:
                 self.expanded = self.__evalhelper()
@@ -57,7 +60,7 @@ class Query(with_metaclass(ExtenderMeta, object)):
         if isinstance(obj, Query):
             obj = obj.evaluate()
         elif isinstance(obj, FORMDataset):
-            obj = obj.get_dataset()
+            obj = obj.dataset
         if isinstance(arg, Query):
             arg = self.arg.evaluate()
         return getattr(obj, self.op)(self.arg)
@@ -99,7 +102,6 @@ class FORMDataset(with_metaclass(ExtenderMeta, object)):
         '__ge__',
         '__eq__',
         '__ne__',
-        '__len__',
     )
 
     @classmethod
@@ -132,10 +134,16 @@ class FORMDataset(with_metaclass(ExtenderMeta, object)):
 
     def __getitem__(self, key):
         idx = self.__evaluate_key(key)
-        return self.get_dataset()[idx]
+        return self.dataset[idx]
 
-    def __init__(self, h5_dataset):
-        self.data = h5_dataset
+    @docval({'name': 'dataset', 'type': ('array_data', Array), 'doc': 'the HDF5 file lazily evaluate'})
+    def __init__(self, **kwargs):
+        super(FORMDataset, self).__init__()
+        self.__dataset = getargs('dataset', kwargs)
 
-    def get_dataset(self):
-        return self.data
+    @property
+    def dataset(self):
+        return self.__dataset
+
+    def __len__(self):
+        return len(self.__dataset)
