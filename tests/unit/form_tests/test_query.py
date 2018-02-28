@@ -133,35 +133,27 @@ class LinspaceQueryTest(AbstractQueryTest):
     def getDataset(self):
         return LinSpace(0, 10, 1)  # noqa: F405
 
+
 class CompoundQueryTest(unittest.TestCase):
 
     def getM(self):
-        print("M: %s" % str(np.arange(10, 20, 1)))
         return SortedArray(np.arange(10, 20, 1))
 
     def getN(self):
-        print("N: %s" % (np.arange(10.0, 20.0, 0.5)))
         return SortedArray(np.arange(10.0, 20.0, 0.5))
 
     def setUp(self):
-        print("\n\n")
         self.m = FORMDataset(self.getM())
         self.n = FORMDataset(self.getN())
 
+    @unittest.skip('not implemented')
     def test_map(self):
-        q = self.m == (12,16)            # IN operation
-        q.evaluate()      # [2,3,4,5]
-        q.evaluate(False) # RangeResult(2,6)
-        print('expanded: %s' % str(q.evaluate()))
-        print('collapsed: %s' % str(q.evaluate(False)))
-        r = self.m[q]
-        r = self.m[q.evaluate()]
-        print('expanded getitem: %s' % str(r))
-        r = self.m[q.evaluate(False)]
-        print('collapsed getitem: %s' % str(r))
-        print(r)
+        q = self.m == (12, 16)                # IN operation
+        q.evaluate()                          # [2,3,4,5]
+        q.evaluate(False)                     # RangeResult(2,6)
+        r = self.m[q]                         # noqa: F841
+        r = self.m[q.evaluate()]              # noqa: F841
+        r = self.m[q.evaluate(False)]         # noqa: F841
 
     def tearDown(self):
-        print("\n\n")
-
-
+        pass
