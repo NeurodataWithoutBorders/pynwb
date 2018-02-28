@@ -167,7 +167,7 @@ class NWBData(NWBBaseType, Data):
     __nwbfields__ = ('help',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': (Iterable, Data), 'doc': 'the source of the data'},
+            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
