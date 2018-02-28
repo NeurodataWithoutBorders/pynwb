@@ -69,25 +69,24 @@ class Query(with_metaclass(ExtenderMeta, object)):
             ret = list()
             for idx in result:
                 if isinstance(idx, slice) and (idx.step is None or idx.step == 1):
-                    ret.append((idx.start, idx,stop))
+                    ret.append((idx.start, idx.stop))
                 else:
                     ret.append(idx)
             return ret
         else:
             return result
 
-
     def __and__(self, other):
-        pass
+        return NotImplemented
 
     def __or__(self, other):
-        pass
+        return NotImplemented
 
     def __xor__(self, other):
-        pass
+        return NotImplemented
 
     def __contains__(self, other):
-        pass
+        return NotImplemented
 
 
 @docval_macro('data')
