@@ -8,7 +8,7 @@ import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
-from ...data_utils import DataChunkIterator, get_shape
+from ...data_utils import DataChunkIterator, get_shape, JITDataset
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager,\
                      RegionBuilder, ReferenceBuilder, TypeMap
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, GroupSpec
@@ -162,6 +162,19 @@ class HDF5IO(FORMIO):
         else:
             return None
 
+    @docval({'name': 'h5obj', 'type': (Dataset, Group),
+             'doc': 'the HDF5 object to the corresponding Container/Data object for'})
+    def get_container(self, **kwargs):
+        h5obj = getargs('h5obj', kwargs)
+        fpath = h5obj.file.filename
+        path = h5obj.name
+        builder = self.__get_built(fpath, path)
+        if builder is None:
+            msg = '%s:%s has not been built' % (fpath, path)
+            raise ValueError(msg)
+        container = self.manager.construct(builder)
+        return container
+
     def __read_group(self, h5obj, name=None):
         kwargs = {
             "attributes": dict(h5obj.attrs.items()),
@@ -236,7 +249,6 @@ class HDF5IO(FORMIO):
             if isinstance(scalar, bytes):
                 scalar = scalar.decode('UTF-8')
 
-            # print scalar, isinstance(scalar, bytes)
             if isinstance(scalar, Reference):
                 target = h5obj.file[scalar]
                 target_builder = self.__read_dataset(target)
@@ -248,7 +260,15 @@ class HDF5IO(FORMIO):
             else:
                 kwargs["data"] = scalar
         elif ndims == 1 and h5obj.dtype == np.dtype('O'):    # read list of strings
-            kwargs["data"] = list(h5obj[()])
+            elem1 = h5obj[0]
+            d = None
+            if isinstance(elem1, str):
+                d = JITDataset(h5obj)
+            elif isinstance(elem1, RegionReference):
+                d = JITRegionDataset(h5obj, self)
+            elif isinstance(elem1, Reference):
+                d = JITReferenceDataset(h5obj, self)
+            kwargs["data"] = d
         else:
             kwargs["data"] = h5obj
         ret = DatasetBuilder(name, **kwargs)
@@ -717,6 +737,36 @@ class HDF5IO(FORMIO):
             else:
                 ret.append(elem)
         return ret
+
+
+class JITReferenceDataset(JITDataset):
+
+    @docval({'name': 'dataset', 'type': Dataset, 'doc': 'the HDF5 file lazily evaluate'},
+            {'name': 'io', 'type': FORMIO, 'doc': 'the IO object that was used to read the underlying dataset'})
+    def __init__(self, **kwargs):
+        self.__io = popargs('io', kwargs)
+        call_docval_func(super(JITReferenceDataset, self).__init__, kwargs)
+
+    @property
+    def io(self):
+        return self.__io
+
+    def __getitem__(self, arg):
+        ref = super(JITReferenceDataset, self).__getitem__(arg)
+        return self.__io.get_container(self.dataset.file[ref])
+
+
+class JITRegionDataset(JITReferenceDataset):
+
+    @docval({'name': 'dataset', 'type': Dataset, 'doc': 'the HDF5 file lazily evaluate'},
+            {'name': 'io', 'type': FORMIO, 'doc': 'the IO object that was used to read the underlying dataset'})
+    def __init__(self, **kwargs):
+        call_docval_func(super(JITRegionDataset, self).__init__, kwargs)
+
+    def __getitem__(self, arg):
+        obj = super(JITRegionDataset, self).__getitem__(arg)
+        ref = self.dataset[arg]
+        return obj[ref]
 
 
 class H5SpecWriter(SpecWriter):
