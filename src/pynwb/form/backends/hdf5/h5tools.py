@@ -235,7 +235,6 @@ class HDF5IO(FORMIO):
             "dtype": h5obj.dtype,
             "maxshape": h5obj.maxshape
         }
-
         for key, val in kwargs['attributes'].items():
             if isinstance(val, bytes):
                 kwargs['attributes'][key] = val.decode('UTF-8')
@@ -262,7 +261,7 @@ class HDF5IO(FORMIO):
         elif ndims == 1 and h5obj.dtype == np.dtype('O'):    # read list of strings
             elem1 = h5obj[0]
             d = None
-            if isinstance(elem1, str):
+            if isinstance(elem1, text_type):
                 d = JITDataset(h5obj)
             elif isinstance(elem1, RegionReference):
                 d = JITRegionDataset(h5obj, self)
