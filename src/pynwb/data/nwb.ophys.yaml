@@ -47,13 +47,11 @@ groups:
     shape:
     - null
     - null
-  - dims:
-    - num_ROIs
-    doc: List of ROIs represented, one name for each row of data[].
-    dtype: text
-    name: roi_names
-    shape:
-    - null
+  - doc: 'a dataset referencing into an ROITable containing information on the ROIs stored in this timeseries'
+    dtype:
+      target_type: ROITable
+      reftype: region
+    name: rois
   doc: ROI responses over an imaging plane. Each row in data[] should correspond to
     the signal from one ROI.
   links:
@@ -121,46 +119,40 @@ groups:
       dtype: text
       name: description
       quantity: '?'
+    - doc: a table for storing pixel masks
+      name: pixel_mask
+      dtype:
+      - name: x
+        dtype: uint
+        doc: the pixel x-coordinate
+      - name: y
+        dtype: uint
+        doc: the pixel y-coordinate
+      - name: weight
+        dtype: float
+        doc: the weight of the pixel
+      neurodata_type_inc: VectorData
+    - name: img_mask
+      doc: ROI mask, represented in 2D ([y][x]) intensity image
+      dims:
+      - num_roi
+      - num_x
+      - num_y
+      dtype: float
+      shape:
+      - null
+      - null
+      - null
+      neurodata_type_inc: NWBData
+      neurodata_type_def: ROIImageMasks
+    - name: pixel_mask_index
+      doc: Pixel Mask regions
+      neurodata_type+inc: VectorIndex
+    - name: roi_ids
+      doc: Unique identifiers for each ROI
+      neurodata_type+inc: ElementIndentifiers
     doc: Group name is human-readable description of imaging plane
     groups:
-    - attributes:
-      - doc: Value is 'Region of interest, as determined by image segmentation'
-        dtype: text
-        name: help
-        value: 'Region of interest, as determined by image segmentation'
-      datasets:
-      - dims:
-        - num_x
-        - num_y
-        doc: ROI mask, represented in 2D ([y][x]) intensity image
-        dtype: float32
-        name: img_mask
-        shape:
-        - null
-        - null
-      - dims:
-        - num_pixels
-        - '2'
-        doc: List of pixels (x,y) that compose the mask
-        dtype: uint16
-        name: pix_mask
-        shape:
-        - null
-        - null
-      - dims:
-        - num_pixels
-        doc: Weight of each pixel listed in pix_mask
-        dtype: float32
-        name: pix_mask_weight
-        shape:
-        - null
-      - doc: Description of this ROI.
-        dtype: text
-        name: roi_description
-      doc: Name of ROI
-      neurodata_type_def: ROI
-      neurodata_type_inc: NWBContainer
-      quantity: '*'
     - doc: Stores image stacks segmentation mask apply to.
       groups:
       - doc: One or more image stacks that the masks apply to (can be one-element
