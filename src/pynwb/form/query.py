@@ -134,13 +134,7 @@ class FORMDataset(with_metaclass(ExtenderMeta, object)):
 
     def __getitem__(self, key):
         idx = self.__evaluate_key(key)
-        try:
-            val = self.dataset[idx]
-            return val
-        except Exception as e:
-            import pdb
-            pdb.set_trace()
-            raise e
+        return self.dataset[idx]
 
     @docval({'name': 'dataset', 'type': ('array_data', Array), 'doc': 'the HDF5 file lazily evaluate'})
     def __init__(self, **kwargs):

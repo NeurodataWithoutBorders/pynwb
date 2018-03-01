@@ -250,9 +250,6 @@ class HDF5IO(FORMIO):
 
         if name is None:
             name = str(os.path.basename(h5obj.name))
-        if name == 'values':
-            import pdb
-            pdb.set_trace()
         kwargs['source'] = self.__path
         ndims = len(h5obj.shape)
         if ndims == 0:                                       # read scalar
