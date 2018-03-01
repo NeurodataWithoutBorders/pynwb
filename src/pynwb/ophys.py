@@ -195,15 +195,11 @@ class ROI(NWBContainer):
 class PlaneSegmentation(MultiContainerInterface):
     """
     """
-    __clsconf__ = {
-        'attr': 'roi',
-        'type': ROI,
-        'add': 'add_roi',
-        'get': 'get_roi',
-        'create': 'create_roi'
-    }
 
     __nwbfields__ = ('description',
+                     'pixel_mask',
+                     'pixel_mask_index',
+                     'image_mask',
                      'imaging_plane',
                      'reference_images')
 
@@ -230,6 +226,13 @@ class PlaneSegmentation(MultiContainerInterface):
         self.roi = dict()
         for roi in roi:
             self.add_roi(roi)
+
+    @docval({'name': 'index', 'type': int,
+             'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
+    def get_pixel_mask(self, **kwargs):
+        index = getargs('index', kwargs)
+        return self.pixel_mask_index[index][:]
+
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
