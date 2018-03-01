@@ -270,7 +270,7 @@ class HDF5IO(FORMIO):
         elif ndims == 1 and h5obj.dtype == np.dtype('O'):    # read list of strings
             elem1 = h5obj[0]
             d = None
-            if isinstance(elem1, text_type):
+            if isinstance(elem1, (text_type, binary_type)):
                 d = H5Dataset(h5obj, self)
             elif isinstance(elem1, RegionReference):
                 d = H5RegionDataset(h5obj, self)
