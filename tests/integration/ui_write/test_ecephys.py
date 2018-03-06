@@ -146,6 +146,10 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
         nwbfile.set_electrode_table(self.table)
         nwbfile.add_acquisition(self.container)
 
+    def test_eg_ref(self):
+        read = self.roundtripContainer()
+        import pdb
+        pdb.set_trace()
 
 class TestMultiElectricalSeries(TestElectricalSeriesIO):
 
