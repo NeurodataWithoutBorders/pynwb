@@ -9,25 +9,20 @@ import numpy as np
 
 def CreatePlaneSegmentation():
     w, h = 5, 5
-    img_mask = [[0 for x in range(w)] for y in range(h)]
-    w, h = 5, 2
-    pix_mask = [[0 for x in range(w)] for y in range(h)]
-    pix_mask_weight = [0 for x in range(w)]
-    iSS = ImageSeries(
-        name='test_iS', source='a hypothetical source', data=list(), unit='unit', external_file=['external_file'],
-        starting_frame=[1, 2, 3], format='tiff', timestamps=list())
+    img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
+    pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
+                [7, 8, 2.0],[9, 10, 2.0]]
+    pix_mask_index = [slice(0,3), slice(3,5)]
 
-    roi1 = ROI('roi1', 'test source', 'roi description1', pix_mask, pix_mask_weight, img_mask, iSS)
-    roi2 = ROI('roi2', 'test source', 'roi description2', pix_mask, pix_mask_weight, img_mask, iSS)
-    roi_list = (roi1, roi2)
+    iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit',
+                      external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
     oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 'emission_lambda')
-    ip = ImagingPlane(
-        'test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
-        'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+    ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
+                      'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
-    ps = PlaneSegmentation('test source', 'description', ip, 'name', roi_list, iSS)
-    return ps
+    pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS, pix_mask, pix_mask_index, img_mask)
+    return pS
 
 
 class TwoPhotonSeriesConstructor(unittest.TestCase):
@@ -106,59 +101,40 @@ class FluorescenceConstructor(unittest.TestCase):
 class ImageSegmentationConstructor(unittest.TestCase):
 
     def test_init(self):
-        w, h = 5, 5
-        img_mask = [[0 for x in range(w)] for y in range(h)]
-        w, h = 5, 2
-        pix_mask = [[0 for x in range(w)] for y in range(h)]
-        pix_mask_weight = [0 for x in range(w)]
-        iSS = ImageSeries(
-            name='test_iS', source='a hypothetical source', data=list(), unit='unit',
-            external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
-
-        roi1 = ROI('roi1', 'test source', 'roi description1', pix_mask, pix_mask_weight, img_mask, iSS)
-        roi2 = ROI('roi2', 'test source', 'roi description2', pix_mask, pix_mask_weight, img_mask, iSS)
-        rois = (roi1, roi2)
-
-        oc = OpticalChannel('test_optical_channel', 'test source', 'description', 'emission_lambda')
-        ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', 'device', 'excitation_lambda',
-                          'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
-
-        ps = PlaneSegmentation('test source', 'description', ip, 'test_pS', rois, iSS)
+        ps = CreatePlaneSegmentation()
 
         iS = ImageSegmentation('test_source', ps, name='test_iS')
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.source, 'test_source')
-        self.assertEqual(iS.plane_segmentations['test_pS'], ps)
-        self.assertEqual(iS['test_pS'], iS.plane_segmentations['test_pS'])
+        self.assertEqual(iS.plane_segmentations[ps.name], ps)
+        self.assertEqual(iS[ps.name], iS.plane_segmentations[ps.name])
 
 
 class PlaneSegmentationConstructor(unittest.TestCase):
     def test_init(self):
         w, h = 5, 5
-        img_mask = [[0 for x in range(w)] for y in range(h)]
-        w, h = 5, 2
-        pix_mask = [[0 for x in range(w)] for y in range(h)]
-        pix_mask_weight = [0 for x in range(w)]
+        img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
+        pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
+                    [7, 8, 2.0], [9, 10, 2.0]]
+        pix_mask_index = [slice(0,3), slice(3,5)]
+
         iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit',
                           external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
-
-        roi1 = ROI('roi1', 'test source', 'roi description1', pix_mask, pix_mask_weight, img_mask, iSS)
-        roi2 = ROI('roi2', 'test source', 'roi description2', pix_mask, pix_mask_weight, img_mask, iSS)
-        rois = {'roi1': roi1, 'roi2': roi2}
 
         oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 'emission_lambda')
         ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
-        pS = PlaneSegmentation('test source', 'description', ip, 'test_name', rois.values(), iSS)
+        pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS, pix_mask, pix_mask_index, img_mask)
+
         self.assertEqual(pS.description, 'description')
         self.assertEqual(pS.source, 'test source')
-        self.assertEqual(pS.roi, rois)
+
         self.assertEqual(pS.imaging_plane, ip)
         self.assertEqual(pS.reference_images, iSS)
-        self.assertEqual(pS.get_roi('roi1'), roi1)
-        self.assertEqual(pS.get_roi('roi1'), pS.roi['roi1'])
-        self.assertEqual(pS.get_roi('roi1'), pS['roi1'])
+        self.assertEqual(pS.pixel_mask.data, pix_mask)
+        self.assertEqual(pS.pixel_mask_index.data, pix_mask_index)
+        self.assertEqual(pS.image_mask, img_mask)
 
 
 if __name__ == '__main__':
