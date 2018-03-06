@@ -163,49 +163,45 @@ class TwoPhotonSeries(ImageSeries):
         self.scan_line_rate = scan_line_rate
 
 
-class ROI(with_metaclass(ExtenderMeta, object)):
+_roit_docval = [
+    {'name': 'pixel_mask_region', 'type': RegionSlicer, 'help': 'a region into a PixelMasks'},
+    {'name': 'image_mask_region', 'type': RegionSlicer, 'help': 'a region into an ImageMasks'},
+]
+
+
+class ROITable(NWBTable):
+
+    @docval({'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
+    def __init__(self, **kwargs):
+        data = getargs('data', kwargs)
+        colnames = [i['name'] for i in _roit_docval]
+        colnames.append('group_ref')
+        super(ElectrodeTable, self).__init__(colnames, 'rois', data)
+
+    @docval(*_roit_docval)
+    def add_row(self, **kwargs):
+        call_docval_func(super(ROITable, self).add_row, kwargs)
+
+    def __getitem__(self, idx):
+        return ROI(super(ROITable, self).__getitem__(idx))
+
+
+class ROI(object):
     """
     A class for defining a region of interest (ROI)
     """
 
-    __methods = {
-        'get_image_mask': 'Get the Image Mask for this ROI',
-        'get_pixel_mask': 'Get the Pixel Mask for this ROI',
-    }
-
-    @classmethod
-    def __make_getter(cls, name, doc):
-        @docval(func_name=name, doc=doc)
-        def _func(self, **kwargs):
-            method = getattr(self.ps, name)
-            return method(self.index)
-        return _func
-
-    @ExtenderMeta.pre_init
-    def __make_getters(cls, name, bases, classdict):
-        for method in cls.__methods:
-            setattr(cls, name, cls.__make_getter(method, cls.__methods[method]))
-
-    @docval({'name': 'index', 'type': int, 'doc': 'the index of the ROI in the given PlaneSegmentation'},
-            {'name': 'ps', 'type': 'PlaneSegmentation', 'doc': 'the PlaneSegmentation the ROI came from'})
+    @docval({'name': 'row', 'type': (dict, np.void), 'doc': 'the ROITable row'})
     def __init__(self, **kwargs):
-        index, ps = getargs('index', 'ps', kwargs)
-        self.__index = index
-        self.__ps = ps
+        self.__row = getargs('row', kwargs)
 
     @property
-    def ps(self):
-        '''
-        the PlaneSegmentation the ROI came from
-        '''
-        return self.__ps
+    def image_mask(self):
+        return self.__row['image_mask_region'][:]
 
     @property
-    def index(self):
-        '''
-        the index of the ROI
-        '''
-        return self.__index
+    def pixel_mask(self):
+        return self.__row['pixel_mask_region'][:]
 
 
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
@@ -214,8 +210,8 @@ class PlaneSegmentation(MultiContainerInterface):
     """
 
     __nwbfields__ = ('description',
+                     'rois',
                      'pixel_mask',
-                     'pixel_mask_index',
                      'image_mask',
                      'imaging_plane',
                      'reference_images')
@@ -228,15 +224,15 @@ class PlaneSegmentation(MultiContainerInterface):
             {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None},
             {'name': 'reference_images', 'type': (ImageSeries, list, dict, tuple), 'default': None,
              'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'},
+            {'name': 'rois', 'type': (ROITable, Iterable), 'default': None,
+             'doc': 'the table holding references to pixel and image masks'},
             {'name': 'pixel_mask', 'type': ('array_data', 'data', VectorData), 'default': None,
              'doc': 'a concatenated list of pixel masks for all ROIs stored in this PlaneSegmenation'},
-            {'name': 'pixel_mask_index', 'type': ('array_data', 'data', VectorIndex), 'default': None,
-             'doc': 'the indices in pixel_mask that correspond to each ROI stored in this PlaneSegmentation'},
             {'name': 'image_mask', 'type': ('array_data'), 'default': None,
              'doc': 'an image mask for each ROI in this PlaneSegmentation'})
     def __init__(self, **kwargs):
-        description, imaging_plane, reference_images, pm, pmi, image_mask = popargs(
-            'description', 'imaging_plane', 'reference_images', 'pixel_mask', 'pixel_mask_index', 'image_mask', kwargs)
+        description, imaging_plane, reference_images, rois, pm, image_mask = popargs(
+            'description', 'imaging_plane', 'reference_images', 'rois', 'pixel_mask', 'image_mask', kwargs)
         if kwargs.get('name') is None:
             kwargs['name'] = imaging_plane.name
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
@@ -244,10 +240,9 @@ class PlaneSegmentation(MultiContainerInterface):
         self.description = description
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
-        self.pixel_mask = pm if isinstance(pm, VectorData) else VectorData('pixel_mask', pm)
-        self.pixel_mask_index = pmi if isinstance(pmi, VectorIndex) else VectorIndex('pixel_mask_index', pmi)
-        self.__iv = IndexedVector(self.pixel_mask, self.pixel_mask_index)
+        self.pixel_mask = pm
         self.image_mask = image_mask
+        self.roi_table = ROITable() if rois is None else rois
         self.__rois = dict()
 
     @docval({'name': 'pixel_mask', 'type': int,
@@ -256,21 +251,26 @@ class PlaneSegmentation(MultiContainerInterface):
              'doc': 'the index of the ROI in roi_ids to retrieve the pixel mask for'})
     def add_roi(self, **kwargs):
         pixel_mask, image_mask = getargs('pixel_mask', 'image_mask', kwargs)
-        npixels = len(self.pixel_mask)
+        n_rois = len(self.roi_table)
+        im_region = get_region_slicer(self.image_mask, [n_rois])
         self.image_mask.append(image_mask)
-        return self.__iv.add_vector(pixel_mask)
+        n_pixels = len(self.pixel_mask)
+        self.pixel_mask.extend(pixel_mask)
+        pm_region = get_region_slice(self.pixel_mask, slice(n_pixels, n_pixels + len(pixel_mask)))
+        self.roi_table.add_row(pm_region, im_region)
+        return n_rois+1
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the ROI to retrieve the pixel mask for'})
     def get_pixel_mask(self, **kwargs):
         index = getargs('index', kwargs)
-        return self.__iv.get_vector(index)
+        return self.roi_table[index]['pixel_mask'][:]
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the ROI to retrieve the image mask for'})
     def get_image_mask(self, **kwargs):
         index = getargs('index', kwargs)
-        return self.image_mask[index]
+        return self.roi_table[index]['image_mask'][:]
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the ROI in roi_ids'})
@@ -279,7 +279,7 @@ class PlaneSegmentation(MultiContainerInterface):
         if index in self.__rois:
             return self.__rois[index]
         else:
-            return self.__rois.setdefault(index, ROI(index, self))
+            return self.__rois.setdefault(index, ROI(self.roi_table[index]))
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
