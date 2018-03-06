@@ -11,8 +11,8 @@ class PlaneSegmentationMap(ObjectMapper):
     # This might be needed for 2.0 as well
     def __init__(self, spec):
         super(PlaneSegmentationMap, self).__init__(spec)
-        roi_spec = self.spec.get_neurodata_type('ROI')
-        self.map_spec('roi_list', roi_spec)
+        # roi_spec = self.spec.get_neurodata_type('ROI')
+        # self.map_spec('roi_list', roi_spec)
 
         reference_images_spec = self.spec.get_group('reference_images').get_neurodata_type('ImageSeries')
         self.map_spec('reference_images', reference_images_spec)
@@ -64,16 +64,3 @@ class TwoPhotonSeriesMap(ObjectMapper):
         ip_builder = root['general/optophysiology/%s' % ip_name]
         imaging_plane = manager.construct(ip_builder)
         return imaging_plane
-
-
-@register_map(ROI)
-class ROIMap(ObjectMapper):
-
-    @ObjectMapper.constructor_arg('reference_images')
-    def carg_reference_images(self, *args):
-        return 'None'
-
-    @ObjectMapper.constructor_arg('name')
-    def carg_name(self, *args):
-        builder = args[0]
-        return builder.name
