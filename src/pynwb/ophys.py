@@ -1,12 +1,13 @@
 from collections import Iterable
+from six import with_metaclass
 import numpy as np
 
-from .form.utils import docval, popargs, fmt_docval_args
+from .form.utils import docval, popargs, fmt_docval_args, ExtenderMeta
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface
+from .core import NWBContainer, MultiContainerInterface, VectorData, VectorIndex, IndexedVector
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -162,33 +163,49 @@ class TwoPhotonSeries(ImageSeries):
         self.scan_line_rate = scan_line_rate
 
 
-@register_class('ROI', CORE_NAMESPACE)
-class ROI(NWBContainer):
+class ROI(with_metaclass(ExtenderMeta, object)):
     """
     A class for defining a region of interest (ROI)
     """
 
-    __nwbfields__ = ('roi_description',
-                     'pix_mask',
-                     'pix_mask_weight',
-                     'img_mask')
+    __methods = {
+        'get_image_mask': 'Get the Image Mask for this ROI',
+        'get_pixel_mask': 'Get the Pixel Mask for this ROI',
+    }
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this ROI'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'roi_description', 'type': str, 'doc': 'Description of this ROI.'},
-            {'name': 'pix_mask', 'type': Iterable, 'doc': 'List of pixels (x,y) that compose the mask.'},
-            {'name': 'pix_mask_weight', 'type': Iterable, 'doc': 'Weight of each pixel listed in pix_mask.'},
-            {'name': 'img_mask', 'type': Iterable, 'doc': 'ROI mask, represented in 2D ([y][x]) intensity image.'},
-            )
+    @classmethod
+    def __make_getter(cls, name, doc):
+        @docval(func_name=name, doc=doc)
+        def _func(self, **kwargs):
+            method = getattr(self.ps, name)
+            return method(self.index)
+        return _func
+
+    @ExtenderMeta.pre_init
+    def __make_getters(cls, name, bases, classdict):
+        for method in cls.__methods:
+            setattr(cls, name, cls.__make_getter(method, cls.__methods[method]))
+
+    @docval({'name': 'index', 'type': int, 'doc': 'the index of the ROI in the given PlaneSegmentation'},
+            {'name': 'ps', 'type': 'PlaneSegmentation', 'doc': 'the PlaneSegmentation the ROI came from'})
     def __init__(self, **kwargs):
-        roi_description, pix_mask, pix_mask_weight, img_mask = popargs(
-            'roi_description', 'pix_mask', 'pix_mask_weight', 'img_mask', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(ROI, self).__init__, kwargs)
-        super(ROI, self).__init__(*pargs, **pkwargs)
-        self.roi_description = roi_description
-        self.pix_mask = pix_mask
-        self.pix_mask_weight = pix_mask_weight
-        self.img_mask = img_mask
+        index, ps = getargs('index', 'ps', kwargs)
+        self.__index = index
+        self.__ps = ps
+
+    @property
+    def ps(self):
+        '''
+        the PlaneSegmentation the ROI came from
+        '''
+        return self.__ps
+
+    @property
+    def index(self):
+        '''
+        the index of the ROI
+        '''
+        return self.__index
 
 
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
@@ -207,15 +224,19 @@ class PlaneSegmentation(MultiContainerInterface):
             {'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.'},
             {'name': 'imaging_plane', 'type': ImagingPlane,
-             'doc': 'link to ImagingPlane group from which this TimeSeries data was generated.'},
+             'doc': 'the ImagingPlane this ROI applies to'},
             {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None},
-            {'name': 'roi', 'type': (Iterable, ROI), 'doc': 'List of ROIs in this imaging plane.',
-             'default': list()},
-            {'name': 'reference_images', 'type': ImageSeries, 'default': None,
-             'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'})
+            {'name': 'reference_images', 'type': (ImageSeries, list, dict, tuple), 'default': None,
+             'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'},
+            {'name': 'pixel_mask', 'type': ('array_data', 'data', VectorData), 'default': None,
+             'doc': 'a concatenated list of pixel masks for all ROIs stored in this PlaneSegmenation'},
+            {'name': 'pixel_mask_index', 'type': ('array_data', 'data', VectorIndex), 'default': None,
+             'doc': 'the indices in pixel_mask that correspond to each ROI stored in this PlaneSegmentation'},
+            {'name': 'image_mask', 'type': ('array_data'), 'default': None,
+             'doc': 'an image mask for each ROI in this PlaneSegmentation'})
     def __init__(self, **kwargs):
-        description, roi, imaging_plane, reference_images = popargs(
-            'description', 'roi', 'imaging_plane', 'reference_images', kwargs)
+        description, imaging_plane, reference_images, pm, pmi, image_mask = popargs(
+            'description', 'imaging_plane', 'reference_images', 'pixel_mask', 'pixel_mask_index', 'image_mask', kwargs)
         if kwargs.get('name') is None:
             kwargs['name'] = imaging_plane.name
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
@@ -223,16 +244,42 @@ class PlaneSegmentation(MultiContainerInterface):
         self.description = description
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
-        self.roi = dict()
-        for roi in roi:
-            self.add_roi(roi)
+        self.pixel_mask = pm if isinstance(pm, VectorData) else VectorData('pixel_mask', pm)
+        self.pixel_mask_index = pmi if isinstance(pmi, VectorIndex) else VectorIndex('pixel_mask_index', pmi)
+        self.__iv = IndexedVector(self.pixel_mask, self.pixel_mask_index)
+        self.image_mask = image_mask
+        self.__rois = dict()
+
+    @docval({'name': 'pixel_mask', 'type': int,
+             'doc': 'the index of the ROI in roi_ids to retrieve the pixel mask for'},
+            {'name': 'image_mask', 'type': int,
+             'doc': 'the index of the ROI in roi_ids to retrieve the pixel mask for'})
+    def add_roi(self, **kwargs):
+        pixel_mask, image_mask = getargs('pixel_mask', 'image_mask', kwargs)
+        npixels = len(self.pixel_mask)
+        self.image_mask.append(image_mask)
+        return self.__iv.add_vector(pixel_mask)
 
     @docval({'name': 'index', 'type': int,
-             'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
+             'doc': 'the index of the ROI to retrieve the pixel mask for'})
     def get_pixel_mask(self, **kwargs):
         index = getargs('index', kwargs)
-        return self.pixel_mask_index[index][:]
+        return self.__iv.get_vector(index)
 
+    @docval({'name': 'index', 'type': int,
+             'doc': 'the index of the ROI to retrieve the image mask for'})
+    def get_image_mask(self, **kwargs):
+        index = getargs('index', kwargs)
+        return self.image_mask[index]
+
+    @docval({'name': 'index', 'type': int,
+             'doc': 'the index of the ROI in roi_ids'})
+    def get_roi(self, **kwargs):
+        index = getargs('index', kwargs)
+        if index in self.__rois:
+            return self.__rois[index]
+        else:
+            return self.__rois.setdefault(index, ROI(index, self))
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
@@ -254,6 +301,16 @@ class ImageSegmentation(MultiContainerInterface):
     }
 
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
+
+    @docval({'name': 'imaging_plane', 'type': ImagingPlane,'doc': 'the ImagingPlane this ROI applies to'},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of image plane, recording wavelength, depth, etc.', 'default': None},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data','default': None},
+            {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None})
+    def add_segmentation(self, **kwargs):
+        kwargs.setdefault('source', self.source)
+        kwargs.setdefault('description', imaging_plane.description)
+        return self.add_plane_segmentation(**kwargs)
 
 
 @register_class('RoiResponseSeries', CORE_NAMESPACE)
