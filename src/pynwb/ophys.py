@@ -2,12 +2,13 @@ from collections import Iterable
 from six import with_metaclass
 import numpy as np
 
-from .form.utils import docval, popargs, fmt_docval_args, ExtenderMeta
+from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from .form.data_utils import RegionSlicer, get_region_slicer
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, VectorData, VectorIndex, IndexedVector
+from .core import NWBContainer, MultiContainerInterface, VectorData, VectorIndex, IndexedVector, NWBTable
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -164,44 +165,23 @@ class TwoPhotonSeries(ImageSeries):
 
 
 _roit_docval = [
-    {'name': 'pixel_mask_region', 'type': RegionSlicer, 'help': 'a region into a PixelMasks'},
-    {'name': 'image_mask_region', 'type': RegionSlicer, 'help': 'a region into an ImageMasks'},
+    {'name': 'pixel_mask', 'type': RegionSlicer, 'help': 'a region into a PixelMasks'},
+    {'name': 'image_mask', 'type': RegionSlicer, 'help': 'a region into an ImageMasks'},
 ]
 
 
+@register_class('ROITable', CORE_NAMESPACE)
 class ROITable(NWBTable):
 
     @docval({'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
     def __init__(self, **kwargs):
         data = getargs('data', kwargs)
         colnames = [i['name'] for i in _roit_docval]
-        colnames.append('group_ref')
-        super(ElectrodeTable, self).__init__(colnames, 'rois', data)
+        super(ROITable, self).__init__(colnames, 'rois', data)
 
     @docval(*_roit_docval)
     def add_row(self, **kwargs):
-        call_docval_func(super(ROITable, self).add_row, kwargs)
-
-    def __getitem__(self, idx):
-        return ROI(super(ROITable, self).__getitem__(idx))
-
-
-class ROI(object):
-    """
-    A class for defining a region of interest (ROI)
-    """
-
-    @docval({'name': 'row', 'type': (dict, np.void), 'doc': 'the ROITable row'})
-    def __init__(self, **kwargs):
-        self.__row = getargs('row', kwargs)
-
-    @property
-    def image_mask(self):
-        return self.__row['image_mask_region'][:]
-
-    @property
-    def pixel_mask(self):
-        return self.__row['pixel_mask_region'][:]
+        super(ROITable, self).add_row(kwargs)
 
 
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
@@ -224,11 +204,11 @@ class PlaneSegmentation(MultiContainerInterface):
             {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None},
             {'name': 'reference_images', 'type': (ImageSeries, list, dict, tuple), 'default': None,
              'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'},
-            {'name': 'rois', 'type': (ROITable, Iterable), 'default': None,
+            {'name': 'rois', 'type': ROITable, 'default': None,
              'doc': 'the table holding references to pixel and image masks'},
-            {'name': 'pixel_mask', 'type': ('array_data', 'data', VectorData), 'default': None,
+            {'name': 'pixel_mask', 'type': ('array_data', 'data', VectorData), 'default': list(),
              'doc': 'a concatenated list of pixel masks for all ROIs stored in this PlaneSegmenation'},
-            {'name': 'image_mask', 'type': ('array_data'), 'default': None,
+            {'name': 'image_mask', 'type': ('array_data'), 'default': list(),
              'doc': 'an image mask for each ROI in this PlaneSegmentation'})
     def __init__(self, **kwargs):
         description, imaging_plane, reference_images, rois, pm, image_mask = popargs(
@@ -242,44 +222,34 @@ class PlaneSegmentation(MultiContainerInterface):
         self.reference_images = reference_images
         self.pixel_mask = pm
         self.image_mask = image_mask
-        self.roi_table = ROITable() if rois is None else rois
-        self.__rois = dict()
+        self.rois = ROITable() if rois is None else rois
 
-    @docval({'name': 'pixel_mask', 'type': int,
+    @docval({'name': 'pixel_mask', 'type': 'array_data',
              'doc': 'the index of the ROI in roi_ids to retrieve the pixel mask for'},
-            {'name': 'image_mask', 'type': int,
+            {'name': 'image_mask', 'type': 'array_data',
              'doc': 'the index of the ROI in roi_ids to retrieve the pixel mask for'})
     def add_roi(self, **kwargs):
         pixel_mask, image_mask = getargs('pixel_mask', 'image_mask', kwargs)
-        n_rois = len(self.roi_table)
+        n_rois = len(self.rois)
         im_region = get_region_slicer(self.image_mask, [n_rois])
         self.image_mask.append(image_mask)
         n_pixels = len(self.pixel_mask)
         self.pixel_mask.extend(pixel_mask)
-        pm_region = get_region_slice(self.pixel_mask, slice(n_pixels, n_pixels + len(pixel_mask)))
-        self.roi_table.add_row(pm_region, im_region)
+        pm_region = get_region_slicer(self.pixel_mask, slice(n_pixels, n_pixels + len(pixel_mask)))
+        self.rois.add_row(pm_region, im_region)
         return n_rois+1
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the ROI to retrieve the pixel mask for'})
     def get_pixel_mask(self, **kwargs):
         index = getargs('index', kwargs)
-        return self.roi_table[index]['pixel_mask'][:]
+        return self.rois[index]['pixel_mask']
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the ROI to retrieve the image mask for'})
     def get_image_mask(self, **kwargs):
         index = getargs('index', kwargs)
-        return self.roi_table[index]['image_mask'][:]
-
-    @docval({'name': 'index', 'type': int,
-             'doc': 'the index of the ROI in roi_ids'})
-    def get_roi(self, **kwargs):
-        index = getargs('index', kwargs)
-        if index in self.__rois:
-            return self.__rois[index]
-        else:
-            return self.__rois.setdefault(index, ROI(self.roi_table[index]))
+        return self.rois[index]['image_mask']
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
