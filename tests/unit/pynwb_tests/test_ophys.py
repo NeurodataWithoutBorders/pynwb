@@ -1,7 +1,7 @@
 import unittest
 
 from pynwb.ophys import TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, PlaneSegmentation, \
-    ImageSegmentation, OpticalChannel, ImagingPlane, ROI
+    ImageSegmentation, OpticalChannel, ImagingPlane, ROITable
 from pynwb.image import ImageSeries
 
 import numpy as np
@@ -12,7 +12,6 @@ def CreatePlaneSegmentation():
     img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
     pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
                 [7, 8, 2.0],[9, 10, 2.0]]
-    pix_mask_index = [slice(0,3), slice(3,5)]
 
     iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit',
                       external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
@@ -21,7 +20,9 @@ def CreatePlaneSegmentation():
     ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
                       'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
-    pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS, pix_mask, pix_mask_index, img_mask)
+    pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
+    pS.add_roi(pix_mask[0:3], img_mask[0])
+    pS.add_roi(pix_mask[3:5], img_mask[1])
     return pS
 
 
@@ -116,7 +117,6 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
         pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
                     [7, 8, 2.0], [9, 10, 2.0]]
-        pix_mask_index = [slice(0,3), slice(3,5)]
 
         iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit',
                           external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
@@ -125,15 +125,16 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
-        pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS, pix_mask, pix_mask_index, img_mask)
+        pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
+        pS.add_roi(pix_mask[0:3], img_mask[0])
+        pS.add_roi(pix_mask[3:5], img_mask[1])
 
         self.assertEqual(pS.description, 'description')
         self.assertEqual(pS.source, 'test source')
 
         self.assertEqual(pS.imaging_plane, ip)
         self.assertEqual(pS.reference_images, iSS)
-        self.assertEqual(pS.pixel_mask.data, pix_mask)
-        self.assertEqual(pS.pixel_mask_index.data, pix_mask_index)
+        self.assertEqual(pS.pixel_mask, pix_mask)
         self.assertEqual(pS.image_mask, img_mask)
 
 
