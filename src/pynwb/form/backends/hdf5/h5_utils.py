@@ -1,6 +1,7 @@
 from copy import copy
 from six import binary_type, text_type
 from h5py import Group, Dataset, RegionReference, Reference, special_dtype
+import json
 
 from ...query import FORMDataset
 from ...array import Array
