@@ -152,8 +152,8 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
         read = self.roundtripContainer()
         row1= read.electrodes[0]
         row2= read.electrodes[1]
-        self.assertIsInstance(row1['group_ref'], ElectrodeGroup)
-        self.assertIsInstance(row2['group_ref'], ElectrodeGroup)
+        self.assertIsInstance(row1['group'], ElectrodeGroup)
+        self.assertIsInstance(row2['group'], ElectrodeGroup)
 
 class TestMultiElectricalSeries(base.TestDataInterfaceIO):
 
