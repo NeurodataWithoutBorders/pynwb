@@ -526,6 +526,7 @@ class ListSlicer(RegionSlicer):
 
 
 from .backends.hdf5 import H5RegionSlicer  # noqa: E402
+from .backends.hdf5.h5tools import H5Dataset
 import h5py  # noqa: E402
 
 
@@ -536,6 +537,6 @@ def get_region_slicer(**kwargs):
     dataset, region = getargs('dataset', 'region', kwargs)
     if isinstance(dataset, (list, tuple, Data)):
         return ListSlicer(dataset, region)
-    elif isinstance(dataset, h5py.Dataset):
+    elif isinstance(dataset, H5Dataset):
         return H5RegionSlicer(dataset, region)
     return None
