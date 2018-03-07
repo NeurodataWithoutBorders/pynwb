@@ -72,13 +72,12 @@ class ElectrodeTable(NWBTable):
     def __init__(self, **kwargs):
         data, name = getargs('data', 'name', kwargs)
         colnames = [i['name'] for i in _et_docval]
-        colnames.append('group_ref')
+        colnames.append('group_name')
         super(ElectrodeTable, self).__init__(colnames, name, data)
 
     @docval(*_et_docval)
     def add_row(self, **kwargs):
-        kwargs['group_ref'] = kwargs['group']
-        kwargs['group'] = kwargs['group'].name
+        kwargs['group_name'] = kwargs['group'].name
         super(ElectrodeTable, self).add_row(kwargs)
 
 
