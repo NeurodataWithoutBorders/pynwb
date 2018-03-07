@@ -2,7 +2,8 @@ from collections import Iterable
 import numpy as np
 
 from .form.utils import docval, getargs, popargs, fmt_docval_args
-from .form.data_utils import RegionSlicer, get_region_slicer
+from .form.data_utils import RegionSlicer
+from .form import get_region_slicer
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
