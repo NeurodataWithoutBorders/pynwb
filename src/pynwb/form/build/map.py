@@ -402,7 +402,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             if spec.data_type_inc is not None:
                 ret = value
             else:
-                if 'text' in spec.dtype:
+                if spec.dtype is not None and 'text' in spec.dtype:
                     if spec.dims is not None:
                         ret = list(map(str, value))
                     else:
