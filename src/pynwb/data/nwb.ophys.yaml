@@ -146,7 +146,7 @@ groups:
       - null
       neurodata_type_inc: NWBData
       neurodata_type_def: ImageMasks
-    - default_name: roi_table
+    - name: roi_table
       doc: A table for storing references to the image mask and pixel mask for each ROI
       attributes:
       - doc: a help string
