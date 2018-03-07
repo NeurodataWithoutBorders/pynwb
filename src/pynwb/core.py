@@ -1,4 +1,3 @@
-from collections import Iterable
 from h5py import RegionReference
 import numpy as np
 

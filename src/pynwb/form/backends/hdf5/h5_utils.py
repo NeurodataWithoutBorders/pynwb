@@ -1,5 +1,5 @@
 from copy import copy
-from six import binary_type, text_type
+from six import binary_type
 from h5py import Group, Dataset, RegionReference, Reference, special_dtype
 import json
 
@@ -35,7 +35,8 @@ class H5TableDataset(H5Dataset):
 
     @docval({'name': 'dataset', 'type': (Dataset, Array), 'doc': 'the HDF5 file lazily evaluate'},
             {'name': 'io', 'type': 'HDF5IO', 'doc': 'the IO object that was used to read the underlying dataset'},
-            {'name': 'types', 'type': (list, tuple), 'doc': 'the IO object that was used to read the underlying dataset'})
+            {'name': 'types', 'type': (list, tuple),
+             'doc': 'the IO object that was used to read the underlying dataset'})
     def __init__(self, **kwargs):
         types = popargs('types', kwargs)
         call_docval_func(super(H5TableDataset, self).__init__, kwargs)
@@ -47,7 +48,6 @@ class H5TableDataset(H5Dataset):
                 self.__refgetters[i] = self.__get_ref
 
     def __getitem__(self, arg):
-        idx = arg
         rows = copy(super(H5TableDataset, self).__getitem__(arg))
         if isinstance(arg, int):
             self.__swap_refs(rows)

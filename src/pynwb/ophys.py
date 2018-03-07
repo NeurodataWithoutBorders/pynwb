@@ -1,14 +1,13 @@
 from collections import Iterable
-from six import with_metaclass
 import numpy as np
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from .form.utils import docval, getargs, popargs, fmt_docval_args
 from .form.data_utils import RegionSlicer, get_region_slicer
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, VectorData, VectorIndex, IndexedVector, NWBTable
+from .core import NWBContainer, MultiContainerInterface, VectorData, NWBTable
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -272,14 +271,14 @@ class ImageSegmentation(MultiContainerInterface):
 
     _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
 
-    @docval({'name': 'imaging_plane', 'type': ImagingPlane,'doc': 'the ImagingPlane this ROI applies to'},
+    @docval({'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'the ImagingPlane this ROI applies to'},
             {'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.', 'default': None},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data','default': None},
+            {'name': 'source', 'type': str, 'doc': 'the source of the data', 'default': None},
             {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None})
     def add_segmentation(self, **kwargs):
         kwargs.setdefault('source', self.source)
-        kwargs.setdefault('description', imaging_plane.description)
+        kwargs.setdefault('description', kwargs['imaging_plane'].description)
         return self.add_plane_segmentation(**kwargs)
 
 

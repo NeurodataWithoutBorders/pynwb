@@ -150,10 +150,11 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
 
     def test_eg_ref(self):
         read = self.roundtripContainer()
-        row1= read.electrodes[0]
-        row2= read.electrodes[1]
-        self.assertIsInstance(row1['group'], ElectrodeGroup)
-        self.assertIsInstance(row2['group'], ElectrodeGroup)
+        row1 = read.electrodes[0]
+        row2 = read.electrodes[1]
+        self.assertIsInstance(row1['group'], ElectrodeGroup)  # noqa: F405
+        self.assertIsInstance(row2['group'], ElectrodeGroup)  # noqa: F405
+
 
 class TestMultiElectricalSeries(base.TestDataInterfaceIO):
 
@@ -223,7 +224,6 @@ class TestMultiElectricalSeries(base.TestDataInterfaceIO):
         nwbfile.add_electrode_group(self.group)
         nwbfile.set_electrode_table(self.table)
         nwbfile.add_acquisition(self.container)
-
 
     def setUpContainer(self):
         raise unittest.SkipTest('Cannot run test unless addContainer is implemented')

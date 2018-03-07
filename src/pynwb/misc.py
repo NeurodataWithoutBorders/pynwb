@@ -1,7 +1,6 @@
 import numpy as np
 from collections import Iterable
 
-from .form import get_region_slicer
 from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE

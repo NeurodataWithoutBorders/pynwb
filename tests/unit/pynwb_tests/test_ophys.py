@@ -1,7 +1,7 @@
 import unittest
 
 from pynwb.ophys import TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, PlaneSegmentation, \
-    ImageSegmentation, OpticalChannel, ImagingPlane, ROITable
+    ImageSegmentation, OpticalChannel, ImagingPlane
 from pynwb.image import ImageSeries
 
 import numpy as np
@@ -11,7 +11,7 @@ def CreatePlaneSegmentation():
     w, h = 5, 5
     img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
     pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
-                [7, 8, 2.0],[9, 10, 2.0]]
+                [7, 8, 2.0], [9, 10, 2.0]]
 
     iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit',
                       external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())

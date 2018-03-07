@@ -1,6 +1,4 @@
 from collections import Iterable, deque
-from copy import copy
-import json
 import numpy as np
 import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference, check_dtype

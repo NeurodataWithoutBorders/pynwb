@@ -6,6 +6,9 @@ from .utils import docval, getargs, popargs, docval_macro
 from operator import itemgetter
 from .container import Data
 
+from .backends.hdf5 import H5RegionSlicer  # noqa: E402
+from .backends.hdf5.h5tools import H5Dataset
+
 
 def __get_shape_helper(data):
     shape = list()
@@ -523,11 +526,6 @@ class ListSlicer(RegionSlicer):
 
     def __len__(self):
         return self.__len
-
-
-from .backends.hdf5 import H5RegionSlicer  # noqa: E402
-from .backends.hdf5.h5tools import H5Dataset
-import h5py  # noqa: E402
 
 
 @docval({'name': 'dataset', 'type': None, 'doc': 'the HDF5 dataset to slice'},
