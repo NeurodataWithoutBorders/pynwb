@@ -66,12 +66,13 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
         ip = CreatePlaneSegmentation()
         iS = ImageSegmentation('test source', ip, name='test_iS')
 
-        ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', ['name1'], iS, timestamps=list())
+        rt_region = ip.create_roi_table_region([1], 'the second ROI')
+
+        ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', rt_region, timestamps=list())
         self.assertEqual(ts.name, 'test_ts')
         self.assertEqual(ts.source, 'a hypothetical source')
         self.assertEqual(ts.unit, 'unit')
-        self.assertEqual(ts.roi_names, ['name1'])
-        self.assertEqual(ts.segmentation_interface, iS)
+        self.assertEqual(ts.rois, rt_region)
 
 
 class DfOverFConstructor(unittest.TestCase):
@@ -79,7 +80,9 @@ class DfOverFConstructor(unittest.TestCase):
         ip = CreatePlaneSegmentation()
         iS = ImageSegmentation('test source', ip, name='test_iS')
 
-        rrs = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', ['name1'], iS, timestamps=list())
+        rt_region = ip.create_roi_table_region([1], 'the second ROI')
+
+        rrs = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', rt_region, timestamps=list())
 
         dof = DfOverF('test_dof', rrs)
         self.assertEqual(dof.source, 'test_dof')
@@ -91,7 +94,9 @@ class FluorescenceConstructor(unittest.TestCase):
         ip = CreatePlaneSegmentation()
         iS = ImageSegmentation('test source', ip, name='test_iS')
 
-        ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', ['name1'], iS, timestamps=list())
+        rt_region = ip.create_roi_table_region([1], 'the second ROI')
+
+        ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', rt_region, timestamps=list())
 
         ff = Fluorescence('test_ff', ts)
         self.assertEqual(ff.source, 'test_ff')
@@ -134,8 +139,8 @@ class PlaneSegmentationConstructor(unittest.TestCase):
 
         self.assertEqual(pS.imaging_plane, ip)
         self.assertEqual(pS.reference_images, iSS)
-        self.assertEqual(pS.pixel_mask, pix_mask)
-        self.assertEqual(pS.image_mask, img_mask)
+        self.assertEqual(pS.pixel_masks, pix_mask)
+        self.assertEqual(pS.image_masks, img_mask)
 
 
 if __name__ == '__main__':
