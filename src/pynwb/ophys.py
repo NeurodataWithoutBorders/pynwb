@@ -1,14 +1,15 @@
 from collections import Iterable
+from h5py import RegionReference
 import numpy as np
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args
+from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 from .form.data_utils import RegionSlicer
 from .form import get_region_slicer
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, VectorData, NWBTable
+from .core import NWBContainer, MultiContainerInterface, VectorData, NWBTable, NWBTableRegion
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -184,15 +185,31 @@ class ROITable(NWBTable):
         super(ROITable, self).add_row(kwargs)
 
 
+@register_class('ROITableRegion', CORE_NAMESPACE)
+class ROITableRegion(NWBTableRegion):
+    '''A subsetting of an ElectrodeTable'''
+
+    __nwbfields__ = ('description',)
+
+    @docval({'name': 'table', 'type': ROITable, 'doc': 'the ElectrodeTable this region applies to'},
+            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
+            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
+    def __init__(self, **kwargs):
+        call_docval_func(super(ROITableRegion, self).__init__, kwargs)
+        self.description = getargs('description', kwargs)
+
+
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
 class PlaneSegmentation(MultiContainerInterface):
     """
+    Image segmentation of a specific imaging plane
     """
 
     __nwbfields__ = ('description',
                      'rois',
-                     'pixel_mask',
-                     'image_mask',
+                     'pixel_masks',
+                     'image_masks',
                      'imaging_plane',
                      'reference_images')
 
@@ -206,13 +223,13 @@ class PlaneSegmentation(MultiContainerInterface):
              'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'},
             {'name': 'rois', 'type': ROITable, 'default': None,
              'doc': 'the table holding references to pixel and image masks'},
-            {'name': 'pixel_mask', 'type': ('array_data', 'data', VectorData), 'default': list(),
+            {'name': 'pixel_masks', 'type': ('array_data', 'data', VectorData), 'default': list(),
              'doc': 'a concatenated list of pixel masks for all ROIs stored in this PlaneSegmenation'},
-            {'name': 'image_mask', 'type': ('array_data'), 'default': list(),
+            {'name': 'image_masks', 'type': ('array_data'), 'default': list(),
              'doc': 'an image mask for each ROI in this PlaneSegmentation'})
     def __init__(self, **kwargs):
-        description, imaging_plane, reference_images, rois, pm, image_mask = popargs(
-            'description', 'imaging_plane', 'reference_images', 'rois', 'pixel_mask', 'image_mask', kwargs)
+        description, imaging_plane, reference_images, rois, pm, image_masks = popargs(
+            'description', 'imaging_plane', 'reference_images', 'rois', 'pixel_masks', 'image_masks', kwargs)
         if kwargs.get('name') is None:
             kwargs['name'] = imaging_plane.name
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
@@ -220,8 +237,8 @@ class PlaneSegmentation(MultiContainerInterface):
         self.description = description
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
-        self.pixel_mask = pm
-        self.image_mask = image_mask
+        self.pixel_masks = pm
+        self.image_masks = image_masks
         self.rois = ROITable() if rois is None else rois
 
     @docval({'name': 'pixel_mask', 'type': 'array_data',
@@ -231,11 +248,11 @@ class PlaneSegmentation(MultiContainerInterface):
     def add_roi(self, **kwargs):
         pixel_mask, image_mask = getargs('pixel_mask', 'image_mask', kwargs)
         n_rois = len(self.rois)
-        im_region = get_region_slicer(self.image_mask, [n_rois])
-        self.image_mask.append(image_mask)
-        n_pixels = len(self.pixel_mask)
-        self.pixel_mask.extend(pixel_mask)
-        pm_region = get_region_slicer(self.pixel_mask, slice(n_pixels, n_pixels + len(pixel_mask)))
+        im_region = get_region_slicer(self.image_masks, [n_rois])
+        self.image_masks.append(image_mask)
+        n_pixels = len(self.pixel_masks)
+        self.pixel_masks.extend(pixel_mask)
+        pm_region = get_region_slicer(self.pixel_masks, slice(n_pixels, n_pixels + len(pixel_mask)))
         self.rois.add_row(pm_region, im_region)
         return n_rois+1
 
@@ -250,6 +267,15 @@ class PlaneSegmentation(MultiContainerInterface):
     def get_image_mask(self, **kwargs):
         index = getargs('index', kwargs)
         return self.rois[index]['image_mask']
+
+    @docval({'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
+            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'rois'})
+    def create_roi_table_region(self, **kwargs):
+        region = getargs('region', kwargs)
+        desc = getargs('description', kwargs)
+        name = getargs('name', kwargs)
+        return ROITableRegion(self.rois, region, desc, name)
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
@@ -289,8 +315,7 @@ class RoiResponseSeries(TimeSeries):
     ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one ROI.
     '''
 
-    __nwbfields__ = ('roi_names',
-                     'segmentation_interface')
+    __nwbfields__ = ('rois',)
 
     _ancestry = "TimeSeries,ImageSeries,ImageMaskSeries"
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
@@ -304,9 +329,8 @@ class RoiResponseSeries(TimeSeries):
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'roi_names', 'type': Iterable,
-             'doc': 'List of ROIs represented, one name for each row of data[].'},
-            {'name': 'segmentation_interface', 'type': ImageSegmentation, 'doc': 'Link to ImageSegmentation.'},
+            {'name': 'rois', 'type': ROITableRegion,
+             'doc': 'a table region corresponding to the ROIs that were used to generate this data'},
 
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -328,11 +352,10 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        roi_names, segmentation_interface = popargs('roi_names', 'segmentation_interface', kwargs)
+        rois = popargs('rois', kwargs)
         pargs, pkwargs = fmt_docval_args(super(RoiResponseSeries, self).__init__, kwargs)
         super(RoiResponseSeries, self).__init__(*pargs, **pkwargs)
-        self.roi_names = roi_names
-        self.segmentation_interface = segmentation_interface
+        self.rois = rois
 
 
 @register_class('DfOverF', CORE_NAMESPACE)
