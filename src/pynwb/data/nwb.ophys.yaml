@@ -54,11 +54,17 @@ datasets:
   neurodata_type_inc: NWBData
   neurodata_type_def: ROITable
 - doc: A region reference for subsetting an ROITable
+  dtype:
+    target_type: ROITable
+    reftype: region
   attributes:
   - doc: a help string
     name: help
     dtype: text
-    value: A region referene to an ROITable
+    value: A region reference to an ROITable
+  - name: description
+    doc: 'a description of this subset of ROIs'
+    dtype: utf8
   neurodata_type_inc: NWBData
   neurodata_type_def: ROITableRegion
 groups:
@@ -94,12 +100,12 @@ groups:
   neurodata_type_def: TwoPhotonSeries
   neurodata_type_inc: ImageSeries
 - attributes:
-  - doc: Value is 'ROI responses over an imaging plane. Each row in data[] should
-      correspond to the signal from one ROI'
+  - doc: Value is 'ROI responses over an imaging plane. Each element on the second dimension of data[]
+      should correspond to the signal from one ROI'
     dtype: text
     name: help
-    value: ROI responses over an imaging plane. Each row in data[] should correspond
-      to the signal from one ROI
+    value: ROI responses over an imaging plane. Each element on the second dimension of data[]
+      should correspond to the signal from one ROI
   datasets:
   - dims:
     - num_times
