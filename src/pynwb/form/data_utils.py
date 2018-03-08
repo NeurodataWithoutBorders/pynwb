@@ -4,7 +4,8 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from six import with_metaclass
 from .utils import docval, getargs, popargs, docval_macro
 from operator import itemgetter
-from .container import Data
+from .container import Data, DataRegion
+
 
 def __get_shape_helper(data):
     shape = list()
@@ -462,7 +463,7 @@ class DataIO(with_metaclass(ABCMeta, object)):
         return self.__data
 
 
-class RegionSlicer(with_metaclass(ABCMeta, object)):
+class RegionSlicer(with_metaclass(ABCMeta, DataRegion)):
     '''
     A abstract base class to control getting using a region
 
@@ -474,6 +475,14 @@ class RegionSlicer(with_metaclass(ABCMeta, object)):
     def __init__(self, **kwargs):
         self.__target = getargs('target', kwargs)
         self.__slice = getargs('slice', kwargs)
+
+    @property
+    def data(self):
+        return self.target
+
+    @property
+    def region(self):
+        return self.slice
 
     @property
     def target(self):
