@@ -58,6 +58,9 @@ class ProcessingModule(NWBContainer):
         container_name = getargs('container_name', kwargs)
         return self.__containers.get(container_name)
 
+    def __getitem__(self, arg):
+        return self.get_data_interface(arg)
+
     @docval({'name': 'container', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
     def add_container(self, **kwargs):
         '''
