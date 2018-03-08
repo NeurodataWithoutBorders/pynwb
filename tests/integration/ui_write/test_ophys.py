@@ -7,7 +7,8 @@ from pynwb.ophys import (
     OpticalChannel,
     PlaneSegmentation,
     ImageSegmentation,
-    TwoPhotonSeries
+    TwoPhotonSeries,
+    RoiResponseSeries
 )
 
 from pynwb.image import ImageSeries
@@ -295,5 +296,57 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         mod = nwbfile.get_processing_module('plane_seg_test_module')
-        img_seg = mod.get_container('ImageSegmentation')
+        img_seg = mod.get_data_interface('ImageSegmentation')
         return img_seg.get_plane_segmentation('test_plane_seg_name')
+
+
+class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
+
+    def setUpContainer(self):
+        self.plane_segmentation = TestPlaneSegmentation.buildPlaneSegmentation(self)
+        self.rt_region = self.plane_segmentation.create_roi_table_region([0], 'the first of two ROIs')
+
+        data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+
+        return RoiResponseSeries('test_roi_response_series', 'RoiResponseSeries integration test',
+                                 data, 'lumens', self.rt_region, timestamps=timestamps)
+
+    def setUpBuilder(self):
+        TestPlaneSegmentation.get_plane_segmentation_builder(self)
+        return GroupBuilder(
+            'test_roi_response_series',
+            attributes={
+                'source': 'RoiResponseSeries integration test',
+                'namespace': base.CORE_NAMESPACE,
+                'comments': 'no comments',
+                'description': 'no description',
+                'neurodata_type': 'RoiResponseSeries',
+                'help': ('ROI responses over an imaging plane. Each element on the second dimension of data[] '
+                         'should correspond to the signal from one ROI')},
+            datasets={
+                'data': DatasetBuilder(
+                    'data', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+                    attributes={
+                        'unit': 'lumens',
+                        'conversion': 1.0,
+                        'resolution': 0.0}
+                ),
+                'timestamps': DatasetBuilder('timestamps', [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
+                                             attributes={'unit': 'Seconds', 'interval': 1}),
+                'rois': DatasetBuilder('rois', RegionBuilder([0], self.rois_builder),
+                                       attributes={'help': 'A region reference to an ROITable',
+                                                   'description': 'the first of two ROIs',
+                                                   'namespace': 'core',
+                                                   'neurodata_type': 'ROITableRegion'}),
+            })
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_imaging_plane(self.imaging_plane)
+        img_seg = ImageSegmentation('plane segmentation round trip')
+        img_seg.add_plane_segmentation(self.plane_segmentation)
+        mod = nwbfile.create_processing_module('plane_seg_test_module',
+                                               'plane segmentation round trip',
+                                               'a plain module for testing')
+        mod.add_data_interface(img_seg)
+        super(TestRoiResponseSeriesIO, self).addContainer(nwbfile)
