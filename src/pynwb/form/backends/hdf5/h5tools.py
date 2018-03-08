@@ -404,6 +404,7 @@ class HDF5IO(FORMIO):
                         self.__queue_ref(self._make_attr_ref_filler(obj, key, tmp))
                     else:
                         value = np.array(value)
+                    obj.attrs[key] = value
                 else:
                     msg = "ignoring attribute '%s' from '%s' - value is empty list" % (key, obj.name)
                     warnings.warn(msg)
@@ -705,9 +706,13 @@ class HDF5IO(FORMIO):
                 builder = container.target_builder
             else:
                 builder = container
+        elif isinstance(container, ReferenceBuilder):
+            builder = container.builder
         else:
             builder = self.manager.build(container)
         path = self.__get_path(builder)
+        if isinstance(container, RegionBuilder):
+            region = container.region
         if region is not None:
             dset = self.__file[path]
             if not isinstance(dset, Dataset):
