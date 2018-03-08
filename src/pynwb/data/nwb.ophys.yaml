@@ -1,5 +1,10 @@
 datasets:
 - doc: ROI mask, represented in 2D ([y][x]) intensity image
+  attributes:
+  - doc: a help string
+    name: help
+    dtype: text
+    value: an array of image masks
   dims:
   - num_roi
   - num_x
@@ -12,6 +17,11 @@ datasets:
   neurodata_type_inc: NWBData
   neurodata_type_def: ImageMasks
 - doc: a table for storing pixel masks
+  attributes:
+  - doc: a help string
+    name: help
+    dtype: text
+    value: a concatenated array of pixel masks
   dtype:
   - name: x
     dtype: uint
