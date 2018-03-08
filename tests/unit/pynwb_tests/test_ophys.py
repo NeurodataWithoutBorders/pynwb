@@ -64,7 +64,6 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
 class RoiResponseSeriesConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
-        iS = ImageSegmentation('test source', ip, name='test_iS')
 
         rt_region = ip.create_roi_table_region([1], 'the second ROI')
 
@@ -78,7 +77,6 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
 class DfOverFConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
-        iS = ImageSegmentation('test source', ip, name='test_iS')
 
         rt_region = ip.create_roi_table_region([1], 'the second ROI')
 
@@ -92,7 +90,6 @@ class DfOverFConstructor(unittest.TestCase):
 class FluorescenceConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
-        iS = ImageSegmentation('test source', ip, name='test_iS')
 
         rt_region = ip.create_roi_table_region([1], 'the second ROI')
 
@@ -139,8 +136,8 @@ class PlaneSegmentationConstructor(unittest.TestCase):
 
         self.assertEqual(pS.imaging_plane, ip)
         self.assertEqual(pS.reference_images, iSS)
-        self.assertEqual(pS.pixel_masks, pix_mask)
-        self.assertEqual(pS.image_masks, img_mask)
+        self.assertEqual(pS.pixel_masks.data, pix_mask)
+        self.assertEqual(pS.image_masks.data, img_mask)
 
 
 if __name__ == '__main__':
