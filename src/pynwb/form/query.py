@@ -147,3 +147,12 @@ class FORMDataset(with_metaclass(ExtenderMeta, object)):
 
     def __len__(self):
         return len(self.__dataset)
+
+    def __iter__(self):
+        return iter(self.dataset)
+
+    def __next__(self):
+        return next(self.dataset)
+
+    def next(self):
+        return self.dataset.next()
