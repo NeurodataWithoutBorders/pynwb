@@ -2,7 +2,7 @@ import unittest2 as unittest
 
 import numpy as np
 
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder, ReferenceBuilder
 
 from pynwb.ecephys import *  # noqa: F403
 from pynwb.misc import UnitTimes
@@ -102,7 +102,33 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
 
     @staticmethod
     def get_table_builder(self):
-        return DatasetBuilder('electrodes', self.table.data,
+        self.device_builder = GroupBuilder('dev1',
+                                           attributes={'neurodata_type': 'Device',
+                                                       'namespace': 'core',
+                                                       'help': 'A recording device e.g. amplifier',
+                                                       'source': 'a test source'})
+        self.eg_builder = GroupBuilder('tetrode1',
+                                       attributes={'neurodata_type': 'ElectrodeGroup',
+                                                   'namespace': 'core',
+                                                   'help': 'A physical grouping of channels',
+                                                   'description': 'tetrode description',
+                                                   'location': 'tetrode location',
+                                                   'source': 'a test source'},
+                                       links={
+                                           'device': LinkBuilder('device', self.device_builder)
+                                       })
+
+        data = [
+            (1, 1.0, 2.0, 3.0, -1.0, 'CA1', 'none', 'first channel of tetrode',
+             ReferenceBuilder(self.eg_builder), 'tetrode1'),
+            (2, 1.0, 2.0, 3.0, -2.0, 'CA1', 'none', 'second channel of tetrode',
+             ReferenceBuilder(self.eg_builder), 'tetrode1'),
+            (3, 1.0, 2.0, 3.0, -3.0, 'CA1', 'none', 'third channel of tetrode',
+             ReferenceBuilder(self.eg_builder), 'tetrode1'),
+            (4, 1.0, 2.0, 3.0, -4.0, 'CA1', 'none', 'fourth channel of tetrode',
+             ReferenceBuilder(self.eg_builder), 'tetrode1')
+        ]
+        return DatasetBuilder('electrodes', data,
                               attributes={'neurodata_type': 'ElectrodeTable',
                                           'namespace': 'core',
                                           'help': 'a table for storing data about extracellular electrodes'})
