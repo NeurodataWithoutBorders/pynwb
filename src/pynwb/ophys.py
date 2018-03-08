@@ -9,7 +9,7 @@ from .form import get_region_slicer
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, VectorData, NWBTable, NWBTableRegion
+from .core import NWBContainer, MultiContainerInterface, NWBData, VectorData, NWBTable, NWBTableRegion
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -200,6 +200,32 @@ class ROITableRegion(NWBTableRegion):
         self.description = getargs('description', kwargs)
 
 
+@register_class('PixelMasks', CORE_NAMESPACE)
+class PixelMasks(VectorData):
+
+    @docval({'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the pixel mask data'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'pixel_masks'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(PixelMasks, self).__init__, kwargs)
+
+
+@register_class('ImageMasks', CORE_NAMESPACE)
+class ImageMasks(NWBData):
+
+    @docval({'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the image mask data'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'image_masks'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(ImageMasks, self).__init__, kwargs)
+
+
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
 class PlaneSegmentation(MultiContainerInterface):
     """
@@ -223,12 +249,12 @@ class PlaneSegmentation(MultiContainerInterface):
              'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'},
             {'name': 'rois', 'type': ROITable, 'default': None,
              'doc': 'the table holding references to pixel and image masks'},
-            {'name': 'pixel_masks', 'type': ('array_data', 'data', VectorData), 'default': list(),
+            {'name': 'pixel_masks', 'type': ('array_data', 'data', PixelMasks), 'default': list(),
              'doc': 'a concatenated list of pixel masks for all ROIs stored in this PlaneSegmenation'},
-            {'name': 'image_masks', 'type': ('array_data'), 'default': list(),
+            {'name': 'image_masks', 'type': ('array_data', ImageMasks), 'default': list(),
              'doc': 'an image mask for each ROI in this PlaneSegmentation'})
     def __init__(self, **kwargs):
-        description, imaging_plane, reference_images, rois, pm, image_masks = popargs(
+        description, imaging_plane, reference_images, rois, pm, im = popargs(
             'description', 'imaging_plane', 'reference_images', 'rois', 'pixel_masks', 'image_masks', kwargs)
         if kwargs.get('name') is None:
             kwargs['name'] = imaging_plane.name
@@ -237,8 +263,8 @@ class PlaneSegmentation(MultiContainerInterface):
         self.description = description
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
-        self.pixel_masks = pm
-        self.image_masks = image_masks
+        self.pixel_masks = pm if isinstance(pm, PixelMasks) else PixelMasks(pm)
+        self.image_masks = im if isinstance(im, ImageMasks) else ImageMasks(im)
         self.rois = ROITable() if rois is None else rois
 
     @docval({'name': 'pixel_mask', 'type': 'array_data',
@@ -306,7 +332,7 @@ class ImageSegmentation(MultiContainerInterface):
     def add_segmentation(self, **kwargs):
         kwargs.setdefault('source', self.source)
         kwargs.setdefault('description', kwargs['imaging_plane'].description)
-        return self.add_plane_segmentation(**kwargs)
+        return self.create_plane_segmentation(**kwargs)
 
 
 @register_class('RoiResponseSeries', CORE_NAMESPACE)
