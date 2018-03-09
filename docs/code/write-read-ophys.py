@@ -4,6 +4,7 @@ from datetime import datetime
 from pynwb import NWBFile, NWBHDF5IO
 from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluorescence
 
+
 def main():
     nwb_path = 'ophys_example.nwb'
     # create your NWBFile object
@@ -30,7 +31,6 @@ def main():
                                    external_file=['images.tiff'], imaging_plane=imaging_plane,
                                    starting_frame=[1, 2, 3], format='tiff', timestamps=list())
     nwbfile.add_acquisition(image_series)
-
 
     mod = nwbfile.create_processing_module('img_seg_example', 'ophys demo', 'an example of writing Ca2+ imaging data')
     img_seg = ImageSegmentation('a toy image segmentation container')
@@ -85,13 +85,14 @@ def main():
     # get the RoiResponseSeries from the Fluorescence data interface
     rrs = mod['Fluorescence'].get_roi_response_series()
     # get the data...
-    rrs_data = rrs.data
-    rrs_timestamps = rrs.timestamps
+    rrs_data = rrs.data                           # noqa: F841
+    rrs_timestamps = rrs.timestamps               # noqa: F841
     # and now do something cool!
 
     io.close()
     if os.path.exists(nwb_path):
         os.remove(nwb_path)
+
 
 if __name__ == '__main__':
     main()
