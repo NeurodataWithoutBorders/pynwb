@@ -81,7 +81,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
         timestamps = list(map(lambda x: x/10, range(10)))
         fov = [2.0, 2.0, 5.0]
         ret = TwoPhotonSeries('test_2ps', 'unit test TestTwoPhotonSeries',
-                              data, self.imaging_plane, 'image_unit', 'raw', fov, 1.7, 3.4,
+                              self.imaging_plane, data, 'image_unit', 'raw', fov, 1.7, 3.4,
                               timestamps=timestamps, dimension=[2])
         return ret
 
