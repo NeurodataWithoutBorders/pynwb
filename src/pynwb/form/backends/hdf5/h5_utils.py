@@ -51,14 +51,16 @@ class H5TableDataset(H5Dataset):
         rows = copy(super(H5TableDataset, self).__getitem__(arg))
         if isinstance(arg, int):
             self.__swap_refs(rows)
-        for row in rows:
-            self.__swap_refs(row)
+        else:
+            for row in rows:
+                self.__swap_refs(row)
         return rows
 
     def __swap_refs(self, row):
         for i in self.__refgetters:
             getref = self.__refgetters[i]
-            row[i] = getref(row[i])
+            if isinstance(row[i], Reference):
+                row[i] = getref(row[i])
 
     def __get_ref(self, ref):
         return self.io.get_container(self.dataset.file[ref])
