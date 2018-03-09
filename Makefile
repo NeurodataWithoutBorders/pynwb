@@ -40,6 +40,7 @@ test:
 flake:
 	$(FLAKE) src/
 	$(FLAKE) tests/
+	$(FLAKE) docs/code/
 
 checkpdb:
 	find {src,tests} -name "*.py" -exec grep -Hn pdb {} \;
