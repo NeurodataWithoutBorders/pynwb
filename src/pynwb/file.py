@@ -257,6 +257,17 @@ class NWBFile(MultiContainerInterface):
                 self.__set_timeseries(ret, ts)
         return ret
 
+    def all_children(self):
+        stack = [self]
+        ret = list()
+        while len(stack):
+            n = stack.pop()
+            ret.append(n)
+            if hasattr(n, 'children'):
+                for c in n.children:
+                    stack.append(c)
+        return ret
+
     @property
     def epochs(self):
         return self.__epochs
