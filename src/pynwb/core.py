@@ -1,3 +1,4 @@
+import types
 from collections import Iterable
 from h5py import RegionReference
 import numpy as np
@@ -93,21 +94,39 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
         self.__parent = parent_container
 
     @staticmethod
-    def _getter(nwbfield):
-        def _func(self):
-            return self.fields.get(nwbfield)
-        return _func
+    def _transform_arg(nwbfield):
+        tmp = nwbfield
+        if isinstance(tmp, dict):
+            if 'name' not in tmp:
+                raise ValueError("must specify 'name' if using dict in __nwbfields__")
+        else:
+            tmp = {'name': tmp}
+        return tmp
 
-    @staticmethod
-    def _setter(nwbfield):
-        def _func(self, val):
+    @classmethod
+    def _getter(cls, nwbfield):
+        doc = nwbfield.get('doc')
+        name = nwbfield['name']
+
+        def nwbbt_getter(self):
+            return self.fields.get(name)
+
+        setattr(nwbbt_getter, '__doc__', doc)
+        return nwbbt_getter
+
+    @classmethod
+    def _setter(cls, nwbfield):
+        name = nwbfield['name']
+
+        def nwbbt_setter(self, val):
             if val is None:
                 return
-            if nwbfield in self.fields:
-                msg = "can't set attribute '%s' -- already set" % nwbfield
+            if name in self.fields:
+                msg = "can't set attribute '%s' -- already set" % name
                 raise AttributeError(msg)
-            self.fields[nwbfield] = val
-        return _func
+            self.fields[name] = val
+
+        return nwbbt_setter
 
     @ExtenderMeta.pre_init
     def __gather_nwbfields(cls, name, bases, classdict):
@@ -123,9 +142,19 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
                 new_nwbfields = list(cls.__nwbfields__)
                 new_nwbfields[0:0] = bases[-1].__nwbfields__
                 cls.__nwbfields__ = tuple(new_nwbfields)
+        new_nwbfields = list()
+        docs = {dv['name']: dv['doc'] for dv in get_docval(cls.__init__)}
         for f in cls.__nwbfields__:
-            if not hasattr(cls, f):
-                setattr(cls, f, property(cls._getter(f), cls._setter(f)))
+            pconf = cls._transform_arg(f)
+            pname = pconf['name']
+            if cls.__name__ == 'TimeSeries' and pname == 'data':
+                import pdb
+                pdb.set_trace()
+            pconf.setdefault('doc', docs.get(pname))
+            if not hasattr(cls, pname):
+                setattr(cls, pname, property(cls._getter(pconf), cls._setter(pconf)))
+            new_nwbfields.append(pname)
+        cls.__nwbfields__ = tuple(new_nwbfields)
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)
@@ -158,7 +187,34 @@ class NWBContainer(NWBBaseType, Container):
 
 @register_class('NWBDataInterface', CORE_NAMESPACE)
 class NWBDataInterface(NWBContainer):
-    pass
+
+    @docval(*get_docval(NWBContainer.__init__))
+    def __init__(self, **kwargs):
+        call_docval_func(super(NWBDataInterface, self).__init__, kwargs)
+        self.__children = list()
+
+    @property
+    def children(self):
+        return tuple(self.__children)
+
+    @docval({'name': 'child', 'type': NWBBaseType,
+             'doc': 'the child NWBContainer or NWBData for this Container', 'default': None})
+    def add_child(self, **kwargs):
+        child = getargs('child', kwargs)
+        self.__children.append(child)
+
+    @classmethod
+    def _setter(cls, nwbfield):
+        super_setter = super(NWBDataInterface, cls)._setter(nwbfield)
+        ret = super_setter
+        if isinstance(nwbfield, dict) and nwbfield.get('child', False):
+
+            def nwbdi_setter(self, val):
+                super_setter(self, val)
+                self.add_child(val)
+
+            ret = nwbdi_setter
+        return ret
 
 
 @register_class('NWBData', CORE_NAMESPACE)
@@ -394,6 +450,7 @@ class MultiContainerInterface(NWBDataInterface):
             d = getattr(self, attr_name)
             for tmp in containers:
                 tmp.parent = self
+                self.add_child(tmp)
                 if tmp.name in d:
                     msg = "'%s' already exists in '%s'" % (tmp.name, self.name)
                     raise ValueError(msg)
@@ -503,9 +560,10 @@ class MultiContainerInterface(NWBDataInterface):
 
             # create property with the name given in 'attr'
             if not hasattr(cls, attr):
-                getter = cls._getter(attr)
+                aconf = cls._transform_arg(attr)
+                getter = cls._getter(aconf)
                 doc = "a dictionary containing the %s in this %s container" % (container_type.__name__, cls.__name__)
-                setattr(cls, attr, property(getter, cls._setter(attr), None, doc))
+                setattr(cls, attr, property(getter, cls._setter(aconf), None, doc))
 
             # create the add method
             setattr(cls, add, cls.__make_add(add, attr, container_type))
