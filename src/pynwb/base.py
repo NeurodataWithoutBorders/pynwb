@@ -93,12 +93,8 @@ class TimeSeries(NWBDataInterface):
                      "rate_unit",
                      "control",
                      "control_description",
-                     "ancestry",
-                     "neurodata_type",
                      "help")
 
-    __ancestry = 'TimeSeries'
-    __neurodata_type = 'TimeSeries'
     __help = 'General purpose TimeSeries'
 
     __time_unit = "Seconds"
