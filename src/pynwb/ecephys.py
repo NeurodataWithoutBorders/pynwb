@@ -105,7 +105,8 @@ class ElectricalSeries(TimeSeries):
     channels] (or [num_times] for single electrode).
     """
 
-    __nwbfields__ = ({'name': 'electrodes', 'doc': 'the electrodes that generated this electrical series', 'child': True},)
+    __nwbfields__ = ({'name': 'electrodes',
+                      'doc': 'the electrodes that generated this electrical series', 'child': True},)
 
     __ancestry = "TimeSeries,ElectricalSeries"
     __help = "Stores acquired voltage data from extracellular recordings."

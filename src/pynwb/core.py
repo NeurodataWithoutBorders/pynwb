@@ -1,4 +1,3 @@
-import types
 from collections import Iterable
 from h5py import RegionReference
 import numpy as np
@@ -147,9 +146,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
         for f in cls.__nwbfields__:
             pconf = cls._transform_arg(f)
             pname = pconf['name']
-            if cls.__name__ == 'TimeSeries' and pname == 'data':
-                import pdb
-                pdb.set_trace()
             pconf.setdefault('doc', docs.get(pname))
             if not hasattr(cls, pname):
                 setattr(cls, pname, property(cls._getter(pconf), cls._setter(pconf)))
