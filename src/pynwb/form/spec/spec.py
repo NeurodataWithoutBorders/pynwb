@@ -959,6 +959,8 @@ class GroupSpec(BaseStorageSpec):
             else:
                 raise TypeError("must specify 'name' or 'data_type_inc' in Group spec")
         else:
+            if spec.data_type_inc is not None or spec.data_type_def is not None:
+                self.__add_data_type_inc(spec)
             self.__groups[spec.name] = spec
         self.setdefault('groups', list()).append(spec)
         spec.parent = self
@@ -989,6 +991,8 @@ class GroupSpec(BaseStorageSpec):
             else:
                 raise TypeError("must specify 'name' or 'data_type_inc' in Dataset spec")
         else:
+            if spec.data_type_inc is not None or spec.data_type_def is not None:
+                self.__add_data_type_inc(spec)
             self.__datasets[spec.name] = spec
         self.setdefault('datasets', list()).append(spec)
         spec.parent = self

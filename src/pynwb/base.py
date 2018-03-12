@@ -58,6 +58,9 @@ class ProcessingModule(NWBContainer):
         container_name = getargs('container_name', kwargs)
         return self.__containers.get(container_name)
 
+    def __getitem__(self, arg):
+        return self.get_data_interface(arg)
+
     @docval({'name': 'container', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
     def add_container(self, **kwargs):
         '''
@@ -109,8 +112,9 @@ class TimeSeries(NWBDataInterface):
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'default': None},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
             {'name': 'resolution', 'type': (str, float),
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
@@ -161,6 +165,8 @@ class TimeSeries(NWBDataInterface):
         elif isinstance(data, DataIO):
             this_data = data.data
             self.fields['num_samples'] = len(this_data)
+        elif data is None:
+            self.fields['num_samples'] = 0
         else:
             self.fields['num_samples'] = len(data)
 

@@ -149,16 +149,10 @@ class FORMDataset(with_metaclass(ExtenderMeta, object)):
         return len(self.__dataset)
 
     def __iter__(self):
-        self.__iter_idx = 0
-        return self
+        return iter(self.dataset)
 
     def __next__(self):
-        if self.__iter_idx == len(self.__dataset):
-            raise StopIteration
-        else:
-            ret = self.__dataset[self.__iter_idx]
-            self.__iter_idx += 1
-            return ret
+        return next(self.dataset)
 
     def next(self):
-        return self.__next__()
+        return self.dataset.next()

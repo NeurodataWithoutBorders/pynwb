@@ -1,4 +1,3 @@
-from collections import Iterable
 from h5py import RegionReference
 import numpy as np
 
@@ -233,6 +232,27 @@ class VectorIndex(NWBData):
         call_docval_func(super(VectorIndex, self).__init__, kwargs)
 
 
+class IndexedVector(object):
+
+    @docval({'name': 'data', 'type': VectorData,
+             'doc': 'the VectorData to maintain'},
+            {'name': 'index', 'type': VectorIndex,
+             'doc': 'a VectorIndex object that indexes this VectorData', 'default': None})
+    def __init__(self, **kwargs):
+        self.__data = popargs('data', kwargs)
+        self.__index = popargs('index', kwargs)
+
+    def add_vector(self, arg):
+        before = len(self.__data)
+        self.__data.extend(arg)
+        rs = get_region_slicer(self.__data, slice(before, before+len(arg)))
+        self.__index.append(rs)
+        return len(self.__index)-1
+
+    def get_vector(self, arg):
+        return self.__index[arg][:]
+
+
 @register_class('ElementIdentifiers', CORE_NAMESPACE)
 class ElementIdentifiers(NWBData):
 
@@ -250,7 +270,7 @@ class NWBTable(NWBData):
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': Iterable, 'doc': 'the source of the data', 'default': list()},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,

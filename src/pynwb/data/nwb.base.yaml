@@ -12,7 +12,6 @@ datasets:
     name: help
     value: Values for a list of elements
   doc: Data values indexed by pointer
-  dtype: any
   neurodata_type_def: VectorData
   neurodata_type_inc: NWBData
 - default_name: vector_index
@@ -122,7 +121,6 @@ groups:
     doc: 'Data values. Can also store binary data (eg, image frames) COMMENT: This
       field may be a link to data stored in an external file, especially in the case
       of raw data.'
-    dtype: any
     name: data
     shape:
     - null

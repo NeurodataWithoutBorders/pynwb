@@ -4,7 +4,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from six import with_metaclass
 from .utils import docval, getargs, popargs, docval_macro
 from operator import itemgetter
-from .container import Data
+from .container import Data, DataRegion
 
 
 def __get_shape_helper(data):
@@ -463,7 +463,7 @@ class DataIO(with_metaclass(ABCMeta, object)):
         return self.__data
 
 
-class RegionSlicer(with_metaclass(ABCMeta, object)):
+class RegionSlicer(with_metaclass(ABCMeta, DataRegion)):
     '''
     A abstract base class to control getting using a region
 
@@ -475,6 +475,14 @@ class RegionSlicer(with_metaclass(ABCMeta, object)):
     def __init__(self, **kwargs):
         self.__target = getargs('target', kwargs)
         self.__slice = getargs('slice', kwargs)
+
+    @property
+    def data(self):
+        return self.target
+
+    @property
+    def region(self):
+        return self.slice
 
     @property
     def target(self):
@@ -523,19 +531,3 @@ class ListSlicer(RegionSlicer):
 
     def __len__(self):
         return self.__len
-
-
-from .backends.hdf5 import H5RegionSlicer  # noqa: E402
-import h5py  # noqa: E402
-
-
-@docval({'name': 'dataset', 'type': None, 'doc': 'the HDF5 dataset to slice'},
-        {'name': 'region', 'type': None, 'doc': 'the region reference to use to slice'},
-        is_method=False)
-def get_region_slicer(**kwargs):
-    dataset, region = getargs('dataset', 'region', kwargs)
-    if isinstance(dataset, (list, tuple, Data)):
-        return ListSlicer(dataset, region)
-    elif isinstance(dataset, h5py.Dataset):
-        return H5RegionSlicer(dataset, region)
-    return None

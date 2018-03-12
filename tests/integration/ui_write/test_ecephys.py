@@ -2,7 +2,7 @@ import unittest2 as unittest
 
 import numpy as np
 
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder, ReferenceBuilder
 
 from pynwb.ecephys import *  # noqa: F403
 from pynwb.misc import UnitTimes
@@ -89,6 +89,7 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
 class TestElectricalSeriesIO(base.TestDataInterfaceIO):
 
+    @staticmethod
     def make_electrode_table(self):
         self.table = ElectrodeTable('electrodes')  # noqa: F405
         self.dev1 = Device('dev1', 'a test source')  # noqa: F405
@@ -99,14 +100,41 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
         self.table.add_row(3, 1.0, 2.0, 3.0, -3.0, 'CA1', 'none', 'third channel of tetrode', self.group)
         self.table.add_row(4, 1.0, 2.0, 3.0, -4.0, 'CA1', 'none', 'fourth channel of tetrode', self.group)
 
+    @staticmethod
     def get_table_builder(self):
-        return DatasetBuilder('electrodes', self.table.data,
+        self.device_builder = GroupBuilder('dev1',
+                                           attributes={'neurodata_type': 'Device',
+                                                       'namespace': 'core',
+                                                       'help': 'A recording device e.g. amplifier',
+                                                       'source': 'a test source'})
+        self.eg_builder = GroupBuilder('tetrode1',
+                                       attributes={'neurodata_type': 'ElectrodeGroup',
+                                                   'namespace': 'core',
+                                                   'help': 'A physical grouping of channels',
+                                                   'description': 'tetrode description',
+                                                   'location': 'tetrode location',
+                                                   'source': 'a test source'},
+                                       links={
+                                           'device': LinkBuilder('device', self.device_builder)
+                                       })
+
+        data = [
+            (1, 1.0, 2.0, 3.0, -1.0, 'CA1', 'none', 'first channel of tetrode',
+             ReferenceBuilder(self.eg_builder), 'tetrode1'),
+            (2, 1.0, 2.0, 3.0, -2.0, 'CA1', 'none', 'second channel of tetrode',
+             ReferenceBuilder(self.eg_builder), 'tetrode1'),
+            (3, 1.0, 2.0, 3.0, -3.0, 'CA1', 'none', 'third channel of tetrode',
+             ReferenceBuilder(self.eg_builder), 'tetrode1'),
+            (4, 1.0, 2.0, 3.0, -4.0, 'CA1', 'none', 'fourth channel of tetrode',
+             ReferenceBuilder(self.eg_builder), 'tetrode1')
+        ]
+        return DatasetBuilder('electrodes', data,
                               attributes={'neurodata_type': 'ElectrodeTable',
                                           'namespace': 'core',
                                           'help': 'a table for storing data about extracellular electrodes'})
 
     def setUpContainer(self):
-        self.make_electrode_table()
+        self.make_electrode_table(self)
         region = ElectrodeTableRegion(self.table, [0, 2], 'the first and third electrodes')  # noqa: F405
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
@@ -114,7 +142,7 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
         return ret
 
     def setUpBuilder(self):
-        table_builder = self.get_table_builder()
+        table_builder = self.get_table_builder(self)
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
         return GroupBuilder('test_eS',
@@ -146,11 +174,18 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
         nwbfile.set_electrode_table(self.table)
         nwbfile.add_acquisition(self.container)
 
+    def test_eg_ref(self):
+        read = self.roundtripContainer()
+        row1 = read.electrodes[0]
+        row2 = read.electrodes[1]
+        self.assertIsInstance(row1['group'], ElectrodeGroup)  # noqa: F405
+        self.assertIsInstance(row2['group'], ElectrodeGroup)  # noqa: F405
 
-class TestMultiElectricalSeries(TestElectricalSeriesIO):
+
+class TestMultiElectricalSeries(base.TestDataInterfaceIO):
 
     def setUpElectricalSeriesContainers(self):
-        self.make_electrode_table()
+        TestElectricalSeriesIO.make_electrode_table(self)
         region1 = ElectrodeTableRegion(self.table, [0, 2], 'the first and third electrodes')  # noqa: F405
         region2 = ElectrodeTableRegion(self.table, [1, 3], 'the second and fourth electrodes')  # noqa: F405
         data1 = list(zip(range(10), range(10, 20)))
@@ -161,7 +196,7 @@ class TestMultiElectricalSeries(TestElectricalSeriesIO):
         return (es1, es2)
 
     def setUpElectricalSeriesBuilders(self):
-        table_builder = self.get_table_builder()
+        table_builder = TestElectricalSeriesIO.get_table_builder(self)
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
         es1 = GroupBuilder('test_eS1',
@@ -208,6 +243,13 @@ class TestMultiElectricalSeries(TestElectricalSeriesIO):
                                                                       'description': 'the second and fourth electrodes',
                                                                       'help': 'a subset (i.e. slice or region) of an ElectrodeTable'})})  # noqa: E501
         return (es1, es2)
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_electrode_group(self.group)
+        nwbfile.set_electrode_table(self.table)
+        nwbfile.add_acquisition(self.container)
 
     def setUpContainer(self):
         raise unittest.SkipTest('Cannot run test unless addContainer is implemented')
