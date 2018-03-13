@@ -522,6 +522,7 @@ class HDF5IO(FORMIO):
                     refs.append(i)
             if len(refs) > 0:
                 _dtype = self.__resolve_dtype__(options['dtype'], data)
+                dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype)
 
                 @self.__queue_ref
                 def _filler():
@@ -531,7 +532,7 @@ class HDF5IO(FORMIO):
                         for i in refs:
                             new_item[i] = self.__get_ref(item[i])
                         ret.append(tuple(new_item))
-                    dset = parent.require_dataset(name, shape=(len(ret),), dtype=_dtype)
+                    dset = parent[name]
                     dset[:] = ret
                     self.set_attributes(dset, attributes)
                 return
@@ -540,38 +541,45 @@ class HDF5IO(FORMIO):
         elif self.__is_ref(options['dtype']):
             _dtype = self.__dtypes[options['dtype']]
             if isinstance(data, RegionBuilder):
+                dset = parent.require_dataset(name, shape=(), dtype=_dtype)
 
                 @self.__queue_ref
                 def _filler():
                     ref = self.__get_ref(data.builder, data.region)
-                    dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    dset = parent[name]
+                    dset[()] = ref
                     self.set_attributes(dset, attributes)
 
             elif isinstance(data, ReferenceBuilder):
+                dset = parent.require_dataset(name, dtype=_dtype, shape=())
 
                 @self.__queue_ref
                 def _filler():
                     ref = self.__get_ref(data.builder)
-                    dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    dset = parent[name]
+                    dset[()] = ref
                     self.set_attributes(dset, attributes)
             else:
                 if options['dtype'] == 'region':
+                    dset = parent.require_dataset(name, dtype=_dtype, shape=(len(data),))
 
                     @self.__queue_ref
                     def _filler():
                         refs = list()
                         for item in data:
                             refs.append(self.__get_ref(item.builder, item.region))
-                        dset = parent.require_dataset(name, data=refs, shape=None, dtype=_dtype)
+                        dset = parent[name]
+                        dset[()] = refs
                         self.set_attributes(dset, attributes)
                 else:
+                    dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype)
 
                     @self.__queue_ref
                     def _filler():
                         refs = list()
                         for item in data:
                             refs.append(self.__get_ref(item.builder))
-                        dset = parent.require_dataset(name, data=refs, shape=None, dtype=_dtype)
+                        dset = parent[name]
                         self.set_attributes(dset, attributes)
             return
         else:
