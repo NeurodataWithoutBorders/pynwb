@@ -1,14 +1,50 @@
 from bisect import bisect_left
 
 from .form.utils import docval, getargs, call_docval_func, fmt_docval_args
-from .form.data_utils import DataIO
+from .form.data_utils import DataIO, RegionSlicer
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import NWBContainer
+from .core import NWBContainer, NWBTable
+
+_eptable_docval = [
+    {'name': 'description', 'type': str, 'help': 'a description of this epoch'},
+    {'name': 'start_time', 'type': float, 'help': 'Start time of epoch, in seconds'},
+    {'name': 'stop_time', 'type': float, 'help': 'Stop time of epoch, in seconds'},
+    {'name': 'tags', 'type': (str, list, tuple), 'help': 'user-defined tags uesd throughout epochs'},
+    {'name': 'timeseries', 'type': RegionSlicer, 'help': 'the TimeSeries the epoch applies to'},
+]
+
+@register_class('EpochTable', CORE_NAMESPACE)
+class EpochTable(NWBTable):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this epoch table'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table', 'default': list()},
+    def __init__(self, **kwargs):
+        name, data = getargs('name', 'data', kwargs)
+        colnames = [i['name'] for i _eptable_docval]
+        super(EpochTable, self).__init__(colnames)
+
+    @docval(*_eptable_docval)
+    def add_row(self, **kwargs):
+        super(EpochTable, self).add_row(kwargs)
 
 
-# @nwbproperties(*__std_fields, neurodata_type='Epoch')
+@register_class('TimeSeriesIndex', CORE_NAMESPACE)
+class TimeSeriesIndex(NWBTable):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this epoch table'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table', 'default': list()},
+    def __init__(self, **kwargs):
+        name, data = getargs('name', 'data', kwargs)
+        colnames = [i['name'] for i _eptable_docval]
+        super(TimeSeriesIndex, self).__init__(colnames)
+
+    @docval(*_eptable_docval)
+    def add_row(self, **kwargs):
+        super(TimeSeriesIndex, self).add_row(kwargs)
+
+
 @register_class('Epoch', CORE_NAMESPACE)
 class Epoch(NWBContainer):
     """ Epoch object
