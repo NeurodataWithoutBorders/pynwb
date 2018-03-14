@@ -8,7 +8,7 @@ from .form import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
-from .epoch import Epoch
+from .epoch import Epochs
 from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
@@ -179,7 +179,7 @@ class NWBFile(MultiContainerInterface):
              'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'stimulus_template', 'type': (list, tuple),
              'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
-            {'name': 'epochs', 'type': (list, tuple),
+            {'name': 'epochs', 'type': Epochs,
              'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
             {'name': 'modules', 'type': (list, tuple),
              'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
@@ -225,7 +225,7 @@ class NWBFile(MultiContainerInterface):
         self.stimulus_template = self.__build_ts('stimulus_template', kwargs)
 
         self.modules = self._to_dict('modules', kwargs)
-        self.__epochs = self._to_dict('epochs', kwargs)
+        self.epochs = self._to_dict('epochs', kwargs)
         self.__ec_electrodes = getargs('ec_electrodes', kwargs)
         self.ec_electrode_groups = self._to_dict('ec_electrode_groups', kwargs)
         self.devices = self._to_dict('devices', kwargs)
@@ -256,10 +256,6 @@ class NWBFile(MultiContainerInterface):
             for ts in const_arg:
                 self.__set_timeseries(ret, ts)
         return ret
-
-    @property
-    def epochs(self):
-        return self.__epochs
 
     @property
     def epoch_tags(self):
@@ -322,75 +318,70 @@ class NWBFile(MultiContainerInterface):
     def __exists(self, ts, d):
         return ts.name in d
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the epoch, as it will appear in the file'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'start', 'type': float, 'doc': 'the starting time of the epoch'},
-            {'name': 'stop', 'type': float, 'doc': 'the ending time of the epoch'},
-            {'name': 'tags', 'type': (tuple, list), 'doc': 'tags for this epoch', 'default': list()},
-            {'name': 'description', 'type': str, 'doc': 'a description of this epoch', 'default': None})
-    def create_epoch(self, **kwargs):
-        """
-        Creates a new Epoch object. Epochs are used to track intervals
-        in an experiment, such as exposure to a certain type of stimuli
-        (an interval where orientation gratings are shown, or of
-        sparse noise) or a different paradigm (a rat exploring an
-        enclosure versus sleeping between explorations)
-        """
-        ep_args, ep_kwargs = fmt_docval_args(Epoch.__init__, kwargs)
-        epoch = Epoch(*ep_args, **ep_kwargs)
-        self.__epochs[epoch.name] = epoch
-        return epoch
-
-    def get_epoch(self, name):
-        return self.__get_epoch(name)
-
-    @docval({'name': 'epoch', 'type': (str, Epoch, list, tuple),
-             'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
-            {'name': 'timeseries', 'type': (str, TimeSeries, list, tuple),
-             'doc': 'the name of a timeseries or a TimeSeries object or a list of \
-             names of timeseries or TimeSeries objects'})
-    def set_epoch_timeseries(self, **kwargs):
-        """
-        Add one or more TimSeries datasets to one or more Epochs
-        """
-        epoch, timeseries = getargs('epoch', 'timeseries', kwargs)
-        if isinstance(epoch, list):
-            ep_objs = [self.__get_epoch(ep) for ep in epoch]
-        else:
-            ep_objs = [self.__get_epoch(epoch)]
-
-        if isinstance(timeseries, list):
-            ts_objs = [self.__get_timeseries_obj(ts) for ts in timeseries]
-        else:
-            ts_objs = [self.__get_timeseries_obj(timeseries)]
-
-        for ep in ep_objs:
-            for ts in ts_objs:
-                ep.add_timeseries(ts)
-
-    def __get_epoch(self, epoch):
-        if isinstance(epoch, Epoch):
-            ep = epoch
-        elif isinstance(epoch, str):
-            ep = self.__epochs.get(epoch)
-            if not ep:
-                raise KeyError("Epoch '%s' not found" % epoch)
-        else:
-            raise TypeError(type(epoch))
-        return ep
-
-    def __get_timeseries_obj(self, timeseries):
-        if isinstance(timeseries, TimeSeries):
-            ts = timeseries
-        elif isinstance(timeseries, str):
-            ts = self.__acquisition.get(timeseries,
-                                        self.__stimulus.get(timeseries,
-                                                            self.__stimulus_template.get(timeseries, None)))
-            if not ts:
-                raise KeyError("TimeSeries '%s' not found" % timeseries)
-        else:
-            raise TypeError(type(timeseries))
-        return ts
+#    @docval(*get_docval(Epochs.add_epoch))
+#    def create_epoch(self, **kwargs):
+#        """
+#        Creates a new Epoch object. Epochs are used to track intervals
+#        in an experiment, such as exposure to a certain type of stimuli
+#        (an interval where orientation gratings are shown, or of
+#        sparse noise) or a different paradigm (a rat exploring an
+#        enclosure versus sleeping between explorations)
+#        """
+#        if self.epoch is None:
+#            self.epoch = Epochs()
+#        call_docval_func(self.epoch.add_epoch, kwargs)
+#        return epoch
+#
+#    def get_epoch(self, name):
+#        return self.__get_epoch(name)
+#
+#    @docval({'name': 'epoch', 'type': (str, Epoch, list, tuple),
+#             'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
+#            {'name': 'timeseries', 'type': (str, TimeSeries, list, tuple),
+#             'doc': 'the name of a timeseries or a TimeSeries object or a list of \
+#             names of timeseries or TimeSeries objects'})
+#    def set_epoch_timeseries(self, **kwargs):
+#        """
+#        Add one or more TimSeries datasets to one or more Epochs
+#        """
+#        epoch, timeseries = getargs('epoch', 'timeseries', kwargs)
+#        if isinstance(epoch, list):
+#            ep_objs = [self.__get_epoch(ep) for ep in epoch]
+#        else:
+#            ep_objs = [self.__get_epoch(epoch)]
+#
+#        if isinstance(timeseries, list):
+#            ts_objs = [self.__get_timeseries_obj(ts) for ts in timeseries]
+#        else:
+#            ts_objs = [self.__get_timeseries_obj(timeseries)]
+#
+#        for ep in ep_objs:
+#            for ts in ts_objs:
+#                ep.add_timeseries(ts)
+#
+#    def __get_epoch(self, epoch):
+#        if isinstance(epoch, Epoch):
+#            ep = epoch
+#        elif isinstance(epoch, str):
+#            ep = self.__epochs.get(epoch)
+#            if not ep:
+#                raise KeyError("Epoch '%s' not found" % epoch)
+#        else:
+#            raise TypeError(type(epoch))
+#        return ep
+#
+#    def __get_timeseries_obj(self, timeseries):
+#        if isinstance(timeseries, TimeSeries):
+#            ts = timeseries
+#        elif isinstance(timeseries, str):
+#            ts = self.__acquisition.get(timeseries,
+#                                        self.__stimulus.get(timeseries,
+#                                                            self.__stimulus_template.get(timeseries, None)))
+#            if not ts:
+#                raise KeyError("TimeSeries '%s' not found" % timeseries)
+#        else:
+#            raise TypeError(type(timeseries))
+#        return ts
 
     def __set_timeseries(self, ts_dict, ts, epoch=None):
         if ts.name in ts_dict:
