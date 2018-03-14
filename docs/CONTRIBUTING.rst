@@ -146,7 +146,7 @@ Python Code Styleguide
 Licence and Copyright
 =======================
 
-See the `Readme <../Readme.rst>`_ and correspoding `licence <../licence.txt>`_ files for details about the copyright and licence.
+See the `Readme <https://github.com/NeurodataWithoutBorders/pynwb#contributing>`_ and correspoding `licence <https://raw.githubusercontent.com/NeurodataWithoutBorders/pynwb/dev/license.txt>`_ files for details about the copyright and licence.
 
 
 
