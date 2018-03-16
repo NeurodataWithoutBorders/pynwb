@@ -1,6 +1,7 @@
 ''' Tests for NWBFile '''
 import unittest
 import six
+import numpy as np
 
 from datetime import datetime
 
@@ -45,11 +46,11 @@ class NWBFileTest(unittest.TestCase):
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
         tags2 = ['t3', 't4']
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
         expected_tags = tags1 + tags2
-        self.nwbfile.create_epoch(source='a fake source', name='test_epoch1', start=0.0, stop=1.0,
-                                  tags=tags1, descrition='test epoch')
-        self.nwbfile.create_epoch(source='a fake source', name='test_epoch2', start=0.0, stop=1.0,
-                                  tags=tags2, descrition='test epoch')
+        self.nwbfile.create_epoch('a fake epoch', 0.0, 1.0, tags1, ts)
+        self.nwbfile.create_epoch('a second fake epoch', 0.0, 1.0, tags2, ts)
         tags = self.nwbfile.epoch_tags
         six.assertCountEqual(self, expected_tags, tags)
 
