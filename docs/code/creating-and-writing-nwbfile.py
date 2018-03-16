@@ -39,18 +39,6 @@ def main():
 
     os.remove(filename)
 
-    # create-epochs: start
-    epoch_tags = ('example_epoch',)
-
-    ep1 = f.create_epoch(source='an hypothetical source', name='epoch1', start=0.0, stop=1.0,
-                         tags=epoch_tags,
-                         description="the first test epoch")
-
-    ep2 = f.create_epoch(source='an hypothetical source', name='epoch2', start=0.0, stop=1.0,
-                         tags=epoch_tags,
-                         description="the second test epoch")
-    # create-epochs: end
-
     # create-device: start
     device = f.create_device(name='trodes_rig123', source="a source")
     # create-device: end
@@ -95,7 +83,7 @@ def main():
                                 resolution=0.001,
                                 comments="This data was randomly generated with numpy, using 1234 as the seed",
                                 description="Random numbers generated with numpy.random.rand")
-    f.add_acquisition(ephys_ts, [ep1, ep2])
+    f.add_acquisition(ephys_ts)
 
     spatial_ts = SpatialSeries('test_spatial_timeseries',
                                'a stumbling rat',
@@ -106,7 +94,7 @@ def main():
                                comments="This data was generated with numpy, using 1234 as the seed",
                                description="This 2D Brownian process generated with "
                                            "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")
-    f.add_acquisition(spatial_ts, [ep1, ep2])
+    f.add_acquisition(spatial_ts)
     # create-timeseries: end
 
     # create-data-interface: start
@@ -122,7 +110,6 @@ def main():
                                             resolution=0.001,
                                             comments="This data was randomly generated with numpy, using 1234 as the seed",  # noqa: E501
                                             description="Random numbers generated with numpy.random.rand")
-    f.set_epoch_timeseries([ep1, ep2], ephys_ts)
 
     pos = f.add_acquisition(Position('a hypothetical source'))
     spatial_ts = pos.create_spatial_series('test_spatial_timeseries',
@@ -134,8 +121,19 @@ def main():
                                            comments="This data was generated with numpy, using 1234 as the seed",
                                            description="This 2D Brownian process generated with "
                                                        "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")  # noqa: E501
-    f.set_epoch_timeseries([ep1, ep2], spatial_ts)
     # create-data-interface: end
+
+    # create-epochs: start
+    epoch_tags = ('example_epoch',)
+
+    f.create_epoch(source='an hypothetical source', name='epoch1', start_time=0.0, stop_time=1.0,
+                   tags=epoch_tags,
+                   description="the first test epoch", timeseries=[ephys_ts, spatial_ts])
+
+    f.create_epoch(source='an hypothetical source', name='epoch2', start_time=0.0, stop_time=1.0,
+                   tags=epoch_tags,
+                   description="the second test epoch", timeseries=[ephys_ts, spatial_ts])
+    # create-epochs: end
 
     # create-compressed-timeseries: start
     from pynwb.ecephys import ElectricalSeries
@@ -150,7 +148,7 @@ def main():
                                 resolution=0.001,
                                 comments="This data was randomly generated with numpy, using 1234 as the seed",
                                 description="Random numbers generated with numpy.random.rand")
-    f.add_acquisition(ephys_ts, [ep1, ep2])
+    f.add_acquisition(ephys_ts)
 
     spatial_ts = SpatialSeries('test_compressed_spatial_timeseries',
                                'a stumbling rat',
@@ -161,7 +159,7 @@ def main():
                                comments="This data was generated with numpy, using 1234 as the seed",
                                description="This 2D Brownian process generated with "
                                            "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")
-    f.add_acquisition(spatial_ts, [ep1, ep2])
+    f.add_acquisition(spatial_ts)
     # create-compressed-timeseries: end
 
 
