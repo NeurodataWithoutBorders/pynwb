@@ -1,11 +1,13 @@
 from bisect import bisect_left
 
-from .form.utils import docval, getargs, call_docval_func, fmt_docval_args
+from .form.utils import docval, getargs, popargs, call_docval_func
 from .form.data_utils import DataIO, RegionSlicer
+from .form import get_region_slicer
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import NWBContainer, NWBTable
+from .core import NWBContainer, NWBTable, NWBTableRegion
+
 
 _eptable_docval = [
     {'name': 'description', 'type': str, 'doc': 'a description of this epoch'},
@@ -15,19 +17,36 @@ _eptable_docval = [
     {'name': 'timeseries', 'type': RegionSlicer, 'doc': 'the TimeSeries the epoch applies to'},
 ]
 
+
 @register_class('EpochTable', CORE_NAMESPACE)
 class EpochTable(NWBTable):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this epoch table', 'default': 'epochs'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table', 'default': list()},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table', 'default': list()})
     def __init__(self, **kwargs):
         name, data = getargs('name', 'data', kwargs)
-        colnames = [i['name'] for i _eptable_docval]
-        super(EpochTable, self).__init__(colnames)
+        colnames = [i['name'] for i in _eptable_docval]
+        super(EpochTable, self).__init__(colnames, name, data)
 
     @docval(*_eptable_docval)
     def add_row(self, **kwargs):
         super(EpochTable, self).add_row(kwargs)
+
+
+@register_class('EpochTableRegion', CORE_NAMESPACE)
+class EpochTableRegion(NWBTableRegion):
+    '''A subsetting of an EpochTable'''
+
+    __nwbfields__ = ('description',)
+
+    @docval({'name': 'table', 'type': EpochTable, 'doc': 'the EpochTable this region applies to'},
+            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
+            {'name': 'description', 'type': str, 'doc': 'a brief description of what this subset of epochs is'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'epochs'})
+    def __init__(self, **kwargs):
+        call_docval_func(super(EpochTableRegion, self).__init__, kwargs)
+        self.description = getargs('description', kwargs)
+
 
 _tsi_docval = [
     {'name': 'idx_start', 'type': int, 'doc': 'start index into the TimeSeries.data field'},
@@ -35,15 +54,16 @@ _tsi_docval = [
     {'name': 'timeseries', 'type': TimeSeries, 'doc': 'the TimeSeries object this index applies to'},
 ]
 
+
 @register_class('TimeSeriesIndex', CORE_NAMESPACE)
 class TimeSeriesIndex(NWBTable):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this epoch table', 'default': 'timeseries_index'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table', 'default': list()},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table', 'default': list()})
     def __init__(self, **kwargs):
         name, data = getargs('name', 'data', kwargs)
-        colnames = [i['name'] for i _eptable_docval]
-        super(TimeSeriesIndex, self).__init__(colnames)
+        colnames = [i['name'] for i in _tsi_docval]
+        super(TimeSeriesIndex, self).__init__(colnames, name, data)
 
     @docval(*_tsi_docval)
     def add_row(self, **kwargs):
@@ -55,11 +75,15 @@ class Epochs(NWBContainer):
 
     __nwbfields__ = ('epochs', 'timeseries_index')
 
-    @docval({'name': 'epochs', 'type': EpochTable, 'doc': 'the EpochTable holding information about each epoch', 'default': None},
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this epoch table', 'default': 'epochs'},
+            {'name': 'epochs', 'type': EpochTable, 'doc': 'the EpochTable holding information about each epoch',
+             'default': None},
             {'name': 'timeseries_index', 'type': TimeSeriesIndex,
              'doc': 'the TimeSeriesIndex table holding indices into each TimeSeries for each epoch', 'default': None})
     def __init__(self, **kwargs):
-        epochs, timeseries_index = getargs('epochs', 'timeseries_index', kwargs)
+        epochs, timeseries_index = popargs('epochs', 'timeseries_index', kwargs)
+        call_docval_func(super(Epochs, self).__init__, kwargs)
         self.epochs = epochs if epochs is not None else EpochTable()
         self.timeseries_index = timeseries_index if timeseries_index else TimeSeriesIndex()
 
@@ -79,7 +103,7 @@ class Epochs(NWBContainer):
             idx_start, count = self.__calculate_idx_count(start_time, stop_time, ts)
             self.timeseries_index.add_row(idx_start, count, ts)
         tsi_region = get_region_slicer(self.timeseries_index, slice(n_tsi, n_tsi+n_ts))
-        self.epochs.add_row(description, start_time, stop_time, tags, ts_region)
+        self.epochs.add_row(description, start_time, stop_time, tags, tsi_region)
 
     def __calculate_idx_count(self, start_time, stop_time, ts_data):
         if isinstance(ts_data.timestamps, DataIO):
