@@ -277,6 +277,7 @@ class NWBTable(NWBData):
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         self.__columns = tuple(popargs('columns', kwargs))
+        self.__col_index = {name: idx for idx, name in enumerate(self.__columns)}
         call_docval_func(super(NWBTable, self).__init__, kwargs)
 
     @property
@@ -301,8 +302,25 @@ class NWBTable(NWBData):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx):
-        return self.data[idx]
+    def __getitem__(self, args):
+        idx = args
+        col = None
+        if isinstance(args, tuple):
+            idx = args[1]
+            if isinstance(args[0], str):
+                col = self.__col_index.get(args[0])
+            elif isinstance(args[0], int):
+                col = args[0]
+            else:
+                raise KeyError('first argument must be a column name or index')
+            return self.data[idx][col]
+        elif isinstance(args, str):
+            col = self.__col_index.get(args)
+            if col is None:
+                raise KeyError(args)
+            return [row[col] for row in self.data]
+        else:
+            return self.data[idx]
 
 
 # diamond inheritence
