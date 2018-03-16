@@ -1,11 +1,5 @@
 datasets:
 - attributes:
-  - doc: Short description of what this type of Interface contains.
-    dtype: text
-    name: help
-  doc: The attributes specified here are included in all interfaces.
-  neurodata_type_def: NWBData
-- attributes:
   - doc: Value is 'Data on how an epoch applies to a time series'
     dtype: text
     name: help
@@ -27,10 +21,10 @@ datasets:
   neurodata_type_def: TimeSeriesIndex
   neurodata_type_inc: NWBData
 - attributes:
-  - doc: Value is 'A general epoch object'
+  - doc: Value is 'A table for storing epoch data'
     dtype: text
     name: help
-    value: A general epoch object
+    value: A table for storing epoch data
   dtype:
   - doc: Description of this epoch.
     dtype: text
@@ -54,6 +48,20 @@ datasets:
   doc: 'One of possibly many different experimental epoch'
   neurodata_type_def: EpochTable
   neurodata_type_inc: NWBData
+- doc: 'a dataset for subsetting EpochTables'
+  neurodata_type_def: EpochTableRegion
+  neurodata_type_inc: NWBData
+  dtype:
+    target_type: EpochTable
+    reftype: region
+  attributes:
+    - name: description
+      doc: 'a description of this subset of epochs'
+      dtype: utf8
+    - doc: Value is 'a subset (i.e. slice or region) of an EpochTable'
+      dtype: text
+      name: help
+      value: a subset (i.e. slice or region) of an EpochTable
 groups:
 - attributes:
   - doc: Value is 'A general epoch object'
@@ -67,5 +75,6 @@ groups:
     - name: timeseries_index
       doc: the TimeSeriesIndex table holding indices into each TimeSeries for each Epoch
       neurodata_type_inc: TimeSeriesIndex
-  neurodata_type_def: Epoch
+  doc: 'A container for aggregating epoch data and the TimeSeries that each epoch applies to'
+  neurodata_type_def: Epochs
   neurodata_type_inc: NWBContainer
