@@ -83,7 +83,8 @@ class Spec(ConstructableDict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
         ret = super(Spec, cls).build_const_args(spec_dict)
         if 'doc' not in ret:
-            raise ValueError("'doc' missing")
+            msg = "'doc' missing: %s" % str(spec_dict)
+            raise ValueError(msg)
         return ret
 
     def __hash__(self):
