@@ -139,14 +139,22 @@ Format Specification Styleguide
 Python Code Styleguide
 ^^^^^^^^^^^^^^^^^^^^^^
 
-**Coming soon**
+Python coding style is checked via ``flake8`` and ``pep8speaks`` for automatic checking of PEP8 style during pull requets.
 
+Endorsement
+-----------
 
+Please don’t take the fact that working with an organization (e.g., during a hackathon or via GitHub) as an endorsement of your work or your organization. It’s okay to say  e.g., “We worked with XXXXX to advance science” but not e.g., “XXXXX supports our work on NWB”.”
 
 Licence and Copyright
 =======================
 
 See the `Readme <https://github.com/NeurodataWithoutBorders/pynwb#contributing>`_ and correspoding `licence <https://raw.githubusercontent.com/NeurodataWithoutBorders/pynwb/dev/license.txt>`_ files for details about the copyright and licence.
 
+As indicated in the PyNWB license: *“You are under no obligation whatsoever to provide any bug fixes, patches, or upgrades to the features, functionality or performance of the source code ("Enhancements") to anyone; however, if you choose to make your Enhancements available either publicly, or directly to Lawrence Berkeley National Laboratory, without imposing a separate written license agreement for such Enhancements, then you hereby grant the following license: a non-exclusive, royalty-free perpetual license to install, use, modify, prepare derivative works, incorporate into other computer software, distribute, and sublicense such enhancements or derivative works thereof, in binary and source code form.”*
+
+Contributors to the NWB code base are expected to use a permissive, non-copyleft open source license. Typically 3-clause BSD i used, but any compatible license is allowed, the MIT and Apache 2.0 licenses being good alternative choices. The GPL and other copyleft licenses are not allowed due to the consternation it generates across many organizations.
+
+Also, make sure that you are permitted to contribute code. Some organizations, even academic organizations, have agreements in place that discuss IP ownership in detail (i.e., address IP rights and ownership that you create while under the employ of the organization). These are typically signed documents that you looked at on your first day of work and then promptly forgot. We don’t want contributed code to be yanked later due to IP issues.
 
 
