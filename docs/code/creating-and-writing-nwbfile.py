@@ -126,12 +126,10 @@ def main():
     # create-epochs: start
     epoch_tags = ('example_epoch',)
 
-    f.create_epoch(source='an hypothetical source', name='epoch1', start_time=0.0, stop_time=1.0,
-                   tags=epoch_tags,
+    f.create_epoch(name='epoch1', start_time=0.0, stop_time=1.0, tags=epoch_tags,
                    description="the first test epoch", timeseries=[ephys_ts, spatial_ts])
 
-    f.create_epoch(source='an hypothetical source', name='epoch2', start_time=0.0, stop_time=1.0,
-                   tags=epoch_tags,
+    f.create_epoch(name='epoch2', start_time=0.0, stop_time=1.0, tags=epoch_tags,
                    description="the second test epoch", timeseries=[ephys_ts, spatial_ts])
     # create-epochs: end
 
