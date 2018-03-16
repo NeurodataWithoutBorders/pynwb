@@ -181,6 +181,8 @@ class NWBFile(MultiContainerInterface):
              'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'epochs', 'type': Epochs,
              'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
+            {'name': 'epoch_tags', 'type': (tuple, list, set),
+             'doc': 'A sorted list of tags used across all epochs', 'default': set()},
             {'name': 'modules', 'type': (list, tuple),
              'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
             {'name': 'ec_electrodes', 'type': (ElectrodeTable, Iterable),
@@ -225,7 +227,10 @@ class NWBFile(MultiContainerInterface):
         self.stimulus_template = self.__build_ts('stimulus_template', kwargs)
 
         self.modules = self._to_dict('modules', kwargs)
-        self.epochs = self._to_dict('epochs', kwargs)
+        self.epochs = getargs('epochs', kwargs)
+        if self.epochs is None:
+            self.epochs = Epochs(self.source)
+        self.epoch_tags = getargs('epoch_tags', kwargs)
         self.__ec_electrodes = getargs('ec_electrodes', kwargs)
         self.ec_electrode_groups = self._to_dict('ec_electrode_groups', kwargs)
         self.devices = self._to_dict('devices', kwargs)
@@ -256,13 +261,6 @@ class NWBFile(MultiContainerInterface):
             for ts in const_arg:
                 self.__set_timeseries(ret, ts)
         return ret
-
-    @property
-    def epoch_tags(self):
-        ret = set()
-        for epoch_name, epoch_obj in self.__epochs.items():
-            ret.update(epoch_obj.tags)
-        return sorted(ret)
 
     @property
     def identifier(self):
@@ -318,19 +316,19 @@ class NWBFile(MultiContainerInterface):
     def __exists(self, ts, d):
         return ts.name in d
 
-#    @docval(*get_docval(Epochs.add_epoch))
-#    def create_epoch(self, **kwargs):
-#        """
-#        Creates a new Epoch object. Epochs are used to track intervals
-#        in an experiment, such as exposure to a certain type of stimuli
-#        (an interval where orientation gratings are shown, or of
-#        sparse noise) or a different paradigm (a rat exploring an
-#        enclosure versus sleeping between explorations)
-#        """
-#        if self.epoch is None:
-#            self.epoch = Epochs()
-#        call_docval_func(self.epoch.add_epoch, kwargs)
-#        return epoch
+    @docval(*get_docval(Epochs.add_epoch))
+    def create_epoch(self, **kwargs):
+        """
+        Creates a new Epoch object. Epochs are used to track intervals
+        in an experiment, such as exposure to a certain type of stimuli
+        (an interval where orientation gratings are shown, or of
+        sparse noise) or a different paradigm (a rat exploring an
+        enclosure versus sleeping between explorations)
+        """
+        if self.epochs is None:
+            self.epochs = Epochs(self.source)
+        self.epoch_tags.update(kwargs.get('tags', list()))
+        call_docval_func(self.epochs.add_epoch, kwargs)
 #
 #    def get_epoch(self, name):
 #        return self.__get_epoch(name)
