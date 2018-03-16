@@ -28,14 +28,20 @@ def main():
     # create-nwbfile: end
 
     # save-nwbfile: start
-    from pynwb import get_manager
-    from pynwb.form.backends.hdf5 import HDF5IO
+    from pynwb import NWBHDF5IO
 
     filename = "example.h5"
-    io = HDF5IO(filename, manager=get_manager(), mode='w')
+    with NWBHDF5IO(filename, mode='w') as io:
+        io.write(f)
+    # save-nwbfile: end
+    os.remove(filename)
+
+    # save-nwbfile2: start
+    filename = "example.h5"
+    io = NWBHDF5IO(filename, mode='w')
     io.write(f)
     io.close()
-    # save-nwbfile: end
+    # save-nwbfile2: end
 
     os.remove(filename)
 
