@@ -15,6 +15,7 @@ class FORMIO(with_metaclass(ABCMeta, object)):
         self.__manager = getargs('manager', kwargs)
         self.__built = dict()
         self.__source = getargs('source', kwargs)
+        self.open()
 
     @property
     def manager(self):
@@ -61,7 +62,6 @@ class FORMIO(with_metaclass(ABCMeta, object)):
         pass
 
     def __enter__(self):
-        self.open()
         return self
 
     def __exit__(self, type, value, traceback):

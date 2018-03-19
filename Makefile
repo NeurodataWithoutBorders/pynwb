@@ -1,4 +1,5 @@
 PYTHON = python
+FLAKE = flake8
 COVERAGE = coverage
 
 help:
@@ -35,6 +36,19 @@ develop: build
 test:
 	pip install -r requirements-dev.txt
 	tox
+
+flake:
+	$(FLAKE) src/
+	$(FLAKE) tests/
+	$(FLAKE) docs/code/
+
+checkpdb:
+	find {src,tests} -name "*.py" -exec grep -Hn pdb {} \;
+
+devtest:
+	$(PYTHON) -W ignore test.py
+	$(MAKE) flake
+	$(MAKE) checkpdb
 
 apidoc:
 	pip install -r requirements-doc.txt

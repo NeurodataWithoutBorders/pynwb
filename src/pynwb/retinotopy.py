@@ -3,7 +3,7 @@ from collections import Iterable
 from .form.utils import docval, popargs, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer
+from .core import NWBContainer, NWBDataInterface
 
 
 class AImage(NWBContainer):
@@ -63,8 +63,8 @@ class AxisMap(NWBContainer):
         self.dimension = dimension
 
 
-@register_class('ImageRetinotopy', CORE_NAMESPACE)    # make sure to uncomment this after this class is implemented
-class ImagingRetinotopy(NWBContainer):
+@register_class('ImagingRetinotopy', CORE_NAMESPACE)
+class ImagingRetinotopy(NWBDataInterface):
     """
     Intrinsic signal optical imaging or widefield imaging for measuring retinotopy. Stores orthogonal
     maps (e.g., altitude/azimuth; radius/theta) of responses to specific stimuli and a combined

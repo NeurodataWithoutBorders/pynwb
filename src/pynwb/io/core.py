@@ -20,10 +20,10 @@ class NWBTableRegionMap(NWBDataMap):
 
     @ObjectMapper.constructor_arg('table')
     def carg_table(self, builder, manager):
-        return manager.construct(builder.data)
+        return manager.construct(builder.data.builder)
 
     @ObjectMapper.constructor_arg('region')
     def carg_region(self, builder, manager):
-        if not isinstance(builder, RegionBuilder):
+        if not isinstance(builder.data, RegionBuilder):
             raise ValueError("'builder' must be a RegionBuilder")
-        return builder.region
+        return builder.data.region

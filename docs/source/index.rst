@@ -32,7 +32,9 @@ Here is a reference to to Sphinx Gallery :ref:`sphx_glr_examples_example.py`
    :maxdepth: 2
    :caption: Overview
 
-   overview
+   overview_intro
+   overview_software_architecture
+   overview_nwbfile
 
 .. toctree::
    :maxdepth: 2

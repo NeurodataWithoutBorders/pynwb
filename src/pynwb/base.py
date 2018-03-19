@@ -1,10 +1,12 @@
+from warnings import warn
+
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, fmt_docval_args
 from .form.data_utils import DataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer
+from .core import NWBContainer, NWBDataInterface
 
 _default_conversion = 1.0
 _default_resolution = 0.0
@@ -39,8 +41,8 @@ class ProcessingModule(NWBContainer):
     def containers(self):
         return tuple(self.__containers.values())
 
-    @docval({'name': 'container', 'type': NWBContainer, 'doc': 'the NWBContainer to add to this Module'})
-    def add_container(self, **kwargs):
+    @docval({'name': 'container', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
+    def add_data_interface(self, **kwargs):
         '''
         Add an NWBContainer to this ProcessingModule
         '''
@@ -49,16 +51,35 @@ class ProcessingModule(NWBContainer):
         container.parent = self
 
     @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
-    def get_container(self, **kwargs):
+    def get_data_interface(self, **kwargs):
         '''
         Retrieve an NWBContainer from this ProcessingModule
         '''
         container_name = getargs('container_name', kwargs)
         return self.__containers.get(container_name)
 
+    def __getitem__(self, arg):
+        return self.get_data_interface(arg)
+
+    @docval({'name': 'container', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
+    def add_container(self, **kwargs):
+        '''
+        Add an NWBContainer to this ProcessingModule
+        '''
+        warn(PendingDeprecationWarning('add_container will be replaced by add_data_interface'))
+        self.add_data_interface(**kwargs)
+
+    @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
+    def get_container(self, **kwargs):
+        '''
+        Retrieve an NWBContainer from this ProcessingModule
+        '''
+        warn(PendingDeprecationWarning('get_container will be replaced by get_data_interface'))
+        return self.get_data_interface(**kwargs)
+
 
 @register_class('TimeSeries', CORE_NAMESPACE)
-class TimeSeries(NWBContainer):
+class TimeSeries(NWBDataInterface):
     """A generic base class for time series data"""
     __nwbfields__ = ("comments",
                      "description",
@@ -91,8 +112,9 @@ class TimeSeries(NWBContainer):
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'default': None},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
             {'name': 'resolution', 'type': (str, float),
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
@@ -141,8 +163,10 @@ class TimeSeries(NWBContainer):
         elif isinstance(data, DataChunkIterator):
             self.fields['num_samples'] = -1
         elif isinstance(data, DataIO):
-            this_data = data.getdata()
+            this_data = data.data
             self.fields['num_samples'] = len(this_data)
+        elif data is None:
+            self.fields['num_samples'] = 0
         else:
             self.fields['num_samples'] = len(data)
 

@@ -58,6 +58,25 @@ ci-steps: &ci-steps
     - run:
         <<: *publish-prerelease-on-github
 
+conda-steps: &conda-steps
+  steps:
+    - checkout
+    - run:
+        name: Configure conda
+        command: |
+          conda config --set always_yes yes --set changeps1 no
+          conda config --add channels conda-forge
+          conda install virtualenv
+          pip install tox
+    - run:
+        name: Build wheel and source distribution
+        command: |
+          tox -e $BUILD_TOX_ENV
+    - run:
+        name: Test installation from a wheel
+        command: |
+          tox -e $TEST_TOX_ENV recreate --installpkg dist/*-none-any.whl
+
 version: 2
 jobs:
   flake8:
@@ -97,6 +116,30 @@ jobs:
      - UPLOAD_WHEELS: "true"
     <<: *ci-steps
 
+  miniconda27:
+    docker:
+      - image: continuumio/miniconda:4.3.14
+    environment:
+      - TEST_TOX_ENV: "py27"
+      - BUILD_TOX_ENV: "build-py27"
+    <<: *conda-steps
+
+  miniconda35:
+    docker:
+      - image: continuumio/miniconda3:4.1.11
+    environment:
+      - TEST_TOX_ENV: "py35"
+      - BUILD_TOX_ENV: "build-py35"
+    <<: *conda-steps
+
+  miniconda36:
+    docker:
+      - image: continuumio/miniconda3:4.3.14
+    environment:
+      - TEST_TOX_ENV: "py36"
+      - BUILD_TOX_ENV: "build-py36"
+    <<: *conda-steps
+
 workflows:
   version: 2
   test-package-publish:
@@ -105,3 +148,6 @@ workflows:
       - python27
       - python35
       - python36
+      - miniconda27
+      - miniconda35
+      - miniconda36

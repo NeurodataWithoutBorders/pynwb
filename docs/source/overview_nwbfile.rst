@@ -1,32 +1,10 @@
-.. _overview:
+.. _sec_nwbformat_overview:
 
-Introduction
-============
+NWB:N File Format
+=================
 
-PyNWB provides a high-level Python API for reading and writing NWB formatted HDF5 files. This section will provide
-a broad overview of the functionality provided for reading and writing neurophysiology data into NWB files.
-
-
-.. _software-architecture:
-
-Software Architecture
-=====================
-
-.. _fig-software-architecture:
-
-.. figure:: figures/software_architecture.*
-   :scale: 100 %
-   :alt: PyNWB Software Architecture
-
-   Overview of the high-level software architecture of PyNWB.
-
-
-.. _nwb_format_overview:
-
-NWB Format
-==========
-
-The `NWB Format <https://nwb-schema.readthedocs.io>`_ is built around two concepts: *TimeSeries* and *Modules*.
+The `NWB Format <https://nwb-schema.readthedocs.io>`_ is built around two concepts:
+*TimeSeries* and *ProcessingModules*.
 
 :ref:`timeseries_overview` are objects for storing time series data, and :ref:`modules_overview` are objects
 for storing and grouping analyses. The following sections describe these classes in further detail.
@@ -35,10 +13,11 @@ for storing and grouping analyses. The following sections describe these classes
 .. _file_overview:
 
 NWBFile
-=======
+-------
 
-NWB files are represented in PyNWB with *NWBFile* objects. :py:class:`~pynwb.file.NWBFile` objects provide functionality
-for creating :ref:`timeseries_overview` datasets and :ref:`modules_overview`, as well as functionality for storing
+NWB files are represented in PyNWB with *NWBFile* objects. :py:class:`~pynwb.file.NWBFile`
+objects provide functionality for creating :ref:`timeseries_overview` datasets
+and :ref:`modules_overview`, as well as functionality for storing
 experimental metadata and other metadata related to data provenance.
 
 .. _timeseries_overview:
@@ -47,13 +26,12 @@ TimeSeries
 ----------
 
 TimeSeries objects store time series data. These Python objects correspond to TimeSeries specifications
-provided by the NWB format specification. Like the NWB specification, TimeSeries Python objects follow an object-oriented inheritance
-pattern. For example, the class :py:class:`~pynwb.base.TimeSeries` serves as the base class for all other TimeSeries types.
+provided by the NWB format specification. Like the NWB specification, TimeSeries Python objects
+follow an object-oriented inheritance pattern. For example, the class :py:class:`~pynwb.base.TimeSeries`
+serves as the base class for all other TimeSeries types.
 
 
 The following TimeSeries objects are provided by the API and NWB specification:
-
-* :py:class:`~pynwb.base.TimeSeries` - a general
 
   * :py:class:`~pynwb.ecephys.ElectricalSeries`
 
@@ -86,20 +64,20 @@ The following TimeSeries objects are provided by the API and NWB specification:
 
 .. _modules_overview:
 
-Modules
--------
+Processing Modules
+------------------
 
-Modules are objects that group together common analyses done during processing of data. Module objects are unique collections of
-analysis results. To standardize the storage of common analyses, NWB provides the concept of an *Interface*, where the output of
-common analyses are represented as objects that extend the :py:class:`~pynwb.base.Interface` class. In most cases, you will not need
-to interact with the :py:class:`~pynwb.base.Interface` class directly. More commonly, you will be creating instances of classes that
-extend this class. For example, a common analysis step for spike data (represented in NWB as a :py:class:`~pynwb.ecephys.SpikeEventSeries` object)
-is spike clustering. In NWB, the result of kind of analysis will be reprsented with a :py:class:`~pynwb.ecephys.Clustering` object.
+Processing modules are objects that group together common analyses done during processing of data.
+Processing module objects are unique collections of analysis results. To standardize the storage of
+common analyses, NWB provides the concept of an *NWBDataInterface*, where the output of
+common analyses are represented as objects that extend the :py:class:`~pynwb.core.NWBDataInterface` class.
+In most cases, you will not need to interact with the :py:class:`~pynwb.core.NWBDataInterface` class directly.
+More commonly, you will be creating instances of classes that extend this class. For example, a common
+analysis step for spike data (represented in NWB as a :py:class:`~pynwb.ecephys.SpikeEventSeries` object)
+is spike clustering. In NWB, the result of this kind of analysis will be represented with a
+:py:class:`~pynwb.ecephys.Clustering` object.
 
-
-The following Interface objects are provided by the API and NWB specification:
-
-* :py:class:`~pynwb.ui.iface.Interface`
+The following analysis :py:class:`~pynwb.core.NWBDataInterface` objects are provided by the API and NWB specification:
 
   * :py:class:`~pynwb.behavior.BehavioralEpochs`
   * :py:class:`~pynwb.behavior.BehavioralEvents`
@@ -120,3 +98,11 @@ The following Interface objects are provided by the API and NWB specification:
   * :py:class:`~pynwb.behavior.MotionCorrection`
   * :py:class:`~pynwb.behavior.Position`
 
+Additionally, the :py:class:`~pynwb.base.TimeSeries` described :ref:`above <timeseries_overview>`
+are also subclasses of :py:class:`~pynwb.core.NWBDataInterface`, and can therefore be used anywhere
+:py:class:`~pynwb.core.NWBDataInterface` is allowed.
+
+.. note::
+
+    In addition to ``NWBContainer`` which functions as a common base type for Group objects
+    ``NWBData`` provides a common base for the specification of datasets in the NWB:N format.

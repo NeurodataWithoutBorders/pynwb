@@ -1,11 +1,15 @@
-from collections import Iterable
 from h5py import RegionReference
+import numpy as np
 
-from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
+from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
+
+
+def _not_parent(arg):
+    return arg['name'] != 'parent'
 
 
 def set_parents(container, parent):
@@ -88,14 +92,16 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
         self.__parent = parent_container
 
     @staticmethod
-    def __getter(nwbfield):
+    def _getter(nwbfield):
         def _func(self):
             return self.fields.get(nwbfield)
         return _func
 
     @staticmethod
-    def __setter(nwbfield):
+    def _setter(nwbfield):
         def _func(self, val):
+            if val is None:
+                return
             if nwbfield in self.fields:
                 msg = "can't set attribute '%s' -- already set" % nwbfield
                 raise AttributeError(msg)
@@ -118,7 +124,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
                 cls.__nwbfields__ = tuple(new_nwbfields)
         for f in cls.__nwbfields__:
             if not hasattr(cls, f):
-                setattr(cls, f, property(cls.__getter(f), cls.__setter(f)))
+                setattr(cls, f, property(cls._getter(f), cls._setter(f)))
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)
@@ -149,13 +155,18 @@ class NWBContainer(NWBBaseType, Container):
             return return_dict
 
 
+@register_class('NWBDataInterface', CORE_NAMESPACE)
+class NWBDataInterface(NWBContainer):
+    pass
+
+
 @register_class('NWBData', CORE_NAMESPACE)
 class NWBData(NWBBaseType, Data):
 
     __nwbfields__ = ('help',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': (Iterable, Data), 'doc': 'the source of the data'},
+            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
@@ -168,12 +179,98 @@ class NWBData(NWBBaseType, Data):
     def data(self):
         return self.__data
 
+    def __len__(self):
+        return len(self.__data)
+
+    def __getitem__(self, args):
+        return self.data[args]
+
+    def append(self, arg):
+        if isinstance(self.data, list):
+            self.data.append(arg)
+        elif isinstance(self.data, np.ndarray):
+            self.__data = np.append(self.__data, [arg])
+        else:
+            msg = "NWBData cannot append to object of type '%s'" % type(self.__data)
+            raise ValueError(msg)
+
+    def extend(self, arg):
+        if isinstance(self.data, list):
+            self.data.extend(arg)
+        elif isinstance(self.data, np.ndarray):
+            self.__data = np.append(self.__data, [arg])
+        else:
+            msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
+            raise ValueError(msg)
+
+
+@register_class('VectorData', CORE_NAMESPACE)
+class VectorData(NWBData):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(VectorData, self).__init__, kwargs)
+
+
+@register_class('VectorIndex', CORE_NAMESPACE)
+class VectorIndex(NWBData):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorIndex'},
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'a 1D dataset containing indexes that apply to VectorData object'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(VectorIndex, self).__init__, kwargs)
+
+
+class IndexedVector(object):
+
+    @docval({'name': 'data', 'type': VectorData,
+             'doc': 'the VectorData to maintain'},
+            {'name': 'index', 'type': VectorIndex,
+             'doc': 'a VectorIndex object that indexes this VectorData', 'default': None})
+    def __init__(self, **kwargs):
+        self.__data = popargs('data', kwargs)
+        self.__index = popargs('index', kwargs)
+
+    def add_vector(self, arg):
+        before = len(self.__data)
+        self.__data.extend(arg)
+        rs = get_region_slicer(self.__data, slice(before, before+len(arg)))
+        self.__index.append(rs)
+        return len(self.__index)-1
+
+    def get_vector(self, arg):
+        return self.__index[arg][:]
+
+
+@register_class('ElementIdentifiers', CORE_NAMESPACE)
+class ElementIdentifiers(NWBData):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this ElementIdentifiers'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'a 1D dataset containing identifiers'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(ElementIdentifiers, self).__init__, kwargs)
+
 
 class NWBTable(NWBData):
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': Iterable, 'doc': 'the source of the data', 'default': list()},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
@@ -240,3 +337,212 @@ class NWBTableRegion(NWBData, DataRegion):
 
     def __getitem__(self, idx):
         return self.__regionslicer[idx]
+
+
+class MultiContainerInterface(NWBDataInterface):
+    '''
+    A class for dynamically defining a API classes that
+    represent NWBDataInterfaces that contain multiple Containers
+    of the same type
+
+    To use, extend this class, and create a dictionary as a class
+    attribute with the following keys:
+
+    * 'add' to name the method for adding Container instances
+
+    * 'create' to name the method fo creating Container instances
+
+    * 'get' to name the method for getting Container instances
+
+    * 'attr' to name the attribute that stores the Container instances
+
+    * 'type' to provide the Container object type
+
+    See LFP or Position for an example of how to use this.
+    '''
+
+    @staticmethod
+    def __add_article(noun):
+        if noun[0] in ('aeiouAEIOU'):
+            return 'an %s' % noun
+        return 'a %s' % noun
+
+    @classmethod
+    def __make_get(cls, func_name, attr_name, container_type):
+        doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+
+        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
+                 'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
+                func_name=func_name, doc=doc)
+        def _func(self, **kwargs):
+            name = getargs('name', kwargs)
+            d = getattr(self, attr_name)
+            if len(d) == 0:
+                msg = "%s '%s' is empty" % (cls.__name__, self.name)
+                raise ValueError(msg)
+            if len(d) > 1 and name is None:
+                msg = "more than one %s in this %s -- must specify a name" % container_type.__name__, cls.__name__
+                raise ValueError(msg)
+            ret = None
+            if len(d) == 1:
+                for v in d.values():
+                    ret = v
+            else:
+                ret = d.get(name)
+                if ret is None:
+                    msg = "'%s' not found in %s '%s'" % (name, cls.__name__, self.name)
+                    raise KeyError(msg)
+            return ret
+
+        return _func
+
+    @classmethod
+    def __make_add(cls, func_name, attr_name, container_type):
+        doc = "Add %s to this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+
+        @docval({'name': attr_name, 'type': (list, tuple, dict, container_type),
+                 'doc': 'the %s to add' % container_type.__name__},
+                func_name=func_name, doc=doc)
+        def _func(self, **kwargs):
+            container = getargs(attr_name, kwargs)
+            if isinstance(container, container_type):
+                containers = [container]
+            elif isinstance(container, dict):
+                containers = container.values()
+            else:
+                containers = container
+            d = getattr(self, attr_name)
+            for tmp in containers:
+                tmp.parent = self
+                if tmp.name in d:
+                    msg = "'%s' already exists in '%s'" % (tmp.name, self.name)
+                    raise ValueError(msg)
+                d[tmp.name] = tmp
+            return container
+        return _func
+
+    @classmethod
+    def __make_create(cls, func_name, add_name, container_type):
+        doc = "Create %s and add it to this %s" % \
+                       (cls.__add_article(container_type.__name__), cls.__name__)
+
+        @docval(*filter(_not_parent, get_docval(container_type.__init__)), func_name=func_name, doc=doc,
+                returns="the %s object that was created" % container_type.__name__, rtype=container_type)
+        def _func(self, **kwargs):
+            cargs, ckwargs = fmt_docval_args(container_type.__init__, kwargs)
+            ret = container_type(*cargs, **ckwargs)
+            getattr(self, add_name)(ret)
+            return ret
+        return _func
+
+    @classmethod
+    def __make_constructor(cls, attr_name, add_name, container_type):
+        @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+                {'name': attr_name, 'type': (list, tuple, dict, container_type),
+                 'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()},
+                {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__},
+                func_name='__init__')
+        def _func(self, **kwargs):
+            source, container = popargs('source', attr_name, kwargs)
+            super(MultiContainerInterface, self).__init__(source, **kwargs)
+            setattr(self, attr_name, dict())
+            add = getattr(self, add_name)
+            add(container)
+        return _func
+
+    @classmethod
+    def __make_getitem(cls, attr_name, container_type):
+        doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+
+        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
+                 'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
+                func_name='__getitem__', doc=doc)
+        def _func(self, **kwargs):
+            name = getargs('name', kwargs)
+            d = getattr(self, attr_name)
+            if len(d) == 0:
+                msg = "%s '%s' is empty" % (cls.__name__, self.name)
+                raise ValueError(msg)
+            if len(d) > 1 and name is None:
+                msg = "more than one %s in this %s -- must specify a name" % container_type.__name__, cls.__name__
+                raise ValueError(msg)
+            ret = None
+            if len(d) == 1:
+                for v in d.values():
+                    ret = v
+            else:
+                ret = d.get(name)
+                if ret is None:
+                    msg = "'%s' not found in %s '%s'" % (name, cls.__name__, self.name)
+                    raise KeyError(msg)
+            return ret
+
+        return _func
+
+    @ExtenderMeta.pre_init
+    def __build_class(cls, name, bases, classdict):
+        '''
+        This classmethod will be called during class declaration in the metaclass to automatically
+        create setters and getters for NWB fields that need to be exported
+        '''
+        if not hasattr(cls, '__clsconf__'):
+            return
+        multi = False
+        if isinstance(cls.__clsconf__, dict):
+            clsconf = [cls.__clsconf__]
+        elif isinstance(cls.__clsconf__, list):
+            multi = True
+            clsconf = cls.__clsconf__
+        else:
+            raise TypeError("'__clsconf__' must be a dict or a list of dicts")
+
+        for i, d in enumerate(clsconf):
+            # get add method name
+            add = d.get('add')
+            if add is None:
+                msg = "MultiContainerInterface subclass '%s' is missing 'add' key in __clsconf__" % cls.__name__
+                if multi:
+                    msg += " at element %d" % i
+                raise ValueError(msg)
+
+            # get container attribute name
+            attr = d.get('attr')
+            if attr is None:
+                msg = "MultiContainerInterface subclass '%s' is missing 'attr' key in __clsconf__" % cls.__name__
+                if multi:
+                    msg += " at element %d" % i
+                raise ValueError(msg)
+
+            # get container type
+            container_type = d.get('type')
+            if container_type is None:
+                msg = "MultiContainerInterface subclass '%s' is missing 'type' key in __clsconf__" % cls.__name__
+                if multi:
+                    msg += " at element %d" % i
+                raise ValueError(msg)
+
+            # create property with the name given in 'attr'
+            if not hasattr(cls, attr):
+                getter = cls._getter(attr)
+                doc = "a dictionary containing the %s in this %s container" % (container_type.__name__, cls.__name__)
+                setattr(cls, attr, property(getter, cls._setter(attr), None, doc))
+
+            # create the add method
+            setattr(cls, add, cls.__make_add(add, attr, container_type))
+
+            # create the constructor, only if it has not been overriden
+            # i.e. it is the same method as the parent class constructor
+            if cls.__init__ == MultiContainerInterface.__init__:
+                setattr(cls, '__init__', cls.__make_constructor(attr, add, container_type))
+
+            # get create method name
+            create = d.get('create')
+            if create is not None:
+                setattr(cls, create, cls.__make_create(create, add, container_type))
+
+            get = d.get('get')
+            if get is not None:
+                setattr(cls, get, cls.__make_get(get, attr, container_type))
+
+        if len(clsconf) == 1:
+            setattr(cls, '__getitem__', cls.__make_getitem(attr, container_type))

@@ -5,6 +5,7 @@ from pynwb.form.build import GroupBuilder, DatasetBuilder
 from pynwb.form.backends.hdf5 import HDF5IO
 
 from pynwb import NWBFile, TimeSeries
+from pynwb.file import Subject
 from pynwb.ecephys import Clustering
 
 from . import base
@@ -60,9 +61,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         return GroupBuilder('root',
                             groups={'acquisition': GroupBuilder(
                                 'acquisition',
-                                groups={'timeseries': GroupBuilder('timeseries',
-                                                                   groups={'test_timeseries': ts_builder}),
-                                        'images': GroupBuilder('images')}),
+                                groups={'test_timeseries': ts_builder}),
                                     'analysis': GroupBuilder('analysis'),
                                     'epochs': GroupBuilder('epochs'),
                                     'general': GroupBuilder('general'),
@@ -110,9 +109,46 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         hdf5io = HDF5IO(self.path, self.manager)
         hdf5io.write(self.container)
         hdf5io.close()
+        hdf5io = HDF5IO(self.path, self.manager)
         container = hdf5io.read()
         self.assertIsInstance(container, NWBFile)
         raw_ts = container.acquisition
         self.assertEqual(len(raw_ts), 1)
-        self.assertIsInstance(raw_ts[0], TimeSeries)
+        for v in raw_ts.values():
+            self.assertIsInstance(v, TimeSeries)
         hdf5io.close()
+
+
+class TestSubjectIO(base.TestDataInterfaceIO):
+
+    def setUpContainer(self):
+        return Subject(age='12 mo',
+                       description='An unfortunate rat',
+                       genotype='WT',
+                       sex='M',
+                       species='Rattus norvegicus',
+                       subject_id='RAT123',
+                       weight='2 lbs',
+                       source='Subject integration test')
+
+    def setUpBuilder(self):
+        return GroupBuilder('subject',
+                            attributes={'source': 'Subject integration test',
+                                        'namespace': base.CORE_NAMESPACE,
+                                        'neurodata_type': 'Subject',
+                                        'help': 'Information about the subject'},
+                            datasets={'age': DatasetBuilder('age', '12 mo'),
+                                      'description': DatasetBuilder('description', 'An unfortunate rat'),
+                                      'genotype': DatasetBuilder('genotype', 'WT'),
+                                      'sex': DatasetBuilder('sex', 'M'),
+                                      'species': DatasetBuilder('species', 'Rattus norvegicus'),
+                                      'subject_id': DatasetBuilder('subject_id', 'RAT123'),
+                                      'weight': DatasetBuilder('weight', '2 lbs')})
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.subject = self.container
+
+    def getContainer(self, nwbfile):
+        ''' Should take an NWBFile object and return the Container'''
+        return nwbfile.subject

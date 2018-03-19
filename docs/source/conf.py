@@ -50,7 +50,13 @@ sphinx_gallery_conf = {
     'gallery_dirs'  : 'examples'
 }
 
-intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None)}
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3.5', None),
+    'numpy': ('http://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
+    'matplotlib': ('http://matplotlib.org', None),
+    'h5py': ('http://docs.h5py.org/en/latest/', None),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -290,8 +296,16 @@ class PatchedPythonDomain(PythonDomain):
         return super(PatchedPythonDomain, self).resolve_xref(
             env, fromdocname, builder, typ, target, node, contnode)
 
+from abc import abstractmethod, abstractproperty
+def skip(app, what, name, obj, skip, options):
+    if isinstance(obj, abstractproperty) or getattr(obj, '__isabstractmethod__', False):
+        return False
+    elif name == "__getitem__":
+        return False
+    return skip
 
 def setup(app):
     app.connect('builder-inited', run_apidoc)
     app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
     app.override_domain(PatchedPythonDomain)
+    app.connect("autodoc-skip-member", skip)

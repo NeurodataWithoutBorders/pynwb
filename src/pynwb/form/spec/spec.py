@@ -93,15 +93,51 @@ class Spec(ConstructableDict):
 #        return id(self) == id(other)
 
 
+_target_type_key = 'target_type'
+
+_ref_args = [
+    {'name': _target_type_key, 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
+    {'name': 'reftype', 'type': str, 'doc': 'the type of references this is i.e. region or object'},
+]
+
+
+class RefSpec(ConstructableDict):
+
+    __allowable_types = ('object', 'region')
+
+    @docval(*_ref_args)
+    def __init__(self, **kwargs):
+        target_type, reftype = getargs(_target_type_key, 'reftype', kwargs)
+        self[_target_type_key] = target_type
+        if reftype not in self.__allowable_types:
+            msg = "reftype must be one of the following: %s" % ", ".join(self.__allowable_types)
+            raise ValueError(msg)
+        self['reftype'] = reftype
+
+    @property
+    def target_type(self):
+        '''The data_type of the target of the reference'''
+        return self[_target_type_key]
+
+    @property
+    def reftype(self):
+        '''The type of reference'''
+        return self['reftype']
+
+    @docval(rtype=bool, returns='True if this RefSpec specifies a region reference, False otherwise')
+    def is_region(self):
+        return self['reftype'] == 'region'
+
+
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
+        {'name': 'dtype', 'type': (str, RefSpec), 'doc': 'The data type of this attribute'},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
         {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'required', 'type': bool,
          'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
-        {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
+        {'name': 'parent', 'type': 'BaseStorageSpec', 'doc': 'the parent of this spec', 'default': None},
         {'name': 'value', 'type': None, 'doc': 'a constant value for this attribute', 'default': None},
         {'name': 'default_value', 'type': None, 'doc': 'a default value for this attribute', 'default': None}
 ]
@@ -405,42 +441,6 @@ class BaseStorageSpec(Spec):
         return ret
 
 
-_target_type_key = 'target_type'
-
-_ref_args = [
-    {'name': _target_type_key, 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
-    {'name': 'reftype', 'type': str, 'doc': 'the type of references this is i.e. region or object'},
-]
-
-
-class RefSpec(ConstructableDict):
-
-    __allowable_types = ('object', 'region')
-
-    @docval(*_ref_args)
-    def __init__(self, **kwargs):
-        target_type, reftype = getargs(_target_type_key, 'reftype', kwargs)
-        self[_target_type_key] = target_type
-        if reftype not in self.__allowable_types:
-            msg = "reftype must be one of the following: %s" % ", ".join(self.__allowable_types)
-            raise ValueError(msg)
-        self['reftype'] = reftype
-
-    @property
-    def target_type(self):
-        '''The data_type of the target of the reference'''
-        return self[_target_type_key]
-
-    @property
-    def reftype(self):
-        '''The type of reference'''
-        return self['reftype']
-
-    @docval(rtype=bool, returns='True if this RefSpec specifies a region reference, False otherwise')
-    def is_region(self):
-        return self['reftype'] == 'region'
-
-
 _dt_args = [
     {'name': 'name', 'type': str, 'doc': 'the name of this column'},
     {'name': 'doc', 'type': str, 'doc': 'a description about what this data type is'},
@@ -539,6 +539,12 @@ class DatasetSpec(BaseStorageSpec):
                 if len(self['dims']) != len(self['shape']):
                     raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
+            if isinstance(dtype, list):
+                for _i, col in enumerate(dtype):
+                    if not isinstance(col, DtypeSpec):
+                        msg = 'must use DtypeSpec if defining compound dtype - found %s at element %d' % \
+                                (type(col), _i)
+                        raise ValueError(msg)
             self['dtype'] = dtype
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if default_value is not None:
@@ -953,6 +959,8 @@ class GroupSpec(BaseStorageSpec):
             else:
                 raise TypeError("must specify 'name' or 'data_type_inc' in Group spec")
         else:
+            if spec.data_type_inc is not None or spec.data_type_def is not None:
+                self.__add_data_type_inc(spec)
             self.__groups[spec.name] = spec
         self.setdefault('groups', list()).append(spec)
         spec.parent = self
@@ -983,6 +991,8 @@ class GroupSpec(BaseStorageSpec):
             else:
                 raise TypeError("must specify 'name' or 'data_type_inc' in Dataset spec")
         else:
+            if spec.data_type_inc is not None or spec.data_type_def is not None:
+                self.__add_data_type_inc(spec)
             self.__datasets[spec.name] = spec
         self.setdefault('datasets', list()).append(spec)
         spec.parent = self

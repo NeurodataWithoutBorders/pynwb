@@ -3,6 +3,7 @@ from dateutil.parser import parse as parse_date
 from collections import Iterable
 
 from .form.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
+from .form.query import FORMDataset
 from .form import Container
 
 from . import register_class, CORE_NAMESPACE
@@ -11,7 +12,8 @@ from .epoch import Epoch
 from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
-from .core import NWBContainer, LabelledDict
+from .ogen import OptogeneticStimulusSite
+from .core import LabelledDict, NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface
 
 from h5py import RegionReference
 
@@ -20,8 +22,8 @@ def _not_parent(arg):
     return arg['name'] != 'parent'
 
 
-@register_class('Image', CORE_NAMESPACE)
-class Image(Container):
+# @register_class('Image', CORE_NAMESPACE)
+class Image(NWBData):
     # TODO: Implement this
     pass
 
@@ -32,29 +34,120 @@ class SpecFile(Container):
     pass
 
 
+@register_class('Subject', CORE_NAMESPACE)
+class Subject(NWBContainer):
+
+    __nwbfields__ = (
+        'age',
+        'description',
+        'genotype',
+        'sex',
+        'species',
+        'subject_id',
+        'weight',
+    )
+
+    @docval({'name': 'age', 'type': str, 'doc': 'the age of the subject', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'a description of the subject', 'default': None},
+            {'name': 'genotype', 'type': str, 'doc': 'the genotype of the subject', 'default': None},
+            {'name': 'sex', 'type': str, 'doc': 'the sex of the subject', 'default': None},
+            {'name': 'species', 'type': str, 'doc': 'the species of the subject', 'default': None},
+            {'name': 'subject_id', 'type': str, 'doc': 'a unique identifier for the subject', 'default': None},
+            {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None},
+            {'name': 'source', 'type': str, 'doc': 'the source of this information', 'default': None})
+    def __init__(self, **kwargs):
+        kwargs['name'] = 'subject'
+        kwargs['source'] = getargs('source', kwargs)
+        pargs, pkwargs = fmt_docval_args(super(Subject, self).__init__, kwargs)
+        super(Subject, self).__init__(*pargs, **pkwargs)
+        self.age = getargs('age', kwargs)
+        self.description = getargs('description', kwargs)
+        self.genotype = getargs('genotype', kwargs)
+        self.sex = getargs('sex', kwargs)
+        self.species = getargs('species', kwargs)
+        self.subject_id = getargs('subject_id', kwargs)
+        self.weight = getargs('weight', kwargs)
+
+
 @register_class('NWBFile', CORE_NAMESPACE)
-class NWBFile(NWBContainer):
+class NWBFile(MultiContainerInterface):
     """
     A representation of an NWB file.
     """
+
+    __clsconf__ = [
+        {
+            'attr': 'acquisition',
+            'add': 'add_acquisition',
+            'type': NWBDataInterface,
+            'get': 'get_acquisition'
+        },
+        {
+            'attr': 'stimulus',
+            'add': 'add_stimulus',
+            'type': TimeSeries,
+            'get': 'get_stimulus'
+        },
+        {
+            'attr': 'stimulus_template',
+            'add': 'add_stimulus_template',
+            'type': TimeSeries,
+            'get': 'get_stimulus_template'
+        },
+        {
+            'attr': 'modules',
+            'add': 'add_processing_modules',
+            'type': ProcessingModule,
+            'create': 'create_processing_module',
+            'get': 'get_processing_module'
+        },
+        {
+            'attr': 'devices',
+            'add': 'add_device',
+            'type': Device,
+            'create': 'create_device',
+            'get': 'get_device'
+        },
+        {
+            'attr': 'ec_electrode_groups',
+            'add': 'add_electrode_group',
+            'type': ElectrodeGroup,
+            'create': 'create_electrode_group',
+            'get': 'get_electrode_group'
+        },
+        {
+            'attr': 'imaging_planes',
+            'add': 'add_imaging_plane',
+            'type': ImagingPlane,
+            'create': 'create_imaging_plane',
+            'get': 'get_imaging_plane'
+        },
+        {
+            'attr': 'ic_electrodes',
+            'add': 'add_ic_electrode',
+            'type': IntracellularElectrode,
+            'create': 'create_ic_electrode',
+            'get': 'get_ic_electrode'
+        },
+        {
+            'attr': 'ogen_sites',
+            'add': 'add_ogen_site',
+            'type': OptogeneticStimulusSite,
+            'create': 'create_ogen_site',
+            'get': 'get_ogen_site'
+        },
+    ]
+
     __nwbfields__ = ('experimenter',
                      'description',
                      'experiment_description',
                      'session_id',
                      'lab',
                      'institution',
-                     'acquisition',
-                     'stimulus',
-                     'stimulus_template',
                      'ec_electrodes',
-                     'ec_electrode_groups',
-                     'ic_electrodes',
-                     'imaging_planes',
-                     'optogenetic_sites',
-                     'modules',
                      'epochs',
-                     'epoch_tags',
-                     'devices')
+                     'subject',
+                     'epoch_tags',)
 
     __current_version = None
 
@@ -70,7 +163,7 @@ class NWBFile(NWBContainer):
              'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
             {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
-            {'name': 'file_create_date', 'type': (list, datetime, str),
+            {'name': 'file_create_date', 'type': (list, datetime, str, FORMDataset),
              'doc': 'the time the file was created and subsequent modifications made', 'default': None},
             {'name': 'version', 'type': str, 'doc': 'the NWB version', 'default': None},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
@@ -98,10 +191,12 @@ class NWBFile(NWBContainer):
              'doc': 'IntracellularElectrodes that belong to this NWBFile', 'default': None},
             {'name': 'imaging_planes', 'type': (list, tuple),
              'doc': 'ImagingPlanes that belong to this NWBFile', 'default': None},
-            {'name': 'optogenetic_sites', 'type': (list, tuple),
+            {'name': 'ogen_sites', 'type': (list, tuple),
              'doc': 'OptogeneticStimulusSites that belong to this NWBFile', 'default': None},
             {'name': 'devices', 'type': (list, tuple),
-             'doc': 'Device objects belonging to this NWBFile', 'default': None})
+             'doc': 'Device objects belonging to this NWBFile', 'default': None},
+            {'name': 'subject', 'type': Subject,
+             'doc': 'subject metadata', 'default': None})
     def __init__(self, **kwargs):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
         pkwargs['name'] = 'root'
@@ -125,19 +220,21 @@ class NWBFile(NWBContainer):
         elif isinstance(self.__file_create_date, str):
             self.__file_create_date = [parse_date(self.__file_create_date)]
 
-        self.__acquisition = self.__build_ts('acquisition', kwargs)
-        self.__stimulus = self.__build_ts('stimulus', kwargs)
-        self.__stimulus_template = self.__build_ts('stimulus_template', kwargs)
+        self.acquisition = self.__build_ts('acquisition', kwargs)
+        self.stimulus = self.__build_ts('stimulus', kwargs)
+        self.stimulus_template = self.__build_ts('stimulus_template', kwargs)
 
-        self.__modules = self._to_dict('modules', kwargs)
+        self.modules = self._to_dict('modules', kwargs)
         self.__epochs = self._to_dict('epochs', kwargs)
         self.__ec_electrodes = getargs('ec_electrodes', kwargs)
-        self.__ec_electrode_groups = self._to_dict('ec_electrode_groups', kwargs)
-        self.__devices = self._to_dict('devices', kwargs)
+        self.ec_electrode_groups = self._to_dict('ec_electrode_groups', kwargs)
+        self.devices = self._to_dict('devices', kwargs)
 
-        self.__ic_electrodes = self._to_dict('ic_electrodes', kwargs)
+        self.ic_electrodes = self._to_dict('ic_electrodes', kwargs)
+        self.imaging_planes = self._to_dict('imaging_planes', kwargs)
+        self.ogen_sites = self._to_dict('ogen_sites', kwargs)
 
-        self.__imaging_planes = self._to_dict('imaging_planes', kwargs)
+        self.subject = getargs('subject', kwargs)
 
         recommended = [
             'experimenter',
@@ -161,10 +258,6 @@ class NWBFile(NWBContainer):
         return ret
 
     @property
-    def devices(self):
-        return self.__devices
-
-    @property
     def epochs(self):
         return self.__epochs
 
@@ -174,10 +267,6 @@ class NWBFile(NWBContainer):
         for epoch_name, epoch_obj in self.__epochs.items():
             ret.update(epoch_obj.tags)
         return sorted(ret)
-
-    @property
-    def modules(self):
-        return self.__modules
 
     @property
     def identifier(self):
@@ -200,18 +289,6 @@ class NWBFile(NWBContainer):
         return self.__session_start_time
 
     @property
-    def acquisition(self):
-        return tuple(self.__acquisition.values())
-
-    @property
-    def stimulus(self):
-        return tuple(self.__stimulus.values())
-
-    @property
-    def stimulus_template(self):
-        return tuple(self.__stimulus_template.values())
-
-    @property
     def ec_electrodes(self):
         return self.__ec_electrodes
 
@@ -232,47 +309,6 @@ class NWBFile(NWBContainer):
         desc = getargs('description', kwargs)
         name = getargs('name', kwargs)
         return ElectrodeTableRegion(self.__ec_electrodes, region, desc, name)
-
-    @property
-    def ec_electrode_groups(self):
-        return tuple(self.__ec_electrode_groups.values())
-
-    @property
-    def ic_electrodes(self):
-        return tuple(self.__ic_electrodes.values())
-
-    @property
-    def imaging_planes(self):
-        return tuple(self.__imaging_planes.values())
-
-    @docval(*filter(_not_parent, get_docval(ImagingPlane.__init__)),
-            returns='the imaging plane', rtype=ImagingPlane)
-    def create_imaging_plane(self, **kwargs):
-        """
-        Add metadata about an imaging plane
-        """
-        ip_args, ip_kwargs = fmt_docval_args(ImagingPlane.__init__, kwargs)
-        img_pln = ImagingPlane(*ip_args, **ip_kwargs)
-        self.set_imaging_plane(img_pln)
-        return img_pln
-
-    @docval({'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'the ImagingPlane object to add to this NWBFile'})
-    def set_imaging_plane(self, **kwargs):
-        """
-        Add an ImagingPlane object to this file
-        """
-        img_pln = getargs('imaging_plane', kwargs)
-        img_pln.parent = self
-        name = img_pln.name
-        self.__imaging_planes[name] = img_pln
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the imaging plane'})
-    def get_imaging_plane(self, **kwargs):
-        """
-        Get an ImagingPlane object from this file
-        """
-        name = getargs('name', kwargs)
-        return self.__imaging_planes.get(name)
 
     def is_acquisition(self, ts):
         return self.__exists(ts, self.__acquisition)
@@ -356,56 +392,6 @@ class NWBFile(NWBContainer):
             raise TypeError(type(timeseries))
         return ts
 
-    @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
-            {'name': 'epoch', 'type': (str, Epoch, list, tuple), 'doc': 'the name of an epoch \
-            or an Epoch object or a list of names of epochs or Epoch objects', 'default': None},
-            returns="the TimeSeries object")
-    def add_acquisition(self, **kwargs):
-        ts, epoch = getargs('ts', 'epoch', kwargs)
-        self.__set_timeseries(self.__acquisition, ts, epoch)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
-    def get_acquisition(self, **kwargs):
-        '''
-        Retrieve acquisition TimeSeries data
-        '''
-        name = getargs('name', kwargs)
-        return self.__get_timeseries(self.__acquisition, name)
-
-    @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
-            {'name': 'epoch', 'type': (str, Epoch),
-             'doc': 'the name of an epoch or an Epoch object or a list of names of \
-             epochs or Epoch objects', 'default': None},
-            returns="the TimeSeries object")
-    def add_stimulus(self, **kwargs):
-        ts, epoch = getargs('ts', 'epoch', kwargs)
-        self.__set_timeseries(self.__stimulus, ts, epoch)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
-    def get_stimulus(self, **kwargs):
-        '''
-        Retrieve stimiulus TimeSeries data
-        '''
-        name = getargs('name', kwargs)
-        return self.__get_timeseries(self.__stimulus, name)
-
-    @docval({'name': 'ts', 'type': TimeSeries, 'doc': 'the  TimeSeries object to add'},
-            {'name': 'epoch', 'type': (str, Epoch),
-             'doc': 'the name of an epoch or an Epoch object or a list of names of \
-             epochs or Epoch objects', 'default': None},
-            returns="the TimeSeries object")
-    def add_stimulus_template(self, **kwargs):
-        ts, epoch = getargs('ts', 'epoch', kwargs)
-        self.__set_timeseries(self.__stimulus_template, ts, epoch)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this TimeSeries'})
-    def get_stimulus_template(self, **kwargs):
-        '''
-        Retrieve stimiulus template TimeSeries data
-        '''
-        name = getargs('name', kwargs)
-        return self.__get_timeseries(self.__stimulus_template, name)
-
     def __set_timeseries(self, ts_dict, ts, epoch=None):
         if ts.name in ts_dict:
             msg = "%s already exists in %s" % (ts.name, ts_dict.label)
@@ -423,25 +409,6 @@ class NWBFile(NWBContainer):
             raise ValueError(msg)
         return ret
 
-    @docval(*filter(_not_parent, get_docval(ElectrodeGroup.__init__)),
-            returns='the electrode group', rtype=ElectrodeGroup)
-    def create_electrode_group(self, **kwargs):
-        """
-        Add an electrode group (e.g. a probe, shank, tetrode).
-        """
-        eg_args, eg_kwargs = fmt_docval_args(ElectrodeGroup.__init__, kwargs)
-        elec_grp = ElectrodeGroup(*eg_args, **eg_kwargs)
-        self.set_electrode_group(elec_grp)
-        return elec_grp
-
-    @docval({'name': 'electrode_grp', 'type': ElectrodeGroup,
-             'doc': 'the ElectrodeGroup object to add to this NWBFile'})
-    def set_electrode_group(self, **kwargs):
-        elec_grp = getargs('electrode_grp', kwargs)
-        elec_grp.parent = self
-        name = elec_grp.name
-        self.__ec_electrode_groups[name] = elec_grp
-
     @docval({'name': 'electrode_table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):
         if self.__ec_electrodes is not None:
@@ -449,80 +416,3 @@ class NWBFile(NWBContainer):
             raise ValueError(msg)
         electrode_table = getargs('electrode_table', kwargs)
         self.__ec_electrodes = electrode_table
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            returns='the recording device', rtype=Device)
-    def create_device(self, **kwargs):
-        name, source = getargs('name', 'source', kwargs)
-        device = Device(name=name, source=source)
-        self.set_device(device)  # This also sets the parent of the device
-        return device
-
-    @docval({'name': 'device', 'type': Device, 'doc': 'the Device object to add to this NWBFile'})
-    def set_device(self, **kwargs):
-        device = getargs('device', kwargs)
-        device.parent = self
-        name = device.name
-        self.__devices[name] = device
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the electrode group'})
-    def get_electrode_group(self, **kwargs):
-        name = getargs('name', kwargs)
-        return self.__ec_electrode_groups.get(name)
-
-    @docval(*filter(_not_parent, get_docval(IntracellularElectrode.__init__)),
-            returns='the intracellular electrode', rtype=IntracellularElectrode)
-    def create_intracellular_electrode(self, **kwargs):
-        ie_args, ie_kwargs = fmt_docval_args(IntracellularElectrode.__init__, kwargs)
-        ic_elec = IntracellularElectrode(*ie_args, **ie_kwargs)
-        self.set_intracellular_electrode(ic_elec)
-        return ic_elec
-
-    @docval({'name': 'ic_elec', 'type': IntracellularElectrode,
-             'doc': 'the IntracellularElectrode object to add to this NWBFile'})
-    def set_intracellular_electrode(self, **kwargs):
-        ic_elec = getargs('ic_elec', kwargs)
-        ic_elec.parent = self
-        name = ic_elec.name
-        self.__ic_electrodes[name] = ic_elec
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the intracellular electrode'})
-    def get_intracellular_electrode(self, **kwargs):
-        '''
-        Retrieve an IntracellularElectrode
-        '''
-        name = getargs('name', kwargs)
-        return self.__ic_electrodes.get(name)
-
-    @docval({'name': 'name',  'type': str, 'doc': 'the name of the processing module'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'description',  'type': str, 'doc': 'description of the processing module'},
-            returns="a processing module", rtype=ProcessingModule)
-    def create_processing_module(self, **kwargs):
-        '''
-        Creates a ProcessingModule object of the specified name. NWBContainers can
-        be created by the module and will be stored inside it
-        '''
-        cargs, ckwargs = fmt_docval_args(ProcessingModule.__init__, kwargs)
-        ret = ProcessingModule(*cargs, **ckwargs)
-        self.set_processing_module(ret)
-        return ret
-
-    @docval({'name': 'module',  'type': ProcessingModule, 'doc': 'the processing module to add to this file'})
-    def set_processing_module(self, **kwargs):
-        '''
-        Add a ProcessingModule to this NWBFile
-        '''
-        module = getargs('module', kwargs)
-        if module.parent is None:
-            module.parent = self
-        self.__modules[module.name] = module
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the processing module'})
-    def get_processing_module(self, **kwargs):
-        '''
-        Retrieve a ProcessingModule
-        '''
-        name = getargs('name', kwargs)
-        return self.__modules.get(name)

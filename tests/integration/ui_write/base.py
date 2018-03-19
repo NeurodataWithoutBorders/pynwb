@@ -22,10 +22,16 @@ def container_test(container):
 
 class TestMapNWBContainer(unittest.TestCase):
 
+    _required_tests = ('test_build', 'test_construct')
+
     def setUp(self):
         self.__manager = get_manager()
         self.__container = self.setUpContainer()
         self.__builder = self.setUpBuilder()
+
+    @property
+    def required_tests(self):
+        return self._required_tests
 
     @property
     def manager(self):
@@ -82,8 +88,13 @@ class TestMapNWBContainer(unittest.TestCase):
                             self.assertContainerEqual(f1[k], f2[k])
                 elif isinstance(f1, NWBContainer):
                     self.assertContainerEqual(f1, f2)
-                elif isinstance(f1, NWBData):
-                    self.assertDataEqual(f1, f2)
+                elif isinstance(f1, NWBData) or isinstance(f2, NWBData):
+                    if isinstance(f1, NWBData) and isinstance(f2, NWBData):
+                        self.assertDataEqual(f1, f2)
+                    elif isinstance(f1, NWBData):
+                        self.assertTrue(np.array_equal(f1.data, f2))
+                    elif isinstance(f2, NWBData):
+                        self.assertTrue(np.array_equal(f1.data, f2))
                 else:
                     self.assertEqual(f1, f2)
 
@@ -94,31 +105,42 @@ class TestMapNWBContainer(unittest.TestCase):
 
 class TestMapRoundTrip(TestMapNWBContainer):
 
+    _required_tests = ('test_build', 'test_construct', 'test_roundtrip')
+
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
         self.start_time = datetime(1971, 1, 1, 12, 0, 0)
         self.create_date = datetime(2018, 4, 15, 12, 0, 0)
         self.container_type = self.container.__class__.__name__
         self.filename = 'test_%s.nwb' % self.container_type
+        self.io = None
 
     def tearDown(self):
+        if self.io is not None:
+            self.io.close()
         if os.path.exists(self.filename):
             os.remove(self.filename)
 
-    def test_roundtrip(self):
+    def roundtripContainer(self):
         description = 'a file to test writing and reading a %s' % self.container_type
         source = 'test_roundtrip for %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
-        io = HDF5IO(self.filename, self.manager)
-        io.write(nwbfile)
+        self.io = HDF5IO(self.filename, self.manager)
+        self.io.write(nwbfile)
+        read_nwbfile = self.io.read()
         try:
-            read_nwbfile = io.read()
-            read_container = self.getContainer(read_nwbfile)
-            self.assertContainerEqual(self.container, read_container)
-        finally:
-            io.close()
+            tmp = self.getContainer(read_nwbfile)
+            return tmp
+        except Exception as e:
+            self.io.close()
+            self.io = None
+            raise e
+
+    def test_roundtrip(self):
+        read_container = self.roundtripContainer()
+        self.assertContainerEqual(self.container, read_container)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
@@ -127,3 +149,14 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
         raise unittest.SkipTest('Cannot run test unless getContainer is implemented')
+
+
+class TestDataInterfaceIO(TestMapRoundTrip):
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.add_acquisition(self.container)
+
+    def getContainer(self, nwbfile):
+        ''' Should take an NWBFile object and return the Container'''
+        return nwbfile.get_acquisition(self.container.name)

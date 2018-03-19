@@ -4,6 +4,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 from six import with_metaclass
 from .utils import docval, getargs, popargs, docval_macro
 from operator import itemgetter
+from .container import Data, DataRegion
 
 
 def __get_shape_helper(data):
@@ -462,10 +463,34 @@ class DataIO(with_metaclass(ABCMeta, object)):
         return self.__data
 
 
-class RegionSlicer(with_metaclass(ABCMeta, object)):
+class RegionSlicer(with_metaclass(ABCMeta, DataRegion)):
     '''
-    A class to control getting using a region
+    A abstract base class to control getting using a region
+
+    Subclasses must implement `__getitem__` and `__len__`
     '''
+
+    @docval({'name': 'target', 'type': None, 'doc': 'the target to slice'},
+            {'name': 'slice', 'type': None, 'doc': 'the region to slice'})
+    def __init__(self, **kwargs):
+        self.__target = getargs('target', kwargs)
+        self.__slice = getargs('slice', kwargs)
+
+    @property
+    def data(self):
+        return self.target
+
+    @property
+    def region(self):
+        return self.slice
+
+    @property
+    def target(self):
+        return self.__target
+
+    @property
+    def slice(self):
+        return self.__slice
 
     @abstractproperty
     def __getitem__(self, idx):
@@ -478,13 +503,14 @@ class RegionSlicer(with_metaclass(ABCMeta, object)):
 
 class ListSlicer(RegionSlicer):
 
-    @docval({'name': 'dataset', 'type': (list, tuple), 'doc': 'the HDF5 dataset to slice'},
+    @docval({'name': 'dataset', 'type': (list, tuple, Data), 'doc': 'the HDF5 dataset to slice'},
             {'name': 'region', 'type': (list, tuple, slice), 'doc': 'the region reference to use to slice'})
     def __init__(self, **kwargs):
         self.__dataset, self.__region = getargs('dataset', 'region', kwargs)
+        super(ListSlicer, self).__init__(self.__dataset, self.__region)
         if isinstance(self.__region, slice):
             self.__getter = itemgetter(self.__region)
-            self.__len = slice_len(self.__region)  # noqa: F821
+            self.__len = len(range(*self.__region.indices(len(self.__dataset))))
         else:
             self.__getter = itemgetter(*self.__region)
             self.__len = len(self.__region)
@@ -500,24 +526,8 @@ class ListSlicer(RegionSlicer):
         if isinstance(idx, (list, tuple)):
             getter = itemgetter(*idx)
         else:
-            return itemgetter(idx)
+            getter = itemgetter(idx)
         return getter(self._read)
 
     def __len__(self):
         return self.__len
-
-
-from .backends.hdf5 import H5RegionSlicer  # noqa: E402
-import h5py  # noqa: E402
-
-
-@docval({'name': 'dataset', 'type': None, 'doc': 'the HDF5 dataset to slice'},
-        {'name': 'region', 'type': None, 'doc': 'the region reference to use to slice'},
-        is_method=False)
-def get_region_slicer(**kwargs):
-    dataset, region = getargs('dataset', 'region', kwargs)
-    if isinstance(dataset, (list, tuple)):
-        return ListSlicer(dataset, region)
-    elif isinstance(dataset, h5py.Dataset):
-        return H5RegionSlicer(dataset, region)
-    return None

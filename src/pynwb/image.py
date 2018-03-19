@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from .form.utils import docval, popargs
+from .form.utils import docval, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -29,13 +29,14 @@ class ImageSeries(TimeSeries):
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'default': None},
             {'name': 'unit', 'type': str,
              'doc': 'The base unit of measurement (should be SI unit)', 'default': 'None'},
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
-             'default': 'None'},
-            {'name': 'external_file', 'type': Iterable,
+             'default': None},
+            {'name': 'external_file', 'type': ('array_data', 'data'),
              'doc': 'Path or URL to one or more external file(s). Field only present if format=external. \
              Either external_file or data must be specified, but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable,
@@ -64,10 +65,9 @@ class ImageSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
         bits_per_pixel, dimension, external_file, starting_frame, format = popargs(
             'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
-        super(ImageSeries, self).__init__(name, source, data, unit, **kwargs)
+        call_docval_func(super(ImageSeries, self).__init__, kwargs)
         self.bits_per_pixel = bits_per_pixel
         self.dimension = dimension
         self.external_file = external_file
