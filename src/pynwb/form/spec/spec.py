@@ -566,12 +566,17 @@ class DatasetSpec(BaseStorageSpec):
 
     @classmethod
     def __is_sub_dtype(cls, orig, new):
-        orig_prec = cls.__get_prec_level(orig)
-        new_prec = cls.__get_prec_level(new)
-        if orig_prec[0] != new_prec[0]:
-            # cannot extend int to float and vice-versa
-            return False
-        return new_prec >= orig_prec
+        if isinstance(orig, RefSpec):
+            if not isinstance(new, RefSpec):
+                return False
+            return orig == new
+        else:
+            orig_prec = cls.__get_prec_level(orig)
+            new_prec = cls.__get_prec_level(new)
+            if orig_prec[0] != new_prec[0]:
+                # cannot extend int to float and vice-versa
+                return False
+            return new_prec >= orig_prec
 
     @docval({'name': 'inc_spec', 'type': 'DatasetSpec', 'doc': 'the data type this specification represents'})
     def resolve_spec(self, **kwargs):
