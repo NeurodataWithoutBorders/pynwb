@@ -175,15 +175,9 @@ _roit_docval = [
 @register_class('ROITable', CORE_NAMESPACE)
 class ROITable(NWBTable):
 
-    @docval({'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
-    def __init__(self, **kwargs):
-        data = getargs('data', kwargs)
-        colnames = [i['name'] for i in _roit_docval]
-        super(ROITable, self).__init__(colnames, 'rois', data)
+    __columns__ = _roit_docval
 
-    @docval(*_roit_docval)
-    def add_row(self, **kwargs):
-        super(ROITable, self).add_row(kwargs)
+    __defaultname__ = 'rois'
 
 
 @register_class('ROITableRegion', CORE_NAMESPACE)

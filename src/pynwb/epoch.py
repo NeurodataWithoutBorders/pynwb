@@ -9,28 +9,30 @@ from .base import TimeSeries
 from .core import NWBContainer, NWBTable, NWBTableRegion
 
 
-_eptable_docval = [
-    {'name': 'description', 'type': str, 'doc': 'a description of this epoch'},
+_evtable_docval = [
     {'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
     {'name': 'stop_time', 'type': float, 'doc': 'Stop time of epoch, in seconds'},
     {'name': 'tags', 'type': (str, list, tuple), 'doc': 'user-defined tags uesd throughout epochs'},
     {'name': 'timeseries', 'type': RegionSlicer, 'doc': 'the TimeSeries the epoch applies to'},
 ]
 
+@register_class('EpochTable', CORE_NAMESPACE)
+class EventTable(NWBTable):
+
+    __columns__ = _evtable_docval
+
+
+_eptable_docval = [
+    {'name': 'description', 'type': str, 'doc': 'a description of this epoch'},
+] + _evtable_docval
+
 
 @register_class('EpochTable', CORE_NAMESPACE)
 class EpochTable(NWBTable):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this epoch table', 'default': 'epochs'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table', 'default': list()})
-    def __init__(self, **kwargs):
-        name, data = getargs('name', 'data', kwargs)
-        colnames = [i['name'] for i in _eptable_docval]
-        super(EpochTable, self).__init__(colnames, name, data)
+    __columns__ = _eptable_docval
 
-    @docval(*_eptable_docval)
-    def add_row(self, **kwargs):
-        super(EpochTable, self).add_row(kwargs)
+    __defaultname__ = 'epochs'
 
 
 @register_class('EpochTableRegion', CORE_NAMESPACE)
@@ -58,16 +60,9 @@ _tsi_docval = [
 @register_class('TimeSeriesIndex', CORE_NAMESPACE)
 class TimeSeriesIndex(NWBTable):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this epoch table', 'default': 'timeseries_index'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table', 'default': list()})
-    def __init__(self, **kwargs):
-        name, data = getargs('name', 'data', kwargs)
-        colnames = [i['name'] for i in _tsi_docval]
-        super(TimeSeriesIndex, self).__init__(colnames, name, data)
+    __columns__ = _tsi_docval
 
-    @docval(*_tsi_docval)
-    def add_row(self, **kwargs):
-        super(TimeSeriesIndex, self).add_row(kwargs)
+    __defaultname__ = 'timeseries_index'
 
 
 @register_class('Epochs', CORE_NAMESPACE)

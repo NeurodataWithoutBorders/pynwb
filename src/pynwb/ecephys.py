@@ -67,6 +67,8 @@ _et_docval = [
 class ElectrodeTable(NWBTable):
     '''A table of all electrodes'''
 
+    __columns__ = _et_docval
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
     def __init__(self, **kwargs):
