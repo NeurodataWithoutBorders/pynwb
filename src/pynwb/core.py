@@ -267,6 +267,53 @@ class ElementIdentifiers(NWBData):
 
 
 class NWBTable(NWBData):
+    '''
+    Subclasses should specify the class attribute \_\_columns\_\_.
+
+    This should be a list of dictionaries with the following keys:
+    ``'name'`` - the column name
+    ``'type'`` - the type of data in this column
+    ``'doc'``  - a brief description of what gets stored in this column
+
+    For reference, this list of dictionaries will be used with docval to autogenerate
+    the ``add_row`` method for adding data to this table.
+
+    If \_\_columns\_\_ is not specified, no custom ``add_row`` method will be added.
+
+    The class attribute __defaultname__ can also be set to specify a default name
+    for the table class. If \_\_defaultname\_\_ is not specified, then ``name`` will
+    need to be specified when the class is instantiated.
+    '''
+
+    @ExtenderMeta.pre_init
+    def __build_table_class(cls, name, bases, classdict):
+        if hasattr(cls, '__columns__'):
+            columns = getattr(cls, '__columns__')
+
+            if cls.__init__ == bases[-1].__init__:     # check if __init__ is overridden
+                name = {'name': 'name', 'type': str, 'doc': 'the name of this table'}
+                defname = getattr(cls, '__defaultname__', None)
+                if defname is not None:
+                    name['default'] = defname
+
+                @docval(name,
+                        {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table',
+                         'default': list()})
+                def __init__(self, **kwargs):
+                    name, data = getargs('name', 'data', kwargs)
+                    colnames = [i['name'] for i in columns]
+                    super(cls, self).__init__(colnames, name, data)
+
+                setattr(cls, '__init__', __init__)
+
+            if cls.add_row == bases[-1].add_row:     # check if add_row is overridden
+
+                @docval(*columns)
+                def add_row(self, **kwargs):
+                    super(cls, self).add_row(kwargs)
+
+                setattr(cls, 'add_row', add_row)
+
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
