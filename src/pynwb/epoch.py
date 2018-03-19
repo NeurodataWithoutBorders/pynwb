@@ -16,6 +16,7 @@ _evtable_docval = [
     {'name': 'timeseries', 'type': RegionSlicer, 'doc': 'the TimeSeries the epoch applies to'},
 ]
 
+
 @register_class('EpochTable', CORE_NAMESPACE)
 class EventTable(NWBTable):
 

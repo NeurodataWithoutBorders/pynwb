@@ -314,7 +314,6 @@ class NWBTable(NWBData):
 
                 setattr(cls, 'add_row', add_row)
 
-
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()},
