@@ -197,7 +197,7 @@ class H5DataIO(DataIO):
         # Get the list of I/O options that user has passed in
         ioarg_names = [name for name in kwargs.keys() if name != 'data']
         # Remove the ioargs from kwargs
-        ioarg_values = popargs(*ioarg_names, kwargs)
+        ioarg_values = [popargs(argname, kwargs) for argname in ioarg_names]
         call_docval_func(super(H5DataIO, self).__init__, kwargs)
         # Construct the dict with the io args, ignoring all options that were set to None
         self.__iosettings = {k: v for k, v in zip(ioarg_names, ioarg_values) if v is not None}
