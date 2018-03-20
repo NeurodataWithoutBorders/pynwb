@@ -95,6 +95,18 @@ class DataChunkIteratorTests(unittest.TestCase):
         self.assertTupleEqual(dci.recommended_data_shape(), (5, 2, 3))
         self.assertIsNone(dci.recommended_chunk_shape())
 
+    def test_max_shape(self):
+        a = np.arange(30).reshape(5, 2, 3)
+        aiter = iter(a)
+        daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
+        self.assertEqual(daiter.get_maxshape(), (None, 2,3))
+
+    def test_dtype(self):
+        a = np.arange(30, dtype='int32').reshape(5, 2, 3)
+        aiter = iter(a)
+        daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
+        self.assertEqual(daiter.get_dtype(), a.dtype)
+
 
 class DataChunkTests(unittest.TestCase):
 
