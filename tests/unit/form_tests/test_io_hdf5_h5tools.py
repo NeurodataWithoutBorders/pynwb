@@ -74,7 +74,7 @@ class H5IOTest(unittest.TestCase):
         self.assertTupleEqual(my_dset.shape, a.shape)
 
     ##########################################
-    #  write_dataset tests
+    #  write_dataset tests: scalars
     ##########################################
     def test_write_dataset_scalar(self):
         a = 10
@@ -91,6 +91,9 @@ class H5IOTest(unittest.TestCase):
         # self.assertEqual(dset[()].decode('utf-8'), a)
         self.assertEqual(dset[()], a)
 
+    ##########################################
+    #  write_dataset tests: lists
+    ##########################################
     def test_write_dataset_list(self):
         a = np.arange(30).reshape(5, 2, 3)
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a.tolist(), attributes={}))
@@ -98,12 +101,32 @@ class H5IOTest(unittest.TestCase):
         self.assertTrue(np.all(dset[:] == a))
 
     def test_write_dataset_list_compress(self):
-        a = H5DataIO(np.arange(30).reshape(5, 2, 3), compress=True)
+        a = H5DataIO(np.arange(30).reshape(5, 2, 3), compression='gzip', compression_opts=5, shuffle=True, fletcher32=True)
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
         dset = self.f['test_dataset']
         self.assertTrue(np.all(dset[:] == a.data))
         self.assertEqual(dset.compression, 'gzip')
+        self.assertEqual(dset.compression_opts, 5)
+        self.assertEqual(dset.shuffle, True)
+        self.assertEqual(dset.fletcher32, True)
 
+    def test_write_dataset_list_chunked(self):
+        a = H5DataIO(np.arange(30).reshape(5, 2, 3), chunks=(1,1,3))
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
+        dset = self.f['test_dataset']
+        self.assertTrue(np.all(dset[:] == a.data))
+        self.assertEqual(dset.chunks, (1,1,3))
+
+    def test_write_dataset_list_fillvalue(self):
+        a = H5DataIO(np.arange(20).reshape(5, 4), fillvalue=-1)
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
+        dset = self.f['test_dataset']
+        self.assertTrue(np.all(dset[:] == a.data))
+        self.assertEqual(dset.fillvalue,-1)
+
+    ##########################################
+    #  write_dataset tests: tables
+    ##########################################
     def test_write_table(self):
         cmpd_dt = np.dtype([('a', np.int32), ('b', np.float64)])
         data = np.zeros(10, dtype=cmpd_dt)
@@ -132,6 +155,9 @@ class H5IOTest(unittest.TestCase):
         self.assertEqual(dset['a'].tolist(), data['a'].tolist())
         self.assertEqual(dset['b'].tolist(), data['b'].tolist())
 
+    ##########################################
+    #  write_dataset tests: Iterable
+    ##########################################
     def test_write_dataset_iterable(self):
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', range(10), attributes={}))
         dset = self.f['test_dataset']
@@ -140,15 +166,54 @@ class H5IOTest(unittest.TestCase):
     def test_write_dataset_iterable_multidimensional_array(self):
         a = np.arange(30).reshape(5, 2, 3)
         aiter = iter(a)
-        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', aiter, attributes={}))
+        daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', daiter, attributes={}))
         dset = self.f['test_dataset']
         self.assertListEqual(dset[:].tolist(), a.tolist())
 
+    def test_write_dataset_iterable_multidimensional_array_compression(self):
+        a = np.arange(30).reshape(5, 2, 3)
+        aiter = iter(a)
+        daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
+        wrapped_daiter = H5DataIO(data=daiter,
+                               compression='gzip',
+                               compression_opts=5,
+                               shuffle=True,
+                               fletcher32=True)
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', wrapped_daiter, attributes={}))
+        dset = self.f['test_dataset']
+        self.assertEqual(dset.shape, a.shape)
+        self.assertListEqual(dset[:].tolist(), a.tolist())
+        self.assertEqual(dset.compression, 'gzip')
+        self.assertEqual(dset.compression_opts, 5)
+        self.assertEqual(dset.shuffle, True)
+        self.assertEqual(dset.fletcher32, True)
+
+    #############################################
+    #  write_dataset tests: data chunk iterator
+    #############################################
     def test_write_dataset_data_chunk_iterator(self):
         dci = DataChunkIterator(data=np.arange(10), buffer_size=2)
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', dci, attributes={}))
         dset = self.f['test_dataset']
         self.assertListEqual(dset[:].tolist(), list(range(10)))
+
+    def test_write_dataset_data_chunk_iterator_with_compression(self):
+        dci = DataChunkIterator(data=np.arange(10), buffer_size=2)
+        wrapped_dci = H5DataIO(data=dci,
+                               compression='gzip',
+                               compression_opts=5,
+                               shuffle=True,
+                               fletcher32=True,
+                               chunks=(2,))
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', wrapped_dci, attributes={}))
+        dset = self.f['test_dataset']
+        self.assertListEqual(dset[:].tolist(), list(range(10)))
+        self.assertEqual(dset.compression, 'gzip')
+        self.assertEqual(dset.compression_opts, 5)
+        self.assertEqual(dset.shuffle, True)
+        self.assertEqual(dset.fletcher32, True)
+        self.assertEqual(dset.chunks, (2,))
 
 
 if __name__ == '__main__':
