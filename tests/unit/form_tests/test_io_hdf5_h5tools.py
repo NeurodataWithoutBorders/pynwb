@@ -101,7 +101,11 @@ class H5IOTest(unittest.TestCase):
         self.assertTrue(np.all(dset[:] == a))
 
     def test_write_dataset_list_compress(self):
-        a = H5DataIO(np.arange(30).reshape(5, 2, 3), compression='gzip', compression_opts=5, shuffle=True, fletcher32=True)
+        a = H5DataIO(np.arange(30).reshape(5, 2, 3),
+                     compression='gzip',
+                     compression_opts=5,
+                     shuffle=True,
+                     fletcher32=True)
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
         dset = self.f['test_dataset']
         self.assertTrue(np.all(dset[:] == a.data))
@@ -111,18 +115,19 @@ class H5IOTest(unittest.TestCase):
         self.assertEqual(dset.fletcher32, True)
 
     def test_write_dataset_list_chunked(self):
-        a = H5DataIO(np.arange(30).reshape(5, 2, 3), chunks=(1,1,3))
+        a = H5DataIO(np.arange(30).reshape(5, 2, 3),
+                     chunks=(1, 1, 3))
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
         dset = self.f['test_dataset']
         self.assertTrue(np.all(dset[:] == a.data))
-        self.assertEqual(dset.chunks, (1,1,3))
+        self.assertEqual(dset.chunks, (1, 1, 3))
 
     def test_write_dataset_list_fillvalue(self):
         a = H5DataIO(np.arange(20).reshape(5, 4), fillvalue=-1)
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
         dset = self.f['test_dataset']
         self.assertTrue(np.all(dset[:] == a.data))
-        self.assertEqual(dset.fillvalue,-1)
+        self.assertEqual(dset.fillvalue, -1)
 
     ##########################################
     #  write_dataset tests: tables
@@ -176,10 +181,10 @@ class H5IOTest(unittest.TestCase):
         aiter = iter(a)
         daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
         wrapped_daiter = H5DataIO(data=daiter,
-                               compression='gzip',
-                               compression_opts=5,
-                               shuffle=True,
-                               fletcher32=True)
+                                  compression='gzip',
+                                  compression_opts=5,
+                                  shuffle=True,
+                                  fletcher32=True)
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', wrapped_daiter, attributes={}))
         dset = self.f['test_dataset']
         self.assertEqual(dset.shape, a.shape)

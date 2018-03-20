@@ -99,7 +99,7 @@ class DataChunkIteratorTests(unittest.TestCase):
         a = np.arange(30).reshape(5, 2, 3)
         aiter = iter(a)
         daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
-        self.assertEqual(daiter.get_maxshape(), (None, 2,3))
+        self.assertEqual(daiter.get_maxshape(), (None, 2, 3))
 
     def test_dtype(self):
         a = np.arange(30, dtype='int32').reshape(5, 2, 3)
