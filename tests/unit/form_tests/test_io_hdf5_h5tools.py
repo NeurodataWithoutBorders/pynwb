@@ -220,6 +220,25 @@ class H5IOTest(unittest.TestCase):
         self.assertEqual(dset.fletcher32, True)
         self.assertEqual(dset.chunks, (2,))
 
+    def test_pass_through_of_recommended_chunks(self):
+
+        class DC(DataChunkIterator):
+            def recommended_chunk_shape(self):
+                return (5, 1, 1)
+        dci = DC(data=np.arange(30).reshape(5, 2, 3))
+        wrapped_dci = H5DataIO(data=dci,
+                               compression='gzip',
+                               compression_opts=5,
+                               shuffle=True,
+                               fletcher32=True)
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', wrapped_dci, attributes={}))
+        dset = self.f['test_dataset']
+        self.assertEqual(dset.chunks, (5, 1, 1))
+        self.assertEqual(dset.compression, 'gzip')
+        self.assertEqual(dset.compression_opts, 5)
+        self.assertEqual(dset.shuffle, True)
+        self.assertEqual(dset.fletcher32, True)
+
 
 if __name__ == '__main__':
     unittest.main()
