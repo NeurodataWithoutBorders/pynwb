@@ -1,4 +1,4 @@
-from collections import Iterable, deque
+from collections import deque
 import numpy as np
 import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference, check_dtype
@@ -7,7 +7,7 @@ import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
-from ...data_utils import AbstractDataChunkIterator, DataChunkIterator, get_shape
+from ...data_utils import AbstractDataChunkIterator, get_shape
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager,\
                      RegionBuilder, ReferenceBuilder, TypeMap
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, GroupSpec

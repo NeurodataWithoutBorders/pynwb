@@ -174,7 +174,7 @@ class H5DataIO(DataIO):
              'default': None},
             {'name': 'compression',
              'type': str,
-             'doc': 'Compression strategy. See http://docs.h5py.org/en/latest/high/dataset.html#dataset-compression',
+             'doc': 'Compression strategy. http://docs.h5py.org/en/latest/high/dataset.html#dataset-compression',
              'default': None},
             {'name': 'compression_opts',
              'type': int,
@@ -186,11 +186,11 @@ class H5DataIO(DataIO):
              'default': None},
             {'name': 'shuffle',
              'type': bool,
-             'doc': 'Enable shuffle I/O filter. See http://docs.h5py.org/en/latest/high/dataset.html#dataset-shuffle',
+             'doc': 'Enable shuffle I/O filter. http://docs.h5py.org/en/latest/high/dataset.html#dataset-shuffle',
              'default': None},
             {'name': 'fletcher32',
              'type': bool,
-             'doc': 'Enable fletcher32 checksum. See http://docs.h5py.org/en/latest/high/dataset.html#dataset-fletcher32',
+             'doc': 'Enable fletcher32 checksum. http://docs.h5py.org/en/latest/high/dataset.html#dataset-fletcher32',
              'default': None}
             )
     def __init__(self, **kwargs):
@@ -200,7 +200,7 @@ class H5DataIO(DataIO):
         ioarg_values = popargs(*ioarg_names, kwargs)
         call_docval_func(super(H5DataIO, self).__init__, kwargs)
         # Construct the dict with the io args, ignoring all options that were set to None
-        self.__iosettings = {k:v for k, v in zip(ioarg_names, ioarg_values) if v is not None}
+        self.__iosettings = {k: v for k, v in zip(ioarg_names, ioarg_values) if v is not None}
         # Set io_propoerties for DataChunkIterators
         if isinstance(self.data, AbstractDataChunkIterator):
             # Define the chunking options if the user has not set them explicitly.
@@ -209,8 +209,6 @@ class H5DataIO(DataIO):
             # Define the maxshape of the data if not provided by the user
             if 'maxshape' not in self.__iosettings:
                 self.__iosettings['maxshape'] = self.data.get_maxshape()
-
-
 
     @property
     def io_settings(self):

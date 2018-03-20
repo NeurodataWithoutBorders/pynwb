@@ -144,7 +144,6 @@ class DataChunkIterator(AbstractDataChunkIterator):
             {'name': 'dtype', 'type': np.dtype, 'doc': 'The Numpy data type for the array', 'default': None},
             {'name': 'buffer_size', 'type': int, 'doc': 'Number of values to be buffered in a chunk', 'default': 1},
             )
-
     def from_iterable(cls, **kwargs):
         return cls(**kwargs)
 
