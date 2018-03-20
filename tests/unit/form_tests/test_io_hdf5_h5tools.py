@@ -7,6 +7,7 @@ from pynwb.form.backends.hdf5 import H5DataIO
 from pynwb.form.build import DatasetBuilder
 
 import tempfile
+import warnings
 import numpy as np
 
 
@@ -239,6 +240,25 @@ class H5IOTest(unittest.TestCase):
         self.assertEqual(dset.shuffle, True)
         self.assertEqual(dset.fletcher32, True)
 
+   #############################################
+    #  H5DataIO general
+    #############################################
+    def test_warning_on_non_gzip_compression(self):
+        # Make sure no warning is issued when using gzip
+        with warnings.catch_warnings(record=True) as w:
+            a = H5DataIO(np.arange(30),
+                         compression='gzip')
+            self.assertEqual(len(w), 0)
+        # Make sure no warning is issued when using lzf
+        with warnings.catch_warnings(record=True) as w:
+            a = H5DataIO(np.arange(30),
+                         compression='szip')
+            self.assertEqual(len(w), 1)
+        # Make sure no warning is issued when using szip
+        with warnings.catch_warnings(record=True) as w:
+            a = H5DataIO(np.arange(30),
+                         compression='szip')
+            self.assertEqual(len(w), 1)
 
 if __name__ == '__main__':
     unittest.main()

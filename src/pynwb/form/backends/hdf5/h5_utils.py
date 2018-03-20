@@ -5,6 +5,7 @@ from h5py import Group, Dataset, RegionReference, Reference, special_dtype
 import json
 import h5py
 import numpy as np
+import warnings
 
 from ...query import FORMDataset
 from ...array import Array
@@ -209,6 +210,11 @@ class H5DataIO(DataIO):
             # Define the maxshape of the data if not provided by the user
             if 'maxshape' not in self.__iosettings:
                 self.__iosettings['maxshape'] = self.data.get_maxshape()
+        if 'compression' in self.__iosettings:
+            if self.__iosettings['compression'] != 'gzip':
+                warnings.warn(str(self.__iosettings['compression']) + " compression may not be available" +
+                              "on all installations of HDF5. Use of gzip is recommended to ensure portability of" +
+                              "the generated HDF5 files.")
 
     @property
     def io_settings(self):
