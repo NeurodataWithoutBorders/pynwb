@@ -1,12 +1,15 @@
 from copy import copy
+from collections import Iterable
 from six import binary_type
 from h5py import Group, Dataset, RegionReference, Reference, special_dtype
 import json
+import h5py
+import numpy as np
 
 from ...query import FORMDataset
 from ...array import Array
 from ...utils import docval, getargs, popargs, call_docval_func
-from ...data_utils import RegionSlicer, DataIO
+from ...data_utils import RegionSlicer, DataIO, AbstractDataChunkIterator
 
 from ...spec import SpecWriter, SpecReader
 
@@ -157,14 +160,58 @@ class H5RegionSlicer(RegionSlicer):
 
 class H5DataIO(DataIO):
 
-    @docval({'name': 'data', 'type': 'array_data', 'doc': 'the data to be written'},
-            {'name': 'compress', 'type': bool,
-             'doc': 'Flag to use gzip compression filter on dataset', 'default': False})
+    @docval({'name': 'data',
+             'type': (np.ndarray, list, tuple, h5py.Dataset, Iterable),
+             'doc': 'the data to be written'},
+            {'name': 'maxshape',
+             'type': tuple,
+             'doc': 'Dataset will be resizable up to this shape (Tuple). Automatically enables chunking.' +
+                    'Use None for the axes you want to be unlimited.',
+             'default': None},
+            {'name': 'chunks',
+             'type': (bool, tuple),
+             'doc': 'Chunk shape or True ti enable auto-chunking',
+             'default': None},
+            {'name': 'compression',
+             'type': str,
+             'doc': 'Compression strategy. See http://docs.h5py.org/en/latest/high/dataset.html#dataset-compression',
+             'default': None},
+            {'name': 'compression_opts',
+             'type': int,
+             'doc': 'Parameter for compression filter',
+             'default': None},
+            {'name': 'fillvalue',
+             'type': None,
+             'doc': 'Value to eb returned when reading uninitalized parts of the dataset',
+             'default': None},
+            {'name': 'shuffle',
+             'type': bool,
+             'doc': 'Enable shuffle I/O filter. See http://docs.h5py.org/en/latest/high/dataset.html#dataset-shuffle',
+             'default': None},
+            {'name': 'fletcher32',
+             'type': bool,
+             'doc': 'Enable fletcher32 checksum. See http://docs.h5py.org/en/latest/high/dataset.html#dataset-fletcher32',
+             'default': None}
+            )
     def __init__(self, **kwargs):
-        compress = popargs('compress', kwargs)
+        # Get the list of I/O options that user has passed in
+        ioarg_names = [name for name in kwargs.keys() if name != 'data']
+        # Remove the ioargs from kwargs
+        ioarg_values = popargs(*ioarg_names, kwargs)
         call_docval_func(super(H5DataIO, self).__init__, kwargs)
-        self.__compress = compress
+        # Construct the dict with the io args, ignoring all options that were set to None
+        self.__iosettings = {k:v for k, v in zip(ioarg_names, ioarg_values) if v is not None}
+        # Set io_propoerties for DataChunkIterators
+        if isinstance(self.data, AbstractDataChunkIterator):
+            # Define the chunking options if the user has not set them explicitly.
+            if 'chunks' not in self.__iosettings and self.data.recommended_chunk_shape() is not None:
+                self.__iosettings['chunks'] = self.data.recommended_chunk_shape()
+            # Define the maxshape of the data if not provided by the user
+            if 'maxshape' not in self.__iosettings:
+                self.__iosettings['maxshape'] = self.data.get_maxshape()
+
+
 
     @property
-    def compress(self):
-        return self.__compress
+    def io_settings(self):
+        return self.__iosettings
