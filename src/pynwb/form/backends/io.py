@@ -66,3 +66,6 @@ class FORMIO(with_metaclass(ABCMeta, object)):
 
     def __exit__(self, type, value, traceback):
         self.close()
+
+    def __del__(self):
+        self.close()
