@@ -18,7 +18,6 @@ The NWB:N team consists of neuroscientists and software developers
 who recognize that adoption of a unified data format is an important step toward
 breaking down the barriers to data sharing in neuroscience.
 
-Here is a reference to to Sphinx Gallery :ref:`sphx_glr_examples_example.py`
 
 .. toctree::
    :maxdepth: 2
@@ -26,7 +25,6 @@ Here is a reference to to Sphinx Gallery :ref:`sphx_glr_examples_example.py`
 
    getting_started
    contributing
-   sphx_glr_examples_example.py
 
 .. toctree::
    :maxdepth: 2
@@ -42,7 +40,7 @@ Here is a reference to to Sphinx Gallery :ref:`sphx_glr_examples_example.py`
 
    example
    tutorials
-   sphx_glr_examples_example.py
+   examples/index
    api_docs
    software_process
 
