@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
-Examples
-=============
+Writing extracellular electrophysiology data
+============================================
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
