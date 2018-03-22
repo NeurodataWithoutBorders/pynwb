@@ -10,3 +10,4 @@ download_if_does_not_exist() {
 }
 
 download_if_does_not_exist 570014520.nwb "https://data.kitware.com/api/v1/file/5a4f91618d777f5e872f8101/download"
+download_if_does_not_exist ophys_example.nwb "https://data.kitware.com/api/v1/file/5ab3e3398d777f068578ed1d/download"
