@@ -64,12 +64,14 @@ def run_example_tests():
     examples_dir = os.path.join(os.path.dirname(__file__), "docs", "code")
     examples_scripts = [
         os.path.join(examples_dir, script) for script in os.listdir(examples_dir) if script.endswith(".py")]
+    examples_dir = os.path.join(os.path.dirname(__file__), "docs", "gallery", "examples")
+    examples_scripts += [
+        os.path.join(examples_dir, script) for script in os.listdir(examples_dir) if script.endswith(".py")]
     TOTAL += len(examples_scripts)
     for script in examples_scripts:
         try:
             logging.info("Executing %s" % script)
             example = _import_from_file(script)
-            example.main()
         except Exception:
             print(traceback.format_exc())
             FAILURES += 1
