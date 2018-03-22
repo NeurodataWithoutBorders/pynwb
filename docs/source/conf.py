@@ -24,10 +24,11 @@ from pynwb._version import get_versions
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
 
+# -- Autodoc configuration -----------------------------------------------------
+
 autoclass_content = 'both'
 autodoc_docstring_signature = True
 autodoc_member_order = 'bysource'
-add_function_parentheses = False
 
 # -- General configuration -----------------------------------------------------
 
@@ -94,7 +95,7 @@ exclude_patterns = ['_build', 'test.py']
 # default_role = None
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
-# add_function_parentheses = True
+add_function_parentheses = False
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
@@ -269,6 +270,12 @@ latex_elements = {
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 # texinfo_show_urls = 'footnote'
 
+
+# -- PyNWB sphinx extension ----------------------------------------------------
+
+#
+# see http://www.sphinx-doc.org/en/master/extdev/appapi.html
+#
 
 def run_apidoc(_):
     from sphinx.apidoc import main
