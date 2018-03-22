@@ -292,7 +292,8 @@ class HDF5IO(FORMIO):
         self.__file = File(self.__path, open_flag)
 
     def close(self):
-        self.__file.close()
+        if self.__file:
+            self.__file.close()
 
     @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
     def write_builder(self, **kwargs):
