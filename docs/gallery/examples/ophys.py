@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Writing Calcium Imaging data
+Writing calcium imaging data
 ============================
 
 This tutorial will demonstrate how to write calcium imaging data. The workflow demonstrated here involves
@@ -30,15 +30,15 @@ from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluo
 # Creating and Writing NWB files
 # ------------------------------
 #
-# When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
-# argument is the name of the NWB file, and the second argument is a brief description of the dataset.
+# When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`.
 
 
 nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
                   experimenter='Dr. Bilbo Baggins',
                   lab='Bag End Laboratory',
                   institution='University of Middle Earth at the Shire',
-                  experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
+                  experiment_description=('I went on an adventure with thirteen '
+                                          'dwarves to reclaim vast treasures.'),
                   session_id='LONELYMTN')
 
 ####################
