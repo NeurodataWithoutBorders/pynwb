@@ -267,6 +267,52 @@ class ElementIdentifiers(NWBData):
 
 
 class NWBTable(NWBData):
+    '''
+    Subclasses should specify the class attribute \_\_columns\_\_.
+
+    This should be a list of dictionaries with the following keys:
+    ``'name'`` - the column name
+    ``'type'`` - the type of data in this column
+    ``'doc'``  - a brief description of what gets stored in this column
+
+    For reference, this list of dictionaries will be used with docval to autogenerate
+    the ``add_row`` method for adding data to this table.
+
+    If \_\_columns\_\_ is not specified, no custom ``add_row`` method will be added.
+
+    The class attribute __defaultname__ can also be set to specify a default name
+    for the table class. If \_\_defaultname\_\_ is not specified, then ``name`` will
+    need to be specified when the class is instantiated.
+    '''
+
+    @ExtenderMeta.pre_init
+    def __build_table_class(cls, name, bases, classdict):
+        if hasattr(cls, '__columns__'):
+            columns = getattr(cls, '__columns__')
+
+            if cls.__init__ == bases[-1].__init__:     # check if __init__ is overridden
+                name = {'name': 'name', 'type': str, 'doc': 'the name of this table'}
+                defname = getattr(cls, '__defaultname__', None)
+                if defname is not None:
+                    name['default'] = defname
+
+                @docval(name,
+                        {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table',
+                         'default': list()})
+                def __init__(self, **kwargs):
+                    name, data = getargs('name', 'data', kwargs)
+                    colnames = [i['name'] for i in columns]
+                    super(cls, self).__init__(colnames, name, data)
+
+                setattr(cls, '__init__', __init__)
+
+            if cls.add_row == bases[-1].add_row:     # check if add_row is overridden
+
+                @docval(*columns)
+                def add_row(self, **kwargs):
+                    super(cls, self).add_row(kwargs)
+
+                setattr(cls, 'add_row', add_row)
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
@@ -277,6 +323,7 @@ class NWBTable(NWBData):
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         self.__columns = tuple(popargs('columns', kwargs))
+        self.__col_index = {name: idx for idx, name in enumerate(self.__columns)}
         call_docval_func(super(NWBTable, self).__init__, kwargs)
 
     @property
@@ -301,8 +348,25 @@ class NWBTable(NWBData):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx):
-        return self.data[idx]
+    def __getitem__(self, args):
+        idx = args
+        col = None
+        if isinstance(args, tuple):
+            idx = args[1]
+            if isinstance(args[0], str):
+                col = self.__col_index.get(args[0])
+            elif isinstance(args[0], int):
+                col = args[0]
+            else:
+                raise KeyError('first argument must be a column name or index')
+            return self.data[idx][col]
+        elif isinstance(args, str):
+            col = self.__col_index.get(args)
+            if col is None:
+                raise KeyError(args)
+            return [row[col] for row in self.data]
+        else:
+            return self.data[idx]
 
 
 # diamond inheritence

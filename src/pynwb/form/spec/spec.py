@@ -83,7 +83,8 @@ class Spec(ConstructableDict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
         ret = super(Spec, cls).build_const_args(spec_dict)
         if 'doc' not in ret:
-            raise ValueError("'doc' missing")
+            msg = "'doc' missing: %s" % str(spec_dict)
+            raise ValueError(msg)
         return ret
 
     def __hash__(self):
@@ -565,12 +566,17 @@ class DatasetSpec(BaseStorageSpec):
 
     @classmethod
     def __is_sub_dtype(cls, orig, new):
-        orig_prec = cls.__get_prec_level(orig)
-        new_prec = cls.__get_prec_level(new)
-        if orig_prec[0] != new_prec[0]:
-            # cannot extend int to float and vice-versa
-            return False
-        return new_prec >= orig_prec
+        if isinstance(orig, RefSpec):
+            if not isinstance(new, RefSpec):
+                return False
+            return orig == new
+        else:
+            orig_prec = cls.__get_prec_level(orig)
+            new_prec = cls.__get_prec_level(new)
+            if orig_prec[0] != new_prec[0]:
+                # cannot extend int to float and vice-versa
+                return False
+            return new_prec >= orig_prec
 
     @docval({'name': 'inc_spec', 'type': 'DatasetSpec', 'doc': 'the data type this specification represents'})
     def resolve_spec(self, **kwargs):

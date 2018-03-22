@@ -58,12 +58,37 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                                            DatasetBuilder('description',
                                                                           "A fake Clustering interface")})})
 
+        tsindex_builder = DatasetBuilder('timeseries_index', [],
+                                         attributes={
+                                              'help': ('Data on how an epoch '
+                                                       'applies to a time series'),
+                                              'namespace': 'core',
+                                              'neurodata_type': 'TimeSeriesIndex',
+                                         })
+        epochs_builder = DatasetBuilder('epochs', [],
+                                        attributes={
+                                             'help': 'A table for storing epoch data',
+                                             'namespace': 'core',
+                                             'neurodata_type': 'EpochTable',
+                                        })
+
         return GroupBuilder('root',
                             groups={'acquisition': GroupBuilder(
                                 'acquisition',
                                 groups={'test_timeseries': ts_builder}),
                                     'analysis': GroupBuilder('analysis'),
-                                    'epochs': GroupBuilder('epochs'),
+                                    'epochs': GroupBuilder('epochs',
+                                                           attributes={
+                                                                'help': 'A general epoch object',
+                                                                'namespace': 'core',
+                                                                'neurodata_type': 'Epochs',
+                                                                'source': 'a test source',
+                                                           },
+                                                           datasets={
+                                                                'timeseries_index': tsindex_builder,
+                                                                'epochs': epochs_builder,
+                                                                 },
+                                                           ),
                                     'general': GroupBuilder('general'),
                                     'processing': GroupBuilder('processing', groups={'test_module': module_builder}),
                                     'stimulus': GroupBuilder(

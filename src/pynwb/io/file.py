@@ -19,7 +19,7 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('stimulus_template', stimulus_ts_spec)
 
         epochs_spec = self.spec.get_group('epochs')
-        self.map_spec('epochs', epochs_spec.get_neurodata_type('Epoch'))
+        self.map_spec('epochs', epochs_spec)
 
         general_spec = self.spec.get_group('general')
         self.map_spec(
