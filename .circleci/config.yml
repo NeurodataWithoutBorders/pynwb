@@ -29,6 +29,9 @@ publish-prerelease-on-github: &publish-prerelease-on-github
 ci-steps: &ci-steps
   steps:
     - checkout
+    - restore_cache:
+        keys:
+          - nwb-test-files
     - run:
         <<: *initialize-venv
     - run:
@@ -57,10 +60,16 @@ ci-steps: &ci-steps
           tox -e $TEST_TOX_ENV recreate --installpkg dist/*-none-any.whl
     - run:
         <<: *publish-prerelease-on-github
+    - save_cache:
+        key: nwb-test-files
+        paths: tests/integration/test_read/data/*.nwb
 
 conda-steps: &conda-steps
   steps:
     - checkout
+    - restore_cache:
+        keys:
+          - nwb-test-files
     - run:
         name: Configure conda
         command: |
@@ -76,6 +85,9 @@ conda-steps: &conda-steps
         name: Test installation from a wheel
         command: |
           tox -e $TEST_TOX_ENV recreate --installpkg dist/*-none-any.whl
+    - save_cache:
+        key: nwb-test-files
+        paths: tests/integration/test_read/data/*.nwb
 
 version: 2
 jobs:
