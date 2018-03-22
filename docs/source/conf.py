@@ -62,6 +62,7 @@ sphinx_gallery_conf = {
     'examples_dirs' : ['../gallery/examples'],
     # path where to save gallery generated examples
     'gallery_dirs'  : ['examples'],
+    'backreferences_dir': 'gen_modules/backreferences',
     'min_reported_time': 5
 }
 
