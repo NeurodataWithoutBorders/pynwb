@@ -51,27 +51,6 @@ io = HDF5IO(filename, manager=get_manager(), mode='w')
 io.write(f)
 io.close()
 
-
-#######################
-# Creating Epochs
-# ^^^^^^^^^^^^^^^
-#
-# Experimental epochs are represented with :py:class:`~pynwb.epoch.Epoch` objects. To create epochs for an NWB file,
-# you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_epoch`.
-
-
-epoch_tags = ('example_epoch',)
-
-ep1 = f.create_epoch(source='an hypothetical source', name='epoch1', start=0.0, stop=1.0,
-                     tags=epoch_tags,
-                     description="the first test epoch")
-
-ep2 = f.create_epoch(source='an hypothetical source', name='epoch2', start=0.0, stop=1.0,
-                     tags=epoch_tags,
-                     description="the second test epoch")
-
-
-
 #######################
 # Creating Electrode Groups
 # ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -144,7 +123,7 @@ ephys_ts = ElectricalSeries('test_ephys_data',
                             resolution=0.001,
                             comments="This data was randomly generated with numpy, using 1234 as the seed",
                             description="Random numbers generated with numpy.random.rand")
-f.add_acquisition(ephys_ts, [ep1, ep2])
+f.add_acquisition(ephys_ts)
 
 spatial_ts = SpatialSeries('test_spatial_timeseries',
                            'a stumbling rat',
@@ -155,4 +134,22 @@ spatial_ts = SpatialSeries('test_spatial_timeseries',
                            comments="This data was generated with numpy, using 1234 as the seed",
                            description="This 2D Brownian process generated with "
                                        "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")
-f.add_acquisition(spatial_ts, [ep1, ep2])
+f.add_acquisition(spatial_ts)
+
+
+#######################
+# Creating Epochs
+# ^^^^^^^^^^^^^^^
+#
+# Experimental epochs are represented with :py:class:`~pynwb.epoch.Epoch` objects. To create epochs for an NWB file,
+# you can use the :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_epoch`.
+
+
+epoch_tags = ('example_epoch',)
+
+f.create_epoch(name='epoch1', start_time=0.0, stop_time=1.0, tags=epoch_tags,
+               description="the first test epoch", timeseries=[ephys_ts, spatial_ts])
+
+f.create_epoch(name='epoch2', start_time=0.0, stop_time=1.0, tags=epoch_tags,
+               description="the second test epoch", timeseries=[ephys_ts, spatial_ts])
+
