@@ -3,7 +3,7 @@ chardet==3.0.4
 h5py==2.7.1
 idna==2.6
 numpy==1.14.0
-python-dateutil==2.6.1
+python-dateutil==2.7.0
 requests==2.18.4
 ruamel.yaml==0.15.35
 six==1.11.0
