@@ -23,9 +23,9 @@ class EventTable(NWBTable):
     __columns__ = _evtable_docval
 
 
-_eptable_docval = [
+_eptable_docval = _evtable_docval + [
     {'name': 'description', 'type': str, 'doc': 'a description of this epoch'},
-] + _evtable_docval
+]
 
 
 @register_class('EpochTable', CORE_NAMESPACE)
@@ -99,7 +99,9 @@ class Epochs(NWBContainer):
             idx_start, count = self.__calculate_idx_count(start_time, stop_time, ts)
             self.timeseries_index.add_row(idx_start, count, ts)
         tsi_region = get_region_slicer(self.timeseries_index, slice(n_tsi, n_tsi+n_ts))
-        self.epochs.add_row(description, start_time, stop_time, tags, tsi_region)
+        if isinstance(tags, (tuple, list)):
+            tags = ",".join(tags)
+        self.epochs.add_row(start_time, stop_time, tags, tsi_region, description)
 
     def __calculate_idx_count(self, start_time, stop_time, ts_data):
         if isinstance(ts_data.timestamps, DataIO):
