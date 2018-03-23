@@ -96,7 +96,7 @@ class NWBFile(MultiContainerInterface):
         },
         {
             'attr': 'modules',
-            'add': 'add_processing_modules',
+            'add': 'add_processing_module',
             'type': ProcessingModule,
             'create': 'create_processing_module',
             'get': 'get_processing_module'
