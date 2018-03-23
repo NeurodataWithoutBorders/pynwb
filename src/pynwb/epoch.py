@@ -103,6 +103,15 @@ class Epochs(NWBContainer):
             tags = ",".join(tags)
         self.epochs.add_row(start_time, stop_time, tags, tsi_region, description)
 
+    def get_timeseries(self, epoch_idx, ts_name):
+        ep_row = self.epochs[epoch_idx]
+        for tsi in ep_row[3]:
+            if tsi[2].name == ts_name:
+                timestamps = tsi[2].timestamps[tsi[0]:tsi[0]+tsi[1]]
+                data = tsi[2].data[tsi[0]:tsi[0]+tsi[1]]
+                return (data, timestamps)
+        return (None, None)
+
     def __calculate_idx_count(self, start_time, stop_time, ts_data):
         if isinstance(ts_data.timestamps, DataIO):
             ts_timestamps = ts_data.timestamps.data
