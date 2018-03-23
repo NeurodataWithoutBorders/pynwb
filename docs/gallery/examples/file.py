@@ -13,6 +13,7 @@ including writing and reading of and NWB file.
 #
 #
 
+from datetime import datetime
 from pynwb import NWBFile
 
 start_time = datetime(2017, 4, 3, 11, 0, 0)
@@ -39,7 +40,7 @@ test_ts = TimeSeries('test_timeseries', 'PyNWB tutorial', data, 'SIunit', timest
 # Alternatively, if your recordings are sampled at a uniform rate, you can supply *starting_time*
 # and *rate*.
 
-test_ts = TimeSeries('test_timeseries', 'PyNWB tutorial', data, 'SIunit', starting_time=0, rate=1)
+test_ts = TimeSeries('test_timeseries', 'PyNWB tutorial', data, 'SIunit', starting_time=0.0, rate=1.0)
 
 ####################
 # Using this scheme says that this :py:class:`~pynwb.base.TimeSeries` started recording 0 seconds after
