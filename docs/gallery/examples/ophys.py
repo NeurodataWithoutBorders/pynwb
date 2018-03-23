@@ -183,15 +183,16 @@ nwbfile = io.read()
 # ---------------------
 #
 # After you read the NWB file, you can access individual components of your data file.
-# To get the :py:class:`~pynwb.base.ProcesingModule` back, you can index into the `modules` attribute
-# with the name of the :py:class:`~pynwb.base.ProcesingModule`.
+# To get the :py:class:`~pynwb.base.ProcessingModule` back, you can index into the
+# :py:func:`~pynwb.file.NWBFile.modules` attribute with the name of the
+# :py:class:`~pynwb.base.ProcessingModule`.
 
 
 mod = nwbfile.modules['my_ca_imaging_module']
 
 ####################
 # Now you can retrieve the :py:class:`~pynwb.ophys.ImageSegmentation` object by indexing into the
-# :py:class:`~pynwb.base.ProcesingModule` with the name of the :py:class:`~pynwb.ophys.ImageSegmentation` container.
+# :py:class:`~pynwb.base.ProcessingModule` with the name of the :py:class:`~pynwb.ophys.ImageSegmentation` container.
 # In our case, this is just "ImageSegmentation", since we did not provide a name and kept the default name.
 #
 
