@@ -91,8 +91,9 @@ nwbfile.add_acquisition(lfp)
 # *Processing modules* are used for storing a set of data interfaces that are related to a particular
 # processing workflow. For example, if you want to store intermediate and final results of a spike sorting workflow,
 # you would create a :py:class:`~pynwb.base.ProcessingModule` that contains data interfaces that represent
-# the common steps in spike sorting e.g. :py:class:`~pynwb.ecephys.EventDetection`,:py:class:`~pynwb.ecephys.EventWaveform`,
-# :py:class:`~pynwb.ecephys.FeatureExtraction`, :py:class:`~pynwb.ecephys.Clustering`, :py:class:`~pynwb.ecephys.ClusterWaveform`.
+# the common steps in spike sorting e.g. :py:class:`~pynwb.ecephys.EventDetection`,
+# :py:class:`~pynwb.ecephys.EventWaveform`,  :py:class:`~pynwb.ecephys.FeatureExtraction`,
+# :py:class:`~pynwb.ecephys.Clustering`, :py:class:`~pynwb.ecephys.ClusterWaveform`.
 #
 # Processing modules can be created using :py:func:`~pynwb.file.NWBFile.create_processing_module`:
 
@@ -118,6 +119,19 @@ mod_ts = TimeSeries('ts_for_mod', 'PyNWB tutorial', data, 'SIunit', timestamps=t
 added_mod.add_data_interface(mod_ts)
 
 ####################
+# Epochs
+# ------
+#
+# Epochs can be added to an NWB file using the method :py:func:`~pynwb.file.NWBFile.create_epoch`.
+# The first argument is a description of the epoch, the second and third argument are the start time
+# and stop time, respectively. The fourth argument is one or more tags for labelling the epoch,
+# and the fifth argument is a list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
+# to.
+
+nwbfile.create_epoch('the first epoch', 2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
+nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
+
+####################
 # Writing an NWB file
 # -------------------
 #
@@ -128,14 +142,14 @@ added_mod.add_data_interface(mod_ts)
 
 from pynwb import NWBHDF5IO
 
-io = NWBHDF5IO('basic_example.nwb')
+io = NWBHDF5IO('basic_example.nwb', 'w')
 io.write(nwbfile)
 io.close()
 
 ####################
 # You can also use :py:func:`~pynwb.NWBHDF5IO` as a context manager:
 
-with NWBHDF5IO('basic_example.nwb') as io:
+with NWBHDF5IO('basic_example.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
