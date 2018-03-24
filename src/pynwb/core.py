@@ -40,6 +40,21 @@ class LabelledDict(dict):
     def label(self):
         return self.__label
 
+    def __getitem__(self, args):
+        key = args
+        if '==' in args:
+            key, val = args.split("==")
+            key = key.strip()
+            val = val.strip()
+            if key != 'name':
+                ret = list()
+                for item in self.values():
+                    if getattr(item, key, None) == val:
+                        ret.append(item)
+                return ret if len(ret) else None
+            key = val
+        return super(LabelledDict, self).__getitem__(key)
+
 
 class NWBBaseType(with_metaclass(ExtenderMeta)):
     '''The base class to any NWB types.
@@ -310,7 +325,7 @@ class NWBTable(NWBData):
 
                 @docval(*columns)
                 def add_row(self, **kwargs):
-                    super(cls, self).add_row(kwargs)
+                    return super(cls, self).add_row(kwargs)
 
                 setattr(cls, 'add_row', add_row)
 
@@ -336,7 +351,9 @@ class NWBTable(NWBData):
         if not isinstance(self.data, list):
             msg = 'Cannot append row to %s' % type(self.data)
             raise ValueError(msg)
+        ret = len(self.data)
         self.data.append(tuple(values[col] for col in self.columns))
+        return ret
 
     @docval({'name': 'kwargs', 'type': dict, 'doc': 'the column to query by'})
     def query(self, **kwargs):
