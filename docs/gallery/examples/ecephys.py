@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 '''
+.. _ecephys_tutorial:
+
 Extracellular electrophysiology data
 ============================================
 
@@ -10,9 +12,6 @@ clarity, we define them here:
 
 
 import numpy as np
-
-spatial_timestamps = ephys_timestamps[::10]
-spatial_data = np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T
 
 #######################
 # Creating and Writing NWB files
@@ -25,12 +24,12 @@ spatial_data = np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), ax
 from datetime import datetime
 from pynwb import NWBFile
 
-f = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
-            experimenter='Dr. Bilbo Baggins',
-            lab='Bag End Laboratory',
-            institution='University of Middle Earth at the Shire',
-            experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-            session_id='LONELYMTN')
+nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+                  experimenter='Dr. Bilbo Baggins',
+                  lab='Bag End Laboratory',
+                  institution='University of Middle Earth at the Shire',
+                  experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
+                  session_id='LONELYMTN')
 
 
 #######################
@@ -46,7 +45,7 @@ f = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', 
 # object using the instance method :py:meth:`~pynwb.file.NWBFile.create_device`.
 
 
-device = f.create_device(name='trodes_rig123', source="a source")
+device = nwbfile.create_device(name='trodes_rig123', source="a source")
 
 
 
@@ -58,11 +57,11 @@ source = "an hypothetical source"
 description = "an example tetrode"
 location = "somewhere in the hippocampus"
 
-electrode_group = f.create_electrode_group(electrode_name,
-                                           source=source,
-                                           description=description,
-                                           location=location,
-                                           device=device)
+electrode_group = nwbfile.create_electrode_group(electrode_name,
+                                                 source=source,
+                                                 description=description,
+                                                 location=location,
+                                                 device=device)
 
 #######################
 # After setting up electrode group metadata, you should add metadata about the individual electrodes comprising each
@@ -73,11 +72,11 @@ electrode_group = f.create_electrode_group(electrode_name,
 
 
 for idx in [1, 2, 3, 4]:
-    f.add_electrode(idx,
-                    x=1.0, y=2.0, z=3.0,
-                    imp=float(-idx),
-                    location='CA1', filtering='none',
-                    description='channel %s' % idx, group=electrode_group)
+    nwbfile.add_electrode(idx,
+                          x=1.0, y=2.0, z=3.0,
+                          imp=float(-idx),
+                          location='CA1', filtering='none',
+                          description='channel %s' % idx, group=electrode_group)
 
 
 #######################
@@ -104,7 +103,7 @@ for idx in [1, 2, 3, 4]:
 # The first argument to :py:class:`~pynwb.file.NWBFile.create_electrode_table_region` a list of the
 # indices of the electrodes you want in the region..
 
-electrode_table_region = f.create_electrode_table_region([0, 2], 'the first and third electrodes')
+electrode_table_region = nwbfile.create_electrode_table_region([0, 2], 'the first and third electrodes')
 
 
 ####################
@@ -131,7 +130,7 @@ ephys_ts = ElectricalSeries('test_ephys_data',
                             resolution=0.001,
                             comments="This data was randomly generated with numpy, using 1234 as the seed",
                             description="Random numbers generated with numpy.random.rand")
-f.add_acquisition(ephys_ts)
+nwbfile.add_acquisition(ephys_ts)
 
 
 #######################
@@ -142,12 +141,12 @@ f.add_acquisition(ephys_ts)
 # are meant for storing specific types of extracellular recordings. In addition to these two
 # :py:class:`~pynwb.base.TimeSeries` classes, NWB provides some :ref:`data interfaces <basic_data_interfaces>`
 # for designating the type of data you are storing. We will briefly discuss them here, and refer the reader to
-# :py:module:`API documentation <pynwb.ecephys>` and :ref:`PyNWB Basics tutorial <basics>` for more details on
+# :py:mod:`API documentation <pynwb.ecephys>` and :ref:`PyNWB Basics tutorial <basics>` for more details on
 # using these objects.
 #
 # For storing spike data, there are two options. Which one you choose depends on what data you have available.
 # If you need to store the raw voltage traces, you should store your the traces with
-# :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acqusition <basic_acquisition>` data, and use
+# :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data, and use
 # the :py:class:`~pynwb.ecephys.EventDetection` class for identifying the spike events in your raw traces.
 # If you do not want to store the raw voltage traces and only the spike events, you should use
 # the :py:class:`~pynwb.ecephys.EventWaveform` class, which can store one or more
@@ -169,7 +168,7 @@ f.add_acquisition(ephys_ts)
 
 from pynwb import NWBHDF5IO
 
-with NWBHDF5IO('ophys_example.nwb', 'w') as io:
+with NWBHDF5IO('ecephys_example.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
@@ -183,7 +182,7 @@ with NWBHDF5IO('ophys_example.nwb', 'w') as io:
 #
 # Now that you have written some electrophysiology data, you can read it back in.
 
-io = NWBHDF5IO('ophys_example.nwb', 'r')
+io = NWBHDF5IO('ecephys_example.nwb', 'r')
 nwbfile = io.read()
 
 ####################
@@ -201,5 +200,5 @@ ephys_ts = nwbfile.acquisition['test_ephys_data']
 # from the :py:func:`~pynwb.ecephys.ElectricalSeries.electrodes` attribute. For example,
 # information about the electrode in the second index can be retrieved like so:
 
-elec2 = ephys_ts.electrides[1]
+elec2 = ephys_ts.electrodes[1]
 
