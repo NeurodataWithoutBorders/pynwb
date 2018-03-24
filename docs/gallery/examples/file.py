@@ -56,6 +56,8 @@ test_ts = TimeSeries('test_timeseries', 'PyNWB tutorial', data, 'SIunit', starti
 nwbfile.add_acquisition(test_ts)
 
 ####################
+# .. _basic_data_interfaces:
+#
 # Data interfaces
 # ---------------
 #
@@ -83,7 +85,7 @@ nwbfile.add_acquisition(lfp)
 # data interface allows and/or requires and what methods you will need to call to add this data.
 
 ####################
-# .. _file_procmod:
+# .. _basic_procmod:
 #
 # Processing modules
 # ------------------
@@ -119,6 +121,8 @@ mod_ts = TimeSeries('ts_for_mod', 'PyNWB tutorial', data, 'SIunit', timestamps=t
 added_mod.add_data_interface(mod_ts)
 
 ####################
+# .. _basic_epochs:
+#
 # Epochs
 # ------
 #
@@ -132,6 +136,8 @@ nwbfile.create_epoch('the first epoch', 2.0, 4.0, ['first', 'example'], [test_ts
 nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 
 ####################
+# .. _basic_writing:
+#
 # Writing an NWB file
 # -------------------
 #
@@ -153,6 +159,8 @@ with NWBHDF5IO('basic_example.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
+# .. _basic_reading:
+#
 # Reading an NWB file
 # -------------------
 #
@@ -169,6 +177,8 @@ nwbfile = io.read()
 # :py:class:`~pynwb.NWBHDF5IO` gets closed and deleted when the context completes [#]_.
 
 ####################
+# .. _basic_data_interfaces:
+#
 # Retrieving data from an NWB file
 # --------------------------------
 #
@@ -222,6 +232,8 @@ mod_ts = added_mod.get_data_interface('ts_for_mod')
 
 mod_ts = added_mod['ts_for_mod']
 
+import pdb
+pdb.set_trace()
 
 ####################
 # .. [#] Stimulus template data may change in the near future. The NWB team will work with interested parties
