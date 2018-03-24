@@ -1,4 +1,6 @@
 """
+.. _basics:
+
 NWB basics
 ==========
 
@@ -23,6 +25,8 @@ nwbfile = NWBFile('PyNWB tutorial', 'demonstrate NWBFile basics', 'NWB123', star
                   file_create_date=create_date)
 
 ####################
+# .. _basic_timeseries:
+#
 # Time series data
 # ----------------
 #
@@ -70,7 +74,7 @@ nwbfile.add_acquisition(test_ts)
 # :ref:`overview page <modules_overview>`
 #
 # :py:class:`~pynwb.base.NWBDataInterface` objects can be added as acquisition data, or as members
-# of a :ref:`ProcessingModule <file_procmod>`
+# of a :ref:`ProcessingModule <basic_procmod>`
 #
 # For the purposes of demonstration, we will use a :py:class:`~pynwb.ecephys.LFP` data interface.
 
@@ -177,7 +181,7 @@ nwbfile = io.read()
 # :py:class:`~pynwb.NWBHDF5IO` gets closed and deleted when the context completes [#]_.
 
 ####################
-# .. _basic_data_interfaces:
+# .. _basic_retrieving_data:
 #
 # Retrieving data from an NWB file
 # --------------------------------
@@ -231,9 +235,6 @@ mod_ts = added_mod.get_data_interface('ts_for_mod')
 # the name of the object we want back.
 
 mod_ts = added_mod['ts_for_mod']
-
-import pdb
-pdb.set_trace()
 
 ####################
 # .. [#] Stimulus template data may change in the near future. The NWB team will work with interested parties
