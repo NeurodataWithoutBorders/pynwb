@@ -38,7 +38,6 @@ dist/
 
 # shell scripts (e.g. used with fswatch)
 *.sh
-!tests/integration/test_read/download_data.sh
 
 docs/tmpl.conf.py
 docs/tmpl.index.rst
