@@ -38,10 +38,10 @@ breaking down the barriers to data sharing in neuroscience.
    :maxdepth: 2
    :caption: Resources
 
-   example
-   tutorials
    examples/index
+   extensions
    api_docs
+   tutorials
    software_process
 
 .. toctree::
