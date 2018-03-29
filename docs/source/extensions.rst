@@ -1,7 +1,227 @@
-.. _extensions:
+.. _extending-nwb:
 
-Extensions
-==========
+Extending NWB
+=============
+
+The following page will discuss how to extend NWB using PyNWB.
+
+.. _creating-extensions:
+
+Creating new Extensions
+-----------------------
+
+The NWB specification is designed to be extended. Extension for the NWB format can be done so using classes provided in the :py:mod:`pynwb.spec` module.
+The classes :py:class:`~pynwb.spec.NWBGroupSpec`, :py:class:`~pynwb.spec.NWBDatasetSpec`, :py:class:`~pynwb.spec.NWBAttributeSpec`, and :py:class:`~pynwb.spec.NWBLinkSpec`
+can be used to define custom types.
+
+Attribute Specifications
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+Specifying attributes is done with :py:class:`~pynwb.spec.NWBAttributeSpec`.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBAttributeSpec
+
+    spec = NWBAttributeSpec('bar', 'float', 'a value for bar')
+
+Dataset Specifications
+^^^^^^^^^^^^^^^^^^^^^^
+
+Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBDatasetSpec
+
+    spec = NWBDatasetSpec('A custom NWB type',
+                        attribute=[
+                            NWBAttributeSpec('baz', 'str', 'a value for baz'),
+                        ],
+                        shape=(None, None))
+
+
+Using datasets to specify tables
+++++++++++++++++++++++++++++++++
+
+Tables can be specified using :py:class:`~pynwb.spec.NWBDtypeSpec`. To specify a table, provide a
+list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
+
+    spec = NWBDatasetSpec('A custom NWB type',
+                        attribute=[
+                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
+                        ],
+                        dtype=[
+                            NWBDtypeSpec('foo', 'column for foo', 'int'),
+                            NWBDtypeSpec('bar', 'a column for bar', 'float')
+                        ])
+
+Compound data types can be nested.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
+
+    spec = NWBDatasetSpec('A custom NWB type',
+                        attribute=[
+                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
+                        ],
+                        dtype=[
+                            NWBDtypeSpec('foo', 'a column for foo', 'int'),
+                            NWBDtypeSpec('bar', 'a column for bar', 'float')
+                        ])
+
+Group Specifications
+^^^^^^^^^^^^^^^^^^^^
+
+Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBGroupSpec
+
+    # A list of NWBAttributeSpec objects to specify new attributes
+    addl_attributes = [...]
+    # A list of NWBDatasetSpec objects to specify new datasets
+    addl_datasets = [...]
+    # A list of NWBDatasetSpec objects to specify new groups
+    addl_groups = [...]
+    spec = NWBGroupSpec('A custom NWB type',
+                        attributes = addl_attributes,
+                        datasets = addl_datasets,
+                        groups = addl_groups)
+
+Neurodata Type Specifications
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+:py:class:`~pynwb.spec.NWBGroupSpec` and :py:class:`~pynwb.spec.NWBDatasetSpec` use the arguments `neurodata_type_inc` and `neurodata_type_def` for
+declaring new types and extending existing types. New types are specified by setting the argument `neurodata_type_def`. New types can extend an existing type
+by specifying the argument `neurodata_type_inc`.
+
+Create a new type
+
+.. code-block:: python
+
+    from pynwb.spec import NWBGroupSpec
+
+    # A list of NWBAttributeSpec objects to specify new attributes
+    addl_attributes = [...]
+    # A list of NWBDatasetSpec objects to specify new datasets
+    addl_datasets = [...]
+    # A list of NWBDatasetSpec objects to specify new groups
+    addl_groups = [...]
+    spec = NWBGroupSpec('A custom NWB type',
+                        attributes = addl_attributes,
+                        datasets = addl_datasets,
+                        groups = addl_groups,
+                        neurodata_type_def='MyNewNWBType')
+
+Extend an existing type
+
+.. code-block:: python
+
+    from pynwb.spec import NWBGroupSpec
+
+    # A list of NWBAttributeSpec objects to specify additional attributes or attributes to be overriden
+    addl_attributes = [...]
+    # A list of NWBDatasetSpec objects to specify additional datasets or datasets to be overriden
+    addl_datasets = [...]
+    # A list of NWBGroupSpec objects to specify additional groups or groups to be overriden
+    addl_groups = [...]
+    spec = NWBGroupSpec('An extended NWB type',
+                        attributes = addl_attributes,
+                        datasets = addl_datasets,
+                        groups = addl_groups,
+                        neurodata_type_inc='Clustering',
+                        neurodata_type_def='MyExtendedClustering')
+
+Existing types can be instantiated by specifying `neurodata_type_inc` alone.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBGroupSpec
+
+    # use another NWBGroupSpec object to specify that a group of type
+    # ElectricalSeries should be present in the new type defined below
+    addl_groups = [ NWBGroupSpec('An included ElectricalSeries instance',
+                                 neurodata_type_inc='ElectricalSeries') ]
+
+    spec = NWBGroupSpec('An extended NWB type',
+                        groups = addl_groups,
+                        neurodata_type_inc='Clustering',
+                        neurodata_type_def='MyExtendedClustering')
+
+
+Datasets can be extended in the same manner (with regard to `neurodata_type_inc` and `neurodata_type_def`,
+by using the class :py:class:`~pynwb.spec.NWBDatasetSpec`.
+
+.. _saving-extensions:
+
+Saving Extensions
+-----------------
+
+Extensions are used by including them in a loaded namespace. Namespaces and extensions need to be saved to file
+for downstream use. The class :py:class:`~pynwb.spec.NWBNamespaceBuilder` can be used to create new namespace and
+specification files.
+
+.. note::
+
+    When using :py:class:`~pynwb.spec.NWBNamespaceBuilder`, the core NWB namespace is automatically included
+
+Create a new namespace with extensions
+
+.. code-block:: python
+
+    from pynwb.spec import NWBGroupSpec, NWBNamespaceBuilder
+
+    # create a builder for the namespace
+    ns_builder = NWBNamespaceBuilder("Extension for use in my laboratory", "mylab", ...)
+
+    # create extensions
+    ext1 = NWBGroupSpec('A custom Clustering interface',
+                        attributes = [...]
+                        datasets = [...],
+                        groups = [...],
+                        neurodata_type_inc='Clustering',
+                        neurodata_type_def='MyExtendedClustering')
+
+    ext2 = NWBGroupSpec('A custom ClusterWaveforms interface',
+                        attributes = [...]
+                        datasets = [...],
+                        groups = [...],
+                        neurodata_type_inc='ClusterWaveforms',
+                        neurodata_type_def='MyExtendedClusterWaveforms')
+
+
+    # add the extension
+    ext_source = 'mylab.specs.yaml'
+    ns_builder.add_spec(ext_source, ext1)
+    ns_builder.add_spec(ext_source, ext2)
+
+    # include an existing namespace - this will include all specifications in that namespace
+    ns_builder.include_namespace('collab_ns')
+
+    # save the namespace and extensions
+    ns_path = 'mylab.namespace.yaml'
+    ns_builder.export(ns_path)
+
+
+.. tip::
+
+    Using the API to generate extensions (rather than writing YAML sources directly) helps avoid errors in the specification
+    (e.g., due to missing required keys or invalid values) and ensure compliance of the extension definition with the
+    NWB specification language. It also helps with maintanence of extensions, e.g., if extensions have to be ported to
+    newer versions of the `specification language <https://schema-language.readthedocs.io/en/latest/>`_
+    in the future.
+
+.. _incorporating-extensions:
+
+Incorporating extensions
+------------------------
 
 The NWB file format supports extending existing data types (See :ref:`extending-nwb` for more details on creating extensions).
 Extensions must be registered with PyNWB to be used for reading and writing of custom neurodata types.
@@ -78,263 +298,10 @@ Once you have retrieved the class object, you can use it just like you would a s
 
 If using iPython, you can access documentation for the class's constructor using the help command.
 
-.. _write_nwbfile:
-
-Write an NWBFile
-^^^^^^^^^^^^^^^^
-
-Writing NWB files to disk is handled by the :py:mod:`pynwb.form` package. Currently,
-the only storage format supported by :py:mod:`pynwb.form` is HDF5.
-
-Reading and writing to and from HDF5 is handled by the class :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO`. The
-only required argument to this is the path of the HDF5 file. A second, optional argument is the
-:py:class:`~pynwb.form.build.map.BuildManager` to use for IO.
-
-Briefly, the :py:class:`~pynwb.form.build.map.BuildManager` is a class that manages objects to be read and written
-from disk. A PyNWB-specific BuildManager can be retrieved using the module-level function :py:func:`~pynwb.get_manager`.
-
-Alternatively, the :py:class:`~pynwb.form.build.map.BuildManager` that a :py:class:`~pynwb.form.backends.io.FORMIO` used
-can be retrieved from the :py:attr:`~pynwb.form.backends.io.FORMIO.manager` attribute.
-
-
-.. literalinclude:: ../code/creating-and-writing-nwbfile-2.py
-   :language: python
-   :start-after: example: start
-   :end-before: example: end
-   :dedent: 4
-
-
-.. note::
-    All :py:class:`~pynwb.form.backends.io.FORMIO` objects are context managers.
-
-
-The third argument to the :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` constructor is the mode for opening the HDF5 file. Valid modes are:
-
-    ========  ================================================
-     r        Readonly, file must exist
-     r+       Read/write, file must exist
-     w        Create file, truncate if exists
-     w- or x  Create file, fail if exists
-     a        Read/write if exists, create otherwise (default)
-    ========  ================================================
-
-.. _extending-nwb:
-
-Extending NWB
--------------
-
-Creating new Extensions
-^^^^^^^^^^^^^^^^^^^^^^^
-
-The NWB specification is designed to be extended. Extension for the NWB format can be done so using classes provided in the :py:mod:`pynwb.spec` module.
-The classes :py:class:`~pynwb.spec.NWBGroupSpec`, :py:class:`~pynwb.spec.NWBDatasetSpec`, :py:class:`~pynwb.spec.NWBAttributeSpec`, and :py:class:`~pynwb.spec.NWBLinkSpec`
-can be used to define custom types.
-
-Attribute Specifications
-________________________
-
-Specifying attributes is done with :py:class:`~pynwb.spec.NWBAttributeSpec`.
-
-.. code-block:: python
-
-    from pynwb.spec import NWBAttributeSpec
-
-    spec = NWBAttributeSpec('bar', 'float', 'a value for bar')
-
-Dataset Specifications
-______________________
-
-Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
-
-.. code-block:: python
-
-    from pynwb.spec import NWBDatasetSpec
-
-    spec = NWBDatasetSpec('A custom NWB type',
-                        attribute=[
-                            NWBAttributeSpec('baz', 'str', 'a value for baz'),
-                        ],
-                        shape=(None, None))
-
-
-Using datasets to specify tables
-++++++++++++++++++++++++++++++++
-
-Tables can be specified using :py:class:`~pynwb.spec.NWBDtypeSpec`. To specify a table, provide a
-list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
-
-.. code-block:: python
-
-    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
-
-    spec = NWBDatasetSpec('A custom NWB type',
-                        attribute=[
-                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
-                        ],
-                        dtype=[
-                            NWBDtypeSpec('foo', 'column for foo', 'int'),
-                            NWBDtypeSpec('bar', 'a column for bar', 'float')
-                        ])
-
-Compound data types can be nested.
-
-.. code-block:: python
-
-    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
-
-    spec = NWBDatasetSpec('A custom NWB type',
-                        attribute=[
-                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
-                        ],
-                        dtype=[
-                            NWBDtypeSpec('foo', 'a column for foo', 'int'),
-                            NWBDtypeSpec('bar', 'a column for bar', 'float')
-                        ])
-
-Group Specifications
-____________________
-
-Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
-
-.. code-block:: python
-
-    from pynwb.spec import NWBGroupSpec
-
-    # A list of NWBAttributeSpec objects to specify new attributes
-    addl_attributes = [...]
-    # A list of NWBDatasetSpec objects to specify new datasets
-    addl_datasets = [...]
-    # A list of NWBDatasetSpec objects to specify new groups
-    addl_groups = [...]
-    spec = NWBGroupSpec('A custom NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
-                        groups = addl_groups)
-
-Neurodata Type Specifications
-_____________________________
-
-:py:class:`~pynwb.spec.NWBGroupSpec` and :py:class:`~pynwb.spec.NWBDatasetSpec` use the arguments `neurodata_type_inc` and `neurodata_type_def` for
-declaring new types and extending existing types. New types are specified by setting the argument `neurodata_type_def`. New types can extend an existing type
-by specifying the argument `neurodata_type_inc`.
-
-Create a new type
-
-.. code-block:: python
-
-    from pynwb.spec import NWBGroupSpec
-
-    # A list of NWBAttributeSpec objects to specify new attributes
-    addl_attributes = [...]
-    # A list of NWBDatasetSpec objects to specify new datasets
-    addl_datasets = [...]
-    # A list of NWBDatasetSpec objects to specify new groups
-    addl_groups = [...]
-    spec = NWBGroupSpec('A custom NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
-                        groups = addl_groups,
-                        neurodata_type_def='MyNewNWBType')
-
-Extend an existing type
-
-.. code-block:: python
-
-    from pynwb.spec import NWBGroupSpec
-
-    # A list of NWBAttributeSpec objects to specify additional attributes or attributes to be overriden
-    addl_attributes = [...]
-    # A list of NWBDatasetSpec objects to specify additional datasets or datasets to be overriden
-    addl_datasets = [...]
-    # A list of NWBGroupSpec objects to specify additional groups or groups to be overriden
-    addl_groups = [...]
-    spec = NWBGroupSpec('An extended NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
-                        groups = addl_groups,
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
-
-Existing types can be instantiate by specifying `neurodata_type_inc` alone.
-
-.. code-block:: python
-
-    from pynwb.spec import NWBGroupSpec
-
-    # use another NWBGroupSpec object to specify that a group of type
-    # ElectricalSeries should be present in the new type defined below
-    addl_groups = [ NWBGroupSpec('An included ElectricalSeries instance',
-                                 neurodata_type_inc='ElectricalSeries') ]
-
-    spec = NWBGroupSpec('An extended NWB type',
-                        groups = addl_groups,
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
-
-
-Datasets can be extended in the same manner (with regard to `neurodata_type_inc` and `neurodata_type_def`,
-by using the class :py:class:`~pynwb.spec.NWBDatasetSpec`.
-
-Saving Extensions
-^^^^^^^^^^^^^^^^^
-
-Extensions are used by including them in a loaded namespace. Namespaces and extensions need to be saved to file
-for downstream use. The class :py:class:`~pynwb.spec.NWBNamespaceBuilder` can be used to create new namespace and
-specification files.
-
-.. note::
-
-    When using :py:class:`~pynwb.spec.NWBNamespaceBuilder`, the core NWB namespace is automatically included
-
-Create a new namespace with extensions
-
-.. code-block:: python
-
-    from pynwb.spec import NWBGroupSpec, NWBNamespaceBuilder
-
-    # create a builder for the namespace
-    ns_builder = NWBNamespaceBuilder("Extension for use in my laboratory", "mylab", ...)
-
-    # create extensions
-    ext1 = NWBGroupSpec('A custom Clustering interface',
-                        attributes = [...]
-                        datasets = [...],
-                        groups = [...],
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
-
-    ext2 = NWBGroupSpec('A custom ClusterWaveforms interface',
-                        attributes = [...]
-                        datasets = [...],
-                        groups = [...],
-                        neurodata_type_inc='ClusterWaveforms',
-                        neurodata_type_def='MyExtendedClusterWaveforms')
-
-
-    # add the extension
-    ext_source = 'mylab.specs.yaml'
-    ns_builder.add_spec(ext_source, ext1)
-    ns_builder.add_spec(ext_source, ext2)
-
-    # include an existing namespace - this will include all specifications in that namespace
-    ns_builder.include_namespace('collab_ns')
-
-    # save the namespace and extensions
-    ns_path = 'mylab.namespace.yaml'
-    ns_builder.export(ns_path)
-
-
-.. tip::
-
-    Using the API to generate extensions (rather than writing YAML sources directly) helps avoid errors in the specification
-    (e.g., due to missing required keys or invalid values) and ensure compliance of the extension definition with the
-    NWB specification language. It also helps with maintanence of extensions, e.g., if extensions have to be ported to
-    newer versions of the `specification language <https://schema-language.readthedocs.io/en/latest/>`_
-    in the future.
-
+.. _documenting-extensions:
 
 Documenting Extensions
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 Using the same tools used to generate the documentation for the `NWB-N core format <https://nwb-schema.readthedocs.io/en/latest/>`_
 one can easily generate documentation in HTML, PDF, ePub and many other format for extensions as well.
@@ -412,29 +379,8 @@ Finally, to generate the HTML version of the docs run:
     without having to worry about the additional setup.
 
 
-
-
-
 Further Reading
-^^^^^^^^^^^^^^^
+---------------
 
-* **Using Extensions:** See :ref:`extensions` for an example on how to use extensions during read and write.
+* **Using Extensions:** See :ref:`extending-nwb` for an example on how to use extensions during read and write.
 * **Specification Language:** For a detailed overview of the specification language itself see https://schema-language.readthedocs.io/en/latest/
-
-Validating NWB files
---------------------
-
-Validating NWB files is handled by a command-line tool availble in :py:mod:`~pynwb`. The validator can be invoked like so:
-
-.. code-block:: bash
-
-    python -m pynwb.validate test.nwb
-
-This will validate the file ``test.nwb`` against the *core* NWB specification. Validating against other specifications i.e. extensions
-can be done using the ``-p`` and ``-n`` flags. For example, the following command will validate against the specifications referenced in the namespace
-file ``mylab.namespace.yaml`` in addition to the core specification.
-
-.. code-block:: bash
-
-    python -m pynwb.validate -p mylab.namespace.yaml test.nwb
-
