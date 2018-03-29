@@ -1,7 +1,7 @@
 
 
-.. _domain_examples:
+.. _tutorials:
 
 
-PyNWB Examples
-==============
+Tutorials
+=========
