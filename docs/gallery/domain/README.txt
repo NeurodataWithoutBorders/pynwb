@@ -5,6 +5,3 @@
 
 PyNWB Examples
 ==============
-
-Domain-specific examples
-------------------------
