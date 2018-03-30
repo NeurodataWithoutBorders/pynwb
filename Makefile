@@ -40,7 +40,7 @@ test:
 flake:
 	$(FLAKE) src/
 	$(FLAKE) tests/
-	$(FLAKE) docs/code/
+	$(FLAKE) --ignore E402 docs/gallery
 
 checkpdb:
 	find {src,tests} -name "*.py" -exec grep -Hn pdb {} \;
