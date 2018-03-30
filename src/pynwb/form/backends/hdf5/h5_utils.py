@@ -160,10 +160,15 @@ class H5RegionSlicer(RegionSlicer):
 
 
 class H5DataIO(DataIO):
+    """
+    Wrap data arrays for write via HDF5IO to customize I/O behavior, such as compression and chunking
+    for data arrays.
+    """
 
     @docval({'name': 'data',
              'type': (np.ndarray, list, tuple, h5py.Dataset, Iterable),
-             'doc': 'the data to be written'},
+             'doc': 'the data to be written. NOTE: If an h5py.Dataset is used, all other settings but link_data' +
+                    ' will be ignored as the dataset will either be linked to or copied as is in H5DataIO.'},
             {'name': 'maxshape',
              'type': tuple,
              'doc': 'Dataset will be resizable up to this shape (Tuple). Automatically enables chunking.' +
@@ -195,23 +200,26 @@ class H5DataIO(DataIO):
              'default': None},
             {'name': 'link_data',
              'type': bool,
-             'doc': 'If data is an h5py.Dataset should it be linked to or copied.',
-             'default': None}
+             'doc': 'If data is an h5py.Dataset should it be linked to or copied. NOTE: This parameter is only '+
+                    'allowed if data is an h5py.Dataset',
+             'default': False}
             )
     def __init__(self, **kwargs):
         # Get the list of I/O options that user has passed in
         ioarg_names = [name for name in kwargs.keys() if name not in['data', 'link_data'] ]
         # Remove the ioargs from kwargs
         ioarg_values = [popargs(argname, kwargs) for argname in ioarg_names]
-        if 'link_data' in kwargs:
-            self.__link_data = popargs('link_data', kwargs)
-        else:
+        # Consume link_data parameter
+        self.__link_data = popargs('link_data', kwargs)
+        # Check for possible collision with other parameters
+        if not isinstance(getargs('data', kwargs), Dataset) and self.__link_data:
             self.__link_data = False
-            self.__link_data = False
+            warnings.warn('link_data parameter in H5DataIO will be ignored')
+        # Call the super constructor and consume the data parameter
         call_docval_func(super(H5DataIO, self).__init__, kwargs)
         # Construct the dict with the io args, ignoring all options that were set to None
         self.__iosettings = {k: v for k, v in zip(ioarg_names, ioarg_values) if v is not None}
-        # Set io_propoerties for DataChunkIterators
+        # Set io_properties for DataChunkIterators
         if isinstance(self.data, AbstractDataChunkIterator):
             # Define the chunking options if the user has not set them explicitly.
             if 'chunks' not in self.__iosettings and self.data.recommended_chunk_shape() is not None:
@@ -224,6 +232,10 @@ class H5DataIO(DataIO):
                 warnings.warn(str(self.__iosettings['compression']) + " compression may not be available" +
                               "on all installations of HDF5. Use of gzip is recommended to ensure portability of" +
                               "the generated HDF5 files.")
+        # Check possible parameter collisions
+        if isinstance(self.data, Dataset):
+            for k in self.__iosettings.keys():
+                warnings.warn("%s in H5DataIO will be ignored with H5DataIO.data being an HDF5 dataset" % k)
 
     @property
     def link_data(self):

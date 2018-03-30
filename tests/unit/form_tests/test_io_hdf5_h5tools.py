@@ -264,6 +264,33 @@ class H5IOTest(unittest.TestCase):
             self.assertEqual(len(w), 1)
             self.assertEqual(dset.io_settings['compression'], 'lzf')
 
+    def test_warning_on_linking_of_regular_array(self):
+        with warnings.catch_warnings(record=True) as w:
+            dset = H5DataIO(np.arange(30),
+                            link_data=True)
+            self.assertEqual(len(w), 1)
+
+    def test_warning_on_linking_of_regular_array(self):
+        with warnings.catch_warnings(record=True) as w:
+            dset = H5DataIO(np.arange(30),
+                            link_data=True)
+            self.assertEqual(len(w), 1)
+
+    def test_warning_on_setting_io_options_on_h5dataset_input(self):
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', np.arange(10), attributes={}))
+        with warnings.catch_warnings(record=True) as w:
+            print("-----------HERE-------------")
+            dset = H5DataIO(self.f['test_dataset'],
+                            compression='gzip',
+                            compression_opts=4,
+                            fletcher32=True,
+                            shuffle=True,
+                            maxshape=(10,20),
+                            chunks=(10,),
+                            fillvalue=100)
+            print("------------END------------")
+            self.assertEqual(len(w), 7)
+
     #############################################
     #  Copy/Link h5py.Dataset object
     #############################################
