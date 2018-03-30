@@ -57,11 +57,14 @@ extensions = [
     'sphinx_gallery.gen_gallery'
 ]
 
+from sphinx_gallery.sorting import ExplicitOrder
+
 sphinx_gallery_conf = {
     # path to your examples scripts
-    'examples_dirs' : ['../gallery/general', '../gallery/domain'],
+    'examples_dirs' : ['../gallery'],
     # path where to save gallery generated examples
-    'gallery_dirs'  : ['tutorials/general', 'tutorials/domain'],
+    'gallery_dirs'  : ['tutorials'],
+    'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain']),
     'backreferences_dir': 'gen_modules/backreferences',
     'download_section_examples': False,
     'min_reported_time': 5
