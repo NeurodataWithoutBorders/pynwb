@@ -4,6 +4,7 @@ import argparse
 import inspect
 import logging
 import os.path
+import os
 import sys
 import traceback
 import unittest2 as unittest
@@ -61,12 +62,12 @@ def _import_from_file(script):
 def run_example_tests():
     global TOTAL, FAILURES, ERRORS
     logging.info('running example tests')
-    examples_dir = os.path.join(os.path.dirname(__file__), "docs", "code")
-    examples_scripts = [
-        os.path.join(examples_dir, script) for script in os.listdir(examples_dir) if script.endswith(".py")]
-    examples_dir = os.path.join(os.path.dirname(__file__), "docs", "gallery", "examples")
-    examples_scripts += [
-        os.path.join(examples_dir, script) for script in os.listdir(examples_dir) if script.endswith(".py")]
+    examples_scripts = list()
+    for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), "docs", "gallery")):
+        for f in files:
+            if f.endswith(".py"):
+                examples_scripts.append(os.path.join(root,f))
+
     TOTAL += len(examples_scripts)
     for script in examples_scripts:
         try:
