@@ -5,7 +5,7 @@ from pynwb.form.data_utils import DataChunkIterator
 from pynwb.form.backends.hdf5.h5tools import HDF5IO
 from pynwb.form.backends.hdf5 import H5DataIO
 from pynwb.form.build import DatasetBuilder
-from h5py import SoftLink, Dataset, HardLink
+from h5py import SoftLink, HardLink
 
 import tempfile
 import warnings
@@ -269,26 +269,19 @@ class H5IOTest(unittest.TestCase):
             dset = H5DataIO(np.arange(30),
                             link_data=True)
             self.assertEqual(len(w), 1)
-
-    def test_warning_on_linking_of_regular_array(self):
-        with warnings.catch_warnings(record=True) as w:
-            dset = H5DataIO(np.arange(30),
-                            link_data=True)
-            self.assertEqual(len(w), 1)
+            self.assertEqual(dset.link_data, False)
 
     def test_warning_on_setting_io_options_on_h5dataset_input(self):
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', np.arange(10), attributes={}))
         with warnings.catch_warnings(record=True) as w:
-            print("-----------HERE-------------")
-            dset = H5DataIO(self.f['test_dataset'],
-                            compression='gzip',
-                            compression_opts=4,
-                            fletcher32=True,
-                            shuffle=True,
-                            maxshape=(10,20),
-                            chunks=(10,),
-                            fillvalue=100)
-            print("------------END------------")
+            H5DataIO(self.f['test_dataset'],
+                     compression='gzip',
+                     compression_opts=4,
+                     fletcher32=True,
+                     shuffle=True,
+                     maxshape=(10, 20),
+                     chunks=(10,),
+                     fillvalue=100)
             self.assertEqual(len(w), 7)
 
     #############################################
@@ -310,21 +303,24 @@ class H5IOTest(unittest.TestCase):
 
     def test_link_h5py_dataset_h5dataio_input(self):
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', np.arange(10), attributes={}))
-        self.io.write_dataset(self.f, DatasetBuilder('test_softlink', H5DataIO(data=self.f['test_dataset'],
-                                                                               link_data=True),
-                                                                               attributes={}))
+        self.io.write_dataset(self.f, DatasetBuilder('test_softlink',
+                                                     H5DataIO(data=self.f['test_dataset'],
+                                                              link_data=True),
+                                                     attributes={}))
         self.assertTrue(isinstance(self.f.get('test_softlink', getlink=True), SoftLink))
 
     def test_copy_h5py_dataset_h5dataio_input(self):
         self.io.write_dataset(self.f, DatasetBuilder('test_dataset', np.arange(10), attributes={}))
         self.io.write_dataset(self.f,
-                              DatasetBuilder('test_copy', H5DataIO(data=self.f['test_dataset'],
-                                                                               link_data=False), #Force dataset copy
-                                                                               attributes={}),
-                              link_data=True) # Make sure the default behavior is set to link the data
+                              DatasetBuilder('test_copy',
+                                             H5DataIO(data=self.f['test_dataset'],
+                                                      link_data=False),  # Force dataset copy
+                                             attributes={}),
+                              link_data=True)  # Make sure the default behavior is set to link the data
         self.assertTrue(isinstance(self.f.get('test_copy', getlink=True), HardLink))
         self.assertListEqual(self.f['test_dataset'][:].tolist(),
                              self.f['test_copy'][:].tolist())
+
 
 if __name__ == '__main__':
     unittest.main()

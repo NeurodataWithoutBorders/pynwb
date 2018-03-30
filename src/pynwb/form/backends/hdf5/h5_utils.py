@@ -200,13 +200,13 @@ class H5DataIO(DataIO):
              'default': None},
             {'name': 'link_data',
              'type': bool,
-             'doc': 'If data is an h5py.Dataset should it be linked to or copied. NOTE: This parameter is only '+
+             'doc': 'If data is an h5py.Dataset should it be linked to or copied. NOTE: This parameter is only ' +
                     'allowed if data is an h5py.Dataset',
              'default': False}
             )
     def __init__(self, **kwargs):
         # Get the list of I/O options that user has passed in
-        ioarg_names = [name for name in kwargs.keys() if name not in['data', 'link_data'] ]
+        ioarg_names = [name for name in kwargs.keys() if name not in['data', 'link_data']]
         # Remove the ioargs from kwargs
         ioarg_values = [popargs(argname, kwargs) for argname in ioarg_names]
         # Consume link_data parameter
