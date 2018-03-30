@@ -115,9 +115,10 @@ added_mod = ProcessingModule('added_mod', 'PyNWB tutorial', 'example module')
 nwbfile.add_processing_module(added_mod)
 
 ####################
-# You can add data to your processing module using the method :py:func:`~pynwb.base.ProcessingModule.add_data_interface`.
-# Lets make another :py:class:`~pynwb.base.TimeSeries` and then add it the :py:class:`~pynwb.base.ProcessingModule`
-# we just added.
+# You can add data to your processing module using the method
+# :py:func:`~pynwb.base.ProcessingModule.add_data_interface`.
+# Lets make another :py:class:`~pynwb.base.TimeSeries` and then add it to the
+# :py:class:`~pynwb.base.ProcessingModule` we just added.
 
 data = list(range(0, 100, 10))
 timestamps = list(range(10))
@@ -242,13 +243,13 @@ mod_ts = added_mod['ts_for_mod']
 #
 # .. [#] HDF5 is currently the only backend supported by NWB.
 #
-# .. [#] Neurodata sets can be *very* large, so individual components of the dataset are only loaded into memory when you requst them.
-#    This functionality is only possible if an open file handle is kept around until users want to load data.
+# .. [#] Neurodata sets can be *very* large, so individual components of the dataset are only loaded into memory when
+#    you requst them. This functionality is only possible if an open file handle is kept around until users want to
+#    load data.
 #
-# .. [#] Some data interface objects have a default name. This default name is the type of the data interface. For example,
-#    the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation" and the default name for
-#    :py:class:`~pynwb.ecephys.EventWaveform` is "EventWaveform".
+# .. [#] Some data interface objects have a default name. This default name is the type of the data interface. For
+#    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation" and the default
+#    name for :py:class:`~pynwb.ecephys.EventWaveform` is "EventWaveform".
 
 ####################
 # .. _hck04: https://github.com/NeurodataWithoutBorders/nwb_hackathons/tree/master/HCK04_2018_Seattle
-

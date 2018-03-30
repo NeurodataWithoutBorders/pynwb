@@ -10,7 +10,6 @@ clarity, we define them here:
 '''
 
 
-
 import numpy as np
 
 #######################
@@ -19,7 +18,6 @@ import numpy as np
 #
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
 # argument is the name of the NWB file, and the second argument is a brief description of the dataset.
-
 
 from datetime import datetime
 from pynwb import NWBFile
@@ -44,13 +42,11 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 # device that was used to record from the electrode. This is done by creating a :py:class:`~pynwb.ecephys.Device`
 # object using the instance method :py:meth:`~pynwb.file.NWBFile.create_device`.
 
-
 device = nwbfile.create_device(name='trodes_rig123', source="a source")
 
-
-
 #######################
-# Once you have created the :py:class:`~pynwb.ecephys.Device`, you can create an :py:class:`~pynwb.ecephys.ElectrodeGroup`.
+# Once you have created the :py:class:`~pynwb.ecephys.Device`, you can create an
+# :py:class:`~pynwb.ecephys.ElectrodeGroup`.
 
 electrode_name = 'tetrode1'
 source = "an hypothetical source"
@@ -64,11 +60,12 @@ electrode_group = nwbfile.create_electrode_group(electrode_name,
                                                  device=device)
 
 #######################
-# After setting up electrode group metadata, you should add metadata about the individual electrodes comprising each
-# electrode group. This is done with :py:func:`~pynwb.file.NWBFile.add_electrode`.
+# After setting up electrode group metadata, you should add metadata about the individual electrodes comprising
+# each electrode group. This is done with :py:func:`~pynwb.file.NWBFile.add_electrode`.
 #
-# The first argument to :py:class:`~pynwb.file.NWBFile.add_electrode` is a unique identifier that the user should assign.
-# For details on the rest of the arguments, please see the :py:func:`API documentation <pynwb.file.NWBFile.add_electrode>`.
+# The first argument to :py:class:`~pynwb.file.NWBFile.add_electrode` is a unique identifier that the user should
+# assign. For details on the rest of the arguments, please see the
+# :py:func:`API documentation <pynwb.file.NWBFile.add_electrode>`.
 
 
 for idx in [1, 2, 3, 4]:
@@ -116,7 +113,7 @@ from pynwb.ecephys import ElectricalSeries
 rate = 10.0
 np.random.seed(1234)
 data_len = 1000
-ephys_data = np.random.rand(data_len * 2).reshape((data_len,2))
+ephys_data = np.random.rand(data_len * 2).reshape((data_len, 2))
 ephys_timestamps = np.arange(data_len) / rate
 
 ephys_ts = ElectricalSeries('test_ephys_data',
@@ -201,4 +198,3 @@ ephys_ts = nwbfile.acquisition['test_ephys_data']
 # information about the electrode in the second index can be retrieved like so:
 
 elec2 = ephys_ts.electrodes[1]
-

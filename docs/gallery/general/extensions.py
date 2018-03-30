@@ -10,14 +10,15 @@ PyNWB API.
 # Defining extensions
 # -----------------------------------------------------
 #
-# Extensions should be defined separately from the code that uses the extensions. This design decision is based on the assumption that
-# extension will be written once, and read or used multiple times. Here, we provide an example of how to create an extension for subsequent use.
+# Extensions should be defined separately from the code that uses the extensions. This design decision is
+# based on the assumption that extension will be written once, and read or used multiple times. Here, we
+# provide an example of how to create an extension for subsequent use.
 # (For more information on the available tools for creating extensions, see :ref:`extending-nwb`).
 #
 #
-# The following block of code demonstrates how to create a new namespace, and then add a new `neurodata_type` to this namespace. Finally,
+# The following block of code demonstrates how to create a new namespace, and then add a new `neurodata_type`
+# to this namespace. Finally,
 # it calls :py:meth:`~form.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
-
 
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 
@@ -77,7 +78,8 @@ ns_builder.export(ns_path)
 #
 # After an extension has been created, it can be used by downstream codes for reading and writing data.
 # There are two main mechanisms for reading and writing extension data with PyNWB.
-# The first involves defining new :py:class:`~pynwb.core.NWBContainer` classes that are then mapped to the neurodata types in the extension.
+# The first involves defining new :py:class:`~pynwb.core.NWBContainer` classes that are then mapped
+# to the neurodata types in the extension.
 
 
 from pynwb import register_class, load_namespaces
@@ -85,6 +87,7 @@ from pynwb.ecephys import ElectricalSeries
 
 ns_path = "mylab.namespace.yaml"
 load_namespaces(ns_path)
+
 
 @register_class('TetrodeSeries', 'mylab')
 class TetrodeSeries(ElectricalSeries):
@@ -96,12 +99,15 @@ class TetrodeSeries(ElectricalSeries):
 ####################
 # .. note::
 #
-#     Although it is not used here, it is encouraged to use the :py:func:`~form.utils.docval` decorator for documenting constructors, methods, and functions.
+#     Although it is not used here, it is encouraged to use the :py:func:`~form.utils.docval`
+#     decorator for documenting constructors, methods, and functions.
 #
-# When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer` subclasses, you should defining the class field ``__nwbfields__``. This will
+# When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer`
+# subclasses, you should defining the class field ``__nwbfields__``. This will
 # tell PyNWB the properties of the :py:class:`~pynwb.core.NWBContainer` extension.
 #
-# If you do not want to write additional code to read your extensions, PyNWB is able to dynamically create an :py:class:`~pynwb.core.NWBContainer` subclass for use within the PyNWB API.
+# If you do not want to write additional code to read your extensions, PyNWB is able to dynamically
+# create an :py:class:`~pynwb.core.NWBContainer` subclass for use within the PyNWB API.
 # Dynamically created classes can be inspected using the built-in :py:func:`.help` or the :py:mod:`inspect` module.
 
 
@@ -110,14 +116,11 @@ from pynwb import get_class, load_namespaces
 ns_path = "mylab.namespace.yaml"
 load_namespaces(ns_path)
 
-TetrodeSeries = get_class('TetrodeSeries', 'mylab')
-
+AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
 
 ####################
 # .. note::
 #
-#     When defining your own :py:class:`~pynwb.core.NWBContainer`, the subclass name does not need to be the same as the extension type name. However,
-#     it is encouraged to keep class and extension names the same for the purposes of readibility.
-
-
-
+#     When defining your own :py:class:`~pynwb.core.NWBContainer`, the subclass name does not need to be the same
+#     as the extension type name. However, it is encouraged to keep class and extension names the same for the
+#     purposes of readibility.

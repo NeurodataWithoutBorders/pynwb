@@ -17,9 +17,6 @@ The following examples will reference variables that may not be defined within t
 clarity, we define them here:
 '''
 
-
-
-import os
 from datetime import datetime
 
 from pynwb import NWBFile
@@ -87,7 +84,7 @@ nwbfile.add_acquisition(image_series)
 # from one or more imaging planes; hence the :py:class:`~pynwb.ophys.PlaneSegmentation` class.
 
 
-mod = nwbfile.create_processing_module('my_ca_imaging_module', 'Ca2+ imaging example', 'a module for storing example data')
+mod = nwbfile.create_processing_module('my_ca_imaging_module', 'Ca2+ imaging example', 'example data module')
 img_seg = ImageSegmentation('Ca2+ imaging example')
 mod.add_data_interface(img_seg)
 ps = img_seg.create_plane_segmentation('Ca2+ imaging example', 'output from segmenting my favorite imaging plane',
@@ -143,7 +140,8 @@ rt_region = ps.create_roi_table_region([0], 'the first of two ROIs')
 
 
 ####################
-# Now that you have an :py:class:`~pynwb.ophys.ROITableRegion`, you can create your an :py:class:`~pynwb.ophys.RoiResponseSeries`.
+# Now that you have an :py:class:`~pynwb.ophys.ROITableRegion`, you can create your an
+# :py:class:`~pynwb.ophys.RoiResponseSeries`.
 
 
 data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -170,8 +168,8 @@ with NWBHDF5IO('ophys_example.nwb', 'w') as io:
 # Reading an NWBFile
 # ------------------
 #
-# Reading is carried out using the :py:class:`~pynwb.NWBHDF5IO` class. Unlike with writing, using :py:class:`~pynwb.NWBHDF5IO`
-# as a context manager is not supported and will raise an exception [#]_.
+# Reading is carried out using the :py:class:`~pynwb.NWBHDF5IO` class. Unlike with writing, using
+# :py:class:`~pynwb.NWBHDF5IO` as a context manager is not supported and will raise an exception [#]_.
 
 
 io = NWBHDF5IO('ophys_example.nwb', 'r')
@@ -230,8 +228,9 @@ rrs_timestamps = rrs.timestamps
 #
 # .. [#] You can also store dF/F data using the :py:class:`~pynwb.ophys.DfOverF` class.
 #
-# .. [#] Neurodata sets can be *very* large, so individual components of the dataset are only loaded into memory when you requst them.
-#    This functionality is only possible if closing of the :py:class:`~pynwb.NWBHDF5IO` object is handled by the user.
+# .. [#] Neurodata sets can be *very* large, so individual components of the dataset are only loaded into memory when
+#    you requst them. This functionality is only possible if closing of the :py:class:`~pynwb.NWBHDF5IO`
+#    object is handled by the user.
 #
 # .. [#] If you added more than one :py:class:`~pynwb.ophys.RoiResponseSeries`, you will need to
 #    provide the name of the :py:class:`~pynwb.ophys.RoiResponseSeries` you want to retrieve to
