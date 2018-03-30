@@ -3,7 +3,9 @@ run-style-check: &run-style-check
   command: |
     . ../venv/bin/activate
     pip install flake8
-    flake8
+    flake8 src/pynwb
+    flake8 tests
+    flake8 --ignore E402 docs/gallery
 
 initialize-venv: &initialize-venv
   name: Initialize Virtual Environment
