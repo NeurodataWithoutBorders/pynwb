@@ -5,6 +5,7 @@ from pynwb.form.data_utils import DataChunkIterator
 from pynwb.form.backends.hdf5.h5tools import HDF5IO
 from pynwb.form.backends.hdf5 import H5DataIO
 from pynwb.form.build import DatasetBuilder
+from h5py import SoftLink, Dataset, HardLink
 
 import tempfile
 import warnings
@@ -263,6 +264,40 @@ class H5IOTest(unittest.TestCase):
             self.assertEqual(len(w), 1)
             self.assertEqual(dset.io_settings['compression'], 'lzf')
 
+    #############################################
+    #  Copy/Link h5py.Dataset object
+    #############################################
+    def test_link_h5py_dataset_input(self):
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', np.arange(10), attributes={}))
+        self.io.write_dataset(self.f, DatasetBuilder('test_softlink', self.f['test_dataset'], attributes={}))
+        self.assertTrue(isinstance(self.f.get('test_softlink', getlink=True), SoftLink))
+
+    def test_copy_h5py_dataset_input(self):
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', np.arange(10), attributes={}))
+        self.io.write_dataset(self.f,
+                              DatasetBuilder('test_copy', self.f['test_dataset'], attributes={}),
+                              link_data=False)
+        self.assertTrue(isinstance(self.f.get('test_copy', getlink=True), HardLink))
+        self.assertListEqual(self.f['test_dataset'][:].tolist(),
+                             self.f['test_copy'][:].tolist())
+
+    def test_link_h5py_dataset_h5dataio_input(self):
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', np.arange(10), attributes={}))
+        self.io.write_dataset(self.f, DatasetBuilder('test_softlink', H5DataIO(data=self.f['test_dataset'],
+                                                                               link_data=True),
+                                                                               attributes={}))
+        self.assertTrue(isinstance(self.f.get('test_softlink', getlink=True), SoftLink))
+
+    def test_copy_h5py_dataset_h5dataio_input(self):
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', np.arange(10), attributes={}))
+        self.io.write_dataset(self.f,
+                              DatasetBuilder('test_copy', H5DataIO(data=self.f['test_dataset'],
+                                                                               link_data=False), #Force dataset copy
+                                                                               attributes={}),
+                              link_data=True) # Make sure the default behavior is set to link the data
+        self.assertTrue(isinstance(self.f.get('test_copy', getlink=True), HardLink))
+        self.assertListEqual(self.f['test_dataset'][:].tolist(),
+                             self.f['test_copy'][:].tolist())
 
 if __name__ == '__main__':
     unittest.main()

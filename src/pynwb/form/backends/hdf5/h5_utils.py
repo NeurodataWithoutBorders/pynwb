@@ -192,13 +192,22 @@ class H5DataIO(DataIO):
             {'name': 'fletcher32',
              'type': bool,
              'doc': 'Enable fletcher32 checksum. http://docs.h5py.org/en/latest/high/dataset.html#dataset-fletcher32',
+             'default': None},
+            {'name': 'link_data',
+             'type': bool,
+             'doc': 'If data is an h5py.Dataset should it be linked to or copied.',
              'default': None}
             )
     def __init__(self, **kwargs):
         # Get the list of I/O options that user has passed in
-        ioarg_names = [name for name in kwargs.keys() if name != 'data']
+        ioarg_names = [name for name in kwargs.keys() if name not in['data', 'link_data'] ]
         # Remove the ioargs from kwargs
         ioarg_values = [popargs(argname, kwargs) for argname in ioarg_names]
+        if 'link_data' in kwargs:
+            self.__link_data = popargs('link_data', kwargs)
+        else:
+            self.__link_data = False
+            self.__link_data = False
         call_docval_func(super(H5DataIO, self).__init__, kwargs)
         # Construct the dict with the io args, ignoring all options that were set to None
         self.__iosettings = {k: v for k, v in zip(ioarg_names, ioarg_values) if v is not None}
@@ -215,6 +224,10 @@ class H5DataIO(DataIO):
                 warnings.warn(str(self.__iosettings['compression']) + " compression may not be available" +
                               "on all installations of HDF5. Use of gzip is recommended to ensure portability of" +
                               "the generated HDF5 files.")
+
+    @property
+    def link_data(self):
+        return self.__link_data
 
     @property
     def io_settings(self):

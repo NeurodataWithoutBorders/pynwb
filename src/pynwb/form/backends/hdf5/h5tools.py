@@ -129,9 +129,11 @@ class HDF5IO(FORMIO):
         return ret
 
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'},
-            {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False})
+            {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False},
+            {'name': 'link_data', 'type': bool,
+             'doc': 'If not specified otherwise link (True) or copy (False) HDF5 Datasets', 'default': True})
     def write(self, **kwargs):
-        cache_spec = getargs('cache_spec', kwargs)
+        cache_spec = popargs('cache_spec', kwargs)
         call_docval_func(super(HDF5IO, self).write, kwargs)
         if cache_spec:
             ref = self.__file.attrs.get(SPEC_LOC_ATTR)
@@ -294,13 +296,15 @@ class HDF5IO(FORMIO):
     def close(self):
         self.__file.close()
 
-    @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
+    @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'},
+            {'name': 'link_data', 'type': bool,
+             'doc': 'If not specified otherwise link (True) or copy (False) HDF5 Datasets', 'default': True})
     def write_builder(self, **kwargs):
-        f_builder = getargs('builder', kwargs)
+        f_builder, link_data = getargs('builder', 'link_data', kwargs)
         for name, gbldr in f_builder.groups.items():
             self.write_group(self.__file, gbldr)
         for name, dbldr in f_builder.datasets.items():
-            self.write_dataset(self.__file, dbldr)
+            self.write_dataset(self.__file, dbldr, link_data)
         self.set_attributes(self.__file, f_builder.attributes)
         self.__add_refs()
 
@@ -486,6 +490,8 @@ class HDF5IO(FORMIO):
 
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},  # noqa
             {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the DatasetBuilder to write'},
+            {'name': 'link_data', 'type': bool,
+             'doc': 'If not specified otherwise link (True) or copy (False) HDF5 Datasets', 'default': True},
             returns='the Dataset that was created', rtype=Dataset)
     def write_dataset(self, **kwargs):
         """ Write a dataset to HDF5
@@ -493,12 +499,13 @@ class HDF5IO(FORMIO):
         The function uses other dataset-dependent write functions, e.g,
         __scalar_fill__, __list_fill__ and __chunked_iter_fill__ to write the data.
         """
-        parent, builder = getargs('parent', 'builder', kwargs)
+        parent, builder, link_data = getargs('parent', 'builder', 'link_data', kwargs)
         name = builder.name
         data = builder.data
         options = dict()   # dict with additional
         if isinstance(data, H5DataIO):
             options['io_settings'] = data.io_settings
+            link_data = data.link_data
             data = data.data
         else:
             options['io_settings'] = {}
@@ -507,8 +514,30 @@ class HDF5IO(FORMIO):
         dset = None
         link = None
 
+        # The user provided an existing h5py dataset as input and asked to create a link to the dataset
+        if isinstance(data, Dataset):
+            # Create a Soft/External link to the dataset
+            if link_data:
+                data_filename = os.path.abspath(data.file.filename)
+                parent_filename = os.path.abspath(parent.file.filename)
+                if data_filename != parent_filename:
+                    link = ExternalLink(os.path.relpath(data_filename, os.path.dirname(parent_filename)), data.name)
+                else:
+                    link = SoftLink(data.name)
+                parent[name] = link
+            # Copy the dataset
+            else:
+                print("Copying dataset")
+                parent.copy(source=data,
+                            dest=parent,
+                            name=name,
+                            expand_soft=False,
+                            expand_external=False,
+                            expand_refs=False,
+                            without_attrs=True)
+                dset = parent[name]
         #  Write a compound dataset, i.e, a dataset with compound data type
-        if isinstance(options['dtype'], list):
+        elif isinstance(options['dtype'], list):
             # do some stuff to figure out what data is a reference
             refs = list()
             for i, dts in enumerate(options['dtype']):
@@ -592,15 +621,6 @@ class HDF5IO(FORMIO):
             # Iterative write of a data chunk iterator
             elif isinstance(data, AbstractDataChunkIterator):
                 dset = self.__chunked_iter_fill__(parent, name, data, options)
-            # Create a soft/external link to an existing HDF5 dataset
-            elif isinstance(data, Dataset):
-                data_filename = os.path.abspath(data.file.filename)
-                parent_filename = os.path.abspath(parent.file.filename)
-                if data_filename != parent_filename:
-                    link = ExternalLink(os.path.relpath(data_filename, os.path.dirname(parent_filename)), data.name)
-                else:
-                    link = SoftLink(data.name)
-                parent[name] = link
             # Write a regular in memory array (e.g., numpy array, list etc.)
             elif hasattr(data, '__len__'):
                 dset = self.__list_fill__(parent, name, data, options)
@@ -610,6 +630,9 @@ class HDF5IO(FORMIO):
         # Create the attributes on the dataset only if we are the primary and not just a Soft/External link
         if link is None:
             self.set_attributes(dset, attributes)
+        # Validate the attributes on the linked dataset
+        elif len(attributes) > 0:
+            pass
         return
 
     @classmethod
