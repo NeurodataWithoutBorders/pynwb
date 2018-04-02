@@ -18,6 +18,7 @@ The NWB:N team consists of neuroscientists and software developers
 who recognize that adoption of a unified data format is an important step toward
 breaking down the barriers to data sharing in neuroscience.
 
+
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started
@@ -37,8 +38,9 @@ breaking down the barriers to data sharing in neuroscience.
    :maxdepth: 2
    :caption: Resources
 
-   example
-   tutorials
+   tutorials/index
+   extensions
+   validation
    api_docs
    software_process
 

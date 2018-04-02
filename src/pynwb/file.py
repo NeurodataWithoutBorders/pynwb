@@ -96,7 +96,7 @@ class NWBFile(MultiContainerInterface):
         },
         {
             'attr': 'modules',
-            'add': 'add_processing_modules',
+            'add': 'add_processing_module',
             'type': ProcessingModule,
             'create': 'create_processing_module',
             'get': 'get_processing_module'
@@ -290,7 +290,7 @@ class NWBFile(MultiContainerInterface):
     def add_electrode(self, **kwargs):
         if self.__ec_electrodes is None:
             self.__ec_electrodes = ElectrodeTable('electrodes')
-        call_docval_func(self.__ec_electrodes.add_row, kwargs)
+        return call_docval_func(self.__ec_electrodes.add_row, kwargs)
 
     @docval({'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
             {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},

@@ -1,3 +1,6 @@
 sphinx==1.6.5
+matplotlib
+pillow
 sphinx_rtd_theme
+sphinx-gallery
 -r requirements.txt

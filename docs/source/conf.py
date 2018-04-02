@@ -53,8 +53,22 @@ autodoc_member_order = 'bysource'
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
-    'sphinx.ext.intersphinx'
+    'sphinx.ext.intersphinx',
+    'sphinx_gallery.gen_gallery'
 ]
+
+from sphinx_gallery.sorting import ExplicitOrder
+
+sphinx_gallery_conf = {
+    # path to your examples scripts
+    'examples_dirs': ['../gallery'],
+    # path where to save gallery generated examples
+    'gallery_dirs': ['tutorials'],
+    'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain']),
+    'backreferences_dir': 'gen_modules/backreferences',
+    'download_section_examples': False,
+    'min_reported_time': 5
+}
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.5', None),
@@ -308,13 +322,16 @@ class PatchedPythonDomain(PythonDomain):
         return super(PatchedPythonDomain, self).resolve_xref(
             env, fromdocname, builder, typ, target, node, contnode)
 
+
 from abc import abstractmethod, abstractproperty
+
 def skip(app, what, name, obj, skip, options):
     if isinstance(obj, abstractproperty) or getattr(obj, '__isabstractmethod__', False):
         return False
     elif name == "__getitem__":
         return False
     return skip
+
 
 def setup(app):
     app.connect('builder-inited', run_apidoc)
