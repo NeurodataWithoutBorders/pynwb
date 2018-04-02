@@ -402,7 +402,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             if spec.data_type_inc is not None:
                 ret = value
             else:
-                if 'text' in spec.dtype:
+                if spec.dtype is not None and 'text' in spec.dtype:
                     if spec.dims is not None:
                         ret = list(map(str, value))
                     else:
@@ -443,24 +443,18 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 msg = "'container' must be of type Data with DatasetSpec"
                 raise ValueError(msg)
             if isinstance(self.spec.dtype, RefSpec):
-                bldr_data = None
-                if self.spec.dtype.is_region():
-                    if self.spec.shape is None:
-                        if not isinstance(container, DataRegion):
-                            msg = "'container' must be of type DataRegion if spec represents region reference"
-                            raise ValueError(msg)
-                        bldr_data = RegionBuilder(container.region, manager.build(container.data))
-                    else:
-                        bldr_data = list()
-                        for d in container.data:
-                            bldr_data.append(RegionBuilder(d.slice, manager.build(d.target)))
-                else:
-                    if self.spec.shape is None:
-                        bldr_data = ReferenceBuilder(manager.build(container.data))
-                    else:
-                        bldr_data = list()
-                        for d in container.data:
-                            bldr_data.append(ReferenceBuilder(manager.build(d.target)))
+                bldr_data = self.__get_ref_builder(self.spec.dtype, self.spec.shape, container, manager)
+                builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
+                                         dtype=self.convert_dtype(self.__spec.dtype))
+            elif isinstance(self.spec.dtype, list):
+                refs = [(i, subt) for i, subt in enumerate(self.spec.dtype) if isinstance(subt.dtype, RefSpec)]
+                bldr_data = copy(container.data)
+                bldr_data = list()
+                for i, row in enumerate(container.data):
+                    tmp = list(row)
+                    for j, subt in refs:
+                        tmp[j] = self.__get_ref_builder(subt.dtype, None, row[j], manager)
+                    bldr_data.append(tuple(tmp))
                 builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
                                          dtype=self.convert_dtype(self.__spec.dtype))
             else:
@@ -468,6 +462,30 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                                          dtype=self.convert_dtype(self.__spec.dtype))
         self.__add_attributes(builder, self.__spec.attributes, container)
         return builder
+
+    def __get_ref_builder(self, dtype, shape, container, manager):
+        bldr_data = None
+        if dtype.is_region():
+            if shape is None:
+                if not isinstance(container, DataRegion):
+                    msg = "'container' must be of type DataRegion if spec represents region reference"
+                    raise ValueError(msg)
+                bldr_data = RegionBuilder(container.region, manager.build(container.data))
+            else:
+                bldr_data = list()
+                for d in container.data:
+                    bldr_data.append(RegionBuilder(d.slice, manager.build(d.target)))
+        else:
+            if shape is None:
+                if isinstance(container, Container):
+                    bldr_data = ReferenceBuilder(manager.build(container))
+                else:
+                    bldr_data = ReferenceBuilder(manager.build(container.data))
+            else:
+                bldr_data = list()
+                for d in container.data:
+                    bldr_data.append(ReferenceBuilder(manager.build(d.target)))
+        return bldr_data
 
     def __is_null(self, item):
         if item is None:
@@ -980,10 +998,12 @@ class TypeMap(object):
     def register_container_type(self, **kwargs):
         ''' Map a container class to a data_type '''
         namespace, data_type, container_cls = getargs('namespace', 'data_type', 'container_cls', kwargs)
-        self.__ns_catalog.get_spec(namespace, data_type)    # make sure the spec exists
+        spec = self.__ns_catalog.get_spec(namespace, data_type)    # make sure the spec exists
         self.__container_types.setdefault(namespace, dict())
         self.__container_types[namespace][data_type] = container_cls
         self.__data_types.setdefault(container_cls, (namespace, data_type))
+        setattr(container_cls, spec.type_key(), data_type)
+        setattr(container_cls, 'namespace', namespace)
 
     @docval({"name": "container_cls", "type": type,
              "doc": "the Container class for which the given ObjectMapper class gets used for"},

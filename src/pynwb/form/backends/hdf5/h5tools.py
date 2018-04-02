@@ -1,22 +1,20 @@
 from collections import Iterable, deque
-import json
 import numpy as np
 import os.path
-from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference
+from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference, check_dtype
 from six import raise_from, text_type, string_types, binary_type
 import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
 from ...data_utils import DataChunkIterator, get_shape
-from ...query import FORMDataset
-from ...array import Array
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager,\
                      RegionBuilder, ReferenceBuilder, TypeMap
-from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, SpecWriter, SpecReader, GroupSpec
+from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, GroupSpec
 from ...spec import NamespaceBuilder
 
-from .h5_utils import H5DataIO
+from .h5_utils import H5Dataset, H5ReferenceDataset, H5RegionDataset, H5TableDataset,\
+                      H5DataIO, H5SpecReader, H5SpecWriter
 
 from ..io import FORMIO
 
@@ -267,15 +265,22 @@ class HDF5IO(FORMIO):
                     kwargs['data'] = ReferenceBuilder(target_builder)
             else:
                 kwargs["data"] = scalar
-        elif ndims == 1 and h5obj.dtype == np.dtype('O'):    # read list of strings
-            elem1 = h5obj[0]
+        elif ndims == 1:
             d = None
-            if isinstance(elem1, (text_type, binary_type)):
-                d = H5Dataset(h5obj, self)
-            elif isinstance(elem1, RegionReference):
-                d = H5RegionDataset(h5obj, self)
-            elif isinstance(elem1, Reference):
-                d = H5ReferenceDataset(h5obj, self)
+            if h5obj.dtype.kind == 'O':    # read list of strings or list of references
+                elem1 = h5obj[0]
+                if isinstance(elem1, text_type):
+                    d = H5Dataset(h5obj, self)
+                elif isinstance(elem1, RegionReference):
+                    d = H5RegionDataset(h5obj, self)
+                elif isinstance(elem1, Reference):
+                    d = H5ReferenceDataset(h5obj, self)
+            elif h5obj.dtype.kind == 'V':    # table
+                cpd_dt = h5obj.dtype
+                ref_cols = [check_dtype(ref=cpd_dt[i]) for i in range(len(cpd_dt))]
+                d = H5TableDataset(h5obj, self, ref_cols)
+            else:
+                d = h5obj
             kwargs["data"] = d
         else:
             kwargs["data"] = h5obj
@@ -287,7 +292,8 @@ class HDF5IO(FORMIO):
         self.__file = File(self.__path, open_flag)
 
     def close(self):
-        self.__file.close()
+        if self.__file:
+            self.__file.close()
 
     @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
     def write_builder(self, **kwargs):
@@ -399,6 +405,7 @@ class HDF5IO(FORMIO):
                         self.__queue_ref(self._make_attr_ref_filler(obj, key, tmp))
                     else:
                         value = np.array(value)
+                    obj.attrs[key] = value
                 else:
                     msg = "ignoring attribute '%s' from '%s' - value is empty list" % (key, obj.name)
                     warnings.warn(msg)
@@ -516,6 +523,7 @@ class HDF5IO(FORMIO):
                     refs.append(i)
             if len(refs) > 0:
                 _dtype = self.__resolve_dtype__(options['dtype'], data)
+                dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype)
 
                 @self.__queue_ref
                 def _filler():
@@ -525,7 +533,7 @@ class HDF5IO(FORMIO):
                         for i in refs:
                             new_item[i] = self.__get_ref(item[i])
                         ret.append(tuple(new_item))
-                    dset = parent.require_dataset(name, shape=(len(ret),), dtype=_dtype)
+                    dset = parent[name]
                     dset[:] = ret
                     self.set_attributes(dset, attributes)
                 return
@@ -534,38 +542,45 @@ class HDF5IO(FORMIO):
         elif self.__is_ref(options['dtype']):
             _dtype = self.__dtypes[options['dtype']]
             if isinstance(data, RegionBuilder):
+                dset = parent.require_dataset(name, shape=(), dtype=_dtype)
 
                 @self.__queue_ref
                 def _filler():
                     ref = self.__get_ref(data.builder, data.region)
-                    dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    dset = parent[name]
+                    dset[()] = ref
                     self.set_attributes(dset, attributes)
 
             elif isinstance(data, ReferenceBuilder):
+                dset = parent.require_dataset(name, dtype=_dtype, shape=())
 
                 @self.__queue_ref
                 def _filler():
                     ref = self.__get_ref(data.builder)
-                    dset = parent.require_dataset(name, data=ref, shape=None, dtype=_dtype)
+                    dset = parent[name]
+                    dset[()] = ref
                     self.set_attributes(dset, attributes)
             else:
                 if options['dtype'] == 'region':
+                    dset = parent.require_dataset(name, dtype=_dtype, shape=(len(data),))
 
                     @self.__queue_ref
                     def _filler():
                         refs = list()
                         for item in data:
                             refs.append(self.__get_ref(item.builder, item.region))
-                        dset = parent.require_dataset(name, data=refs, shape=None, dtype=_dtype)
+                        dset = parent[name]
+                        dset[()] = refs
                         self.set_attributes(dset, attributes)
                 else:
+                    dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype)
 
                     @self.__queue_ref
                     def _filler():
                         refs = list()
                         for item in data:
                             refs.append(self.__get_ref(item.builder))
-                        dset = parent.require_dataset(name, data=refs, shape=None, dtype=_dtype)
+                        dset = parent[name]
                         self.set_attributes(dset, attributes)
             return
         else:
@@ -700,9 +715,13 @@ class HDF5IO(FORMIO):
                 builder = container.target_builder
             else:
                 builder = container
+        elif isinstance(container, ReferenceBuilder):
+            builder = container.builder
         else:
             builder = self.manager.build(container)
         path = self.__get_path(builder)
+        if isinstance(container, RegionBuilder):
+            region = container.region
         if region is not None:
             dset = self.__file[path]
             if not isinstance(dset, Dataset):
@@ -744,80 +763,4 @@ class HDF5IO(FORMIO):
                 ret.append(self.__get_ref(elem))
             else:
                 ret.append(elem)
-        return ret
-
-
-class H5Dataset(FORMDataset):
-    @docval({'name': 'dataset', 'type': (Dataset, Array), 'doc': 'the HDF5 file lazily evaluate'},
-            {'name': 'io', 'type': FORMIO, 'doc': 'the IO object that was used to read the underlying dataset'})
-    def __init__(self, **kwargs):
-        self.__io = popargs('io', kwargs)
-        call_docval_func(super(H5Dataset, self).__init__, kwargs)
-
-    @property
-    def io(self):
-        return self.__io
-
-
-class H5ReferenceDataset(H5Dataset):
-
-    def __getitem__(self, arg):
-        ref = super(H5ReferenceDataset, self).__getitem__(arg)
-        return self.io.get_container(self.dataset.file[ref])
-
-
-class H5RegionDataset(H5ReferenceDataset):
-
-    def __getitem__(self, arg):
-        obj = super(H5RegionDataset, self).__getitem__(arg)
-        ref = self.dataset[arg]
-        return obj[ref]
-
-
-class H5SpecWriter(SpecWriter):
-
-    __str_type = special_dtype(vlen=binary_type)
-
-    @docval({'name': 'group', 'type': Group, 'doc': 'the HDF5 file to write specs to'})
-    def __init__(self, **kwargs):
-        self.__group = getargs('group', kwargs)
-
-    @staticmethod
-    def stringify(spec):
-        '''
-        Converts a spec into a JSON string to write to a dataset
-        '''
-        return json.dumps(spec, separators=(',', ':'))
-
-    def __write(self, d, name):
-        data = self.stringify(d)
-        dset = self.__group.create_dataset(name, data=data, dtype=self.__str_type)
-        return dset
-
-    def write_spec(self, spec, path):
-        return self.__write(spec, path)
-
-    def write_namespace(self, namespace, path):
-        return self.__write({'namespaces': [namespace]}, path)
-
-
-class H5SpecReader(SpecReader):
-
-    @docval({'name': 'group', 'type': Group, 'doc': 'the HDF5 file to read specs from'})
-    def __init__(self, **kwargs):
-        self.__group = getargs('group', kwargs)
-
-    def __read(self, path):
-        s = self.__group[path][()]
-        if isinstance(s, bytes):
-            s = s.decode('UTF-8')
-        d = json.loads(s)
-        return d
-
-    def read_spec(self, spec_path):
-        return self.__read(spec_path)
-
-    def read_namespace(self, ns_path):
-        ret = self.__read(ns_path)
-        ret = ret['namespaces']
         return ret

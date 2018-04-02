@@ -1,12 +1,11 @@
 import numpy as np
 from collections import Iterable
 
-from .form import get_region_slicer
 from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer, NWBDataInterface, ElementIdentifiers, VectorData, VectorIndex
+from .core import NWBContainer, NWBDataInterface, ElementIdentifiers, VectorData, VectorIndex, IndexedVector
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -226,19 +225,18 @@ class UnitTimes(NWBDataInterface):
         self.unit_ids = unit_ids
         self.spike_times = spike_times
         self.spike_times_index = spike_times_index
+        self.__iv = IndexedVector(self.spike_times, self.spike_times_index)
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
     def get_unit_spike_times(self, **kwargs):
         index = getargs('index', kwargs)
-        return self.spike_times_index[index][:]
+        return self.__iv.get_vector(index)
 
     @docval({'name': 'unit_id', 'type': int, 'doc': 'the unit to add spike times for'},
-            {'name': 'spike_times', 'type': ('array_data',), 'doc': 'the spike times for the unit'})
+            {'name': 'spike_times', 'type': ('array_data',), 'doc': 'the spike times for the unit'},
+            rtype=int, returns="the index of the added unit in this UnitTimes")
     def add_spike_times(self, **kwargs):
         unit_id, spike_times = getargs('unit_id', 'spike_times', kwargs)
         self.unit_ids.append(unit_id)
-        ntimes = len(self.spike_times)
-        rs = get_region_slicer(self.spike_times, slice(ntimes, ntimes+len(spike_times)))
-        self.spike_times_index.append(rs)
-        self.spike_times.extend(spike_times)
+        return self.__iv.add_vector(spike_times)

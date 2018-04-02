@@ -1,4 +1,3 @@
-from collections import Iterable
 from h5py import RegionReference
 import numpy as np
 
@@ -40,6 +39,21 @@ class LabelledDict(dict):
     @property
     def label(self):
         return self.__label
+
+    def __getitem__(self, args):
+        key = args
+        if '==' in args:
+            key, val = args.split("==")
+            key = key.strip()
+            val = val.strip()
+            if key != 'name':
+                ret = list()
+                for item in self.values():
+                    if getattr(item, key, None) == val:
+                        ret.append(item)
+                return ret if len(ret) else None
+            key = val
+        return super(LabelledDict, self).__getitem__(key)
 
 
 class NWBBaseType(with_metaclass(ExtenderMeta)):
@@ -285,6 +299,27 @@ class VectorIndex(NWBData):
         call_docval_func(super(VectorIndex, self).__init__, kwargs)
 
 
+class IndexedVector(object):
+
+    @docval({'name': 'data', 'type': VectorData,
+             'doc': 'the VectorData to maintain'},
+            {'name': 'index', 'type': VectorIndex,
+             'doc': 'a VectorIndex object that indexes this VectorData', 'default': None})
+    def __init__(self, **kwargs):
+        self.__data = popargs('data', kwargs)
+        self.__index = popargs('index', kwargs)
+
+    def add_vector(self, arg):
+        before = len(self.__data)
+        self.__data.extend(arg)
+        rs = get_region_slicer(self.__data, slice(before, before+len(arg)))
+        self.__index.append(rs)
+        return len(self.__index)-1
+
+    def get_vector(self, arg):
+        return self.__index[arg][:]
+
+
 @register_class('ElementIdentifiers', CORE_NAMESPACE)
 class ElementIdentifiers(NWBData):
 
@@ -299,16 +334,63 @@ class ElementIdentifiers(NWBData):
 
 
 class NWBTable(NWBData):
+    '''
+    Subclasses should specify the class attribute \_\_columns\_\_.
+
+    This should be a list of dictionaries with the following keys:
+    ``'name'`` - the column name
+    ``'type'`` - the type of data in this column
+    ``'doc'``  - a brief description of what gets stored in this column
+
+    For reference, this list of dictionaries will be used with docval to autogenerate
+    the ``add_row`` method for adding data to this table.
+
+    If \_\_columns\_\_ is not specified, no custom ``add_row`` method will be added.
+
+    The class attribute __defaultname__ can also be set to specify a default name
+    for the table class. If \_\_defaultname\_\_ is not specified, then ``name`` will
+    need to be specified when the class is instantiated.
+    '''
+
+    @ExtenderMeta.pre_init
+    def __build_table_class(cls, name, bases, classdict):
+        if hasattr(cls, '__columns__'):
+            columns = getattr(cls, '__columns__')
+
+            if cls.__init__ == bases[-1].__init__:     # check if __init__ is overridden
+                name = {'name': 'name', 'type': str, 'doc': 'the name of this table'}
+                defname = getattr(cls, '__defaultname__', None)
+                if defname is not None:
+                    name['default'] = defname
+
+                @docval(name,
+                        {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table',
+                         'default': list()})
+                def __init__(self, **kwargs):
+                    name, data = getargs('name', 'data', kwargs)
+                    colnames = [i['name'] for i in columns]
+                    super(cls, self).__init__(colnames, name, data)
+
+                setattr(cls, '__init__', __init__)
+
+            if cls.add_row == bases[-1].add_row:     # check if add_row is overridden
+
+                @docval(*columns)
+                def add_row(self, **kwargs):
+                    return super(cls, self).add_row(kwargs)
+
+                setattr(cls, 'add_row', add_row)
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': Iterable, 'doc': 'the source of the data', 'default': list()},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         self.__columns = tuple(popargs('columns', kwargs))
+        self.__col_index = {name: idx for idx, name in enumerate(self.__columns)}
         call_docval_func(super(NWBTable, self).__init__, kwargs)
 
     @property
@@ -321,7 +403,9 @@ class NWBTable(NWBData):
         if not isinstance(self.data, list):
             msg = 'Cannot append row to %s' % type(self.data)
             raise ValueError(msg)
+        ret = len(self.data)
         self.data.append(tuple(values[col] for col in self.columns))
+        return ret
 
     @docval({'name': 'kwargs', 'type': dict, 'doc': 'the column to query by'})
     def query(self, **kwargs):
@@ -333,8 +417,25 @@ class NWBTable(NWBData):
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx):
-        return self.data[idx]
+    def __getitem__(self, args):
+        idx = args
+        col = None
+        if isinstance(args, tuple):
+            idx = args[1]
+            if isinstance(args[0], str):
+                col = self.__col_index.get(args[0])
+            elif isinstance(args[0], int):
+                col = args[0]
+            else:
+                raise KeyError('first argument must be a column name or index')
+            return self.data[idx][col]
+        elif isinstance(args, str):
+            col = self.__col_index.get(args)
+            if col is None:
+                raise KeyError(args)
+            return [row[col] for row in self.data]
+        else:
+            return self.data[idx]
 
 
 # diamond inheritence

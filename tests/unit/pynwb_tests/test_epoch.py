@@ -1,55 +1,64 @@
 import unittest
 
-from pynwb.epoch import Epoch, EpochTimeSeries
+from pynwb.epoch import EpochTable, TimeSeriesIndex
 from pynwb import TimeSeries
+from pynwb.form.data_utils import ListSlicer
 
 import numpy as np
 
 
-class EpochTimeSeriesConstructor(unittest.TestCase):
-
-    def test_init_timestamps(self):
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
-        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        epoch_ts = EpochTimeSeries('a fake source', ts, 40, 105)
-        self.assertEqual(epoch_ts.count, 105)
-        self.assertEqual(epoch_ts.idx_start, 40)
-
-    def test_init_sample_rate(self):
-        # self.ts.set_time_by_rate(1.0, 10.0)
-        ts = TimeSeries("test_ts", "a hypothetical source", list(range(200)), 'unit', starting_time=1.0, rate=10.0)
-        epoch_ts = EpochTimeSeries('a fake source', ts, 40, 105)
-        self.assertEqual(epoch_ts.count, 105)
-        self.assertEqual(epoch_ts.idx_start, 40)
-
-
-class EpochConstructor(unittest.TestCase):
+class TimeSeriesIndexTest(unittest.TestCase):
 
     def test_init(self):
-        epoch = Epoch("test_epoch", 'a fake source', 100.0, 200.0, "this is an epoch")
-        self.assertEqual(epoch.name, "test_epoch")
-        self.assertEqual(epoch.start_time, 100.0)
-        self.assertEqual(epoch.stop_time, 200.0)
-        self.assertEqual(epoch.description, "this is an epoch")
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
+        tsi = TimeSeriesIndex()
+        self.assertEqual(tsi.name, 'timeseries_index')
+        tsi.add_row(40, 105, ts)
+        self.assertEqual(tsi['count', 0], 105)
+        self.assertEqual(tsi['idx_start', 0], 40)
+        self.assertEqual(tsi['timeseries', 0], ts)
+
+
+class EpochTableTest(unittest.TestCase):
+
+    def test_init(self):
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
+        tsi = TimeSeriesIndex()
+        tsi.add_row(40, 105, ts)
+        ept = EpochTable()
+        self.assertEqual(ept.name, 'epochs')
+        ept.add_row(10.0, 20.0, "test,unittest,pynwb", ListSlicer(tsi.data, slice(0, 1)), 'a test epoch')
+        row = ept[0]
+        self.assertEqual(row[0], 10.0)
+        self.assertEqual(row[1], 20.0)
+        self.assertEqual(row[2], "test,unittest,pynwb")
+        self.assertEqual(row[3].data, tsi.data)
+        self.assertEqual(row[3].region, slice(0, 1))
+        self.assertEqual(row[4], 'a test epoch')
 
 
 class EpochSetters(unittest.TestCase):
 
     def setUp(self):
-        self.epoch = Epoch("test_epoch", 'a fake source', 10.0, 20.0, "this is an epoch")
+        # self.epoch = Epoch("test_epoch", 'a fake source', 10.0, 20.0, "this is an epoch")
+        pass
 
     def test_add_tags(self):
-        self.epoch.add_tag("tag1")
-        self.epoch.add_tag("tag2")
-        self.assertListEqual(self.epoch.tags, ["tag1", "tag2"])
+        # self.epoch.add_tag("tag1")
+        # self.epoch.add_tag("tag2")
+        # self.assertListEqual(self.epoch.tags, ["tag1", "tag2"])
+        pass
 
     def test_add_timeseries(self):
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
-        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        epoch_ts = self.epoch.add_timeseries(ts)
-        self.assertEqual(epoch_ts.count, 100)
-        self.assertEqual(epoch_ts.idx_start, 90)
-        self.assertIs(self.epoch.get_timeseries("test_ts"), epoch_ts)
+        # tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        # ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
+        # epoch_ts = self.epoch.add_timeseries(ts)
+        # self.assertEqual(epoch_ts.count, 100)
+        # self.assertEqual(epoch_ts.idx_start, 90)
+        # self.assertIs(self.epoch.get_timeseries("test_ts"), epoch_ts)
+        pass
 
 
 if __name__ == '__main__':
