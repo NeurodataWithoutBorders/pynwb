@@ -66,7 +66,7 @@ def run_example_tests():
     for root, dirs, files in os.walk(os.path.join(os.path.dirname(__file__), "docs", "gallery")):
         for f in files:
             if f.endswith(".py"):
-                examples_scripts.append(os.path.join(root,f))
+                examples_scripts.append(os.path.join(root, f))
 
     TOTAL += len(examples_scripts)
     for script in examples_scripts:
