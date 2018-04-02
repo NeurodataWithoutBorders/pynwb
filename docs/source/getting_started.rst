@@ -70,7 +70,7 @@ For development an editable install is recommended.
 
    $ pip install -U virtualenv
    $ virtualenv ~/pynwb
-   $ ~/pynwb/bin/activate
+   $ source ~/pynwb/bin/activate
    $ git clone git@github.com:NeurodataWithoutBorders/pynwb.git
    $ cd pynwb
    $ pip install -r requirements.txt -r requirements-dev.txt
@@ -86,7 +86,7 @@ For running the tests, it is required to install the development requirements.
 
    $ pip install -U virtualenv
    $ virtualenv ~/pynwb
-   $ ~/pynwb/bin/activate
+   $ source ~/pynwb/bin/activate
    $ git clone git@github.com:NeurodataWithoutBorders/pynwb.git
    $ cd pynwb
    $ pip install -r requirements.txt -r requirements-dev.txt
