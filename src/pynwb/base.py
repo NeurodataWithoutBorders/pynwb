@@ -47,6 +47,9 @@ class ProcessingModule(MultiContainerInterface):
     def containers(self):
         return self.data_interfaces
 
+    def __getitem__(self, arg):
+        return self.get_data_interface(arg)
+
     @docval({'name': 'container', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
     def add_container(self, **kwargs):
         '''
