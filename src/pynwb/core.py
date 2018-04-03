@@ -495,6 +495,17 @@ class MultiContainerInterface(NWBDataInterface):
     See LFP or Position for an example of how to use this.
     '''
 
+    @docval(*get_docval(NWBDataInterface.__init__))
+    def __init__(self, **kwargs):
+        call_docval_func(super(MultiContainerInterface, self).__init__, kwargs)
+        if isinstance(self.__clsconf__, dict):
+            attr_name = self.__clsconf__['attr']
+            self.fields[attr_name] = LabelledDict(attr_name)
+        else:
+            for d in self.__clsconf__:
+                attr_name = d['attr']
+                self.fields[attr_name] = LabelledDict(attr_name)
+
     @staticmethod
     def __add_article(noun):
         if noun[0] in ('aeiouAEIOU'):
@@ -546,9 +557,6 @@ class MultiContainerInterface(NWBDataInterface):
             else:
                 containers = container
             d = getattr(self, attr_name)
-            if d is None:
-                self.fields[attr_name] = LabelledDict(attr_name)
-                d = self.fields[attr_name]
             for tmp in containers:
                 tmp.parent = self
                 self.add_child(tmp)
@@ -582,8 +590,7 @@ class MultiContainerInterface(NWBDataInterface):
                 func_name='__init__')
         def _func(self, **kwargs):
             source, container = popargs('source', attr_name, kwargs)
-            super(MultiContainerInterface, self).__init__(source, **kwargs)
-            self.fields[attr_name] = LabelledDict(attr_name)
+            super(cls, self).__init__(source, **kwargs)
             add = getattr(self, add_name)
             add(container)
         return _func
@@ -619,16 +626,12 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_setter(cls, nwbfield, add_name):
-        name = nwbfield['name']
 
         @docval({'name': 'val', 'type': (list, tuple, dict), 'doc': 'the sub items to add', 'default': None})
         def nwbbt_setter(self, **kwargs):
             val = getargs('val', kwargs)
             if val is None:
                 return
-            if name in self.fields:
-                msg = "can't set attribute '%s' -- already set" % name
-                raise AttributeError(msg)
             getattr(self, add_name)(val)
 
         return nwbbt_setter
