@@ -222,7 +222,7 @@ class ImageMasks(NWBData):
 
 
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
-class PlaneSegmentation(MultiContainerInterface):
+class PlaneSegmentation(NWBContainer):
     """
     Image segmentation of a specific imaging plane
     """
