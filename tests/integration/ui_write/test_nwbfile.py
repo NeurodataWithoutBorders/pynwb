@@ -112,7 +112,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         container = NWBFile('a test source', 'a test NWB File', 'TEST123',
                             self.start_time, file_create_date=self.create_date)
         self.ts = TimeSeries('test_timeseries', 'example_source', list(range(100, 200, 10)),
-                        'SIunit', timestamps=list(range(10)), resolution=0.1)
+                             'SIunit', timestamps=list(range(10)), resolution=0.1)
         container.add_acquisition(self.ts)
         self.mod = container.create_processing_module('test_module',
                                                       'a test source for a ProcessingModule',
@@ -124,8 +124,9 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         return container
 
     def test_children(self):
-        self.assertIn(self.mod, self.container.children)
         self.assertIn(self.ts, self.container.children)
+        self.assertIn(self.mod, self.container.children)
+        self.assertIn(self.clustering, self.mod.children)
 
     def tearDown(self):
         if os.path.exists(self.path):
