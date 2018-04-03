@@ -221,7 +221,8 @@ class NWBDataInterface(NWBContainer):
 
             def nwbdi_setter(self, val):
                 super_setter(self, val)
-                self.add_child(val)
+                if val is not None:
+                    self.add_child(val)
 
             ret = nwbdi_setter
         return ret
@@ -545,6 +546,9 @@ class MultiContainerInterface(NWBDataInterface):
             else:
                 containers = container
             d = getattr(self, attr_name)
+            if d is None:
+                self.fields[attr_name] = LabelledDict(attr_name)
+                d = self.fields[attr_name]
             for tmp in containers:
                 tmp.parent = self
                 self.add_child(tmp)
@@ -579,7 +583,7 @@ class MultiContainerInterface(NWBDataInterface):
         def _func(self, **kwargs):
             source, container = popargs('source', attr_name, kwargs)
             super(MultiContainerInterface, self).__init__(source, **kwargs)
-            setattr(self, attr_name, dict())
+            self.fields[attr_name] = LabelledDict(attr_name)
             add = getattr(self, add_name)
             add(container)
         return _func
@@ -612,6 +616,22 @@ class MultiContainerInterface(NWBDataInterface):
             return ret
 
         return _func
+
+    @classmethod
+    def __make_setter(cls, nwbfield, add_name):
+        name = nwbfield['name']
+
+        @docval({'name': 'val', 'type': (list, tuple, dict), 'doc': 'the sub items to add', 'default': None})
+        def nwbbt_setter(self, **kwargs):
+            val = getargs('val', kwargs)
+            if val is None:
+                return
+            if name in self.fields:
+                msg = "can't set attribute '%s' -- already set" % name
+                raise AttributeError(msg)
+            getattr(self, add_name)(val)
+
+        return nwbbt_setter
 
     @ExtenderMeta.pre_init
     def __build_class(cls, name, bases, classdict):
@@ -660,7 +680,7 @@ class MultiContainerInterface(NWBDataInterface):
                 aconf = cls._transform_arg(attr)
                 getter = cls._getter(aconf)
                 doc = "a dictionary containing the %s in this %s container" % (container_type.__name__, cls.__name__)
-                setattr(cls, attr, property(getter, cls._setter(aconf), None, doc))
+                setattr(cls, attr, property(getter, cls.__make_setter(aconf, add), None, doc))
 
             # create the add method
             setattr(cls, add, cls.__make_add(add, attr, container_type))
