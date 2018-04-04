@@ -30,7 +30,12 @@ setup_args = {
         'ruamel.yaml',
         'python-dateutil',
         'six',
-        'requests'
+        'requests',
+        'sphinx==1.6.5',
+        'sphinx-gallery',
+        'sphinx_rtd_theme',
+        'matplotlib',
+        'pillow'
     ],
     'packages': pkgs,
     'package_dir': {'': 'src'},

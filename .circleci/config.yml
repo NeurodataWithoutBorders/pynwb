@@ -10,6 +10,7 @@ run-style-check: &run-style-check
 initialize-venv: &initialize-venv
   name: Initialize Virtual Environment
   command: |
+    sudo apt-get install python2.7-dev
     python -m virtualenv ../venv || python -m venv ../venv
     . ../venv/bin/activate
 
@@ -66,6 +67,9 @@ conda-steps: &conda-steps
     - run:
         name: Configure conda
         command: |
+          apt-get update -y
+          apt-get upgrade -y
+          apt-get install -y build-essential
           conda config --set always_yes yes --set changeps1 no
           conda config --add channels conda-forge
           conda install virtualenv
@@ -125,6 +129,12 @@ jobs:
       - TEST_TOX_ENV: "py27"
       - BUILD_TOX_ENV: "build-py27"
     <<: *conda-steps
+    steps:
+      - checkout
+      - run:
+          name: Add subprocess32
+          command: |
+            conda install subprocess32
 
   miniconda35:
     docker:
