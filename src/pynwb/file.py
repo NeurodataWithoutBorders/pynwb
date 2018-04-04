@@ -232,12 +232,12 @@ class NWBFile(MultiContainerInterface):
             self.epochs = Epochs(self.source)
         self.epoch_tags = getargs('epoch_tags', kwargs)
         self.ec_electrodes = getargs('ec_electrodes', kwargs)
-        self.ec_electrode_groups = self._to_dict('ec_electrode_groups', kwargs)
-        self.devices = self._to_dict('devices', kwargs)
+        self.ec_electrode_groups = getargs('ec_electrode_groups', kwargs)
+        self.devices = getargs('devices', kwargs)
 
-        self.ic_electrodes = self._to_dict('ic_electrodes', kwargs)
-        self.imaging_planes = self._to_dict('imaging_planes', kwargs)
-        self.ogen_sites = self._to_dict('ogen_sites', kwargs)
+        self.ic_electrodes = getargs('ic_electrodes', kwargs)
+        self.imaging_planes = getargs('imaging_planes', kwargs)
+        self.ogen_sites = getargs('ogen_sites', kwargs)
 
         self.subject = getargs('subject', kwargs)
 
@@ -250,9 +250,6 @@ class NWBFile(MultiContainerInterface):
         ]
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
-
-    def _to_dict(self, label, const_args):
-        return super(NWBFile, self)._to_dict(getargs(label, const_args), label)
 
     def __build_ts(self, ts_type, kwargs):
         ret = LabelledDict(ts_type)
