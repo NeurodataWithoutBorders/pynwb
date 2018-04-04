@@ -65,7 +65,7 @@ nwbfile.add_stimulus(ccss)
 ####################
 # .. _icephys_writing:
 #
-# Once you have finished adding all of your data to the :py:class:`~pynwb.NWBFile`,
+# Once you have finished adding all of your data to the :py:class:`~pynwb.file.NWBFile`,
 # write the file with :py:class:`~pynwb.NWBHDF5IO`.
 
 from pynwb import NWBHDF5IO
@@ -78,7 +78,7 @@ io.close()
 # For more details on :py:class:`~pynwb.NWBHDF5IO`, see the :ref:`basic tutorial <basic_writing>`.
 
 ####################
-# .. _ecephys_reading:
+# .. _icephys_reading:
 #
 # Reading electrophysiology data
 # ------------------------------
@@ -91,9 +91,9 @@ nwbfile = io.read()
 ####################
 # For details on retrieving data from an :py:class:`~pynwb.file.NWBFile`, we refer the reader to the
 # :ref:`basic tutorial <basic_reading>`. For this tutorial, we will just get back our the
-# :py:class:`~pynwb.ecephys.ElectricalSeries` object we added above.
+# :py:class:`~pynwb.icephys.CurrentClampStimulusSeries` object we added above.
 #
-# First, get the  :py:class:`~pynwb.icephys.CurentClampStimulusSeries` we added as stimulus data.
+# First, get the :py:class:`~pynwb.icephys.CurrentClampStimulusSeries` we added as stimulus data.
 
 ccss = nwbfile.get_stimulus('ccss')
 
@@ -103,7 +103,7 @@ ccss = nwbfile.get_stimulus('ccss')
 elec = nwbfile.get_ic_electrode('elec0')
 
 ####################
-# Alternatively, we can also get this electrode from the :py:class:`~pynwb.icephys.CurentClampStimulusSeries`
-# we retrieved above.
+# Alternatively, we can also get this electrode from the :py:class:`~pynwb.icephys.CurrentClampStimulusSeries`
+# we retrieved above. This is exposed via the :py:meth:`~pynwb.icephys.PatchClampSeries.electrode` attribute.
 
 elec = ccss.electrode

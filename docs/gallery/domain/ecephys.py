@@ -160,7 +160,7 @@ nwbfile.add_acquisition(ephys_ts)
 ####################
 # .. _ecephys_writing:
 #
-# Once you have finished adding all of your data to the :py:class:`~pynwb.NWBFile`,
+# Once you have finished adding all of your data to the :py:class:`~pynwb.file.NWBFile`,
 # write the file with :py:class:`~pynwb.NWBHDF5IO`.
 
 from pynwb import NWBHDF5IO
