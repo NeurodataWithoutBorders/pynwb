@@ -203,7 +203,7 @@ class NWBFile(MultiContainerInterface):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
         pkwargs['name'] = 'root'
         super(NWBFile, self).__init__(*pargs, **pkwargs)
-        self.__start_time = datetime.utcnow()
+        self.__start_time = datetime.utcnow().isoformat() + "Z"
         # set version
         version = getargs('version', kwargs)
         if version is None:
@@ -216,7 +216,7 @@ class NWBFile(MultiContainerInterface):
             self.__session_start_time = parse_date(self.__session_start_time)
         self.__file_create_date = getargs('file_create_date', kwargs)
         if self.__file_create_date is None:
-            self.__file_create_date = datetime.utcnow()
+            self.__file_create_date = datetime.utcnow().isoformat() + "Z"
         if isinstance(self.__file_create_date, datetime):
             self.__file_create_date = [self.__file_create_date]
         elif isinstance(self.__file_create_date, str):
