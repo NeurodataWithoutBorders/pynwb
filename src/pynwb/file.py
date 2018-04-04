@@ -216,7 +216,7 @@ class NWBFile(MultiContainerInterface):
             self.__session_start_time = parse_date(self.__session_start_time)
         self.__file_create_date = getargs('file_create_date', kwargs)
         if self.__file_create_date is None:
-            self.__file_create_date = datetime.now()
+            self.__file_create_date = datetime.utcnow()
         if isinstance(self.__file_create_date, datetime):
             self.__file_create_date = [self.__file_create_date]
         elif isinstance(self.__file_create_date, str):
