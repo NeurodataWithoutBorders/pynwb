@@ -522,20 +522,22 @@ class MultiContainerInterface(NWBDataInterface):
         def _func(self, **kwargs):
             name = getargs('name', kwargs)
             d = getattr(self, attr_name)
-            if len(d) == 0:
-                msg = "%s '%s' is empty" % (cls.__name__, self.name)
-                raise ValueError(msg)
-            if len(d) > 1 and name is None:
-                msg = "more than one %s in this %s -- must specify a name" % container_type.__name__, cls.__name__
-                raise ValueError(msg)
             ret = None
-            if len(d) == 1:
-                for v in d.values():
-                    ret = v
+            if name is None:
+                if len(d) > 1:
+                    msg = "more than one element in %s of %s '%s' -- must specify a name" % \
+                          (attr_name, cls.__name__, self.name)
+                    raise ValueError(msg)
+                elif len(d) == 0:
+                    msg = "%s of %s '%s' is empty" % (attr_name, cls.__name__, self.name)
+                    raise ValueError(msg)
+                elif len(d) == 1:
+                    for v in d.values():
+                        ret = v
             else:
                 ret = d.get(name)
                 if ret is None:
-                    msg = "'%s' not found in %s '%s'" % (name, cls.__name__, self.name)
+                    msg = "'%s' not found in %s of %s '%s'" % (name, attr_name, cls.__name__, self.name)
                     raise KeyError(msg)
             return ret
 
