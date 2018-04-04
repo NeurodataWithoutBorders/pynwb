@@ -4,8 +4,8 @@
 NWB basics
 ==========
 
-This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
-including writing and reading of and NWB file.
+This tutorial will focus on the basics of working with a :py:class:`~pynwb.file.NWBFile` object,
+including writing and reading of a NWB file.
 
 """
 
@@ -32,19 +32,19 @@ nwbfile = NWBFile('PyNWB tutorial', 'demonstrate NWBFile basics', 'NWB123', star
 #
 # PyNWB stores time series data using the :py:class:`~pynwb.base.TimeSeries` class and its subclasses.
 # The main components of a :py:class:`~pynwb.base.TimeSeries` are the *data* and the *timestamps*.
-# You will also need to supply a *source* and *description* of the data and the unit for *data*.
+# You will also need to supply a *source* and *description* of the *data* and the *unit* for *data*.
 
 from pynwb import TimeSeries
 
 data = list(range(100, 200, 10))
 timestamps = list(range(10))
-test_ts = TimeSeries('test_timeseries', 'PyNWB tutorial', data, 'SIunit', timestamps=timestamps)
+test_ts = TimeSeries('test_timeseries', 'PyNWB tutorial', data, unit='SIunit', timestamps=timestamps)
 
 ####################
 # Alternatively, if your recordings are sampled at a uniform rate, you can supply *starting_time*
 # and *rate*.
 
-test_ts = TimeSeries('test_timeseries', 'PyNWB tutorial', data, 'SIunit', starting_time=0.0, rate=1.0)
+test_ts = TimeSeries('test_timeseries', 'PyNWB tutorial', data, unit='SIunit', starting_time=0.0, rate=1.0)
 
 ####################
 # Using this scheme says that this :py:class:`~pynwb.base.TimeSeries` started recording 0 seconds after
