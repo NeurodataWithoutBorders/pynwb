@@ -110,6 +110,8 @@ class TestMapNWBContainer(unittest.TestCase):
                         self.assertTrue(np.array_equal(f1.data, f2))
                     elif isinstance(f2, NWBData):
                         self.assertTrue(np.array_equal(f1.data, f2))
+                elif isinstance(f1, float) and isinstance(f2, float) and np.isnan(f1) and np.isnan(f2):
+                    self.assertTrue(True)
                 else:
                     if isinstance(f1, float):
                         self.assertAlmostEqual(f1, f2)
