@@ -291,13 +291,35 @@ class PlaneSegmentation(NWBContainer):
         index = getargs('index', kwargs)
         return self.rois[index]['image_mask']
 
-    @docval({'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'rois'})
+    @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
+            {'name': 'names', 'type': (list, tuple), 'doc': 'the names of the ROIs', 'default': None},
+            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table',
+             'default': None},
+            {'name': 'name', 'type': str, 'doc': 'the name of the ROITableRegion', 'default': 'rois'})
     def create_roi_table_region(self, **kwargs):
-        region = getargs('region', kwargs)
         desc = getargs('description', kwargs)
         name = getargs('name', kwargs)
+        region = getargs('region', kwargs)
+        names = getargs('names', kwargs)
+        if region is None and names is None:
+            msg = "must provide 'region' or 'names'"
+            raise ValueError(msg)
+        elif names is not None:
+            region = list()
+            for n in names:
+                idx = self.rois.which(name=n)
+                if len(idx) == 0:
+                    msg = "no ROI named '%s'" % n
+                    raise ValueError(msg)
+                region.append(idx[0])
+            # collapse into a slice if we can
+            consecutive = True
+            for i in range(1, len(region)):
+                if region[i] - region[i-1] != 1:
+                    consecutive = False
+                    break
+            if consecutive:
+                region = slice(region[0], region[-1]+1)
         return ROITableRegion(self.rois, region, desc, name)
 
 
