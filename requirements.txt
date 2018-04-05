@@ -8,3 +8,8 @@ requests==2.18.4
 ruamel.yaml==0.15.35
 six==1.11.0
 urllib3==1.22
+sphinx==1.6.5
+sphinx-gallery==0.1.13
+sphinx_rtd_theme==0.2.4
+matplotlib==2.2.2
+pillow==5.1.0
