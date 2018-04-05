@@ -425,8 +425,10 @@ class NWBTable(NWBData):
             msg = "no '%s' column in %s" % (colname, self.__class__.__name__)
             raise KeyError(msg)
         ret = list()
-        for i, row in enumerate(self.data):
-            if row[idx] == value:
+        for i in range(len(self.data)):
+            row = self.data[i]
+            row_val = row[idx]
+            if row_val == value:
                 ret.append(i)
         return ret
 
