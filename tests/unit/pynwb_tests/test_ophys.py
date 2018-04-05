@@ -65,7 +65,7 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
-        rt_region = ip.create_roi_table_region([1], 'the second ROI')
+        rt_region = ip.create_roi_table_region('the second ROI', region=[1])
 
         ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', rt_region, timestamps=list())
         self.assertEqual(ts.name, 'test_ts')
@@ -78,7 +78,7 @@ class DfOverFConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
-        rt_region = ip.create_roi_table_region([1], 'the second ROI')
+        rt_region = ip.create_roi_table_region('the second ROI', region=[1])
 
         rrs = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', rt_region, timestamps=list())
 
@@ -91,7 +91,7 @@ class FluorescenceConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
-        rt_region = ip.create_roi_table_region([1], 'the second ROI')
+        rt_region = ip.create_roi_table_region('the second ROI', region=[1])
 
         ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', rt_region, timestamps=list())
 
