@@ -19,7 +19,7 @@ class TestExtension(unittest.TestCase):
             os.remove(path)
 
     def test_export(self):
-        ns_builder = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension")
+        ns_builder = NWBNamespaceBuilder('Extension for us in my Lab', "mylab")
         ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
                             attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
                             neurodata_type_inc='ElectricalSeries',
@@ -33,7 +33,7 @@ class TestExtension(unittest.TestCase):
 
     def test_get_class(self):
         self.test_load_namespace()
-        TetrodeSeries = get_class('TetrodeSeries', 'pynwb_test_extension')  # noqa: F841
+        TetrodeSeries = get_class('TetrodeSeries', 'mylab')  # noqa: F841
 
 
 class TestCatchDupNS(unittest.TestCase):
