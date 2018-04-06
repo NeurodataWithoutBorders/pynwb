@@ -1,6 +1,9 @@
 import unittest2 as unittest
 from datetime import datetime
 import os
+import difflib
+import pprint
+from unittest2.util import _common_shorten_repr
 import numpy as np
 
 from pynwb import NWBContainer, get_manager, NWBFile, NWBData
@@ -35,6 +38,18 @@ class TestMapNWBContainer(unittest.TestCase):
     @property
     def manager(self):
         return self.__manager
+
+    def assertDictEqual(self, d1, d2, msg=None):
+        self.assertIsInstance(d1, dict, 'First argument is not a dictionary')
+        self.assertIsInstance(d2, dict, 'Second argument is not a dictionary')
+
+        if d1 != d2:
+            standardMsg = '%s != %s' % _common_shorten_repr(d1, d2)
+            diff = ('\n' + '\n'.join(difflib.ndiff(
+                           pprint.pformat(d1).splitlines(),
+                           pprint.pformat(d2).splitlines())))
+            standardMsg = self._truncateMessage(standardMsg, diff)
+            self.fail(self._formatMessage(msg, standardMsg))
 
     def test_build(self):
         try:
