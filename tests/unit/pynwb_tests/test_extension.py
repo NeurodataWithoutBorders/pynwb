@@ -72,3 +72,28 @@ class TestCatchDupNS(unittest.TestCase):
         load_namespaces(os.path.join(self.tempdir, self.ns_path1))
         with self.assertRaises(KeyError):
             load_namespaces(os.path.join(self.tempdir, self.ns_path2))
+
+
+class TestCatchDuplicateSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.ext_source = 'fake_extension3.yaml'
+
+    def tearDown(self):
+        pass
+
+    def test_catch_duplicate_spec(self):
+        spec1 = NWBGroupSpec("This is my new group 1",
+                             "Group1",
+                             neurodata_type_inc="NWBDataInterface",
+                             neurodata_type_def="Group1")
+        spec2 = NWBGroupSpec("This is my new group 2",
+                             "Group2",
+                             groups=[spec1],
+                             neurodata_type_inc="NWBDataInterface",
+                             neurodata_type_def="Group2")
+        ns_builder = NWBNamespaceBuilder("Example namespace",
+                                         "pynwb_test_ext")
+        ns_builder.add_spec(self.ext_source, spec1)
+        with self.assertRaises(ValueError):
+            ns_builder.add_spec(self.ext_source, spec2)
