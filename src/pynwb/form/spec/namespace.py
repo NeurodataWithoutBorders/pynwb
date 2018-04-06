@@ -363,6 +363,8 @@ class NamespaceCatalog(object):
         types_key = self.__spec_namespace_cls.types_key()
         # now load specs into namespace
         for ns in namespaces:
+            if ns['name'] in self.__namespaces:
+                raise KeyError("namespace '%s' already exists" % ns['name'])
             catalog = SpecCatalog()
             included_types = dict()
             for s in ns['schema']:
