@@ -337,6 +337,40 @@ class NamespaceCatalog(object):
         for subspec_dict in it:
             self.__resolve_includes(subspec_dict, catalog)
 
+    def __load_namespace(self, namespace, reader, types_key, resolve=True):
+        ns_name = namespace['name']
+        if ns_name in self.__namespaces:
+            raise KeyError("namespace '%s' already exists" % ns_name)
+        catalog = SpecCatalog()
+        included_types = dict()
+        for s in namespace['schema']:
+            if 'source' in s:
+                # read specs from file
+                dtypes = None
+                if types_key in s:
+                    dtypes = set(s[types_key])
+                self.__load_spec_file(reader, s['source'], catalog, dtypes=dtypes, resolve=resolve)
+                self.__included_sources.setdefault(ns_name, list()).append(s['source'])
+            elif 'namespace' in s:
+                # load specs from namespace
+                try:
+                    inc_ns = self.get_namespace(s['namespace'])
+                except KeyError:
+                    raise ValueError("Could not load namespace '%s'" % s['namespace'])
+                if types_key in s:
+                    types = s[types_key]
+                else:
+                    types = inc_ns.get_registered_types()
+                for ndt in types:
+                    spec = inc_ns.get_spec(ndt)
+                    spec_file = inc_ns.catalog.get_spec_source_file(ndt)
+                    catalog.register_spec(spec, spec_file)
+                included_types[s['namespace']] = tuple(types)
+        # construct namespace
+        self.add_namespace(ns_name,
+                           self.__spec_namespace_cls.build_namespace(catalog=catalog, **namespace))
+        return included_types
+
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
             {'name': 'resolve',
              'type': bool,
@@ -366,33 +400,6 @@ class NamespaceCatalog(object):
                 raise KeyError("namespace '%s' already exists" % ns['name'])
         # now load specs into namespace
         for ns in namespaces:
-            catalog = SpecCatalog()
-            included_types = dict()
-            for s in ns['schema']:
-                if 'source' in s:
-                    # read specs from file
-                    dtypes = None
-                    if types_key in s:
-                        dtypes = set(s[types_key])
-                    self.__load_spec_file(reader, s['source'], catalog, dtypes=dtypes, resolve=resolve)
-                    self.__included_sources.setdefault(ns['name'], list()).append(s['source'])
-                elif 'namespace' in s:
-                    # load specs from namespace
-                    try:
-                        inc_ns = self.get_namespace(s['namespace'])
-                    except KeyError:
-                        raise ValueError("Could not load namespace '%s'" % s['namespace'])
-                    if types_key in s:
-                        types = s[types_key]
-                    else:
-                        types = inc_ns.get_registered_types()
-                    for ndt in types:
-                        spec = inc_ns.get_spec(ndt)
-                        spec_file = inc_ns.catalog.get_spec_source_file(ndt)
-                        catalog.register_spec(spec, spec_file)
-                    included_types[s['namespace']] = tuple(types)
-            ret[ns['name']] = included_types
-            # construct namespace
-            self.add_namespace(ns['name'], self.__spec_namespace_cls.build_namespace(catalog=catalog, **ns))
+            ret[ns['name']] = self.__load_namespace(ns, reader, types_key, resolve=resolve)
         self.__included_specs[namespace_path] = ret
         return ret
