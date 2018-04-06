@@ -21,8 +21,8 @@ def CreatePlaneSegmentation():
                       'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
     pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
-    pS.add_roi(pix_mask[0:3], img_mask[0])
-    pS.add_roi(pix_mask[3:5], img_mask[1])
+    pS.add_roi("1234", pix_mask[0:3], img_mask[0])
+    pS.add_roi("5678", pix_mask[3:5], img_mask[1])
     return pS
 
 
@@ -65,7 +65,7 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
-        rt_region = ip.create_roi_table_region([1], 'the second ROI')
+        rt_region = ip.create_roi_table_region('the second ROI', region=[1])
 
         ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', rt_region, timestamps=list())
         self.assertEqual(ts.name, 'test_ts')
@@ -78,7 +78,7 @@ class DfOverFConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
-        rt_region = ip.create_roi_table_region([1], 'the second ROI')
+        rt_region = ip.create_roi_table_region('the second ROI', region=[1])
 
         rrs = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', rt_region, timestamps=list())
 
@@ -91,7 +91,7 @@ class FluorescenceConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
-        rt_region = ip.create_roi_table_region([1], 'the second ROI')
+        rt_region = ip.create_roi_table_region('the second ROI', region=[1])
 
         ts = RoiResponseSeries('test_ts', 'a hypothetical source', list(), 'unit', rt_region, timestamps=list())
 
@@ -128,8 +128,8 @@ class PlaneSegmentationConstructor(unittest.TestCase):
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
         pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
-        pS.add_roi(pix_mask[0:3], img_mask[0])
-        pS.add_roi(pix_mask[3:5], img_mask[1])
+        pS.add_roi("1234", pix_mask[0:3], img_mask[0])
+        pS.add_roi("5678", pix_mask[3:5], img_mask[1])
 
         self.assertEqual(pS.description, 'description')
         self.assertEqual(pS.source, 'test source')

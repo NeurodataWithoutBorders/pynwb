@@ -59,7 +59,8 @@ _et_docval = [
     {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
     {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
     {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-    {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'}
+    {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
+    {'name': 'group_name', 'type': str, 'doc': 'the ElectrodeGroup object to add to this NWBFile', 'default': None}
 ]
 
 
@@ -74,7 +75,6 @@ class ElectrodeTable(NWBTable):
     def __init__(self, **kwargs):
         data, name = getargs('data', 'name', kwargs)
         colnames = [i['name'] for i in _et_docval]
-        colnames.append('group_name')
         super(ElectrodeTable, self).__init__(colnames, name, data)
 
     @docval(*_et_docval)
