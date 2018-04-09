@@ -231,7 +231,7 @@ class UnitTimes(NWBDataInterface):
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
     def get_unit_spike_times(self, **kwargs):
         index = getargs('index', kwargs)
-        return self.__iv.get_vector(index)
+        return np.array(self.__iv.get_vector(index))
 
     @docval({'name': 'unit_id', 'type': int, 'doc': 'the unit to add spike times for'},
             {'name': 'spike_times', 'type': ('array_data',), 'doc': 'the spike times for the unit'},
