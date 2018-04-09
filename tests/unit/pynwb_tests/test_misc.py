@@ -2,7 +2,7 @@ import unittest
 
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, UnitTimes
 
-from . import ContainerRoundTrip
+from .base import ContainerRoundTrip
 
 
 class AnnotationSeriesConstructor(unittest.TestCase):
