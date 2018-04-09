@@ -7,8 +7,8 @@ from pynwb import load_namespaces, get_class
 
 from pynwb.ecephys import Device, ElectrodeGroup, ElectrodeTableRegion
 
-from .base import ContainerRoundTrip
-from .test_ephys import make_electrode_table
+from base import ContainerRoundTrip
+from test_ephys import make_electrode_table
 
 
 class TestExtension(unittest.TestCase):

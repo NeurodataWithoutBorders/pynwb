@@ -2,7 +2,7 @@ import unittest
 
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, UnitTimes
 
-from .base import ContainerRoundTrip
+from base import ContainerRoundTrip
 
 
 class AnnotationSeriesConstructor(unittest.TestCase):
@@ -80,9 +80,9 @@ class UnitTimesConstructor(unittest.TestCase):
         ut.add_spike_times(0, [0, 1, 2])
         ut.add_spike_times(1, [3, 4, 5])
 
-        with ContainerRoundTrip(ut) as ut:
-            self.assertEqual(ut.get_unit_spike_times(0), [0, 1, 2])
-            self.assertEqual(ut.get_unit_spike_times(1), [3, 4, 5])
+        with ContainerRoundTrip(ut) as ut_read:
+            self.assertEqual(ut_read.get_unit_spike_times(0), [0, 1, 2])
+            self.assertEqual(ut_read.get_unit_spike_times(1), [3, 4, 5])
 
 
 if __name__ == '__main__':
