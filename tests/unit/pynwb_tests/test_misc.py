@@ -81,6 +81,8 @@ class UnitTimesConstructor(unittest.TestCase):
         ut.add_spike_times(1, [3, 4, 5])
 
         with ContainerRoundTrip(ut) as ut2:
+            self.assertEqual(type(ut.get_unit_spike_times(0)),
+                             type(ut2.get_unit_spike_times(0)))
             self.assertEqual(ut2.get_unit_spike_times(0), [0, 1, 2])
             self.assertEqual(ut2.get_unit_spike_times(1), [3, 4, 5])
 
