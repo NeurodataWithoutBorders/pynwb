@@ -5,6 +5,11 @@ from tempfile import gettempdir
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 from pynwb import load_namespaces, get_class
 
+from pynwb.ecephys import Device, ElectrodeGroup, ElectrodeTableRegion
+
+from base import ContainerRoundTrip
+from test_ephys import make_electrode_table
+
 
 class TestExtension(unittest.TestCase):
 
@@ -34,6 +39,22 @@ class TestExtension(unittest.TestCase):
     def test_get_class(self):
         self.test_load_namespace()
         TetrodeSeries = get_class('TetrodeSeries', 'pynwb_test_extension')  # noqa: F841
+
+    def round_trip(self):
+        self.test_load_namespace()
+        TetrodeSeries = get_class('TetrodeSeries', 'pynwb_test_extension')  # noqa: F841
+
+        dev1 = Device('dev1', 'a test source')  # noqa: F405
+        group = ElectrodeGroup(  # noqa: F405, F841
+            'tetrode1', 'a test source', 'tetrode description', 'tetrode location', dev1)
+        table = make_electrode_table()
+        region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
+        container = TetrodeSeries('test_eS', 'a hypothetical source',
+                                  [0, 1, 2, 3], region,
+                                  timestamps=[0.1, 0.2, 0.3, 0.4], trode_id=1)
+
+        with ContainerRoundTrip(container) as c:
+            pass
 
 
 class TestCatchDupNS(unittest.TestCase):
