@@ -26,8 +26,6 @@ class ContainerRoundTrip:
             io.write(nwbfile)
         self.io = NWBHDF5IO(self.filename, 'r')
         nwbfile = self.io.read()
-        #import pdb
-        #pdb.set_trace()
         container = list(nwbfile.modules['test'].containers.values())[0]
 
         return container
