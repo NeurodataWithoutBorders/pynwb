@@ -13,8 +13,8 @@ class ContainerRoundTrip:
         nwbfile = NWBFile(source='source',
                           session_description='session_description',
                           identifier='identifier',
-                          session_start_time=datetime.now(),
-                          file_create_date=datetime.now(),
+                          session_start_time=datetime(2018, 1, 1),
+                          file_create_date=datetime(2018, 1, 1),
                           institution='institution',
                           lab='lab')
         module = nwbfile.create_processing_module('test',
