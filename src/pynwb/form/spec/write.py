@@ -8,6 +8,7 @@ from abc import ABCMeta, abstractmethod
 
 from .namespace import SpecNamespace
 from .spec import GroupSpec, DatasetSpec
+from .catalog import SpecCatalog
 
 from ..utils import docval, getargs, popargs
 
@@ -59,6 +60,7 @@ class NamespaceBuilder(object):
         self.__ns_args = copy.deepcopy(kwargs)
         self.__namespaces = OrderedDict()
         self.__sources = OrderedDict()
+        self.__catalog = SpecCatalog()
         self.__dt_key = ns_cls.types_key()
 
     @docval({'name': 'source', 'type': str, 'doc': 'the path to write the spec to'},
@@ -66,6 +68,7 @@ class NamespaceBuilder(object):
     def add_spec(self, **kwargs):
         ''' Add a Spec to the namespace '''
         source, spec = getargs('source', 'spec', kwargs)
+        self.__catalog.auto_register(spec, source)
         self.add_source(source)
         self.__sources[source].setdefault(self.__dt_key, list()).append(spec)
 
