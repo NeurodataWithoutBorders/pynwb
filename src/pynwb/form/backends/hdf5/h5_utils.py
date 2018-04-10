@@ -1,5 +1,5 @@
 from copy import copy
-from six import binary_type
+from six import binary_type, text_type
 from h5py import Group, Dataset, RegionReference, Reference, special_dtype
 import json
 
@@ -46,6 +46,29 @@ class H5TableDataset(H5Dataset):
                 self.__refgetters[i] = self.__get_regref
             elif t is Reference:
                 self.__refgetters[i] = self.__get_ref
+        tmp = list()
+        for i in range(len(self.dataset.dtype)):
+            sub = self.dataset.dtype[i]
+            if sub.metadata:
+                if 'vlen' in sub.metadata:
+                    t = sub.metadata['vlen']
+                    if t is text_type:
+                        tmp.append('utf')
+                    elif t is binary_type:
+                        tmp.append('ascii')
+                elif 'ref' in sub.metadata:
+                    t = sub.metadata['ref']
+                    if t is Reference:
+                        tmp.append('object')
+                    elif t is RegionReference:
+                        tmp.append('region')
+            else:
+                tmp.append(sub.type.__name__)
+        self.__dtype = tmp
+
+    @property
+    def dtype(self):
+        return self.__dtype
 
     def __getitem__(self, arg):
         rows = copy(super(H5TableDataset, self).__getitem__(arg))
@@ -75,6 +98,10 @@ class H5ReferenceDataset(H5Dataset):
         ref = super(H5ReferenceDataset, self).__getitem__(arg)
         return self.io.get_container(self.dataset.file[ref])
 
+    @property
+    def dtype(self):
+        return 'object'
+
 
 class H5RegionDataset(H5ReferenceDataset):
 
@@ -82,6 +109,10 @@ class H5RegionDataset(H5ReferenceDataset):
         obj = super(H5RegionDataset, self).__getitem__(arg)
         ref = self.dataset[arg]
         return obj[ref]
+
+    @property
+    def dtype(self):
+        return 'region'
 
 
 class H5SpecWriter(SpecWriter):
