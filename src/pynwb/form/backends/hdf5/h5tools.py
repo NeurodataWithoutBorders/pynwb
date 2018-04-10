@@ -13,7 +13,7 @@ from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildMa
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, GroupSpec
 from ...spec import NamespaceBuilder
 
-from .h5_utils import H5Dataset, H5ReferenceDataset, H5RegionDataset, H5TableDataset,\
+from .h5_utils import H5ReferenceDataset, H5RegionDataset, H5TableDataset,\
                       H5DataIO, H5SpecReader, H5SpecWriter
 
 from ..io import FORMIO
@@ -271,8 +271,8 @@ class HDF5IO(FORMIO):
             d = None
             if h5obj.dtype.kind == 'O':    # read list of strings or list of references
                 elem1 = h5obj[0]
-                if isinstance(elem1, text_type):
-                    d = H5Dataset(h5obj, self)
+                if isinstance(elem1, (text_type, binary_type)):
+                    d = h5obj[()]
                 elif isinstance(elem1, RegionReference):
                     d = H5RegionDataset(h5obj, self)
                 elif isinstance(elem1, Reference):
@@ -528,7 +528,6 @@ class HDF5IO(FORMIO):
                 parent[name] = link
             # Copy the dataset
             else:
-                print("Copying dataset")
                 parent.copy(source=data,
                             dest=parent,
                             name=name,
@@ -617,7 +616,7 @@ class HDF5IO(FORMIO):
         # write a "regular" dataset
         else:
             # Write a scalar dataset containing a single string
-            if isinstance(data, str):
+            if isinstance(data, (text_type, binary_type)):
                 dset = self.__scalar_fill__(parent, name, data, options)
             # Iterative write of a data chunk iterator
             elif isinstance(data, AbstractDataChunkIterator):

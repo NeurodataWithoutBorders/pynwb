@@ -1,19 +1,21 @@
 import numpy as np
 from abc import ABCMeta, abstractmethod
+from copy import copy
 from itertools import chain
 
 from ..utils import docval, getargs
-from ..data_utils import get_type, get_shape
+from ..data_utils import get_shape
 
-from ..spec import Spec, AttributeSpec, GroupSpec, DatasetSpec
-from ..spec.spec import BaseStorageSpec
+from ..spec import Spec, AttributeSpec, GroupSpec, DatasetSpec, RefSpec
+from ..spec.spec import BaseStorageSpec, simplify_cpd_type
 from ..spec import SpecNamespace
 
-from ..build import GroupBuilder, DatasetBuilder, LinkBuilder
+from ..build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder, RegionBuilder
 from ..build.builders import BaseBuilder
 
-from .errors import *  # noqa: F403
-from six import with_metaclass, raise_from
+from .errors import DtypeError, MissingError, MissingDataType, ShapeError
+from six import with_metaclass, raise_from, text_type, binary_type
+
 
 __valid_dtypes = {
     'float': float,
@@ -22,24 +24,121 @@ __valid_dtypes = {
     'int': int,
     'int32': np.int32,
     'int16': np.int16,
-    'text': str,
-    'str': str
+    'text': text_type,
+    'region': 'region',
+    'object': 'object',
 }
+
+__synonyms = {
+    'float': ["float", "float32"],
+    'double': ["double", "float64"],
+    'short': ["int16", "short"],
+    'int': ["int32", "int"],
+    'long': ["int64", "long"],
+    'utf': ["text", "utf", "utf8", "utf-8"],
+    'ascii': ["ascii", "bytes"],
+    'uint8': ["uint8"],
+    'uint16': ["uint16"],
+    'uint32': ["uint32", "uint"],
+    'uint64': ["uint64"],
+    'object': ['object'],
+    'region': ['region']
+}
+
+__additional = {
+    'float': ['double'],
+    'short': ['int', 'long'],
+    'int': ['long'],
+    'uint8': ['uint16', 'uint32', 'uint64'],
+    'uint16': ['uint32', 'uint64'],
+    'uint32': ['uint64'],
+}
+
+__allowable = dict()
+for dt, dt_syn in __synonyms.items():
+    allow = copy(dt_syn)
+    if dt in __additional:
+        for addl in __additional[dt]:
+            allow.extend(__synonyms[addl])
+    for syn in dt_syn:
+        __allowable[syn] = allow
 
 
 def check_type(expected, received):
-    expected_type = __valid_dtypes.get(expected)
-    if expected_type is None:
-        raise ValueError("Unrecognized type: '%s'" % expected)
-    return expected_type is received
+    '''
+    *expected* should come from the spec
+    *received* should come from the data
+    '''
+    if isinstance(expected, list):
+        if len(expected) > len(received):
+            raise ValueError('compound type shorter than expected')
+        for i, exp in enumerate(simplify_cpd_type(expected)):
+            rec = received[i]
+            if rec not in __allowable[exp]:
+                return False
+        return True
+    else:
+        if isinstance(received, np.dtype):
+            if received.char == 'O':
+                if 'vlen' in received.metadata:
+                    received = received.metadata['vlen']
+                else:
+                    raise ValueError("Unrecognized type: '%s'" % received)
+                received = 'utf' if received is text_type else 'ascii'
+            elif received.char == 'U':
+                received in 'utf'
+            elif received.char == 'S':
+                received in 'ascii'
+            else:
+                received = received.name
+        elif isinstance(received, type):
+            received = received.__name__
+        if isinstance(expected, RefSpec):
+            expected = expected.reftype
+        elif isinstance(expected, type):
+            expected = expected.__name__
+        return received in __allowable[expected]
+
+
+def get_type(data):
+    if isinstance(data, text_type):
+        return 'utf'
+    elif isinstance(data, binary_type):
+        return 'ascii'
+    elif isinstance(data, RegionBuilder):
+        return 'region'
+    elif isinstance(data, ReferenceBuilder):
+        return 'object'
+    if not hasattr(data, '__len__'):
+        return type(data).__name__
+    else:
+        if hasattr(data, 'dtype'):
+            return data.dtype
+        if len(data) == 0:
+            raise ValueError('cannot determine type for empty data')
+        return get_type(data[0])
 
 
 def check_shape(expected, received):
     ret = False
-    if received == expected:
+    if expected is None:
         ret = True
-    elif received in expected:
-        ret = True
+    else:
+        if isinstance(expected, (list, tuple)):
+            if isinstance(expected[0], (list, tuple)):
+                for sub in expected:
+                    if check_shape(sub, received):
+                        ret = True
+                        break
+            else:
+                if len(expected) == len(received):
+                    ret = True
+                    for e, r in zip(expected, received):
+                        if not check_shape(e, r):
+                            ret = False
+                            break
+        elif isinstance(expected, int):
+            ret = expected == received
     return ret
 
 
@@ -95,17 +194,17 @@ class AttributeValidator(Validator):
             returns='a list of Errors', rtype=list)
     def validate(self, **kwargs):
         value = getargs('value', kwargs)
-        spec = self.spec
         ret = list()
+        spec = self.spec
         if spec.required and value is None:
-            ret.append(MissingError(self.get_spec_loc(spec)))  # noqa: F405
+            ret.append(MissingError(self.get_spec_loc(spec)))
         else:
             dtype = get_type(value)
             if not check_type(spec.dtype, dtype):
-                ret.append(DtypeError(self.get_spec_loc(spec), spec.dtype, dtype))  # noqa: F405
+                ret.append(DtypeError(self.get_spec_loc(spec), spec.dtype, dtype))
             shape = get_shape(value)
             if not check_shape(spec.shape, shape):
-                ret.append(ShapeError(self.get_spec_loc(spec), spec.shape, shape))  # noqa: F405
+                ret.append(ShapeError(self.get_spec_loc(spec), spec.shape, shape))
         return ret
 
 
@@ -129,9 +228,13 @@ class BaseStorageValidator(Validator):
             attr_val = attributes.get(attr)
             if attr_val is None:
                 if validator.spec.required:
-                    ret.append(MissingError(self.get_spec_loc(validator.spec)))  # noqa: F405
+                    ret.append(MissingError(self.get_spec_loc(validator.spec),
+                                            location=self.get_builder_loc(builder)))
             else:
-                ret.extend(validator.validate(attr_val))
+                errors = validator.validate(attr_val)
+                for err in errors:
+                    err.location = self.get_builder_loc(builder) + ".%s" % validator.spec.name
+                ret.extend(errors)
         return ret
 
 
@@ -159,7 +262,7 @@ class ValidatorMap(object):
         for dt, children in tree.items():
             _list = list()
             for t in children:
-                spec = self.__ns.get_spec(dt)
+                spec = self.__ns.get_spec(t)
                 if isinstance(spec, GroupSpec):
                     val = GroupValidator(spec, self)
                 else:
@@ -239,10 +342,12 @@ class DatasetValidator(BaseStorageValidator):
         data = builder.data
         dtype = get_type(data)
         if not check_type(self.spec.dtype, dtype):
-            ret.append(DtypeError(builder.name, self.spec.dtype, dtype))  # noqa: F405
+            ret.append(DtypeError(self.get_spec_loc(self.spec), self.spec.dtype, dtype,
+                                  location=self.get_builder_loc(builder)))
         shape = get_shape(data)
         if not check_shape(self.spec.shape, shape):
-            ret.append(ShapeError(builder.name, self.spec.shape, shape))  # noqa: F405
+            ret.append(ShapeError(self.get_spec_loc(self.spec), self.spec.shape, shape,
+                                  location=self.get_builder_loc(builder)))
         return ret
 
 
@@ -299,7 +404,8 @@ class GroupValidator(BaseStorageValidator):
                         ret.extend(sub_val.validate(bldr))
                         found = True
             if not found and self.__include_dts[dt].required:
-                ret.append(MissingDataType(self.get_builder_loc(builder), dt))  # noqa: F405
+                ret.append(MissingDataType(self.get_spec_loc(self.spec), dt,
+                                           location=self.get_builder_loc(builder)))
         it = chain(self.__dataset_validators.items(),
                    self.__group_validators.items())
         for name, validator in it:
@@ -310,7 +416,8 @@ class GroupValidator(BaseStorageValidator):
                 def_spec = validator.spec
                 if sub_builder is None:
                     if inc_spec.required:
-                        ret.append(MissingDataType(self.get_builder_loc(builder), def_spec.data_type_def))  # noqa: F405
+                        ret.append(MissingDataType(self.get_spec_loc(def_spec), def_spec.data_type_def,
+                                                   location=self.get_builder_loc(builder)))
                 else:
                     ret.extend(validator.validate(sub_builder))
 
@@ -318,7 +425,7 @@ class GroupValidator(BaseStorageValidator):
                 spec = validator.spec
                 if sub_builder is None:
                     if spec.required:
-                        ret.append(MissingError(self.get_spec_loc(spec)))  # noqa: F405
+                        ret.append(MissingError(self.get_spec_loc(spec), location=self.get_builder_loc(builder)))
                 else:
                     ret.extend(validator.validate(sub_builder))
 

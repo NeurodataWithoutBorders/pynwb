@@ -1,7 +1,7 @@
 groups:
 - attributes:
   - doc: Value is 'an NWB:N file for storing cellular-based neurophysiology data'
-    dtype: str
+    dtype: text
     name: help
     value: an NWB:N file for storing cellular-based neurophysiology data
   datasets:
@@ -76,7 +76,7 @@ groups:
     \ can span multiple stimuli. Different windows into the same time series can\
     \ be achieved by including multiple instances of that time series, each with\
     \ different start/stop times."
-    neurodata_type_inc: Epoch
+    neurodata_type_inc: Epochs
     name: epochs
   - doc: "The home for processing Modules. These modules perform intermediate analysis\
       \ of data that is necessary to perform before scientific analysis. Examples\
@@ -217,7 +217,7 @@ groups:
       groups:
       - attributes:
         - doc: Value is 'A recording device e.g. amplifier'
-          dtype: str
+          dtype: text
           name: help
           value: A recording device e.g. amplifier
         doc: One of possibly many. Information about device and device description.
@@ -250,7 +250,7 @@ groups:
       quantity: '?'
     - attributes:
       - doc: Value is 'Information about the subject'
-        dtype: str
+        dtype: text
         name: help
         value: Information about the subject
       datasets:

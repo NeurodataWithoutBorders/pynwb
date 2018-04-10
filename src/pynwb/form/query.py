@@ -145,6 +145,10 @@ class FORMDataset(with_metaclass(ExtenderMeta, object)):
     def dataset(self):
         return self.__dataset
 
+    @property
+    def dtype(self):
+        return self.__dataset.dtype
+
     def __len__(self):
         return len(self.__dataset)
 
