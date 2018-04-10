@@ -51,7 +51,7 @@ class TestBasicSpec(ValidatorTestBase):
                         datasets=[DatasetSpec('an example dataset', 'int', name='data',
                                               attributes=[AttributeSpec(
                                                   'attr2', 'an example integer attribute', 'int')])],
-                        attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
+                        attributes=[AttributeSpec('attr1', 'an example string attribute', 'text')])
         return (ret,)
 
     def test_invalid_missing(self):
@@ -100,7 +100,7 @@ class TestNestedTypes(ValidatorTestBase):
                         datasets=[DatasetSpec('an example dataset', 'int', name='data',
                                               attributes=[AttributeSpec('attr2', 'an example integer attribute',
                                                                         'int')])],
-                        attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
+                        attributes=[AttributeSpec('attr1', 'an example string attribute', 'text')])
         foo = GroupSpec('A test group that contains a data type',
                         data_type_def='Foo',
                         groups=[GroupSpec('A Bar group for Foos', name='my_bar', data_type_inc='Bar')],
