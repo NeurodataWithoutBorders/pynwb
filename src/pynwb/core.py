@@ -1,5 +1,5 @@
-from collections import Iterable
 from h5py import RegionReference
+import numpy as np
 
 from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
@@ -39,6 +39,21 @@ class LabelledDict(dict):
     @property
     def label(self):
         return self.__label
+
+    def __getitem__(self, args):
+        key = args
+        if '==' in args:
+            key, val = args.split("==")
+            key = key.strip()
+            val = val.strip()
+            if key != 'name':
+                ret = list()
+                for item in self.values():
+                    if getattr(item, key, None) == val:
+                        ret.append(item)
+                return ret if len(ret) else None
+            key = val
+        return super(LabelledDict, self).__getitem__(key)
 
 
 def prepend_string(string, prepend='    '):
@@ -118,21 +133,39 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
         self.__parent = parent_container
 
     @staticmethod
-    def _getter(nwbfield):
-        def _func(self):
-            return self.fields.get(nwbfield)
-        return _func
+    def _transform_arg(nwbfield):
+        tmp = nwbfield
+        if isinstance(tmp, dict):
+            if 'name' not in tmp:
+                raise ValueError("must specify 'name' if using dict in __nwbfields__")
+        else:
+            tmp = {'name': tmp}
+        return tmp
 
-    @staticmethod
-    def _setter(nwbfield):
-        def _func(self, val):
+    @classmethod
+    def _getter(cls, nwbfield):
+        doc = nwbfield.get('doc')
+        name = nwbfield['name']
+
+        def nwbbt_getter(self):
+            return self.fields.get(name)
+
+        setattr(nwbbt_getter, '__doc__', doc)
+        return nwbbt_getter
+
+    @classmethod
+    def _setter(cls, nwbfield):
+        name = nwbfield['name']
+
+        def nwbbt_setter(self, val):
             if val is None:
                 return
-            if nwbfield in self.fields:
-                msg = "can't set attribute '%s' -- already set" % nwbfield
+            if name in self.fields:
+                msg = "can't set attribute '%s' -- already set" % name
                 raise AttributeError(msg)
-            self.fields[nwbfield] = val
-        return _func
+            self.fields[name] = val
+
+        return nwbbt_setter
 
     @ExtenderMeta.pre_init
     def __gather_nwbfields(cls, name, bases, classdict):
@@ -148,9 +181,16 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
                 new_nwbfields = list(cls.__nwbfields__)
                 new_nwbfields[0:0] = bases[-1].__nwbfields__
                 cls.__nwbfields__ = tuple(new_nwbfields)
+        new_nwbfields = list()
+        docs = {dv['name']: dv['doc'] for dv in get_docval(cls.__init__)}
         for f in cls.__nwbfields__:
-            if not hasattr(cls, f):
-                setattr(cls, f, property(cls._getter(f), cls._setter(f)))
+            pconf = cls._transform_arg(f)
+            pname = pconf['name']
+            pconf.setdefault('doc', docs.get(pname))
+            if not hasattr(cls, pname):
+                setattr(cls, pname, property(cls._getter(pconf), cls._setter(pconf)))
+            new_nwbfields.append(pname)
+        cls.__nwbfields__ = tuple(new_nwbfields)
 
     def __str__(self):
         return nwb_repr(self)
@@ -189,7 +229,35 @@ class NWBContainer(NWBBaseType, Container):
 
 @register_class('NWBDataInterface', CORE_NAMESPACE)
 class NWBDataInterface(NWBContainer):
-    pass
+
+    @docval(*get_docval(NWBContainer.__init__))
+    def __init__(self, **kwargs):
+        call_docval_func(super(NWBDataInterface, self).__init__, kwargs)
+        self.__children = list()
+
+    @property
+    def children(self):
+        return tuple(self.__children)
+
+    @docval({'name': 'child', 'type': NWBBaseType,
+             'doc': 'the child NWBContainer or NWBData for this Container', 'default': None})
+    def add_child(self, **kwargs):
+        child = getargs('child', kwargs)
+        self.__children.append(child)
+
+    @classmethod
+    def _setter(cls, nwbfield):
+        super_setter = super(NWBDataInterface, cls)._setter(nwbfield)
+        ret = super_setter
+        if isinstance(nwbfield, dict) and nwbfield.get('child', False):
+
+            def nwbdi_setter(self, val):
+                super_setter(self, val)
+                if val is not None:
+                    self.add_child(val)
+
+            ret = nwbdi_setter
+        return ret
 
 
 @register_class('NWBData', CORE_NAMESPACE)
@@ -198,7 +266,7 @@ class NWBData(NWBBaseType, Data):
     __nwbfields__ = ('help',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': (Iterable, Data), 'doc': 'the source of the data'},
+            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
@@ -211,18 +279,156 @@ class NWBData(NWBBaseType, Data):
     def data(self):
         return self.__data
 
+    def __len__(self):
+        return len(self.__data)
+
+    def __getitem__(self, args):
+        return self.data[args]
+
+    def append(self, arg):
+        if isinstance(self.data, list):
+            self.data.append(arg)
+        elif isinstance(self.data, np.ndarray):
+            self.__data = np.append(self.__data, [arg])
+        else:
+            msg = "NWBData cannot append to object of type '%s'" % type(self.__data)
+            raise ValueError(msg)
+
+    def extend(self, arg):
+        if isinstance(self.data, list):
+            self.data.extend(arg)
+        elif isinstance(self.data, np.ndarray):
+            self.__data = np.append(self.__data, [arg])
+        else:
+            msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
+            raise ValueError(msg)
+
+
+@register_class('VectorData', CORE_NAMESPACE)
+class VectorData(NWBData):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(VectorData, self).__init__, kwargs)
+
+
+@register_class('VectorIndex', CORE_NAMESPACE)
+class VectorIndex(NWBData):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorIndex'},
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'a 1D dataset containing indexes that apply to VectorData object'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(VectorIndex, self).__init__, kwargs)
+
+
+class IndexedVector(object):
+
+    @docval({'name': 'data', 'type': VectorData,
+             'doc': 'the VectorData to maintain'},
+            {'name': 'index', 'type': VectorIndex,
+             'doc': 'a VectorIndex object that indexes this VectorData', 'default': None})
+    def __init__(self, **kwargs):
+        self.__data = popargs('data', kwargs)
+        self.__index = popargs('index', kwargs)
+
+    def add_vector(self, arg):
+        before = len(self.__data)
+        self.__data.extend(arg)
+        rs = get_region_slicer(self.__data, slice(before, before+len(arg)))
+        self.__index.append(rs)
+        return len(self.__index)-1
+
+    def get_vector(self, arg):
+        return self.__index[arg][:]
+
+
+@register_class('ElementIdentifiers', CORE_NAMESPACE)
+class ElementIdentifiers(NWBData):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this ElementIdentifiers'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'a 1D dataset containing identifiers'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(ElementIdentifiers, self).__init__, kwargs)
+
 
 class NWBTable(NWBData):
+    '''
+    Subclasses should specify the class attribute \_\_columns\_\_.
+
+    This should be a list of dictionaries with the following keys:
+    ``'name'`` - the column name
+    ``'type'`` - the type of data in this column
+    ``'doc'``  - a brief description of what gets stored in this column
+
+    For reference, this list of dictionaries will be used with docval to autogenerate
+    the ``add_row`` method for adding data to this table.
+
+    If \_\_columns\_\_ is not specified, no custom ``add_row`` method will be added.
+
+    The class attribute __defaultname__ can also be set to specify a default name
+    for the table class. If \_\_defaultname\_\_ is not specified, then ``name`` will
+    need to be specified when the class is instantiated.
+    '''
+
+    @ExtenderMeta.pre_init
+    def __build_table_class(cls, name, bases, classdict):
+        if hasattr(cls, '__columns__'):
+            columns = getattr(cls, '__columns__')
+
+            idx = dict()
+            for i, col in enumerate(columns):
+                idx[col['name']] = i
+            setattr(cls, '__colidx__', idx)
+
+            if cls.__init__ == bases[-1].__init__:     # check if __init__ is overridden
+                name = {'name': 'name', 'type': str, 'doc': 'the name of this table'}
+                defname = getattr(cls, '__defaultname__', None)
+                if defname is not None:
+                    name['default'] = defname
+
+                @docval(name,
+                        {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table',
+                         'default': list()})
+                def __init__(self, **kwargs):
+                    name, data = getargs('name', 'data', kwargs)
+                    colnames = [i['name'] for i in columns]
+                    super(cls, self).__init__(colnames, name, data)
+
+                setattr(cls, '__init__', __init__)
+
+            if cls.add_row == bases[-1].add_row:     # check if add_row is overridden
+
+                @docval(*columns)
+                def add_row(self, **kwargs):
+                    return super(cls, self).add_row(kwargs)
+
+                setattr(cls, 'add_row', add_row)
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': Iterable, 'doc': 'the source of the data', 'default': list()},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         self.__columns = tuple(popargs('columns', kwargs))
+        self.__col_index = {name: idx for idx, name in enumerate(self.__columns)}
         call_docval_func(super(NWBTable, self).__init__, kwargs)
 
     @property
@@ -235,20 +441,51 @@ class NWBTable(NWBData):
         if not isinstance(self.data, list):
             msg = 'Cannot append row to %s' % type(self.data)
             raise ValueError(msg)
+        ret = len(self.data)
         self.data.append(tuple(values[col] for col in self.columns))
+        return ret
 
-    @docval({'name': 'kwargs', 'type': dict, 'doc': 'the column to query by'})
-    def query(self, **kwargs):
+    def which(self, **kwargs):
         '''
         Query a table
         '''
-        raise NotImplementedError('query')
+        if len(kwargs) != 1:
+            raise ValueError("only one column can be queried")
+        colname, value = kwargs.popitem()
+        idx = self.__colidx__.get(colname)
+        if idx is None:
+            msg = "no '%s' column in %s" % (colname, self.__class__.__name__)
+            raise KeyError(msg)
+        ret = list()
+        for i in range(len(self.data)):
+            row = self.data[i]
+            row_val = row[idx]
+            if row_val == value:
+                ret.append(i)
+        return ret
 
     def __len__(self):
         return len(self.data)
 
-    def __getitem__(self, idx):
-        return self.data[idx]
+    def __getitem__(self, args):
+        idx = args
+        col = None
+        if isinstance(args, tuple):
+            idx = args[1]
+            if isinstance(args[0], str):
+                col = self.__col_index.get(args[0])
+            elif isinstance(args[0], int):
+                col = args[0]
+            else:
+                raise KeyError('first argument must be a column name or index')
+            return self.data[idx][col]
+        elif isinstance(args, str):
+            col = self.__col_index.get(args)
+            if col is None:
+                raise KeyError(args)
+            return [row[col] for row in self.data]
+        else:
+            return self.data[idx]
 
 
 # diamond inheritence
@@ -307,6 +544,17 @@ class MultiContainerInterface(NWBDataInterface):
     See LFP or Position for an example of how to use this.
     '''
 
+    @docval(*get_docval(NWBDataInterface.__init__))
+    def __init__(self, **kwargs):
+        call_docval_func(super(MultiContainerInterface, self).__init__, kwargs)
+        if isinstance(self.__clsconf__, dict):
+            attr_name = self.__clsconf__['attr']
+            self.fields[attr_name] = LabelledDict(attr_name)
+        else:
+            for d in self.__clsconf__:
+                attr_name = d['attr']
+                self.fields[attr_name] = LabelledDict(attr_name)
+
     @staticmethod
     def __add_article(noun):
         if noun[0] in ('aeiouAEIOU'):
@@ -323,20 +571,22 @@ class MultiContainerInterface(NWBDataInterface):
         def _func(self, **kwargs):
             name = getargs('name', kwargs)
             d = getattr(self, attr_name)
-            if len(d) == 0:
-                msg = "%s '%s' is empty" % (cls.__name__, self.name)
-                raise ValueError(msg)
-            if len(d) > 1 and name is None:
-                msg = "more than one %s in this %s -- must specify a name" % container_type.__name__, cls.__name__
-                raise ValueError(msg)
             ret = None
-            if len(d) == 1:
-                for v in d.values():
-                    ret = v
+            if name is None:
+                if len(d) > 1:
+                    msg = "more than one element in %s of %s '%s' -- must specify a name" % \
+                          (attr_name, cls.__name__, self.name)
+                    raise ValueError(msg)
+                elif len(d) == 0:
+                    msg = "%s of %s '%s' is empty" % (attr_name, cls.__name__, self.name)
+                    raise ValueError(msg)
+                elif len(d) == 1:
+                    for v in d.values():
+                        ret = v
             else:
                 ret = d.get(name)
                 if ret is None:
-                    msg = "'%s' not found in %s '%s'" % (name, cls.__name__, self.name)
+                    msg = "'%s' not found in %s of %s '%s'" % (name, attr_name, cls.__name__, self.name)
                     raise KeyError(msg)
             return ret
 
@@ -360,6 +610,7 @@ class MultiContainerInterface(NWBDataInterface):
             d = getattr(self, attr_name)
             for tmp in containers:
                 tmp.parent = self
+                self.add_child(tmp)
                 if tmp.name in d:
                     msg = "'%s' already exists in '%s'" % (tmp.name, self.name)
                     raise ValueError(msg)
@@ -390,8 +641,7 @@ class MultiContainerInterface(NWBDataInterface):
                 func_name='__init__')
         def _func(self, **kwargs):
             source, container = popargs('source', attr_name, kwargs)
-            super(MultiContainerInterface, self).__init__(source, **kwargs)
-            setattr(self, attr_name, dict())
+            super(cls, self).__init__(source, **kwargs)
             add = getattr(self, add_name)
             add(container)
         return _func
@@ -424,6 +674,18 @@ class MultiContainerInterface(NWBDataInterface):
             return ret
 
         return _func
+
+    @classmethod
+    def __make_setter(cls, nwbfield, add_name):
+
+        @docval({'name': 'val', 'type': (list, tuple, dict), 'doc': 'the sub items to add', 'default': None})
+        def nwbbt_setter(self, **kwargs):
+            val = getargs('val', kwargs)
+            if val is None:
+                return
+            getattr(self, add_name)(val)
+
+        return nwbbt_setter
 
     @ExtenderMeta.pre_init
     def __build_class(cls, name, bases, classdict):
@@ -469,9 +731,10 @@ class MultiContainerInterface(NWBDataInterface):
 
             # create property with the name given in 'attr'
             if not hasattr(cls, attr):
-                getter = cls._getter(attr)
+                aconf = cls._transform_arg(attr)
+                getter = cls._getter(aconf)
                 doc = "a dictionary containing the %s in this %s container" % (container_type.__name__, cls.__name__)
-                setattr(cls, attr, property(getter, cls._setter(attr), None, doc))
+                setattr(cls, attr, property(getter, cls.__make_setter(aconf, add), None, doc))
 
             # create the add method
             setattr(cls, add, cls.__make_add(add, attr, container_type))

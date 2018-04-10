@@ -40,9 +40,15 @@ test:
 flake:
 	$(FLAKE) src/
 	$(FLAKE) tests/
+	$(FLAKE) --ignore E402 docs/gallery
+
+checkpdb:
+	find {src,tests} -name "*.py" -exec grep -Hn pdb {} \;
 
 devtest:
-	$(PYTHON) -W ignore test.py && $(MAKE) flake
+	$(PYTHON) -W ignore test.py
+	$(MAKE) flake
+	$(MAKE) checkpdb
 
 apidoc:
 	pip install -r requirements-doc.txt

@@ -19,7 +19,7 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('stimulus_template', stimulus_ts_spec)
 
         epochs_spec = self.spec.get_group('epochs')
-        self.map_spec('epochs', epochs_spec.get_neurodata_type('Epoch'))
+        self.map_spec('epochs', epochs_spec)
 
         general_spec = self.spec.get_group('general')
         self.map_spec(
@@ -41,8 +41,8 @@ class NWBFileMap(ObjectMapper):
             self.spec.get_group('processing').get_neurodata_type('ProcessingModule'))
         self.unmap(general_spec.get_dataset('stimulus'))
 
-        subject_spec = general_spec.get_group('subject')
-        self.map_spec('subject', subject_spec)
+        self.map_spec('subject', general_spec.get_group('subject'))
+        self.map_spec('devices', general_spec.get_group('devices').get_neurodata_type('Device'))
 
     @ObjectMapper.constructor_arg('file_name')
     def name(self, builder, manager):

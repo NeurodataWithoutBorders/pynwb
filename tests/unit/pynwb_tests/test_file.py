@@ -1,6 +1,7 @@
 ''' Tests for NWBFile '''
-import unittest
+import unittest2 as unittest
 import six
+import numpy as np
 
 from datetime import datetime
 
@@ -45,11 +46,11 @@ class NWBFileTest(unittest.TestCase):
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
         tags2 = ['t3', 't4']
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
         expected_tags = tags1 + tags2
-        self.nwbfile.create_epoch(source='a fake source', name='test_epoch1', start=0.0, stop=1.0,
-                                  tags=tags1, descrition='test epoch')
-        self.nwbfile.create_epoch(source='a fake source', name='test_epoch2', start=0.0, stop=1.0,
-                                  tags=tags2, descrition='test epoch')
+        self.nwbfile.create_epoch('a fake epoch', 0.0, 1.0, tags1, ts)
+        self.nwbfile.create_epoch('a second fake epoch', 0.0, 1.0, tags2, ts)
         tags = self.nwbfile.epoch_tags
         six.assertCountEqual(self, expected_tags, tags)
 
@@ -74,6 +75,26 @@ class NWBFileTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.nwbfile.add_acquisition(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
                                                     'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+
+    def test_get_acquisition_empty(self):
+        with self.assertRaisesRegex(ValueError, "acquisition of NWBFile 'root' is empty"):
+            self.nwbfile.get_acquisition()
+
+    def test_get_acquisition_multiple_elements(self):
+        self.nwbfile.add_acquisition(TimeSeries('test_ts1', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+                                                'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.nwbfile.add_acquisition(TimeSeries('test_ts2', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+                                                'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        msg = "more than one element in acquisition of NWBFile 'root' -- must specify a name"
+        with self.assertRaisesRegex(ValueError,  msg):
+            self.nwbfile.get_acquisition()
+
+    def test_add_acquisition_invalid_name(self):
+        self.nwbfile.add_acquisition(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+                                                'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        msg = "'TEST_TS' not found in acquisition of NWBFile 'root'"
+        with self.assertRaisesRegex(KeyError, msg):
+            self.nwbfile.get_acquisition("TEST_TS")
 
 
 class SubjectTest(unittest.TestCase):

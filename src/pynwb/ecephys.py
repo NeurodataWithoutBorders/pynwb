@@ -59,7 +59,8 @@ _et_docval = [
     {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
     {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
     {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-    {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'}
+    {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
+    {'name': 'group_name', 'type': str, 'doc': 'the ElectrodeGroup object to add to this NWBFile', 'default': None}
 ]
 
 
@@ -67,18 +68,18 @@ _et_docval = [
 class ElectrodeTable(NWBTable):
     '''A table of all electrodes'''
 
+    __columns__ = _et_docval
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
     def __init__(self, **kwargs):
         data, name = getargs('data', 'name', kwargs)
         colnames = [i['name'] for i in _et_docval]
-        colnames.append('group_ref')
         super(ElectrodeTable, self).__init__(colnames, name, data)
 
     @docval(*_et_docval)
     def add_row(self, **kwargs):
-        kwargs['group_ref'] = kwargs['group']
-        kwargs['group'] = kwargs['group'].name
+        kwargs['group_name'] = kwargs['group'].name
         super(ElectrodeTable, self).add_row(kwargs)
 
 
@@ -105,7 +106,8 @@ class ElectricalSeries(TimeSeries):
     channels] (or [num_times] for single electrode).
     """
 
-    __nwbfields__ = ('electrodes',)
+    __nwbfields__ = ({'name': 'electrodes',
+                      'doc': 'the electrodes that generated this electrical series', 'child': True},)
 
     __ancestry = "TimeSeries,ElectricalSeries"
     __help = "Stores acquired voltage data from extracellular recordings."

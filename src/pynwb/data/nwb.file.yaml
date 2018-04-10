@@ -59,28 +59,24 @@ groups:
       should be documented so that it is sharable with other labs'
     name: analysis
   - doc: "Experimental intervals, whether that be logically distinct sub-experiments\
-      \ having a particular scientific goal, trials during an experiment, or epochs\
-      \ deriving from analysis of data.  COMMENT: Epochs provide pointers to time\
-      \ series that are relevant to the epoch, and windows into the data in those\
-      \ time series (i.e., the start and end indices of TimeSeries::data[] that overlap\
-      \ with the epoch). This allows easy access to a range of data in specific experimental\
-      \ intervals. MORE_INFO: An experiment can be separated into one or many logical\
-      \ intervals, with the order and duration of these intervals often definable\
-      \ before the experiment starts. In this document, and in the context of NWB,\
-      \ these intervals are called 'epochs'. Epochs have acquisition and stimulus\
-      \ data associated with them, and different epochs can overlap. Examples of epochs\
-      \ are the time when a rat runs around an enclosure or maze as well as intervening\
-      \ sleep sessions; the presentation of a set of visual stimuli to a mouse running\
-      \ on a wheel; or the uninterrupted presentation of current to a patch-clamped\
-      \ cell. Epochs can be limited to the interval of a particular stimulus, or they\
-      \ can span multiple stimuli. Different windows into the same time series can\
-      \ be achieved by including multiple instances of that time series, each with\
-      \ different start/stop times."
-    groups:
-    - doc: 'One of possibly many different experimental epochCOMMENT: Name is arbitrary
-        but must be unique within the experiment.'
-      neurodata_type_inc: Epoch
-      quantity: '*'
+    \ having a particular scientific goal, trials during an experiment, or epochs\
+    \ deriving from analysis of data.  COMMENT: Epochs provide pointers to time\
+    \ series that are relevant to the epoch, and windows into the data in those\
+    \ time series (i.e., the start and end indices of TimeSeries::data[] that overlap\
+    \ with the epoch). This allows easy access to a range of data in specific experimental\
+    \ intervals. MORE_INFO: An experiment can be separated into one or many logical\
+    \ intervals, with the order and duration of these intervals often definable\
+    \ before the experiment starts. In this document, and in the context of NWB,\
+    \ these intervals are called 'epochs'. Epochs have acquisition and stimulus\
+    \ data associated with them, and different epochs can overlap. Examples of epochs\
+    \ are the time when a rat runs around an enclosure or maze as well as intervening\
+    \ sleep sessions; the presentation of a set of visual stimuli to a mouse running\
+    \ on a wheel; or the uninterrupted presentation of current to a patch-clamped\
+    \ cell. Epochs can be limited to the interval of a particular stimulus, or they\
+    \ can span multiple stimuli. Different windows into the same time series can\
+    \ be achieved by including multiple instances of that time series, each with\
+    \ different start/stop times."
+    neurodata_type_inc: Epoch
     name: epochs
   - doc: "The home for processing Modules. These modules perform intermediate analysis\
       \ of data that is necessary to perform before scientific analysis. Examples\
@@ -227,6 +223,7 @@ groups:
         doc: One of possibly many. Information about device and device description.
         neurodata_type_def: Device
         neurodata_type_inc: NWBContainer
+        quantity: '+'
       name: devices
       quantity: '?'
     - datasets:

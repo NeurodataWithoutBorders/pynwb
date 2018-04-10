@@ -5,6 +5,7 @@ from .form.utils import docval, popargs, fmt_docval_args
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer
+from .ecephys import Device
 
 
 @register_class('OptogeneticStimulusSite', CORE_NAMESPACE)
@@ -19,7 +20,7 @@ class OptogeneticStimulusSite(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this stimulus site'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used'},
             {'name': 'description', 'type': str, 'doc': 'Description of site.'},
             {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
             {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})

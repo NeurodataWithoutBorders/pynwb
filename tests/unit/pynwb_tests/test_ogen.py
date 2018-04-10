@@ -1,14 +1,16 @@
 import unittest
 
 from pynwb.ogen import OptogeneticSeries, OptogeneticStimulusSite
+from pynwb.ecephys import Device
 
 
 class OptogeneticSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        oS = OptogeneticStimulusSite('site1', 'a test source', 'device', 'description', 'excitation_lambda', 'location')
+        device = Device('name', 'source')
+        oS = OptogeneticStimulusSite('site1', 'a test source', device, 'description', 'excitation_lambda', 'location')
         self.assertEqual(oS.name, 'site1')
-        self.assertEqual(oS.device, 'device')
+        self.assertEqual(oS.device, device)
         self.assertEqual(oS.description, 'description')
         self.assertEqual(oS.excitation_lambda, 'excitation_lambda')
         self.assertEqual(oS.location, 'location')

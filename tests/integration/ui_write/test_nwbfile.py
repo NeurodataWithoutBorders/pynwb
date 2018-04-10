@@ -58,12 +58,37 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                                            DatasetBuilder('description',
                                                                           "A fake Clustering interface")})})
 
+        tsindex_builder = DatasetBuilder('timeseries_index', [],
+                                         attributes={
+                                              'help': ('Data on how an epoch '
+                                                       'applies to a time series'),
+                                              'namespace': 'core',
+                                              'neurodata_type': 'TimeSeriesIndex',
+                                         })
+        epochs_builder = DatasetBuilder('epochs', [],
+                                        attributes={
+                                             'help': 'A table for storing epoch data',
+                                             'namespace': 'core',
+                                             'neurodata_type': 'EpochTable',
+                                        })
+
         return GroupBuilder('root',
                             groups={'acquisition': GroupBuilder(
                                 'acquisition',
                                 groups={'test_timeseries': ts_builder}),
                                     'analysis': GroupBuilder('analysis'),
-                                    'epochs': GroupBuilder('epochs'),
+                                    'epochs': GroupBuilder('epochs',
+                                                           attributes={
+                                                                'help': 'A general epoch object',
+                                                                'namespace': 'core',
+                                                                'neurodata_type': 'Epochs',
+                                                                'source': 'a test source',
+                                                           },
+                                                           datasets={
+                                                                'timeseries_index': tsindex_builder,
+                                                                'epochs': epochs_builder,
+                                                                 },
+                                                           ),
                                     'general': GroupBuilder('general'),
                                     'processing': GroupBuilder('processing', groups={'test_module': module_builder}),
                                     'stimulus': GroupBuilder(
@@ -86,14 +111,22 @@ class TestNWBFileIO(base.TestMapNWBContainer):
     def setUpContainer(self):
         container = NWBFile('a test source', 'a test NWB File', 'TEST123',
                             self.start_time, file_create_date=self.create_date)
-        ts = TimeSeries('test_timeseries', 'example_source', list(range(100, 200, 10)),
-                        'SIunit', timestamps=list(range(10)), resolution=0.1)
-        container.add_acquisition(ts)
-        mod = container.create_processing_module('test_module', 'a test source for a ProcessingModule', 'a test module')
-        mod.add_container(Clustering("an example source for Clustering",
+        self.ts = TimeSeries('test_timeseries', 'example_source', list(range(100, 200, 10)),
+                             'SIunit', timestamps=list(range(10)), resolution=0.1)
+        container.add_acquisition(self.ts)
+        self.mod = container.create_processing_module('test_module',
+                                                      'a test source for a ProcessingModule',
+                                                      'a test module')
+        self.clustering = Clustering("an example source for Clustering",
                                      "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102],
-                                     list(range(10, 61, 10))))
+                                     list(range(10, 61, 10)))
+        self.mod.add_container(self.clustering)
         return container
+
+    def test_children(self):
+        self.assertIn(self.ts, self.container.children)
+        self.assertIn(self.mod, self.container.children)
+        self.assertIn(self.clustering, self.mod.children)
 
     def tearDown(self):
         if os.path.exists(self.path):
