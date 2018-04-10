@@ -13,7 +13,7 @@ from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildMa
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, GroupSpec
 from ...spec import NamespaceBuilder
 
-from .h5_utils import H5Dataset, H5ReferenceDataset, H5RegionDataset, H5TableDataset,\
+from .h5_utils import H5ReferenceDataset, H5RegionDataset, H5TableDataset,\
                       H5DataIO, H5SpecReader, H5SpecWriter
 
 from ..io import FORMIO
@@ -269,8 +269,8 @@ class HDF5IO(FORMIO):
             d = None
             if h5obj.dtype.kind == 'O':    # read list of strings or list of references
                 elem1 = h5obj[0]
-                if isinstance(elem1, text_type):
-                    d = H5Dataset(h5obj, self)
+                if isinstance(elem1, (text_type, binary_type)):
+                    d = h5obj[()]
                 elif isinstance(elem1, RegionReference):
                     d = H5RegionDataset(h5obj, self)
                 elif isinstance(elem1, Reference):
@@ -488,12 +488,16 @@ class HDF5IO(FORMIO):
     @classmethod
     def isinstance_inmemory_array(cls, data):
         """Check if an object is a common in-memory data structure"""
-        return isinstance(data, list) or \
-            isinstance(data, np.ndarray) or \
-            isinstance(data, tuple) or \
-            isinstance(data, set) or \
-            isinstance(data, str) or \
-            isinstance(data, frozenset)
+        inmem_types = (
+            list,
+            np.ndarray,
+            tuple,
+            set,
+            text_type,
+            binary_type,
+            frozenset
+        )
+        return isinstance(data, inmem_types)
 
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},  # noqa
             {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the DatasetBuilder to write'},
@@ -584,7 +588,7 @@ class HDF5IO(FORMIO):
                         self.set_attributes(dset, attributes)
             return
         else:
-            if isinstance(data, str):
+            if isinstance(data, (text_type, binary_type)):
                 dset = self.__scalar_fill__(parent, name, data, options)
             elif isinstance(data, DataChunkIterator):
                 dset = self.__chunked_iter_fill__(parent, name, data, options)
