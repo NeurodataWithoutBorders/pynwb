@@ -52,6 +52,14 @@ class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
     def recommended_data_shape(self):
         pass
 
+    @abstractmethod
+    def get_dtype(self):
+        pass
+
+    @abstractmethod
+    def get_maxshape(self):
+        pass
+
 
 @docval_macro('array_data')
 class DataChunkIterator(AbstractDataChunkIterator):
@@ -127,6 +135,17 @@ class DataChunkIterator(AbstractDataChunkIterator):
         if self.__next_chunk.data is not None:
             self.dtype = self.__next_chunk.data.dtype
             self.__first_chunk_shape = ShapeValidator.get_data_shape(self.__next_chunk.data)
+
+    @classmethod
+    @docval({'name': 'data', 'type': None, 'doc': 'The data object used for iteration', 'default': None},
+            {'name': 'max_shape', 'type': tuple,
+             'doc': 'The maximum shape of the full data array. Use None to indicate unlimited dimensions',
+             'default': None},
+            {'name': 'dtype', 'type': np.dtype, 'doc': 'The Numpy data type for the array', 'default': None},
+            {'name': 'buffer_size', 'type': int, 'doc': 'Number of values to be buffered in a chunk', 'default': 1},
+            )
+    def from_iterable(cls, **kwargs):
+        return cls(**kwargs)
 
     def __iter__(self):
         """Return the iterator object"""
@@ -211,6 +230,12 @@ class DataChunkIterator(AbstractDataChunkIterator):
             if np.all([i is not None for i in self.max_shape]):
                 return self.max_shape
         return self.__first_chunk_shape
+
+    def get_maxshape(self):
+        return self.max_shape
+
+    def get_dtype(self):
+        return self.dtype
 
 
 class DataChunk(object):
