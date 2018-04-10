@@ -80,7 +80,7 @@ def run_example_tests():
             with warnings.catch_warnings(record=True) as tmp:
                 example = _import_from_file(script)
                 for w in tmp:  # ignore RunTimeWarnings about importing
-                    if not warning_re.match(w.message.message):
+                    if isinstance(w.message, RuntimeWarning) and not warning_re.match(w.message.message):
                         ws.append(w)
             for w in ws:
                 warnings.showwarning(w.message, w.category, w.filename, w.lineno, w.line)
