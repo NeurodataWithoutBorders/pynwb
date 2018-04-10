@@ -1,12 +1,16 @@
 from copy import copy
+from collections import Iterable
 from six import binary_type
 from h5py import Group, Dataset, RegionReference, Reference, special_dtype
 import json
+import h5py
+import numpy as np
+import warnings
 
 from ...query import FORMDataset
 from ...array import Array
 from ...utils import docval, getargs, popargs, call_docval_func
-from ...data_utils import RegionSlicer, DataIO
+from ...data_utils import RegionSlicer, DataIO, AbstractDataChunkIterator
 
 from ...spec import SpecWriter, SpecReader
 
@@ -156,15 +160,87 @@ class H5RegionSlicer(RegionSlicer):
 
 
 class H5DataIO(DataIO):
+    """
+    Wrap data arrays for write via HDF5IO to customize I/O behavior, such as compression and chunking
+    for data arrays.
+    """
 
-    @docval({'name': 'data', 'type': 'array_data', 'doc': 'the data to be written'},
-            {'name': 'compress', 'type': bool,
-             'doc': 'Flag to use gzip compression filter on dataset', 'default': False})
+    @docval({'name': 'data',
+             'type': (np.ndarray, list, tuple, h5py.Dataset, Iterable),
+             'doc': 'the data to be written. NOTE: If an h5py.Dataset is used, all other settings but link_data' +
+                    ' will be ignored as the dataset will either be linked to or copied as is in H5DataIO.'},
+            {'name': 'maxshape',
+             'type': tuple,
+             'doc': 'Dataset will be resizable up to this shape (Tuple). Automatically enables chunking.' +
+                    'Use None for the axes you want to be unlimited.',
+             'default': None},
+            {'name': 'chunks',
+             'type': (bool, tuple),
+             'doc': 'Chunk shape or True ti enable auto-chunking',
+             'default': None},
+            {'name': 'compression',
+             'type': str,
+             'doc': 'Compression strategy. http://docs.h5py.org/en/latest/high/dataset.html#dataset-compression',
+             'default': None},
+            {'name': 'compression_opts',
+             'type': int,
+             'doc': 'Parameter for compression filter',
+             'default': None},
+            {'name': 'fillvalue',
+             'type': None,
+             'doc': 'Value to eb returned when reading uninitalized parts of the dataset',
+             'default': None},
+            {'name': 'shuffle',
+             'type': bool,
+             'doc': 'Enable shuffle I/O filter. http://docs.h5py.org/en/latest/high/dataset.html#dataset-shuffle',
+             'default': None},
+            {'name': 'fletcher32',
+             'type': bool,
+             'doc': 'Enable fletcher32 checksum. http://docs.h5py.org/en/latest/high/dataset.html#dataset-fletcher32',
+             'default': None},
+            {'name': 'link_data',
+             'type': bool,
+             'doc': 'If data is an h5py.Dataset should it be linked to or copied. NOTE: This parameter is only ' +
+                    'allowed if data is an h5py.Dataset',
+             'default': False}
+            )
     def __init__(self, **kwargs):
-        compress = popargs('compress', kwargs)
+        # Get the list of I/O options that user has passed in
+        ioarg_names = [name for name in kwargs.keys() if name not in['data', 'link_data']]
+        # Remove the ioargs from kwargs
+        ioarg_values = [popargs(argname, kwargs) for argname in ioarg_names]
+        # Consume link_data parameter
+        self.__link_data = popargs('link_data', kwargs)
+        # Check for possible collision with other parameters
+        if not isinstance(getargs('data', kwargs), Dataset) and self.__link_data:
+            self.__link_data = False
+            warnings.warn('link_data parameter in H5DataIO will be ignored')
+        # Call the super constructor and consume the data parameter
         call_docval_func(super(H5DataIO, self).__init__, kwargs)
-        self.__compress = compress
+        # Construct the dict with the io args, ignoring all options that were set to None
+        self.__iosettings = {k: v for k, v in zip(ioarg_names, ioarg_values) if v is not None}
+        # Set io_properties for DataChunkIterators
+        if isinstance(self.data, AbstractDataChunkIterator):
+            # Define the chunking options if the user has not set them explicitly.
+            if 'chunks' not in self.__iosettings and self.data.recommended_chunk_shape() is not None:
+                self.__iosettings['chunks'] = self.data.recommended_chunk_shape()
+            # Define the maxshape of the data if not provided by the user
+            if 'maxshape' not in self.__iosettings:
+                self.__iosettings['maxshape'] = self.data.get_maxshape()
+        if 'compression' in self.__iosettings:
+            if self.__iosettings['compression'] != 'gzip':
+                warnings.warn(str(self.__iosettings['compression']) + " compression may not be available" +
+                              "on all installations of HDF5. Use of gzip is recommended to ensure portability of" +
+                              "the generated HDF5 files.")
+        # Check possible parameter collisions
+        if isinstance(self.data, Dataset):
+            for k in self.__iosettings.keys():
+                warnings.warn("%s in H5DataIO will be ignored with H5DataIO.data being an HDF5 dataset" % k)
 
     @property
-    def compress(self):
-        return self.__compress
+    def link_data(self):
+        return self.__link_data
+
+    @property
+    def io_settings(self):
+        return self.__iosettings

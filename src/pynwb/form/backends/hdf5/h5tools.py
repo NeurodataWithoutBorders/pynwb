@@ -1,4 +1,4 @@
-from collections import Iterable, deque
+from collections import deque
 import numpy as np
 import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference, check_dtype
@@ -7,7 +7,7 @@ import warnings
 from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
-from ...data_utils import DataChunkIterator, get_shape
+from ...data_utils import AbstractDataChunkIterator, get_shape
 from ...build import Builder, GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager,\
                      RegionBuilder, ReferenceBuilder, TypeMap
 from ...spec import RefSpec, DtypeSpec, NamespaceCatalog, GroupSpec
@@ -129,9 +129,11 @@ class HDF5IO(FORMIO):
         return ret
 
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'},
-            {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False})
+            {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False},
+            {'name': 'link_data', 'type': bool,
+             'doc': 'If not specified otherwise link (True) or copy (False) HDF5 Datasets', 'default': True})
     def write(self, **kwargs):
-        cache_spec = getargs('cache_spec', kwargs)
+        cache_spec = popargs('cache_spec', kwargs)
         call_docval_func(super(HDF5IO, self).write, kwargs)
         if cache_spec:
             ref = self.__file.attrs.get(SPEC_LOC_ATTR)
@@ -295,13 +297,15 @@ class HDF5IO(FORMIO):
         if self.__file:
             self.__file.close()
 
-    @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'})
+    @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'},
+            {'name': 'link_data', 'type': bool,
+             'doc': 'If not specified otherwise link (True) or copy (False) HDF5 Datasets', 'default': True})
     def write_builder(self, **kwargs):
-        f_builder = getargs('builder', kwargs)
+        f_builder, link_data = getargs('builder', 'link_data', kwargs)
         for name, gbldr in f_builder.groups.items():
             self.write_group(self.__file, gbldr)
         for name, dbldr in f_builder.datasets.items():
-            self.write_dataset(self.__file, dbldr)
+            self.write_dataset(self.__file, dbldr, link_data)
         self.set_attributes(self.__file, f_builder.attributes)
         self.__add_refs()
 
@@ -390,7 +394,7 @@ class HDF5IO(FORMIO):
     @docval({'name': 'obj', 'type': (Group, Dataset), 'doc': 'the HDF5 object to add attributes to'},
             {'name': 'attributes',
              'type': dict,
-             'doc': 'a dict containing the attributes on the Group, indexed by attribute name'})
+             'doc': 'a dict containing the attributes on the Group or Dataset, indexed by attribute name'})
     def set_attributes(self, **kwargs):
         obj, attributes = getargs('obj', 'attributes', kwargs)
         for key, value in attributes.items():
@@ -485,18 +489,10 @@ class HDF5IO(FORMIO):
         parent[name] = link_obj
         return link_obj
 
-    @classmethod
-    def isinstance_inmemory_array(cls, data):
-        """Check if an object is a common in-memory data structure"""
-        return isinstance(data, list) or \
-            isinstance(data, np.ndarray) or \
-            isinstance(data, tuple) or \
-            isinstance(data, set) or \
-            isinstance(data, str) or \
-            isinstance(data, frozenset)
-
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},  # noqa
             {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the DatasetBuilder to write'},
+            {'name': 'link_data', 'type': bool,
+             'doc': 'If not specified otherwise link (True) or copy (False) HDF5 Datasets', 'default': True},
             returns='the Dataset that was created', rtype=Dataset)
     def write_dataset(self, **kwargs):
         """ Write a dataset to HDF5
@@ -504,26 +500,54 @@ class HDF5IO(FORMIO):
         The function uses other dataset-dependent write functions, e.g,
         __scalar_fill__, __list_fill__ and __chunked_iter_fill__ to write the data.
         """
-        parent, builder = getargs('parent', 'builder', kwargs)
+        parent, builder, link_data = getargs('parent', 'builder', 'link_data', kwargs)
         name = builder.name
         data = builder.data
-        options = dict()
+        options = dict()   # dict with additional
         if isinstance(data, H5DataIO):
-            options['compression'] = 'gzip' if data.compress else None
+            options['io_settings'] = data.io_settings
+            link_data = data.link_data
             data = data.data
+        else:
+            options['io_settings'] = {}
         attributes = builder.attributes
         options['dtype'] = builder.dtype
         dset = None
         link = None
-        if isinstance(options['dtype'], list):
+
+        # The user provided an existing h5py dataset as input and asked to create a link to the dataset
+        if isinstance(data, Dataset):
+            # Create a Soft/External link to the dataset
+            if link_data:
+                data_filename = os.path.abspath(data.file.filename)
+                parent_filename = os.path.abspath(parent.file.filename)
+                if data_filename != parent_filename:
+                    link = ExternalLink(os.path.relpath(data_filename, os.path.dirname(parent_filename)), data.name)
+                else:
+                    link = SoftLink(data.name)
+                parent[name] = link
+            # Copy the dataset
+            else:
+                print("Copying dataset")
+                parent.copy(source=data,
+                            dest=parent,
+                            name=name,
+                            expand_soft=False,
+                            expand_external=False,
+                            expand_refs=False,
+                            without_attrs=True)
+                dset = parent[name]
+        #  Write a compound dataset, i.e, a dataset with compound data type
+        elif isinstance(options['dtype'], list):
             # do some stuff to figure out what data is a reference
             refs = list()
             for i, dts in enumerate(options['dtype']):
                 if self.__is_ref(dts):
                     refs.append(i)
+            # If one ore more of the parts of the compound data type are references then we need to deal with those
             if len(refs) > 0:
                 _dtype = self.__resolve_dtype__(options['dtype'], data)
-                dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype)
+                dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype, **options['io_settings'])
 
                 @self.__queue_ref
                 def _filler():
@@ -537,10 +561,14 @@ class HDF5IO(FORMIO):
                     dset[:] = ret
                     self.set_attributes(dset, attributes)
                 return
+            # If the compound data type contains only regular data (i.e., no references) then we can write it as usual
             else:
                 dset = self.__list_fill__(parent, name, data, options)
+        # Write a dataset containing references, i.e., a region or object reference.
+        # NOTE: we can ignore options['io_settings'] for scalar data
         elif self.__is_ref(options['dtype']):
             _dtype = self.__dtypes[options['dtype']]
+            # Write a scalar data region reference dataset
             if isinstance(data, RegionBuilder):
                 dset = parent.require_dataset(name, shape=(), dtype=_dtype)
 
@@ -550,7 +578,7 @@ class HDF5IO(FORMIO):
                     dset = parent[name]
                     dset[()] = ref
                     self.set_attributes(dset, attributes)
-
+            # Write a scalar object reference dataset
             elif isinstance(data, ReferenceBuilder):
                 dset = parent.require_dataset(name, dtype=_dtype, shape=())
 
@@ -560,9 +588,11 @@ class HDF5IO(FORMIO):
                     dset = parent[name]
                     dset[()] = ref
                     self.set_attributes(dset, attributes)
+            # Write an array dataset of references
             else:
+                # Write a array of region references
                 if options['dtype'] == 'region':
-                    dset = parent.require_dataset(name, dtype=_dtype, shape=(len(data),))
+                    dset = parent.require_dataset(name, dtype=_dtype, shape=(len(data),), **options['io_settings'])
 
                     @self.__queue_ref
                     def _filler():
@@ -572,8 +602,9 @@ class HDF5IO(FORMIO):
                         dset = parent[name]
                         dset[()] = refs
                         self.set_attributes(dset, attributes)
+                # Write array of object references
                 else:
-                    dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype)
+                    dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype, ** options['io_settings'])
 
                     @self.__queue_ref
                     def _filler():
@@ -583,28 +614,27 @@ class HDF5IO(FORMIO):
                         dset = parent[name]
                         self.set_attributes(dset, attributes)
             return
+        # write a "regular" dataset
         else:
+            # Write a scalar dataset containing a single string
             if isinstance(data, str):
                 dset = self.__scalar_fill__(parent, name, data, options)
-            elif isinstance(data, DataChunkIterator):
+            # Iterative write of a data chunk iterator
+            elif isinstance(data, AbstractDataChunkIterator):
                 dset = self.__chunked_iter_fill__(parent, name, data, options)
-            elif isinstance(data, Dataset):
-                data_filename = os.path.abspath(data.file.filename)
-                parent_filename = os.path.abspath(parent.file.filename)
-                if data_filename != parent_filename:
-                    link = ExternalLink(os.path.relpath(data_filename, os.path.dirname(parent_filename)), data.name)
-                else:
-                    link = SoftLink(data.name)
-                parent[name] = link
-            elif isinstance(data, Iterable) and not self.isinstance_inmemory_array(data):
-                dset = self.__chunked_iter_fill__(parent, name, DataChunkIterator(data=data, buffer_size=100), options)
+            # Write a regular in memory array (e.g., numpy array, list etc.)
             elif hasattr(data, '__len__'):
                 dset = self.__list_fill__(parent, name, data, options)
+            # Write a regular scalar dataset
             else:
                 dset = self.__scalar_fill__(parent, name, data, options)
+        # Create the attributes on the dataset only if we are the primary and not just a Soft/External link
         if link is None:
             self.set_attributes(dset, attributes)
-        return dset
+        # Validate the attributes on the linked dataset
+        elif len(attributes) > 0:
+            pass
+        return
 
     @classmethod
     def __selection_max_bounds__(cls, selection):
@@ -621,14 +651,14 @@ class HDF5IO(FORMIO):
     @classmethod
     def __scalar_fill__(cls, parent, name, data, options=None):
         dtype = None
-        compression = None
+        io_settings = {}
         if options is not None:
             dtype = options.get('dtype')
-            compression = options.get('compression')
+            io_settings = options.get('io_settings')
         if not isinstance(dtype, type):
             dtype = cls.__resolve_dtype__(dtype, data)
         try:
-            dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype, compression=compression)
+            dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype, **io_settings)
         except Exception as exc:
             msg = "Could not create scalar dataset %s in %s" % (name, parent.name)
             raise_from(Exception(msg), exc)
@@ -645,19 +675,28 @@ class HDF5IO(FORMIO):
         :type name: str
         :param data: The data to be written.
         :type data: DataChunkIterator
-        :param options: options for creating a dataset. available options are 'dtype' and 'compression'
+        :param options: Dict with options for creating a dataset. available options are 'dtype' and 'io_settings'
         :type data: dict
 
         """
-        compression = None
+        io_settings = {}
         if options is not None:
-            compression = options.get('compression')
-        recommended_chunks = data.recommended_chunk_shape()
-        chunks = True if recommended_chunks is None else recommended_chunks
-        baseshape = data.recommended_data_shape()
+            if 'io_settings' in options:
+                io_settings = options.get('io_settings')
+        # Define the chunking options if the user has not set them explicitly. We need chunking for the iterative write.
+        if 'chunks' not in io_settings:
+            recommended_chunks = data.recommended_chunk_shape()
+            io_settings['chunks'] = True if recommended_chunks is None else recommended_chunks
+        # Define the shape of the data if not provided by the user
+        if 'shape' not in io_settings:
+            io_settings['shape'] = data.recommended_data_shape()
+        # Define the maxshape of the data if not provided by the user
+        if 'maxshape' not in io_settings:
+            io_settings['maxshape'] = data.get_maxshape()
+        if 'dtype' not in io_settings:
+            io_settings['dtype'] = data.get_dtype()
         try:
-            dset = parent.create_dataset(name, shape=baseshape, dtype=data.dtype,
-                                         maxshape=data.max_shape, chunks=chunks, compression=compression)
+            dset = parent.create_dataset(name, **io_settings)
         except Exception as exc:
             raise_from(Exception("Could not create dataset %s in %s" % (name, parent.name)), exc)
         for chunk_i in data:
@@ -678,22 +717,28 @@ class HDF5IO(FORMIO):
 
     @classmethod
     def __list_fill__(cls, parent, name, data, options=None):
-        compression = None
+        # define the io settings and data type if necessary
+        io_settings = {}
         dtype = None
         if options is not None:
             dtype = options.get('dtype')
-            compression = options.get('compression')
+            io_settings = options.get('io_settings')
         if not isinstance(dtype, type):
             dtype = cls.__resolve_dtype__(dtype, data)
-        if isinstance(dtype, np.dtype):
+        # define the data shape
+        if 'shape' in io_settings:
+            data_shape = io_settings.pop('shape')
+        elif isinstance(dtype, np.dtype):
             data_shape = (len(data),)
         else:
             data_shape = get_shape(data)
+        # Create the dataset
         try:
-            dset = parent.create_dataset(name, shape=data_shape, dtype=dtype, compression=compression)
+            dset = parent.create_dataset(name, shape=data_shape, dtype=dtype, **io_settings)
         except Exception as exc:
             msg = "Could not create dataset %s in %s" % (name, parent.name)
             raise_from(Exception(msg), exc)
+        # Write the data
         if len(data) > dset.shape[0]:
             new_shape = list(dset.shape)
             new_shape[0] = len(data)
