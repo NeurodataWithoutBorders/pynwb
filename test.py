@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+import warnings
+import re
 import argparse
 import inspect
 import logging
@@ -59,6 +61,8 @@ def _import_from_file(script):
     return imp.load_source(os.path.basename(script), script)
 
 
+warning_re = re.compile("Parent module '[a-zA-Z0-9]+' not found while handling absolute import")
+
 def run_example_tests():
     global TOTAL, FAILURES, ERRORS
     logging.info('running example tests')
@@ -72,7 +76,14 @@ def run_example_tests():
     for script in examples_scripts:
         try:
             logging.info("Executing %s" % script)
-            example = _import_from_file(script)
+            ws = list()
+            with warnings.catch_warnings(record=True) as tmp:
+                example = _import_from_file(script)
+                for w in tmp:  # ignore RunTimeWarnings about importing
+                    if not warning_re.match(w.message.message):
+                        ws.append(w)
+            for w in ws:
+                warnings.showwarning(w.message, w.category, w.filename, w.lineno, w.line)
         except Exception:
             print(traceback.format_exc())
             FAILURES += 1
