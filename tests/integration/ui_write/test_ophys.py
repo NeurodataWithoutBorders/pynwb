@@ -180,8 +180,8 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         self.pix_mask = deepcopy(pix_mask)
         pS = PlaneSegmentation('integration test PlaneSegmentation', 'plane segmentation description',
                                self.imaging_plane, 'test_plane_seg_name', self.image_series)
-        pS.add_roi(pix_mask[0:3], img_mask[0])
-        pS.add_roi(pix_mask[3:5], img_mask[1])
+        pS.add_roi('1234', pix_mask[0:3], img_mask[0])
+        pS.add_roi('5678', pix_mask[3:5], img_mask[1])
         return pS
 
     @staticmethod
@@ -248,9 +248,9 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                                    'help': 'an array of image masks'})
 
         self.rois_builder = DatasetBuilder('rois', [
-                                            (RegionBuilder(slice(0, 3), self.pixel_masks_builder),
+                                            ('1234', RegionBuilder(slice(0, 3), self.pixel_masks_builder),
                                              RegionBuilder([0], self.image_masks_builder)),
-                                            (RegionBuilder(slice(3, 5), self.pixel_masks_builder),
+                                            ('5678', RegionBuilder(slice(3, 5), self.pixel_masks_builder),
                                              RegionBuilder([1], self.image_masks_builder))
                                         ],
                                         attributes={
@@ -304,7 +304,7 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
 
     def setUpContainer(self):
         self.plane_segmentation = TestPlaneSegmentation.buildPlaneSegmentation(self)
-        self.rt_region = self.plane_segmentation.create_roi_table_region([0], 'the first of two ROIs')
+        self.rt_region = self.plane_segmentation.create_roi_table_region('the first of two ROIs', region=[0])
 
         data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
         timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]

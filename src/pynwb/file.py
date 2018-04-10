@@ -96,7 +96,7 @@ class NWBFile(MultiContainerInterface):
         },
         {
             'attr': 'modules',
-            'add': 'add_processing_modules',
+            'add': 'add_processing_module',
             'type': ProcessingModule,
             'create': 'create_processing_module',
             'get': 'get_processing_module'
@@ -144,7 +144,7 @@ class NWBFile(MultiContainerInterface):
                      'session_id',
                      'lab',
                      'institution',
-                     'ec_electrodes',
+                     {'name': 'ec_electrodes', 'child': True},
                      'epochs',
                      'subject',
                      'epoch_tags',)
@@ -222,22 +222,22 @@ class NWBFile(MultiContainerInterface):
         elif isinstance(self.__file_create_date, str):
             self.__file_create_date = [parse_date(self.__file_create_date)]
 
-        self.acquisition = self.__build_ts('acquisition', kwargs)
-        self.stimulus = self.__build_ts('stimulus', kwargs)
-        self.stimulus_template = self.__build_ts('stimulus_template', kwargs)
+        self.acquisition = getargs('acquisition', kwargs)
+        self.stimulus = getargs('stimulus', kwargs)
+        self.stimulus_template = getargs('stimulus_template', kwargs)
 
-        self.modules = self._to_dict('modules', kwargs)
+        self.modules = getargs('modules', kwargs)
         self.epochs = getargs('epochs', kwargs)
         if self.epochs is None:
             self.epochs = Epochs(self.source)
         self.epoch_tags = getargs('epoch_tags', kwargs)
-        self.__ec_electrodes = getargs('ec_electrodes', kwargs)
-        self.ec_electrode_groups = self._to_dict('ec_electrode_groups', kwargs)
-        self.devices = self._to_dict('devices', kwargs)
+        self.ec_electrodes = getargs('ec_electrodes', kwargs)
+        self.ec_electrode_groups = getargs('ec_electrode_groups', kwargs)
+        self.devices = getargs('devices', kwargs)
 
-        self.ic_electrodes = self._to_dict('ic_electrodes', kwargs)
-        self.imaging_planes = self._to_dict('imaging_planes', kwargs)
-        self.ogen_sites = self._to_dict('ogen_sites', kwargs)
+        self.ic_electrodes = getargs('ic_electrodes', kwargs)
+        self.imaging_planes = getargs('imaging_planes', kwargs)
+        self.ogen_sites = getargs('ogen_sites', kwargs)
 
         self.subject = getargs('subject', kwargs)
 
@@ -251,15 +251,23 @@ class NWBFile(MultiContainerInterface):
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
 
-    def _to_dict(self, label, const_args):
-        return super(NWBFile, self)._to_dict(getargs(label, const_args), label)
-
     def __build_ts(self, ts_type, kwargs):
         ret = LabelledDict(ts_type)
         const_arg = getargs(ts_type, kwargs)
         if const_arg:
             for ts in const_arg:
                 self.__set_timeseries(ret, ts)
+        return ret
+
+    def all_children(self):
+        stack = [self]
+        ret = list()
+        while len(stack):
+            n = stack.pop()
+            ret.append(n)
+            if hasattr(n, 'children'):
+                for c in n.children:
+                    stack.append(c)
         return ret
 
     @property
@@ -282,27 +290,23 @@ class NWBFile(MultiContainerInterface):
     def session_start_time(self):
         return self.__session_start_time
 
-    @property
-    def ec_electrodes(self):
-        return self.__ec_electrodes
-
     @docval(*get_docval(ElectrodeTable.add_row))
     def add_electrode(self, **kwargs):
-        if self.__ec_electrodes is None:
-            self.__ec_electrodes = ElectrodeTable('electrodes')
-        call_docval_func(self.__ec_electrodes.add_row, kwargs)
+        if self.ec_electrodes is None:
+            self.ec_electrodes = ElectrodeTable('electrodes')
+        return call_docval_func(self.ec_electrodes.add_row, kwargs)
 
     @docval({'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
             {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
     def create_electrode_table_region(self, **kwargs):
-        if self.__ec_electrodes is None:
+        if self.ec_electrodes is None:
             msg = "no electrodes available. add electrodes before creating a region"
             raise RuntimeError(msg)
         region = getargs('region', kwargs)
         desc = getargs('description', kwargs)
         name = getargs('name', kwargs)
-        return ElectrodeTableRegion(self.__ec_electrodes, region, desc, name)
+        return ElectrodeTableRegion(self.ec_electrodes, region, desc, name)
 
     def is_acquisition(self, ts):
         return self.__exists(ts, self.__acquisition)
@@ -400,8 +404,9 @@ class NWBFile(MultiContainerInterface):
 
     @docval({'name': 'electrode_table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):
-        if self.__ec_electrodes is not None:
+        if self.ec_electrodes is not None:
             msg = 'ElectrodeTable already exists, cannot overwrite'
             raise ValueError(msg)
         electrode_table = getargs('electrode_table', kwargs)
-        self.__ec_electrodes = electrode_table
+        electrode_table.parent = self
+        self.ec_electrodes = electrode_table

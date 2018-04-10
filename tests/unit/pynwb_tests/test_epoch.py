@@ -29,14 +29,14 @@ class EpochTableTest(unittest.TestCase):
         tsi.add_row(40, 105, ts)
         ept = EpochTable()
         self.assertEqual(ept.name, 'epochs')
-        ept.add_row('a test epoch', 10.0, 20.0, "test,unittest,pynwb", ListSlicer(tsi.data, slice(0, 1)))
+        ept.add_row(10.0, 20.0, "test,unittest,pynwb", ListSlicer(tsi.data, slice(0, 1)), 'a test epoch')
         row = ept[0]
-        self.assertEqual(row[0], 'a test epoch')
-        self.assertEqual(row[1], 10.0)
-        self.assertEqual(row[2], 20.0)
-        self.assertEqual(row[3], "test,unittest,pynwb")
-        self.assertEqual(row[4].data, tsi.data)
-        self.assertEqual(row[4].region, slice(0, 1))
+        self.assertEqual(row[0], 10.0)
+        self.assertEqual(row[1], 20.0)
+        self.assertEqual(row[2], "test,unittest,pynwb")
+        self.assertEqual(row[3].data, tsi.data)
+        self.assertEqual(row[3].region, slice(0, 1))
+        self.assertEqual(row[4], 'a test epoch')
 
 
 class EpochSetters(unittest.TestCase):

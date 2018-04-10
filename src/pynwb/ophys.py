@@ -167,6 +167,7 @@ class TwoPhotonSeries(ImageSeries):
 
 
 _roit_docval = [
+    {'name': 'name', 'type': str, 'help': 'a name for this ROI'},
     {'name': 'pixel_mask', 'type': RegionSlicer, 'help': 'a region into a PixelMasks'},
     {'name': 'image_mask', 'type': RegionSlicer, 'help': 'a region into an ImageMasks'},
 ]
@@ -222,7 +223,7 @@ class ImageMasks(NWBData):
 
 
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
-class PlaneSegmentation(MultiContainerInterface):
+class PlaneSegmentation(NWBContainer):
     """
     Image segmentation of a specific imaging plane
     """
@@ -262,19 +263,20 @@ class PlaneSegmentation(MultiContainerInterface):
         self.image_masks = im if isinstance(im, ImageMasks) else ImageMasks(im)
         self.rois = ROITable() if rois is None else rois
 
-    @docval({'name': 'pixel_mask', 'type': 'array_data',
+    @docval({'name': 'name', 'type': str, 'help': 'a name for this ROI'},
+            {'name': 'pixel_mask', 'type': 'array_data',
              'doc': 'the index of the ROI in roi_ids to retrieve the pixel mask for'},
             {'name': 'image_mask', 'type': 'array_data',
              'doc': 'the index of the ROI in roi_ids to retrieve the pixel mask for'})
     def add_roi(self, **kwargs):
-        pixel_mask, image_mask = getargs('pixel_mask', 'image_mask', kwargs)
+        name, pixel_mask, image_mask = getargs('name', 'pixel_mask', 'image_mask', kwargs)
         n_rois = len(self.rois)
         im_region = get_region_slicer(self.image_masks, [n_rois])
         self.image_masks.append(image_mask)
         n_pixels = len(self.pixel_masks)
         self.pixel_masks.extend(pixel_mask)
         pm_region = get_region_slicer(self.pixel_masks, slice(n_pixels, n_pixels + len(pixel_mask)))
-        self.rois.add_row(pm_region, im_region)
+        self.rois.add_row(name, pm_region, im_region)
         return n_rois+1
 
     @docval({'name': 'index', 'type': int,
@@ -289,13 +291,35 @@ class PlaneSegmentation(MultiContainerInterface):
         index = getargs('index', kwargs)
         return self.rois[index]['image_mask']
 
-    @docval({'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'rois'})
+    @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
+            {'name': 'names', 'type': (list, tuple), 'doc': 'the names of the ROIs', 'default': None},
+            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table',
+             'default': None},
+            {'name': 'name', 'type': str, 'doc': 'the name of the ROITableRegion', 'default': 'rois'})
     def create_roi_table_region(self, **kwargs):
-        region = getargs('region', kwargs)
         desc = getargs('description', kwargs)
         name = getargs('name', kwargs)
+        region = getargs('region', kwargs)
+        names = getargs('names', kwargs)
+        if region is None and names is None:
+            msg = "must provide 'region' or 'names'"
+            raise ValueError(msg)
+        elif names is not None:
+            region = list()
+            for n in names:
+                idx = self.rois.which(name=n)
+                if len(idx) == 0:
+                    msg = "no ROI named '%s'" % n
+                    raise ValueError(msg)
+                region.append(idx[0])
+            # collapse into a slice if we can
+            consecutive = True
+            for i in range(1, len(region)):
+                if region[i] - region[i-1] != 1:
+                    consecutive = False
+                    break
+            if consecutive:
+                region = slice(region[0], region[-1]+1)
         return ROITableRegion(self.rois, region, desc, name)
 
 

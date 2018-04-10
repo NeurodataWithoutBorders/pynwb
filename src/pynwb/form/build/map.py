@@ -653,8 +653,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             const_arg = self.get_const_arg(subspec)
             if const_arg is not None:
                 const_args[const_arg] = value
-        # build args and kwargs for the constructor
-        args = list()
+        # build kwargs for the constructor
         kwargs = dict()
         for const_arg in get_docval(cls.__init__):
             argname = const_arg['name']
@@ -665,15 +664,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 val = const_args[argname]
             else:
                 continue
-            if 'default' in const_arg:
-                kwargs[argname] = val
-            else:
-                args.append(val)
+            kwargs[argname] = val
         try:
-            obj = cls(*args, **kwargs)
+            obj = cls(**kwargs)
         except Exception as ex:
-            details = '%s: %s (%s)' % (ex, cls.__name__, builder.name)
-            msg = 'Could not construct %s object\n    %s' % (cls.__name__, details)
+            msg = 'Could not construct %s object' % cls.__name__
             raise_from(Exception(msg), ex)
         return obj
 
@@ -998,10 +993,12 @@ class TypeMap(object):
     def register_container_type(self, **kwargs):
         ''' Map a container class to a data_type '''
         namespace, data_type, container_cls = getargs('namespace', 'data_type', 'container_cls', kwargs)
-        self.__ns_catalog.get_spec(namespace, data_type)    # make sure the spec exists
+        spec = self.__ns_catalog.get_spec(namespace, data_type)    # make sure the spec exists
         self.__container_types.setdefault(namespace, dict())
         self.__container_types[namespace][data_type] = container_cls
         self.__data_types.setdefault(container_cls, (namespace, data_type))
+        setattr(container_cls, spec.type_key(), data_type)
+        setattr(container_cls, 'namespace', namespace)
 
     @docval({"name": "container_cls", "type": type,
              "doc": "the Container class for which the given ObjectMapper class gets used for"},
