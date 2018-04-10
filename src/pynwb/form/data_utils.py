@@ -17,21 +17,12 @@ def __get_shape_helper(data):
 
 
 def get_shape(data):
-    if hasattr(data, '__len__') and not isinstance(data, str):
+    if isinstance(data, dict):
+        return None
+    elif hasattr(data, '__len__') and not isinstance(data, str):
         return __get_shape_helper(data)
     else:
         return None
-
-
-def get_type(data):
-    if isinstance(data, str):
-        return str
-    if not hasattr(data, '__len__'):
-        return type(data)
-    else:
-        if len(data) == 0:
-            raise ValueError('cannot determine type for empty data')
-        return get_type(data[0])
 
 
 class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):

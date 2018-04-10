@@ -1,5 +1,8 @@
 
 from ..utils import docval, getargs
+from ..spec.spec import simplify_cpd_type
+from numpy import dtype
+
 
 __all__ = [
     "Error",
@@ -36,13 +39,15 @@ class Error(object):
 class DtypeError(Error):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
-            {'name': 'expected', 'type': (type, str), 'doc': 'the expected dtype'},
-            {'name': 'received', 'type': (type, str), 'doc': 'the received dtype'})
+            {'name': 'expected', 'type': (dtype, type, str, list), 'doc': 'the expected dtype'},
+            {'name': 'received', 'type': (dtype, type, str, list), 'doc': 'the received dtype'})
     def __init__(self, **kwargs):
         name = getargs('name', kwargs)
         expected = getargs('expected', kwargs)
         received = getargs('received', kwargs)
-        reason = "incorrect type: expected '%s', got'%s'" % (expected, received)
+        if isinstance(expected, list):
+            expected = simplify_cpd_type(expected)
+        reason = "incorrect type: expected '%s', got '%s'" % (expected, received)
         super(DtypeError, self).__init__(name, reason)
 
 
