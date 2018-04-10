@@ -115,7 +115,7 @@ class TestNestedTypes(ValidatorTestBase):
                                                          'foo_attr': text('example Foo object')})
         results = self.vmap.validate(foo_builder)
         self.assertIsInstance(results[0], MissingDataType)  # noqa: F405
-        self.assertEqual(results[0].name, 'my_foo')
+        self.assertEqual(results[0].name, 'Foo')
         self.assertEqual(results[0].reason, 'missing data type Bar')
 
     def test_invalid_wrong_name_req_type(self):
