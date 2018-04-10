@@ -23,7 +23,7 @@ Specifying attributes is done with :py:class:`~pynwb.spec.NWBAttributeSpec`.
 
     from pynwb.spec import NWBAttributeSpec
 
-    spec = NWBAttributeSpec('bar', 'float', 'a value for bar')
+    spec = NWBAttributeSpec('bar', 'a value for bar', 'float')
 
 Dataset Specifications
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -36,7 +36,7 @@ Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
 
     spec = NWBDatasetSpec('A custom NWB type',
                         attribute=[
-                            NWBAttributeSpec('baz', 'str', 'a value for baz'),
+                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
                         ],
                         shape=(None, None))
 

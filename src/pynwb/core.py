@@ -358,6 +358,11 @@ class NWBTable(NWBData):
         if hasattr(cls, '__columns__'):
             columns = getattr(cls, '__columns__')
 
+            idx = dict()
+            for i, col in enumerate(columns):
+                idx[col['name']] = i
+            setattr(cls, '__colidx__', idx)
+
             if cls.__init__ == bases[-1].__init__:     # check if __init__ is overridden
                 name = {'name': 'name', 'type': str, 'doc': 'the name of this table'}
                 defname = getattr(cls, '__defaultname__', None)
@@ -408,12 +413,24 @@ class NWBTable(NWBData):
         self.data.append(tuple(values[col] for col in self.columns))
         return ret
 
-    @docval({'name': 'kwargs', 'type': dict, 'doc': 'the column to query by'})
-    def query(self, **kwargs):
+    def which(self, **kwargs):
         '''
         Query a table
         '''
-        raise NotImplementedError('query')
+        if len(kwargs) != 1:
+            raise ValueError("only one column can be queried")
+        colname, value = kwargs.popitem()
+        idx = self.__colidx__.get(colname)
+        if idx is None:
+            msg = "no '%s' column in %s" % (colname, self.__class__.__name__)
+            raise KeyError(msg)
+        ret = list()
+        for i in range(len(self.data)):
+            row = self.data[i]
+            row_val = row[idx]
+            if row_val == value:
+                ret.append(i)
+        return ret
 
     def __len__(self):
         return len(self.data)
