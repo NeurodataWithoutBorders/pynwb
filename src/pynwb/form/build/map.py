@@ -653,8 +653,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             const_arg = self.get_const_arg(subspec)
             if const_arg is not None:
                 const_args[const_arg] = value
-        # build args and kwargs for the constructor
-        args = list()
+        # build kwargs for the constructor
         kwargs = dict()
         for const_arg in get_docval(cls.__init__):
             argname = const_arg['name']
@@ -665,15 +664,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 val = const_args[argname]
             else:
                 continue
-            if 'default' in const_arg:
-                kwargs[argname] = val
-            else:
-                args.append(val)
+            kwargs[argname] = val
         try:
-            obj = cls(*args, **kwargs)
+            obj = cls(**kwargs)
         except Exception as ex:
-            details = '%s: %s (%s)' % (ex, cls.__name__, builder.name)
-            msg = 'Could not construct %s object\n    %s' % (cls.__name__, details)
+            msg = 'Could not construct %s object' % cls.__name__
             raise_from(Exception(msg), ex)
         return obj
 

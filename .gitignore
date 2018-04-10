@@ -12,6 +12,12 @@ docs/notebooks/boc/
 # Auto-generated apidocs RST files
 docs/source/pynwb*.rst
 docs/source/modules.rst
+docs/source/gen_modules/
+docs/source/modules/generated
+
+# Auto-generated files after running tutorials
+*_example.nwb
+mylab.*.yaml
 
 # Auto-generated tutorials
 docs/source/tutorials/

@@ -6,14 +6,14 @@ from .form.utils import docval, getargs, popargs, fmt_docval_args
 from .form.data_utils import DataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer, NWBDataInterface
+from .core import NWBDataInterface, MultiContainerInterface
 
 _default_conversion = 1.0
 _default_resolution = 0.0
 
 
 @register_class('ProcessingModule', CORE_NAMESPACE)
-class ProcessingModule(NWBContainer):
+class ProcessingModule(MultiContainerInterface):
     """ Processing module. This is a container for one or more containers
         that provide data at intermediate levels of analysis
 
@@ -21,42 +21,31 @@ class ProcessingModule(NWBContainer):
         They should not be instantiated directly
     """
 
-    __nwbfields__ = ('description',
-                     'containers')
+    __nwbfields__ = ('description',)
+
+    __clsconf__ = {
+            'attr': 'data_interfaces',
+            'add': 'add_data_interface',
+            'type': NWBDataInterface,
+            'get': 'get_data_interface'
+    }
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
-            {'name': 'containers', 'type': (list, dict),
-             'doc': 'NWBContainers that belong to this ProcessingModule', 'default': None},
+            {'name': 'data_interfaces', 'type': (list, tuple, dict),
+             'doc': 'NWBDataInterfacess that belong to this ProcessingModule', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        description, containers = popargs('description', 'containers', kwargs)
+        description = popargs('description', kwargs)
         super(ProcessingModule, self).__init__(**kwargs)
         self.description = description
-        self.__containers = self._to_dict(containers, 'module_containers')
+        self.data_interfaces = getargs('data_interfaces', kwargs)
 
     @property
     def containers(self):
-        return tuple(self.__containers.values())
-
-    @docval({'name': 'container', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
-    def add_data_interface(self, **kwargs):
-        '''
-        Add an NWBContainer to this ProcessingModule
-        '''
-        container = getargs('container', kwargs)
-        self.__containers[container.name] = container
-        container.parent = self
-
-    @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
-    def get_data_interface(self, **kwargs):
-        '''
-        Retrieve an NWBContainer from this ProcessingModule
-        '''
-        container_name = getargs('container_name', kwargs)
-        return self.__containers.get(container_name)
+        return self.data_interfaces
 
     def __getitem__(self, arg):
         return self.get_data_interface(arg)
@@ -66,16 +55,18 @@ class ProcessingModule(NWBContainer):
         '''
         Add an NWBContainer to this ProcessingModule
         '''
+        container = getargs('container', kwargs)
         warn(PendingDeprecationWarning('add_container will be replaced by add_data_interface'))
-        self.add_data_interface(**kwargs)
+        self.add_data_interface(container)
 
     @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_container(self, **kwargs):
         '''
         Retrieve an NWBContainer from this ProcessingModule
         '''
+        container_name = getargs('container_name', kwargs)
         warn(PendingDeprecationWarning('get_container will be replaced by get_data_interface'))
-        return self.get_data_interface(**kwargs)
+        return self.get_data_interface(container_name)
 
 
 @register_class('TimeSeries', CORE_NAMESPACE)
@@ -96,12 +87,8 @@ class TimeSeries(NWBDataInterface):
                      "rate_unit",
                      "control",
                      "control_description",
-                     "ancestry",
-                     "neurodata_type",
                      "help")
 
-    __ancestry = 'TimeSeries'
-    __neurodata_type = 'TimeSeries'
     __help = 'General purpose TimeSeries'
 
     __time_unit = "Seconds"

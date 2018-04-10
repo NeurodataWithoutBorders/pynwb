@@ -10,7 +10,7 @@ class ModuleMap(ObjectMapper):
     def __init__(self, spec):
         super(ModuleMap, self).__init__(spec)
         containers_spec = self.spec.get_neurodata_type('NWBDataInterface')
-        self.map_spec('containers', containers_spec)
+        self.map_spec('data_interfaces', containers_spec)
 
     @ObjectMapper.constructor_arg('name')
     def name(self, builder, manager):

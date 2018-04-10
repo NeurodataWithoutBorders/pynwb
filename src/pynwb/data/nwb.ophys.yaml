@@ -41,6 +41,9 @@ datasets:
     dtype: text
     value: A table for storing ROI data
   dtype:
+  - name: name
+    dtype: ascii
+    doc: a name for this ROI
   - name: pixel_mask
     dtype:
       reftype: region
