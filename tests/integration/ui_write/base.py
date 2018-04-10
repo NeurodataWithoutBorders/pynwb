@@ -26,8 +26,7 @@ class TestMapNWBContainer(unittest.TestCase):
 
     def setUp(self):
         self.__manager = get_manager()
-        self.__container = self.setUpContainer()
-        self.__builder = self.setUpBuilder()
+        self.container = self.setUpContainer()
 
     @property
     def required_tests(self):
@@ -37,22 +36,15 @@ class TestMapNWBContainer(unittest.TestCase):
     def manager(self):
         return self.__manager
 
-    @property
-    def container(self):
-        return self.__container
-
-    @property
-    def builder(self):
-        return self.__builder
-
     def test_build(self):
-        # raise Exception
+        self.builder = self.setUpBuilder()
         self.maxDiff = None
         result = self.manager.build(self.container)
         # do something here to validate the result Builder against the spec
         self.assertDictEqual(result, self.builder)
 
     def test_construct(self):
+        self.builder = self.setUpBuilder()
         result = self.manager.construct(self.builder)
         self.assertContainerEqual(result, self.container)
 
@@ -109,6 +101,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
 
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
+        self.container = self.setUpContainer()
         self.start_time = datetime(1971, 1, 1, 12, 0, 0)
         self.create_date = datetime(2018, 4, 15, 12, 0, 0)
         self.container_type = self.container.__class__.__name__
