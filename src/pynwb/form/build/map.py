@@ -3,7 +3,7 @@ import warnings
 from collections import OrderedDict
 from copy import copy
 
-from six import with_metaclass, raise_from
+from six import with_metaclass, raise_from, text_type, binary_type
 from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec
@@ -394,19 +394,25 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         if isinstance(spec, AttributeSpec):
             if 'text' in spec.dtype:
                 if spec.dims is not None:
-                    ret = list(map(str, value))
+                    ret = list(map(text_type, value))
                 else:
-                    ret = str(value)
+                    ret = text_type(value)
         elif isinstance(spec, DatasetSpec):
             # TODO: make sure we can handle specs with data_type_inc set
             if spec.data_type_inc is not None:
                 ret = value
             else:
-                if spec.dtype is not None and 'text' in spec.dtype:
-                    if spec.dims is not None:
-                        ret = list(map(str, value))
-                    else:
-                        ret = str(value)
+                if spec.dtype is not None:
+                    string_type = None
+                    if 'text' in spec.dtype:
+                        string_type = text_type
+                    elif 'ascii' in spec.dtype:
+                        string_type = binary_type
+                    if string_type is not None:
+                        if spec.dims is not None:
+                            ret = list(map(string_type, value))
+                        else:
+                            ret = string_type(value)
         return ret
 
     @classmethod
@@ -668,7 +674,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         try:
             obj = cls(**kwargs)
         except Exception as ex:
-            msg = 'Could not construct %s object' % cls.__name__
+            msg = 'Could not construct %s object: %s' % (cls.__name__, ex.message)
             raise_from(Exception(msg), ex)
         return obj
 

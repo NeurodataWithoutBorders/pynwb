@@ -20,6 +20,24 @@ FLAGS = {
 from six import with_metaclass  # noqa: E402
 
 
+@docval({'name': 'cpd_type', 'type': list, 'doc': 'the list of DtypeSpecs to simplify'},
+        is_method=False)
+def simplify_cpd_type(**kwargs):
+    '''
+    Transform a list of DtypeSpecs into a list of strings.
+    Use for simple representation of compound type and
+    validation.
+    '''
+    cpd_type = getargs('cpd_type', kwargs)
+    ret = list()
+    for exp in cpd_type:
+        exp_key = exp.dtype
+        if isinstance(exp_key, RefSpec):
+            exp_key = exp_key.reftype
+        ret.append(exp_key)
+    return ret
+
+
 class ConstructableDict(with_metaclass(abc.ABCMeta, dict)):
     @classmethod
     def build_const_args(cls, spec_dict):

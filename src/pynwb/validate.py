@@ -13,7 +13,7 @@ def _print_errors(validation_errors):
     if validation_errors:
         print(' - found the following errors:', file=sys.stderr)
         for err in validation_errors:
-            print('%s - %s' % (err.name, err.reason), file=sys.stderr)
+            print(str(err), file=sys.stderr)
     else:
         print(' - no errors found.')
 

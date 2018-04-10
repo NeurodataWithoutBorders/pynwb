@@ -1,7 +1,7 @@
 from collections import Iterable
 import numpy as np
 from abc import ABCMeta, abstractmethod, abstractproperty
-from six import with_metaclass
+from six import with_metaclass, text_type, binary_type
 from .utils import docval, getargs, popargs, docval_macro
 from operator import itemgetter
 from .container import Data, DataRegion
@@ -11,27 +11,18 @@ def __get_shape_helper(data):
     shape = list()
     if hasattr(data, '__len__'):
         shape.append(len(data))
-        if len(data) and not isinstance(data[0], str):
+        if len(data) and not isinstance(data[0], (text_type, binary_type)):
             shape.extend(__get_shape_helper(data[0]))
     return tuple(shape)
 
 
 def get_shape(data):
-    if hasattr(data, '__len__') and not isinstance(data, str):
+    if isinstance(data, dict):
+        return None
+    elif hasattr(data, '__len__') and not isinstance(data, (text_type, binary_type)):
         return __get_shape_helper(data)
     else:
         return None
-
-
-def get_type(data):
-    if isinstance(data, str):
-        return str
-    if not hasattr(data, '__len__'):
-        return type(data)
-    else:
-        if len(data) == 0:
-            raise ValueError('cannot determine type for empty data')
-        return get_type(data[0])
 
 
 class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
@@ -291,14 +282,14 @@ class ShapeValidator(object):
             shape = list()
             if hasattr(local_data, '__len__'):
                 shape.append(len(local_data))
-                if len(local_data) and not isinstance(local_data[0], str):
+                if len(local_data) and not isinstance(local_data[0], (text_type, binary_type)):
                     shape.extend(__get_shape_helper(local_data[0]))
             return tuple(shape)
         if isinstance(data, DataChunkIterator):
             return data.max_shape
         if hasattr(data, 'shape'):
             return data.shape
-        if hasattr(data, '__len__') and not isinstance(data, str):
+        if hasattr(data, '__len__') and not isinstance(data, (text_type, binary_type)):
             if not strict_no_data_load or (isinstance(data, list) or isinstance(data, tuple) or isinstance(data, set)):
                 return __get_shape_helper(data)
             else:
