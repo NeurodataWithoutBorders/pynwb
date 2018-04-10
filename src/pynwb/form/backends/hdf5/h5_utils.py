@@ -1,5 +1,5 @@
 from copy import copy
-from six import binary_type
+from collections import Iterable
 from six import binary_type, text_type
 from h5py import Group, Dataset, RegionReference, Reference, special_dtype
 import json
@@ -197,7 +197,7 @@ class H5DataIO(DataIO):
     """
 
     @docval({'name': 'data',
-             'type': (np.ndarray, list, tuple, h5py.Dataset),
+             'type': (np.ndarray, list, tuple, h5py.Dataset, Iterable),
              'doc': 'the data to be written. NOTE: If an h5py.Dataset is used, all other settings but link_data' +
                     ' will be ignored as the dataset will either be linked to or copied as is in H5DataIO.'},
             {'name': 'maxshape',

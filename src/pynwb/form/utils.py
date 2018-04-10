@@ -42,7 +42,6 @@ def __type_okay(value, argtype, allow_none=False):
         return allow_none
     if isinstance(argtype, str):
         if argtype in __macros:
-            print('FOUND MACRO')
             return __type_okay(value, __macros[argtype], allow_none=allow_none)
         elif argtype is 'int':
             return __is_int(value)

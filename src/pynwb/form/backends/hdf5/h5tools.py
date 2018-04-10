@@ -528,7 +528,6 @@ class HDF5IO(FORMIO):
                 parent[name] = link
             # Copy the dataset
             else:
-                print("Copying dataset")
                 parent.copy(source=data,
                             dest=parent,
                             name=name,
