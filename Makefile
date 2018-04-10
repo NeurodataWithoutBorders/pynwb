@@ -46,7 +46,7 @@ checkpdb:
 	find {src,tests} -name "*.py" -exec grep -Hn pdb {} \;
 
 devtest:
-	$(PYTHON) -W ignore test.py
+	$(PYTHON) -W ignore:::pynwb.form.build.map: test.py
 	$(MAKE) flake
 	$(MAKE) checkpdb
 

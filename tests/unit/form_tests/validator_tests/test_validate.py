@@ -1,6 +1,7 @@
 import unittest2 as unittest
 from abc import ABCMeta, abstractmethod
 from six import with_metaclass
+from six import text_type as text
 
 from pynwb.form.spec import GroupSpec, AttributeSpec, DatasetSpec, SpecCatalog, SpecNamespace
 from pynwb.form.build import GroupBuilder, DatasetBuilder
@@ -51,7 +52,7 @@ class TestBasicSpec(ValidatorTestBase):
                         datasets=[DatasetSpec('an example dataset', 'int', name='data',
                                               attributes=[AttributeSpec(
                                                   'attr2', 'an example integer attribute', 'int')])],
-                        attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
+                        attributes=[AttributeSpec('attr1', 'an example string attribute', 'text')])
         return (ret,)
 
     def test_invalid_missing(self):
@@ -85,7 +86,7 @@ class TestBasicSpec(ValidatorTestBase):
 
     def test_valid(self):
         builder = GroupBuilder('my_bar',
-                               attributes={'data_type': 'Bar', 'attr1': 'a string attribute'},
+                               attributes={'data_type': 'Bar', 'attr1': text('a string attribute')},
                                datasets=[DatasetBuilder('data', 100, attributes={'attr2': 10})])
         validator = self.vmap.get_validator('Bar')
         result = validator.validate(builder)
@@ -100,7 +101,7 @@ class TestNestedTypes(ValidatorTestBase):
                         datasets=[DatasetSpec('an example dataset', 'int', name='data',
                                               attributes=[AttributeSpec('attr2', 'an example integer attribute',
                                                                         'int')])],
-                        attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
+                        attributes=[AttributeSpec('attr1', text('an example string attribute'), 'text')])
         foo = GroupSpec('A test group that contains a data type',
                         data_type_def='Foo',
                         groups=[GroupSpec('A Bar group for Foos', name='my_bar', data_type_inc='Bar')],
@@ -110,10 +111,11 @@ class TestNestedTypes(ValidatorTestBase):
         return (bar, foo)
 
     def test_invalid_missing_req_type(self):
-        foo_builder = GroupBuilder('my_foo', attributes={'data_type': 'Foo', 'foo_attr': 'example Foo object'})
+        foo_builder = GroupBuilder('my_foo', attributes={'data_type': 'Foo',
+                                                         'foo_attr': text('example Foo object')})
         results = self.vmap.validate(foo_builder)
         self.assertIsInstance(results[0], MissingDataType)  # noqa: F405
-        self.assertEqual(results[0].name, 'my_foo')
+        self.assertEqual(results[0].name, 'Foo')
         self.assertEqual(results[0].reason, 'missing data type Bar')
 
     def test_invalid_wrong_name_req_type(self):
@@ -122,7 +124,7 @@ class TestNestedTypes(ValidatorTestBase):
                                    datasets=[DatasetBuilder('data', 100, attributes={'attr2': 10})])
 
         foo_builder = GroupBuilder('my_foo',
-                                   attributes={'data_type': 'Foo', 'foo_attr': 'example Foo object'},
+                                   attributes={'data_type': 'Foo', 'foo_attr': text('example Foo object')},
                                    groups=[bar_builder])
 
         results = self.vmap.validate(foo_builder)
@@ -132,11 +134,11 @@ class TestNestedTypes(ValidatorTestBase):
 
     def test_valid(self):
         bar_builder = GroupBuilder('my_bar',
-                                   attributes={'data_type': 'Bar', 'attr1': 'a string attribute'},
+                                   attributes={'data_type': 'Bar', 'attr1': text('a string attribute')},
                                    datasets=[DatasetBuilder('data', 100, attributes={'attr2': 10})])
 
         foo_builder = GroupBuilder('my_foo',
-                                   attributes={'data_type': 'Foo', 'foo_attr': 'example Foo object'},
+                                   attributes={'data_type': 'Foo', 'foo_attr': text('example Foo object')},
                                    groups=[bar_builder])
 
         results = self.vmap.validate(foo_builder)
@@ -144,7 +146,7 @@ class TestNestedTypes(ValidatorTestBase):
 
     def test_valid_wo_opt_attr(self):
         bar_builder = GroupBuilder('my_bar',
-                                   attributes={'data_type': 'Bar', 'attr1': 'a string attribute'},
+                                   attributes={'data_type': 'Bar', 'attr1': text('a string attribute')},
                                    datasets=[DatasetBuilder('data', 100, attributes={'attr2': 10})])
         foo_builder = GroupBuilder('my_foo',
                                    attributes={'data_type': 'Foo'},
