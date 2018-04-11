@@ -33,7 +33,7 @@ class HDF5IO(FORMIO):
     def __init__(self, **kwargs):
         '''Open an HDF5 file for IO
 
-        For `mode`, see :ref:`write_nwbfile`
+        For `mode`, see `h5py.File <http://docs.h5py.org/en/latest/high/file.html#opening-creating-files>_`.
         '''
         path, manager, mode, comm = popargs('path', 'manager', 'mode', 'comm', kwargs)
         if manager is None:
