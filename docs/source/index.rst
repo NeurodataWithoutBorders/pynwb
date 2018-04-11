@@ -43,6 +43,7 @@ breaking down the barriers to data sharing in neuroscience.
    validation
    api_docs
    software_process
+   make_roundtrip_test
 
 .. toctree::
    :maxdepth: 2
