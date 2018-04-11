@@ -66,7 +66,7 @@ also where you can add additonial containers that your container of interest dep
 :py:class:`~pynwb.ecephys.Device` dependencies.
 
 
-Continuing from our example above, we will add the method for adding a generic :py:class:`~pynwb.base.TimeSeries`: instance:
+Continuing from our example above, we will add the method for adding a generic :py:class:`~pynwb.base.TimeSeries` instance:
 
 
 .. code-block:: python
@@ -88,7 +88,7 @@ method takes an :py:class:`~pynwb.file.NWBFile` as its single argument. The only
 Again, since not all containers go in the same place, we need to tell the test harness how to get back our container
 of interest.
 
-To finish off example from above, we will add the method for getting back our generic :py:class:`~pynwb.base.TimeSeries`: instance:
+To finish off example from above, we will add the method for getting back our generic :py:class:`~pynwb.base.TimeSeries` instance:
 
 .. code-block:: python
 
@@ -97,6 +97,43 @@ To finish off example from above, we will add the method for getting back our ge
         def getContainer(self, nwbfile):
             return nwbfile.get_acquisition(self.container.name)
 
+
+################
+``setUpBuilder``
+################
+
+As mentioned above, there is an optional method to override. This method will add two additional tests. First, it will
+add a test for converting your container into a builder to make sure the intermerdiate data structure gets built
+appropriately. Second it will add a test for constructing your container from the builder returned by your overriden
+``setUpBuilder`` method.  This method takes no arguments, and should return the builder representation of your
+container class instance.
+
+
+This method is not required, but can serve as an additional check to make sure your containers are getting converted
+to the expected structure as described in your specification.
+
+Continuing from the :py:class:`~pynwb.base.TimeSeries` example, lets add ``setUpBuilder``:
+
+.. code-block:: python
+
+    from pynwb.form.build import GroupBuilder
+
+    class TimeSeriesRoundTrip(TestMapRoundTrip):
+
+        def setUpBuilder(self):
+            return GroupBuilder('test_timeseries',
+                                attributes={'source': 'example_source',
+                                            'namespace': base.CORE_NAMESPACE,
+                                            'neurodata_type': 'TimeSeries',
+                                            'description': 'no description',
+                                            'comments': 'no comments',
+                                            'help': 'General time series object'},
+                                datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
+                                                                 attributes={'unit': 'SIunit',
+                                                                             'conversion': 1.0,
+                                                                             'resolution': 0.1}),
+                                          'timestamps': DatasetBuilder('timestamps', list(range(10)),
+                                                                       attributes={'unit': 'Seconds', 'interval': 1})})
 
 .. _rt_below:
 
