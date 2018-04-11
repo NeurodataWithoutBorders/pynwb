@@ -1,11 +1,4 @@
-import unittest2 as unittest
-
-import numpy as np
-
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder, ReferenceBuilder
-
-from pynwb.icephys import *  # noqa: F403
-from pynwb.misc import UnitTimes
+from pynwb.icephys import IntracellularElectrode, CurrentClampStimulusSeries
 
 from . import base
 
@@ -30,7 +23,7 @@ class TestPCS(base.TestDataInterfaceIO):
 
     def setUpElectrode(self):
         self.elec = IntracellularElectrode(name="elec0", source='', slice='', resistance='', seal='', description='',
-                                      location='', filtering='', initial_access_resistance='', device='')
+                                           location='', filtering='', initial_access_resistance='', device='')
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
