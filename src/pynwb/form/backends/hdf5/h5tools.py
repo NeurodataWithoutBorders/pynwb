@@ -4,6 +4,7 @@ import os.path
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference, check_dtype
 from six import raise_from, text_type, string_types, binary_type
 import warnings
+from threading import Thread
 from ...container import Container
 
 from ...utils import docval, getargs, popargs, call_docval_func
@@ -46,6 +47,7 @@ class HDF5IO(FORMIO):
         self.__built = dict()       # keep track of which files have been read
         self.__read = dict()        # keep track of each builder for each dataset/group/link
         self.__ref_queue = deque()  # a queue of the references that need to be added
+        self.__streams = list()
 
     @property
     def comm(self):
@@ -293,7 +295,17 @@ class HDF5IO(FORMIO):
         open_flag = self.__mode
         self.__file = File(self.__path, open_flag)
 
+    def __add_stream__(self, parent, name, data, options=None):
+        t = Thread(target=self.__chunked_iter_fill__,
+                   args=[parent, name, data],
+                   kwargs={'options': options})
+        self.__streams.append(t)
+        t.start()
+
     def close(self):
+        while len(self.__streams) > 0:
+            s = self.__streams.pop()
+            s.join()
         if self.__file:
             self.__file.close()
 
@@ -620,6 +632,8 @@ class HDF5IO(FORMIO):
                 dset = self.__scalar_fill__(parent, name, data, options)
             # Iterative write of a data chunk iterator
             elif isinstance(data, AbstractDataChunkIterator):
+                # add something here to decide if we want to
+                # run this concurrently with self.__add_stream__
                 dset = self.__chunked_iter_fill__(parent, name, data, options)
             # Write a regular in memory array (e.g., numpy array, list etc.)
             elif hasattr(data, '__len__'):
