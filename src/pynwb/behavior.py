@@ -6,7 +6,6 @@ from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer, MultiContainerInterface
 from .misc import IntervalSeries
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .image import ImageSeries
 
 
 @register_class('SpatialSeries', CORE_NAMESPACE)
@@ -193,52 +192,3 @@ class Position(MultiContainerInterface):
     }
 
     _help = "Position data, whether along the x, xy or xyz axis"
-
-
-@register_class('CorrectedImageStack', CORE_NAMESPACE)
-class CorrectedImageStack(NWBContainer):
-    """
-    An image stack where all frames are shifted (registered) to a common coordinate system, to
-    account for movement and drift between frames. Note: each frame at each point in time is
-    assumed to be 2-D (has only x & y dimensions).
-    """
-
-    __nwbfields__ = ('corrected',
-                     'original',
-                     'xy_translation')
-
-    _help = ""
-
-    @docval({'name': 'name', 'type': str,
-             'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'corrected', 'type': ImageSeries,
-             'doc': 'Image stack with frames shifted to the common coordinates.'},
-            {'name': 'original', 'type': ImageSeries,
-             'doc': 'Link to image series that is being registered.'},
-            {'name': 'xy_translation', 'type': TimeSeries,
-             'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates,\
-             for example, to align each frame to a reference image.'})
-    def __init__(self, **kwargs):
-        corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
-        super(CorrectedImageStack, self).__init__(**kwargs)
-        self.corrected = corrected
-        self.original = original
-        self.xy_translation = xy_translation
-
-
-@register_class('MotionCorrection', CORE_NAMESPACE)
-class MotionCorrection(MultiContainerInterface):
-    """
-    A collection of corrected images stacks.
-    """
-
-    __clsconf__ = {
-        'add': 'add_corrected_image_stack',
-        'get': 'get_corrected_image_stack',
-        'create': 'create_corrected_image_stack',
-        'type': CorrectedImageStack,
-        'attr': 'corrected_images_stacks'
-    }
-
-    _help = "Image stacks whose frames have been shifted (registered) to account for motion."
