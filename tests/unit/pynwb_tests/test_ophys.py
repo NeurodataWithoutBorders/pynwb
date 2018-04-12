@@ -1,8 +1,9 @@
 import unittest
 
 from pynwb.ophys import TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, PlaneSegmentation, \
-    ImageSegmentation, OpticalChannel, ImagingPlane
+    ImageSegmentation, OpticalChannel, ImagingPlane, MotionCorrection, CorrectedImageStack
 from pynwb.image import ImageSeries
+from pynwb.base import TimeSeries
 
 import numpy as np
 
@@ -59,6 +60,27 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(tPS.starting_frame, [1, 2, 3])
         self.assertEqual(tPS.format, 'tiff')
         self.assertEqual(tPS.dimension, [np.nan])
+
+
+class MotionCorrectionConstructor(unittest.TestCase):
+    def test_init(self):
+        mc = MotionCorrection('test_mc', list())
+        self.assertEqual(mc.source, 'test_mc')
+
+
+class CorrectedImageStackConstructor(unittest.TestCase):
+    def test_init(self):
+        is1 = ImageSeries(name='is1', source='a hypothetical source', data=list(), unit='unit',
+                          external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
+        is2 = ImageSeries(name='is2', source='a hypothetical source', data=list(), unit='unit',
+                          external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
+        cis = CorrectedImageStack("CorrectedImageStackConstructor", is1, is2, ts)
+        self.assertEqual(cis.source, "CorrectedImageStackConstructor")
+        self.assertEqual(cis.corrected, is1)
+        self.assertEqual(cis.original, is2)
+        self.assertEqual(cis.xy_translation, ts)
 
 
 class RoiResponseSeriesConstructor(unittest.TestCase):
