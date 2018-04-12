@@ -295,17 +295,7 @@ class HDF5IO(FORMIO):
         open_flag = self.__mode
         self.__file = File(self.__path, open_flag)
 
-    def __add_stream__(self, parent, name, data, options=None):
-        t = Thread(target=self.__chunked_iter_fill__,
-                   args=[parent, name, data],
-                   kwargs={'options': options})
-        self.__streams.append(t)
-        t.start()
-
     def close(self):
-        while len(self.__streams) > 0:
-            s = self.__streams.pop()
-            s.join()
         if self.__file:
             self.__file.close()
 
@@ -319,6 +309,17 @@ class HDF5IO(FORMIO):
         for name, dbldr in f_builder.datasets.items():
             self.write_dataset(self.__file, dbldr, link_data)
         self.set_attributes(self.__file, f_builder.attributes)
+        if len(self.__dci_writers) > 0:
+            self.__runners = list()
+            self.__nrunners = 0
+            for i in range(min(len(self.__dci_writers), nthreads)):
+                r = DCIRunner(self)
+                self.__runners.append(r)
+                self.__nrunners += 1
+            for i in range(nthreads):
+                self.__runners[i].run()
+            for i in range(nthreads):
+                self.__runners[i].join()
         self.__add_refs()
 
     def __add_refs(self):
@@ -633,7 +634,7 @@ class HDF5IO(FORMIO):
             # Iterative write of a data chunk iterator
             elif isinstance(data, AbstractDataChunkIterator):
                 # add something here to decide if we want to
-                # run this concurrently with self.__add_stream__
+                # run this concurrently with a ChunkWriter
                 dset = self.__chunked_iter_fill__(parent, name, data, options)
             # Write a regular in memory array (e.g., numpy array, list etc.)
             elif hasattr(data, '__len__'):
@@ -822,3 +823,112 @@ class HDF5IO(FORMIO):
             else:
                 ret.append(elem)
         return ret
+
+    def queue_chunk(self, cw):
+        self.__queue.put(cw)
+
+    def finish_chunk(self, cw):
+        self.__dci_writers.pop((cw.parent.name, cw.name))
+
+    nchunks = 10
+
+    finish = 0
+
+    def next_chunk(self):
+        c = len(self.__dci_writers)
+        r = self.__nrunners
+        if c < r:
+            self.__nrunners -= 1
+            return self.finish, None
+        else
+            cw = self.__queue.get()
+            if c > r:
+                return self.nchunks, cw
+            else:
+                return self.finish, cw
+
+class DCIRunner(Thread):
+
+    def __init__(self, io):
+        self.__io = io
+
+    def run(self):
+        while True:
+            nchunks, cw = self.__io.get_next_chunk()
+            if cw is None :
+                break
+            i = 0
+            done = False
+            while True:
+                if done or i == nchunks:
+                    break
+                done = cw.write_chunk()
+                if nchunks > 0
+                    i++
+            if done:
+                self.__io.finish_chunk(cw)
+            else:
+                self.__io.queue_chunk(cw)
+
+class ChunkWriter(object):
+
+    def __init__(self, parent, name, data, options=None):
+        """
+        Write data to a dataset one-chunk-at-a-time based on the given DataChunkIterator
+
+        :param parent: The parent object to which the dataset should be added
+        :type parent: h5py.Group, h5py.File
+        :param name: The name of the dataset
+        :type name: str
+        :param data: The data to be written.
+        :type data: DataChunkIterator
+        :param options: Dict with options for creating a dataset. available options are 'dtype' and 'io_settings'
+        :type data: dict
+
+        """
+        self.data = data
+        self.name = name
+        self.parent = parent
+        self.options = options
+        io_settings = {}
+        if options is not None:
+            if 'io_settings' in options:
+                io_settings = options.get('io_settings')
+        # Define the chunking options if the user has not set them explicitly. We need chunking for the iterative write.
+        if 'chunks' not in io_settings:
+            recommended_chunks = data.recommended_chunk_shape()
+            io_settings['chunks'] = True if recommended_chunks is None else recommended_chunks
+        # Define the shape of the data if not provided by the user
+        if 'shape' not in io_settings:
+            io_settings['shape'] = data.recommended_data_shape()
+        # Define the maxshape of the data if not provided by the user
+        if 'maxshape' not in io_settings:
+            io_settings['maxshape'] = data.get_maxshape()
+        if 'dtype' not in io_settings:
+            io_settings['dtype'] = data.get_dtype()
+        try:
+            self.dset = parent.create_dataset(name, **io_settings)
+        except Exception as exc:
+            raise_from(Exception("Could not create dataset %s in %s" % (name, parent.name)), exc)
+
+    def write_chunks(self):
+         try:
+             chunk_i = next(self.data)
+         except StopIteration:
+            return True
+         if i == nchunks:
+             break
+         # Determine the minimum array dimensions to fit the chunk selection
+         max_bounds = HDF5IO.__selection_max_bounds__(chunk_i.selection)
+         if not hasattr(max_bounds, '__len__'):
+             max_bounds = (max_bounds,)
+         # Determine if we need to expand any of the data dimensions
+         expand_dims = [i for i, v in enumerate(max_bounds) if v is not None and v > dset.shape[i]]
+         # Expand the dataset if needed
+         if len(expand_dims) > 0:
+             new_shape = np.asarray(dset.shape)
+             new_shape[expand_dims] = np.asarray(max_bounds)[expand_dims]
+             dset.resize(new_shape)
+         # Process and write the data
+         self.dset[chunk_i.selection] = chunk_i.data
+        return False
