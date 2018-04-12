@@ -76,12 +76,5 @@ class PositionConstructor(unittest.TestCase):
         self.assertEqual(pc.spatial_series.get('test_sS'), sS)
 
 
-class MotionCorrectionConstructor(unittest.TestCase):
-    def test_init(self):
-        # mc = MotionCorrection('test_mc', list())
-        # self.assertEqual(mc.source, 'test_mc')
-        pass
-
-
 if __name__ == '__main__':
     unittest.main()
