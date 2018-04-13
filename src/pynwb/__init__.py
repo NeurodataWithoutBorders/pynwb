@@ -200,8 +200,6 @@ from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
 from .file import NWBFile  # noqa: E402
 
-NWBFile.set_version(__NS_CATALOG.get_namespace(CORE_NAMESPACE).version)
-
 from . import behavior  # noqa: F401,E402
 from . import ecephys  # noqa: F401,E402
 from . import epoch  # noqa: F401,E402
