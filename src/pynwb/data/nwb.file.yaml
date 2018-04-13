@@ -4,6 +4,11 @@ groups:
     dtype: text
     name: help
     value: an NWB:N file for storing cellular-based neurophysiology data
+  - doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
+      format with trailing major, minor and patch numbers.'
+    dtype: text
+    value: '2.0b'
+    name: nwb_version
   datasets:
   - dims:
     - '*unlimited*'
@@ -21,11 +26,6 @@ groups:
       values. The goal is that the string should be unique to all other files.'
     dtype: text
     name: identifier
-  - doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
-      format with trailing major, minor and patch numbers.'
-    dtype: text
-    value: '2.0b'
-    name: nwb_version
   - doc: One or two sentences describing the experiment and data in the file.
     dtype: text
     name: session_description
