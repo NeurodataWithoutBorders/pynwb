@@ -7,6 +7,9 @@ from pynwb.form.build import GroupBuilder, DatasetBuilder
 from pynwb.form.utils import docval, getargs
 from pynwb.form.build import ObjectMapper, BuildManager, TypeMap
 
+from abc import ABCMeta
+from six import with_metaclass
+
 CORE_NAMESPACE = 'test_core'
 
 
@@ -174,11 +177,9 @@ class TestBuildManager(TestBase):
         self.assertIs(container1, container2)
 
 
-class TestNestedBase(TestBase):
+class TestNestedBase(with_metaclass(ABCMeta, TestBase)):
 
     def setUp(self):
-        if type(self) == TestNestedBase:
-            raise unittest.SkipTest('Abstract Base Class')
         super(TestNestedBase, self).setUp()
         self.foo_bucket = FooBucket('test_foo_bucket', [
                             Foo('my_foo1', list(range(10)), 'value1', 10),
@@ -206,10 +207,10 @@ class TestNestedBase(TestBase):
         self.manager = BuildManager(self.type_map)
 
     def setUpBucketBuilder(self):
-        pass
+        raise unittest.SkipTest('Abstract Base Class')
 
     def setUpBucketSpec(self):
-        pass
+        raise unittest.SkipTest('Abstract Base Class')
 
     def test_build(self):
         ''' Test default mapping for an Container that has an Container as an attribute value '''

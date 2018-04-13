@@ -12,7 +12,7 @@ from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Devic
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
-from .core import LabelledDict, NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface
+from .core import NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface
 
 from h5py import RegionReference
 
@@ -148,15 +148,6 @@ class NWBFile(MultiContainerInterface):
                      'subject',
                      'epoch_tags',)
 
-    __current_version = None
-
-    @classmethod
-    def set_version(cls, version):
-        if cls.__current_version is not None:
-            msg = 'version already set'
-            raise ValueError(msg)
-        cls.__current_version = version
-
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'session_description', 'type': str,
              'doc': 'a description of the session where this data was generated'},
@@ -164,7 +155,6 @@ class NWBFile(MultiContainerInterface):
             {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
             {'name': 'file_create_date', 'type': ('array_data', 'data', datetime, str),
              'doc': 'the time the file was created and subsequent modifications made', 'default': None},
-            {'name': 'version', 'type': str, 'doc': 'the NWB version', 'default': None},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str,
              'doc': 'general description of the experiment', 'default': None},
@@ -203,11 +193,6 @@ class NWBFile(MultiContainerInterface):
         pkwargs['name'] = 'root'
         super(NWBFile, self).__init__(*pargs, **pkwargs)
         self.__start_time = datetime.utcnow().isoformat() + "Z"
-        # set version
-        version = getargs('version', kwargs)
-        if version is None:
-            version = self.__current_version
-        self.__nwb_version = version
         self.__session_description = getargs('session_description', kwargs)
         self.__identifier = getargs('identifier', kwargs)
         self.__session_start_time = getargs('session_start_time', kwargs)
@@ -250,14 +235,6 @@ class NWBFile(MultiContainerInterface):
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
 
-    def __build_ts(self, ts_type, kwargs):
-        ret = LabelledDict(ts_type)
-        const_arg = getargs(ts_type, kwargs)
-        if const_arg:
-            for ts in const_arg:
-                self.__set_timeseries(ret, ts)
-        return ret
-
     def all_children(self):
         stack = [self]
         ret = list()
@@ -272,10 +249,6 @@ class NWBFile(MultiContainerInterface):
     @property
     def identifier(self):
         return self.__identifier
-
-    @property
-    def nwb_version(self):
-        return self.__nwb_version
 
     @property
     def session_description(self):
@@ -307,18 +280,6 @@ class NWBFile(MultiContainerInterface):
         name = getargs('name', kwargs)
         return ElectrodeTableRegion(self.ec_electrodes, region, desc, name)
 
-    def is_acquisition(self, ts):
-        return self.__exists(ts, self.__acquisition)
-
-    def is_stimulus(self, ts):
-        return self.__exists(ts, self.__stimulus)
-
-    def is_stimulus_template(self, ts):
-        return self.__exists(ts, self.__stimulus_template)
-
-    def __exists(self, ts, d):
-        return ts.name in d
-
     @docval(*get_docval(Epochs.add_epoch))
     def create_epoch(self, **kwargs):
         """
@@ -328,78 +289,8 @@ class NWBFile(MultiContainerInterface):
         sparse noise) or a different paradigm (a rat exploring an
         enclosure versus sleeping between explorations)
         """
-        if self.epochs is None:
-            self.epochs = Epochs(self.source)
         self.epoch_tags.update(kwargs.get('tags', list()))
         call_docval_func(self.epochs.add_epoch, kwargs)
-#
-#    def get_epoch(self, name):
-#        return self.__get_epoch(name)
-#
-#    @docval({'name': 'epoch', 'type': (str, Epoch, list, tuple),
-#             'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
-#            {'name': 'timeseries', 'type': (str, TimeSeries, list, tuple),
-#             'doc': 'the name of a timeseries or a TimeSeries object or a list of \
-#             names of timeseries or TimeSeries objects'})
-#    def set_epoch_timeseries(self, **kwargs):
-#        """
-#        Add one or more TimSeries datasets to one or more Epochs
-#        """
-#        epoch, timeseries = getargs('epoch', 'timeseries', kwargs)
-#        if isinstance(epoch, list):
-#            ep_objs = [self.__get_epoch(ep) for ep in epoch]
-#        else:
-#            ep_objs = [self.__get_epoch(epoch)]
-#
-#        if isinstance(timeseries, list):
-#            ts_objs = [self.__get_timeseries_obj(ts) for ts in timeseries]
-#        else:
-#            ts_objs = [self.__get_timeseries_obj(timeseries)]
-#
-#        for ep in ep_objs:
-#            for ts in ts_objs:
-#                ep.add_timeseries(ts)
-#
-#    def __get_epoch(self, epoch):
-#        if isinstance(epoch, Epoch):
-#            ep = epoch
-#        elif isinstance(epoch, str):
-#            ep = self.__epochs.get(epoch)
-#            if not ep:
-#                raise KeyError("Epoch '%s' not found" % epoch)
-#        else:
-#            raise TypeError(type(epoch))
-#        return ep
-#
-#    def __get_timeseries_obj(self, timeseries):
-#        if isinstance(timeseries, TimeSeries):
-#            ts = timeseries
-#        elif isinstance(timeseries, str):
-#            ts = self.__acquisition.get(timeseries,
-#                                        self.__stimulus.get(timeseries,
-#                                                            self.__stimulus_template.get(timeseries, None)))
-#            if not ts:
-#                raise KeyError("TimeSeries '%s' not found" % timeseries)
-#        else:
-#            raise TypeError(type(timeseries))
-#        return ts
-
-    def __set_timeseries(self, ts_dict, ts, epoch=None):
-        if ts.name in ts_dict:
-            msg = "%s already exists in %s" % (ts.name, ts_dict.label)
-            raise ValueError(msg)
-        ts_dict[ts.name] = ts
-        if ts.parent is None:
-            ts.parent = self
-        if epoch:
-            self.set_epoch_timeseries(epoch, ts)
-
-    def __get_timeseries(self, ts_dict, name):
-        ret = ts_dict.get(name)
-        if ret is None:
-            msg = "no TimeSeries named '%s' found" % name
-            raise ValueError(msg)
-        return ret
 
     @docval({'name': 'electrode_table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):

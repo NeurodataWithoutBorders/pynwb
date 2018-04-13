@@ -198,9 +198,7 @@ class NWBHDF5IO(HDF5IO):
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
-from .file import NWBFile  # noqa: E402
-
-NWBFile.set_version(__NS_CATALOG.get_namespace(CORE_NAMESPACE).version)
+from .file import NWBFile  # noqa: E402, F401
 
 from . import behavior  # noqa: F401,E402
 from . import ecephys  # noqa: F401,E402

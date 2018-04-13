@@ -7,7 +7,7 @@ from datetime import datetime
 
 from pynwb import NWBFile, TimeSeries
 from pynwb.file import Subject
-from pynwb.ecephys import Device
+from pynwb.ecephys import ElectrodeTable
 
 
 class NWBFileTest(unittest.TestCase):
@@ -37,7 +37,7 @@ class NWBFileTest(unittest.TestCase):
         name = 'example_electrode_group'
         desc = 'An example electrode'
         loc = 'an example location'
-        d = Device('a fake device', 'a fake source')
+        d = self.nwbfile.create_device('a fake device', 'a fake source')
         elecgrp = self.nwbfile.create_electrode_group(name, 'a fake source', desc, loc, d)
         self.assertEqual(elecgrp.description, desc)
         self.assertEqual(elecgrp.location, loc)
@@ -95,6 +95,52 @@ class NWBFileTest(unittest.TestCase):
         msg = "'TEST_TS' not found in acquisition of NWBFile 'root'"
         with self.assertRaisesRegex(KeyError, msg):
             self.nwbfile.get_acquisition("TEST_TS")
+
+    def test_set_electrode_table(self):
+        table = ElectrodeTable('test_table')  # noqa: F405
+        dev1 = self.nwbfile.create_device('dev1', 'a test source')  # noqa: F405
+        group = self.nwbfile.create_electrode_group('tetrode1', 'a test source',
+                                                    'tetrode description', 'tetrode location', dev1)
+        table.add_row(1, 1.0, 2.0, 3.0, -1.0, 'CA1', 'none', 'first channel of tetrode', group)
+        table.add_row(2, 1.0, 2.0, 3.0, -2.0, 'CA1', 'none', 'second channel of tetrode', group)
+        table.add_row(3, 1.0, 2.0, 3.0, -3.0, 'CA1', 'none', 'third channel of tetrode', group)
+        table.add_row(4, 1.0, 2.0, 3.0, -4.0, 'CA1', 'none', 'fourth channel of tetrode', group)
+        self.nwbfile.set_electrode_table(table)
+        self.assertIs(self.nwbfile.ec_electrodes, table)
+        self.assertIs(table.parent, self.nwbfile)
+
+    def test_add_electrode(self):
+        dev1 = self.nwbfile.create_device('dev1', 'a test source')  # noqa: F405
+        group = self.nwbfile.create_electrode_group('tetrode1', 'a test source',
+                                                    'tetrode description', 'tetrode location', dev1)
+        self.nwbfile.add_electrode(1, 1.0, 2.0, 3.0, -1.0, 'CA1', 'none', 'first channel of tetrode', group)
+        self.assertEqual(self.nwbfile.ec_electrodes[0][0], 1)
+        self.assertEqual(self.nwbfile.ec_electrodes[0][1], 1.0)
+        self.assertEqual(self.nwbfile.ec_electrodes[0][2], 2.0)
+        self.assertEqual(self.nwbfile.ec_electrodes[0][3], 3.0)
+        self.assertEqual(self.nwbfile.ec_electrodes[0][4], -1.0)
+        self.assertEqual(self.nwbfile.ec_electrodes[0][5], 'CA1')
+        self.assertEqual(self.nwbfile.ec_electrodes[0][6], 'none')
+        self.assertEqual(self.nwbfile.ec_electrodes[0][7], 'first channel of tetrode')
+        self.assertEqual(self.nwbfile.ec_electrodes[0][8], group)
+
+    def test_all_children(self):
+        ts1 = TimeSeries('test_ts1', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = TimeSeries('test_ts2', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        self.nwbfile.add_acquisition(ts1)
+        self.nwbfile.add_acquisition(ts2)
+        name = 'example_electrode_group'
+        desc = 'An example electrode'
+        loc = 'an example location'
+        device = self.nwbfile.create_device('a fake device', 'a fake source')
+        elecgrp = self.nwbfile.create_electrode_group(name, 'a fake source', desc, loc, device)
+        children = self.nwbfile.all_children()
+        self.assertIn(ts1, children)
+        self.assertIn(ts2, children)
+        self.assertIn(device, children)
+        self.assertIn(elecgrp, children)
 
 
 class SubjectTest(unittest.TestCase):
