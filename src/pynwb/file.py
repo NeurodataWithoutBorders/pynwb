@@ -308,8 +308,6 @@ class NWBFile(MultiContainerInterface):
         sparse noise) or a different paradigm (a rat exploring an
         enclosure versus sleeping between explorations)
         """
-        if self.epochs is None:
-            self.epochs = Epochs(self.source)
         self.epoch_tags.update(kwargs.get('tags', list()))
         call_docval_func(self.epochs.add_epoch, kwargs)
 
