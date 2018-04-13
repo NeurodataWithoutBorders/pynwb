@@ -1,0 +1,6 @@
+namespaces:
+- doc: Extension for use in my Lab
+  name: crcnsret1
+  schema:
+  - namespace: core
+  - source: crcnsret1.extensions.yaml
