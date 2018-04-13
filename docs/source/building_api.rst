@@ -3,16 +3,16 @@ Building API classes
 
 After you have written an extension, you will need a Pythonic way to interact with the data model. To do this,
 you will need to write some classes that represent the data you defined in your specificiation extensions.
-The :py:module:`pynwb.core` module has various tools to make it easier to write classes that behave like
+The :py:mod:`pynwb.core` module has various tools to make it easier to write classes that behave like
 the rest of the PyNWB API.
 
-The :py:module:`pynwb.core` defines two base classes that represent the primitive structures supported by
+The :py:mod:`pynwb.core` defines two base classes that represent the primitive structures supported by
 the schema. :py:class:`~pynwb.core.NWBData` represents datasets and :py:class:`~pynwb.core.NWBContainer`
-represents groups. Additionally, :py:module:`pynwb.core` offers subclasses of these two classes for
+represents groups. Additionally, :py:mod:`pynwb.core` offers subclasses of these two classes for
 writing classes that come with more functionality.
 
 ``register_class``
------------------
+------------------
 
 When defining a class that represents a *neurodata_type* (i.e. anything that has a *neurodata_type_def*)
 from your extension, you can tell PyNWB which *neurodata_type* it represents using the function
@@ -115,11 +115,13 @@ for :py:class:`~pynwb.core.NWBTableRegion`. When subclassing this class, make su
 arguments for the :py:class:`~pynwb.core.NWBTableRegion` constructor--the *name* of the dataset, the *table* that the region
 applies to, and the *region* itself.
 
+
 ``NWBContainer``
 ----------------
 
-:py:class:`~pynwb.core.NWBContainer` should be used to represent groups with a *neurodata_type_def*. This section
- will discuss the available :py:class:`~pynwb.core.NWBContainer` subclasses for representing common group specifications.
+:py:class:`~pynwb.core.NWBContainer`
+should be used to represent groups with a *neurodata_type_def*. This section
+will discuss the available :py:class:`~pynwb.core.NWBContainer` subclasses for representing common group specifications.
 
 ``NWBDataInterface``
 ^^^^^^^^^^^^^^^^^^^^
@@ -185,4 +187,7 @@ with neurodata type "MyContainer".
         ...
 
 
-
+This class will have the methods ``add_container``, ``create_container``,  and ``get_container``. It will also have
+the property ``containers``. The ``add_container`` method will check to make sure that either an object of type
+``MyContainer`` or a list/dict/tuple of objects of type ``MyContainer`` is passed in. ``create_container`` will
+accept the exact same arguments that the ``MyContainer`` class constructor accepts.
