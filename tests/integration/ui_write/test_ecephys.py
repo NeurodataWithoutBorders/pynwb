@@ -315,3 +315,74 @@ class TestClusteringIO(base.TestDataInterfaceIO):
     def setUpContainer(self):
         return Clustering("an example source for Clustering", "A fake Clustering interface",  # noqa: F405
                           [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10, 61, 10)))
+
+
+class EventWaveformConstructor(base.TestDataInterfaceIO):
+    def setUpContainer(self):
+        TestElectricalSeriesIO.make_electrode_table(self)
+        region = ElectrodeTableRegion(self.table, [0, 2], 'the first and third electrodes')  # noqa: F405
+        sES = SpikeEventSeries(  # noqa: F405
+            'test_sES', 'a hypothetical source', list(range(10)), list(range(10)), region)
+        ew = EventWaveform('test_ew', sES)  # noqa: F405
+        return ew
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_electrode_group(self.group)
+        nwbfile.set_electrode_table(self.table)
+        nwbfile.add_acquisition(self.container)
+
+
+class ClusterWaveformsConstructor(base.TestDataInterfaceIO):
+    def setUpContainer(self):
+        times = [1.3, 2.3]
+        num = [3, 4]
+        peak_over_rms = [5.3, 6.3]
+        self.clustering = Clustering('test_cc', 'description', num, peak_over_rms, times)  # noqa: F405
+        means = [7.3, 7.3]
+        stdevs = [8.3, 8.3]
+        cw = ClusterWaveforms('test_cw', self.clustering, 'filtering', means, stdevs)  # noqa: F405
+        return cw
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.add_acquisition(self.clustering)
+        nwbfile.add_acquisition(self.container)
+
+
+class FeatureExtractionConstructor(base.TestDataInterfaceIO):
+    def setUpContainer(self):
+        event_times = [1.9, 3.5]
+        TestElectricalSeriesIO.make_electrode_table(self)
+        region = ElectrodeTableRegion(self.table, [0, 2], 'the first and third electrodes')   # noqa: F405
+        description = ['desc1', 'desc2', 'desc3']
+        features = [[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]]
+        fe = FeatureExtraction('test_fe', region, description, event_times, features)   # noqa: F405
+        return fe
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_electrode_group(self.group)
+        nwbfile.set_electrode_table(self.table)
+        nwbfile.add_acquisition(self.container)
+
+
+class EventDetectionConstructor(base.TestDataInterfaceIO):
+    def setUpContainer(self):
+        data = list(range(10))
+        ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        TestElectricalSeriesIO.make_electrode_table(self)
+        region = ElectrodeTableRegion(self.table, [0, 2], 'the first and third electrodes')  # noqa: F405
+        self.eS = ElectricalSeries('test_eS', 'a hypothetical source', data, region, timestamps=ts)  # noqa: F405
+        eD = EventDetection('test_ed', 'detection_method', self.eS, (1, 2, 3), (0.1, 0.2, 0.3))  # noqa: F405
+        return eD
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        nwbfile.add_device(self.dev1)
+        nwbfile.add_electrode_group(self.group)
+        nwbfile.set_electrode_table(self.table)
+        nwbfile.add_acquisition(self.eS)
+        nwbfile.add_acquisition(self.container)
