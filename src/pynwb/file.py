@@ -299,18 +299,6 @@ class NWBFile(MultiContainerInterface):
         name = getargs('name', kwargs)
         return ElectrodeTableRegion(self.ec_electrodes, region, desc, name)
 
-    def is_acquisition(self, ts):
-        return self.__exists(ts, self.__acquisition)
-
-    def is_stimulus(self, ts):
-        return self.__exists(ts, self.__stimulus)
-
-    def is_stimulus_template(self, ts):
-        return self.__exists(ts, self.__stimulus_template)
-
-    def __exists(self, ts, d):
-        return ts.name in d
-
     @docval(*get_docval(Epochs.add_epoch))
     def create_epoch(self, **kwargs):
         """
