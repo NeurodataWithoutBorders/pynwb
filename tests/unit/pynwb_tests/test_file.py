@@ -143,7 +143,6 @@ class NWBFileTest(unittest.TestCase):
         self.assertIn(elecgrp, children)
 
 
-
 class SubjectTest(unittest.TestCase):
     def setUp(self):
         self.subject = Subject(age='12 mo',

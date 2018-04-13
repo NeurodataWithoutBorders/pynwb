@@ -37,14 +37,22 @@ class TestMapNWBContainer(unittest.TestCase):
         return self.__manager
 
     def test_build(self):
-        self.builder = self.setUpBuilder()
+        try:
+            self.builder = self.setUpBuilder()
+        except unittest.SkipTest:
+            raise unittest.SkipTest("cannot run construct test for %s -- setUpBuilder not implemented" %
+                                    self.__class__.__name__)
         self.maxDiff = None
         result = self.manager.build(self.container)
         # do something here to validate the result Builder against the spec
         self.assertDictEqual(result, self.builder)
 
     def test_construct(self):
-        self.builder = self.setUpBuilder()
+        try:
+            self.builder = self.setUpBuilder()
+        except unittest.SkipTest:
+            raise unittest.SkipTest("cannot run construct test for %s -- setUpBuilder not implemented" %
+                                    self.__class__.__name__)
         result = self.manager.construct(self.builder)
         self.assertContainerEqual(result, self.container)
 

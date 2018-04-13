@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
+
 import warnings
 import re
 import argparse
@@ -52,6 +54,10 @@ def run_test_suite(directory, description="", verbose=True):
     TOTAL += pynwb_test_result.testsRun
     FAILURES += len(pynwb_test_result.failures)
     ERRORS += len(pynwb_test_result.errors)
+
+    for tc, reason in pynwb_test_result.skipped:
+        if not hasattr(tc, '_abc_cache'):
+            print(tc.__class__.__name__, reason)
 
     return pynwb_test_result
 

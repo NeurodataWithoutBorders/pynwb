@@ -9,6 +9,9 @@ from pynwb.misc import UnitTimes
 
 from . import base
 
+from abc import ABCMeta
+from six import with_metaclass
+
 
 class TestUnitTimesIO(base.TestDataInterfaceIO):
 
@@ -182,7 +185,7 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
         self.assertIsInstance(row2['group'], ElectrodeGroup)  # noqa: F405
 
 
-class TestMultiElectricalSeries(base.TestDataInterfaceIO):
+class TestMultiElectricalSeries(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
 
     def setUpElectricalSeriesContainers(self):
         TestElectricalSeriesIO.make_electrode_table(self)

@@ -5,6 +5,9 @@ from pynwb.form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildMa
 from pynwb.form import Container
 from pynwb.form.utils import docval, getargs, get_docval
 
+from abc import ABCMeta
+from six import with_metaclass
+
 CORE_NAMESPACE = 'test_core'
 
 
@@ -203,7 +206,7 @@ class TestDynamicContainer(unittest.TestCase):
         self.assertEqual(inst.attr4, 1.0)
 
 
-class TestObjectMapper(unittest.TestCase):
+class TestObjectMapper(with_metaclass(ABCMeta, unittest.TestCase)):
 
     def setUp(self):
         self.setUpBarSpec()
