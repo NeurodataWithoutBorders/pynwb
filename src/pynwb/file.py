@@ -12,7 +12,7 @@ from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Devic
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
-from .core import LabelledDict, NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface
+from .core import NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface
 
 from h5py import RegionReference
 
