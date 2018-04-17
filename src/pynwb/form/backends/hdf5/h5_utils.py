@@ -265,7 +265,7 @@ class H5DataIO(DataIO):
                     self.__iosettings['compression'] = 'gzip'
                 else:
                     self.__iosettings.pop('compression', None)
-                    if 'compression_opts' in  self.__iosettings:
+                    if 'compression_opts' in self.__iosettings:
                         warnings.warn('Compression disabled by compression=False setting. ' +
                                       'compression_opts parameter will, therefore, be ignored.')
                         self.__iosettings.pop('compression_opts', None)

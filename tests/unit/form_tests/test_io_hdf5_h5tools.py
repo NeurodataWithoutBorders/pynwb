@@ -130,7 +130,7 @@ class H5IOTest(unittest.TestCase):
             a = H5DataIO(np.arange(30).reshape(5, 2, 3),
                          compression=False,
                          compression_opts=5)
-            self.assertEqual(len(w), 1) # We expect a warning that compression options are being ignored
+            self.assertEqual(len(w), 1)  # We expect a warning that compression options are being ignored
             self.assertFalse('compression_ops' in a.io_settings)
             self.assertFalse('compression' in a.io_settings)
 

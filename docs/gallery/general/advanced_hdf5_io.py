@@ -77,17 +77,19 @@ nwbfile.add_acquisition(test_ts)
 #####################
 # .. tip::
 #
-#    For an introduction to chunking and compression in HDF5 and h5py in particular see also `https://www.safaribooksonline.com/library/view/python-and-hdf5/9781491944981/ch04.html <https://www.safaribooksonline.com/library/view/python-and-hdf5/9781491944981/ch04.html>`__
+#    For an introduction to chunking and compression in HDF5 and h5py in particular see also the online book
+#    `Python and HDF5 <https://www.safaribooksonline.com/library/view/python-and-hdf5/9781491944981/ch04.html>`__
+#    by Andrew Collette.
 
 
 ####################
-# To use chunking we again, simply need to wrap our dataset using :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`.
+# To use chunking we again, simply need to wrap our dataset via :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`.
 # Using chunking then also allows to also create resizable arrays simply by defining the ``maxshape`` of the array.
 
-data = np.arange(10000).reshape((1000,10))
+data = np.arange(10000).reshape((1000, 10))
 wrapped_data = H5DataIO(data=data,
-                        chunks=True,         # <---- Enable chunking
-                        maxshape=(None,10)   # <---- Make the time dimension unlimited and hence resizeable
+                        chunks=True,          # <---- Enable chunking
+                        maxshape=(None, 10)   # <---- Make the time dimension unlimited and hence resizeable
                         )
 test_ts = TimeSeries(name='test_chunked_timeseries',
                      source='PyNWB tutorial',
@@ -183,10 +185,10 @@ nwbfile = io.read()
 # Now lets have a look to confirm that all our I/O settings where indeed used.
 
 for k, v in nwbfile.acquisition.items():
-    print( "name=%s, chunks=%s, compression=%s, maxshape=%s" % (k,
-                                                                v.data.chunks,
-                                                                v.data.compression,
-                                                                v.data.maxshape))
+    print("name=%s, chunks=%s, compression=%s, maxshape=%s" % (k,
+                                                               v.data.chunks,
+                                                               v.data.compression,
+                                                               v.data.maxshape))
 
 ####################
 #
@@ -227,6 +229,3 @@ for k, v in nwbfile.acquisition.items():
 # the corporation or organization or individual. The authors bear no responsibility for the accuracy, legality or
 # content of the external site or for that of subsequent links. Contact the external site for answers to questions
 # regarding its content.
-
-
-
