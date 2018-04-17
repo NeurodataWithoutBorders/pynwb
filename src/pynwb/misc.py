@@ -197,9 +197,9 @@ class UnitTimes(NWBDataInterface):
     """
 
     __nwbfields__ = (
-        'unit_ids',
-        'spike_times_index',
-        'spike_times',
+        {'name': 'unit_ids', 'child': True},
+        {'name': 'spike_times_index', 'child': True},
+        {'name': 'spike_times', 'child': True},
         )
 
     @docval({'name': 'source', 'type': str,

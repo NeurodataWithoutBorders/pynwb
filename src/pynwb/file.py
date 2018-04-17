@@ -144,8 +144,8 @@ class NWBFile(MultiContainerInterface):
                      'lab',
                      'institution',
                      {'name': 'ec_electrodes', 'child': True},
-                     'epochs',
-                     'subject',
+                     {'name': 'epochs', 'child': True},
+                     {'name': 'subject', 'child': True},
                      'epoch_tags',)
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
@@ -211,9 +211,10 @@ class NWBFile(MultiContainerInterface):
         self.stimulus_template = getargs('stimulus_template', kwargs)
 
         self.modules = getargs('modules', kwargs)
-        self.epochs = getargs('epochs', kwargs)
-        if self.epochs is None:
-            self.epochs = Epochs(self.source)
+        epochs = getargs('epochs', kwargs)
+        if epochs is None:
+            epochs = Epochs(self.source)
+        self.epochs = epochs
         self.epoch_tags = getargs('epoch_tags', kwargs)
         self.ec_electrodes = getargs('ec_electrodes', kwargs)
         self.ec_electrode_groups = getargs('ec_electrode_groups', kwargs)
@@ -224,6 +225,8 @@ class NWBFile(MultiContainerInterface):
         self.ogen_sites = getargs('ogen_sites', kwargs)
 
         self.subject = getargs('subject', kwargs)
+        #if self.subject is not None:
+        #    self.subject.parent = self
 
         recommended = [
             'experimenter',
@@ -298,5 +301,4 @@ class NWBFile(MultiContainerInterface):
             msg = 'ElectrodeTable already exists, cannot overwrite'
             raise ValueError(msg)
         electrode_table = getargs('electrode_table', kwargs)
-        electrode_table.parent = self
         self.ec_electrodes = electrode_table
