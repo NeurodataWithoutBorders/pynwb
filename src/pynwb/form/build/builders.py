@@ -28,6 +28,20 @@ class Builder(with_metaclass(ABCMeta, dict)):
             self.__source = parent.source
         else:
             self.__source = None
+        self.__written = False
+
+    @property
+    def written(self):
+        ''' The source of this Builder '''
+        return self.__written
+
+    @written.setter
+    def written(self, s):
+        if not self.__written:
+            self.__written = s
+        else:
+            msg = "Cannot unset 'written' if already set"
+            raise ValueError(msg)
 
     @property
     def name(self):
@@ -255,13 +269,13 @@ class GroupBuilder(BaseBuilder):
         name, builder, = getargs('name', 'builder', kwargs)
         self.__set_builder(builder, GroupBuilder.__group)
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this link'},
-            {'name': 'target', 'type': ('GroupBuilder', 'DatasetBuilder'), 'doc': 'the target Builder'},
+    @docval({'name': 'target', 'type': ('GroupBuilder', 'DatasetBuilder'), 'doc': 'the target Builder'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this link', 'default': None},
             returns='the builder object for the soft link', rtype='LinkBuilder')
     def add_link(self, **kwargs):
         ''' Create a soft link and add it to this group '''
         name, target = getargs('name', 'target', kwargs)
-        builder = LinkBuilder(name, target, self)
+        builder = LinkBuilder(target, name, self)
         self.set_link(builder)
         return builder
 
@@ -442,12 +456,14 @@ class DatasetBuilder(BaseBuilder):
 
 class LinkBuilder(Builder):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the target of this link'},
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the target of this link'},
+            {'name': 'name', 'type': str, 'doc': 'the name of the dataset', 'default': None},
             {'name': 'parent', 'type': GroupBuilder, 'doc': 'the parent builder of this Builder', 'default': None},
             {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
     def __init__(self, **kwargs):
         name, builder, parent, source = getargs('name', 'builder', 'parent', 'source', kwargs)
+        if name is None:
+            name = builder.name
         super(LinkBuilder, self).__init__(name, parent, source)
         self['builder'] = builder
 

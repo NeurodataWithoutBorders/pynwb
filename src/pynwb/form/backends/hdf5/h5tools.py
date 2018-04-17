@@ -215,7 +215,7 @@ class HDF5IO(FORMIO):
                         else:
                             builder = self.__read_group(sub_h5obj, builder_name)
                         self.__set_built(sub_h5obj.file.filename, target_path, builder)
-                    kwargs['links'][builder_name] = LinkBuilder(k, builder, source=self.__path)
+                    kwargs['links'][builder_name] = LinkBuilder(builder, k, source=self.__path)
                 else:
                     builder = self.__get_built(sub_h5obj.file.filename, sub_h5obj.name)
                     obj_type = None
@@ -439,6 +439,11 @@ class HDF5IO(FORMIO):
     def write_group(self, **kwargs):
 
         parent, builder = getargs('parent', 'builder', kwargs)
+        if builder.written:
+            import pdb
+            #pdb.set_trace()
+            print('%s already written to %s' % (self.__get_path(builder), builder.source))
+            return None
         group = parent.create_group(builder.name)
         # write all groups
         subgroups = builder.groups
@@ -458,6 +463,7 @@ class HDF5IO(FORMIO):
                 self.write_link(group, sub_builder)
         attributes = builder.attributes
         self.set_attributes(group, attributes)
+        builder.written = True
         return group
 
     def __get_path(self, builder):
@@ -475,6 +481,11 @@ class HDF5IO(FORMIO):
             returns='the Link that was created', rtype='Link')
     def write_link(self, **kwargs):
         parent, builder = getargs('parent', 'builder', kwargs)
+        if builder.written:
+            import pdb
+            #pdb.set_trace()
+            print('%s already written to %s' % (self.__get_path(builder), builder.source))
+            return None
         name = builder.name
         target_builder = builder.builder
         path = self.__get_path(target_builder)
@@ -487,6 +498,7 @@ class HDF5IO(FORMIO):
             msg = 'cannot create external link to %s' % path
             raise ValueError(msg)
         parent[name] = link_obj
+        builder.written = True
         return link_obj
 
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},  # noqa
@@ -501,6 +513,11 @@ class HDF5IO(FORMIO):
         __scalar_fill__, __list_fill__ and __chunked_iter_fill__ to write the data.
         """
         parent, builder, link_data = getargs('parent', 'builder', 'link_data', kwargs)
+        if builder.written:
+            import pdb
+            #pdb.set_trace()
+            print('%s already written to %s' % (self.__get_path(builder), builder.source))
+            return None
         name = builder.name
         data = builder.data
         options = dict()   # dict with additional
@@ -547,6 +564,7 @@ class HDF5IO(FORMIO):
             if len(refs) > 0:
                 _dtype = self.__resolve_dtype__(options['dtype'], data)
                 dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype, **options['io_settings'])
+                builder.written = True
 
                 @self.__queue_ref
                 def _filler():
@@ -570,6 +588,7 @@ class HDF5IO(FORMIO):
             # Write a scalar data region reference dataset
             if isinstance(data, RegionBuilder):
                 dset = parent.require_dataset(name, shape=(), dtype=_dtype)
+                builder.written = True
 
                 @self.__queue_ref
                 def _filler():
@@ -580,6 +599,7 @@ class HDF5IO(FORMIO):
             # Write a scalar object reference dataset
             elif isinstance(data, ReferenceBuilder):
                 dset = parent.require_dataset(name, dtype=_dtype, shape=())
+                builder.written = True
 
                 @self.__queue_ref
                 def _filler():
@@ -592,6 +612,7 @@ class HDF5IO(FORMIO):
                 # Write a array of region references
                 if options['dtype'] == 'region':
                     dset = parent.require_dataset(name, dtype=_dtype, shape=(len(data),), **options['io_settings'])
+                    builder.written = True
 
                     @self.__queue_ref
                     def _filler():
@@ -604,6 +625,7 @@ class HDF5IO(FORMIO):
                 # Write array of object references
                 else:
                     dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype, ** options['io_settings'])
+                    builder.written = True
 
                     @self.__queue_ref
                     def _filler():
@@ -633,6 +655,7 @@ class HDF5IO(FORMIO):
         # Validate the attributes on the linked dataset
         elif len(attributes) > 0:
             pass
+        builder.written = True
         return
 
     @classmethod

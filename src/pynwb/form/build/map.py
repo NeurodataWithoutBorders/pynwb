@@ -523,7 +523,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             attr_value = self.get_attr_value(spec, container)
             if not attr_value:
                 continue
-            self.__add_containers(builder, spec, attr_value, build_manager, source)
+            self.__add_containers(builder, spec, attr_value, build_manager, source, container)
 
     def __add_datasets(self, builder, datasets, container, build_manager, source):
         for spec in datasets:
@@ -537,7 +537,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
                 self.__add_attributes(sub_builder, spec.attributes, container)
             else:
-                self.__add_containers(builder, spec, attr_value, build_manager, source)
+                self.__add_containers(builder, spec, attr_value, build_manager, source, container)
 
     def __add_groups(self, builder, groups, container, build_manager, source):
         for spec in groups:
@@ -559,7 +559,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                             it = iter(attr_value.values())
                         for item in it:
                             if isinstance(item, Container):
-                                self.__add_containers(sub_builder, spec, item, build_manager, source)
+                                self.__add_containers(sub_builder, spec, item, build_manager, source, container)
                 self.__add_groups(sub_builder, spec.groups, container, build_manager, source)
                 empty = sub_builder.is_empty()
                 if not empty or (empty and isinstance(spec.quantity, int)):
@@ -570,21 +570,21 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     if attr_name is not None:
                         attr_value = getattr(container, attr_name, None)
                         if attr_value is not None:
-                            self.__add_containers(builder, spec, attr_value, build_manager, source)
+                            self.__add_containers(builder, spec, attr_value, build_manager, source, container)
                 else:
                     attr_name = self.get_attribute(spec)
                     attr_value = getattr(container, attr_name, None)
                     if attr_value is not None:
-                        self.__add_containers(builder, spec, attr_value, build_manager, source)
+                        self.__add_containers(builder, spec, attr_value, build_manager, source, container)
 
-    def __add_containers(self, builder, spec, value, build_manager, source):
+    def __add_containers(self, builder, spec, value, build_manager, source, parent_container):
         if isinstance(value, Container):
             rendered_obj = build_manager.build(value, source=source)
             # use spec to determine what kind of HDF5
             # object this Container corresponds to
-            if isinstance(spec, LinkSpec):
+            if isinstance(spec, LinkSpec) or value.parent is not parent_container:
                 name = spec.name
-                builder.set_link(LinkBuilder(name, rendered_obj, builder))
+                builder.set_link(LinkBuilder(rendered_obj, name, builder))
             elif isinstance(spec, DatasetSpec):
                 builder.set_dataset(rendered_obj)
             else:
@@ -600,7 +600,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                        "Containers if 'spec' is a GroupSpec")
                 raise ValueError(msg % value.__class__.__name__)
             for container in values:
-                self.__add_containers(builder, spec, container, build_manager, source)
+                self.__add_containers(builder, spec, container, build_manager, source, parent_container)
 
     def __get_subspec_values(self, builder, spec, manager):
         ret = dict()
@@ -614,19 +614,21 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 # GroupBuilder.items will return attributes as well, need to skip non Builder items
                 if not isinstance(sub_builder, Builder):
                     continue
+                subspec = manager.get_subspec(spec, sub_builder)
                 link_name = None
                 if isinstance(sub_builder, LinkBuilder):
                     link_name = sub_builder.name  # noqa: F841
-                subspec = manager.get_subspec(spec, sub_builder)
                 if subspec is not None:
-                    if isinstance(subspec, LinkSpec):
-                        if isinstance(sub_builder, LinkBuilder):
-                            sub_builder = sub_builder.builder
-                        else:
-                            # LEGACY
-                            msg = 'expected LinkBuilder, got %s' % type(sub_builder).__name__
-                            warnings.warn(msg)
-                            continue
+                    if isinstance(sub_builder, LinkBuilder):
+                        sub_builder = sub_builder.builder
+                    #if isinstance(subspec, LinkSpec):
+                    #    if isinstance(sub_builder, LinkBuilder):
+                    #        sub_builder = sub_builder.builder
+                    #    else:
+                    #        # LEGACY
+                    #        msg = 'expected LinkBuilder, got %s' % type(sub_builder).__name__
+                    #        warnings.warn(msg)
+                    #        continue
                     if self.__data_type_key in sub_builder.attributes or \
                        not (subspec.data_type_inc is None and subspec.data_type_def is None):
                         val = manager.construct(sub_builder)
@@ -651,6 +653,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         ''' Construct an Container from the given Builder '''
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
+        if cls.__name__ == 'TwoPhotonSeries':
+            import pdb
+            pdb.set_trace()
         # gather all subspecs
         subspecs = self.__get_subspec_values(builder, self.spec, manager)
         # get the constructor argument each specification corresponds to
@@ -674,7 +679,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         try:
             obj = cls(**kwargs)
         except Exception as ex:
-            msg = 'Could not construct %s object: %s' % (cls.__name__, ex.message)
+            msg = 'Could not construct %s object' % (cls.__name__,)
             raise_from(Exception(msg), ex)
         return obj
 
@@ -899,6 +904,8 @@ class TypeMap(object):
         return ret
 
     def get_builder_ns(self, builder):
+        if isinstance(builder, LinkBuilder):
+            builder = builder.builder
         ret = builder.attributes.get('namespace')
         if ret is None:
             msg = "builder '%s' does not have a namespace" % builder.name
