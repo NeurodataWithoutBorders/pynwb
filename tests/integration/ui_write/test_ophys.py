@@ -144,7 +144,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
                 'field_of_view': DatasetBuilder('field_of_view', [2.0, 2.0, 5.0]),
             },
             links={
-                'imaging_plane': LinkBuilder('imaging_plane', imgpln_builder)
+                'imaging_plane': LinkBuilder(imgpln_builder, 'imaging_plane')
             })
 
     def addContainer(self, nwbfile):
@@ -274,7 +274,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'reference_images': GroupBuilder('reference_images', groups={'test_iS': self.is_builder}),
             },
             links={
-                'imaging_plane': LinkBuilder('imaging_plane', self.imgpln_builder)
+                'imaging_plane': LinkBuilder(self.imgpln_builder, 'imaging_plane')
             }
         )
         return ps_builder
