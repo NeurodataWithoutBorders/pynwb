@@ -5,7 +5,6 @@ Modular Data Storage using External Files
 PyNWB supports linking between files using external links.
 '''
 
-
 ####################
 # Example Use Case: Integrating data from multiple files
 # ---------------------------------------------------------
@@ -24,6 +23,14 @@ PyNWB supports linking between files using external links.
 ####################
 # .. tip::
 #
+#    The same strategies we use here for creating External Links also apply to Soft Links.
+#    The main difference between soft and external links is that soft links point to other
+#    objects within the same file while external links point to objects in external files.
+#
+
+####################
+# .. tip::
+#
 #    In the case of :py:meth:`~pynwb.base.TimeSeries`, the uncorrected time  stamps generated  by the acquisition
 #    system can be stored (or linked) in the *sync* group. In the NWB:N format, hardware-recorded time data
 #    must then be corrected to a common time base (e.g., timestamps from all hardware sources aligned) before
@@ -32,6 +39,13 @@ PyNWB supports linking between files using external links.
 #    timestamps in the same file when using external links.
 #
 
+####################
+# .. warning::
+#
+#    External links can become stale/break. Since external links are pointing to data in other files
+#    external links may become invalid any time files are modified on the file system, e.g., renamed,
+#    moved or access permissions are changed.
+#
 
 ####################
 # Creating test data
@@ -56,6 +70,7 @@ filename1 = 'external1_example.nwb'
 filename2 = 'external2_example.nwb'
 filename3 = 'external_linkcontainer_example.nwb'
 filename4 = 'external_linkdataset_example.nwb'
+filename5 = 'external_linkdataset_copy_example.nwb'
 
 # Create the first file
 nwbfile1 = NWBFile(source='PyNWB tutorial',
@@ -139,7 +154,7 @@ nwbfile4.add_acquisition(test_ts4)
 
 ####################
 # In the above case we did not make it explicit how we want to handle the data from
-# our timeseries, this means that  :py:class:`~pynwb.NWBHDF5IO` class [#]_ will need to
+# our timeseries, this means that :py:class:`~pynwb.NWBHDF5IO` will need to
 # determine on write how to treat the dataset. We can make this explicit and customize this
 # behavior on a per-dataset basis by wrapping our dataset using
 # :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`
@@ -160,7 +175,7 @@ nwbfile4.add_acquisition(test_ts5)
 #
 from pynwb import NWBHDF5IO
 
-io4 = NWBHDF5IO('basic_example.nwb', 'w')
+io4 = NWBHDF5IO(filename4, 'w')
 io4.write(nwbfile4, link_data=True)     # <-------- Specify default behavior to link rather than copy data
 io4.close()
 
@@ -177,6 +192,7 @@ io4.close()
 # Linking to whole Containers
 # ---------------------------
 
+"""
 ####################
 # Step 1: Get the container object you want to link to
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -216,4 +232,32 @@ nwbfile3.add_acquisition(timeseries_2)
 io3 = NWBHDF5IO(filename3, 'w')
 io3.write(nwbfile3)
 io3.close()
+"""
+
+####################
+# Creating a single file for sharing
+# -----------------------------------
+#
+# External links are convenient but to share data we may want to hand a single file with all the
+# data to our collaborator rather than having to collect all relevant files. To do this,
+# :py:class:`~pynwb.from.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
+# provide the conveniencefunction :py:func:`~pynwb.from.backends.hdf5.h5tools.HDF5IO.copy_file`
+
+NWBHDF5IO.copy_file(source_filename=filename4,
+                    dest_filename=filename5,
+                    expand_external=True)
+
+
+####################
+#
+# Here we copied with the following default settings of :py:func:`~pynwb.from.backends.hdf5.h5tools.HDF5IO.copy_file` :
+#
+#  * ``expand_external=True`` Expand external links into the file, i.e., copy objects refered to by external links
+#  * ``expand_soft=False``    Do not expand soft links
+#  * ``expand_refs=False``    Do not copy objects which are pointed to by reference
+#
+
+
+
+
 
