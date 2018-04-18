@@ -64,7 +64,7 @@ import numpy as np
 # Create the base data
 start_time = datetime(2017, 4, 3, 11, 0, 0)
 create_date = datetime(2017, 4, 15, 12, 0, 0)
-data = np.arange(1000).reshape((100,10))
+data = np.arange(1000).reshape((100, 10))
 timestamps = np.arange(100)
 filename1 = 'external1_example.nwb'
 filename2 = 'external2_example.nwb'
@@ -147,7 +147,7 @@ timeseries_1_data = timeseries_1.data
 # Create a new timeseries that links to our data
 test_ts4 = TimeSeries(name='test_timeseries1',
                       source='PyNWB tutorial',
-                      data= timeseries_1_data,   # <-------
+                      data=timeseries_1_data,   # <-------
                       unit='SIunit',
                       timestamps=timestamps)
 nwbfile4.add_acquisition(test_ts4)
@@ -164,7 +164,8 @@ from pynwb.form.backends.hdf5.h5_utils import H5DataIO
 # Create another timeseries that links to the same data
 test_ts5 = TimeSeries(name='test_timeseries2',
                       source='PyNWB tutorial',
-                      data= H5DataIO(data=timeseries_1_data, link_data=True),   # <-------
+                      data=H5DataIO(data=timeseries_1_data,     # <-------
+                                    link_data=True),            # <-------
                       unit='SIunit',
                       timestamps=timestamps)
 nwbfile4.add_acquisition(test_ts5)
@@ -227,7 +228,7 @@ nwbfile3 = NWBFile(source='PyNWB tutorial',
 nwbfile3.add_acquisition(timeseries_1)             # <--------
 nwbfile3.add_acquisition(timeseries_2)             # <--------
 
-## Write our third file that includes our two timeseries as external links
+# Write our third file that includes our two timeseries as external links
 io3 = NWBHDF5IO(filename3, 'w')
 io3.write(nwbfile3)
 io3.close()
@@ -247,7 +248,6 @@ NWBHDF5IO.copy_file(source_filename=filename4,
                     expand_external=True        # <------ Expand/copy external links
                     )
 
-
 ####################
 #
 # Here we copied with the following default settings of :py:func:`~pynwb.from.backends.hdf5.h5tools.HDF5IO.copy_file` :
@@ -256,8 +256,3 @@ NWBHDF5IO.copy_file(source_filename=filename4,
 #  * ``expand_soft=False``    Do not expand soft links
 #  * ``expand_refs=False``    Do not copy objects which are pointed to by reference
 #
-
-
-
-
-
