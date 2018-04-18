@@ -322,5 +322,37 @@ class H5IOTest(unittest.TestCase):
                              self.f['test_copy'][:].tolist())
 
 
+class H5IOMultiFileTest(unittest.TestCase):
+    """Tests for h5tools IO tools"""
+
+    def setUp(self):
+        numfiles = 3
+        self.test_temp_files = [tempfile.NamedTemporaryFile() for i in range(numfiles)]
+
+        # On Windows h5py cannot truncate an open file in write mode.
+        # The temp file will be closed before h5py truncates it
+        # and will be removed during the tearDown step.
+        for i in self.test_temp_files:
+            i.close()
+        self.io = [HDF5IO(i.name) for i in self.test_temp_files]
+        self.f  = [i._file for i in self.io]
+
+
+    def tearDown(self):
+        for fileobj in self.f:
+            path = fileobj.filename
+            fileobj .close()
+            os.remove(path)
+            del fileobj
+        self.f = None
+        for i in self.test_temp_files:
+            del i
+        self.test_temp_files = None
+
+    def test_copy_file_with_external_links(self):
+        self.assertTrue(True)
+
+
+
 if __name__ == '__main__':
     unittest.main()
