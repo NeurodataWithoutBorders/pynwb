@@ -142,7 +142,7 @@ timeseries_1_data = timeseries_1.data
 # Step 3: Create the object you want to link to the data
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# To make it explicit that we want to link to the dataset we here link to the
+# To link to the dataset we can simply assign the data object (here `` timeseries_1.data``) to a new ``TimeSeries``
 
 # Create a new timeseries that links to our data
 test_ts4 = TimeSeries(name='test_timeseries1',
@@ -154,7 +154,7 @@ nwbfile4.add_acquisition(test_ts4)
 
 ####################
 # In the above case we did not make it explicit how we want to handle the data from
-# our timeseries, this means that :py:class:`~pynwb.NWBHDF5IO` will need to
+# our TimeSeries, this means that :py:class:`~pynwb.NWBHDF5IO` will need to
 # determine on write how to treat the dataset. We can make this explicit and customize this
 # behavior on a per-dataset basis by wrapping our dataset using
 # :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`
@@ -176,7 +176,8 @@ nwbfile4.add_acquisition(test_ts5)
 from pynwb import NWBHDF5IO
 
 io4 = NWBHDF5IO(filename4, 'w')
-io4.write(nwbfile4, link_data=True)     # <-------- Specify default behavior to link rather than copy data
+io4.write(nwbfile4,
+          link_data=True)     # <-------- Specify default behavior to link rather than copy data
 io4.close()
 
 #####################
@@ -192,7 +193,6 @@ io4.close()
 # Linking to whole Containers
 # ---------------------------
 
-"""
 ####################
 # Step 1: Get the container object you want to link to
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -218,21 +218,20 @@ timeseries_2 = nwbfile1.get_acquisition('test_timeseries')
 # been written to another file and will create external links for us.
 #
 
-# Create a new NWBFile
-# Create the first file
+# Create a new NWBFile that links to the external timeseries
 nwbfile3 = NWBFile(source='PyNWB tutorial',
                    session_description='demonstrate external files',
                    identifier='NWBE3',
                    session_start_time=start_time,
                    file_create_date=create_date)
-nwbfile3.add_acquisition(timeseries_1)
-nwbfile3.add_acquisition(timeseries_2)
+nwbfile3.add_acquisition(timeseries_1)             # <--------
+nwbfile3.add_acquisition(timeseries_2)             # <--------
 
 ## Write our third file that includes our two timeseries as external links
 io3 = NWBHDF5IO(filename3, 'w')
 io3.write(nwbfile3)
 io3.close()
-"""
+
 
 ####################
 # Creating a single file for sharing
@@ -241,11 +240,12 @@ io3.close()
 # External links are convenient but to share data we may want to hand a single file with all the
 # data to our collaborator rather than having to collect all relevant files. To do this,
 # :py:class:`~pynwb.from.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
-# provide the conveniencefunction :py:func:`~pynwb.from.backends.hdf5.h5tools.HDF5IO.copy_file`
+# provide the convenience function :py:func:`~pynwb.from.backends.hdf5.h5tools.HDF5IO.copy_file`
 
 NWBHDF5IO.copy_file(source_filename=filename4,
                     dest_filename=filename5,
-                    expand_external=True)
+                    expand_external=True        # <------ Expand/copy external links
+                    )
 
 
 ####################
