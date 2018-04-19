@@ -5,25 +5,72 @@ from .utils import docval, getargs
 
 class Container(with_metaclass(abc.ABCMeta, object)):
 
-    @docval({'name': 'parent', 'type': 'Container', 'doc': 'the Container that holds this Container', 'default': None})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'parent', 'type': 'Container', 'doc': 'the Container that holds this Container', 'default': None},
+            {'name': 'container_source', 'type': str, 'doc': 'the source of this container', 'default': None})
     def __init__(self, **kwargs):
+        self.__name = getargs('name', kwargs)
         self.__parent = getargs('parent', kwargs)
+        self.__container_source = getargs('container_source', kwargs)
+        self.__children = list()
+
+    @property
+    def children(self):
+        return tuple(self.__children)
+
+    @docval({'name': 'child', 'type': 'Container',
+             'doc': 'the child Container for this Container', 'default': None})
+    def add_child(self, **kwargs):
+        child = getargs('child', kwargs)
+        self.__children.append(child)
+        if not isinstance(child.parent, Container):
+            child.parent = self
 
     @classmethod
     def type_hierarchy(cls):
         return cls.__mro__
 
     @property
+    def name(self):
+        '''
+        The name of this Container
+        '''
+        return self.__name
+
+    @property
+    def container_source(self):
+        '''
+        The source of this Container
+        '''
+        return self.__container_source
+
+    @container_source.setter
+    def container_source(self, source):
+        if self.__container_source is not None:
+            raise Exception('cannot reassign container_source')
+        self.__container_source = source
+
+    @property
     def parent(self):
-        '''The parent NWBContainer of this NWBContainer
+        '''
+        The parent Container of this Container
         '''
         return self.__parent
 
     @parent.setter
     def parent(self, parent_container):
+        parent = self.__parent
         if self.__parent is not None:
-            raise Exception('cannot reassign parent')
-        self.__parent = parent_container
+            if isinstance(self.__parent, Container):
+                raise Exception('cannot reassign parent')
+            else:
+                if self.__parent.matches(parent_container):
+                    self.__parent = parent_container
+                else:
+                    self.__parent.add_candidate(parent_container)
+        else:
+            self.__parent = parent_container
+
 
 
 class Data(Container):

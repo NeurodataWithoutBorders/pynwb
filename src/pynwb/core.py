@@ -98,20 +98,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         parent, container_source = getargs('parent', 'container_source', kwargs)
-        super(NWBBaseType, self).__init__(parent)
+        call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
-        self.__name = getargs('name', kwargs)
-        self.__container_source = container_source
-
-    @property
-    def name(self):
-        return self.__name
-
-    @property
-    def container_source(self):
-        '''The source of this Container e.g. file name or table
-        '''
-        return self.__container_source
 
     @property
     def fields(self):
@@ -180,9 +168,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     def __str__(self):
         return nwb_repr(self)
 
-    def __repr__(self):
-        return str(self)
-
 
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBBaseType, Container):
@@ -199,18 +184,6 @@ class NWBContainer(NWBBaseType, Container):
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
         self.source = getargs('source', kwargs)
-        self.__children = list()
-
-    @property
-    def children(self):
-        return tuple(self.__children)
-
-    @docval({'name': 'child', 'type': NWBBaseType,
-             'doc': 'the child NWBContainer or NWBData for this Container', 'default': None})
-    def add_child(self, **kwargs):
-        child = getargs('child', kwargs)
-        self.__children.append(child)
-        child.parent = self
 
     @classmethod
     def _setter(cls, nwbfield):
@@ -228,8 +201,7 @@ class NWBContainer(NWBBaseType, Container):
                     else:
                         val = [val]
                     for v in val:
-                        if v.parent is None:
-                            self.add_child(v)
+                        self.add_child(v)
 
             ret = nwbdi_setter
         return ret

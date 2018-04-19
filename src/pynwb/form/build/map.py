@@ -8,7 +8,69 @@ from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec
 from ..spec.spec import BaseStorageSpec
-from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, ReferenceBuilder, RegionBuilder
+from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, ReferenceBuilder, RegionBuilder, BaseBuilder
+
+
+class Proxy(object):
+
+    def __init__(self, manager, source, location, namespace, data_type):
+        self.__source = source
+        self.__location = location
+        self.__namespace = namespace
+        self.__data_type = data_type
+        self.__manager = manager
+        self.__candidates = list()
+
+    @property
+    def candidates(self):
+        return self.__candidates
+
+    @property
+    def source(self):
+        return self.__source
+
+    @property
+    def location(self):
+        return self.__location
+
+    @property
+    def namespace(self):
+        return self.__namespace
+
+    @property
+    def data_type(self):
+        return self.__data_type
+
+    @docval({"name": "object", "type": (BaseBuilder, Container), "doc": "the container or builder to get a proxy for"})
+    def matches(self, **kwargs):
+        obj = getargs('object', kwargs)
+        tmp = obj
+        if not isinstance(obj, Proxy):
+            obj = self.__manager.get_proxy(obj)
+        return self == obj
+
+    @docval({"name": "container", "type": Container, "doc": "the Container to add as a candidate match"})
+    def add_candidate(self, **kwargs):
+        container = getargs('container', kwargs)
+        self.__candidates.append(container)
+
+    def resolve(self, **kwargs):
+        for candidate in self.__candidates:
+            if self.matches(candidate):
+                return candidate
+        return None
+
+    def __eq__(self, other):
+        return self.data_type == other.data_type and \
+               self.location == other.location and \
+               self.namespace == other.namespace and \
+               self.source == other.source
+
+    def __repr__(self):
+        ret = dict()
+        for key in ('source', 'location', 'namespace', 'data_type'):
+            ret[key] = getattr(self, key, None)
+        return str(ret)
 
 
 class BuildManager(object):
@@ -24,6 +86,38 @@ class BuildManager(object):
     @property
     def namespace_catalog(self):
         return self.__type_map.namespace_catalog
+
+    @docval({"name": "object", "type": (BaseBuilder, Container), "doc": "the container or builder to get a proxy for"},
+            {"name": "source", "type": str,
+             "doc": "the source of container being built i.e. file path", 'default': None})
+    def get_proxy(self, **kwargs):
+        obj = getargs('object', kwargs)
+        if isinstance(obj, BaseBuilder):
+            return self.__get_proxy_builder(obj)
+        elif isinstance(obj, Container):
+            return self.__get_proxy_container(obj)
+
+    def __get_proxy_builder(self, builder):
+        dt = self.__type_map.get_builder_dt(builder)
+        ns = self.__type_map.get_builder_ns(builder)
+        name = builder.name
+        stack = list()
+        tmp = builder
+        while tmp is not None:
+            stack.append(tmp.name)
+            tmp = self.__get_parent_dt_builder(tmp)
+        loc = "/".join(reversed(stack))
+        return Proxy(self, builder.source, loc, ns, dt)
+
+    def __get_proxy_container(self, container):
+        ns, dt = self.__type_map.get_container_ns_dt(container)
+        stack = list()
+        tmp = container
+        while tmp is not None:
+            stack.append(tmp.name)
+            tmp = tmp.parent
+        loc = "/".join(reversed(stack))
+        return Proxy(self, container.container_source, loc, ns, dt)
 
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             {"name": "source", "type": str,
@@ -66,8 +160,38 @@ class BuildManager(object):
         result = self.__containers.get(builder_id)
         if result is None:
             result = self.__type_map.construct(builder, self)
+            parent_builder = self.__get_parent_dt_builder(builder)
+            if parent_builder is not None:
+                result.parent = self.__get_proxy_builder(parent_builder)
+            else:
+                self.__resolve_parents(result)
             self.prebuilt(result, builder)
         return result
+
+    def __resolve_parents(self, container):
+        stack = [container]
+        while len(stack) > 0:
+            tmp = stack.pop()
+            if isinstance(tmp.parent, Proxy):
+                tmp.parent = tmp.parent.resolve()
+            for child in tmp.children:
+                stack.append(child)
+
+    def __get_parent_dt_builder(self, builder):
+        '''
+        Get the next builder above the given builder
+        that has a data type
+        '''
+        tmp = builder.parent
+        ret = None
+        while tmp is not None:
+            try:
+                ret = tmp
+                self.__type_map.get_builder_dt(tmp)
+                break
+            except:
+                tmp = tmp.parent
+        return ret
 
     @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder to get the class object for'})
     def get_cls(self, **kwargs):
@@ -653,9 +777,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         ''' Construct an Container from the given Builder '''
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
-        if cls.__name__ == 'TwoPhotonSeries':
-            import pdb
-            pdb.set_trace()
         # gather all subspecs
         subspecs = self.__get_subspec_values(builder, self.spec, manager)
         # get the constructor argument each specification corresponds to
@@ -678,6 +799,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             kwargs[argname] = val
         try:
             obj = cls(**kwargs)
+            obj.container_source = builder.source
         except Exception as ex:
             msg = 'Could not construct %s object' % (cls.__name__,)
             raise_from(Exception(msg), ex)
@@ -953,12 +1075,12 @@ class TypeMap(object):
                         break
         return subspec
 
-    def __get_container_ns_dt(self, obj):
+    def get_container_ns_dt(self, obj):
         container_cls = obj.__class__
-        namespace, data_type = self.__get_container_cls_dt(container_cls)
+        namespace, data_type = self.get_container_cls_dt(container_cls)
         return namespace, data_type
 
-    def __get_container_cls_dt(self, cls):
+    def get_container_cls_dt(self, cls):
         return self.__data_types.get(cls, (None, None))
 
     @docval({'name': 'namespace', 'type': str,
@@ -978,7 +1100,7 @@ class TypeMap(object):
         # get the container class, and namespace/data_type
         if isinstance(obj, Container):
             container_cls = obj.__class__
-            namespace, data_type = self.__get_container_ns_dt(obj)
+            namespace, data_type = self.get_container_ns_dt(obj)
             if namespace is None:
                 raise ValueError("class %s does not mapped to a data_type" % container_cls)
         else:
@@ -1019,7 +1141,7 @@ class TypeMap(object):
     def register_map(self, **kwargs):
         ''' Map a container class to an ObjectMapper class '''
         container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
-        if self.__get_container_cls_dt(container_cls) == (None, None):
+        if self.get_container_cls_dt(container_cls) == (None, None):
             raise ValueError('cannot register map for type %s - no data_type found' % container_cls)
         self.__mapper_cls[container_cls] = mapper_cls
 
@@ -1038,7 +1160,7 @@ class TypeMap(object):
             raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
             builder = attr_map.build(container, manager, source=getargs('source', kwargs))
-        namespace, data_type = self.__get_container_ns_dt(container)
+        namespace, data_type = self.get_container_ns_dt(container)
         builder.set_attribute('namespace', namespace)
         builder.set_attribute(attr_map.spec.type_key(), data_type)
         return builder
