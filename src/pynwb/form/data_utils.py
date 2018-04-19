@@ -43,12 +43,12 @@ class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
     def recommended_data_shape(self):
         pass
 
-    @abstractmethod
-    def get_dtype(self):
+    @abstractproperty
+    def dtype(self):
         pass
 
-    @abstractmethod
-    def get_maxshape(self):
+    @abstractproperty
+    def maxshape(self):
         pass
 
 
@@ -57,7 +57,7 @@ class DataChunkIterator(AbstractDataChunkIterator):
     """Custom iterator class used to iterate over chunks of data.
 
     Derived classes must ensure that self.shape and self.dtype are set properly.
-    define the self.max_shape property describing the maximum shape of the array.
+    define the self.maxshape property describing the maximum shape of the array.
     In addition, derived classes must implement the __next__ method (or overwrite _read_next_chunk
     if the default behavior of __next__ should be reused). The __next__ method must return
     in each iteration 1) a numpy array with the data values for the chunk and 2) a numpy-compliant index tuple
@@ -75,7 +75,7 @@ class DataChunkIterator(AbstractDataChunkIterator):
     in memory and writing larger blocks at once.
     """
     @docval({'name': 'data', 'type': None, 'doc': 'The data object used for iteration', 'default': None},
-            {'name': 'max_shape', 'type': tuple,
+            {'name': 'maxshape', 'type': tuple,
              'doc': 'The maximum shape of the full data array. Use None to indicate unlimited dimensions',
              'default': None},
             {'name': 'dtype', 'type': np.dtype, 'doc': 'The Numpy data type for the array', 'default': None},
@@ -84,52 +84,52 @@ class DataChunkIterator(AbstractDataChunkIterator):
     def __init__(self, **kwargs):
         """Initalize the DataChunkIterator"""
         # Get the user parameters
-        self.data, self.max_shape, self.dtype, self.buffer_size = getargs('data',
-                                                                          'max_shape',
-                                                                          'dtype',
-                                                                          'buffer_size',
-                                                                          kwargs)
+        self.data, self.__maxshape, self.__dtype, self.buffer_size = getargs('data',
+                                                                              'maxshape',
+                                                                              'dtype',
+                                                                              'buffer_size',
+                                                                               kwargs)
         # Create an iterator for the data if possible
         self.__data_iter = iter(self.data) if isinstance(self.data, Iterable) else None
         self.__next_chunk = DataChunk(None, None)
         self.__first_chunk_shape = None
         # Determine the shape of the data if possible
-        if self.max_shape is None:
+        if self.__maxshape is None:
             # If the self.data object identifies it shape then use it
             if hasattr(self.data,  "shape"):
-                self.max_shape = self.data.shape
+                self.__maxshape = self.data.shape
                 # Avoid the special case of scalar values by making them into a 1D numpy array
-                if len(self.max_shape) == 0:
+                if len(self.__maxshape) == 0:
                     self.data = np.asarray([self.data, ])
-                    self.max_shape = self.data.shape
+                    self.__maxshape = self.data.shape
                     self.__data_iter = iter(self.data)
-            # Try to get an accurate idea of max_shape for other Python datastructures if possible.
+            # Try to get an accurate idea of __maxshape for other Python datastructures if possible.
             # Don't just callget_shape for a generator as that would potentially trigger loading of all the data
             elif isinstance(self.data, list) or isinstance(self.data, tuple):
-                self.max_shape = ShapeValidator.get_data_shape(self.data, strict_no_data_load=True)
+                self.__maxshape = ShapeValidator.get_data_shape(self.data, strict_no_data_load=True)
 
         # If we have a data iterator, then read the first chunk
-        if self.__data_iter is not None:  # and(self.max_shape is None or self.dtype is None):
+        if self.__data_iter is not None:  # and(self.__maxshape is None or self.__dtype is None):
             self._read_next_chunk()
 
         # If we still don't know the shape then try to determine the shape from the first chunk
-        if self.max_shape is None and self.__next_chunk.data is not None:
+        if self.__maxshape is None and self.__next_chunk.data is not None:
             data_shape = ShapeValidator.get_data_shape(self.__next_chunk.data)
-            self.max_shape = list(data_shape)
+            self.__maxshape = list(data_shape)
             try:
-                self.max_shape[0] = len(self.data)  # We use self.data here because self.__data_iter does not allow len
+                self.__maxshape[0] = len(self.data)  # We use self.data here because self.__data_iter does not allow len
             except TypeError:
-                self.max_shape[0] = None
-            self.max_shape = tuple(self.max_shape)
+                self.__maxshape[0] = None
+            self.__maxshape = tuple(self.__maxshape)
 
         # Determine the type of the data if possible
         if self.__next_chunk.data is not None:
-            self.dtype = self.__next_chunk.data.dtype
+            self.__dtype = self.__next_chunk.data.dtype
             self.__first_chunk_shape = ShapeValidator.get_data_shape(self.__next_chunk.data)
 
     @classmethod
     @docval({'name': 'data', 'type': None, 'doc': 'The data object used for iteration', 'default': None},
-            {'name': 'max_shape', 'type': tuple,
+            {'name': 'maxshape', 'type': tuple,
              'doc': 'The maximum shape of the full data array. Use None to indicate unlimited dimensions',
              'default': None},
             {'name': 'dtype', 'type': np.dtype, 'doc': 'The Numpy data type for the array', 'default': None},
@@ -217,16 +217,18 @@ class DataChunkIterator(AbstractDataChunkIterator):
     def recommended_data_shape(self):
         """Recommend an initial shape of the data. This is useful when progressively writing data and
         we want to recommend and initial size for the dataset"""
-        if self.max_shape is not None:
-            if np.all([i is not None for i in self.max_shape]):
-                return self.max_shape
+        if self.__maxshape is not None:
+            if np.all([i is not None for i in self.__maxshape]):
+                return self.__maxshape
         return self.__first_chunk_shape
 
-    def get_maxshape(self):
-        return self.max_shape
+    @property
+    def maxshape(self):
+        return self.__maxshape
 
-    def get_dtype(self):
-        return self.dtype
+    @property
+    def dtype(self):
+        return self.__dtype
 
 
 class DataChunk(object):
@@ -286,7 +288,7 @@ class ShapeValidator(object):
                     shape.extend(__get_shape_helper(local_data[0]))
             return tuple(shape)
         if isinstance(data, DataChunkIterator):
-            return data.max_shape
+            return data.maxshape
         if hasattr(data, 'shape'):
             return data.shape
         if hasattr(data, '__len__') and not isinstance(data, (text_type, binary_type)):

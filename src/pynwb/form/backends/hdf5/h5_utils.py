@@ -257,7 +257,7 @@ class H5DataIO(DataIO):
                 self.__iosettings['chunks'] = self.data.recommended_chunk_shape()
             # Define the maxshape of the data if not provided by the user
             if 'maxshape' not in self.__iosettings:
-                self.__iosettings['maxshape'] = self.data.get_maxshape()
+                self.__iosettings['maxshape'] = self.data.maxshape
         if 'compression' in self.__iosettings:
             if self.__iosettings['compression'] != 'gzip':
                 warnings.warn(str(self.__iosettings['compression']) + " compression may not be available" +
