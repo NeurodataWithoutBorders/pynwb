@@ -87,7 +87,7 @@ writing large arrays without loading all data into memory and streaming data wri
 #
 # .. tip::
 #
-#    Currrently the the HDF5 I/O backend of PyNWB (:py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO`,
+#    Currently the HDF5 I/O backend of PyNWB (:py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO`,
 #    :py:class:`~pynwb.NWBHDF5IO`) processes itertive data writes one-dataset-at-a-time. This means, that
 #    while you may have an arbitrary number of iterative data writes, the write is performed in order.
 #    In the future we may use a queing process to enable the simultaneous processing of multiple iterative writes at
@@ -208,17 +208,13 @@ print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
 # To further customize this behavior we may also define the ``maxshape``, ``dtype``, and ``buffer_size`` when
 # we create the :py:class:`~pynwb.form.data_utils.DataChunkIterator`.
 #
-# We here used :py:class:`~pynwb.form.data_utils.DataChunkIterator` to conveniently wrap our data stream.
-#
 # .. tip::
 #
-#    :py:class:`~pynwb.form.data_utils.DataChunkIterator` assumes that our generators yields
-#
-#    * ``1`` complete element along the **first dimension** of our array and
-#    * that we are yielding all elements along the first dimension in **consecutive order**
-#
-#    This behavior is useful in many practical cased. However, If the this strategy does not match our
-#    needs, then we can alternatively implement our own derived
+#    We here used :py:class:`~pynwb.form.data_utils.DataChunkIterator` to conveniently wrap our data stream.
+#    :py:class:`~pynwb.form.data_utils.DataChunkIterator` assumes that our generators yields in **consecutive order**
+#    **single** complete element along the **first dimension** of our a array (i.e., iterate over the first
+#    axis and yield one-element-at-a-time). This behavior is useful in many practical cases. However, if
+#    this strategy does not match our needs, then you can alternatively implement our own derived
 #    :py:class:`~pynwb.form.data_utils.AbstractDataChunkIterator`.  We show an example of this next.
 #
 
@@ -309,7 +305,7 @@ data = SparseMatrixIterator(shape=(xsize, ysize),
 
 #####################
 # In order to also enable compression and other advanced HDF5 dataset I/O featurs we can then also
-# wrap our data via :py:class:`pynwb.form.backends.hdf5.h5_utils.H5DataIO`.
+# wrap our data via :py:class:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`.
 from pynwb.form.backends.hdf5.h5_utils import H5DataIO
 matrix2 = SparseMatrixIterator(shape=(xsize, ysize),
                                num_chunks=num_chunks,
@@ -319,7 +315,7 @@ data2 = H5DataIO(data=matrix2,
                  compression_opts=4)
 
 ######################
-# We can now alos customize the chunking , fillvalue and other settings
+# We can now also customize the chunking , fillvalue and other settings
 #
 from pynwb.form.backends.hdf5.h5_utils import H5DataIO
 
@@ -346,7 +342,7 @@ data4 = H5DataIO(data=matrix4,
 # Step 3: Write the data as usual
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# Here we use our SparseMatrixIterator as input for our TimeSeries
+# Here we simply use our ``SparseMatrixIterator`` as input for our ``TimeSeries``
 
 write_test_file(filename='basic_sparse_iterwrite_example.nwb',
                 data=data)
@@ -412,18 +408,19 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 # Discussion
 # ^^^^^^^^^^
 #
-# * **1) vs 2)** While the full matrix would have a size of ``8TB`` the HDF5 file is only ``0.88MB``. This is roughly
+# * **1) vs 2):** While the full matrix would have a size of ``8TB`` the HDF5 file is only ``0.88MB``. This is roughly
 #   the same as the real occupied size of ``0.8MB``. When using chunking, HDF5 does not allocate the full dataset but
 #   only allocates chunks that actually contain data. In (2) the size of our chunks align perfectly with the
 #   occupied chunks of our sparse matrix, hence, only the minimal amount of storage needs to be allocated.
 #   A slight overhead (here 0.08MB) is expected because our file contains also the additional objects from
 #   the NWBFile, plus some overhead for managing all the HDF5 metadata for all objects.
-# * **3) vs 2)**  Adding compression does not yield any improvement here. This is expected, because, again we
-#   selected the chunking here in a way that we already allocated the minimum  amount of storage to represent our data.
-# * **4) vs 2)** When we increase our chunk size to ``(100,100)`` (i.e., ``100x`` larger than the chunks produced by
+# * **3) vs 2):**  Adding compression does not yield any improvement here. This is expected, because, again we
+#   selected the chunking here in a way that we already allocated the minimum  amount of storage to represent our data
+#   and lossless compression of random data is not efficient.
+# * **4) vs 2):** When we increase our chunk size to ``(100,100)`` (i.e., ``100x`` larger than the chunks produced by
 #   our matrix generator) we observe an according roughly ``100x`` increase in file size. This is expected
 #   since our chunks now do not align perfectly with the occupied data and each occupied chunk is allocated fully.
-# * **5) vs 4)** When using compression for the larger chunks we see a significant reduction
+# * **5) vs 4):** When using compression for the larger chunks we see a significant reduction
 #   in file size (``1.14MB`` vs. ``80MB``). This is because the allocated chunks now contain in addition to the random
 #   values large areas of constant fillvalues, which compress easily.
 #
@@ -437,8 +434,8 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 #
 # .. tip::
 #
-#    With great power comes great responsibility**!** I/O and storage cost will depend among others on the chunk size,
-#    compression options, and the the write pattern, i.e., the number and structure of the
+#    With great power comes great responsibility **!** I/O and storage cost will depend among others on the chunk size,
+#    compression options, and the write pattern, i.e., the number and structure of the
 #    :py:class:`~pynwb.form.data_utils.DataChunk` objects written. For example, using ``(1,1)`` chunks and writing them
 #    one value at a time would result in poor I/O performance in most practical cases, because of the large number of
 #    chunks and large number of small I/O operations required.
@@ -459,7 +456,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 #
 # .. tip::
 #
-#    As we have seen here, our data chunk iterator may produce chunks in arbitrary order and locations with the
+#    As we have seen here, our data chunk iterator may produce chunks in arbitrary order and locations within the
 #    array. In the case of the HDF5 I/O backend we need to take care that the selection we yield can be understood
 #    by h5py.
 
@@ -467,7 +464,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 # Example: Convert large binary data arrays
 # -----------------------------------------------------
 #
-# When converting large data files a typical problem is that it is often too expensive to load all the data
+# When converting large data files, a typical problem is that it is often too expensive to load all the data
 # into memory. This example is very similar to the data generator example only that instead of generating
 # data on-the-fly in memory we are loading data from a file one-chunk-at-a-time in our generator.
 #
@@ -533,7 +530,7 @@ write_test_file(filename='basic_sparse_iterwrite_largearray.nwb',
 #
 #       Again, if we want to explicitly control how our data will be chunked (compressed etc.)
 #       in the HDF5 file then we need to wrap our :py:class:`~pynwb.form.data_utils.DataChunkIterator`
-#       using :py:class:`pynwb.form.backends.hdf5.h5_utils.H5DataIO`
+#       using :py:class:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`
 
 ####################
 # Discussion
@@ -567,10 +564,10 @@ else:
 # Example: Convert arrays stored in multiple files
 # -----------------------------------------------------
 #
-# In practice, data from recording devices may distributed across many files, e.g., one file per time range
+# In practice, data from recording devices may be distributed across many files, e.g., one file per time range
 # or one file per recording channel. Using iterative data write provides an elegant solution to this problem
 # as it allows us to process large arrays one-subarray-at-a-time. To make things more interesting we'll show
-# this for the case where each recording channel (i.e, the second dimension of our TimeSeries) is broken up
+# this for the case where each recording channel (i.e, the second dimension of our ``TimeSeries``) is broken up
 # across files.
 
 ####################
@@ -668,7 +665,7 @@ write_test_file(filename='basic_sparse_iterwrite_multifile.nwb',
 #
 #    Common mistakes that will result in errors on write:
 #
-#    * The size of a :py:class:`~pynwb.form.data_utils.DataChunk does not match the selection.
+#    * The size of a :py:class:`~pynwb.form.data_utils.DataChunk` does not match the selection.
 #    * The selection for the :py:class:`~pynwb.form.data_utils.DataChunk` is not supported by h5py
 #      (e.g., unordered lists etc.)
 #
@@ -678,8 +675,8 @@ write_test_file(filename='basic_sparse_iterwrite_multifile.nwb',
 #    * Using auto chunking without supplying a good recommended_data_shape. h5py auto chunking can only make a good
 #      guess of what the chunking should be if it (at least roughly) knows what the shape of the array will be.
 #    * Trying to wrap a data generator using the default :py:class:`~pynwb.form.data_utils.DataChunkIterator`
-#      when the generator that does not comply with the assumptions of the default implementation (i.e., yield
+#      when the generator does not comply with the assumptions of the default implementation (i.e., yield
 #      individual, complete elements along the first dimension of the array one-at-a-time). Depending on the generator,
-#      this may or may not result in an error on write, but the the array you are generating will probably end up
+#      this may or may not result in an error on write, but the array you are generating will probably end up
 #      at least not having the intended shape.
 #
