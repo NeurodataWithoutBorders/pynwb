@@ -325,7 +325,6 @@ class H5IOTest(unittest.TestCase):
         self.assertListEqual(self.f['test_dataset'][:].tolist(),
                              self.f['test_copy'][:].tolist())
 
-
 class NWBHDF5IOMultiFileTest(unittest.TestCase):
     """Tests for h5tools IO tools"""
 
@@ -343,14 +342,18 @@ class NWBHDF5IOMultiFileTest(unittest.TestCase):
         self.f = [i._file for i in self.io]
 
     def tearDown(self):
-        for fileobj in self.f:
-            fileobj.close()
-            del fileobj
+        # Close all the files
+        for i in self.io:
+            i.close()
+            del(i)
+        self.io = None
         self.f = None
+        # Make sure the files have been deleted
         for tf in self.test_temp_files:
-            os.remove(tf.name)
-        for i in self.test_temp_files:
-            del i
+            try:
+                os.remove(tf.name)
+            except:
+                pass
         self.test_temp_files = None
 
     def test_copy_file_with_external_links(self):
@@ -389,9 +392,11 @@ class NWBHDF5IOMultiFileTest(unittest.TestCase):
                               unit='SIunit',
                               timestamps=timestamps)
         nwbfile2.add_acquisition(test_ts2)
-        # Write the first file
+        # Write the second file
         self.io[1].write(nwbfile2)
         self.io[1].close()
+        self.io[0].close() # Don't forget to close the first file too
+
 
         # Copy the file
         self.io[2].close()
