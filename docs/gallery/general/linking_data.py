@@ -109,7 +109,6 @@ io.write(nwbfile2)
 io.close()
 
 
-
 #####################
 # Linking to select datasets
 # --------------------------
