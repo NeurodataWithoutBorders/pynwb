@@ -139,6 +139,11 @@ class HDF5IO(FORMIO):
     def copy_file(self, **kwargs):
         """
         Convenience function to copy an HDF5 file while allowing external links to be resolved.
+
+        NOTE: The source file will be opened in 'r' mode and the destination file will be opened in 'w' mode
+              using h5py. To avoid possible collisions, care should be taken that, e.g., the source file is
+              not opened already when calling this function.
+
         """
         source_filename, dest_filename, expand_external, expand_refs, expand_soft = getargs('source_filename',
                                                                                             'dest_filename',
