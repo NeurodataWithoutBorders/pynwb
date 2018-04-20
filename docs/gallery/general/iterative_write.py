@@ -153,15 +153,17 @@ from random import random
 import numpy as np
 
 
-def iter_sin(chunk_length=10):
+def iter_sin(chunk_length=10, max_chunks=100):
     """
-    Generator creating a random number of chunks of length chunk_lenght containing
+    Generator creating a random number of chunks (but at most max_chunks) of length chunk_length containing
     random samples of sin([0, 2pi]).
     """
     x = 0
-    while(x < 0.5):
+    num_chunks=0
+    while(x < 0.5 and num_chunks<max_chunks):
         val = np.asarray([sin(random() * 2 * pi) for i in range(chunk_length)])
         x = random()
+        num_chunks += 1
         yield val
     return
 
