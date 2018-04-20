@@ -120,6 +120,29 @@ class H5IOTest(unittest.TestCase):
         self.assertEqual(dset.shuffle, True)
         self.assertEqual(dset.fletcher32, True)
 
+    def test_write_dataset_list_enable_default_compress(self):
+        a = H5DataIO(np.arange(30).reshape(5, 2, 3),
+                     compression=True)
+        self.assertEqual(a.io_settings['compression'], 'gzip')
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
+        dset = self.f['test_dataset']
+        self.assertTrue(np.all(dset[:] == a.data))
+        self.assertEqual(dset.compression, 'gzip')
+
+    def test_write_dataset_list_disable_default_compress(self):
+        with warnings.catch_warnings(record=True) as w:
+            a = H5DataIO(np.arange(30).reshape(5, 2, 3),
+                         compression=False,
+                         compression_opts=5)
+            self.assertEqual(len(w), 1)  # We expect a warning that compression options are being ignored
+            self.assertFalse('compression_ops' in a.io_settings)
+            self.assertFalse('compression' in a.io_settings)
+
+        self.io.write_dataset(self.f, DatasetBuilder('test_dataset', a, attributes={}))
+        dset = self.f['test_dataset']
+        self.assertTrue(np.all(dset[:] == a.data))
+        self.assertEqual(dset.compression, None)
+
     def test_write_dataset_list_chunked(self):
         a = H5DataIO(np.arange(30).reshape(5, 2, 3),
                      chunks=(1, 1, 3))

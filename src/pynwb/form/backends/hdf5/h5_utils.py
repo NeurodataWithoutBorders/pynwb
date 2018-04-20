@@ -210,8 +210,9 @@ class H5DataIO(DataIO):
              'doc': 'Chunk shape or True ti enable auto-chunking',
              'default': None},
             {'name': 'compression',
-             'type': str,
-             'doc': 'Compression strategy. http://docs.h5py.org/en/latest/high/dataset.html#dataset-compression',
+             'type': (str, bool),
+             'doc': 'Compression strategy. If a bool is given, then gzip compression will be used by default.' +
+                    'http://docs.h5py.org/en/latest/high/dataset.html#dataset-compression',
              'default': None},
             {'name': 'compression_opts',
              'type': int,
@@ -258,6 +259,16 @@ class H5DataIO(DataIO):
             # Define the maxshape of the data if not provided by the user
             if 'maxshape' not in self.__iosettings:
                 self.__iosettings['maxshape'] = self.data.maxshape
+        if 'compression' in self.__iosettings:
+            if isinstance(self.__iosettings['compression'], bool):
+                if self.__iosettings['compression']:
+                    self.__iosettings['compression'] = 'gzip'
+                else:
+                    self.__iosettings.pop('compression', None)
+                    if 'compression_opts' in self.__iosettings:
+                        warnings.warn('Compression disabled by compression=False setting. ' +
+                                      'compression_opts parameter will, therefore, be ignored.')
+                        self.__iosettings.pop('compression_opts', None)
         if 'compression' in self.__iosettings:
             if self.__iosettings['compression'] != 'gzip':
                 warnings.warn(str(self.__iosettings['compression']) + " compression may not be available" +
