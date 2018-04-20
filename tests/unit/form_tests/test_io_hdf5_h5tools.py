@@ -5,11 +5,15 @@ from pynwb.form.data_utils import DataChunkIterator
 from pynwb.form.backends.hdf5.h5tools import HDF5IO
 from pynwb.form.backends.hdf5 import H5DataIO
 from pynwb.form.build import DatasetBuilder
-from h5py import SoftLink, HardLink
+from h5py import SoftLink, HardLink, ExternalLink, File
+from pynwb.file import NWBFile
+from pynwb.base import TimeSeries
+
 
 import tempfile
 import warnings
 import numpy as np
+from datetime import datetime
 
 
 class H5IOTest(unittest.TestCase):
@@ -320,6 +324,98 @@ class H5IOTest(unittest.TestCase):
         self.assertTrue(isinstance(self.f.get('test_copy', getlink=True), HardLink))
         self.assertListEqual(self.f['test_dataset'][:].tolist(),
                              self.f['test_copy'][:].tolist())
+
+
+class NWBHDF5IOMultiFileTest(unittest.TestCase):
+    """Tests for h5tools IO tools"""
+
+    def setUp(self):
+        from pynwb import NWBHDF5IO
+        numfiles = 3
+        self.test_temp_files = [tempfile.NamedTemporaryFile() for i in range(numfiles)]
+
+        # On Windows h5py cannot truncate an open file in write mode.
+        # The temp file will be closed before h5py truncates it
+        # and will be removed during the tearDown step.
+        for i in self.test_temp_files:
+            i.close()
+        self.io = [NWBHDF5IO(i.name) for i in self.test_temp_files]
+        self.f = [i._file for i in self.io]
+
+    def tearDown(self):
+        # Close all the files
+        for i in self.io:
+            i.close()
+            del(i)
+        self.io = None
+        self.f = None
+        # Make sure the files have been deleted
+        for tf in self.test_temp_files:
+            try:
+                os.remove(tf.name)
+            except OSError:
+                pass
+        self.test_temp_files = None
+
+    def test_copy_file_with_external_links(self):
+        # Setup all the data we need
+        start_time = datetime(2017, 4, 3, 11, 0, 0)
+        create_date = datetime(2017, 4, 15, 12, 0, 0)
+        data = np.arange(1000).reshape((100, 10))
+        timestamps = np.arange(100)
+        # Create the first file
+        nwbfile1 = NWBFile(source='PyNWB tutorial',
+                           session_description='demonstrate external files',
+                           identifier='NWBE1',
+                           session_start_time=start_time,
+                           file_create_date=create_date)
+
+        test_ts1 = TimeSeries(name='test_timeseries',
+                              source='PyNWB tutorial',
+                              data=data,
+                              unit='SIunit',
+                              timestamps=timestamps)
+        nwbfile1.add_acquisition(test_ts1)
+        # Write the first file
+        self.io[0].write(nwbfile1)
+        nwbfile1_read = self.io[0].read()
+
+        # Create the second file
+        nwbfile2 = NWBFile(source='PyNWB tutorial',
+                           session_description='demonstrate external files',
+                           identifier='NWBE1',
+                           session_start_time=start_time,
+                           file_create_date=create_date)
+
+        test_ts2 = TimeSeries(name='test_timeseries',
+                              source='PyNWB tutorial',
+                              data=nwbfile1_read.get_acquisition('test_timeseries').data,
+                              unit='SIunit',
+                              timestamps=timestamps)
+        nwbfile2.add_acquisition(test_ts2)
+        # Write the second file
+        self.io[1].write(nwbfile2)
+        self.io[1].close()
+        self.io[0].close()  # Don't forget to close the first file too
+
+        # Copy the file
+        self.io[2].close()
+        HDF5IO.copy_file(source_filename=self.test_temp_files[1].name,
+                         dest_filename=self.test_temp_files[2].name,
+                         expand_external=True,
+                         expand_soft=False,
+                         expand_refs=False)
+
+        # Test that everything is working as expected
+        # Confirm that our orginal data file is correct
+        f1 = File(self.test_temp_files[0].name)
+        self.assertTrue(isinstance(f1.get('/acquisition/test_timeseries/data', getlink=True), HardLink))
+        # Confirm that we succesfully created and External Link in our second file
+        f2 = File(self.test_temp_files[1].name)
+        self.assertTrue(isinstance(f2.get('/acquisition/test_timeseries/data', getlink=True), ExternalLink))
+        # Confirm that we succesfully resolved the External Link when we copied our second file
+        f3 = File(self.test_temp_files[2].name)
+        self.assertTrue(isinstance(f3.get('/acquisition/test_timeseries/data', getlink=True), HardLink))
 
 
 if __name__ == '__main__':

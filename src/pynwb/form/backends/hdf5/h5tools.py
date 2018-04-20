@@ -128,6 +128,46 @@ class HDF5IO(FORMIO):
                 ret.append(subspec)
         return ret
 
+    @classmethod
+    @docval({'name': 'source_filename', 'type': str, 'doc': 'the path to the HDF5 file to copy'},
+            {'name': 'dest_filename', 'type': str, 'doc': 'the name of the desitnation file'},
+            {'name': 'expand_external', 'type': bool, 'doc': 'expand external links into new objects', 'default': True},
+            {'name': 'expand_refs', 'type': bool, 'doc': 'copy objects which are pointed to by reference',
+             'default': False},
+            {'name': 'expand_soft', 'type': bool, 'doc': 'expand soft links into new objects', 'default': False}
+            )
+    def copy_file(self, **kwargs):
+        """
+        Convenience function to copy an HDF5 file while allowing external links to be resolved.
+
+        NOTE: The source file will be opened in 'r' mode and the destination file will be opened in 'w' mode
+              using h5py. To avoid possible collisions, care should be taken that, e.g., the source file is
+              not opened already when calling this function.
+
+        """
+        source_filename, dest_filename, expand_external, expand_refs, expand_soft = getargs('source_filename',
+                                                                                            'dest_filename',
+                                                                                            'expand_external',
+                                                                                            'expand_refs',
+                                                                                            'expand_soft',
+                                                                                            kwargs)
+        source_file = File(source_filename, 'r')
+        dest_file = File(dest_filename, 'w')
+        for objname in source_file["/"].keys():
+            source_file.copy(source=objname,
+                             dest=dest_file,
+                             name=objname,
+                             expand_external=expand_external,
+                             expand_refs=expand_refs,
+                             expand_soft=expand_soft,
+                             shallow=False,
+                             without_attrs=False,
+                             )
+        for objname in source_file['/'].attrs:
+            dest_file['/'].attrs[objname] = source_file['/'].attrs[objname]
+        source_file.close()
+        dest_file.close()
+
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'},
             {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False},
             {'name': 'link_data', 'type': bool,
