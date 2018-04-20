@@ -37,11 +37,7 @@ class Builder(with_metaclass(ABCMeta, dict)):
 
     @written.setter
     def written(self, s):
-        if not self.__written:
-            self.__written = s
-        else:
-            msg = "Cannot unset 'written' if already set"
-            raise ValueError(msg)
+        self.__written = s
 
     @property
     def name(self):

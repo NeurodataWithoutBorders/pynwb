@@ -236,6 +236,7 @@ class HDF5IO(FORMIO):
                 continue
         kwargs['source'] = self.__path
         ret = GroupBuilder(name, **kwargs)
+        ret.written = True
         return ret
 
     def __read_dataset(self, h5obj, name=None):
@@ -287,6 +288,7 @@ class HDF5IO(FORMIO):
         else:
             kwargs["data"] = h5obj
         ret = DatasetBuilder(name, **kwargs)
+        ret.written = True
         return ret
 
     def open(self):
@@ -440,11 +442,10 @@ class HDF5IO(FORMIO):
 
         parent, builder = getargs('parent', 'builder', kwargs)
         if builder.written:
-            import pdb
-            #pdb.set_trace()
             print('%s already written to %s' % (self.__get_path(builder), builder.source))
-            return None
-        group = parent.create_group(builder.name)
+            group = parent[builder.name]
+        else:
+            group = parent.create_group(builder.name)
         # write all groups
         subgroups = builder.groups
         if subgroups:
@@ -482,8 +483,6 @@ class HDF5IO(FORMIO):
     def write_link(self, **kwargs):
         parent, builder = getargs('parent', 'builder', kwargs)
         if builder.written:
-            import pdb
-            #pdb.set_trace()
             print('%s already written to %s' % (self.__get_path(builder), builder.source))
             return None
         name = builder.name
@@ -514,8 +513,6 @@ class HDF5IO(FORMIO):
         """
         parent, builder, link_data = getargs('parent', 'builder', 'link_data', kwargs)
         if builder.written:
-            import pdb
-            #pdb.set_trace()
             print('%s already written to %s' % (self.__get_path(builder), builder.source))
             return None
         name = builder.name

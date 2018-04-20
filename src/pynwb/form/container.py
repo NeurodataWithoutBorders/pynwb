@@ -13,6 +13,19 @@ class Container(with_metaclass(abc.ABCMeta, object)):
         self.__parent = getargs('parent', kwargs)
         self.__container_source = getargs('container_source', kwargs)
         self.__children = list()
+        self.__modified = True
+
+    @property
+    def modified(self):
+        return self.__modified
+
+    @docval({'name': 'modified', 'type': bool,
+             'doc': 'whether or not this Container has been modified', 'default': True})
+    def set_modified(self, **kwargs):
+        modified = getargs('modified', kwargs)
+        self.__modified = modified
+        if modified and self.parent is not None:
+            self.parent.set_modified()
 
     @property
     def children(self):
@@ -23,6 +36,7 @@ class Container(with_metaclass(abc.ABCMeta, object)):
     def add_child(self, **kwargs):
         child = getargs('child', kwargs)
         self.__children.append(child)
+        self.set_modified()
         if not isinstance(child.parent, Container):
             child.parent = self
 
@@ -59,7 +73,6 @@ class Container(with_metaclass(abc.ABCMeta, object)):
 
     @parent.setter
     def parent(self, parent_container):
-        parent = self.__parent
         if self.__parent is not None:
             if isinstance(self.__parent, Container):
                 raise Exception('cannot reassign parent')
@@ -70,7 +83,6 @@ class Container(with_metaclass(abc.ABCMeta, object)):
                     self.__parent.add_candidate(parent_container)
         else:
             self.__parent = parent_container
-
 
 
 class Data(Container):

@@ -225,8 +225,6 @@ class NWBFile(MultiContainerInterface):
         self.ogen_sites = getargs('ogen_sites', kwargs)
 
         self.subject = getargs('subject', kwargs)
-        #if self.subject is not None:
-        #    self.subject.parent = self
 
         recommended = [
             'experimenter',

@@ -44,7 +44,6 @@ class Proxy(object):
     @docval({"name": "object", "type": (BaseBuilder, Container), "doc": "the container or builder to get a proxy for"})
     def matches(self, **kwargs):
         obj = getargs('object', kwargs)
-        tmp = obj
         if not isinstance(obj, Proxy):
             obj = self.__manager.get_proxy(obj)
         return self == obj
@@ -100,7 +99,6 @@ class BuildManager(object):
     def __get_proxy_builder(self, builder):
         dt = self.__type_map.get_builder_dt(builder)
         ns = self.__type_map.get_builder_ns(builder)
-        name = builder.name
         stack = list()
         tmp = builder
         while tmp is not None:
@@ -130,6 +128,11 @@ class BuildManager(object):
         if result is None:
             result = self.__type_map.build(container, self, source=getargs('source', kwargs))
             self.prebuilt(container, result)
+        elif container.modified:
+            if isinstance(result, GroupBuilder):
+                # TODO: if Datasets attributes are allowed to be modified, we need to
+                # figure out how to handle that starting here.
+                result = self.__type_map.build(container, self, builder=result, source=getargs('source', kwargs))
         return result
 
     @docval({"name": "container", "type": Container, "doc": "the Container to save as prebuilt"},
@@ -166,6 +169,7 @@ class BuildManager(object):
             else:
                 self.__resolve_parents(result)
             self.prebuilt(result, builder)
+        result.set_modified(False)
         return result
 
     def __resolve_parents(self, container):
@@ -189,7 +193,7 @@ class BuildManager(object):
                 ret = tmp
                 self.__type_map.get_builder_dt(tmp)
                 break
-            except:
+            except Exception as e:
                 tmp = tmp.parent
         return ret
 
@@ -558,13 +562,16 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             {"name": "parent", "type": Builder, "doc": "the parent of the resulting Builder", 'default': None},
             {"name": "source", "type": str,
              "doc": "the source of container being built i.e. file path", 'default': None},
+            {"name": "builder", "type": GroupBuilder, "doc": "the Builder to build on", 'default': None},
             returns="the Builder representing the given Container", rtype=Builder)
     def build(self, **kwargs):
         ''' Convert an Container to a Builder representation '''
         container, manager, parent, source = getargs('container', 'manager', 'parent', 'source', kwargs)
+        builder = getargs('builder', kwargs)
         name = manager.get_builder_name(container)
         if isinstance(self.__spec, GroupSpec):
-            builder = GroupBuilder(name, parent=parent, source=source)
+            if builder is None:
+                builder = GroupBuilder(name, parent=parent, source=source)
             self.__add_datasets(builder, self.__spec.datasets, container, manager, source)
             self.__add_groups(builder, self.__spec.groups, container, manager, source)
             self.__add_links(builder, self.__spec.links, container, manager, source)
@@ -658,7 +665,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     warnings.warn("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
-                sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
+                if spec.name in builder.datasets:
+                    sub_builder = builder.datasets[spec.name]
+                else:
+                    sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
                 self.__add_attributes(sub_builder, spec.attributes, container)
             else:
                 self.__add_containers(builder, spec, attr_value, build_manager, source, container)
@@ -668,7 +678,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             if spec.data_type_def is None and spec.data_type_inc is None:
                 # we don't need to get attr_name since any named
                 # group does not have the concept of value
-                sub_builder = GroupBuilder(spec.name)
+                sub_builder = builder.groups.get(spec.name)
+                if sub_builder is None:
+                    sub_builder = GroupBuilder(spec.name)
                 self.__add_attributes(sub_builder, spec.attributes, container)
                 self.__add_datasets(sub_builder, spec.datasets, container, build_manager, source)
 
@@ -687,7 +699,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 self.__add_groups(sub_builder, spec.groups, container, build_manager, source)
                 empty = sub_builder.is_empty()
                 if not empty or (empty and isinstance(spec.quantity, int)):
-                    builder.set_group(sub_builder)
+                    if sub_builder.name not in builder.groups:
+                        builder.set_group(sub_builder)
             else:
                 if spec.data_type_def is not None:
                     attr_name = self.get_attribute(spec)
@@ -703,16 +716,17 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
     def __add_containers(self, builder, spec, value, build_manager, source, parent_container):
         if isinstance(value, Container):
-            rendered_obj = build_manager.build(value, source=source)
-            # use spec to determine what kind of HDF5
-            # object this Container corresponds to
-            if isinstance(spec, LinkSpec) or value.parent is not parent_container:
-                name = spec.name
-                builder.set_link(LinkBuilder(rendered_obj, name, builder))
-            elif isinstance(spec, DatasetSpec):
-                builder.set_dataset(rendered_obj)
-            else:
-                builder.set_group(rendered_obj)
+            if value.modified:
+                rendered_obj = build_manager.build(value, source=source)
+                # use spec to determine what kind of HDF5
+                # object this Container corresponds to
+                if isinstance(spec, LinkSpec) or value.parent is not parent_container:
+                    name = spec.name
+                    builder.set_link(LinkBuilder(rendered_obj, name, builder))
+                elif isinstance(spec, DatasetSpec):
+                    builder.set_dataset(rendered_obj)
+                else:
+                    builder.set_group(rendered_obj)
         else:
             if any(isinstance(value, t) for t in (list, tuple)):
                 values = value
@@ -745,14 +759,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 if subspec is not None:
                     if isinstance(sub_builder, LinkBuilder):
                         sub_builder = sub_builder.builder
-                    #if isinstance(subspec, LinkSpec):
-                    #    if isinstance(sub_builder, LinkBuilder):
-                    #        sub_builder = sub_builder.builder
-                    #    else:
-                    #        # LEGACY
-                    #        msg = 'expected LinkBuilder, got %s' % type(sub_builder).__name__
-                    #        warnings.warn(msg)
-                    #        continue
                     if self.__data_type_key in sub_builder.attributes or \
                        not (subspec.data_type_inc is None and subspec.data_type_def is None):
                         val = manager.construct(sub_builder)
@@ -1149,17 +1155,18 @@ class TypeMap(object):
             {"name": "manager", "type": BuildManager,
              "doc": "the BuildManager to use for managing this build", 'default': None},
             {"name": "source", "type": str,
-             "doc": "the source of container being built i.e. file path", 'default': None})
+             "doc": "the source of container being built i.e. file path", 'default': None},
+            {"name": "builder", "type": GroupBuilder, "doc": "the Builder to build on", 'default': None})
     def build(self, **kwargs):
         """ Build the GroupBuilder for the given Container"""
-        container, manager = getargs('container', 'manager', kwargs)
+        container, manager, builder = getargs('container', 'manager', 'builder', kwargs)
         if manager is None:
             manager = BuildManager(self)
         attr_map = self.get_map(container)
         if attr_map is None:
             raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
-            builder = attr_map.build(container, manager, source=getargs('source', kwargs))
+            builder = attr_map.build(container, manager, builder=builder, source=getargs('source', kwargs))
         namespace, data_type = self.get_container_ns_dt(container)
         builder.set_attribute('namespace', namespace)
         builder.set_attribute(attr_map.spec.type_key(), data_type)
