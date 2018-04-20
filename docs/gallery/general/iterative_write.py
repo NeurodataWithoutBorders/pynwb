@@ -578,7 +578,7 @@ import numpy as np
 # Create the test data
 num_channels = 10
 num_steps = 10000
-channel_files = ['basic_sparse_iterwrite_testdata_channel_%i.npy' for i in range(num_channels)]
+channel_files = ['basic_sparse_iterwrite_testdata_channel_%i.npy' % i for i in range(num_channels)]
 for f in channel_files:
     temp = np.memmap(f, dtype='float64', mode='w+', shape=(num_steps,))
     temp[:] = np.arange(num_steps, dtype='float64')
