@@ -153,15 +153,17 @@ from random import random
 import numpy as np
 
 
-def iter_sin(chunk_length=10):
+def iter_sin(chunk_length=10, max_chunks=100):
     """
-    Generator creating a random number of chunks of length chunk_lenght containing
+    Generator creating a random number of chunks (but at most max_chunks) of length chunk_length containing
     random samples of sin([0, 2pi]).
     """
     x = 0
-    while(x < 0.5):
+    num_chunks = 0
+    while(x < 0.5 and num_chunks < max_chunks):
         val = np.asarray([sin(random() * 2 * pi) for i in range(chunk_length)])
         x = random()
+        num_chunks += 1
         yield val
     return
 
@@ -475,7 +477,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 
 import numpy as np
 # Create the test data
-datashape = (10000, 10)   # OK, this not really large, but we just want to show how it works
+datashape = (100, 10)   # OK, this not really large, but we just want to show how it works
 num_values = np.prod(datashape)
 arrdata = np.arange(num_values).reshape(datashape)
 # Write the test data to disk
@@ -514,7 +516,7 @@ from pynwb.form.data_utils import DataChunkIterator
 data = DataChunkIterator(data=iter_largearray(filename='basic_sparse_iterwrite_testdata.npy',
                                               shape=datashape),
                          maxshape=datashape,
-                         buffersize=100)   # Buffer 100 elements into a chunk, i.e., create chunks of shape (100,10)
+                         buffersize=10)   # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
 
 
 ####################
@@ -577,8 +579,8 @@ else:
 import numpy as np
 # Create the test data
 num_channels = 10
-num_steps = 10000
-channel_files = ['basic_sparse_iterwrite_testdata_channel_%i.npy' for i in range(num_channels)]
+num_steps = 100
+channel_files = ['basic_sparse_iterwrite_testdata_channel_%i.npy' % i for i in range(num_channels)]
 for f in channel_files:
     temp = np.memmap(f, dtype='float64', mode='w+', shape=(num_steps,))
     temp[:] = np.arange(num_steps, dtype='float64')
