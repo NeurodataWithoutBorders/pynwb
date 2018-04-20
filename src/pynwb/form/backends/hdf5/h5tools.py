@@ -751,9 +751,9 @@ class HDF5IO(FORMIO):
             io_settings['shape'] = data.recommended_data_shape()
         # Define the maxshape of the data if not provided by the user
         if 'maxshape' not in io_settings:
-            io_settings['maxshape'] = data.get_maxshape()
+            io_settings['maxshape'] = data.maxshape
         if 'dtype' not in io_settings:
-            io_settings['dtype'] = data.get_dtype()
+            io_settings['dtype'] = data.dtype
         try:
             dset = parent.create_dataset(name, **io_settings)
         except Exception as exc:
