@@ -25,51 +25,84 @@ def get_shape(data):
         return None
 
 
+@docval_macro('array_data')
 class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
+    """
+    Abstract iterator class used to iterate over DataChunks.
+
+    Derived classes must ensure that all abstract methods and abstract properties are implemented, in
+    particular, dtype, maxshape, __iter__, ___next__, recommended_chunk_shape, and recommended_data_shape.
+    """
 
     @abstractmethod
     def __iter__(self):
-        pass
+        """Return the iterator object"""
+        raise NotImplementedError("__iter__ not implemented for derived class")
 
     @abstractmethod
     def __next__(self):
-        pass
+        """
+        Return the next data chunk or raise a StopIteration exception if all chunks have been retrieved.
+
+        HINT: numpy.s_ provides a convenient way to generate index tuples using standard array slicing. This
+        is often useful to define the DataChunk.selection of the current chunk
+
+        :returns: DataChunk object with the data and selection of the current chunk
+        :rtype: DataChunk
+        """
+        raise NotImplementedError("__next__ not implemented for derived class")
 
     @abstractmethod
     def recommended_chunk_shape(self):
-        pass
+        """
+
+        :return: NumPy-style shape tuple describing the recommended shape for the chunks of the target
+                 array or None. This may or may not be the same as the shape of the chunks returned in the
+                 iteration process.
+        """
+        raise NotImplementedError("recommended_chunk_shape not implemented for derived class")
 
     @abstractmethod
     def recommended_data_shape(self):
-        pass
+        """
+        Recommend the initial shape for the data array.
+
+        This is useful in particular to avoid repeated resized of the target array when reading from
+        this data iterator. This should typically be either the final size of the array or the known
+        minimal shape of the array.
+
+        :return: NumPy-style shape tuple indicating the recommended initial shape for the target array.
+                 This may or may not be the final full shape of the array, i.e., the array is allowed
+                 to grow. This should not be None.
+        """
+        raise NotImplementedError("recommended_data_shape not implemented for derived class")
 
     @abstractproperty
     def dtype(self):
-        pass
+        """
+        Define the data type of the array
+
+        :return: NumPy style dtype or otherwise compliant dtype string
+        """
+        raise NotImplementedError("dtype not implemented for derived class")
 
     @abstractproperty
     def maxshape(self):
-        pass
+        """
+        Property describing the maximum shape of the data array that is being iterated over
+
+        :return: NumPy-style shape tuple indicating the maxiumum dimensions up to which the dataset may be
+                 resized. Axes with None are unlimited.
+        """
+        raise NotImplementedError("maxshape not implemented for derived class")
 
 
-@docval_macro('array_data')
 class DataChunkIterator(AbstractDataChunkIterator):
-    """Custom iterator class used to iterate over chunks of data.
+    """
+    Custom iterator class used to iterate over chunks of data.
 
-    Derived classes must ensure that self.shape and self.dtype are set properly.
-    define the self.maxshape property describing the maximum shape of the array.
-    In addition, derived classes must implement the __next__ method (or overwrite _read_next_chunk
-    if the default behavior of __next__ should be reused). The __next__ method must return
-    in each iteration 1) a numpy array with the data values for the chunk and 2) a numpy-compliant index tuple
-    describing where the chunk is located within the complete data.
-    HINT: `numpy.s <https://docs.scipy.org/doc/numpy-1.13.0/reference/generated/numpy.s_.html>`_ provides a
-    convenient way to generate index tuples using standard array slicing. There are
-    a number of additional functions that one can overwrite to customize behavior, e.g,
-    the :py:func:`~form.utils.DataChunkIterator.recommended_chunk_shape` or
-    :py:func:`~form.utils.DataChunkIterator.recommended_data_shape`
-
-    The default implementation accepts any iterable and assumes that we iterate over
-    the first dimension of the data array. The default implemention supports buffered read,
+    This default implementation of AbstractDataChunkIterator accepts any iterable and assumes that we iterate over
+    the first dimension of the data array. DataChunkIterator supports buffered read,
     i.e., multiple values from the input iterator can be combined to a single chunk. This is
     useful for buffered I/O operations, e.g., to improve performance by accumulating data
     in memory and writing larger blocks at once.
@@ -82,7 +115,7 @@ class DataChunkIterator(AbstractDataChunkIterator):
             {'name': 'buffer_size', 'type': int, 'doc': 'Number of values to be buffered in a chunk', 'default': 1},
             )
     def __init__(self, **kwargs):
-        """Initalize the DataChunkIterator"""
+        """Initialize the DataChunkIterator"""
         # Get the user parameters
         self.data, self.__maxshape, self.__dtype, self.buffer_size = getargs('data',
                                                                               'maxshape',
