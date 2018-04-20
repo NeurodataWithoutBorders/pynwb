@@ -118,10 +118,10 @@ class DataChunkIterator(AbstractDataChunkIterator):
         """Initialize the DataChunkIterator"""
         # Get the user parameters
         self.data, self.__maxshape, self.__dtype, self.buffer_size = getargs('data',
-                                                                              'maxshape',
-                                                                              'dtype',
-                                                                              'buffer_size',
-                                                                               kwargs)
+                                                                             'maxshape',
+                                                                             'dtype',
+                                                                             'buffer_size',
+                                                                             kwargs)
         # Create an iterator for the data if possible
         self.__data_iter = iter(self.data) if isinstance(self.data, Iterable) else None
         self.__next_chunk = DataChunk(None, None)
