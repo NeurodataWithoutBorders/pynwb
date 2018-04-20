@@ -325,6 +325,7 @@ class H5IOTest(unittest.TestCase):
         self.assertListEqual(self.f['test_dataset'][:].tolist(),
                              self.f['test_copy'][:].tolist())
 
+
 class NWBHDF5IOMultiFileTest(unittest.TestCase):
     """Tests for h5tools IO tools"""
 
@@ -352,7 +353,7 @@ class NWBHDF5IOMultiFileTest(unittest.TestCase):
         for tf in self.test_temp_files:
             try:
                 os.remove(tf.name)
-            except:
+            except OSError:
                 pass
         self.test_temp_files = None
 
@@ -395,8 +396,7 @@ class NWBHDF5IOMultiFileTest(unittest.TestCase):
         # Write the second file
         self.io[1].write(nwbfile2)
         self.io[1].close()
-        self.io[0].close() # Don't forget to close the first file too
-
+        self.io[0].close()  # Don't forget to close the first file too
 
         # Copy the file
         self.io[2].close()
