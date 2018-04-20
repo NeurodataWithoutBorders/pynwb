@@ -160,7 +160,7 @@ def iter_sin(chunk_length=10):
     """
     x = 0
     while(x < 0.5):
-        val = np.asarray([sin(random()*2*pi) for i in range(chunk_length)])
+        val = np.asarray([sin(random() * 2 * pi) for i in range(chunk_length)])
         x = random()
         yield val
     return
@@ -501,7 +501,7 @@ def iter_largearray(filename, shape, dtype='float64'):
     for i in range(shape[0]):
         # Open the file and read the next chunk
         newfp = np.memmap(filename, dtype=dtype, mode='r', shape=shape)
-        curr_data = newfp[i:(i+1), ...]
+        curr_data = newfp[i:(i + 1), ...]
         del newfp  # Reopen the file in each iterator to prevent accumulation of data in memory
         yield curr_data
     return
