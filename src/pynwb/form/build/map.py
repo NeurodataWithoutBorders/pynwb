@@ -125,14 +125,16 @@ class BuildManager(object):
         container = getargs('container', kwargs)
         container_id = self.__conthash__(container)
         result = self.__builders.get(container_id)
+        source = getargs('source', kwargs)
         if result is None:
-            result = self.__type_map.build(container, self, source=getargs('source', kwargs))
+            container.container_source = source
+            result = self.__type_map.build(container, self, source=source)
             self.prebuilt(container, result)
         elif container.modified:
             if isinstance(result, GroupBuilder):
                 # TODO: if Datasets attributes are allowed to be modified, we need to
                 # figure out how to handle that starting here.
-                result = self.__type_map.build(container, self, builder=result, source=getargs('source', kwargs))
+                result = self.__type_map.build(container, self, builder=result, source=source)
         return result
 
     @docval({"name": "container", "type": Container, "doc": "the Container to save as prebuilt"},
@@ -727,6 +729,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     builder.set_dataset(rendered_obj)
                 else:
                     builder.set_group(rendered_obj)
+            elif value.container_source:
+                if value.container_source != parent_container.source:
+                    rendered_obj = build_manager.build(value, source=source)
+                    builder.set_link(LinkBuilder(rendered_obj, parent=builder))
         else:
             if any(isinstance(value, t) for t in (list, tuple)):
                 values = value
