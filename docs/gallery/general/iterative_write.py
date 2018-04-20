@@ -475,7 +475,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 
 import numpy as np
 # Create the test data
-datashape = (10000, 10)   # OK, this not really large, but we just want to show how it works
+datashape = (100, 10)   # OK, this not really large, but we just want to show how it works
 num_values = np.prod(datashape)
 arrdata = np.arange(num_values).reshape(datashape)
 # Write the test data to disk
@@ -514,7 +514,7 @@ from pynwb.form.data_utils import DataChunkIterator
 data = DataChunkIterator(data=iter_largearray(filename='basic_sparse_iterwrite_testdata.npy',
                                               shape=datashape),
                          maxshape=datashape,
-                         buffersize=100)   # Buffer 100 elements into a chunk, i.e., create chunks of shape (100,10)
+                         buffersize=10)   # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
 
 
 ####################
@@ -577,7 +577,7 @@ else:
 import numpy as np
 # Create the test data
 num_channels = 10
-num_steps = 10000
+num_steps = 100
 channel_files = ['basic_sparse_iterwrite_testdata_channel_%i.npy' % i for i in range(num_channels)]
 for f in channel_files:
     temp = np.memmap(f, dtype='float64', mode='w+', shape=(num_steps,))
