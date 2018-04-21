@@ -101,7 +101,10 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
         super(NWBBaseType, self).__init__()
         self.__fields = dict()
         self.__parent = None
-        self.__name = getargs('name', kwargs)
+        name = getargs('name', kwargs)
+        if '/' in name:
+            raise ValueError("name '" + name + "' cannot contain '/'")
+        self.__name = name
         if parent:
             self.parent = parent
         self.__container_source = container_source
