@@ -143,6 +143,14 @@ class NWBFile(MultiContainerInterface):
                      'session_id',
                      'lab',
                      'institution',
+                     'notes',
+                     'pharmacology',
+                     'protocol',
+                     'related_publications',
+                     'slices',
+                     'source_script',
+                     'surgery',
+                     'virus',
                      {'name': 'ec_electrodes', 'child': True},
                      'epochs',
                      'subject',
@@ -161,6 +169,28 @@ class NWBFile(MultiContainerInterface):
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
             {'name': 'institution', 'type': str,
              'doc': 'institution(s) where experiment is performed', 'default': None},
+            {'name': 'notes', 'type': str,
+             'doc': 'Notes about the experiment.', 'default': None},
+            {'name': 'pharmacology', 'type': str,
+             'doc': 'Description of drugs used, including how and when they were administered. '
+                    'Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.', 'default': None},
+            {'name': 'protocol', 'type': str,
+             'doc': 'Experimental protocol, if applicable. E.g., include IACUC protocol', 'default': None},
+            {'name': 'related_publications', 'type': str,
+             'doc': 'Publication information.'
+             'PMID, DOI, URL, etc. If multiple, concatenate together and describe which is which. '
+             'such as PMID, DOI, URL, etc', 'default': None},
+            {'name': 'slices', 'type': str,
+             'doc': 'Description of slices, including information about preparation '
+             'thickness, orientation, temperature and bath solution', 'default': None},
+            {'name': 'source_script', 'type': str,
+             'doc': 'Script file used to create this NWB file.', 'default': None},
+            {'name': 'surgery', 'type': str,
+             'doc': 'Narrative description about surgery/surgeries, including date(s) '
+                    'and who performed surgery.', 'default': None},
+            {'name': 'virus', 'type': str,
+             'doc': 'Information about virus(es) used in experiments, including virus ID, '
+                    'source, date made, injection location, volume, etc.', 'default': None},
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
             {'name': 'acquisition', 'type': (list, tuple),
              'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
@@ -230,7 +260,15 @@ class NWBFile(MultiContainerInterface):
             'experiment_description',
             'session_id',
             'lab',
-            'institution'
+            'institution',
+            'notes',
+            'pharmacology',
+            'protocol',
+            'related_publications',
+            'slices',
+            'source_script',
+            'surgery',
+            'virus',
         ]
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))

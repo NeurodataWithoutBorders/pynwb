@@ -21,7 +21,14 @@ class NWBFileTest(unittest.TestCase):
                                lab='a test lab',
                                institution='a test institution',
                                experiment_description='a test experiment description',
-                               session_id='test1')
+                               session_id='test1',
+                               notes='my notes',
+                               pharmacology='drugs',
+                               protocol='protocol',
+                               related_publications='my pubs',
+                               slices='my slices',
+                               surgery='surgery',
+                               virus='a virus')
 
     def test_constructor(self):
         self.assertEqual(self.nwbfile.session_description, 'a test session description for a test NWBFile')
