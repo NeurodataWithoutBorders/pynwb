@@ -44,6 +44,13 @@ class TestNWBContainer(unittest.TestCase):
         child_obj.parent = parent_obj
         self.assertIs(child_obj.parent, parent_obj)
 
+    def test_slash_restriction(self):
+        """
+        Make sure that a slash is not allowed in the name of an object.
+        This is necessary because h5py interprets '/' as a new group
+        """
+        self.assertRaises(ValueError, MyTestClass, 'test source', 'bad/name')
+
 
 if __name__ == '__main__':
     unittest.main()
