@@ -127,7 +127,11 @@ class BuildManager(object):
         result = self.__builders.get(container_id)
         source = getargs('source', kwargs)
         if result is None:
-            container.container_source = source
+            if container.container_source is None:
+                container.container_source = source
+            else:
+                if container.container_source != source:
+                    raise ValueError("Can't change container_source once set")
             result = self.__type_map.build(container, self, source=source)
             self.prebuilt(container, result)
         elif container.modified:
@@ -195,7 +199,7 @@ class BuildManager(object):
                 ret = tmp
                 self.__type_map.get_builder_dt(tmp)
                 break
-            except Exception as e:
+            except Exception:
                 tmp = tmp.parent
         return ret
 
