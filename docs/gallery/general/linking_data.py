@@ -70,7 +70,6 @@ filename1 = 'external1_example.nwb'
 filename2 = 'external2_example.nwb'
 filename3 = 'external_linkcontainer_example.nwb'
 filename4 = 'external_linkdataset_example.nwb'
-filename5 = 'external_linkdataset_copy_example.nwb'
 
 # Create the first file
 nwbfile1 = NWBFile(source='PyNWB tutorial',
@@ -247,7 +246,6 @@ io3 = NWBHDF5IO(filename3, 'w', manager=manager)
 io3.write(nwbfile3)
 io3.close()
 
-
 ####################
 # Creating a single file for sharing
 # -----------------------------------
@@ -256,17 +254,3 @@ io3.close()
 # data to our collaborator rather than having to collect all relevant files. To do this,
 # :py:class:`~pynwb.from.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
 # provide the convenience function :py:func:`~pynwb.from.backends.hdf5.h5tools.HDF5IO.copy_file`
-
-NWBHDF5IO.copy_file(source_filename=filename4,
-                    dest_filename=filename5,
-                    expand_external=True        # <------ Expand/copy external links
-                    )
-
-####################
-#
-# Here we copied with the following default settings of :py:func:`~pynwb.from.backends.hdf5.h5tools.HDF5IO.copy_file` :
-#
-#  * ``expand_external=True`` Expand external links into the file, i.e., copy objects refered to by external links
-#  * ``expand_soft=False``    Do not expand soft links
-#  * ``expand_refs=False``    Do not copy objects which are pointed to by reference
-#
