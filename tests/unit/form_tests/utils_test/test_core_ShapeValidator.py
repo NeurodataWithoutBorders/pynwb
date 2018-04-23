@@ -140,8 +140,7 @@ class ShapeValidatorTests(unittest.TestCase):
 
     def test_DataChunkIterator_ignore_undetermined_axis(self):
         # Compare data chunk iterators with undetermined axis (ignore axis)
-        d1 = DataChunkIterator(data=np.arange(10).reshape(2, 5))
-        d1.max_shape = (None, 5)
+        d1 = DataChunkIterator(data=np.arange(10).reshape(2, 5), maxshape=(None, 5))
         d2 = DataChunkIterator(data=np.arange(10).reshape(2, 5))
         res = ShapeValidator.assertEqualShape(d1, d2, ignore_undetermined=True)
         self.assertTrue(res.result)
@@ -155,8 +154,7 @@ class ShapeValidatorTests(unittest.TestCase):
 
     def test_DataChunkIterator_error_on_undetermined_axis(self):
         # Compare data chunk iterators with undetermined axis (error on undetermined axis)
-        d1 = DataChunkIterator(data=np.arange(10).reshape(2, 5))
-        d1.max_shape = (None, 5)
+        d1 = DataChunkIterator(data=np.arange(10).reshape(2, 5), maxshape=(None, 5))
         d2 = DataChunkIterator(data=np.arange(10).reshape(2, 5))
         res = ShapeValidator.assertEqualShape(d1, d2, ignore_undetermined=False)
         self.assertFalse(res.result)

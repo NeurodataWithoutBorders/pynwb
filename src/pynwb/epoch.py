@@ -69,7 +69,10 @@ class TimeSeriesIndex(NWBTable):
 @register_class('Epochs', CORE_NAMESPACE)
 class Epochs(NWBContainer):
 
-    __nwbfields__ = ('epochs', 'timeseries_index')
+    __nwbfields__ = (
+            {'name': 'epochs', 'child': True},
+            {'name': 'timeseries_index', 'child': True}
+    )
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'name', 'type': str, 'doc': 'the name of this epoch table', 'default': 'epochs'},

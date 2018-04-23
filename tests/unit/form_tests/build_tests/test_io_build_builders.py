@@ -31,14 +31,14 @@ class GroupBuilderSetterTests(unittest.TestCase):
 
     def test_add_link(self):
         gp = self.gb.add_group('my_subgroup')
-        sl = self.gb.add_link('my_link', gp)
+        sl = self.gb.add_link(gp, 'my_link')
         self.assertIsInstance(sl, LinkBuilder)
         self.assertIs(self.gb['my_link'], sl)
         self.assertIs(self.gb, sl.parent)
 
     def test_add_external_link(self):
         gp = self.gb2.add_group('my_subgroup')
-        el = self.gb.add_link('my_externallink', gp)
+        el = self.gb.add_link(gp, 'my_externallink')
         self.assertIsInstance(el, LinkBuilder)
         self.assertIs(self.gb['my_externallink'], el)
         self.assertIs(self.gb, el.parent)
@@ -65,7 +65,7 @@ class GroupBuilderGetterTests(unittest.TestCase):
     def setUp(self):
         self.subgroup1 = GroupBuilder('subgroup1')
         self.dataset1 = DatasetBuilder('dataset1', list(range(10)))
-        self.soft_link1 = LinkBuilder('soft_link1', self.subgroup1)
+        self.soft_link1 = LinkBuilder(self.subgroup1, 'soft_link1')
         self.int_attr = 1
         self.str_attr = "my_str"
 
@@ -249,8 +249,8 @@ class GroupBuilderDeepUpdateTests(unittest.TestCase):
         self.assertEqual(gb2['attr2'], 'my_attribute2')
 
     def test_mutually_exclusive_links(self):
-        gb1 = GroupBuilder('gb1', links={'link1': LinkBuilder('link1', GroupBuilder('target1'))})
-        gb2 = GroupBuilder('gb2', links={'link2': LinkBuilder('link2', GroupBuilder('target2'))})
+        gb1 = GroupBuilder('gb1', links={'link1': LinkBuilder(GroupBuilder('target1'), 'link1')})
+        gb2 = GroupBuilder('gb2', links={'link2': LinkBuilder(GroupBuilder('target2'), 'link2')})
         gb1.deep_update(gb2)
         self.assertIn('link2', gb2)
         self.assertEqual(gb1['link2'], gb2['link2'])
@@ -279,8 +279,8 @@ class GroupBuilderDeepUpdateTests(unittest.TestCase):
         self.assertEqual(gb2['attr2'], 'my_attribute2')
 
     def test_intersecting_links(self):
-        gb1 = GroupBuilder('gb1', links={'link2': LinkBuilder('link2', GroupBuilder('target1'))})
-        gb2 = GroupBuilder('gb2', links={'link2': LinkBuilder('link2', GroupBuilder('target2'))})
+        gb1 = GroupBuilder('gb1', links={'link2': LinkBuilder(GroupBuilder('target1'), 'link2')})
+        gb2 = GroupBuilder('gb2', links={'link2': LinkBuilder(GroupBuilder('target2'), 'link2')})
         gb1.deep_update(gb2)
         self.assertIn('link2', gb2)
         self.assertEqual(gb1['link2'], gb2['link2'])

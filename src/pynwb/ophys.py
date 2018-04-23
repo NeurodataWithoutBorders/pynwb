@@ -39,7 +39,7 @@ class ImagingPlane(NWBContainer):
     """
     """
 
-    __nwbfields__ = ('optical_channel',
+    __nwbfields__ = ({'name': 'optical_channel', 'child': True},
                      'description',
                      'device',
                      'excitation_lambda',
@@ -278,11 +278,11 @@ class PlaneSegmentation(NWBContainer):
     """
 
     __nwbfields__ = ('description',
-                     'rois',
-                     'pixel_masks',
-                     'image_masks',
+                     {'name': 'rois', 'child': True},
+                     {'name': 'pixel_masks', 'child': True},
+                     {'name': 'image_masks', 'child': True},
                      'imaging_plane',
-                     'reference_images')
+                     {'name': 'reference_images', 'child': True})
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str,
@@ -409,7 +409,7 @@ class RoiResponseSeries(TimeSeries):
     ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one ROI.
     '''
 
-    __nwbfields__ = ('rois',)
+    __nwbfields__ = ({'name': 'rois', 'child': True},)
 
     _ancestry = "TimeSeries,ImageSeries,ImageMaskSeries"
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."

@@ -386,7 +386,7 @@ class FeatureExtraction(NWBDataInterface):
     """
 
     __nwbfields__ = ('description',
-                     'electrodes',
+                     {'name': 'electrodes', 'child': True},
                      'times',
                      'features')
 

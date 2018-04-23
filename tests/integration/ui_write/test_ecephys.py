@@ -77,7 +77,7 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
                                         'location': 'a nonexistent place',
                                         'source': 'a test source'},
                             links={
-                                'device': LinkBuilder('device', device_builder)
+                                'device': LinkBuilder(device_builder, 'device')
                             })
 
     def addContainer(self, nwbfile):
@@ -118,7 +118,7 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
                                                    'location': 'tetrode location',
                                                    'source': 'a test source'},
                                        links={
-                                           'device': LinkBuilder('device', self.device_builder)
+                                           'device': LinkBuilder(self.device_builder, 'device')
                                        })
 
         data = [
