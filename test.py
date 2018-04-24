@@ -86,7 +86,7 @@ def run_example_tests():
             with warnings.catch_warnings(record=True) as tmp:
                 example = _import_from_file(script)
                 for w in tmp:  # ignore RunTimeWarnings about importing
-                    if isinstance(w.message, RuntimeWarning) and not warning_re.match(w.message.message):
+                    if isinstance(w.message, RuntimeWarning) and not warning_re.match(str(w.message)):
                         ws.append(w)
             for w in ws:
                 warnings.showwarning(w.message, w.category, w.filename, w.lineno, w.line)
@@ -163,6 +163,7 @@ def main():
     args = parser.parse_args()
     if not args.suites:
         args.suites = list(flags.values())
+        args.suites.pop(args.suites.index(flags['example'])) # remove example as a suite run by default
 
     # set up logger
     root = logging.getLogger()
