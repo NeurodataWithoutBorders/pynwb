@@ -4,6 +4,11 @@ groups:
     dtype: text
     name: help
     value: an NWB:N file for storing cellular-based neurophysiology data
+  - doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
+      format with trailing major, minor and patch numbers.'
+    dtype: text
+    value: '2.0b'
+    name: nwb_version
   datasets:
   - dims:
     - '*unlimited*'
@@ -21,10 +26,6 @@ groups:
       values. The goal is that the string should be unique to all other files.'
     dtype: text
     name: identifier
-  - doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
-      format with trailing major, minor and patch numbers.'
-    dtype: text
-    name: nwb_version
   - doc: One or two sentences describing the experiment and data in the file.
     dtype: text
     name: session_description
@@ -58,6 +59,10 @@ groups:
       end users. Such data should be placed in the analysis group. The analysis data
       should be documented so that it is sharable with other labs'
     name: analysis
+    groups:
+    - doc: Custom analysis results
+      neurodata_type_inc: NWBContainer
+      quantity: '*'
   - doc: "Experimental intervals, whether that be logically distinct sub-experiments\
     \ having a particular scientific goal, trials during an experiment, or epochs\
     \ deriving from analysis of data.  COMMENT: Epochs provide pointers to time\

@@ -6,7 +6,7 @@ How to contribute to NWB:N software and documents
 Code of Conduct
 ---------------
 
-This project and everyone participating in it is governed by our `code of conduct guidelines <docs/CODE_OF_CONDUCT.rst>`_. By participating, you are expected to uphold this code. Please report unacceptable behavior.
+This project and everyone participating in it is governed by our `code of conduct guidelines <https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/docs/CONTRIBUTING.rst>`_. By participating, you are expected to uphold this code. Please report unacceptable behavior.
 
 .. _sec-contribution-types:
 

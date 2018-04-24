@@ -18,6 +18,7 @@ clarity, we define them here:
 
 from datetime import datetime
 from pynwb import NWBFile
+import numpy as np
 
 nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
                   experimenter='Dr. Bilbo Baggins',
@@ -25,6 +26,16 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
                   institution='University of Middle Earth at the Shire',
                   experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
                   session_id='LONELYMTN')
+
+#######################
+# Device metadata
+# ^^^^^^^^^^^^^^^
+#
+# Device metadata is represented by :py:class:`~pynwb.ecephys.Device` objects.
+# To create a device, you can use the :py:class:`~pynwb.ecephys.Device` instance method
+# :py:meth:`~pynwb.file.NWBFile.create_device`.
+
+device = nwbfile.create_device(name='Heka ITC-1600', source='a source')
 
 #######################
 # Electrode metadata
@@ -36,7 +47,7 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 
 elec = nwbfile.create_ic_electrode(
     name="elec0", source='', slice='', resistance='', seal='', description='',
-    location='', filtering='', initial_access_resistance='', device='')
+    location='', filtering='', initial_access_resistance='', device=device.name)
 
 #######################
 # Stimulus data
@@ -61,6 +72,21 @@ ccss = CurrentClampStimulusSeries(
     starting_time=123.6, rate=10e3, electrode=elec, gain=0.02)
 
 nwbfile.add_stimulus(ccss)
+
+# Here, we will use :py:class:`~pynwb.icephys.VoltageClampSeries` to store voltage clamp
+# data and then add it to our NWBFile as acquired data using the :py:class:`~pynwb.file.NWBFile` method
+# :py:meth:`~pynwb.file.NWBFile.add_acquisition`.
+
+from pynwb.icephys import VoltageClampSeries
+
+vcs = VoltageClampSeries(
+    name='vcs', source="command", data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    unit='A', conversion=1e-12, resolution=np.nan, starting_time=123.6, rate=20e3,
+    electrode=elec, gain=0.02, capacitance_slow=100e-12, resistance_comp_correction=70.0,
+    capacitance_fast=np.nan, resistance_comp_bandwidth=np.nan, resistance_comp_prediction=np.nan,
+    whole_cell_capacitance_comp=np.nan, whole_cell_series_resistance_comp=np.nan)
+
+nwbfile.add_acquisition(vcs)
 
 ####################
 # .. _icephys_writing:
@@ -97,6 +123,10 @@ nwbfile = io.read()
 
 ccss = nwbfile.get_stimulus('ccss')
 
+# Grabbing acquisition data an be done via :py:meth:`~pynwb.file.NWBFile.get_acquisition`
+
+vcs = nwbfile.get_acquisition('vcs')
+
 ####################
 # We can also get back the electrode we added.
 
@@ -107,3 +137,8 @@ elec = nwbfile.get_ic_electrode('elec0')
 # we retrieved above. This is exposed via the :py:meth:`~pynwb.icephys.PatchClampSeries.electrode` attribute.
 
 elec = ccss.electrode
+
+####################
+# And the device name via :py:meth:`~pynbwb.file.NWBFile.get_device`
+
+device = nwbfile.get_device('Heka ITC-1600')

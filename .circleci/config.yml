@@ -71,6 +71,10 @@ conda-steps: &conda-steps
           conda install virtualenv
           pip install tox
     - run:
+        name: Run the tests
+        command: |
+          tox -e $TEST_TOX_ENV
+    - run:
         name: Build wheel and source distribution
         command: |
           tox -e $BUILD_TOX_ENV

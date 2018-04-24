@@ -386,7 +386,7 @@ class FeatureExtraction(NWBDataInterface):
     """
 
     __nwbfields__ = ('description',
-                     'electrode_group',
+                     {'name': 'electrodes', 'child': True},
                      'times',
                      'features')
 
@@ -445,7 +445,7 @@ class FeatureExtraction(NWBDataInterface):
 
         # Initalize the object
         super(FeatureExtraction, self).__init__(source, **kwargs)
-        self.fields['electrodes'] = electrodes
-        self.fields['description'] = description
-        self.fields['times'] = list(times)
-        self.fields['features'] = features
+        self.electrodes = electrodes
+        self.description = description
+        self.times = list(times)
+        self.features = features

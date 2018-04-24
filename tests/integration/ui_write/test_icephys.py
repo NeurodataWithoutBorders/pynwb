@@ -2,6 +2,9 @@ from pynwb.icephys import IntracellularElectrode, CurrentClampStimulusSeries
 
 from . import base
 
+from abc import ABCMeta
+from six import with_metaclass
+
 
 class TestIntracellularElectrode(base.TestMapRoundTrip):
 
@@ -19,7 +22,7 @@ class TestIntracellularElectrode(base.TestMapRoundTrip):
         return nwbfile.get_ic_electrode(self.container.name)
 
 
-class TestPCS(base.TestDataInterfaceIO):
+class TestPCS(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
 
     def setUpElectrode(self):
         self.elec = IntracellularElectrode(name="elec0", source='', slice='', resistance='', seal='', description='',

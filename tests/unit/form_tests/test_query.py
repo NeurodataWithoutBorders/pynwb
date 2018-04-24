@@ -6,8 +6,11 @@ import numpy as np
 from pynwb.form.query import FORMDataset, Query
 from pynwb.form.array import SortedArray, LinSpace
 
+from six import with_metaclass
+from abc import ABCMeta
 
-class AbstractQueryTest(unittest.TestCase):
+
+class AbstractQueryTest(with_metaclass(ABCMeta, unittest.TestCase)):
 
     def getDataset(self):
         raise unittest.SkipTest('getDataset must be implemented')

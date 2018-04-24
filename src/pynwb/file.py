@@ -12,7 +12,7 @@ from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Devic
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
-from .core import LabelledDict, NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface
+from .core import NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface
 
 from h5py import RegionReference
 
@@ -82,6 +82,12 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_acquisition'
         },
         {
+            'attr': 'analysis',
+            'add': 'add_analysis',
+            'type': NWBContainer,
+            'get': 'get_analysis'
+        },
+        {
             'attr': 'stimulus',
             'add': 'add_stimulus',
             'type': TimeSeries,
@@ -143,19 +149,18 @@ class NWBFile(MultiContainerInterface):
                      'session_id',
                      'lab',
                      'institution',
+                     'notes',
+                     'pharmacology',
+                     'protocol',
+                     'related_publications',
+                     'slices',
+                     'source_script',
+                     'surgery',
+                     'virus',
                      {'name': 'ec_electrodes', 'child': True},
-                     'epochs',
-                     'subject',
+                     {'name': 'epochs', 'child': True},
+                     {'name': 'subject', 'child': True},
                      'epoch_tags',)
-
-    __current_version = None
-
-    @classmethod
-    def set_version(cls, version):
-        if cls.__current_version is not None:
-            msg = 'version already set'
-            raise ValueError(msg)
-        cls.__current_version = version
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'session_description', 'type': str,
@@ -164,13 +169,34 @@ class NWBFile(MultiContainerInterface):
             {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
             {'name': 'file_create_date', 'type': ('array_data', 'data', datetime, str),
              'doc': 'the time the file was created and subsequent modifications made', 'default': None},
-            {'name': 'version', 'type': str, 'doc': 'the NWB version', 'default': None},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str,
              'doc': 'general description of the experiment', 'default': None},
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
             {'name': 'institution', 'type': str,
              'doc': 'institution(s) where experiment is performed', 'default': None},
+            {'name': 'notes', 'type': str,
+             'doc': 'Notes about the experiment.', 'default': None},
+            {'name': 'pharmacology', 'type': str,
+             'doc': 'Description of drugs used, including how and when they were administered. '
+                    'Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.', 'default': None},
+            {'name': 'protocol', 'type': str,
+             'doc': 'Experimental protocol, if applicable. E.g., include IACUC protocol', 'default': None},
+            {'name': 'related_publications', 'type': str,
+             'doc': 'Publication information.'
+             'PMID, DOI, URL, etc. If multiple, concatenate together and describe which is which. '
+             'such as PMID, DOI, URL, etc', 'default': None},
+            {'name': 'slices', 'type': str,
+             'doc': 'Description of slices, including information about preparation '
+             'thickness, orientation, temperature and bath solution', 'default': None},
+            {'name': 'source_script', 'type': str,
+             'doc': 'Script file used to create this NWB file.', 'default': None},
+            {'name': 'surgery', 'type': str,
+             'doc': 'Narrative description about surgery/surgeries, including date(s) '
+                    'and who performed surgery.', 'default': None},
+            {'name': 'virus', 'type': str,
+             'doc': 'Information about virus(es) used in experiments, including virus ID, '
+                    'source, date made, injection location, volume, etc.', 'default': None},
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
             {'name': 'acquisition', 'type': (list, tuple),
              'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
@@ -203,11 +229,6 @@ class NWBFile(MultiContainerInterface):
         pkwargs['name'] = 'root'
         super(NWBFile, self).__init__(*pargs, **pkwargs)
         self.__start_time = datetime.utcnow().isoformat() + "Z"
-        # set version
-        version = getargs('version', kwargs)
-        if version is None:
-            version = self.__current_version
-        self.__nwb_version = version
         self.__session_description = getargs('session_description', kwargs)
         self.__identifier = getargs('identifier', kwargs)
         self.__session_start_time = getargs('session_start_time', kwargs)
@@ -226,9 +247,10 @@ class NWBFile(MultiContainerInterface):
         self.stimulus_template = getargs('stimulus_template', kwargs)
 
         self.modules = getargs('modules', kwargs)
-        self.epochs = getargs('epochs', kwargs)
-        if self.epochs is None:
-            self.epochs = Epochs(self.source)
+        epochs = getargs('epochs', kwargs)
+        if epochs is None:
+            epochs = Epochs(self.source)
+        self.epochs = epochs
         self.epoch_tags = getargs('epoch_tags', kwargs)
         self.ec_electrodes = getargs('ec_electrodes', kwargs)
         self.ec_electrode_groups = getargs('ec_electrode_groups', kwargs)
@@ -245,18 +267,18 @@ class NWBFile(MultiContainerInterface):
             'experiment_description',
             'session_id',
             'lab',
-            'institution'
+            'institution',
+            'notes',
+            'pharmacology',
+            'protocol',
+            'related_publications',
+            'slices',
+            'source_script',
+            'surgery',
+            'virus',
         ]
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
-
-    def __build_ts(self, ts_type, kwargs):
-        ret = LabelledDict(ts_type)
-        const_arg = getargs(ts_type, kwargs)
-        if const_arg:
-            for ts in const_arg:
-                self.__set_timeseries(ret, ts)
-        return ret
 
     def all_children(self):
         stack = [self]
@@ -272,10 +294,6 @@ class NWBFile(MultiContainerInterface):
     @property
     def identifier(self):
         return self.__identifier
-
-    @property
-    def nwb_version(self):
-        return self.__nwb_version
 
     @property
     def session_description(self):
@@ -307,18 +325,6 @@ class NWBFile(MultiContainerInterface):
         name = getargs('name', kwargs)
         return ElectrodeTableRegion(self.ec_electrodes, region, desc, name)
 
-    def is_acquisition(self, ts):
-        return self.__exists(ts, self.__acquisition)
-
-    def is_stimulus(self, ts):
-        return self.__exists(ts, self.__stimulus)
-
-    def is_stimulus_template(self, ts):
-        return self.__exists(ts, self.__stimulus_template)
-
-    def __exists(self, ts, d):
-        return ts.name in d
-
     @docval(*get_docval(Epochs.add_epoch))
     def create_epoch(self, **kwargs):
         """
@@ -328,78 +334,8 @@ class NWBFile(MultiContainerInterface):
         sparse noise) or a different paradigm (a rat exploring an
         enclosure versus sleeping between explorations)
         """
-        if self.epochs is None:
-            self.epochs = Epochs(self.source)
         self.epoch_tags.update(kwargs.get('tags', list()))
         call_docval_func(self.epochs.add_epoch, kwargs)
-#
-#    def get_epoch(self, name):
-#        return self.__get_epoch(name)
-#
-#    @docval({'name': 'epoch', 'type': (str, Epoch, list, tuple),
-#             'doc': 'the name of an epoch or an Epoch object or a list of names of epochs or Epoch objects'},
-#            {'name': 'timeseries', 'type': (str, TimeSeries, list, tuple),
-#             'doc': 'the name of a timeseries or a TimeSeries object or a list of \
-#             names of timeseries or TimeSeries objects'})
-#    def set_epoch_timeseries(self, **kwargs):
-#        """
-#        Add one or more TimSeries datasets to one or more Epochs
-#        """
-#        epoch, timeseries = getargs('epoch', 'timeseries', kwargs)
-#        if isinstance(epoch, list):
-#            ep_objs = [self.__get_epoch(ep) for ep in epoch]
-#        else:
-#            ep_objs = [self.__get_epoch(epoch)]
-#
-#        if isinstance(timeseries, list):
-#            ts_objs = [self.__get_timeseries_obj(ts) for ts in timeseries]
-#        else:
-#            ts_objs = [self.__get_timeseries_obj(timeseries)]
-#
-#        for ep in ep_objs:
-#            for ts in ts_objs:
-#                ep.add_timeseries(ts)
-#
-#    def __get_epoch(self, epoch):
-#        if isinstance(epoch, Epoch):
-#            ep = epoch
-#        elif isinstance(epoch, str):
-#            ep = self.__epochs.get(epoch)
-#            if not ep:
-#                raise KeyError("Epoch '%s' not found" % epoch)
-#        else:
-#            raise TypeError(type(epoch))
-#        return ep
-#
-#    def __get_timeseries_obj(self, timeseries):
-#        if isinstance(timeseries, TimeSeries):
-#            ts = timeseries
-#        elif isinstance(timeseries, str):
-#            ts = self.__acquisition.get(timeseries,
-#                                        self.__stimulus.get(timeseries,
-#                                                            self.__stimulus_template.get(timeseries, None)))
-#            if not ts:
-#                raise KeyError("TimeSeries '%s' not found" % timeseries)
-#        else:
-#            raise TypeError(type(timeseries))
-#        return ts
-
-    def __set_timeseries(self, ts_dict, ts, epoch=None):
-        if ts.name in ts_dict:
-            msg = "%s already exists in %s" % (ts.name, ts_dict.label)
-            raise ValueError(msg)
-        ts_dict[ts.name] = ts
-        if ts.parent is None:
-            ts.parent = self
-        if epoch:
-            self.set_epoch_timeseries(epoch, ts)
-
-    def __get_timeseries(self, ts_dict, name):
-        ret = ts_dict.get(name)
-        if ret is None:
-            msg = "no TimeSeries named '%s' found" % name
-            raise ValueError(msg)
-        return ret
 
     @docval({'name': 'electrode_table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):
@@ -407,5 +343,4 @@ class NWBFile(MultiContainerInterface):
             msg = 'ElectrodeTable already exists, cannot overwrite'
             raise ValueError(msg)
         electrode_table = getargs('electrode_table', kwargs)
-        electrode_table.parent = self
         self.ec_electrodes = electrode_table

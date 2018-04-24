@@ -101,9 +101,9 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                 DatasetBuilder('file_create_date', [str(self.create_date)]),
                                 'identifier': DatasetBuilder('identifier', 'TEST123'),
                                 'session_description': DatasetBuilder('session_description', 'a test NWB File'),
-                                'nwb_version': DatasetBuilder('nwb_version', '1.2.0'),
                                 'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
                             attributes={'namespace': base.CORE_NAMESPACE,
+                                        'nwb_version': '2.0b',
                                         'neurodata_type': 'NWBFile',
                                         'help': 'an NWB:N file for storing cellular-based neurophysiology data',
                                         'source': 'a test source'})

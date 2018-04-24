@@ -37,14 +37,22 @@ class TestMapNWBContainer(unittest.TestCase):
         return self.__manager
 
     def test_build(self):
-        self.builder = self.setUpBuilder()
+        try:
+            self.builder = self.setUpBuilder()
+        except unittest.SkipTest:
+            raise unittest.SkipTest("cannot run construct test for %s -- setUpBuilder not implemented" %
+                                    self.__class__.__name__)
         self.maxDiff = None
         result = self.manager.build(self.container)
         # do something here to validate the result Builder against the spec
         self.assertDictEqual(result, self.builder)
 
     def test_construct(self):
-        self.builder = self.setUpBuilder()
+        try:
+            self.builder = self.setUpBuilder()
+        except unittest.SkipTest:
+            raise unittest.SkipTest("cannot run construct test for %s -- setUpBuilder not implemented" %
+                                    self.__class__.__name__)
         result = self.manager.construct(self.builder)
         self.assertContainerEqual(result, self.container)
 
@@ -70,7 +78,14 @@ class TestMapNWBContainer(unittest.TestCase):
                             self.assertContainerEqual(sub1, sub2)
                         continue
                     else:
-                        self.assertTrue(np.array_equal(f1, f2))
+                        self.assertEqual(len(f1), len(f2))
+                        if len(f1) == 0:
+                            continue
+                        if isinstance(f1[0], float):
+                                for v1, v2 in zip(f1, f2):
+                                    self.assertAlmostEqual(v1, v2, places=6)
+                        else:
+                            self.assertTrue(np.array_equal(f1, f2))
                 elif isinstance(f1, dict) and len(f1) and isinstance(next(iter(f1.values())), NWBContainer):
                     f1_keys = set(f1.keys())
                     f2_keys = set(f2.keys())

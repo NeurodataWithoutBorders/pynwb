@@ -7,6 +7,9 @@ from pynwb.form.build import GroupBuilder, DatasetBuilder
 from pynwb.form.utils import docval, getargs
 from pynwb.form.build import ObjectMapper, BuildManager, TypeMap
 
+from abc import ABCMeta
+from six import with_metaclass
+
 CORE_NAMESPACE = 'test_core'
 
 
@@ -19,8 +22,7 @@ class Foo(Container):
             {'name': 'attr3', 'type': float, 'doc': 'a third attribute', 'default': 3.14})
     def __init__(self, **kwargs):
         name, my_data, attr1, attr2, attr3 = getargs('name', 'my_data', 'attr1', 'attr2', 'attr3', kwargs)
-        super(Foo, self).__init__()
-        self.__name = name
+        super(Foo, self).__init__(name=name, source='test_io_manager')
         self.__data = my_data
         self.__attr1 = attr1
         self.__attr2 = attr2
@@ -33,10 +35,6 @@ class Foo(Container):
     def __str__(self):
         attrs = ('name', 'my_data', 'attr1', 'attr2', 'attr3')
         return '<' + ','.join('%s=%s' % (a, getattr(self, a)) for a in attrs) + '>'
-
-    @property
-    def name(self):
-        return self.__name
 
     @property
     def my_data(self):
@@ -64,9 +62,10 @@ class FooBucket(Container):
             {'name': 'foos', 'type': list, 'doc': 'the Foo objects in this bucket', 'default': list()})
     def __init__(self, **kwargs):
         name, foos = getargs('name', 'foos', kwargs)
-        super(FooBucket, self).__init__()
-        self.__name = name
+        super(FooBucket, self).__init__(name=name, source='test_io_manger')
         self.__foos = foos
+        for f in self.__foos:
+            self.add_child(f)
 
     def __eq__(self, other):
         return self.name == other.name and set(self.foos) == set(other.foos)
@@ -74,10 +73,6 @@ class FooBucket(Container):
     def __str__(self):
         foo_str = "[" + ",".join(str(f) for f in self.foos) + "]"
         return 'name=%s, foos=%s' % (self.name, foo_str)
-
-    @property
-    def name(self):
-        return self.__name
 
     @property
     def foos(self):
@@ -174,11 +169,9 @@ class TestBuildManager(TestBase):
         self.assertIs(container1, container2)
 
 
-class TestNestedBase(TestBase):
+class TestNestedBase(with_metaclass(ABCMeta, TestBase)):
 
     def setUp(self):
-        if type(self) == TestNestedBase:
-            raise unittest.SkipTest('Abstract Base Class')
         super(TestNestedBase, self).setUp()
         self.foo_bucket = FooBucket('test_foo_bucket', [
                             Foo('my_foo1', list(range(10)), 'value1', 10),
@@ -206,10 +199,10 @@ class TestNestedBase(TestBase):
         self.manager = BuildManager(self.type_map)
 
     def setUpBucketBuilder(self):
-        pass
+        raise unittest.SkipTest('Abstract Base Class')
 
     def setUpBucketSpec(self):
-        pass
+        raise unittest.SkipTest('Abstract Base Class')
 
     def test_build(self):
         ''' Test default mapping for an Container that has an Container as an attribute value '''

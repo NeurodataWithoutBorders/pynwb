@@ -5,6 +5,9 @@ from pynwb.form.build import GroupBuilder, DatasetBuilder, ObjectMapper, BuildMa
 from pynwb.form import Container
 from pynwb.form.utils import docval, getargs, get_docval
 
+from abc import ABCMeta
+from six import with_metaclass
+
 CORE_NAMESPACE = 'test_core'
 
 
@@ -17,8 +20,7 @@ class Bar(Container):
             {'name': 'attr3', 'type': float, 'doc': 'a third attribute', 'default': 3.14})
     def __init__(self, **kwargs):
         name, data, attr1, attr2, attr3 = getargs('name', 'data', 'attr1', 'attr2', 'attr3', kwargs)
-        super(Bar, self).__init__()
-        self.__name = name
+        super(Bar, self).__init__(name=name, source='test_io_map')
         self.__data = data
         self.__attr1 = attr1
         self.__attr2 = attr2
@@ -35,10 +37,6 @@ class Bar(Container):
     @property
     def data_type(self):
         return 'Bar'
-
-    @property
-    def name(self):
-        return self.__name
 
     @property
     def data(self):
@@ -110,7 +108,7 @@ class TestTypeMap(unittest.TestCase):
         self.type_map.register_map(Bar, ObjectMapper)
         self.type_map.register_map(Foo, ObjectMapper)
         bar_inst = Bar('my_bar', list(range(10)), 'value1', 10)
-        foo_inst = Foo()
+        foo_inst = Foo(name='my_foo', source='test_io_map')
         bar_mapper = self.type_map.get_map(bar_inst)
         foo_mapper = self.type_map.get_map(foo_inst)
         self.assertIsNot(bar_mapper, foo_mapper)
@@ -203,7 +201,7 @@ class TestDynamicContainer(unittest.TestCase):
         self.assertEqual(inst.attr4, 1.0)
 
 
-class TestObjectMapper(unittest.TestCase):
+class TestObjectMapper(with_metaclass(ABCMeta, unittest.TestCase)):
 
     def setUp(self):
         self.setUpBarSpec()

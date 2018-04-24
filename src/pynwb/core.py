@@ -82,7 +82,7 @@ def nwb_repr(nwb_object, verbose=True):
         return str(nwb_object)
 
 
-class NWBBaseType(with_metaclass(ExtenderMeta)):
+class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     '''The base class to any NWB types.
 
     The purpose of this class is to provide a mechanism for representing hierarchical
@@ -92,45 +92,18 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
     __nwbfields__ = tuple()
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': 'NWBContainer',
+            {'name': 'parent', 'type': Container,
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         parent, container_source = getargs('parent', 'container_source', kwargs)
-        super(NWBBaseType, self).__init__()
+        call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
-        self.__parent = None
-        self.__name = getargs('name', kwargs)
-        if parent:
-            self.parent = parent
-        self.__container_source = container_source
-
-    @property
-    def name(self):
-        return self.__name
-
-    @property
-    def container_source(self):
-        '''The source of this Container e.g. file name or table
-        '''
-        return self.__container_source
 
     @property
     def fields(self):
         return self.__fields
-
-    @property
-    def parent(self):
-        '''The parent NWBContainer of this NWBContainer
-        '''
-        return self.__parent
-
-    @parent.setter
-    def parent(self, parent_container):
-        if self.__parent is not None:
-            raise Exception('cannot reassign parent')
-        self.__parent = parent_container
 
     @staticmethod
     def _transform_arg(nwbfield):
@@ -195,9 +168,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
     def __str__(self):
         return nwb_repr(self)
 
-    def __repr__(self):
-        return str(self)
-
 
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBBaseType, Container):
@@ -214,6 +184,27 @@ class NWBContainer(NWBBaseType, Container):
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
         self.source = getargs('source', kwargs)
+
+    @classmethod
+    def _setter(cls, nwbfield):
+        super_setter = NWBBaseType._setter(nwbfield)
+        ret = super_setter
+        if isinstance(nwbfield, dict) and nwbfield.get('child', False):
+
+            def nwbdi_setter(self, val):
+                super_setter(self, val)
+                if val is not None:
+                    if isinstance(val, (tuple, list)):
+                        pass
+                    elif isinstance(val, dict):
+                        val = val.values()
+                    else:
+                        val = [val]
+                    for v in val:
+                        self.add_child(v)
+
+            ret = nwbdi_setter
+        return ret
 
     def _to_dict(self, arg, label="NULL"):
         return_dict = LabelledDict(label)
@@ -233,31 +224,6 @@ class NWBDataInterface(NWBContainer):
     @docval(*get_docval(NWBContainer.__init__))
     def __init__(self, **kwargs):
         call_docval_func(super(NWBDataInterface, self).__init__, kwargs)
-        self.__children = list()
-
-    @property
-    def children(self):
-        return tuple(self.__children)
-
-    @docval({'name': 'child', 'type': NWBBaseType,
-             'doc': 'the child NWBContainer or NWBData for this Container', 'default': None})
-    def add_child(self, **kwargs):
-        child = getargs('child', kwargs)
-        self.__children.append(child)
-
-    @classmethod
-    def _setter(cls, nwbfield):
-        super_setter = super(NWBDataInterface, cls)._setter(nwbfield)
-        ret = super_setter
-        if isinstance(nwbfield, dict) and nwbfield.get('child', False):
-
-            def nwbdi_setter(self, val):
-                super_setter(self, val)
-                if val is not None:
-                    self.add_child(val)
-
-            ret = nwbdi_setter
-        return ret
 
 
 @register_class('NWBData', CORE_NAMESPACE)
@@ -609,7 +575,6 @@ class MultiContainerInterface(NWBDataInterface):
                 containers = container
             d = getattr(self, attr_name)
             for tmp in containers:
-                tmp.parent = self
                 self.add_child(tmp)
                 if tmp.name in d:
                     msg = "'%s' already exists in '%s'" % (tmp.name, self.name)

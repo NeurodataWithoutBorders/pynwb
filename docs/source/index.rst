@@ -40,6 +40,7 @@ breaking down the barriers to data sharing in neuroscience.
 
    tutorials/index
    extensions
+   building_api
    validation
    api_docs
    software_process

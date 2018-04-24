@@ -75,7 +75,6 @@ class TestHDF5Writer(unittest.TestCase):
         self.assertIn('file_create_date', f)
         self.assertIn('identifier', f)
         self.assertIn('session_description', f)
-        self.assertIn('nwb_version', f)
         self.assertIn('session_start_time', f)
         acq = f.get('acquisition')
         self.assertIn('test_timeseries', acq)

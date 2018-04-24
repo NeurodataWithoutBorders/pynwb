@@ -15,8 +15,7 @@ class Baz(Data):
             {'name': 'baz_attr', 'type': str, 'doc': 'an attribute'})
     def __init__(self, **kwargs):
         name, data, baz_attr = getargs('name', 'data', 'baz_attr', kwargs)
-        super(Baz, self).__init__()
-        self.__name = name
+        super(Baz, self).__init__(name=name, source='test_io_map_data')
         self.__data = data
         self.__baz_attr = baz_attr
 
