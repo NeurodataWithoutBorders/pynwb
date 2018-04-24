@@ -82,6 +82,12 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_acquisition'
         },
         {
+            'attr': 'analysis',
+            'add': 'add_analysis',
+            'type': NWBContainer,
+            'get': 'get_analysis'
+        },
+        {
             'attr': 'stimulus',
             'add': 'add_stimulus',
             'type': TimeSeries,
