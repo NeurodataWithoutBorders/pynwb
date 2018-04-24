@@ -252,5 +252,5 @@ io3.close()
 #
 # External links are convenient but to share data we may want to hand a single file with all the
 # data to our collaborator rather than having to collect all relevant files. To do this,
-# :py:class:`~pynwb.from.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
-# provide the convenience function :py:func:`~pynwb.from.backends.hdf5.h5tools.HDF5IO.copy_file`
+# :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
+# provide the convenience function :py:func:`~pynwb.form.backends.hdf5.h5tools.HDF5IO.copy_file`

@@ -9,7 +9,10 @@ class Container(with_metaclass(abc.ABCMeta, object)):
             {'name': 'parent', 'type': 'Container', 'doc': 'the Container that holds this Container', 'default': None},
             {'name': 'container_source', 'type': str, 'doc': 'the source of this container', 'default': None})
     def __init__(self, **kwargs):
-        self.__name = getargs('name', kwargs)
+        name = getargs('name', kwargs)
+        if '/' in name:
+            raise ValueError("name '" + name + "' cannot contain '/'")
+        self.__name = name
         self.__parent = getargs('parent', kwargs)
         self.__container_source = getargs('container_source', kwargs)
         self.__children = list()
