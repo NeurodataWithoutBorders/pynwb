@@ -34,14 +34,14 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(oc.emission_lambda, 'emission_lambda')
 
         ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', 'device', 'excitation_lambda',
-                          'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+                          'imaging_rate', 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
         self.assertEqual(ip.optical_channel[0], oc)
         self.assertEqual(ip.device, 'device')
         self.assertEqual(ip.excitation_lambda, 'excitation_lambda')
         self.assertEqual(ip.imaging_rate, 'imaging_rate')
         self.assertEqual(ip.indicator, 'indicator')
         self.assertEqual(ip.location, 'location')
-        self.assertEqual(ip.manifold, (1, 2, 1, 2, 3))
+        self.assertEqual(ip.manifold, (50, 100, 3))
         self.assertEqual(ip.conversion, 4.0)
         self.assertEqual(ip.unit, 'unit')
         self.assertEqual(ip.reference_frame, 'reference_frame')
