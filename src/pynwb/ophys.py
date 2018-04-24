@@ -23,7 +23,7 @@ class OpticalChannel(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},
-            {'name': 'emission_lambda', 'type': str, 'doc': 'Emission lambda for channel.'},
+            {'name': 'emission_lambda', 'type': float, 'doc': 'Emission wavelength for channel in nm.'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
@@ -57,7 +57,7 @@ class ImagingPlane(NWBContainer):
              'doc': 'One of possibly many groups storing channelspecific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
             {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
-            {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
+            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},
             {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
