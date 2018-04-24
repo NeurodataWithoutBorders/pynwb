@@ -227,7 +227,7 @@ groups:
     dtype: text
     name: device
   - doc: Excitation wavelength
-    dtype: text
+    dtype: float
     name: excitation_lambda
   - doc: Rate images are acquired, in Hz.
     dtype: text
@@ -283,7 +283,7 @@ groups:
       dtype: text
       name: description
     - doc: Emission lambda for channel
-      dtype: text
+      dtype: float
       name: emission_lambda
     doc: 'One of possibly many groups storing channel-specific data COMMENT: Name
       is arbitrary but should be meaningful'

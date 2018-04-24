@@ -17,8 +17,8 @@ def CreatePlaneSegmentation():
     iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit',
                       external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
-    oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 'emission_lambda')
-    ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
+    oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 500.)
+    ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 600.,
                       'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
     pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
@@ -29,19 +29,19 @@ def CreatePlaneSegmentation():
 
 class TwoPhotonSeriesConstructor(unittest.TestCase):
     def test_init(self):
-        oc = OpticalChannel('test_name', 'test_source', 'description', 'emission_lambda')
+        oc = OpticalChannel('test_name', 'test_source', 'description', 500.)
         self.assertEqual(oc.description, 'description')
-        self.assertEqual(oc.emission_lambda, 'emission_lambda')
+        self.assertEqual(oc.emission_lambda, 500.)
 
-        ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', 'device', 'excitation_lambda',
-                          'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+        ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', 'device', 600.,
+                          'imaging_rate', 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
         self.assertEqual(ip.optical_channel[0], oc)
         self.assertEqual(ip.device, 'device')
-        self.assertEqual(ip.excitation_lambda, 'excitation_lambda')
+        self.assertEqual(ip.excitation_lambda, 600.)
         self.assertEqual(ip.imaging_rate, 'imaging_rate')
         self.assertEqual(ip.indicator, 'indicator')
         self.assertEqual(ip.location, 'location')
-        self.assertEqual(ip.manifold, (1, 2, 1, 2, 3))
+        self.assertEqual(ip.manifold, (50, 100, 3))
         self.assertEqual(ip.conversion, 4.0)
         self.assertEqual(ip.unit, 'unit')
         self.assertEqual(ip.reference_frame, 'reference_frame')
@@ -145,8 +145,8 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit',
                           external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
-        oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 'emission_lambda')
-        ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 'excitation_lambda',
+        oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 500.)
+        ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 600.,
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
         pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
