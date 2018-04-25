@@ -18,7 +18,7 @@ PyNWB API.
 #
 # The following block of code demonstrates how to create a new namespace, and then add a new `neurodata_type`
 # to this namespace. Finally,
-# it calls :py:meth:`~form.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
+# it calls :py:meth:`~pynwb.form.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
 
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 

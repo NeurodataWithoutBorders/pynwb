@@ -5,10 +5,9 @@ from h5py import File, Dataset, Reference
 from six import text_type
 
 from pynwb.form.backends.hdf5 import HDF5IO
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
-from pynwb.form.spec import NamespaceCatalog
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager
 
-from pynwb import TimeSeries
+from pynwb import TimeSeries, get_type_map
 
 from numbers import Number
 
@@ -136,7 +135,8 @@ class GroupBuilderTestCase(unittest.TestCase):
 class TestHDF5Writer(GroupBuilderTestCase):
 
     def setUp(self):
-        self.manager = BuildManager(TypeMap(NamespaceCatalog()))
+        type_map = get_type_map()
+        self.manager = BuildManager(type_map)
         self.path = "test_pynwb_io_hdf5.h5"
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)

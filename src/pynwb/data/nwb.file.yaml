@@ -59,6 +59,10 @@ groups:
       end users. Such data should be placed in the analysis group. The analysis data
       should be documented so that it is sharable with other labs'
     name: analysis
+    groups:
+    - doc: Custom analysis results
+      neurodata_type_inc: NWBContainer
+      quantity: '*'
   - doc: "Experimental intervals, whether that be logically distinct sub-experiments\
     \ having a particular scientific goal, trials during an experiment, or epochs\
     \ deriving from analysis of data.  COMMENT: Epochs provide pointers to time\
