@@ -131,11 +131,14 @@ AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
 # -----------------------------------------------------
 #
 # Here we show how to create extensions by example by creating a data class for a
-# cortical surface mesh. This data type is particularly important for ECoG data, we need to know where each electrode is
-# with respect to the gyri and sucli. Surface mesh objects contain two types of data:
-# 1. `vertices`, which is an (n,3) matrix of floats that represents points in 3D space
-# 2. `faces`, which is an (n,3) matrix of uints that represents indices of the `vertices` matrix. Each triplet of points
-# defines a triangular face, and the mesh is comprised of a collection of triangular faces.
+# cortical surface mesh. This data type is particularly important for ECoG data,
+# we need to know where each electrode is with respect to the gyri and sucli.
+# Surface mesh objects contain two types of data:
+#
+# 1. `vertices`, which is an (n, 3) matrix of floats that represents points in 3D space.
+#
+# 2. `faces`, which is an (n, 3) matrix of uints that represents indices of the `vertices` matrix. Each triplet of
+# points defines a triangular face, and the mesh is comprised of a collection of triangular faces.
 #
 # First, we set up our extension. I am going to use the name `ecog`
 
@@ -145,17 +148,24 @@ name = 'ecog'
 ns_path = name + ".namespace.yaml"
 ext_source = name + ".extensions.yaml"
 
-# Now we define the data structures. We use `NWBDataInterface` as the base type,
+####################
+# Now we define the data structures. We use :py:meth:`~pynwb.core.NWBDataInterface` as the base type,
 # which is the lowest type you are likely to use as a base. The name of the
 # class is `CorticalSurface`, and it requires two matrices, `vertices` and
 # `faces`.
 
+datasets = [
+       NWBDatasetSpec(doc='faces for surface, indexes vertices',
+                      shape=(None, 3),
+                      name='faces', dtype='uint',
+                      dims=('face_number', 'vertex_index')),
+       NWBDatasetSpec(doc='vertices for surface, points in 3D space',
+                      shape=(None, 3),
+                      name='vertices', dtype='float',
+                      dims=('vertex_number', 'xyz'))]
+
 surface = NWBGroupSpec(doc='brain cortical surface',
-                       datasets=[
-                           NWBDatasetSpec(doc='faces for surface, indexes vertices', shape=(None, 3),
-                                          name='faces', dtype='uint', dims=('face_number', 'vertex_index')),
-                           NWBDatasetSpec(doc='vertices for surface, points in 3D space', shape=(None, 3),
-                                          name='vertices', dtype='float', dims=('vertex_number', 'xyz'))],
+                       datasets=datasets,
                        neurodata_type_def='CorticalSurface',
                        neurodata_type_inc='NWBDataInterface')
 
@@ -165,6 +175,7 @@ ns_builder = NWBNamespaceBuilder(name + ' extensions', name)
 ns_builder.add_spec(ext_source, surface)
 ns_builder.export(ns_path)
 
+####################
 # The above should generate 2 YAML files. `ecog.extensions.yaml`,
 # defines the newly defined types
 #
@@ -195,7 +206,8 @@ ns_builder.export(ns_path)
 #       neurodata_type_def: CorticalSurface
 #       neurodata_type_inc: NWBDataInterface
 #
-# Finally, we should test the new types to make sure they run as expected
+# Finally, we should test the new types to make sure the auto-generated classes
+# work and they run as expected
 
 from pynwb import load_namespaces, get_class, NWBHDF5IO, NWBFile
 from datetime import datetime
@@ -221,12 +233,5 @@ cortex_module = nwbfile.create_processing_module(name='cortex',
                                                  source='source')
 cortex_module.add_container(cortical_surface)
 
-
 with NWBHDF5IO('test_cortical_surface.nwb', 'w') as io:
     io.write(nwbfile)
-
-
-
-
-
-
