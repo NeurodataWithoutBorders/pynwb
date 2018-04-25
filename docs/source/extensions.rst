@@ -300,6 +300,8 @@ Documenting Extensions
 Using the same tools used to generate the documentation for the `NWB-N core format <https://nwb-schema.readthedocs.io/en/latest/>`_
 one can easily generate documentation in HTML, PDF, ePub and many other format for extensions as well.
 
+Code to generate this documentation is maintained in a separate repo: https://github.com/NeurodataWithoutBorders/nwb-docutils
+
 For the purpose of this example we assume that our current directory has the following structure.
 
 .. code-block:: text
@@ -333,8 +335,7 @@ We can now create the sources of our documentation as follows:
                  --external_description my_extension_source/docs/mylab_description.rst \  (Optional)
                  --external_release_notes my_extension_source/docs/mylab_release_notes.rst \  (Optional)
 
-The new folder ``my_extension_docs/`` now contains the basic setup for the documentation. To automatically generate
-the RST documentation files from the YAML (or JSON) sources of the extension simply run:
+To automatically generate the RST documentation files from the YAML (or JSON) sources of the extension simply run:
 
 .. code-block:: text
 
