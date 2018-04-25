@@ -152,6 +152,23 @@ jobs:
       - TEST_WHEELINSTALL_ENV: "wheelinstall-py36"
     <<: *conda-steps
 
+  gallery:
+    docker:
+      - image: circleci/python:3.6.3-jessie
+    environment:
+     - TEST_TOX_ENV: "gallery"
+    steps:
+      - checkout
+      - run:
+          <<: *initialize-venv
+      - run:
+          name: Run the gallery tests
+          command: |
+            . ../venv/bin/activate
+            pip install tox
+            tox -e $TEST_TOX_ENV
+          no_output_timeout: 20m
+
 workflows:
   version: 2
   test-package-publish:
@@ -163,3 +180,4 @@ workflows:
       - miniconda27
       - miniconda35
       - miniconda36
+      - gallery
