@@ -154,15 +154,14 @@ ext_source = name + ".extensions.yaml"
 # class is `CorticalSurface`, and it requires two matrices, `vertices` and
 # `faces`.
 
-datasets = [
-       NWBDatasetSpec(doc='faces for surface, indexes vertices',
-                      shape=(None, 3),
-                      name='faces', dtype='uint',
-                      dims=('face_number', 'vertex_index')),
-       NWBDatasetSpec(doc='vertices for surface, points in 3D space',
-                      shape=(None, 3),
-                      name='vertices', dtype='float',
-                      dims=('vertex_number', 'xyz'))]
+datasets = [NWBDatasetSpec(doc='faces for surface, indexes vertices',
+                           shape=(None, 3),
+                           name='faces', dtype='uint',
+                           dims=('face_number', 'vertex_index')),
+            NWBDatasetSpec(doc='vertices for surface, points in 3D space',
+                           shape=(None, 3),
+                           name='vertices', dtype='float',
+                           dims=('vertex_number', 'xyz'))]
 
 surface = NWBGroupSpec(doc='brain cortical surface',
                        datasets=datasets,
