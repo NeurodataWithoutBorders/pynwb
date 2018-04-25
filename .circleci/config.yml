@@ -159,6 +159,9 @@ jobs:
      - TEST_TOX_ENV: "gallery"
     steps:
       - checkout
+      - restore_cache:
+          keys:
+            - ophys-data
       - run:
           <<: *initialize-venv
       - run:
@@ -168,6 +171,9 @@ jobs:
             pip install tox
             tox -e $TEST_TOX_ENV
           no_output_timeout: 20m
+      - save_cache:
+          key: ophys-data
+          paths: ophys_experiment_data/*.nwb
 
 workflows:
   version: 2
