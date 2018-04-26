@@ -1,0 +1,225 @@
+groups:
+- attributes:
+  - doc: Value is 'Superclass definition for patch-clamp data'
+    dtype: text
+    name: help
+    value: Superclass definition for patch-clamp data
+  datasets:
+  - dims:
+    - num_times
+    doc: Recorded voltage or current.
+    dtype: number
+    name: data
+    shape:
+    - null
+  - doc: 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'
+    dtype: float
+    name: gain
+    quantity: '?'
+  doc: Stores stimulus or response current or voltage. Superclass definition for patch-clamp
+    data (this class should not be instantiated directly).
+  links:
+  - doc: link to IntracellularElectrode group that describes th electrode that was
+      used to apply or record this data
+    name: electrode
+    target_type: IntracellularElectrode
+  neurodata_type_def: PatchClampSeries
+  neurodata_type_inc: TimeSeries
+- attributes:
+  - doc: Value is 'Voltage recorded from cell during current-clamp recording'
+    dtype: text
+    name: help
+    value: Voltage recorded from cell during current-clamp recording
+  datasets:
+  - doc: 'Unit: Amp'
+    dtype: float32
+    name: bias_current
+    quantity: '?'
+  - doc: 'Unit: Ohm'
+    dtype: float32
+    name: bridge_balance
+    quantity: '?'
+  - doc: 'Unit: Farad'
+    dtype: float32
+    name: capacitance_compensation
+    quantity: '?'
+  doc: Stores voltage data recorded from intracellular current-clamp recordings. A
+    corresponding CurrentClampStimulusSeries (stored separately as a stimulus) is
+    used to store the current injected.
+  neurodata_type_def: CurrentClampSeries
+  neurodata_type_inc: PatchClampSeries
+- attributes:
+  - doc: Value is 'Voltage from intracellular recordings when all current and amplifier
+      settings are off'
+    dtype: text
+    name: help
+    value: Voltage from intracellular recordings when all current and amplifier settings
+      are off
+  doc: Stores recorded voltage data from intracellular recordings when all current
+    and amplifier settings are off (i.e., CurrentClampSeries fields will be zero).
+    There is no CurrentClampStimulusSeries associated with an IZero series because
+    the amplifier is disconnected and no stimulus can reach the cell.
+  neurodata_type_def: IZeroClampSeries
+  neurodata_type_inc: CurrentClampSeries
+- attributes:
+  - doc: Value is 'Stimulus current applied during current clamp recording'
+    dtype: text
+    name: help
+    value: Stimulus current applied during current clamp recording
+  doc: Aliases to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries
+    for machine (and human) readability of the file.
+  neurodata_type_def: CurrentClampStimulusSeries
+  neurodata_type_inc: PatchClampSeries
+- attributes:
+  - doc: Value is 'Current recorded from cell during voltage-clamp recording'
+    dtype: text
+    name: help
+    value: Current recorded from cell during voltage-clamp recording
+  datasets:
+  - attributes:
+    - default_value: Farad
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      dtype: text
+      name: unit
+      required: false
+    doc: 'Unit: Farad'
+    dtype: float32
+    name: capacitance_fast
+    quantity: '?'
+  - attributes:
+    - default_value: Farad
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      dtype: text
+      name: unit
+      required: false
+    doc: 'Unit: Farad'
+    dtype: float32
+    name: capacitance_slow
+    quantity: '?'
+  - attributes:
+    - default_value: Hz
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      dtype: text
+      name: unit
+      required: false
+    doc: 'Unit: Hz'
+    dtype: float32
+    name: resistance_comp_bandwidth
+    quantity: '?'
+  - attributes:
+    - default_value: pecent
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      dtype: text
+      name: unit
+      required: false
+    doc: 'Unit: %'
+    dtype: float32
+    name: resistance_comp_correction
+    quantity: '?'
+  - attributes:
+    - default_value: pecent
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      dtype: text
+      name: unit
+      required: false
+    doc: 'Unit: %'
+    dtype: float32
+    name: resistance_comp_prediction
+    quantity: '?'
+  - attributes:
+    - default_value: Farad
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      dtype: text
+      name: unit
+      required: false
+    doc: 'Unit: Farad'
+    dtype: float32
+    name: whole_cell_capacitance_comp
+    quantity: '?'
+  - attributes:
+    - default_value: Ohm
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      dtype: text
+      name: unit
+      required: false
+    doc: 'Unit: Ohm'
+    dtype: float32
+    name: whole_cell_series_resistance_comp
+    quantity: '?'
+  doc: Stores current data recorded from intracellular voltage-clamp recordings. A
+    corresponding VoltageClampStimulusSeries (stored separately as a stimulus) is
+    used to store the voltage injected.
+  neurodata_type_def: VoltageClampSeries
+  neurodata_type_inc: PatchClampSeries
+- attributes:
+  - doc: Value is 'Stimulus voltage applied during voltage clamp recording'
+    dtype: text
+    name: help
+    value: Stimulus voltage applied during voltage clamp recording
+  doc: Aliases to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries
+    for machine (and human) readability of the file.
+  neurodata_type_def: VoltageClampStimulusSeries
+  neurodata_type_inc: PatchClampSeries
+- attributes:
+  - doc: Value is 'Metadata about an intracellular electrode'
+    dtype: text
+    name: help
+    value: Metadata about an intracellular electrode
+  datasets:
+  - doc: 'Recording description, description of electrode (e.g.,  whole-cell, sharp,
+      etc)COMMENT: Free-form text (can be from Methods)'
+    dtype: text
+    name: description
+  - doc: Name(s) of devices in general/devices
+    dtype: text
+    name: device
+    quantity: '?'
+  - doc: Electrode specific filtering.
+    dtype: text
+    name: filtering
+    quantity: '?'
+  - doc: Initial access resistance
+    dtype: text
+    name: initial_access_resistance
+    quantity: '?'
+  - doc: Area, layer, comments on estimation, stereotaxis coordinates (if in vivo,
+      etc)
+    dtype: text
+    name: location
+    quantity: '?'
+  - doc: 'Electrode resistance COMMENT: unit: Ohm'
+    dtype: text
+    name: resistance
+    quantity: '?'
+  - doc: Information about seal used for recording
+    dtype: text
+    name: seal
+    quantity: '?'
+  - doc: Information about slice used for recording
+    dtype: text
+    name: slice
+    quantity: '?'
+  doc: 'One of possibly many. COMMENT: Name should be informative.'
+  neurodata_type_def: IntracellularElectrode
+  neurodata_type_inc: NWBContainer
