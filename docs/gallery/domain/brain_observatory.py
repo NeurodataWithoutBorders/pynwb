@@ -43,7 +43,7 @@ epoch_table['start'] = timestamps[epoch_table['start'].values]
 epoch_table['end'] = timestamps[epoch_table['end'].values]
 
 ########################################
-# First, lets create a top-level "file" container object.  All the other NWB:N data components will be stored hierarchically, relative to this container.  The data won't actually be written to the file system until the end of the script.
+# 1) First, lets create a top-level "file" container object.  All the other NWB:N data components will be stored hierarchically, relative to this container.  The data won't actually be written to the file system until the end of the script.
 
 nwbfile = NWBFile(
     source='Allen Brain Observatory: Visual Coding',
@@ -55,7 +55,7 @@ nwbfile = NWBFile(
 
 
 ########################################
-# Next, we add stimuli templates (one for each type of stimulus), and a data series that indexes these templates to describe what stimulus was being shown during the experiment.
+# 2) Next, we add stimuli templates (one for each type of stimulus), and a data series that indexes these templates to describe what stimulus was being shown during the experiment.
 for stimulus in stimulus_list:
     visual_stimulus_images = ImageSeries(
         name=stimulus,
@@ -75,7 +75,7 @@ for stimulus in stimulus_list:
     nwbfile.add_stimulus(image_index)
 
 ########################################
-# Besides the two-photon calcium image stack, the running speed of the animal was also recordered in this experiment.  We can store this data as a TimeSeries, in the acquisition portion of the file.
+# 3) Besides the two-photon calcium image stack, the running speed of the animal was also recordered in this experiment.  We can store this data as a TimeSeries, in the acquisition portion of the file.
 
 running_speed = TimeSeries(
     name='running_speed',
@@ -87,7 +87,7 @@ running_speed = TimeSeries(
 nwbfile.add_acquisition(running_speed)
 
 ########################################
-# In NWB:N, an "epoch" is an interval of experiment time that can slice into a timeseries (for example running_speed, the one we just added).  PyNWB uses an object-oriented approach to create links into these timeseries, so that data is not copied multiple times.  Here, we extract the stimulus epochs (both fine and coarse-grained) from the Brain Observatory experiment using the allensdk.
+# 4) In NWB:N, an "epoch" is an interval of experiment time that can slice into a timeseries (for example running_speed, the one we just added).  PyNWB uses an object-oriented approach to create links into these timeseries, so that data is not copied multiple times.  Here, we extract the stimulus epochs (both fine and coarse-grained) from the Brain Observatory experiment using the allensdk.
 
 for ri, row in trial_table.iterrows():
     nwbfile.create_epoch(start_time=row.start,
@@ -104,7 +104,7 @@ for ri, row in epoch_table.iterrows():
                          description=row.stimulus)
 
 ########################################
-# In the brain observatory, a two-photon microscope is used to acquire images of the calcium activity of neurons expressing a flourescent protien indicator.  Essentially the microscope captures picture (30 times a second) at a single depth in the visual cortex (the imaging plane).  Let's use pynwb to store the metadata associated with this hardware and experimental setup:
+# 5) In the brain observatory, a two-photon microscope is used to acquire images of the calcium activity of neurons expressing a flourescent protien indicator.  Essentially the microscope captures picture (30 times a second) at a single depth in the visual cortex (the imaging plane).  Let's use pynwb to store the metadata associated with this hardware and experimental setup:
 optical_channel = OpticalChannel(
     name='optical_channel',
     source='Allen Brain Observatory: Visual Coding',
@@ -129,7 +129,7 @@ imaging_plane = nwbfile.create_imaging_plane(
 )
 
 ########################################
-#  The Allen Insitute does not include the raw imaging signal, as this data would make the file too large. Instead, these data are  preprocessed, and a dF/F flourescence signal extracted for each region-of-interest (ROI). To store the chain of computations necessary to describe this data processing pipeline, pynwb provides a "processing module" with interfaces that simplify and standarize the process of adding the steps in this provenance chain to the file:
+# The Allen Insitute does not include the raw imaging signal, as this data would make the file too large. Instead, these data are  preprocessed, and a dF/F flourescence signal extracted for each region-of-interest (ROI). To store the chain of computations necessary to describe this data processing pipeline, pynwb provides a "processing module" with interfaces that simplify and standarize the process of adding the steps in this provenance chain to the file:
 ophys_module = nwbfile.create_processing_module(
     name='ophys_module',
     source='Allen Brain Observatory: Visual Coding',
@@ -137,7 +137,7 @@ ophys_module = nwbfile.create_processing_module(
 )
 
 ########################################
-# First, we add an image segmentation interface to the module.  This interface implements a pre-defined schema and API that facilitates writing segmentation masks for ROI's:
+# 6) First, we add an image segmentation interface to the module.  This interface implements a pre-defined schema and API that facilitates writing segmentation masks for ROI's:
 
 image_segmentation_interface = ImageSegmentation(
     name='image_segmentation',
@@ -157,7 +157,7 @@ for cell_specimen_id in cell_specimen_ids:
     plane_segmentation.add_roi(curr_name, [], curr_image_mask)
 
 ########################################
-# Next, we add a dF/F  interface to the module.  This allows us to write the dF/F timeseries data associated with each ROI.
+# 7) Next, we add a dF/F  interface to the module.  This allows us to write the dF/F timeseries data associated with each ROI.
 
 dff_interface = DfOverF(name='dff_interface', source='Flourescence data container')
 ophys_module.add_data_interface(dff_interface)
