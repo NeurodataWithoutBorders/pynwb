@@ -23,7 +23,7 @@ class OpticalChannel(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},
-            {'name': 'emission_lambda', 'type': str, 'doc': 'Emission lambda for channel.'},
+            {'name': 'emission_lambda', 'type': float, 'doc': 'Emission lambda for channel.'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
@@ -39,7 +39,7 @@ class ImagingPlane(NWBContainer):
     """
     """
 
-    __nwbfields__ = ('optical_channel',
+    __nwbfields__ = ({'name': 'optical_channel', 'child': True},
                      'description',
                      'device',
                      'excitation_lambda',
@@ -57,11 +57,11 @@ class ImagingPlane(NWBContainer):
              'doc': 'One of possibly many groups storing channelspecific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
             {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
-            {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
+            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength.'},
             {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
-            {'name': 'manifold', 'type': Iterable, 'doc': 'Physical position of each pixel. height, weight, x, y, z.',
+            {'name': 'manifold', 'type': Iterable, 'doc': 'Physical position of each pixel. height, weight, xyz.',
              'default': None},
             {'name': 'conversion', 'type': float,
              'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)',
@@ -278,11 +278,11 @@ class PlaneSegmentation(NWBContainer):
     """
 
     __nwbfields__ = ('description',
-                     'rois',
-                     'pixel_masks',
-                     'image_masks',
+                     {'name': 'rois', 'child': True},
+                     {'name': 'pixel_masks', 'child': True},
+                     {'name': 'image_masks', 'child': True},
                      'imaging_plane',
-                     'reference_images')
+                     {'name': 'reference_images', 'child': True})
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str,
@@ -409,7 +409,7 @@ class RoiResponseSeries(TimeSeries):
     ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one ROI.
     '''
 
-    __nwbfields__ = ('rois',)
+    __nwbfields__ = ({'name': 'rois', 'child': True},)
 
     _ancestry = "TimeSeries,ImageSeries,ImageMaskSeries"
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."

@@ -3,7 +3,7 @@ from warnings import warn
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, fmt_docval_args
-from .form.data_utils import DataChunkIterator, DataIO
+from .form.data_utils import AbstractDataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface
@@ -147,11 +147,14 @@ class TimeSeries(NWBDataInterface):
         if isinstance(data, TimeSeries):
             data.fields['data_link'].append(self)
             self.fields['num_samples'] = data.num_samples
-        elif isinstance(data, DataChunkIterator):
+        elif isinstance(data, AbstractDataChunkIterator):
             self.fields['num_samples'] = -1
         elif isinstance(data, DataIO):
             this_data = data.data
-            self.fields['num_samples'] = len(this_data)
+            if isinstance(this_data, AbstractDataChunkIterator):
+                self.fields['num_samples'] = -1
+            else:
+                self.fields['num_samples'] = len(this_data)
         elif data is None:
             self.fields['num_samples'] = 0
         else:
