@@ -131,7 +131,7 @@ AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
 # -----------------------------------------------------
 #
 # Here we show how to create extensions by example by creating a data class for a
-# cortical surface mesh. This data type is particularly important for ECoG data,
+# cortical surface mesh. This data type is particularly important for ECoG data, because
 # we need to know where each electrode is with respect to the gyri and sucli.
 # Surface mesh objects contain two types of data:
 #
@@ -233,4 +233,82 @@ cortex_module = nwbfile.create_processing_module(name='cortex',
 cortex_module.add_container(cortical_surface)
 
 with NWBHDF5IO('test_cortical_surface.nwb', 'w') as io:
+    io.write(nwbfile)
+
+####################
+# Example: CompartmentSeries
+# -----------------------------------------------------
+#
+# This is an extension that allows us to store continuous series data like membrane potentials for cell compartments in
+# simulated neurons. The format needs to accommodate multiple cells and multiple compartments with potentially not the
+# same number of compartments per cell. It also needs to be able to be writen/read efficiently in parallel.
+#
+# Generate our YAMLS:
+
+from pynwb.spec import NWBDatasetSpec, NWBNamespaceBuilder, NWBGroupSpec
+
+datasets = [
+    NWBDatasetSpec(doc='list of cell ids',
+                   dtype='uint32',
+                   shape=(None,),
+                   name='gid',
+                   quantity='?',
+                   dims=('cells',)),
+    NWBDatasetSpec(doc='index pointer',
+                   dtype='uint64',
+                   shape=(None,),
+                   name='index_pointer',
+                   dims=('cells',)),
+    NWBDatasetSpec(doc='cell compartment ids corresponding to a given '
+                       'column in the data',
+                   dtype='uint32',
+                   shape=(None,),
+                   name='element_id',
+                   dims=('compartments',)),
+    NWBDatasetSpec(doc='relative position of recording within a given '
+                       'cell',
+                   dtype='float',
+                   shape=(None, None),
+                   name='compartment_position',
+                   dims=('compartments', 'position'))]
+
+cont_data = NWBGroupSpec(doc='Stores continuous data in cell compartments',
+                         datasets=datasets,
+                         neurodata_type_inc='TimeSeries',
+                         neurodata_type_def='CompartmentSeries')
+
+# Export
+ns_builder = NWBNamespaceBuilder(name + ' extensions', name)
+ns_builder.add_spec(ext_source, cont_data)
+ns_builder.export(ns_path)
+
+####################
+# Test
+
+from pynwb import load_namespaces, get_class, NWBHDF5IO, NWBFile
+from datetime import datetime
+
+import numpy as np
+
+load_namespaces('simulation_output.namespace.yaml')
+CompartmentSeries = get_class('CompartmentSeries', 'simulation_output')
+membrane_potential = CompartmentSeries(source='source',
+                                       name='membrane_potential',
+                                       gid=[1, 2, 3],
+                                       index_pointer=[1, 2, 3],
+                                       data=[[1., 2., 4.], [1., 2., 4.]],
+                                       timestamps=np.arange(2),
+                                       element_id=[0, 0, 0],
+                                       element_pos=[1., 1., 1.],
+                                       unit='µV')
+
+nwbfile = NWBFile(source='source', session_description='session_description',
+                  identifier='identifier', session_start_time=datetime.now(),)
+
+module = nwbfile.create_processing_module(name='membrane_potential',
+                                          source='source',
+                                          description='description')
+module.add_container(membrane_potential)
+
+with NWBHDF5IO('mem_potential_toy.nwb', mode='w') as io:
     io.write(nwbfile)
