@@ -183,5 +183,4 @@ with NWBHDF5IO(save_file_name, mode='w') as io:
 
 ########################################
 # For good measure, lets read the data back in and see if everything went as planned:
-with NWBHDF5IO(save_file_name, mode='r') as io:
-    nwbfile_in = io.read()
+nwbfile_in = NWBHDF5IO(save_file_name, mode='r').read()
