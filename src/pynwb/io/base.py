@@ -3,7 +3,7 @@ from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
 
-print "I won't work with python 3"
+print ("I won't work with python 3")
 
 
 @register_map(ProcessingModule)
