@@ -5,7 +5,7 @@ run-style-check: &run-style-check
     pip install flake8
     flake8 src/pynwb
     flake8 tests
-    flake8 --ignore E402 docs/gallery
+    flake8 --ignore E402,E501 docs/gallery
 
 initialize-venv: &initialize-venv
   name: Initialize Virtual Environment
@@ -83,6 +83,24 @@ conda-steps: &conda-steps
         command: |
           tox -e $TEST_WHEELINSTALL_ENV --recreate --installpkg dist/*-none-any.whl
 
+gallery-steps: &gallery-steps
+  steps:
+    - checkout
+    - restore_cache:
+        keys:
+          - ophys-data-cache
+    - run:
+        <<: *initialize-venv
+    - run:
+        name: Run the gallery tests
+        command: |
+          . ../venv/bin/activate
+          pip install tox
+          tox -e $TEST_TOX_ENV
+    - save_cache:
+        key: ophys-data-cache
+        paths: ophys_experiment_data
+
 version: 2
 jobs:
   flake8:
@@ -152,22 +170,26 @@ jobs:
       - TEST_WHEELINSTALL_ENV: "wheelinstall-py36"
     <<: *conda-steps
 
-  gallery:
+  gallery27:
+    docker:
+      - image: circleci/python:2.7.14-jessie
+    environment:
+     - TEST_TOX_ENV: "gallery-py27"
+    <<: *gallery-steps
+
+  gallery35:
+    docker:
+      - image: circleci/python:3.5.4-jessie
+    environment:
+     - TEST_TOX_ENV: "gallery-py35"
+    <<: *gallery-steps
+
+  gallery36:
     docker:
       - image: circleci/python:3.6.3-jessie
     environment:
-     - TEST_TOX_ENV: "gallery"
-    steps:
-      - checkout
-      - run:
-          <<: *initialize-venv
-      - run:
-          name: Run the gallery tests
-          command: |
-            . ../venv/bin/activate
-            pip install tox
-            tox -e $TEST_TOX_ENV
-          no_output_timeout: 20m
+     - TEST_TOX_ENV: "gallery-py36"
+    <<: *gallery-steps
 
 workflows:
   version: 2
@@ -180,4 +202,6 @@ workflows:
       - miniconda27
       - miniconda35
       - miniconda36
-      - gallery
+      - gallery27
+      - gallery35
+      - gallery36

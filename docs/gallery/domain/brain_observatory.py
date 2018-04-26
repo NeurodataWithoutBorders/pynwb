@@ -6,10 +6,10 @@ Create an nwb file from Allen Brain Observatory data.
 """
 
 ########################################
-# This example demostrates the basic functionality of several parts of the pynwb write API, centered around the optical physiology submodule (pynwb.ophys). We will follow and extract/transform/load (ETL) methodology, using the allensdk as a read API while leveraging the pynwb data model and write api to transform and write the data back to disk. # noqa: E501
+# This example demostrates the basic functionality of several parts of the pynwb write API, centered around the optical physiology submodule (pynwb.ophys). We will use the allensdk as a read API, while leveraging the pynwb data model and write api to transform and write the data back to disk.
 
 ########################################
-# .. image:: http://interactive.blockdiag.com/image?compression=deflate&encoding=base64&src=eJyVkFEKAjEMRP89RS_gCQSvUrLd2W6wTWrTIiLe3S0KwoIf_k2SN5OQKWm4zEzRPQ7OyW1aOMEdz84a5566DV0qDNKoscrpN9aQS6IG2zEUrp2Nh3uUtYuwRG8FmHcoioZ1748QVEpDamla1ruxJo330eFMcaRtmwUfhAMlH1YSQdpllaoBZpvjzW5ZPuvc39N5WTxLQ10o4C_nOAPeEPP3Uc8XlV14ZQ # noqa: E501
+# .. image:: http://interactive.blockdiag.com/image?compression=deflate&encoding=base64&src=eJyVkFEKAjEMRP89RS_gCQSvUrLd2W6wTWrTIiLe3S0KwoIf_k2SN5OQKWm4zEzRPQ7OyW1aOMEdz84a5566DV0qDNKoscrpN9aQS6IG2zEUrp2Nh3uUtYuwRG8FmHcoioZ1748QVEpDamla1ruxJo330eFMcaRtmwUfhAMlH1YSQdpllaoBZpvjzW5ZPuvc39N5WTxLQ10o4C_nOAPeEPP3Uc8XlV14ZQ
 
 import datetime
 
@@ -26,7 +26,7 @@ ophys_experiment_id = 562095852
 save_file_name = 'brain_observatory.nwb'
 
 ########################################
-# We begin by downloading an Allen Institute Brain Observatory file.  After we cache this file locally (approx. 450 MB), we can read in the data assets we wish to write.  These include data relevant to stimulus, acquisition, and processing, as well as intervals of time denoted by "epochs". # noqa: E501
+# Let's begin by downloading an Allen Institute Brain Observatory file.  After we cache this file locally (approx. 450 MB), we can open data assets we wish to write into our NWB:N file.  These include stimulus, acquisition, and processing data, as well as time "epochs" (intervals of interest)".
 boc = BrainObservatoryCache(manifest_file='manifest.json')
 dataset = boc.get_ophys_experiment_data(ophys_experiment_id)
 metadata = dataset.get_metadata()
@@ -43,7 +43,7 @@ epoch_table['start'] = timestamps[epoch_table['start'].values]
 epoch_table['end'] = timestamps[epoch_table['end'].values]
 
 ########################################
-# First, lets create the top-level file container:
+# 1) First, lets create a top-level "file" container object.  All the other NWB:N data components will be stored hierarchically, relative to this container.  The data won't actually be written to the file system until the end of the script.
 
 nwbfile = NWBFile(
     source='Allen Brain Observatory: Visual Coding',
@@ -55,7 +55,7 @@ nwbfile = NWBFile(
 
 
 ########################################
-# Next, we add stimulus templates, and a data series that indexes into these templates to describe what stimulus was being shown during the experiment # noqa: E501
+# 2) Next, we add stimuli templates (one for each type of stimulus), and a data series that indexes these templates to describe what stimulus was being shown during the experiment.
 for stimulus in stimulus_list:
     visual_stimulus_images = ImageSeries(
         name=stimulus,
@@ -75,7 +75,7 @@ for stimulus in stimulus_list:
     nwbfile.add_stimulus(image_index)
 
 ########################################
-# Besides the two-photon calcium movie recordered in the experiment, the running speed of the animal is also recorded as a function of time.  Here we store this data as a TimeSeries, in the acquisition portion of the file. # noqa: E501
+# 3) Besides the two-photon calcium image stack, the running speed of the animal was also recordered in this experiment.  We can store this data as a TimeSeries, in the acquisition portion of the file.
 
 running_speed = TimeSeries(
     name='running_speed',
@@ -87,7 +87,7 @@ running_speed = TimeSeries(
 nwbfile.add_acquisition(running_speed)
 
 ########################################
-# In NWB:N, an epoch is an interval of time during the experiment that can slice into a timeseries like the one we just added.  PyNWB uses an object-oriented approach to create links into the timeseries that you have already added, so that data is copied multiple times.  Here, we extract the stimulus epochs (both fine and coarse-grained) from the Brain Observatory experiment using the allensdk. # noqa: E501
+# 4) In NWB:N, an "epoch" is an interval of experiment time that can slice into a timeseries (for example running_speed, the one we just added).  PyNWB uses an object-oriented approach to create links into these timeseries, so that data is not copied multiple times.  Here, we extract the stimulus epochs (both fine and coarse-grained) from the Brain Observatory experiment using the allensdk.
 
 for ri, row in trial_table.iterrows():
     nwbfile.create_epoch(start_time=row.start,
@@ -104,7 +104,7 @@ for ri, row in epoch_table.iterrows():
                          description=row.stimulus)
 
 ########################################
-# In the brain observatory, a two-photon microscope is used to acquire images of the calcium activity of neurons expressing a flourescent protien indicator.  Essentially the microscope captures picture (30 times a second) at a single place in the visual cortex (the imaging plane).  We can use pynwb to store the metadata associated with this hardware and experimental setup: # noqa: E501
+# 5) In the brain observatory, a two-photon microscope is used to acquire images of the calcium activity of neurons expressing a flourescent protien indicator.  Essentially the microscope captures picture (30 times a second) at a single depth in the visual cortex (the imaging plane).  Let's use pynwb to store the metadata associated with this hardware and experimental setup:
 optical_channel = OpticalChannel(
     name='optical_channel',
     source='Allen Brain Observatory: Visual Coding',
@@ -129,7 +129,7 @@ imaging_plane = nwbfile.create_imaging_plane(
 )
 
 ########################################
-#  We do not include the raw imaging signal, as this data is too large. Instead, the Allen Insitute has preprocessed that data and extracted a dF/F flourescence signal for each region-of-interest (ROI). To store the chain of computations necessary to describe this data processing pipeline, we use a "processing module" with several subsequent interfaces: # noqa: E501
+# The Allen Insitute does not include the raw imaging signal, as this data would make the file too large. Instead, these data are  preprocessed, and a dF/F flourescence signal extracted for each region-of-interest (ROI). To store the chain of computations necessary to describe this data processing pipeline, pynwb provides a "processing module" with interfaces that simplify and standarize the process of adding the steps in this provenance chain to the file:
 ophys_module = nwbfile.create_processing_module(
     name='ophys_module',
     source='Allen Brain Observatory: Visual Coding',
@@ -137,7 +137,7 @@ ophys_module = nwbfile.create_processing_module(
 )
 
 ########################################
-# First, we add an image segmentation interface to the module.  This interface implements a pre-defined schema and API that facilitates writing segmentation masks for ROI's: # noqa: E501
+# 6) First, we add an image segmentation interface to the module.  This interface implements a pre-defined schema and API that facilitates writing segmentation masks for ROI's:
 
 image_segmentation_interface = ImageSegmentation(
     name='image_segmentation',
@@ -157,7 +157,7 @@ for cell_specimen_id in cell_specimen_ids:
     plane_segmentation.add_roi(curr_name, [], curr_image_mask)
 
 ########################################
-# Next, we add a dF/F  interface to the module.  This allows us to write the dF/F timeseries data associated with each ROI. # noqa: E501
+# 7) Next, we add a dF/F  interface to the module.  This allows us to write the dF/F timeseries data associated with each ROI.
 
 dff_interface = DfOverF(name='dff_interface', source='Flourescence data container')
 ophys_module.add_data_interface(dff_interface)
