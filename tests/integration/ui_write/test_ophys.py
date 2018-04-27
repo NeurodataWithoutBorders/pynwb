@@ -10,7 +10,7 @@ from pynwb.ophys import (
     TwoPhotonSeries,
     RoiResponseSeries
 )
-
+from pynwb.ecephys import Device
 from pynwb.image import ImageSeries
 
 from . import base
@@ -25,7 +25,7 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         self.optical_channel = OpticalChannel('optchan1', 'unit test TestImagingPlaneIO',
                                               'a fake OpticalChannel', 500.)
         return ImagingPlane('imgpln1', 'unit test TestImagingPlaneIO', self.optical_channel,
-                            'a fake ImagingPlane', 'imaging_device_1', 600., '2.718', 'GFP', 'somewhere in the brain')
+                            'a fake ImagingPlane', Device('imaging_device_1', source='No source'), 600., '2.718', 'GFP', 'somewhere in the brain')
 
     def setUpBuilder(self):
         optchan_builder = GroupBuilder(
@@ -73,7 +73,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
         self.optical_channel = OpticalChannel('optchan1', source, 'a fake OpticalChannel', 500.)
         self.imaging_plane = ImagingPlane('imgpln1', source, self.optical_channel,
                                           'a fake ImagingPlane',
-                                          'imaging_device_1', 600., '2.718', 'GFP', 'somewhere in the brain')
+                                          Device('imaging_device_1', source='No'), 600., '2.718', 'GFP', 'somewhere in the brain')
 
     def setUpContainer(self):
         self.make_imaging_plane('unit test TestTwoPhotonSeries')
@@ -172,7 +172,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                           'ophys integration tests',
                                           self.optical_channel,
                                           'imaging plane description',
-                                          'imaging_device_1',
+                                          Device('imaging_device_1', source='No source'),
                                           600., '2.718', 'GFP', 'somewhere in the brain',
                                           (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
 
