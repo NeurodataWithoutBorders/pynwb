@@ -30,7 +30,7 @@ class BehavioralEventsConstructor(unittest.TestCase):
 
         bE = BehavioralEvents('test_bE', ts)
         self.assertEqual(bE.source, 'test_bE')
-        self.assertEqual(bE.timeseries['test_ts'], ts)
+        self.assertEqual(bE.time_series['test_ts'], ts)
 
 
 class BehavioralTimeSeriesConstructor(unittest.TestCase):
@@ -39,7 +39,7 @@ class BehavioralTimeSeriesConstructor(unittest.TestCase):
 
         bts = BehavioralTimeSeries('test_bts', ts)
         self.assertEqual(bts.source, 'test_bts')
-        self.assertEqual(bts.timeseries['test_ts'], ts)
+        self.assertEqual(bts.time_series['test_ts'], ts)
 
 
 class PupilTrackingConstructor(unittest.TestCase):
