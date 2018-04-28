@@ -272,7 +272,7 @@ groups:
         dtype: text
         name: genotype
         quantity: '?'
-      - doc: Gender of subject
+      - doc: Sex of subject
         dtype: text
         name: sex
         quantity: '?'
@@ -320,9 +320,9 @@ groups:
         quantity: '*'
       name: intracellular_ephys
       quantity: '?'
-    - doc: Metadata describing optogenetic stimuluation
+    - doc: Metadata describing optogenetic stimulation
       groups:
-      - doc: 'One of possibly many groups describing an optogenetic stimuluation site.
+      - doc: 'One of possibly many groups describing an optogenetic stimulation site.
           COMMENT: Name is arbitrary but should be meaningful. Name is referenced
           by OptogeneticSeries'
         neurodata_type_inc: OptogeneticStimulusSite
