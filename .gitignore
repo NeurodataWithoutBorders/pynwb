@@ -48,9 +48,6 @@ dist/
 #PyCharm
 .idea/
 
-# shell scripts (e.g. used with fswatch)
-*.sh
-
 docs/tmpl.conf.py
 docs/tmpl.index.rst
 
