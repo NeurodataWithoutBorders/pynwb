@@ -52,6 +52,7 @@ breaking down the barriers to data sharing in neuroscience.
 
    make_a_release
    update_requirements
+   update_schema_files
 
 .. toctree::
    :maxdepth: 2
