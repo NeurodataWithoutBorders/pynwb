@@ -4,10 +4,7 @@
 # "UpdateFromUpstream.sh", which defines the following shell variables:
 #
 #   - thirdparty_module_name :
-#       The name of the ThirdParty module to be updated. This must match the
-#       name of the ITK ThirdParty module's base directory (which contains
-#       "itk-module.cmake").
-#       i.e. "Modules/ThirdParty/<thirdparty_module_name>/itk-module.cmake"
+#       The name of the ThirdParty module to be updated.
 #   - upstream_git_url :
 #       The full URL (including the scheme) of the upstream Git repository
 #       that the ThirdParty module tracks.
@@ -15,19 +12,19 @@
 #      The upstream Git branch name that the ThirdParty module tracks.
 #   - snapshot_author_name :
 #      The author name to which the upstream files should be attributed,
-#      in ITK's Git repository.
+#      in nwb-schema's Git repository.
 #   - snapshot_author_email :
 #      The author email to which the upstream files should be attributed.
-#      in ITK's Git repository.
+#      in nwb-schema's Git repository.
 #   - snapshot_redact_cmd :
 #      A string, containing a command to be eval'd within the CWD of the fresh
-#      upstream snapshot, in order to prepare it for being committed to ITK's
+#      upstream snapshot, in order to prepare it for being committed to nwb-schema's
 #      repository. The string may be empty or contain multiple commands chained
 #      with "&&", etc. The command typically removes extraneous files
-#      or directories that shouldn't be committed to ITK for size, simplicity,
+#      or directories that shouldn't be committed to nwb-schema for size, simplicity,
 #      or licensing reasons.
 #   - snapshot_relative_path :
-#      The path, relative to the ThirdParty module's base directory, that
+#      The path, relative to the nwb-schema root's directory, that
 #      the upstream snapshot's file should be merged into.
 #      e.g. "src/mylib/"
 #   - snapshot_paths :
@@ -45,7 +42,7 @@
 #        subcommand will be integrated in the commit message. If set to true,
 #        a URL will be added to the commit message. This URL points to a
 #        github page showing the differences between the last update of the
-#        project in ITK and the current commit used in the update.
+#        project in nwb-schema and the current commit used in the update.
 #
 # The script, "UpdateFromUpstream.sh", must be located in the associated
 # ThirdParty module's base directory.
@@ -60,10 +57,10 @@ die()
 update_from_upstream()
 {
 ## Set up paths ##
-local module_path=$( cd "$( dirname "$0" )" && pwd )
-local toplevel_path=$(cd "$module_path" && git rev-parse --show-toplevel)
+local script_path=$( cd "$( dirname "$0" )" && pwd )
+local toplevel_path=$(cd "$script_path" && git rev-parse --show-toplevel)
 if [[ $? -ne 0 ]]; then
-  die "Could not find the top-level of a Git repository in \"$module_path\""
+  die "Could not find the top-level of a Git repository in \"$script_path\""
 fi
 cd "$toplevel_path"
 
@@ -80,18 +77,12 @@ done
 local input_variables=( thirdparty_module_name snapshot_relative_path \
                         upstream_git_url upstream_git_branch \
                         snapshot_author_name snapshot_author_email \
-                        snapshot_relative_path )
+                      )
 for input_variable in ${input_variables[@]}; do
   if [[ -z $(eval echo "\$$input_variable") ]]; then
     die "\$$input_variable must be set"
   fi
 done
-
-local module_path_basename=$(basename "$module_path")
-if [[ "$thirdparty_module_name" != "$module_path_basename" ]]; then
-  die "The script \"$0\" must be in the base directory for the \"$thirdparty_module_name\" module"
-fi
-
 
 ## Old snapshot commit ##
 local regex_date='20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]'
@@ -155,10 +146,8 @@ rm -rf "$snapshot_temp_path" "$snapshot_temp_index"
 ## New shapshot commit ##
 if [[ -z "$snapshot_old_sha" ]]; then
   local snapshot_new_shortlog="Initial import of $upstream_new_sha"
-  local snapshot_new_change_id=$(git commit-tree $snapshot_new_tree </dev/null)
   local snapshot_log_command=""
 else
-  local snapshot_new_change_id=$(git commit-tree $snapshot_new_tree -p $snapshot_old_sha </dev/null)
   if [[ $github_compare == true ]]; then
     local snapshot_log_command=""
     local snapshot_new_shortlog="${upstream_git_url%.*}/compare/$(git rev-list $upstream_old_sha -n 1)...$upstream_new_sha"
@@ -176,9 +165,7 @@ using the following shell commands.
 \$ git archive --prefix=$snapshot_branch_name/ $upstream_new_sha_short -- $snapshot_paths | tar x
 $snapshot_log_command
 
-$snapshot_new_shortlog
-
-Change-Id: I$snapshot_new_change_id"
+$snapshot_new_shortlog"
 if [[ -z "$snapshot_old_sha" ]]; then
   local snapshot_new_sha=$(
     echo "$snapshot_new_commit_msg" |
@@ -200,21 +187,9 @@ fi
 
 ## New shapshot branch ##
 git update-ref refs/heads/$snapshot_branch_name $snapshot_new_sha
-local module_relative_path=${module_path#"$toplevel_path/"}
 echo "Created upstream snapshot branch '$snapshot_branch_name'."
-if [[ -z "$snapshot_old_sha" ]]; then
-    echo "Perform initial merge with commands:
-
-    cd \"$toplevel_path\" &&
-    git merge -s ours --no-commit $snapshot_branch_name &&
-    git read-tree -u --prefix=$module_relative_path/$snapshot_relative_path/ $snapshot_branch_name &&
-    git commit
-"
-else
-    cd "$toplevel_path" &&
-    git merge -X subtree=$module_relative_path/$snapshot_relative_path $snapshot_branch_name
-    git branch -d "$snapshot_branch_name"
-fi
+cd "$toplevel_path" &&
+git merge -X subtree=$snapshot_relative_path $snapshot_branch_name
+git branch -d "$snapshot_branch_name"
 
 }
-
