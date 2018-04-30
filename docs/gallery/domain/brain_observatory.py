@@ -9,7 +9,12 @@ Create an nwb file from Allen Brain Observatory data.
 # This example demostrates the basic functionality of several parts of the pynwb write API, centered around the optical physiology submodule (pynwb.ophys). We will use the allensdk as a read API, while leveraging the pynwb data model and write api to transform and write the data back to disk.
 
 ########################################
+<<<<<<< 4c5b933ec3c5577e7ddaf539af6a40174abbe35a
 # .. image:: http://interactive.blockdiag.com/image?compression=deflate&encoding=base64&src=eJyVkFEKAjEMRP89RS_gCQSvUrLd2W6wTWrTIiLe3S0KwoIf_k2SN5OQKWm4zEzRPQ7OyW1aOMEdz84a5566DV0qDNKoscrpN9aQS6IG2zEUrp2Nh3uUtYuwRG8FmHcoioZ1748QVEpDamla1ruxJo330eFMcaRtmwUfhAMlH1YSQdpllaoBZpvjzW5ZPuvc39N5WTxLQ10o4C_nOAPeEPP3Uc8XlV14ZQ
+=======
+# .. raw:: html
+#     :url: https://gist.githubusercontent.com/nicain/82e6b3d8f9ff5b85ef01a582e41e2389/raw/5fc01f4df1f00874349a6e3fec24580cb92ad109/block_diagram.html
+>>>>>>> image adapter
 
 import datetime
 
