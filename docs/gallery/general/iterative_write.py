@@ -707,14 +707,15 @@ write_test_file(filename='basic_sparse_iterwrite_multifile.nwb',
 from pynwb.form.backends.hdf5.h5_utils import H5DataIO
 
 write_test_file(filename='basic_alternative_custom_write.nwb',
-                data=H5DataIO(data=np.empty(shape=(0,10), dtype='float'),
-                              maxshape=(None,10),  # <-- Make the time dimension resizable
+                data=H5DataIO(data=np.empty(shape=(0, 10), dtype='float'),
+                              maxshape=(None, 10),  # <-- Make the time dimension resizable
                               chunks=(131072, 2),  # <-- Use 2MB chunks
                               compression='gzip',     # <-- Enable GZip compression
                               compression_opts=4,  # <-- GZip aggression
                               shuffle=True,        # <-- Enable shuffle filter
                               fillvalue=np.nan     # <-- Use NAN as fillvalue
-                ))
+                              )
+                )
 
 ####################
 # Step 2: Get the dataset(s) to be updated
@@ -736,16 +737,16 @@ print("Shape %s, Chunks: %s, Maxshape=%s" % (str(data.shape), str(data.chunks), 
 #
 #       Shape (0, 10), Chunks: (131072, 2), Maxshape=(None, 10)
 #
+
 ####################
 # Step 3: Implement custom write
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
-data.resize((8,10))  # <-- Allocate the space with need
-data[0:3, :]  = 1    # <-- Write timesteps 0,1,2
-data[3:6, :] = 2     # <-- Write timesteps 3,4,5
-                     # <-- Note timesteps 6,7 are not being initialized
-io.close()
+data.resize((8, 10))    # <-- Allocate the space with need
+data[0:3, :] = 1        # <-- Write timesteps 0,1,2
+data[3:6, :] = 2        # <-- Write timesteps 3,4,5,  Note timesteps 6,7 are not being initialized
+io.close()              # <-- Close the file
 
 
 ####################
@@ -773,4 +774,3 @@ io.close()
 #        [  2.   2.   2.   2.   2.   2.   2.   2.   2.   2.]
 #        [ nan  nan  nan  nan  nan  nan  nan  nan  nan  nan]
 #        [ nan  nan  nan  nan  nan  nan  nan  nan  nan  nan]]
-
