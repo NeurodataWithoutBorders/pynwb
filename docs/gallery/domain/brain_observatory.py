@@ -10,7 +10,7 @@ Create an nwb file from Allen Brain Observatory data.
 
 ########################################
 # .. raw:: html
-#     :url: https://gist.githubusercontent.com/nicain/82e6b3d8f9ff5b85ef01a582e41e2389/raw/5fc01f4df1f00874349a6e3fec24580cb92ad109/block_diagram.html
+#     :url: https://gist.githubusercontent.com/nicain/82e6b3d8f9ff5b85ef01a582e41e2389/raw/
 
 import datetime
 
