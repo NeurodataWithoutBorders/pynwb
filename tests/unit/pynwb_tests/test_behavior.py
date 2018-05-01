@@ -48,7 +48,7 @@ class PupilTrackingConstructor(unittest.TestCase):
 
         pt = PupilTracking('test_pt', ts)
         self.assertEqual(pt.source, 'test_pt')
-        self.assertEqual(pt.timeseries['test_ts'], ts)
+        self.assertEqual(pt.time_series['test_ts'], ts)
 
 
 class EyeTrackingConstructor(unittest.TestCase):

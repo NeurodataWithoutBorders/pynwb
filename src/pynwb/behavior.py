@@ -135,7 +135,7 @@ class PupilTracking(MultiContainerInterface):
         'get': 'get_timeseries',
         'create': 'create_timeseries',
         'type': TimeSeries,
-        'attr': 'timeseries'
+        'attr': 'time_series'
     }
 
 
