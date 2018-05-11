@@ -206,7 +206,7 @@ print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
 # in its ``maxshape`` that the first dimensions of our array should be unlimited (``None``) and the second
 # dimension be ``10`` (i.e., the length of our chunk. Since :py:class:`~pynwb.form.data_utils.DataChunkIterator`
 # has no way of knowing the minimum size of the array it automatically recommends the size of the first
-# chunk as the minimum size (i.e, ``(1, 10)`` and also infers the data type automatically from the first chunk.
+# chunk as the minimum size (i.e, ``(1, 10)``) and also infers the data type automatically from the first chunk.
 # To further customize this behavior we may also define the ``maxshape``, ``dtype``, and ``buffer_size`` when
 # we create the :py:class:`~pynwb.form.data_utils.DataChunkIterator`.
 #
