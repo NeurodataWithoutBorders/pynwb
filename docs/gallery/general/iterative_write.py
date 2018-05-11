@@ -551,7 +551,7 @@ data_match = np.all(arrdata == data[:])   # Don't do this for very large arrays!
 if data_match:
     print("Success: All data values match")
 else:
-    print("ERROR: Mismathch between data")
+    print("ERROR: Mismatch between data")
 
 
 ####################
