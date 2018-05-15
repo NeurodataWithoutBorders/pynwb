@@ -245,6 +245,10 @@ with NWBHDF5IO('test_cortical_surface.nwb', 'w') as io:
 #
 # Generate our YAMLS:
 
+name = 'simulation_output'
+ns_path = name + ".namespace.yaml"
+ext_source = name + ".extensions.yaml"
+
 from pynwb.spec import NWBDatasetSpec, NWBNamespaceBuilder, NWBGroupSpec
 
 datasets = [
@@ -299,7 +303,7 @@ membrane_potential = CompartmentSeries(source='source',
                                        data=[[1., 2., 4.], [1., 2., 4.]],
                                        timestamps=np.arange(2),
                                        element_id=[0, 0, 0],
-                                       element_pos=[1., 1., 1.],
+                                       compartment_position=[1., 1., 1.],
                                        unit='µV')
 
 nwbfile = NWBFile(source='source', session_description='session_description',
