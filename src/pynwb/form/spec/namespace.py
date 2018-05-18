@@ -201,7 +201,7 @@ class NamespaceCatalog(object):
         self.__included_sources = dict()
 
     @property
-    @docval(returns='a tuple of the availble namespaces', rtype=tuple)
+    @docval(returns='a tuple of the available namespaces', rtype=tuple)
     def namespaces(self):
         """The namespaces in this NamespaceCatalog"""
         return tuple(self.__namespaces.keys())
