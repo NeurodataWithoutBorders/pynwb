@@ -231,7 +231,6 @@ class AttributeSpec(Spec):
         return ret
 
 
-
 _attrbl_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
         {'name': 'name', 'type': str, 'doc': 'the name of this base storage container', 'default': None},
