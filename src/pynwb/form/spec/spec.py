@@ -221,6 +221,16 @@ class AttributeSpec(Spec):
         ''' The shape of this attribute's value '''
         return self.get('shape', None)
 
+    @classmethod
+    def build_const_args(cls, spec_dict):
+        ''' Build constructor arguments for this Spec class from a dictionary '''
+        ret = super(AttributeSpec, cls).build_const_args(spec_dict)
+        if 'dtype' in ret:
+            if isinstance(ret['dtype'], dict):
+                ret['dtype'] = RefSpec.build_spec(ret['dtype'])
+        return ret
+
+
 
 _attrbl_args = [
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
