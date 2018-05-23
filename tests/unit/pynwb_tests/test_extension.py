@@ -2,7 +2,8 @@ import unittest
 import os
 from tempfile import gettempdir
 
-from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
+from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
+from pynwb.form.spec.spec import RefSpec
 from pynwb import load_namespaces, get_class
 
 
@@ -19,7 +20,7 @@ class TestExtension(unittest.TestCase):
             os.remove(path)
 
     def test_export(self):
-        ns_builder = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension")
+        ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "pynwb_test_extension")
         ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
                             attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
                             neurodata_type_inc='ElectricalSeries',
@@ -34,6 +35,18 @@ class TestExtension(unittest.TestCase):
     def test_get_class(self):
         self.test_load_namespace()
         TetrodeSeries = get_class('TetrodeSeries', 'pynwb_test_extension')  # noqa: F841
+
+    def test_load_namespace_with_reftype_attribute(self):
+        ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "pynwb_test_extension")
+        test_ds_ext = NWBDatasetSpec(doc='test dataset to add an attr',
+                                     name='test_data', shape=(None,),
+                                     attributes=[NWBAttributeSpec(name='target_ds',
+                                                                  doc='the target the dataset applies to',
+                                                                  dtype=RefSpec('TimeSeries', 'object'))],
+                                     neurodata_type_def='my_new_type')
+        ns_builder.add_spec(self.ext_source, test_ds_ext)
+        ns_builder.export(self.ns_path, outdir=self.tempdir)
+        load_namespaces(os.path.join(self.tempdir, self.ns_path))
 
 
 class TestCatchDupNS(unittest.TestCase):
