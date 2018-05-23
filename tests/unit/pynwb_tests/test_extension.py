@@ -14,7 +14,7 @@ def id_generator(N=10):
     """
     Generator a random string of characters.
     """
-    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=N))
+    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
 
 class TestExtension(unittest.TestCase):
