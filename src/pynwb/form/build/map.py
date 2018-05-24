@@ -931,10 +931,17 @@ class TypeMap(object):
         'int32': int
     }
 
-    @classmethod
     def __get_type(self, spec):
         if isinstance(spec, AttributeSpec):
-            return self._type_map.get(spec.dtype)
+            if isinstance(spec.dtype, RefSpec):
+                tgttype = spec.dtype.target_type
+                for val in self.__container_types.values():
+                    container_type = val.get(tgttype)
+                    if container_type is not None:
+                        return container_type
+                return (Data, Container)
+            else:
+                return self._type_map.get(spec.dtype)
         elif isinstance(spec, LinkSpec):
             return Container
         else:
@@ -946,7 +953,6 @@ class TypeMap(object):
             else:
                 return ('array_data', 'data',)
 
-    @classmethod
     def __get_constructor(self, base, addl_fields):
         # TODO: fix this to be more maintainable and smarter
         existing_args = set()
