@@ -1,6 +1,7 @@
 from collections import deque
 import numpy as np
 import os.path
+from functools import partial
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference, check_dtype
 from six import raise_from, text_type, string_types, binary_type
 import warnings
@@ -196,8 +197,13 @@ class HDF5IO(FORMIO):
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
         f_builder = self.__read.get(self.__file)
+        # ignore cached specs when reading builder
+        ignore = set()
+        specloc = self.__file.attrs.get(SPEC_LOC_ATTR)
+        if specloc is not None:
+            ignore.add(self.__file[specloc].name)
         if f_builder is None:
-            f_builder = self.__read_group(self.__file, ROOT_NAME)
+            f_builder = self.__read_group(self.__file, ROOT_NAME, ignore=ignore)
             self.__read[self.__file] = f_builder
         return f_builder
 
@@ -224,7 +230,7 @@ class HDF5IO(FORMIO):
         container = self.manager.construct(builder)
         return container
 
-    def __read_group(self, h5obj, name=None):
+    def __read_group(self, h5obj, name=None, ignore=set()):
         kwargs = {
             "attributes": dict(h5obj.attrs.items()),
             "groups": dict(),
@@ -240,6 +246,8 @@ class HDF5IO(FORMIO):
             name = str(os.path.basename(h5obj.name))
         for k in h5obj:
             sub_h5obj = h5obj.get(k)
+            if sub_h5obj.name in ignore:
+                continue
             if not (sub_h5obj is None):
                 link_type = h5obj.get(k, getlink=True)
                 if isinstance(link_type, SoftLink) or isinstance(link_type, ExternalLink):
@@ -253,7 +261,7 @@ class HDF5IO(FORMIO):
                         if isinstance(sub_h5obj, Dataset):
                             builder = self.__read_dataset(sub_h5obj, builder_name)
                         else:
-                            builder = self.__read_group(sub_h5obj, builder_name)
+                            builder = self.__read_group(sub_h5obj, builder_name, ignore=ignore)
                         self.__set_built(sub_h5obj.file.filename, target_path, builder)
                     kwargs['links'][builder_name] = LinkBuilder(builder, k, source=self.__path)
                 else:
@@ -264,7 +272,7 @@ class HDF5IO(FORMIO):
                         read_method = self.__read_dataset
                         obj_type = kwargs['datasets']
                     else:
-                        read_method = self.__read_group
+                        read_method = partial(self.__read_group, ignore=ignore)
                         obj_type = kwargs['groups']
                     if builder is None:
                         builder = read_method(sub_h5obj)
