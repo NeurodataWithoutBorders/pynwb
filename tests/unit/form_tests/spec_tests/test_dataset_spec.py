@@ -3,6 +3,7 @@ import json
 
 from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, DtypeSpec, DtypeHelper, RefSpec
 
+
 class DtypeSpecHelper(unittest.TestCase):
     def setUp(self):
         pass
@@ -12,13 +13,13 @@ class DtypeSpecHelper(unittest.TestCase):
                              list(DtypeHelper.primary_dtype_synonyms.keys()))
 
     def test_valid_primary_dtypes(self):
-        a = set(list(DtypeHelper.primary_dtype_synonyms.keys()) + [vi for v in DtypeHelper.primary_dtype_synonyms.values()
-                                                               for vi in v])
+        a = set(list(DtypeHelper.primary_dtype_synonyms.keys()) +
+                [vi for v in DtypeHelper.primary_dtype_synonyms.values() for vi in v])
         self.assertSetEqual(a, DtypeHelper.valid_primary_dtypes)
 
     def test_simplify_cpd_type(self):
-        compound_type =  [DtypeSpec('test', 'test field', 'float'),
-                          DtypeSpec('test2', 'test field2', 'int')]
+        compound_type = [DtypeSpec('test', 'test field', 'float'),
+                         DtypeSpec('test2', 'test field2', 'int')]
         expected_result = ['float', 'int']
         result = DtypeHelper.simplify_cpd_type(compound_type)
         self.assertListEqual(result, expected_result)

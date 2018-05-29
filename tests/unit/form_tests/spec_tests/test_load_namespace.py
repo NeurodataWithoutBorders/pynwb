@@ -3,7 +3,7 @@ import ruamel.yaml as yaml
 import json
 import os
 
-from pynwb.form.spec import *  # noqa: F403
+from pynwb.form.spec import AttributeSpec, DatasetSpec, GroupSpec, SpecNamespace, NamespaceCatalog
 
 
 class TestSpecLoad(unittest.TestCase):
