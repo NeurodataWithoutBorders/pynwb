@@ -7,18 +7,18 @@ from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec
 class GroupSpecTests(unittest.TestCase):
     def setUp(self):
         self.attributes = [
-            AttributeSpec('attribute1', 'my first attribute', 'str'),
-            AttributeSpec('attribute2', 'my second attribute', 'str')
+            AttributeSpec('attribute1', 'my first attribute', 'text'),
+            AttributeSpec('attribute2', 'my second attribute', 'text')
         ]
 
         self.dset1_attributes = [
-            AttributeSpec('attribute3', 'my third attribute', 'str'),
-            AttributeSpec('attribute4', 'my fourth attribute', 'str')
+            AttributeSpec('attribute3', 'my third attribute', 'text'),
+            AttributeSpec('attribute4', 'my fourth attribute', 'text')
         ]
 
         self.dset2_attributes = [
-            AttributeSpec('attribute5', 'my fifth attribute', 'str'),
-            AttributeSpec('attribute6', 'my sixth attribute', 'str')
+            AttributeSpec('attribute5', 'my fifth attribute', 'text'),
+            AttributeSpec('attribute6', 'my sixth attribute', 'text')
         ]
 
         self.datasets = [
@@ -120,7 +120,7 @@ class GroupSpecTests(unittest.TestCase):
                          namespace='core',
                          data_type_def='EphysData')
         dset1_attributes_ext = [
-            AttributeSpec('dset1_extra_attribute', 'an extra attribute for the first dataset', 'str')
+            AttributeSpec('dset1_extra_attribute', 'an extra attribute for the first dataset', 'text')
         ]
         ext_datasets = [
             DatasetSpec('my first dataset extension',
@@ -130,7 +130,7 @@ class GroupSpecTests(unittest.TestCase):
                         linkable=True),
         ]
         ext_attributes = [
-            AttributeSpec('ext_extra_attribute', 'an extra attribute for the group', 'str'),
+            AttributeSpec('ext_extra_attribute', 'an extra attribute for the group', 'text'),
         ]
         ext = GroupSpec('A test group extension',
                         name='child_type',
