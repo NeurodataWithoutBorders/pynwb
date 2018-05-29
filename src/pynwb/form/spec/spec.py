@@ -205,8 +205,8 @@ class AttributeSpec(Spec):
             self['dtype'] = dtype
             # Validate the dype string
             if self['dtype'] not in DtypeHelper.valid_primary_dtypes:
-                # print(kwargs)
-                raise ValueError('dtype %s not a valid primary data type' % self['dtype'])
+                raise ValueError('dtype %s not a valid primary data type %s' % (self['dtype'],
+                                                                                str(DtypeHelper.valid_primary_dtypes)))
         if value is not None:
             self.pop('required', None)
             self['value'] = value
@@ -618,7 +618,8 @@ class DatasetSpec(BaseStorageSpec):
             else:   # Dtype is a string
                 self['dtype'] = dtype
                 if self['dtype'] not in DtypeHelper.valid_primary_dtypes:
-                    raise ValueError('dtype %s not a valid primary data type' % self['dtype'])
+                    raise ValueError('dtype %s not a valid primary data type %s' %
+                                     (self['dtype'], str(DtypeHelper.valid_primary_dtypes)))
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if default_value is not None:
             self['default_value'] = default_value
