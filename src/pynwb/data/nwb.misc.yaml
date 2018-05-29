@@ -60,11 +60,11 @@ groups:
     - doc: Value is 'float('NaN')'
       dtype: float
       name: conversion
-      default_value: NaN
+      value: NaN
     - doc: Value is 'float('NaN')'
       dtype: float
       name: resolution
-      default_value: NaN
+      value: NaN
     - doc: Value is 'n/a'
       dtype: text
       name: unit
@@ -92,11 +92,11 @@ groups:
     - doc: Value is 'float('NaN')'
       dtype: float
       name: conversion
-      default_value: NaN
+      value: NaN
     - doc: Value is 'float('NaN')'
       dtype: float
       name: resolution
-      default_value: NaN
+      value: NaN
     - doc: Value is 'n/a'
       dtype: text
       name: unit
