@@ -44,8 +44,7 @@ class DtypeHelper():
 
     # List of valid primary data type strings
     valid_primary_dtypes = set(list(primary_dtype_synonyms.keys()) +
-                               [vi for v in primary_dtype_synonyms.values() for vi in v] +
-                               ['number',])
+                               [vi for v in primary_dtype_synonyms.values() for vi in v])
 
     @staticmethod
     def simplify_cpd_type(cpd_type):

@@ -13,7 +13,7 @@ class DtypeSpecHelper(unittest.TestCase):
 
     def test_valid_primary_dtypes(self):
         a = set(list(DtypeHelper.primary_dtype_synonyms.keys()) + [vi for v in DtypeHelper.primary_dtype_synonyms.values()
-                                                               for vi in v] + ['number', ])
+                                                               for vi in v])
         self.assertSetEqual(a, DtypeHelper.valid_primary_dtypes)
 
     def test_simplify_cpd_type(self):
