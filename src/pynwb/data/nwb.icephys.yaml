@@ -8,7 +8,7 @@ groups:
   - dims:
     - num_times
     doc: Recorded voltage or current.
-    dtype:
+    dtype: float
     name: data
     shape:
     - null
