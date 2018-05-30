@@ -1,45 +1,8 @@
 import unittest2 as unittest
 import json
 
-from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, DtypeSpec, DtypeHelper, RefSpec
-
-
-class DtypeSpecHelper(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    def test_recommended_dtypes(self):
-        self.assertListEqual(DtypeHelper.recommended_primary_dtypes,
-                             list(DtypeHelper.primary_dtype_synonyms.keys()))
-
-    def test_valid_primary_dtypes(self):
-        a = set(list(DtypeHelper.primary_dtype_synonyms.keys()) +
-                [vi for v in DtypeHelper.primary_dtype_synonyms.values() for vi in v])
-        self.assertSetEqual(a, DtypeHelper.valid_primary_dtypes)
-
-    def test_simplify_cpd_type(self):
-        compound_type = [DtypeSpec('test', 'test field', 'float'),
-                         DtypeSpec('test2', 'test field2', 'int')]
-        expected_result = ['float', 'int']
-        result = DtypeHelper.simplify_cpd_type(compound_type)
-        self.assertListEqual(result, expected_result)
-
-
-class DtypeSpecTests(unittest.TestCase):
-    def setUp(self):
-        pass
-
-    def test_constructor(self):
-        spec = DtypeSpec('column1', 'an example column', 'int')
-        self.assertEqual(spec.doc, 'an example column')
-        self.assertEqual(spec.name, 'column1')
-        self.assertEqual(spec.dtype, 'int')
-
-    def test_build_spec(self):
-        spec = DtypeSpec.build_spec({'doc': 'an example column', 'name': 'column1', 'dtype': 'int'})
-        self.assertEqual(spec.doc, 'an example column')
-        self.assertEqual(spec.name, 'column1')
-        self.assertEqual(spec.dtype, 'int')
+from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, DtypeSpec, RefSpec
+from pynwb.form.spec.spec import ZERO_OR_MANY
 
 
 class DatasetSpecTests(unittest.TestCase):
@@ -81,6 +44,16 @@ class DatasetSpecTests(unittest.TestCase):
         self.assertListEqual(spec['attributes'], self.attributes)
         self.assertIs(spec, self.attributes[0].parent)
         self.assertIs(spec, self.attributes[1].parent)
+
+    def test_constructor_shape(self):
+        shape = [None,2]
+        spec = DatasetSpec('my first dataset',
+                           'int',
+                           name='dataset1',
+                           shape=shape,
+                           attributes=self.attributes)
+        self.assertEqual(spec['shape'],shape)
+        self.assertEqual(spec.shape, shape)
 
     def test_constructor_invalidate_dtype(self):
         with self.assertRaises(ValueError):
@@ -162,6 +135,22 @@ class DatasetSpecTests(unittest.TestCase):
         self.assertIs(spec, self.attributes[0].parent)
         self.assertIs(spec, self.attributes[1].parent)
         json.dumps(spec)
+
+    def test_constructor_invalid_table(self):
+        with self.assertRaises(ValueError):
+            DatasetSpec('my first table',
+                        [DtypeSpec('column1', 'the first column', 'int'),
+                         {}     # <--- Bad compound type spec must raise an error
+                         ],
+                        name='table1',
+                        attributes=self.attributes)
+
+    def test_constructor_default_value(self):
+        spec = DatasetSpec(doc='test',
+                           default_value=5,
+                           dtype='int',
+                           data_type_def='test')
+        self.assertEqual(spec.default_value, 5)
 
     def test_datatype_table_extension(self):
         dtype1 = DtypeSpec('column1', 'the first column', 'int')

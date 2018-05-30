@@ -188,3 +188,31 @@ class GroupSpecTests(unittest.TestCase):
         else:
             for i in range(len(spec1_attr)):
                 self.assertDictEqual(spec1_attr[i], spec2_attr[i])
+
+    def test_add_attribute(self):
+        spec = GroupSpec('A test group',
+                         name='root_constructor',
+                         groups=self.subgroups,
+                         datasets=self.datasets,
+                         linkable=False)
+        for attrspec in self.attributes:
+            spec.add_attribute(**attrspec)
+        self.assertListEqual(spec['attributes'], self.attributes)
+        self.assertListEqual(spec['datasets'], self.datasets)
+        self.assertNotIn('data_type_def', spec)
+        self.assertIs(spec, self.subgroups[0].parent)
+        self.assertIs(spec, self.subgroups[1].parent)
+        self.assertIs(spec, spec.attributes[0].parent)
+        self.assertIs(spec, spec.attributes[1].parent)
+        self.assertIs(spec, self.datasets[0].parent)
+        self.assertIs(spec, self.datasets[1].parent)
+        json.dumps(spec)
+
+    def test_update_attribute_spec(self):
+        spec = GroupSpec('A test group',
+                         name='root_constructor',
+                         attributes=[AttributeSpec('attribute1', 'my first attribute', 'text'),])
+        spec.set_attribute(AttributeSpec('attribute1', 'my first attribute', 'int', value=5))
+        res = spec.get_attribute('attribute1')
+        self.assertEqual(res.value, 5)
+        self.assertEqual(res.dtype, 'int')
