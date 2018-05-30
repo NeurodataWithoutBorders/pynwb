@@ -13,7 +13,7 @@ ONE_OR_MANY = '+'
 DEF_QUANTITY = 1
 FLAGS = {
     'zero_or_one': ZERO_OR_ONE,
-    'zero_or_more': ZERO_OR_MANY,
+    'zero_or_many': ZERO_OR_MANY,
     'one_or_many': ONE_OR_MANY
 }
 
@@ -555,9 +555,13 @@ class DtypeSpec(ConstructableDict):
     @docval({'name': 'spec', 'type': (str, dict), 'doc': 'the spec object to check'}, is_method=False)
     def is_ref(**kwargs):
         spec = getargs('spec', kwargs)
+        spec_is_ref = False
         if isinstance(spec, dict):
-            return _target_type_key in spec
-        return False
+            if _target_type_key in spec:
+                spec_is_ref = True
+            elif 'dtype' in spec and isinstance(spec['dtype'], dict) and _target_type_key in spec['dtype']:
+                spec_is_ref = True
+        return spec_is_ref
 
     @classmethod
     def build_const_args(cls, spec_dict):
@@ -694,6 +698,11 @@ class DatasetSpec(BaseStorageSpec):
     def shape(self):
         ''' The shape of the dataset '''
         return self.get('shape', None)
+
+    @property
+    def default_value(self):
+        '''The default value of the dataset or None if not specified'''
+        return self.get('default_value', None)
 
     @classmethod
     def __check_dim(cls, dim, data):
