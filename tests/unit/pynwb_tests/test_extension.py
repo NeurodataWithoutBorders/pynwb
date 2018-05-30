@@ -1,17 +1,29 @@
 import unittest
 import os
 from tempfile import gettempdir
+import random
+import string
 
-from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
-from pynwb import load_namespaces, get_class
+from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
+from pynwb.form.spec.spec import RefSpec
+from pynwb import load_namespaces, get_class, TimeSeries
+from pynwb.form.utils import get_docval
+
+
+def id_generator(N=10):
+    """
+    Generator a random string of characters.
+    """
+    return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
 
 class TestExtension(unittest.TestCase):
 
     def setUp(self):
         self.tempdir = gettempdir()
-        self.ext_source = 'fake_extension.yaml'
-        self.ns_path = 'fake_namespace.yaml'
+        self.prefix = id_generator()
+        self.ext_source = '%s_extension.yaml' % self.prefix
+        self.ns_path = '%s_namespace.yaml' % self.prefix
 
     def tearDown(self):
         for f in (self.ext_source, self.ns_path):
@@ -19,9 +31,9 @@ class TestExtension(unittest.TestCase):
             os.remove(path)
 
     def test_export(self):
-        ns_builder = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension")
+        ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix)
         ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                            attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
+                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
                             neurodata_type_inc='ElectricalSeries',
                             neurodata_type_def='TetrodeSeries')
         ns_builder.add_spec(self.ext_source, ext1)
@@ -33,17 +45,50 @@ class TestExtension(unittest.TestCase):
 
     def test_get_class(self):
         self.test_load_namespace()
-        TetrodeSeries = get_class('TetrodeSeries', 'pynwb_test_extension')  # noqa: F841
+        TetrodeSeries = get_class('TetrodeSeries', self.prefix)  # noqa: F841
+
+    def test_load_namespace_with_reftype_attribute(self):
+        ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix)
+        test_ds_ext = NWBDatasetSpec(doc='test dataset to add an attr',
+                                     name='test_data', shape=(None,),
+                                     attributes=[NWBAttributeSpec(name='target_ds',
+                                                                  doc='the target the dataset applies to',
+                                                                  dtype=RefSpec('TimeSeries', 'object'))],
+                                     neurodata_type_def='my_new_type')
+        ns_builder.add_spec(self.ext_source, test_ds_ext)
+        ns_builder.export(self.ns_path, outdir=self.tempdir)
+        load_namespaces(os.path.join(self.tempdir, self.ns_path))
+
+    def test_load_namespace_with_reftype_attribute_check_autoclass_const(self):
+        ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix)
+        test_ds_ext = NWBDatasetSpec(doc='test dataset to add an attr',
+                                     name='test_data', shape=(None,),
+                                     attributes=[NWBAttributeSpec(name='target_ds',
+                                                                  doc='the target the dataset applies to',
+                                                                  dtype=RefSpec('TimeSeries', 'object'))],
+                                     neurodata_type_def='my_new_type')
+        ns_builder.add_spec(self.ext_source, test_ds_ext)
+        ns_builder.export(self.ns_path, outdir=self.tempdir)
+        load_namespaces(os.path.join(self.tempdir, self.ns_path))
+        my_new_type = get_class('my_new_type', self.prefix)
+        docval = None
+        for tmp in get_docval(my_new_type.__init__):
+            if tmp['name'] == 'target_ds':
+                docval = tmp
+                break
+        self.assertIsNotNone(docval)
+        self.assertEqual(docval['type'], TimeSeries)
 
 
 class TestCatchDupNS(unittest.TestCase):
 
     def setUp(self):
         self.tempdir = gettempdir()
-        self.ext_source1 = 'fake_extension1.yaml'
-        self.ns_path1 = 'fake_namespace1.yaml'
-        self.ext_source2 = 'fake_extension2.yaml'
-        self.ns_path2 = 'fake_namespace2.yaml'
+        self.prefix = id_generator()
+        self.ext_source1 = '%s_extension1.yaml' % self.prefix
+        self.ns_path1 = '%s_namespace1.yaml' % self.prefix
+        self.ext_source2 = '%s_extension2.yaml' % self.prefix
+        self.ns_path2 = '%s_namespace2.yaml' % self.prefix
 
     def tearDown(self):
         files = (self.ext_source1,
@@ -57,14 +102,14 @@ class TestCatchDupNS(unittest.TestCase):
     def test_catch_dup_name(self):
         ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1")
         ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                            attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
+                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
                             neurodata_type_inc='ElectricalSeries',
                             neurodata_type_def='TetrodeSeries')
         ns_builder1.add_spec(self.ext_source1, ext1)
         ns_builder1.export(self.ns_path1, outdir=self.tempdir)
         ns_builder2 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1")
         ext2 = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                            attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
+                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
                             neurodata_type_inc='ElectricalSeries',
                             neurodata_type_def='TetrodeSeries')
         ns_builder2.add_spec(self.ext_source2, ext2)
@@ -77,7 +122,8 @@ class TestCatchDupNS(unittest.TestCase):
 class TestCatchDuplicateSpec(unittest.TestCase):
 
     def setUp(self):
-        self.ext_source = 'fake_extension3.yaml'
+        self.prefix = id_generator()
+        self.ext_source = '%s_extension3.yaml' % self.prefix
 
     def tearDown(self):
         pass

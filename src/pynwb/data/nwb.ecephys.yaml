@@ -19,7 +19,7 @@ groups:
     - - num_times
       - num_channels
     doc: Recorded voltage data.
-    dtype: number
+    dtype: float
     name: data
     shape:
     - - null
