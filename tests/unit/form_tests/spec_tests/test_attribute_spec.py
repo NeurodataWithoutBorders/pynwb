@@ -50,12 +50,12 @@ class AttributeSpecTests(unittest.TestCase):
         self.assertEqual(spec.default_value, 'some text')
 
     def test_shape(self):
-        shape = [None,2]
+        shape = [None, 2]
         spec = AttributeSpec('attribute1',
                              'my first attribute',
                              'text',
                              shape=shape)
-        self.assertEqual(spec['shape'],shape)
+        self.assertEqual(spec['shape'], shape)
         self.assertEqual(spec.shape, shape)
 
     def test_dims_without_shape(self):
@@ -63,4 +63,4 @@ class AttributeSpecTests(unittest.TestCase):
                              'my first attribute',
                              'text',
                              dims=['test'])
-        self.assertEqual(spec.shape, (None,))
+        self.assertEqual(spec.shape, (None, ))

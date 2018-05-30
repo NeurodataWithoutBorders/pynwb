@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from pynwb.form.spec import  DtypeSpec, DtypeHelper, RefSpec
+from pynwb.form.spec import DtypeSpec, DtypeHelper, RefSpec
 
 
 class DtypeSpecHelper(unittest.TestCase):
@@ -42,8 +42,8 @@ class DtypeSpecTests(unittest.TestCase):
 
     def test_invalid_refspec_dict(self):
         with self.assertRaises(AssertionError):
-            DtypeSpec.assertValidDtype( {'no target': 'test',   # <-- missing or here bad target key for RefSpec
-                                         'reftype': 'object'})
+            DtypeSpec.assertValidDtype({'no target': 'test',   # <-- missing or here bad target key for RefSpec
+                                        'reftype': 'object'})
 
     def test_refspec_dtype(self):
         # just making sure this does not cause an error

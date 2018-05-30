@@ -211,7 +211,7 @@ class GroupSpecTests(unittest.TestCase):
     def test_update_attribute_spec(self):
         spec = GroupSpec('A test group',
                          name='root_constructor',
-                         attributes=[AttributeSpec('attribute1', 'my first attribute', 'text'),])
+                         attributes=[AttributeSpec('attribute1', 'my first attribute', 'text'), ])
         spec.set_attribute(AttributeSpec('attribute1', 'my first attribute', 'int', value=5))
         res = spec.get_attribute('attribute1')
         self.assertEqual(res.value, 5)

@@ -2,7 +2,6 @@ import unittest2 as unittest
 import json
 
 from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, DtypeSpec, RefSpec
-from pynwb.form.spec.spec import ZERO_OR_MANY
 
 
 class DatasetSpecTests(unittest.TestCase):
@@ -46,13 +45,13 @@ class DatasetSpecTests(unittest.TestCase):
         self.assertIs(spec, self.attributes[1].parent)
 
     def test_constructor_shape(self):
-        shape = [None,2]
+        shape = [None, 2]
         spec = DatasetSpec('my first dataset',
                            'int',
                            name='dataset1',
                            shape=shape,
                            attributes=self.attributes)
-        self.assertEqual(spec['shape'],shape)
+        self.assertEqual(spec['shape'], shape)
         self.assertEqual(spec.shape, shape)
 
     def test_constructor_invalidate_dtype(self):
