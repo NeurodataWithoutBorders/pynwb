@@ -47,9 +47,18 @@ class ConstructableDict(with_metaclass(abc.ABCMeta, dict)):
     @classmethod
     def build_spec(cls, spec_dict):
         ''' Build a Spec object from the given Spec dict '''
-        kwargs = cls.build_const_args(spec_dict)
+        vargs = cls.build_const_args(spec_dict)
+        args = list()
+        kwargs = dict()
         try:
-            args = [kwargs.pop(x['name']) for x in get_docval(cls.__init__) if 'default' not in x]
+
+            for x in get_docval(cls.__init__):
+                if not x['name'] in vargs:
+                    continue
+                if 'default' not in x:
+                    args.append(vargs.get(x['name']))
+                else:
+                    kwargs[x['name']] = vargs.get(x['name'])
         except KeyError as e:
             raise KeyError("'%s' not found in %s" % (e.args[0], str(spec_dict)))
         return cls(*args, **kwargs)
