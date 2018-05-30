@@ -33,7 +33,7 @@ class TestExtension(unittest.TestCase):
     def test_export(self):
         ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix)
         ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                            attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
+                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
                             neurodata_type_inc='ElectricalSeries',
                             neurodata_type_def='TetrodeSeries')
         ns_builder.add_spec(self.ext_source, ext1)
@@ -102,14 +102,14 @@ class TestCatchDupNS(unittest.TestCase):
     def test_catch_dup_name(self):
         ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1")
         ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                            attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
+                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
                             neurodata_type_inc='ElectricalSeries',
                             neurodata_type_def='TetrodeSeries')
         ns_builder1.add_spec(self.ext_source1, ext1)
         ns_builder1.export(self.ns_path1, outdir=self.tempdir)
         ns_builder2 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1")
         ext2 = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                            attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
+                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
                             neurodata_type_inc='ElectricalSeries',
                             neurodata_type_def='TetrodeSeries')
         ns_builder2.add_spec(self.ext_source2, ext2)

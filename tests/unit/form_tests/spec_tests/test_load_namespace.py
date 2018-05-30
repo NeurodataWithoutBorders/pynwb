@@ -3,7 +3,7 @@ import ruamel.yaml as yaml
 import json
 import os
 
-from pynwb.form.spec import *  # noqa: F403
+from pynwb.form.spec import AttributeSpec, DatasetSpec, GroupSpec, SpecNamespace, NamespaceCatalog
 
 
 class TestSpecLoad(unittest.TestCase):
@@ -11,16 +11,16 @@ class TestSpecLoad(unittest.TestCase):
 
     def setUp(self):
         self.attributes = [
-            AttributeSpec('attribute1', 'my first attribute', 'str'),  # noqa: F405
-            AttributeSpec('attribute2', 'my second attribute', 'str')  # noqa: F405
+            AttributeSpec('attribute1', 'my first attribute', 'text'),
+            AttributeSpec('attribute2', 'my second attribute', 'text')
         ]
         self.dset1_attributes = [
-            AttributeSpec('attribute3', 'my third attribute', 'str'),  # noqa: F405
-            AttributeSpec('attribute4', 'my fourth attribute', 'str')  # noqa: F405
+            AttributeSpec('attribute3', 'my third attribute', 'text'),
+            AttributeSpec('attribute4', 'my fourth attribute', 'text')
         ]
         self.dset2_attributes = [
-            AttributeSpec('attribute5', 'my fifth attribute', 'str'),  # noqa: F405
-            AttributeSpec('attribute6', 'my sixth attribute', 'str')  # noqa: F405
+            AttributeSpec('attribute5', 'my fifth attribute', 'text'),
+            AttributeSpec('attribute6', 'my sixth attribute', 'text')
         ]
         self.datasets = [
             DatasetSpec('my first dataset',  # noqa: F405
@@ -43,7 +43,7 @@ class TestSpecLoad(unittest.TestCase):
                               linkable=False,
                               data_type_def='EphysData')
         dset1_attributes_ext = [
-            AttributeSpec('dset1_extra_attribute', 'an extra attribute for the first dataset', 'str')  # noqa: F405
+            AttributeSpec('dset1_extra_attribute', 'an extra attribute for the first dataset', 'text')
         ]
         self.ext_datasets = [
             DatasetSpec('my first dataset extension',  # noqa: F405
@@ -53,7 +53,7 @@ class TestSpecLoad(unittest.TestCase):
                         linkable=True),
         ]
         self.ext_attributes = [
-            AttributeSpec('ext_extra_attribute', 'an extra attribute for the group', 'str'),  # noqa: F405
+            AttributeSpec('ext_extra_attribute', 'an extra attribute for the group', 'text'),
         ]
         self.ext_spec = GroupSpec('A test group extension',  # noqa: F405
                                    name='root_constructor_nwbtype',

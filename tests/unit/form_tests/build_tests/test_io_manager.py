@@ -92,7 +92,7 @@ class TestBase(unittest.TestCase):
                                           'attr2',
                                           'an example integer attribute',
                                           'int')])],
-                                  attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
+                                  attributes=[AttributeSpec('attr1', 'an example string attribute', 'text')])
 
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.foo_spec, 'test.yaml')

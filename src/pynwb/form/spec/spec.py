@@ -20,22 +20,50 @@ FLAGS = {
 from six import with_metaclass  # noqa: E402
 
 
-@docval({'name': 'cpd_type', 'type': list, 'doc': 'the list of DtypeSpecs to simplify'},
-        is_method=False)
-def simplify_cpd_type(**kwargs):
-    '''
-    Transform a list of DtypeSpecs into a list of strings.
-    Use for simple representation of compound type and
-    validation.
-    '''
-    cpd_type = getargs('cpd_type', kwargs)
-    ret = list()
-    for exp in cpd_type:
-        exp_key = exp.dtype
-        if isinstance(exp_key, RefSpec):
-            exp_key = exp_key.reftype
-        ret.append(exp_key)
-    return ret
+class DtypeHelper():
+    # Dict where the keys are the primary data type and the values are list of strings with synonyms for the dtype
+    primary_dtype_synonyms = {
+            'float': ["float", "float32"],
+            'double': ["double", "float64"],
+            'short': ["int16", "short"],
+            'int': ["int32", "int"],
+            'long': ["int64", "long"],
+            'utf': ["text", "utf", "utf8", "utf-8"],
+            'ascii': ["ascii", "bytes"],
+            'int8': ["int8"],
+            'uint8': ["uint8"],
+            'uint16': ["uint16"],
+            'uint32': ["uint32", "uint"],
+            'uint64': ["uint64"],
+            'object': ['object'],
+            'region': ['region']
+        }
+
+    # List of recommeneded primary dtype strings. These are the keys of primary_dtype_string_synonyms
+    recommended_primary_dtypes = list(primary_dtype_synonyms.keys())
+
+    # List of valid primary data type strings
+    valid_primary_dtypes = set(list(primary_dtype_synonyms.keys()) +
+                               [vi for v in primary_dtype_synonyms.values() for vi in v])
+
+    @staticmethod
+    def simplify_cpd_type(cpd_type):
+        '''
+        Transform a list of DtypeSpecs into a list of strings.
+        Use for simple representation of compound type and
+        validation.
+
+        :param cpd_type: The list of DtypeSpecs to simplify
+        :type cpd_type: list
+
+        '''
+        ret = list()
+        for exp in cpd_type:
+            exp_key = exp.dtype
+            if isinstance(exp_key, RefSpec):
+                exp_key = exp_key.reftype
+            ret.append(exp_key)
+        return ret
 
 
 class ConstructableDict(with_metaclass(abc.ABCMeta, dict)):
@@ -180,10 +208,14 @@ class AttributeSpec(Spec):
         name, dtype, doc, dims, shape, required, parent, value, default_value = getargs(
             'name', 'dtype', 'doc', 'dims', 'shape', 'required', 'parent', 'value', 'default_value', kwargs)
         super(AttributeSpec, self).__init__(doc, name=name, required=required, parent=parent)
-        if isinstance(dtype, type):
-            self['dtype'] = dtype.__name__
-        elif dtype is not None:
+        if isinstance(dtype, RefSpec):
             self['dtype'] = dtype
+        else:
+            self['dtype'] = dtype
+            # Validate the dype string
+            if self['dtype'] not in DtypeHelper.valid_primary_dtypes:
+                raise ValueError('dtype %s not a valid primary data type %s' % (self['dtype'],
+                                                                                str(DtypeHelper.valid_primary_dtypes)))
         if value is not None:
             self.pop('required', None)
             self['value'] = value
@@ -192,13 +224,15 @@ class AttributeSpec(Spec):
                 raise ValueError("cannot specify 'value' and 'default_value'")
             self['default_value'] = default_value
             self['required'] = False
+        if shape is not None:
+            self['shape'] = shape
         if dims is not None:
             self['dims'] = dims
             if 'shape' not in self:
                 self['shape'] = tuple([None] * len(dims))
-            else:
-                if len(self['dims']) != len(self['shape']):
-                    raise ValueError("'dims' and 'shape' must be the same length")
+        if self.shape is not None and self.dims is not None:
+            if len(self['dims']) != len(self['shape']):
+                raise ValueError("'dims' and 'shape' must be the same length")
 
     @property
     def dtype(self):
@@ -517,15 +551,26 @@ class DtypeSpec(ConstructableDict):
             if _target_type_key not in dtype:
                 msg = "'dtype' must have the key '%s'" % _target_type_key
                 raise AssertionError(msg)
+        elif isinstance(dtype, RefSpec):
+            pass
+        else:
+            if dtype not in DtypeHelper.valid_primary_dtypes:
+                msg = "'dtype=%s' string not in valid primary data type: %s " % (str(dtype),
+                                                                                 str(DtypeHelper.valid_primary_dtypes))
+                raise AssertionError(msg)
         return True
 
     @staticmethod
     @docval({'name': 'spec', 'type': (str, dict), 'doc': 'the spec object to check'}, is_method=False)
     def is_ref(**kwargs):
         spec = getargs('spec', kwargs)
+        spec_is_ref = False
         if isinstance(spec, dict):
-            return _target_type_key in spec
-        return False
+            if _target_type_key in spec:
+                spec_is_ref = True
+            elif 'dtype' in spec and isinstance(spec['dtype'], dict) and _target_type_key in spec['dtype']:
+                spec_is_ref = True
+        return spec_is_ref
 
     @classmethod
     def build_const_args(cls, spec_dict):
@@ -572,24 +617,31 @@ class DatasetSpec(BaseStorageSpec):
             self['dims'] = dims
             if 'shape' not in self:
                 self['shape'] = tuple([None] * len(dims))
-            else:
-                if len(self['dims']) != len(self['shape']):
-                    raise ValueError("'dims' and 'shape' must be the same length")
+        if self.shape is not None and self.dims is not None:
+            if len(self['dims']) != len(self['shape']):
+                raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
-            if isinstance(dtype, list):
+            if isinstance(dtype, list):  # Dtype is a compound data type
                 for _i, col in enumerate(dtype):
                     if not isinstance(col, DtypeSpec):
                         msg = 'must use DtypeSpec if defining compound dtype - found %s at element %d' % \
                                 (type(col), _i)
                         raise ValueError(msg)
-            self['dtype'] = dtype
+                self['dtype'] = dtype
+            elif isinstance(dtype, RefSpec):  # Dtype is a reference
+                self['dtype'] = dtype
+            else:   # Dtype is a string
+                self['dtype'] = dtype
+                if self['dtype'] not in DtypeHelper.valid_primary_dtypes:
+                    raise ValueError('dtype %s not a valid primary data type %s' %
+                                     (self['dtype'], str(DtypeHelper.valid_primary_dtypes)))
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if default_value is not None:
             self['default_value'] = default_value
             if self.name is not None:
                 self.pop('quantity')
             else:
-                self['quantity'] = ZERO_OR_MORE  # noqa: F821
+                self['quantity'] = ZERO_OR_MANY
 
     @classmethod
     def __get_prec_level(cls, dtype):
@@ -655,6 +707,11 @@ class DatasetSpec(BaseStorageSpec):
     def shape(self):
         ''' The shape of the dataset '''
         return self.get('shape', None)
+
+    @property
+    def default_value(self):
+        '''The default value of the dataset or None if not specified'''
+        return self.get('default_value', None)
 
     @classmethod
     def __check_dim(cls, dim, data):

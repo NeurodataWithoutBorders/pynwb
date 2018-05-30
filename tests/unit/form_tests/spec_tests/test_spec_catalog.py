@@ -8,8 +8,8 @@ class SpecCatalogTest(unittest.TestCase):
     def setUp(self):
         self.catalog = SpecCatalog()
         self.attributes = [
-            AttributeSpec('attribute1', 'my first attribute', 'str'),
-            AttributeSpec('attribute2', 'my second attribute', 'str')
+            AttributeSpec('attribute1', 'my first attribute', 'text'),
+            AttributeSpec('attribute2', 'my second attribute', 'text')
         ]
         self.spec = DatasetSpec('my first dataset',
                                 'int',

@@ -7,7 +7,7 @@ from ..utils import docval, getargs
 from ..data_utils import get_shape
 
 from ..spec import Spec, AttributeSpec, GroupSpec, DatasetSpec, RefSpec
-from ..spec.spec import BaseStorageSpec, simplify_cpd_type
+from ..spec.spec import BaseStorageSpec, DtypeHelper
 from ..spec import SpecNamespace
 
 from ..build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder, RegionBuilder
@@ -24,26 +24,13 @@ __valid_dtypes = {
     'int': int,
     'int32': np.int32,
     'int16': np.int16,
+    'int8': np.int8,
     'text': text_type,
     'region': 'region',
     'object': 'object',
 }
 
-__synonyms = {
-    'float': ["float", "float32"],
-    'double': ["double", "float64"],
-    'short': ["int16", "short"],
-    'int': ["int32", "int"],
-    'long': ["int64", "long"],
-    'utf': ["text", "utf", "utf8", "utf-8"],
-    'ascii': ["ascii", "bytes"],
-    'uint8': ["uint8"],
-    'uint16': ["uint16"],
-    'uint32': ["uint32", "uint"],
-    'uint64': ["uint64"],
-    'object': ['object'],
-    'region': ['region']
-}
+__synonyms = DtypeHelper.primary_dtype_synonyms
 
 __additional = {
     'float': ['double'],
@@ -72,7 +59,7 @@ def check_type(expected, received):
     if isinstance(expected, list):
         if len(expected) > len(received):
             raise ValueError('compound type shorter than expected')
-        for i, exp in enumerate(simplify_cpd_type(expected)):
+        for i, exp in enumerate(DtypeHelper.simplify_cpd_type(expected)):
             rec = received[i]
             if rec not in __allowable[exp]:
                 return False
