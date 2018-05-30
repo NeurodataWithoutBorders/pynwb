@@ -7,18 +7,18 @@ from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec
 class GroupSpecTests(unittest.TestCase):
     def setUp(self):
         self.attributes = [
-            AttributeSpec('attribute1', 'my first attribute', 'str'),
-            AttributeSpec('attribute2', 'my second attribute', 'str')
+            AttributeSpec('attribute1', 'my first attribute', 'text'),
+            AttributeSpec('attribute2', 'my second attribute', 'text')
         ]
 
         self.dset1_attributes = [
-            AttributeSpec('attribute3', 'my third attribute', 'str'),
-            AttributeSpec('attribute4', 'my fourth attribute', 'str')
+            AttributeSpec('attribute3', 'my third attribute', 'text'),
+            AttributeSpec('attribute4', 'my fourth attribute', 'text')
         ]
 
         self.dset2_attributes = [
-            AttributeSpec('attribute5', 'my fifth attribute', 'str'),
-            AttributeSpec('attribute6', 'my sixth attribute', 'str')
+            AttributeSpec('attribute5', 'my fifth attribute', 'text'),
+            AttributeSpec('attribute6', 'my sixth attribute', 'text')
         ]
 
         self.datasets = [
@@ -120,7 +120,7 @@ class GroupSpecTests(unittest.TestCase):
                          namespace='core',
                          data_type_def='EphysData')
         dset1_attributes_ext = [
-            AttributeSpec('dset1_extra_attribute', 'an extra attribute for the first dataset', 'str')
+            AttributeSpec('dset1_extra_attribute', 'an extra attribute for the first dataset', 'text')
         ]
         ext_datasets = [
             DatasetSpec('my first dataset extension',
@@ -130,7 +130,7 @@ class GroupSpecTests(unittest.TestCase):
                         linkable=True),
         ]
         ext_attributes = [
-            AttributeSpec('ext_extra_attribute', 'an extra attribute for the group', 'str'),
+            AttributeSpec('ext_extra_attribute', 'an extra attribute for the group', 'text'),
         ]
         ext = GroupSpec('A test group extension',
                         name='child_type',
@@ -188,3 +188,31 @@ class GroupSpecTests(unittest.TestCase):
         else:
             for i in range(len(spec1_attr)):
                 self.assertDictEqual(spec1_attr[i], spec2_attr[i])
+
+    def test_add_attribute(self):
+        spec = GroupSpec('A test group',
+                         name='root_constructor',
+                         groups=self.subgroups,
+                         datasets=self.datasets,
+                         linkable=False)
+        for attrspec in self.attributes:
+            spec.add_attribute(**attrspec)
+        self.assertListEqual(spec['attributes'], self.attributes)
+        self.assertListEqual(spec['datasets'], self.datasets)
+        self.assertNotIn('data_type_def', spec)
+        self.assertIs(spec, self.subgroups[0].parent)
+        self.assertIs(spec, self.subgroups[1].parent)
+        self.assertIs(spec, spec.attributes[0].parent)
+        self.assertIs(spec, spec.attributes[1].parent)
+        self.assertIs(spec, self.datasets[0].parent)
+        self.assertIs(spec, self.datasets[1].parent)
+        json.dumps(spec)
+
+    def test_update_attribute_spec(self):
+        spec = GroupSpec('A test group',
+                         name='root_constructor',
+                         attributes=[AttributeSpec('attribute1', 'my first attribute', 'text'), ])
+        spec.set_attribute(AttributeSpec('attribute1', 'my first attribute', 'int', value=5))
+        res = spec.get_attribute('attribute1')
+        self.assertEqual(res.value, 5)
+        self.assertEqual(res.dtype, 'int')
