@@ -57,10 +57,9 @@ class DatasetSpecTests(unittest.TestCase):
             DatasetSpec(doc='my first dataset',
                         dtype='my bad dtype',     # <-- Expect AssertionError due to bad type
                         name='dataset1',
-                        dimension=(None, None),
+                        dims=(None, None),
                         attributes=self.attributes,
                         linkable=False,
-                        namespace='core',
                         data_type_def='EphysData')
 
     def test_constructor_ref_spec(self):
@@ -68,10 +67,9 @@ class DatasetSpecTests(unittest.TestCase):
         spec = DatasetSpec(doc='my first dataset',
                            dtype=dtype,
                            name='dataset1',
-                           dimension=(None, None),
+                           dims=(None, None),
                            attributes=self.attributes,
                            linkable=False,
-                           namespace='core',
                            data_type_def='EphysData')
         self.assertDictEqual(spec['dtype'], dtype)
 
