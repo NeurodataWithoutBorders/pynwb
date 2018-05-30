@@ -500,7 +500,7 @@ def iter_largearray(filename, shape, dtype='float64'):
     for i in range(shape[0]):
         # Open the file and read the next chunk
         newfp = np.memmap(filename, dtype=dtype, mode='r', shape=shape)
-        curr_data = newfp[i:(i + 1), ...]
+        curr_data = newfp[i:(i + 1), ...][0]
         del newfp  # Reopen the file in each iterator to prevent accumulation of data in memory
         yield curr_data
     return
@@ -516,7 +516,7 @@ from pynwb.form.data_utils import DataChunkIterator
 data = DataChunkIterator(data=iter_largearray(filename='basic_sparse_iterwrite_testdata.npy',
                                               shape=datashape),
                          maxshape=datashape,
-                         buffersize=10)   # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
+                         buffer_size=10)   # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
 
 
 ####################
