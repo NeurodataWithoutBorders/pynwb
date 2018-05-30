@@ -46,7 +46,7 @@ class TestDataMap(unittest.TestCase):
 
     def setUpBazSpec(self):
         self.baz_spec = DatasetSpec('an Baz type', 'int', name='MyBaz', data_type_def='Baz',
-                                    attributes=[AttributeSpec('baz_attr', 'an example string attribute', 'str')])
+                                    attributes=[AttributeSpec('baz_attr', 'an example string attribute', 'text')])
 
     def test_build(self):
         ''' Test default mapping functionality when no attributes are nested '''

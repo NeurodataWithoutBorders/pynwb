@@ -141,7 +141,7 @@ class TestDynamicContainer(unittest.TestCase):
                                   datasets=[DatasetSpec('an example dataset', 'int', name='data',
                                                         attributes=[AttributeSpec(
                                                             'attr2', 'an example integer attribute', 'int')])],
-                                  attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
+                                  attributes=[AttributeSpec('attr1', 'an example string attribute', 'text')])
         self.spec_catalog = SpecCatalog()
         self.spec_catalog.register_spec(self.bar_spec, 'test.yaml')
         self.namespace = SpecNamespace('a test namespace', CORE_NAMESPACE,
@@ -237,7 +237,7 @@ class TestObjectMapperNested(TestObjectMapper):
                                   datasets=[DatasetSpec('an example dataset', 'int', name='data',
                                                         attributes=[AttributeSpec(
                                                             'attr2', 'an example integer attribute', 'int')])],
-                                  attributes=[AttributeSpec('attr1', 'an example string attribute', 'str')])
+                                  attributes=[AttributeSpec('attr1', 'an example string attribute', 'text')])
 
     def test_build(self):
         ''' Test default mapping functionality when object attributes map to an  attribute deeper
@@ -272,7 +272,7 @@ class TestObjectMapperNoNesting(TestObjectMapper):
         self.bar_spec = GroupSpec('A test group specification with a data type',
                                   data_type_def='Bar',
                                   datasets=[DatasetSpec('an example dataset', 'int', name='data')],
-                                  attributes=[AttributeSpec('attr1', 'an example string attribute', 'str'),
+                                  attributes=[AttributeSpec('attr1', 'an example string attribute', 'text'),
                                               AttributeSpec('attr2', 'an example integer attribute', 'int')])
 
     def test_build(self):
@@ -304,7 +304,7 @@ class TestObjectMapperContainer(TestObjectMapper):
         self.bar_spec = GroupSpec('A test group specification with a data type',
                                   data_type_def='Bar',
                                   groups=[GroupSpec('an example group', data_type_def='Foo')],
-                                  attributes=[AttributeSpec('attr1', 'an example string attribute', 'str'),
+                                  attributes=[AttributeSpec('attr1', 'an example string attribute', 'text'),
                                               AttributeSpec('attr2', 'an example integer attribute', 'int')])
 
     def test_default_mapping_keys(self):
