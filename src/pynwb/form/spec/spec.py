@@ -215,13 +215,15 @@ class AttributeSpec(Spec):
                 raise ValueError("cannot specify 'value' and 'default_value'")
             self['default_value'] = default_value
             self['required'] = False
+        if shape is not None:
+            self['shape'] = shape
         if dims is not None:
             self['dims'] = dims
             if 'shape' not in self:
                 self['shape'] = tuple([None] * len(dims))
-            else:
-                if len(self['dims']) != len(self['shape']):
-                    raise ValueError("'dims' and 'shape' must be the same length")
+        if self.shape is not None and self.dims is not None:
+            if len(self['dims']) != len(self['shape']):
+                raise ValueError("'dims' and 'shape' must be the same length")
 
     @property
     def dtype(self):
@@ -602,9 +604,9 @@ class DatasetSpec(BaseStorageSpec):
             self['dims'] = dims
             if 'shape' not in self:
                 self['shape'] = tuple([None] * len(dims))
-            else:
-                if len(self['dims']) != len(self['shape']):
-                    raise ValueError("'dims' and 'shape' must be the same length")
+        if self.shape is not None and self.dims is not None:
+            if len(self['dims']) != len(self['shape']):
+                raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
             if isinstance(dtype, list):  # Dtype is a compound data type
                 for _i, col in enumerate(dtype):
