@@ -2,7 +2,7 @@ from warnings import warn
 
 from collections import Iterable
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args
+from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 from .form.data_utils import AbstractDataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
@@ -38,10 +38,9 @@ class ProcessingModule(MultiContainerInterface):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        description = popargs('description', kwargs)
-        super(ProcessingModule, self).__init__(**kwargs)
-        self.description = description
-        self.data_interfaces = getargs('data_interfaces', kwargs)
+        call_docval_func(super(ProcessingModule, self).__init__, kwargs)
+        self.description = popargs('description', kwargs)
+        self.data_interfaces = popargs('data_interfaces', kwargs)
 
     @property
     def containers(self):
