@@ -31,7 +31,7 @@ class TestSpecLoad(unittest.TestCase):
             DatasetSpec('my second dataset',  # noqa: F405
                         'int',
                         name='dataset2',
-                        dimension=(None, None),
+                        dims=(None, None),
                         attributes=self.dset2_attributes,
                         linkable=True,
                         data_type_def='VoltageArray')

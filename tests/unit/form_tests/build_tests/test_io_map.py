@@ -20,7 +20,7 @@ class Bar(Container):
             {'name': 'attr3', 'type': float, 'doc': 'a third attribute', 'default': 3.14})
     def __init__(self, **kwargs):
         name, data, attr1, attr2, attr3 = getargs('name', 'data', 'attr1', 'attr2', 'attr3', kwargs)
-        super(Bar, self).__init__(name=name, source='test_io_map')
+        super(Bar, self).__init__(name=name)
         self.__data = data
         self.__attr1 = attr1
         self.__attr2 = attr2
@@ -108,7 +108,7 @@ class TestTypeMap(unittest.TestCase):
         self.type_map.register_map(Bar, ObjectMapper)
         self.type_map.register_map(Foo, ObjectMapper)
         bar_inst = Bar('my_bar', list(range(10)), 'value1', 10)
-        foo_inst = Foo(name='my_foo', source='test_io_map')
+        foo_inst = Foo(name='my_foo')
         bar_mapper = self.type_map.get_map(bar_inst)
         foo_mapper = self.type_map.get_map(foo_inst)
         self.assertIsNot(bar_mapper, foo_mapper)

@@ -22,7 +22,7 @@ class Foo(Container):
             {'name': 'attr3', 'type': float, 'doc': 'a third attribute', 'default': 3.14})
     def __init__(self, **kwargs):
         name, my_data, attr1, attr2, attr3 = getargs('name', 'my_data', 'attr1', 'attr2', 'attr3', kwargs)
-        super(Foo, self).__init__(name=name, source='test_io_manager')
+        super(Foo, self).__init__(name=name)
         self.__data = my_data
         self.__attr1 = attr1
         self.__attr2 = attr2
@@ -62,7 +62,7 @@ class FooBucket(Container):
             {'name': 'foos', 'type': list, 'doc': 'the Foo objects in this bucket', 'default': list()})
     def __init__(self, **kwargs):
         name, foos = getargs('name', 'foos', kwargs)
-        super(FooBucket, self).__init__(name=name, source='test_io_manger')
+        super(FooBucket, self).__init__(name=name)
         self.__foos = foos
         for f in self.__foos:
             self.add_child(f)
@@ -83,7 +83,6 @@ class TestBase(unittest.TestCase):
 
     def setUp(self):
         self.foo_spec = GroupSpec('A test group specification with a data type',
-                                  namespace=CORE_NAMESPACE,
                                   data_type_def='Foo',
                                   datasets=[DatasetSpec(
                                       'an example dataset',
@@ -230,11 +229,9 @@ class TestNestedContainersNoSubgroups(TestNestedBase):
     def setUpBucketSpec(self):
         self.bucket_spec = GroupSpec('A test group specification for a data type containing data type',
                                      name="test_foo_bucket",
-                                     namespace=CORE_NAMESPACE,
                                      data_type_def='FooBucket',
                                      groups=[GroupSpec(
                                          'the Foos in this bucket',
-                                         namespace=CORE_NAMESPACE,
                                          data_type_inc='Foo',
                                          quantity=ZERO_OR_MANY)])
 
@@ -258,12 +255,10 @@ class TestNestedContainersSubgroup(TestNestedBase):
             'A subgroup for Foos',
             name='foo_holder',
             groups=[GroupSpec('the Foos in this bucket',
-                              namespace=CORE_NAMESPACE,
                               data_type_inc='Foo',
                               quantity=ZERO_OR_MANY)])
         self.bucket_spec = GroupSpec('A test group specification for a data type containing data type',
                                      name="test_foo_bucket",
-                                     namespace=CORE_NAMESPACE,
                                      data_type_def='FooBucket',
                                      groups=[tmp_spec])
 
@@ -288,13 +283,11 @@ class TestNestedContainersSubgroupSubgroup(TestNestedBase):
         tmp_spec = GroupSpec('A subgroup for Foos',
                              name='foo_holder',
                              groups=[GroupSpec('the Foos in this bucket',
-                                               namespace=CORE_NAMESPACE,
                                                data_type_inc='Foo',
                                                quantity=ZERO_OR_MANY)])
         tmp_spec = GroupSpec('A subgroup to hold the subgroup', name='foo_holder_holder', groups=[tmp_spec])
         self.bucket_spec = GroupSpec('A test group specification for a data type containing data type',
                                      name="test_foo_bucket",
-                                     namespace=CORE_NAMESPACE,
                                      data_type_def='FooBucket',
                                      groups=[tmp_spec])
 

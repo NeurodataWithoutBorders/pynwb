@@ -14,10 +14,9 @@ class SpecCatalogTest(unittest.TestCase):
         self.spec = DatasetSpec('my first dataset',
                                 'int',
                                 name='dataset1',
-                                dimension=(None, None),
+                                dims=(None, None),
                                 attributes=self.attributes,
                                 linkable=False,
-                                namespace='core',
                                 data_type_def='EphysData')
 
     def test_register_spec(self):
@@ -27,12 +26,10 @@ class SpecCatalogTest(unittest.TestCase):
 
     def test_hierarchy(self):
         spikes_spec = DatasetSpec('my extending dataset', 'int',
-                                  namespace='core',
                                   data_type_inc='EphysData',
                                   data_type_def='SpikeData')
 
         lfp_spec = DatasetSpec('my second extending dataset', 'int',
-                               namespace='core',
                                data_type_inc='EphysData',
                                data_type_def='LFPData')
 
@@ -49,7 +46,6 @@ class SpecCatalogTest(unittest.TestCase):
 
     def test_get_spec_source_file(self):
         spikes_spec = GroupSpec('test group',
-                                namespace='core',
                                 data_type_def='SpikeData')
         source_file_path = '/test/myt/test.yaml'
         self.catalog.auto_register(spikes_spec, source_file_path)
