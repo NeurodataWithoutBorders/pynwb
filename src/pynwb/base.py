@@ -145,7 +145,7 @@ class TimeSeries(NWBDataInterface):
         data = getargs('data', kwargs)
         self.fields['data'] = data
         if isinstance(data, TimeSeries):
-            data.fields['data_link'].append(self)
+            data.fields.setdefault('data_link', list()).append(self)
             self.fields['num_samples'] = data.num_samples
         elif isinstance(data, AbstractDataChunkIterator):
             self.fields['num_samples'] = -1
@@ -168,7 +168,7 @@ class TimeSeries(NWBDataInterface):
             self.timestamps_unit = 'Seconds'
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
-                timestamps.fields['timestamp_link'].append(self)
+                timestamps.fields.setdefault('timestamp_link', list()).append(self)
         elif starting_time is not None and rate is not None:
             self.starting_time = starting_time
             self.rate = rate
