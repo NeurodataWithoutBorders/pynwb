@@ -226,28 +226,6 @@ def call_docval_func(func, kwargs):
     return func(*fargs, **fkwargs)
 
 
-def get_docval_args(func):
-    '''get_docval_args(func)
-    Like get_docval, but return only positional arguments
-    '''
-    func_docval = getattr(func, docval_attr_name, None)
-    if func_docval:
-        return tuple(a for a in func_docval[__docval_args_loc] if 'default' not in a)
-    else:
-        return tuple()
-
-
-def get_docval_kwargs(func):
-    '''get_docval_kwargs(func)
-    Like get_docval, but return only keyword arguments
-    '''
-    func_docval = getattr(func, docval_attr_name, None)
-    if func_docval:
-        return tuple(a for a in func_docval[__docval_args_loc] if 'default' in a)
-    else:
-        return tuple()
-
-
 def __resolve_macros(t):
     if t is None:
         return t
