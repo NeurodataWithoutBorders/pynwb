@@ -145,6 +145,8 @@ class TestHDF5Writer(GroupBuilderTestCase):
                                        attributes={'ancestry': 'TimeSeries',
                                                    'source': 'example_source',
                                                    'neurodata_type': 'TimeSeries',
+                                                   'int_array_attribute': [0, 1, 2, 3],
+                                                   'str_array_attribute': ['a', 'b', 'c', 'd'],
                                                    'help': 'General purpose TimeSeries'},
                                        datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                         attributes={'unit': 'SIunit',
