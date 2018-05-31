@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 
 from pynwb.base import ProcessingModule, TimeSeries
 from pynwb.form.data_utils import DataChunkIterator
