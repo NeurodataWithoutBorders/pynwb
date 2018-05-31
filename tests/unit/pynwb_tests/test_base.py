@@ -78,5 +78,4 @@ class TestTimeSeries(unittest.TestCase):
 
     def test_no_time(self):
         with self.assertRaisesRegex(TypeError, "either 'timestamps' or 'starting_time' and 'rate' must be specified"):
-            ts2 = TimeSeries('test_ts2', 'unit test test_data_timeseries', [10, 11, 12, 13, 14, 15], 'grams')
-
+            TimeSeries('test_ts2', 'unit test test_data_timeseries', [10, 11, 12, 13, 14, 15], 'grams')
