@@ -1,6 +1,6 @@
 
 from ..utils import docval, getargs
-from ..spec.spec import simplify_cpd_type
+from ..spec.spec import DtypeHelper
 from numpy import dtype
 
 
@@ -62,7 +62,7 @@ class DtypeError(Error):
         expected = getargs('expected', kwargs)
         received = getargs('received', kwargs)
         if isinstance(expected, list):
-            expected = simplify_cpd_type(expected)
+            expected = DtypeHelper.simplify_cpd_type(expected)
         reason = "incorrect type - expected '%s', got '%s'" % (expected, received)
         loc = getargs('location', kwargs)
         super(DtypeError, self).__init__(name, reason, location=loc)
