@@ -105,8 +105,8 @@ class GroupBuilderTestCase(unittest.TestCase):
                 b_sub = b[k]
                 b_keys.remove(k)
                 if isinstance(a_sub, LinkBuilder) and isinstance(a_sub, LinkBuilder):
-                    a_sub = a_sub['target']
-                    b_sub = b_sub['target']
+                    a_sub = a_sub['builder']
+                    b_sub = b_sub['builder']
                 elif isinstance(a_sub, LinkBuilder) != isinstance(a_sub, LinkBuilder):
                     reasons.append('%s != %s' % (a_sub, b_sub))
                 if isinstance(a_sub, DatasetBuilder) and isinstance(a_sub, DatasetBuilder):
@@ -176,6 +176,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.manager.prebuilt(self.ts, self.ts_builder)
         self.builder = GroupBuilder(
             'root',
+            source=self.path,
             groups={'acquisition':
                     GroupBuilder('acquisition',
                                  groups={'timeseries':
@@ -185,7 +186,12 @@ class TestHDF5Writer(GroupBuilderTestCase):
                     'analysis': GroupBuilder('analysis'),
                     'epochs': GroupBuilder('epochs'),
                     'general': GroupBuilder('general'),
-                    'processing': GroupBuilder('processing'),
+                    'processing': GroupBuilder('processing',
+                                               groups={'test_module':
+                                                       GroupBuilder('test_module',
+                                                                    links={'test_timeseries_link':
+                                                                           LinkBuilder(self.ts_builder,
+                                                                                       'test_timeseries_link')})}),
                     'stimulus': GroupBuilder(
                         'stimulus',
                         groups={'presentation':
