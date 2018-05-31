@@ -1,4 +1,3 @@
-import collections as _collections
 import itertools as _itertools
 import copy as _copy
 from abc import ABCMeta
@@ -47,8 +46,6 @@ def __type_okay(value, argtype, allow_none=False):
             return __is_int(value)
         elif argtype is 'float':
             return __is_float(value)
-        elif argtype is 'num':
-            return __is_int(value) or __is_float(value)
         return argtype in [cls.__name__ for cls in value.__class__.__mro__]
     elif isinstance(argtype, type):
         if argtype == six.text_type:
