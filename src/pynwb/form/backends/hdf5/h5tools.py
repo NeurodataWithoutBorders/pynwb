@@ -61,7 +61,7 @@ class HDF5IO(FORMIO):
              'type': NamespaceCatalog,
              'doc': 'the NamespaceCatalog to load namespaces into'},
             {'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
-            {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': list})
+            {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': None})
     def load_namespaces(cls, namespace_catalog, path, namespaces=None):
         '''
         Load cached namespaces from a file.
