@@ -8,6 +8,10 @@ from .form.data_utils import AbstractDataChunkIterator, DataIO
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface
 
+from math import floor, ceil
+from numpy import searchsorted, ndarray
+from copy import copy
+
 _default_conversion = 1.0
 _default_resolution = 0.0
 
@@ -219,3 +223,161 @@ class TimeSeries(NWBDataInterface):
     @property
     def time_unit(self):
         return self.__time_unit
+
+    @docval({'name': 'time', 'type': float, 'doc': 'The time value to mak to an index in the timeseries'},
+            {'name': 'match', 'type': str, 'doc': "One of 'before', 'after', or 'exact'.", 'default': 'before'},
+            returns="This function returns: 1) the integer index and 2) the floating point time value")
+    def time_to_index(self, **kwargs):
+        """
+        Convert a time value to an index for selection in the timeseries.
+
+        The function will always try to return the index of the exact matching timepoint if available.
+        If no exact match for the time is found then the function will return:
+
+        * The closest index before the indicated time if match is set to 'before'
+        * The closest index after the indicated time if match is set to 'after'
+        * None in case match is set to 'exact'
+        * None in case no time before the given time can be found and match is set to before
+        * None in case not time after the give time can be found and match is set to after
+
+        """
+        time, match = getargs('time', 'match', kwargs)
+        valid_match_vals = ['before', 'after', 'exact']
+        if match not in valid_match_vals:
+            raise ValueError("match=%s invalid. Valid values are one of: %s" % (match, str(valid_match_vals)))
+        result_index = None
+        result_time = None
+        ts = self.timestamps
+        # Find the closest timestamp in our series
+        if ts is not None:
+            stamps = ts[:]
+            target_index = searchsorted(stamps,
+                                        [time],
+                                        side='left' if match != 'after' else 'right')
+            if match == 'exact':
+                if result_index  < len(stamps) and stamps[result_index] == time:
+                    result_index = target_index
+                elif (result_index+1) < len(stamps) and stamps[result_index+1] == time:
+                    result_index = target_index
+                else:
+                    result_index = None
+            elif match == 'before':
+                result_index = target_index
+                if result_index == 0 and stamps[result_index] > time:
+                    result_index = None
+            elif match == 'after':
+                result_index = target_index
+                if result_index == len(stamps):
+                    if stamps[-1] == time:
+                        result_index -= 1
+                    else:
+                        result_index = None
+            result_time = None if result_index is None else stamps[result_index]
+        # Compute the closest timestamp
+        else:
+            rate = self.rate
+            start = self.starting_time
+            steps = self['num_samples']
+            if steps <= 0:
+                raise ValueError("Indexing of empty time series is empty. self['num_samples']=%i" % steps)
+            end = start + steps*rate
+            target_steps = (time-start) / rate
+            if match == 'exact':
+                target_time = start + int(target_steps) * rate
+                result_index = target_steps if target_time == time else None
+            elif match == 'before':
+                result_index = int(floor(target_steps))
+                if result_index<0:
+                    result_index = None
+                elif result_index>steps:
+                    result_index = steps
+            elif match == 'after':
+                result_index = int(ceil(target_steps))
+                if result_index<0:
+                    result_index = 0
+                elif result_index>steps:
+                    result_index = None
+            result_time = None if result_index is None else (start + result_index*rate)
+
+        return result_index, result_time
+
+
+    @docval({'name': 'time_range', 'type': tuple, 'doc': 'Tuple with start and stop time to select', 'default': None},
+            {'name': 'time_match', 'type': tuple,
+             'doc': 'Tuple indicting for time_range whether start/stop should be matched "before", "after" or "exact',
+             'default':None},
+            {'name': 'index_select', 'type': tuple, 'doc': 'Selections to be applied to self.data.', 'default': None},
+            returns='New TimeSeries with data and timestamps adjustd by the applied selection')
+    def subset_series(self, **kwargs):
+        time_range, time_match, index_select = getargs('time_range', 'time_match', 'index_select', kwargs)
+        # No selection applied
+        if time_range is None and index_select is None:
+            return self
+        # Validate that time_range and index_select are compatible
+        if time_range is not None and index_select is not None:
+            if index_select[0] is not None and index_select != slice(None):
+                raise ValueError("time_range=%s not compatible with selection specified by index_select[0]=%s" %
+                                 (str(time_range), str(index_select[0])))
+        if time_range is not None:
+            if len(time_range) != 2:
+                raise ValueError('time_range must have length 2')
+            if time_match is not None and len(time_match) != 2:
+                raise ValueError('time_match must have length 2')
+        # If we only have a time_range select, then create an empty index_select so we can update it
+        if index_select is None:
+            index_select = []
+
+        # Convert the time_range selection to an index selection and update index_select and new_starting_time
+        if time_range is not None:
+            if time_match is None:
+                time_match = ['after', 'before']
+            start_index, start_time = self.time_to_index(time=time_range[0], match=time_match[0])
+            stop_index, stop_time  = self.time_to_index(time=time_range[1], match=time_match[1])
+            if start_index is None:
+                raise ValueError("No valid start time found %s %s" % (str(time_match[0]), str(time_range[0])))
+            if stop_index is None:
+                raise ValueError("No valid stop time found %s %s" % (str(time_match[1]), str(time_range[1])))
+            index_select[0] = slice(start=start_index,
+                                    stop=stop_index+1,   # +1 because we need to include the stop
+                                    step=1               # Select all elements in the range
+                                    )
+            new_starting_time = start_time
+        # Apply our selection to the data
+        new_data = self.data[tuple(index_select)]
+        # Initialize the new starting and end times
+        new_sampling_rate = None
+        new_starting_time = None
+        new_timestamps = None
+        if self.timestamps is not None:
+            new_sampling_rate = None
+            new_starting_time = None
+            new_timestamps = self.timestamps
+        else:
+            new_timestamps = None
+            new_sampling_rate = self.rate
+            start_index = 0
+            if isinstance(index_select[0], slice):
+                start_index = index_select[0].start
+            elif isinstance(index_select[0], list) or isinstance(index_select[0], ndarray):
+                start_index = index_select[0][0]
+            elif isinstance(index_select[0], int):
+                start_index = index_select[0]
+            else:
+                raise NotImplementedError("Could not determine new start time from selection %s" % str(index_select[0]))
+            new_starting_time = self.starting_time + self.rate * start_index
+
+        new_fields = dict(data=new_data,
+                          timestamps=new_timestamps,
+                          sampling_rate=new_sampling_rate,
+                          start_time=new_starting_time)
+        for k,v in self.fields.items():
+            if k not in new_fields:  # ignore fields we have already set explicitly
+                new_fields[k] = copy(v)
+
+        return self.__class__.__init__(**new_fields)
+
+        # TODO implement making of self.timestams in the io/base.py object mapper
+        # TODO implement self.timestams to tbe an form.array.LinSpace  or an form.array.SortedArray so that we can directly look up times always in the timestamps
+        # TODO Test the time_to_indes(...) and subset_series(...) are actually working
+
+
