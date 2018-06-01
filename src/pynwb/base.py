@@ -89,8 +89,6 @@ class TimeSeries(NWBDataInterface):
                      "control_description",
                      "help")
 
-    __help = 'General purpose TimeSeries'
-
     __time_unit = "Seconds"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
