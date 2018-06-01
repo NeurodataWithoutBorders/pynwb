@@ -5,9 +5,12 @@ from pynwb.form.data_utils import DataChunkIterator
 from pynwb.form.backends.hdf5.h5tools import HDF5IO
 from pynwb.form.backends.hdf5 import H5DataIO
 from pynwb.form.build import DatasetBuilder
+from pynwb.form.spec.namespace import NamespaceCatalog
 from h5py import SoftLink, HardLink, ExternalLink, File
 from pynwb.file import NWBFile
 from pynwb.base import TimeSeries
+from pynwb import NWBHDF5IO
+from pynwb.spec import NWBNamespace, NWBGroupSpec, NWBDatasetSpec
 
 
 import tempfile
@@ -349,11 +352,58 @@ class H5IOTest(unittest.TestCase):
                              self.f['test_copy'][:].tolist())
 
 
+class TestCacheSpec(unittest.TestCase):
+
+    def test_cache_spec(self):
+        self.test_temp_file = tempfile.NamedTemporaryFile()
+        # On Windows h5py cannot truncate an open file in write mode.
+        # The temp file will be closed before h5py truncates it
+        # and will be removed during the tearDown step.
+        self.test_temp_file.close()
+        self.io = NWBHDF5IO(self.test_temp_file.name)
+        # Setup all the data we need
+        start_time = datetime(2017, 4, 3, 11, 0, 0)
+        create_date = datetime(2017, 4, 15, 12, 0, 0)
+        data = np.arange(1000).reshape((100, 10))
+        timestamps = np.arange(100)
+        # Create the first file
+        nwbfile1 = NWBFile(source='PyNWB tutorial',
+                           session_description='demonstrate external files',
+                           identifier='NWBE1',
+                           session_start_time=start_time,
+                           file_create_date=create_date)
+
+        test_ts1 = TimeSeries(name='test_timeseries',
+                              source='PyNWB tutorial',
+                              data=data,
+                              unit='SIunit',
+                              timestamps=timestamps)
+        nwbfile1.add_acquisition(test_ts1)
+        # Write the first file
+        self.io.write(nwbfile1, cache_spec=True)
+        self.io.close()
+        ns_catalog = NamespaceCatalog(group_spec_cls=NWBGroupSpec,
+                                      dataset_spec_cls=NWBDatasetSpec,
+                                      spec_namespace_cls=NWBNamespace)
+        NWBHDF5IO.load_namespaces(ns_catalog, self.test_temp_file.name)
+        self.assertEqual(ns_catalog.namespaces, ('core',))
+        source_types = self.__get_types(self.io.manager.namespace_catalog)
+        read_types = self.__get_types(ns_catalog)
+        self.assertSetEqual(source_types, read_types)
+
+    def __get_types(self, catalog):
+        types = set()
+        for ns_name in catalog.namespaces:
+            ns = catalog.get_namespace(ns_name)
+            for source in ns['schema']:
+                types.update(catalog.get_types(source['source']))
+        return types
+
+
 class NWBHDF5IOMultiFileTest(unittest.TestCase):
     """Tests for h5tools IO tools"""
 
     def setUp(self):
-        from pynwb import NWBHDF5IO
         numfiles = 3
         self.test_temp_files = [tempfile.NamedTemporaryFile() for i in range(numfiles)]
 
