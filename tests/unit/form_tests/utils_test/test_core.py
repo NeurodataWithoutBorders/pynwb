@@ -56,7 +56,7 @@ class TestDocValidator(unittest.TestCase):
         self.test_obj_sub = MyTestSubclass()
 
     def test_bad_type(self):
-        exp_msg = "argtype must be a type, a str, a list, a tuple, or None - got <class 'dict'>"
+        exp_msg = "argtype must be a type, a str, a list, a tuple, or None - got <class|type 'dict'>"
         with self.assertRaisesRegex(ValueError, exp_msg):
             @docval({'name': 'arg1', 'type': {'a': 1}, 'doc': 'this is a bad type'})
             def method(self, **kwargs):
