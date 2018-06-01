@@ -1,16 +1,16 @@
 import unittest2 as unittest
 from six import text_type
 
-from pynwb.form.utils import *  # noqa: F403
+from pynwb.form.utils import docval, fmt_docval_args
 
 
 class MyTestClass(object):
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'})  # noqa: F405
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'})
     def basic_add(self, **kwargs):
         return kwargs
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},  # noqa: F405
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},
             {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int'})
     def basic_add2(self, **kwargs):
         return kwargs
@@ -20,13 +20,13 @@ class MyTestClass(object):
     def basic_add2_text_type(self, **kwargs):
         return kwargs
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},  # noqa: F405
-            {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int'},
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},
+            {'name': 'arg2', 'type': 'int', 'doc': 'argument2 is a int'},
             {'name': 'arg3', 'type': bool, 'doc': 'argument3 is a bool. it defaults to False', 'default': False})
     def basic_add2_kw(self, **kwargs):
         return kwargs
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str', 'default': 'a'},  # noqa: F405
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str', 'default': 'a'},
             {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int', 'default': 1})
     def basic_only_kw(self, **kwargs):
         return kwargs
@@ -34,16 +34,16 @@ class MyTestClass(object):
 
 class MyTestSubclass(MyTestClass):
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},  # noqa: F405
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},
             {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int'})
     def basic_add(self, **kwargs):
         return kwargs
 
-    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},  # noqa: F405
+    @docval({'name': 'arg1', 'type': str, 'doc': 'argument1 is a str'},
             {'name': 'arg2', 'type': int, 'doc': 'argument2 is a int'},
             {'name': 'arg3', 'type': bool, 'doc': 'argument3 is a bool. it defaults to False', 'default': False},
             {'name': 'arg4', 'type': str, 'doc': 'argument4 is a str'},
-            {'name': 'arg5', 'type': int, 'doc': 'argument5 is a int'},
+            {'name': 'arg5', 'type': 'float', 'doc': 'argument5 is a float'},
             {'name': 'arg6', 'type': bool, 'doc': 'argument6 is a bool. it defaults to False', 'default': None})
     def basic_add2_kw(self, **kwargs):
         return kwargs
@@ -55,6 +55,14 @@ class TestDocValidator(unittest.TestCase):
         self.test_obj = MyTestClass()
         self.test_obj_sub = MyTestSubclass()
 
+    def test_bad_type(self):
+        exp_msg = "argtype must be a type, a str, a list, a tuple, or None - got <class 'dict'>"
+        with self.assertRaisesRegex(ValueError, exp_msg):
+            @docval({'name': 'arg1', 'type': {'a': 1}, 'doc': 'this is a bad type'})
+            def method(self, **kwargs):
+                pass
+            method(self, arg1=1234560)
+
     def test_fmt_docval_args(self):
         """ Test that fmt_docval_args works """
         test_kwargs = {
@@ -62,7 +70,7 @@ class TestDocValidator(unittest.TestCase):
             'arg2': 1,
             'arg3': True,
         }
-        rec_args, rec_kwargs = fmt_docval_args(self.test_obj.basic_add2_kw, test_kwargs)  # noqa: F405
+        rec_args, rec_kwargs = fmt_docval_args(self.test_obj.basic_add2_kw, test_kwargs)
         exp_args = ['a string', 1]
         self.assertListEqual(rec_args, exp_args)
         exp_kwargs = {'arg3': True}
@@ -176,9 +184,9 @@ class TestDocValidator(unittest.TestCase):
            two keyword arguments, where two positional and one keyword
            argument is specified in both the parent and sublcass implementations
         """
-        kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', 200)
+        kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', 200.0)
         expected = {'arg1': 'a string', 'arg2': 100,
-                    'arg4': 'another string', 'arg5': 200,
+                    'arg4': 'another string', 'arg5': 200.0,
                     'arg3': False, 'arg6': None}
         self.assertDictEqual(kwargs, expected)
 
@@ -199,9 +207,9 @@ class TestDocValidator(unittest.TestCase):
            and one keyword argument is specified in both the parent
            and sublcass implementations
         """
-        kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', 200, arg6=True)
+        kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', 200.0, arg6=True)
         expected = {'arg1': 'a string', 'arg2': 100,
-                    'arg4': 'another string', 'arg5': 200,
+                    'arg4': 'another string', 'arg5': 200.0,
                     'arg3': False, 'arg6': True}
         self.assertDictEqual(kwargs, expected)
 
@@ -222,7 +230,7 @@ class TestDocValidator(unittest.TestCase):
         """
         with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', None, arg6=True)  # noqa: F841
-        msg = "incorrect type for 'arg5' (got 'NoneType', expected 'int')"
+        msg = "incorrect type for 'arg5' (got 'NoneType', expected 'float')"
         self.assertEqual(cm.exception.args[0], msg)
 
     def test_only_kw_no_args(self):
