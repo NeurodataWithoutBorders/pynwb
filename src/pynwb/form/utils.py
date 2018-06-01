@@ -59,10 +59,8 @@ def __type_okay(value, argtype, allow_none=False):
         return isinstance(value, argtype)
     elif isinstance(argtype, tuple) or isinstance(argtype, list):
         return any(__type_okay(value, i) for i in argtype)
-    elif argtype is None:
+    else:    # argtype is None
         return True
-    else:
-        raise ValueError("argtype must be a type, a str, a list, a tuple, or None")
 
 
 def __is_int(value):
@@ -226,7 +224,7 @@ def call_docval_func(func, kwargs):
     return func(*fargs, **fkwargs)
 
 
-def __resolve_macros(t):
+def __resolve_type(t):
     if t is None:
         return t
     if isinstance(t, str):
@@ -236,15 +234,18 @@ def __resolve_macros(t):
             return t
     elif isinstance(t, type):
         return t
-    else:
+    elif isinstance(t, (list, tuple)):
         ret = list()
         for i in t:
-            resolved = __resolve_macros(i)
+            resolved = __resolve_type(i)
             if isinstance(resolved, tuple):
                 ret.extend(resolved)
             else:
                 ret.append(resolved)
         return tuple(ret)
+    else:
+        msg = "argtype must be a type, a str, a list, a tuple, or None - got %s" % type(t)
+        raise ValueError(msg)
 
 
 def docval(*validator, **options):
@@ -300,7 +301,7 @@ def docval(*validator, **options):
         pos = list()
         kw = list()
         for a in val_copy:
-            a['type'] = __resolve_macros(a['type'])
+            a['type'] = __resolve_type(a['type'])
             if 'default' in a:
                 kw.append(a)
             else:
