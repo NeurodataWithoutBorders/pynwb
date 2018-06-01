@@ -86,8 +86,7 @@ class TimeSeries(NWBDataInterface):
                      "rate",
                      "rate_unit",
                      "control",
-                     "control_description",
-                     "help")
+                     "control_description")
 
     __time_unit = "Seconds"
 
@@ -173,10 +172,6 @@ class TimeSeries(NWBDataInterface):
             self.rate_unit = 'Seconds'
         else:
             raise TypeError("either 'timestamps' or 'starting_time' and 'rate' must be specified")
-
-    @property
-    def help(self):
-        return self.__help
 
     @property
     def data(self):
