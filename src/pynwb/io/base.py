@@ -2,7 +2,6 @@ from ..form.build import ObjectMapper
 from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
-from ..form.array import LinSpace
 
 
 @register_map(ProcessingModule)
@@ -38,18 +37,3 @@ class TimeSeriesMap(ObjectMapper):
     @ObjectMapper.constructor_arg('name')
     def name(self, builder, manager):
         return builder.name
-
-    """
-    @ObjectMapper.constructor_arg('timestamps')
-    def timestamps(self, builder, manager):
-        if 'timestamps' in builder:
-            return builder['timestamps']
-        elif 'sampling_rate' in builder and 'starting_time' in builder:
-            num_steps = builder['data'].shape[0]
-            start = builder['starting_time']
-            rate = builder['sampling_rate']
-            stop = start + rate*num_steps
-            return LinSpace(start=start,
-                            stop=stop,
-                            step=rate)
-    """

@@ -3,6 +3,7 @@ from abc import abstractmethod, ABCMeta
 from six import with_metaclass
 from math import ceil, floor
 
+
 class Array(object):
 
     def __init__(self, data, dtype=None):
@@ -177,10 +178,7 @@ class SortedArray(AbstractSortedArray):
         if dtype is not None:
             self.dtype = dtype
 
-    def find_point(self, val):
-        return self.find_point(val, 'left')
-
-    def find_point(self, val, side):
+    def find_point(self, val, side='left'):
         return np.searchsorted(self.data, val, side=side)
 
 
@@ -200,7 +198,7 @@ class LinSpace(SortedArray):
 
     def find_point(self, val, side):
         nsteps = (val - self.start) / self.step
-        if nsteps < 0 or val>self.stop:
+        if nsteps < 0 or val > self.stop:
             raise ValueError("%s out of range")
         if side == 'left':
             fl = int(floor(nsteps))

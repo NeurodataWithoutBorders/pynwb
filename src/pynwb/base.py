@@ -8,10 +8,9 @@ from .form.data_utils import AbstractDataChunkIterator, DataIO
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface
 
-from math import floor, ceil
-from numpy import searchsorted, ndarray
+from numpy import ndarray
 from copy import copy
-from .form.array import LinSpace, SortedArray, Array
+from .form.array import LinSpace, SortedArray
 
 _default_conversion = 1.0
 _default_resolution = 0.0
@@ -208,7 +207,15 @@ class TimeSeries(NWBDataInterface):
         else:
             return self.fields['timestamps']
 
-    def get_timestamps(self, as_sortedarray=True):
+    @docval({'name': 'as_sortedarray', 'type': bool, 'doc': 'If True, return form.array.SortedArray for timestamps',
+             'default': True})
+    def get_timestamps(self, **kwargs):
+        """
+        Get timestamps array
+
+        :return: SortedArray of as_sortedarray is True else return self.timestamps directly
+        """
+        as_sortedarray = getargs('as_sortedarray', kwargs)
         if as_sortedarray:
             if 'timestamps' not in self.fields:
                 return LinSpace(start=self.starting_time,
@@ -271,20 +278,21 @@ class TimeSeries(NWBDataInterface):
             result_time = None
         return result_index, result_time
 
-
     @docval({'name': 'name', 'type': str, 'doc': 'Name of the new subset TimeSeries'},
             {'name': 'time_range', 'type': tuple, 'doc': 'Tuple with start and stop time to select', 'default': None},
             {'name': 'time_match', 'type': tuple,
-             'doc': 'Tuple indicting for time_range whether start/stop should be matched "before", "after" or "exact',
-             'default':None},
+             'doc': 'Tuple indicting for time_range whether start/stop should be matched "before" or "after".' +
+                    'Default behavior is ("after", "before"), i.e., start=after and stop=before',
+             'default': None},
             {'name': 'index_select', 'type': tuple, 'doc': 'Selections to be applied to self.data.', 'default': None},
             returns='New TimeSeries with data and timestamps adjustd by the applied selection')
     def subset_series(self, **kwargs):
-        new_name, time_range, time_match, index_select = getargs('name','time_range', 'time_match', 'index_select',
+        new_name, time_range, time_match, index_select = getargs('name', 'time_range', 'time_match', 'index_select',
                                                                  kwargs)
         # No selection applied
         if time_range is None and index_select is None:
             return self
+
         # Validate that time_range and index_select are compatible
         if time_range is not None and index_select is not None:
             if index_select[0] is not None and index_select != slice(None):
@@ -295,6 +303,7 @@ class TimeSeries(NWBDataInterface):
                 raise ValueError('time_range must have length 2')
             if time_match is not None and len(time_match) != 2:
                 raise ValueError('time_match must have length 2')
+
         # If we only have a time_range select, then create an empty index_select so we can update it
         if index_select is None:
             index_select = [slice(None), ]
@@ -304,7 +313,7 @@ class TimeSeries(NWBDataInterface):
             if time_match is None:
                 time_match = ['after', 'before']
             start_index, start_time = self.time_to_index(time=time_range[0], match=time_match[0])
-            stop_index, stop_time  = self.time_to_index(time=time_range[1], match=time_match[1])
+            stop_index, stop_time = self.time_to_index(time=time_range[1], match=time_match[1])
             if start_index is None:
                 raise ValueError("No valid start time found %s %s" % (str(time_match[0]), str(time_range[0])))
             if stop_index is None:
@@ -315,7 +324,6 @@ class TimeSeries(NWBDataInterface):
                                     )
             new_starting_time = start_time
         # Apply our selection to the data
-        #print(np.s_index_select)
         if isinstance(self.data, list):
             new_data = self.data
             for s in index_select:
@@ -349,11 +357,7 @@ class TimeSeries(NWBDataInterface):
                           timestamps=new_timestamps,
                           sampling_rate=new_sampling_rate,
                           start_time=new_starting_time)
-        for k,v in self.fields.items():
+        for k, v in self.fields.items():
             if k not in new_fields:  # ignore fields we have already set explicitly
                 new_fields[k] = copy(v)
         return self.__class__(name=new_name, **new_fields)
-
-        # TODO implement making of self.timestams in the io/base.py object mapper
-
-

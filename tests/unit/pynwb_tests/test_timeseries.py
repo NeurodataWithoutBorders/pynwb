@@ -75,30 +75,29 @@ class TimeSeriesConstructor(unittest.TestCase):
                         unit='unit',
                         starting_time=3.0,
                         rate=1.0)
-        ri, rt =  ts.time_to_index(0.0)
+        ri, rt = ts.time_to_index(0.0)
         self.assertIsNone(ri)
         self.assertIsNone(rt)
-        ri, rt =  ts.time_to_index(20.0)
+        ri, rt = ts.time_to_index(20.0)
         self.assertIsNone(ri)
         self.assertIsNone(rt)
 
     def test_subset_timeseries_numpy(self):
         ts = TimeSeries(name='test_ts',
-                source='a hypothetical source',
-		data=np.arange(200).reshape(100,2),
-		unit='unit',
-		starting_time=3.0,
-		rate=1.0)
+                        source='a hypothetical source',
+                        data=np.arange(200).reshape(100, 2),
+                        unit='unit',
+                        starting_time=3.0,
+                        rate=1.0)
         subset = ts.subset_series(name='subset_series', time_range=(4., 5.))
         self.assertListEqual(subset.data.tolist(), [[2, 3], [4, 5]])
 
-
     def test_subset_timeseries_list(self):
         ts = TimeSeries(name='test_ts',
-                source='a hypothetical source',
-		data=np.arange(200).reshape(100,2).tolist(),
-		unit='unit',
-		starting_time=3.0,
-		rate=1.0)
+                        source='a hypothetical source',
+                        data=np.arange(200).reshape(100, 2).tolist(),
+                        unit='unit',
+                        starting_time=3.0,
+                        rate=1.0)
         subset = ts.subset_series(name='subset_series', time_range=(4., 5.))
         self.assertListEqual(subset.data, [[2, 3], [4, 5]])

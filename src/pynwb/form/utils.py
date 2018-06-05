@@ -345,7 +345,7 @@ def docval(*validator, **options):
                     msg = ', '.join(parse_err)
                     try:
                         msg += " for function " + str(type(self).__name__) + "." + str(func.__name__)
-                    except:
+                    except AttributeError:
                         pass
                     raise_from(TypeError(msg), None)
                 return func(self, **parsed['args'])

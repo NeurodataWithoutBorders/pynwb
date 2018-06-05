@@ -160,7 +160,9 @@ class TestDocValidator(unittest.TestCase):
         """
         with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj.basic_add2_kw('a string', 'bad string')  # noqa: F841
-        self.assertEqual(cm.exception.args[0], u"incorrect type for 'arg2' (got 'str', expected 'int') for function MyTestClass.basic_add2_kw")
+        expected_msg = u"incorrect type for 'arg2' (got 'str', expected 'int') for function MyTestClass.basic_add2_kw"
+        self.assertEqual(cm.exception.args[0],
+                         expected_msg)
 
     def test_docval_add_sub(self):
         """Test that docval works with a two positional arguments,
