@@ -343,6 +343,10 @@ def docval(*validator, **options):
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
+                    try:
+                        msg += " for function " + str(type(self).__name__) + "." + str(func.__name__)
+                    except:
+                        pass
                     raise_from(TypeError(msg), None)
                 return func(self, **parsed['args'])
         else:

@@ -88,7 +88,7 @@ class TestDocValidator(unittest.TestCase):
         """
         with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj.basic_add()  # noqa: F841
-        msg = "missing argument 'arg1'"
+        msg = "missing argument 'arg1' for function MyTestClass.basic_add"
         self.assertEqual(cm.exception.args[0], msg)
 
     def test_docval_add2(self):
@@ -160,8 +160,7 @@ class TestDocValidator(unittest.TestCase):
         """
         with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj.basic_add2_kw('a string', 'bad string')  # noqa: F841
-
-        self.assertEqual(cm.exception.args[0], u"incorrect type for 'arg2' (got 'str', expected 'int')")
+        self.assertEqual(cm.exception.args[0], u"incorrect type for 'arg2' (got 'str', expected 'int') for function MyTestClass.basic_add2_kw")
 
     def test_docval_add_sub(self):
         """Test that docval works with a two positional arguments,
@@ -190,7 +189,7 @@ class TestDocValidator(unittest.TestCase):
         """
         with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string')  # noqa: F841
-        msg = "missing argument 'arg5'"
+        msg = "missing argument 'arg5' for function MyTestSubclass.basic_add2_kw"
         self.assertEqual(cm.exception.args[0], msg)
 
     def test_docval_add2_kw_kwsyntax_sub(self):
@@ -212,7 +211,7 @@ class TestDocValidator(unittest.TestCase):
         """
         with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', arg6=True)  # noqa: F841
-        msg = "missing argument 'arg5'"
+        msg = "missing argument 'arg5' for function MyTestSubclass.basic_add2_kw"
         self.assertEqual(cm.exception.args[0], msg)
 
     def test_docval_add2_kw_kwsyntax_sub_nonetype_arg(self):
@@ -222,7 +221,7 @@ class TestDocValidator(unittest.TestCase):
         """
         with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', None, arg6=True)  # noqa: F841
-        msg = "incorrect type for 'arg5' (got 'NoneType', expected 'int')"
+        msg = "incorrect type for 'arg5' (got 'NoneType', expected 'int') for function MyTestSubclass.basic_add2_kw"
         self.assertEqual(cm.exception.args[0], msg)
 
     def test_only_kw_no_args(self):
