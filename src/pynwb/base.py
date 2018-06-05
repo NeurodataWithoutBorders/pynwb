@@ -11,6 +11,7 @@ from .core import NWBDataInterface, MultiContainerInterface
 from math import floor, ceil
 from numpy import searchsorted, ndarray
 from copy import copy
+from .form.array import LinSpace, SortedArray, Array
 
 _default_conversion = 1.0
 _default_resolution = 0.0
@@ -207,6 +208,22 @@ class TimeSeries(NWBDataInterface):
         else:
             return self.fields['timestamps']
 
+    def get_timestamps(self, as_sortedarray=True):
+        if as_sortedarray:
+            if 'timestamps' not in self.fields:
+                return LinSpace(start=self.starting_time,
+                                stop=self.starting_time + self.fields['num_samples'] * self.rate,
+                                step=self.rate)
+            if isinstance(self.fields['timestamps'], TimeSeries):
+                return self.fields['timestamps'].get_timestamps(as_sortedarray=as_sortedarray)
+            else:
+                if isinstance(self.fields['timestamps'], SortedArray):
+                    return self.fields['timestamps']
+                else:
+                    return SortedArray(self.fields['timestamps'], dtype='float')
+        else:
+            return self.timestamps
+
     @property
     def timestamp_link(self):
         return self.__get_links('timestamp_link')
@@ -225,7 +242,7 @@ class TimeSeries(NWBDataInterface):
         return self.__time_unit
 
     @docval({'name': 'time', 'type': float, 'doc': 'The time value to mak to an index in the timeseries'},
-            {'name': 'match', 'type': str, 'doc': "One of 'before', 'after', or 'exact'.", 'default': 'before'},
+            {'name': 'match', 'type': str, 'doc': "Find best matching time 'before' or 'after'.", 'default': 'before'},
             returns="This function returns: 1) the integer index and 2) the floating point time value")
     def time_to_index(self, **kwargs):
         """
@@ -236,80 +253,35 @@ class TimeSeries(NWBDataInterface):
 
         * The closest index before the indicated time if match is set to 'before'
         * The closest index after the indicated time if match is set to 'after'
-        * None in case match is set to 'exact'
-        * None in case no time before the given time can be found and match is set to before
-        * None in case not time after the give time can be found and match is set to after
+        * None in case the given time is out of range of the time series
 
         """
         time, match = getargs('time', 'match', kwargs)
-        valid_match_vals = ['before', 'after', 'exact']
+        valid_match_vals = ['before', 'after']
         if match not in valid_match_vals:
             raise ValueError("match=%s invalid. Valid values are one of: %s" % (match, str(valid_match_vals)))
-        result_index = None
-        result_time = None
-        ts = self.timestamps
         # Find the closest timestamp in our series
-        if ts is not None:
-            stamps = ts[:]
-            target_index = searchsorted(stamps,
-                                        [time],
-                                        side='left' if match != 'after' else 'right')
-            if match == 'exact':
-                if result_index  < len(stamps) and stamps[result_index] == time:
-                    result_index = target_index
-                elif (result_index+1) < len(stamps) and stamps[result_index+1] == time:
-                    result_index = target_index
-                else:
-                    result_index = None
-            elif match == 'before':
-                result_index = target_index
-                if result_index == 0 and stamps[result_index] > time:
-                    result_index = None
-            elif match == 'after':
-                result_index = target_index
-                if result_index == len(stamps):
-                    if stamps[-1] == time:
-                        result_index -= 1
-                    else:
-                        result_index = None
-            result_time = None if result_index is None else stamps[result_index]
-        # Compute the closest timestamp
-        else:
-            rate = self.rate
-            start = self.starting_time
-            steps = self['num_samples']
-            if steps <= 0:
-                raise ValueError("Indexing of empty time series is empty. self['num_samples']=%i" % steps)
-            end = start + steps*rate
-            target_steps = (time-start) / rate
-            if match == 'exact':
-                target_time = start + int(target_steps) * rate
-                result_index = target_steps if target_time == time else None
-            elif match == 'before':
-                result_index = int(floor(target_steps))
-                if result_index<0:
-                    result_index = None
-                elif result_index>steps:
-                    result_index = steps
-            elif match == 'after':
-                result_index = int(ceil(target_steps))
-                if result_index<0:
-                    result_index = 0
-                elif result_index>steps:
-                    result_index = None
-            result_time = None if result_index is None else (start + result_index*rate)
-
+        side = 'left' if match != 'after' else 'right'
+        try:
+            st = self.get_timestamps(as_sortedarray=True)
+            result_index = st.find_point(time, side)
+            result_time = st[result_index]
+        except ValueError:
+            result_index = None
+            result_time = None
         return result_index, result_time
 
 
-    @docval({'name': 'time_range', 'type': tuple, 'doc': 'Tuple with start and stop time to select', 'default': None},
+    @docval({'name': 'name', 'type': str, 'doc': 'Name of the new subset TimeSeries'},
+            {'name': 'time_range', 'type': tuple, 'doc': 'Tuple with start and stop time to select', 'default': None},
             {'name': 'time_match', 'type': tuple,
              'doc': 'Tuple indicting for time_range whether start/stop should be matched "before", "after" or "exact',
              'default':None},
             {'name': 'index_select', 'type': tuple, 'doc': 'Selections to be applied to self.data.', 'default': None},
             returns='New TimeSeries with data and timestamps adjustd by the applied selection')
     def subset_series(self, **kwargs):
-        time_range, time_match, index_select = getargs('time_range', 'time_match', 'index_select', kwargs)
+        new_name, time_range, time_match, index_select = getargs('name','time_range', 'time_match', 'index_select',
+                                                                 kwargs)
         # No selection applied
         if time_range is None and index_select is None:
             return self
@@ -325,7 +297,7 @@ class TimeSeries(NWBDataInterface):
                 raise ValueError('time_match must have length 2')
         # If we only have a time_range select, then create an empty index_select so we can update it
         if index_select is None:
-            index_select = []
+            index_select = [slice(None), ]
 
         # Convert the time_range selection to an index selection and update index_select and new_starting_time
         if time_range is not None:
@@ -337,13 +309,20 @@ class TimeSeries(NWBDataInterface):
                 raise ValueError("No valid start time found %s %s" % (str(time_match[0]), str(time_range[0])))
             if stop_index is None:
                 raise ValueError("No valid stop time found %s %s" % (str(time_match[1]), str(time_range[1])))
-            index_select[0] = slice(start=start_index,
-                                    stop=stop_index+1,   # +1 because we need to include the stop
-                                    step=1               # Select all elements in the range
+            index_select[0] = slice(start_index,    # start
+                                    stop_index+1,   # stop = +1 because we need to include the stop
+                                    1               # step = Select all elements in the range
                                     )
             new_starting_time = start_time
         # Apply our selection to the data
-        new_data = self.data[tuple(index_select)]
+        #print(np.s_index_select)
+        if isinstance(self.data, list):
+            new_data = self.data
+            for s in index_select:
+                new_data = new_data[s]
+        else:
+            new_data = self.data[index_select]
+
         # Initialize the new starting and end times
         new_sampling_rate = None
         new_starting_time = None
@@ -373,11 +352,8 @@ class TimeSeries(NWBDataInterface):
         for k,v in self.fields.items():
             if k not in new_fields:  # ignore fields we have already set explicitly
                 new_fields[k] = copy(v)
-
-        return self.__class__.__init__(**new_fields)
+        return self.__class__(name=new_name, **new_fields)
 
         # TODO implement making of self.timestams in the io/base.py object mapper
-        # TODO implement self.timestams to tbe an form.array.LinSpace  or an form.array.SortedArray so that we can directly look up times always in the timestamps
-        # TODO Test the time_to_indes(...) and subset_series(...) are actually working
 
 
