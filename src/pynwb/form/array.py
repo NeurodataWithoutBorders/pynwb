@@ -1,18 +1,23 @@
 import numpy as np
 from abc import abstractmethod, ABCMeta
 from six import with_metaclass
-
+from math import ceil, floor
 
 class Array(object):
 
-    def __init__(self, data):
+    def __init__(self, data, dtype=None):
         self.__data = data
-        if hasattr(data, 'dtype'):
+        if dtype is not None:
+            self.dtype = dtype
+        elif hasattr(data, 'dtype'):
             self.dtype = data.dtype
         else:
             tmp = data
             while isinstance(tmp, (list, tuple)):
-                tmp = tmp[0]
+                if len(tmp) > 0:
+                    tmp = tmp[0]
+                else:
+                    raise ValueError("Cannot determine dtype for empty array")
             self.dtype = type(tmp)
 
     @property
@@ -26,6 +31,7 @@ class Array(object):
         return self.__data
 
     def __getidx__(self, arg):
+
         return self.__data[arg]
 
     def __sliceiter(self, arg):
@@ -54,14 +60,14 @@ class AbstractSortedArray(with_metaclass(ABCMeta, Array)):
     '''
 
     @abstractmethod
-    def find_point(self, val):
+    def find_point(self, val, side):
         pass
 
     def get_data(self):
         return self
 
     def __lower(self, other):
-        ins = self.find_point(other)
+        ins = self.find_point(other, 'left')
         return ins
 
     def __upper(self, other):
@@ -166,11 +172,16 @@ class SortedArray(AbstractSortedArray):
     efficiency.
     '''
 
-    def __init__(self, array):
+    def __init__(self, array, dtype=None):
         super(SortedArray, self).__init__(array)
+        if dtype is not None:
+            self.dtype = dtype
 
     def find_point(self, val):
-        return np.searchsorted(self.data, val)
+        return self.find_point(val, 'left')
+
+    def find_point(self, val, side):
+        return np.searchsorted(self.data, val, side=side)
 
 
 class LinSpace(SortedArray):
@@ -179,19 +190,23 @@ class LinSpace(SortedArray):
         self.start = start
         self.stop = stop
         self.step = step
+        if step <= 0:
+            raise ValueError("step must be larger than 0")
         self.dtype = float if any(isinstance(s, float) for s in (start, stop, step)) else int
         self.__len = int((stop - start)/step)
 
     def __len__(self):
         return self.__len
 
-    def find_point(self, val):
-        nsteps = (val-self.start)/self.step
-        fl = int(nsteps)
-        if fl == nsteps:
-            return int(fl)
-        else:
-            return int(fl+1)
+    def find_point(self, val, side):
+        nsteps = (val - self.start) / self.step
+        if nsteps < 0 or val>self.stop:
+            raise ValueError("%s out of range")
+        if side == 'left':
+            fl = int(floor(nsteps))
+        elif side == 'right':
+            fl = int(ceil(nsteps))
+        return fl
 
     def __getidx__(self, arg):
         return self.start + self.step*arg
