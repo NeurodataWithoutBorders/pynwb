@@ -49,7 +49,7 @@ class TestNWBContainer(unittest.TestCase):
         subs = NWBContainer.subtypes()
 
         def all_subs(myclass):
-            return set(myclass.__subclasses__()).union( [s for c in myclass.__subclasses__() for s in all_subs(c)])
+            return set(myclass.__subclasses__()).union([s for c in myclass.__subclasses__() for s in all_subs(c)])
 
         expected_subs = all_subs(NWBContainer)
         self.assertSetEqual(subs, expected_subs)

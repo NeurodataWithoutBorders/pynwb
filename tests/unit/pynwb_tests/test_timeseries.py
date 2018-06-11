@@ -1,11 +1,62 @@
-import unittest
+import unittest2 as unittest
 
 from pynwb import TimeSeries
 from pynwb.core import NWBContainer
 import numpy as np
+import pynwb
 
 
-class TimeSeriesConstructor(unittest.TestCase):
+class TimeseriesTestCaseBase(unittest.TestCase):
+
+    # List of timeseries types to be tested for sub-setting
+    def get_subset_series_test_cases(self):
+        return []
+
+    def test_subset_timeseries(self):
+        for case in self. get_subset_series_test_cases():
+            with self.subTest(case['name']):
+                try:
+                    ts_instance = case['class'](**case['const_args'])
+                except Exception as e:
+                    ts_instance = None
+                    self.skipTest("Skipping: " + case['name'] + " Reason: " + str(e))
+                if ts_instance is not None:
+                    subset = ts_instance.subset_series(**case['subset_args'])
+                    case['assert'](subset.data if isinstance(subset.data, list) else subset.data.tolist(),
+                                   case['expected_data'])
+
+
+class TimeSeriesConstructor(TimeseriesTestCaseBase):
+
+    def get_subset_series_test_cases(self):
+        subset_series_tests = []
+        subset_series_tests.append({
+            'class': pynwb.image.TimeSeries,
+            'const_args': dict(name='test_ts',
+                               source='a hypothetical source',
+                               data=np.arange(200).reshape(100, 2),
+                               unit='unit',
+                               starting_time=3.0,
+                               rate=1.0),
+            'subset_args': dict(name='subset_series', time_range=(4., 5.)),
+            'expected_data': [[2, 3], [4, 5]],
+            'assert': self.assertListEqual,
+            'name': "TimeSeries subset numpy"
+        })
+        subset_series_tests.append({
+            'class': pynwb.image.TimeSeries,
+            'const_args': dict(name='test_ts',
+                               source='a hypothetical source',
+                               data=np.arange(200).reshape(100, 2).tolist(),
+                               unit='unit',
+                               starting_time=3.0,
+                               rate=1.0),
+            'subset_args': dict(name='subset_series', time_range=(4., 5.)),
+            'expected_data': [[2, 3], [4, 5]],
+            'assert': self.assertListEqual,
+            'name': "TimeSeries subset list"
+        })
+        return subset_series_tests
 
     def test_init_no_parent(self):
         ts = TimeSeries('test_ts', 'a hypothetical source', list(), 'unit', timestamps=list())
@@ -81,23 +132,3 @@ class TimeSeriesConstructor(unittest.TestCase):
         ri, rt = ts.time_to_index(20.0)
         self.assertIsNone(ri)
         self.assertIsNone(rt)
-
-    def test_subset_timeseries_numpy(self):
-        ts = TimeSeries(name='test_ts',
-                        source='a hypothetical source',
-                        data=np.arange(200).reshape(100, 2),
-                        unit='unit',
-                        starting_time=3.0,
-                        rate=1.0)
-        subset = ts.subset_series(name='subset_series', time_range=(4., 5.))
-        self.assertListEqual(subset.data.tolist(), [[2, 3], [4, 5]])
-
-    def test_subset_timeseries_list(self):
-        ts = TimeSeries(name='test_ts',
-                        source='a hypothetical source',
-                        data=np.arange(200).reshape(100, 2).tolist(),
-                        unit='unit',
-                        starting_time=3.0,
-                        rate=1.0)
-        subset = ts.subset_series(name='subset_series', time_range=(4., 5.))
-        self.assertListEqual(subset.data, [[2, 3], [4, 5]])
