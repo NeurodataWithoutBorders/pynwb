@@ -113,7 +113,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         """
         return set(cls.__subclasses__()).union(
             [subclass for current_subclass in cls.__subclasses__()
-               for subclass in current_subclass.subtypes()])
+             for subclass in current_subclass.subtypes()])
 
     @staticmethod
     def _transform_arg(nwbfield):

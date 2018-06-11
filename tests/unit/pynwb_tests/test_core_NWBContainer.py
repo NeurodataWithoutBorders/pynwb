@@ -47,11 +47,12 @@ class TestNWBContainer(unittest.TestCase):
     def test_subtypes_api(self):
         """Test the subtypes method for getting all subtypes of a class"""
         subs = NWBContainer.subtypes()
+
         def all_subs(myclass):
             return set(myclass.__subclasses__()).union( [s for c in myclass.__subclasses__() for s in all_subs(c)])
+
         expected_subs = all_subs(NWBContainer)
         self.assertSetEqual(subs, expected_subs)
-
 
 
 if __name__ == '__main__':
