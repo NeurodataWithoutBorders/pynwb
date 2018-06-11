@@ -282,7 +282,9 @@ class TimeSeries(NWBDataInterface):
             {'name': 'time_range', 'type': tuple, 'doc': 'Tuple with start and stop time to select', 'default': None},
             {'name': 'time_match', 'type': tuple,
              'doc': 'Tuple indicting for time_range whether start/stop should be matched "before" or "after".' +
-                    'Default behavior is ("after", "before"), i.e., start=after and stop=before',
+                    'Default behavior is ("before", "before"), i.e., start=before and stop=before ' +
+                    'similar to Python index slicing [n,m) where we are left-inclusive (n is in) and ' +
+                    'right exclusive (i.e., m is outside of the selection).',
              'default': None},
             {'name': 'index_select', 'type': tuple, 'doc': 'Selections to be applied to self.data.', 'default': None},
             returns='New TimeSeries with data and timestamps adjustd by the applied selection')
@@ -311,7 +313,7 @@ class TimeSeries(NWBDataInterface):
         # Convert the time_range selection to an index selection and update index_select and new_starting_time
         if time_range is not None:
             if time_match is None:
-                time_match = ['after', 'before']
+                time_match = ['before', 'before']
             start_index, start_time = self.time_to_index(time=time_range[0], match=time_match[0])
             stop_index, stop_time = self.time_to_index(time=time_range[1], match=time_match[1])
             if start_index is None:
