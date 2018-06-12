@@ -188,13 +188,23 @@ class LinSpace(SortedArray):
         self.start = start
         self.stop = stop
         self.step = step
-        if step <= 0:
-            raise ValueError("step must be larger than 0")
-        self.dtype = float if any(isinstance(s, float) for s in (start, stop, step)) else int
+        self.dtype = np.asarray(start).dtype
         self.__len = int((stop - start)/step)
+        self.__current_iter_step = -1
 
     def __len__(self):
         return self.__len
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        self.__current_iter_step += 1
+        if self.__current_iter_step < len(self):
+            return self[self.__current_iter_step]
+        else:
+            self.__current_iter_step = -1
+            raise StopIteration
 
     def find_point(self, val, side):
         nsteps = (val - self.start) / self.step
@@ -207,7 +217,12 @@ class LinSpace(SortedArray):
         return fl
 
     def __getidx__(self, arg):
-        val = self.start + self.step*arg
+        loc = arg if arg >=0 else len(self) + arg
+        val = self.start + self.step * loc
         if val < self.start or val > self.stop:
             raise IndexError("Value out of range")
         return val
+
+    @property
+    def shape(self):
+        return (len(self),)
