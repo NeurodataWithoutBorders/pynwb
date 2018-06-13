@@ -217,7 +217,7 @@ class LinSpace(SortedArray):
         return fl
 
     def __getidx__(self, arg):
-        loc = arg if arg >=0 else len(self) + arg
+        loc = arg if arg >= 0 else len(self) + arg
         val = self.start + self.step * loc
         if val < self.start or val > self.stop:
             raise IndexError("Value out of range")
@@ -225,4 +225,4 @@ class LinSpace(SortedArray):
 
     @property
     def shape(self):
-        return (len(self),)
+        return (len(self), )
