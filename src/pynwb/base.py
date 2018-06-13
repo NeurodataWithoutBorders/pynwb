@@ -8,10 +8,8 @@ from .form.data_utils import AbstractDataChunkIterator, DataIO
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface
 
-import numpy as np
-
 from .form.array import LinSpace, SortedArray
-import datetime
+
 
 _default_conversion = 1.0
 _default_resolution = 0.0
@@ -248,4 +246,3 @@ class TimeSeries(NWBDataInterface):
     @property
     def time_unit(self):
         return self.__time_unit
-
