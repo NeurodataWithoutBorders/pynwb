@@ -5,6 +5,7 @@ import datetime
 import numpy as np
 from ..form.array import LinSpace, SortedArray
 
+
 class TimeSeriesHelper(object):
     """
     Helper class designed for interacting with TimeSeries data
@@ -12,7 +13,6 @@ class TimeSeriesHelper(object):
     @docval({'name': 'series', 'type': TimeSeries,  'doc': 'The timeseries for which operations should be performed'})
     def __init__(self, **kwargs):
         self.ts = getargs('series', kwargs)
-
 
     @docval({'name': 'time', 'type': float, 'doc': 'The time value to mak to an index in the timeseries'},
             {'name': 'match', 'type': str, 'doc': "Find best matching time 'before' or 'after'.", 'default': 'before'},
@@ -59,7 +59,7 @@ class TimeSeriesHelper(object):
         def stamp_to_abs_time(session_start_time, stamp):
 
             return np.datetime64(session_start_time +
-                                 datetime.timedelta(seconds=int(stamp)) + \
+                                 datetime.timedelta(seconds=int(stamp)) +
                                  datetime.timedelta(microseconds=(stamp - int(stamp)) * 1e6))
 
         def generate_timestamps(session_start_time, stamps):
@@ -91,9 +91,8 @@ class TimeSeriesHelper(object):
         else:
             return SortedArray(np.fromiter(generate_timestamps(session_start_time, stamps)), dtype=datetime)
 
-
     @docval({'name': 'name', 'type': str, 'doc': 'Name of the new subset TimeSeries'},
-            {'name': 'time_range', 'type': tuple, 'doc': 'Tuple with start and stop time to select', 'default': None},
+            {'name': 'time_range', 'type': tuple, 'doc': 'Tuple with start and stop time selection', 'default': None},
             {'name': 'time_match', 'type': tuple,
              'doc': 'Tuple indicting for time_range whether start/stop should be matched "before" or "after".' +
                     'Default behavior is ("before", "before"), i.e., start=before and stop=before ' +
@@ -111,7 +110,7 @@ class TimeSeriesHelper(object):
 
         # Validate that time_range and index_select are compatible
         if time_range is not None and index_select is not None:
-            if index_select[0] is not None and index_select != slice(None):
+            if index_select[0] is not None and index_select[0] != slice(None):
                 raise ValueError("time_range=%s not compatible with selection specified by index_select[0]=%s" %
                                  (str(time_range), str(index_select[0])))
         if time_range is not None:
@@ -123,6 +122,8 @@ class TimeSeriesHelper(object):
         # If we only have a time_range select, then create an empty index_select so we can update it
         if index_select is None:
             index_select = [slice(None), ]
+        else:
+            index_select = list(index_select)
 
         # Convert the time_range selection to an index selection and update index_select and new_starting_time
         if time_range is not None:
@@ -139,6 +140,7 @@ class TimeSeriesHelper(object):
                                     1               # step = Select all elements in the range
                                     )
             new_starting_time = start_time
+        index_select = tuple(index_select)
         # Apply our selection to the data
         if isinstance(self.ts.data, list):
             new_data = self.ts.data
@@ -178,22 +180,81 @@ class TimeSeriesHelper(object):
                 new_fields[k] = copy(v)
         return self.ts.__class__(name=new_name, **new_fields)
 
-    def to_pandas(self, session_start_time=None):
+    def to_xarray(self, use_absolute_times=False, session_start_time=None, copy_meta=True):
+        """
+        Convert the time series to an xarray
+
+        :param use_absolute_times: Bool indicating whether absolut times or time offsets should be
+                                   used as index.
+        :param session_start_time: The starttime of the session. May be None in case
+                                   that use_absolute_times is False or in case that self.ts has been
+                                   assigned to an NWBFile where the session_start_time can be looked up.
+        :param copy_meta: Copy the metadata (i.e, all fields aside from data and timestamps) from the
+                          TimeSeries to the .attrs object of the resulting xarray
+
+        :returns: xarrray.DataArray object with the data of the TimeSeries
+        """
+        from xarray import DataArray
+        if use_absolute_times:
+            stamps = self.get_absolute_timestamps(session_start_time=session_start_time)
+            time_label = 'Time'
+        else:
+            stamps = [datetime.timedelta(seconds=int(s), microseconds=(s-int(s)) * 10e6) for s in self.get_timestamps()]
+            time_label = 'Time Offest'
+        coords = {time_label: stamps}
+        data = self.ts.data
+        dims = [time_label] + [str(i) for i in range(len(data.shape) - 1)]
+        res = DataArray(data,
+                        coords=coords,
+                        dims=dims)
+        # Copy all the metadata
+        if copy_meta:
+            for k, v in self.ts.fields.items():
+                if k not in ['data', 'timestamps']:
+                    res.attrs[k] = copy(v)
+        if session_start_time:
+            res.attrs['session_start_time'] = session_start_time
+        return res
+
+    def to_pandas(self, use_absolute_times=False, session_start_time=None):
         """
         Convert the time series to a pandas DataFrame timeseries
 
-        :param session_start_time: The starttime of the session. May be None in case self.ts has been
-               assigned to an NWBFile where the session_start_time can be looked up
+        :param use_absolute_times: Bool indicating whether absolut times or time offsets should be
+                                   used as index.
+        :param session_start_time: The starttime of the session. May be None in case
+                                   that use_absolute_times is False or in case that self.ts has been
+                                   assigned to an NWBFile where the session_start_time can be looked up.
 
-        :return: Pandas dataframe with the absolut times as index and the channels as columns
+        :return: Pandas dataframe with the absolute times or time offsets as index and the channels as columns
         """
         import pandas as pd
 
         data = self.ts.data[:]  # Load all data
+        num_channels = np.prod(data.shape[1:])
         if len(data.shape) > 2:
-            data = data.reshape((data.shape[0], np.prod(data.shape[1:])))
+            data = data.reshape((data.shape[0], num_channels))
         df = pd.DataFrame(data)
-        df.set_index(pd.DatetimeIndex(self.get_absolute_timestamps(session_start_time=session_start_time)),
-                     inplace=True)
+        if use_absolute_times:
+            df.set_index(pd.DatetimeIndex(self.get_absolute_timestamps(session_start_time=session_start_time)),
+                         inplace=True)
+            df.index.name = 'Time'
+        else:
+            stamps = pd.TimedeltaIndex([datetime.timedelta(seconds=int(s), microseconds=(s-int(s)) * 10e6)
+                                        for s in self.get_timestamps()])
+            df.set_index(stamps, inplace=True)
+            df.index.name = 'Offset to session start %s' % ("" if session_start_time is None
+                                                            else "at " + str(session_start_time))
         return df
 
+    def plot_pandas(self, use_absolute_times=False, session_start_time=None, **kwargs):
+        """
+        Plot the time series using pandas
+
+        :param use_absolute_times: See to_pandas()
+        :param session_start_time: See to_pandas()
+        :param kwargs: Additional arguments to be passed to pandas.DataFrame.plot(...)
+        :return: Matplotlib figure object created by pandas
+        """
+        return self.to_pandas(use_absolute_times=use_absolute_times,
+                              session_start_time=session_start_time).plot(**kwargs)
