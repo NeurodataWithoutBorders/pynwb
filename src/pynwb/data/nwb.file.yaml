@@ -347,6 +347,7 @@ groups:
       attributes:
         - name: description
           value: the start time of each trial
+          dtype: text
           doc: Value is 'the start time of each trial'
       name: start
       neurodata_type_inc: TableColumn
@@ -355,6 +356,7 @@ groups:
       attributes:
         - name: description
           value: the stop time of each trial
+          dtype: text
           doc: Value is 'the stop time of each trial'
       name: stop
       neurodata_type_inc: TableColumn

@@ -222,10 +222,11 @@ groups:
       neurodata_type_inc: NWBData
       doc: The unique identifier for the rows in this dynamic table
       dtype: int
+      shape:
+        - null
     - doc: The columns in this dynamic table
       neurodata_type_inc: TableColumn
       quantity: '*'
-  default_name: Images
   doc: A group containing multiple datasets that are aligned on the first dimension (Currently, this requirement
     if left up to APIs to check and enforce). Apart from a column that contains unique identifiers for each row
     there are no other required datasets. Users are free to add any number of TableColumn objects here. Table
