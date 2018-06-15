@@ -1004,8 +1004,22 @@ class GroupSpec(BaseStorageSpec):
         if not dt:
             raise TypeError("spec does not have '%s' or '%s' defined" % (self.def_key(), self.inc_key()))
         if dt in self.__data_types:
-            raise TypeError('Cannot have multipled data types of the same type without specifying name')
-        self.__data_types[dt] = spec
+            curr = self.__data_types[dt]
+            if spec.name is None:
+                if curr.name is None:
+                    raise TypeError('Cannot have multiple data types of the same type without specifying name')
+                else:
+                    # unnamed data types will be stored as data_types
+                    self.__data_types[dt] = spec
+            else:
+                if curr.name is None:
+                    # leave the existing data type as is, since the new one can be retrieved by name
+                    return
+                else:
+                    # store both specific instances of a data type
+                    self.__data_types[dt] = [curr, spec]
+        else:
+            self.__data_types[dt] = spec
 
     @docval({'name': 'data_type', 'type': str, 'doc': 'the data_type to retrieve'})
     def get_data_type(self, **kwargs):
