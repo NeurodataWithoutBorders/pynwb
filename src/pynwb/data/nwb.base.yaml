@@ -219,7 +219,7 @@ groups:
     name: description
   datasets:
     - name: id
-      neurodata_type_inc: NWBData
+      neurodata_type_inc: ElementIdentifiers
       doc: The unique identifier for the rows in this dynamic table
       dtype: int
       shape:
