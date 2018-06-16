@@ -1,5 +1,6 @@
 from h5py import RegionReference
 import numpy as np
+import pandas as pd
 
 from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
@@ -720,3 +721,90 @@ class MultiContainerInterface(NWBDataInterface):
 
         if len(clsconf) == 1:
             setattr(cls, '__getitem__', cls.__make_getitem(attr, container_type))
+
+
+@register_class('TableColumn', CORE_NAMESPACE)
+class TableColumn(NWBData):
+
+    __nwbfields__ = (
+        'description',
+    )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this column'},
+            {'name': 'description', 'type': str, 'doc': 'a description for this column'})
+    def __init__(self, **kwargs):
+        self.description = popargs('description', kwargs)
+        call_docval_func(super(TableColumn, self).__init__, kwargs)
+
+
+@register_class('DynamicTable', CORE_NAMESPACE)
+class DynamicTable(NWBContainer):
+
+    __nwbfields__ = (
+        'ids',
+        'columns',
+    )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},
+            {'name': 'ids', 'type': ('array', ElementIdentifiers), 'doc': 'the identifiers for this table'},
+            {'name': 'columns', 'type': 'array', 'doc': 'the identifiers for this table', 'default': list()})
+    def __init__(self, **kwargs):
+        self.ids, self.columns = popargs('ids', 'columns', kwargs)
+        call_docval_func(super(TableColumn, self).__init__, kwargs)
+
+        # column names for convenience
+        self.colnames = tuple(col.name for col in self.columns)
+
+        # to make generating DataFrames and Series easier
+        self.__df_cols = [self.ids.data] + [c.data for c in self.columns]
+        self.__df_colnames = [self.ids.name] + [c.name for c in self.columns]
+
+        # for bookkeeping
+        self.__colids = dict(enumerate(self.colnames))
+        self.__cache = dict()
+
+    @docval(*get_docval(TableColumn.__init__))
+    def add_column(self, **kwargs):
+        """
+        Add a column to this table. Data should already be populated
+        """
+        name, data, desc = getargs('name', 'data', 'description', kwargs)
+        col = call_docval_func(TableColumn.__init__, kwargs)
+        if len(data) != len(self.ids):
+            raise ValueError("column must have the same number of rows as 'id'")
+        self.__colids[name] = len(self.columns)
+        self.fields['colnames'] = tuple(self.colnames+[name])
+        self.fields['colnames'] = tuple(self.columns+[col])
+        self.__df_colnames.append(name)
+        self.__df_cols.append(data)
+
+    def __cache_and_return(self, args, result):
+        self.__cache[tuple(args)] = result
+        return result
+
+    def __cached(self, args):
+        return self.__cache.get(tuple(args))
+
+    def __getitem__(self, *args):
+        result = self.__cached(args)
+        if result is not None:
+            return result
+        ret = None
+        if len(args) == 1:
+            arg = args[0]
+            if isinstance(arg, str):
+                ret = self.__df_cols[self.__colids[arg]]
+            elif isinstance(arg, int):
+                ret = pd.Series([col[arg] for col in self.__df_cols], self.__df_colnames)
+            elif isinstance(arg, (tuple, list)):
+                d = dict()
+                for name, col in zip(self.__df_colnames, self.__df_cols):
+                    d[name] = col[arg]
+                ret = pd.DataFrame(data=d)
+        elif len(args) == 2:
+            arg1 = args[0]
+            arg2 = args[1]
+            if isinstance(arg2, str):
+                arg2 = self.__colids[arg2]
+            ret = self.__df_cols[arg2][arg1]
+        return self.__cache_and_return(args, ret)
