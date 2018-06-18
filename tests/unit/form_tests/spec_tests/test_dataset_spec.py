@@ -141,6 +141,30 @@ class DatasetSpecTests(unittest.TestCase):
                            data_type_def='test')
         self.assertEqual(spec.default_value, 5)
 
+    def test_name_with_incompatible_quantity(self):
+        # Check that we raise an error when the quantity allows more than one instance with a fixed name
+        with self.assertRaises(ValueError):
+            DatasetSpec(doc='my first dataset',
+                        dtype='int',
+                        name='ds1',
+                        quantity='zero_or_many')
+        with self.assertRaises(ValueError):
+            DatasetSpec(doc='my first dataset',
+                        dtype='int',
+                        name='ds1',
+                        quantity='one_or_many')
+
+    def test_name_with_compatible_quantity(self):
+        # Make sure compatible quantity flags pass when name is fixed
+        DatasetSpec(doc='my first dataset',
+                    dtype='int',
+                    name='ds1',
+                    quantity='zero_or_one')
+        DatasetSpec(doc='my first dataset',
+                    dtype='int',
+                    name='ds1',
+                    quantity=1)
+
     def test_datatype_table_extension(self):
         dtype1 = DtypeSpec('column1', 'the first column', 'int')
         dtype2 = DtypeSpec('column2', 'the second column', 'float')

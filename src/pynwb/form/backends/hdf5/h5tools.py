@@ -61,7 +61,7 @@ class HDF5IO(FORMIO):
              'type': NamespaceCatalog,
              'doc': 'the NamespaceCatalog to load namespaces into'},
             {'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
-            {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': list})
+            {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': None})
     def load_namespaces(cls, namespace_catalog, path, namespaces=None):
         '''
         Load cached namespaces from a file.
@@ -451,10 +451,9 @@ class HDF5IO(FORMIO):
             if isinstance(value, (set, list, tuple)):
                 tmp = tuple(value)
                 if len(tmp) > 0:
-                    if isinstance(tmp[0], str):          # a list of strings will need a special type
-                        max_len = max(len(s) for s in tmp)
-                        dt = '|S%d' % max_len
-                        value = np.array(tmp, dtype=dt)
+                    # a list of strings will need a special type
+                    if isinstance(tmp[0], (text_type, binary_type)):
+                        value = [np.string_(s) for s in tmp]
                     elif isinstance(tmp[0], Container):  # a list of references
                         self.__queue_ref(self._make_attr_ref_filler(obj, key, tmp))
                     else:
@@ -803,7 +802,7 @@ class HDF5IO(FORMIO):
         try:
             dset = parent.create_dataset(name, shape=data_shape, dtype=dtype, **io_settings)
         except Exception as exc:
-            msg = "Could not create dataset %s in %s" % (name, parent.name)
+            msg = "Could not create dataset %s in %s. %s" % (name, parent.name, str(exc))
             raise_from(Exception(msg), exc)
         # Write the data
         if len(data) > dset.shape[0]:

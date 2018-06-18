@@ -638,10 +638,11 @@ class DatasetSpec(BaseStorageSpec):
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if default_value is not None:
             self['default_value'] = default_value
-            if self.name is not None:
-                self.pop('quantity')
-            else:
-                self['quantity'] = ZERO_OR_MANY
+        if self.name is not None:
+            valid_quant_vals = [1, 'zero_or_one', ZERO_OR_ONE]
+            if self.quantity not in valid_quant_vals:
+                raise ValueError("quantity %s invalid for spec with fixed name. Valid values are: %s" %
+                                 (self.quantity, str(valid_quant_vals)))
 
     @classmethod
     def __get_prec_level(cls, dtype):
