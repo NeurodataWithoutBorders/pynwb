@@ -731,29 +731,56 @@ class TableColumn(NWBData):
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this column'},
-            {'name': 'description', 'type': str, 'doc': 'a description for this column'})
+            {'name': 'description', 'type': str, 'doc': 'a description for this column'},
+            {'name': 'data', 'type': 'array_data', 'doc': 'the data contained in this  column', 'default': list()})
     def __init__(self, **kwargs):
-        self.description = popargs('description', kwargs)
+        desc = popargs('description', kwargs)
         call_docval_func(super(TableColumn, self).__init__, kwargs)
+        self.description = desc
+
+    @docval({'name': 'val', 'type': None, 'doc': 'the value to add to this column'})
+    def add_row(self, **kwargs):
+        val = getargs('val', kwargs)
+        self.data.append(val)
 
 
 @register_class('DynamicTable', CORE_NAMESPACE)
 class DynamicTable(NWBContainer):
+    """
+    A column-based table. Columns are defined by the argument *columns*. This argument
+    must be a list/tuple of TableColumns or a list/tuple of dicts containing the keys
+    'name' and 'description' that provide the name and description of each column
+    in the table.
+    """
 
     __nwbfields__ = (
         'ids',
         'columns',
+        'colnames',
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},
-            {'name': 'ids', 'type': ('array', ElementIdentifiers), 'doc': 'the identifiers for this table'},
-            {'name': 'columns', 'type': 'array', 'doc': 'the identifiers for this table', 'default': list()})
+            {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
+            {'name': 'ids', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
+             'default': list()},
+            {'name': 'columns', 'type': (tuple, list) , 'doc': 'the columns in this table', 'default': list()})
     def __init__(self, **kwargs):
-        self.ids, self.columns = popargs('ids', 'columns', kwargs)
-        call_docval_func(super(TableColumn, self).__init__, kwargs)
+        ids, columns = popargs('ids', 'columns', kwargs)
+        call_docval_func(super(DynamicTable, self).__init__, kwargs)
 
-        # column names for convenience
-        self.colnames = tuple(col.name for col in self.columns)
+        if not isinstance(ids, ElementIdentifiers):
+            self.ids = ElementIdentifiers('ids', data=ids)
+        else:
+            self.ids = ids
+
+        if len(columns) > 0:
+            if isinstance(columns[0], dict):
+                columns = tuple(TableColumn(*d) for d in columns)
+            elif not isinstance(columns[0], TableColumn):
+                raise ValueError("'columns' must be a list of TableColumns or dicts")
+            # column names for convenience
+        self.colnames = tuple(col.name for col in columns)
+        self.columns = columns
 
         # to make generating DataFrames and Series easier
         self.__df_cols = [self.ids.data] + [c.data for c in self.columns]
@@ -774,7 +801,7 @@ class DynamicTable(NWBContainer):
             raise ValueError("column must have the same number of rows as 'id'")
         self.__colids[name] = len(self.columns)
         self.fields['colnames'] = tuple(self.colnames+[name])
-        self.fields['colnames'] = tuple(self.columns+[col])
+        self.fields['columns'] = tuple(self.columns+[col])
         self.__df_colnames.append(name)
         self.__df_cols.append(data)
 
