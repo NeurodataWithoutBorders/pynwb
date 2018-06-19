@@ -37,6 +37,7 @@ class TestDynamicTable(unittest.TestCase):
         self.check_empty_table(table)
 
     def check_table(self, table):
+        self.assertEqual(len(table), 2)
         self.assertEqual(table.columns[0].data, [1, 2])
         self.assertEqual(table.columns[1].data, [10.0, 20.0])
         self.assertEqual(table.columns[2].data, ['cat', 'dog'])
