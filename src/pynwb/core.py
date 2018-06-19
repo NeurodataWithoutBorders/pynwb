@@ -778,7 +778,21 @@ class DynamicTable(NWBContainer):
                 columns = tuple(TableColumn(**d) for d in columns)
             elif not isinstance(columns[0], TableColumn):
                 raise ValueError("'columns' must be a list of TableColumns or dicts")
-            # column names for convenience
+            if not all(len(c) == len(columns[0]) for c in columns):
+                raise ValueError("columns must be the same length")
+            ni = len(self.ids)
+            nc = len(columns[0])
+            if ni != nc:
+                if ni != 0 and nc != 0:
+                    raise ValueError("must provide same number of ids as length of columns if specifying ids")
+                elif nc != 0:
+                    for i in range(nc):
+                        self.ids.data.append(i)
+                elif nc != 0:
+                    raise ValueError("cannot provide ids with no rows")
+
+        # column names for convenience
+
         self.colnames = tuple(col.name for col in columns)
         self.columns = columns
 
@@ -811,13 +825,13 @@ class DynamicTable(NWBContainer):
         """
         Add a column to this table. Data should already be populated
         """
-        name, data, desc = getargs('name', 'data', 'description', kwargs)
-        col = call_docval_func(TableColumn.__init__, kwargs)
+        col = TableColumn(**kwargs)
+        name, data, desc = col.name, col.data, col.description
         if len(data) != len(self.ids):
             raise ValueError("column must have the same number of rows as 'id'")
         self.__colids[name] = len(self.columns)
-        self.fields['colnames'] = tuple(self.colnames+[name])
-        self.fields['columns'] = tuple(self.columns+[col])
+        self.fields['colnames'] = tuple(list(self.colnames)+[name])
+        self.fields['columns'] = tuple(list(self.columns)+[col])
         self.__df_colnames.append(name)
         self.__df_cols.append(data)
 
