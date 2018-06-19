@@ -1,12 +1,12 @@
 from h5py import RegionReference
 import numpy as np
-import pandas as pd
 
 from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
+from .form.data_utils import get_shape
 
 from . import CORE_NAMESPACE, register_class
-from six import with_metaclass, iteritems
+from six import with_metaclass, iteritems, text_type, binary_type
 
 
 def _not_parent(arg):
@@ -250,6 +250,8 @@ class NWBData(NWBBaseType, Data):
         return len(self.__data)
 
     def __getitem__(self, args):
+        if isinstance(self.data, (tuple, list)) and isinstance(args, (tuple, list)):
+            return [self.data[i] for i in args]
         return self.data[args]
 
     def append(self, arg):
@@ -763,7 +765,7 @@ class DynamicTable(NWBContainer):
             {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
             {'name': 'ids', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
              'default': list()},
-            {'name': 'columns', 'type': (tuple, list) , 'doc': 'the columns in this table', 'default': list()})
+            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': list()})
     def __init__(self, **kwargs):
         ids, columns = popargs('ids', 'columns', kwargs)
         call_docval_func(super(DynamicTable, self).__init__, kwargs)
@@ -797,7 +799,7 @@ class DynamicTable(NWBContainer):
         self.columns = columns
 
         # to make generating DataFrames and Series easier
-        self.__df_cols = [self.ids.data] + [c.data for c in self.columns]
+        self.__df_cols = [self.ids] + list(self.columns)
         self.__df_colnames = [self.ids.name] + [c.name for c in self.columns]
 
         # for bookkeeping
@@ -814,11 +816,21 @@ class DynamicTable(NWBContainer):
         Add a row to the table. If *id* is not provided, it will auto-increment.
         '''
         data = getargs('data', kwargs)
-        cid = self.__colids
         for k, v in data.items():
             colnum = self.__colids[k]
             self.columns[colnum].add_row(v)
         self.ids.data.append(len(self.ids))
+
+    def get_dtype(self, col):
+        x = col.data[0]
+        shape = get_shape(x)
+        shape = None if shape is None else shape
+        while hasattr(x, '__len__') and not isinstance(x, (text_type, binary_type)):
+            x = x[0]
+        t = type(x)
+        if t == text_type or t == binary_type:
+            t = np.string_
+        return (col.name, t, shape)
 
     @docval(*get_docval(TableColumn.__init__))
     def add_column(self, **kwargs):
@@ -826,42 +838,39 @@ class DynamicTable(NWBContainer):
         Add a column to this table. Data should already be populated
         """
         col = TableColumn(**kwargs)
-        name, data, desc = col.name, col.data, col.description
+        name, data = col.name, col.data
         if len(data) != len(self.ids):
             raise ValueError("column must have the same number of rows as 'id'")
         self.__colids[name] = len(self.columns)
         self.fields['colnames'] = tuple(list(self.colnames)+[name])
         self.fields['columns'] = tuple(list(self.columns)+[col])
         self.__df_colnames.append(name)
-        self.__df_cols.append(data)
+        self.__df_cols.append(col)
 
-    def __cache_and_return(self, args, result):
-        self.__cache[tuple(args)] = result
-        return result
-
-    def __cached(self, args):
-        return self.__cache.get(tuple(args))
-
-    def __getitem__(self, *args):
-        result = self.__cached(args)
-        if result is not None:
-            return result
+    def __getitem__(self, key):
         ret = None
-        if len(args) == 1:
-            arg = args[0]
-            if isinstance(arg, str):
-                ret = self.__df_cols[self.__colids[arg]]
-            elif isinstance(arg, int):
-                ret = pd.Series([col[arg] for col in self.__df_cols], self.__df_colnames)
-            elif isinstance(arg, (tuple, list)):
-                d = dict()
-                for name, col in zip(self.__df_colnames, self.__df_cols):
-                    d[name] = col[arg]
-                ret = pd.DataFrame(data=d)
-        elif len(args) == 2:
-            arg1 = args[0]
-            arg2 = args[1]
+        if isinstance(key, tuple):
+            # index by row and column, return specific cell
+            arg1 = key[0]
+            arg2 = key[1]
             if isinstance(arg2, str):
-                arg2 = self.__colids[arg2]
+                arg2 = self.__colids[arg2] + 1
             ret = self.__df_cols[arg2][arg1]
-        return self.__cache_and_return(args, ret)
+        else:
+            arg = key
+            if isinstance(arg, str):
+                # index by one string, return column
+                ret = self.__df_cols[self.__colids[arg]+1]
+                dt = self.get_dtype(ret)[1]
+                ret = np.array(ret.data, dtype=dt)
+            elif isinstance(arg, int):
+                # index by int, return row
+                dt = [self.get_dtype(col) for col in self.__df_cols]
+                ret = np.array([tuple(col[arg] for col in self.__df_cols)], dtype=dt)
+            elif isinstance(arg, (tuple, list)):
+                # index by a list of ints, return multiple rows
+                dt = [self.get_dtype(col) for col in self.__df_cols]
+                ret = np.zeros((len(arg),), dtype=dt)
+                for name, col in zip(self.__df_colnames, self.__df_cols):
+                    ret[name] = col[arg]
+        return ret
