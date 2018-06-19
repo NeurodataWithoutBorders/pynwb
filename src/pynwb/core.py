@@ -775,7 +775,7 @@ class DynamicTable(NWBContainer):
 
         if len(columns) > 0:
             if isinstance(columns[0], dict):
-                columns = tuple(TableColumn(*d) for d in columns)
+                columns = tuple(TableColumn(**d) for d in columns)
             elif not isinstance(columns[0], TableColumn):
                 raise ValueError("'columns' must be a list of TableColumns or dicts")
             # column names for convenience
@@ -787,8 +787,24 @@ class DynamicTable(NWBContainer):
         self.__df_colnames = [self.ids.name] + [c.name for c in self.columns]
 
         # for bookkeeping
-        self.__colids = dict(enumerate(self.colnames))
+        self.__colids = {name: i for i, name in enumerate(self.colnames)}
         self.__cache = dict()
+
+    def __len__(self):
+        return len(self.ids)
+
+    @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row'},
+            {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None})
+    def add_row(self, **kwargs):
+        '''
+        Add a row to the table. If *id* is not provided, it will auto-increment.
+        '''
+        data = getargs('data', kwargs)
+        cid = self.__colids
+        for k, v in data.items():
+            colnum = self.__colids[k]
+            self.columns[colnum].add_row(v)
+        self.ids.data.append(len(self.ids))
 
     @docval(*get_docval(TableColumn.__init__))
     def add_column(self, **kwargs):
