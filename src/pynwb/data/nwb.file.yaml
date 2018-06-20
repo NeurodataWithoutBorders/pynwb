@@ -352,13 +352,13 @@ groups:
       name: start
       neurodata_type_inc: TableColumn
       dtype: float
-    - doc: The stop time of each trial
+    - doc: The end time of each trial
       attributes:
         - name: description
-          value: the stop time of each trial
+          value: the end time of each trial
           dtype: text
-          doc: Value is 'the stop time of each trial'
-      name: stop
+          doc: Value is 'the end time of each trial'
+      name: end
       neurodata_type_inc: TableColumn
       dtype: float
   name: root
