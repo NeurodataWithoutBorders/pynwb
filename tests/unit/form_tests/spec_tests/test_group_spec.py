@@ -30,10 +30,8 @@ class GroupSpecTests(unittest.TestCase):
             DatasetSpec('my second dataset',
                         'int',
                         name='dataset2',
-                        dimension=(None, None),
                         attributes=self.dset2_attributes,
                         linkable=True,
-                        namespace='core',
                         data_type_def='VoltageArray')
         ]
 
@@ -75,7 +73,6 @@ class GroupSpecTests(unittest.TestCase):
                          datasets=self.datasets,
                          attributes=self.attributes,
                          linkable=False,
-                         namespace='core',
                          data_type_def='EphysData')
         self.assertFalse(spec['linkable'])
         self.assertListEqual(spec['attributes'], self.attributes)
@@ -93,7 +90,6 @@ class GroupSpecTests(unittest.TestCase):
         spec = GroupSpec('A test group',
                          name='root_test_set_dataset',
                          linkable=False,
-                         namespace='core',
                          data_type_def='EphysData')
         spec.set_dataset(self.datasets[0])
         self.assertIs(spec, self.datasets[0].parent)
@@ -102,7 +98,6 @@ class GroupSpecTests(unittest.TestCase):
         spec = GroupSpec('A test group',
                          name='root_test_set_group',
                          linkable=False,
-                         namespace='core',
                          data_type_def='EphysData')
         spec.set_group(self.subgroups[0])
         spec.set_group(self.subgroups[1])
@@ -117,7 +112,6 @@ class GroupSpecTests(unittest.TestCase):
                          datasets=self.datasets,
                          attributes=self.attributes,
                          linkable=False,
-                         namespace='core',
                          data_type_def='EphysData')
         dset1_attributes_ext = [
             AttributeSpec('dset1_extra_attribute', 'an extra attribute for the first dataset', 'text')
@@ -137,7 +131,6 @@ class GroupSpecTests(unittest.TestCase):
                         datasets=ext_datasets,
                         attributes=ext_attributes,
                         linkable=False,
-                        namespace='core',
                         data_type_inc=spec,
                         data_type_def='SpikeData')
         ext_dset1 = ext.get_dataset('dataset1')

@@ -280,6 +280,14 @@ class TestDocValidator(unittest.TestCase):
         kwargs = self.test_obj.basic_only_kw('b', 2)
         self.assertDictEqual(kwargs, {'arg1': 'b', 'arg2': 2})
 
+    def test_extra_kwarg(self):
+        """Test that docval parses arguments when only keyword
+           arguments exist, and both arguments are specified
+           as positional arguments
+        """
+        with self.assertRaises(TypeError):
+            self.test_obj.basic_add2_kw('a string', 100, bar=1000)
+
 
 if __name__ == '__main__':
     unittest.main()
