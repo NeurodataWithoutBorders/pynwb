@@ -93,11 +93,10 @@ class TestDynamicTable(unittest.TestCase):
         table = self.with_spec()
         self.add_rows(table)
         row = table[2]
-        self.assertTrue(hasattr(row, 'dtype'))
-        self.assertEqual(row.dtype.names, ('ids', 'foo', 'bar', 'baz'))
-        self.assertEqual(row['foo'], 3)
-        self.assertEqual(row['bar'], 30.0)
-        self.assertEqual(row['baz'], b'bird')
+        self.assertEqual(row[0], 2)
+        self.assertEqual(row[1], 3)
+        self.assertEqual(row[2], 30.0)
+        self.assertEqual(row[3], 'bird')
 
     def test_getitem_column(self):
         table = self.with_spec()
@@ -113,8 +112,10 @@ class TestDynamicTable(unittest.TestCase):
         table = self.with_spec()
         self.add_rows(table)
         row = table[[0, 2, 4]]
-        self.assertTrue(hasattr(row, 'dtype'))
-        self.assertEqual(row.dtype.names, ('ids', 'foo', 'bar', 'baz'))
+        self.assertEqual(len(row), 3)
+        self.assertEqual(row[0], (0, 1, 10.0, 'cat'))
+        self.assertEqual(row[1], (2, 3, 30.0, 'bird'))
+        self.assertEqual(row[2], (4, 5, 50.0, 'lizard'))
 
     def test_getitem_point_idx_colname(self):
         table = self.with_spec()

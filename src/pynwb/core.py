@@ -3,10 +3,9 @@ import numpy as np
 
 from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
-from .form.data_utils import get_shape
 
 from . import CORE_NAMESPACE, register_class
-from six import with_metaclass, iteritems, text_type, binary_type
+from six import with_metaclass, iteritems
 
 
 def _not_parent(arg):
@@ -821,16 +820,20 @@ class DynamicTable(NWBContainer):
             self.columns[colnum].add_row(v)
         self.ids.data.append(len(self.ids))
 
-    def get_dtype(self, col):
-        x = col.data[0]
-        shape = get_shape(x)
-        shape = None if shape is None else shape
-        while hasattr(x, '__len__') and not isinstance(x, (text_type, binary_type)):
-            x = x[0]
-        t = type(x)
-        if t in (text_type, binary_type):
-            t = np.string_
-        return (col.name, t, shape)
+    # # keeping this around in case anyone wants to resurrect it
+    # # this was used to return a numpy structured array. this does not
+    # # work across platforms (it breaks on windows). instead, return
+    # # tuples and lists of tuples
+    # def get_dtype(self, col):
+    #     x = col.data[0]
+    #     shape = get_shape(x)
+    #     shape = None if shape is None else shape
+    #     while hasattr(x, '__len__') and not isinstance(x, (text_type, binary_type)):
+    #         x = x[0]
+    #     t = type(x)
+    #     if t in (text_type, binary_type):
+    #         t = np.string_
+    #     return (col.name, t, shape)
 
     @docval(*get_docval(TableColumn.__init__))
     def add_column(self, **kwargs):
@@ -860,19 +863,26 @@ class DynamicTable(NWBContainer):
             arg = key
             if isinstance(arg, str):
                 # index by one string, return column
-                ret = self.__df_cols[self.__colids[arg]+1]
-                dt = self.get_dtype(ret)[1]
-                ret = np.array(ret.data, dtype=dt)
+                ret = tuple(self.__df_cols[self.__colids[arg]+1].data)
+                # # keeping this around in case anyone wants to resurrect it
+                # dt = self.get_dtype(ret)[1]
+                # ret = np.array(ret.data, dtype=dt)
             elif isinstance(arg, int):
                 # index by int, return row
-                dt = [self.get_dtype(col) for col in self.__df_cols]
-                print('int:', dt)
-                ret = np.array([tuple(col[arg] for col in self.__df_cols)], dtype=dt)
+                ret = tuple(col[arg] for col in self.__df_cols)
+                # # keeping this around in case anyone wants to resurrect it
+                # dt = [self.get_dtype(col) for col in self.__df_cols]
+                # ret = np.array([ret], dtype=dt)
+
             elif isinstance(arg, (tuple, list)):
                 # index by a list of ints, return multiple rows
-                dt = [self.get_dtype(col) for col in self.__df_cols]
-                print('list:', dt)
-                ret = np.zeros((len(arg),), dtype=dt)
-                for name, col in zip(self.__df_colnames, self.__df_cols):
-                    ret[name] = col[arg]
+                # # keeping this around in case anyone wants to resurrect it
+                # dt = [self.get_dtype(col) for col in self.__df_cols]
+                # ret = np.zeros((len(arg),), dtype=dt)
+                # for name, col in zip(self.__df_colnames, self.__df_cols):
+                #     ret[name] = col[arg]
+                ret = list()
+                for i in arg:
+                    ret.append(tuple(col[i] for col in self.__df_cols))
+
         return ret
