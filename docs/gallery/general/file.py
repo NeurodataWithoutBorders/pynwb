@@ -153,7 +153,7 @@ nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_
 
 from pynwb import NWBHDF5IO
 
-io = NWBHDF5IO('basic_example.nwb', 'w')
+io = NWBHDF5IO('basic_example.nwb', mode='w')
 io.write(nwbfile)
 io.close()
 
