@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from pynwb.core import DynamicTable, TableColumn
+from pynwb.core import DynamicTable, TableColumn, ElementIdentifiers
 
 
 class TestDynamicTable(unittest.TestCase):
@@ -58,6 +58,13 @@ class TestDynamicTable(unittest.TestCase):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
         table = DynamicTable("with_columns", 'PyNWB unit test', ids=[0, 1, 2, 3, 4], columns=columns)
+        self.check_table(table)
+
+    def test_constructor_ElementIdentifier_ids(self):
+        columns = [TableColumn(name=s['name'], description=s['description'], data=d)
+                   for s, d in zip(self.spec, self.data)]
+        ids = ElementIdentifiers('ids', [0, 1, 2, 3, 4])
+        table = DynamicTable("with_columns", 'PyNWB unit test', ids=ids, columns=columns)
         self.check_table(table)
 
     def test_constructor_ids_bad_ids(self):
