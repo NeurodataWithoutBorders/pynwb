@@ -116,6 +116,17 @@ class NWBFileTest(unittest.TestCase):
         self.assertIs(self.nwbfile.ec_electrodes, table)
         self.assertIs(table.parent, self.nwbfile)
 
+    def test_add_trial_column(self):
+        self.nwbfile.add_trial_column('trial_type', 'the type of trial')
+        self.assertEqual(self.nwbfile.trials.colnames, ('start', 'end', 'trial_type'))
+
+    def test_add_trial(self):
+        self.nwbfile.add_trial({'start': 10, 'end': 20})
+        self.assertEqual(len(self.nwbfile.trials), 1)
+        self.nwbfile.add_trial({'start': 30, 'end': 40})
+        self.nwbfile.add_trial({'start': 50, 'end': 70})
+        self.assertEqual(len(self.nwbfile.trials), 3)
+
     def test_add_electrode(self):
         dev1 = self.nwbfile.create_device('dev1', 'a test source')  # noqa: F405
         group = self.nwbfile.create_electrode_group('tetrode1', 'a test source',
