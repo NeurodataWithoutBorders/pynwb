@@ -306,8 +306,13 @@ For the purpose of this example we assume that our current directory has the fol
 
 .. code-block:: text
 
-    - nwb_schema (cloned from `https://github.com/NeurodataWithoutBorders/nwb-docutils`)
-    - my_extension/
+    pip install nwb-docutils
+
+
+.. code-block:: text
+
+    - nwb_schema
+      - my_extension/
         - my_extension_source/
             - mylab.namespace.yaml
             - mylab.specs.yaml
@@ -323,7 +328,7 @@ We can now create the sources of our documentation as follows:
 
 .. code-block:: text
 
-    python3 nwb-schema/docs/utils/init_sphinx_extension_doc.py \
+    python3 nwb_init_sphinx_extension_doc  \
                  --project test \
                  --author "Dr. Master Expert" \
                  --version "1.2.3" \
