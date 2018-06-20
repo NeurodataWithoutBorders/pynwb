@@ -770,7 +770,7 @@ class DynamicTable(NWBContainer):
         call_docval_func(super(DynamicTable, self).__init__, kwargs)
 
         if not isinstance(ids, ElementIdentifiers):
-            self.ids = ElementIdentifiers('ids', data=ids)
+            self.ids = ElementIdentifiers('id', data=ids)
         else:
             self.ids = ids
 
@@ -838,7 +838,8 @@ class DynamicTable(NWBContainer):
     @docval(*get_docval(TableColumn.__init__))
     def add_column(self, **kwargs):
         """
-        Add a column to this table. Data should already be populated
+        Add a column to this table. If data is provided, it must
+        contain the same number of rows as the current state of the table.
         """
         col = TableColumn(**kwargs)
         name, data = col.name, col.data
