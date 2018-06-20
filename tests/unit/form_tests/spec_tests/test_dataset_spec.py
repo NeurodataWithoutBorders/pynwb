@@ -30,10 +30,8 @@ class DatasetSpecTests(unittest.TestCase):
         spec = DatasetSpec('my first dataset',
                            'int',
                            name='dataset1',
-                           dimension=(None, None),
                            attributes=self.attributes,
                            linkable=False,
-                           namespace='core',
                            data_type_def='EphysData')
         self.assertEqual(spec['dtype'], 'int')
         self.assertEqual(spec['name'], 'dataset1')
@@ -59,10 +57,9 @@ class DatasetSpecTests(unittest.TestCase):
             DatasetSpec(doc='my first dataset',
                         dtype='my bad dtype',     # <-- Expect AssertionError due to bad type
                         name='dataset1',
-                        dimension=(None, None),
+                        dims=(None, None),
                         attributes=self.attributes,
                         linkable=False,
-                        namespace='core',
                         data_type_def='EphysData')
 
     def test_constructor_ref_spec(self):
@@ -70,10 +67,9 @@ class DatasetSpecTests(unittest.TestCase):
         spec = DatasetSpec(doc='my first dataset',
                            dtype=dtype,
                            name='dataset1',
-                           dimension=(None, None),
+                           dims=(None, None),
                            attributes=self.attributes,
                            linkable=False,
-                           namespace='core',
                            data_type_def='EphysData')
         self.assertDictEqual(spec['dtype'], dtype)
 
@@ -81,20 +77,16 @@ class DatasetSpecTests(unittest.TestCase):
         base = DatasetSpec('my first dataset',
                            'int',
                            name='dataset1',
-                           dimension=(None, None),
                            attributes=self.attributes,
                            linkable=False,
-                           namespace='core',
                            data_type_def='EphysData')
 
         attributes = [AttributeSpec('attribute3', 'my first extending attribute', 'float')]
         ext = DatasetSpec('my first dataset extension',
                           'int',
                           name='dataset1',
-                          dimension=(None, None),
                           attributes=attributes,
                           linkable=False,
-                          namespace='core',
                           data_type_inc=base,
                           data_type_def='SpikeData')
         self.assertDictEqual(ext['attributes'][0], attributes[0])
@@ -108,13 +100,11 @@ class DatasetSpecTests(unittest.TestCase):
     def test_datatype_extension_groupspec(self):
         '''Test to make sure DatasetSpec catches when a GroupSpec used as data_type_inc'''
         base = GroupSpec('a fake grop',
-                         namespace='core',
                          data_type_def='EphysData')
         with self.assertRaises(TypeError):
             ext = DatasetSpec('my first dataset extension',  # noqa: F841
                               'int',
                               name='dataset1',
-                              namespace='core',
                               data_type_inc=base,
                               data_type_def='SpikeData')
 
@@ -181,14 +171,12 @@ class DatasetSpecTests(unittest.TestCase):
         base = DatasetSpec('my first table',
                            [dtype1, dtype2],
                            attributes=self.attributes,
-                           namespace='core',
                            data_type_def='SimpleTable')
         self.assertEqual(base['dtype'], [dtype1, dtype2])
         self.assertEqual(base['doc'], 'my first table')
         dtype3 = DtypeSpec('column3', 'the third column', 'text')
         ext = DatasetSpec('my first table extension',
                           [dtype3],
-                          namespace='core',
                           data_type_inc=base,
                           data_type_def='ExtendedTable')
         self.assertEqual(ext['dtype'], [dtype1, dtype2, dtype3])
@@ -200,14 +188,12 @@ class DatasetSpecTests(unittest.TestCase):
         base = DatasetSpec('my first table',
                            [dtype1, dtype2],
                            attributes=self.attributes,
-                           namespace='core',
                            data_type_def='SimpleTable')
         self.assertEqual(base['dtype'], [dtype1, dtype2])
         self.assertEqual(base['doc'], 'my first table')
         dtype3 = DtypeSpec('column2', 'the second column, with greater precision', 'float64')
         ext = DatasetSpec('my first table extension',
                           [dtype3],
-                          namespace='core',
                           data_type_inc=base,
                           data_type_def='ExtendedTable')
         self.assertEqual(ext['dtype'], [dtype1, dtype3])
@@ -219,7 +205,6 @@ class DatasetSpecTests(unittest.TestCase):
         base = DatasetSpec('my first table',
                            [dtype1, dtype2],
                            attributes=self.attributes,
-                           namespace='core',
                            data_type_def='SimpleTable')
         self.assertEqual(base['dtype'], [dtype1, dtype2])
         self.assertEqual(base['doc'], 'my first table')
@@ -227,7 +212,6 @@ class DatasetSpecTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Cannot extend float64 to float32'):
             ext = DatasetSpec('my first table extension',  # noqa: F841
                               [dtype3],
-                              namespace='core',
                               data_type_inc=base,
                               data_type_def='ExtendedTable')
 
@@ -237,7 +221,6 @@ class DatasetSpecTests(unittest.TestCase):
         base = DatasetSpec('my first table',
                            [dtype1, dtype2],
                            attributes=self.attributes,
-                           namespace='core',
                            data_type_def='SimpleTable')
         self.assertEqual(base['dtype'], [dtype1, dtype2])
         self.assertEqual(base['doc'], 'my first table')
@@ -245,6 +228,5 @@ class DatasetSpecTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'Cannot extend float64 to int32'):
             ext = DatasetSpec('my first table extension',  # noqa: F841
                           [dtype3],
-                          namespace='core',
                           data_type_inc=base,
                           data_type_def='ExtendedTable')
