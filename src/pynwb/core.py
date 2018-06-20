@@ -828,7 +828,7 @@ class DynamicTable(NWBContainer):
         while hasattr(x, '__len__') and not isinstance(x, (text_type, binary_type)):
             x = x[0]
         t = type(x)
-        if t == text_type or t == binary_type:
+        if t in (text_type, binary_type):
             t = np.string_
         return (col.name, t, shape)
 
@@ -866,10 +866,12 @@ class DynamicTable(NWBContainer):
             elif isinstance(arg, int):
                 # index by int, return row
                 dt = [self.get_dtype(col) for col in self.__df_cols]
+                print('int:', dt)
                 ret = np.array([tuple(col[arg] for col in self.__df_cols)], dtype=dt)
             elif isinstance(arg, (tuple, list)):
                 # index by a list of ints, return multiple rows
                 dt = [self.get_dtype(col) for col in self.__df_cols]
+                print('list:', dt)
                 ret = np.zeros((len(arg),), dtype=dt)
                 for name, col in zip(self.__df_colnames, self.__df_cols):
                     ret[name] = col[arg]
