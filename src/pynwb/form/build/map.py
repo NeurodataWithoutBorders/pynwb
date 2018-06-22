@@ -510,24 +510,26 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
     @docval({"name": "spec", "type": Spec, "doc": "the spec to get the attribute value for"},
             {"name": "container", "type": Container, "doc": "the container to get the attribute value from"},
+            {"name": "manager", "type": BuildManager, "doc": "the BuildManager used for managing this build"},
             returns='the value of the attribute')
     def get_attr_value(self, **kwargs):
         ''' Get the value of the attribute corresponding to this spec from the given container '''
-        spec, container = getargs('spec', 'container', kwargs)
+        spec, container, manager = getargs('spec', 'container', 'manager', kwargs)
         attr_name = self.get_attribute(spec)
         if attr_name is None:
             return None
-        attr_val = getattr(container, attr_name, None)
+        attr_val = self.__get_override_attr(attr_name, container, manager)
         if attr_val is None:
-            return None
-        else:
-            return self.__convert_value(attr_val, spec)
+            attr_val = getattr(container, attr_name, None)
+            if attr_val is not None:
+                attr_val = self.__convert_value(attr_val, spec)
+        return attr_val
 
     def __convert_value(self, value, spec):
         ret = value
         if isinstance(spec, AttributeSpec):
             if 'text' in spec.dtype:
-                if spec.dims is not None:
+                if spec.shape is not None:
                     ret = list(map(text_type, value))
                 else:
                     ret = text_type(value)
@@ -603,7 +605,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             else:
                 builder = DatasetBuilder(name, container.data, parent=parent, source=source,
                                          dtype=self.convert_dtype(self.__spec.dtype))
-        self.__add_attributes(builder, self.__spec.attributes, container)
+        self.__add_attributes(builder, self.__spec.attributes, container, manager)
         return builder
 
     def __get_ref_builder(self, dtype, shape, container, manager):
@@ -638,12 +640,12 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 return len(item) == 0
         return False
 
-    def __add_attributes(self, builder, attributes, container):
+    def __add_attributes(self, builder, attributes, container, build_manager):
         for spec in attributes:
             if spec.value is not None:
                 attr_value = spec.value
             else:
-                attr_value = self.get_attr_value(spec, container)
+                attr_value = self.get_attr_value(spec, container, build_manager)
                 if attr_value is None:
                     attr_value = spec.default_value
 
@@ -653,20 +655,21 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                                   % (spec.name, builder.name, self.spec.data_type_def)
                     warnings.warn(msg)
                 continue
-            builder.set_attribute(spec.name, attr_value)
+            if attr_value:
+                builder.set_attribute(spec.name, attr_value)
 
     def __add_links(self, builder, links, container, build_manager, source):
         for spec in links:
-            attr_value = self.get_attr_value(spec, container)
+            attr_value = self.get_attr_value(spec, container, build_manager)
             if not attr_value:
                 continue
             self.__add_containers(builder, spec, attr_value, build_manager, source, container)
 
     def __add_datasets(self, builder, datasets, container, build_manager, source):
         for spec in datasets:
-            attr_value = self.get_attr_value(spec, container)
+            attr_value = self.get_attr_value(spec, container, build_manager)
             # TODO: add check for required datasets
-            if attr_value is None:
+            if attr_value is None or len(attr_value) == 0:
                 if spec.required:
                     warnings.warn("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
                 continue
@@ -675,7 +678,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     sub_builder = builder.datasets[spec.name]
                 else:
                     sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
-                self.__add_attributes(sub_builder, spec.attributes, container)
+                self.__add_attributes(sub_builder, spec.attributes, container, build_manager)
             else:
                 self.__add_containers(builder, spec, attr_value, build_manager, source, container)
 
@@ -687,14 +690,14 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 sub_builder = builder.groups.get(spec.name)
                 if sub_builder is None:
                     sub_builder = GroupBuilder(spec.name)
-                self.__add_attributes(sub_builder, spec.attributes, container)
+                self.__add_attributes(sub_builder, spec.attributes, container, build_manager)
                 self.__add_datasets(sub_builder, spec.datasets, container, build_manager, source)
 
                 # handle subgroups that are not Containers
                 attr_name = self.get_attribute(spec)
                 if attr_name is not None:
                     attr_value = getattr(container, attr_name, None)
-                    attr_value = self.get_attr_value(spec, container)
+                    attr_value = self.get_attr_value(spec, container, build_manager)
                     if any(isinstance(attr_value, t) for t in (list, tuple, set, dict)):
                         it = iter(attr_value)
                         if isinstance(attr_value, dict):
@@ -722,6 +725,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
     def __add_containers(self, builder, spec, value, build_manager, source, parent_container):
         if isinstance(value, Container):
+            if value.parent is None:
+                import pdb
+                raise ValueError("container '%s' has no parent" % value.name)
             if value.modified:
                 rendered_obj = build_manager.build(value, source=source)
                 # use spec to determine what kind of HDF5
@@ -748,7 +754,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                        "Containers if 'spec' is a GroupSpec")
                 raise ValueError(msg % value.__class__.__name__)
             for container in values:
-                self.__add_containers(builder, spec, container, build_manager, source, parent_container)
+                if container:
+                    self.__add_containers(builder, spec, container, build_manager, source, parent_container)
 
     def __get_subspec_values(self, builder, spec, manager):
         ret = dict()

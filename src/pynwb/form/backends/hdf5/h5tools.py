@@ -423,11 +423,7 @@ class HDF5IO(FORMIO):
         # number
         dtype = cls.__resolve_dtype_helper__(dtype)
         if dtype is None:
-            try:
-                dtype = cls.get_type(data)
-            except Exception as exc:
-                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
-                raise_from(Exception(msg), exc)
+            dtype = cls.get_type(data)
         return dtype
 
     @classmethod
@@ -489,7 +485,6 @@ class HDF5IO(FORMIO):
 
         parent, builder = getargs('parent', 'builder', kwargs)
         if builder.written:
-            print('%s already written to %s' % (self.__get_path(builder), builder.source))
             group = parent[builder.name]
         else:
             group = parent.create_group(builder.name)
@@ -530,7 +525,6 @@ class HDF5IO(FORMIO):
     def write_link(self, **kwargs):
         parent, builder = getargs('parent', 'builder', kwargs)
         if builder.written:
-            print('%s already written to %s' % (self.__get_path(builder), builder.source))
             return None
         name = builder.name
         target_builder = builder.builder
@@ -560,7 +554,6 @@ class HDF5IO(FORMIO):
         """
         parent, builder, link_data = getargs('parent', 'builder', 'link_data', kwargs)
         if builder.written:
-            print('%s already written to %s' % (self.__get_path(builder), builder.source))
             return None
         name = builder.name
         data = builder.data
@@ -606,7 +599,11 @@ class HDF5IO(FORMIO):
                     refs.append(i)
             # If one ore more of the parts of the compound data type are references then we need to deal with those
             if len(refs) > 0:
-                _dtype = self.__resolve_dtype__(options['dtype'], data)
+                try:
+                    _dtype = self.__resolve_dtype__(options['dtype'], data)
+                except Exception as exc:
+                    msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
+                    raise_from(Exception(msg), exc)
                 dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype, **options['io_settings'])
                 builder.written = True
 
@@ -722,7 +719,11 @@ class HDF5IO(FORMIO):
             dtype = options.get('dtype')
             io_settings = options.get('io_settings')
         if not isinstance(dtype, type):
-            dtype = cls.__resolve_dtype__(dtype, data)
+            try:
+                dtype = cls.__resolve_dtype__(dtype, data)
+            except Exception as exc:
+                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
+                raise_from(Exception(msg), exc)
         try:
             dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype, **io_settings)
         except Exception as exc:
@@ -790,7 +791,13 @@ class HDF5IO(FORMIO):
             dtype = options.get('dtype')
             io_settings = options.get('io_settings')
         if not isinstance(dtype, type):
-            dtype = cls.__resolve_dtype__(dtype, data)
+            try:
+                dtype = cls.__resolve_dtype__(dtype, data)
+            except Exception as exc:
+                import pdb
+                pdb.set_trace()
+                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
+                raise_from(Exception(msg), exc)
         # define the data shape
         if 'shape' in io_settings:
             data_shape = io_settings.pop('shape')
