@@ -755,8 +755,8 @@ class DynamicTable(NWBContainer):
     """
 
     __nwbfields__ = (
-        'ids',
-        'columns',
+        {'name': 'id', 'child': True},
+        {'name': 'columns', 'child': True},
         'colnames',
     )
 
@@ -770,9 +770,9 @@ class DynamicTable(NWBContainer):
         call_docval_func(super(DynamicTable, self).__init__, kwargs)
 
         if not isinstance(ids, ElementIdentifiers):
-            self.ids = ElementIdentifiers('id', data=ids)
+            self.id = ElementIdentifiers('id', data=ids)
         else:
-            self.ids = ids
+            self.id = ids
 
         if len(columns) > 0:
             if isinstance(columns[0], dict):
@@ -781,14 +781,14 @@ class DynamicTable(NWBContainer):
                 raise ValueError("'columns' must be a list of TableColumns or dicts")
             if not all(len(c) == len(columns[0]) for c in columns):
                 raise ValueError("columns must be the same length")
-            ni = len(self.ids)
+            ni = len(self.id)
             nc = len(columns[0])
             if ni != nc:
                 if ni != 0 and nc != 0:
                     raise ValueError("must provide same number of ids as length of columns if specifying ids")
                 elif nc != 0:
                     for i in range(nc):
-                        self.ids.data.append(i)
+                        self.id.data.append(i)
                 elif nc != 0:
                     raise ValueError("cannot provide ids with no rows")
 
@@ -798,15 +798,15 @@ class DynamicTable(NWBContainer):
         self.columns = columns
 
         # to make generating DataFrames and Series easier
-        self.__df_cols = [self.ids] + list(self.columns)
-        self.__df_colnames = [self.ids.name] + [c.name for c in self.columns]
+        self.__df_cols = [self.id] + list(self.columns)
+        self.__df_colnames = [self.id.name] + [c.name for c in self.columns]
 
         # for bookkeeping
         self.__colids = {name: i for i, name in enumerate(self.colnames)}
         self.__cache = dict()
 
     def __len__(self):
-        return len(self.ids)
+        return len(self.id)
 
     @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row'},
             {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None})
@@ -818,7 +818,7 @@ class DynamicTable(NWBContainer):
         for k, v in data.items():
             colnum = self.__colids[k]
             self.columns[colnum].add_row(v)
-        self.ids.data.append(len(self.ids))
+        self.id.data.append(len(self.id))
 
     # # keeping this around in case anyone wants to resurrect it
     # # this was used to return a numpy structured array. this does not
@@ -842,8 +842,9 @@ class DynamicTable(NWBContainer):
         contain the same number of rows as the current state of the table.
         """
         col = TableColumn(**kwargs)
+        self.add_child(col)
         name, data = col.name, col.data
-        if len(data) != len(self.ids):
+        if len(data) != len(self.id):
             raise ValueError("column must have the same number of rows as 'id'")
         self.__colids[name] = len(self.columns)
         self.fields['colnames'] = tuple(list(self.colnames)+[name])
