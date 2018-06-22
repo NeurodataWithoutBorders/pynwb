@@ -65,6 +65,10 @@ class TestMapNWBContainer(unittest.TestCase):
         raise unittest.SkipTest('Cannot run test unless setUpContainer is implemented')
 
     def assertContainerEqual(self, container1, container2):
+        '''
+        container1 is what was read or generated
+        container2 is what is hardcoded in the TestCase
+        '''
         type1 = type(container1)
         type2 = type(container2)
         self.assertEqual(type1, type2)

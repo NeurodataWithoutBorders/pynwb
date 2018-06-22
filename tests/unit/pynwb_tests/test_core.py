@@ -46,7 +46,7 @@ class TestDynamicTable(unittest.TestCase):
         self.assertEqual(table.columns[0].data, [1, 2, 3, 4, 5])
         self.assertEqual(table.columns[1].data, [10.0, 20.0, 30.0, 40.0, 50.0])
         self.assertEqual(table.columns[2].data, ['cat', 'dog', 'bird', 'fish', 'lizard'])
-        self.assertEqual(table.ids.data, [0, 1, 2, 3, 4])
+        self.assertEqual(table.id.data, [0, 1, 2, 3, 4])
 
     def test_constructor_ids_default(self):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
