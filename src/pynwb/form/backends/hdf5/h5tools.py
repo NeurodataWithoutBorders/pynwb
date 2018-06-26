@@ -794,8 +794,6 @@ class HDF5IO(FORMIO):
             try:
                 dtype = cls.__resolve_dtype__(dtype, data)
             except Exception as exc:
-                import pdb
-                pdb.set_trace()
                 msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
                 raise_from(Exception(msg), exc)
         # define the data shape

@@ -6,13 +6,11 @@ from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBu
 
 from pynwb.ecephys import *  # noqa: F403
 from pynwb.misc import UnitTimes
-from pynwb.file import NWBFile
 
 from . import base
 
 from abc import ABCMeta
 from six import with_metaclass
-from datetime import datetime
 
 
 class TestUnitTimesIO(base.TestDataInterfaceIO):
@@ -104,11 +102,6 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
         self.table.add_row(2, 1.0, 2.0, 3.0, -2.0, 'CA1', 'none', 'second channel of tetrode', self.group)
         self.table.add_row(3, 1.0, 2.0, 3.0, -3.0, 'CA1', 'none', 'third channel of tetrode', self.group)
         self.table.add_row(4, 1.0, 2.0, 3.0, -4.0, 'CA1', 'none', 'fourth channel of tetrode', self.group)
-        #self.nwbfile = NWBFile('ecephys integration tests', 'test nwbfile', 'ECEPHYS_TEST', datetime.now(),
-        #                       devices=[self.dev1],
-        #                       ec_electrode_groups=[self.group],
-        #                       ec_electrodes=self.table)
-
 
     @staticmethod
     def get_table_builder(self):

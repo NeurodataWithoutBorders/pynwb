@@ -100,6 +100,7 @@ class Data(Container):
     def __nonzero__(self):
         return len(self.data) != 0
 
+
 class DataRegion(Data):
 
     @abc.abstractproperty
