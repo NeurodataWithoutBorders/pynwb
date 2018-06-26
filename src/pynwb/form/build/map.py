@@ -9,6 +9,7 @@ from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec
 from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, ReferenceBuilder, RegionBuilder, BaseBuilder
+from .warnings import OrphanContainerWarning, MissingRequiredWarning
 
 
 class Proxy(object):
@@ -649,14 +650,15 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 if attr_value is None:
                     attr_value = spec.default_value
 
+            # do not write empty or null valued objects
             if attr_value is None:
                 if spec.required:
-                    msg = "missing required attribute '%s' for '%s' of type '%s'"\
+                    msg = "attribute '%s' for '%s' (%s)"\
                                   % (spec.name, builder.name, self.spec.data_type_def)
-                    warnings.warn(msg)
+                    warnings.warn(msg, MissingRequiredWarning)
                 continue
-            if attr_value:
-                builder.set_attribute(spec.name, attr_value)
+
+            builder.set_attribute(spec.name, attr_value)
 
     def __add_links(self, builder, links, container, build_manager, source):
         for spec in links:
@@ -669,9 +671,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         for spec in datasets:
             attr_value = self.get_attr_value(spec, container, build_manager)
             # TODO: add check for required datasets
-            if attr_value is None or len(attr_value) == 0:
+            if attr_value is None:
                 if spec.required:
-                    warnings.warn("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
+                    msg = "dataset '%s' for '%s' of type (%s)"\
+                                  % (spec.name, builder.name, self.spec.data_type_def)
+                    warnings.warn(msg, MissingRequiredWarning)
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
                 if spec.name in builder.datasets:
@@ -726,8 +730,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     def __add_containers(self, builder, spec, value, build_manager, source, parent_container):
         if isinstance(value, Container):
             if value.parent is None:
-                import pdb
-                raise ValueError("container '%s' has no parent" % value.name)
+                msg = "'%s' (%s) for '%s' (%s)"\
+                              % (value.name, getattr(value, self.spec.type_key()),
+                                 builder.name, self.spec.data_type_def)
+                warnings.warn(msg, OrphanContainerWarning)
             if value.modified:
                 rendered_obj = build_manager.build(value, source=source)
                 # use spec to determine what kind of HDF5
