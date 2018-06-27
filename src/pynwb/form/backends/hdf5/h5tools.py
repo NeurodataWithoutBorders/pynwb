@@ -454,10 +454,7 @@ class HDF5IO(FORMIO):
                         self.__queue_ref(self._make_attr_ref_filler(obj, key, tmp))
                     else:
                         value = np.array(value)
-                    obj.attrs[key] = value
-                else:
-                    msg = "ignoring attribute '%s' from '%s' - value is empty list" % (key, obj.name)
-                    warnings.warn(msg)
+                obj.attrs[key] = value
             elif isinstance(value, (Container, Builder)):           # a reference
                 self.__queue_ref(self._make_attr_ref_filler(obj, key, value))
             else:
