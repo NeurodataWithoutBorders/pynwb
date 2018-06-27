@@ -128,11 +128,14 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.create_date = datetime(2018, 4, 15, 12, 0, 0)
         self.container_type = self.container.__class__.__name__
         self.filename = 'test_%s.nwb' % self.container_type
-        self.io = None
+        self.writer = None
+        self.reader = None
 
     def tearDown(self):
-        if self.io is not None:
-            self.io.close()
+        if self.writer is not None:
+            self.writer.close()
+        if self.reader is not None:
+            self.reader.close()
         if os.path.exists(self.filename):
             os.remove(self.filename)
 
@@ -142,19 +145,23 @@ class TestMapRoundTrip(TestMapNWBContainer):
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
-        self.io = HDF5IO(self.filename, self.manager)
-        self.io.write(nwbfile)
-        read_nwbfile = self.io.read()
+        self.writer = HDF5IO(self.filename, get_manager())
+        self.writer.write(nwbfile)
+        self.writer.close()
+        self.reader = HDF5IO(self.filename, get_manager())
+        read_nwbfile = self.reader.read()
         try:
             tmp = self.getContainer(read_nwbfile)
             return tmp
         except Exception as e:
-            self.io.close()
-            self.io = None
+            self.reader.close()
+            self.reader = None
             raise e
 
     def test_roundtrip(self):
         read_container = self.roundtripContainer()
+        # make sure we get a completely new object
+        self.assertNotEqual(id(self.container), id(read_container))
         self.assertContainerEqual(self.container, read_container)
 
     def addContainer(self, nwbfile):
