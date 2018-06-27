@@ -35,6 +35,7 @@ class TestDynamicTableIO(base.TestMapRoundTrip):
     def getContainer(self, nwbfile):
         return nwbfile.trials
 
+
 class TestTrials(base.TestMapRoundTrip):
 
     def setUpContainer(self):
