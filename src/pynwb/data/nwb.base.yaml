@@ -214,6 +214,15 @@ groups:
   neurodata_type_def: Images
   neurodata_type_inc: NWBDataInterface
 - attributes:
+  - doc: Value is 'A column-centric table'
+    dtype: text
+    name: help
+    value: A column-centric table
+  - doc: The names of the columns in this table. This should be used to specifying an order to the columns
+    dtype: text
+    name: colnames
+    shape:
+      - null
   - doc: Description of what is in this dynamic table
     dtype: text
     name: description
