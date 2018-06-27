@@ -758,16 +758,19 @@ class DynamicTable(NWBContainer):
         {'name': 'id', 'child': True},
         {'name': 'columns', 'child': True},
         'colnames',
+        'description'
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},
             {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
+            {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
             {'name': 'ids', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
              'default': list()},
             {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': list()})
     def __init__(self, **kwargs):
-        ids, columns = popargs('ids', 'columns', kwargs)
+        ids, columns, desc = popargs('ids', 'columns', 'description', kwargs)
         call_docval_func(super(DynamicTable, self).__init__, kwargs)
+        self.description = desc
 
         if not isinstance(ids, ElementIdentifiers):
             self.id = ElementIdentifiers('id', data=ids)
@@ -803,7 +806,6 @@ class DynamicTable(NWBContainer):
 
         # for bookkeeping
         self.__colids = {name: i for i, name in enumerate(self.colnames)}
-        self.__cache = dict()
 
     def __len__(self):
         return len(self.id)
