@@ -77,9 +77,13 @@ class TestMapNWBContainer(unittest.TestCase):
                 f1 = getattr(container1, nwbfield)
                 f2 = getattr(container2, nwbfield)
                 if isinstance(f1, (tuple, list, np.ndarray)):
-                    if len(f1) > 0 and isinstance(f1[0], NWBContainer):
-                        for sub1, sub2 in zip(f1, f2):
-                            self.assertContainerEqual(sub1, sub2)
+                    if len(f1) > 0:
+                        if isinstance(f1[0], NWBContainer):
+                            for sub1, sub2 in zip(f1, f2):
+                                self.assertContainerEqual(sub1, sub2)
+                        elif isinstance(f1[0], NWBData):
+                            for sub1, sub2 in zip(f1, f2):
+                                self.assertDataEqual(sub1, sub2)
                         continue
                     else:
                         self.assertEqual(len(f1), len(f2))
