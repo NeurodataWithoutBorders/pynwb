@@ -19,11 +19,11 @@ class TestDynamicTable(unittest.TestCase):
 
     def with_table_columns(self):
         cols = [TableColumn(**d) for d in self.spec]
-        table = DynamicTable("with_table_columns", 'PyNWB unit test', columns=cols)
+        table = DynamicTable("with_table_columns", 'PyNWB unit test', 'a test table', columns=cols)
         return table
 
     def with_spec(self):
-        table = DynamicTable("with_spec", 'PyNWB unit test', columns=self.spec)
+        table = DynamicTable("with_spec", 'PyNWB unit test', 'a test table', columns=self.spec)
         return table
 
     def check_empty_table(self, table):
@@ -51,20 +51,20 @@ class TestDynamicTable(unittest.TestCase):
     def test_constructor_ids_default(self):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
-        table = DynamicTable("with_spec", 'PyNWB unit test', columns=columns)
+        table = DynamicTable("with_spec", 'PyNWB unit test', 'a test table', columns=columns)
         self.check_table(table)
 
     def test_constructor_ids(self):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
-        table = DynamicTable("with_columns", 'PyNWB unit test', ids=[0, 1, 2, 3, 4], columns=columns)
+        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', ids=[0, 1, 2, 3, 4], columns=columns)
         self.check_table(table)
 
     def test_constructor_ElementIdentifier_ids(self):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
         ids = ElementIdentifiers('ids', [0, 1, 2, 3, 4])
-        table = DynamicTable("with_columns", 'PyNWB unit test', ids=ids, columns=columns)
+        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', ids=ids, columns=columns)
         self.check_table(table)
 
     def test_constructor_ids_bad_ids(self):
@@ -72,7 +72,7 @@ class TestDynamicTable(unittest.TestCase):
                    for s, d in zip(self.spec, self.data)]
         msg = "must provide same number of ids as length of columns if specifying ids"
         with self.assertRaisesRegex(ValueError, msg):
-            DynamicTable("with_columns", 'PyNWB unit test', ids=[0, 1], columns=columns)
+            DynamicTable("with_columns", 'PyNWB unit test', 'a test table', ids=[0, 1], columns=columns)
 
     def add_rows(self, table):
         table.add_row({'foo': 1, 'bar': 10.0, 'baz': 'cat'})
