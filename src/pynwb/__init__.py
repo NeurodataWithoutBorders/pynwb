@@ -180,18 +180,32 @@ class NWBHDF5IO(HDF5IO):
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
             {'name': 'mode', 'type': str,
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'},
+            {'name': 'load_namespaces', 'type': bool,
+             'doc': 'whether or not to load cached namespaces from given path', 'default': False},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
              to namespaces and TypeMaps', 'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions = popargs('path', 'mode', 'manager', 'extensions', kwargs)
-        if manager is not None and extensions is not None:
-            raise ValueError("'manager' and 'extensions' cannot be specified together")
-        elif extensions is not None:
-            manager = get_manager(extensions=extensions)
-        elif manager is None:
-            manager = get_manager()
+        path, mode, manager, extensions, load_namespaces =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', kwargs)
+        if load_namespaces:
+            if manager is not None:
+                warnings.warn("loading namespaces from file - ignoring 'manager'")
+            if extensions is not None:
+                warnings.warn("loading namespaces from file - ignoring 'extensions' argument")
+            if 'w' in mode:
+                raise ValueError("cannot load namespaces from file when writing to it")
+            ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+            super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
+            manager = BuildManager(TypeMap(ns_catalog))
+        else:
+            if manager is not None and extensions is not None:
+                raise ValueError("'manager' and 'extensions' cannot be specified together")
+            elif extensions is not None:
+                manager = get_manager(extensions=extensions)
+            elif manager is None:
+                manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager, mode=mode)
 
 
