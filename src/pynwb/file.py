@@ -366,7 +366,7 @@ class NWBFile(MultiContainerInterface):
         Add a trial to the trial table. See DynamicTable.add_row for
         more details.
 
-        Required fields are *start*, *stop*, and any columns that have
+        Required fields are *start*, *end*, and any columns that have
         been added (through calls to `add_trial_columns`).
         """
         self.__check_trials()
