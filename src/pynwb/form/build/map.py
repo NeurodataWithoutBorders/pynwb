@@ -1148,7 +1148,7 @@ class TypeMap(object):
         mapper = self.__mappers.get(container_cls)
         if mapper is None:
             mapper_cls = self.__default_mapper_cls
-            for cls in container_cls.type_hierarchy():
+            for cls in container_cls.__mro__:
                 tmp_mapper_cls = self.__mapper_cls.get(cls)
                 if tmp_mapper_cls is not None:
                     mapper_cls = tmp_mapper_cls
