@@ -165,12 +165,15 @@ class TimeSeries(NWBDataInterface):
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
                 timestamps.__add_link('timestamp_link', self)
-        elif starting_time is not None and rate is not None:
-            self.starting_time = starting_time
+        elif rate is not None:
             self.rate = rate
             self.rate_unit = 'Seconds'
+            if starting_time is not None:
+                self.starting_time = starting_time
+            else:
+                self.starting_time = 0.0
         else:
-            raise TypeError("either 'timestamps' or 'starting_time' and 'rate' must be specified")
+            raise TypeError("either 'timestamps' or 'rate' must be specified")
 
     @property
     def data(self):
