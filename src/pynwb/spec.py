@@ -1,6 +1,7 @@
 from copy import copy, deepcopy
 
-from .form.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, NamespaceBuilder, AttributeSpec, DtypeSpec
+from .form.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace,\
+                       NamespaceBuilder, AttributeSpec, DtypeSpec, RefSpec
 from .form.utils import docval, get_docval, fmt_docval_args
 
 from . import CORE_NAMESPACE
@@ -20,6 +21,17 @@ def __swap_inc_def(cls):
         else:
             ret.append(copy(arg))
     return ret
+
+
+_ref_docval = __swap_inc_def(RefSpec)
+
+
+class NWBRefSpec(RefSpec):
+
+    @docval(*_ref_docval)
+    def __init__(self, **kwargs):
+        args, kwargs = fmt_docval_args(RefSpec.__init__, kwargs)
+        super(NWBRefSpec, self).__init__(*args, **kwargs)
 
 
 _attr_docval = __swap_inc_def(AttributeSpec)

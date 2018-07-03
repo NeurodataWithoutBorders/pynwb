@@ -54,7 +54,7 @@ imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
                                              'a very interesting part of the brain',
                                              'imaging_device_1',
                                              600., '2.718', 'GFP', 'my favorite brain location',
-                                             (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+                                             [], 4.0, 'manifold unit', 'A frame to refer to')
 
 
 ####################

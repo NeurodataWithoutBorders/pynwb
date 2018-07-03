@@ -12,11 +12,9 @@ class RefSpecTests(unittest.TestCase):
         self.assertEqual(spec.reftype, 'object')
         json.dumps(spec)  # to ensure there are no circular links
 
-    def test_invlaud_reftype(self):
+    def test_wrong_reference_type(self):
         with self.assertRaises(ValueError):
-            RefSpec('TimeSeries',
-                    'invalid'        # <-- Invalid reftype must raise a ValueError
-                    )
+            RefSpec('TimeSeries', 'unknownreftype')
 
     def test_isregion(self):
         spec = RefSpec('TimeSeries', 'object')
