@@ -1,12 +1,12 @@
 from bisect import bisect_left
 
-from .form.utils import docval, getargs, popargs, call_docval_func
+from .form.utils import docval, getargs, popargs, call_docval_func, get_docval
 from .form.data_utils import DataIO, RegionSlicer
 from .form import get_region_slicer
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import NWBContainer, NWBTable, NWBTableRegion
+from .core import NWBContainer, NWBTable, NWBTableRegion, DynamicTable
 
 
 _evtable_docval = [
@@ -69,28 +69,41 @@ class TimeSeriesIndex(NWBTable):
 @register_class('Epochs', CORE_NAMESPACE)
 class Epochs(NWBContainer):
 
-    __nwbfields__ = ('epochs', 'timeseries_index')
+    __nwbfields__ = (
+            {'name': 'epochs', 'child': True},
+            {'name': 'timeseries_index', 'child': True},
+            {'name': 'metadata', 'child': True}
+    )
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'name', 'type': str, 'doc': 'the name of this epoch table', 'default': 'epochs'},
             {'name': 'epochs', 'type': EpochTable, 'doc': 'the EpochTable holding information about each epoch',
              'default': None},
             {'name': 'timeseries_index', 'type': TimeSeriesIndex,
-             'doc': 'the TimeSeriesIndex table holding indices into each TimeSeries for each epoch', 'default': None})
+             'doc': 'the TimeSeriesIndex table holding indices into each TimeSeries for each epoch', 'default': None},
+            {'name': 'metadata', 'type': DynamicTable, 'doc': 'a metadata table for the epochs',
+             'default': None})
     def __init__(self, **kwargs):
-        epochs, timeseries_index = popargs('epochs', 'timeseries_index', kwargs)
+        epochs, timeseries_index, metadata = popargs('epochs', 'timeseries_index', 'metadata', kwargs)
         call_docval_func(super(Epochs, self).__init__, kwargs)
         self.epochs = epochs if epochs is not None else EpochTable()
         self.timeseries_index = timeseries_index if timeseries_index else TimeSeriesIndex()
+        if metadata is not None:
+            self.metadata = metadata
+
+    def __check_metadata(self):
+        if self.metadata is None:
+            self.metadata = DynamicTable('metadata', self.source, 'a table for metadata about each epoch')
 
     @docval({'name': 'description', 'type': str, 'doc': 'a description of this epoch'},
             {'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
             {'name': 'stop_time', 'type': float, 'doc': 'Stop time of epoch, in seconds'},
             {'name': 'tags', 'type': (str, list, tuple), 'doc': 'user-defined tags uesd throughout epochs'},
-            {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to'})
+            {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to'},
+            {'name': 'metadata', 'type': dict, 'doc': 'the metadata about this epoch', 'default': None})
     def add_epoch(self, **kwargs):
-        description, start_time, stop_time, tags, timeseries =\
-            getargs('description', 'start_time', 'stop_time', 'tags', 'timeseries', kwargs)
+        description, start_time, stop_time, tags, timeseries, metadata =\
+            getargs('description', 'start_time', 'stop_time', 'tags', 'timeseries', 'metadata', kwargs)
         if isinstance(timeseries, TimeSeries):
             timeseries = [timeseries]
         n_tsi = len(self.timeseries_index)
@@ -102,6 +115,24 @@ class Epochs(NWBContainer):
         if isinstance(tags, (tuple, list)):
             tags = ",".join(tags)
         self.epochs.add_row(start_time, stop_time, tags, tsi_region, description)
+        if metadata is None:
+            if self.metadata is not None:
+                raise ValueError("must consistently provide metdata for epochs")
+        else:
+            self.__check_metadata()
+            if len(self.metadata) != len(self.epochs) - 1:
+                raise ValueError("must consistently provide metdata for epochs")
+            self.metadata.add_row(metadata)
+
+    @docval(*get_docval(DynamicTable.add_column))
+    def add_metadata_column(self, **kwargs):
+        """
+        Add a column to the trial table. See DynamicTable.add_column for more details
+        """
+        self.__check_metadata()
+        if len(self.epochs) > 0 or len(self.metadata) > 0:
+            raise ValueError("cannot add columns after table has been populated")
+        call_docval_func(self.metadata.add_column, kwargs)
 
     def get_timeseries(self, epoch_idx, ts_name):
         ep_row = self.epochs[epoch_idx]

@@ -1,6 +1,7 @@
 from collections import deque
 import numpy as np
 import os.path
+from functools import partial
 from h5py import File, Group, Dataset, special_dtype, SoftLink, ExternalLink, Reference, RegionReference, check_dtype
 from six import raise_from, text_type, string_types, binary_type
 import warnings
@@ -60,7 +61,7 @@ class HDF5IO(FORMIO):
              'type': NamespaceCatalog,
              'doc': 'the NamespaceCatalog to load namespaces into'},
             {'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
-            {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': list})
+            {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': None})
     def load_namespaces(cls, namespace_catalog, path, namespaces=None):
         '''
         Load cached namespaces from a file.
@@ -128,6 +129,46 @@ class HDF5IO(FORMIO):
                 ret.append(subspec)
         return ret
 
+    @classmethod
+    @docval({'name': 'source_filename', 'type': str, 'doc': 'the path to the HDF5 file to copy'},
+            {'name': 'dest_filename', 'type': str, 'doc': 'the name of the desitnation file'},
+            {'name': 'expand_external', 'type': bool, 'doc': 'expand external links into new objects', 'default': True},
+            {'name': 'expand_refs', 'type': bool, 'doc': 'copy objects which are pointed to by reference',
+             'default': False},
+            {'name': 'expand_soft', 'type': bool, 'doc': 'expand soft links into new objects', 'default': False}
+            )
+    def copy_file(self, **kwargs):
+        """
+        Convenience function to copy an HDF5 file while allowing external links to be resolved.
+
+        NOTE: The source file will be opened in 'r' mode and the destination file will be opened in 'w' mode
+              using h5py. To avoid possible collisions, care should be taken that, e.g., the source file is
+              not opened already when calling this function.
+
+        """
+        source_filename, dest_filename, expand_external, expand_refs, expand_soft = getargs('source_filename',
+                                                                                            'dest_filename',
+                                                                                            'expand_external',
+                                                                                            'expand_refs',
+                                                                                            'expand_soft',
+                                                                                            kwargs)
+        source_file = File(source_filename, 'r')
+        dest_file = File(dest_filename, 'w')
+        for objname in source_file["/"].keys():
+            source_file.copy(source=objname,
+                             dest=dest_file,
+                             name=objname,
+                             expand_external=expand_external,
+                             expand_refs=expand_refs,
+                             expand_soft=expand_soft,
+                             shallow=False,
+                             without_attrs=False,
+                             )
+        for objname in source_file['/'].attrs:
+            dest_file['/'].attrs[objname] = source_file['/'].attrs[objname]
+        source_file.close()
+        dest_file.close()
+
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'},
             {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False},
             {'name': 'link_data', 'type': bool,
@@ -156,8 +197,13 @@ class HDF5IO(FORMIO):
     @docval(returns='a GroupBuilder representing the NWB Dataset', rtype='GroupBuilder')
     def read_builder(self):
         f_builder = self.__read.get(self.__file)
+        # ignore cached specs when reading builder
+        ignore = set()
+        specloc = self.__file.attrs.get(SPEC_LOC_ATTR)
+        if specloc is not None:
+            ignore.add(self.__file[specloc].name)
         if f_builder is None:
-            f_builder = self.__read_group(self.__file, ROOT_NAME)
+            f_builder = self.__read_group(self.__file, ROOT_NAME, ignore=ignore)
             self.__read[self.__file] = f_builder
         return f_builder
 
@@ -184,7 +230,7 @@ class HDF5IO(FORMIO):
         container = self.manager.construct(builder)
         return container
 
-    def __read_group(self, h5obj, name=None):
+    def __read_group(self, h5obj, name=None, ignore=set()):
         kwargs = {
             "attributes": dict(h5obj.attrs.items()),
             "groups": dict(),
@@ -200,6 +246,8 @@ class HDF5IO(FORMIO):
             name = str(os.path.basename(h5obj.name))
         for k in h5obj:
             sub_h5obj = h5obj.get(k)
+            if sub_h5obj.name in ignore:
+                continue
             if not (sub_h5obj is None):
                 link_type = h5obj.get(k, getlink=True)
                 if isinstance(link_type, SoftLink) or isinstance(link_type, ExternalLink):
@@ -213,9 +261,9 @@ class HDF5IO(FORMIO):
                         if isinstance(sub_h5obj, Dataset):
                             builder = self.__read_dataset(sub_h5obj, builder_name)
                         else:
-                            builder = self.__read_group(sub_h5obj, builder_name)
+                            builder = self.__read_group(sub_h5obj, builder_name, ignore=ignore)
                         self.__set_built(sub_h5obj.file.filename, target_path, builder)
-                    kwargs['links'][builder_name] = LinkBuilder(k, builder, source=self.__path)
+                    kwargs['links'][builder_name] = LinkBuilder(builder, k, source=self.__path)
                 else:
                     builder = self.__get_built(sub_h5obj.file.filename, sub_h5obj.name)
                     obj_type = None
@@ -224,7 +272,7 @@ class HDF5IO(FORMIO):
                         read_method = self.__read_dataset
                         obj_type = kwargs['datasets']
                     else:
-                        read_method = self.__read_group
+                        read_method = partial(self.__read_group, ignore=ignore)
                         obj_type = kwargs['groups']
                     if builder is None:
                         builder = read_method(sub_h5obj)
@@ -236,6 +284,7 @@ class HDF5IO(FORMIO):
                 continue
         kwargs['source'] = self.__path
         ret = GroupBuilder(name, **kwargs)
+        ret.written = True
         return ret
 
     def __read_dataset(self, h5obj, name=None):
@@ -287,6 +336,7 @@ class HDF5IO(FORMIO):
         else:
             kwargs["data"] = h5obj
         ret = DatasetBuilder(name, **kwargs)
+        ret.written = True
         return ret
 
     def open(self):
@@ -373,11 +423,7 @@ class HDF5IO(FORMIO):
         # number
         dtype = cls.__resolve_dtype_helper__(dtype)
         if dtype is None:
-            try:
-                dtype = cls.get_type(data)
-            except Exception as exc:
-                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
-                raise_from(Exception(msg), exc)
+            dtype = cls.get_type(data)
         return dtype
 
     @classmethod
@@ -401,18 +447,14 @@ class HDF5IO(FORMIO):
             if isinstance(value, (set, list, tuple)):
                 tmp = tuple(value)
                 if len(tmp) > 0:
-                    if isinstance(tmp[0], str):          # a list of strings will need a special type
-                        max_len = max(len(s) for s in tmp)
-                        dt = '|S%d' % max_len
-                        value = np.array(tmp, dtype=dt)
+                    # a list of strings will need a special type
+                    if isinstance(tmp[0], (text_type, binary_type)):
+                        value = [np.string_(s) for s in tmp]
                     elif isinstance(tmp[0], Container):  # a list of references
                         self.__queue_ref(self._make_attr_ref_filler(obj, key, tmp))
                     else:
                         value = np.array(value)
-                    obj.attrs[key] = value
-                else:
-                    msg = "ignoring attribute '%s' from '%s' - value is empty list" % (key, obj.name)
-                    warnings.warn(msg)
+                obj.attrs[key] = value
             elif isinstance(value, (Container, Builder)):           # a reference
                 self.__queue_ref(self._make_attr_ref_filler(obj, key, value))
             else:
@@ -439,7 +481,10 @@ class HDF5IO(FORMIO):
     def write_group(self, **kwargs):
 
         parent, builder = getargs('parent', 'builder', kwargs)
-        group = parent.create_group(builder.name)
+        if builder.written:
+            group = parent[builder.name]
+        else:
+            group = parent.create_group(builder.name)
         # write all groups
         subgroups = builder.groups
         if subgroups:
@@ -458,6 +503,7 @@ class HDF5IO(FORMIO):
                 self.write_link(group, sub_builder)
         attributes = builder.attributes
         self.set_attributes(group, attributes)
+        builder.written = True
         return group
 
     def __get_path(self, builder):
@@ -475,6 +521,8 @@ class HDF5IO(FORMIO):
             returns='the Link that was created', rtype='Link')
     def write_link(self, **kwargs):
         parent, builder = getargs('parent', 'builder', kwargs)
+        if builder.written:
+            return None
         name = builder.name
         target_builder = builder.builder
         path = self.__get_path(target_builder)
@@ -487,6 +535,7 @@ class HDF5IO(FORMIO):
             msg = 'cannot create external link to %s' % path
             raise ValueError(msg)
         parent[name] = link_obj
+        builder.written = True
         return link_obj
 
     @docval({'name': 'parent', 'type': Group, 'doc': 'the parent HDF5 object'},  # noqa
@@ -501,6 +550,8 @@ class HDF5IO(FORMIO):
         __scalar_fill__, __list_fill__ and __chunked_iter_fill__ to write the data.
         """
         parent, builder, link_data = getargs('parent', 'builder', 'link_data', kwargs)
+        if builder.written:
+            return None
         name = builder.name
         data = builder.data
         options = dict()   # dict with additional
@@ -545,8 +596,13 @@ class HDF5IO(FORMIO):
                     refs.append(i)
             # If one ore more of the parts of the compound data type are references then we need to deal with those
             if len(refs) > 0:
-                _dtype = self.__resolve_dtype__(options['dtype'], data)
+                try:
+                    _dtype = self.__resolve_dtype__(options['dtype'], data)
+                except Exception as exc:
+                    msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
+                    raise_from(Exception(msg), exc)
                 dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype, **options['io_settings'])
+                builder.written = True
 
                 @self.__queue_ref
                 def _filler():
@@ -570,6 +626,7 @@ class HDF5IO(FORMIO):
             # Write a scalar data region reference dataset
             if isinstance(data, RegionBuilder):
                 dset = parent.require_dataset(name, shape=(), dtype=_dtype)
+                builder.written = True
 
                 @self.__queue_ref
                 def _filler():
@@ -580,6 +637,7 @@ class HDF5IO(FORMIO):
             # Write a scalar object reference dataset
             elif isinstance(data, ReferenceBuilder):
                 dset = parent.require_dataset(name, dtype=_dtype, shape=())
+                builder.written = True
 
                 @self.__queue_ref
                 def _filler():
@@ -592,6 +650,7 @@ class HDF5IO(FORMIO):
                 # Write a array of region references
                 if options['dtype'] == 'region':
                     dset = parent.require_dataset(name, dtype=_dtype, shape=(len(data),), **options['io_settings'])
+                    builder.written = True
 
                     @self.__queue_ref
                     def _filler():
@@ -604,6 +663,7 @@ class HDF5IO(FORMIO):
                 # Write array of object references
                 else:
                     dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype, ** options['io_settings'])
+                    builder.written = True
 
                     @self.__queue_ref
                     def _filler():
@@ -633,6 +693,7 @@ class HDF5IO(FORMIO):
         # Validate the attributes on the linked dataset
         elif len(attributes) > 0:
             pass
+        builder.written = True
         return
 
     @classmethod
@@ -655,7 +716,11 @@ class HDF5IO(FORMIO):
             dtype = options.get('dtype')
             io_settings = options.get('io_settings')
         if not isinstance(dtype, type):
-            dtype = cls.__resolve_dtype__(dtype, data)
+            try:
+                dtype = cls.__resolve_dtype__(dtype, data)
+            except Exception as exc:
+                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
+                raise_from(Exception(msg), exc)
         try:
             dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype, **io_settings)
         except Exception as exc:
@@ -691,9 +756,9 @@ class HDF5IO(FORMIO):
             io_settings['shape'] = data.recommended_data_shape()
         # Define the maxshape of the data if not provided by the user
         if 'maxshape' not in io_settings:
-            io_settings['maxshape'] = data.get_maxshape()
+            io_settings['maxshape'] = data.maxshape
         if 'dtype' not in io_settings:
-            io_settings['dtype'] = data.get_dtype()
+            io_settings['dtype'] = data.dtype
         try:
             dset = parent.create_dataset(name, **io_settings)
         except Exception as exc:
@@ -723,7 +788,11 @@ class HDF5IO(FORMIO):
             dtype = options.get('dtype')
             io_settings = options.get('io_settings')
         if not isinstance(dtype, type):
-            dtype = cls.__resolve_dtype__(dtype, data)
+            try:
+                dtype = cls.__resolve_dtype__(dtype, data)
+            except Exception as exc:
+                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
+                raise_from(Exception(msg), exc)
         # define the data shape
         if 'shape' in io_settings:
             data_shape = io_settings.pop('shape')
@@ -735,7 +804,7 @@ class HDF5IO(FORMIO):
         try:
             dset = parent.create_dataset(name, shape=data_shape, dtype=dtype, **io_settings)
         except Exception as exc:
-            msg = "Could not create dataset %s in %s" % (name, parent.name)
+            msg = "Could not create dataset %s in %s. %s" % (name, parent.name, str(exc))
             raise_from(Exception(msg), exc)
         # Write the data
         if len(data) > dset.shape[0]:

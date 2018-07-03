@@ -18,7 +18,7 @@ PyNWB API.
 #
 # The following block of code demonstrates how to create a new namespace, and then add a new `neurodata_type`
 # to this namespace. Finally,
-# it calls :py:meth:`~form.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
+# it calls :py:meth:`~pynwb.form.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
 
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 
@@ -27,7 +27,7 @@ ext_source = "mylab.extensions.yaml"
 
 ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "mylab")
 ext = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                   attributes=[NWBAttributeSpec('trode_id', 'int', 'the tetrode id')],
+                   attributes=[NWBAttributeSpec('trode_id', 'the tetrode id', 'int')],
                    neurodata_type_inc='ElectricalSeries',
                    neurodata_type_def='TetrodeSeries')
 

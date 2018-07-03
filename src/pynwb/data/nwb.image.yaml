@@ -20,7 +20,7 @@ groups:
       - y
       - x
     doc: Either binary data containing image or empty.
-    dtype: number
+    dtype: int8
     name: data
     shape:
     - - null

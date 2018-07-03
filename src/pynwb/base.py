@@ -2,8 +2,8 @@ from warnings import warn
 
 from collections import Iterable
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args
-from .form.data_utils import DataChunkIterator, DataIO
+from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from .form.data_utils import AbstractDataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface
@@ -38,10 +38,9 @@ class ProcessingModule(MultiContainerInterface):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        description = popargs('description', kwargs)
-        super(ProcessingModule, self).__init__(**kwargs)
-        self.description = description
-        self.data_interfaces = getargs('data_interfaces', kwargs)
+        call_docval_func(super(ProcessingModule, self).__init__, kwargs)
+        self.description = popargs('description', kwargs)
+        self.data_interfaces = popargs('data_interfaces', kwargs)
 
     @property
     def containers(self):
@@ -86,10 +85,7 @@ class TimeSeries(NWBDataInterface):
                      "rate",
                      "rate_unit",
                      "control",
-                     "control_description",
-                     "help")
-
-    __help = 'General purpose TimeSeries'
+                     "control_description")
 
     __time_unit = "Seconds"
 
@@ -145,13 +141,16 @@ class TimeSeries(NWBDataInterface):
         data = getargs('data', kwargs)
         self.fields['data'] = data
         if isinstance(data, TimeSeries):
-            data.fields['data_link'].append(self)
+            data.__add_link('data_link', self)
             self.fields['num_samples'] = data.num_samples
-        elif isinstance(data, DataChunkIterator):
+        elif isinstance(data, AbstractDataChunkIterator):
             self.fields['num_samples'] = -1
         elif isinstance(data, DataIO):
             this_data = data.data
-            self.fields['num_samples'] = len(this_data)
+            if isinstance(this_data, AbstractDataChunkIterator):
+                self.fields['num_samples'] = -1
+            else:
+                self.fields['num_samples'] = len(this_data)
         elif data is None:
             self.fields['num_samples'] = 0
         else:
@@ -165,20 +164,13 @@ class TimeSeries(NWBDataInterface):
             self.timestamps_unit = 'Seconds'
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
-                timestamps.fields['timestamp_link'].append(self)
+                timestamps.__add_link('timestamp_link', self)
         elif starting_time is not None and rate is not None:
             self.starting_time = starting_time
             self.rate = rate
             self.rate_unit = 'Seconds'
         else:
             raise TypeError("either 'timestamps' or 'starting_time' and 'rate' must be specified")
-
-        # self.fields['data_link'] = set()
-        # self.fields['timestamp_link'] = set()
-
-    @property
-    def help(self):
-        return self.__help
 
     @property
     def data(self):

@@ -82,7 +82,7 @@ def nwb_repr(nwb_object, verbose=True):
         return str(nwb_object)
 
 
-class NWBBaseType(with_metaclass(ExtenderMeta)):
+class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     '''The base class to any NWB types.
 
     The purpose of this class is to provide a mechanism for representing hierarchical
@@ -92,45 +92,18 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
     __nwbfields__ = tuple()
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': 'NWBContainer',
+            {'name': 'parent', 'type': Container,
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         parent, container_source = getargs('parent', 'container_source', kwargs)
-        super(NWBBaseType, self).__init__()
+        call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
-        self.__parent = None
-        self.__name = getargs('name', kwargs)
-        if parent:
-            self.parent = parent
-        self.__container_source = container_source
-
-    @property
-    def name(self):
-        return self.__name
-
-    @property
-    def container_source(self):
-        '''The source of this Container e.g. file name or table
-        '''
-        return self.__container_source
 
     @property
     def fields(self):
         return self.__fields
-
-    @property
-    def parent(self):
-        '''The parent NWBContainer of this NWBContainer
-        '''
-        return self.__parent
-
-    @parent.setter
-    def parent(self, parent_container):
-        if self.__parent is not None:
-            raise Exception('cannot reassign parent')
-        self.__parent = parent_container
 
     @staticmethod
     def _transform_arg(nwbfield):
@@ -195,9 +168,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta)):
     def __str__(self):
         return nwb_repr(self)
 
-    def __repr__(self):
-        return str(self)
-
 
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBBaseType, Container):
@@ -214,6 +184,27 @@ class NWBContainer(NWBBaseType, Container):
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
         self.source = getargs('source', kwargs)
+
+    @classmethod
+    def _setter(cls, nwbfield):
+        super_setter = NWBBaseType._setter(nwbfield)
+        ret = super_setter
+        if isinstance(nwbfield, dict) and nwbfield.get('child', False):
+
+            def nwbdi_setter(self, val):
+                super_setter(self, val)
+                if val is not None:
+                    if isinstance(val, (tuple, list)):
+                        pass
+                    elif isinstance(val, dict):
+                        val = val.values()
+                    else:
+                        val = [val]
+                    for v in val:
+                        self.add_child(v)
+
+            ret = nwbdi_setter
+        return ret
 
     def _to_dict(self, arg, label="NULL"):
         return_dict = LabelledDict(label)
@@ -233,31 +224,6 @@ class NWBDataInterface(NWBContainer):
     @docval(*get_docval(NWBContainer.__init__))
     def __init__(self, **kwargs):
         call_docval_func(super(NWBDataInterface, self).__init__, kwargs)
-        self.__children = list()
-
-    @property
-    def children(self):
-        return tuple(self.__children)
-
-    @docval({'name': 'child', 'type': NWBBaseType,
-             'doc': 'the child NWBContainer or NWBData for this Container', 'default': None})
-    def add_child(self, **kwargs):
-        child = getargs('child', kwargs)
-        self.__children.append(child)
-
-    @classmethod
-    def _setter(cls, nwbfield):
-        super_setter = super(NWBDataInterface, cls)._setter(nwbfield)
-        ret = super_setter
-        if isinstance(nwbfield, dict) and nwbfield.get('child', False):
-
-            def nwbdi_setter(self, val):
-                super_setter(self, val)
-                if val is not None:
-                    self.add_child(val)
-
-            ret = nwbdi_setter
-        return ret
 
 
 @register_class('NWBData', CORE_NAMESPACE)
@@ -283,6 +249,8 @@ class NWBData(NWBBaseType, Data):
         return len(self.__data)
 
     def __getitem__(self, args):
+        if isinstance(self.data, (tuple, list)) and isinstance(args, (tuple, list)):
+            return [self.data[i] for i in args]
         return self.data[args]
 
     def append(self, arg):
@@ -609,7 +577,6 @@ class MultiContainerInterface(NWBDataInterface):
                 containers = container
             d = getattr(self, attr_name)
             for tmp in containers:
-                tmp.parent = self
                 self.add_child(tmp)
                 if tmp.name in d:
                     msg = "'%s' already exists in '%s'" % (tmp.name, self.name)
@@ -755,3 +722,171 @@ class MultiContainerInterface(NWBDataInterface):
 
         if len(clsconf) == 1:
             setattr(cls, '__getitem__', cls.__make_getitem(attr, container_type))
+
+
+@register_class('TableColumn', CORE_NAMESPACE)
+class TableColumn(NWBData):
+
+    __nwbfields__ = (
+        'description',
+    )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this column'},
+            {'name': 'description', 'type': str, 'doc': 'a description for this column'},
+            {'name': 'data', 'type': 'array_data', 'doc': 'the data contained in this  column', 'default': list()})
+    def __init__(self, **kwargs):
+        desc = popargs('description', kwargs)
+        call_docval_func(super(TableColumn, self).__init__, kwargs)
+        self.description = desc
+
+    @docval({'name': 'val', 'type': None, 'doc': 'the value to add to this column'})
+    def add_row(self, **kwargs):
+        val = getargs('val', kwargs)
+        self.data.append(val)
+
+
+@register_class('DynamicTable', CORE_NAMESPACE)
+class DynamicTable(NWBContainer):
+    """
+    A column-based table. Columns are defined by the argument *columns*. This argument
+    must be a list/tuple of TableColumns or a list/tuple of dicts containing the keys
+    'name' and 'description' that provide the name and description of each column
+    in the table.
+    """
+
+    __nwbfields__ = (
+        {'name': 'id', 'child': True},
+        {'name': 'columns', 'child': True},
+        'colnames',
+        'description'
+    )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},
+            {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
+            {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
+            {'name': 'ids', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
+             'default': list()},
+            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': list()})
+    def __init__(self, **kwargs):
+        ids, columns, desc = popargs('ids', 'columns', 'description', kwargs)
+        call_docval_func(super(DynamicTable, self).__init__, kwargs)
+        self.description = desc
+
+        if not isinstance(ids, ElementIdentifiers):
+            self.id = ElementIdentifiers('id', data=ids)
+        else:
+            self.id = ids
+
+        if len(columns) > 0:
+            if isinstance(columns[0], dict):
+                columns = tuple(TableColumn(**d) for d in columns)
+            elif not isinstance(columns[0], TableColumn):
+                raise ValueError("'columns' must be a list of TableColumns or dicts")
+            if not all(len(c) == len(columns[0]) for c in columns):
+                raise ValueError("columns must be the same length")
+            ni = len(self.id)
+            nc = len(columns[0])
+            if ni != nc:
+                if ni != 0 and nc != 0:
+                    raise ValueError("must provide same number of ids as length of columns if specifying ids")
+                elif nc != 0:
+                    for i in range(nc):
+                        self.id.data.append(i)
+                elif nc != 0:
+                    raise ValueError("cannot provide ids with no rows")
+
+        # column names for convenience
+
+        self.colnames = tuple(col.name for col in columns)
+        self.columns = columns
+
+        # to make generating DataFrames and Series easier
+        self.__df_cols = [self.id] + list(self.columns)
+        self.__df_colnames = [self.id.name] + [c.name for c in self.columns]
+
+        # for bookkeeping
+        self.__colids = {name: i for i, name in enumerate(self.colnames)}
+
+    def __len__(self):
+        return len(self.id)
+
+    @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row'},
+            {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None})
+    def add_row(self, **kwargs):
+        '''
+        Add a row to the table. If *id* is not provided, it will auto-increment.
+        '''
+        data = getargs('data', kwargs)
+        for k, v in data.items():
+            colnum = self.__colids[k]
+            self.columns[colnum].add_row(v)
+        self.id.data.append(len(self.id))
+
+    # # keeping this around in case anyone wants to resurrect it
+    # # this was used to return a numpy structured array. this does not
+    # # work across platforms (it breaks on windows). instead, return
+    # # tuples and lists of tuples
+    # def get_dtype(self, col):
+    #     x = col.data[0]
+    #     shape = get_shape(x)
+    #     shape = None if shape is None else shape
+    #     while hasattr(x, '__len__') and not isinstance(x, (text_type, binary_type)):
+    #         x = x[0]
+    #     t = type(x)
+    #     if t in (text_type, binary_type):
+    #         t = np.string_
+    #     return (col.name, t, shape)
+
+    @docval(*get_docval(TableColumn.__init__))
+    def add_column(self, **kwargs):
+        """
+        Add a column to this table. If data is provided, it must
+        contain the same number of rows as the current state of the table.
+        """
+        col = TableColumn(**kwargs)
+        self.add_child(col)
+        name, data = col.name, col.data
+        if len(data) != len(self.id):
+            raise ValueError("column must have the same number of rows as 'id'")
+        self.__colids[name] = len(self.columns)
+        self.fields['colnames'] = tuple(list(self.colnames)+[name])
+        self.fields['columns'] = tuple(list(self.columns)+[col])
+        self.__df_colnames.append(name)
+        self.__df_cols.append(col)
+
+    def __getitem__(self, key):
+        ret = None
+        if isinstance(key, tuple):
+            # index by row and column, return specific cell
+            arg1 = key[0]
+            arg2 = key[1]
+            if isinstance(arg2, str):
+                arg2 = self.__colids[arg2] + 1
+            ret = self.__df_cols[arg2][arg1]
+        else:
+            arg = key
+            if isinstance(arg, str):
+                # index by one string, return column
+                ret = tuple(self.__df_cols[self.__colids[arg]+1].data)
+                # # keeping this around in case anyone wants to resurrect it
+                # dt = self.get_dtype(ret)[1]
+                # ret = np.array(ret.data, dtype=dt)
+            elif isinstance(arg, int):
+                # index by int, return row
+                ret = tuple(col[arg] for col in self.__df_cols)
+                # # keeping this around in case anyone wants to resurrect it
+                # dt = [self.get_dtype(col) for col in self.__df_cols]
+                # ret = np.array([ret], dtype=dt)
+
+            elif isinstance(arg, (tuple, list)):
+                # index by a list of ints, return multiple rows
+                # # keeping this around in case anyone wants to resurrect it
+                # dt = [self.get_dtype(col) for col in self.__df_cols]
+                # ret = np.zeros((len(arg),), dtype=dt)
+                # for name, col in zip(self.__df_colnames, self.__df_cols):
+                #     ret[name] = col[arg]
+                ret = list()
+                for i in arg:
+                    ret.append(tuple(col[i] for col in self.__df_cols))
+
+        return ret

@@ -18,6 +18,9 @@ docs/source/modules/generated
 # Auto-generated files after running tutorials
 *_example.nwb
 mylab.*.yaml
+*.npy
+*.nwb
+manifest.json
 
 # Auto-generated tutorials
 docs/source/tutorials/

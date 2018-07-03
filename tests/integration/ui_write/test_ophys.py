@@ -23,9 +23,9 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         self.optical_channel = OpticalChannel('optchan1', 'unit test TestImagingPlaneIO',
-                                              'a fake OpticalChannel', '3.14')
+                                              'a fake OpticalChannel', 500.)
         return ImagingPlane('imgpln1', 'unit test TestImagingPlaneIO', self.optical_channel,
-                            'a fake ImagingPlane', 'imaging_device_1', '6.28', '2.718', 'GFP', 'somewhere in the brain')
+                            'a fake ImagingPlane', 'imaging_device_1', 600., '2.718', 'GFP', 'somewhere in the brain')
 
     def setUpBuilder(self):
         optchan_builder = GroupBuilder(
@@ -37,7 +37,7 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
                 'source': 'unit test TestImagingPlaneIO'},
             datasets={
                 'description': DatasetBuilder('description', 'a fake OpticalChannel'),
-                'emission_lambda': DatasetBuilder('emission_lambda', '3.14')},
+                'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
         )
         return GroupBuilder(
             'imgpln1',
@@ -49,7 +49,7 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
             datasets={
                 'description': DatasetBuilder('description', 'a fake ImagingPlane'),
                 'device': DatasetBuilder('device', 'imaging_device_1'),
-                'excitation_lambda': DatasetBuilder('excitation_lambda', '6.28'),
+                'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
                 'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
@@ -70,10 +70,10 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
 class TestTwoPhotonSeries(base.TestDataInterfaceIO):
 
     def make_imaging_plane(self, source):
-        self.optical_channel = OpticalChannel('optchan1', source, 'a fake OpticalChannel', '3.14')
+        self.optical_channel = OpticalChannel('optchan1', source, 'a fake OpticalChannel', 500.)
         self.imaging_plane = ImagingPlane('imgpln1', source, self.optical_channel,
                                           'a fake ImagingPlane',
-                                          'imaging_device_1', '6.28', '2.718', 'GFP', 'somewhere in the brain')
+                                          'imaging_device_1', 600., '2.718', 'GFP', 'somewhere in the brain')
 
     def setUpContainer(self):
         self.make_imaging_plane('unit test TestTwoPhotonSeries')
@@ -95,7 +95,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
                  'source': 'unit test TestTwoPhotonSeries'},
             datasets={
                  'description': DatasetBuilder('description', 'a fake OpticalChannel'),
-                 'emission_lambda': DatasetBuilder('emission_lambda', '3.14')},
+                 'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
         )
         imgpln_builder = GroupBuilder(
             'imgpln1',
@@ -107,7 +107,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
             datasets={
                 'description': DatasetBuilder('description', 'a fake ImagingPlane'),
                 'device': DatasetBuilder('device', 'imaging_device_1'),
-                'excitation_lambda': DatasetBuilder('excitation_lambda', '6.28'),
+                'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
                 'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
@@ -144,7 +144,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
                 'field_of_view': DatasetBuilder('field_of_view', [2.0, 2.0, 5.0]),
             },
             links={
-                'imaging_plane': LinkBuilder('imaging_plane', imgpln_builder)
+                'imaging_plane': LinkBuilder(imgpln_builder, 'imaging_plane')
             })
 
     def addContainer(self, nwbfile):
@@ -162,18 +162,19 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         pix_mask = [(1, 2, 1.0), (3, 4, 1.0), (5, 6, 1.0),
                     (7, 8, 2.0), (9, 10, 2.)]
 
+        ts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         self.image_series = ImageSeries(name='test_iS', source='a hypothetical source', dimension=[2],
                                         external_file=['images.tiff'],
-                                        starting_frame=[1, 2, 3], format='tiff', timestamps=list())
+                                        starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
 
         self.optical_channel = OpticalChannel('test_optical_channel', 'optical channel source',
-                                              'optical channel description', '3.14')
+                                              'optical channel description', 500.)
         self.imaging_plane = ImagingPlane('test_imaging_plane',
                                           'ophys integration tests',
                                           self.optical_channel,
                                           'imaging plane description',
                                           'imaging_device_1',
-                                          '6.28', '2.718', 'GFP', 'somewhere in the brain',
+                                          600., '2.718', 'GFP', 'somewhere in the brain',
                                           (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
 
         self.img_mask = deepcopy(img_mask)
@@ -195,7 +196,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'source': 'optical channel source'},
             datasets={
                 'description': DatasetBuilder('description', 'optical channel description'),
-                'emission_lambda': DatasetBuilder('emission_lambda', '3.14')},
+                'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
         )
         self.imgpln_builder = GroupBuilder(
             'imgpln1',
@@ -207,7 +208,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
             datasets={
                 'description': DatasetBuilder('description', 'imaging plane description'),
                 'device': DatasetBuilder('device', 'imaging_device_1'),
-                'excitation_lambda': DatasetBuilder('excitation_lambda', '6.28'),
+                'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
                 'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
                 'manifold': DatasetBuilder('manifold', (1, 2, 1, 2, 3),
@@ -218,6 +219,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'optchan1': self.optchan_builder
             }
         )
+        ts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         self.is_builder = GroupBuilder('test_iS',
                                        attributes={'source': 'a hypothetical source',
                                                    'namespace': 'core',
@@ -225,7 +227,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                                    'description': 'no description',
                                                    'comments': 'no comments',
                                                    'help': 'Storage object for time-series 2-D image data'},
-                                       datasets={'timestamps': DatasetBuilder('timestamps', [],
+                                       datasets={'timestamps': DatasetBuilder('timestamps', ts,
                                                                               attributes={'unit': 'Seconds',
                                                                                           'interval': 1}),
                                                  'external_file': DatasetBuilder('external_file', ['images.tiff'],
@@ -274,7 +276,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'reference_images': GroupBuilder('reference_images', groups={'test_iS': self.is_builder}),
             },
             links={
-                'imaging_plane': LinkBuilder('imaging_plane', self.imgpln_builder)
+                'imaging_plane': LinkBuilder(self.imgpln_builder, 'imaging_plane')
             }
         )
         return ps_builder

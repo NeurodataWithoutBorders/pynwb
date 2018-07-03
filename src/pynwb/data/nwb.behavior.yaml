@@ -20,7 +20,7 @@ groups:
     - num_times
     - num_features
     doc: 2-D array storing position or direction relative to some reference frame.
-    dtype: number
+    dtype: float
     name: data
     shape:
     - null

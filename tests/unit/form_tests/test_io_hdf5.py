@@ -5,10 +5,9 @@ from h5py import File, Dataset, Reference
 from six import text_type
 
 from pynwb.form.backends.hdf5 import HDF5IO
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
-from pynwb.form.spec import NamespaceCatalog
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager
 
-from pynwb import TimeSeries
+from pynwb import TimeSeries, get_type_map
 
 from numbers import Number
 
@@ -106,8 +105,8 @@ class GroupBuilderTestCase(unittest.TestCase):
                 b_sub = b[k]
                 b_keys.remove(k)
                 if isinstance(a_sub, LinkBuilder) and isinstance(a_sub, LinkBuilder):
-                    a_sub = a_sub['target']
-                    b_sub = b_sub['target']
+                    a_sub = a_sub['builder']
+                    b_sub = b_sub['builder']
                 elif isinstance(a_sub, LinkBuilder) != isinstance(a_sub, LinkBuilder):
                     reasons.append('%s != %s' % (a_sub, b_sub))
                 if isinstance(a_sub, DatasetBuilder) and isinstance(a_sub, DatasetBuilder):
@@ -117,7 +116,23 @@ class GroupBuilderTestCase(unittest.TestCase):
                 elif isinstance(a_sub, GroupBuilder) and isinstance(a_sub, GroupBuilder):
                     reasons.extend(self.__assert_helper(a_sub, b_sub))
                 else:
-                    if a_sub != b_sub:
+                    equal = None
+                    a_array = isinstance(a_sub, np.ndarray)
+                    b_array = isinstance(b_sub, np.ndarray)
+                    if a_array and b_array:
+                        equal = np.array_equal(a_sub, b_sub)
+                    elif a_array or b_array:
+                        # if strings, convert before comparing
+                        if b_array:
+                            if b_sub.dtype.char in ('S', 'U'):
+                                a_sub = [np.string_(s) for s in a_sub]
+                        else:
+                            if a_sub.dtype.char in ('S', 'U'):
+                                b_sub = [np.string_(s) for s in b_sub]
+                        equal = np.array_equal(a_sub, b_sub)
+                    else:
+                        equal = a_sub == b_sub
+                    if not equal:
                         reasons.append('%s != %s' % (self.__fmt(a_sub), self.__fmt(b_sub)))
             else:
                 reasons.append("'%s' not in both" % k)
@@ -136,7 +151,8 @@ class GroupBuilderTestCase(unittest.TestCase):
 class TestHDF5Writer(GroupBuilderTestCase):
 
     def setUp(self):
-        self.manager = BuildManager(TypeMap(NamespaceCatalog()))
+        type_map = get_type_map()
+        self.manager = BuildManager(type_map)
         self.path = "test_pynwb_io_hdf5.h5"
         self.start_time = datetime(1970, 1, 1, 12, 0, 0)
         self.create_date = datetime(2017, 4, 15, 12, 0, 0)
@@ -145,6 +161,8 @@ class TestHDF5Writer(GroupBuilderTestCase):
                                        attributes={'ancestry': 'TimeSeries',
                                                    'source': 'example_source',
                                                    'neurodata_type': 'TimeSeries',
+                                                   'int_array_attribute': [0, 1, 2, 3],
+                                                   'str_array_attribute': ['a', 'b', 'c', 'd'],
                                                    'help': 'General purpose TimeSeries'},
                                        datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                         attributes={'unit': 'SIunit',
@@ -158,6 +176,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.manager.prebuilt(self.ts, self.ts_builder)
         self.builder = GroupBuilder(
             'root',
+            source=self.path,
             groups={'acquisition':
                     GroupBuilder('acquisition',
                                  groups={'timeseries':
@@ -167,7 +186,12 @@ class TestHDF5Writer(GroupBuilderTestCase):
                     'analysis': GroupBuilder('analysis'),
                     'epochs': GroupBuilder('epochs'),
                     'general': GroupBuilder('general'),
-                    'processing': GroupBuilder('processing'),
+                    'processing': GroupBuilder('processing',
+                                               groups={'test_module':
+                                                       GroupBuilder('test_module',
+                                                                    links={'test_timeseries_link':
+                                                                           LinkBuilder(self.ts_builder,
+                                                                                       'test_timeseries_link')})}),
                     'stimulus': GroupBuilder(
                         'stimulus',
                         groups={'presentation':

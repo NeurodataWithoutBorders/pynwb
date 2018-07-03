@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 import re
 import warnings
 from collections import OrderedDict
@@ -8,7 +9,69 @@ from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec
 from ..spec.spec import BaseStorageSpec
-from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, ReferenceBuilder, RegionBuilder
+from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, ReferenceBuilder, RegionBuilder, BaseBuilder
+from .warnings import OrphanContainerWarning, MissingRequiredWarning
+
+
+class Proxy(object):
+
+    def __init__(self, manager, source, location, namespace, data_type):
+        self.__source = source
+        self.__location = location
+        self.__namespace = namespace
+        self.__data_type = data_type
+        self.__manager = manager
+        self.__candidates = list()
+
+    @property
+    def candidates(self):
+        return self.__candidates
+
+    @property
+    def source(self):
+        return self.__source
+
+    @property
+    def location(self):
+        return self.__location
+
+    @property
+    def namespace(self):
+        return self.__namespace
+
+    @property
+    def data_type(self):
+        return self.__data_type
+
+    @docval({"name": "object", "type": (BaseBuilder, Container), "doc": "the container or builder to get a proxy for"})
+    def matches(self, **kwargs):
+        obj = getargs('object', kwargs)
+        if not isinstance(obj, Proxy):
+            obj = self.__manager.get_proxy(obj)
+        return self == obj
+
+    @docval({"name": "container", "type": Container, "doc": "the Container to add as a candidate match"})
+    def add_candidate(self, **kwargs):
+        container = getargs('container', kwargs)
+        self.__candidates.append(container)
+
+    def resolve(self, **kwargs):
+        for candidate in self.__candidates:
+            if self.matches(candidate):
+                return candidate
+        return None
+
+    def __eq__(self, other):
+        return self.data_type == other.data_type and \
+               self.location == other.location and \
+               self.namespace == other.namespace and \
+               self.source == other.source
+
+    def __repr__(self):
+        ret = dict()
+        for key in ('source', 'location', 'namespace', 'data_type'):
+            ret[key] = getattr(self, key, None)
+        return str(ret)
 
 
 class BuildManager(object):
@@ -25,6 +88,37 @@ class BuildManager(object):
     def namespace_catalog(self):
         return self.__type_map.namespace_catalog
 
+    @docval({"name": "object", "type": (BaseBuilder, Container), "doc": "the container or builder to get a proxy for"},
+            {"name": "source", "type": str,
+             "doc": "the source of container being built i.e. file path", 'default': None})
+    def get_proxy(self, **kwargs):
+        obj = getargs('object', kwargs)
+        if isinstance(obj, BaseBuilder):
+            return self.__get_proxy_builder(obj)
+        elif isinstance(obj, Container):
+            return self.__get_proxy_container(obj)
+
+    def __get_proxy_builder(self, builder):
+        dt = self.__type_map.get_builder_dt(builder)
+        ns = self.__type_map.get_builder_ns(builder)
+        stack = list()
+        tmp = builder
+        while tmp is not None:
+            stack.append(tmp.name)
+            tmp = self.__get_parent_dt_builder(tmp)
+        loc = "/".join(reversed(stack))
+        return Proxy(self, builder.source, loc, ns, dt)
+
+    def __get_proxy_container(self, container):
+        ns, dt = self.__type_map.get_container_ns_dt(container)
+        stack = list()
+        tmp = container
+        while tmp is not None:
+            stack.append(tmp.name)
+            tmp = tmp.parent
+        loc = "/".join(reversed(stack))
+        return Proxy(self, container.container_source, loc, ns, dt)
+
     @docval({"name": "container", "type": Container, "doc": "the container to convert to a Builder"},
             {"name": "source", "type": str,
              "doc": "the source of container being built i.e. file path", 'default': None})
@@ -33,9 +127,20 @@ class BuildManager(object):
         container = getargs('container', kwargs)
         container_id = self.__conthash__(container)
         result = self.__builders.get(container_id)
+        source = getargs('source', kwargs)
         if result is None:
-            result = self.__type_map.build(container, self, source=getargs('source', kwargs))
+            if container.container_source is None:
+                container.container_source = source
+            else:
+                if container.container_source != source:
+                    raise ValueError("Can't change container_source once set")
+            result = self.__type_map.build(container, self, source=source)
             self.prebuilt(container, result)
+        elif container.modified:
+            if isinstance(result, GroupBuilder):
+                # TODO: if Datasets attributes are allowed to be modified, we need to
+                # figure out how to handle that starting here.
+                result = self.__type_map.build(container, self, builder=result, source=source)
         return result
 
     @docval({"name": "container", "type": Container, "doc": "the Container to save as prebuilt"},
@@ -66,8 +171,39 @@ class BuildManager(object):
         result = self.__containers.get(builder_id)
         if result is None:
             result = self.__type_map.construct(builder, self)
+            parent_builder = self.__get_parent_dt_builder(builder)
+            if parent_builder is not None:
+                result.parent = self.__get_proxy_builder(parent_builder)
+            else:
+                self.__resolve_parents(result)
             self.prebuilt(result, builder)
+        result.set_modified(False)
         return result
+
+    def __resolve_parents(self, container):
+        stack = [container]
+        while len(stack) > 0:
+            tmp = stack.pop()
+            if isinstance(tmp.parent, Proxy):
+                tmp.parent = tmp.parent.resolve()
+            for child in tmp.children:
+                stack.append(child)
+
+    def __get_parent_dt_builder(self, builder):
+        '''
+        Get the next builder above the given builder
+        that has a data type
+        '''
+        tmp = builder.parent
+        ret = None
+        while tmp is not None:
+            try:
+                ret = tmp
+                self.__type_map.get_builder_dt(tmp)
+                break
+            except Exception:
+                tmp = tmp.parent
+        return ret
 
     @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder to get the class object for'})
     def get_cls(self, **kwargs):
@@ -376,24 +512,26 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
     @docval({"name": "spec", "type": Spec, "doc": "the spec to get the attribute value for"},
             {"name": "container", "type": Container, "doc": "the container to get the attribute value from"},
+            {"name": "manager", "type": BuildManager, "doc": "the BuildManager used for managing this build"},
             returns='the value of the attribute')
     def get_attr_value(self, **kwargs):
         ''' Get the value of the attribute corresponding to this spec from the given container '''
-        spec, container = getargs('spec', 'container', kwargs)
+        spec, container, manager = getargs('spec', 'container', 'manager', kwargs)
         attr_name = self.get_attribute(spec)
         if attr_name is None:
             return None
-        attr_val = getattr(container, attr_name, None)
+        attr_val = self.__get_override_attr(attr_name, container, manager)
         if attr_val is None:
-            return None
-        else:
-            return self.__convert_value(attr_val, spec)
+            attr_val = getattr(container, attr_name, None)
+            if attr_val is not None:
+                attr_val = self.__convert_value(attr_val, spec)
+        return attr_val
 
     def __convert_value(self, value, spec):
         ret = value
         if isinstance(spec, AttributeSpec):
             if 'text' in spec.dtype:
-                if spec.dims is not None:
+                if spec.shape is not None:
                     ret = list(map(text_type, value))
                 else:
                     ret = text_type(value)
@@ -434,13 +572,16 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             {"name": "parent", "type": Builder, "doc": "the parent of the resulting Builder", 'default': None},
             {"name": "source", "type": str,
              "doc": "the source of container being built i.e. file path", 'default': None},
+            {"name": "builder", "type": GroupBuilder, "doc": "the Builder to build on", 'default': None},
             returns="the Builder representing the given Container", rtype=Builder)
     def build(self, **kwargs):
         ''' Convert an Container to a Builder representation '''
         container, manager, parent, source = getargs('container', 'manager', 'parent', 'source', kwargs)
+        builder = getargs('builder', kwargs)
         name = manager.get_builder_name(container)
         if isinstance(self.__spec, GroupSpec):
-            builder = GroupBuilder(name, parent=parent, source=source)
+            if builder is None:
+                builder = GroupBuilder(name, parent=parent, source=source)
             self.__add_datasets(builder, self.__spec.datasets, container, manager, source)
             self.__add_groups(builder, self.__spec.groups, container, manager, source)
             self.__add_links(builder, self.__spec.links, container, manager, source)
@@ -466,7 +607,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             else:
                 builder = DatasetBuilder(name, container.data, parent=parent, source=source,
                                          dtype=self.convert_dtype(self.__spec.dtype))
-        self.__add_attributes(builder, self.__spec.attributes, container)
+        self.__add_attributes(builder, self.__spec.attributes, container, manager)
         return builder
 
     def __get_ref_builder(self, dtype, shape, container, manager):
@@ -501,94 +642,114 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 return len(item) == 0
         return False
 
-    def __add_attributes(self, builder, attributes, container):
+    def __add_attributes(self, builder, attributes, container, build_manager):
         for spec in attributes:
             if spec.value is not None:
                 attr_value = spec.value
             else:
-                attr_value = self.get_attr_value(spec, container)
+                attr_value = self.get_attr_value(spec, container, build_manager)
                 if attr_value is None:
                     attr_value = spec.default_value
 
+            # do not write empty or null valued objects
             if attr_value is None:
                 if spec.required:
-                    msg = "missing required attribute '%s' for '%s' of type '%s'"\
+                    msg = "attribute '%s' for '%s' (%s)"\
                                   % (spec.name, builder.name, self.spec.data_type_def)
-                    warnings.warn(msg)
+                    warnings.warn(msg, MissingRequiredWarning)
                 continue
+
             builder.set_attribute(spec.name, attr_value)
 
     def __add_links(self, builder, links, container, build_manager, source):
         for spec in links:
-            attr_value = self.get_attr_value(spec, container)
+            attr_value = self.get_attr_value(spec, container, build_manager)
             if not attr_value:
                 continue
-            self.__add_containers(builder, spec, attr_value, build_manager, source)
+            self.__add_containers(builder, spec, attr_value, build_manager, source, container)
 
     def __add_datasets(self, builder, datasets, container, build_manager, source):
         for spec in datasets:
-            attr_value = self.get_attr_value(spec, container)
+            attr_value = self.get_attr_value(spec, container, build_manager)
             # TODO: add check for required datasets
             if attr_value is None:
                 if spec.required:
-                    warnings.warn("missing required attribute '%s' for '%s'" % (spec.name, builder.name))
+                    msg = "dataset '%s' for '%s' of type (%s)"\
+                                  % (spec.name, builder.name, self.spec.data_type_def)
+                    warnings.warn(msg, MissingRequiredWarning)
                 continue
             if spec.data_type_def is None and spec.data_type_inc is None:
-                sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
-                self.__add_attributes(sub_builder, spec.attributes, container)
+                if spec.name in builder.datasets:
+                    sub_builder = builder.datasets[spec.name]
+                else:
+                    sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
+                self.__add_attributes(sub_builder, spec.attributes, container, build_manager)
             else:
-                self.__add_containers(builder, spec, attr_value, build_manager, source)
+                self.__add_containers(builder, spec, attr_value, build_manager, source, container)
 
     def __add_groups(self, builder, groups, container, build_manager, source):
         for spec in groups:
             if spec.data_type_def is None and spec.data_type_inc is None:
                 # we don't need to get attr_name since any named
                 # group does not have the concept of value
-                sub_builder = GroupBuilder(spec.name)
-                self.__add_attributes(sub_builder, spec.attributes, container)
+                sub_builder = builder.groups.get(spec.name)
+                if sub_builder is None:
+                    sub_builder = GroupBuilder(spec.name)
+                self.__add_attributes(sub_builder, spec.attributes, container, build_manager)
                 self.__add_datasets(sub_builder, spec.datasets, container, build_manager, source)
 
                 # handle subgroups that are not Containers
                 attr_name = self.get_attribute(spec)
                 if attr_name is not None:
                     attr_value = getattr(container, attr_name, None)
-                    attr_value = self.get_attr_value(spec, container)
+                    attr_value = self.get_attr_value(spec, container, build_manager)
                     if any(isinstance(attr_value, t) for t in (list, tuple, set, dict)):
                         it = iter(attr_value)
                         if isinstance(attr_value, dict):
                             it = iter(attr_value.values())
                         for item in it:
                             if isinstance(item, Container):
-                                self.__add_containers(sub_builder, spec, item, build_manager, source)
+                                self.__add_containers(sub_builder, spec, item, build_manager, source, container)
                 self.__add_groups(sub_builder, spec.groups, container, build_manager, source)
                 empty = sub_builder.is_empty()
                 if not empty or (empty and isinstance(spec.quantity, int)):
-                    builder.set_group(sub_builder)
+                    if sub_builder.name not in builder.groups:
+                        builder.set_group(sub_builder)
             else:
                 if spec.data_type_def is not None:
                     attr_name = self.get_attribute(spec)
                     if attr_name is not None:
                         attr_value = getattr(container, attr_name, None)
                         if attr_value is not None:
-                            self.__add_containers(builder, spec, attr_value, build_manager, source)
+                            self.__add_containers(builder, spec, attr_value, build_manager, source, container)
                 else:
                     attr_name = self.get_attribute(spec)
                     attr_value = getattr(container, attr_name, None)
                     if attr_value is not None:
-                        self.__add_containers(builder, spec, attr_value, build_manager, source)
+                        self.__add_containers(builder, spec, attr_value, build_manager, source, container)
 
-    def __add_containers(self, builder, spec, value, build_manager, source):
+    def __add_containers(self, builder, spec, value, build_manager, source, parent_container):
         if isinstance(value, Container):
-            rendered_obj = build_manager.build(value, source=source)
-            # use spec to determine what kind of HDF5
-            # object this Container corresponds to
-            if isinstance(spec, LinkSpec):
-                name = spec.name
-                builder.set_link(LinkBuilder(name, rendered_obj, builder))
-            elif isinstance(spec, DatasetSpec):
-                builder.set_dataset(rendered_obj)
-            else:
-                builder.set_group(rendered_obj)
+            if value.parent is None:
+                msg = "'%s' (%s) for '%s' (%s)"\
+                              % (value.name, getattr(value, self.spec.type_key()),
+                                 builder.name, self.spec.data_type_def)
+                warnings.warn(msg, OrphanContainerWarning)
+            if value.modified:
+                rendered_obj = build_manager.build(value, source=source)
+                # use spec to determine what kind of HDF5
+                # object this Container corresponds to
+                if isinstance(spec, LinkSpec) or value.parent is not parent_container:
+                    name = spec.name
+                    builder.set_link(LinkBuilder(rendered_obj, name, builder))
+                elif isinstance(spec, DatasetSpec):
+                    builder.set_dataset(rendered_obj)
+                else:
+                    builder.set_group(rendered_obj)
+            elif value.container_source:
+                if value.container_source != parent_container.source:
+                    rendered_obj = build_manager.build(value, source=source)
+                    builder.set_link(LinkBuilder(rendered_obj, parent=builder))
         else:
             if any(isinstance(value, t) for t in (list, tuple)):
                 values = value
@@ -600,7 +761,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                        "Containers if 'spec' is a GroupSpec")
                 raise ValueError(msg % value.__class__.__name__)
             for container in values:
-                self.__add_containers(builder, spec, container, build_manager, source)
+                if container:
+                    self.__add_containers(builder, spec, container, build_manager, source, parent_container)
 
     def __get_subspec_values(self, builder, spec, manager):
         ret = dict()
@@ -614,19 +776,13 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 # GroupBuilder.items will return attributes as well, need to skip non Builder items
                 if not isinstance(sub_builder, Builder):
                     continue
+                subspec = manager.get_subspec(spec, sub_builder)
                 link_name = None
                 if isinstance(sub_builder, LinkBuilder):
                     link_name = sub_builder.name  # noqa: F841
-                subspec = manager.get_subspec(spec, sub_builder)
                 if subspec is not None:
-                    if isinstance(subspec, LinkSpec):
-                        if isinstance(sub_builder, LinkBuilder):
-                            sub_builder = sub_builder.builder
-                        else:
-                            # LEGACY
-                            msg = 'expected LinkBuilder, got %s' % type(sub_builder).__name__
-                            warnings.warn(msg)
-                            continue
+                    if isinstance(sub_builder, LinkBuilder):
+                        sub_builder = sub_builder.builder
                     if self.__data_type_key in sub_builder.attributes or \
                        not (subspec.data_type_inc is None and subspec.data_type_def is None):
                         val = manager.construct(sub_builder)
@@ -673,8 +829,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             kwargs[argname] = val
         try:
             obj = cls(**kwargs)
+            obj.container_source = builder.source
         except Exception as ex:
-            msg = 'Could not construct %s object: %s' % (cls.__name__, ex.message)
+            msg = 'Could not construct %s object' % (cls.__name__,)
             raise_from(Exception(msg), ex)
         return obj
 
@@ -788,10 +945,17 @@ class TypeMap(object):
         'int32': int
     }
 
-    @classmethod
     def __get_type(self, spec):
         if isinstance(spec, AttributeSpec):
-            return self._type_map.get(spec.dtype)
+            if isinstance(spec.dtype, RefSpec):
+                tgttype = spec.dtype.target_type
+                for val in self.__container_types.values():
+                    container_type = val.get(tgttype)
+                    if container_type is not None:
+                        return container_type
+                return (Data, Container)
+            else:
+                return self._type_map.get(spec.dtype)
         elif isinstance(spec, LinkSpec):
             return Container
         else:
@@ -803,7 +967,6 @@ class TypeMap(object):
             else:
                 return ('array_data', 'data',)
 
-    @classmethod
     def __get_constructor(self, base, addl_fields):
         # TODO: fix this to be more maintainable and smarter
         existing_args = set()
@@ -899,6 +1062,8 @@ class TypeMap(object):
         return ret
 
     def get_builder_ns(self, builder):
+        if isinstance(builder, LinkBuilder):
+            builder = builder.builder
         ret = builder.attributes.get('namespace')
         if ret is None:
             msg = "builder '%s' does not have a namespace" % builder.name
@@ -946,12 +1111,12 @@ class TypeMap(object):
                         break
         return subspec
 
-    def __get_container_ns_dt(self, obj):
+    def get_container_ns_dt(self, obj):
         container_cls = obj.__class__
-        namespace, data_type = self.__get_container_cls_dt(container_cls)
+        namespace, data_type = self.get_container_cls_dt(container_cls)
         return namespace, data_type
 
-    def __get_container_cls_dt(self, cls):
+    def get_container_cls_dt(self, cls):
         return self.__data_types.get(cls, (None, None))
 
     @docval({'name': 'namespace', 'type': str,
@@ -971,7 +1136,7 @@ class TypeMap(object):
         # get the container class, and namespace/data_type
         if isinstance(obj, Container):
             container_cls = obj.__class__
-            namespace, data_type = self.__get_container_ns_dt(obj)
+            namespace, data_type = self.get_container_ns_dt(obj)
             if namespace is None:
                 raise ValueError("class %s does not mapped to a data_type" % container_cls)
         else:
@@ -1012,7 +1177,7 @@ class TypeMap(object):
     def register_map(self, **kwargs):
         ''' Map a container class to an ObjectMapper class '''
         container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
-        if self.__get_container_cls_dt(container_cls) == (None, None):
+        if self.get_container_cls_dt(container_cls) == (None, None):
             raise ValueError('cannot register map for type %s - no data_type found' % container_cls)
         self.__mapper_cls[container_cls] = mapper_cls
 
@@ -1020,18 +1185,19 @@ class TypeMap(object):
             {"name": "manager", "type": BuildManager,
              "doc": "the BuildManager to use for managing this build", 'default': None},
             {"name": "source", "type": str,
-             "doc": "the source of container being built i.e. file path", 'default': None})
+             "doc": "the source of container being built i.e. file path", 'default': None},
+            {"name": "builder", "type": GroupBuilder, "doc": "the Builder to build on", 'default': None})
     def build(self, **kwargs):
         """ Build the GroupBuilder for the given Container"""
-        container, manager = getargs('container', 'manager', kwargs)
+        container, manager, builder = getargs('container', 'manager', 'builder', kwargs)
         if manager is None:
             manager = BuildManager(self)
         attr_map = self.get_map(container)
         if attr_map is None:
             raise ValueError('No ObjectMapper found for container of type %s' % str(container.__class__.__name__))
         else:
-            builder = attr_map.build(container, manager, source=getargs('source', kwargs))
-        namespace, data_type = self.__get_container_ns_dt(container)
+            builder = attr_map.build(container, manager, builder=builder, source=getargs('source', kwargs))
+        namespace, data_type = self.get_container_ns_dt(container)
         builder.set_attribute('namespace', namespace)
         builder.set_attribute(attr_map.spec.type_key(), data_type)
         return builder

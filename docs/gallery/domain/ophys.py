@@ -47,14 +47,14 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 
 
 optical_channel = OpticalChannel('my_optchan', 'Ca2+ imaging example',
-                                 'pi wavelength', '3.14')
+                                 'pi wavelength', 500.)
 imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
                                              'Ca2+ imaging example',
                                              optical_channel,
                                              'a very interesting part of the brain',
                                              'imaging_device_1',
-                                             '6.28', '2.718', 'GFP', 'my favorite brain location',
-                                             (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+                                             600., '2.718', 'GFP', 'my favorite brain location',
+                                             [], 4.0, 'manifold unit', 'A frame to refer to')
 
 
 ####################

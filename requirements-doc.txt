@@ -3,4 +3,5 @@ matplotlib
 pillow
 sphinx_rtd_theme
 sphinx-gallery
+allensdk
 -r requirements.txt
