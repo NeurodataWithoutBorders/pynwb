@@ -46,8 +46,9 @@ class TestTrials(base.TestMapRoundTrip):
         nwbfile.add_trial_column('foo', 'an int column')
         nwbfile.add_trial_column('bar', 'a float column')
         nwbfile.add_trial_column('baz', 'a string column')
-        nwbfile.add_trial({'start': 0., 'end': 1., 'foo': 27, 'bar': 28.0, 'baz': "29"})
-        nwbfile.add_trial({'start': 2., 'end': 3., 'foo': 37, 'bar': 38.0, 'baz': "39"})
+        nwbfile.add_trial_column('qux', 'a boolean column')
+        nwbfile.add_trial({'start': 0., 'end': 1., 'foo': 27, 'bar': 28.0, 'baz': "29", 'qux': True})
+        nwbfile.add_trial({'start': 2., 'end': 3., 'foo': 37, 'bar': 38.0, 'baz': "39", 'qux': False})
         # reset the thing
         self.container = nwbfile.trials
 
