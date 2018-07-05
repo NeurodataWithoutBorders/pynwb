@@ -77,5 +77,10 @@ class TestTimeSeries(unittest.TestCase):
         self.assertEqual(ts1.num_samples, -1)
 
     def test_no_time(self):
-        with self.assertRaisesRegex(TypeError, "either 'timestamps' or 'starting_time' and 'rate' must be specified"):
+        with self.assertRaisesRegex(TypeError, "either 'timestamps' or 'rate' must be specified"):
             TimeSeries('test_ts2', 'unit test test_data_timeseries', [10, 11, 12, 13, 14, 15], 'grams')
+
+    def test_no_starting_time(self):
+        # if no starting_time is given, 0.0 is assumed
+        ts1 = TimeSeries('test_ts1', 'unit test test_DataIO', rate=0.1)
+        self.assertEqual(ts1.starting_time, 0.0)
