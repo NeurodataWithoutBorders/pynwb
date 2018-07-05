@@ -39,8 +39,9 @@ class NWBFileMap(ObjectMapper):
         self.map_spec(
             'modules',
             self.spec.get_group('processing').get_neurodata_type('ProcessingModule'))
-        #self.unmap(general_spec.get_dataset('stimulus'))
+        # self.unmap(general_spec.get_dataset('stimulus'))
         self.map_spec('stimulus_notes', general_spec.get_dataset('stimulus'))
+        self.map_spec('source_script_file_name', general_spec.get_dataset('source_script').get_attribute('file_name'))
 
         self.map_spec('subject', general_spec.get_group('subject'))
         self.map_spec('devices', general_spec.get_group('devices').get_neurodata_type('Device'))
