@@ -158,6 +158,7 @@ class NWBFile(MultiContainerInterface):
                      'source_script',
                      'surgery',
                      'virus',
+                     'stimulus_notes',
                      {'name': 'ec_electrodes', 'child': True},
                      {'name': 'epochs', 'child': True},
                      {'name': 'trials', 'child': True},
@@ -201,6 +202,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'virus', 'type': str,
              'doc': 'Information about virus(es) used in experiments, including virus ID, '
                     'source, date made, injection location, volume, etc.', 'default': None},
+            {'name': 'stimulus_notes', 'type': str,
+             'doc': 'Notes about stimuli, such as how and where presented.', 'default': None},
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
             {'name': 'acquisition', 'type': (list, tuple),
              'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
@@ -285,6 +288,7 @@ class NWBFile(MultiContainerInterface):
             'source_script',
             'surgery',
             'virus',
+            'stimulus_notes',
         ]
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
