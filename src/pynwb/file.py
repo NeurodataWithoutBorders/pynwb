@@ -144,6 +144,7 @@ class NWBFile(MultiContainerInterface):
     ]
 
     __nwbfields__ = ('experimenter',
+                     'data_collection',
                      'description',
                      'experiment_description',
                      'session_id',
@@ -192,6 +193,8 @@ class NWBFile(MultiContainerInterface):
              'thickness, orientation, temperature and bath solution', 'default': None},
             {'name': 'source_script', 'type': str,
              'doc': 'Script file used to create this NWB file.', 'default': None},
+            {'name': 'data_collection', 'type': str,
+             'doc': 'Notes about data collection and analysis.', 'default': None},
             {'name': 'surgery', 'type': str,
              'doc': 'Narrative description about surgery/surgeries, including date(s) '
                     'and who performed surgery.', 'default': None},
@@ -273,6 +276,7 @@ class NWBFile(MultiContainerInterface):
             'session_id',
             'lab',
             'institution',
+            'data_collection',
             'notes',
             'pharmacology',
             'protocol',
