@@ -58,12 +58,34 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                                            DatasetBuilder('description',
                                                                           "A fake Clustering interface")})})
 
+        general_builder = GroupBuilder('general',
+                                       datasets={
+                                            'experimenter': DatasetBuilder('experimenter', 'test experimenter'),
+                                            'stimulus': DatasetBuilder('stimulus', 'test stimulus notes'),
+                                            'experiment_description': DatasetBuilder('experiment_description',
+                                                                                     'test experiment description'),
+                                            'data_collection': DatasetBuilder('data_collection',
+                                                                              'test data collection notes'),
+                                            'institution': DatasetBuilder('institution', 'nomad'),
+                                            'lab': DatasetBuilder('lab', 'nolab'),
+                                            'notes': DatasetBuilder('notes', 'nonotes'),
+                                            'pharmacology': DatasetBuilder('pharmacology', 'nopharmacology'),
+                                            'protocol': DatasetBuilder('protocol', 'noprotocol'),
+                                            'related_publications': DatasetBuilder('related_publications', 'nopubs'),
+                                            'session_id': DatasetBuilder('session_id', '007'),
+                                            'slices': DatasetBuilder('slices', 'noslices'),
+                                            'source_script': DatasetBuilder('source_script', 'nosources',
+                                                                            attributes={'file_name': 'nofilename'}),
+                                            'surgery': DatasetBuilder('surgery', 'nosurgery'),
+                                            'virus': DatasetBuilder('virus', 'novirus')}
+                                       )
+
         return GroupBuilder('root',
                             groups={'acquisition': GroupBuilder(
                                 'acquisition',
                                 groups={'test_timeseries': ts_builder}),
                                     'analysis': GroupBuilder('analysis'),
-                                    'general': GroupBuilder('general'),
+                                    'general': general_builder,
                                     'processing': GroupBuilder('processing', groups={'test_module': module_builder}),
                                     'stimulus': GroupBuilder(
                                         'stimulus',
@@ -84,7 +106,24 @@ class TestNWBFileIO(base.TestMapNWBContainer):
 
     def setUpContainer(self):
         container = NWBFile('a test source', 'a test NWB File', 'TEST123',
-                            self.start_time, file_create_date=self.create_date)
+                            self.start_time,
+                            file_create_date=self.create_date,
+                            experimenter='test experimenter',
+                            stimulus_notes='test stimulus notes',
+                            experiment_description='test experiment description',
+                            data_collection='test data collection notes',
+                            institution='nomad',
+                            lab='nolab',
+                            notes='nonotes',
+                            pharmacology='nopharmacology',
+                            protocol='noprotocol',
+                            related_publications='nopubs',
+                            session_id='007',
+                            slices='noslices',
+                            source_script='nosources',
+                            surgery='nosurgery',
+                            virus='novirus',
+                            source_script_file_name='nofilename')
         self.ts = TimeSeries('test_timeseries', 'example_source', list(range(100, 200, 10)),
                              'SIunit', timestamps=list(range(10)), resolution=0.1)
         container.add_acquisition(self.ts)
