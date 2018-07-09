@@ -345,7 +345,6 @@ class LFP(MultiContainerInterface):
         'add': 'add_electrical_series',
         'get': 'get_electrical_series',
         'create': 'create_electrical_series',
-        'get': 'get_electrical_series'
     }
 
     __help = ("LFP data from one or more channels. Filter properties "
