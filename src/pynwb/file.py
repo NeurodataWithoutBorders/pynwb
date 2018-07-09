@@ -144,6 +144,7 @@ class NWBFile(MultiContainerInterface):
     ]
 
     __nwbfields__ = ('experimenter',
+                     'data_collection',
                      'description',
                      'experiment_description',
                      'session_id',
@@ -155,8 +156,10 @@ class NWBFile(MultiContainerInterface):
                      'related_publications',
                      'slices',
                      'source_script',
+                     'source_script_file_name',
                      'surgery',
                      'virus',
+                     'stimulus_notes',
                      {'name': 'ec_electrodes', 'child': True},
                      {'name': 'epochs', 'child': True},
                      {'name': 'trials', 'child': True},
@@ -192,12 +195,18 @@ class NWBFile(MultiContainerInterface):
              'thickness, orientation, temperature and bath solution', 'default': None},
             {'name': 'source_script', 'type': str,
              'doc': 'Script file used to create this NWB file.', 'default': None},
+            {'name': 'source_script_file_name', 'type': str,
+             'doc': 'Name of the sourc_script file', 'default': None},
+            {'name': 'data_collection', 'type': str,
+             'doc': 'Notes about data collection and analysis.', 'default': None},
             {'name': 'surgery', 'type': str,
              'doc': 'Narrative description about surgery/surgeries, including date(s) '
                     'and who performed surgery.', 'default': None},
             {'name': 'virus', 'type': str,
              'doc': 'Information about virus(es) used in experiments, including virus ID, '
                     'source, date made, injection location, volume, etc.', 'default': None},
+            {'name': 'stimulus_notes', 'type': str,
+             'doc': 'Notes about stimuli, such as how and where presented.', 'default': None},
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
             {'name': 'acquisition', 'type': (list, tuple),
              'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
@@ -273,17 +282,23 @@ class NWBFile(MultiContainerInterface):
             'session_id',
             'lab',
             'institution',
+            'data_collection',
             'notes',
             'pharmacology',
             'protocol',
             'related_publications',
             'slices',
             'source_script',
+            'source_script_file_name',
             'surgery',
             'virus',
+            'stimulus_notes',
         ]
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
+
+        if getargs('source_script', kwargs) is None and getargs('source_script_file_name', kwargs) is not None:
+            raise ValueError("'source_script' cannot be None when 'source_script_file_name' is set")
 
     def all_children(self):
         stack = [self]

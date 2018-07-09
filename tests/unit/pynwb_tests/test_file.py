@@ -28,7 +28,11 @@ class NWBFileTest(unittest.TestCase):
                                related_publications='my pubs',
                                slices='my slices',
                                surgery='surgery',
-                               virus='a virus')
+                               virus='a virus',
+                               source_script='noscript',
+                               source_script_file_name='nofilename',
+                               stimulus_notes='test stimulus notes',
+                               data_collection='test data collection notes')
 
     def test_constructor(self):
         self.assertEqual(self.nwbfile.session_description, 'a test session description for a test NWBFile')
@@ -39,6 +43,10 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.institution, 'a test institution')
         self.assertEqual(self.nwbfile.experiment_description, 'a test experiment description')
         self.assertEqual(self.nwbfile.session_id, 'test1')
+        self.assertEqual(self.nwbfile.stimulus_notes, 'test stimulus notes')
+        self.assertEqual(self.nwbfile.data_collection, 'test data collection notes')
+        self.assertEqual(self.nwbfile.source_script, 'noscript')
+        self.assertEqual(self.nwbfile.source_script_file_name, 'nofilename')
 
     def test_create_electrode_group(self):
         name = 'example_electrode_group'
@@ -159,6 +167,13 @@ class NWBFileTest(unittest.TestCase):
         self.assertIn(ts2, children)
         self.assertIn(device, children)
         self.assertIn(elecgrp, children)
+
+    def test_fail_if_source_script_file_name_without_source_script(self):
+        with self.assertRaises(ValueError):
+            # <-- source_script_file_name without source_script is not allowed
+            NWBFile('a fake source', 'a test session description for a test NWBFile', 'FILE123', self.start,
+                    source_script=None,
+                    source_script_file_name='nofilename')
 
 
 class SubjectTest(unittest.TestCase):
