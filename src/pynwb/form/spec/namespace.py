@@ -213,6 +213,16 @@ class NamespaceCatalog(object):
         self.__included_specs = dict()
         self.__included_sources = dict()
 
+    def __copy__(self):
+        ret = NamespaceCatalog(self.__group_spec_cls,
+                               self.__dataset_spec_cls,
+                               self.__spec_namespace_cls)
+        ret.__namespaces = copy(self.__namespaces)
+        ret.__loaded_specs = copy(self.__loaded_specs)
+        ret.__included_specs = copy(self.__included_specs)
+        ret.__included_sources = copy(self.__included_sources)
+        return ret
+
     @property
     @docval(returns='a tuple of the availble namespaces', rtype=tuple)
     def namespaces(self):

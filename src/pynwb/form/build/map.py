@@ -85,10 +85,6 @@ class BuildManager(object):
         self.__type_map = type_map
 
     @property
-    def type_map(self):
-        return self.__type_map
-
-    @property
     def namespace_catalog(self):
         return self.__type_map.namespace_catalog
 
@@ -895,15 +891,11 @@ class TypeMap(object):
         self.__default_mapper_cls = getargs('mapper_cls', kwargs)
 
     @property
-    def types(self):
-        return self.__container_types
-
-    @property
     def namespace_catalog(self):
         return self.__ns_catalog
 
     def __copy__(self):
-        ret = TypeMap(self.__ns_catalog, self.__default_mapper_cls)
+        ret = TypeMap(copy(self.__ns_catalog), self.__default_mapper_cls)
         ret.merge(self)
         return ret
 

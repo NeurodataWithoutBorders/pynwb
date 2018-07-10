@@ -2,13 +2,13 @@
 for reading and writing data in NWB format
 '''
 import os.path
-from copy import copy
+from copy import deepcopy
 from warnings import warn
 
 CORE_NAMESPACE = 'core'
 
 from .form.spec import NamespaceCatalog  # noqa: E402
-from .form.utils import docval, getargs, popargs  # noqa: E402
+from .form.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
 from .form.backends.io import FORMIO  # noqa: E402
 from .form.backends.hdf5 import HDF5IO  # noqa: E402
 from .form.validate import ValidatorMap  # noqa: E402
@@ -43,17 +43,12 @@ from .form.build import TypeMap as TypeMap  # noqa: E402
 __TYPE_MAP = TypeMap(__NS_CATALOG)
 
 
-def get_type_map():
-    ret = copy(__TYPE_MAP)
-    return ret
-
-
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
          'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
          'default': None},
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
-def get_manager(**kwargs):
+def get_type_map(**kwargs):
     '''
     Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
     return a BuildManager that uses the core namespace
@@ -61,12 +56,12 @@ def get_manager(**kwargs):
     extensions = getargs('extensions', kwargs)
     type_map = None
     if extensions is None:
-        type_map = __TYPE_MAP
+        type_map = deepcopy(__TYPE_MAP)
     else:
         if isinstance(extensions, TypeMap):
             type_map = extensions
         else:
-            type_map = get_type_map()
+            type_map = deepcopy(__TYPE_MAP)
         if isinstance(extensions, list):
             for ext in extensions:
                 if isinstance(ext, str):
@@ -80,8 +75,21 @@ def get_manager(**kwargs):
             type_map.load_namespaces(extensions)
         elif isinstance(extensions, TypeMap):
             type_map.merge(extensions)
-    manager = BuildManager(type_map)
-    return manager
+    return type_map
+
+
+@docval({'name': 'extensions', 'type': (str, TypeMap, list),
+         'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
+         'default': None},
+        returns="the namespaces loaded from the given file", rtype=tuple,
+        is_method=False)
+def get_manager(**kwargs):
+    '''
+    Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
+    return a BuildManager that uses the core namespace
+    '''
+    type_map = call_docval_func(get_type_map, kwargs)
+    return BuildManager(type_map)
 
 
 @docval({'name': 'namespace_path', 'type': str,
@@ -198,6 +206,7 @@ class NWBHDF5IO(HDF5IO):
             if 'w' in mode:
                 raise ValueError("cannot load namespaces from file when writing to it")
             ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+            print('id in constructor =', id(ns_catalog))
             super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
             tm = TypeMap(ns_catalog)
             tm.copy_mappers(get_type_map())
