@@ -1,6 +1,9 @@
 import unittest2 as unittest
 
 from pynwb.core import DynamicTable, TableColumn, ElementIdentifiers
+from pynwb import NWBFile
+
+from datetime import datetime
 
 
 class TestDynamicTable(unittest.TestCase):
@@ -135,3 +138,14 @@ class TestDynamicTable(unittest.TestCase):
         self.add_rows(table)
         val = table[2, 2]
         self.assertEqual(val, 30.0)
+
+    def test_add_to_file(self):
+        table = self.with_spec()
+        self.add_rows(table)
+
+        nwbfile = NWBFile(source='source', session_description='session_description',
+                          identifier='identifier', session_start_time=datetime.now())
+
+        module_behavior = nwbfile.create_processing_module('a', 'b', 'c')
+
+        module_behavior.add_container(table)

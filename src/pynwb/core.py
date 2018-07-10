@@ -746,7 +746,7 @@ class TableColumn(NWBData):
 
 
 @register_class('DynamicTable', CORE_NAMESPACE)
-class DynamicTable(NWBContainer):
+class DynamicTable(NWBDataInterface):
     """
     A column-based table. Columns are defined by the argument *columns*. This argument
     must be a list/tuple of TableColumns or a list/tuple of dicts containing the keys
