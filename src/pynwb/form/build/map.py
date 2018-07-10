@@ -85,6 +85,10 @@ class BuildManager(object):
         self.__type_map = type_map
 
     @property
+    def type_map(self):
+        return self.__type_map
+
+    @property
     def namespace_catalog(self):
         return self.__type_map.namespace_catalog
 
@@ -891,6 +895,10 @@ class TypeMap(object):
         self.__default_mapper_cls = getargs('mapper_cls', kwargs)
 
     @property
+    def types(self):
+        return self.__container_types
+
+    @property
     def namespace_catalog(self):
         return self.__ns_catalog
 
@@ -904,8 +912,19 @@ class TypeMap(object):
         #      needing this argument in deepcopy. Doesn't hurt anything, though.
         return self.__copy__()
 
-    def merge(self, type_map):
+    def copy_mappers(self, type_map):
+        for namespace in self.__ns_catalog.namespaces:
+            if namespace not in type_map.__container_types:
+                continue
+            for data_type in self.__ns_catalog.get_namespace(namespace).get_registered_types():
+                container_cls = type_map.__container_types[namespace].get(data_type)
+                if container_cls is None:
+                    continue
+                self.register_container_type(namespace, data_type, container_cls)
+                if container_cls in type_map.__mapper_cls:
+                    self.register_map(container_cls, type_map.__mapper_cls[container_cls])
 
+    def merge(self, type_map):
         for namespace in type_map.__container_types:
             for data_type in type_map.__container_types[namespace]:
 

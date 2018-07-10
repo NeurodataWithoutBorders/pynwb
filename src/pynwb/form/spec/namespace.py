@@ -7,10 +7,10 @@ import string
 from warnings import warn
 from itertools import chain
 from abc import ABCMeta, abstractmethod
-from six import with_metaclass
+from six import with_metaclass, raise_from
 
 
-from ..utils import docval, getargs, popargs, get_docval
+from ..utils import docval, getargs, popargs, get_docval, call_docval_func
 from .catalog import SpecCatalog
 from .spec import DatasetSpec, GroupSpec
 
@@ -105,6 +105,10 @@ class SpecNamespace(dict):
         return self['doc']
 
     @property
+    def schema(self):
+        return self['schema']
+
+    @property
     def catalog(self):
         """The SpecCatalog containing all the Specs"""
         return self.__catalog
@@ -142,6 +146,14 @@ class SpecNamespace(dict):
 
 class SpecReader(with_metaclass(ABCMeta, object)):
 
+    @docval({'name': 'source', 'type': str, 'doc': 'the source from which this reader reads from'})
+    def __init__(self, **kwargs):
+        self.__source = getargs('source', kwargs)
+
+    @property
+    def source(self):
+        return self.__source
+
     @abstractmethod
     def read_spec(self):
         pass
@@ -155,7 +167,8 @@ class YAMLSpecReader(SpecReader):
 
     @docval({'name': 'indir', 'type': str, 'doc': 'the path spec files are relative to', 'default': '.'})
     def __init__(self, **kwargs):
-        self.__indir = getargs('indir', kwargs)
+        super_kwargs = {'source': kwargs['indir']}
+        call_docval_func(super(YAMLSpecReader, self).__init__, super_kwargs)
 
     def read_namespace(self, namespace_path):
         namespaces = None
@@ -177,7 +190,7 @@ class YAMLSpecReader(SpecReader):
     def __get_spec_path(self, spec_path):
         if os.path.isabs(spec_path):
             return spec_path
-        return os.path.join(self.__indir, spec_path)
+        return os.path.join(self.source, spec_path)
 
 
 class NamespaceCatalog(object):
@@ -355,8 +368,8 @@ class NamespaceCatalog(object):
                 # load specs from namespace
                 try:
                     inc_ns = self.get_namespace(s['namespace'])
-                except KeyError:
-                    raise ValueError("Could not load namespace '%s'" % s['namespace'])
+                except KeyError as e:
+                    raise_from(ValueError("Could not load namespace '%s'" % s['namespace']), e)
                 if types_key in s:
                     types = s[types_key]
                 else:
@@ -388,7 +401,8 @@ class NamespaceCatalog(object):
                 msg = "namespace file '%s' not found" % namespace_path
                 raise IOError(msg)
             reader = YAMLSpecReader(indir=os.path.dirname(namespace_path))
-        ret = self.__included_specs.get(namespace_path)
+        ns_path_key = os.path.join(reader.source, os.path.basename(namespace_path))
+        ret = self.__included_specs.get(ns_path_key)
         if ret is None:
             ret = dict()
         else:
@@ -401,5 +415,5 @@ class NamespaceCatalog(object):
         # now load specs into namespace
         for ns in namespaces:
             ret[ns['name']] = self.__load_namespace(ns, reader, types_key, resolve=resolve)
-        self.__included_specs[namespace_path] = ret
+        self.__included_specs[ns_path_key] = ret
         return ret

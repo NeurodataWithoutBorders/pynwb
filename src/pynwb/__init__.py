@@ -3,6 +3,7 @@ for reading and writing data in NWB format
 '''
 import os.path
 from copy import copy
+from warnings import warn
 
 CORE_NAMESPACE = 'core'
 
@@ -191,14 +192,16 @@ class NWBHDF5IO(HDF5IO):
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', kwargs)
         if load_namespaces:
             if manager is not None:
-                warnings.warn("loading namespaces from file - ignoring 'manager'")
+                warn("loading namespaces from file - ignoring 'manager'")
             if extensions is not None:
-                warnings.warn("loading namespaces from file - ignoring 'extensions' argument")
+                warn("loading namespaces from file - ignoring 'extensions' argument")
             if 'w' in mode:
                 raise ValueError("cannot load namespaces from file when writing to it")
             ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
             super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
-            manager = BuildManager(TypeMap(ns_catalog))
+            tm = TypeMap(ns_catalog)
+            tm.copy_mappers(get_type_map())
+            manager = BuildManager(tm)
         else:
             if manager is not None and extensions is not None:
                 raise ValueError("'manager' and 'extensions' cannot be specified together")

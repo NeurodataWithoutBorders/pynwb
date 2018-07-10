@@ -86,15 +86,19 @@ class HDF5IO(FORMIO):
                                    version=ns.version,
                                    author=ns.author,
                                    contact=ns.contact)
-        source_files = ns_catalog.get_namespace_sources(namespace)
-        for source in source_files:
-            for dt in ns_catalog.get_types(source):
-                spec = ns_catalog.get_spec(namespace, dt)
-                if spec.parent is not None:
-                    continue
-                h5_source = cls.__get_name(source)
-                spec = cls.__copy_spec(spec)
-                builder.add_spec(h5_source, spec)
+        for elem in ns.schema:
+            if 'namespace' in elem:
+                inc_ns = elem['namespace']
+                builder.include_namespace(inc_ns)
+            else:
+                source = elem['source']
+                for dt in ns_catalog.get_types(source):
+                    spec = ns_catalog.get_spec(namespace, dt)
+                    if spec.parent is not None:
+                        continue
+                    h5_source = cls.__get_name(source)
+                    spec = cls.__copy_spec(spec)
+                    builder.add_spec(h5_source, spec)
         return builder
 
     @classmethod
@@ -190,7 +194,7 @@ class HDF5IO(FORMIO):
                 ns_builder = self.__convert_namespace(ns_catalog, ns_name)
                 namespace = ns_catalog.get_namespace(ns_name)
                 if namespace.version is None:
-                    group_name = '%s/unversioned'
+                    group_name = '%s/unversioned' % ns_name
                 else:
                     group_name = '%s/%s' % (ns_name, namespace.version)
                 ns_group = spec_group.require_group(group_name)
