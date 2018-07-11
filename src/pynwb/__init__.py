@@ -205,11 +205,16 @@ class NWBHDF5IO(HDF5IO):
                 warn("loading namespaces from file - ignoring 'extensions' argument")
             if 'w' in mode:
                 raise ValueError("cannot load namespaces from file when writing to it")
-            ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-            print('id in constructor =', id(ns_catalog))
-            super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
-            tm = TypeMap(ns_catalog)
-            tm.copy_mappers(get_type_map())
+
+            # XXX: Leaving this here in case we want to revert to this strategy for
+            #      loading cached namespaces
+            # ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+            # super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
+            # tm = TypeMap(ns_catalog)
+            # tm.copy_mappers(get_type_map())
+
+            tm = get_type_map()
+            super(NWBHDF5IO, self).load_namespaces(tm, path)
             manager = BuildManager(tm)
         else:
             if manager is not None and extensions is not None:

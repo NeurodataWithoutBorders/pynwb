@@ -58,8 +58,8 @@ class HDF5IO(FORMIO):
 
     @classmethod
     @docval({'name': 'namespace_catalog',
-             'type': NamespaceCatalog,
-             'doc': 'the NamespaceCatalog to load namespaces into'},
+             'type': (NamespaceCatalog, TypeMap),
+             'doc': 'the NamespaceCatalog or TypeMap to load namespaces into'},
             {'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
             {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': None})
     def load_namespaces(cls, namespace_catalog, path, namespaces=None):
@@ -67,6 +67,9 @@ class HDF5IO(FORMIO):
         Load cached namespaces from a file.
         '''
         f = File(path, 'r')
+        if SPEC_LOC_ATTR not in f.attrs:
+            msg = "No cached namespaces found in %s" % path
+            raise ValueError(msg)
         spec_group = f[f.attrs[SPEC_LOC_ATTR]]
         if namespaces is None:
             namespaces = list(spec_group.keys())

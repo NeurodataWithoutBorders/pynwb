@@ -5,9 +5,10 @@ from collections import OrderedDict
 from copy import copy
 
 from six import with_metaclass, raise_from, text_type, binary_type
-from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args
+from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args, call_docval_func
 from ..container import Container, Data, DataRegion
-from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec
+from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec,\
+                   SpecReader
 from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, ReferenceBuilder, RegionBuilder, BaseBuilder
 from .warnings import OrphanContainerWarning, MissingRequiredWarning
@@ -929,6 +930,9 @@ class TypeMap(object):
     @docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the file containing the namespaces(s) to load'},
             {'name': 'resolve', 'type': bool,
              'doc': 'whether or not to include objects from included/parent spec objects', 'default': True},
+            {'name': 'reader',
+             'type': SpecReader,
+             'doc': 'the class to user for reading specifications', 'default': None},
             returns="the namespaces loaded from the given file", rtype=tuple)
     def load_namespaces(self, **kwargs):
         '''Load namespaces from a namespace file.
@@ -937,8 +941,7 @@ class TypeMap(object):
         it will process the return value to keep track of what types were included in the loaded namespaces. Calling
         load_namespaces here has the advantage of being able to keep track of type dependencies across namespaces.
         '''
-        namespace_path, resolve = getargs('namespace_path', 'resolve', kwargs)
-        deps = self.__ns_catalog.load_namespaces(namespace_path, resolve)
+        deps = call_docval_func(self.__ns_catalog.load_namespaces, kwargs)
         for new_ns, ns_deps in deps.items():
             for src_ns, types in ns_deps.items():
                 for dt in types:
@@ -965,8 +968,10 @@ class TypeMap(object):
                     if container_type is not None:
                         return container_type
                 return (Data, Container)
-            else:
+            elif spec.shape is None:
                 return self._type_map.get(spec.dtype)
+            else:
+                return ('array_data',)
         elif isinstance(spec, LinkSpec):
             return Container
         else:
@@ -1025,6 +1030,7 @@ class TypeMap(object):
         namespace, data_type = getargs('namespace', 'data_type', kwargs)
         cls = self.__get_container_cls(namespace, data_type)
         if cls is None:
+            spec = self.__ns_catalog.get_spec(namespace, data_type)
             dt_hier = self.__ns_catalog.get_hierarchy(namespace, data_type)
             parent_cls = None
             for t in dt_hier:
@@ -1034,8 +1040,15 @@ class TypeMap(object):
             bases = tuple()
             if parent_cls is not None:
                 bases = (parent_cls,)
+            else:
+                if isinstance(spec, GroupSpec):
+                    bases = (Container,)
+                elif isinstance(spec, DatasetSpec):
+                    bases = (Data,)
+                else:
+                    raise ValueError("Cannot generate class from %s" % type(spec))
+                parent_cls = bases[0]
             name = data_type
-            spec = self.__ns_catalog.get_spec(namespace, data_type)
             attr_names = self.__default_mapper_cls.get_attr_names(spec)
             fields = dict()
             for k, field_spec in attr_names.items():

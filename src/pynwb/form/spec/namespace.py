@@ -419,11 +419,14 @@ class NamespaceCatalog(object):
             return ret
         namespaces = reader.read_namespace(namespace_path)
         types_key = self.__spec_namespace_cls.types_key()
+        to_load = list()
         for ns in namespaces:
             if ns['name'] in self.__namespaces:
-                raise KeyError("namespace '%s' already exists" % ns['name'])
+                warn("ignoring namespace '%s' because it already exists" % ns['name'])
+            else:
+                to_load.append(ns)
         # now load specs into namespace
-        for ns in namespaces:
+        for ns in to_load:
             ret[ns['name']] = self.__load_namespace(ns, reader, types_key, resolve=resolve)
         self.__included_specs[ns_path_key] = ret
         return ret
