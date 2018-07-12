@@ -1056,7 +1056,7 @@ class TypeMap(object):
                     # fields.append(k)
                     fields[k] = field_spec
             d = {'__init__': self.__get_constructor(parent_cls, fields)}
-            cls = type(name, bases, d)
+            cls = type(str(name), bases, d)
             self.register_container_type(namespace, data_type, cls)
         return cls
 
