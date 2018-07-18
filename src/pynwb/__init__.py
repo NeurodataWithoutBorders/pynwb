@@ -2,12 +2,13 @@
 for reading and writing data in NWB format
 '''
 import os.path
-from copy import copy
+from copy import deepcopy
+from warnings import warn
 
 CORE_NAMESPACE = 'core'
 
 from .form.spec import NamespaceCatalog  # noqa: E402
-from .form.utils import docval, getargs, popargs  # noqa: E402
+from .form.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
 from .form.backends.io import FORMIO  # noqa: E402
 from .form.backends.hdf5 import HDF5IO  # noqa: E402
 from .form.validate import ValidatorMap  # noqa: E402
@@ -42,17 +43,12 @@ from .form.build import TypeMap as TypeMap  # noqa: E402
 __TYPE_MAP = TypeMap(__NS_CATALOG)
 
 
-def get_type_map():
-    ret = copy(__TYPE_MAP)
-    return ret
-
-
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
          'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
          'default': None},
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
-def get_manager(**kwargs):
+def get_type_map(**kwargs):
     '''
     Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
     return a BuildManager that uses the core namespace
@@ -60,12 +56,12 @@ def get_manager(**kwargs):
     extensions = getargs('extensions', kwargs)
     type_map = None
     if extensions is None:
-        type_map = __TYPE_MAP
+        type_map = deepcopy(__TYPE_MAP)
     else:
         if isinstance(extensions, TypeMap):
             type_map = extensions
         else:
-            type_map = get_type_map()
+            type_map = deepcopy(__TYPE_MAP)
         if isinstance(extensions, list):
             for ext in extensions:
                 if isinstance(ext, str):
@@ -79,8 +75,21 @@ def get_manager(**kwargs):
             type_map.load_namespaces(extensions)
         elif isinstance(extensions, TypeMap):
             type_map.merge(extensions)
-    manager = BuildManager(type_map)
-    return manager
+    return type_map
+
+
+@docval({'name': 'extensions', 'type': (str, TypeMap, list),
+         'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
+         'default': None},
+        returns="the namespaces loaded from the given file", rtype=tuple,
+        is_method=False)
+def get_manager(**kwargs):
+    '''
+    Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
+    return a BuildManager that uses the core namespace
+    '''
+    type_map = call_docval_func(get_type_map, kwargs)
+    return BuildManager(type_map)
 
 
 @docval({'name': 'namespace_path', 'type': str,
@@ -180,18 +189,40 @@ class NWBHDF5IO(HDF5IO):
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
             {'name': 'mode', 'type': str,
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'},
+            {'name': 'load_namespaces', 'type': bool,
+             'doc': 'whether or not to load cached namespaces from given path', 'default': False},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
              to namespaces and TypeMaps', 'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions = popargs('path', 'mode', 'manager', 'extensions', kwargs)
-        if manager is not None and extensions is not None:
-            raise ValueError("'manager' and 'extensions' cannot be specified together")
-        elif extensions is not None:
-            manager = get_manager(extensions=extensions)
-        elif manager is None:
-            manager = get_manager()
+        path, mode, manager, extensions, load_namespaces =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', kwargs)
+        if load_namespaces:
+            if manager is not None:
+                warn("loading namespaces from file - ignoring 'manager'")
+            if extensions is not None:
+                warn("loading namespaces from file - ignoring 'extensions' argument")
+            if 'w' in mode:
+                raise ValueError("cannot load namespaces from file when writing to it")
+
+            # XXX: Leaving this here in case we want to revert to this strategy for
+            #      loading cached namespaces
+            # ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+            # super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
+            # tm = TypeMap(ns_catalog)
+            # tm.copy_mappers(get_type_map())
+
+            tm = get_type_map()
+            super(NWBHDF5IO, self).load_namespaces(tm, path)
+            manager = BuildManager(tm)
+        else:
+            if manager is not None and extensions is not None:
+                raise ValueError("'manager' and 'extensions' cannot be specified together")
+            elif extensions is not None:
+                manager = get_manager(extensions=extensions)
+            elif manager is None:
+                manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager, mode=mode)
 
 

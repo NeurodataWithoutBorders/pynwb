@@ -2,10 +2,12 @@
 import unittest2 as unittest
 import six
 import numpy as np
+import os
 
 from datetime import datetime
 
 from pynwb import NWBFile, TimeSeries
+from pynwb import NWBHDF5IO
 from pynwb.file import Subject
 from pynwb.ecephys import ElectrodeTable
 
@@ -210,3 +212,23 @@ class SubjectTest(unittest.TestCase):
 
     def test_nwbfile_constructor(self):
         self.assertIs(self.nwbfile.subject, self.subject)
+
+
+class TestCacheSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.path = 'unittest_cached_spec.nwb'
+
+    def tearDown(self):
+        if os.path.exists(self.path):
+            os.remove(self.path)
+
+    def test_simple(self):
+        nwbfile = NWBFile('source', ' ', ' ',
+                          datetime.now(), datetime.now(),
+                          institution='University of California, San Francisco',
+                          lab='Chang Lab')
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(nwbfile, cache_spec=True)
+        reader = NWBHDF5IO(self.path, 'r', load_namespaces=True)
+        nwbfile = reader.read()

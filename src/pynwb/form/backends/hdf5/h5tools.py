@@ -58,8 +58,8 @@ class HDF5IO(FORMIO):
 
     @classmethod
     @docval({'name': 'namespace_catalog',
-             'type': NamespaceCatalog,
-             'doc': 'the NamespaceCatalog to load namespaces into'},
+             'type': (NamespaceCatalog, TypeMap),
+             'doc': 'the NamespaceCatalog or TypeMap to load namespaces into'},
             {'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
             {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': None})
     def load_namespaces(cls, namespace_catalog, path, namespaces=None):
@@ -67,15 +67,19 @@ class HDF5IO(FORMIO):
         Load cached namespaces from a file.
         '''
         f = File(path, 'r')
-        spec_group = f[f.attrs[SPEC_LOC_ATTR]]
-        if namespaces is None:
-            namespaces = list(spec_group.keys())
-        for ns in namespaces:
-            ns_group = spec_group[ns]
-            latest_version = list(ns_group.keys())[-1]
-            ns_group = ns_group[latest_version]
-            reader = H5SpecReader(ns_group)
-            namespace_catalog.load_namespaces('namespace', reader=reader)
+        if SPEC_LOC_ATTR not in f.attrs:
+            msg = "No cached namespaces found in %s" % path
+            warnings.warn(msg)
+        else:
+            spec_group = f[f.attrs[SPEC_LOC_ATTR]]
+            if namespaces is None:
+                namespaces = list(spec_group.keys())
+            for ns in namespaces:
+                ns_group = spec_group[ns]
+                latest_version = list(ns_group.keys())[-1]
+                ns_group = ns_group[latest_version]
+                reader = H5SpecReader(ns_group)
+                namespace_catalog.load_namespaces('namespace', reader=reader)
         f.close()
 
     @classmethod
@@ -86,15 +90,19 @@ class HDF5IO(FORMIO):
                                    version=ns.version,
                                    author=ns.author,
                                    contact=ns.contact)
-        source_files = ns_catalog.get_namespace_sources(namespace)
-        for source in source_files:
-            for dt in ns_catalog.get_types(source):
-                spec = ns_catalog.get_spec(namespace, dt)
-                if spec.parent is not None:
-                    continue
-                h5_source = cls.__get_name(source)
-                spec = cls.__copy_spec(spec)
-                builder.add_spec(h5_source, spec)
+        for elem in ns.schema:
+            if 'namespace' in elem:
+                inc_ns = elem['namespace']
+                builder.include_namespace(inc_ns)
+            else:
+                source = elem['source']
+                for dt in ns_catalog.get_types(source):
+                    spec = ns_catalog.get_spec(namespace, dt)
+                    if spec.parent is not None:
+                        continue
+                    h5_source = cls.__get_name(source)
+                    spec = cls.__copy_spec(spec)
+                    builder.add_spec(h5_source, spec)
         return builder
 
     @classmethod
@@ -189,7 +197,10 @@ class HDF5IO(FORMIO):
             for ns_name in ns_catalog.namespaces:
                 ns_builder = self.__convert_namespace(ns_catalog, ns_name)
                 namespace = ns_catalog.get_namespace(ns_name)
-                group_name = '%s/%s' % (ns_name, namespace.version)
+                if namespace.version is None:
+                    group_name = '%s/unversioned' % ns_name
+                else:
+                    group_name = '%s/%s' % (ns_name, namespace.version)
                 ns_group = spec_group.require_group(group_name)
                 writer = H5SpecWriter(ns_group)
                 ns_builder.export('namespace', writer=writer)

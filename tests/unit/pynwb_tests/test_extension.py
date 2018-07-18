@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 import os
 from tempfile import gettempdir
 import random
@@ -6,7 +6,7 @@ import string
 
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
 from pynwb.form.spec.spec import RefSpec
-from pynwb import load_namespaces, get_class, TimeSeries
+from pynwb import get_type_map, TimeSeries
 from pynwb.form.utils import get_docval
 
 
@@ -41,11 +41,12 @@ class TestExtension(unittest.TestCase):
 
     def test_load_namespace(self):
         self.test_export()
-        load_namespaces(os.path.join(self.tempdir, self.ns_path))
+        get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
 
     def test_get_class(self):
-        self.test_load_namespace()
-        TetrodeSeries = get_class('TetrodeSeries', self.prefix)  # noqa: F841
+        self.test_export()
+        type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
+        type_map.get_container_cls(self.prefix, 'TetrodeSeries')
 
     def test_load_namespace_with_reftype_attribute(self):
         ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix)
@@ -57,7 +58,7 @@ class TestExtension(unittest.TestCase):
                                      neurodata_type_def='my_new_type')
         ns_builder.add_spec(self.ext_source, test_ds_ext)
         ns_builder.export(self.ns_path, outdir=self.tempdir)
-        load_namespaces(os.path.join(self.tempdir, self.ns_path))
+        get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
 
     def test_load_namespace_with_reftype_attribute_check_autoclass_const(self):
         ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix)
@@ -69,8 +70,8 @@ class TestExtension(unittest.TestCase):
                                      neurodata_type_def='my_new_type')
         ns_builder.add_spec(self.ext_source, test_ds_ext)
         ns_builder.export(self.ns_path, outdir=self.tempdir)
-        load_namespaces(os.path.join(self.tempdir, self.ns_path))
-        my_new_type = get_class('my_new_type', self.prefix)
+        type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
+        my_new_type = type_map.get_container_cls(self.prefix, 'my_new_type')
         docval = None
         for tmp in get_docval(my_new_type.__init__):
             if tmp['name'] == 'target_ds':
@@ -114,9 +115,9 @@ class TestCatchDupNS(unittest.TestCase):
                             neurodata_type_def='TetrodeSeries')
         ns_builder2.add_spec(self.ext_source2, ext2)
         ns_builder2.export(self.ns_path2, outdir=self.tempdir)
-        load_namespaces(os.path.join(self.tempdir, self.ns_path1))
-        with self.assertRaises(KeyError):
-            load_namespaces(os.path.join(self.tempdir, self.ns_path2))
+        type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path1))
+        with self.assertWarnsRegex(UserWarning, "ignoring namespace '\S+' because it already exists"):
+            type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
 
 
 class TestCatchDuplicateSpec(unittest.TestCase):
