@@ -275,7 +275,7 @@ groups:
   groups:
   - doc: ElectricalSeries object containing filtered electrophysiology data
     neurodata_type_inc: ElectricalSeries
-    quantity: +
+    quantity: '+'
   default_name: FilteredEphys
   neurodata_type_def: FilteredEphys
   neurodata_type_inc: NWBDataInterface
@@ -292,7 +292,7 @@ groups:
   groups:
   - doc: ElectricalSeries object containing LFP data for one or channels
     neurodata_type_inc: ElectricalSeries
-    quantity: +
+    quantity: '+'
   default_name: LFP
   neurodata_type_def: LFP
   neurodata_type_inc: NWBDataInterface
