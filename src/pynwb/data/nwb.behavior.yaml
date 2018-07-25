@@ -101,7 +101,7 @@ groups:
   groups:
   - doc: TimeSeries object containing time series data on pupil size
     neurodata_type_inc: TimeSeries
-    quantity: +
+    quantity: '+'
   default_name: PupilTracking
   neurodata_type_def: PupilTracking
   neurodata_type_inc: NWBDataInterface
@@ -147,7 +147,7 @@ groups:
   groups:
   - doc: SpatialSeries object containing position data
     neurodata_type_inc: SpatialSeries
-    quantity: +
+    quantity: '+'
   default_name: Position
   neurodata_type_def: Position
   neurodata_type_inc: NWBDataInterface
