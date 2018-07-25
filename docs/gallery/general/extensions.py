@@ -7,6 +7,8 @@ PyNWB API.
 '''
 
 ####################
+# .. _defining_extension:
+#
 # Defining extensions
 # -----------------------------------------------------
 #
@@ -73,6 +75,8 @@ ns_builder.export(ns_path)
 
 
 ####################
+# .. _using_extension:
+#
 # Using extensions
 # -----------------------------------------------------
 #
@@ -84,6 +88,7 @@ ns_builder.export(ns_path)
 
 from pynwb import register_class, load_namespaces
 from pynwb.ecephys import ElectricalSeries
+from pynwb.form.utils import docval, call_docval_func, getargs, get_docval
 
 ns_path = "mylab.namespace.yaml"
 load_namespaces(ns_path)
@@ -91,16 +96,22 @@ load_namespaces(ns_path)
 
 @register_class('TetrodeSeries', 'mylab')
 class TetrodeSeries(ElectricalSeries):
-    __nwbfields__ = ('tetrode_id',)
 
-    def __init__(self, *args, **kwargs):
-        pass
+    __nwbfields__ = ('trode_id',)
+
+    @docval(*get_docval(ElectricalSeries.__init__) +
+            ({'name': 'trode_id', 'type': int, 'doc': 'the tetrode id'},))
+    def __init__(self, **kwargs):
+        call_docval_func(super(TetrodeSeries, self).__init__, kwargs)
+        self.trode_id = getargs('trode_id', kwargs)
+
 
 ####################
 # .. note::
 #
-#     Although it is not used here, it is encouraged to use the :py:func:`~form.utils.docval`
-#     decorator for documenting constructors, methods, and functions.
+#     See the API docs for more information about :py:func:`~pynwb.form.utils.docval`
+#     :py:func:`~pynwb.form.utils.call_docval_func`, :py:func:`~pynwb.form.utils.getargs`
+#     and :py:func:`~pynwb.form.utils.get_docval`
 #
 # When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer`
 # subclasses, you should defining the class field ``__nwbfields__``. This will
@@ -124,3 +135,93 @@ AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
 #     When defining your own :py:class:`~pynwb.core.NWBContainer`, the subclass name does not need to be the same
 #     as the extension type name. However, it is encouraged to keep class and extension names the same for the
 #     purposes of readibility.
+
+####################
+# .. _caching_extension:
+#
+# Caching extensions to file
+# -----------------------------------------------------
+#
+# Extensions can be cached to file so that your NWB file will carry the extensions needed to read the file with it.
+# This is done by setting *cache_spec* to *True* when calling :py:meth:`~pynwb.form.backends.hdf5.h5tools.HDF5IO.write`
+# on :py:class:`~pynwb.NWBHDF5IO` (See :ref:`basic_writing` for more on writing NWB files).
+#
+# To demonstrate this, first we will make some fake data using our extensions.
+
+from datetime import datetime
+from pynwb import NWBFile
+
+start_time = datetime(2017, 4, 3, 11, 0, 0)
+create_date = datetime(2017, 4, 15, 12, 0, 0)
+
+nwbfile = NWBFile('PyNWB tutorial', 'demonstrate caching', 'NWB456', start_time,
+                  file_create_date=create_date)
+
+device = nwbfile.create_device(name='trodes_rig123', source="a source")
+
+electrode_name = 'tetrode1'
+source = "an hypothetical source"
+description = "an example tetrode"
+location = "somewhere in the hippocampus"
+
+electrode_group = nwbfile.create_electrode_group(electrode_name,
+                                                 source=source,
+                                                 description=description,
+                                                 location=location,
+                                                 device=device)
+for idx in [1, 2, 3, 4]:
+    nwbfile.add_electrode(idx,
+                          x=1.0, y=2.0, z=3.0,
+                          imp=float(-idx),
+                          location='CA1', filtering='none',
+                          description='channel %s' % idx, group=electrode_group)
+electrode_table_region = nwbfile.create_electrode_table_region([0, 2], 'the first and third electrodes')
+
+import numpy as np
+
+rate = 10.0
+np.random.seed(1234)
+data_len = 1000
+data = np.random.rand(data_len * 2).reshape((data_len, 2))
+timestamps = np.arange(data_len) / rate
+
+ts = TetrodeSeries('test_ephys_data',
+                   'an hypothetical source',
+                   data,
+                   electrode_table_region,
+                   timestamps=timestamps,
+                   trode_id=1,
+                   # Alternatively, could specify starting_time and rate as follows
+                   # starting_time=ephys_timestamps[0],
+                   # rate=rate,
+                   resolution=0.001,
+                   comments="This data was randomly generated with numpy, using 1234 as the seed",
+                   description="Random numbers generated with numpy.random.rand")
+nwbfile.add_acquisition(ts)
+
+####################
+# .. note::
+#
+#     For more information on writing :py:class:`~pynwb.ecephys.ElectricalSeries`,
+#     see :ref:`ecephys_tutorial`.
+#
+# Now that we have some data, lets write our file while caching our spec:
+
+from pynwb import NWBHDF5IO
+
+io = NWBHDF5IO('cache_spec_example.nwb', mode='w')
+io.write(nwbfile, cache_spec=True)
+io.close()
+
+####################
+# .. note::
+#
+#     For more information on writing NWB files, see :ref:`basic_writing`.
+
+####################
+# By default, PyNWB does not use the namespaces cached in a file--you must explicitly specify this.
+# This behavior is enabled by the *load_namespaces* argument to the :py:class:`~pynwb.NWBHDF5IO`
+# constructor.
+
+io = NWBHDF5IO('cache_spec_example.nwb', mode='r', load_namespaces=True)
+nwbfile = io.read()

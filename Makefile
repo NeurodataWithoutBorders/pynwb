@@ -48,6 +48,9 @@ checkpdb:
 devtest:
 	$(PYTHON) -W ignore:::pynwb.form.build.map: test.py -fpi
 
+testclean:
+	rm *.npy *.nwb *.yaml
+
 apidoc:
 	pip install -r requirements-doc.txt
 	cd docs && $(MAKE) apidoc
