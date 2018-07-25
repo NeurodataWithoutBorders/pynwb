@@ -290,7 +290,7 @@ groups:
     will identify which channels are providing LFP data. Filter properties should
     be noted in the ElectricalSeries description or comments field.
   groups:
-  - doc: ElectricalSeries object containing LFP data for one or channels
+  - doc: ElectricalSeries object containing LFP data for one or more channels
     neurodata_type_inc: ElectricalSeries
     quantity: '+'
   default_name: LFP
