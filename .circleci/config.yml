@@ -1,107 +1,110 @@
-run-style-check: &run-style-check
-  name: Run Style Checks
-  command: |
-    . ../venv/bin/activate
-    pip install flake8
-    flake8 src/pynwb
-    flake8 tests
-    flake8 --ignore E402,E501 docs/gallery
-
-initialize-venv: &initialize-venv
-  name: Initialize Virtual Environment
-  command: |
-    python -m virtualenv ../venv || python -m venv ../venv
-    . ../venv/bin/activate
-
-publish-prerelease-on-github: &publish-prerelease-on-github
-  name: Publish wheel and source distribution on github
-  command: |
-    if [[ "${CIRCLE_BRANCH}" == "dev" && "${UPLOAD_WHEELS}" == "true" ]]; then
-      . ../venv/bin/activate
-      pip install -U scikit-ci-addons
-      ci_addons publish_github_release NeurodataWithoutBorders/pynwb  \
-          --prerelease-packages "dist/*" \
-          --prerelease-sha dev \
-          --prerelease-packages-clear-pattern "*" \
-          --prerelease-packages-keep-pattern "*dev<COMMIT_DISTANCE>*" \
-          --re-upload \
-          --exit-success-if-missing-token
-    fi
-
-ci-steps: &ci-steps
-  steps:
-    - checkout
-    - run:
-        <<: *initialize-venv
-    - run:
-        name: Run the tests
-        command: |
-          . ../venv/bin/activate
-          pip install tox
-          tox -e $TEST_TOX_ENV
-        # Install is expected to be quick. Increase timeout in case there are some network issues.
-        # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
-        no_output_timeout: 30m
-    - run:
-        name: Run coverage and submit to codecov-io
-        command: |
-          . ../venv/bin/activate
-          tox -e $COVERAGE_TOX_ENV
-    - run:
-        name: Build wheel and source distribution
-        command: |
-          . ../venv/bin/activate
-          tox -e $BUILD_TOX_ENV
-    - run:
-        name: Test installation from a wheel
-        command: |
-          . ../venv/bin/activate
-          tox -e $TEST_WHEELINSTALL_ENV --recreate --installpkg dist/*-none-any.whl
-    - run:
-        <<: *publish-prerelease-on-github
-
-conda-steps: &conda-steps
-  steps:
-    - checkout
-    - run:
-        name: Configure conda
-        command: |
-          conda config --set always_yes yes --set changeps1 no
-          conda config --add channels conda-forge
-          conda install virtualenv
-          pip install tox
-    - run:
-        name: Run the tests
-        command: |
-          tox -e $TEST_TOX_ENV
-    - run:
-        name: Build wheel and source distribution
-        command: |
-          tox -e $BUILD_TOX_ENV
-    - run:
-        name: Test installation from a wheel
-        command: |
-          tox -e $TEST_WHEELINSTALL_ENV --recreate --installpkg dist/*-none-any.whl
-
-gallery-steps: &gallery-steps
-  steps:
-    - checkout
-    - restore_cache:
-        keys:
-          - ophys-data-cache
-    - run:
-        <<: *initialize-venv
-    - run:
-        name: Run the gallery tests
-        command: |
-          . ../venv/bin/activate
-          pip install tox
-          tox -e $TEST_TOX_ENV
-    - save_cache:
-        key: ophys-data-cache
-        paths: ophys_experiment_data
-
 version: 2
+
+references:
+
+  run-style-check: &run-style-check
+    name: Run Style Checks
+    command: |
+      . ../venv/bin/activate
+      pip install flake8
+      flake8 src/pynwb
+      flake8 tests
+      flake8 --ignore E402,E501 docs/gallery
+
+  initialize-venv: &initialize-venv
+    name: Initialize Virtual Environment
+    command: |
+      python -m virtualenv ../venv || python -m venv ../venv
+      . ../venv/bin/activate
+
+  publish-prerelease-on-github: &publish-prerelease-on-github
+    name: Publish wheel and source distribution on github
+    command: |
+      if [[ "${CIRCLE_BRANCH}" == "dev" && "${UPLOAD_WHEELS}" == "true" ]]; then
+        . ../venv/bin/activate
+        pip install -U scikit-ci-addons
+        ci_addons publish_github_release NeurodataWithoutBorders/pynwb  \
+            --prerelease-packages "dist/*" \
+            --prerelease-sha dev \
+            --prerelease-packages-clear-pattern "*" \
+            --prerelease-packages-keep-pattern "*dev<COMMIT_DISTANCE>*" \
+            --re-upload \
+            --exit-success-if-missing-token
+      fi
+
+  ci-steps: &ci-steps
+    steps:
+      - checkout
+      - run:
+          <<: *initialize-venv
+      - run:
+          name: Run the tests
+          command: |
+            . ../venv/bin/activate
+            pip install tox
+            tox -e $TEST_TOX_ENV
+          # Install is expected to be quick. Increase timeout in case there are some network issues.
+          # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
+          no_output_timeout: 30m
+      - run:
+          name: Run coverage and submit to codecov-io
+          command: |
+            . ../venv/bin/activate
+            tox -e $COVERAGE_TOX_ENV
+      - run:
+          name: Build wheel and source distribution
+          command: |
+            . ../venv/bin/activate
+            tox -e $BUILD_TOX_ENV
+      - run:
+          name: Test installation from a wheel
+          command: |
+            . ../venv/bin/activate
+            tox -e $TEST_WHEELINSTALL_ENV --recreate --installpkg dist/*-none-any.whl
+      - run:
+          <<: *publish-prerelease-on-github
+
+  conda-steps: &conda-steps
+    steps:
+      - checkout
+      - run:
+          name: Configure conda
+          command: |
+            conda config --set always_yes yes --set changeps1 no
+            conda config --add channels conda-forge
+            conda install virtualenv
+            pip install tox
+      - run:
+          name: Run the tests
+          command: |
+            tox -e $TEST_TOX_ENV
+      - run:
+          name: Build wheel and source distribution
+          command: |
+            tox -e $BUILD_TOX_ENV
+      - run:
+          name: Test installation from a wheel
+          command: |
+            tox -e $TEST_WHEELINSTALL_ENV --recreate --installpkg dist/*-none-any.whl
+
+  gallery-steps: &gallery-steps
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - ophys-data-cache
+      - run:
+          <<: *initialize-venv
+      - run:
+          name: Run the gallery tests
+          command: |
+            . ../venv/bin/activate
+            pip install tox
+            tox -e $TEST_TOX_ENV
+      - save_cache:
+          key: ophys-data-cache
+          paths: ophys_experiment_data
+
 jobs:
   flake8:
     docker:
