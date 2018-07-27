@@ -33,6 +33,34 @@ Commands to evaluate starts with a dollar sign. For example::
 
 means that ``echo "Hello"`` should be copied and evaluated in the terminal.
 
+----------------------
+Setting up environment
+----------------------
+
+1. First, `register for an account on PyPI <https://pypi.org>`_.
+
+
+2. If not already the case, ask to be added as a ``Package Index Maintainer``.
+
+
+3. Create a ``~/.pypirc`` file with your login credentials::
+
+    [distutils]
+    index-servers =
+      pypi
+      pypitest
+
+    [pypi]
+    username=<your-username>
+    password=<your-password>
+
+    [pypitest]
+    repository=https://test.pypi.org/legacy/
+    username=<your-username>
+    password=<your-password>
+
+  where ``<your-username>`` and ``<your-password>`` correspond to your PyPI account.
+
 
 ------------------
 PyPI: Step-by-step
