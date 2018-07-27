@@ -17,21 +17,6 @@ references:
       python -m virtualenv ../venv || python -m venv ../venv
       . ../venv/bin/activate
 
-  publish-prerelease-on-github: &publish-prerelease-on-github
-    name: Publish wheel and source distribution on github
-    command: |
-      if [[ "${CIRCLE_BRANCH}" == "dev" && "${UPLOAD_WHEELS}" == "true" ]]; then
-        . ../venv/bin/activate
-        pip install -U scikit-ci-addons
-        ci_addons publish_github_release NeurodataWithoutBorders/pynwb  \
-            --prerelease-packages "dist/*" \
-            --prerelease-sha dev \
-            --prerelease-packages-clear-pattern "*" \
-            --prerelease-packages-keep-pattern "*dev<COMMIT_DISTANCE>*" \
-            --re-upload \
-            --exit-success-if-missing-token
-      fi
-
   ci-steps: &ci-steps
     steps:
       - checkout
@@ -62,7 +47,20 @@ references:
             . ../venv/bin/activate
             tox -e $TEST_WHEELINSTALL_ENV --recreate --installpkg dist/*-none-any.whl
       - run:
-          <<: *publish-prerelease-on-github
+          name: Remove distributions if UPLOAD_WHEELS != true
+          command: |
+            if [[ "${UPLOAD_WHEELS}" != "true" ]]; then
+              echo "Discarding distributions"
+              ls -1 dist
+              rm -rf dist/*
+            else
+              echo "Keeping distributions for upload"
+              ls -1 dist
+            fi
+      - persist_to_workspace:
+          root: ./
+          paths:
+            - dist
 
   conda-steps: &conda-steps
     steps:
@@ -104,6 +102,11 @@ references:
       - save_cache:
           key: ophys-data-cache
           paths: ophys_experiment_data
+
+  no_filters: &no_filters
+    filters:
+      tags:
+        only: /.*/
 
 jobs:
   flake8:
@@ -194,17 +197,107 @@ jobs:
      - TEST_TOX_ENV: "gallery-py36"
     <<: *gallery-steps
 
+  deploy-dev:
+    docker:
+      - image: circleci/python:3.7.0-stretch
+    steps:
+      - checkout
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Publish wheel and source distribution as a GitHub pre-release
+          command: |
+            python -m venv ../venv
+            . ../venv/bin/activate
+            pip install -U scikit-ci-addons
+            echo "CIRCLE_SHA1 [$CIRCLE_SHA1]"
+            ci_addons publish_github_release NeurodataWithoutBorders/pynwb  \
+                --prerelease-packages "dist/*" \
+                --prerelease-sha $CIRCLE_SHA1 \
+                --prerelease-packages-clear-pattern "*" \
+                --prerelease-packages-keep-pattern "*dev<COMMIT_DISTANCE>*" \
+                --re-upload \
+                --exit-success-if-missing-token
+
+  deploy-release:
+    docker:
+      - image: circleci/python:3.7.0-stretch
+    steps:
+      - attach_workspace:
+          at: ./
+      - run:
+          name: Deploy release
+          command: |
+            echo "Deploy release"
+            python -m venv ../venv
+            . ../venv/bin/activate
+            pip install twine
+            ls dist
+            twine upload -u $PYPI_USER -p $PYPI_PASSWORD --skip-existing dist/*
+      - run:
+          name: Publish wheel and source distribution as a GitHub release
+          command: |
+            python -m venv ../venv
+            . ../venv/bin/activate
+            pip install githubrelease
+            githubrelease release $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME \
+              create $CIRCLE_TAG --name $CIRCLE_TAG \
+              --publish ./dist/*
+
 workflows:
   version: 2
   test-package-publish:
     jobs:
-      - flake8
-      - python27
-      - python35
-      - python36
-      - miniconda27
-      - miniconda35
-      - miniconda36
-      - gallery27
-      - gallery35
-      - gallery36
+      - flake8:
+          <<: *no_filters
+      - python27:
+          <<: *no_filters
+      - python35:
+          <<: *no_filters
+      - python36:
+          <<: *no_filters
+      - miniconda27:
+          <<: *no_filters
+      - miniconda35:
+          <<: *no_filters
+      - miniconda36:
+          <<: *no_filters
+      - gallery27:
+          <<: *no_filters
+      - gallery35:
+          <<: *no_filters
+      - gallery36:
+          <<: *no_filters
+      - deploy-dev:
+          requires:
+            - flake8
+            - python27
+            - python35
+            - python36
+            - miniconda27
+            - miniconda35
+            - miniconda36
+            - gallery27
+            - gallery35
+            - gallery36
+          filters:
+            branches:
+              only: dev
+      - deploy-release:
+          requires:
+            - flake8
+            - python27
+            - python35
+            - python36
+            - miniconda27
+            - miniconda35
+            - miniconda36
+            - gallery27
+            - gallery35
+            - gallery36
+          filters:
+            tags:
+              only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
+            branches:
+              ignore: /.*/
+
