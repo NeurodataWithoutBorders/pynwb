@@ -60,6 +60,21 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(elecgrp.location, loc)
         self.assertIs(elecgrp.device, d)
 
+    def test_create_electrode_group_invalid_index(self):
+        """
+        Test the case where the user creates an electrode table region with
+        indexes that are out of range of the amount of electrodes added.
+        """
+        nwbfile = NWBFile('a', 'b', 'c', datetime.now())
+        device = nwbfile.create_device('a', 'b')
+        elecgrp = nwbfile.create_electrode_group('a', 'b', 'c', device=device, location='a')
+        for i in range(4):
+            nwbfile.add_electrode(i, np.nan, np.nan, np.nan, np.nan, group=elecgrp,
+                                  location='a', filtering='a', description='a')
+        with self.assertRaises(TypeError) as err:
+            nwbfile.create_electrode_table_region(list(range(6)), 'test')
+        self.assertTrue('out of range' in str(err.exception))
+
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
         tags2 = ['t3', 't4']
