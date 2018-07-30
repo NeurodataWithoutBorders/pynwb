@@ -343,7 +343,7 @@ class NWBFile(MultiContainerInterface):
         region = getargs('region', kwargs)
         for idx in region:
             if idx < 0 or idx >= len(self.ec_electrodes):
-                raise TypeError('The index ' + str(idx) +
+                raise IndexError('The index ' + str(idx) +
                                 ' is out of range for the ElectrodeTable of length '
                                 + str(len(self.ec_electrodes)))
         desc = getargs('description', kwargs)
