@@ -1,7 +1,22 @@
 from ..form.build import ObjectMapper, RegionBuilder
 from .. import register_map
 
-from pynwb.core import NWBData
+from pynwb.core import NWBData, DynamicTable
+
+
+@register_map(DynamicTable)
+class DynamicTableMap(ObjectMapper):
+
+    def __init__(self, spec):
+        super(DynamicTableMap, self).__init__(spec)
+        columns_spec = spec.get_neurodata_type('TableColumn')
+        self.map_spec('columns', columns_spec)
+
+    @ObjectMapper.object_attr('colnames')
+    def attr_columns(self, container, manager):
+        if all(len(col) == 0 for col in container.columns):
+            return tuple()
+        return container.colnames
 
 
 @register_map(NWBData)

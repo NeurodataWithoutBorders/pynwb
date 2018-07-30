@@ -83,6 +83,7 @@ groups:
     \ different start/stop times."
     neurodata_type_inc: Epochs
     name: epochs
+    quantity: '?'
   - doc: "The home for processing Modules. These modules perform intermediate analysis\
       \ of data that is necessary to perform before scientific analysis. Examples\
       \ include spike clustering, extracting position from tracking data, stitching\
@@ -339,6 +340,29 @@ groups:
       name: optophysiology
       quantity: '?'
     name: general
+  - doc: 'Data about experimental trials'
+    name: trials
+    neurodata_type_inc: DynamicTable
+    quantity: '?'
+    datasets:
+    - doc: The start time of each trial
+      attributes:
+        - name: description
+          value: the start time of each trial
+          dtype: text
+          doc: Value is 'the start time of each trial'
+      name: start
+      neurodata_type_inc: TableColumn
+      dtype: float
+    - doc: The end time of each trial
+      attributes:
+        - name: description
+          value: the end time of each trial
+          dtype: text
+          doc: Value is 'the end time of each trial'
+      name: end
+      neurodata_type_inc: TableColumn
+      dtype: float
   name: root
   neurodata_type_def: NWBFile
   neurodata_type_inc: NWBContainer

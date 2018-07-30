@@ -141,6 +141,33 @@ nwbfile.create_epoch('the first epoch', 2.0, 4.0, ['first', 'example'], [test_ts
 nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 
 ####################
+# .. _basic_trials:
+#
+# Trials
+# ------
+#
+# Trials can be added to an NWB file using the methods :py:func:`~pynwb.file.NWBFile.add_trial`
+# and :py:func:`~pynwb.file.NWBFile.add_trial_column`. Together, these methods maintains a
+# table-like structure that can define arbitrary columns without having to go through the
+# extension process.
+#
+# By default, NWBFile only requires trial start time and trial end time. Additional columns
+# can be added using :py:func:`~pynwb.file.NWBFile.add_trial_column`. This method takes a name
+# for the column and a description of what the column stores. You do not need to supply data
+# type, as this will inferred.
+
+# Once all columns have been added, trial data can be populated using :py:func:`~pynwb.file.NWBFile.add_trial`.
+# This method takes a dict with keys that correspond to column names.
+#
+# Lets add an additional column and some trial data.
+
+nwbfile.add_trial_column('stim', 'the visual stimuli during the trial')
+
+nwbfile.add_trial({'start': 0, 'end': 2, 'stim': 'person'})
+nwbfile.add_trial({'start': 3, 'end': 5, 'stim': 'ocean'})
+nwbfile.add_trial({'start': 6, 'end': 8, 'stim': 'desert'})
+
+####################
 # .. _basic_writing:
 #
 # Writing an NWB file
@@ -153,7 +180,7 @@ nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_
 
 from pynwb import NWBHDF5IO
 
-io = NWBHDF5IO('basic_example.nwb', 'w')
+io = NWBHDF5IO('basic_example.nwb', mode='w')
 io.write(nwbfile)
 io.close()
 

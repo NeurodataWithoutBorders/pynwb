@@ -248,7 +248,7 @@ The following code demonstrates how to associate a specification with the :py:cl
 .. code-block:: python
 
     from pynwb import register_class
-    @register_class('my_namespace', 'MyExtension')
+    @register_class('MyExtension', 'my_namespace')
     class MyExtensionContainer(NWBContainer):
         ...
 

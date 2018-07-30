@@ -156,7 +156,7 @@ groups:
   groups:
   - doc: RoiResponseSeries object containing fluorescence data for a ROI
     neurodata_type_inc: RoiResponseSeries
-    quantity: +
+    quantity: '+'
   default_name: Fluorescence
   neurodata_type_def: Fluorescence
   neurodata_type_inc: NWBDataInterface
@@ -323,7 +323,7 @@ groups:
       target_type: ImageSeries
     neurodata_type_def: CorrectedImageStack
     neurodata_type_inc: NWBContainer
-    quantity: +
+    quantity: '+'
   default_name: MotionCorrection
   neurodata_type_def: MotionCorrection
   neurodata_type_inc: NWBDataInterface

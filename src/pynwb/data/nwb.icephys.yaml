@@ -194,7 +194,6 @@ groups:
   - doc: Name(s) of devices in general/devices
     dtype: text
     name: device
-    quantity: '?'
   - doc: Electrode specific filtering.
     dtype: text
     name: filtering

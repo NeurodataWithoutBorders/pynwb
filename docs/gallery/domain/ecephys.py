@@ -45,7 +45,7 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 device = nwbfile.create_device(name='trodes_rig123', source="a source")
 
 #######################
-# Once you have created the :py:class:`~pynwb.ecephys.Device`, you can create an
+# Once you have created the :py:class:`~pynwb.device.Device`, you can create an
 # :py:class:`~pynwb.ecephys.ElectrodeGroup`.
 
 electrode_name = 'tetrode1'

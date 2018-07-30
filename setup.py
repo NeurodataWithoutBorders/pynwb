@@ -26,6 +26,7 @@ setup_args = {
     'install_requires':
     [
         'numpy',
+        'pandas',
         'h5py',
         'ruamel.yaml',
         'python-dateutil',
