@@ -175,7 +175,7 @@ In order to release a new version on conda-forge, follow the steps below:
 
    .. code::
 
-      $ cd pynwb-feedstok && \
+      $ cd pynwb-feedstock && \
         git checkout -b $release
 
 
