@@ -273,6 +273,9 @@ ns_builder.export(ns_path)
 ####################
 # Then create DataMapper classes registered to the new data types (this is generally done in a new file)
 
+from pynwb import register_class, load_namespaces
+from pynwb.file import MultiContainerInterface, NWBContainer
+
 load_namespaces(ns_path)
 
 @register_class('Potato', name)
@@ -302,6 +305,8 @@ class PotatoSack(MultiContainerInterface):
 
 ####################    
 # Then use the objects (again, this would often be done in a separate scipt)
+
+from pynwb import NWBHDF5IO, NWBFile
 
 potato_sack = PotatoSack(source='pantry',
                          potatos=Potato(name='potato1', age=2.3, weight=3.0, 
