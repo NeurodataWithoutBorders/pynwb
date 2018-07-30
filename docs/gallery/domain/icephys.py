@@ -31,8 +31,8 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 # Device metadata
 # ^^^^^^^^^^^^^^^
 #
-# Device metadata is represented by :py:class:`~pynwb.ecephys.Device` objects.
-# To create a device, you can use the :py:class:`~pynwb.ecephys.Device` instance method
+# Device metadata is represented by :py:class:`~pynwb.device.Device` objects.
+# To create a device, you can use the :py:class:`~pynwb.device.Device` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_device`.
 
 device = nwbfile.create_device(name='Heka ITC-1600', source='a source')
