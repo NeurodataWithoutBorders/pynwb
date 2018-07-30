@@ -225,3 +225,93 @@ io.close()
 
 io = NWBHDF5IO('cache_spec_example.nwb', mode='r', load_namespaces=True)
 nwbfile = io.read()
+
+####################
+# .. _MultiContainerInterface:
+# Creating and using a custom MultiContainerInterface
+# -----------------------------------------------------
+# It is sometimes the case that we need a group to hold zero-or-more or one-or-more of the same object.
+# Here we show how to create an extension that defines a group (`PotatoSack`) that holds multiple objects (`Pototo`es)
+# and then how to use the new data types. First, we use `pynwb` to define the new data types.
+
+from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
+
+name = 'test_multicontainerinterface'
+ns_path = name + ".namespace.yaml"
+ext_source = name + ".extensions.yaml"
+
+potato = NWBGroupSpec(neurodata_type_def='Potato',
+                      neurodata_type_inc='NWBDataInterface',
+                      doc='time of multicontainer', quantity='*',
+                      attributes=[
+                          NWBAttributeSpec(name='weight',
+                                           doc='weight of potato',
+                                           dtype='float',
+                                           required=True),
+                          NWBAttributeSpec(name='age',
+                                           doc='age of potato',
+                                           dtype='float',
+                                           required=False)
+                      ])
+
+potato_sack = NWBGroupSpec(neurodata_type_def='PotatoSack',
+                           neurodata_type_inc='NWBDataInterface',
+                           name='potato_sack',
+                           doc='test of multicontainer', quantity='?',
+                           groups=[potato],
+                           attributes=[
+                               NWBAttributeSpec(name='help',
+                                                doc='help',
+                                                dtype='text',
+                                                value="It's a sack of potatoes")
+                           ])
+
+ns_builder = NWBNamespaceBuilder(name + ' extensions', name)
+ns_builder.add_spec(ext_source, potato_sack)
+ns_builder.export(ns_path)
+
+####################
+# Then create DataMapper classes registered to the new data types (this is generally done in a new file)
+
+load_namespaces(ns_path)
+
+@register_class('Potato', name)
+class Potato(NWBContainer):
+    __nwbfields__ = ('name', 'weight', 'age', 'source')
+
+    def __init__(self, **kwargs):
+        super(Potato, self).__init__(kwargs['source'], name=kwargs['name'])
+        self.weight = kwargs['weight']
+        self.age = kwargs['age']
+
+
+@register_class('PotatoSack', name)
+class PotatoSack(MultiContainerInterface):
+
+    __nwbfields__ = ('potatos',)
+
+    __clsconf__ = {
+        'attr': 'potatos',
+        'type': Potato,
+        'add': 'add_potato',
+        'get': 'get_potato',
+        'create': 'create_potato',
+    }
+
+    __help = 'info about potatoes'
+
+####################    
+# Then use the objects (again, this would often be done in a separate scipt)
+
+potato_sack = PotatoSack(source='pantry',
+                         potatos=Potato(name='potato1', age=2.3, weight=3.0, 
+                                        source='the ground'))
+
+nwbfile = NWBFile("source", "a file with metadata", "NB123A", '2018-06-01T00:00:00')
+
+pmod = nwbfile.create_processing_module('module_name', 'source', 'desc')
+pmod.add_container(potato_sack)
+
+
+with NWBHDF5IO('test_multicontainerinterface.nwb', 'w') as io:
+    io.write(nwbfile)
