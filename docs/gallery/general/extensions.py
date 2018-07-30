@@ -282,6 +282,7 @@ from pynwb.file import MultiContainerInterface, NWBContainer
 
 load_namespaces(ns_path)
 
+
 @register_class('Potato', name)
 class Potato(NWBContainer):
     __nwbfields__ = ('name', 'weight', 'age', 'source')
@@ -310,7 +311,8 @@ class PotatoSack(MultiContainerInterface):
 
     __help = 'info about potatoes'
 
-####################    
+
+####################
 # Then use the objects (again, this would often be done in a different file).
 
 from pynwb import NWBHDF5IO, NWBFile
