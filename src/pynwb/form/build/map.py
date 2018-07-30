@@ -15,6 +15,16 @@ from .warnings import OrphanContainerWarning, MissingRequiredWarning
 
 
 class Proxy(object):
+    """
+    A temporary object to represent a Container. This gets used when resolving the true location of a
+    Container's parent.
+
+    Proxy objects allow simple bookeeping of all potential parents a Container may have.
+
+    This object is used by providing all the necessary information for describing the object. This object
+    gets passed around and candidates are accumulated. Upon calling resolve, all saved candidates are matched
+    against the information (provided to the constructor). The candidate that has an exact match is returned.
+    """
 
     def __init__(self, manager, source, location, namespace, data_type):
         self.__source = source
@@ -26,22 +36,27 @@ class Proxy(object):
 
     @property
     def candidates(self):
+        """Potential matches to this Proxy object"""
         return self.__candidates
 
     @property
     def source(self):
+        """The source of the object e.g. file source"""
         return self.__source
 
     @property
     def location(self):
+        """The location of the object. This can be thought of as a unique path"""
         return self.__location
 
     @property
     def namespace(self):
+        """The namespace from which the data_type of this Proxy came from"""
         return self.__namespace
 
     @property
     def data_type(self):
+        """The data_type of Container that should match this Proxy"""
         return self.__data_type
 
     @docval({"name": "object", "type": (BaseBuilder, Container), "doc": "the container or builder to get a proxy for"})
@@ -115,8 +130,12 @@ class BuildManager(object):
         stack = list()
         tmp = container
         while tmp is not None:
-            stack.append(tmp.name)
-            tmp = tmp.parent
+            if isinstance(tmp, Proxy):
+                stack.append(tmp.location)
+                break
+            else:
+                stack.append(tmp.name)
+                tmp = tmp.parent
         loc = "/".join(reversed(stack))
         return Proxy(self, container.container_source, loc, ns, dt)
 
@@ -523,6 +542,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             return None
         attr_val = self.__get_override_attr(attr_name, container, manager)
         if attr_val is None:
+            if not hasattr(container, attr_name):
+                msg = "Container '%s' (%s) does not have attribute '%s'" % (container.name, type(container), attr_name)
+                #warnings.warn(msg)
             attr_val = getattr(container, attr_name, None)
             if attr_val is not None:
                 attr_val = self.__convert_value(attr_val, spec)
