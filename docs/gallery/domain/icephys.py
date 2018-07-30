@@ -74,6 +74,7 @@ ccss = CurrentClampStimulusSeries(
 
 nwbfile.add_stimulus(ccss)
 
+#######################
 # Here, we will use :py:class:`~pynwb.icephys.VoltageClampSeries` to store voltage clamp
 # data and then add it to our NWBFile as acquired data using the :py:class:`~pynwb.file.NWBFile` method
 # :py:meth:`~pynwb.file.NWBFile.add_acquisition`.
@@ -124,6 +125,7 @@ nwbfile = io.read()
 
 ccss = nwbfile.get_stimulus('ccss')
 
+####################
 # Grabbing acquisition data an be done via :py:meth:`~pynwb.file.NWBFile.get_acquisition`
 
 vcs = nwbfile.get_acquisition('vcs')
