@@ -71,7 +71,7 @@ class NWBFileTest(unittest.TestCase):
         for i in range(4):
             nwbfile.add_electrode(i, np.nan, np.nan, np.nan, np.nan, group=elecgrp,
                                   location='a', filtering='a', description='a')
-        with self.assertRaises(TypeError) as err:
+        with self.assertRaises(IndexError) as err:
             nwbfile.create_electrode_table_region(list(range(6)), 'test')
         self.assertTrue('out of range' in str(err.exception))
 
