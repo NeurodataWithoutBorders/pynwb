@@ -291,8 +291,6 @@ class Potato(NWBContainer):
 @register_class('PotatoSack', name)
 class PotatoSack(MultiContainerInterface):
 
-    __nwbfields__ = ('potatos',)
-
     __clsconf__ = {
         'attr': 'potatos',
         'type': Potato,
