@@ -35,11 +35,6 @@ class Proxy(object):
         self.__candidates = list()
 
     @property
-    def candidates(self):
-        """Potential matches to this Proxy object"""
-        return self.__candidates
-
-    @property
     def source(self):
         """The source of the object e.g. file source"""
         return self.__source
