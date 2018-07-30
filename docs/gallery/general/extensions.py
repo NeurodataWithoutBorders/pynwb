@@ -282,6 +282,11 @@ load_namespaces(ns_path)
 class Potato(NWBContainer):
     __nwbfields__ = ('name', 'weight', 'age', 'source')
 
+    @docval({'name': 'name', 'type': str, 'doc': 'who names a potato?'},
+            {'name': 'weight', 'type': float, 'doc': 'weight of potato in grams'},
+            {'name': 'age', 'type': float, 'doc': 'age of potato in days'},
+            {'name': 'source', 'type': str, 'doc': 'source of potato',
+             'default': 'the ground'})
     def __init__(self, **kwargs):
         super(Potato, self).__init__(kwargs['source'], name=kwargs['name'])
         self.weight = kwargs['weight']
