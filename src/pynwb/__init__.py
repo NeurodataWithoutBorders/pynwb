@@ -232,6 +232,7 @@ from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
 from .file import NWBFile  # noqa: E402, F401
 
 from . import behavior  # noqa: F401,E402
+from . import device  # noqa: F401,E402
 from . import ecephys  # noqa: F401,E402
 from . import epoch  # noqa: F401,E402
 from . import icephys  # noqa: F401,E402
