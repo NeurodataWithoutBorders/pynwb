@@ -53,7 +53,9 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
                 'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
-                'location': DatasetBuilder('location', 'somewhere in the brain')},
+                'location': DatasetBuilder('location', 'somewhere in the brain'),
+                'pixel_deltas': DatasetBuilder('pixel_deltas', (.1, .2)),
+                'pixel_origin': DatasetBuilder('pixel_origin', (0., 0.))},
             groups={
                 'optchan1': optchan_builder
             }
@@ -178,7 +180,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                           'imaging plane description',
                                           'imaging_device_1',
                                           600., '2.718', 'GFP', 'somewhere in the brain',
-                                          (.0, .0), (.1, .2), 'A frame to refer to')
+                                          (.1, .2), (.0, .0), 'A frame to refer to')
 
         self.img_mask = deepcopy(img_mask)
         self.pix_mask = deepcopy(pix_mask)
