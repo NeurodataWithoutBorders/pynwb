@@ -62,10 +62,10 @@ class ImagingPlane(NWBContainer):
             {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
-            {'name': 'pixel_origin', 'type': Iterable,
-             'doc': 'Location of pixel 0 in x, y (,z) in millimeters', 'default': None},
             {'name': 'pixel_deltas', 'type': Iterable,
              'doc': 'Space between pixels in x, y (,z) directions. Assumes imaging plane is a grid.'},
+            {'name': 'pixel_origin', 'type': Iterable,
+             'doc': 'Location of pixel 0 in x, y (,z) in millimeters', 'default': None},
             {'name': 'reference_frame', 'type': str,
              'doc': 'Describes position and reference frame of pixel space based on position of first element \
              in pixel_space.', 'default': None},
@@ -73,10 +73,10 @@ class ImagingPlane(NWBContainer):
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, \
-            indicator, location, pixel_origin, pixel_deltas, reference_frame, parent = popargs(
+            indicator, location, pixel_deltas, pixel_origin, reference_frame, parent = popargs(
                 'optical_channel', 'description', 'device', 'excitation_lambda',
-                'imaging_rate', 'indicator', 'location', 'pixel_origin', 'pixel_deltas', 'reference_frame', 'parent',
-            kwargs)
+                'imaging_rate', 'indicator', 'location', 'pixel_deltas', 'pixel_origin', 'reference_frame', 'parent',
+                kwargs)
         pargs, pkwargs = fmt_docval_args(super(ImagingPlane, self).__init__, kwargs)
         super(ImagingPlane, self).__init__(*pargs, **pkwargs)
         self.optical_channel = optical_channel if isinstance(optical_channel, list) else [optical_channel]

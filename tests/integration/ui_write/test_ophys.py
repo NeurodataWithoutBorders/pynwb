@@ -25,7 +25,8 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         self.optical_channel = OpticalChannel('optchan1', 'unit test TestImagingPlaneIO',
                                               'a fake OpticalChannel', 500.)
         return ImagingPlane('imgpln1', 'unit test TestImagingPlaneIO', self.optical_channel,
-                            'a fake ImagingPlane', 'imaging_device_1', 600., '2.718', 'GFP', 'somewhere in the brain')
+                            'a fake ImagingPlane', 'imaging_device_1', 600., '2.718', 'GFP', 'somewhere in the brain',
+                            (.1, .2), (0., 0.))
 
     def setUpBuilder(self):
         optchan_builder = GroupBuilder(
@@ -72,8 +73,8 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
     def make_imaging_plane(self, source):
         self.optical_channel = OpticalChannel('optchan1', source, 'a fake OpticalChannel', 500.)
         self.imaging_plane = ImagingPlane('imgpln1', source, self.optical_channel,
-                                          'a fake ImagingPlane',
-                                          'imaging_device_1', 600., '2.718', 'GFP', 'somewhere in the brain')
+                                          'a fake ImagingPlane', 'imaging_device_1', 600., '2.718', 'GFP',
+                                          'somewhere in the brain', (.1, .2), (0., 0.))
 
     def setUpContainer(self):
         self.make_imaging_plane('unit test TestTwoPhotonSeries')
@@ -110,7 +111,9 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
                 'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
-                'location': DatasetBuilder('location', 'somewhere in the brain')},
+                'location': DatasetBuilder('location', 'somewhere in the brain'),
+                'pixel_deltas': DatasetBuilder('pixel_deltas', (.1, .2)),
+                'pixel_origin': DatasetBuilder('pixel_origin', (0., 0.))},
             groups={
                 'optchan1': optchan_builder
             }
