@@ -44,7 +44,7 @@ class ImageSeries(TimeSeries):
              This serves as an index to what frames each file contains.', 'default': None},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'Number of bit per image pixel', 'default': None},
             {'name': 'dimension', 'type': Iterable,
-             'doc': 'Number of pixels on x, y, (and z) axes.', 'default': [-1]},
+             'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
