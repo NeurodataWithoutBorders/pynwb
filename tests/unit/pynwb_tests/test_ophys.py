@@ -19,7 +19,7 @@ def CreatePlaneSegmentation():
 
     oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 500.)
     ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 600.,
-                      'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+                      'imaging_rate', 'indicator', 'location', (0., 0.), (.1, .2), 'reference_frame')
 
     pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
     pS.add_roi("1234", pix_mask[0:3], img_mask[0])
@@ -34,16 +34,15 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(oc.emission_lambda, 500.)
 
         ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', 'device', 600.,
-                          'imaging_rate', 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
+                          'imaging_rate', 'indicator', 'location', (.0, .0), (.1, .2), 'reference_frame')
         self.assertEqual(ip.optical_channel[0], oc)
         self.assertEqual(ip.device, 'device')
         self.assertEqual(ip.excitation_lambda, 600.)
         self.assertEqual(ip.imaging_rate, 'imaging_rate')
         self.assertEqual(ip.indicator, 'indicator')
         self.assertEqual(ip.location, 'location')
-        self.assertEqual(ip.manifold, (50, 100, 3))
-        self.assertEqual(ip.conversion, 4.0)
-        self.assertEqual(ip.unit, 'unit')
+        self.assertEqual(ip.pixel_origin, (.0, .0))
+        self.assertEqual(ip.pixel_deltas, (.1, .2))
         self.assertEqual(ip.reference_frame, 'reference_frame')
 
         tPS = TwoPhotonSeries('test_tPS', 'a hypothetical source', data=list(), unit='unit', field_of_view=list(),
@@ -147,7 +146,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
 
         oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 500.)
         ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 600.,
-                          'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+                          'imaging_rate', 'indicator', 'location', (0., 0.), (.1, .2), 'reference_frame')
 
         pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
         pS.add_roi("1234", pix_mask[0:3], img_mask[0])

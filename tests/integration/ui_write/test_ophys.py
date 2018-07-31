@@ -175,7 +175,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                           'imaging plane description',
                                           'imaging_device_1',
                                           600., '2.718', 'GFP', 'somewhere in the brain',
-                                          (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+                                          (.0, .0), (.1, .2), 'A frame to refer to')
 
         self.img_mask = deepcopy(img_mask)
         self.pix_mask = deepcopy(pix_mask)
@@ -211,8 +211,8 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
                 'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
-                'manifold': DatasetBuilder('manifold', (1, 2, 1, 2, 3),
-                                           attributes={'conversion': 4.0, 'unit': 'manifold unit'}),
+                'pixel_origin': DatasetBuilder('pixel_origin', (.0, .0)),
+                'pixel_deltas': DatasetBuilder('pixel_deltas', (.1, .2)),
                 'reference_frame': DatasetBuilder('reference_frame', 'A frame to refer to'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
             groups={

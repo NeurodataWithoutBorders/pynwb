@@ -46,7 +46,8 @@ class ImagingPlane(NWBContainer):
                      'imaging_rate',
                      'indicator',
                      'location',
-                     'manifold',
+                     'pixel_origin',
+                     'pixel_deltas',
                      'conversion',
                      'unit',
                      'reference_frame')
@@ -54,32 +55,28 @@ class ImagingPlane(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'optical_channel', 'type': (list, OpticalChannel),
-             'doc': 'One of possibly many groups storing channelspecific data.'},
+             'doc': 'One of possibly many groups storing channel-specific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
             {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
             {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength.'},
             {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
-            {'name': 'manifold', 'type': Iterable,
-             'doc': 'Physical position of each pixel. size=("height", "width", "xyz").',
-             'default': None},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)',
-             'default': None},
-            {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).',
-             'default': None},
+            {'name': 'pixel_origin', 'type': Iterable,
+             'doc': 'Location of pixel 0 in x, y (,z) in millimeters', 'default': None},
+            {'name': 'pixel_deltas', 'type': Iterable,
+             'doc': 'Space between pixels in x, y (,z) directions. Assumes imaging plane is a grid.'},
             {'name': 'reference_frame', 'type': str,
-             'doc': 'Describes position and reference frame of manifold based on position of first element \
-             in manifold.', 'default': None},
+             'doc': 'Describes position and reference frame of pixel space based on position of first element \
+             in pixel_space.', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, \
-            indicator, location, manifold, conversion, unit, reference_frame, parent = popargs(
+            indicator, location, pixel_origin, pixel_deltas, reference_frame, parent = popargs(
                 'optical_channel', 'description', 'device', 'excitation_lambda',
-                'imaging_rate', 'indicator', 'location', 'manifold', 'conversion',
-                'unit', 'reference_frame', 'parent', kwargs)
+                'imaging_rate', 'indicator', 'location', 'pixel_origin', 'pixel_deltas', 'reference_frame', 'parent',
+            kwargs)
         pargs, pkwargs = fmt_docval_args(super(ImagingPlane, self).__init__, kwargs)
         super(ImagingPlane, self).__init__(*pargs, **pkwargs)
         self.optical_channel = optical_channel if isinstance(optical_channel, list) else [optical_channel]
@@ -89,9 +86,8 @@ class ImagingPlane(NWBContainer):
         self.imaging_rate = imaging_rate
         self.indicator = indicator
         self.location = location
-        self.manifold = manifold
-        self.conversion = conversion
-        self.unit = unit
+        self.pixel_origin = pixel_origin
+        self.pixel_deltas = pixel_deltas
         self.reference_frame = reference_frame
 
 

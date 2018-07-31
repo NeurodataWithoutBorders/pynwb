@@ -238,35 +238,21 @@ groups:
   - doc: Location of image plane
     dtype: text
     name: location
-  - attributes:
-    - default_value: 1.0
-      doc: Multiplier to get from stored values to specified unit (e.g., 1e-3 for
-        millimeters)
-      dtype: float
-      name: conversion
-      required: false
-    - default_value: Meter
-      doc: Base unit that coordinates are stored in (e.g., Meters)
-      dtype: text
-      name: unit
-      required: false
+  - name: pixel_origin
+    doc: Location of pixel 0 in x, y (,z) in millimeters
+    required: false
+    dtype: float
     dims:
-    - height
-    - weight
-    - x|y|z
-    doc: 'Physical position of each pixel. COMMENT: "xyz" represents the position
-      of the pixel relative to the defined coordinate space'
-    dtype: float32
-    name: manifold
-    shape:
     - null
+  - name: pixel_deltas
+    required: true
+    dtype: float
+    dims:
     - null
-    - 3
-  - doc: 'Describes position and reference frame of manifold based on position of
-      first element in manifold. For example, text description of anotomical location
-      or vectors needed to rotate to common anotomical axis (eg, AP/DV/ML). COMMENT:
-      This field is necessary to interpret manifold. If manifold is not present then
-      this field is not required'
+    doc: Space between pixels in x, y (,z) directions. Assumes imaging plane is a grid.
+  - doc: 'Describes position and reference frame of pixel space based on position of
+      first element in image. For example, text description of anatomical location
+      or vectors needed to rotate to common anatomical axis (eg, AP/DV/ML).'
     dtype: text
     name: reference_frame
   doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name is
@@ -304,7 +290,7 @@ groups:
     each point in time is assumed to be 2-D (has only x & y dimensions).'
   groups:
   - attributes:
-    - doc: Value is 'Reuslts from motion correction of an image stack'
+    - doc: Value is 'Results from motion correction of an image stack'
       dtype: text
       name: help
       value: Reuslts from motion correction of an image stack
