@@ -3,8 +3,6 @@ import unittest
 from pynwb import TimeSeries
 from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries
 
-import numpy as np
-
 
 class ImageSeriesConstructor(unittest.TestCase):
 
