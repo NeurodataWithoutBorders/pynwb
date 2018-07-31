@@ -401,6 +401,7 @@ class TestCacheSpec(unittest.TestCase):
                 types.update(catalog.get_types(source['source']))
         return types
 
+
 class TestLinkResolution(unittest.TestCase):
 
     def test_link_resolve(self):
@@ -428,6 +429,7 @@ class TestLinkResolution(unittest.TestCase):
                                                  data=[1., 2., 3.],
                                                  rate=0.0,
                                                  electrodes=etr)
+            nwbfile.add_acquisition(electrical_series)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile)
         with NWBHDF5IO(self.path, 'r') as io:
@@ -435,6 +437,7 @@ class TestLinkResolution(unittest.TestCase):
 
     def setUp(self):
         self.path = "test_link_resolve.nwb"
+
 
     def tearDown(self):
         if os.path.exists(self.path):
