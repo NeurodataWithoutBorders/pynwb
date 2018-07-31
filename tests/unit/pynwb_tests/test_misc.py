@@ -1,5 +1,7 @@
 import unittest
 
+import numpy as np
+
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, UnitTimes
 
 
@@ -70,8 +72,8 @@ class UnitTimesConstructor(unittest.TestCase):
         ut = UnitTimes('UnitTimes add_spike_times unit test')
         ut.add_spike_times(0, [0, 1, 2])
         ut.add_spike_times(1, [3, 4, 5])
-        self.assertEqual(ut.get_unit_spike_times(0), [0, 1, 2])
-        self.assertEqual(ut.get_unit_spike_times(1), [3, 4, 5])
+        self.assertTrue(all(ut.get_unit_spike_times(0) == np.array([0, 1, 2])))
+        self.assertTrue(all(ut.get_unit_spike_times(1) == np.array([3, 4, 5])))
 
 
 if __name__ == '__main__':
