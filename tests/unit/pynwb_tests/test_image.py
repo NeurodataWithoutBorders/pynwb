@@ -18,7 +18,7 @@ class ImageSeriesConstructor(unittest.TestCase):
         self.assertEqual(iS.starting_frame, [1, 2, 3])
         self.assertEqual(iS.format, 'tiff')
         # self.assertEqual(iS.bits_per_pixel, np.nan)
-        self.assertEqual(iS.dimension, [np.nan])
+        self.assertEqual(iS.dimension, [-1])
 
 
 class IndexSeriesConstructor(unittest.TestCase):
