@@ -438,10 +438,10 @@ class TestLinkResolution(unittest.TestCase):
     def setUp(self):
         self.path = "test_link_resolve.nwb"
 
-
     def tearDown(self):
         if os.path.exists(self.path):
             os.remove(self.path)
+
 
 class NWBHDF5IOMultiFileTest(unittest.TestCase):
     """Tests for h5tools IO tools"""
