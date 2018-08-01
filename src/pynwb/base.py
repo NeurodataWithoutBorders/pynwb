@@ -159,6 +159,8 @@ class TimeSeries(NWBDataInterface):
         timestamps = kwargs.get('timestamps')
         starting_time = kwargs.get('starting_time')
         rate = kwargs.get('rate')
+        if rate is not None and timestamps is not None:
+            raise ValueError('specify rate[+starting_time] OR timestamps, not both')
         if timestamps is not None:
             self.fields['timestamps'] = timestamps
             self.timestamps_unit = 'Seconds'
