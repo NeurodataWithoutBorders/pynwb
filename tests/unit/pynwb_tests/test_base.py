@@ -85,7 +85,10 @@ class TestTimeSeries(unittest.TestCase):
         ts1 = TimeSeries('test_ts1', 'unit test test_DataIO', rate=0.1)
         self.assertEqual(ts1.starting_time, 0.0)
 
-    def test_both_time_args(self):
+    def test_conflicting_time_args(self):
         with self.assertRaises(ValueError):
             TimeSeries('test_ts2', 'unit test test_data_timeseries', [10, 11, 12, 13, 14, 15], 'grams', rate=30.,
                        timestamps=[.3, .4, .5, .6, .7, .8])
+        with self.assertRaises(ValueError):
+            TimeSeries('test_ts2', 'unit test test_data_timeseries', [10, 11, 12, 13, 14, 15], 'grams',
+                       starting_time=30., timestamps=[.3, .4, .5, .6, .7, .8])
