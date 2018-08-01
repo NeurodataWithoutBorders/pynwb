@@ -83,7 +83,7 @@ class TimeSeries(NWBDataInterface):
                      "interval",
                      "starting_time",
                      "rate",
-                     "rate_unit",
+                     "starting_time_unit",
                      "control",
                      "control_description")
 
@@ -167,9 +167,9 @@ class TimeSeries(NWBDataInterface):
                 timestamps.__add_link('timestamp_link', self)
         elif rate is not None:
             self.rate = rate
-            self.rate_unit = 'Seconds'
             if starting_time is not None:
                 self.starting_time = starting_time
+                self.starting_time_unit = 'Seconds'
             else:
                 self.starting_time = 0.0
         else:
