@@ -139,7 +139,6 @@ groups:
     - doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
       dtype: float32
       name: rate
-      required: false
     - doc: Value is 'Seconds'
       dtype: text
       name: unit
