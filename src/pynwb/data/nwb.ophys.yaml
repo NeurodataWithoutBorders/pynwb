@@ -223,9 +223,6 @@ groups:
     dtype: text
     name: description
     quantity: '?'
-  - doc: Name of device in /general/devices
-    dtype: text
-    name: device
   - doc: Excitation wavelength
     dtype: float
     name: excitation_lambda
@@ -269,6 +266,10 @@ groups:
       this field is not required'
     dtype: text
     name: reference_frame
+  links:
+  - doc: the device that was used to record from this electrode
+    name: device
+    target_type: Device
   doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name is
     arbitrary but should be meaningful. It is referenced by TwoPhotonSeries and also
     ImageSegmentation and DfOverF interfaces'

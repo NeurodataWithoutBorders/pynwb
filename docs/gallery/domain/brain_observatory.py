@@ -22,6 +22,7 @@ import allensdk.brain_observatory.stimulus_info as si
 from pynwb import NWBFile, NWBHDF5IO, TimeSeries
 from pynwb.ophys import OpticalChannel, DfOverF, ImageSegmentation
 from pynwb.image import ImageSeries, IndexSeries
+from pynwb.device import Device
 
 
 # Settings:
@@ -127,12 +128,15 @@ optical_channel = OpticalChannel(
     emission_lambda=520.,
 )
 
+device = Device(metadata['device'], source='a source')
+nwbfile.add_device(device)
+
 imaging_plane = nwbfile.create_imaging_plane(
     name='imaging_plane',
     source='Allen Brain Observatory: Visual Coding',
     optical_channel=optical_channel,
     description='Imaging plane ',
-    device=metadata['device'],
+    device=device,
     excitation_lambda=float(metadata['excitation_lambda'].split(' ')[0]),
     imaging_rate='30.',
     indicator='GCaMP6f',
