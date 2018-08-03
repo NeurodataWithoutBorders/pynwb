@@ -8,21 +8,7 @@ from .form.data_utils import DataChunkIterator, ShapeValidator
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer, NWBTable, NWBTableRegion, NWBDataInterface, MultiContainerInterface
-
-
-@register_class('Device', CORE_NAMESPACE)
-class Device(NWBContainer):
-    """
-    """
-
-    __nwbfields__ = ('name',)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
-    def __init__(self, **kwargs):
-        call_docval_func(super(Device, self).__init__, kwargs)
+from .device import Device
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)

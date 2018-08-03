@@ -161,17 +161,42 @@ PyPI: Step-by-step
 Conda: Step-by-step
 -------------------
 
+.. warning::
+
+   Publishing on conda requires you to have corresponding package version uploaded on
+   `PyPI`_. So you have to do the PypI and Github release before you do the conda release.
+
 In order to release a new version on conda-forge, follow the steps below:
 
-1. Clone feedstock
+1. Choose the next release version number (that matches with the pypi version that you already published)
+
+  .. code::
+
+    $ release=X.Y.Z
+
+2. Fork pynwb-feedstock
+
+ First step is to fork `pynwb-feedstock <https://github.com/conda-forge/pynwb-feedstock>`_ repository.
+ This is the recommended `best practice <https://conda-forge.org/docs/conda-forge_gotchas.html#using-a-fork-vs-a-branch-when-updating-a-recipe>`_  by conda.
+
+
+3. Clone forked feedstock
+
+   Fill the YOURGITHUBUSER part.
 
    .. code::
 
-      $ cd /tmp && \
-        git clone git@github.com:conda-forge/pynwb-feedstock.git
+      $ cd /tmp && git clone https://github.com/YOURGITHUBUSER/pynwb-feedstock.git
 
 
-2. Create a new branch
+4. Download corresponding source for the release version
+
+  .. code::
+
+    $ cd /tmp && \
+      wget https://github.com/NeurodataWithoutBorders/pynwb/releases/download/$release/pynwb-$release.tar.gz
+
+5. Create a new branch
 
    .. code::
 
@@ -179,25 +204,38 @@ In order to release a new version on conda-forge, follow the steps below:
         git checkout -b $release
 
 
-3. Modify meta.yaml
+6. Modify ``meta.yaml``
 
    Update the `version string <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml#L2>`_ and
    `sha256 <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml#L3>`_.
 
+   We have to modify the sha and the version string in the ``meta.yaml`` file.
+
+   For linux flavors:
+
    .. code::
 
       $ sed -i "2s/.*/{% set version = \"$release\" %}/" recipe/meta.yaml
-      $ sha=$(openssl sha256 ../pynwb/dist/*.tar.gz | awk '{print $2}')
+      $ sha=$(openssl sha256 /tmp/pynwb-$release.tar.gz | awk '{print $2}')
       $ sed -i "3s/.*/{$ set sha256 = \"$sha\" %}/" recipe/meta.yaml
 
+   For macOS:
 
-4. Push the changes
+   .. code::
+
+      $ sed -i -- "2s/.*/{% set version = \"$release\" %}/" recipe/meta.yaml
+      $ sha=$(openssl sha256 /tmp/pynwb-$release.tar.gz | awk '{print $2}')
+      $ sed -i -- "3s/.*/{$ set sha256 = \"$sha\" %}/" recipe/meta.yaml
+
+
+
+7. Push the changes
 
    .. code::
 
       $ git push origin $release
 
-5. Create a Pull Request
+8. Create a Pull Request
 
    Create a pull request against the `main repository <https://github.com/conda-forge/pynwb-feedstock/pulls>`_. If the tests are passed
    a new release will be published on Anaconda cloud.
