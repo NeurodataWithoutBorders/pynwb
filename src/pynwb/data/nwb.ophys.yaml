@@ -242,12 +242,12 @@ groups:
     doc: Location of pixel 0 in x, y (,z) in millimeters
     required: false
     dtype: float
-    dims:
+    shape:
     - null
   - name: pixel_deltas
     required: true
     dtype: float
-    dims:
+    shape:
     - null
     doc: Space between pixels in x, y (,z) directions. Assumes imaging plane is a grid.
   - doc: 'Describes position and reference frame of pixel space based on position of
