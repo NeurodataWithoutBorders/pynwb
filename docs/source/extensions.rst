@@ -300,28 +300,27 @@ Documenting Extensions
 Using the same tools used to generate the documentation for the `NWB-N core format <https://nwb-schema.readthedocs.io/en/latest/>`_
 one can easily generate documentation in HTML, PDF, ePub and many other format for extensions as well.
 
-Code to generate this documentation is maintained in a separate repo: https://github.com/NeurodataWithoutBorders/nwb-docutils
-
-For the purpose of this example we assume that our current directory has the following structure.
+Code to generate this documentation is maintained in a separate repo: https://github.com/NeurodataWithoutBorders/nwb-docutils. To use these utilities, install the package with pip:
 
 .. code-block:: text
 
     pip install nwb-docutils
 
+For the purpose of this example, we assume that our current directory has the following structure.
+
 
 .. code-block:: text
 
-    - nwb_schema
-      - my_extension/
-        - my_extension_source/
-            - mylab.namespace.yaml
-            - mylab.specs.yaml
-            - ...
-            - docs/  (Optional)
-                - mylab_description.rst
-                - mylab_release_notes.rst
+    - my_extension/
+      - my_extension_source/
+          - mylab.namespace.yaml
+          - mylab.specs.yaml
+          - ...
+          - docs/  (Optional)
+              - mylab_description.rst
+              - mylab_release_notes.rst
 
-In addition to Python 3.x you will also need ``sphinx`` (including the ``sphinx-quickstart`` tool) installed.
+In addition to Python 3.x, you will also need ``sphinx`` (including the ``sphinx-quickstart`` tool) installed.
 Sphinx is availble here http://www.sphinx-doc.org/en/stable/install.html .
 
 We can now create the sources of our documentation as follows:
