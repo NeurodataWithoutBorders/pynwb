@@ -1,4 +1,3 @@
-import collections as _collections
 import itertools as _itertools
 import copy as _copy
 from abc import ABCMeta
@@ -47,8 +46,6 @@ def __type_okay(value, argtype, allow_none=False):
             return __is_int(value)
         elif argtype is 'float':
             return __is_float(value)
-        elif argtype is 'num':
-            return __is_int(value) or __is_float(value)
         return argtype in [cls.__name__ for cls in value.__class__.__mro__]
     elif isinstance(argtype, type):
         if argtype == six.text_type:
@@ -62,10 +59,8 @@ def __type_okay(value, argtype, allow_none=False):
         return isinstance(value, argtype)
     elif isinstance(argtype, tuple) or isinstance(argtype, list):
         return any(__type_okay(value, i) for i in argtype)
-    elif argtype is None:
+    else:    # argtype is None
         return True
-    else:
-        raise ValueError("argtype must be a type, a str, a list, a tuple, or None")
 
 
 def __is_int(value):
@@ -115,6 +110,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     ret = dict()
     errors = list()
     argsi = 0
+    extras = set(kwargs.keys())
     try:
         it = iter(validator)
         arg = next(it)
@@ -126,7 +122,8 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
             argname = arg['name']
             argval_set = False
             if argname in kwargs:
-                argval = kwargs[argname]
+                argval = kwargs.get(argname)
+                extras.discard(argname)
                 argval_set = True
             elif argsi < len(args):
                 argval = args[argsi]
@@ -148,7 +145,8 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
         while True:
             argname = arg['name']
             if argname in kwargs:
-                ret[argname] = kwargs[argname]
+                ret[argname] = kwargs.get(argname)
+                extras.discard(argname)
             elif len(args) > argsi:
                 ret[argname] = args[argsi]
                 argsi += 1
@@ -160,8 +158,11 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
                     fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                     errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
             arg = next(it)
+
     except StopIteration:
         pass
+    for key in extras:
+        errors.append("unrecognized argument: '%s'" % key)
     return {'args': ret, 'errors': errors}
 
 
@@ -229,29 +230,7 @@ def call_docval_func(func, kwargs):
     return func(*fargs, **fkwargs)
 
 
-def get_docval_args(func):
-    '''get_docval_args(func)
-    Like get_docval, but return only positional arguments
-    '''
-    func_docval = getattr(func, docval_attr_name, None)
-    if func_docval:
-        return tuple(a for a in func_docval[__docval_args_loc] if 'default' not in a)
-    else:
-        return tuple()
-
-
-def get_docval_kwargs(func):
-    '''get_docval_kwargs(func)
-    Like get_docval, but return only keyword arguments
-    '''
-    func_docval = getattr(func, docval_attr_name, None)
-    if func_docval:
-        return tuple(a for a in func_docval[__docval_args_loc] if 'default' in a)
-    else:
-        return tuple()
-
-
-def __resolve_macros(t):
+def __resolve_type(t):
     if t is None:
         return t
     if isinstance(t, str):
@@ -261,15 +240,18 @@ def __resolve_macros(t):
             return t
     elif isinstance(t, type):
         return t
-    else:
+    elif isinstance(t, (list, tuple)):
         ret = list()
         for i in t:
-            resolved = __resolve_macros(i)
+            resolved = __resolve_type(i)
             if isinstance(resolved, tuple):
                 ret.extend(resolved)
             else:
                 ret.append(resolved)
         return tuple(ret)
+    else:
+        msg = "argtype must be a type, a str, a list, a tuple, or None - got %s" % type(t)
+        raise ValueError(msg)
 
 
 def docval(*validator, **options):
@@ -325,7 +307,7 @@ def docval(*validator, **options):
         pos = list()
         kw = list()
         for a in val_copy:
-            a['type'] = __resolve_macros(a['type'])
+            a['type'] = __resolve_type(a['type'])
             if 'default' in a:
                 kw.append(a)
             else:
@@ -336,10 +318,11 @@ def docval(*validator, **options):
             def func_call(*args, **kwargs):
                 self = args[0]
                 parsed = __parse_args(
-                    _copy.deepcopy(
-                        loc_val), args[1:], kwargs,
-                    enforce_type=enforce_type,
-                    enforce_ndim=enforce_ndim)
+                            _copy.deepcopy(loc_val),
+                            args[1:],
+                            kwargs,
+                            enforce_type=enforce_type,
+                            enforce_ndim=enforce_ndim)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
@@ -493,45 +476,3 @@ class ExtenderMeta(ABCMeta):
         it = (a for a in it if hasattr(a, cls.__postinit))
         for func in it:
             func(name, bases, classdict)
-
-
-class frozendict(_collections.Mapping):
-    '''An immutable dict
-
-    This will be useful for getter of dicts that we don't want to support
-    '''
-    def __init__(self, somedict):
-        self._dict = somedict   # make a copy
-        self._hash = None
-
-    def __getitem__(self, key):
-        return self._dict[key]
-
-    def get(self, key, default=None):
-        return self._dict.get(key, default)
-
-    def __len__(self):
-        return len(self._dict)
-
-    def __iter__(self):
-        return iter(self._dict)
-
-    def __hash__(self):
-        if self._hash is None:
-            self._hash = hash(frozenset(self._dict.items()))
-        return self._hash
-
-    def __eq__(self, other):
-        return self._dict == other._dict
-
-    def __contains__(self, key):
-        return self._dict.__contains__(key)
-
-    def keys(self):
-        return self._dict.keys()
-
-    def values(self):
-        return self._dict.values()
-
-    def items(self):
-        return self._dict.items()

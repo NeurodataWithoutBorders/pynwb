@@ -2,10 +2,12 @@
 import unittest2 as unittest
 import six
 import numpy as np
+import os
 
 from datetime import datetime
 
 from pynwb import NWBFile, TimeSeries
+from pynwb import NWBHDF5IO
 from pynwb.file import Subject
 from pynwb.ecephys import ElectrodeTable
 
@@ -28,7 +30,11 @@ class NWBFileTest(unittest.TestCase):
                                related_publications='my pubs',
                                slices='my slices',
                                surgery='surgery',
-                               virus='a virus')
+                               virus='a virus',
+                               source_script='noscript',
+                               source_script_file_name='nofilename',
+                               stimulus_notes='test stimulus notes',
+                               data_collection='test data collection notes')
 
     def test_constructor(self):
         self.assertEqual(self.nwbfile.session_description, 'a test session description for a test NWBFile')
@@ -39,6 +45,10 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.institution, 'a test institution')
         self.assertEqual(self.nwbfile.experiment_description, 'a test experiment description')
         self.assertEqual(self.nwbfile.session_id, 'test1')
+        self.assertEqual(self.nwbfile.stimulus_notes, 'test stimulus notes')
+        self.assertEqual(self.nwbfile.data_collection, 'test data collection notes')
+        self.assertEqual(self.nwbfile.source_script, 'noscript')
+        self.assertEqual(self.nwbfile.source_script_file_name, 'nofilename')
 
     def test_create_electrode_group(self):
         name = 'example_electrode_group'
@@ -49,6 +59,21 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(elecgrp.description, desc)
         self.assertEqual(elecgrp.location, loc)
         self.assertIs(elecgrp.device, d)
+
+    def test_create_electrode_group_invalid_index(self):
+        """
+        Test the case where the user creates an electrode table region with
+        indexes that are out of range of the amount of electrodes added.
+        """
+        nwbfile = NWBFile('a', 'b', 'c', datetime.now())
+        device = nwbfile.create_device('a', 'b')
+        elecgrp = nwbfile.create_electrode_group('a', 'b', 'c', device=device, location='a')
+        for i in range(4):
+            nwbfile.add_electrode(i, np.nan, np.nan, np.nan, np.nan, group=elecgrp,
+                                  location='a', filtering='a', description='a')
+        with self.assertRaises(IndexError) as err:
+            nwbfile.create_electrode_table_region(list(range(6)), 'test')
+        self.assertTrue('out of range' in str(err.exception))
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
@@ -116,6 +141,17 @@ class NWBFileTest(unittest.TestCase):
         self.assertIs(self.nwbfile.ec_electrodes, table)
         self.assertIs(table.parent, self.nwbfile)
 
+    def test_add_trial_column(self):
+        self.nwbfile.add_trial_column('trial_type', 'the type of trial')
+        self.assertEqual(self.nwbfile.trials.colnames, ('start', 'end', 'trial_type'))
+
+    def test_add_trial(self):
+        self.nwbfile.add_trial({'start': 10, 'end': 20})
+        self.assertEqual(len(self.nwbfile.trials), 1)
+        self.nwbfile.add_trial({'start': 30, 'end': 40})
+        self.nwbfile.add_trial({'start': 50, 'end': 70})
+        self.assertEqual(len(self.nwbfile.trials), 3)
+
     def test_add_electrode(self):
         dev1 = self.nwbfile.create_device('dev1', 'a test source')  # noqa: F405
         group = self.nwbfile.create_electrode_group('tetrode1', 'a test source',
@@ -148,6 +184,13 @@ class NWBFileTest(unittest.TestCase):
         self.assertIn(ts2, children)
         self.assertIn(device, children)
         self.assertIn(elecgrp, children)
+
+    def test_fail_if_source_script_file_name_without_source_script(self):
+        with self.assertRaises(ValueError):
+            # <-- source_script_file_name without source_script is not allowed
+            NWBFile('a fake source', 'a test session description for a test NWBFile', 'FILE123', self.start,
+                    source_script=None,
+                    source_script_file_name='nofilename')
 
 
 class SubjectTest(unittest.TestCase):
@@ -184,3 +227,23 @@ class SubjectTest(unittest.TestCase):
 
     def test_nwbfile_constructor(self):
         self.assertIs(self.nwbfile.subject, self.subject)
+
+
+class TestCacheSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.path = 'unittest_cached_spec.nwb'
+
+    def tearDown(self):
+        if os.path.exists(self.path):
+            os.remove(self.path)
+
+    def test_simple(self):
+        nwbfile = NWBFile('source', ' ', ' ',
+                          datetime.now(), datetime.now(),
+                          institution='University of California, San Francisco',
+                          lab='Chang Lab')
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(nwbfile, cache_spec=True)
+        reader = NWBHDF5IO(self.path, 'r', load_namespaces=True)
+        nwbfile = reader.read()

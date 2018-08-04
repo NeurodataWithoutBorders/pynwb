@@ -206,7 +206,7 @@ print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
 # in its ``maxshape`` that the first dimensions of our array should be unlimited (``None``) and the second
 # dimension be ``10`` (i.e., the length of our chunk. Since :py:class:`~pynwb.form.data_utils.DataChunkIterator`
 # has no way of knowing the minimum size of the array it automatically recommends the size of the first
-# chunk as the minimum size (i.e, ``(1, 10)`` and also infers the data type automatically from the first chunk.
+# chunk as the minimum size (i.e, ``(1, 10)``) and also infers the data type automatically from the first chunk.
 # To further customize this behavior we may also define the ``maxshape``, ``dtype``, and ``buffer_size`` when
 # we create the :py:class:`~pynwb.form.data_utils.DataChunkIterator`.
 #
@@ -500,7 +500,7 @@ def iter_largearray(filename, shape, dtype='float64'):
     for i in range(shape[0]):
         # Open the file and read the next chunk
         newfp = np.memmap(filename, dtype=dtype, mode='r', shape=shape)
-        curr_data = newfp[i:(i + 1), ...]
+        curr_data = newfp[i:(i + 1), ...][0]
         del newfp  # Reopen the file in each iterator to prevent accumulation of data in memory
         yield curr_data
     return
@@ -516,7 +516,7 @@ from pynwb.form.data_utils import DataChunkIterator
 data = DataChunkIterator(data=iter_largearray(filename='basic_sparse_iterwrite_testdata.npy',
                                               shape=datashape),
                          maxshape=datashape,
-                         buffersize=10)   # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
+                         buffer_size=10)   # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
 
 
 ####################
@@ -551,7 +551,7 @@ data_match = np.all(arrdata == data[:])   # Don't do this for very large arrays!
 if data_match:
     print("Success: All data values match")
 else:
-    print("ERROR: Mismathch between data")
+    print("ERROR: Mismatch between data")
 
 
 ####################

@@ -111,10 +111,11 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'parent', 'type': NWBContainer,
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data = popargs('name', 'source', 'data', kwargs)
+        name, source, data, features, feature_units = popargs('name', 'source', 'data',
+                                                              'features', 'feature_units', kwargs)
         super(AbstractFeatureSeries, self).__init__(name, source, data, "see 'feature_units'", **kwargs)
-        self.features = getargs('features', kwargs)
-        self.feature_units = getargs('feature_units', kwargs)
+        self.features = features
+        self.feature_units = feature_units
 
     @docval({'name': 'time', 'type': float, 'doc': 'the time point of this feature'},
             {'name': 'features', 'type': (list, np.ndarray), 'doc': 'the feature values for this time point'})
@@ -167,7 +168,7 @@ class IntervalSeries(TimeSeries):
         super(IntervalSeries, self).__init__(name, source, data, unit,
                                              timestamps=timestamps,
                                              resolution=_default_resolution,
-                                             conversiont=_default_conversion,
+                                             conversion=_default_conversion,
                                              **kwargs)
 
     @docval({'name': 'start', 'type': float, 'doc': 'The name of this TimeSeries dataset'},

@@ -15,7 +15,7 @@ class Baz(Data):
             {'name': 'baz_attr', 'type': str, 'doc': 'an attribute'})
     def __init__(self, **kwargs):
         name, data, baz_attr = getargs('name', 'data', 'baz_attr', kwargs)
-        super(Baz, self).__init__(name=name, source='test_io_map_data')
+        super(Baz, self).__init__(name=name)
         self.__data = data
         self.__baz_attr = baz_attr
 
@@ -46,7 +46,7 @@ class TestDataMap(unittest.TestCase):
 
     def setUpBazSpec(self):
         self.baz_spec = DatasetSpec('an Baz type', 'int', name='MyBaz', data_type_def='Baz',
-                                    attributes=[AttributeSpec('baz_attr', 'an example string attribute', 'str')])
+                                    attributes=[AttributeSpec('baz_attr', 'an example string attribute', 'text')])
 
     def test_build(self):
         ''' Test default mapping functionality when no attributes are nested '''

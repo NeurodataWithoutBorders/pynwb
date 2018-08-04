@@ -9,8 +9,13 @@ from six import with_metaclass
 class TestIntracellularElectrode(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        elec = IntracellularElectrode(name="elec0", source='', slice='', resistance='', seal='', description='',
-                                      location='', filtering='', initial_access_resistance='', device='')
+        elec = IntracellularElectrode(name="elec0", source='ice source', slice='tissue slice',
+                                      resistance='something measured in ohms',
+                                      seal='sealing method', description='a fake electrode object',
+                                      location='Springfield Elementary School',
+                                      filtering='a meaningless free-form text field',
+                                      initial_access_resistance='I guess this changes',
+                                      device='I should be a Device object, but just a name will do')
         return elec
 
     def addContainer(self, nwbfile):
@@ -25,8 +30,14 @@ class TestIntracellularElectrode(base.TestMapRoundTrip):
 class TestPCS(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
 
     def setUpElectrode(self):
-        self.elec = IntracellularElectrode(name="elec0", source='', slice='', resistance='', seal='', description='',
-                                           location='', filtering='', initial_access_resistance='', device='')
+        elec = IntracellularElectrode(name="elec0", source='ice source', slice='tissue slice',
+                                      resistance='something measured in ohms',
+                                      seal='sealing method', description='a fake electrode object',
+                                      location='Springfield Elementary School',
+                                      filtering='a meaningless free-form text field',
+                                      initial_access_resistance='I guess this changes',
+                                      device='I should be a Device object, but just a name will do')
+        self.elec = elec
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''

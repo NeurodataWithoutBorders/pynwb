@@ -22,18 +22,19 @@ class IntracellularElectrode(NWBContainer):
                      'device')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
+            {'name': 'device', 'type': str, 'doc': 'Name(s) of devices in general/devices.'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.'},
-            {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.'},
             {'name': 'description', 'type': str,
              'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc) \
              COMMENT: Free-form text (can be from Methods)'},
+            {'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.', 'default': None},
+            {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.', 'default': None},
             {'name': 'location', 'type': str,
-             'doc': 'Area, layer, comments on estimation, stereotaxis coordinates (if in vivo, etc).'},
-            {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance COMMENT: unit: Ohm.'},
-            {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.'},
-            {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.'},
-            {'name': 'device', 'type': str, 'doc': 'Name(s) of devices in general/devices.'})
+             'doc': 'Area, layer, comments on estimation, stereotaxis coordinates (if in vivo, etc).', 'default': None},
+            {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance COMMENT: unit: Ohm.', 'default': None},
+            {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.', 'default': None},
+            {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.', 'default': None},
+            )
     def __init__(self, **kwargs):
         slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs(
             'slice', 'seal', 'description', 'location', 'resistance',

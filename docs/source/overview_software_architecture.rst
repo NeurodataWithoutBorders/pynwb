@@ -10,20 +10,20 @@ PyNWB and functionality of the various components.
 .. _fig-software-architecture:
 
 .. figure:: figures/software_architecture.*
-   :scale: 100 %
+   :width: 100%
    :alt: PyNWB Software Architecture
 
-   Overview of the high-level software architecture of PyNWB.
+   Overview of the high-level software architecture of PyNWB (click to enlarge).
 
 
 .. _fig-software-architecture-purpose:
 
 .. figure:: figures/software_architecture_design_choices.*
-   :scale: 100 %
+   :width: 100%
    :alt: PyNWB Software Architecture Functions
 
    We choose a modular design for PyNWB to enable flexibility and separate the
-   various aspects of the NWB:N ecosystem.
+   various aspects of the NWB:N ecosystem (click to enlarge).
 
 .. raw:: latex
 
@@ -37,10 +37,10 @@ Main Concepts
 .. _fig-software-architecture-concepts:
 
 .. figure:: figures/software_architecture_concepts.*
-   :scale: 100 %
+   :width: 100%
    :alt: PyNWB Software Architecture Concepts
 
-   Overview of the main concepts/classes in PyNWB and their location in the overall software architecture.
+   Overview of the main concepts/classes in PyNWB and their location in the overall software architecture (click to enlarge).
 
 Container
 ^^^^^^^^^
@@ -128,7 +128,7 @@ ObjectMapper
 .. _fig-software-architecture-mainconcepts:
 
 .. figure:: figures/software_architecture_mainconcepts.*
-   :scale: 100 %
+   :width: 100%
    :alt: PyNWB Software Architecture Main Concepts
 
    Relationship between ``Containers``, ``Builders``, ``ObjectMappers``, and ``Specs``
@@ -183,10 +183,10 @@ BuildManager
 .. _fig-software-architecture-buildmanager:
 
 .. figure:: figures/software_architecture_buildmanager.*
-   :scale: 100 %
+   :width: 100%
    :alt: PyNWB Software Architecture BuildManager and TypeMap
 
-   Overview of ``BuildManager`` (and ``TypeMap``).
+   Overview of ``BuildManager`` (and ``TypeMap``) (click to enlarge).
 
 
 FORMIO
@@ -210,7 +210,7 @@ FORMIO
 .. _fig-software-architecture-formio:
 
 .. figure:: figures/software_architecture_formio.*
-   :scale: 100 %
+   :width: 100%
    :alt: PyNWB Software Architecture FormIO
 
-   Overview of ``FORMIO``.
+   Overview of ``FORMIO`` (click to enlarge).

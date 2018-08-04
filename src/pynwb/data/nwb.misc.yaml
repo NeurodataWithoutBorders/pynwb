@@ -13,7 +13,7 @@ groups:
         \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
         \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
         \ below describes how to convert the data to the specified SI unit."
-      dtype: None
+      dtype: text
       name: unit
       required: false
     dims:
@@ -58,15 +58,15 @@ groups:
   datasets:
   - attributes:
     - doc: Value is 'float('NaN')'
-      dtype: None
+      dtype: float
       name: conversion
       value: NaN
     - doc: Value is 'float('NaN')'
-      dtype: None
+      dtype: float
       name: resolution
       value: NaN
     - doc: Value is 'n/a'
-      dtype: None
+      dtype: text
       name: unit
       value: n/a
     dims:
@@ -90,15 +90,15 @@ groups:
   datasets:
   - attributes:
     - doc: Value is 'float('NaN')'
-      dtype: None
+      dtype: float
       name: conversion
       value: NaN
     - doc: Value is 'float('NaN')'
-      dtype: None
+      dtype: float
       name: resolution
       value: NaN
     - doc: Value is 'n/a'
-      dtype: None
+      dtype: text
       name: unit
       value: n/a
     dims:

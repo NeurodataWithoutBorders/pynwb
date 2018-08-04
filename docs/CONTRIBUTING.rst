@@ -139,7 +139,7 @@ Format Specification Styleguide
 Python Code Styleguide
 ^^^^^^^^^^^^^^^^^^^^^^
 
-Python coding style is checked via ``flake8`` and ``pep8speaks`` for automatic checking of PEP8 style during pull requets.
+Python coding style is checked via ``flake8`` for automatic checking of PEP8 style during pull requets.
 
 Endorsement
 -----------
@@ -156,5 +156,3 @@ As indicated in the PyNWB license: *“You are under no obligation whatsoever to
 Contributors to the NWB code base are expected to use a permissive, non-copyleft open source license. Typically 3-clause BSD i used, but any compatible license is allowed, the MIT and Apache 2.0 licenses being good alternative choices. The GPL and other copyleft licenses are not allowed due to the consternation it generates across many organizations.
 
 Also, make sure that you are permitted to contribute code. Some organizations, even academic organizations, have agreements in place that discuss IP ownership in detail (i.e., address IP rights and ownership that you create while under the employ of the organization). These are typically signed documents that you looked at on your first day of work and then promptly forgot. We don’t want contributed code to be yanked later due to IP issues.
-
-

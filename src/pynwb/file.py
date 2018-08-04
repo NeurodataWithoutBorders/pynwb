@@ -12,7 +12,7 @@ from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Devic
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
-from .core import NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface
+from .core import NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface, DynamicTable
 
 from h5py import RegionReference
 
@@ -144,6 +144,7 @@ class NWBFile(MultiContainerInterface):
     ]
 
     __nwbfields__ = ('experimenter',
+                     'data_collection',
                      'description',
                      'experiment_description',
                      'session_id',
@@ -155,10 +156,13 @@ class NWBFile(MultiContainerInterface):
                      'related_publications',
                      'slices',
                      'source_script',
+                     'source_script_file_name',
                      'surgery',
                      'virus',
+                     'stimulus_notes',
                      {'name': 'ec_electrodes', 'child': True},
                      {'name': 'epochs', 'child': True},
+                     {'name': 'trials', 'child': True},
                      {'name': 'subject', 'child': True},
                      'epoch_tags',)
 
@@ -191,12 +195,18 @@ class NWBFile(MultiContainerInterface):
              'thickness, orientation, temperature and bath solution', 'default': None},
             {'name': 'source_script', 'type': str,
              'doc': 'Script file used to create this NWB file.', 'default': None},
+            {'name': 'source_script_file_name', 'type': str,
+             'doc': 'Name of the sourc_script file', 'default': None},
+            {'name': 'data_collection', 'type': str,
+             'doc': 'Notes about data collection and analysis.', 'default': None},
             {'name': 'surgery', 'type': str,
              'doc': 'Narrative description about surgery/surgeries, including date(s) '
                     'and who performed surgery.', 'default': None},
             {'name': 'virus', 'type': str,
              'doc': 'Information about virus(es) used in experiments, including virus ID, '
                     'source, date made, injection location, volume, etc.', 'default': None},
+            {'name': 'stimulus_notes', 'type': str,
+             'doc': 'Notes about stimuli, such as how and where presented.', 'default': None},
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
             {'name': 'acquisition', 'type': (list, tuple),
              'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
@@ -208,6 +218,8 @@ class NWBFile(MultiContainerInterface):
              'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
             {'name': 'epoch_tags', 'type': (tuple, list, set),
              'doc': 'A sorted list of tags used across all epochs', 'default': set()},
+            {'name': 'trials', 'type': DynamicTable,
+             'doc': 'A table containing trial data', 'default': None},
             {'name': 'modules', 'type': (list, tuple),
              'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
             {'name': 'ec_electrodes', 'type': (ElectrodeTable, Iterable),
@@ -228,7 +240,6 @@ class NWBFile(MultiContainerInterface):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
         pkwargs['name'] = 'root'
         super(NWBFile, self).__init__(*pargs, **pkwargs)
-        self.__start_time = datetime.utcnow().isoformat() + "Z"
         self.__session_description = getargs('session_description', kwargs)
         self.__identifier = getargs('identifier', kwargs)
         self.__session_start_time = getargs('session_start_time', kwargs)
@@ -248,10 +259,13 @@ class NWBFile(MultiContainerInterface):
 
         self.modules = getargs('modules', kwargs)
         epochs = getargs('epochs', kwargs)
-        if epochs is None:
-            epochs = Epochs(self.source)
-        self.epochs = epochs
+        if epochs is not None:
+            self.epochs = epochs
         self.epoch_tags = getargs('epoch_tags', kwargs)
+
+        trials = getargs('trials', kwargs)
+        if trials is not None:
+            self.trials = trials
         self.ec_electrodes = getargs('ec_electrodes', kwargs)
         self.ec_electrode_groups = getargs('ec_electrode_groups', kwargs)
         self.devices = getargs('devices', kwargs)
@@ -268,17 +282,23 @@ class NWBFile(MultiContainerInterface):
             'session_id',
             'lab',
             'institution',
+            'data_collection',
             'notes',
             'pharmacology',
             'protocol',
             'related_publications',
             'slices',
             'source_script',
+            'source_script_file_name',
             'surgery',
             'virus',
+            'stimulus_notes',
         ]
         for attr in recommended:
             setattr(self, attr, kwargs.get(attr, None))
+
+        if getargs('source_script', kwargs) is None and getargs('source_script_file_name', kwargs) is not None:
+            raise ValueError("'source_script' cannot be None when 'source_script_file_name' is set")
 
     def all_children(self):
         stack = [self]
@@ -321,6 +341,11 @@ class NWBFile(MultiContainerInterface):
             msg = "no electrodes available. add electrodes before creating a region"
             raise RuntimeError(msg)
         region = getargs('region', kwargs)
+        for idx in region:
+            if idx < 0 or idx >= len(self.ec_electrodes):
+                raise IndexError('The index ' + str(idx) +
+                                 ' is out of range for the ElectrodeTable of length '
+                                 + str(len(self.ec_electrodes)))
         desc = getargs('description', kwargs)
         name = getargs('name', kwargs)
         return ElectrodeTableRegion(self.ec_electrodes, region, desc, name)
@@ -334,8 +359,37 @@ class NWBFile(MultiContainerInterface):
         sparse noise) or a different paradigm (a rat exploring an
         enclosure versus sleeping between explorations)
         """
+        if self.epochs is None:
+            self.epochs = Epochs(self.source)
         self.epoch_tags.update(kwargs.get('tags', list()))
         call_docval_func(self.epochs.add_epoch, kwargs)
+
+    def __check_trials(self):
+        if self.trials is None:
+            self.trials = DynamicTable('trials', 'autogenerated by PyNWB API', 'data about experimental trials')
+            self.trials.add_column('start', 'the start time of each trial')
+            self.trials.add_column('end', 'the end time of each trial')
+
+    @docval(*get_docval(DynamicTable.add_column))
+    def add_trial_column(self, **kwargs):
+        """
+        Add a column to the trial table. See DynamicTable.add_column
+        for more details
+        """
+        self.__check_trials()
+        call_docval_func(self.trials.add_column, kwargs)
+
+    @docval(*get_docval(DynamicTable.add_row))
+    def add_trial(self, **kwargs):
+        """
+        Add a trial to the trial table. See DynamicTable.add_row for
+        more details.
+
+        Required fields are *start*, *end*, and any columns that have
+        been added (through calls to `add_trial_columns`).
+        """
+        self.__check_trials()
+        call_docval_func(self.trials.add_row, kwargs)
 
     @docval({'name': 'electrode_table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):
