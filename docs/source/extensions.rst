@@ -5,6 +5,11 @@ Extending NWB
 
 The following page will discuss how to extend NWB using PyNWB.
 
+.. note::
+
+    A simple example demonstrating the creation and use of a custom extension is available as part of the
+    tutorial :ref:`tutorial-extending-nwb`.
+
 .. _creating-extensions:
 
 Creating new Extensions
@@ -232,6 +237,9 @@ The following code demonstrates how to load custom namespaces.
 
     This will register all namespaces defined in the file ``'my_namespace.yaml'``.
 
+NWBContainer : Representing custom data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 To read and write custom data, corresponding :py:class:`~pynwb.core.NWBContainer` classes must be associated with their respective specifications.
 :py:class:`~pynwb.core.NWBContainer` classes are associated with their respective specification using the decorator :py:func:`~pynwb.register_class`.
 
@@ -252,6 +260,24 @@ The following code demonstrates how to associate a specification with the :py:cl
     class MyExtensionContainer(NWBContainer):
         ...
     register_class('my_namespace', 'MyExtension', MyExtensionContainer)
+
+If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your extension specification,
+a dynamically created class is created by default.
+
+To use the dynamic class, you will need to retrieve the class object using the function :py:func:`~pynwb.get_class`.
+Once you have retrieved the class object, you can use it just like you would a statically defined class.
+
+.. code-block:: python
+
+    from pynwb import get_class
+    MyExtensionContainer = get_class('my_namespace', 'MyExtension')
+    my_ext_inst = MyExtensionContainer(...)
+
+
+If using iPython, you can access documentation for the class's constructor using the help command.
+
+ObjectMapper : Customizing the mapping between NWBContainer and the Spec
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer`
 class for reading and writing, you will need to implement and register a custom :py:class:`~pynwb.form.build.map.ObjectMapper`.
@@ -276,21 +302,20 @@ class for reading and writing, you will need to implement and register a custom 
         ...
     register_map(MyExtensionContainer, MyExtensionMapper)
 
+.. tip::
 
-If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your extension specification,
-a dynamically created class is created by default.
+    ObjectMappers allow you to customize how objects in the spec are mapped to attributes of your NWBContainer in
+    Python. This is useful, e.g., in cases where you want ot customize the default mapping. For example in
+    TimeSeries the attribute ``unit`` which is defined on the dataset ``data`` (i.e., ``data.unit``) would
+    by default be mapped to the attribute ``data_unit`` on :py:class:`~pynwb.base.TimeSeries`. The ObjectMapper
+    :py:class:`~pynwb.io.base.TimeSeriesMap` then changes this mapping to map ``data.unit`` to the attribute ``unit``
+    on :py:class:`~pynwb.base.TimeSeries` . ObjectMappers also allow you to customize how constructor arguments
+    for your ``NWBContainer`` are constructed. E.g., in TimeSeries instead of explicit ``timestamps`` we
+    may only have a ``starting_time`` and ``rate``. In the ObjectMapper we could then construct ``timestamps``
+    from this data on data load to always have ``timestamps`` available for the user.
+    For an overview of the concepts of containers, spec, builders, object mappers in PyNWB see also
+    :ref:`software-architecture`
 
-To use the dynamic class, you will need to retrieve the class object using the function :py:func:`~pynwb.get_class`.
-Once you have retrieved the class object, you can use it just like you would a statically defined class.
-
-.. code-block:: python
-
-    from pynwb import get_class
-    MyExtensionContainer = get_class('my_namespace', 'MyExtension')
-    my_ext_inst = MyExtensionContainer(...)
-
-
-If using iPython, you can access documentation for the class's constructor using the help command.
 
 .. _documenting-extensions:
 

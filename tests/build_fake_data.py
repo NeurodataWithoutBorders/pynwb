@@ -20,6 +20,8 @@ f = NWBFile(filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now
             lab='Bag End Labatory',
             institution='University of Middle Earth at the Shire',
             experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
+            stimulus_notes='The one ring to rule them all has been found',
+            data_collection='The ring was found in cave and stolen from Gollum',
             session_id='LONELYMTN')
 
 # Create the electrode group this simulated data is generated from

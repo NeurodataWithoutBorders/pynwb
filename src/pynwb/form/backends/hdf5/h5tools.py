@@ -58,8 +58,8 @@ class HDF5IO(FORMIO):
 
     @classmethod
     @docval({'name': 'namespace_catalog',
-             'type': NamespaceCatalog,
-             'doc': 'the NamespaceCatalog to load namespaces into'},
+             'type': (NamespaceCatalog, TypeMap),
+             'doc': 'the NamespaceCatalog or TypeMap to load namespaces into'},
             {'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
             {'name': 'namespaces', 'type': list, 'doc': 'the namespaces to load', 'default': None})
     def load_namespaces(cls, namespace_catalog, path, namespaces=None):
@@ -67,15 +67,19 @@ class HDF5IO(FORMIO):
         Load cached namespaces from a file.
         '''
         f = File(path, 'r')
-        spec_group = f[f.attrs[SPEC_LOC_ATTR]]
-        if namespaces is None:
-            namespaces = list(spec_group.keys())
-        for ns in namespaces:
-            ns_group = spec_group[ns]
-            latest_version = list(ns_group.keys())[-1]
-            ns_group = ns_group[latest_version]
-            reader = H5SpecReader(ns_group)
-            namespace_catalog.load_namespaces('namespace', reader=reader)
+        if SPEC_LOC_ATTR not in f.attrs:
+            msg = "No cached namespaces found in %s" % path
+            warnings.warn(msg)
+        else:
+            spec_group = f[f.attrs[SPEC_LOC_ATTR]]
+            if namespaces is None:
+                namespaces = list(spec_group.keys())
+            for ns in namespaces:
+                ns_group = spec_group[ns]
+                latest_version = list(ns_group.keys())[-1]
+                ns_group = ns_group[latest_version]
+                reader = H5SpecReader(ns_group)
+                namespace_catalog.load_namespaces('namespace', reader=reader)
         f.close()
 
     @classmethod
@@ -86,15 +90,19 @@ class HDF5IO(FORMIO):
                                    version=ns.version,
                                    author=ns.author,
                                    contact=ns.contact)
-        source_files = ns_catalog.get_namespace_sources(namespace)
-        for source in source_files:
-            for dt in ns_catalog.get_types(source):
-                spec = ns_catalog.get_spec(namespace, dt)
-                if spec.parent is not None:
-                    continue
-                h5_source = cls.__get_name(source)
-                spec = cls.__copy_spec(spec)
-                builder.add_spec(h5_source, spec)
+        for elem in ns.schema:
+            if 'namespace' in elem:
+                inc_ns = elem['namespace']
+                builder.include_namespace(inc_ns)
+            else:
+                source = elem['source']
+                for dt in ns_catalog.get_types(source):
+                    spec = ns_catalog.get_spec(namespace, dt)
+                    if spec.parent is not None:
+                        continue
+                    h5_source = cls.__get_name(source)
+                    spec = cls.__copy_spec(spec)
+                    builder.add_spec(h5_source, spec)
         return builder
 
     @classmethod
@@ -189,7 +197,10 @@ class HDF5IO(FORMIO):
             for ns_name in ns_catalog.namespaces:
                 ns_builder = self.__convert_namespace(ns_catalog, ns_name)
                 namespace = ns_catalog.get_namespace(ns_name)
-                group_name = '%s/%s' % (ns_name, namespace.version)
+                if namespace.version is None:
+                    group_name = '%s/unversioned' % ns_name
+                else:
+                    group_name = '%s/%s' % (ns_name, namespace.version)
                 ns_group = spec_group.require_group(group_name)
                 writer = H5SpecWriter(ns_group)
                 ns_builder.export('namespace', writer=writer)
@@ -423,11 +434,7 @@ class HDF5IO(FORMIO):
         # number
         dtype = cls.__resolve_dtype_helper__(dtype)
         if dtype is None:
-            try:
-                dtype = cls.get_type(data)
-            except Exception as exc:
-                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
-                raise_from(Exception(msg), exc)
+            dtype = cls.get_type(data)
         return dtype
 
     @classmethod
@@ -458,10 +465,7 @@ class HDF5IO(FORMIO):
                         self.__queue_ref(self._make_attr_ref_filler(obj, key, tmp))
                     else:
                         value = np.array(value)
-                    obj.attrs[key] = value
-                else:
-                    msg = "ignoring attribute '%s' from '%s' - value is empty list" % (key, obj.name)
-                    warnings.warn(msg)
+                obj.attrs[key] = value
             elif isinstance(value, (Container, Builder)):           # a reference
                 self.__queue_ref(self._make_attr_ref_filler(obj, key, value))
             else:
@@ -489,7 +493,6 @@ class HDF5IO(FORMIO):
 
         parent, builder = getargs('parent', 'builder', kwargs)
         if builder.written:
-            print('%s already written to %s' % (self.__get_path(builder), builder.source))
             group = parent[builder.name]
         else:
             group = parent.create_group(builder.name)
@@ -530,7 +533,6 @@ class HDF5IO(FORMIO):
     def write_link(self, **kwargs):
         parent, builder = getargs('parent', 'builder', kwargs)
         if builder.written:
-            print('%s already written to %s' % (self.__get_path(builder), builder.source))
             return None
         name = builder.name
         target_builder = builder.builder
@@ -560,7 +562,6 @@ class HDF5IO(FORMIO):
         """
         parent, builder, link_data = getargs('parent', 'builder', 'link_data', kwargs)
         if builder.written:
-            print('%s already written to %s' % (self.__get_path(builder), builder.source))
             return None
         name = builder.name
         data = builder.data
@@ -606,7 +607,11 @@ class HDF5IO(FORMIO):
                     refs.append(i)
             # If one ore more of the parts of the compound data type are references then we need to deal with those
             if len(refs) > 0:
-                _dtype = self.__resolve_dtype__(options['dtype'], data)
+                try:
+                    _dtype = self.__resolve_dtype__(options['dtype'], data)
+                except Exception as exc:
+                    msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
+                    raise_from(Exception(msg), exc)
                 dset = parent.require_dataset(name, shape=(len(data),), dtype=_dtype, **options['io_settings'])
                 builder.written = True
 
@@ -722,7 +727,11 @@ class HDF5IO(FORMIO):
             dtype = options.get('dtype')
             io_settings = options.get('io_settings')
         if not isinstance(dtype, type):
-            dtype = cls.__resolve_dtype__(dtype, data)
+            try:
+                dtype = cls.__resolve_dtype__(dtype, data)
+            except Exception as exc:
+                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
+                raise_from(Exception(msg), exc)
         try:
             dset = parent.create_dataset(name, data=data, shape=None, dtype=dtype, **io_settings)
         except Exception as exc:
@@ -790,7 +799,11 @@ class HDF5IO(FORMIO):
             dtype = options.get('dtype')
             io_settings = options.get('io_settings')
         if not isinstance(dtype, type):
-            dtype = cls.__resolve_dtype__(dtype, data)
+            try:
+                dtype = cls.__resolve_dtype__(dtype, data)
+            except Exception as exc:
+                msg = 'cannot add %s to %s - could not determine type' % (name, parent.name)  # noqa: F821
+                raise_from(Exception(msg), exc)
         # define the data shape
         if 'shape' in io_settings:
             data_shape = io_settings.pop('shape')

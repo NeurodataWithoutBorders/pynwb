@@ -162,9 +162,10 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         pix_mask = [(1, 2, 1.0), (3, 4, 1.0), (5, 6, 1.0),
                     (7, 8, 2.0), (9, 10, 2.)]
 
+        ts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         self.image_series = ImageSeries(name='test_iS', source='a hypothetical source', dimension=[2],
                                         external_file=['images.tiff'],
-                                        starting_frame=[1, 2, 3], format='tiff', timestamps=list())
+                                        starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
 
         self.optical_channel = OpticalChannel('test_optical_channel', 'optical channel source',
                                               'optical channel description', 500.)
@@ -218,6 +219,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'optchan1': self.optchan_builder
             }
         )
+        ts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         self.is_builder = GroupBuilder('test_iS',
                                        attributes={'source': 'a hypothetical source',
                                                    'namespace': 'core',
@@ -225,7 +227,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                                    'description': 'no description',
                                                    'comments': 'no comments',
                                                    'help': 'Storage object for time-series 2-D image data'},
-                                       datasets={'timestamps': DatasetBuilder('timestamps', [],
+                                       datasets={'timestamps': DatasetBuilder('timestamps', ts,
                                                                               attributes={'unit': 'Seconds',
                                                                                           'interval': 1}),
                                                  'external_file': DatasetBuilder('external_file', ['images.tiff'],

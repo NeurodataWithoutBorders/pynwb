@@ -76,6 +76,10 @@ groups:
     dtype: text
     name: help
     value: A general epoch object
+  groups:
+    - name: metadata
+      doc: a DynamicTable for storing metadata about epochs
+      neurodata_type_inc: DynamicTable
   datasets:
     - name: epochs
       doc: the EpochTable holding information about each Epoch

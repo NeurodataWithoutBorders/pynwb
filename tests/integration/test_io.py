@@ -45,7 +45,6 @@ class TestHDF5Writer(unittest.TestCase):
         self.builder = GroupBuilder(
             'root', groups={'acquisition': GroupBuilder('acquisition', groups={'test_timeseries': ts_builder}),
                             'analysis': GroupBuilder('analysis'),
-                            'epochs': GroupBuilder('epochs'),
                             'general': GroupBuilder('general'),
                             'processing': GroupBuilder('processing'),
                             'stimulus': GroupBuilder(
@@ -69,7 +68,6 @@ class TestHDF5Writer(unittest.TestCase):
         f = File(self.path)
         self.assertIn('acquisition', f)
         self.assertIn('analysis', f)
-        self.assertIn('epochs', f)
         self.assertIn('general', f)
         self.assertIn('processing', f)
         self.assertIn('file_create_date', f)

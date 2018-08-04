@@ -110,6 +110,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     ret = dict()
     errors = list()
     argsi = 0
+    extras = set(kwargs.keys())
     try:
         it = iter(validator)
         arg = next(it)
@@ -121,7 +122,8 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
             argname = arg['name']
             argval_set = False
             if argname in kwargs:
-                argval = kwargs[argname]
+                argval = kwargs.get(argname)
+                extras.discard(argname)
                 argval_set = True
             elif argsi < len(args):
                 argval = args[argsi]
@@ -143,7 +145,8 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
         while True:
             argname = arg['name']
             if argname in kwargs:
-                ret[argname] = kwargs[argname]
+                ret[argname] = kwargs.get(argname)
+                extras.discard(argname)
             elif len(args) > argsi:
                 ret[argname] = args[argsi]
                 argsi += 1
@@ -155,8 +158,11 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
                     fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                     errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
             arg = next(it)
+
     except StopIteration:
         pass
+    for key in extras:
+        errors.append("unrecognized argument: '%s'" % key)
     return {'args': ret, 'errors': errors}
 
 
@@ -312,10 +318,11 @@ def docval(*validator, **options):
             def func_call(*args, **kwargs):
                 self = args[0]
                 parsed = __parse_args(
-                    _copy.deepcopy(
-                        loc_val), args[1:], kwargs,
-                    enforce_type=enforce_type,
-                    enforce_ndim=enforce_ndim)
+                            _copy.deepcopy(loc_val),
+                            args[1:],
+                            kwargs,
+                            enforce_type=enforce_type,
+                            enforce_ndim=enforce_ndim)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)

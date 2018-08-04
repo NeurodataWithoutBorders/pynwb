@@ -12,6 +12,8 @@ from pynwb.base import TimeSeries
 from pynwb import NWBHDF5IO
 from pynwb.spec import NWBNamespace, NWBGroupSpec, NWBDatasetSpec
 
+from pynwb.ecephys import ElectricalSeries
+
 
 import tempfile
 import warnings
@@ -398,6 +400,47 @@ class TestCacheSpec(unittest.TestCase):
             for source in ns['schema']:
                 types.update(catalog.get_types(source['source']))
         return types
+
+
+class TestLinkResolution(unittest.TestCase):
+
+    def test_link_resolve(self):
+        print("TEST_LINK_RESOLVE")
+
+        nwbfile = NWBFile("source", "a file with header data", "NB123A", '2018-06-01T00:00:00')
+        device = nwbfile.create_device('device_name', 'source')
+        electrode_group = nwbfile.create_electrode_group(
+            name='electrode_group_name',
+            source='source',
+            description='desc',
+            device=device,
+            location='unknown')
+        nwbfile.add_electrode(0,
+                              1.0, 2.0, 3.0,  # position?
+                              imp=2.718,
+                              location='unknown',
+                              filtering='unknown',
+                              description='desc',
+                              group=electrode_group)
+        etr = nwbfile.create_electrode_table_region([0], 'etr_name')
+        for passband in ('theta', 'gamma'):
+            electrical_series = ElectricalSeries(name=passband + '_phase',
+                                                 source='ephys_analysis',
+                                                 data=[1., 2., 3.],
+                                                 rate=0.0,
+                                                 electrodes=etr)
+            nwbfile.add_acquisition(electrical_series)
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(nwbfile)
+        with NWBHDF5IO(self.path, 'r') as io:
+            io.read()
+
+    def setUp(self):
+        self.path = "test_link_resolve.nwb"
+
+    def tearDown(self):
+        if os.path.exists(self.path):
+            os.remove(self.path)
 
 
 class NWBHDF5IOMultiFileTest(unittest.TestCase):
