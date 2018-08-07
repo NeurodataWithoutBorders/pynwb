@@ -10,6 +10,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
 from .core import NWBContainer, MultiContainerInterface, NWBData, VectorData, NWBTable, NWBTableRegion
+from .device import Device
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -56,7 +57,7 @@ class ImagingPlane(NWBContainer):
             {'name': 'optical_channel', 'type': (list, OpticalChannel),
              'doc': 'One of possibly many groups storing channelspecific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
-            {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},
             {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength.'},
             {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
