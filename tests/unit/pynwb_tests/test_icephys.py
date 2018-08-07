@@ -2,10 +2,13 @@ import unittest
 
 from pynwb.icephys import PatchClampSeries, CurrentClampSeries, IZeroClampSeries, CurrentClampStimulusSeries, \
         VoltageClampSeries, VoltageClampStimulusSeries, IntracellularElectrode
+from pynwb.device import Device
 
 
 def GetElectrode():
+        device = Device(name='device_name', source='device_source')
         elec = IntracellularElectrode('test_iS',
+                                      device,
                                       'a test source',
                                       'slice',
                                       'seal',
@@ -13,16 +16,17 @@ def GetElectrode():
                                       'location',
                                       'resistance',
                                       'filtering',
-                                      'initial_access_resistance',
-                                      'device')
+                                      'initial_access_resistance')
         return elec
 
 
 class IntracellularElectrodeConstructor(unittest.TestCase):
 
     def GetElectrode(self):
+        device = Device(name='device_name', source='device_source')
         elec = IntracellularElectrode('slice', 'seal', 'description', 'location', 'resistance',
-                                      'filtering', 'initial_access_resistance', 'device')
+                                      'filtering', 'initial_access_resistance',
+                                      device)
         self.assertEqual(elec.slice, 'slice')
         self.assertEqual(elec.seal, 'seal')
         self.assertEqual(elec.description, 'description')
@@ -30,7 +34,7 @@ class IntracellularElectrodeConstructor(unittest.TestCase):
         self.assertEqual(elec.resistance, 'resistance')
         self.assertEqual(elec.filtering, 'filtering')
         self.assertEqual(elec.initial_access_resistance, 'initial_access_resistance')
-        self.assertEqual(elec.device, 'device')
+        self.assertEqual(elec.device, device)
 
 
 class PatchClampSeriesConstructor(unittest.TestCase):

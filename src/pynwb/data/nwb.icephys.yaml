@@ -191,9 +191,6 @@ groups:
       etc)COMMENT: Free-form text (can be from Methods)'
     dtype: text
     name: description
-  - doc: Name(s) of devices in general/devices
-    dtype: text
-    name: device
   - doc: Electrode specific filtering.
     dtype: text
     name: filtering
@@ -219,6 +216,10 @@ groups:
     dtype: text
     name: slice
     quantity: '?'
+  links:
+  - doc: the device that was used to record from this electrode
+    name: device
+    target_type: Device
   doc: 'One of possibly many. COMMENT: Name should be informative.'
   neurodata_type_def: IntracellularElectrode
   neurodata_type_inc: NWBContainer
