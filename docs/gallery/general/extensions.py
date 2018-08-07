@@ -310,7 +310,7 @@ class Potato(NWBContainer):
 class PotatoSack(MultiContainerInterface):
 
     __clsconf__ = {
-        'attr': 'potatos',
+        'attr': 'potatoes',
         'type': Potato,
         'add': 'add_potato',
         'get': 'get_potato',
