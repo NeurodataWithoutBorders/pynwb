@@ -326,7 +326,7 @@ class PotatoSack(MultiContainerInterface):
 from pynwb import NWBHDF5IO, NWBFile
 
 potato_sack = PotatoSack(source='pantry',
-                         potatos=Potato(name='potato1', age=2.3, weight=3.0,
+                         potatoes=Potato(name='potato1', age=2.3, weight=3.0,
                                         source='the ground'))
 
 nwbfile = NWBFile("source", "a file with metadata", "NB123A", '2018-06-01T00:00:00')

@@ -117,7 +117,7 @@ for ri, row in epoch_table.iterrows():
 
 ########################################
 # 5) In the brain observatory, a two-photon microscope is used to acquire images of the calcium activity of neurons
-# expressing a flourescent protien indicator.  Essentially the microscope captures picture (30 times a second) at a
+# expressing a fluorescent protien indicator.  Essentially the microscope captures picture (30 times a second) at a
 # single depth in the visual cortex (the imaging plane).  Let's use pynwb to store the metadata associated with this
 # hardware and experimental setup:
 optical_channel = OpticalChannel(

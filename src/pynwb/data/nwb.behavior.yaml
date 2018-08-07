@@ -41,10 +41,10 @@ groups:
   neurodata_type_def: SpatialSeries
   neurodata_type_inc: TimeSeries
 - attributes:
-  - doc: Value is 'General container for storing behavorial epochs'
+  - doc: Value is 'General container for storing behavioral epochs'
     dtype: text
     name: help
-    value: General container for storing behavorial epochs
+    value: General container for storing behavioral epochs
   doc: TimeSeries for storing behavoioral epochs.  The objective of this and the other
     two Behavioral interfaces (e.g. BehavioralEvents and BehavioralTimeSeries) is
     to provide generic hooks for software tools/scripts. This allows a tool/script

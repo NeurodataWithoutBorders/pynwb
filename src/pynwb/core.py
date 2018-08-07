@@ -456,7 +456,7 @@ class NWBTable(NWBData):
             return self.data[idx]
 
 
-# diamond inheritence
+# diamond inheritance
 class NWBTableRegion(NWBData, DataRegion):
     '''
     A class for representing regions i.e. slices or indices into an NWBTable
@@ -706,7 +706,7 @@ class MultiContainerInterface(NWBDataInterface):
             # create the add method
             setattr(cls, add, cls.__make_add(add, attr, container_type))
 
-            # create the constructor, only if it has not been overriden
+            # create the constructor, only if it has not been overridden
             # i.e. it is the same method as the parent class constructor
             if cls.__init__ == MultiContainerInterface.__init__:
                 setattr(cls, '__init__', cls.__make_constructor(attr, add, container_type))

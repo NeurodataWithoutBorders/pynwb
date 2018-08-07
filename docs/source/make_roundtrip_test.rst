@@ -104,7 +104,7 @@ To finish off example from above, we will add the method for getting back our ge
 
 As mentioned above, there is an optional method to override. This method will add two additional tests. First, it will
 add a test for converting your container into a builder to make sure the intermerdiate data structure gets built
-appropriately. Second it will add a test for constructing your container from the builder returned by your overriden
+appropriately. Second it will add a test for constructing your container from the builder returned by your overridden
 ``setUpBuilder`` method.  This method takes no arguments, and should return the builder representation of your
 container class instance.
 
@@ -142,7 +142,7 @@ Continuing from the :py:class:`~pynwb.base.TimeSeries` example, lets add ``setUp
 -----------------------
 
 If you are testing something that can go in *acquisition*, you can avoid writing ``addContainer`` and ``getContainer``
-by extending ``TestDataInterfaceIO``.  This class has already overriden these methods to add your container object to
+by extending ``TestDataInterfaceIO``.  This class has already overridden these methods to add your container object to
 acquisition.
 
 Even if your container can go in acquisition, you may still need to override ``addContainer`` if your container depends

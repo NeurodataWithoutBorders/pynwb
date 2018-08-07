@@ -184,7 +184,7 @@ io4.close()
 # .. note::
 #
 #   In the case of TimeSeries one advantage of linking to just the main dataset is that we can now
-#   use our own timestamps in case the timestamps in the original file are not alligned with the
+#   use our own timestamps in case the timestamps in the original file are not aligned with the
 #   clock of the NWBFile we are creating. In this way we can use the linking to "re-align" different
 #   TimeSeries without having to copy the main data.
 

@@ -223,7 +223,7 @@ class H5DataIO(DataIO):
              'default': None},
             {'name': 'fillvalue',
              'type': None,
-             'doc': 'Value to eb returned when reading uninitalized parts of the dataset',
+             'doc': 'Value to eb returned when reading uninitialized parts of the dataset',
              'default': None},
             {'name': 'shuffle',
              'type': bool,

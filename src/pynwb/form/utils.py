@@ -24,7 +24,7 @@ def docval_macro(macro):
 def __type_okay(value, argtype, allow_none=False):
     """Check a value against a type
 
-       The differance between this function and :py:func:`isinstance` is that
+       The difference between this function and :py:func:`isinstance` is that
        it allows specifying a type as a string. Furthermore, strings allow for specifying more general
        types, such as a simple numeric type (i.e. ``argtype``="num").
 
