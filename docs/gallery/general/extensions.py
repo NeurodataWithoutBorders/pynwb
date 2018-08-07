@@ -346,6 +346,7 @@ with NWBHDF5IO('test_multicontainerinterface.nwb', 'w') as io:
 # different file).
 
 load_namespaces(ns_path)
+# from xxx import PotatoSack, Potato
 io = NWBHDF5IO('test_multicontainerinterface.nwb', 'r')
 nwb = io.read()
 print(nwb.get_processing_module()['potato_sack'].get_potato().weight)
