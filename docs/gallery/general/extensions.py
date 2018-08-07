@@ -227,9 +227,9 @@ io.close()
 #     For more information on writing NWB files, see :ref:`basic_writing`.
 
 ####################
-# By default, PyNWB does not use the namespaces cached in a file--you must explicitly specify this.
-# This behavior is enabled by the *load_namespaces* argument to the :py:class:`~pynwb.NWBHDF5IO`
-# constructor.
+# By default, PyNWB does not use the namespaces cached in a file--you must
+# explicitly specify this. This behavior is enabled by the *load_namespaces*
+# argument to the :py:class:`~pynwb.NWBHDF5IO` constructor.
 
 io = NWBHDF5IO('cache_spec_example.nwb', mode='r', load_namespaces=True)
 nwbfile = io.read()
@@ -238,9 +238,11 @@ nwbfile = io.read()
 # .. _MultiContainerInterface:
 # Creating and using a custom MultiContainerInterface
 # -----------------------------------------------------
-# It is sometimes the case that we need a group to hold zero-or-more or one-or-more of the same object.
-# Here we show how to create an extension that defines a group (`PotatoSack`) that holds multiple objects (`Pototo`es)
-# and then how to use the new data types. First, we use `pynwb` to define the new data types.
+# It is sometimes the case that we need a group to hold zero-or-more or
+# one-or-more of the same object. Here we show how to create an extension that
+# defines a group (`PotatoSack`) that holds multiple objects (`Pototo` es) and
+# then how to use the new data types. First, we use `pynwb` to define the new
+# data types.
 
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 
@@ -283,7 +285,8 @@ ns_builder.add_spec(ext_source, potato_sack)
 ns_builder.export(ns_path)
 
 ####################
-# Then create Container classes registered to the new data types (this is generally done in a different file)
+# Then create Container classes registered to the new data types (this is
+# generally done in a different file)
 
 from pynwb import register_class, load_namespaces
 from pynwb.file import MultiContainerInterface, NWBContainer
@@ -337,3 +340,14 @@ pmod.add_container(potato_sack)
 
 with NWBHDF5IO('test_multicontainerinterface.nwb', 'w') as io:
     io.write(nwbfile)
+
+####################
+# This is how you read the NWB file (again, this would often be done in a
+# different file).
+
+load_namespaces(ns_path)
+# from xxx import PotatoSack, Potato
+io = NWBHDF5IO('test_multicontainerinterface.nwb', 'r')
+nwb = io.read()
+print(nwb.get_processing_module()['potato_sack'].get_potato().weight)
+io.close()

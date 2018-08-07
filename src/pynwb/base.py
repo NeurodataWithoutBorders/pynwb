@@ -160,6 +160,10 @@ class TimeSeries(NWBDataInterface):
         starting_time = kwargs.get('starting_time')
         rate = kwargs.get('rate')
         if timestamps is not None:
+            if rate is not None:
+                raise ValueError('Specifying rate and timestamps is not supported.')
+            if starting_time is not None:
+                raise ValueError('Specifying starting_time and timestamps is not supported.')
             self.fields['timestamps'] = timestamps
             self.timestamps_unit = 'Seconds'
             self.interval = 1
