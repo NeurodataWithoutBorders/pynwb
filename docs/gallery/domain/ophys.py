@@ -243,4 +243,4 @@ rrs_rois = rrs.rois
 # .. [#] If you added more than one :py:class:`~pynwb.ophys.RoiResponseSeries`, you will need to
 #    provide the name of the :py:class:`~pynwb.ophys.RoiResponseSeries` you want to retrieve to
 #    :py:func:`~pynwb.ophys.Fluorescence.create_roi_response_series`. This same behavior is exhibited
-#    with :py:class:`~pynwb.ophys.ImageSegmentation` and various other objects thought the PyNWB API.
+#    with :py:class:`~pynwb.ophys.ImageSegmentation` and various other objects through the PyNWB API.
