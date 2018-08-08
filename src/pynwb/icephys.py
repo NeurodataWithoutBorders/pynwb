@@ -5,6 +5,7 @@ from .form.utils import docval, popargs, fmt_docval_args
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer
+from .device import Device
 
 
 @register_class('IntracellularElectrode', CORE_NAMESPACE)
@@ -22,7 +23,7 @@ class IntracellularElectrode(NWBContainer):
                      'device')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
-            {'name': 'device', 'type': str, 'doc': 'Name(s) of devices in general/devices.'},
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str,
              'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc) \

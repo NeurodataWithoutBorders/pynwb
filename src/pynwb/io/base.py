@@ -31,7 +31,7 @@ class TimeSeriesMap(ObjectMapper):
         self.map_attr('timestamps_unit', timestamps_spec.get_attribute('unit'))
         # self.map_attr('interval', timestamps_spec.get_attribute('interval'))
         startingtime_spec = self.spec.get_dataset('starting_time')
-        self.map_attr('rate_unit', startingtime_spec.get_attribute('unit'))
+        self.map_attr('starting_time_unit', startingtime_spec.get_attribute('unit'))
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))
 
     @ObjectMapper.constructor_arg('name')

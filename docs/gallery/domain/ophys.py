@@ -21,6 +21,7 @@ from datetime import datetime
 
 from pynwb import NWBFile
 from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluorescence
+from pynwb.device import Device
 
 
 ####################
@@ -43,16 +44,18 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 # ---------------------------------
 #
 # Before you can add your data, you will need to provide some information about how that data was generated.
-# This amounts describing the imaging plane and the optical channel used.
+# This amounts describing the device, imaging plane and the optical channel used.
 
 
+device = Device('imaging_device_1', source='a source')
+nwbfile.add_device(device)
 optical_channel = OpticalChannel('my_optchan', 'Ca2+ imaging example',
                                  'pi wavelength', 500.)
 imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
                                              'Ca2+ imaging example',
                                              optical_channel,
                                              'a very interesting part of the brain',
-                                             'imaging_device_1',
+                                             device,
                                              600., '2.718', 'GFP', 'my favorite brain location',
                                              (.1, .2), (0., 0.), 'A frame to refer to')
 

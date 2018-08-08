@@ -4,6 +4,7 @@ from pynwb.ophys import TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescenc
     ImageSegmentation, OpticalChannel, ImagingPlane, MotionCorrection, CorrectedImageStack
 from pynwb.image import ImageSeries
 from pynwb.base import TimeSeries
+from pynwb.device import Device
 
 import numpy as np
 
@@ -18,7 +19,7 @@ def CreatePlaneSegmentation():
                       external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
     oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 500.)
-    ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 600.,
+    ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', device, 600.,
                       'imaging_rate', 'indicator', 'location', (.1, .2), (0., 0.), 'reference_frame')
 
     pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
@@ -33,10 +34,10 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(oc.description, 'description')
         self.assertEqual(oc.emission_lambda, 500.)
 
-        ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', 'device', 600.,
+        ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', device, 600.,
                           'imaging_rate', 'indicator', 'location', (.1, .2), (.0, .0), 'reference_frame')
         self.assertEqual(ip.optical_channel[0], oc)
-        self.assertEqual(ip.device, 'device')
+        self.assertEqual(ip.device, device)
         self.assertEqual(ip.excitation_lambda, 600.)
         self.assertEqual(ip.imaging_rate, 'imaging_rate')
         self.assertEqual(ip.indicator, 'indicator')
@@ -144,10 +145,10 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit',
                           external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
+        device = Device(name='device_name', source='device_source')
         oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 500.)
-        ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', 'device', 600.,
+        ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', device, 600.,
                           'imaging_rate', 'indicator', 'location', (.1, .2), (0., 0.), 'reference_frame')
-
         pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
         pS.add_roi("1234", pix_mask[0:3], img_mask[0])
         pS.add_roi("5678", pix_mask[3:5], img_mask[1])
