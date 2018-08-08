@@ -48,7 +48,7 @@ device = nwbfile.create_device(name='Heka ITC-1600', source='a source')
 elec = nwbfile.create_ic_electrode(
     name="elec0", source='PyNWB tutorial example',
     description='a mock intracellular electrode',
-    device=device.name)
+    device=device)
 
 #######################
 # Stimulus data
