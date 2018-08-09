@@ -3,8 +3,6 @@ import unittest
 from pynwb import TimeSeries
 from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries
 
-import numpy as np
-
 
 class ImageSeriesConstructor(unittest.TestCase):
 
@@ -18,7 +16,6 @@ class ImageSeriesConstructor(unittest.TestCase):
         self.assertEqual(iS.starting_frame, [1, 2, 3])
         self.assertEqual(iS.format, 'tiff')
         # self.assertEqual(iS.bits_per_pixel, np.nan)
-        self.assertEqual(iS.dimension, [np.nan])
 
 
 class IndexSeriesConstructor(unittest.TestCase):
