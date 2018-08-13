@@ -428,7 +428,7 @@ class FeatureExtraction(NWBDataInterface):
         if raise_error:
             raise TypeError(error_msg)
 
-        # Initalize the object
+        # Initialize the object
         super(FeatureExtraction, self).__init__(source, **kwargs)
         self.electrodes = electrodes
         self.description = description

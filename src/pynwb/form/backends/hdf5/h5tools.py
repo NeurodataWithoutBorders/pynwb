@@ -139,7 +139,7 @@ class HDF5IO(FORMIO):
 
     @classmethod
     @docval({'name': 'source_filename', 'type': str, 'doc': 'the path to the HDF5 file to copy'},
-            {'name': 'dest_filename', 'type': str, 'doc': 'the name of the desitnation file'},
+            {'name': 'dest_filename', 'type': str, 'doc': 'the name of the destination file'},
             {'name': 'expand_external', 'type': bool, 'doc': 'expand external links into new objects', 'default': True},
             {'name': 'expand_refs', 'type': bool, 'doc': 'copy objects which are pointed to by reference',
              'default': False},

@@ -54,7 +54,7 @@ class ShapeValidatorTests(unittest.TestCase):
         self.assertTupleEqual(res.axes1, (0, 1))
         self.assertTupleEqual(res.axes2, (0, 1, 2))
 
-    def test_array_unequal_number_of_dimenions_check_one_axis_only(self):
+    def test_array_unequal_number_of_dimensions_check_one_axis_only(self):
         # Test unequal num dims compare one axis
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(20).reshape(2, 5, 2)
@@ -68,7 +68,7 @@ class ShapeValidatorTests(unittest.TestCase):
         self.assertTupleEqual(res.axes1, (0,))
         self.assertTupleEqual(res.axes2, (0,))
 
-    def test_array_unequal_number_of_dimenions_check_multiple_axesy(self):
+    def test_array_unequal_number_of_dimensions_check_multiple_axesy(self):
         # Test unequal num dims compare multiple axes
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(20).reshape(5, 2, 2)
@@ -83,7 +83,7 @@ class ShapeValidatorTests(unittest.TestCase):
         self.assertTupleEqual(res.axes2, (1, 0))
 
     def test_array_unequal_number_of_axes_for_comparison(self):
-        # Test unequal num axes for comparions
+        # Test unequal num axes for comparison
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(20).reshape(5, 2, 2)
         res = ShapeValidator.assertEqualShape(d1, d2, [0, 1], 1)

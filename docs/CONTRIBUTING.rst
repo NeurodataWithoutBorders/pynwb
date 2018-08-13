@@ -82,7 +82,7 @@ From your local copy directory, use the following commands.
 
     * Ensure the PR description clearly describes the problem and solution.
     * Include the relevant issue number if applicable.
-    * Before submitting, please ensure that the code follows the standard coding style of the repsective repository.
+    * Before submitting, please ensure that the code follows the standard coding style of the respective repository.
     * **NOTE:** Contributed branches will be removed by the development team after the merge is complete and should, hence, not be used after the pull request is complete.
 
 

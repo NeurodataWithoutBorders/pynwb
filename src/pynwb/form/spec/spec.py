@@ -39,7 +39,7 @@ class DtypeHelper():
             'region': ['region']
         }
 
-    # List of recommeneded primary dtype strings. These are the keys of primary_dtype_string_synonyms
+    # List of recommended primary dtype strings. These are the keys of primary_dtype_string_synonyms
     recommended_primary_dtypes = list(primary_dtype_synonyms.keys())
 
     # List of valid primary data type strings
