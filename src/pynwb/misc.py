@@ -16,9 +16,6 @@ class AnnotationSeries(TimeSeries):
     add_annotation() and then call finalize(). Alternatively, if
     all annotations are already stored in a list, use set_data()
     and set_timestamps()
-
-    All time series are created by calls to  NWB.create_timeseries().
-    They should not not be instantiated directly
     """
 
     __nwbfields__ = ()
@@ -68,9 +65,6 @@ class AbstractFeatureSeries(TimeSeries):
     and not of high value, while the salient characteristics (eg,
     orientation, spatial frequency, contrast, etc) are what important
     and are what are used for analysis
-
-    All time series are created by calls to  NWB.create_timeseries().
-    They should not not be instantiated directly
     """
 
     __nwbfields__ = ('feature_units',
