@@ -167,6 +167,9 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
     def __str__(self):
         return nwb_repr(self)
+    
+    def __repr__(self):
+        return self.__str__()
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)
