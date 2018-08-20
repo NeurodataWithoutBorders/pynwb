@@ -68,6 +68,8 @@ class ImageSeries(TimeSeries):
         bits_per_pixel, dimension, external_file, starting_frame, format = popargs(
             'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
         call_docval_func(super(ImageSeries, self).__init__, kwargs)
+        if not external_file and not self.data:
+            raise ValueError('must supply either external_file or data')
         self.bits_per_pixel = bits_per_pixel
         self.dimension = dimension
         self.external_file = external_file
