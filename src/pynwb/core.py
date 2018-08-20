@@ -60,6 +60,26 @@ def prepend_string(string, prepend='    '):
     return prepend + prepend.join(string.splitlines(True))
 
 
+def list2str(v):
+    return str(np.array(v)) + '\n'
+
+
+""" This works for 1D arrays but not 2D arrays
+    template = ''
+    if len(v) < 7:
+        for item in v:
+            template += prepend_string(nwb_repr(item, verbose=False)) + ', '
+    else:
+        for item in v[:3]:
+            template += prepend_string(nwb_repr(item, verbose=False)) + ', '
+        template += '...'
+        for item in v[-3:]:
+            template += prepend_string(nwb_repr(item, verbose=False)) + ', '
+    template += '\n'
+    return template
+"""
+
+
 def nwb_repr(nwb_object, verbose=True):
     try:
         template = "{} {}\nFields:\n""".format(getattr(nwb_object, 'name'), type(nwb_object))
@@ -68,8 +88,7 @@ def nwb_repr(nwb_object, verbose=True):
             for k, v in iteritems(nwb_object.fields):
                 template += "  {}:\n".format(k)
                 if isinstance(v, list):
-                    for item in v:
-                        template += prepend_string(nwb_repr(item, verbose=False)) + '\n'
+                    template += list2str(v)
                 else:
                     template += prepend_string(str(v)) + '\n'
         else:
@@ -79,7 +98,10 @@ def nwb_repr(nwb_object, verbose=True):
 
         return template
     except AttributeError:
-        return str(nwb_object)
+        if isinstance(nwb_object, list):
+            return list2str(nwb_object)
+        else:
+            return str(nwb_object)
 
 
 class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
@@ -167,6 +189,9 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
     def __str__(self):
         return nwb_repr(self)
+
+    def __repr__(self):
+        return self.__str__()
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)
