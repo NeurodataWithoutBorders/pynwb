@@ -189,9 +189,9 @@ nwbfile.add_trial({'start': 6, 'end': 8, 'stim': 'desert'})
 nwbfile.add_unit_column('location', 'the anatomical location of this unit')
 nwbfile.add_unit_column('quality', 'the quality for the inference of this unit')
 
-nwbfile.add_trial({'id': 1, 'location': 'CA1', 'quality': 0.95})
-nwbfile.add_trial({'id': 2, 'location': 'CA3', 'quality': 0.85})
-nwbfile.add_trial({'id': 3, 'location': 'CA1', 'quality': 0.90})
+nwbfile.add_unit({'id': 1, 'location': 'CA1', 'quality': 0.95})
+nwbfile.add_unit({'id': 2, 'location': 'CA3', 'quality': 0.85})
+nwbfile.add_unit({'id': 3, 'location': 'CA1', 'quality': 0.90})
 
 ####################
 # .. _basic_writing:
