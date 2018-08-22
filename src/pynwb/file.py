@@ -359,6 +359,7 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(Epochs.add_epoch))
     def create_epoch(self, **kwargs):
         """
+
         Creates a new Epoch object. Epochs are used to track intervals
         in an experiment, such as exposure to a certain type of stimuli
         (an interval where orientation gratings are shown, or of
@@ -378,8 +379,8 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(DynamicTable.add_column))
     def add_unit_column(self, **kwargs):
         """
-        Add a column to the unit table. See DynamicTable.add_column
-        for more details
+        Add a column to the unit table.
+        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
         """
         self.__check_units()
         call_docval_func(self.units.add_column, kwargs)
@@ -387,8 +388,8 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(DynamicTable.add_row))
     def add_unit(self, **kwargs):
         """
-        Add a unit to the unit table. See DynamicTable.add_row for
-        more details.
+        Add a unit to the unit table.
+        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
 
         Required fields are *start*, *end*, and any columns that have
         been added (through calls to `add_trial_columns`).
@@ -405,8 +406,8 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(DynamicTable.add_column))
     def add_trial_column(self, **kwargs):
         """
-        Add a column to the trial table. See DynamicTable.add_column
-        for more details
+        Add a column to the trial table.
+        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
         """
         self.__check_trials()
         call_docval_func(self.trials.add_column, kwargs)
@@ -414,8 +415,8 @@ class NWBFile(MultiContainerInterface):
     @docval(*get_docval(DynamicTable.add_row))
     def add_trial(self, **kwargs):
         """
-        Add a trial to the trial table. See DynamicTable.add_row for
-        more details.
+        Add a trial to the trial table.
+        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
 
         Required fields are *start*, *end*, and any columns that have
         been added (through calls to `add_trial_columns`).
@@ -425,6 +426,9 @@ class NWBFile(MultiContainerInterface):
 
     @docval({'name': 'electrode_table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):
+        """
+        Set the electrode table of this NWBFile to an existing ElectrodeTable
+        """
         if self.ec_electrodes is not None:
             msg = 'ElectrodeTable already exists, cannot overwrite'
             raise ValueError(msg)
