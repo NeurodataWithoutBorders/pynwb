@@ -155,7 +155,6 @@ nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_
 # can be added using :py:func:`~pynwb.file.NWBFile.add_trial_column`. This method takes a name
 # for the column and a description of what the column stores. You do not need to supply data
 # type, as this will inferred.
-
 # Once all columns have been added, trial data can be populated using :py:func:`~pynwb.file.NWBFile.add_trial`.
 # This method takes a dict with keys that correspond to column names.
 #
@@ -166,6 +165,33 @@ nwbfile.add_trial_column('stim', 'the visual stimuli during the trial')
 nwbfile.add_trial({'start': 0, 'end': 2, 'stim': 'person'})
 nwbfile.add_trial({'start': 3, 'end': 5, 'stim': 'ocean'})
 nwbfile.add_trial({'start': 6, 'end': 8, 'stim': 'desert'})
+
+####################
+# .. _basic_units:
+#
+# Units
+# ------
+#
+# Unit metadata can be added to an NWB file using the methods :py:func:`~pynwb.file.NWBFile.add_unit`
+# and :py:func:`~pynwb.file.NWBFile.add_unit_column`. These methods work like the methods for adding
+# trials described :ref:`above <basic_trials>`
+#
+# By default, NWBFile only requires a unique identifier for each unit. Additional columns
+# can be added using :py:func:`~pynwb.file.NWBFile.add_unit_column`. Like
+# :py:func:`~pynwb.file.NWBFile.add_trial_column`, this method also takes a name
+# for the column, a description of what the column stores and does not need a data type.
+# Once all columns have been added, unit data can be populated using :py:func:`~pynwb.file.NWBFile.add_unit`.
+# Again, like :py:func:`~pynwb.file.NWBFile.add_trial_column`, this method takes a dict with keys that correspond
+# to column names.
+#
+# Lets specify some unit metadata and then add some units
+
+nwbfile.add_unit_column('location', 'the anatomical location of this unit')
+nwbfile.add_unit_column('quality', 'the quality for the inference of this unit')
+
+nwbfile.add_trial({'id': 1, 'location': 'CA1', 'quality': 0.95})
+nwbfile.add_trial({'id': 2, 'location': 'CA3', 'quality': 0.85})
+nwbfile.add_trial({'id': 3, 'location': 'CA1', 'quality': 0.90})
 
 ####################
 # .. _basic_writing:
