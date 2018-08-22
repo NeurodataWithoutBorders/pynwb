@@ -363,6 +363,20 @@ groups:
       name: end
       neurodata_type_inc: TableColumn
       dtype: float
+  - doc: 'Data about units'
+    name: units
+    neurodata_type_inc: DynamicTable
+    quantity: '?'
+    datasets:
+    - doc: the unique identifier for each unit
+      attributes:
+        - name: description
+          value: the unique identifier for each unit
+          dtype: text
+          doc: Value is 'the unique identifier for each unit'
+      name: id
+      neurodata_type_inc: TableColumn
+      dtype: int
   name: root
   neurodata_type_def: NWBFile
   neurodata_type_inc: NWBContainer
