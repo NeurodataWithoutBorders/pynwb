@@ -62,14 +62,14 @@ class SpecCatalog(object):
         return tuple(self.__specs.keys())
 
     @docval({'name': 'data_type', 'type': str, 'doc': 'the data_type of the spec to get the source file for'},
-            returns="the path to source specification file from which the spec was orignially loaded or None ",
+            returns="the path to source specification file from which the spec was originally loaded or None ",
             rtype='str')
     def get_spec_source_file(self, **kwargs):
         '''
         Return the path to the source file from which the spec for the given
         type was loaded from. None is returned if no file path is available
         for the spec. Note: The spec in the file may not be identical to the
-        object in case teh spec is modified after load.
+        object in case the spec is modified after load.
         '''
         data_type = getargs('data_type', kwargs)
         return self.__spec_source_files.get(data_type, None)

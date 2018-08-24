@@ -14,7 +14,7 @@ class DataChunkProcessor(AbstractDataChunkIterator):
 
     @docval({'name': 'data', 'type': DataChunkIterator, 'doc': 'the DataChunkIterator to analyze'})
     def __init__(self, **kwargs):
-        """Initalize the DataChunkIterator"""
+        """Initialize the DataChunkIterator"""
         # Get the user parameters
         self.__dci = getargs('data', kwargs)  # noqa: F821
 

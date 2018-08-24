@@ -24,7 +24,7 @@ writing large arrays without loading all data into memory and streaming data wri
 # Why Iterative Data Write?
 # ^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# The possible applications for iterative data write are broad. Here we list a few typcial applications
+# The possible applications for iterative data write are broad. Here we list a few typical applications
 # for iterative data write in practice.
 #
 # * **Large data arrays** A central challenge when dealing with large data arrays is that it is often
@@ -359,7 +359,7 @@ write_test_file(filename='basic_sparse_iterwrite_largechunks_compressed_example.
 # Check the results
 # ^^^^^^^^^^^^^^^^^
 #
-# Now lets check out the size of our data file and compare it agains the expected full size of our matrix
+# Now lets check out the size of our data file and compare it against the expected full size of our matrix
 import os
 
 expected_size = xsize * ysize * 8              # This is the full size of our matrix in byte

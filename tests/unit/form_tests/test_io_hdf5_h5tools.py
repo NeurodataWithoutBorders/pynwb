@@ -405,8 +405,6 @@ class TestCacheSpec(unittest.TestCase):
 class TestLinkResolution(unittest.TestCase):
 
     def test_link_resolve(self):
-        print("TEST_LINK_RESOLVE")
-
         nwbfile = NWBFile("source", "a file with header data", "NB123A", '2018-06-01T00:00:00')
         device = nwbfile.create_device('device_name', 'source')
         electrode_group = nwbfile.create_electrode_group(
@@ -523,13 +521,13 @@ class NWBHDF5IOMultiFileTest(unittest.TestCase):
                          expand_refs=False)
 
         # Test that everything is working as expected
-        # Confirm that our orginal data file is correct
+        # Confirm that our original data file is correct
         f1 = File(self.test_temp_files[0].name)
         self.assertTrue(isinstance(f1.get('/acquisition/test_timeseries/data', getlink=True), HardLink))
-        # Confirm that we succesfully created and External Link in our second file
+        # Confirm that we successfully created and External Link in our second file
         f2 = File(self.test_temp_files[1].name)
         self.assertTrue(isinstance(f2.get('/acquisition/test_timeseries/data', getlink=True), ExternalLink))
-        # Confirm that we succesfully resolved the External Link when we copied our second file
+        # Confirm that we successfully resolved the External Link when we copied our second file
         f3 = File(self.test_temp_files[2].name)
         self.assertTrue(isinstance(f3.get('/acquisition/test_timeseries/data', getlink=True), HardLink))
 

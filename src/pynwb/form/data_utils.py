@@ -310,7 +310,7 @@ class ShapeValidator(object):
                     along each dimensions would potentially be loaded into memory. By setting this option
                     we enforce that this does not happen, at the cost that we may not be able to determine
                     the shape of the array.
-        :return: Tuple of ints indicating the size of known dimensions. Dimenions for which the size is unknown
+        :return: Tuple of ints indicating the size of known dimensions. Dimensions for which the size is unknown
                  will be set to None.
         """
         def __get_shape_helper(local_data):
@@ -399,7 +399,7 @@ class ShapeValidator(object):
             elif np.max(response.axes2) >= num_dims_2:
                 response.message += "Insufficient number of dimensions for %s -- Expected %i found %i" % \
                                     (n2, np.max(response.axes2)+1, num_dims_2)
-        # 4) Compare the lenght of the dimensions we should validate
+        # 4) Compare the length of the dimensions we should validate
         else:
             unmatched = []
             ignored = []
@@ -412,7 +412,7 @@ class ShapeValidator(object):
             response.unmatched = unmatched
             response.ignored = ignored
 
-            # Check if everyting checked out
+            # Check if everything checked out
             if len(response.unmatched) == 0:
                 response.result = True
                 response.error = None
@@ -451,7 +451,7 @@ class ShapeValidatorResult(object):
                    'AXIS_OUT_OF_BOUNDS': "Axis index for comparison out of bounds.",
                    'AXIS_LEN_ERROR': "Unequal length of axes."}
     """
-    Dict where the Keys are the type of errors that may have occured during shape comparison and the
+    Dict where the Keys are the type of errors that may have occurred during shape comparison and the
     values are strings with default error messages for the type.
     """
 

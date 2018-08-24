@@ -42,7 +42,7 @@ class FORMIO(with_metaclass(ABCMeta, object)):
     @abstractmethod
     @docval(returns='a GroupBuilder representing the read data', rtype='GroupBuilder')
     def read_builder(self):
-        ''' Read data and return the GroupBuilder represention '''
+        ''' Read data and return the GroupBuilder representing '''
         pass
 
     @abstractmethod

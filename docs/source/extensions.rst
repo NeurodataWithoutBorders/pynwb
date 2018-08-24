@@ -125,11 +125,11 @@ Extend an existing type
 
     from pynwb.spec import NWBGroupSpec
 
-    # A list of NWBAttributeSpec objects to specify additional attributes or attributes to be overriden
+    # A list of NWBAttributeSpec objects to specify additional attributes or attributes to be overridden
     addl_attributes = [...]
-    # A list of NWBDatasetSpec objects to specify additional datasets or datasets to be overriden
+    # A list of NWBDatasetSpec objects to specify additional datasets or datasets to be overridden
     addl_datasets = [...]
-    # A list of NWBGroupSpec objects to specify additional groups or groups to be overriden
+    # A list of NWBGroupSpec objects to specify additional groups or groups to be overridden
     addl_groups = [...]
     spec = NWBGroupSpec('An extended NWB type',
                         attributes = addl_attributes,
@@ -213,7 +213,7 @@ Create a new namespace with extensions
 
     Using the API to generate extensions (rather than writing YAML sources directly) helps avoid errors in the specification
     (e.g., due to missing required keys or invalid values) and ensure compliance of the extension definition with the
-    NWB specification language. It also helps with maintanence of extensions, e.g., if extensions have to be ported to
+    NWB specification language. It also helps with maintenance of extensions, e.g., if extensions have to be ported to
     newer versions of the `specification language <https://schema-language.readthedocs.io/en/latest/>`_
     in the future.
 
@@ -346,7 +346,7 @@ For the purpose of this example, we assume that our current directory has the fo
               - mylab_release_notes.rst
 
 In addition to Python 3.x, you will also need ``sphinx`` (including the ``sphinx-quickstart`` tool) installed.
-Sphinx is availble here http://www.sphinx-doc.org/en/stable/install.html .
+Sphinx is available here http://www.sphinx-doc.org/en/stable/install.html .
 
 We can now create the sources of our documentation as follows:
 
