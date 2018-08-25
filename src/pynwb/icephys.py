@@ -60,7 +60,8 @@ class PatchClampSeries(TimeSeries):
     '''
 
     __nwbfields__ = ('electrode',
-                     'gain')
+                     'gain',
+                     'stimulus_description')
 
     _ancestry = "TimeSeries,PatchClampSeries"
     _help = "Superclass definition for patch-clamp data."
@@ -78,6 +79,7 @@ class PatchClampSeries(TimeSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
              or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
 
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -106,6 +108,7 @@ class PatchClampSeries(TimeSeries):
         super(PatchClampSeries, self).__init__(name, source, data, unit, **kwargs)
         self.electrode = electrode
         self.gain = gain
+        self.stimulus_description = stimulus_description
 
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)
@@ -136,6 +139,7 @@ class CurrentClampSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or \
              record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol'},
 
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp'},
             {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm'},
@@ -201,6 +205,7 @@ class IZeroClampSeries(CurrentClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
              or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol'},
 
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': 0.0},
             {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': 0.0},
@@ -259,6 +264,7 @@ class CurrentClampStimulusSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to \
              apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol'},
 
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -318,6 +324,7 @@ class VoltageClampSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to \
              apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol'},
             {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad'},
             {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad'},
             {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz'},
@@ -387,6 +394,7 @@ class VoltageClampStimulusSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was \
              used to apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},

@@ -4,6 +4,9 @@ groups:
     dtype: text
     name: help
     value: Superclass definition for patch-clamp data
+  - doc: the protocol/stimulus name for this patch-clamp dataset
+    dtype: text
+    name: stimulus_description
   datasets:
   - dims:
     - num_times
