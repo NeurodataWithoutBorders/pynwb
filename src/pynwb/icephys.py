@@ -103,7 +103,7 @@ class PatchClampSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
+        name, source, data, unit, stimulus_description = popargs('name', 'source', 'data', 'unit', 'stimulus_description', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
         super(PatchClampSeries, self).__init__(name, source, data, unit, **kwargs)
         self.electrode = electrode
@@ -139,7 +139,7 @@ class CurrentClampSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or \
              record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
 
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp'},
             {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm'},
@@ -205,7 +205,7 @@ class IZeroClampSeries(CurrentClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
              or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
 
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': 0.0},
             {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': 0.0},
@@ -264,7 +264,7 @@ class CurrentClampStimulusSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to \
              apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
 
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -324,7 +324,7 @@ class VoltageClampSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to \
              apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
             {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad'},
             {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad'},
             {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz'},
@@ -394,7 +394,7 @@ class VoltageClampStimulusSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was \
              used to apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
