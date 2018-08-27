@@ -39,6 +39,8 @@ class YAMLSpecWriter(SpecWriter):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
             self.__dump_spec(spec_file_dict, stream)
 
+        self.reorder_yaml(os.path.join(self.__outdir, path))
+
     def write_namespace(self, namespace, path):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
             self.__dump_spec({'namespaces': [namespace]}, stream)
@@ -166,7 +168,6 @@ class NamespaceBuilder(object):
                 item[self.__dt_key] = dts
             elif out:
                 writer.write_spec(out, path)
-                writer.reorder_yaml(path)
             ns_args['schema'].append(item)
         namespace = SpecNamespace.build_namespace(**ns_args)
         writer.write_namespace(namespace, ns_path)
