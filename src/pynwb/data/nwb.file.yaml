@@ -331,6 +331,20 @@ groups:
         doc: Value is 'the end time of each trial'
         value: the end time of each trial
     quantity: '?'
+  - neurodata_type_inc: DynamicTable
+    name: units
+    doc: Data about units
+    datasets:
+    - neurodata_type_inc: TableColumn
+      name: id
+      dtype: int
+      doc: the unique identifier for each unit
+      attributes:
+      - name: description
+        dtype: text
+        doc: Value is 'the unique identifier for each unit'
+        value: the unique identifier for each unit
+    quantity: '?'
   datasets:
   - name: file_create_date
     dtype: text
