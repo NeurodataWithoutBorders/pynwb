@@ -116,7 +116,6 @@ groups:
     doc: Signals from ROIs
     dtype: float32
     name: data
-    quantity: '?'
     shape:
     - null
     - null

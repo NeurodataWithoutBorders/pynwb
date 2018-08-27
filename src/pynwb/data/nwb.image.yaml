@@ -22,6 +22,7 @@ groups:
     doc: Either binary data containing image or empty.
     dtype: int8
     name: data
+    quantity: '?'
     shape:
     - - null
       - null
