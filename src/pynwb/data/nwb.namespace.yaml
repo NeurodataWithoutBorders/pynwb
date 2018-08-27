@@ -1,5 +1,7 @@
 namespaces:
-- author:
+- name: core
+  doc: NWB namespace
+  author:
   - Keith Godfrey
   - Jeff Teeters
   - Oliver Ruebel
@@ -9,9 +11,7 @@ namespaces:
   - jteeters@berkeley.edu
   - oruebel@lbl.gov
   - ajtritt@lbl.gov
-  doc: NWB namespace
   full_name: NWB core
-  name: core
   schema:
   - source: nwb.base.yaml
   - source: nwb.epoch.yaml
