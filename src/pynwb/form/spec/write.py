@@ -43,6 +43,35 @@ class YAMLSpecWriter(SpecWriter):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
             self.__dump_spec({'namespaces': [namespace]}, stream)
 
+    def reorder_yaml(self, path):
+        full_path = os.path.join(self.__outdir, path)
+        with open(full_path, 'rb') as f_in:
+            data = yaml.load(f_in, Loader=yaml.RoundTripLoader)
+        sorted_data = self.sort_keys(data)
+
+        with open(full_path, 'w') as f_out:
+            f_out.write(yaml.dump(sorted_data, Dumper=yaml.RoundTripDumper))
+
+    def sort_keys(self, obj):
+        order = ['neurodata_type_def', 'neurodata_type_inc', 'name', 'dtype',
+                 'doc', 'quantity', 'required', 'attributes', 'datasets', 'groups']
+
+        if isinstance(obj, dict):
+            keys = list(obj.keys())
+            for k in order[::-1]:
+                if k in keys:
+                    keys.remove(k)
+                    keys.insert(0, k)
+            return yaml.comments.CommentedMap(
+                yaml.compat.ordereddict([(k, self.sort_keys(obj[k])) for k in keys])
+            )
+        elif isinstance(obj, list):
+            return [self.sort_keys(v) for v in obj]
+        elif isinstance(obj, tuple):
+            return (self.sort_keys(v) for v in obj)
+        else:
+            return obj
+
 
 class NamespaceBuilder(object):
     ''' A class for building namespace and spec files '''
@@ -137,6 +166,7 @@ class NamespaceBuilder(object):
                 item[self.__dt_key] = dts
             elif out:
                 writer.write_spec(out, path)
+                writer.reorder_yaml(path)
             ns_args['schema'].append(item)
         namespace = SpecNamespace.build_namespace(**ns_args)
         writer.write_namespace(namespace, ns_path)
