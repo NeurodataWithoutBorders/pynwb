@@ -141,6 +141,17 @@ class NWBFileTest(unittest.TestCase):
         self.assertIs(self.nwbfile.ec_electrodes, table)
         self.assertIs(table.parent, self.nwbfile)
 
+    def test_add_unit_column(self):
+        self.nwbfile.add_unit_column('unit_type', 'the type of unit')
+        self.assertEqual(self.nwbfile.units.colnames, ('id', 'unit_type'))
+
+    def test_add_unit(self):
+        self.nwbfile.add_unit({'id': 1})
+        self.assertEqual(len(self.nwbfile.units), 1)
+        self.nwbfile.add_unit({'id': 2})
+        self.nwbfile.add_unit({'id': 3})
+        self.assertEqual(len(self.nwbfile.units), 3)
+
     def test_add_trial_column(self):
         self.nwbfile.add_trial_column('trial_type', 'the type of trial')
         self.assertEqual(self.nwbfile.trials.colnames, ('start', 'end', 'trial_type'))
