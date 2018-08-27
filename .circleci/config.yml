@@ -71,7 +71,7 @@ references:
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
             conda install virtualenv
-            pip install tox
+            conda install tox
       - run:
           name: Run the tests
           command: |
@@ -300,4 +300,3 @@ workflows:
               only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
             branches:
               ignore: /.*/
-
