@@ -103,7 +103,8 @@ class PatchClampSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit, stimulus_description = popargs('name', 'source', 'data', 'unit', 'stimulus_description', kwargs)
+        name, source, data, unit, stimulus_description = popargs('name', 'source', 'data',
+                                                                 'unit', 'stimulus_description', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
         super(PatchClampSeries, self).__init__(name, source, data, unit, **kwargs)
         self.electrode = electrode
