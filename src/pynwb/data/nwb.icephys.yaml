@@ -8,9 +8,9 @@ groups:
     dtype: text
     doc: Value is 'Superclass definition for patch-clamp data'
     value: Superclass definition for patch-clamp data
-  - doc: the protocol/stimulus name for this patch-clamp dataset
+  - name: stimulus_description
     dtype: text
-    name: stimulus_description
+    doc: the protocol/stimulus name for this patch-clamp dataset
   datasets:
   - name: data
     dtype: float
