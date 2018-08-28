@@ -19,6 +19,7 @@ groups:
   - name: data
     dtype: int8
     doc: Either binary data containing image or empty.
+    quantity: '?'
     dims:
     - - x
       - y
