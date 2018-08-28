@@ -49,7 +49,7 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(ip.unit, 'unit')
         self.assertEqual(ip.reference_frame, 'reference_frame')
 
-        tPS = TwoPhotonSeries('test_tPS', 'a hypothetical source', data=list(), unit='unit', field_of_view=list(),
+        tPS = TwoPhotonSeries('test_tPS', 'a hypothetical source', unit='unit', field_of_view=list(),
                               imaging_plane=ip, pmt_gain=1.0, scan_line_rate=2.0, external_file=['external_file'],
                               starting_frame=[1, 2, 3], format='tiff', timestamps=list())
         self.assertEqual(tPS.name, 'test_tPS')
@@ -63,6 +63,16 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(tPS.starting_frame, [1, 2, 3])
         self.assertEqual(tPS.format, 'tiff')
         self.assertEqual(tPS.dimension, [np.nan])
+
+    def test_args(self):
+        oc = OpticalChannel('test_name', 'test_source', 'description', 500.)
+        device = Device(name='device_name', source='device_source')
+        ip = ImagingPlane('test_imaging_plane', 'test source', oc, 'description', device, 600.,
+                          'imaging_rate', 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
+        with self.assertRaises(ValueError):  # no data or external file
+            TwoPhotonSeries('test_tPS', 'a hypothetical source', unit='unit', field_of_view=list(),
+                            imaging_plane=ip, pmt_gain=1.0, scan_line_rate=2.0,
+                            starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
 
 class MotionCorrectionConstructor(unittest.TestCase):
