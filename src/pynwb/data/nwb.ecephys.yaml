@@ -1,322 +1,6 @@
-groups:
-- attributes:
-  - doc: Value is 'Stores acquired voltage data from extracellular recordings'
-    dtype: text
-    name: help
-    value: Stores acquired voltage data from extracellular recordings
-  datasets:
-  - attributes:
-    - default_value: volt
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
-      dtype: text
-      name: unit
-      required: false
-    dims:
-    - - num_times
-    - - num_times
-      - num_channels
-    doc: Recorded voltage data.
-    dtype: float
-    name: data
-    shape:
-    - - null
-    - - null
-      - null
-  - name: electrodes
-    doc: 'the electrodes that this series was generated from'
-    neurodata_type_inc: ElectrodeTableRegion
-  doc: 'Stores acquired voltage data from extracellular recordings. The data field
-    of an ElectricalSeries is an int or float array storing data in Volts. TimeSeries::data
-    array structure: :blue:`[num times] [num channels] (or [num_times] for single
-    electrode).`'
-  neurodata_type_def: ElectricalSeries
-  neurodata_type_inc: TimeSeries
-- attributes:
-  - doc: Value is 'Snapshots of spike events from data.'
-    dtype: text
-    name: help
-    value: Snapshots of spike events from data.
-  datasets:
-  - attributes:
-    - default_value: volt
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
-      dtype: text
-      name: unit
-      required: false
-    dims:
-    - - num_events
-      - num_samples
-    - - num_events
-      - num_channels
-      - num_samples
-    doc: Spike waveforms.
-    dtype: float32
-    name: data
-    shape:
-    - - null
-      - null
-    - - null
-      - null
-      - null
-  doc: 'Stores "snapshots" of spike events (i.e., threshold crossings) in data. This
-    may also be raw data, as reported by ephys hardware. If so, the TimeSeries::description
-    field should describing how events were detected. All SpikeEventSeries should
-    reside in a module (under EventWaveform interface) even if the spikes were reported
-    and stored by hardware. All events span the same recording channels and store
-    snapshots of equal duration. TimeSeries::data array structure: :blue:`[num events]
-    [num channels] [num samples] (or [num events] [num samples] for single electrode)`.'
-  neurodata_type_def: SpikeEventSeries
-  neurodata_type_inc: ElectricalSeries
-- attributes:
-  - doc: Value is 'Mean waveform shape of clusters. Waveforms should be high-pass
-      filtered (ie, not the same bandpass filter used waveform analysis and clustering)'
-    dtype: text
-    name: help
-    value: Mean waveform shape of clusters. Waveforms should be high-pass filtered
-      (ie, not the same bandpass filter used waveform analysis and clustering)
-  datasets:
-  - doc: Filtering applied to data before generating mean/sd
-    dtype: text
-    name: waveform_filtering
-  - dims:
-    - num_clusters
-    - num_samples
-    doc: The mean waveform for each cluster, using the same indices for each wave
-      as cluster numbers in the associated Clustering module (i.e, cluster 3 is in
-      array slot [3]). Waveforms corresponding to gaps in cluster sequence should
-      be empty (e.g., zero- filled)
-    dtype: float32
-    name: waveform_mean
-    shape:
-    - null
-    - null
-  - dims:
-    - num_clusters
-    - num_samples
-    doc: Stdev of waveforms for each cluster, using the same indices as in mean
-    dtype: float32
-    name: waveform_sd
-    shape:
-    - null
-    - null
-  doc: The mean waveform shape, including standard deviation, of the different clusters.
-    Ideally, the waveform analysis should be performed on data that is only high-pass
-    filtered. This is a separate module because it is expected to require updating.
-    For example, IMEC probes may require different storage requirements to store/display
-    mean waveforms, requiring a new interface or an extension of this one.
-  links:
-  - doc: HDF5 link to Clustering interface that was the source of the clustered data
-    name: clustering_interface
-    target_type: Clustering
-  default_name: ClusterWaveforms
-  neurodata_type_def: ClusterWaveforms
-  neurodata_type_inc: NWBDataInterface
-- attributes:
-  - doc: Value is 'Clustered spike data, whether from automatic clustering tools (eg,
-      klustakwik) or as a result of manual sorting'
-    dtype: text
-    name: help
-    value: Clustered spike data, whether from automatic clustering tools (eg, klustakwik)
-      or as a result of manual sorting
-  datasets:
-  - doc: Description of clusters or clustering, (e.g. cluster 0 is noise, clusters
-      curated using Klusters, etc)
-    dtype: text
-    name: description
-  - dims:
-    - num_events
-    doc: Cluster number of each event
-    dtype: int32
-    name: num
-    shape:
-    - null
-  - dims:
-    - num_clusters
-    doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
-      a basic clustering metric).
-    dtype: float32
-    name: peak_over_rms
-    shape:
-    - null
-  - dims:
-    - num_events
-    doc: Times of clustered events, in seconds. This may be a link to times field
-      in associated FeatureExtraction module.
-    dtype: float64
-    name: times
-    shape:
-    - null
-  doc: Clustered spike data, whether from automatic clustering tools (e.g., klustakwik)
-    or as a result of manual sorting.
-  default_name: Clustering
-  neurodata_type_def: Clustering
-  neurodata_type_inc: NWBDataInterface
-- attributes:
-  - doc: Value is 'Container for salient features of detected events'
-    dtype: text
-    name: help
-    value: Container for salient features of detected events
-  datasets:
-  - dims:
-    - num_features
-    doc: Description of features (eg, "PC1") for each of the extracted features.
-    dtype: text
-    name: description
-    shape:
-    - null
-  - dims:
-    - num_events
-    - num_channels
-    - num_features
-    doc: Multi-dimensional array of features extracted from each event.
-    dtype: float32
-    name: features
-    shape:
-    - null
-    - null
-    - null
-  - dims:
-    - num_events
-    doc: Times of events that features correspond to (can be a link).
-    dtype: float64
-    name: times
-    shape:
-    - null
-  - name: electrodes
-    doc: 'the electrodes that this series was generated from'
-    neurodata_type_inc: ElectrodeTableRegion
-  doc: Features, such as PC1 and PC2, that are extracted from signals stored in a
-    SpikeEvent TimeSeries or other source.
-  default_name: FeatureExtraction
-  neurodata_type_def: FeatureExtraction
-  neurodata_type_inc: NWBDataInterface
-- attributes:
-  - doc: Value is 'Detected spike events from voltage trace(s)'
-    dtype: text
-    name: help
-    value: Detected spike events from voltage trace(s)
-  datasets:
-  - doc: Description of how events were detected, such as voltage threshold, or dV/dT
-      threshold, as well as relevant values.
-    dtype: text
-    name: detection_method
-  - dims:
-    - num_events
-    doc: Indices (zero-based) into source ElectricalSeries::data array corresponding
-      to time of event. Module description should define what is meant by time of
-      event (e.g., .25msec before action potential peak, zero-crossing time, etc).
-      The index points to each event from the raw data
-    dtype: int32
-    name: source_idx
-    shape:
-    - null
-  - attributes:
-    - default_value: Seconds
-      doc: The string "Seconds"
-      dtype: text
-      name: unit
-      required: false
-    dims:
-    - num_events
-    doc: Timestamps of events, in Seconds
-    dtype: float64
-    name: times
-    shape:
-    - null
-  doc: Detected spike events from voltage trace(s).
-  links:
-  - doc: HDF5 link to ElectricalSeries that this data was calculated from. Metadata
-      about electrodes and their position can be read from that ElectricalSeries so
-      it's not necessary to mandate that information be stored here
-    name: source_electricalseries
-    target_type: ElectricalSeries
-  default_name: EventDetection
-  neurodata_type_def: EventDetection
-  neurodata_type_inc: NWBDataInterface
-- attributes:
-  - doc: Value is 'Waveform of detected extracellularly recorded spike events'
-    dtype: text
-    name: help
-    value: Waveform of detected extracellularly recorded spike events
-  doc: Represents either the waveforms of detected events, as extracted from a raw
-    data trace in /acquisition, or the event waveforms that were stored during experiment
-    acquisition.
-  groups:
-  - doc: SpikeEventSeries object containing detected spike event waveforms
-    neurodata_type_inc: SpikeEventSeries
-    quantity: '*'
-  default_name: EventWaveform
-  neurodata_type_def: EventWaveform
-  neurodata_type_inc: NWBDataInterface
-- attributes:
-  - doc: Value is 'Ephys data from one or more channels that is subjected to filtering,
-      such as for gamma or theta oscillations (LFP has its own interface). Filter
-      properties should be noted in the ElectricalSeries'
-    dtype: text
-    name: help
-    value: Ephys data from one or more channels that is subjected to filtering, such
-      as for gamma or theta oscillations (LFP has its own interface). Filter properties
-      should be noted in the ElectricalSeries
-  doc: "Ephys data from one or more channels that has been subjected to filtering.
-    Examples of filtered data include Theta and Gamma (LFP has its own interface).
-    FilteredEphys modules publish an ElectricalSeries for each filtered channel or
-    set of channels. The name of each ElectricalSeries is arbitrary but should be
-    informative. The source of the filtered data, whether this is from analysis of
-    another time series or as acquired by hardware, should be noted in each's TimeSeries::description
-    field. There is no assumed 1::1 correspondence between filtered ephys signals
-    and electrodes, as a single signal can apply to many nearby electrodes, and one
-    electrode may have different filtered (e.g., theta and/or gamma) signals represented."
-  groups:
-  - doc: ElectricalSeries object containing filtered electrophysiology data
-    neurodata_type_inc: ElectricalSeries
-    quantity: '+'
-  default_name: FilteredEphys
-  neurodata_type_def: FilteredEphys
-  neurodata_type_inc: NWBDataInterface
-- attributes:
-  - doc: Value is 'LFP data from one or more channels. Filter properties should be
-      noted in the ElectricalSeries'
-    dtype: text
-    name: help
-    value: LFP data from one or more channels. Filter properties should be noted in
-      the ElectricalSeries
-  doc: LFP data from one or more channels. The electrode map in each published ElectricalSeries
-    will identify which channels are providing LFP data. Filter properties should
-    be noted in the ElectricalSeries description or comments field.
-  groups:
-  - doc: ElectricalSeries object containing LFP data for one or more channels
-    neurodata_type_inc: ElectricalSeries
-    quantity: '+'
-  default_name: LFP
-  neurodata_type_def: LFP
-  neurodata_type_inc: NWBDataInterface
-- attributes:
-  - doc: Value is 'Metadata about a physical grouping of channels'
-    dtype: text
-    name: help
-    value: A physical grouping of channels
-  - doc: description of this electrode group
-    dtype: text
-    name: description
-  - doc: description of location of this electrode group
-    dtype: text
-    name: location
-  doc: One of possibly many groups, one for each electrode group.
-  links:
-  - doc: the device that was used to record from this electrode group
-    name: device
-    quantity: '?'
-    target_type: Device
-  neurodata_type_def: ElectrodeGroup
-  neurodata_type_inc: NWBContainer
 datasets:
-- doc: 'a table for storing queryable information about electrodes in a single table'
+- neurodata_type_def: ElectrodeTable
+  neurodata_type_inc: NWBData
   dtype:
   - name: id
     dtype: int
@@ -344,30 +28,346 @@ datasets:
     doc: a brief description of what this electrode is
   - name: group
     dtype:
-        target_type: ElectrodeGroup
-        reftype: object
+      target_type: ElectrodeGroup
+      reftype: object
     doc: a reference to the ElectrodeGroup this electrode is a part of
   - name: group_name
     dtype: ascii
     doc: the name of the ElectrodeGroup this electrode is a part of
+  doc: a table for storing queryable information about electrodes in a single table
   attributes:
-    - doc: Value is 'a table for storing data about extracellular electrodes'
-      dtype: text
-      name: help
-      value: a table for storing data about extracellular electrodes
-  neurodata_type_inc: NWBData
-  neurodata_type_def: ElectrodeTable
-- doc: 'a dataset for subsetting ElectrodeTables'
-  neurodata_type_def: ElectrodeTableRegion
+  - name: help
+    dtype: text
+    doc: Value is 'a table for storing data about extracellular electrodes'
+    value: a table for storing data about extracellular electrodes
+- neurodata_type_def: ElectrodeTableRegion
   neurodata_type_inc: NWBData
   dtype:
     target_type: ElectrodeTable
     reftype: region
+  doc: a dataset for subsetting ElectrodeTables
   attributes:
-    - name: description
-      doc: 'a description of this subset of electrodes'
-      dtype: utf8
-    - doc: Value is 'a subset (i.e. slice or region) of an ElectrodeTable'
+  - name: description
+    dtype: utf8
+    doc: a description of this subset of electrodes
+  - name: help
+    dtype: text
+    doc: Value is 'a subset (i.e. slice or region) of an ElectrodeTable'
+    value: a subset (i.e. slice or region) of an ElectrodeTable
+groups:
+- neurodata_type_def: ElectricalSeries
+  neurodata_type_inc: TimeSeries
+  doc: 'Stores acquired voltage data from extracellular recordings. The data field
+    of an ElectricalSeries is an int or float array storing data in Volts. TimeSeries::data
+    array structure: :blue:`[num times] [num channels] (or [num_times] for single
+    electrode).`'
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'Stores acquired voltage data from extracellular recordings'
+    value: Stores acquired voltage data from extracellular recordings
+  datasets:
+  - name: data
+    dtype: float
+    doc: Recorded voltage data.
+    attributes:
+    - name: unit
       dtype: text
-      name: help
-      value: a subset (i.e. slice or region) of an ElectrodeTable
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      default_value: volt
+      required: false
+    dims:
+    - - num_times
+    - - num_times
+      - num_channels
+    shape:
+    - - 
+    - - 
+      - 
+  - neurodata_type_inc: ElectrodeTableRegion
+    name: electrodes
+    doc: the electrodes that this series was generated from
+- neurodata_type_def: SpikeEventSeries
+  neurodata_type_inc: ElectricalSeries
+  doc: 'Stores "snapshots" of spike events (i.e., threshold crossings) in data. This
+    may also be raw data, as reported by ephys hardware. If so, the TimeSeries::description
+    field should describing how events were detected. All SpikeEventSeries should
+    reside in a module (under EventWaveform interface) even if the spikes were reported
+    and stored by hardware. All events span the same recording channels and store
+    snapshots of equal duration. TimeSeries::data array structure: :blue:`[num events]
+    [num channels] [num samples] (or [num events] [num samples] for single electrode)`.'
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'Snapshots of spike events from data.'
+    value: Snapshots of spike events from data.
+  datasets:
+  - name: data
+    dtype: float32
+    doc: Spike waveforms.
+    attributes:
+    - name: unit
+      dtype: text
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
+      default_value: volt
+      required: false
+    dims:
+    - - num_events
+      - num_samples
+    - - num_events
+      - num_channels
+      - num_samples
+    shape:
+    - - 
+      - 
+    - - 
+      - 
+      - 
+- neurodata_type_def: ClusterWaveforms
+  neurodata_type_inc: NWBDataInterface
+  doc: The mean waveform shape, including standard deviation, of the different clusters.
+    Ideally, the waveform analysis should be performed on data that is only high-pass
+    filtered. This is a separate module because it is expected to require updating.
+    For example, IMEC probes may require different storage requirements to store/display
+    mean waveforms, requiring a new interface or an extension of this one.
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'Mean waveform shape of clusters. Waveforms should be high-pass
+      filtered (ie, not the same bandpass filter used waveform analysis and clustering)'
+    value: Mean waveform shape of clusters. Waveforms should be high-pass filtered
+      (ie, not the same bandpass filter used waveform analysis and clustering)
+  datasets:
+  - name: waveform_filtering
+    dtype: text
+    doc: Filtering applied to data before generating mean/sd
+  - name: waveform_mean
+    dtype: float32
+    doc: The mean waveform for each cluster, using the same indices for each wave
+      as cluster numbers in the associated Clustering module (i.e, cluster 3 is in
+      array slot [3]). Waveforms corresponding to gaps in cluster sequence should
+      be empty (e.g., zero- filled)
+    dims:
+    - num_clusters
+    - num_samples
+    shape:
+    - 
+    - 
+  - name: waveform_sd
+    dtype: float32
+    doc: Stdev of waveforms for each cluster, using the same indices as in mean
+    dims:
+    - num_clusters
+    - num_samples
+    shape:
+    - 
+    - 
+  links:
+  - name: clustering_interface
+    doc: HDF5 link to Clustering interface that was the source of the clustered data
+    target_type: Clustering
+  default_name: ClusterWaveforms
+- neurodata_type_def: Clustering
+  neurodata_type_inc: NWBDataInterface
+  doc: Clustered spike data, whether from automatic clustering tools (e.g., klustakwik)
+    or as a result of manual sorting.
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'Clustered spike data, whether from automatic clustering tools (eg,
+      klustakwik) or as a result of manual sorting'
+    value: Clustered spike data, whether from automatic clustering tools (eg, klustakwik)
+      or as a result of manual sorting
+  datasets:
+  - name: description
+    dtype: text
+    doc: Description of clusters or clustering, (e.g. cluster 0 is noise, clusters
+      curated using Klusters, etc)
+  - name: num
+    dtype: int32
+    doc: Cluster number of each event
+    dims:
+    - num_events
+    shape:
+    - 
+  - name: peak_over_rms
+    dtype: float32
+    doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
+      a basic clustering metric).
+    dims:
+    - num_clusters
+    shape:
+    - 
+  - name: times
+    dtype: float64
+    doc: Times of clustered events, in seconds. This may be a link to times field
+      in associated FeatureExtraction module.
+    dims:
+    - num_events
+    shape:
+    - 
+  default_name: Clustering
+- neurodata_type_def: FeatureExtraction
+  neurodata_type_inc: NWBDataInterface
+  doc: Features, such as PC1 and PC2, that are extracted from signals stored in a
+    SpikeEvent TimeSeries or other source.
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'Container for salient features of detected events'
+    value: Container for salient features of detected events
+  datasets:
+  - name: description
+    dtype: text
+    doc: Description of features (eg, "PC1") for each of the extracted features.
+    dims:
+    - num_features
+    shape:
+    - 
+  - name: features
+    dtype: float32
+    doc: Multi-dimensional array of features extracted from each event.
+    dims:
+    - num_events
+    - num_channels
+    - num_features
+    shape:
+    - 
+    - 
+    - 
+  - name: times
+    dtype: float64
+    doc: Times of events that features correspond to (can be a link).
+    dims:
+    - num_events
+    shape:
+    - 
+  - neurodata_type_inc: ElectrodeTableRegion
+    name: electrodes
+    doc: the electrodes that this series was generated from
+  default_name: FeatureExtraction
+- neurodata_type_def: EventDetection
+  neurodata_type_inc: NWBDataInterface
+  doc: Detected spike events from voltage trace(s).
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'Detected spike events from voltage trace(s)'
+    value: Detected spike events from voltage trace(s)
+  datasets:
+  - name: detection_method
+    dtype: text
+    doc: Description of how events were detected, such as voltage threshold, or dV/dT
+      threshold, as well as relevant values.
+  - name: source_idx
+    dtype: int32
+    doc: Indices (zero-based) into source ElectricalSeries::data array corresponding
+      to time of event. Module description should define what is meant by time of
+      event (e.g., .25msec before action potential peak, zero-crossing time, etc).
+      The index points to each event from the raw data
+    dims:
+    - num_events
+    shape:
+    - 
+  - name: times
+    dtype: float64
+    doc: Timestamps of events, in Seconds
+    attributes:
+    - name: unit
+      dtype: text
+      doc: The string "Seconds"
+      default_value: Seconds
+      required: false
+    dims:
+    - num_events
+    shape:
+    - 
+  links:
+  - name: source_electricalseries
+    doc: HDF5 link to ElectricalSeries that this data was calculated from. Metadata
+      about electrodes and their position can be read from that ElectricalSeries so
+      it's not necessary to mandate that information be stored here
+    target_type: ElectricalSeries
+  default_name: EventDetection
+- neurodata_type_def: EventWaveform
+  neurodata_type_inc: NWBDataInterface
+  doc: Represents either the waveforms of detected events, as extracted from a raw
+    data trace in /acquisition, or the event waveforms that were stored during experiment
+    acquisition.
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'Waveform of detected extracellularly recorded spike events'
+    value: Waveform of detected extracellularly recorded spike events
+  groups:
+  - neurodata_type_inc: SpikeEventSeries
+    doc: SpikeEventSeries object containing detected spike event waveforms
+    quantity: '*'
+  default_name: EventWaveform
+- neurodata_type_def: FilteredEphys
+  neurodata_type_inc: NWBDataInterface
+  doc: Ephys data from one or more channels that has been subjected to filtering.
+    Examples of filtered data include Theta and Gamma (LFP has its own interface).
+    FilteredEphys modules publish an ElectricalSeries for each filtered channel or
+    set of channels. The name of each ElectricalSeries is arbitrary but should be
+    informative. The source of the filtered data, whether this is from analysis of
+    another time series or as acquired by hardware, should be noted in each's TimeSeries::description
+    field. There is no assumed 1::1 correspondence between filtered ephys signals
+    and electrodes, as a single signal can apply to many nearby electrodes, and one
+    electrode may have different filtered (e.g., theta and/or gamma) signals represented.
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'Ephys data from one or more channels that is subjected to filtering,
+      such as for gamma or theta oscillations (LFP has its own interface). Filter
+      properties should be noted in the ElectricalSeries'
+    value: Ephys data from one or more channels that is subjected to filtering, such
+      as for gamma or theta oscillations (LFP has its own interface). Filter properties
+      should be noted in the ElectricalSeries
+  groups:
+  - neurodata_type_inc: ElectricalSeries
+    doc: ElectricalSeries object containing filtered electrophysiology data
+    quantity: +
+  default_name: FilteredEphys
+- neurodata_type_def: LFP
+  neurodata_type_inc: NWBDataInterface
+  doc: LFP data from one or more channels. The electrode map in each published ElectricalSeries
+    will identify which channels are providing LFP data. Filter properties should
+    be noted in the ElectricalSeries description or comments field.
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'LFP data from one or more channels. Filter properties should be
+      noted in the ElectricalSeries'
+    value: LFP data from one or more channels. Filter properties should be noted in
+      the ElectricalSeries
+  groups:
+  - neurodata_type_inc: ElectricalSeries
+    doc: ElectricalSeries object containing LFP data for one or more channels
+    quantity: +
+  default_name: LFP
+- neurodata_type_def: ElectrodeGroup
+  neurodata_type_inc: NWBContainer
+  doc: One of possibly many groups, one for each electrode group.
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'Metadata about a physical grouping of channels'
+    value: A physical grouping of channels
+  - name: description
+    dtype: text
+    doc: description of this electrode group
+  - name: location
+    dtype: text
+    doc: description of location of this electrode group
+  links:
+  - name: device
+    doc: the device that was used to record from this electrode group
+    quantity: '?'
+    target_type: Device
