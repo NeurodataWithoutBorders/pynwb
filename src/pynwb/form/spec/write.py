@@ -52,6 +52,12 @@ class YAMLSpecWriter(SpecWriter):
             f_out.write(yaml.dump(sorted_data, Dumper=yaml.RoundTripDumper))
 
     def sort_keys(self, obj):
+
+        # Represent None as null
+        def my_represent_none(self, data):
+            return self.represent_scalar(u'tag:yaml.org,2002:null', u'null')
+        yaml.RoundTripRepresenter.add_representer(type(None), my_represent_none)
+
         order = ['neurodata_type_def', 'neurodata_type_inc', 'name', 'dtype', 'doc',
                  'attributes', 'datasets', 'groups']
         if isinstance(obj, dict):
