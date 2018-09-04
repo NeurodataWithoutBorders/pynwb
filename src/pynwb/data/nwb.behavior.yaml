@@ -24,18 +24,18 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      doc: 'The base unit of measure used to store data. This should be in the SI
-        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
-        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
-        below describes how to convert the data to the specified SI unit.'
+      doc: "The base unit of measure used to store data. This should be in the SI\
+        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
+        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
+        \ below describes how to convert the data to the specified SI unit."
       default_value: meter
       required: false
     dims:
     - num_times
     - num_features
     shape:
-    -
-    -
+    - null
+    - null
   - name: reference_frame
     dtype: text
     doc: Description defining what exactly 'straight-ahead' means.
