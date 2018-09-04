@@ -34,8 +34,8 @@ groups:
     - num_times
     - num_features
     shape:
-    - 
-    - 
+    - null
+    - null
   - name: reference_frame
     dtype: text
     doc: Description defining what exactly 'straight-ahead' means.

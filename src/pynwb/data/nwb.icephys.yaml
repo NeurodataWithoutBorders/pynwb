@@ -18,7 +18,7 @@ groups:
     dims:
     - num_times
     shape:
-    - 
+    - null
   - name: gain
     dtype: float
     doc: 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'
