@@ -4,6 +4,7 @@ for reading and writing data in NWB format
 import os.path
 from copy import deepcopy
 from warnings import warn
+import pkg_resources
 
 CORE_NAMESPACE = 'core'
 
@@ -246,3 +247,10 @@ from . import legacy  # noqa: F401,E402
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
 del get_versions
+
+
+extensions = {
+    entry_point.name: entry_point.load()
+    for entry_point
+    in pkg_resources.iter_entry_points('pynwb.extensions')
+}
