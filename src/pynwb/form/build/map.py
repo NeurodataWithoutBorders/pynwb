@@ -560,7 +560,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 else:
                     ret = text_type(value)
             elif ('float' in spec.dtype) or ('int' in spec.dtype):
-                ret = np.asscalar(np.array(value, dtype=spec.dtype))
+                ret = np.array(value, dtype=spec.dtype)
         elif isinstance(spec, DatasetSpec):
             # TODO: make sure we can handle specs with data_type_inc set
             if spec.data_type_inc is not None:
