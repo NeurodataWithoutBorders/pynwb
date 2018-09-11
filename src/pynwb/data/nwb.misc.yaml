@@ -66,14 +66,10 @@ groups:
     dtype: text
     doc: Annotations made during an experiment.
     attributes:
-    - name: conversion
-      dtype: float
-      doc: Value is 'float('NaN')'
-      value: .NaN
     - name: resolution
       dtype: float
-      doc: Value is 'float('NaN')'
-      value: .NaN
+      doc: Value is -1.0
+      value: -1.0
     - name: unit
       dtype: text
       doc: Value is 'n/a'
@@ -101,14 +97,10 @@ groups:
     dtype: int8
     doc: '>0 if interval started, <0 if interval ended.'
     attributes:
-    - name: conversion
-      dtype: float
-      doc: Value is 'float('NaN')'
-      value: .NaN
     - name: resolution
       dtype: float
-      doc: Value is 'float('NaN')'
-      value: .NaN
+      doc: Value is -1.0
+      value: -1.0
     - name: unit
       dtype: text
       doc: Value is 'n/a'

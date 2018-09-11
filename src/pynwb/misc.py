@@ -42,7 +42,7 @@ class AnnotationSeries(TimeSeries):
     def __init__(self, **kwargs):
         name, source, data, timestamps = popargs('name', 'source', 'data', 'timestamps', kwargs)
         super(AnnotationSeries, self).__init__(name, source, data, 'n/a',
-                                               resolution=np.nan, conversion=np.nan,
+                                               resolution=-1.0, conversion=1.0,
                                                timestamps=timestamps, **kwargs)
 
     @docval({'name': 'time', 'type': float, 'doc': 'The time for the anotation'},
@@ -161,8 +161,8 @@ class IntervalSeries(TimeSeries):
         self.__interval_data = data
         super(IntervalSeries, self).__init__(name, source, data, unit,
                                              timestamps=timestamps,
-                                             resolution=np.nan,
-                                             conversion=np.nan,
+                                             resolution=-1.0,
+                                             conversion=1.0,
                                              **kwargs)
 
     @docval({'name': 'start', 'type': float, 'doc': 'The name of this TimeSeries dataset'},
