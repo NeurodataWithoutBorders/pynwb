@@ -3,6 +3,7 @@
 from setuptools import setup, find_packages
 
 import versioneer
+import pkg_resources
 
 with open('README.rst', 'r') as fp:
     readme = fp.read()
@@ -69,3 +70,9 @@ setup_args = {
 
 if __name__ == '__main__':
     setup(**setup_args)
+
+plugins = {
+    entry_point.name: entry_point.load()
+    for entry_point
+    in pkg_resources.iter_entry_points('pynwb.extensions')
+}
