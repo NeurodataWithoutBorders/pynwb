@@ -161,8 +161,8 @@ class IntervalSeries(TimeSeries):
         self.__interval_data = data
         super(IntervalSeries, self).__init__(name, source, data, unit,
                                              timestamps=timestamps,
-                                             resolution=_default_resolution,
-                                             conversion=_default_conversion,
+                                             resolution=np.nan,
+                                             conversion=np.nan,
                                              **kwargs)
 
     @docval({'name': 'start', 'type': float, 'doc': 'The name of this TimeSeries dataset'},
