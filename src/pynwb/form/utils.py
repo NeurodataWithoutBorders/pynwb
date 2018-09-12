@@ -91,7 +91,7 @@ def __format_type(argtype):
         raise ValueError("argtype must be a type, str, list, or tuple")
 
 
-def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
+def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, allow_extra=False):
     """
     Internal helper function used by the docval decroator to parse and validate function arguments
 
@@ -110,7 +110,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     ret = dict()
     errors = list()
     argsi = 0
-    extras = set(kwargs.keys())
+    extras = dict(kwargs)
     try:
         it = iter(validator)
         arg = next(it)
@@ -123,7 +123,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
             argval_set = False
             if argname in kwargs:
                 argval = kwargs.get(argname)
-                extras.discard(argname)
+                extras.pop(argname, None)
                 argval_set = True
             elif argsi < len(args):
                 argval = args[argsi]
@@ -146,7 +146,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
             argname = arg['name']
             if argname in kwargs:
                 ret[argname] = kwargs.get(argname)
-                extras.discard(argname)
+                extras.pop(argname, None)
             elif len(args) > argsi:
                 ret[argname] = args[argsi]
                 argsi += 1
@@ -158,11 +158,16 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
                     fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                     errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
             arg = next(it)
-
     except StopIteration:
         pass
-    for key in extras:
-        errors.append("unrecognized argument: '%s'" % key)
+    if not allow_extra:
+        for key in extras.keys():
+            errors.append("unrecognized argument: '%s'" % key)
+    else:
+        # TODO: Extras get stripped out if function arguments are composed with fmt_docval_args.
+        # allow_extra needs to be tracked on a function so that fmt_docval_args doesn't strip them out
+        for key in extras.keys():
+            ret[key] = extras[key]
     return {'args': ret, 'errors': errors}
 
 
@@ -298,6 +303,7 @@ def docval(*validator, **options):
     returns = options.pop('returns', None)
     rtype = options.pop('rtype', None)
     is_method = options.pop('is_method', True)
+    allow_extra = options.pop('allow_extra', False)
     val_copy = __sort_args(_copy.deepcopy(validator))
 
     def dec(func):
@@ -322,7 +328,8 @@ def docval(*validator, **options):
                             args[1:],
                             kwargs,
                             enforce_type=enforce_type,
-                            enforce_ndim=enforce_ndim)
+                            enforce_ndim=enforce_ndim,
+                            allow_extra=allow_extra)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
@@ -330,7 +337,11 @@ def docval(*validator, **options):
                 return func(self, **parsed['args'])
         else:
             def func_call(*args, **kwargs):
-                parsed = __parse_args(_copy.deepcopy(loc_val), args, kwargs, enforce_type=enforce_type)
+                parsed = __parse_args(_copy.deepcopy(loc_val),
+                                      args,
+                                      kwargs,
+                                      enforce_type=enforce_type,
+                                      allow_extra=allow_extra)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
