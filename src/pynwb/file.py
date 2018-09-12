@@ -385,7 +385,7 @@ class NWBFile(MultiContainerInterface):
         self.__check_units()
         call_docval_func(self.units.add_column, kwargs)
 
-    @docval(*get_docval(DynamicTable.add_row))
+    @docval(*get_docval(DynamicTable.add_row), allow_extra=True)
     def add_unit(self, **kwargs):
         """
         Add a unit to the unit table.
@@ -412,7 +412,7 @@ class NWBFile(MultiContainerInterface):
         self.__check_trials()
         call_docval_func(self.trials.add_column, kwargs)
 
-    @docval(*get_docval(DynamicTable.add_row))
+    @docval(*get_docval(DynamicTable.add_row), allow_extra=True)
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
