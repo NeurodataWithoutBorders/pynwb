@@ -11,7 +11,7 @@ datasets:
   attributes:
   - name: help
     dtype: text
-    doc: Value is 'One of many columns that can be added to a DynamicTable'
+    doc: Value is 'One of many columns that can be added to a DynamicTable'.
     value: One of many columns that can be added to a DynamicTable
   - name: description
     dtype: text

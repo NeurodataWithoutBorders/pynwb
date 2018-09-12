@@ -19,8 +19,8 @@ groups:
     doc: 'Time file was created, UTC, and subsequent modifications to file. COMMENT:
       Date + time, Use ISO format (eg, ISO 8601) or a format that is easy to read
       and unambiguous. File can be created after the experiment was run, so this may
-      differ from experiment start time. Each modifictation to file adds new entry
-      to array. '
+      differ from experiment start time. Each modification to file adds new entry
+      to array.'
     dims:
     - '*unlimited*'
     shape:
@@ -37,7 +37,7 @@ groups:
     dtype: text
     doc: 'Time of experiment/session start, UTC.  COMMENT: Date + time, Use ISO format
       (eg, ISO 8601) or an easy-to-read and unambiguous format. All times stored in
-      the file use this time as reference (ie, time zero)'
+      the file use this time as reference (ie, time zero).'
   groups:
   - name: acquisition
     doc: 'Data streams recorded from the system, including ephys, ophys, tracking,
@@ -46,7 +46,7 @@ groups:
       to raw data stored in external HDF5 files. This will allow keeping bulky raw
       data out of the file while preserving the option of keeping some/all in the
       file. MORE_INFO: Acquired data includes tracking and experimental data streams
-      (ie, everything measured from the system).If bulky data is stored in the /acquisition
+      (ie, everything measured from the system). If bulky data is stored in the /acquisition
       group, the data can exist in a separate HDF5 file that is linked to by the file
       being used for processing and analysis.'
     groups:
@@ -61,7 +61,7 @@ groups:
       MORE_INFO: The file can store lab-specific and custom data analysis without
       restriction on its form or schema, reducing data formatting restrictions on
       end users. Such data should be placed in the analysis group. The analysis data
-      should be documented so that it is sharable with other labs'
+      should be documented so that it could be shared with other labs.'
     groups:
     - neurodata_type_inc: NWBContainer
       doc: Custom analysis results
@@ -109,7 +109,7 @@ groups:
       a stimulus) COMMENT: This group is read-only after experiment complete and timestamps
       are corrected to common timebase. Stores both presented stimuli and stimulus
       templates, the latter in case the same stimulus is presented multiple times,
-      or is pulled from an external stimulus library.MORE_INFO: Stimuli are here defined
+      or is pulled from an external stimulus library. MORE_INFO: Stimuli are here defined
       as any signal that is pushed into the system as part of the experiment (eg,
       sound, video, voltage, etc). Many different experiments can use the same stimuli,
       and stimuli can be re-used during an experiment. The stimulus group is organized
@@ -181,11 +181,11 @@ groups:
       quantity: '?'
     - name: protocol
       dtype: text
-      doc: 'Experimetnal protocol, if applicable.COMMENT: E.g., include IACUC protocol'
+      doc: 'Experimental protocol, if applicable. COMMENT: E.g., include IACUC protocol.'
       quantity: '?'
     - name: related_publications
       dtype: text
-      doc: 'Publication information.COMMENT: PMID, DOI, URL, etc. If multiple, concatenate
+      doc: 'Publication information. COMMENT: PMID, DOI, URL, etc. If multiple, concatenate
         together and describe which is which. such as PMID, DOI, URL, etc'
       quantity: '?'
     - name: session_id
@@ -208,18 +208,18 @@ groups:
       quantity: '?'
     - name: stimulus
       dtype: text
-      doc: 'Notes about stimuli, such as how and where presented.COMMENT: Can be from
-        Methods'
+      doc: 'Notes about stimuli, such as how and where presented. COMMENT: Can be from
+        Methods.'
       quantity: '?'
     - name: surgery
       dtype: text
       doc: 'Narrative description about surgery/surgeries, including date(s) and who
-        performed surgery. COMMENT: Much can be copied from Methods'
+        performed surgery. COMMENT: Much can be copied from Methods.'
       quantity: '?'
     - name: virus
       dtype: text
       doc: Information about virus(es) used in experiments, including virus ID, source,
-        date made, injection location, volume, etc
+        date made, injection location, volume, etc.
       quantity: '?'
     groups:
     - name: devices
@@ -232,7 +232,7 @@ groups:
         attributes:
         - name: help
           dtype: text
-          doc: Value is 'A recording device e.g. amplifier'
+          doc: Value is 'A recording device e.g. amplifier'.
           value: A recording device e.g. amplifier
         quantity: +
       quantity: '?'
@@ -275,7 +275,7 @@ groups:
       - name: description
         dtype: text
         doc: Description of subject and where subject came from (e.g., breeder, if
-          animal)
+          animal).
         quantity: '?'
       - name: genotype
         dtype: text
@@ -304,7 +304,7 @@ groups:
       datasets:
       - neurodata_type_inc: ElectrodeTable
         name: electrodes
-        doc: A table of all electrodes (i.e. channels) used for recording
+        doc: A table of all electrodes (i.e. channels) used for recording.
         quantity: '?'
       groups:
       - neurodata_type_inc: ElectrodeGroup
@@ -329,9 +329,9 @@ groups:
       doc: Metadata describing optogenetic stimuluation
       groups:
       - neurodata_type_inc: OptogeneticStimulusSite
-        doc: 'One of possibly many groups describing an optogenetic stimuluation site.
+        doc: 'One of possibly many groups describing an optogenetic stimulation site.
           COMMENT: Name is arbitrary but should be meaningful. Name is referenced
-          by OptogeneticSeries'
+          by OptogeneticSeries.'
         quantity: '*'
       quantity: '?'
     - name: optophysiology
@@ -340,7 +340,7 @@ groups:
       - neurodata_type_inc: ImagingPlane
         doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name
           is arbitrary but should be meaningful. It is referenced by TwoPhotonSeries
-          and also ImageSegmentation and DfOverF interfaces'
+          and also ImageSegmentation and DfOverF interfaces.'
         quantity: '*'
       quantity: '?'
   - neurodata_type_inc: DynamicTable
@@ -377,6 +377,6 @@ groups:
       attributes:
       - name: description
         dtype: text
-        doc: Value is 'the unique identifier for each unit'
+        doc: Value is 'the unique identifier for each unit'.
         value: the unique identifier for each unit
     quantity: '?'
