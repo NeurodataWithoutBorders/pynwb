@@ -18,7 +18,7 @@ groups:
     dims:
     - num_times
     shape:
-    - 
+    -
   - name: gain
     dtype: float
     doc: 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'
@@ -133,7 +133,7 @@ groups:
         \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
         \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
         \ below describes how to convert the data to the specified SI unit."
-      default_value: pecent
+      default_value: percent
       required: false
     quantity: '?'
   - name: resistance_comp_prediction
@@ -146,7 +146,7 @@ groups:
         \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
         \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
         \ below describes how to convert the data to the specified SI unit."
-      default_value: pecent
+      default_value: percent
       required: false
     quantity: '?'
   - name: whole_cell_capacitance_comp
