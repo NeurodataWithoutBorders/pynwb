@@ -68,7 +68,7 @@ groups:
       quantity: '*'
   - neurodata_type_inc: Epochs
     name: epochs
-    doc: "Experimental intervals, whether that be logically distinct sub-experiments
+    doc: 'Experimental intervals, whether that be logically distinct sub-experiments
         having a particular scientific goal, trials during an experiment, or epochs
         deriving from analysis of data.  COMMENT: Epochs provide pointers to time
         series that are relevant to the epoch, and windows into the data in those
@@ -77,7 +77,7 @@ groups:
         intervals. MORE_INFO: An experiment can be separated into one or many logical
         intervals, with the order and duration of these intervals often definable
         before the experiment starts. In this document, and in the context of NWB,
-        these intervals are called 'epochs'. Epochs have acquisition and stimulus
+        these intervals are called ''epochs''. Epochs have acquisition and stimulus
         data associated with them, and different epochs can overlap. Examples of epochs
         are the time when a rat runs around an enclosure or maze as well as intervening
         sleep sessions; the presentation of a set of visual stimuli to a mouse running
@@ -85,10 +85,10 @@ groups:
         cell. Epochs can be limited to the interval of a particular stimulus, or they
         can span multiple stimuli. Different windows into the same time series can
         be achieved by including multiple instances of that time series, each with
-        different start/stop times."
+        different start/stop times.'
     quantity: '?'
   - name: processing
-    doc: "The home for ProcessingModules. These modules perform intermediate analysis
+    doc: 'The home for ProcessingModules. These modules perform intermediate analysis
         of data that is necessary to perform before scientific analysis. Examples
         include spike clustering, extracting position from tracking data, stitching
         together image slices. COMMENT: Modules are defined below. They can be large
@@ -96,9 +96,9 @@ groups:
         and clustering) or small, representing extraction of position information
         from tracking video, or even binary lick/no-lick decisions. Common software
         tools (e.g., klustakwik, MClust) are expected to read/write data here. MORE_INFO:
-        'Processing' refers to intermediate analysis of the acquired data to make
+        ''Processing'' refers to intermediate analysis of the acquired data to make
         it more amenable to scientific analysis. These are performed using Modules,
-        as defined above. All modules reside in the processing group."
+        as defined above. All modules reside in the processing group.'
     groups:
     - neurodata_type_inc: ProcessingModule
       doc: Intermediate analysis of acquired data
@@ -124,21 +124,21 @@ groups:
         doc: TimeSeries objects containing data of presented stimuli
         quantity: '*'
     - name: templates
-      doc: "Template stimuli. COMMENT: Time stamps in templates are based on stimulus
+      doc: 'Template stimuli. COMMENT: Time stamps in templates are based on stimulus
         design and are relative to the beginning of the stimulus. When templates
         are used, the stimulus instances must convert presentation times to the
-        experiment's time reference frame."
+        experiment`s time reference frame.'
       groups:
       - neurodata_type_inc: TimeSeries
         doc: TimeSeries objects containing template data of presented stimuli
         quantity: '*'
   - name: general
-    doc: "Experimental metadata, including protocol, notes and description of hardware
+    doc: 'Experimental metadata, including protocol, notes and description of hardware
       device(s).  COMMENT: The metadata stored in this section should be used to
       describe the experiment. Metadata necessary for interpreting the data is stored
       with the data. MORE_INFO: General experimental metadata, including animal
       strain, experimental protocols, experimenter, devices, etc, are stored under
-      'general'. Core metadata (e.g., that required to interpret data fields) is
+      ''general''. Core metadata (e.g., that required to interpret data fields) is
       stored with the data itself, and implicitly defined by the file specification
       (e.g., time is in seconds). The strategy used here for storing non-core metadata
       is to use free-form text fields, such as would appear in sentences or paragraphs
@@ -147,7 +147,7 @@ groups:
       metadata is stored as attributes to these free-form datasets. All
       entries in the below table are to be included when data is present. Unused
       groups (e.g., intracellular_ephys in an optophysiology experiment) should
-      not be created unless there is data to store within them."
+      not be created unless there is data to store within them.'
     datasets:
     - name: data_collection
       dtype: text

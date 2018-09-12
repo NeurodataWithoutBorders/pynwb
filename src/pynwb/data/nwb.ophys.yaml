@@ -244,7 +244,7 @@ groups:
     doc: Location of image plane
   - name: manifold
     dtype: float32
-    doc: 'Physical position of each pixel. COMMENT: "xyz" represents the position
+    doc: 'Physical position of each pixel. COMMENT: ''xyz'' represents the position
       of the pixel relative to the defined coordinate space'
     attributes:
     - name: conversion
