@@ -50,7 +50,7 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 device = Device('imaging_device_1', source='a source')
 nwbfile.add_device(device)
 optical_channel = OpticalChannel('my_optchan', 'Ca2+ imaging example',
-                                 'pi wavelength', 500.)
+                                 300., 500.)
 imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
                                              'Ca2+ imaging example',
                                              optical_channel,
