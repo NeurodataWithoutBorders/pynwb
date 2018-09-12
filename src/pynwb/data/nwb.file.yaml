@@ -24,7 +24,7 @@ groups:
     dims:
     - '*unlimited*'
     shape:
-    - 
+    - null
   - name: identifier
     dtype: text
     doc: 'A unique text identifier for the file. COMMENT: Eg, concatenated lab name,
@@ -255,7 +255,7 @@ groups:
           dims:
           - num_namespaces
           shape:
-          - 
+          - null
         quantity: '*'
       quantity: '?'
     - neurodata_type_def: Subject
@@ -369,14 +369,4 @@ groups:
   - neurodata_type_inc: DynamicTable
     name: units
     doc: Data about units
-    datasets:
-    - neurodata_type_inc: TableColumn
-      name: id
-      dtype: int
-      doc: the unique identifier for each unit
-      attributes:
-      - name: description
-        dtype: text
-        doc: Value is 'the unique identifier for each unit'.
-        value: the unique identifier for each unit
     quantity: '?'

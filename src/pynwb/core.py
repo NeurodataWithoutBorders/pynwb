@@ -811,16 +811,23 @@ class DynamicTable(NWBDataInterface):
         return len(self.id)
 
     @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row'},
-            {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None})
+            {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None},
+            allow_extra=True)
     def add_row(self, **kwargs):
         '''
         Add a row to the table. If *id* is not provided, it will auto-increment.
         '''
+
         data = getargs('data', kwargs)
+        row_id = getargs('id', kwargs)
+        if row_id is None:
+            row_id = data.pop('id', None)
+        if row_id is None:
+            row_id = len(self)
+        self.id.data.append(row_id)
         for k, v in data.items():
             colnum = self.__colids[k]
             self.columns[colnum].add_row(v)
-        self.id.data.append(len(self.id))
 
     # # keeping this around in case anyone wants to resurrect it
     # # this was used to return a numpy structured array. this does not

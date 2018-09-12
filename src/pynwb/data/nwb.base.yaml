@@ -38,7 +38,7 @@ datasets:
     value: indexes into a list of values for a list of elements
   default_name: vector_index
   shape:
-  -
+  - null
 - neurodata_type_def: ElementIdentifiers
   neurodata_type_inc: NWBData
   dtype: int
@@ -50,7 +50,7 @@ datasets:
     value: unique identifiers for a list of elements
   default_name: element_id
   shape:
-  -
+  - null
 groups:
 - neurodata_type_def: NWBContainer
   doc: The attributes specified here are included in all interfaces.
@@ -98,7 +98,7 @@ groups:
     - num_times
     quantity: '?'
     shape:
-    -
+    - null
   - name: control_description
     dtype: text
     doc: 'Description of each control value. COMMENT: Array length should be as long
@@ -108,7 +108,7 @@ groups:
     - num_control_values
     quantity: '?'
     shape:
-    -
+    - null
   - name: data
     doc: 'Data values. Can also store binary data (eg, image frames) COMMENT: This
       field may be a link to data stored in an external file, especially in the case
@@ -137,7 +137,7 @@ groups:
     dims:
     - num_times
     shape:
-    -
+    - null
   - name: starting_time
     dtype: float64
     doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
@@ -170,7 +170,7 @@ groups:
     - num_times
     quantity: '?'
     shape:
-    -
+    - null
   groups:
   - name: sync
     doc: "Lab specific time and sync information as provided directly from hardware\
@@ -245,7 +245,7 @@ groups:
     doc: The names of the columns in this table. This should be used to specifying
       an order to the columns
     shape:
-    -
+    - null
   - name: description
     dtype: text
     doc: Description of what is in this dynamic table
@@ -255,7 +255,7 @@ groups:
     dtype: int
     doc: The unique identifier for the rows in this dynamic table
     shape:
-    -
+    - null
   - neurodata_type_inc: TableColumn
     doc: The columns in this dynamic table
     quantity: '*'
