@@ -59,7 +59,7 @@ class ImagingPlane(NWBContainer):
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},
             {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength.'},
-            {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
+            {'name': 'imaging_rate', 'type': float, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
             {'name': 'manifold', 'type': Iterable,

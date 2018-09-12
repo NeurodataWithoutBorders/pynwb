@@ -13,9 +13,9 @@ datasets:
   - num_x
   - num_y
   shape:
-  - 
-  - 
-  - 
+  -
+  -
+  -
 - neurodata_type_def: PixelMasks
   neurodata_type_inc: VectorData
   dtype:
@@ -121,8 +121,8 @@ groups:
     - num_times
     - num_ROIs
     shape:
-    - 
-    - 
+    -
+    -
   - neurodata_type_inc: ROITableRegion
     name: rois
     doc: a dataset referencing into an ROITable containing information on the ROIs
@@ -234,7 +234,7 @@ groups:
     dtype: float
     doc: Excitation wavelength
   - name: imaging_rate
-    dtype: text
+    dtype: float
     doc: Rate images are acquired, in Hz.
   - name: indicator
     dtype: text
@@ -263,8 +263,8 @@ groups:
     - weight
     - x|y|z
     shape:
-    - 
-    - 
+    -
+    -
     - 3
   - name: reference_frame
     dtype: text

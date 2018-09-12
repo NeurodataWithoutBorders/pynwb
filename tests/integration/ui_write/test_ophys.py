@@ -27,7 +27,7 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         self.optical_channel = OpticalChannel('optchan1', 'unit test TestImagingPlaneIO',
                                               'a fake OpticalChannel', 500.)
         return ImagingPlane('imgpln1', 'unit test TestImagingPlaneIO', self.optical_channel,
-                            'a fake ImagingPlane', self.device, 600., '2.718', 'GFP', 'somewhere in the brain')
+                            'a fake ImagingPlane', self.device, 600., 2.2, 'GFP', 'somewhere in the brain')
 
     def setUpBuilder(self):
         optchan_builder = GroupBuilder(
@@ -56,7 +56,7 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
             datasets={
                 'description': DatasetBuilder('description', 'a fake ImagingPlane'),
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
-                'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
+                'imaging_rate': DatasetBuilder('imaging_rate', 2.2),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
             groups={
@@ -84,7 +84,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
         self.optical_channel = OpticalChannel('optchan1', source, 'a fake OpticalChannel', 500.)
         self.imaging_plane = ImagingPlane('imgpln1', source, self.optical_channel,
                                           'a fake ImagingPlane',
-                                          self.device, 600., '2.718', 'GFP', 'somewhere in the brain')
+                                          self.device, 600., 2.2, 'GFP', 'somewhere in the brain')
 
     def setUpContainer(self):
         self.make_imaging_plane('unit test TestTwoPhotonSeries')
@@ -123,7 +123,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
             datasets={
                 'description': DatasetBuilder('description', 'a fake ImagingPlane'),
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
-                'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
+                'imaging_rate': DatasetBuilder('imaging_rate', 2.2),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
             groups={
@@ -194,7 +194,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                           self.optical_channel,
                                           'imaging plane description',
                                           self.device,
-                                          600., '2.718', 'GFP', 'somewhere in the brain',
+                                          600., 2.2, 'GFP', 'somewhere in the brain',
                                           (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
 
         self.img_mask = deepcopy(img_mask)
@@ -233,7 +233,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
             datasets={
                 'description': DatasetBuilder('description', 'imaging plane description'),
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
-                'imaging_rate': DatasetBuilder('imaging_rate', '2.718'),
+                'imaging_rate': DatasetBuilder('imaging_rate', 2.2),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
                 'manifold': DatasetBuilder('manifold', (1, 2, 1, 2, 3),
                                            attributes={'conversion': 4.0, 'unit': 'manifold unit'}),
