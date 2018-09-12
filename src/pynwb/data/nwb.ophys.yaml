@@ -232,7 +232,7 @@ groups:
     quantity: '?'
   - name: excitation_lambda
     dtype: float
-    doc: Excitation wavelength
+    doc: Excitation wavelength in nm
   - name: imaging_rate
     dtype: float
     doc: Rate images are acquired, in Hz.
@@ -290,7 +290,7 @@ groups:
       doc: Any notes or comments about the channel
     - name: emission_lambda
       dtype: float
-      doc: Emission lambda for channel
+      doc: Emission wavelength for channel in nm
   links:
   - name: device
     doc: the device that was used to record from this electrode
