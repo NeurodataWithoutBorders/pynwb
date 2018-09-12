@@ -13,6 +13,8 @@ from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, ReferenceBuilder, RegionBuilder, BaseBuilder
 from .warnings import OrphanContainerWarning, MissingRequiredWarning
 
+import numpy as np
+
 
 class Proxy(object):
     """
@@ -557,6 +559,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     ret = list(map(text_type, value))
                 else:
                     ret = text_type(value)
+            elif ('float' in spec.dtype) or ('int' in spec.dtype):
+                ret = np.array(value, dtype=spec.dtype)
         elif isinstance(spec, DatasetSpec):
             # TODO: make sure we can handle specs with data_type_inc set
             if spec.data_type_inc is not None:
@@ -672,6 +676,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 attr_value = self.get_attr_value(spec, container, build_manager)
                 if attr_value is None:
                     attr_value = spec.default_value
+            attr_value = self.__convert_value(attr_value, spec)
 
             # do not write empty or null valued objects
             if attr_value is None:
