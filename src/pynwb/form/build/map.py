@@ -769,7 +769,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 else:
                     builder.set_group(rendered_obj)
             elif value.container_source:
-                if value.container_source != parent_container.source:
+                if value.container_source != parent_container.container_source:
                     rendered_obj = build_manager.build(value, source=source)
                     builder.set_link(LinkBuilder(rendered_obj, parent=builder))
         else:
