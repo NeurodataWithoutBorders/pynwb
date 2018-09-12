@@ -1,6 +1,6 @@
 datasets:
 - neurodata_type_def: NWBData
-  doc: The attributes specified here are included in all interfaces.
+  doc: 'The attributes specified here are included in all interfaces.'
   attributes:
   - name: help
     dtype: text
@@ -211,7 +211,7 @@ groups:
   datasets:
   - neurodata_type_inc: Image
     doc: Images stored in this NWBDataInterface
-    quantity: +
+    quantity: '+'
   default_name: Images
 - neurodata_type_def: DynamicTable
   neurodata_type_inc: NWBDataInterface

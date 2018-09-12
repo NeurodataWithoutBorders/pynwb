@@ -73,10 +73,10 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
+      doc: "The base unit of measure used to store data. This should be in the SI
+        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
+        such as Volts. If the actual data is stored in millivolts, the field 'conversion'
+        below describes how to convert the data to the specified SI unit."
       default_value: volt
       required: false
     dims:
@@ -84,9 +84,9 @@ groups:
     - - num_times
       - num_channels
     shape:
-    - - 
-    - - 
-      - 
+    - -
+    - -
+      -
   - neurodata_type_inc: ElectrodeTableRegion
     name: electrodes
     doc: the electrodes that this series was generated from
@@ -111,10 +111,10 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
+      doc: "The base unit of measure used to store data. This should be in the SI
+        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
+        such as Volts. If the actual data is stored in millivolts, the field 'conversion'
+        below describes how to convert the data to the specified SI unit."
       default_value: volt
       required: false
     dims:
@@ -124,11 +124,11 @@ groups:
       - num_channels
       - num_samples
     shape:
-    - - 
-      - 
-    - - 
-      - 
-      - 
+    - -
+      -
+    - -
+      -
+      -
 - neurodata_type_def: ClusterWaveforms
   neurodata_type_inc: NWBDataInterface
   doc: The mean waveform shape, including standard deviation, of the different clusters.
@@ -157,8 +157,8 @@ groups:
     - num_clusters
     - num_samples
     shape:
-    - 
-    - 
+    -
+    -
   - name: waveform_sd
     dtype: float32
     doc: Stdev of waveforms for each cluster, using the same indices as in mean
@@ -166,8 +166,8 @@ groups:
     - num_clusters
     - num_samples
     shape:
-    - 
-    - 
+    -
+    -
   links:
   - name: clustering_interface
     doc: HDF5 link to Clustering interface that was the source of the clustered data
@@ -195,7 +195,7 @@ groups:
     dims:
     - num_events
     shape:
-    - 
+    -
   - name: peak_over_rms
     dtype: float32
     doc: Maximum ratio of waveform peak to RMS on any channel in the cluster (provides
@@ -203,7 +203,7 @@ groups:
     dims:
     - num_clusters
     shape:
-    - 
+    -
   - name: times
     dtype: float64
     doc: Times of clustered events, in seconds. This may be a link to times field
@@ -211,7 +211,7 @@ groups:
     dims:
     - num_events
     shape:
-    - 
+    -
   default_name: Clustering
 - neurodata_type_def: FeatureExtraction
   neurodata_type_inc: NWBDataInterface
@@ -229,7 +229,7 @@ groups:
     dims:
     - num_features
     shape:
-    - 
+    -
   - name: features
     dtype: float32
     doc: Multi-dimensional array of features extracted from each event.
@@ -238,16 +238,16 @@ groups:
     - num_channels
     - num_features
     shape:
-    - 
-    - 
-    - 
+    -
+    -
+    -
   - name: times
     dtype: float64
     doc: Times of events that features correspond to (can be a link).
     dims:
     - num_events
     shape:
-    - 
+    -
   - neurodata_type_inc: ElectrodeTableRegion
     name: electrodes
     doc: the electrodes that this series was generated from
@@ -274,7 +274,7 @@ groups:
     dims:
     - num_events
     shape:
-    - 
+    -
   - name: times
     dtype: float64
     doc: Timestamps of events, in Seconds
@@ -287,7 +287,7 @@ groups:
     dims:
     - num_events
     shape:
-    - 
+    -
   links:
   - name: source_electricalseries
     doc: HDF5 link to ElectricalSeries that this data was calculated from. Metadata
@@ -333,7 +333,7 @@ groups:
   groups:
   - neurodata_type_inc: ElectricalSeries
     doc: ElectricalSeries object containing filtered electrophysiology data
-    quantity: +
+    quantity: '+'
   default_name: FilteredEphys
 - neurodata_type_def: LFP
   neurodata_type_inc: NWBDataInterface
@@ -350,7 +350,7 @@ groups:
   groups:
   - neurodata_type_inc: ElectricalSeries
     doc: ElectricalSeries object containing LFP data for one or more channels
-    quantity: +
+    quantity: '+'
   default_name: LFP
 - neurodata_type_def: ElectrodeGroup
   neurodata_type_inc: NWBContainer
