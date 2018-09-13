@@ -337,7 +337,7 @@ io.close()
 #    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation" and the default
 #    name for :py:class:`~pynwb.ecephys.EventWaveform` is "EventWaveform".
 #
-# .. [#] NWB only supports *adding* to files. Removal and modifying of existing data is now allowed.
+# .. [#] NWB only supports *adding* to files. Removal and modifying of existing data is not allowed.
 
 ####################
 # .. _hck04: https://github.com/NeurodataWithoutBorders/nwb_hackathons/tree/master/HCK04_2018_Seattle
