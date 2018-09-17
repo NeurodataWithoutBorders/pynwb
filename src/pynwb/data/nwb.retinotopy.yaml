@@ -25,14 +25,14 @@ groups:
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: field_of_view
       dtype: float
       doc: Size of viewing area, in meters
       dims:
       - row|column
       shape:
-      - 
+      - null
     - name: unit
       dtype: text
       doc: Unit that axis data is stored in (e.g., degrees)
@@ -40,8 +40,8 @@ groups:
     - num_rows
     - num_cols
     shape:
-    - 
-    - 
+    - null
+    - null
   - name: axis_1_power_map
     dtype: float32
     doc: Power response on the first measured axis. Response is scaled so 0.0 is no
@@ -54,14 +54,14 @@ groups:
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: field_of_view
       dtype: float
       doc: Size of viewing area, in meters
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: unit
       dtype: text
       doc: Unit that axis data is stored in (e.g., degrees)
@@ -70,8 +70,8 @@ groups:
     - num_cols
     quantity: '?'
     shape:
-    - 
-    - 
+    - null
+    - null
   - name: axis_2_phase_map
     dtype: float32
     doc: Phase response to stimulus on the second measured axis
@@ -83,14 +83,14 @@ groups:
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: field_of_view
       dtype: float
       doc: Size of viewing area, in meters
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: unit
       dtype: text
       doc: Unit that axis data is stored in (e.g., degrees)
@@ -98,8 +98,8 @@ groups:
     - num_rows
     - num_cols
     shape:
-    - 
-    - 
+    - null
+    - null
   - name: axis_2_power_map
     dtype: float32
     doc: Power response on the second measured axis. Response is scaled so 0.0 is
@@ -112,14 +112,14 @@ groups:
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: field_of_view
       dtype: float
       doc: Size of viewing area, in meters
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: unit
       dtype: text
       doc: Unit that axis data is stored in (e.g., degrees)
@@ -128,8 +128,8 @@ groups:
     - num_cols
     quantity: '?'
     shape:
-    - 
-    - 
+    - null
+    - null
   - name: axis_descriptions
     dtype: text
     doc: Two-element array describing the contents of the two response axis fields.
@@ -138,7 +138,7 @@ groups:
     dims:
     - '2'
     shape:
-    - 
+    - null
   - name: focal_depth_image
     dtype: uint16
     doc: 'Gray-scale image taken with same settings/parameters (e.g., focal depth,
@@ -155,14 +155,14 @@ groups:
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: field_of_view
       dtype: float
       doc: Size of viewing area, in meters
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: focal_depth
       dtype: float
       doc: Focal depth offset, in meters
@@ -173,8 +173,8 @@ groups:
     - num_rows
     - num_cols
     shape:
-    - 
-    - 
+    - null
+    - null
   - name: sign_map
     dtype: float32
     doc: Sine of the angle between the direction of the gradient in axis_1 and axis_2
@@ -186,20 +186,20 @@ groups:
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: field_of_view
       dtype: float
       doc: Size of viewing area, in meters.
       dims:
       - row_col
       shape:
-      - 
+      - null
     dims:
     - num_rows
     - num_cols
     shape:
-    - 
-    - 
+    - null
+    - null
   - name: vasculature_image
     dtype: uint16
     doc: 'Gray-scale anatomical image of cortical surface. Array structure: [rows][columns]'
@@ -215,14 +215,14 @@ groups:
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: field_of_view
       dtype: float
       doc: Size of viewing area, in meters
       dims:
       - row_col
       shape:
-      - 
+      - null
     - name: format
       dtype: text
       doc: Format of image. Right now only 'raw' supported
@@ -230,6 +230,6 @@ groups:
     - num_rows
     - num_cols
     shape:
-    - 
-    - 
+    - null
+    - null
   default_name: ImagingRetinotopy

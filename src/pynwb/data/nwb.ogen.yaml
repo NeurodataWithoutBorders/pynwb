@@ -23,7 +23,7 @@ groups:
     dims:
     - num_times
     shape:
-    -
+    - null
   links:
   - name: site
     doc: link to OptogeneticStimulusSite group that describes the site to which this
