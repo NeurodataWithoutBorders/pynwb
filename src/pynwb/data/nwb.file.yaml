@@ -166,6 +166,12 @@ groups:
       dtype: text
       doc: Institution(s) where experiment was performed
       quantity: '?'
+    - name: keywords
+      dtype: text
+      doc: Terms to search over
+      quantity: '?'
+      shape:
+      - null
     - name: lab
       dtype: text
       doc: Lab where experiment was performed
