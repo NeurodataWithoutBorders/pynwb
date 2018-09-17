@@ -1,6 +1,6 @@
 datasets:
 - neurodata_type_def: NWBData
-  doc: The attributes specified here are included in all interfaces.
+  doc: 'The attributes specified here are included in all interfaces.'
   attributes:
   - name: help
     dtype: text
@@ -130,10 +130,10 @@ groups:
       required: false
     - name: unit
       dtype: text
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
+      doc: 'The base unit of measure used to store data. This should be in the SI
+        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
+        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
+        below describes how to convert the data to the specified SI unit.'
     dims:
     - num_times
     shape:
@@ -173,12 +173,12 @@ groups:
     -
   groups:
   - name: sync
-    doc: "Lab specific time and sync information as provided directly from hardware\
-      \ devices and that is necessary for aligning all acquired time information to\
-      \ a common timebase. The timestamp array stores time in the common timebase.\
-      \ COMMENT: This group will usually only be populated in TimeSeries that are\
-      \ stored external to the NWB file, in files storing raw data. Once timestamp\
-      \ data is calculated, the contents of 'sync' are mostly for archival purposes."
+    doc: 'Lab specific time and sync information as provided directly from hardware
+      devices and that is necessary for aligning all acquired time information to
+      a common timebase. The timestamp array stores time in the common timebase.
+      COMMENT: This group will usually only be populated in TimeSeries that are
+      stored external to the NWB file, in files storing raw data. Once timestamp
+      data is calculated, the contents of ''sync'' are mostly for archival purposes.'
     quantity: '?'
 - neurodata_type_def: ProcessingModule
   neurodata_type_inc: NWBContainer
@@ -211,7 +211,7 @@ groups:
   datasets:
   - neurodata_type_inc: Image
     doc: Images stored in this NWBDataInterface
-    quantity: +
+    quantity: '+'
   default_name: Images
 - neurodata_type_def: DynamicTable
   neurodata_type_inc: NWBDataInterface

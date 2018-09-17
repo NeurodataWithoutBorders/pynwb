@@ -5,7 +5,7 @@ groups:
     is a 2D array storing position or direction relative to some reference frame.
     Array structure: [num measurements] [num dimensions]. Each SpatialSeries has a
     text dataset reference_frame that indicates the zero-position, or the zero-axes
-    for direction. For example, if representing gaze direction, "straight-ahead" might
+    for direction. For example, if representing gaze direction, ''straight-ahead'' might
     be a specific pixel on the monitor, or some other point in space. For position
     data, the 0,0 point might be the top-left corner of an enclosure, as viewed from
     the tracking camera. The unit of data will indicate how to interpret SpatialSeries
@@ -24,25 +24,25 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
+      doc: 'The base unit of measure used to store data. This should be in the SI
+        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
+        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
+        below describes how to convert the data to the specified SI unit.'
       default_value: meter
       required: false
     dims:
     - num_times
     - num_features
     shape:
-    - 
-    - 
+    -
+    -
   - name: reference_frame
     dtype: text
     doc: Description defining what exactly 'straight-ahead' means.
     quantity: '?'
 - neurodata_type_def: BehavioralEpochs
   neurodata_type_inc: NWBDataInterface
-  doc: TimeSeries for storing behavoioral epochs.  The objective of this and the other
+  doc: 'TimeSeries for storing behavoioral epochs.  The objective of this and the other
     two Behavioral interfaces (e.g. BehavioralEvents and BehavioralTimeSeries) is
     to provide generic hooks for software tools/scripts. This allows a tool/script
     to take the output one specific interface (e.g., UnitTimes) and plot that data
@@ -51,9 +51,9 @@ groups:
     that one or more TimeSeries of the specified type is published. These TimeSeries
     should reside in a group having the same name as the interface. For example, if
     a BehavioralTimeSeries interface is declared, the module will have one or more
-    TimeSeries defined in the module sub-group "BehavioralTimeSeries". BehavioralEpochs
+    TimeSeries defined in the module sub-group ''BehavioralTimeSeries''. BehavioralEpochs
     should use IntervalSeries. BehavioralEvents is used for irregular events. BehavioralTimeSeries
-    is for continuous data.
+    is for continuous data.'
   attributes:
   - name: help
     dtype: text
@@ -103,7 +103,7 @@ groups:
   groups:
   - neurodata_type_inc: TimeSeries
     doc: TimeSeries object containing time series data on pupil size
-    quantity: +
+    quantity: '+'
   default_name: PupilTracking
 - neurodata_type_def: EyeTracking
   neurodata_type_inc: NWBDataInterface
@@ -149,5 +149,5 @@ groups:
   groups:
   - neurodata_type_inc: SpatialSeries
     doc: SpatialSeries object containing position data
-    quantity: +
+    quantity: '+'
   default_name: Position

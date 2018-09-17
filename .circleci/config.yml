@@ -99,6 +99,7 @@ references:
             . ../venv/bin/activate
             pip install tox
             tox -e $TEST_TOX_ENV
+          no_output_timeout: 30m
       - save_cache:
           key: ophys-data-cache
           paths: ophys_experiment_data
