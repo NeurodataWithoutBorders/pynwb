@@ -73,10 +73,10 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
+      doc: 'The base unit of measure used to store data. This should be in the SI
+        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
+        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
+        below describes how to convert the data to the specified SI unit.'
       default_value: volt
       required: false
     dims:
@@ -92,13 +92,13 @@ groups:
     doc: the electrodes that this series was generated from
 - neurodata_type_def: SpikeEventSeries
   neurodata_type_inc: ElectricalSeries
-  doc: 'Stores "snapshots" of spike events (i.e., threshold crossings) in data. This
+  doc: 'Stores ''snapshots'' of spike events (i.e., threshold crossings) in data. This
     may also be raw data, as reported by ephys hardware. If so, the TimeSeries::description
     field should describing how events were detected. All SpikeEventSeries should
     reside in a module (under EventWaveform interface) even if the spikes were reported
     and stored by hardware. All events span the same recording channels and store
-    snapshots of equal duration. TimeSeries::data array structure: :blue:`[num events]
-    [num channels] [num samples] (or [num events] [num samples] for single electrode)`.'
+    snapshots of equal duration. TimeSeries::data array structure: [num events]
+    [num channels] [num samples] (or [num events] [num samples] for single electrode).'
   attributes:
   - name: help
     dtype: text
@@ -111,10 +111,10 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
+      doc: 'The base unit of measure used to store data. This should be in the SI
+        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
+        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
+        below describes how to convert the data to the specified SI unit.'
       default_value: volt
       required: false
     dims:
@@ -131,11 +131,11 @@ groups:
       - null
 - neurodata_type_def: ClusterWaveforms
   neurodata_type_inc: NWBDataInterface
-  doc: The mean waveform shape, including standard deviation, of the different clusters.
+  doc: 'The mean waveform shape, including standard deviation, of the different clusters.
     Ideally, the waveform analysis should be performed on data that is only high-pass
     filtered. This is a separate module because it is expected to require updating.
     For example, IMEC probes may require different storage requirements to store/display
-    mean waveforms, requiring a new interface or an extension of this one.
+    mean waveforms, requiring a new interface or an extension of this one.'
   attributes:
   - name: help
     dtype: text
@@ -225,7 +225,7 @@ groups:
   datasets:
   - name: description
     dtype: text
-    doc: Description of features (eg, "PC1") for each of the extracted features.
+    doc: Description of features (eg, ''PC1'') for each of the extracted features.
     dims:
     - num_features
     shape:
@@ -281,7 +281,7 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      doc: The string "Seconds"
+      doc: The string ''Seconds''
       default_value: Seconds
       required: false
     dims:
@@ -333,7 +333,7 @@ groups:
   groups:
   - neurodata_type_inc: ElectricalSeries
     doc: ElectricalSeries object containing filtered electrophysiology data
-    quantity: +
+    quantity: '+'
   default_name: FilteredEphys
 - neurodata_type_def: LFP
   neurodata_type_inc: NWBDataInterface
@@ -350,7 +350,7 @@ groups:
   groups:
   - neurodata_type_inc: ElectricalSeries
     doc: ElectricalSeries object containing LFP data for one or more channels
-    quantity: +
+    quantity: '+'
   default_name: LFP
 - neurodata_type_def: ElectrodeGroup
   neurodata_type_inc: NWBContainer
