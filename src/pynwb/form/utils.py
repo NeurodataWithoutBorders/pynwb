@@ -6,6 +6,8 @@ from six import raise_from
 import numpy as np
 import h5py
 
+from .validate.shapevalidator import ShapeValidator
+
 __macros = {
     'array_data': [np.ndarray, list, tuple, h5py.Dataset],
     'scalar_data': [str, int, float],
@@ -111,6 +113,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
     errors = list()
     argsi = 0
     extras = dict(kwargs)
+    shape_validator = ShapeValidator()
     try:
         it = iter(validator)
         arg = next(it)
@@ -140,6 +143,9 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
                             fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                             errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
                     ret[argname] = argval
+                    if enforce_ndim:
+                        import pdb; pdb.set_trace()
+                        shape_validator.get_data_shape(argval)
             argsi += 1
             arg = next(it)
         while True:
