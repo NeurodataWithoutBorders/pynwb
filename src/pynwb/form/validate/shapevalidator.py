@@ -1,7 +1,7 @@
-from six import text_type, binary_type
-from ..data_utils import DataChunkIterator
-
 import numpy as np
+from six import text_type, binary_type
+
+from ..data_utils import DataChunkIterator
 
 
 def __get_shape_helper(data):
@@ -245,7 +245,7 @@ class ShapeValidatorResult(object):
 
     def __getattr__(self, item):
         """
-        Overwrite to allow dynamic retrival of the default message
+        Overwrite to allow dynamic retrieval of the default message
         """
         if item == 'default_message':
             return self.SHAPE_ERROR[self.error]

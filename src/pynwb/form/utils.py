@@ -1,10 +1,11 @@
-import itertools as _itertools
 import copy as _copy
+import itertools as _itertools
 from abc import ABCMeta
+
+import h5py
+import numpy as np
 import six
 from six import raise_from
-import numpy as np
-import h5py
 
 from .validate.shapevalidator import ShapeValidator
 

@@ -1,11 +1,12 @@
-from collections import Iterable
-import numpy as np
 from abc import ABCMeta, abstractmethod, abstractproperty
-from six import with_metaclass
-from .utils import docval, getargs, popargs, docval_macro
+from collections import Iterable
 from operator import itemgetter
-from .container import Data, DataRegion
 
+import numpy as np
+from six import with_metaclass
+
+from .container import Data, DataRegion
+from .utils import docval, getargs, popargs, docval_macro
 from .validate.shapevalidator import ShapeValidator
 
 
