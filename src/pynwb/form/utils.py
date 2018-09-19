@@ -94,7 +94,7 @@ def __format_type(argtype):
         raise ValueError("argtype must be a type, str, list, or tuple")
 
 
-def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, allow_extra=False):   # noqa: 901
+def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True, allow_extra=False):   # noqa: 901
     """
     Internal helper function used by the docval decroator to parse and validate function arguments
 
@@ -103,7 +103,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
     :param kwargs: Dict keyword arguments supplied by the caller where keys are the argument name and
                    values are the argument value.
     :param enforce_type: Boolean indicating whether the type of arguments should be enforced
-    :param enforce_ndim: Boolean indicating whether the number of dimensions of array arguments
+    :param enforce_shape: Boolean indicating whether the dimensions of array arguments
                          should be enforced if possible.
 
     :return: Dict with:
@@ -142,10 +142,11 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
                         if not __type_okay(argval, arg['type']):
                             fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                             errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
-                    ret[argname] = argval
-                    if enforce_ndim:
-                        import pdb; pdb.set_trace()
+                    if enforce_shape:
+                        import pdb
+                        pdb.set_trace()
                         get_data_shape(argval)
+                    ret[argname] = argval
             argsi += 1
             arg = next(it)
         while True:
