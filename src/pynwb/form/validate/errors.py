@@ -1,5 +1,4 @@
 
-from ..utils import docval, getargs
 from ..spec.spec import DtypeHelper
 from numpy import dtype
 
@@ -15,13 +14,21 @@ __all__ = [
 
 class Error(object):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
-            {'name': 'reason', 'type': str, 'doc': 'the reason for the error'},
-            {'name': 'location', 'type': str, 'doc': 'the location of the error', 'default': None})
-    def __init__(self, **kwargs):
-        self.__name = getargs('name', kwargs)
-        self.__reason = getargs('reason', kwargs)
-        self.__location = getargs('location', kwargs)
+    def __init__(self, name, reason, location=None):
+        """
+
+        Parameters
+        ----------
+        name: str
+            the name of the component that is erroneous
+        reason: str
+            the reason for the error
+        location: str
+            the location of the error
+        """
+        self.__name = name
+        self.__reason = reason
+        self.__location = location
         if self.__location is not None:
             self.__str = "%s (%s): %s" % (self.__name, self.__location, self.__reason)
         else:
@@ -53,40 +60,60 @@ class Error(object):
 
 class DtypeError(Error):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
-            {'name': 'expected', 'type': (dtype, type, str, list), 'doc': 'the expected dtype'},
-            {'name': 'received', 'type': (dtype, type, str, list), 'doc': 'the received dtype'},
-            {'name': 'location', 'type': str, 'doc': 'the location of the error', 'default': None})
-    def __init__(self, **kwargs):
-        name = getargs('name', kwargs)
-        expected = getargs('expected', kwargs)
-        received = getargs('received', kwargs)
+    def __init__(self, name, expected, received, location):
+        """
+
+        Parameters
+        ----------
+        name: str
+            the name of the component that is erroneous
+        expected: dtype | type | str | list
+            the expected dtype
+        received: dtype | type | str | list
+            the received dtype
+        location: str | None, optional
+            the location of the error. Default = None
+        """
+        name = name
+        expected = expected
+        received = received
         if isinstance(expected, list):
             expected = DtypeHelper.simplify_cpd_type(expected)
         reason = "incorrect type - expected '%s', got '%s'" % (expected, received)
-        loc = getargs('location', kwargs)
+        loc = location
         super(DtypeError, self).__init__(name, reason, location=loc)
 
 
 class MissingError(Error):
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
-            {'name': 'location', 'type': str, 'doc': 'the location of the error', 'default': None})
-    def __init__(self, **kwargs):
-        name = getargs('name', kwargs)
+    def __init__(self, name, location=None):
+        """
+
+        Parameters
+        ----------
+        name: str
+            the name of the component that is erroneous
+        location: str
+            the location of the error
+        """
+        name = name
         reason = "argument missing"
-        loc = getargs('location', kwargs)
+        loc = location
         super(MissingError, self).__init__(name, reason, location=loc)
 
 
 class MissingDataType(Error):
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
-            {'name': 'data_type', 'type': str, 'doc': 'the missing data type'},
-            {'name': 'location', 'type': str, 'doc': 'the location of the error', 'default': None})
-    def __init__(self, **kwargs):
-        name, data_type = getargs('name', 'data_type', kwargs)
+    def __init__(self, name, data_type, location=None):
+        """
+
+        Parameters
+        ----------
+        name: str
+        data_type: str
+        location: str
+        """
         self.__data_type = data_type
         reason = "missing data type %s" % self.__data_type
-        loc = getargs('location', kwargs)
+        loc = location
         super(MissingDataType, self).__init__(name, reason, location=loc)
 
     @property
@@ -96,14 +123,16 @@ class MissingDataType(Error):
 
 class ShapeError(Error):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
-            {'name': 'expected', 'type': (tuple, list), 'doc': 'the expected shape'},
-            {'name': 'received', 'type': (tuple, list), 'doc': 'the received shape'},
-            {'name': 'location', 'type': str, 'doc': 'the location of the error', 'default': None})
-    def __init__(self, **kwargs):
-        name = getargs('name', kwargs)
-        expected = getargs('expected', kwargs)
-        received = getargs('received', kwargs)
+    def __init__(self, name, expected, received, location=None):
+        """
+
+        Parameters
+        ----------
+        name: str
+        expected: tuple | list
+        received: tuple | list
+        location: str
+        kwargs
+        """
         reason = "incorrect shape - expected '%s', got'%s'" % (expected, received)
-        loc = getargs('location', kwargs)
-        super(ShapeError, self).__init__(name, reason, location=loc)
+        super(ShapeError, self).__init__(name, reason, location=location)
