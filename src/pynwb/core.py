@@ -897,3 +897,41 @@ class DynamicTable(NWBDataInterface):
                     ret.append(tuple(col[i] for col in self.__df_cols))
 
         return ret
+
+
+@register_class('DynamicTableRegion', CORE_NAMESPACE)
+class DynamicTableRegion(NWBData):
+    """
+    An object for easily slicing into a DynamicTable
+    """
+
+    __nwbfields__ = (
+        'table'
+    )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
+            {'name': 'table', 'type': DynamicTable,
+             'doc': 'the DynamicTable this region applies to'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        self.table = popargs('table', kwargs)
+        call_docval_func(super(DynamicTableRegion, self).__init__, kwargs)
+
+    def __getitem__(self, key):
+        # treat the list of indices as data that can be indexed. then pass the
+        # result to the table to get the data
+        if isinstance(key, tuple):
+            arg1 = key[0]
+            arg2 = key[1]
+            return self.table[self.data[arg1], arg2]
+        else:
+            if isinstance(key, int):
+                return self.table[self.data[key]]
+            else:
+                raise ValueError("unrecognized argument: '%s'" % key)
+

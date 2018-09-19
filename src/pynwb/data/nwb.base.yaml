@@ -51,6 +51,14 @@ datasets:
   default_name: element_id
   shape:
   -
+- neurodata_type_def: NWBData
+  neurodata_type_inc: DynamicTableRegion
+  attributes:
+  - name: table
+    dtype:
+      target_type: DynamicTable
+      reftype: object
+    doc: a reference to the DynamicTable this region applies to
 groups:
 - neurodata_type_def: NWBContainer
   doc: The attributes specified here are included in all interfaces.
