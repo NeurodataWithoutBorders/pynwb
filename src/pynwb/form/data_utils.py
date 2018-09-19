@@ -7,7 +7,7 @@ from six import with_metaclass
 
 from .container import Data, DataRegion
 from .utils import docval, getargs, popargs, docval_macro
-from .validate.shapevalidator import ShapeValidator
+from .validate.shapevalidator import get_data_shape
 
 
 @docval_macro('array_data')
@@ -62,7 +62,7 @@ class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
         """
         raise NotImplementedError("recommended_data_shape not implemented for derived class")
 
-    @abstractproperty
+    @property
     def dtype(self):
         """
         Define the data type of the array
@@ -71,7 +71,7 @@ class AbstractDataChunkIterator(with_metaclass(ABCMeta, object)):
         """
         raise NotImplementedError("dtype not implemented for derived class")
 
-    @abstractproperty
+    @property
     def maxshape(self):
         """
         Property describing the maximum shape of the data array that is being iterated over
@@ -124,7 +124,7 @@ class DataChunkIterator(AbstractDataChunkIterator):
             # Try to get an accurate idea of __maxshape for other Python datastructures if possible.
             # Don't just callget_shape for a generator as that would potentially trigger loading of all the data
             elif isinstance(self.data, list) or isinstance(self.data, tuple):
-                self.__maxshape = ShapeValidator.get_data_shape(self.data, strict_no_data_load=True)
+                self.__maxshape = get_data_shape(self.data, strict_no_data_load=True)
 
         # If we have a data iterator, then read the first chunk
         if self.__data_iter is not None:  # and(self.__maxshape is None or self.__dtype is None):
@@ -132,7 +132,7 @@ class DataChunkIterator(AbstractDataChunkIterator):
 
         # If we still don't know the shape then try to determine the shape from the first chunk
         if self.__maxshape is None and self.__next_chunk.data is not None:
-            data_shape = ShapeValidator.get_data_shape(self.__next_chunk.data)
+            data_shape = get_data_shape(self.__next_chunk.data)
             self.__maxshape = list(data_shape)
             try:
                 self.__maxshape[0] = len(self.data)  # We use self.data here because self.__data_iter does not allow len
@@ -143,7 +143,7 @@ class DataChunkIterator(AbstractDataChunkIterator):
         # Determine the type of the data if possible
         if self.__next_chunk.data is not None:
             self.__dtype = self.__next_chunk.data.dtype
-            self.__first_chunk_shape = ShapeValidator.get_data_shape(self.__next_chunk.data)
+            self.__first_chunk_shape = get_data_shape(self.__next_chunk.data)
 
     @classmethod
     @docval({'name': 'data', 'type': None, 'doc': 'The data object used for iteration', 'default': None},

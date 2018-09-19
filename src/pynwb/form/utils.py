@@ -7,7 +7,7 @@ import numpy as np
 import six
 from six import raise_from
 
-from .validate.shapevalidator import ShapeValidator
+from .validate.shapevalidator import get_data_shape
 
 __macros = {
     'array_data': [np.ndarray, list, tuple, h5py.Dataset],
@@ -114,7 +114,6 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
     errors = list()
     argsi = 0
     extras = dict(kwargs)
-    shape_validator = ShapeValidator()
     try:
         it = iter(validator)
         arg = next(it)
@@ -146,7 +145,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
                     ret[argname] = argval
                     if enforce_ndim:
                         import pdb; pdb.set_trace()
-                        shape_validator.get_data_shape(argval)
+                        get_data_shape(argval)
             argsi += 1
             arg = next(it)
         while True:
