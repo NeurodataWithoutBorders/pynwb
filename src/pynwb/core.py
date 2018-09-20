@@ -732,7 +732,7 @@ class TableColumn(NWBData):
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this column'},
-            {'name': 'description', 'type': str, 'doc': 'a description for this column'},
+            {'name': 'description', 'type': str, 'doc': 'a description for this column', 'default': None},
             {'name': 'data', 'type': 'array_data', 'doc': 'the data contained in this  column', 'default': list()})
     def __init__(self, **kwargs):
         desc = popargs('description', kwargs)
@@ -906,12 +906,14 @@ class DynamicTableRegion(NWBData):
     """
 
     __nwbfields__ = (
-        'table'
+        'table',
+        'description'
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
+            {'name': 'description', 'type': str, 'doc': 'a description of what this region represents'},
             {'name': 'table', 'type': DynamicTable,
              'doc': 'the DynamicTable this region applies to'},
             {'name': 'parent', 'type': 'NWBContainer',
