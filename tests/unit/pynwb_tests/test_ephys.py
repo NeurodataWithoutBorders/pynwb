@@ -18,14 +18,14 @@ def make_electrode_table():
 
 class ElectricalSeriesConstructor(unittest.TestCase):
     def test_init(self):
-        data = list(range(10))
+        data = np.arange(10)[:, np.newaxis]
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         table = make_electrode_table()
         region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         eS = ElectricalSeries('test_eS', 'a hypothetical source', data, region, timestamps=ts)  # noqa: F405
         self.assertEqual(eS.name, 'test_eS')
         self.assertEqual(eS.source, 'a hypothetical source')
-        self.assertEqual(eS.data, data)
+        self.assertTrue(np.all(eS.data == data))
         self.assertEqual(eS.timestamps, ts)
 
 
@@ -33,7 +33,7 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
     def test_init(self):
         table = make_electrode_table()
         region = ElectrodeTableRegion(table, [1, 3], 'the second and fourth electrodes')  # noqa: F405
-        data = np.zeros(10)
+        data = np.zeros((10, 1))
         timestamps = np.arange(10)
         sES = SpikeEventSeries('test_sES', 'a hypothetical source', data, timestamps, region)  # noqa: F405
         self.assertEqual(sES.name, 'test_sES')
@@ -56,7 +56,7 @@ class ElectrodeGroupConstructor(unittest.TestCase):
 
 class EventDetectionConstructor(unittest.TestCase):
     def test_init(self):
-        data = list(range(10))
+        data = np.arange(10)[:, np.newaxis]
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         table = make_electrode_table()
         region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
@@ -78,7 +78,7 @@ class EventWaveformConstructor(unittest.TestCase):
         table = make_electrode_table()
         region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         sES = SpikeEventSeries(  # noqa: F405
-            'test_sES', 'a hypothetical source', list(range(10)), list(range(10)), region)
+            'test_sES', 'a hypothetical source', np.arange(10)[:, np.newaxis], list(range(10)), region)
 
         ew = EventWaveform('test_ew', sES)  # noqa: F405
         self.assertEqual(ew.source, 'test_ew')
@@ -126,7 +126,7 @@ class LFPTest(unittest.TestCase):
         table = make_electrode_table()
         region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         eS = ElectricalSeries(  # noqa: F405
-            'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+            'test_eS', 'a hypothetical source', [[0], [1], [2], [3]], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         lfp = LFP('test_lfp', eS)  # noqa: F405
         self.assertEqual(lfp.source, 'test_lfp')
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
@@ -140,7 +140,7 @@ class LFPTest(unittest.TestCase):
         table = make_electrode_table()
         region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         eS = ElectricalSeries(  # noqa: F405
-            'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+            'test_eS', 'a hypothetical source', [[0], [1], [2], [3]], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
         self.assertEqual(lfp['test_eS'], lfp.electrical_series.get('test_eS'))
@@ -154,7 +154,7 @@ class FilteredEphysTest(unittest.TestCase):
         table = make_electrode_table()
         region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         eS = ElectricalSeries(  # noqa: F405
-            'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+            'test_eS', 'a hypothetical source', [[0], [1], [2], [3]], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         fe = FilteredEphys('test_fe', eS)  # noqa: F405
         self.assertEqual(fe.source, 'test_fe')
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
@@ -168,7 +168,7 @@ class FilteredEphysTest(unittest.TestCase):
         table = make_electrode_table()
         region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         eS = ElectricalSeries(  # noqa: F405
-            'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+            'test_eS', 'a hypothetical source', [[0], [1], [2], [3]], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         fe.add_electrical_series(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))

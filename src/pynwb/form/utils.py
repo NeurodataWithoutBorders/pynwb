@@ -64,6 +64,16 @@ def __type_okay(value, argtype, allow_none=False):
         return True
 
 
+def __shape_okay(value, argshape):
+    valshape = get_data_shape(value)
+    if not len(valshape) == len(argshape):
+        return False
+    for a, b in zip(valshape, argshape):
+        if b not in (a, None):
+            return False
+    return True
+
+
 def __is_int(value):
     return any(isinstance(value, i) for i in (int, np.int8, np.int16, np.int32, np.int64))
 
@@ -92,7 +102,7 @@ def __format_type(argtype):
         raise ValueError("argtype must be a type, str, list, or tuple")
 
 
-def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, allow_extra=False):   # noqa: 901
+def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True, allow_extra=False):   # noqa: 901
     """
     Internal helper function used by the docval decroator to parse and validate function arguments
 
@@ -101,8 +111,8 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
     :param kwargs: Dict keyword arguments supplied by the caller where keys are the argument name and
                    values are the argument value.
     :param enforce_type: Boolean indicating whether the type of arguments should be enforced
-    :param enforce_ndim: Boolean indicating whether the number of dimensions of array arguments
-                         should be enforced if possible.
+    :param enforce_shape: Boolean indicating whether the dimensions of array arguments
+                          should be enforced if possible.
 
     :return: Dict with:
         * 'args' : Dict all arguments where keys are the names and values are the values of the arguments.
@@ -140,6 +150,10 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
                         if not __type_okay(argval, arg['type']):
                             fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                             errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+                    if enforce_shape and 'shape' in arg:
+                        if not __shape_okay(argval, arg['shape']):
+                            fmt_val = (argname, get_data_shape(argval), arg['shape'])
+                            raise ValueError("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
                     ret[argname] = argval
             argsi += 1
             arg = next(it)
@@ -158,6 +172,10 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
                 if not __type_okay(argval, arg['type'], arg['default'] is None):
                     fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                     errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+            if enforce_shape and 'shape' in arg:
+                if not __shape_okay(argval, arg['shape']):
+                    fmt_val = (argname, get_data_shape(argval), arg['shape'])
+                    raise ValueError("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
             arg = next(it)
     except StopIteration:
         pass
@@ -270,8 +288,8 @@ def docval(*validator, **options):
     arguments and keyword arguments of the decorated function. These dictionaries
     must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a
     positional argument. To define a keyword argument, specify a default value
-    using the key ``'default'``. To validate the number of dimensions of an input array
-    add the optional ``'ndim'`` parameter.
+    using the key ``'default'``. To validate the dimensions of an input array
+    add the optional ``'shape'`` parameter.
 
     The decorated method must take ``self`` and ``**kwargs`` as arguments.
 
@@ -295,12 +313,12 @@ def docval(*validator, **options):
     :param returns: String describing the return values
     :param rtype: String describing the data type of the return values
     :param is_method: True if this is decorating an instance or class method, False otherwise (Default=True)
-    :param enforce_ndim: Enforce the number of dimensions of input arrays (Default=True)
+    :param enforce_shape: Enforce the dimensions of input arrays (Default=True)
     :param validator: :py:func:`dict` objects specifying the method parameters
     :param options: additional options for documenting and validating method parameters
     '''
     enforce_type = options.pop('enforce_type', True)
-    enforce_ndim = options.pop('enforce_ndim', True)
+    enforce_shape = options.pop('enforce_shape', True)
     returns = options.pop('returns', None)
     rtype = options.pop('rtype', None)
     is_method = options.pop('is_method', True)
@@ -329,7 +347,7 @@ def docval(*validator, **options):
                             args[1:],
                             kwargs,
                             enforce_type=enforce_type,
-                            enforce_ndim=enforce_ndim,
+                            enforce_shape=enforce_shape,
                             allow_extra=allow_extra)
                 parse_err = parsed.get('errors')
                 if parse_err:

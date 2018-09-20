@@ -325,7 +325,7 @@ class EventWaveformConstructor(base.TestDataInterfaceIO):
         TestElectricalSeriesIO.make_electrode_table(self)
         region = ElectrodeTableRegion(self.table, [0, 2], 'the first and third electrodes')  # noqa: F405
         sES = SpikeEventSeries(  # noqa: F405
-            'test_sES', 'a hypothetical source', list(range(10)), list(range(10)), region)
+            'test_sES', 'a hypothetical source', np.arange(10)[:, np.newaxis], list(range(10)), region)
         ew = EventWaveform('test_ew', sES)  # noqa: F405
         return ew
 
@@ -374,7 +374,7 @@ class FeatureExtractionConstructor(base.TestDataInterfaceIO):
 
 class EventDetectionConstructor(base.TestDataInterfaceIO):
     def setUpContainer(self):
-        data = list(range(10))
+        data = list(map(list, zip(range(10))))  # transpose data
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         TestElectricalSeriesIO.make_electrode_table(self)
         region = ElectrodeTableRegion(self.table, [0, 2], 'the first and third electrodes')  # noqa: F405

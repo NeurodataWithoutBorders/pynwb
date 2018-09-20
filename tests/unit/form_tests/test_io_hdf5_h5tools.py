@@ -424,7 +424,7 @@ class TestLinkResolution(unittest.TestCase):
         for passband in ('theta', 'gamma'):
             electrical_series = ElectricalSeries(name=passband + '_phase',
                                                  source='ephys_analysis',
-                                                 data=[1., 2., 3.],
+                                                 data=[[1.], [2.], [3.]],
                                                  rate=0.0,
                                                  electrodes=etr)
             nwbfile.add_acquisition(electrical_series)

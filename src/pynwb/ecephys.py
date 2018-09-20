@@ -103,7 +103,7 @@ class ElectricalSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, None),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
             {'name': 'electrodes', 'type': ElectrodeTableRegion,
@@ -268,11 +268,12 @@ class Clustering(NWBDataInterface):
             {'name': 'description', 'type': str,
              'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, \
              clusters curated using Klusters, etc).'},
-            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.'},
+            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.', 'shape': (None,)},
             {'name': 'peak_over_rms', 'type': Iterable,
              'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster\
              (provides a basic clustering metric).'},
-            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.'},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.',
+             'shape': (None,)},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
         source, description, num, peak_over_rms, times = popargs(
