@@ -1,10 +1,11 @@
-import itertools as _itertools
 import copy as _copy
+import itertools as _itertools
 from abc import ABCMeta
-import six
-from six import raise_from
-import numpy as np
+
 import h5py
+import numpy as np
+import six
+from six import raise_from, text_type, binary_type
 
 __macros = {
     'array_data': [np.ndarray, list, tuple, h5py.Dataset],
@@ -487,3 +488,38 @@ class ExtenderMeta(ABCMeta):
         it = (a for a in it if hasattr(a, cls.__postinit))
         for func in it:
             func(name, bases, classdict)
+
+
+def get_data_shape(data, strict_no_data_load=False):
+    """
+    Helper function used to determine the shape of the given array.
+
+    :param data: Array for which we should determine the shape.
+    :type data: List, numpy.ndarray, DataChunkIterator, any object that support __len__ or .shape.
+    :param strict_no_data_load: In order to determin the shape of nested tuples and lists, this function
+                recursively inspects elements along the dimensions, assuming that the data has a regular,
+                rectangular shape. In the case of out-of-core iterators this means that the first item
+                along each dimensions would potentially be loaded into memory. By setting this option
+                we enforce that this does not happen, at the cost that we may not be able to determine
+                the shape of the array.
+    :return: Tuple of ints indicating the size of known dimensions. Dimensions for which the size is unknown
+             will be set to None.
+    """
+    def __get_shape_helper(local_data):
+        shape = list()
+        if hasattr(local_data, '__len__'):
+            shape.append(len(local_data))
+            if len(local_data) and not isinstance(local_data[0], (text_type, binary_type)):
+                shape.extend(__get_shape_helper(local_data[0]))
+        return tuple(shape)
+    if hasattr(data, 'maxshape'):
+        return data.maxshape
+    if hasattr(data, 'shape'):
+        return data.shape
+    if hasattr(data, '__len__') and not isinstance(data, (text_type, binary_type)):
+        if not strict_no_data_load or (isinstance(data, list) or isinstance(data, tuple) or isinstance(data, set)):
+            return __get_shape_helper(data)
+        else:
+            return None
+    else:
+        return None

@@ -3,7 +3,7 @@ from h5py import RegionReference
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, call_docval_func
-from .form.data_utils import DataChunkIterator, ShapeValidator
+from .form.data_utils import DataChunkIterator, assertEqualShape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -395,29 +395,29 @@ class FeatureExtraction(NWBDataInterface):
         # Validate the shape of the inputs
         # Validate event times compared to features
         shape_validators = []
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=times,
-                                                                axes1=0,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='times',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=times,
+                                                 axes1=0,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='times',
+                                                 ignore_undetermined=True))
         # Validate electrodes compared to features
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=electrodes,
-                                                                axes1=1,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='electrodes',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=electrodes,
+                                                 axes1=1,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='electrodes',
+                                                 ignore_undetermined=True))
         # Valided description compared to features
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=description,
-                                                                axes1=2,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='description',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=description,
+                                                 axes1=2,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='description',
+                                                 ignore_undetermined=True))
         # Raise an error if any of the shapes do not match
         raise_error = False
         error_msg = ""
