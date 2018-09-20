@@ -64,15 +64,16 @@ class TestDocValidator(unittest.TestCase):
             method(self, arg1=1234560)
 
     def test_bad_shape2(self):
+        @docval({'name': 'arg1', 'type': 'array_data', 'doc': 'this is a bad shape', 'shape': (None, 2)})
+        def method1(self, **kwargs):
+            pass
         with self.assertRaises(ValueError):
-            @docval({'name': 'arg1', 'type': 'array_data', 'doc': 'this is a bad shape', 'shape': (None, 2)})
-            def method1(self, **kwargs):
-                pass
             method1(self, arg1=[[1]])
+
+        @docval({'name': 'arg1', 'type': 'array_data', 'doc': 'this is a bad shape', 'shape': (None, 2)})
+        def method2(self, **kwargs):
+            pass
         with self.assertRaises(ValueError):
-            @docval({'name': 'arg1', 'type': 'array_data', 'doc': 'this is a bad shape', 'shape': (None, 2)})
-            def method2(self, **kwargs):
-                pass
             method2(self, arg1=[1])
 
         # this should work
@@ -80,6 +81,20 @@ class TestDocValidator(unittest.TestCase):
         def method3(self, **kwargs):
             pass
         method3(self, arg1=[[1, 1]])
+
+    def test_multi_shape(self):
+        @docval({'name': 'arg1', 'type': 'array_data', 'doc': 'this is a bad shape',
+                 'shape': ((None,), (None, 2))})
+        def method1(self, **kwargs):
+            pass
+
+        method1(self, arg1=[[1, 1]])
+        method1(self, arg1=[1, 2])
+        with self.assertRaises(ValueError):
+            method1(self, arg1=[[1, 1, 1]])
+
+
+
 
     def test_fmt_docval_args(self):
         """ Test that fmt_docval_args works """
