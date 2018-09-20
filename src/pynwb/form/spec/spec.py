@@ -576,6 +576,8 @@ class DtypeSpec(ConstructableDict):
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
         ret = super(DtypeSpec, cls).build_const_args(spec_dict)
+        if 'dtype' not in ret:
+            print(ret)
         if isinstance(ret['dtype'], list):
             ret['dtype'] = list(map(cls.build_const_args, ret['dtype']))
         elif isinstance(ret['dtype'], dict):
@@ -1021,12 +1023,15 @@ class GroupSpec(BaseStorageSpec):
                     # unnamed data types will be stored as data_types
                     self.__data_types[dt] = spec
             else:
-                if curr.name is None:
-                    # leave the existing data type as is, since the new one can be retrieved by name
-                    return
+                if isinstance(curr, list):
+                    self.__data_types[dt].append(spec)
                 else:
-                    # store both specific instances of a data type
-                    self.__data_types[dt] = [curr, spec]
+                    if curr.name is None:
+                        # leave the existing data type as is, since the new one can be retrieved by name
+                        return
+                    else:
+                        # store both specific instances of a data type
+                        self.__data_types[dt] = [curr, spec]
         else:
             self.__data_types[dt] = spec
 

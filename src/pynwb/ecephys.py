@@ -7,7 +7,7 @@ from .form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, NWBTable, NWBTableRegion, NWBDataInterface, MultiContainerInterface
+from .core import NWBContainer, NWBTable, NWBTableRegion, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
 
 

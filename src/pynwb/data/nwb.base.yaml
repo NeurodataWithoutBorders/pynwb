@@ -51,8 +51,10 @@ datasets:
   default_name: element_id
   shape:
   -
-- neurodata_type_def: NWBData
-  neurodata_type_inc: DynamicTableRegion
+- neurodata_type_def: DynamicTableRegion
+  neurodata_type_inc: NWBData
+  dtype: int
+  doc: a region/index into a DynamicTable
   attributes:
   - name: table
     dtype:

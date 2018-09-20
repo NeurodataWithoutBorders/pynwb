@@ -936,4 +936,3 @@ class DynamicTableRegion(NWBData):
                 return self.table[self.data[key]]
             else:
                 raise ValueError("unrecognized argument: '%s'" % key)
-

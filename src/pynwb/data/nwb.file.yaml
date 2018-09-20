@@ -376,14 +376,14 @@ groups:
         - neurodata_type_inc: TableColumn
           name: group
           dtype:
-            - reftype: ElectrodeGroup
+            target_type: ElectrodeGroup
+            reftype: object
           doc: a reference to the ElectrodeGroup this electrode is a part of
           attributes:
           - name: description
             dtype: text
             doc: value is 'a reference to the ElectrodeGroup this electrode is a part of'
             value: a reference to the ElectrodeGroup this electrode is a part of
-        quantity: '?'
       quantity: '?'
     - name: intracellular_ephys
       doc: Metadata related to intracellular electrophysiology
