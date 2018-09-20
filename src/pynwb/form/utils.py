@@ -64,6 +64,13 @@ def __type_okay(value, argtype, allow_none=False):
         return True
 
 
+def __shape_okay_multi(value, argshape):
+    if type(argshape[0]) in (tuple, list):  # if multiple shapes are present
+        return any(__shape_okay(value, a) for a in argshape)
+    else:
+        return __shape_okay(value, argshape)
+
+
 def __shape_okay(value, argshape):
     valshape = get_data_shape(value)
     if not len(valshape) == len(argshape):
@@ -151,7 +158,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True,
                             fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                             errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
                     if enforce_shape and 'shape' in arg:
-                        if not __shape_okay(argval, arg['shape']):
+                        if not __shape_okay_multi(argval, arg['shape']):
                             fmt_val = (argname, get_data_shape(argval), arg['shape'])
                             raise ValueError("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
                     ret[argname] = argval
@@ -173,7 +180,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True,
                     fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                     errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
             if enforce_shape and 'shape' in arg:
-                if not __shape_okay(argval, arg['shape']):
+                if not __shape_okay_multi(argval, arg['shape']):
                     fmt_val = (argname, get_data_shape(argval), arg['shape'])
                     raise ValueError("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
             arg = next(it)
