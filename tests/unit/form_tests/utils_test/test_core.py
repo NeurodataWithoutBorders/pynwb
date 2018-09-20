@@ -93,9 +93,6 @@ class TestDocValidator(unittest.TestCase):
         with self.assertRaises(ValueError):
             method1(self, arg1=[[1, 1, 1]])
 
-
-
-
     def test_fmt_docval_args(self):
         """ Test that fmt_docval_args works """
         test_kwargs = {
