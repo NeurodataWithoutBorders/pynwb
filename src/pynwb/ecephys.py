@@ -106,7 +106,7 @@ class ElectricalSeries(TimeSeries):
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
