@@ -33,7 +33,7 @@ class YAMLSpecWriter(SpecWriter):
         self.__outdir = getargs('outdir', kwargs)
 
     def __dump_spec(self, specs, stream):
-        yaml.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
+        yaml.main.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
 
     def write_spec(self, spec_file_dict, path):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
@@ -46,17 +46,17 @@ class YAMLSpecWriter(SpecWriter):
 
     def reorder_yaml(self, path):
         with open(path, 'rb') as f_in:
-            data = yaml.load(f_in, Loader=yaml.RoundTripLoader)
+            data = yaml.load(f_in, Loader=yaml.loader.RoundTripLoader)
         sorted_data = self.sort_keys(data)
         with open(path, 'w') as f_out:
-            f_out.write(yaml.dump(sorted_data, Dumper=yaml.RoundTripDumper))
+            f_out.write(yaml.dump(sorted_data, Dumper=yaml.dumper.RoundTripDumper))
 
     def sort_keys(self, obj):
 
         # Represent None as null
         def my_represent_none(self, data):
             return self.represent_scalar(u'tag:yaml.org,2002:null', u'null')
-        yaml.RoundTripRepresenter.add_representer(type(None), my_represent_none)
+        yaml.representer.RoundTripRepresenter.add_representer(type(None), my_represent_none)
 
         order = ['neurodata_type_def', 'neurodata_type_inc', 'name', 'dtype', 'doc',
                  'attributes', 'datasets', 'groups']
