@@ -12,9 +12,7 @@ from .ecephys import ElectrodeTable, ElectrodeTableRegion, ElectrodeGroup, Devic
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
-from .core import NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface, DynamicTable
-
-from h5py import RegionReference
+from .core import NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
 
 
 def _not_parent(arg):
@@ -160,7 +158,7 @@ class NWBFile(MultiContainerInterface):
                      'surgery',
                      'virus',
                      'stimulus_notes',
-                     {'name': 'ec_electrodes', 'child': True},
+                     {'name': 'electrodes', 'child': True},
                      {'name': 'epochs', 'child': True},
                      {'name': 'trials', 'child': True},
                      {'name': 'units', 'child': True},
@@ -318,6 +316,11 @@ class NWBFile(MultiContainerInterface):
         return ret
 
     @property
+    def ec_electrodes(self):
+        warn("replaced by NWBFile.electrodes", DeprecationWarning)
+        return self.electrodes
+
+    @property
     def identifier(self):
         return self.__identifier
 
@@ -332,29 +335,6 @@ class NWBFile(MultiContainerInterface):
     @property
     def session_start_time(self):
         return self.__session_start_time
-
-    @docval(*get_docval(ElectrodeTable.add_row))
-    def add_electrode(self, **kwargs):
-        if self.ec_electrodes is None:
-            self.ec_electrodes = ElectrodeTable('electrodes')
-        return call_docval_func(self.ec_electrodes.add_row, kwargs)
-
-    @docval({'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
-    def create_electrode_table_region(self, **kwargs):
-        if self.ec_electrodes is None:
-            msg = "no electrodes available. add electrodes before creating a region"
-            raise RuntimeError(msg)
-        region = getargs('region', kwargs)
-        for idx in region:
-            if idx < 0 or idx >= len(self.ec_electrodes):
-                raise IndexError('The index ' + str(idx) +
-                                 ' is out of range for the ElectrodeTable of length '
-                                 + str(len(self.ec_electrodes)))
-        desc = getargs('description', kwargs)
-        name = getargs('name', kwargs)
-        return ElectrodeTableRegion(self.ec_electrodes, region, desc, name)
 
     @docval(*get_docval(Epochs.add_epoch))
     def create_epoch(self, **kwargs):
@@ -371,10 +351,57 @@ class NWBFile(MultiContainerInterface):
         self.epoch_tags.update(kwargs.get('tags', list()))
         call_docval_func(self.epochs.add_epoch, kwargs)
 
+    def __check_electrodes(self):
+        if self.electrodes is None:
+            self.electrodes = ElectrodeTable()
+
+    @docval(*get_docval(DynamicTable.add_column))
+    def add_electrode_column(self, **kwargs):
+        """
+        Add a column to the electrode table.
+        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        """
+        self.__check_electrodes()
+        call_docval_func(self.electrodes.add_column, kwargs)
+
+    @docval(*get_docval(DynamicTable.add_row), allow_extra=True)
+    def add_electrode(self, **kwargs):
+        """
+        Add a unit to the unit table.
+        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+
+        Required fields are *x*, *y*, *z*, *imp*, *location*, *filtering*,
+        *description*, *group* and any columns that have been added
+        (through calls to `add_electrode_columns`).
+        """
+        self.__check_electrodes()
+        d = kwargs['data']
+        if 'group_name' not in kwargs['data']:
+            tmp = {'group_name': kwargs['group'].name}
+            tmp.update(d)
+            kwargs['data'] = tmp
+        call_docval_func(self.electrodes.add_row, kwargs)
+
+    @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
+            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
+    def create_electrode_table_region(self, **kwargs):
+        if self.ec_electrodes is None:
+            msg = "no electrodes available. add electrodes before creating a region"
+            raise RuntimeError(msg)
+        region = getargs('region', kwargs)
+        for idx in region:
+            if idx < 0 or idx >= len(self.ec_electrodes):
+                raise IndexError('The index ' + str(idx) +
+                                 ' is out of range for the ElectrodeTable of length '
+                                 + str(len(self.ec_electrodes)))
+        desc = getargs('description', kwargs)
+        name = getargs('name', kwargs)
+        return DynamicTableRegion(name, region, desc, self.ec_electrodes)
+
     def __check_units(self):
         if self.units is None:
-            self.units = DynamicTable('units', 'autogenerated by PyNWB API', 'metadata about experimental units')
-            self.units.add_column('id', 'the unique identifier for each unit')
+            self.units =  UnitTable()
 
     @docval(*get_docval(DynamicTable.add_column))
     def add_unit_column(self, **kwargs):
@@ -392,16 +419,14 @@ class NWBFile(MultiContainerInterface):
         See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
 
         Required fields are *start*, *end*, and any columns that have
-        been added (through calls to `add_trial_columns`).
+        been added (through calls to `add_unit_columns`).
         """
         self.__check_units()
         call_docval_func(self.units.add_row, kwargs)
 
     def __check_trials(self):
         if self.trials is None:
-            self.trials = DynamicTable('trials', 'autogenerated by PyNWB API', 'data about experimental trials')
-            self.trials.add_column('start', 'the start time of each trial')
-            self.trials.add_column('end', 'the end time of each trial')
+            return self.trials = TrialTable()
 
     @docval(*get_docval(DynamicTable.add_column))
     def add_trial_column(self, **kwargs):
@@ -434,3 +459,35 @@ class NWBFile(MultiContainerInterface):
             raise ValueError(msg)
         electrode_table = getargs('electrode_table', kwargs)
         self.ec_electrodes = electrode_table
+
+
+def _tablefunc(table_name, description, columns, source='autogenerated by PyNWB API'):
+    t = DynamicTable(table_name, source, description)
+    for c in columns:
+        if isinstance(c, tuple):
+            t.add_column(c[0], c[1])
+        elif isinstance(c, str):
+            t.add_column(c)
+        else:
+            raise ValueError("Elements of 'columns' must be str or tuple")
+    return t
+
+
+def ElectrodeTable(name='electrodes',
+                   description='metadata about extracellular electrodes',
+                   source='autogenerated by PyNWB API'):
+    return _tablefunc(name, description,
+                      ['x', 'y', 'z', 'imp', 'location', 'filtering', 'description', 'group', 'group_name'],
+                      source)
+
+
+def UnitTable(name='units',
+                   description='metadata about experimental units',
+                   source='autogenerated by PyNWB API'):
+    return _tablefunc(name, description, list(), source)
+
+
+def TrialTable(name='trials',
+                   description='metadata about experimental trials',
+                   source='autogenerated by PyNWB API'):
+    return _tablefunc(name, description, ['start', 'end'], source)
