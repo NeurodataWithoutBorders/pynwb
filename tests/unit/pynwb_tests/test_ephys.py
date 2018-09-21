@@ -194,7 +194,8 @@ class FeatureExtractionConstructor(unittest.TestCase):
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
         self.assertRaises(
-            ArgValidationError, FeatureExtraction, 'test_fe', electrodes, description, event_times, features)   # noqa: F405
+            ArgValidationError, FeatureExtraction, 'test_fe', electrodes,  # noqa: F405
+            description, event_times, features)
 
     def test_invalid_init_mismatched_electrodes(self):
         event_times = [1]
