@@ -7,6 +7,11 @@ import numpy as np
 import six
 from six import raise_from, text_type, binary_type
 
+
+class ArgValidationError(Exception):
+    def __init__(self, message):
+        super(ArgValidationError, self).__init__(message)
+
 __macros = {
     'array_data': [np.ndarray, list, tuple, h5py.Dataset],
     'scalar_data': [str, int, float],
@@ -160,7 +165,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True,
                     if enforce_shape and 'shape' in arg:
                         if not __shape_okay_multi(argval, arg['shape']):
                             fmt_val = (argname, get_data_shape(argval), arg['shape'])
-                            raise ValueError("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
+                            errors.append("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
                     ret[argname] = argval
             argsi += 1
             arg = next(it)
@@ -182,7 +187,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True,
             if enforce_shape and 'shape' in arg:
                 if not __shape_okay_multi(argval, arg['shape']):
                     fmt_val = (argname, get_data_shape(argval), arg['shape'])
-                    raise ValueError("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
+                    errors.append("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
             arg = next(it)
     except StopIteration:
         pass
@@ -359,7 +364,7 @@ def docval(*validator, **options):
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
-                    raise_from(TypeError(msg), None)
+                    raise_from(ArgValidationError(msg), None)
                 return func(self, **parsed['args'])
         else:
             def func_call(*args, **kwargs):
@@ -371,7 +376,7 @@ def docval(*validator, **options):
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
-                    raise_from(TypeError(msg), None)
+                    raise_from(ArgValidationError(msg), None)
                 return func(**parsed['args'])
         _rtype = rtype
         if isinstance(rtype, type):

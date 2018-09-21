@@ -2,6 +2,7 @@ import unittest2 as unittest
 import json
 
 from pynwb.form.spec import GroupSpec, DatasetSpec, AttributeSpec, DtypeSpec, RefSpec
+from pynwb.form.utils import ArgValidationError
 
 
 class DatasetSpecTests(unittest.TestCase):
@@ -101,7 +102,7 @@ class DatasetSpecTests(unittest.TestCase):
         '''Test to make sure DatasetSpec catches when a GroupSpec used as data_type_inc'''
         base = GroupSpec('a fake grop',
                          data_type_def='EphysData')
-        with self.assertRaises(TypeError):
+        with self.assertRaises(ArgValidationError):
             ext = DatasetSpec('my first dataset extension',  # noqa: F841
                               'int',
                               name='dataset1',

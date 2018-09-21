@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from pynwb.ecephys import *  # noqa: F403
+from pynwb.form.utils import ArgValidationError
 
 
 def make_electrode_table():
@@ -193,14 +194,14 @@ class FeatureExtractionConstructor(unittest.TestCase):
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
         self.assertRaises(
-            TypeError, FeatureExtraction, 'test_fe', electrodes, description, event_times, features)   # noqa: F405
+            ArgValidationError, FeatureExtraction, 'test_fe', electrodes, description, event_times, features)   # noqa: F405
 
     def test_invalid_init_mismatched_electrodes(self):
         event_times = [1]
         electrodes = ['elec1']  # Need 2 electrodes but give 1
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
-        self.assertRaises(TypeError, FeatureExtraction, 'test_fe', electrodes,   # noqa: F405
+        self.assertRaises(ArgValidationError, FeatureExtraction, 'test_fe', electrodes,   # noqa: F405
                           description, event_times, features)
 
     def test_invalid_init_mismatched_description(self):
@@ -208,7 +209,7 @@ class FeatureExtractionConstructor(unittest.TestCase):
         electrodes = ['elec1', 'elec2']
         description = ['desc1', 'desc2', 'desc3', 'desc4']  # Need 3 descriptions but give 4
         features = [[[0, 1, 2], [3, 4, 5]]]
-        self.assertRaises(TypeError, FeatureExtraction, 'test_fe',   # noqa: F405
+        self.assertRaises(ArgValidationError, FeatureExtraction, 'test_fe',   # noqa: F405
                           electrodes, description, event_times, features)
 
     def test_invalid_init_mismatched_description(self):  # noqa: F811
@@ -216,7 +217,7 @@ class FeatureExtractionConstructor(unittest.TestCase):
         electrodes = ['elec1', 'elec2']
         description = ['desc1', 'desc2', 'desc3']
         features = [[0, 1, 2], [3, 4, 5]]  # Need 3D feature array but give only 2D array
-        self.assertRaises(TypeError, FeatureExtraction, 'test_fe',   # noqa: F405
+        self.assertRaises(ArgValidationError, FeatureExtraction, 'test_fe',   # noqa: F405
                           electrodes, description, event_times, features)
 
 
