@@ -8,14 +8,15 @@ import six
 from six import raise_from, text_type, binary_type
 
 
-class ArgValidationError(Exception):
-    def __init__(self, message):
-        super(ArgValidationError, self).__init__(message)
-
 __macros = {
     'array_data': [np.ndarray, list, tuple, h5py.Dataset],
     'scalar_data': [str, int, float],
 }
+
+
+class ArgValidationError(Exception):
+    def __init__(self, message):
+        super(ArgValidationError, self).__init__(message)
 
 
 def docval_macro(macro):
