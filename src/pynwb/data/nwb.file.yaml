@@ -365,7 +365,7 @@ groups:
             doc: value is 'description of hardware filtering'
             value: description of hardware filtering
         - neurodata_type_inc: TableColumn
-          name: description
+          name: description2
           dtype: utf8
           doc: a brief description of what this electrode is
           attributes:

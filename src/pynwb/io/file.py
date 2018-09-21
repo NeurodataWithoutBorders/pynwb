@@ -27,7 +27,7 @@ class NWBFileMap(ObjectMapper):
             general_spec.get_group('intracellular_ephys')
             .get_neurodata_type('IntracellularElectrode'))
         ecephys_spec = general_spec.get_group('extracellular_ephys')
-        self.map_spec('ec_electrodes', ecephys_spec.get_dataset('electrodes'))
+        self.map_spec('ec_electrodes', ecephys_spec.get_group('electrodes'))
         self.map_spec('ec_electrode_groups', ecephys_spec.get_neurodata_type('ElectrodeGroup'))
         self.map_spec(
             'optogenetic_sites',

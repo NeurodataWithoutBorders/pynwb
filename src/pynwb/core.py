@@ -810,16 +810,16 @@ class DynamicTable(NWBDataInterface):
     def __len__(self):
         return len(self.id)
 
-    @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row'},
+    @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row', 'default': None},
             {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None},
             allow_extra=True)
     def add_row(self, **kwargs):
         '''
         Add a row to the table. If *id* is not provided, it will auto-increment.
         '''
-
-        data = getargs('data', kwargs)
-        row_id = getargs('id', kwargs)
+        #data = getargs('data', kwargs)
+        data, row_id = popargs('data', 'id', kwargs)
+        data = data if data is not None else kwargs
         if row_id is None:
             row_id = data.pop('id', None)
         if row_id is None:
@@ -921,8 +921,9 @@ class DynamicTableRegion(NWBData):
             {'name': 'container_source', 'type': object,
             'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
-        self.table = popargs('table', kwargs)
+        t = popargs('table', kwargs)
         call_docval_func(super(DynamicTableRegion, self).__init__, kwargs)
+        self.table = t
 
     def __getitem__(self, key):
         # treat the list of indices as data that can be indexed. then pass the

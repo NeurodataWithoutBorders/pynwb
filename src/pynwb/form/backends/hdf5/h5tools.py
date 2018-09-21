@@ -21,7 +21,10 @@ from ..io import FORMIO
 
 ROOT_NAME = 'root'
 SPEC_LOC_ATTR = '.specloc'
-
+H5_TEXT = special_dtype(vlen=text_type)
+H5_BINARY = special_dtype(vlen=binary_type)
+H5_REF = special_dtype(ref=Reference)
+H5_REGREF = special_dtype(ref=RegionReference)
 
 class HDF5IO(FORMIO):
 
@@ -393,7 +396,9 @@ class HDF5IO(FORMIO):
     @classmethod
     def get_type(cls, data):
         if isinstance(data, (text_type, string_types)):
-            return special_dtype(vlen=text_type)
+            return H5_TEXT
+        elif isinstance(data, Container):
+            return H5_REF
         elif not hasattr(data, '__len__'):
             return type(data)
         else:
@@ -412,19 +417,20 @@ class HDF5IO(FORMIO):
         "int32": np.int32,
         "int16": np.int16,
         "int8": np.int8,
-        "text": special_dtype(vlen=text_type),
-        "utf": special_dtype(vlen=text_type),
-        "utf8": special_dtype(vlen=text_type),
-        "utf-8": special_dtype(vlen=text_type),
-        "ascii": special_dtype(vlen=binary_type),
-        "str": special_dtype(vlen=binary_type),
+        "text": H5_TEXT,
+        "text": H5_TEXT,
+        "utf": H5_TEXT,
+        "utf8": H5_TEXT,
+        "utf-8": H5_TEXT,
+        "ascii": H5_BINARY,
+        "str": H5_BINARY,
         "uint32": np.uint32,
         "uint16": np.uint16,
         "uint8": np.uint8,
-        "ref": special_dtype(ref=Reference),
-        "reference": special_dtype(ref=Reference),
-        "object": special_dtype(ref=Reference),
-        "region": special_dtype(ref=RegionReference)
+        "ref": H5_REF,
+        "reference": H5_REF,
+        "object": H5_REF,
+        "region": H5_REGREF,
     }
 
     @classmethod
@@ -633,7 +639,8 @@ class HDF5IO(FORMIO):
         # Write a dataset containing references, i.e., a region or object reference.
         # NOTE: we can ignore options['io_settings'] for scalar data
         elif self.__is_ref(options['dtype']):
-            _dtype = self.__dtypes[options['dtype']]
+            print("DLFKJSDLFKJSDFLKJDFLKJFFUCK")
+            _dtype = self.__dtypes.get(options['dtype'])
             # Write a scalar data region reference dataset
             if isinstance(data, RegionBuilder):
                 dset = parent.require_dataset(name, shape=(), dtype=_dtype)
@@ -680,7 +687,7 @@ class HDF5IO(FORMIO):
                     def _filler():
                         refs = list()
                         for item in data:
-                            refs.append(self.__get_ref(item.builder))
+                            refs.append(self.__get_ref(item))
                         dset = parent[name]
                         self.set_attributes(dset, attributes)
             return

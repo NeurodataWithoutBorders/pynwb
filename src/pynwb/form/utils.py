@@ -219,14 +219,19 @@ def fmt_docval_args(func, kwargs):
     func_docval = getattr(func, docval_attr_name, None)
     ret_args = list()
     ret_kwargs = dict()
+    kwargs_copy = _copy.copy(kwargs)
     if func_docval:
         for arg in func_docval[__docval_args_loc]:
-            val = kwargs.get(arg['name'])
+            val = kwargs_copy.pop(arg['name'], None)
             if 'default' in arg:
                 if val is not None:
                     ret_kwargs[arg['name']] = val
             else:
                 ret_args.append(val)
+        if func_docval['allow_extra']:
+            ret_kwargs.update(kwargs_copy)
+    else:
+        raise ValueError('no docval found on %s' % str(func))
     return (ret_args, ret_kwargs)
 
 
@@ -308,6 +313,7 @@ def docval(*validator, **options):
 
     def dec(func):
         _docval = _copy.copy(options)
+        _docval['allow_extra'] = allow_extra
         func.__name__ = _docval.get('func_name', func.__name__)
         func.__doc__ = _docval.get('doc', func.__doc__)
         pos = list()

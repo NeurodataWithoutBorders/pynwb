@@ -599,6 +599,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     def build(self, **kwargs):
         ''' Convert an Container to a Builder representation '''
         container, manager, parent, source = getargs('container', 'manager', 'parent', 'source', kwargs)
+        if container.__class__.__name__ == 'TableColumn' and container.name == 'group':
+            import pdb
+        #    pdb.set_trace()
         builder = getargs('builder', kwargs)
         name = manager.get_builder_name(container)
         if isinstance(self.__spec, GroupSpec):
@@ -627,10 +630,28 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
                                          dtype=self.convert_dtype(self.__spec.dtype))
             else:
-                builder = DatasetBuilder(name, container.data, parent=parent, source=source,
-                                         dtype=self.convert_dtype(self.__spec.dtype))
+                #TODO: If container.data is a list of containers, convert that list to
+                # a list of ReferenceBuilders
+                if self.__spec.dtype is None and self.__is_reftype(container.data):
+                    bldr_data = list()
+                    for d in container.data:
+                        bldr_data.append(manager.build(d))
+                    builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
+                                             dtype='object')
+                else:
+                    builder = DatasetBuilder(name, container.data, parent=parent, source=source,
+                                             dtype=self.convert_dtype(self.__spec.dtype))
         self.__add_attributes(builder, self.__spec.attributes, container, manager)
         return builder
+
+    def __is_reftype(self, data):
+        tmp = data
+        while hasattr(tmp, '__len__') and not isinstance(tmp, (Container, text_type, binary_type)):
+            tmp = tmp[0]
+        if isinstance(tmp, Container):
+            return True
+        else:
+            return False
 
     def __get_ref_builder(self, dtype, shape, container, manager):
         bldr_data = None

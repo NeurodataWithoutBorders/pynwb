@@ -210,8 +210,8 @@ class GroupBuilder(BaseBuilder):
                     #         To allow read to get past this special case, this will skip the issue.
                     warnings.warn("'%s' already exists as %s; skipping..." % (name, self.obj_type[name]))
                 else:
-                    raise KeyError("'%s' already exists as %s, cannot set as %s" %
-                                   (name, self.obj_type[name], obj_type))
+                    raise KeyError("'%s' already exists as %s in %s, cannot set as %s" %
+                                   (name, self.obj_type[name], self.name, obj_type))
         super(GroupBuilder, self).__getitem__(obj_type)[name] = builder
         self.obj_type[name] = obj_type
         if builder.parent is None:
@@ -406,7 +406,11 @@ class DatasetBuilder(BaseBuilder):
             'name', 'data', 'dtype', 'attributes', 'maxshape', 'chunks', 'parent', 'source', kwargs)
         super(DatasetBuilder, self).__init__(name, attributes, parent, source)
         self['data'] = data
-        self['attributes'] = _copy.deepcopy(attributes)
+        try:
+            self['attributes'] = _copy.copy(attributes)
+        except TypeError:
+            import pdb
+            pdb.set_trace()
         self.__chunks = chunks
         self.__maxshape = maxshape
         if isinstance(data, BaseBuilder):
