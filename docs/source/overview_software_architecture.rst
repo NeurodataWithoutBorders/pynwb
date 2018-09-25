@@ -87,7 +87,7 @@ Spec
    * :py:class:`pynwb.spec.NWBDatasetSpec` - specification for dataset (like and n-dimensional array). Specifies data type, dimensions, etc.
    * :py:class:`pynwb.spec.NWBLinkSpec` - specification for link (like a POSIX soft link)
    * :py:class:`pynwb.form.spec.spec.RefSpec` - specification for references (References are like links, but stored as data)
-   * :py:class:`pynwb.spec.NWBDtypeSpec` - specification for compound data types. Used to build complex data type specification, e.g., to define tables (used only in ``DatasetSpec``)
+   * :py:class:`pynwb.spec.NWBDtypeSpec` - specification for compound data types. Used to build complex data type specification, e.g., to define tables (used only in :py:class:`DatasetSpec <pynwb.spec.NWBDatasetSpec>`)
 
 * **Main Modules:**
 
@@ -193,18 +193,18 @@ FORMIO
 ^^^^^^
 
 * Abstract base class for I/O
-* FORMIO has two key abstract methods:
+* :py:class:`FORMIO <pynwb.form.backends.io.FORMIO>` has two key abstract methods:
 
-   * ``write_builder`` – given a builder, write data to storage format
-   * ``read_builder`` – given a handle to storage format, return builder representation
-   * Others: ``open`` and ``close``
+   * :py:meth:`~pynwb.form.backends.io.FORMIO.write_builder` – given a builder, write data to storage format
+   * :py:meth:`~pynwb.form.backends.io.FORMIO.read_builder` – given a handle to storage format, return builder representation
+   * Others: :py:meth:`~pynwb.form.backends.io.FORMIO.open` and :py:meth:`~pynwb.form.backends.io.FORMIO.close`
 
 * Constructed with a `BuildManager`_
 * Extend this for creating a new I/O backend
 * PyNWB has one extension of this:
 
-   * :py:class:`pynwb.form.backends.hdf5.HDF5IO` - reading and writing HDF5
-   * :py:class:`pynwb.NWBHDF5IO` - wrapper that pulls in core NWB specification
+   * :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` - reading and writing HDF5
+   * :py:class:`~pynwb.NWBHDF5IO` - wrapper that pulls in core NWB specification
 
 
 .. _fig-software-architecture-formio:
