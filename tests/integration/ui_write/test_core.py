@@ -54,3 +54,20 @@ class TestTrials(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         return nwbfile.trials
+
+
+class TestUnits(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return DynamicTable('units', 'unit table integration test', 'a placeholder table')
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_unit_column('foo', 'an int column')
+        nwbfile.add_unit({'foo': 27})
+        nwbfile.add_unit({'foo': 37})
+        # reset the thing
+        self.container = nwbfile.units
+
+    def getContainer(self, nwbfile):
+        return nwbfile.units
