@@ -73,7 +73,6 @@ Builder
 
 * **Main Module:** :py:class:`pynwb.form.build.builders`
 
-
 Spec
 ^^^^
 
@@ -109,18 +108,17 @@ Spec
 
    I.e, if both keys are defined then we create a new type that uses/inherits an existing type as a base.
 
-
 ObjectMapper
 ^^^^^^^^^^^^
 
-* Maintains the mapping between ``Container`` attributes and ``Spec`` components
-* Provides a way of converting between ``Container`` and ``Builders``
-* ObjectMappers are constructed using a Spec
+* Maintains the mapping between `Container`_ attributes and `Spec`_ components
+* Provides a way of converting between `Container`_ and `Builder`_
+* ObjectMappers are constructed using a `Spec`_
 * Ideally, one ObjectMapper for each data type
 * Things an ObjectMapper should do:
 
-   * Given a ``Builder``, return a Container representation
-   * Given a ``Container``, return a Builder representation
+   * Given a `Builder`_, return a Container representation
+   * Given a `Container`_, return a Builder representation
 
 * PyNWB has many of these -- one for each type in NWB schema
 * **Main Module:** :py:class:`pynwb.form.build.map`
@@ -133,7 +131,7 @@ ObjectMapper
    :width: 100%
    :alt: PyNWB Software Architecture Main Concepts
 
-   Relationship between ``Containers``, ``Builders``, ``ObjectMappers``, and ``Specs``
+   Relationship between `Container`_, `Builder`_, `ObjectMapper`_, and `Spec`_
 
 
 Additional Concepts
@@ -178,8 +176,8 @@ TypeMap
 BuildManager
 ^^^^^^^^^^^^
 
-* Responsible for memoizing ``Builders`` and ``Containers``
-* Constructed from a ``TypeMap``
+* Responsible for mapping `Builder`_ and `Container`_
+* Constructed from a `TypeMap`_
 * PyNWB only has one of these: :py:class:`pynwb.form.build.map.BuildManager`
 
 .. _fig-software-architecture-buildmanager:
@@ -188,7 +186,7 @@ BuildManager
    :width: 100%
    :alt: PyNWB Software Architecture BuildManager and TypeMap
 
-   Overview of ``BuildManager`` (and ``TypeMap``) (click to enlarge).
+   Overview of `BuildManager`_ (and `TypeMap`_) (click to enlarge).
 
 
 FORMIO
@@ -201,7 +199,7 @@ FORMIO
    * ``read_builder`` – given a handle to storage format, return builder representation
    * Others: ``open`` and ``close``
 
-* Constructed with a ``BuildManager``
+* Constructed with a `BuildManager`_
 * Extend this for creating a new I/O backend
 * PyNWB has one extension of this:
 
@@ -215,4 +213,4 @@ FORMIO
    :width: 100%
    :alt: PyNWB Software Architecture FormIO
 
-   Overview of ``FORMIO`` (click to enlarge).
+   Overview of `FORMIO`_ (click to enlarge).
