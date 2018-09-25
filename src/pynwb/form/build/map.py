@@ -19,7 +19,7 @@ class Proxy(object):
     A temporary object to represent a Container. This gets used when resolving the true location of a
     Container's parent.
 
-    Proxy objects allow simple bookeeping of all potential parents a Container may have.
+    Proxy objects allow simple bookkeeping of all potential parents a Container may have.
 
     This object is used by providing all the necessary information for describing the object. This object
     gets passed around and candidates are accumulated. Upon calling resolve, all saved candidates are matched
