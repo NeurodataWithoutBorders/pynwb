@@ -246,7 +246,8 @@ class HDF5IO(FORMIO):
 
     def __read_group(self, h5obj, name=None, ignore=set()):
         kwargs = {
-            "attributes": dict(h5obj.attrs.items()),
+            #"attributes": dict(h5obj.attrs.items()),
+            "attributes": self.__read_attrs(h5obj),
             "groups": dict(),
             "datasets": dict(),
             "links": dict()
@@ -303,7 +304,8 @@ class HDF5IO(FORMIO):
 
     def __read_dataset(self, h5obj, name=None):
         kwargs = {
-            "attributes": dict(h5obj.attrs.items()),
+            #"attributes": dict(h5obj.attrs.items()),
+            "attributes": self.__read_attrs(h5obj),
             "dtype": h5obj.dtype,
             "maxshape": h5obj.maxshape
         }
@@ -321,6 +323,7 @@ class HDF5IO(FORMIO):
                 scalar = scalar.decode('UTF-8')
 
             if isinstance(scalar, Reference):
+                # TODO (AJTRITT):  This should call __read_ref to support Group references
                 target = h5obj.file[scalar]
                 target_builder = self.__read_dataset(target)
                 self.__set_built(target.file.filename, target.name, target_builder)
@@ -352,6 +355,27 @@ class HDF5IO(FORMIO):
         ret = DatasetBuilder(name, **kwargs)
         ret.written = True
         return ret
+
+    def __read_attrs(self, h5obj):
+        ret = dict()
+        for k, v in h5obj.attrs.items():
+            if k == SPEC_LOC_ATTR: # ignore cached spec
+                continue
+            if isinstance(v, RegionReference):
+                raise ValueError("cannot read region reference attributes yet")
+            elif isinstance(v, Reference):
+                ret[k] = self.__read_ref(h5obj.file[v])
+            else:
+                ret[k] = v
+        return ret
+
+    def __read_ref(self, h5obj):
+        if isinstance(h5obj, Dataset):
+            return self.__read_dataset(h5obj)
+        elif isinstance(h5obj, Group):
+            return self.__read_group(h5obj)
+        else:
+            raise ValueError("h5obj must be a Dataset or a Group - got %s" % str(h5obj))
 
     def open(self):
         open_flag = self.__mode
@@ -639,7 +663,6 @@ class HDF5IO(FORMIO):
         # Write a dataset containing references, i.e., a region or object reference.
         # NOTE: we can ignore options['io_settings'] for scalar data
         elif self.__is_ref(options['dtype']):
-            print("DLFKJSDLFKJSDFLKJDFLKJFFUCK")
             _dtype = self.__dtypes.get(options['dtype'])
             # Write a scalar data region reference dataset
             if isinstance(data, RegionBuilder):

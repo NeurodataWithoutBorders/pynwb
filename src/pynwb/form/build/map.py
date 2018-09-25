@@ -599,9 +599,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     def build(self, **kwargs):
         ''' Convert an Container to a Builder representation '''
         container, manager, parent, source = getargs('container', 'manager', 'parent', 'source', kwargs)
-        if container.__class__.__name__ == 'TableColumn' and container.name == 'group':
-            import pdb
-        #    pdb.set_trace()
         builder = getargs('builder', kwargs)
         name = manager.get_builder_name(container)
         if isinstance(self.__spec, GroupSpec):
@@ -813,7 +810,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             subspec = spec.get_attribute(h5attr_name)
             if subspec is None:
                 continue
-            ret[subspec] = h5attr_val
+            if isinstance(h5attr_val, (GroupBuilder, DatasetBuilder)):
+                ret[subspec] = manager.construct(h5attr_val)
+            else:
+                ret[subspec] = h5attr_val
         if isinstance(builder, GroupBuilder):
             for sub_builder_name, sub_builder in builder.items():
                 # GroupBuilder.items will return attributes as well, need to skip non Builder items

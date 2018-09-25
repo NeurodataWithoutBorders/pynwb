@@ -61,6 +61,9 @@ datasets:
       target_type: DynamicTable
       reftype: object
     doc: a reference to the DynamicTable this region applies to
+  - name: description
+    dtype: text
+    doc: Description of what this table region points to
 groups:
 - neurodata_type_def: NWBContainer
   doc: The attributes specified here are included in all interfaces.

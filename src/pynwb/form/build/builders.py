@@ -407,6 +407,9 @@ class DatasetBuilder(BaseBuilder):
         super(DatasetBuilder, self).__init__(name, attributes, parent, source)
         self['data'] = data
         try:
+            # pdb: AJTRITT: I think deepcopy can be copy. I had it set to copy
+            # but I am setting back to deepcopy because it raised an error and I want
+            # to remember where I left off
             self['attributes'] = _copy.copy(attributes)
         except TypeError:
             import pdb

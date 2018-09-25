@@ -161,7 +161,7 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data'},
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -378,7 +378,7 @@ class FeatureExtraction(NWBDataInterface):
     __help = "Container for salient features of detected events"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data'},
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator),
              'doc': 'A description for each feature extracted', 'ndim': 1},

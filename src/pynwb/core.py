@@ -803,6 +803,8 @@ class DynamicTable(NWBDataInterface):
         # to make generating DataFrames and Series easier
         self.__df_cols = [self.id] + list(self.columns)
         self.__df_colnames = [self.id.name] + [c.name for c in self.columns]
+        self.df_cols = self.__df_cols # pdb
+        self.df_colnames = self.__df_colnames #pdb
 
         # for bookkeeping
         self.__colids = {name: i for i, name in enumerate(self.colnames)}
@@ -921,9 +923,10 @@ class DynamicTableRegion(NWBData):
             {'name': 'container_source', 'type': object,
             'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
-        t = popargs('table', kwargs)
+        t, d = popargs('table', 'description', kwargs)
         call_docval_func(super(DynamicTableRegion, self).__init__, kwargs)
         self.table = t
+        self.description = d
 
     def __getitem__(self, key):
         # treat the list of indices as data that can be indexed. then pass the

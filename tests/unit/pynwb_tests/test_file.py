@@ -69,8 +69,8 @@ class NWBFileTest(unittest.TestCase):
         device = nwbfile.create_device('a', 'b')
         elecgrp = nwbfile.create_electrode_group('a', 'b', 'c', device=device, location='a')
         for i in range(4):
-            nwbfile.add_electrode(i, np.nan, np.nan, np.nan, np.nan, group=elecgrp,
-                                  location='a', filtering='a', description='a')
+            nwbfile.add_electrode(id=i, x=np.nan, y=np.nan, z=np.nan, imp=np.nan, group=elecgrp,
+                                  location='a', filtering='a', description2='a')
         with self.assertRaises(IndexError) as err:
             nwbfile.create_electrode_table_region(list(range(6)), 'test')
         self.assertTrue('out of range' in str(err.exception))
@@ -167,7 +167,8 @@ class NWBFileTest(unittest.TestCase):
         dev1 = self.nwbfile.create_device('dev1', 'a test source')  # noqa: F405
         group = self.nwbfile.create_electrode_group('tetrode1', 'a test source',
                                                     'tetrode description', 'tetrode location', dev1)
-        self.nwbfile.add_electrode(1, 1.0, 2.0, 3.0, -1.0, 'CA1', 'none', 'first channel of tetrode', group)
+        self.nwbfile.add_electrode(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1',
+                                   filtering='none', description2='first channel of tetrode', group=group)
         self.assertEqual(self.nwbfile.ec_electrodes[0][0], 1)
         self.assertEqual(self.nwbfile.ec_electrodes[0][1], 1.0)
         self.assertEqual(self.nwbfile.ec_electrodes[0][2], 2.0)
