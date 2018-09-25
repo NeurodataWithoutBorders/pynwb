@@ -1,6 +1,10 @@
 import unittest2 as unittest
 from datetime import datetime
 import os
+import difflib
+import pprint
+import collections
+from unittest2.util import _common_shorten_repr
 import numpy as np
 
 from pynwb import NWBContainer, get_manager, NWBFile, NWBData
@@ -35,6 +39,40 @@ class TestMapNWBContainer(unittest.TestCase):
     @property
     def manager(self):
         return self.__manager
+
+    def assertDictEqual(self, d1, d2, msg=None):
+        """
+        Custom dictionary comparison routine treating NaN == NaN as True
+        """
+        self.assertIsInstance(d1, dict, 'First argument is not a dictionary')
+        self.assertIsInstance(d2, dict, 'Second argument is not a dictionary')
+
+        if d1 != d2:
+
+            def update(d, replacement):
+                """
+                Recursively update all dictionary entries which are keys in
+                replacement and who's values is NaN
+                """
+                for k, v in d.items():
+                    if isinstance(v, collections.Mapping):
+                        update(v, replacement)
+
+                    if replacement.get(k) is not None and np.isnan(v):
+                            d[k] = replacement[k]
+
+            replacement = {}
+            replacement['resolution'] = 3.1415
+            update(d1, replacement)
+            update(d2, replacement)
+
+            if d1 != d2:
+                standardMsg = '%s != %s' % _common_shorten_repr(d1, d2)
+                diff = ('\n' + '\n'.join(difflib.ndiff(
+                               pprint.pformat(d1).splitlines(),
+                               pprint.pformat(d2).splitlines())))
+                standardMsg = self._truncateMessage(standardMsg, diff)
+                self.fail(self._formatMessage(msg, standardMsg))
 
     def test_build(self):
         try:
@@ -110,6 +148,8 @@ class TestMapNWBContainer(unittest.TestCase):
                         self.assertTrue(np.array_equal(f1.data, f2))
                     elif isinstance(f2, NWBData):
                         self.assertTrue(np.array_equal(f1.data, f2))
+                elif isinstance(f1, float) and isinstance(f2, float) and np.isnan(f1) and np.isnan(f2):
+                    self.assertTrue(True)
                 else:
                     if isinstance(f1, float):
                         self.assertAlmostEqual(f1, f2)

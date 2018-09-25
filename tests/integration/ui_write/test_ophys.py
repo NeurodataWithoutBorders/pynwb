@@ -153,7 +153,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
                     attributes={
                         'unit': 'image_unit',
                         'conversion': 1.0,
-                        'resolution': 0.0}
+                        'resolution': float('nan')}
                 ),
                 'timestamps': DatasetBuilder('timestamps', timestamps,
                                              attributes={'unit': 'Seconds', 'interval': 1}),
@@ -360,7 +360,7 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
                     attributes={
                         'unit': 'lumens',
                         'conversion': 1.0,
-                        'resolution': 0.0}
+                        'resolution': float('nan')}
                 ),
                 'timestamps': DatasetBuilder('timestamps', [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
                                              attributes={'unit': 'Seconds', 'interval': 1}),

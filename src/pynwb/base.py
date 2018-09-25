@@ -9,7 +9,7 @@ from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface
 
 _default_conversion = 1.0
-_default_resolution = 0.0
+_default_resolution = float('nan')
 
 
 @register_class('ProcessingModule', CORE_NAMESPACE)
