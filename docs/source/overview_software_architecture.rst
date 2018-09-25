@@ -102,9 +102,11 @@ Spec
    The specification of the NWB format is basically a collection of ``neurodata_types``, e.g.:
    ``NWBFile`` defines  a GroupSpec for the top-level group of an NWB format file  which includes
    ``TimeSeries``, ``ElectrodeGroup``, ``ImagingPlane`` and many other ``neurodata_types`` .
-   When creating a specification, two main keys are used to include and define new ``neurodata_types`` :
-   **i)** ``neurodata_type_inc`` is used to include an existing type and
-   **ii)** ``neurodata_type_def`` is used to defines a new type
+   When creating a specification, two main keys are used to include and define new ``neurodata_types``
+
+   * ``neurodata_type_inc`` is used to include an existing type and
+   * ``neurodata_type_def`` is used to define a new type
+
    I.e, if both keys are defined then we create a new type that uses/inherits an existing type as a base.
 
 
