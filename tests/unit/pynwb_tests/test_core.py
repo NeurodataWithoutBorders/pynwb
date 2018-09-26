@@ -3,6 +3,7 @@ import unittest2 as unittest
 from pynwb.core import DynamicTable, TableColumn, ElementIdentifiers
 from pynwb import NWBFile
 
+import pandas as pd
 from datetime import datetime
 
 
@@ -149,3 +150,18 @@ class TestDynamicTable(unittest.TestCase):
         module_behavior = nwbfile.create_processing_module('a', 'b', 'c')
 
         module_behavior.add_container(table)
+
+    def test_pandas_roundtrip(self):
+        df = pd.DataFrame({
+            'a': [1, 2, 3, 4],
+            'b': ['a', 'b', 'c', '4']
+        }, index=pd.Index(name='an_index', data=[2, 4, 6, 8]))
+
+        table = DynamicTable.from_dataframe(df, 'foo', 'baz')
+        obtained = table.to_dataframe()
+
+        print(df)
+        print(obtained)
+
+        assert df.equals(obtained)
+        # pd.testing.assert_frame_equal(df, obtained)

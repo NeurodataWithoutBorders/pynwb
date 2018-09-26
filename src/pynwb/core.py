@@ -1,5 +1,6 @@
 from h5py import RegionReference
 import numpy as np
+import pandas as pd
 
 from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
@@ -897,3 +898,56 @@ class DynamicTable(NWBDataInterface):
                     ret.append(tuple(col[i] for col in self.__df_cols))
 
         return ret
+
+    def to_dataframe(self):
+        '''Produce a pandas DataFrame containing this table's data.
+        '''
+
+        data = {}
+        for column in self.columns:
+            data[column.name] = column.data
+
+        return pd.DataFrame(data, index=pd.Index(name=self.id.name, data=self.id.data))
+
+    @classmethod # TODO: docval
+    def from_dataframe(cls, df, name, source, 
+        index_column=None, table_description='', column_descriptions=None, 
+        *args, **kwargs
+    ):
+        '''Construct a DynamicTable from a pandas DataFrame
+
+        Parameters
+        ----------
+        df : pandas.DataFrame
+            source dataframe
+        name : str
+            name of table
+        source : str
+            source of table
+        index_column : str, optional 
+            If provided this column will form the table's index
+        table_description : str, optional
+        column_descriptions : dict, optional
+            Map from string column names to descriptions. Empty strings will be used if not provided
+        '''
+
+        if column_descriptions is None:
+            column_descriptions = {}
+
+        if index_column is not None:
+            ids = ElementIdentifiers(name=index_column, data=np.array(df[index_column].values))
+        else:
+            ids = ElementIdentifiers(name=df.index.name, data=np.array(df.index.data))
+
+        columns = []
+        for column_name in df.columns:
+            if index_column is not None and column_name == index_column:
+                continue
+
+            columns.append({
+                'name': column_name,
+                'data': np.array(df[column_name].values),
+                'description': column_descriptions.get(column_name, '')
+            })
+
+        return cls(name=name, source=source, ids=ids, columns=columns, description=table_description, *args, **kwargs)
