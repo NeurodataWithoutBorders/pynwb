@@ -785,7 +785,7 @@ class DynamicTable(NWBDataInterface):
                 raise ValueError("'columns' must be a list of TableColumns or dicts")
             if not all(len(c) == len(columns[0]) for c in columns):
                 raise ValueError("columns must be the same length")
-                
+
             ni = len(self.id)
             nc = len(columns[0])
 
@@ -912,26 +912,22 @@ class DynamicTable(NWBDataInterface):
         return pd.DataFrame(data, index=pd.Index(name=self.id.name, data=self.id.data))
 
     @classmethod # TODO: docval
-    def from_dataframe(cls, df, name, source, 
-        index_column=None, table_description='', column_descriptions=None, 
-        *args, **kwargs
-    ):
-        '''Construct a DynamicTable from a pandas DataFrame
-
-        Parameters
-        ----------
-        df : pandas.DataFrame
-            source dataframe
-        name : str
-            name of table
-        source : str
-            source of table
-        index_column : str, optional 
-            If provided this column will form the table's index
-        table_description : str, optional
-        column_descriptions : dict, optional
-            Map from string column names to descriptions. Empty strings will be used if not provided
-        '''
+    @docval(
+        {'name': 'df', 'type': pd.DataFrame, 'doc': 'source DataFrame'},
+        {'name': 'name', 'type': str, 'doc': 'the name of this table'},
+        {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
+        {'name': 'index_column', 'type': str, 'help': 'if provided, this column will become the table\'s index', 'default': None},
+        {'name': 'table_description', 'type': str, 'help': 'a description of what is in the resulting table', 'default': ''},
+        {'name': 'column_descriptions', 'type': dict, 'help': 'a dictionary mapping column names to descriptions of their contents', 'default': None},
+        allow_extra=True
+    )
+    def from_dataframe(cls, **kwargs):
+        df = kwargs.pop('df')
+        name = kwargs.pop('name')
+        source = kwargs.pop('source')
+        index_column = kwargs.pop('index_column')
+        table_description = kwargs.pop('table_description')
+        column_descriptions = kwargs.pop('column_descriptions')
 
         if column_descriptions is None:
             column_descriptions = {}
@@ -952,4 +948,4 @@ class DynamicTable(NWBDataInterface):
                 'description': column_descriptions.get(column_name, '')
             })
 
-        return cls(name=name, source=source, ids=ids, columns=columns, description=table_description, *args, **kwargs)
+        return cls(name=name, source=source, ids=ids, columns=columns, description=table_description, **kwargs)
