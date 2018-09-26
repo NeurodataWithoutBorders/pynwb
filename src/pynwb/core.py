@@ -785,8 +785,10 @@ class DynamicTable(NWBDataInterface):
                 raise ValueError("'columns' must be a list of TableColumns or dicts")
             if not all(len(c) == len(columns[0]) for c in columns):
                 raise ValueError("columns must be the same length")
+                
             ni = len(self.id)
             nc = len(columns[0])
+
             if ni != nc:
                 if ni != 0 and nc != 0:
                     raise ValueError("must provide same number of ids as length of columns if specifying ids")
@@ -937,7 +939,7 @@ class DynamicTable(NWBDataInterface):
         if index_column is not None:
             ids = ElementIdentifiers(name=index_column, data=np.array(df[index_column].values))
         else:
-            ids = ElementIdentifiers(name=df.index.name, data=np.array(df.index.data))
+            ids = ElementIdentifiers(name=df.index.name, data=np.array(df.index.values))
 
         columns = []
         for column_name in df.columns:
