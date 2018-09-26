@@ -53,7 +53,6 @@ class TestTrials(base.TestMapRoundTrip):
         self.container = nwbfile.trials
 
     def getContainer(self, nwbfile):
-        print(nwbfile.trials.to_dataframe())
         return nwbfile.trials
 
 
@@ -71,5 +70,4 @@ class TestUnits(base.TestMapRoundTrip):
         self.container = nwbfile.units
 
     def getContainer(self, nwbfile):
-        print(nwbfile.units.to_dataframe())
         return nwbfile.units

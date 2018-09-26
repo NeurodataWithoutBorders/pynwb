@@ -160,8 +160,4 @@ class TestDynamicTable(unittest.TestCase):
         table = DynamicTable.from_dataframe(df, 'foo', 'baz')
         obtained = table.to_dataframe()
 
-        print(df)
-        print(obtained)
-
         assert df.equals(obtained)
-        # pd.testing.assert_frame_equal(df, obtained)
