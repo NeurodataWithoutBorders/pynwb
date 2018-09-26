@@ -911,7 +911,7 @@ class DynamicTable(NWBDataInterface):
 
         return pd.DataFrame(data, index=pd.Index(name=self.id.name, data=self.id.data))
 
-    @classmethod # TODO: docval
+    @classmethod
     @docval(
         {'name': 'df', 'type': pd.DataFrame, 'doc': 'source DataFrame'},
         {'name': 'name', 'type': str, 'doc': 'the name of this table'},
@@ -933,9 +933,10 @@ class DynamicTable(NWBDataInterface):
             column_descriptions = {}
 
         if index_column is not None:
-            ids = ElementIdentifiers(name=index_column, data=np.array(df[index_column].values))
+            ids = ElementIdentifiers(name=index_column, data=df[index_column].values.tolist())
         else:
-            ids = ElementIdentifiers(name=df.index.name, data=np.array(df.index.values))
+            index_name = df.index.name if df.index.name is not None else ''
+            ids = ElementIdentifiers(name=index_name, data=df.index.values.tolist())
 
         columns = []
         for column_name in df.columns:
@@ -944,7 +945,7 @@ class DynamicTable(NWBDataInterface):
 
             columns.append({
                 'name': column_name,
-                'data': np.array(df[column_name].values),
+                'data': df[column_name].values.tolist(),
                 'description': column_descriptions.get(column_name, '')
             })
 

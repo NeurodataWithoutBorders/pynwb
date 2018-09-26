@@ -26,6 +26,13 @@ class TestDynamicTable(unittest.TestCase):
         table = DynamicTable("with_table_columns", 'PyNWB unit test', 'a test table', columns=cols)
         return table
 
+    def with_columns_and_data(self):
+        columns = [
+            TableColumn(name=s['name'], description=s['description'], data=d)
+            for s, d in zip(self.spec, self.data)
+        ]
+        return  DynamicTable("with_columns_and_data", 'PyNWB unit test', 'a test table', columns=columns)
+
     def with_spec(self):
         table = DynamicTable("with_spec", 'PyNWB unit test', 'a test table', columns=self.spec)
         return table
@@ -161,3 +168,23 @@ class TestDynamicTable(unittest.TestCase):
         obtained = table.to_dataframe()
 
         assert df.equals(obtained)
+
+    def test_to_dataframe(self):
+        table = self.with_columns_and_data()
+        expected_df = pd.DataFrame({
+            'foo': [1, 2, 3, 4, 5],
+            'bar': [10.0, 20.0, 30.0, 40.0, 50.0],
+            'baz': ['cat', 'dog', 'bird', 'fish', 'lizard']
+        })
+        obtained_df = table.to_dataframe()
+        assert expected_df.equals(obtained_df)
+
+    def test_from_dataframe(self):
+        df = pd.DataFrame({
+            'foo': [1, 2, 3, 4, 5],
+            'bar': [10.0, 20.0, 30.0, 40.0, 50.0],
+            'baz': ['cat', 'dog', 'bird', 'fish', 'lizard']
+        }).loc[:, ('foo', 'bar', 'baz')]
+
+        obtained_table = DynamicTable.from_dataframe(df, 'test', 'test')
+        self.check_table(obtained_table)
