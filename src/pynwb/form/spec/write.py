@@ -40,8 +40,8 @@ class YAMLSpecWriter(SpecWriter):
         out_fullpath = os.path.join(self.__outdir, path)
         spec_plain_dict = json.loads(json.dumps(spec_file_dict))
         sorted_data = self.sort_keys(spec_plain_dict)
-        with open(out_fullpath, 'w') as f_out:
-            f_out.write(yaml.dump(sorted_data, Dumper=yaml.dumper.RoundTripDumper))
+        with open(out_fullpath, 'w') as fd_write:
+            yaml.dump(sorted_data, fd_write, Dumper=yaml.dumper.RoundTripDumper)
 
     def write_namespace(self, namespace, path):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
