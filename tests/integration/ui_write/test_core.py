@@ -85,7 +85,7 @@ class TestUnitsDf(base.TestMapRoundTrip):
         nwbfile.units = DynamicTable.from_dataframe(pd.DataFrame({
             'a': [1, 2, 3],
             'b': ['4', '5', '6']
-        }, index=pd.Index(name='id', data=[0, 1, 2])), 'units', 'a_source')
+        }), 'units', 'a_source')
         # reset the thing
         self.container = nwbfile.units
 

@@ -935,7 +935,7 @@ class DynamicTable(NWBDataInterface):
         if index_column is not None:
             ids = ElementIdentifiers(name=index_column, data=df[index_column].values.tolist())
         else:
-            index_name = df.index.name if df.index.name is not None else ''
+            index_name = df.index.name if df.index.name is not None else 'id'
             ids = ElementIdentifiers(name=index_name, data=df.index.values.tolist())
 
         columns = []
