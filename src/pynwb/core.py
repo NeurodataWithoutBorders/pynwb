@@ -1,9 +1,11 @@
 from h5py import RegionReference
 import numpy as np
 import pandas as pd
+from operator import itemgetter
 
 from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
+from .form.data_utils import RegionSlicer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass, iteritems
@@ -271,6 +273,12 @@ class NWBData(NWBBaseType, Data):
         else:
             msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
             raise ValueError(msg)
+
+    def extract_slice(self, slc, **constructor_kwargs):
+        if not 'name' in constructor_kwargs:
+            constructor_kwargs['name'] = self.name
+        constructor_kwargs['data'] = self[slc]
+        return self.__class__(**constructor_kwargs)
 
 
 @register_class('VectorData', CORE_NAMESPACE)
@@ -745,6 +753,11 @@ class TableColumn(NWBData):
         val = getargs('val', kwargs)
         self.data.append(val)
 
+    def extract_slice(self, slc, **constructor_kwargs):
+        if not 'description' in constructor_kwargs:
+            constructor_kwargs['description'] = self.description
+        return super(TableColumn, self).extract_slice(slc, **constructor_kwargs)
+
 
 @register_class('DynamicTable', CORE_NAMESPACE)
 class DynamicTable(NWBDataInterface):
@@ -901,6 +914,31 @@ class DynamicTable(NWBDataInterface):
 
         return ret
 
+    @docval(
+        {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
+        {'name': 'name', 'type': str, 'doc': 'the name of the extracted subtable', 'default': None},
+        {'name': 'source', 'type': str, 'doc': 'a description of where the extracted subtable came from', 'default': None},
+        {'name': 'description', 'type': str, 'doc': 'a description of what is in the extracted subtable', 'default': None}
+        )
+    def extract_subtable(self, **kwargs):
+        region, name, source, description = getargs('region', 'name', 'source', 'description', kwargs)
+
+        if name is None:
+            name = self.name
+        if source is None:
+            source = self.source
+        if description is None:
+            description = self.description
+
+        columns = [column.extract_slice(region) for column in self.columns]
+        return self.__class__(
+            name=name,
+            source=source,
+            description=description,
+            ids=self.id.extract_slice(region),
+            columns=columns
+        )
+
     def to_dataframe(self):
         '''Produce a pandas DataFrame containing this table's data.
         '''
@@ -950,3 +988,49 @@ class DynamicTable(NWBDataInterface):
             })
 
         return cls(name=name, source=source, ids=ids, columns=columns, description=table_description, **kwargs)
+
+
+class TableColumnsSlicer(RegionSlicer):
+
+    @docval(
+        {'name': 'dataset', 'type': (list, tuple), 'doc': 'A collection of columns to be sliced'},
+        {'name': 'region', 'type': (list, tuple, slice), 'doc': 'The region reference used to slice'}
+    )
+    def __init__(self, **kwargs):
+        self.__dataset, self.__region = getargs('dataset', 'region', kwargs)
+        super(TableColumnsSlicer, self).__init__(self.__dataset, self.__region)
+
+
+
+class DynamicTableRegion(object):
+    '''
+    A class for representing regions i.e. slices or indices into a DynamicTable
+    '''
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'table', 'type': DynamicTable, 'doc': 'the table this region applies to'},
+            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'})
+    def __init__(self, **kwargs):
+        name, table, region = getargs('name', 'table', 'region', kwargs)
+
+        self.__table = table
+        self.__region = region
+        
+        super(DynamicTableRegion, self).__init__(name, table)
+
+
+    @property
+    def table(self):
+        '''The ElectrodeTable this region applies to'''
+        return self.__table
+
+    @property
+    def region(self):
+        '''The indices into table'''
+        return self.__region
+
+    def __len__(self):
+        return len(self.__regionslicer)
+
+    def __getitem__(self, idx):
+        return self.__regionslicer[idx]
