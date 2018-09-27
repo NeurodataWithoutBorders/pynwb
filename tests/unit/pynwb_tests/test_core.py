@@ -192,7 +192,7 @@ class TestDynamicTable(unittest.TestCase):
 
     def test_extract_subtable(self):
         table = self.with_columns_and_data()
-        obtained_df = table.extract_subtable([1, 3, 4]).to_dataframe()
+        obtained_df = table.extract_subtable([1, 3, 4]).to_dataframe().loc[:, ('foo', 'bar', 'baz')]
         
         expected_df = pd.DataFrame({
             'foo': [2, 4, 5],

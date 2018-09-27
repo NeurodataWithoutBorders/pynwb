@@ -999,38 +999,3 @@ class TableColumnsSlicer(RegionSlicer):
     def __init__(self, **kwargs):
         self.__dataset, self.__region = getargs('dataset', 'region', kwargs)
         super(TableColumnsSlicer, self).__init__(self.__dataset, self.__region)
-
-
-
-class DynamicTableRegion(object):
-    '''
-    A class for representing regions i.e. slices or indices into a DynamicTable
-    '''
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'table', 'type': DynamicTable, 'doc': 'the table this region applies to'},
-            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'})
-    def __init__(self, **kwargs):
-        name, table, region = getargs('name', 'table', 'region', kwargs)
-
-        self.__table = table
-        self.__region = region
-        
-        super(DynamicTableRegion, self).__init__(name, table)
-
-
-    @property
-    def table(self):
-        '''The ElectrodeTable this region applies to'''
-        return self.__table
-
-    @property
-    def region(self):
-        '''The indices into table'''
-        return self.__region
-
-    def __len__(self):
-        return len(self.__regionslicer)
-
-    def __getitem__(self, idx):
-        return self.__regionslicer[idx]
