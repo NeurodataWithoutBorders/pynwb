@@ -92,7 +92,7 @@ class Query(with_metaclass(ExtenderMeta, object)):
         return NotImplemented
 
 
-@docval_macro('data')
+@docval_macro('array_data')
 class FORMDataset(with_metaclass(ExtenderMeta, object)):
 
     __operations__ = (
