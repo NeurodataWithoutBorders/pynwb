@@ -47,6 +47,15 @@ class YAMLSpecWriter(SpecWriter):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
             self.__dump_spec({'namespaces': [namespace]}, stream)
 
+    def reorder_yaml(self, path):
+        """
+        Open a YAML file, load it as python data, sort the data, and write it back out to the
+        same path.
+        """
+        with open(path, 'rb') as fd_read:
+            data = yaml.load(fd_read, Loader=yaml.loader.RoundTripLoader)
+        self.write_spec(data, path)
+
     def sort_keys(self, obj):
 
         # Represent None as null
