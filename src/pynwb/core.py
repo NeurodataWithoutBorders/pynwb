@@ -1018,8 +1018,7 @@ class DynamicTableRegion(NWBDataInterface):
         self.description = description
         self.indices = indices
 
-    @property
-    def data(self):
+    def __getitem__(self, slc):
         return self.table.extract_subtable(
-            region=list(self.indices[:]), name=self.name, source=self.source, description=self.description
+            region=list(self.indices[slc]), name=self.name, source=self.source, description=self.description
         )
