@@ -259,3 +259,19 @@ groups:
   - neurodata_type_inc: TableColumn
     doc: The columns in this dynamic table
     quantity: '*'
+- neurodata_type_def: DynamicTableRegion
+  neurodata_type_inc: NWBDataInterface
+  doc: Used for subsetting DynamicTables
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'A subset of the rows of a DynamicTable'
+    value: A subset of the rows of a DynamicTable
+  datasets:
+  - name: indices
+    dtype: uint32
+    doc: row indices defining this region
+  links:
+  - name: table
+    doc: The table into which this region slices
+    target_type: DynamicTable

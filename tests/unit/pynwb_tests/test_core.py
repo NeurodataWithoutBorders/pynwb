@@ -189,7 +189,6 @@ class TestDynamicTable(unittest.TestCase):
         obtained_table = DynamicTable.from_dataframe(df, 'test', 'test')
         self.check_table(obtained_table)
 
-
     def test_extract_subtable(self):
         table = self.with_columns_and_data()
         obtained_df = table.extract_subtable([1, 3, 4]).to_dataframe().loc[:, ('foo', 'bar', 'baz')]
@@ -200,4 +199,3 @@ class TestDynamicTable(unittest.TestCase):
             'baz': ['dog', 'fish', 'lizard']
         }, index=pd.Index(name='id', data=[1, 3, 4])).loc[:, ('foo', 'bar', 'baz')]
         assert expected_df.equals(obtained_df)
-        

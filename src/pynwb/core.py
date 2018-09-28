@@ -990,12 +990,36 @@ class DynamicTable(NWBDataInterface):
         return cls(name=name, source=source, ids=ids, columns=columns, description=table_description, **kwargs)
 
 
-class TableColumnsSlicer(RegionSlicer):
+@register_class('DynamicTableRegion', CORE_NAMESPACE)
+class DynamicTableRegion(NWBDataInterface):
+    '''Slice into the rows of a DynamicTable
+    '''
+
+    __nwbfields__ = (
+        'table',
+        'indices'
+    )
+
+    __help = (
+        'Slice into the rows of a DynamicTable'
+    )
 
     @docval(
-        {'name': 'dataset', 'type': (list, tuple), 'doc': 'A collection of columns to be sliced'},
-        {'name': 'region', 'type': (list, tuple, slice), 'doc': 'The region reference used to slice'}
+        {'name': 'table', 'type': DynamicTable, 'doc': 'table into which this region slices'},
+        {'name': 'indices', 'type': (list, tuple, slice, 'array_data'), 'doc': 'row indices defining this region'},
+        {'name': 'name', 'type': str, 'doc': 'the name of this region', 'default': 'DynamicTableRegion'},
+        {'name': 'source', 'type': str, 'doc': 'a description of where this region came from', 'default': ''},
+        {'name': 'description', 'type': str, 'doc': 'a description of what is in this region', 'default': ''},
     )
     def __init__(self, **kwargs):
-        self.__dataset, self.__region = getargs('dataset', 'region', kwargs)
-        super(TableColumnsSlicer, self).__init__(self.__dataset, self.__region)
+        table, indices, description = popargs('table', 'indices', 'description', kwargs)
+        super(DynamicTableRegion, self).__init__(**kwargs)
+        self.table = table
+        self.description = description
+        self.indices = indices
+
+    @property
+    def data(self):
+        return self.table.extract_subtable(
+            region=list(self.indices[:]), name=self.name, source=self.source, description=self.description
+        )
