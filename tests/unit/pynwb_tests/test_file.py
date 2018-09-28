@@ -8,8 +8,7 @@ from datetime import datetime
 
 from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
-from pynwb.file import Subject
-from pynwb.ecephys import ElectrodeTable
+from pynwb.file import Subject, ElectrodeTable
 
 
 class NWBFileTest(unittest.TestCase):
@@ -69,8 +68,7 @@ class NWBFileTest(unittest.TestCase):
         device = nwbfile.create_device('a', 'b')
         elecgrp = nwbfile.create_electrode_group('a', 'b', 'c', device=device, location='a')
         for i in range(4):
-            nwbfile.add_electrode(id=i, x=np.nan, y=np.nan, z=np.nan, imp=np.nan, group=elecgrp,
-                                  location='a', filtering='a', description2='a')
+            nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i)
         with self.assertRaises(IndexError) as err:
             nwbfile.create_electrode_table_region(list(range(6)), 'test')
         self.assertTrue('out of range' in str(err.exception))
@@ -129,14 +127,18 @@ class NWBFileTest(unittest.TestCase):
             self.nwbfile.get_acquisition("TEST_TS")
 
     def test_set_electrode_table(self):
-        table = ElectrodeTable('test_table')  # noqa: F405
+        table = ElectrodeTable()  # noqa: F405
         dev1 = self.nwbfile.create_device('dev1', 'a test source')  # noqa: F405
         group = self.nwbfile.create_electrode_group('tetrode1', 'a test source',
                                                     'tetrode description', 'tetrode location', dev1)
-        table.add_row(1, 1.0, 2.0, 3.0, -1.0, 'CA1', 'none', 'first channel of tetrode', group)
-        table.add_row(2, 1.0, 2.0, 3.0, -2.0, 'CA1', 'none', 'second channel of tetrode', group)
-        table.add_row(3, 1.0, 2.0, 3.0, -3.0, 'CA1', 'none', 'third channel of tetrode', group)
-        table.add_row(4, 1.0, 2.0, 3.0, -4.0, 'CA1', 'none', 'fourth channel of tetrode', group)
+        table.add_row(x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=group,
+                      group_name='tetrode1')
+        table.add_row(x=1.0, y=2.0, z=3.0, imp=-2.0, location='CA1', filtering='none', group=group,
+                      group_name='tetrode1')
+        table.add_row(x=1.0, y=2.0, z=3.0, imp=-3.0, location='CA1', filtering='none', group=group,
+                      group_name='tetrode1')
+        table.add_row(x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none', group=group,
+                      group_name='tetrode1')
         self.nwbfile.set_electrode_table(table)
         self.assertIs(self.nwbfile.ec_electrodes, table)
         self.assertIs(table.parent, self.nwbfile)
@@ -167,8 +169,8 @@ class NWBFileTest(unittest.TestCase):
         dev1 = self.nwbfile.create_device('dev1', 'a test source')  # noqa: F405
         group = self.nwbfile.create_electrode_group('tetrode1', 'a test source',
                                                     'tetrode description', 'tetrode location', dev1)
-        self.nwbfile.add_electrode(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1',
-                                   filtering='none', description2='first channel of tetrode', group=group)
+        self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1',
+                                   'none', group=group, id=1)
         self.assertEqual(self.nwbfile.ec_electrodes[0][0], 1)
         self.assertEqual(self.nwbfile.ec_electrodes[0][1], 1.0)
         self.assertEqual(self.nwbfile.ec_electrodes[0][2], 2.0)
@@ -176,8 +178,7 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.ec_electrodes[0][4], -1.0)
         self.assertEqual(self.nwbfile.ec_electrodes[0][5], 'CA1')
         self.assertEqual(self.nwbfile.ec_electrodes[0][6], 'none')
-        self.assertEqual(self.nwbfile.ec_electrodes[0][7], 'first channel of tetrode')
-        self.assertEqual(self.nwbfile.ec_electrodes[0][8], group)
+        self.assertEqual(self.nwbfile.ec_electrodes[0][7], group)
 
     def test_all_children(self):
         ts1 = TimeSeries('test_ts1', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],

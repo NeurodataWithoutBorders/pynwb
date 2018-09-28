@@ -43,7 +43,8 @@ class TestMapNWBContainer(unittest.TestCase):
             raise unittest.SkipTest("cannot run construct test for %s -- setUpBuilder not implemented" %
                                     self.__class__.__name__)
         self.maxDiff = None
-        result = self.manager.build(self.container)
+        source = self.__class__.__name__ + ".test_build"
+        result = self.manager.build(self.container, source=source)
         # do something here to validate the result Builder against the spec
         self.assertDictEqual(result, self.builder)
 
@@ -163,10 +164,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
             raise e
 
     def test_roundtrip(self):
-        read_container = self.roundtripContainer()
+        self.read_container = self.roundtripContainer()
         # make sure we get a completely new object
-        self.assertNotEqual(id(self.container), id(read_container))
-        self.assertContainerEqual(self.container, read_container)
+        self.assertNotEqual(id(self.container), id(self.read_container))
+        self.assertContainerEqual(self.container, self.read_container)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''

@@ -418,7 +418,6 @@ class TestLinkResolution(unittest.TestCase):
                               imp=2.718,
                               location='unknown',
                               filtering='unknown',
-                              description2='desc',
                               group=electrode_group)
         etr = nwbfile.create_electrode_table_region([0], 'etr_name')
         for passband in ('theta', 'gamma'):

@@ -10,18 +10,17 @@ from pynwb.core import DynamicTableRegion
 
 
 def make_electrode_table():
-    #table = DynamicTable('test_table', 'PyNWB unit test', 'a table for storing fake electrodes')  # noqa: F405
     table = ElectrodeTable()
     dev1 = Device('dev1', 'a test source')  # noqa: F405
     group = ElectrodeGroup('tetrode1', 'a test source', 'tetrode description', 'tetrode location', dev1)  # noqa: F405
     table.add_row(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none',
-                  description2='first channel of tetrode', group=group, group_name='tetrode1')
+                  group=group, group_name='tetrode1')
     table.add_row(id=2, x=1.0, y=2.0, z=3.0, imp=-2.0, location='CA1', filtering='none',
-                  description2='second channel of tetrode', group=group, group_name='tetrode1')
+                  group=group, group_name='tetrode1')
     table.add_row(id=3, x=1.0, y=2.0, z=3.0, imp=-3.0, location='CA1', filtering='none',
-                  description2='third channel of tetrode', group=group, group_name='tetrode1')
+                  group=group, group_name='tetrode1')
     table.add_row(id=4, x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none',
-                  description2='fourth channel of tetrode', group=group, group_name='tetrode1')
+                  group=group, group_name='tetrode1')
     return table
 
 
@@ -30,7 +29,6 @@ class ElectricalSeriesConstructor(unittest.TestCase):
         data = list(range(10))
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         table = make_electrode_table()
-        #region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         eS = ElectricalSeries('test_eS', 'a hypothetical source', data, region, timestamps=ts)  # noqa: F405
         self.assertEqual(eS.name, 'test_eS')
@@ -42,7 +40,6 @@ class ElectricalSeriesConstructor(unittest.TestCase):
 class SpikeEventSeriesConstructor(unittest.TestCase):
     def test_init(self):
         table = make_electrode_table()
-        #region = ElectrodeTableRegion(table, [1, 3], 'the second and fourth electrodes')  # noqa: F405
         region = DynamicTableRegion('electrodes', [1, 3], 'the second and fourth electrodes', table)
         data = np.zeros(10)
         timestamps = np.arange(10)
@@ -70,7 +67,6 @@ class EventDetectionConstructor(unittest.TestCase):
         data = list(range(10))
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         table = make_electrode_table()
-        #region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         eS = ElectricalSeries('test_eS', 'a hypothetical source', data, region, timestamps=ts)  # noqa: F405
         eD = EventDetection('test_ed', 'detection_method', eS, (1, 2, 3), (0.1, 0.2, 0.3))  # noqa: F405
@@ -88,7 +84,6 @@ class EventWaveformConstructor(unittest.TestCase):
         group = ElectrodeGroup(  # noqa: F405, F841
             'tetrode1', 'a test source', 'tetrode description', 'tetrode location', dev1)
         table = make_electrode_table()
-        #region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         sES = SpikeEventSeries(  # noqa: F405
             'test_sES', 'a hypothetical source', list(range(10)), list(range(10)), region)
@@ -137,7 +132,6 @@ class LFPTest(unittest.TestCase):
         group = ElectrodeGroup(  # noqa: F405, F841
             'tetrode1', 'a test source', 'tetrode description', 'tetrode location', dev1)
         table = make_electrode_table()
-        #region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         eS = ElectricalSeries(  # noqa: F405
             'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
@@ -152,7 +146,6 @@ class LFPTest(unittest.TestCase):
         group = ElectrodeGroup(  # noqa: F405, F841
             'tetrode1', 'a test source', 'tetrode description', 'tetrode location', dev1)
         table = make_electrode_table()
-        #region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         eS = ElectricalSeries(  # noqa: F405
             'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
@@ -167,7 +160,6 @@ class FilteredEphysTest(unittest.TestCase):
         group = ElectrodeGroup(  # noqa: F405, F841
             'tetrode1', 'a test source', 'tetrode description', 'tetrode location', dev1)
         table = make_electrode_table()
-        #region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         eS = ElectricalSeries(  # noqa: F405
             'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
@@ -182,7 +174,6 @@ class FilteredEphysTest(unittest.TestCase):
         group = ElectrodeGroup(  # noqa: F405, F841
             'tetrode1', 'a test source', 'tetrode description', 'tetrode location', dev1)
         table = make_electrode_table()
-        #region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')  # noqa: F405
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         eS = ElectricalSeries(  # noqa: F405
             'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
@@ -195,7 +186,6 @@ class FeatureExtractionConstructor(unittest.TestCase):
     def test_init(self):
         event_times = [1.9, 3.5]
         table = make_electrode_table()
-        #region = ElectrodeTableRegion(table, [0, 2], 'the first and third electrodes')   # noqa: F405
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]]
