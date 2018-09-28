@@ -1,59 +1,3 @@
-datasets:
-- neurodata_type_def: ElectrodeTable
-  neurodata_type_inc: NWBData
-  dtype:
-  - name: id
-    dtype: int
-    doc: a user-specified unique identifier
-  - name: x
-    dtype: float
-    doc: the x coordinate of the channels location
-  - name: y
-    dtype: float
-    doc: the y coordinate of the channels location
-  - name: z
-    dtype: float
-    doc: the z coordinate of the channels location
-  - name: imp
-    dtype: float
-    doc: the impedance of the channel
-  - name: location
-    dtype: ascii
-    doc: the location of channel within the subject e.g. brain region
-  - name: filtering
-    dtype: ascii
-    doc: description of hardware filtering
-  - name: description
-    dtype: utf8
-    doc: a brief description of what this electrode is
-  - name: group
-    dtype:
-      target_type: ElectrodeGroup
-      reftype: object
-    doc: a reference to the ElectrodeGroup this electrode is a part of
-  - name: group_name
-    dtype: ascii
-    doc: the name of the ElectrodeGroup this electrode is a part of
-  doc: a table for storing queryable information about electrodes in a single table
-  attributes:
-  - name: help
-    dtype: text
-    doc: Value is 'a table for storing data about extracellular electrodes'
-    value: a table for storing data about extracellular electrodes
-- neurodata_type_def: ElectrodeTableRegion
-  neurodata_type_inc: NWBData
-  dtype:
-    target_type: ElectrodeTable
-    reftype: region
-  doc: a dataset for subsetting ElectrodeTables
-  attributes:
-  - name: description
-    dtype: utf8
-    doc: a description of this subset of electrodes
-  - name: help
-    dtype: text
-    doc: Value is 'a subset (i.e. slice or region) of an ElectrodeTable'
-    value: a subset (i.e. slice or region) of an ElectrodeTable
 groups:
 - neurodata_type_def: ElectricalSeries
   neurodata_type_inc: TimeSeries
@@ -84,7 +28,6 @@ groups:
     - - num_times
       - num_channels
     shape:
-  - neurodata_type_inc: ElectrodeTableRegion
   - neurodata_type_inc: DynamicTableRegion
     name: electrodes
     doc: the electrodes that this series was generated from

@@ -1,5 +1,4 @@
 import numpy as np
-from h5py import RegionReference
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, call_docval_func
@@ -7,7 +6,7 @@ from .form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, NWBTable, NWBTableRegion, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
 
 
@@ -48,40 +47,6 @@ _et_docval = [
     {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
     {'name': 'group_name', 'type': str, 'doc': 'the ElectrodeGroup object to add to this NWBFile', 'default': None}
 ]
-
-
-@register_class('ElectrodeTable', CORE_NAMESPACE)
-class ElectrodeTable(NWBTable):
-    '''A table of all electrodes'''
-
-    __columns__ = _et_docval
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
-    def __init__(self, **kwargs):
-        data, name = getargs('data', 'name', kwargs)
-        colnames = [i['name'] for i in _et_docval]
-        super(ElectrodeTable, self).__init__(colnames, name, data)
-
-    @docval(*_et_docval)
-    def add_row(self, **kwargs):
-        kwargs['group_name'] = kwargs['group'].name
-        super(ElectrodeTable, self).add_row(kwargs)
-
-
-@register_class('ElectrodeTableRegion', CORE_NAMESPACE)
-class ElectrodeTableRegion(NWBTableRegion):
-    '''A subsetting of an ElectrodeTable'''
-
-    __nwbfields__ = ('description',)
-
-    @docval({'name': 'table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable this region applies to'},
-            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
-    def __init__(self, **kwargs):
-        call_docval_func(super(ElectrodeTableRegion, self).__init__, kwargs)
-        self.description = getargs('description', kwargs)
 
 
 @register_class('ElectricalSeries', CORE_NAMESPACE)
