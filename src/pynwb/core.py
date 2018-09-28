@@ -272,6 +272,24 @@ class NWBData(NWBBaseType, Data):
             raise ValueError(msg)
 
 
+@register_class('Index', CORE_NAMESPACE)
+class Index(NWBData):
+
+    __nwbfields__ = ("target",)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
+            {'name': 'target', 'type': NWBData,
+             'doc': 'the target dataset that this index applies to'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(Index, self).__init__, kwargs)
+
+
 @register_class('VectorData', CORE_NAMESPACE)
 class VectorData(NWBData):
 
@@ -287,11 +305,13 @@ class VectorData(NWBData):
 
 
 @register_class('VectorIndex', CORE_NAMESPACE)
-class VectorIndex(NWBData):
+class VectorIndex(Index):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorIndex'},
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a 1D dataset containing indexes that apply to VectorData object'},
+            {'name': 'target', 'type': VectorData,
+             'doc': 'the target dataset that this index applies to'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
@@ -299,26 +319,14 @@ class VectorIndex(NWBData):
     def __init__(self, **kwargs):
         call_docval_func(super(VectorIndex, self).__init__, kwargs)
 
-
-class IndexedVector(object):
-
-    @docval({'name': 'data', 'type': VectorData,
-             'doc': 'the VectorData to maintain'},
-            {'name': 'index', 'type': VectorIndex,
-             'doc': 'a VectorIndex object that indexes this VectorData', 'default': None})
-    def __init__(self, **kwargs):
-        self.__data = popargs('data', kwargs)
-        self.__index = popargs('index', kwargs)
-
     def add_vector(self, arg):
-        before = len(self.__data)
-        self.__data.extend(arg)
-        rs = get_region_slicer(self.__data, slice(before, before+len(arg)))
-        self.__index.append(rs)
-        return len(self.__index)-1
+        self.target.extend(arg)
+        self.data.append(len(self.target))
 
-    def get_vector(self, arg):
-        return self.__index[arg][:]
+    def __getitem__(self, arg):
+        start = 0 if arg == 0 else self.data[arg-1]
+        end = self.data[arg]
+        return self.target[start:end]
 
 
 @register_class('ElementIdentifiers', CORE_NAMESPACE)

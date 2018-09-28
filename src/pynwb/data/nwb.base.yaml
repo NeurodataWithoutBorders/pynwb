@@ -16,6 +16,19 @@ datasets:
   - name: description
     dtype: text
     doc: A short description of what this column stores
+- neurodata_type_def: Index
+  neurodata_type_inc: NWBData
+  doc: Pointers that index data values
+  attributes:
+  - name: help
+    dtype: text
+    doc: a help string
+    value: indexes into a list of values for a list of elements
+  - name: target
+    dtype:
+      target_type: NWBData
+      reftype: object
+    doc: the target dataset that this index applies to
 - neurodata_type_def: VectorData
   neurodata_type_inc: NWBData
   doc: Data values indexed by pointer
@@ -24,21 +37,15 @@ datasets:
     dtype: text
     doc: a help string
     value: Values for a list of elements
-  default_name: vector_data
 - neurodata_type_def: VectorIndex
   neurodata_type_inc: NWBData
-  dtype:
-    target_type: VectorData
-    reftype: region
   doc: Pointers that index data values
   attributes:
-  - name: help
-    dtype: text
-    doc: a help string
-    value: indexes into a list of values for a list of elements
-  default_name: vector_index
-  shape:
-  - null
+  - name: target
+    dtype:
+      target_type: VectorData
+      reftype: object
+    doc: the target dataset that this index applies to
 - neurodata_type_def: ElementIdentifiers
   neurodata_type_inc: NWBData
   dtype: int
@@ -275,4 +282,10 @@ groups:
     - null
   - neurodata_type_inc: TableColumn
     doc: The columns in this dynamic table
+    quantity: '*'
+  - neurodata_type_inc: VectorData
+    doc: The vector columns in this dynamic table
+    quantity: '*'
+  - neurodata_type_inc: VectorIndex
+    doc: The indices for the vector columns in this dynamic table
     quantity: '*'
