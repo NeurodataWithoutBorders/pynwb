@@ -365,15 +365,6 @@ groups:
             doc: value is 'description of hardware filtering'
             value: description of hardware filtering
         - neurodata_type_inc: TableColumn
-          name: description2
-          dtype: utf8
-          doc: a brief description of what this electrode is
-          attributes:
-          - name: description
-            dtype: text
-            doc: value is 'a brief description of what this electrode is'
-            value: a brief description of what this electrode is
-        - neurodata_type_inc: TableColumn
           name: group
           dtype:
             target_type: ElectrodeGroup
@@ -384,6 +375,15 @@ groups:
             dtype: text
             doc: value is 'a reference to the ElectrodeGroup this electrode is a part of'
             value: a reference to the ElectrodeGroup this electrode is a part of
+        - neurodata_type_inc: TableColumn
+          name: group_name
+          dtype: ascii
+          doc: name of the ElectrodeGroup this electrode is a part of
+          attributes:
+          - name: description
+            dtype: text
+            doc: value is 'the name of the ElectrodeGroup this electrode is a part of'
+            value: the name of the ElectrodeGroup this electrode is a part of
       quantity: '?'
     - name: intracellular_ephys
       doc: Metadata related to intracellular electrophysiology

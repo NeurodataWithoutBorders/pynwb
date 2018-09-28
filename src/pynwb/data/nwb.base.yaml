@@ -56,6 +56,10 @@ datasets:
   dtype: int
   doc: a region/index into a DynamicTable
   attributes:
+  - name: help
+    dtype: text
+    doc: value is 'a subset (i.e. slice or region) of a DynamicTable'
+    value: a subset (i.e. slice or region) of a DynamicTable
   - name: table
     dtype:
       target_type: DynamicTable

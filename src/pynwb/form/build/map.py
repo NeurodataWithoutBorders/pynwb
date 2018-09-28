@@ -595,6 +595,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             {"name": "source", "type": str,
              "doc": "the source of container being built i.e. file path", 'default': None},
             {"name": "builder", "type": GroupBuilder, "doc": "the Builder to build on", 'default': None},
+            {"name": "spec_ext", "type": Spec, "doc": "a spec extension", 'default': None},
             returns="the Builder representing the given Container", rtype=Builder)
     def build(self, **kwargs):
         ''' Convert an Container to a Builder representation '''
@@ -627,18 +628,16 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
                                          dtype=self.convert_dtype(self.__spec.dtype))
             else:
-                #TODO: If container.data is a list of containers, convert that list to
-                # a list of ReferenceBuilders
                 if self.__spec.dtype is None and self.__is_reftype(container.data):
                     bldr_data = list()
                     for d in container.data:
-                        bldr_data.append(manager.build(d))
+                        bldr_data.append(ReferenceBuilder(manager.build(d)))
                     builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
                                              dtype='object')
                 else:
                     builder = DatasetBuilder(name, container.data, parent=parent, source=source,
                                              dtype=self.convert_dtype(self.__spec.dtype))
-        self.__add_attributes(builder, self.__spec.attributes, container, manager)
+        self.__add_attributes(builder, self.__spec.attributes, container, manager, source)
         return builder
 
     def __is_reftype(self, data):
@@ -682,7 +681,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 return len(item) == 0
         return False
 
-    def __add_attributes(self, builder, attributes, container, build_manager):
+    def __add_attributes(self, builder, attributes, container, build_manager, source):
         for spec in attributes:
             if spec.value is not None:
                 attr_value = spec.value
@@ -690,6 +689,13 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 attr_value = self.get_attr_value(spec, container, build_manager)
                 if attr_value is None:
                     attr_value = spec.default_value
+
+            if isinstance(spec.dtype, RefSpec):
+                if not self.__is_reftype(attr_value):
+                    msg = "invalid type for reference '%s' (%s) - must be Container" % (spec.name, type(attr_value))
+                    raise ValueError(msg)
+                target_builder = build_manager.build(attr_value, source=source)
+                attr_value = ReferenceBuilder(target_builder)
 
             # do not write empty or null valued objects
             if attr_value is None:
@@ -723,7 +729,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     sub_builder = builder.datasets[spec.name]
                 else:
                     sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
-                self.__add_attributes(sub_builder, spec.attributes, container, build_manager)
+                self.__add_attributes(sub_builder, spec.attributes, container, build_manager, source)
             else:
                 self.__add_containers(builder, spec, attr_value, build_manager, source, container)
 
@@ -734,8 +740,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 # group does not have the concept of value
                 sub_builder = builder.groups.get(spec.name)
                 if sub_builder is None:
-                    sub_builder = GroupBuilder(spec.name)
-                self.__add_attributes(sub_builder, spec.attributes, container, build_manager)
+                    sub_builder = GroupBuilder(spec.name, source=source)
+                self.__add_attributes(sub_builder, spec.attributes, container, build_manager, source)
                 self.__add_datasets(sub_builder, spec.datasets, container, build_manager, source)
 
                 # handle subgroups that are not Containers
@@ -812,6 +818,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 continue
             if isinstance(h5attr_val, (GroupBuilder, DatasetBuilder)):
                 ret[subspec] = manager.construct(h5attr_val)
+            elif isinstance(h5attr_val, RegionBuilder):
+                raise ValueError("RegionReferences as attributes is not yet supported")
+            elif isinstance(h5attr_val, ReferenceBuilder):
+                ret[subspec] = manager.construct(h5attr_val.builder)
             else:
                 ret[subspec] = h5attr_val
         if isinstance(builder, GroupBuilder):

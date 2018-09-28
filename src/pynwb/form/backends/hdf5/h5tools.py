@@ -26,6 +26,7 @@ H5_BINARY = special_dtype(vlen=binary_type)
 H5_REF = special_dtype(ref=Reference)
 H5_REGREF = special_dtype(ref=RegionReference)
 
+
 class HDF5IO(FORMIO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
@@ -246,7 +247,6 @@ class HDF5IO(FORMIO):
 
     def __read_group(self, h5obj, name=None, ignore=set()):
         kwargs = {
-            #"attributes": dict(h5obj.attrs.items()),
             "attributes": self.__read_attrs(h5obj),
             "groups": dict(),
             "datasets": dict(),
@@ -304,7 +304,6 @@ class HDF5IO(FORMIO):
 
     def __read_dataset(self, h5obj, name=None):
         kwargs = {
-            #"attributes": dict(h5obj.attrs.items()),
             "attributes": self.__read_attrs(h5obj),
             "dtype": h5obj.dtype,
             "maxshape": h5obj.maxshape
@@ -359,7 +358,7 @@ class HDF5IO(FORMIO):
     def __read_attrs(self, h5obj):
         ret = dict()
         for k, v in h5obj.attrs.items():
-            if k == SPEC_LOC_ATTR: # ignore cached spec
+            if k == SPEC_LOC_ATTR:     # ignore cached spec
                 continue
             if isinstance(v, RegionReference):
                 raise ValueError("cannot read region reference attributes yet")
@@ -496,7 +495,7 @@ class HDF5IO(FORMIO):
                     else:
                         value = np.array(value)
                 obj.attrs[key] = value
-            elif isinstance(value, (Container, Builder)):           # a reference
+            elif isinstance(value, (Container, Builder, ReferenceBuilder)):           # a reference
                 self.__queue_ref(self._make_attr_ref_filler(obj, key, value))
             else:
                 obj.attrs[key] = value                   # a regular scalar
@@ -712,6 +711,7 @@ class HDF5IO(FORMIO):
                         for item in data:
                             refs.append(self.__get_ref(item))
                         dset = parent[name]
+                        dset[()] = refs
                         self.set_attributes(dset, attributes)
             return
         # write a "regular" dataset

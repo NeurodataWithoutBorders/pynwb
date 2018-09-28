@@ -1,7 +1,7 @@
 from h5py import RegionReference
 import numpy as np
 
-from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
+from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
 from .form import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
@@ -766,9 +766,11 @@ class DynamicTable(NWBDataInterface):
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
             {'name': 'ids', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
              'default': list()},
-            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': list()})
+            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': list()},
+            {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
+             'default': None})
     def __init__(self, **kwargs):
-        ids, columns, desc = popargs('ids', 'columns', 'description', kwargs)
+        ids, columns, desc, colnames = popargs('ids', 'columns', 'description', 'colnames', kwargs)
         call_docval_func(super(DynamicTable, self).__init__, kwargs)
         self.description = desc
 
@@ -797,14 +799,17 @@ class DynamicTable(NWBDataInterface):
 
         # column names for convenience
 
-        self.colnames = tuple(col.name for col in columns)
-        self.columns = columns
+        if colnames is None:
+            self.colnames = tuple(col.name for col in columns)
+            self.columns = list(columns)
+        else:
+            self.colnames = tuple(pystr(c) for c in colnames)
+            col_dict = {col.name: col for col in columns}
+            self.columns = [col_dict[name] for name in self.colnames]
 
         # to make generating DataFrames and Series easier
         self.__df_cols = [self.id] + list(self.columns)
         self.__df_colnames = [self.id.name] + [c.name for c in self.columns]
-        self.df_cols = self.__df_cols # pdb
-        self.df_colnames = self.__df_colnames #pdb
 
         # for bookkeeping
         self.__colids = {name: i for i, name in enumerate(self.colnames)}
@@ -819,7 +824,6 @@ class DynamicTable(NWBDataInterface):
         '''
         Add a row to the table. If *id* is not provided, it will auto-increment.
         '''
-        #data = getargs('data', kwargs)
         data, row_id = popargs('data', 'id', kwargs)
         data = data if data is not None else kwargs
         if row_id is None:
@@ -827,9 +831,11 @@ class DynamicTable(NWBDataInterface):
         if row_id is None:
             row_id = len(self)
         self.id.data.append(row_id)
-        for k, v in data.items():
-            colnum = self.__colids[k]
-            self.columns[colnum].add_row(v)
+
+        for colname, colnum in self.__colids.items():
+            if colname not in data:
+                raise ValueError("column '%s' missing" % colname)
+            self.columns[colnum].add_row(data[colname])
 
     # # keeping this around in case anyone wants to resurrect it
     # # this was used to return a numpy structured array. this does not
@@ -880,7 +886,7 @@ class DynamicTable(NWBDataInterface):
                 # # keeping this around in case anyone wants to resurrect it
                 # dt = self.get_dtype(ret)[1]
                 # ret = np.array(ret.data, dtype=dt)
-            elif isinstance(arg, int):
+            elif isinstance(arg, (int, np.int8, np.int16, np.int32, np.int64)):
                 # index by int, return row
                 ret = tuple(col[arg] for col in self.__df_cols)
                 # # keeping this around in case anyone wants to resurrect it

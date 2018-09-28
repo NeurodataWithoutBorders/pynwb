@@ -1017,11 +1017,14 @@ class GroupSpec(BaseStorageSpec):
         if dt in self.__data_types:
             curr = self.__data_types[dt]
             if spec.name is None:
-                if curr.name is None:
-                    raise TypeError('Cannot have multiple data types of the same type without specifying name')
-                else:
-                    # unnamed data types will be stored as data_types
+                if isinstance(curr, list):
                     self.__data_types[dt] = spec
+                else:
+                    if curr.name is None:
+                        raise TypeError('Cannot have multiple data types of the same type without specifying name')
+                    else:
+                        # unnamed data types will be stored as data_types
+                        self.__data_types[dt] = spec
             else:
                 if isinstance(curr, list):
                     self.__data_types[dt].append(spec)

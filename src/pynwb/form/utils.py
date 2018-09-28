@@ -493,3 +493,15 @@ class ExtenderMeta(ABCMeta):
         it = (a for a in it if hasattr(a, cls.__postinit))
         for func in it:
             func(name, bases, classdict)
+
+
+def pystr(s):
+    """
+    Cross-version support for convertin a string of characters to Python str object
+    """
+    if six.PY2 and isinstance(s, six.text_type):
+        return s.encode('ascii', 'ignore')
+    elif six.PY3 and isinstance(s, six.binary_type):
+        return s.decode('utf-8')
+    else:
+        return s

@@ -248,7 +248,7 @@ groups:
     - num_events
     shape:
     -
-  - neurodata_type_inc: ElectrodeTableRegion
+  - neurodata_type_inc: DynamicTableRegion
     name: electrodes
     doc: the electrodes that this series was generated from
   default_name: FeatureExtraction
