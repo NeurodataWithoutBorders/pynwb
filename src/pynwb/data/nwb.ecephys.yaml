@@ -28,6 +28,9 @@ groups:
     - - num_times
       - num_channels
     shape:
+    - - null
+    - - null
+      - null
   - neurodata_type_inc: DynamicTableRegion
     name: electrodes
     doc: the electrodes that this series was generated from
