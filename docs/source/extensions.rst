@@ -40,6 +40,7 @@ Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
     from pynwb.spec import NWBDatasetSpec
 
     spec = NWBDatasetSpec('A custom NWB type',
+                        name='qux',
                         attribute=[
                             NWBAttributeSpec('baz', 'a value for baz', 'str'),
                         ],
@@ -57,6 +58,7 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
     from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
 
     spec = NWBDatasetSpec('A custom NWB type',
+                        name='qux',
                         attribute=[
                             NWBAttributeSpec('baz', 'a value for baz', 'str'),
                         ],
@@ -65,20 +67,20 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
                             NWBDtypeSpec('bar', 'a column for bar', 'float')
                         ])
 
-Compound data types can be nested.
-
-.. code-block:: python
-
-    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
-
-    spec = NWBDatasetSpec('A custom NWB type',
-                        attribute=[
-                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
-                        ],
-                        dtype=[
-                            NWBDtypeSpec('foo', 'a column for foo', 'int'),
-                            NWBDtypeSpec('bar', 'a column for bar', 'float')
-                        ])
+# Compound data types can be nested.
+#
+# .. code-block:: python
+#
+#     from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
+#
+#     spec = NWBDatasetSpec('A custom NWB type',
+#                         attribute=[
+#                             NWBAttributeSpec('baz', 'a value for baz', 'str'),
+#                         ],
+#                         dtype=[
+#                             NWBDtypeSpec('foo', 'a column for foo', 'int'),
+#                             NWBDtypeSpec('bar', 'a column for bar', 'float')
+#                         ])
 
 Group Specifications
 ^^^^^^^^^^^^^^^^^^^^
@@ -90,9 +92,10 @@ Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
     from pynwb.spec import NWBGroupSpec
 
     spec = NWBGroupSpec('A custom NWB type',
-                        attributes = [...],
-                        datasets = [...],
-                        groups = [...])
+                        name='quux',
+                        attributes=[...],
+                        datasets=[...],
+                        groups=[...])
 
 Neurodata Type Specifications
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -114,9 +117,9 @@ Create a new type
     # A list of NWBDatasetSpec objects to specify new groups
     addl_groups = [...]
     spec = NWBGroupSpec('A custom NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
-                        groups = addl_groups,
+                        attributes=addl_attributes,
+                        datasets=addl_datasets,
+                        groups=addl_groups,
                         neurodata_type_def='MyNewNWBType')
 
 Extend an existing type
@@ -132,9 +135,9 @@ Extend an existing type
     # A list of NWBGroupSpec objects to specify additional groups or groups to be overridden
     addl_groups = [...]
     spec = NWBGroupSpec('An extended NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
-                        groups = addl_groups,
+                        attributes=addl_attributes,
+                        datasets=addl_datasets,
+                        groups=addl_groups,
                         neurodata_type_inc='Clustering',
                         neurodata_type_def='MyExtendedClustering')
 
@@ -150,7 +153,7 @@ Existing types can be instantiated by specifying `neurodata_type_inc` alone.
                                  neurodata_type_inc='ElectricalSeries') ]
 
     spec = NWBGroupSpec('An extended NWB type',
-                        groups = addl_groups,
+                        groups=addl_groups,
                         neurodata_type_inc='Clustering',
                         neurodata_type_def='MyExtendedClustering')
 
@@ -182,16 +185,16 @@ Create a new namespace with extensions
 
     # create extensions
     ext1 = NWBGroupSpec('A custom Clustering interface',
-                        attributes = [...]
-                        datasets = [...],
-                        groups = [...],
+                        attributes=[...]
+                        datasets=[...],
+                        groups=[...],
                         neurodata_type_inc='Clustering',
                         neurodata_type_def='MyExtendedClustering')
 
     ext2 = NWBGroupSpec('A custom ClusterWaveforms interface',
-                        attributes = [...]
-                        datasets = [...],
-                        groups = [...],
+                        attributes=[...]
+                        datasets=[...],
+                        groups=[...],
                         neurodata_type_inc='ClusterWaveforms',
                         neurodata_type_def='MyExtendedClusterWaveforms')
 
