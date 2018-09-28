@@ -1,6 +1,6 @@
 datasets:
 - neurodata_type_def: NWBData
-  doc: The attributes specified here are included in all interfaces.
+  doc: 'The attributes specified here are included in all interfaces.'
   attributes:
   - name: help
     dtype: text
@@ -38,7 +38,7 @@ datasets:
     value: indexes into a list of values for a list of elements
   default_name: vector_index
   shape:
-  -
+  - null
 - neurodata_type_def: ElementIdentifiers
   neurodata_type_inc: NWBData
   dtype: int
@@ -50,7 +50,7 @@ datasets:
     value: unique identifiers for a list of elements
   default_name: element_id
   shape:
-  -
+  - null
 - neurodata_type_def: DynamicTableRegion
   neurodata_type_inc: NWBData
   dtype: int
@@ -115,7 +115,7 @@ groups:
     - num_times
     quantity: '?'
     shape:
-    -
+    - null
   - name: control_description
     dtype: text
     doc: 'Description of each control value. COMMENT: Array length should be as long
@@ -125,7 +125,7 @@ groups:
     - num_control_values
     quantity: '?'
     shape:
-    -
+    - null
   - name: data
     doc: 'Data values. Can also store binary data (eg, image frames) COMMENT: This
       field may be a link to data stored in an external file, especially in the case
@@ -147,14 +147,14 @@ groups:
       required: false
     - name: unit
       dtype: text
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
+      doc: 'The base unit of measure used to store data. This should be in the SI
+        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
+        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
+        below describes how to convert the data to the specified SI unit.'
     dims:
     - num_times
     shape:
-    -
+    - null
   - name: starting_time
     dtype: float64
     doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
@@ -187,15 +187,15 @@ groups:
     - num_times
     quantity: '?'
     shape:
-    -
+    - null
   groups:
   - name: sync
-    doc: "Lab specific time and sync information as provided directly from hardware\
-      \ devices and that is necessary for aligning all acquired time information to\
-      \ a common timebase. The timestamp array stores time in the common timebase.\
-      \ COMMENT: This group will usually only be populated in TimeSeries that are\
-      \ stored external to the NWB file, in files storing raw data. Once timestamp\
-      \ data is calculated, the contents of 'sync' are mostly for archival purposes."
+    doc: 'Lab specific time and sync information as provided directly from hardware
+      devices and that is necessary for aligning all acquired time information to
+      a common timebase. The timestamp array stores time in the common timebase.
+      COMMENT: This group will usually only be populated in TimeSeries that are
+      stored external to the NWB file, in files storing raw data. Once timestamp
+      data is calculated, the contents of ''sync'' are mostly for archival purposes.'
     quantity: '?'
 - neurodata_type_def: ProcessingModule
   neurodata_type_inc: NWBContainer
@@ -228,7 +228,7 @@ groups:
   datasets:
   - neurodata_type_inc: Image
     doc: Images stored in this NWBDataInterface
-    quantity: +
+    quantity: '+'
   default_name: Images
 - neurodata_type_def: DynamicTable
   neurodata_type_inc: NWBDataInterface
@@ -262,7 +262,7 @@ groups:
     doc: The names of the columns in this table. This should be used to specifying
       an order to the columns
     shape:
-    -
+    - null
   - name: description
     dtype: text
     doc: Description of what is in this dynamic table
@@ -272,7 +272,7 @@ groups:
     dtype: int
     doc: The unique identifier for the rows in this dynamic table
     shape:
-    -
+    - null
   - neurodata_type_inc: TableColumn
     doc: The columns in this dynamic table
     quantity: '*'

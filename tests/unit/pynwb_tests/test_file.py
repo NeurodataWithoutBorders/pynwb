@@ -33,7 +33,8 @@ class NWBFileTest(unittest.TestCase):
                                source_script='noscript',
                                source_script_file_name='nofilename',
                                stimulus_notes='test stimulus notes',
-                               data_collection='test data collection notes')
+                               data_collection='test data collection notes',
+                               keywords=('these', 'are', 'keywords'))
 
     def test_constructor(self):
         self.assertEqual(self.nwbfile.session_description, 'a test session description for a test NWBFile')
@@ -48,6 +49,7 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.data_collection, 'test data collection notes')
         self.assertEqual(self.nwbfile.source_script, 'noscript')
         self.assertEqual(self.nwbfile.source_script_file_name, 'nofilename')
+        self.assertEqual(self.nwbfile.keywords, ('these', 'are', 'keywords'))
 
     def test_create_electrode_group(self):
         name = 'example_electrode_group'

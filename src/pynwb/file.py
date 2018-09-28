@@ -148,6 +148,7 @@ class NWBFile(MultiContainerInterface):
                      'description',
                      'experiment_description',
                      'session_id',
+                     'keywords',
                      'lab',
                      'institution',
                      'notes',
@@ -180,6 +181,7 @@ class NWBFile(MultiContainerInterface):
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
             {'name': 'institution', 'type': str,
              'doc': 'institution(s) where experiment is performed', 'default': None},
+            {'name': 'keywords', 'type': 'array_data', 'doc': 'Terms to search over', 'default': None},
             {'name': 'notes', 'type': str,
              'doc': 'Notes about the experiment.', 'default': None},
             {'name': 'pharmacology', 'type': str,
@@ -259,6 +261,7 @@ class NWBFile(MultiContainerInterface):
         self.acquisition = getargs('acquisition', kwargs)
         self.stimulus = getargs('stimulus', kwargs)
         self.stimulus_template = getargs('stimulus_template', kwargs)
+        self.keywords = getargs('keywords', kwargs)
 
         self.modules = getargs('modules', kwargs)
         epochs = getargs('epochs', kwargs)

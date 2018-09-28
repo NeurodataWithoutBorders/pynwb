@@ -13,9 +13,9 @@ datasets:
   - num_x
   - num_y
   shape:
-  - 
-  - 
-  - 
+  - null
+  - null
+  - null
 - neurodata_type_def: PixelMasks
   neurodata_type_inc: VectorData
   dtype:
@@ -121,8 +121,8 @@ groups:
     - num_times
     - num_ROIs
     shape:
-    - 
-    - 
+    - null
+    - null
   - neurodata_type_inc: ROITableRegion
     name: rois
     doc: a dataset referencing into an ROITable containing information on the ROIs
@@ -159,7 +159,7 @@ groups:
   groups:
   - neurodata_type_inc: RoiResponseSeries
     doc: RoiResponseSeries object containing fluorescence data for a ROI
-    quantity: +
+    quantity: '+'
   default_name: Fluorescence
 - neurodata_type_def: ImageSegmentation
   neurodata_type_inc: NWBDataInterface
@@ -228,7 +228,7 @@ groups:
   datasets:
   - name: description
     dtype: text
-    doc: Description of &lt;image_plane_X&gt;
+    doc: Description of image_plane_X
     quantity: '?'
   - name: excitation_lambda
     dtype: float
@@ -244,7 +244,7 @@ groups:
     doc: Location of image plane
   - name: manifold
     dtype: float32
-    doc: 'Physical position of each pixel. COMMENT: "xyz" represents the position
+    doc: 'Physical position of each pixel. COMMENT: ''xyz'' represents the position
       of the pixel relative to the defined coordinate space'
     attributes:
     - name: conversion
@@ -263,8 +263,8 @@ groups:
     - weight
     - x|y|z
     shape:
-    - 
-    - 
+    - null
+    - null
     - 3
   - name: reference_frame
     dtype: text
@@ -329,5 +329,5 @@ groups:
     - name: original
       doc: HDF5 Link to image series that is being registered.
       target_type: ImageSeries
-    quantity: +
+    quantity: '+'
   default_name: MotionCorrection
