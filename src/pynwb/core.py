@@ -1,7 +1,6 @@
 from h5py import RegionReference
 import numpy as np
 import pandas as pd
-from operator import itemgetter
 
 from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from .form import Container, Data, DataRegion, get_region_slicer
@@ -988,37 +987,3 @@ class DynamicTable(NWBDataInterface):
             })
 
         return cls(name=name, source=source, ids=ids, columns=columns, description=table_description, **kwargs)
-
-
-@register_class('DynamicTableRegion', CORE_NAMESPACE)
-class DynamicTableRegion(NWBDataInterface):
-    '''Slice into the rows of a DynamicTable
-    '''
-
-    __nwbfields__ = (
-        'table',
-        'indices'
-    )
-
-    __help = (
-        'Slice into the rows of a DynamicTable'
-    )
-
-    @docval(
-        {'name': 'table', 'type': DynamicTable, 'doc': 'table into which this region slices'},
-        {'name': 'indices', 'type': (list, tuple, slice, 'array_data'), 'doc': 'row indices defining this region'},
-        {'name': 'name', 'type': str, 'doc': 'the name of this region', 'default': 'DynamicTableRegion'},
-        {'name': 'source', 'type': str, 'doc': 'a description of where this region came from', 'default': ''},
-        {'name': 'description', 'type': str, 'doc': 'a description of what is in this region', 'default': ''},
-    )
-    def __init__(self, **kwargs):
-        table, indices, description = popargs('table', 'indices', 'description', kwargs)
-        super(DynamicTableRegion, self).__init__(**kwargs)
-        self.table = table
-        self.description = description
-        self.indices = indices
-
-    def __getitem__(self, slc):
-        return self.table.extract_subtable(
-            region=list(self.indices[slc]), name=self.name, source=self.source, description=self.description
-        )
