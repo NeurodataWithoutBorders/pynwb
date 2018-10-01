@@ -2,7 +2,7 @@ from h5py import RegionReference
 import numpy as np
 import pandas as pd
 
-from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
+from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
 from .form import Container, Data, DataRegion, get_region_slicer
 from .form.data_utils import RegionSlicer
 
@@ -740,7 +740,7 @@ class TableColumn(NWBData):
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this column'},
-            {'name': 'description', 'type': str, 'doc': 'a description for this column'},
+            {'name': 'description', 'type': str, 'doc': 'a description for this column', 'default': None},
             {'name': 'data', 'type': 'array_data', 'doc': 'the data contained in this  column', 'default': list()})
     def __init__(self, **kwargs):
         desc = popargs('description', kwargs)
@@ -779,9 +779,11 @@ class DynamicTable(NWBDataInterface):
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
             {'name': 'ids', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
              'default': list()},
-            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': list()})
+            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': list()},
+            {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
+             'default': None})
     def __init__(self, **kwargs):
-        ids, columns, desc = popargs('ids', 'columns', 'description', kwargs)
+        ids, columns, desc, colnames = popargs('ids', 'columns', 'description', 'colnames', kwargs)
         call_docval_func(super(DynamicTable, self).__init__, kwargs)
         self.description = desc
 
@@ -812,8 +814,13 @@ class DynamicTable(NWBDataInterface):
 
         # column names for convenience
 
-        self.colnames = tuple(col.name for col in columns)
-        self.columns = columns
+        if colnames is None:
+            self.colnames = tuple(col.name for col in columns)
+            self.columns = list(columns)
+        else:
+            self.colnames = tuple(pystr(c) for c in colnames)
+            col_dict = {col.name: col for col in columns}
+            self.columns = [col_dict[name] for name in self.colnames]
 
         # to make generating DataFrames and Series easier
         self.__df_cols = [self.id] + list(self.columns)
@@ -825,24 +832,25 @@ class DynamicTable(NWBDataInterface):
     def __len__(self):
         return len(self.id)
 
-    @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row'},
+    @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row', 'default': None},
             {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None},
             allow_extra=True)
     def add_row(self, **kwargs):
         '''
         Add a row to the table. If *id* is not provided, it will auto-increment.
         '''
-
-        data = getargs('data', kwargs)
-        row_id = getargs('id', kwargs)
+        data, row_id = popargs('data', 'id', kwargs)
+        data = data if data is not None else kwargs
         if row_id is None:
             row_id = data.pop('id', None)
         if row_id is None:
             row_id = len(self)
         self.id.data.append(row_id)
-        for k, v in data.items():
-            colnum = self.__colids[k]
-            self.columns[colnum].add_row(v)
+
+        for colname, colnum in self.__colids.items():
+            if colname not in data:
+                raise ValueError("column '%s' missing" % colname)
+            self.columns[colnum].add_row(data[colname])
 
     # # keeping this around in case anyone wants to resurrect it
     # # this was used to return a numpy structured array. this does not
@@ -893,7 +901,7 @@ class DynamicTable(NWBDataInterface):
                 # # keeping this around in case anyone wants to resurrect it
                 # dt = self.get_dtype(ret)[1]
                 # ret = np.array(ret.data, dtype=dt)
-            elif isinstance(arg, int):
+            elif isinstance(arg, (int, np.int8, np.int16, np.int32, np.int64)):
                 # index by int, return row
                 ret = tuple(col[arg] for col in self.__df_cols)
                 # # keeping this around in case anyone wants to resurrect it
@@ -987,3 +995,43 @@ class DynamicTable(NWBDataInterface):
             })
 
         return cls(name=name, source=source, ids=ids, columns=columns, description=table_description, **kwargs)
+
+@register_class('DynamicTableRegion', CORE_NAMESPACE)
+class DynamicTableRegion(NWBData):
+    """
+    An object for easily slicing into a DynamicTable
+    """
+
+    __nwbfields__ = (
+        'table',
+        'description'
+    )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
+            {'name': 'description', 'type': str, 'doc': 'a description of what this region represents'},
+            {'name': 'table', 'type': DynamicTable,
+             'doc': 'the DynamicTable this region applies to'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        t, d = popargs('table', 'description', kwargs)
+        call_docval_func(super(DynamicTableRegion, self).__init__, kwargs)
+        self.table = t
+        self.description = d
+
+    def __getitem__(self, key):
+        # treat the list of indices as data that can be indexed. then pass the
+        # result to the table to get the data
+        if isinstance(key, tuple):
+            arg1 = key[0]
+            arg2 = key[1]
+            return self.table[self.data[arg1], arg2]
+        else:
+            if isinstance(key, int):
+                return self.table[self.data[key]]
+            else:
+                raise ValueError("unrecognized argument: '%s'" % key)
