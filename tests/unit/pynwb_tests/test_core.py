@@ -199,3 +199,15 @@ class TestDynamicTable(unittest.TestCase):
             'baz': ['dog', 'fish', 'lizard']
         }, index=pd.Index(name='id', data=[1, 3, 4])).loc[:, ('foo', 'bar', 'baz')]
         assert expected_df.equals(obtained_df)
+
+    def test_missing_columns(self):
+        table = self.with_spec()
+
+        with self.assertRaises(ValueError) as obt:
+            table.add_row({'bar': 60.0, 'foo': [6]}, None)
+
+    def test_oryz_columns(self):
+        table = self.with_spec()
+
+        with self.assertRaises(ValueError) as obt:
+            table.add_row({'bar': 60.0, 'foo': 6, 'baz': 'oryx', 'qax': -1}, None)

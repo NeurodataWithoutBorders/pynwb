@@ -847,9 +847,19 @@ class DynamicTable(NWBDataInterface):
             row_id = len(self)
         self.id.data.append(row_id)
 
+        extra_columns = set(list(data.keys())) - set(list(self.__colids.keys()))
+        missing_columns = set(list(self.__colids.keys())) - set(list(data.keys()))
+
+        if extra_columns or missing_columns:
+            raise ValueError(
+                '\n'.join([
+                    'row data keys don\'t match available columns',
+                    'you supplied {} extra keys: {}'.format(len(extra_columns), extra_columns),
+                    'and were missing {} keys: {}'.format(len(missing_columns), missing_columns)
+                ])
+            )
+
         for colname, colnum in self.__colids.items():
-            if colname not in data:
-                raise ValueError("column '%s' missing" % colname)
             self.columns[colnum].add_row(data[colname])
 
     # # keeping this around in case anyone wants to resurrect it
@@ -995,6 +1005,7 @@ class DynamicTable(NWBDataInterface):
             })
 
         return cls(name=name, source=source, ids=ids, columns=columns, description=table_description, **kwargs)
+
 
 @register_class('DynamicTableRegion', CORE_NAMESPACE)
 class DynamicTableRegion(NWBData):
