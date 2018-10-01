@@ -7,6 +7,7 @@ from pynwb.form.backends.hdf5 import HDF5IO
 from pynwb import NWBFile, TimeSeries
 from pynwb.file import Subject
 from pynwb.ecephys import Clustering
+from pynwb.epoch import Epochs
 
 from . import base
 
@@ -198,3 +199,31 @@ class TestSubjectIO(base.TestDataInterfaceIO):
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
         return nwbfile.subject
+
+
+class TestEpochsRoundtrip(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return Epochs('epochs', 'epochs integration test')
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_epoch_metadata_column(
+            name='temperature',
+            description='average temperture (c) during epoch'
+        )
+
+        nwbfile.create_epoch(
+            start_time=5.3,
+            stop_time=6.1,
+            timeseries=[],
+            tags='ambient',
+            description='ambient data epoch',
+            metadata={'temperature': 26.4}
+        )
+
+        # reset the thing
+        self.container = nwbfile.epochs
+
+    def getContainer(self, nwbfile):
+        return nwbfile.epochs

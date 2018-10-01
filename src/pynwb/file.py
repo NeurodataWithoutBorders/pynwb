@@ -346,6 +346,21 @@ class NWBFile(MultiContainerInterface):
     def session_start_time(self):
         return self.__session_start_time
 
+
+    def __check_epochs(self):
+        if self.epochs is None:
+            self.epochs = Epochs(self.source)
+
+    @docval(*get_docval(DynamicTable.add_column))
+    def add_epoch_metadata_column(self, **kwargs):
+        """
+        Add a column to the electrode table.
+        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        """
+        self.__check_epochs()
+        self.epoch_tags.update(kwargs.pop('tags', list()))
+        call_docval_func(self.epochs.add_metadata_column, kwargs)
+
     @docval(*get_docval(Epochs.add_epoch))
     def create_epoch(self, **kwargs):
         """
@@ -356,8 +371,7 @@ class NWBFile(MultiContainerInterface):
         sparse noise) or a different paradigm (a rat exploring an
         enclosure versus sleeping between explorations)
         """
-        if self.epochs is None:
-            self.epochs = Epochs(self.source)
+        self.__check_epochs()
         self.epoch_tags.update(kwargs.get('tags', list()))
         call_docval_func(self.epochs.add_epoch, kwargs)
 
