@@ -92,7 +92,7 @@ class TestUnitsDf(base.TestMapRoundTrip):
     def getContainer(self, nwbfile):
         return nwbfile.units
 
-        
+
 class TestElectrodes(base.TestMapRoundTrip):
 
     def setUpContainer(self):

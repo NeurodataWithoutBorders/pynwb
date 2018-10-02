@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from pynwb.core import DynamicTable, TableColumn, ElementIdentifiers
+from pynwb.core import DynamicTable, TableColumn, ElementIdentifiers, NWBTable
 from pynwb import NWBFile
 
 import pandas as pd
@@ -206,8 +206,29 @@ class TestDynamicTable(unittest.TestCase):
         with self.assertRaises(ValueError) as obt:
             table.add_row({'bar': 60.0, 'foo': [6]}, None)
 
-    def test_oryz_columns(self):
+    def test_extra_columns(self):
         table = self.with_spec()
 
         with self.assertRaises(ValueError) as obt:
             table.add_row({'bar': 60.0, 'foo': 6, 'baz': 'oryx', 'qax': -1}, None)
+
+
+class TestNWBTable(unittest.TestCase):
+
+    def setUp(self):
+        class MyTable(NWBTable):
+            __columns__ = [
+                {'name': 'foo', 'type': str, 'doc': 'the foo column'},
+                {'name': 'bar', 'type': int, 'doc': 'the bar column'},
+            ]
+        self.cls = MyTable
+
+
+    def test_init(self):
+        table = self.cls(
+            name='testing table',
+            data={
+                'foo': [1, 2, 3],
+                'bar': ['a', 'b', 'c']
+            }
+        )

@@ -463,6 +463,11 @@ class NWBTable(NWBData):
         else:
             return self.data[idx]
 
+    def to_dataframe(self):
+        data = {colname: self.data[:, ii] for ii, colname in enumerate(self.columns)}
+        return pd.DataFrame(data, index=pd.Index(name=self.id.name, data=self.id.data))
+
+
 
 # diamond inheritance
 class NWBTableRegion(NWBData, DataRegion):
