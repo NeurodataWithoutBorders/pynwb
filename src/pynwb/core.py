@@ -467,6 +467,50 @@ class NWBTable(NWBData):
         data = {colname: self[colname] for ii, colname in enumerate(self.columns)}
         return pd.DataFrame(data)
 
+    @classmethod
+    @docval(
+        {'name': 'df', 'type': pd.DataFrame, 'doc': 'input data'},
+        {'name': 'name', 'type': str, 'doc': 'the name of this container'},
+        {'name': 'extra_ok', 'type': bool, 'doc': 'accept (and ignore) unexpected columns on the input dataframe', 'default': False},
+    )
+    def from_dataframe(cls, **kwargs):
+        df, name, extra_ok = getargs('df', 'name', 'extra_ok', kwargs)
+
+        cls_cols = list([col['name'] for col in getattr(cls, '__columns__')])
+        df_cols = list(df.columns)
+
+        missing_columns = set(cls_cols) - set(df_cols)
+        extra_columns = set(df_cols) - set(cls_cols)
+
+        if extra_columns:
+            raise ValueError(
+                'unrecognized column(s) {} for table class {} (columns {})'.format(
+                    extra_columns, cls.__name__, cls_cols
+                )
+            )
+        if len(missing_columns) > 1:
+            raise ValueError(
+                'missing column(s) {} for table class {} (columns {}, provided {})'.format(
+                    missing, cls.__name__, cls_cols, df_cols
+                )
+            )
+
+        use_index = False
+        if len(missing_columns) == 1 and list(missing_columns)[0] == df.index.name:
+            use_index = True   
+
+        data = []
+        for index, row in df.iterrows():
+            if use_index:
+                data.append([
+                    row[colname] if colname != df.index.name else index
+                    for colname in cls_cols
+                ])
+            else:
+                data.append([row[colname] for colname in cls_cols])
+
+        return cls(name=name, data=data)
+
 
 
 # diamond inheritance

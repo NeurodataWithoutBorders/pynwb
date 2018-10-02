@@ -245,6 +245,25 @@ class TestNWBTable(unittest.TestCase):
         expected = pd.DataFrame({
             'foo': [1, 2, 3],
             'bar': ['a', 'b', 'c']
-        }, index=pd.Index(name='id', data=[0, 1, 2]))
+        })
 
+        assert expected.equals(obtained)
+
+    def test_from_dataframe(self):
+        df = pd.DataFrame({
+            'bar': ['a', 'b', 'c']
+        }, index=pd.Index(name='foo', data=[1, 2, 3], dtype=int))
+        table = self.cls.from_dataframe(
+            df=df,
+            name='test table' 
+        )
+
+        assert table['foo', 1] == 2
+
+    def test_dataframe_roundtrip(self):
+        expected = pd.DataFrame({
+            'foo': [1, 2, 3],
+            'bar': ['a', 'b', 'c']
+        })
+        obtained = self.cls.from_dataframe(df=expected, name='test table').to_dataframe()
         assert expected.equals(obtained)
