@@ -11,6 +11,10 @@ class DynamicTableMap(ObjectMapper):
         super(DynamicTableMap, self).__init__(spec)
         columns_spec = spec.get_neurodata_type('TableColumn')
         self.map_spec('columns', columns_spec)
+        vector_data_spec = spec.get_neurodata_type('VectorData')
+        vector_index_spec = spec.get_neurodata_type('VectorIndex')
+        self.map_spec('columns', vector_data_spec)
+        self.map_spec('columns', vector_index_spec)
 
     @ObjectMapper.object_attr('colnames')
     def attr_columns(self, container, manager):
