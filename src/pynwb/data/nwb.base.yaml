@@ -38,7 +38,7 @@ datasets:
     doc: a help string
     value: Values for a list of elements
 - neurodata_type_def: VectorIndex
-  neurodata_type_inc: NWBData
+  neurodata_type_inc: Index
   doc: Pointers that index data values
   attributes:
   - name: target

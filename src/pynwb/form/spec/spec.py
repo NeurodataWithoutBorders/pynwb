@@ -576,8 +576,6 @@ class DtypeSpec(ConstructableDict):
     def build_const_args(cls, spec_dict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
         ret = super(DtypeSpec, cls).build_const_args(spec_dict)
-        if 'dtype' not in ret:
-            print(ret)
         if isinstance(ret['dtype'], list):
             ret['dtype'] = list(map(cls.build_const_args, ret['dtype']))
         elif isinstance(ret['dtype'], dict):

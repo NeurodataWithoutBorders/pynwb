@@ -318,6 +318,7 @@ class VectorIndex(Index):
             'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorIndex, self).__init__, kwargs)
+        self.target = getargs('target', kwargs)
 
     def add_vector(self, arg):
         self.target.extend(arg)
