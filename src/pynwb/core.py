@@ -470,7 +470,7 @@ class NWBTable(NWBData):
     @classmethod
     @docval(
         {'name': 'df', 'type': pd.DataFrame, 'doc': 'input data'},
-        {'name': 'name', 'type': str, 'doc': 'the name of this container'},
+        {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
         {'name': 'extra_ok', 'type': bool, 'doc': 'accept (and ignore) unexpected columns on the input dataframe', 'default': False},
     )
     def from_dataframe(cls, **kwargs):
@@ -510,6 +510,8 @@ class NWBTable(NWBData):
             else:
                 data.append([row[colname] for colname in cls_cols])
 
+        if name is None:
+            return cls(data=data)
         return cls(name=name, data=data)
 
 

@@ -8,6 +8,9 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer, NWBTable, NWBTableRegion, DynamicTable
 
+import pandas as pd
+import six
+
 
 _evtable_docval = [
     {'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
@@ -165,3 +168,82 @@ class Epochs(NWBContainer):
         count = stop_idx - start_idx
         idx_start = start_idx
         return (int(idx_start), int(count))
+
+
+    def to_dataframe(self):
+        epochs_df = self.epochs.to_dataframe()
+        metadata_df = self.metadata.to_dataframe()
+
+        epochs_df['timeseries'] = epochs_df.apply(lambda row: [tsi_row[2] for tsi_row in row['timeseries']], axis=1)
+        return epochs_df.merge(metadata_df, left_index=True, right_index=True)
+
+    @classmethod
+    @docval(
+        {'name': 'df', 'type': pd.DataFrame, 'doc': 'source dataframe'},
+        {'name': 'source', 'type': str, 'doc': 'the source of the data'},
+        {'name': 'name', 'type': str, 'doc': 'name of this epochs container'},
+        {
+            'name': 'descriptions', 
+            'type': list(six.string_types) + [list, tuple, 'array_data'],
+            'description': 'either a string naming a dataframe column whose values are epoch descriptions or an array of epoch descriptions',
+            'default': 'description'
+        },
+        {
+            'name': 'start_times', 
+            'type': list(six.string_types) + [list, tuple, 'array_data'], # TODO: support TimeSeries here?
+            'description': 'either a string naming a dataframe column whose values are start times or an array of start times',
+            'default': 'start_time'
+        },
+        {
+            'name': 'stop_times', 
+            'type': list(six.string_types) + [list, tuple, 'array_data'], # TODO: support TimeSeries here?
+            'description': 'either a string naming a dataframe column whose values are stop times or an array of stop times',
+            'default': 'stop_time'
+        },
+        {
+            'name': 'timeseries', 
+            'type': list(six.string_types) + [list, tuple, 'array_data'],
+            'description': 'either a string naming a dataframe column whose values are timeseries or an array of timeseries',
+            'default': 'timeseries'
+        },
+        {
+            'name': 'tags', 
+            'type': list(six.string_types) + [list, tuple, 'array_data'],
+            'description': 'either a string naming a dataframe column whose values are tags or an array of tags',
+            'default': 'tags'
+        }
+    )
+    def from_dataframe(cls, **kwargs):
+        df, source, name, descriptions, start_times, stop_times, timeseries, tags = getargs(
+            'df', 'source', 'name', 'descriptions', 'start_times', 'stop_times', 'timeseries', 'tags', 
+            kwargs
+        )
+
+        df = df.copy()
+        if isinstance(descriptions, six.string_types):
+            descriptions = df.pop(descriptions).values.tolist()
+        if isinstance(start_times, six.string_types):
+            start_times = df.pop(start_times).values.tolist()
+        if isinstance(stop_times, six.string_types):
+            stop_times = df.pop(stop_times).values.tolist()
+        if isinstance(timeseries, six.string_types):
+            timeseries = df.pop(timeseries).values.tolist()
+        if isinstance(tags, six.string_types):
+            tags = df.pop(tags).values.tolist()
+
+        obj = cls(source=source, name=name)
+        
+        for colname in df.columns.values:
+            obj.add_metadata_column(name=colname)
+
+        for ii, row in df.iterrows():
+            obj.add_epoch(
+                description=descriptions[ii],
+                start_time=start_times[ii],
+                stop_time=stop_times[ii],
+                tags=tags[ii],
+                timeseries=timeseries[ii],
+                metadata=row.to_dict()
+            )
+
+        return obj
