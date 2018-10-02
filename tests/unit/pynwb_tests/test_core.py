@@ -253,10 +253,7 @@ class TestNWBTable(unittest.TestCase):
         df = pd.DataFrame({
             'bar': ['a', 'b', 'c']
         }, index=pd.Index(name='foo', data=[1, 2, 3], dtype=int))
-        table = self.cls.from_dataframe(
-            df=df,
-            name='test table' 
-        )
+        table = self.cls.from_dataframe(df=df, name='test table')
 
         assert table['foo', 1] == 2
 
@@ -267,3 +264,22 @@ class TestNWBTable(unittest.TestCase):
         })
         obtained = self.cls.from_dataframe(df=expected, name='test table').to_dataframe()
         assert expected.equals(obtained)
+
+    def test_from_dataframe_missing_columns(self):
+        df = pd.DataFrame({
+            'bar': ['a', 'b', 'c']
+        })
+
+        with self.assertRaises(ValueError) as obt:
+            table = self.cls.from_dataframe(df=df, name='test_table')
+
+    def test_from_dataframe_extra_columns(self):
+        df = pd.DataFrame({
+            'foo': [1, 2, 3],
+            'bar': ['a', 'b', 'c'],
+            'baz': [-1, -2, -3]
+        })
+
+        with self.assertRaises(ValueError) as obt:
+            table = self.cls.from_dataframe(df=df, name='test_table')
+

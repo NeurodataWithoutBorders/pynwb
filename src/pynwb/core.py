@@ -488,16 +488,17 @@ class NWBTable(NWBData):
                     extra_columns, cls.__name__, cls_cols
                 )
             )
-        if len(missing_columns) > 1:
-            raise ValueError(
-                'missing column(s) {} for table class {} (columns {}, provided {})'.format(
-                    missing, cls.__name__, cls_cols, df_cols
-                )
-            )
 
         use_index = False
         if len(missing_columns) == 1 and list(missing_columns)[0] == df.index.name:
             use_index = True   
+
+        elif missing_columns:
+            raise ValueError(
+                'missing column(s) {} for table class {} (columns {}, provided {})'.format(
+                    missing_columns, cls.__name__, cls_cols, df_cols
+                )
+            )
 
         data = []
         for index, row in df.iterrows():
@@ -510,7 +511,6 @@ class NWBTable(NWBData):
                 data.append([row[colname] for colname in cls_cols])
 
         return cls(name=name, data=data)
-
 
 
 # diamond inheritance
