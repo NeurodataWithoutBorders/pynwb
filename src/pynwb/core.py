@@ -464,8 +464,8 @@ class NWBTable(NWBData):
             return self.data[idx]
 
     def to_dataframe(self):
-        data = {colname: self.data[:, ii] for ii, colname in enumerate(self.columns)}
-        return pd.DataFrame(data, index=pd.Index(name=self.id.name, data=self.id.data))
+        data = {colname: self[colname] for ii, colname in enumerate(self.columns)}
+        return pd.DataFrame(data)
 
 
 

@@ -223,12 +223,28 @@ class TestNWBTable(unittest.TestCase):
             ]
         self.cls = MyTable
 
+    def basic_data(self):
+        return [
+            [1, 'a'],
+            [2, 'b'],
+            [3, 'c']
+        ]
+
+    def table_with_data(self):
+        return self.cls(
+            name='testing table',
+            data=self.basic_data()
+        )
 
     def test_init(self):
-        table = self.cls(
-            name='testing table',
-            data={
-                'foo': [1, 2, 3],
-                'bar': ['a', 'b', 'c']
-            }
-        )
+        table = self.table_with_data()
+        assert(table['foo', 1]) == 2
+
+    def test_to_dataframe(self):
+        obtained = self.table_with_data().to_dataframe()
+        expected = pd.DataFrame({
+            'foo': [1, 2, 3],
+            'bar': ['a', 'b', 'c']
+        }, index=pd.Index(name='id', data=[0, 1, 2]))
+
+        assert expected.equals(obtained)
