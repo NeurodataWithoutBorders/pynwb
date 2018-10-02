@@ -370,6 +370,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         self.__carg2spec = dict()
         self.__map_spec(spec)
 
+        self.spec2attr = self.__spec2attr    # pdb
+        self.attr2spec = self.__attr2spec    # pdb
+        self.spec2carg = self.__spec2carg    # pdb
+        self.carg2spec = self.__carg2spec    # pdb
+
     @property
     def spec(self):
         ''' the Spec used in this ObjectMapper '''
@@ -476,10 +481,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     def map_const_arg(self, **kwargs):
         """ Map an attribute to spec. Use this to override default behavior """
         const_arg, spec = getargs('const_arg', 'spec', kwargs)
-        if const_arg in self.__carg2spec:
-            existing = self.__carg2spec.pop(const_arg)
-            if existing is not spec:
-                self.__spec2carg.pop(existing)
         self.__spec2carg[spec] = const_arg
         self.__carg2spec[const_arg] = spec
 
@@ -867,6 +868,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         for subspec, value in subspecs.items():
             const_arg = self.get_const_arg(subspec)
             if const_arg is not None:
+                if isinstance(subspec, BaseStorageSpec) and subspec.is_many():
+                    existing_value = const_args.get(const_arg)
+                    if isinstance(existing_value, list):
+                        value = existing_value + value
                 const_args[const_arg] = value
         # build kwargs for the constructor
         kwargs = dict()
@@ -881,6 +886,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 continue
             kwargs[argname] = val
         try:
+
             obj = cls(**kwargs)
             obj.container_source = builder.source
         except Exception as ex:
