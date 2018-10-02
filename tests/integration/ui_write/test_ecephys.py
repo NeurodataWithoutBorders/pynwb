@@ -17,47 +17,6 @@ from abc import ABCMeta
 from six import with_metaclass
 
 
-class TestUnitTimesIO(base.TestDataInterfaceIO):
-
-    def setUpContainer(self):
-        # self.spike_unit1 = SpikeUnit('unit1', [0, 1, 2], 'spike unit1 description', 'spike units source')
-        # self.spike_unit2 = SpikeUnit('unit2', [3, 4, 5], 'spike unit2 description', 'spike units source')
-        ut = UnitTimes('UnitTimes integration test', name='UnitTimesTest')
-        ut.add_spike_times(0, [0, 1, 2])
-        ut.add_spike_times(1, [3, 4, 5])
-        return ut
-
-    def setUpBuilder(self):
-        ids_builder = DatasetBuilder('unit_ids', [0, 1],
-                                     attributes={'neurodata_type': 'ElementIdentifiers',
-                                                 'namespace': 'core',
-                                                 'help': 'unique identifiers for a list of elements'})
-        st_builder = DatasetBuilder('spike_times', [0, 1, 2, 3, 4, 5],
-                                    attributes={'neurodata_type': 'VectorData',
-                                                'namespace': 'core',
-                                                'help': 'Values for a list of elements'})
-        sti_builder = DatasetBuilder('spike_times_index',
-                                     [RegionBuilder(slice(0, 3), st_builder), RegionBuilder(slice(3, 6), st_builder)],
-                                     attributes={'neurodata_type': 'VectorIndex',
-                                                 'namespace': 'core',
-                                                 'help': 'indexes into a list of values for a list of elements'})
-        return GroupBuilder('UnitTimesTest',
-                            attributes={'neurodata_type': 'UnitTimes',
-                                        'namespace': 'core',
-                                        'help': 'Estimated spike times from a single unit',
-                                        'source': 'UnitTimes integration test'},
-                            datasets={'unit_ids': ids_builder,
-                                      'spike_times': st_builder,
-                                      'spike_times_index': sti_builder})
-
-    def test_get_spike_times(self):
-        ut = self.roundtripContainer()
-        received = ut.get_unit_spike_times(0)
-        self.assertTrue(np.array_equal(received, [0, 1, 2]))
-        received = ut.get_unit_spike_times(1)
-        self.assertTrue(np.array_equal(received, [3, 4, 5]))
-
-
 class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
