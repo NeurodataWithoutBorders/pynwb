@@ -447,6 +447,7 @@ class HDF5IO(FORMIO):
         "utf-8": H5_TEXT,
         "ascii": H5_BINARY,
         "str": H5_BINARY,
+        "isodatetime": H5_TEXT,
         "uint32": np.uint32,
         "uint16": np.uint16,
         "uint8": np.uint8,

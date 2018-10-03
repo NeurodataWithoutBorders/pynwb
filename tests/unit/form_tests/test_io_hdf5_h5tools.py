@@ -405,7 +405,7 @@ class TestCacheSpec(unittest.TestCase):
 class TestLinkResolution(unittest.TestCase):
 
     def test_link_resolve(self):
-        nwbfile = NWBFile("source", "a file with header data", "NB123A", '2018-06-01T00:00:00')
+        nwbfile = NWBFile("source", "a file with header data", "NB123A", datetime(2018, 6, 1, 0, 0, 0, 0))
         device = nwbfile.create_device('device_name', 'source')
         electrode_group = nwbfile.create_electrode_group(
             name='electrode_group_name',

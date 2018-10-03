@@ -5,6 +5,7 @@ import numpy as np
 import os
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 
 from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
@@ -13,7 +14,7 @@ from pynwb.file import Subject, ElectrodeTable
 
 class NWBFileTest(unittest.TestCase):
     def setUp(self):
-        self.start = datetime(2017, 5, 1, 12, 0, 0)
+        self.start = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile('a fake source', 'a test session description for a test NWBFile',
                                'FILE123',

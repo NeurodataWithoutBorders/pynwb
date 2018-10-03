@@ -327,12 +327,13 @@ class PotatoSack(MultiContainerInterface):
 # Then use the objects (again, this would often be done in a different file).
 
 from pynwb import NWBHDF5IO, NWBFile
+from datetime import datetime
 
 potato_sack = PotatoSack(source='pantry',
                          potatos=Potato(name='potato1', age=2.3, weight=3.0,
                                         source='the ground'))
 
-nwbfile = NWBFile("source", "a file with metadata", "NB123A", '2018-06-01T00:00:00')
+nwbfile = NWBFile("source", "a file with metadata", "NB123A", datetime(2018, 6, 1))
 
 pmod = nwbfile.create_processing_module('module_name', 'source', 'desc')
 pmod.add_container(potato_sack)
