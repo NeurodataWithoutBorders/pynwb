@@ -3,8 +3,9 @@ import re
 import warnings
 from collections import OrderedDict
 from copy import copy
-
+from datetime import datetime
 from six import with_metaclass, raise_from, text_type, binary_type
+
 from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args, call_docval_func
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec,\
@@ -568,6 +569,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                         string_type = text_type
                     elif 'ascii' in spec.dtype:
                         string_type = binary_type
+                    elif 'isodatetime' in spec.dtype:
+                        # raise ValueError if not datetime or no timezone?
+                        string_type = datetime.isoformat
                     if string_type is not None:
                         if spec.dims is not None:
                             ret = list(map(string_type, value))
@@ -599,6 +603,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             returns="the Builder representing the given Container", rtype=Builder)
     def build(self, **kwargs):
         ''' Convert an Container to a Builder representation '''
+
+        # this is the place where datasets get written to a file.
+
         container, manager, parent, source = getargs('container', 'manager', 'parent', 'source', kwargs)
         builder = getargs('builder', kwargs)
         name = manager.get_builder_name(container)
@@ -858,6 +865,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
     def construct(self, **kwargs):
         ''' Construct an Container from the given Builder '''
+
+        # the builder has read the hdf5 info and the here they are mapped to the container!
+
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
         # gather all subspecs
@@ -1008,7 +1018,8 @@ class TypeMap(object):
         'float': float,
         'float64': float,
         'int': int,
-        'int32': int
+        'int32': int,
+        'isodatetime': datetime
     }
 
     def __get_type(self, spec):
@@ -1132,6 +1143,7 @@ class TypeMap(object):
             msg = "builder '%s' does not have a data_type" % builder.name
             raise ValueError(msg)
 
+        # another decode at builder stage without six package (4e9bad3b states legacy file support)
         if isinstance(ret, bytes):
             ret = ret.decode('UTF-8')
 

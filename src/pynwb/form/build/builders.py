@@ -391,7 +391,7 @@ class DatasetBuilder(BaseBuilder):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
             {'name': 'data', 'type': ('array_data', 'scalar_data', 'data', 'DatasetBuilder', 'RegionBuilder', Iterable),
              'doc': 'the data in this dataset', 'default': None},
-            {'name': 'dtype', 'type': (type, np.dtype, str, list),
+            {'name': 'dtype', 'type': (type, np.dtype, str, list),    # does not accept datetime at this stage
              'doc': 'the datatype of this dataset', 'default': None},
             {'name': 'attributes', 'type': dict,
              'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
