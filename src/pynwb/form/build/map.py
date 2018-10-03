@@ -3,8 +3,9 @@ import re
 import warnings
 from collections import OrderedDict
 from copy import copy
-
+from datetime import datetime
 from six import with_metaclass, raise_from, text_type, binary_type
+
 from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args, call_docval_func
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec,\
@@ -568,6 +569,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                         string_type = text_type
                     elif 'ascii' in spec.dtype:
                         string_type = binary_type
+                    elif 'isodatetime' in spec.dtype:
+                        string_type = datetime.isoformat
                     if string_type is not None:
                         if spec.dims is not None:
                             ret = list(map(string_type, value))
@@ -1008,7 +1011,8 @@ class TypeMap(object):
         'float': float,
         'float64': float,
         'int': int,
-        'int32': int
+        'int32': int,
+        'isodatetime': datetime
     }
 
     def __get_type(self, spec):

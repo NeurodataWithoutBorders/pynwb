@@ -36,7 +36,8 @@ class DtypeHelper():
             'uint32': ["uint32", "uint"],
             'uint64': ["uint64"],
             'object': ['object'],
-            'region': ['region']
+            'region': ['region'],
+            'isodatetime': ["isodatetime", "datetime", "datetime64"]
         }
 
     # List of recommended primary dtype strings. These are the keys of primary_dtype_string_synonyms

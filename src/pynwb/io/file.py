@@ -1,3 +1,5 @@
+import arrow
+
 from ..form.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile
@@ -45,6 +47,18 @@ class NWBFileMap(ObjectMapper):
 
         self.map_spec('subject', general_spec.get_group('subject'))
         self.map_spec('devices', general_spec.get_group('devices').get_neurodata_type('Device'))
+
+    @ObjectMapper.constructor_arg('session_start_time')
+    def dateconversion(self, builder, manager):
+        datestr = builder.get('session_start_time').data
+        date = arrow.get(datestr).datetime
+        return date
+
+    @ObjectMapper.constructor_arg('file_create_date')
+    def dateconversion_list(self, builder, manager):
+        datestr = builder.get('file_create_date').data
+        dates = list(map(lambda d: arrow.get(d).datetime, datestr))
+        return dates
 
     @ObjectMapper.constructor_arg('file_name')
     def name(self, builder, manager):
