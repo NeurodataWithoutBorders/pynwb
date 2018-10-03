@@ -31,7 +31,7 @@ class TestDynamicTable(unittest.TestCase):
             TableColumn(name=s['name'], description=s['description'], data=d)
             for s, d in zip(self.spec, self.data)
         ]
-        return  DynamicTable("with_columns_and_data", 'PyNWB unit test', 'a test table', columns=columns)
+        return DynamicTable("with_columns_and_data", 'PyNWB unit test', 'a test table', columns=columns)
 
     def with_spec(self):
         table = DynamicTable("with_spec", 'PyNWB unit test', 'a test table', columns=self.spec)
@@ -192,7 +192,7 @@ class TestDynamicTable(unittest.TestCase):
     def test_extract_subtable(self):
         table = self.with_columns_and_data()
         obtained_df = table.extract_subtable([1, 3, 4]).to_dataframe().loc[:, ('foo', 'bar', 'baz')]
-        
+
         expected_df = pd.DataFrame({
             'foo': [2, 4, 5],
             'bar': [20.0, 40.0, 50.0],
@@ -203,13 +203,13 @@ class TestDynamicTable(unittest.TestCase):
     def test_missing_columns(self):
         table = self.with_spec()
 
-        with self.assertRaises(ValueError) as obt:
+        with self.assertRaises(ValueError):
             table.add_row({'bar': 60.0, 'foo': [6]}, None)
 
     def test_extra_columns(self):
         table = self.with_spec()
 
-        with self.assertRaises(ValueError) as obt:
+        with self.assertRaises(ValueError):
             table.add_row({'bar': 60.0, 'foo': 6, 'baz': 'oryx', 'qax': -1}, None)
 
 
@@ -270,8 +270,8 @@ class TestNWBTable(unittest.TestCase):
             'bar': ['a', 'b', 'c']
         })
 
-        with self.assertRaises(ValueError) as obt:
-            table = self.cls.from_dataframe(df=df, name='test_table')
+        with self.assertRaises(ValueError):
+            self.cls.from_dataframe(df=df, name='test_table')
 
     def test_from_dataframe_extra_columns(self):
         df = pd.DataFrame({
@@ -280,6 +280,5 @@ class TestNWBTable(unittest.TestCase):
             'baz': [-1, -2, -3]
         })
 
-        with self.assertRaises(ValueError) as obt:
-            table = self.cls.from_dataframe(df=df, name='test_table')
-
+        with self.assertRaises(ValueError):
+            self.cls.from_dataframe(df=df, name='test_table')

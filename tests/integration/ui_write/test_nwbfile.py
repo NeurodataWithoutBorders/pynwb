@@ -250,15 +250,15 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
         nwbfile.epochs = Epochs.from_dataframe(
             pd.DataFrame({
-            'foo': [1, 2, 3, 4],
-            'bar': ['fish', 'fowl', 'dog', 'cat'],
-            'start_time': [0.2, 0.25, 0.30, 0.35],
-            'stop_time': [0.25, 0.30, 0.40, 0.45],
-            'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
-            'description': ['q', 'w', 'e', 'r'],
-            'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
+                'foo': [1, 2, 3, 4],
+                'bar': ['fish', 'fowl', 'dog', 'cat'],
+                'start_time': [0.2, 0.25, 0.30, 0.35],
+                'stop_time': [0.25, 0.30, 0.40, 0.45],
+                'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
+                'description': ['q', 'w', 'e', 'r'],
+                'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
             }),
-            'epochs', 
+            'epochs',
             'epochs integration test'
         )
 

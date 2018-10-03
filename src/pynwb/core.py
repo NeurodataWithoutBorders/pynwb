@@ -4,7 +4,6 @@ import pandas as pd
 
 from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
 from .form import Container, Data, DataRegion, get_region_slicer
-from .form.data_utils import RegionSlicer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass, iteritems
@@ -274,7 +273,7 @@ class NWBData(NWBBaseType, Data):
             raise ValueError(msg)
 
     def extract_slice(self, slc, **constructor_kwargs):
-        if not 'name' in constructor_kwargs:
+        if 'name' not in constructor_kwargs:
             constructor_kwargs['name'] = self.name
         constructor_kwargs['data'] = self[slc]
         return self.__class__(**constructor_kwargs)
@@ -471,7 +470,12 @@ class NWBTable(NWBData):
     @docval(
         {'name': 'df', 'type': pd.DataFrame, 'doc': 'input data'},
         {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
-        {'name': 'extra_ok', 'type': bool, 'doc': 'accept (and ignore) unexpected columns on the input dataframe', 'default': False},
+        {
+            'name': 'extra_ok',
+            'type': bool,
+            'doc': 'accept (and ignore) unexpected columns on the input dataframe',
+            'default': False
+        },
     )
     def from_dataframe(cls, **kwargs):
         df, name, extra_ok = getargs('df', 'name', 'extra_ok', kwargs)
@@ -491,7 +495,7 @@ class NWBTable(NWBData):
 
         use_index = False
         if len(missing_columns) == 1 and list(missing_columns)[0] == df.index.name:
-            use_index = True   
+            use_index = True
 
         elif missing_columns:
             raise ValueError(
@@ -804,7 +808,7 @@ class TableColumn(NWBData):
         self.data.append(val)
 
     def extract_slice(self, slc, **constructor_kwargs):
-        if not 'description' in constructor_kwargs:
+        if 'description' not in constructor_kwargs:
             constructor_kwargs['description'] = self.description
         return super(TableColumn, self).extract_slice(slc, **constructor_kwargs)
 
@@ -985,8 +989,18 @@ class DynamicTable(NWBDataInterface):
     @docval(
         {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
         {'name': 'name', 'type': str, 'doc': 'the name of the extracted subtable', 'default': None},
-        {'name': 'source', 'type': str, 'doc': 'a description of where the extracted subtable came from', 'default': None},
-        {'name': 'description', 'type': str, 'doc': 'a description of what is in the extracted subtable', 'default': None}
+        {
+            'name': 'source',
+            'type': str,
+            'doc': 'a description of where the extracted subtable came from',
+            'default': None
+        },
+        {
+            'name': 'description',
+            'type': str,
+            'doc': 'a description of what is in the extracted subtable',
+            'default': None
+        }
         )
     def extract_subtable(self, **kwargs):
         region, name, source, description = getargs('region', 'name', 'source', 'description', kwargs)
@@ -1022,9 +1036,24 @@ class DynamicTable(NWBDataInterface):
         {'name': 'df', 'type': pd.DataFrame, 'doc': 'source DataFrame'},
         {'name': 'name', 'type': str, 'doc': 'the name of this table'},
         {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
-        {'name': 'index_column', 'type': str, 'help': 'if provided, this column will become the table\'s index', 'default': None},
-        {'name': 'table_description', 'type': str, 'help': 'a description of what is in the resulting table', 'default': ''},
-        {'name': 'column_descriptions', 'type': dict, 'help': 'a dictionary mapping column names to descriptions of their contents', 'default': None},
+        {
+            'name': 'index_column',
+            'type': str,
+            'help': 'if provided, this column will become the table\'s index',
+            'default': None
+        },
+        {
+            'name': 'table_description',
+            'type': str,
+            'help': 'a description of what is in the resulting table',
+            'default': ''
+        },
+        {
+            'name': 'column_descriptions',
+            'type': dict,
+            'help': 'a dictionary mapping column names to descriptions of their contents',
+            'default': None
+        },
         allow_extra=True
     )
     def from_dataframe(cls, **kwargs):

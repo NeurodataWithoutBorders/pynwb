@@ -346,7 +346,6 @@ class NWBFile(MultiContainerInterface):
     def session_start_time(self):
         return self.__session_start_time
 
-
     def __check_epochs(self):
         if self.epochs is None:
             self.epochs = Epochs(self.source)

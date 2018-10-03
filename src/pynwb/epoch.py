@@ -169,7 +169,6 @@ class Epochs(NWBContainer):
         idx_start = start_idx
         return (int(idx_start), int(count))
 
-
     def to_dataframe(self):
         epochs_df = self.epochs.to_dataframe()
         metadata_df = self.metadata.to_dataframe()
@@ -183,31 +182,33 @@ class Epochs(NWBContainer):
         {'name': 'source', 'type': str, 'doc': 'the source of the data'},
         {'name': 'name', 'type': str, 'doc': 'name of this epochs container'},
         {
-            'name': 'descriptions', 
+            'name': 'descriptions',
             'type': list(six.string_types) + [list, tuple, 'array_data'],
-            'description': 'either a string naming a dataframe column whose values are epoch descriptions or an array of epoch descriptions',
+            'description': (
+                'either a string naming a dataframe column whose values are descriptions or an array of descriptions'
+            ),
             'default': 'description'
         },
         {
-            'name': 'start_times', 
-            'type': list(six.string_types) + [list, tuple, 'array_data'], # TODO: support TimeSeries here?
-            'description': 'either a string naming a dataframe column whose values are start times or an array of start times',
+            'name': 'start_times',
+            'type': list(six.string_types) + [list, tuple, 'array_data'],  # TODO: support TimeSeries here?
+            'description': 'a string naming a dataframe column whose values are start times or an array of start times',
             'default': 'start_time'
         },
         {
-            'name': 'stop_times', 
-            'type': list(six.string_types) + [list, tuple, 'array_data'], # TODO: support TimeSeries here?
-            'description': 'either a string naming a dataframe column whose values are stop times or an array of stop times',
+            'name': 'stop_times',
+            'type': list(six.string_types) + [list, tuple, 'array_data'],  # TODO: support TimeSeries here?
+            'description': 'a string naming a dataframe column whose values are stop times or an array of stop times',
             'default': 'stop_time'
         },
         {
-            'name': 'timeseries', 
+            'name': 'timeseries',
             'type': list(six.string_types) + [list, tuple, 'array_data'],
-            'description': 'either a string naming a dataframe column whose values are timeseries or an array of timeseries',
+            'description': 'a string naming a dataframe column whose values are timeseries or an array of timeseries',
             'default': 'timeseries'
         },
         {
-            'name': 'tags', 
+            'name': 'tags',
             'type': list(six.string_types) + [list, tuple, 'array_data'],
             'description': 'either a string naming a dataframe column whose values are tags or an array of tags',
             'default': 'tags'
@@ -215,7 +216,7 @@ class Epochs(NWBContainer):
     )
     def from_dataframe(cls, **kwargs):
         df, source, name, descriptions, start_times, stop_times, timeseries, tags = getargs(
-            'df', 'source', 'name', 'descriptions', 'start_times', 'stop_times', 'timeseries', 'tags', 
+            'df', 'source', 'name', 'descriptions', 'start_times', 'stop_times', 'timeseries', 'tags',
             kwargs
         )
 
@@ -232,7 +233,7 @@ class Epochs(NWBContainer):
             tags = df.pop(tags).values.tolist()
 
         obj = cls(source=source, name=name)
-        
+
         for colname in df.columns.values:
             obj.add_metadata_column(name=colname)
 
