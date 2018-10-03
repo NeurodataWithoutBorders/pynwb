@@ -106,11 +106,11 @@ groups:
     value: Stores groups of pixels that define regions of interest from one or more
       imaging planes
   groups:
-######### BEGIN: ROITable Refactor
+  ######### BEGIN: ROITable Refactor
   - neurodata_type_def: PlaneSegmentation
     neurodata_type_inc: DynamicTable
-    attributes:
     doc: results for image segmentation of a specific imaging plane
+    attributes:
     - name: help
       dtype: text
       doc: Value is 'Results from segmentation of an imaging plane'
@@ -127,15 +127,16 @@ groups:
       - null
       - null
       - null
-      quantity: ?
+      quantity: '?'
     - neurodata_type_inc: VectorIndex
       name: pixel_mask_index
       doc: index into pixel_mask
-      quantity: ?
+      quantity: '?'
     - neurodata_type_inc: VectorData
       name: pixel_mask
       doc: Pixel masks for each ROI. Pixel masks are concatenated and parsing of this
         dataset is maintained by the PlaneSegmentation
+      dtype:
       - name: x
         dtype: uint
         doc: the pixel x-coordinate
@@ -145,7 +146,7 @@ groups:
       - name: weight
         dtype: float
         doc: the weight of the pixel
-      quantity: ?
+      quantity: '?'
     groups:
     - name: reference_images
       doc: Stores image stacks segmentation mask apply to.
@@ -158,7 +159,7 @@ groups:
       doc: link to ImagingPlane group from which this TimeSeries data was generated
       target_type: ImagingPlane
     quantity: '*'
-######### END: ROITable Refactor
+  ######### END: ROITable Refactor
   default_name: ImageSegmentation
 - neurodata_type_def: ImagingPlane
   neurodata_type_inc: NWBContainer
