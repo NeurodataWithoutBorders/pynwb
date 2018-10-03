@@ -366,6 +366,17 @@ class NWBFile(MultiContainerInterface):
             self.electrodes = ElectrodeTable()
 
     @docval(*get_docval(DynamicTable.add_column))
+    def add_epoch_metadata_column(self, **kwargs):
+        """
+        Add a column to the electrode table.
+        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        """
+        if self.epochs is None:
+            self.epochs = Epochs(self.source)
+        self.epoch_tags.update(kwargs.pop('tags', list()))
+        call_docval_func(self.epochs.add_metadata_column, kwargs)
+
+    @docval(*get_docval(DynamicTable.add_column))
     def add_electrode_column(self, **kwargs):
         """
         Add a column to the electrode table.
