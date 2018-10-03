@@ -1,12 +1,16 @@
 from datetime import datetime
 import os
 
+import pandas as pd
+import numpy as np
+
 from pynwb.form.build import GroupBuilder, DatasetBuilder
 from pynwb.form.backends.hdf5 import HDF5IO
 
 from pynwb import NWBFile, TimeSeries
 from pynwb.file import Subject
 from pynwb.ecephys import Clustering
+from pynwb.epoch import Epochs
 
 from . import base
 
@@ -198,3 +202,68 @@ class TestSubjectIO(base.TestDataInterfaceIO):
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
         return nwbfile.subject
+
+
+class TestEpochsRoundtrip(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return Epochs('epochs', 'epochs integration test')
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_epoch_metadata_column(
+            name='temperature',
+            description='average temperture (c) during epoch'
+        )
+
+        nwbfile.create_epoch(
+            start_time=5.3,
+            stop_time=6.1,
+            timeseries=[],
+            tags='ambient',
+            description='ambient data epoch',
+            metadata={'temperature': 26.4}
+        )
+
+        # reset the thing
+        self.container = nwbfile.epochs
+
+    def getContainer(self, nwbfile):
+        return nwbfile.epochs
+
+
+class TestEpochsRoundtripDf(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return Epochs('epochs', 'epochs integration test')
+
+    def addContainer(self, nwbfile):
+
+        tsa, tsb = [
+            TimeSeries(name='a', source='test', timestamps=np.linspace(0, 1, 11)),
+            TimeSeries(name='b', source='test', timestamps=np.linspace(0.1, 5, 13)),
+        ]
+
+        nwbfile.add_acquisition(tsa)
+        nwbfile.add_acquisition(tsb)
+
+        nwbfile.epochs = Epochs.from_dataframe(
+            pd.DataFrame({
+                'foo': [1, 2, 3, 4],
+                'bar': ['fish', 'fowl', 'dog', 'cat'],
+                'start_time': [0.2, 0.25, 0.30, 0.35],
+                'stop_time': [0.25, 0.30, 0.40, 0.45],
+                'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
+                'description': ['q', 'w', 'e', 'r'],
+                'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
+            }),
+            'epochs',
+            'epochs integration test'
+        )
+
+        # reset the thing
+        self.container = nwbfile.epochs
+
+    def getContainer(self, nwbfile):
+        return nwbfile.epochs
