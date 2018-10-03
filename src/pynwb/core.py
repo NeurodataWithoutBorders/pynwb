@@ -272,12 +272,6 @@ class NWBData(NWBBaseType, Data):
             msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
             raise ValueError(msg)
 
-    def extract_slice(self, slc, **constructor_kwargs):
-        if 'name' not in constructor_kwargs:
-            constructor_kwargs['name'] = self.name
-        constructor_kwargs['data'] = self[slc]
-        return self.__class__(**constructor_kwargs)
-
 
 @register_class('VectorData', CORE_NAMESPACE)
 class VectorData(NWBData):
@@ -807,11 +801,6 @@ class TableColumn(NWBData):
         val = getargs('val', kwargs)
         self.data.append(val)
 
-    def extract_slice(self, slc, **constructor_kwargs):
-        if 'description' not in constructor_kwargs:
-            constructor_kwargs['description'] = self.description
-        return super(TableColumn, self).extract_slice(slc, **constructor_kwargs)
-
 
 @register_class('DynamicTable', CORE_NAMESPACE)
 class DynamicTable(NWBDataInterface):
@@ -985,41 +974,6 @@ class DynamicTable(NWBDataInterface):
                     ret.append(tuple(col[i] for col in self.__df_cols))
 
         return ret
-
-    @docval(
-        {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
-        {'name': 'name', 'type': str, 'doc': 'the name of the extracted subtable', 'default': None},
-        {
-            'name': 'source',
-            'type': str,
-            'doc': 'a description of where the extracted subtable came from',
-            'default': None
-        },
-        {
-            'name': 'description',
-            'type': str,
-            'doc': 'a description of what is in the extracted subtable',
-            'default': None
-        }
-        )
-    def extract_subtable(self, **kwargs):
-        region, name, source, description = getargs('region', 'name', 'source', 'description', kwargs)
-
-        if name is None:
-            name = self.name
-        if source is None:
-            source = self.source
-        if description is None:
-            description = self.description
-
-        columns = [column.extract_slice(region) for column in self.columns]
-        return self.__class__(
-            name=name,
-            source=source,
-            description=description,
-            ids=self.id.extract_slice(region),
-            columns=columns
-        )
 
     def to_dataframe(self):
         '''Produce a pandas DataFrame containing this table's data.
