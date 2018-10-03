@@ -253,6 +253,7 @@ class HDF5IO(FORMIO):
             "links": dict()
         }
 
+        # why convert all byte attributes to utf8 here shouldn't this be done on write or never at all?
         for key, val in kwargs['attributes'].items():
             if isinstance(val, bytes):
                 kwargs['attributes'][key] = val.decode('UTF-8')
@@ -337,6 +338,7 @@ class HDF5IO(FORMIO):
             if h5obj.dtype.kind == 'O':    # read list of strings or list of references
                 elem1 = h5obj[0]
                 if isinstance(elem1, (text_type, binary_type)):
+                    # true for datetime
                     d = h5obj[()]
                 elif isinstance(elem1, RegionReference):
                     d = H5RegionDataset(h5obj, self)
@@ -447,7 +449,7 @@ class HDF5IO(FORMIO):
         "utf-8": H5_TEXT,
         "ascii": H5_BINARY,
         "str": H5_BINARY,
-        "isodatetime": H5_TEXT, # no direct mapping for np.datetime64 in hdf5 possible
+        "isodatetime": H5_TEXT,    # no direct mapping for np.datetime64 in hdf5 possible
         "uint32": np.uint32,
         "uint16": np.uint16,
         "uint8": np.uint8,
@@ -823,6 +825,9 @@ class HDF5IO(FORMIO):
 
     @classmethod
     def __list_fill__(cls, parent, name, data, options=None):
+
+        # this function writes the hdf5 dataset
+
         # define the io settings and data type if necessary
         io_settings = {}
         dtype = None

@@ -570,6 +570,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     elif 'ascii' in spec.dtype:
                         string_type = binary_type
                     elif 'isodatetime' in spec.dtype:
+                        # raise ValueError if not datetime or no timezone?
                         string_type = datetime.isoformat
                     if string_type is not None:
                         if spec.dims is not None:
@@ -602,6 +603,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             returns="the Builder representing the given Container", rtype=Builder)
     def build(self, **kwargs):
         ''' Convert an Container to a Builder representation '''
+
+        # this is the place where datasets get written to a file.
+
         container, manager, parent, source = getargs('container', 'manager', 'parent', 'source', kwargs)
         builder = getargs('builder', kwargs)
         name = manager.get_builder_name(container)
@@ -861,6 +865,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager for this build'})
     def construct(self, **kwargs):
         ''' Construct an Container from the given Builder '''
+
+        # the builder has read the hdf5 info and the here they are mapped to the container!
+
         builder, manager = getargs('builder', 'manager', kwargs)
         cls = manager.get_cls(builder)
         # gather all subspecs
@@ -1136,6 +1143,7 @@ class TypeMap(object):
             msg = "builder '%s' does not have a data_type" % builder.name
             raise ValueError(msg)
 
+        # another decode at builder stage without six package (4e9bad3b states legacy file support)
         if isinstance(ret, bytes):
             ret = ret.decode('UTF-8')
 

@@ -1,4 +1,4 @@
-import arrow
+import arrow  # `datetime.fromisoformat` is missing in python2.7
 
 from ..form.build import ObjectMapper
 from .. import register_map
@@ -10,6 +10,11 @@ class NWBFileMap(ObjectMapper):
 
     def __init__(self, spec):
         super(NWBFileMap, self).__init__(spec)
+
+        # datetime_spec = self.spec.get_dataset("file_create_date")
+        # datetime_spec['dtype'] = 'datetime' # not changing anything here
+        # self.map_spec('file_create_date', datetime_spec)
+
         raw_ts_spec = self.spec.get_group('acquisition').get_neurodata_type('NWBDataInterface')
         self.map_spec('acquisition', raw_ts_spec)
 
@@ -47,6 +52,9 @@ class NWBFileMap(ObjectMapper):
 
         self.map_spec('subject', general_spec.get_group('subject'))
         self.map_spec('devices', general_spec.get_group('devices').get_neurodata_type('Device'))
+
+    # Note: we could also define a new class extending the ObjectMapper and
+    # override the data method with @ObjectMapper.object_attr('data')
 
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
