@@ -131,17 +131,20 @@ groups:
     - neurodata_type_inc: VectorIndex
       name: pixel_mask_index
       doc: index into pixel_mask
-      shape:
-      - null
-      - null
       quantity: ?
     - neurodata_type_inc: VectorData
       name: pixel_mask
       doc: Pixel masks for each ROI. Pixel masks are concatenated and parsing of this
         dataset is maintained by the PlaneSegmentation
-      shape:
-      - null
-      - null
+      - name: x
+        dtype: uint
+        doc: the pixel x-coordinate
+      - name: y
+        dtype: uint
+        doc: the pixel y-coordinate
+      - name: weight
+        dtype: float
+        doc: the weight of the pixel
       quantity: ?
     groups:
     - name: reference_images

@@ -293,15 +293,19 @@ class Index(NWBData):
 @register_class('VectorData', CORE_NAMESPACE)
 class VectorData(NWBData):
 
+    __nwbfields__ = ("description",)
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'a description for this column', 'default': None},
             {'name': 'container_source', 'type': object,
             'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorData, self).__init__, kwargs)
+        self.description = getargs('description', kwargs)
 
 
 @register_class('VectorIndex', CORE_NAMESPACE)
@@ -812,13 +816,20 @@ class DynamicTable(NWBDataInterface):
             self.colnames = tuple(col.name for col in columns)
             self.columns = list(columns)
         else:
+            # self.columns should return all TableColumns, VectorIndex, and VectorData
+            # self.__df_cols should be set up for indexing
+            # determine order by colnames
             self.colnames = tuple(pystr(c) for c in colnames)
-            col_dict = {col.name: col for col in columns}
-            self.columns = [col_dict[name] for name in self.colnames]
+            self.columns = [col for col in columns]
 
         # to make generating DataFrames and Series easier
-        self.__df_cols = [self.id] + list(self.columns)
-        self.__df_colnames = [self.id.name] + [c.name for c in self.columns]
+        col_dict = dict()
+        for col in self.columns:
+            if isinstance(col, TableColumn):
+                col_dict[col.name] = col
+            elif isinstance(col, VectorIndex):
+                col_dict[col.target.name] = col  # use target name for reference and VectorIndex for retrieval
+        self.__df_cols = [self.id] + [col_dict[name] for name in self.colnames]
 
         # for bookkeeping
         self.__colids = {name: i for i, name in enumerate(self.colnames)}
@@ -844,7 +855,11 @@ class DynamicTable(NWBDataInterface):
         for colname, colnum in self.__colids.items():
             if colname not in data:
                 raise ValueError("column '%s' missing" % colname)
-            self.columns[colnum].add_row(data[colname])
+            c = self.columns[colnum]
+            if isinstance(c, VectorIndex):
+                c.add_vector(data[colname])
+            else:
+                c.add_row(data[colname])
 
     # # keeping this around in case anyone wants to resurrect it
     # # this was used to return a numpy structured array. this does not
@@ -875,8 +890,46 @@ class DynamicTable(NWBDataInterface):
         self.__colids[name] = len(self.columns)
         self.fields['colnames'] = tuple(list(self.colnames)+[name])
         self.fields['columns'] = tuple(list(self.columns)+[col])
-        self.__df_colnames.append(name)
         self.__df_cols.append(col)
+
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this vector column', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'a description for this vector column', 'default': None},
+            {'name': 'index', 'type': 'array_data', 'doc': 'the index for this vector column', 'default': None},
+            {'name': 'data', 'type': 'array_data', 'doc': 'the data contained in this vector column', 'default': None})
+    def add_vector_column(self, **kwargs):
+        """
+        Add a column comprised of vector data (i.e. where the cells of
+        the column are vectors rather than scalars) to this table
+
+        If *name* and *description* are given, the index will be named *<name>_index*
+        """
+        index, data, name, description = getargs('index', 'data', 'name', 'description', kwargs)
+        if index is None and data is None:
+            if name is not None and description is not None:
+                data = VectorData(name, list(), description=description)
+                index = VectorIndex(name + "_index", list(), data)
+            else:
+                raise ValueError("Must supply 'index' and 'data' or 'name' and 'description'")
+        elif index is not None and data is not None:
+            if not isinstance(index, VectorIndex) and not isinstance(data, VectorData):
+                pass
+            else:
+                if name is not None and description is not None:
+                    data = VectorData(name, data, description=description)
+                    index = VectorIndex(name + "_index", index, data)
+                else:
+                    msg = ("Must supply 'name' and 'description' if 'index' and 'data' ",
+                           "are not VectorIndex and VectorData, respectively")
+                    raise ValueError(msg)
+        else:
+            raise ValueError("Must supply both 'index' and 'data' or neither")
+        if len(index) != len(self.id):
+            raise ValueError("'index' must have the same number of rows as 'id'")
+        self.__colids[name] = len(self.columns)
+        self.fields['colnames'] = tuple(list(self.colnames)+[name])
+        self.fields['columns'] = tuple(list(self.columns)+[index])
+        self.__df_cols.append(index)
 
     def __getitem__(self, key):
         ret = None

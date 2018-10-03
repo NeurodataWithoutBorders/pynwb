@@ -37,6 +37,9 @@ datasets:
     dtype: text
     doc: a help string
     value: Values for a list of elements
+  - name: description
+    dtype: text
+    doc: A short description of what these vectors are
 - neurodata_type_def: VectorIndex
   neurodata_type_inc: Index
   doc: Pointers that index data values
