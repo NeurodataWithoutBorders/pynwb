@@ -170,6 +170,9 @@ class Epochs(NWBContainer):
         return (int(idx_start), int(count))
 
     def to_dataframe(self):
+        '''Produce a pandas DataFrame from this Epochs' data
+        '''
+
         epochs_df = self.epochs.to_dataframe()
         metadata_df = self.metadata.to_dataframe()
 
@@ -215,6 +218,9 @@ class Epochs(NWBContainer):
         }
     )
     def from_dataframe(cls, **kwargs):
+        '''Instantiate an Epochs from a pandas DataFrame.
+        '''
+
         df, source, name, descriptions, start_times, stop_times, timeseries, tags = getargs(
             'df', 'source', 'name', 'descriptions', 'start_times', 'stop_times', 'timeseries', 'tags',
             kwargs

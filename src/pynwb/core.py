@@ -457,6 +457,9 @@ class NWBTable(NWBData):
             return self.data[idx]
 
     def to_dataframe(self):
+        '''Produce a pandas DataFrame containing this table's data.
+        '''
+
         data = {colname: self[colname] for ii, colname in enumerate(self.columns)}
         return pd.DataFrame(data)
 
@@ -472,6 +475,10 @@ class NWBTable(NWBData):
         },
     )
     def from_dataframe(cls, **kwargs):
+        '''Construct an instance of NWBTable (or a subclass) from a pandas DataFrame. The columns of the dataframe
+        should match the columns defined on the NWBTable subclass.
+        '''
+
         df, name, extra_ok = getargs('df', 'name', 'extra_ok', kwargs)
 
         cls_cols = list([col['name'] for col in getattr(cls, '__columns__')])
@@ -1011,6 +1018,13 @@ class DynamicTable(NWBDataInterface):
         allow_extra=True
     )
     def from_dataframe(cls, **kwargs):
+        '''Construct an instance of DynamicTable (or a subclass) from a pandas DataFrame. The columns of the resulting
+        table are defined by the columns of the dataframe and the index by the dataframe's index (make sure it has a
+        name!) or by a column whose name is supplied to the index_column parameter. We recommend that you supply
+        column_descriptions - a dictionary mapping column names to string descriptions - to help others understand
+        the contents of your table.
+        '''
+
         df = kwargs.pop('df')
         name = kwargs.pop('name')
         source = kwargs.pop('source')
