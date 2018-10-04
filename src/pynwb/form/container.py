@@ -18,6 +18,9 @@ class Container(with_metaclass(abc.ABCMeta, object)):
         self.__children = list()
         self.__modified = True
 
+    def __repr__(self):
+        return "<%s '%s' at 0x%d>" % (self.__class__.__name__, self.name, id(self))
+
     @property
     def modified(self):
         return self.__modified
