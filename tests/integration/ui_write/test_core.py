@@ -4,6 +4,8 @@ from pynwb.core import DynamicTable
 
 from . import base
 
+import pandas as pd
+
 
 class TestDynamicTableIO(base.TestMapRoundTrip):
 
@@ -54,6 +56,41 @@ class TestTrials(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         return nwbfile.trials
+
+
+class TestUnits(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return DynamicTable('units', 'unit table integration test', 'a placeholder table')
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_unit_column('foo', 'an int column')
+        nwbfile.add_unit({'foo': 27})
+        nwbfile.add_unit({'foo': 37})
+        # reset the thing
+        self.container = nwbfile.units
+
+    def getContainer(self, nwbfile):
+        return nwbfile.units
+
+
+class TestUnitsDf(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return DynamicTable('units', 'unit table integration test', 'a placeholder table')
+
+    def addContainer(self, nwbfile):
+        nwbfile.units = DynamicTable.from_dataframe(pd.DataFrame({
+            'a': [1, 2, 3],
+            'b': ['4', '5', '6']
+        }), 'units', 'a_source')
+        # reset the thing
+        self.container = nwbfile.units
+
+    def getContainer(self, nwbfile):
+        return nwbfile.units
 
 
 class TestElectrodes(base.TestMapRoundTrip):

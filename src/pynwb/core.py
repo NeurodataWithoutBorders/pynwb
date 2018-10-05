@@ -1,5 +1,6 @@
 from h5py import RegionReference
 import numpy as np
+import pandas as pd
 
 from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
 from .form import Container, Data, DataRegion, get_region_slicer
@@ -455,6 +456,69 @@ class NWBTable(NWBData):
         else:
             return self.data[idx]
 
+    def to_dataframe(self):
+        '''Produce a pandas DataFrame containing this table's data.
+        '''
+
+        data = {colname: self[colname] for ii, colname in enumerate(self.columns)}
+        return pd.DataFrame(data)
+
+    @classmethod
+    @docval(
+        {'name': 'df', 'type': pd.DataFrame, 'doc': 'input data'},
+        {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
+        {
+            'name': 'extra_ok',
+            'type': bool,
+            'doc': 'accept (and ignore) unexpected columns on the input dataframe',
+            'default': False
+        },
+    )
+    def from_dataframe(cls, **kwargs):
+        '''Construct an instance of NWBTable (or a subclass) from a pandas DataFrame. The columns of the dataframe
+        should match the columns defined on the NWBTable subclass.
+        '''
+
+        df, name, extra_ok = getargs('df', 'name', 'extra_ok', kwargs)
+
+        cls_cols = list([col['name'] for col in getattr(cls, '__columns__')])
+        df_cols = list(df.columns)
+
+        missing_columns = set(cls_cols) - set(df_cols)
+        extra_columns = set(df_cols) - set(cls_cols)
+
+        if extra_columns:
+            raise ValueError(
+                'unrecognized column(s) {} for table class {} (columns {})'.format(
+                    extra_columns, cls.__name__, cls_cols
+                )
+            )
+
+        use_index = False
+        if len(missing_columns) == 1 and list(missing_columns)[0] == df.index.name:
+            use_index = True
+
+        elif missing_columns:
+            raise ValueError(
+                'missing column(s) {} for table class {} (columns {}, provided {})'.format(
+                    missing_columns, cls.__name__, cls_cols, df_cols
+                )
+            )
+
+        data = []
+        for index, row in df.iterrows():
+            if use_index:
+                data.append([
+                    row[colname] if colname != df.index.name else index
+                    for colname in cls_cols
+                ])
+            else:
+                data.append([row[colname] for colname in cls_cols])
+
+        if name is None:
+            return cls(data=data)
+        return cls(name=name, data=data)
+
 
 # diamond inheritance
 class NWBTableRegion(NWBData, DataRegion):
@@ -786,8 +850,10 @@ class DynamicTable(NWBDataInterface):
                 raise ValueError("'columns' must be a list of TableColumns or dicts")
             if not all(len(c) == len(columns[0]) for c in columns):
                 raise ValueError("columns must be the same length")
+
             ni = len(self.id)
             nc = len(columns[0])
+
             if ni != nc:
                 if ni != 0 and nc != 0:
                     raise ValueError("must provide same number of ids as length of columns if specifying ids")
@@ -832,9 +898,19 @@ class DynamicTable(NWBDataInterface):
             row_id = len(self)
         self.id.data.append(row_id)
 
+        extra_columns = set(list(data.keys())) - set(list(self.__colids.keys()))
+        missing_columns = set(list(self.__colids.keys())) - set(list(data.keys()))
+
+        if extra_columns or missing_columns:
+            raise ValueError(
+                '\n'.join([
+                    'row data keys don\'t match available columns',
+                    'you supplied {} extra keys: {}'.format(len(extra_columns), extra_columns),
+                    'and were missing {} keys: {}'.format(len(missing_columns), missing_columns)
+                ])
+            )
+
         for colname, colnum in self.__colids.items():
-            if colname not in data:
-                raise ValueError("column '%s' missing" % colname)
             self.columns[colnum].add_row(data[colname])
 
     # # keeping this around in case anyone wants to resurrect it
@@ -905,6 +981,78 @@ class DynamicTable(NWBDataInterface):
                     ret.append(tuple(col[i] for col in self.__df_cols))
 
         return ret
+
+    def to_dataframe(self):
+        '''Produce a pandas DataFrame containing this table's data.
+        '''
+
+        data = {}
+        for column in self.columns:
+            data[column.name] = column.data
+
+        return pd.DataFrame(data, index=pd.Index(name=self.id.name, data=self.id.data))
+
+    @classmethod
+    @docval(
+        {'name': 'df', 'type': pd.DataFrame, 'doc': 'source DataFrame'},
+        {'name': 'name', 'type': str, 'doc': 'the name of this table'},
+        {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
+        {
+            'name': 'index_column',
+            'type': str,
+            'help': 'if provided, this column will become the table\'s index',
+            'default': None
+        },
+        {
+            'name': 'table_description',
+            'type': str,
+            'help': 'a description of what is in the resulting table',
+            'default': ''
+        },
+        {
+            'name': 'column_descriptions',
+            'type': dict,
+            'help': 'a dictionary mapping column names to descriptions of their contents',
+            'default': None
+        },
+        allow_extra=True
+    )
+    def from_dataframe(cls, **kwargs):
+        '''Construct an instance of DynamicTable (or a subclass) from a pandas DataFrame. The columns of the resulting
+        table are defined by the columns of the dataframe and the index by the dataframe's index (make sure it has a
+        name!) or by a column whose name is supplied to the index_column parameter. We recommend that you supply
+        column_descriptions - a dictionary mapping column names to string descriptions - to help others understand
+        the contents of your table.
+        '''
+
+        df = kwargs.pop('df')
+        name = kwargs.pop('name')
+        source = kwargs.pop('source')
+        index_column = kwargs.pop('index_column')
+        table_description = kwargs.pop('table_description')
+        column_descriptions = kwargs.pop('column_descriptions')
+
+        if column_descriptions is None:
+            column_descriptions = {}
+
+        if index_column is not None:
+            ids = ElementIdentifiers(name=index_column, data=df[index_column].values.tolist())
+        else:
+            index_name = df.index.name if df.index.name is not None else 'id'
+            ids = ElementIdentifiers(name=index_name, data=df.index.values.tolist())
+
+        columns = []
+        for column_name in df.columns:
+            if index_column is not None and column_name == index_column:
+                continue
+
+            columns.append({
+                'name': column_name,
+                'data': df[column_name].values.tolist(),
+                'description': column_descriptions.get(column_name, '')
+            })
+
+        return cls(name=name, source=source, ids=ids, columns=columns, description=table_description, **kwargs)
 
 
 @register_class('DynamicTableRegion', CORE_NAMESPACE)
