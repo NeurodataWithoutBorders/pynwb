@@ -82,13 +82,16 @@ Spec
 * Interface for writing extensions or custom specification
 * There are several main specification classes:
 
-   * :py:class:`pynwb.spec.NWBAttributeSpec` - specification for metadata
-   * :py:class:`pynwb.spec.NWBGroupSpec` - specification for a collection of objects (i.e. subgroups, datasets, link)
-   * :py:class:`pynwb.spec.NWBDatasetSpec` - specification for dataset (like and n-dimensional array). Specifies data type, dimensions, etc.
-   * :py:class:`pynwb.spec.NWBLinkSpec` - specification for link (like a POSIX soft link)
-   * :py:class:`pynwb.form.spec.spec.RefSpec` - specification for references (References are like links, but stored as data)
-
-   * :py:class:`pynwb.spec.NWBDtypeSpec` - specification for compound data
+   * :py:class:`~pynwb.spec.NWBAttributeSpec` - specification for metadata
+   * :py:class:`~pynwb.spec.NWBGroupSpec` - specification for a collection of
+     objects (i.e. subgroups, datasets, link)
+   * :py:class:`~pynwb.spec.NWBDatasetSpec` - specification for dataset (like
+     and n-dimensional array). Specifies data type, dimensions, etc.
+   * :py:class:`~pynwb.spec.NWBLinkSpec` - specification for link (like a POSIX
+     soft link)
+   * :py:class:`~pynwb.form.spec.spec.RefSpec` - specification for references
+     (References are like links, but stored as data)
+   * :py:class:`~pynwb.spec.NWBDtypeSpec` - specification for compound data
      types. Used to build complex data type specification, e.g., to define
      tables (used only in :py:class:`~pynwb.form.spec.spec.DatasetSpec` and
      correspondingly :py:class:`~pynwb.spec.NWBDatasetSpec`)
@@ -96,21 +99,25 @@ Spec
 * **Main Modules:**
 
    * :py:class:`pynwb.form.spec` -- General specification classes.
-   * :py:class:`pynwb.spec` -- NWB specification classes. (Most of these are specializations of the classes from :py:class:`pynwb.form.spec`)
+   * :py:class:`pynwb.spec` -- NWB specification classes. (Most of these are
+     specializations of the classes from :py:class:`pynwb.form.spec`)
 
 .. note::
 
-   A ``data_type`` (or more specifically a ``neurodata_type`` in the context of NWB) defines a
-   reusable type in a format specification that can be referenced and used elsewhere in other specifications.
-   The specification of the NWB format is basically a collection of ``neurodata_types``, e.g.:
-   ``NWBFile`` defines  a GroupSpec for the top-level group of an NWB format file  which includes
-   ``TimeSeries``, ``ElectrodeGroup``, ``ImagingPlane`` and many other ``neurodata_types`` .
-   When creating a specification, two main keys are used to include and define new ``neurodata_types``
+   A ``data_type`` (or more specifically a ``neurodata_type`` in the context of
+   NWB) defines a reusable type in a format specification that can be
+   referenced and used elsewhere in other specifications.  The specification of
+   the NWB format is basically a collection of ``neurodata_types``, e.g.:
+   ``NWBFile`` defines  a GroupSpec for the top-level group of an NWB format
+   file  which includes ``TimeSeries``, ``ElectrodeGroup``, ``ImagingPlane``
+   and many other ``neurodata_types`` .  When creating a specification, two
+   main keys are used to include and define new ``neurodata_types``
 
    * ``neurodata_type_inc`` is used to include an existing type and
    * ``neurodata_type_def`` is used to define a new type
 
-   I.e, if both keys are defined then we create a new type that uses/inherits an existing type as a base.
+   I.e, if both keys are defined then we create a new type that uses/inherits
+   an existing type as a base.
 
 ObjectMapper
 ^^^^^^^^^^^^
