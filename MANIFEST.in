@@ -1,3 +1,6 @@
-include license.txt
-include versioneer.py
-include src/pynwb/_version.py
+include license.txt versioneer.py src/pynwb/_version.py
+include requirements.txt requirements-dev.txt requirements-doc.txt
+include test.py tox.ini
+
+
+graft tests

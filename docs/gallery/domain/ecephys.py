@@ -73,7 +73,7 @@ for idx in [1, 2, 3, 4]:
                           x=1.0, y=2.0, z=3.0,
                           imp=float(-idx),
                           location='CA1', filtering='none',
-                          description='channel %s' % idx, group=electrode_group)
+                          group=electrode_group)
 
 
 #######################

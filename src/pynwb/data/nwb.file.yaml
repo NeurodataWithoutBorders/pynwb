@@ -166,6 +166,12 @@ groups:
       dtype: text
       doc: Institution(s) where experiment was performed
       quantity: '?'
+    - name: keywords
+      dtype: text
+      doc: Terms to search over
+      quantity: '?'
+      shape:
+      - null
     - name: lab
       dtype: text
       doc: Lab where experiment was performed
@@ -301,15 +307,89 @@ groups:
       quantity: '?'
     - name: extracellular_ephys
       doc: Metadata related to extracellular electrophysiology.
-      datasets:
-      - neurodata_type_inc: ElectrodeTable
-        name: electrodes
-        doc: A table of all electrodes (i.e. channels) used for recording.
-        quantity: '?'
       groups:
       - neurodata_type_inc: ElectrodeGroup
         doc: One of possibly many groups, one for each electrode group.
         quantity: '*'
+      - neurodata_type_inc: DynamicTable
+        name: electrodes
+        doc: A table of all electrodes (i.e. channels) used for recording.
+        quantity: '?'
+        datasets:
+        - neurodata_type_inc: TableColumn
+          name: x
+          dtype: float
+          doc: the x coordinate of the channel location
+          attributes:
+          - name: description
+            dtype: text
+            doc: value is 'the x coordinate of the channel location'
+            value: the x coordinate of the channel location
+        - neurodata_type_inc: TableColumn
+          name: y
+          dtype: float
+          doc: the y coordinate of the channel location
+          attributes:
+          - name: description
+            dtype: text
+            doc: value is 'the y coordinate of the channel location'
+            value: the y coordinate of the channel location
+        - neurodata_type_inc: TableColumn
+          name: z
+          dtype: float
+          doc: the z coordinate of the channel location
+          attributes:
+          - name: description
+            dtype: text
+            doc: value is 'the z coordinate of the channel location'
+            value: the z coordinate of the channel location
+        - neurodata_type_inc: TableColumn
+          name: imp
+          dtype: float
+          doc: the impedance of the channel
+          attributes:
+          - name: description
+            dtype: text
+            doc: value is 'the impedance of the channel'
+            value: the impedance of the channel
+        - neurodata_type_inc: TableColumn
+          name: location
+          dtype: ascii
+          doc: the location of channel within the subject e.g. brain region
+          attributes:
+          - name: description
+            dtype: text
+            doc: value is 'the location of channel within the subject e.g. brain region'
+            value: the location of channel within the subject e.g. brain region
+        - neurodata_type_inc: TableColumn
+          name: filtering
+          dtype: float
+          doc: description of hardware filtering
+          attributes:
+          - name: description
+            dtype: text
+            doc: value is 'description of hardware filtering'
+            value: description of hardware filtering
+        - neurodata_type_inc: TableColumn
+          name: group
+          dtype:
+            target_type: ElectrodeGroup
+            reftype: object
+          doc: a reference to the ElectrodeGroup this electrode is a part of
+          attributes:
+          - name: description
+            dtype: text
+            doc: value is 'a reference to the ElectrodeGroup this electrode is a part of'
+            value: a reference to the ElectrodeGroup this electrode is a part of
+        - neurodata_type_inc: TableColumn
+          name: group_name
+          dtype: ascii
+          doc: name of the ElectrodeGroup this electrode is a part of
+          attributes:
+          - name: description
+            dtype: text
+            doc: value is 'the name of the ElectrodeGroup this electrode is a part of'
+            value: the name of the ElectrodeGroup this electrode is a part of
       quantity: '?'
     - name: intracellular_ephys
       doc: Metadata related to intracellular electrophysiology
