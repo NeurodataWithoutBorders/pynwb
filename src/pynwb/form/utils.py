@@ -247,15 +247,20 @@ def fmt_docval_args(func, kwargs):
     func_docval = getattr(func, docval_attr_name, None)
     ret_args = list()
     ret_kwargs = dict()
+    kwargs_copy = _copy.copy(kwargs)
     if func_docval:
         for arg in func_docval[__docval_args_loc]:
-            val = kwargs.get(arg['name'])
+            val = kwargs_copy.pop(arg['name'], None)
             if 'default' in arg:
                 if val is not None:
                     ret_kwargs[arg['name']] = val
             else:
                 ret_args.append(val)
-    return (ret_args, ret_kwargs)
+        if func_docval['allow_extra']:
+            ret_kwargs.update(kwargs_copy)
+    else:
+        raise ValueError('no docval found on %s' % str(func))
+    return ret_args, ret_kwargs
 
 
 def call_docval_func(func, kwargs):
@@ -336,6 +341,7 @@ def docval(*validator, **options):
 
     def dec(func):
         _docval = _copy.copy(options)
+        _docval['allow_extra'] = allow_extra
         func.__name__ = _docval.get('func_name', func.__name__)
         func.__doc__ = _docval.get('doc', func.__doc__)
         pos = list()
@@ -557,3 +563,15 @@ def get_data_shape(data, strict_no_data_load=False):
             return None
     else:
         return None
+
+
+def pystr(s):
+    """
+    Cross-version support for convertin a string of characters to Python str object
+    """
+    if six.PY2 and isinstance(s, six.text_type):
+        return s.encode('ascii', 'ignore')
+    elif six.PY3 and isinstance(s, six.binary_type):
+        return s.decode('utf-8')
+    else:
+        return s

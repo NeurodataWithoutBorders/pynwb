@@ -33,23 +33,28 @@ class YAMLSpecWriter(SpecWriter):
         self.__outdir = getargs('outdir', kwargs)
 
     def __dump_spec(self, specs, stream):
-        yaml.main.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
+        specs_plain_dict = json.loads(json.dumps(specs))
+        yaml.main.safe_dump(specs_plain_dict, stream, default_flow_style=False)
 
     def write_spec(self, spec_file_dict, path):
-        with open(os.path.join(self.__outdir, path), 'w') as stream:
-            self.__dump_spec(spec_file_dict, stream)
-        self.reorder_yaml(os.path.join(self.__outdir, path))
+        out_fullpath = os.path.join(self.__outdir, path)
+        spec_plain_dict = json.loads(json.dumps(spec_file_dict))
+        sorted_data = self.sort_keys(spec_plain_dict)
+        with open(out_fullpath, 'w') as fd_write:
+            yaml.dump(sorted_data, fd_write, Dumper=yaml.dumper.RoundTripDumper)
 
     def write_namespace(self, namespace, path):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
             self.__dump_spec({'namespaces': [namespace]}, stream)
 
     def reorder_yaml(self, path):
-        with open(path, 'rb') as f_in:
-            data = yaml.load(f_in, Loader=yaml.loader.RoundTripLoader)
-        sorted_data = self.sort_keys(data)
-        with open(path, 'w') as f_out:
-            f_out.write(yaml.dump(sorted_data, Dumper=yaml.dumper.RoundTripDumper))
+        """
+        Open a YAML file, load it as python data, sort the data, and write it back out to the
+        same path.
+        """
+        with open(path, 'rb') as fd_read:
+            data = yaml.load(fd_read, Loader=yaml.loader.RoundTripLoader)
+        self.write_spec(data, path)
 
     def sort_keys(self, obj):
 
