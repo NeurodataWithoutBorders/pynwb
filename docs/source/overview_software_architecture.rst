@@ -176,7 +176,7 @@ TypeMap
 BuildManager
 ^^^^^^^^^^^^
 
-* Responsible for memorizing `Builder`_ and `Container`_
+* Responsible for `memoizing <https://en.wikipedia.org/wiki/Memoization>`_ `Builder`_ and `Container`_
 * Constructed from a `TypeMap`_
 * PyNWB only has one of these: :py:class:`pynwb.form.build.map.BuildManager`
 
