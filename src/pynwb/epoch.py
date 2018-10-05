@@ -176,7 +176,15 @@ class Epochs(NWBContainer):
         epochs_df = self.epochs.to_dataframe()
         metadata_df = self.metadata.to_dataframe()
 
-        epochs_df['timeseries'] = epochs_df.apply(lambda row: [tsi_row[2] for tsi_row in row['timeseries']], axis=1)
+        timeseries_arr = []
+        for ep_idx in range(len(self.epochs)):
+            ep = self.epochs[ep_idx]
+            current = []
+            for timeseries in ep[3]:
+                current.append(timeseries[2])
+            timeseries_arr.append(current)
+        epochs_df['timeseries'] = timeseries_arr
+
         return epochs_df.merge(metadata_df, left_index=True, right_index=True)
 
     @classmethod
