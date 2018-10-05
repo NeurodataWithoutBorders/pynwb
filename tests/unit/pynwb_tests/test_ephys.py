@@ -1,5 +1,10 @@
 import unittest
-from pynwb.ecephys import *  # noqa: F403
+from pynwb.device import Device
+from pynwb.ecephys import ElectrodeTable, ElectrodeGroup, ElectrodeTableRegion, \
+    ElectricalSeries, SpikeEventSeries, EventDetection, EventWaveform, Clustering, \
+    ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction
+
+import numpy as np
 
 
 def make_electrode_table():
