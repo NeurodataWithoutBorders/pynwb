@@ -1,4 +1,5 @@
 import unittest2 as unittest
+import numpy as np
 
 from pynwb.base import ProcessingModule, TimeSeries
 from pynwb.form.data_utils import DataChunkIterator
@@ -59,22 +60,48 @@ class TestTimeSeries(unittest.TestCase):
         self.assertEqual(ts1.num_samples, 0)
 
     def test_dataio_list_data(self):
-        data = H5DataIO(list(range(100)))
-        ts1 = TimeSeries('test_ts1', 'unit test test_DataIO', data,
+        num_samples = 100
+        data = list(range(num_samples))
+        ts1 = TimeSeries('test_ts1', 'unit test test_DataIO', H5DataIO(data),
                          'grams', starting_time=0.0, rate=0.1)
-        self.assertEqual(ts1.num_samples, 100)
+        self.assertEqual(ts1.num_samples, num_samples)
+        assert data == list(ts1.data)
 
     def test_dataio_dci_data(self):
-        data = H5DataIO(DataChunkIterator(data=(i for i in range(100))))
+
+        def generator_factory():
+            return (i for i in range(100))
+
+        data = H5DataIO(DataChunkIterator(data=generator_factory()))
         ts1 = TimeSeries('test_ts1', 'unit test test_DataIO', data,
                          'grams', starting_time=0.0, rate=0.1)
         self.assertEqual(ts1.num_samples, -1)
+        for xi, yi in zip(data, generator_factory()):
+            assert np.allclose(xi, yi)
 
     def test_dci_data(self):
-        data = DataChunkIterator(data=(i for i in range(100)))
+
+        def generator_factory():
+            return (i for i in range(100))
+
+        data = DataChunkIterator(data=generator_factory())
         ts1 = TimeSeries('test_ts1', 'unit test test_DataIO', data,
                          'grams', starting_time=0.0, rate=0.1)
         self.assertEqual(ts1.num_samples, -1)
+        for xi, yi in zip(data, generator_factory()):
+            assert np.allclose(xi, yi)
+
+    def test_dci_data_arr(self):
+
+        def generator_factory():
+            return (np.array([i, i+1]) for i in range(100))
+
+        data = DataChunkIterator(data=generator_factory())
+        ts1 = TimeSeries('test_ts1', 'unit test test_DataIO', data,
+                         'grams', starting_time=0.0, rate=0.1)
+        self.assertEqual(ts1.num_samples, -1)
+        for xi, yi in zip(data, generator_factory()):
+            assert np.allclose(xi, yi)
 
     def test_no_time(self):
         with self.assertRaisesRegex(TypeError, "either 'timestamps' or 'rate' must be specified"):

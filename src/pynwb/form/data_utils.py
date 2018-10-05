@@ -284,6 +284,11 @@ class DataChunk(object):
         else:
             return 0
 
+    # Delegate attribute lookup to data object (See issue #636
+    # https://github.com/NeurodataWithoutBorders/pynwb/issues/636#issuecomment-426742988)
+    def __getattr__(self, attr):
+        return getattr(self.data, attr)
+
 
 class ShapeValidator(object):
     """
@@ -512,6 +517,19 @@ class DataIO(with_metaclass(ABCMeta, object)):
     @property
     def data(self):
         return self.__data
+
+    # Delegate attribute lookup to data object (See issue #636
+    # https://github.com/NeurodataWithoutBorders/pynwb/issues/636#issuecomment-426742988)
+    def __getattr__(self, attr):
+        return getattr(self.data, attr)
+
+    # Delegate iteration interface to data object:
+    def __next__(self):
+        return self.data.__next__()
+
+    # Delegate iteration interface to data object:
+    def __iter__(self):
+        return self.data.__iter__()
 
 
 class RegionSlicer(with_metaclass(ABCMeta, DataRegion)):
