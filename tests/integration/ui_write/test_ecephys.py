@@ -376,7 +376,7 @@ class EventWaveformConstructor(base.TestDataInterfaceIO):
         TestElectricalSeriesIO.make_electrode_table(self)
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
         sES = SpikeEventSeries(
-            'test_sES', 'a hypothetical source', list(range(10)), list(range(10)), region)
+            'test_sES', 'a hypothetical source', np.arange(10)[:, np.newaxis], list(range(10)), region)
         ew = EventWaveform('test_ew', sES)
         return ew
 
