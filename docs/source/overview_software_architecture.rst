@@ -87,7 +87,11 @@ Spec
    * :py:class:`pynwb.spec.NWBDatasetSpec` - specification for dataset (like and n-dimensional array). Specifies data type, dimensions, etc.
    * :py:class:`pynwb.spec.NWBLinkSpec` - specification for link (like a POSIX soft link)
    * :py:class:`pynwb.form.spec.spec.RefSpec` - specification for references (References are like links, but stored as data)
-   * :py:class:`pynwb.spec.NWBDtypeSpec` - specification for compound data types. Used to build complex data type specification, e.g., to define tables (used only in :py:class:`DatasetSpec <pynwb.spec.NWBDatasetSpec>`)
+
+   * :py:class:`pynwb.spec.NWBDtypeSpec` - specification for compound data
+     types. Used to build complex data type specification, e.g., to define
+     tables (used only in :py:class:`~pynwb.form.spec.spec.DatasetSpec` and
+     correspondingly :py:class:`~pynwb.spec.NWBDatasetSpec`)
 
 * **Main Modules:**
 
