@@ -14,11 +14,6 @@ __macros = {
 }
 
 
-class ArgValidationError(Exception):
-    def __init__(self, message):
-        super(ArgValidationError, self).__init__(message)
-
-
 def docval_macro(macro):
     def _dec(cls):
         if macro not in __macros:
@@ -132,7 +127,8 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True,
         * 'errors' : List of string with error messages
     """
     ret = dict()
-    errors = list()
+    type_errors = list()
+    value_errors = list()
     argsi = 0
     extras = dict(kwargs)
     try:
@@ -154,19 +150,19 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True,
                 argval_set = True
 
             if not argval_set:
-                errors.append("missing argument '%s'" % argname)
+                type_errors.append("missing argument '%s'" % argname)
             else:
                 if argname in ret:
-                    errors.append("'got multiple arguments for '%s" % argname)
+                    type_errors.append("'got multiple arguments for '%s" % argname)
                 else:
                     if enforce_type:
                         if not __type_okay(argval, arg['type']):
                             fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
-                            errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+                            type_errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
                     if enforce_shape and 'shape' in arg:
                         if not __shape_okay_multi(argval, arg['shape']):
                             fmt_val = (argname, get_data_shape(argval), arg['shape'])
-                            errors.append("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
+                            value_errors.append("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
                     ret[argname] = argval
             argsi += 1
             arg = next(it)
@@ -184,23 +180,23 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True,
                 argval = ret[argname]
                 if not __type_okay(argval, arg['type'], arg['default'] is None):
                     fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
-                    errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+                    type_errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
             if enforce_shape and 'shape' in arg:
                 if not __shape_okay_multi(argval, arg['shape']):
                     fmt_val = (argname, get_data_shape(argval), arg['shape'])
-                    errors.append("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
+                    value_errors.append("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
             arg = next(it)
     except StopIteration:
         pass
     if not allow_extra:
         for key in extras.keys():
-            errors.append("unrecognized argument: '%s'" % key)
+            type_errors.append("unrecognized argument: '%s'" % key)
     else:
         # TODO: Extras get stripped out if function arguments are composed with fmt_docval_args.
         # allow_extra needs to be tracked on a function so that fmt_docval_args doesn't strip them out
         for key in extras.keys():
             ret[key] = extras[key]
-    return {'args': ret, 'errors': errors}
+    return {'args': ret, 'type_errors': type_errors, 'value_errors': value_errors}
 
 
 def __sort_args(validator):
@@ -362,10 +358,14 @@ def docval(*validator, **options):
                             enforce_type=enforce_type,
                             enforce_shape=enforce_shape,
                             allow_extra=allow_extra)
-                parse_err = parsed.get('errors')
-                if parse_err:
-                    msg = ', '.join(parse_err)
-                    raise_from(ArgValidationError(msg), None)
+
+                for error_type, ExceptionType in (('type_errors', TypeError),
+                                                  ('value_errors', ValueError)):
+                    parse_err = parsed.get(error_type)
+                    if parse_err:
+                        msg = ', '.join(parse_err)
+                        raise_from(ExceptionType(msg), None)
+
                 return func(self, **parsed['args'])
         else:
             def func_call(*args, **kwargs):
@@ -374,10 +374,13 @@ def docval(*validator, **options):
                                       kwargs,
                                       enforce_type=enforce_type,
                                       allow_extra=allow_extra)
-                parse_err = parsed.get('errors')
-                if parse_err:
-                    msg = ', '.join(parse_err)
-                    raise_from(ArgValidationError(msg), None)
+                for error_type, ExceptionType in (('type_errors', TypeError),
+                                                  ('value_errors', ValueError)):
+                    parse_err = parsed.get(error_type)
+                    if parse_err:
+                        msg = ', '.join(parse_err)
+                        raise_from(ExceptionType(msg), None)
+
                 return func(**parsed['args'])
         _rtype = rtype
         if isinstance(rtype, type):

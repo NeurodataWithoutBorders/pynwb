@@ -427,7 +427,7 @@ class FeatureExtraction(NWBDataInterface):
             if not sv.result:
                 error_msg += sv.message + "\n"
         if raise_error:
-            raise TypeError(error_msg)
+            raise ValueError(error_msg)
 
         # Initialize the object
         super(FeatureExtraction, self).__init__(source, **kwargs)

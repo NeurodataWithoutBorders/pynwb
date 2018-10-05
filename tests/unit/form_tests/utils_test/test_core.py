@@ -1,7 +1,7 @@
 import unittest2 as unittest
 from six import text_type
 
-from pynwb.form.utils import docval, fmt_docval_args, ArgValidationError
+from pynwb.form.utils import docval, fmt_docval_args
 
 
 class MyTestClass(object):
@@ -67,13 +67,13 @@ class TestDocValidator(unittest.TestCase):
         @docval({'name': 'arg1', 'type': 'array_data', 'doc': 'this is a bad shape', 'shape': (None, 2)})
         def method1(self, **kwargs):
             pass
-        with self.assertRaises(ArgValidationError):
+        with self.assertRaises(ValueError):
             method1(self, arg1=[[1]])
 
         @docval({'name': 'arg1', 'type': 'array_data', 'doc': 'this is a bad shape', 'shape': (None, 2)})
         def method2(self, **kwargs):
             pass
-        with self.assertRaises(ArgValidationError):
+        with self.assertRaises(ValueError):
             method2(self, arg1=[1])
 
         # this should work
@@ -90,7 +90,7 @@ class TestDocValidator(unittest.TestCase):
 
         method1(self, arg1=[[1, 1]])
         method1(self, arg1=[1, 2])
-        with self.assertRaises(ArgValidationError):
+        with self.assertRaises(ValueError):
             method1(self, arg1=[[1, 1, 1]])
 
     def test_fmt_docval_args(self):
@@ -124,7 +124,7 @@ class TestDocValidator(unittest.TestCase):
         """Test that docval catches missing argument
            with a single positional argument
         """
-        with self.assertRaises(ArgValidationError) as cm:
+        with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj.basic_add()  # noqa: F841
         msg = "missing argument 'arg1'"
         self.assertEqual(cm.exception.args[0], msg)
@@ -196,7 +196,7 @@ class TestDocValidator(unittest.TestCase):
            arguments and a keyword argument when specifying
            keyword argument value with positional syntax
         """
-        with self.assertRaises(ArgValidationError) as cm:
+        with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj.basic_add2_kw('a string', 'bad string')  # noqa: F841
 
         self.assertEqual(cm.exception.args[0], u"incorrect type for 'arg2' (got 'str', expected 'int')")
@@ -226,7 +226,7 @@ class TestDocValidator(unittest.TestCase):
            argument is specified in both the parent and sublcass implementations,
            when using default values for keyword arguments
         """
-        with self.assertRaises(ArgValidationError) as cm:
+        with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string')  # noqa: F841
         msg = "missing argument 'arg5'"
         self.assertEqual(cm.exception.args[0], msg)
@@ -248,7 +248,7 @@ class TestDocValidator(unittest.TestCase):
            arguments and two keyword arguments, where two positional and one keyword
            argument is specified in both the parent and sublcass implementations
         """
-        with self.assertRaises(ArgValidationError) as cm:
+        with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', arg6=True)  # noqa: F841
         msg = "missing argument 'arg5'"
         self.assertEqual(cm.exception.args[0], msg)
@@ -258,7 +258,7 @@ class TestDocValidator(unittest.TestCase):
            arguments and two keyword arguments, where two positional and one keyword
            argument is specified in both the parent and sublcass implementations
         """
-        with self.assertRaises(ArgValidationError) as cm:
+        with self.assertRaises(TypeError) as cm:
             kwargs = self.test_obj_sub.basic_add2_kw('a string', 100, 'another string', None, arg6=True)  # noqa: F841
         msg = "incorrect type for 'arg5' (got 'NoneType', expected 'float')"
         self.assertEqual(cm.exception.args[0], msg)
@@ -315,7 +315,7 @@ class TestDocValidator(unittest.TestCase):
            arguments exist, and both arguments are specified
            as positional arguments
         """
-        with self.assertRaises(ArgValidationError):
+        with self.assertRaises(TypeError):
             self.test_obj.basic_add2_kw('a string', 100, bar=1000)
 
 
