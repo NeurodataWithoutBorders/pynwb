@@ -239,22 +239,26 @@ class PlaneSegmentation(DynamicTable):
             {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
             'default': None})
     def __init__(self, **kwargs):
-        description, imaging_plane, reference_images = popargs(
-            'description', 'imaging_plane', 'reference_images', kwargs)
+        imaging_plane, reference_images = popargs('imaging_plane', 'reference_images', kwargs)
         if kwargs.get('name') is None:
             kwargs['name'] = imaging_plane.name
         columns, colnames = getargs('columns', 'colnames', kwargs)
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
         super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
-        self.description = description
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
+        self.__has_image_masks = False
+        self.__has_pixel_masks = False
 
     def __check_image_mask(self):
-        self.add_column(name='image_mask', description='Image masks for each ROI')
+        if not self.__has_image_masks:
+            self.add_column(name='image_mask', description='Image masks for each ROI')
+            self.__has_image_masks = True
 
     def __check_pixel_mask(self):
-        self.add_vector_column(name='pixel_mask', description='Pixel masks for each ROI')
+        if not self.__has_pixel_masks:
+            self.add_vector_column(name='pixel_mask', description='Pixel masks for each ROI')
+            self.__has_pixel_masks = True
 
     @docval({'name': 'pixel_mask', 'type': 'array_data', 'doc': 'the pixel mask', 'default': None},
             {'name': 'image_mask', 'type': 'array_data', 'doc': 'the image mask for this ROI', 'default': None},
@@ -269,9 +273,15 @@ class PlaneSegmentation(DynamicTable):
             raise ValueError("Must provide either 'image_mask' or 'pixel_mask' or both")
         if image_mask is not None:
             self.__check_image_mask()
-        if pixel_max is not None:
+        if pixel_mask is not None:
             self.__check_pixel_mask()
         return super(PlaneSegmentation, self).add_row(**kwargs)
+
+    @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what the region is'},
+            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table', 'default': slice(None)},
+            {'name': 'name', 'type': str, 'doc': 'the name of the ROITableRegion', 'default': 'rois'})
+    def create_roi_table_region(self, **kwargs):
+        return call_docval_func(self.create_region, kwargs)
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
