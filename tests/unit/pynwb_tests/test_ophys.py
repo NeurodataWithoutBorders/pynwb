@@ -24,8 +24,8 @@ def CreatePlaneSegmentation():
                       'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
     pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
-    pS.add_roi("1234", pix_mask[0:3], img_mask[0])
-    pS.add_roi("5678", pix_mask[3:5], img_mask[1])
+    pS.add_roi(pixel_mask=pix_mask[0:3], image_mask=img_mask[0])
+    pS.add_roi(pixel_mask=pix_mask[3:5], image_mask=img_mask[1])
     return pS
 
 
@@ -164,16 +164,19 @@ class PlaneSegmentationConstructor(unittest.TestCase):
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
 
         pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
-        pS.add_roi("1234", pix_mask[0:3], img_mask[0])
-        pS.add_roi("5678", pix_mask[3:5], img_mask[1])
+        pS.add_roi(pixel_mask=pix_mask[0:3], image_mask=img_mask[0])
+        pS.add_roi(pixel_mask=pix_mask[3:5], image_mask=img_mask[1])
 
         self.assertEqual(pS.description, 'description')
         self.assertEqual(pS.source, 'test source')
 
         self.assertEqual(pS.imaging_plane, ip)
         self.assertEqual(pS.reference_images, iSS)
-        self.assertEqual(pS.pixel_masks.data, pix_mask)
-        self.assertEqual(pS.image_masks.data, img_mask)
+
+        self.assertEqual(pS['pixel_mask'].target.data, pix_mask)
+        self.assertEqual(pS['pixel_mask'][0], pix_mask[0:3])
+        self.assertEqual(pS['pixel_mask'][1], pix_mask[3:5])
+        self.assertEqual(pS['image_mask'].data, img_mask)
 
 
 if __name__ == '__main__':
