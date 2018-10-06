@@ -829,10 +829,16 @@ class DynamicTable(NWBDataInterface):
                 col_dict[col.name] = col
             elif isinstance(col, VectorIndex):
                 col_dict[col.target.name] = col  # use target name for reference and VectorIndex for retrieval
+        if 'image_mask' in self.colnames and 'image_mask' not in col_dict:
+            import pdb
+            #pdb.set_trace()
         self.__df_cols = [self.id] + [col_dict[name] for name in self.colnames]
 
         # for bookkeeping
         self.__colids = {name: i for i, name in enumerate(self.colnames)}
+
+        self.df_cols = self.__df_cols
+        self.colids = self.__colids
 
     def __len__(self):
         return len(self.id)
@@ -882,9 +888,12 @@ class DynamicTable(NWBDataInterface):
         Add a column to this table. If data is provided, it must
         contain the same number of rows as the current state of the table.
         """
+        name, data = getargs('name', 'data', kwargs)
+        if name in self.__colids:
+            msg = "column '%s' already exists in DynamicTable '%s'" % (name, self.name)
+            raise ValueError(msg)
         col = TableColumn(**kwargs)
         self.add_child(col)
-        name, data = col.name, col.data
         if len(data) != len(self.id):
             raise ValueError("column must have the same number of rows as 'id'")
         self.__colids[name] = len(self.columns)
@@ -924,12 +933,35 @@ class DynamicTable(NWBDataInterface):
                     raise ValueError(msg)
         else:
             raise ValueError("Must supply both 'index' and 'data' or neither")
+        self.add_child(index)
+        self.add_child(data)
         if len(index) != len(self.id):
             raise ValueError("'index' must have the same number of rows as 'id'")
         self.__colids[name] = len(self.columns)
         self.fields['colnames'] = tuple(list(self.colnames)+[name])
-        self.fields['columns'] = tuple(list(self.columns)+[index])
+        self.fields['columns'] = tuple(list(self.columns)+[index, data])
         self.__df_cols.append(index)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the DynamicTableRegion object'},
+            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
+            {'name': 'description', 'type': str, 'doc': 'a brief description of what the region is'})
+    def create_region(self, **kwargs):
+        region = getargs('region', kwargs)
+        if isinstance(region, slice):
+            if (region.start is not None and region.start < 0) or region.stop > len(self):
+                msg = 'region slice %s is out of range for this DynamicTable of length ' % (str(region), len(self))
+                raise IndexError(msg)
+            region = list(region)
+            region = list(range(*region.indices(len(self))))
+        else:
+            for idx in region:
+                if idx < 0 or idx >= len(self):
+                    raise IndexError('The index ' + str(idx) +
+                                     ' is out of range for this DynamicTable of length '
+                                     + str(len(self.electrodes)))
+        desc = getargs('description', kwargs)
+        name = getargs('name', kwargs)
+        return DynamicTableRegion(name, region, desc, self)
 
     def __getitem__(self, key):
         ret = None
@@ -944,7 +976,8 @@ class DynamicTable(NWBDataInterface):
             arg = key
             if isinstance(arg, str):
                 # index by one string, return column
-                ret = tuple(self.__df_cols[self.__colids[arg]+1].data)
+                #ret = tuple(self.__df_cols[self.__colids[arg]+1].data)
+                ret = self.__df_cols[self.__colids[arg]+1]
                 # # keeping this around in case anyone wants to resurrect it
                 # dt = self.get_dtype(ret)[1]
                 # ret = np.array(ret.data, dtype=dt)
