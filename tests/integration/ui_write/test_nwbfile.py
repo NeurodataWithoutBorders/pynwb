@@ -1,6 +1,6 @@
-from datetime import datetime
 import os
-from dateutil.tz import tzlocal
+from datetime import datetime
+from dateutil.tz import tzlocal, tzutc
 
 import pandas as pd
 import numpy as np
@@ -19,8 +19,8 @@ from . import base
 class TestNWBFileIO(base.TestMapNWBContainer):
 
     def setUp(self):
-        self.start_time = datetime(1970, 1, 1, 12, 0, 0, tzinfo = tzlocal())
-        self.create_date = datetime(2017, 4, 15, 12, 0, 0, tzinfo = tzlocal())
+        self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
+        self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         super(TestNWBFileIO, self).setUp()
         self.path = "test_pynwb_io_hdf5.h5"
 

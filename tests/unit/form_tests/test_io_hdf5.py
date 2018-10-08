@@ -1,5 +1,6 @@
 import unittest
 from datetime import datetime
+from dateutil.tz import tzlocal
 import os
 from h5py import File, Dataset, Reference
 from six import text_type
@@ -154,8 +155,8 @@ class TestHDF5Writer(GroupBuilderTestCase):
         type_map = get_type_map()
         self.manager = BuildManager(type_map)
         self.path = "test_pynwb_io_hdf5.h5"
-        self.start_time = datetime(1970, 1, 1, 12, 0, 0)
-        self.create_date = datetime(2017, 4, 15, 12, 0, 0)
+        self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzlocal())
+        self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
         self.ts_builder = GroupBuilder('test_timeseries',
                                        attributes={'ancestry': 'TimeSeries',

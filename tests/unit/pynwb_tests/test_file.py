@@ -67,7 +67,7 @@ class NWBFileTest(unittest.TestCase):
         Test the case where the user creates an electrode table region with
         indexes that are out of range of the amount of electrodes added.
         """
-        nwbfile = NWBFile('a', 'b', 'c', datetime.now())
+        nwbfile = NWBFile('a', 'b', 'c', datetime.now(tzlocal()))
         device = nwbfile.create_device('a', 'b')
         elecgrp = nwbfile.create_electrode_group('a', 'b', 'c', device=device, location='a')
         for i in range(4):
@@ -219,7 +219,7 @@ class SubjectTest(unittest.TestCase):
                                subject_id='RAT123',
                                weight='2 lbs',
                                source='Subject unittest')
-        self.start = datetime(2017, 5, 1, 12, 0, 0)
+        self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile('a fake source', 'a test session description for a test NWBFile',
                                'FILE123',
@@ -256,7 +256,7 @@ class TestCacheSpec(unittest.TestCase):
 
     def test_simple(self):
         nwbfile = NWBFile('source', ' ', ' ',
-                          datetime.now(), datetime.now(),
+                          datetime.now(tzlocal()), datetime.now(tzlocal()),
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:

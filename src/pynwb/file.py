@@ -254,7 +254,7 @@ class NWBFile(MultiContainerInterface):
 
         self.__file_create_date = getargs('file_create_date', kwargs)
         if self.__file_create_date is None:
-            self.__file_create_date = datetime.now()
+            self.__file_create_date = datetime.now(tzlocal())
         if isinstance(self.__file_create_date, datetime):
             self.__file_create_date = [self.__file_create_date]
         self.__file_create_date = list(map(self.add_missing_timezone, self.__file_create_date))
