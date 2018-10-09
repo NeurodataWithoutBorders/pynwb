@@ -1,14 +1,11 @@
 import unittest2 as unittest
 
-import numpy as np
-
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder, ReferenceBuilder
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
 
 from pynwb.ecephys import ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, Clustering, ClusterWaveforms,\
                           SpikeEventSeries, EventWaveform, EventDetection, FeatureExtraction
 from pynwb.device import Device
 from pynwb.core import DynamicTableRegion
-from pynwb.misc import UnitTimes
 from pynwb.file import ElectrodeTable as get_electrode_table
 
 from . import base

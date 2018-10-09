@@ -1,10 +1,10 @@
-import unittest2 as unittest
 from . import base
 
 import numpy as np
 from pynwb.form.build import GroupBuilder, DatasetBuilder, ReferenceBuilder
 
 from pynwb.misc import UnitTimes
+
 
 class TestUnitTimesIO(base.TestDataInterfaceIO):
 
@@ -44,5 +44,3 @@ class TestUnitTimesIO(base.TestDataInterfaceIO):
         self.assertTrue(np.array_equal(received, [0, 1, 2]))
         received = ut.get_unit_spike_times(1)
         self.assertTrue(np.array_equal(received, [3, 4, 5]))
-
-

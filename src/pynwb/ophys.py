@@ -1,15 +1,12 @@
 from collections import Iterable
-from h5py import RegionReference
 import numpy as np
 
 from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
-from .form.data_utils import RegionSlicer
-from .form import get_region_slicer
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, NWBData, VectorData, DynamicTable, DynamicTableRegion
+from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion
 from .device import Device
 
 

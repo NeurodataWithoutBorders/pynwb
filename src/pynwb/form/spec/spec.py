@@ -860,7 +860,6 @@ class GroupSpec(BaseStorageSpec):
                 self.__overridden_links.add(link.name)
                 continue
             self.set_link(link)
-        newdt = self.__new_data_types #pdb
         # resolve inherited data_types
         for dt_spec in data_types:
             if isinstance(dt_spec, LinkSpec):
