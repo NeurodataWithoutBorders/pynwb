@@ -774,7 +774,7 @@ class DynamicTable(NWBDataInterface):
         'description'
     )
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},    # noqa: C901
             {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
             {'name': 'ids', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
@@ -797,7 +797,7 @@ class DynamicTable(NWBDataInterface):
                 columns = tuple(TableColumn(**d) for d in columns)
             elif not isinstance(columns[0], TableColumn):
                 raise ValueError("'columns' must be a list of TableColumns or dicts")
-            if not all(len(c) == len(columns[0]) for c in columns):
+            if not all(len(c) == len(columns[0]) for c in columns if isinstance(c, TableColumn)):
                 raise ValueError("columns must be the same length")
             ni = len(self.id)
             nc = len(columns[0])
@@ -813,14 +813,44 @@ class DynamicTable(NWBDataInterface):
         # column names for convenience
 
         if colnames is None:
-            self.colnames = tuple(col.name for col in columns)
-            self.columns = list(columns)
+            if columns is None:
+                self.colnames = list()
+                self.columns = list()
+            else:
+                tmp = list()
+                for col in columns:
+                    if isinstance(col, VectorIndex):
+                        continue
+                    tmp.append(col.name)
+                self.colnames = tuple(tmp)
+                self.columns = columns
         else:
-            # self.columns should return all TableColumns, VectorIndex, and VectorData
-            # self.__df_cols should be set up for indexing
-            # determine order by colnames
-            self.colnames = tuple(pystr(c) for c in colnames)
-            self.columns = [col for col in columns]
+            if columns is None:
+                raise ValueError("Must supply 'columns' if specifying 'colnames'")
+            else:
+                # make sure columns order matches colnames order
+                self.colnames = tuple(pystr(c) for c in colnames)
+                col_dict = {col.name: col for col in columns}
+                order = dict()
+                i = 0
+                for name in self.colnames:
+                    col = col_dict[name]
+                    order[col.name] = i
+                    if isinstance(col, VectorData):
+                        i = i + 1
+                    i = i + 1
+                tmp = [None] * i
+                for col in columns:
+                    if isinstance(col, TableColumn):
+                        pos = order[col.name]
+                        tmp[pos] = col
+                    elif isinstance(col, VectorData):
+                        continue
+                    elif isinstance(col, VectorIndex):
+                        pos = order[col.target.name]
+                        tmp[pos] = col
+                        tmp[pos+1] = col.target
+                self.columns = list(tmp)
 
         # to make generating DataFrames and Series easier
         col_dict = dict()
@@ -829,16 +859,9 @@ class DynamicTable(NWBDataInterface):
                 col_dict[col.name] = col
             elif isinstance(col, VectorIndex):
                 col_dict[col.target.name] = col  # use target name for reference and VectorIndex for retrieval
-        if 'image_mask' in self.colnames and 'image_mask' not in col_dict:
-            import pdb
-            #pdb.set_trace()
+
         self.__df_cols = [self.id] + [col_dict[name] for name in self.colnames]
-
-        # for bookkeeping
         self.__colids = {name: i for i, name in enumerate(self.colnames)}
-
-        self.df_cols = self.__df_cols
-        self.colids = self.__colids
 
     def __len__(self):
         return len(self.id)
@@ -900,7 +923,6 @@ class DynamicTable(NWBDataInterface):
         self.fields['colnames'] = tuple(list(self.colnames)+[name])
         self.fields['columns'] = tuple(list(self.columns)+[col])
         self.__df_cols.append(col)
-
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this vector column', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'a description for this vector column', 'default': None},
@@ -976,7 +998,6 @@ class DynamicTable(NWBDataInterface):
             arg = key
             if isinstance(arg, str):
                 # index by one string, return column
-                #ret = tuple(self.__df_cols[self.__colids[arg]+1].data)
                 ret = self.__df_cols[self.__colids[arg]+1]
                 # # keeping this around in case anyone wants to resurrect it
                 # dt = self.get_dtype(ret)[1]
