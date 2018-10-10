@@ -1,10 +1,11 @@
 import unittest
 
-from pynwb.epoch import EpochTable, TimeSeriesIndex
+from pynwb.epoch import EpochTable, TimeSeriesIndex, Epochs
 from pynwb import TimeSeries
 from pynwb.form.data_utils import ListSlicer
 
 import numpy as np
+import pandas as pd
 
 
 class TimeSeriesIndexTest(unittest.TestCase):
@@ -59,6 +60,36 @@ class EpochSetters(unittest.TestCase):
         # self.assertEqual(epoch_ts.idx_start, 90)
         # self.assertIs(self.epoch.get_timeseries("test_ts"), epoch_ts)
         pass
+
+
+class TestEpochsDf(unittest.TestCase):
+
+    def get_timeseries(self):
+        return [
+            TimeSeries(name='a', source='test', timestamps=np.linspace(0, 1, 11)),
+            TimeSeries(name='b', source='test', timestamps=np.linspace(0.1, 5, 13)),
+        ]
+
+    def get_dataframe(self):
+        tsa, tsb = self.get_timeseries()
+        return pd.DataFrame({
+            'foo': [1, 2, 3, 4],
+            'bar': ['fish', 'fowl', 'dog', 'cat'],
+            'start_time': [0.2, 0.25, 0.30, 0.35],
+            'end': [0.25, 0.30, 0.40, 0.45],
+            'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
+            'description': ['q', 'w', 'e', 'r'],
+            'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
+        })
+
+    def test_dataframe_roundtrip(self):
+        df = self.get_dataframe()
+        epochs = Epochs.from_dataframe(df, name='test epochs', source='testing', stop_times='end')
+        obtained = epochs.to_dataframe()
+
+        assert set(df.columns) ^ set(obtained.columns) == set(['stop_time', 'end'])
+        assert obtained.loc[3, 'timeseries'][1] is df.loc[3, 'timeseries'][1]
+        assert obtained.loc[2, 'foo'] == df.loc[2, 'foo']
 
 
 if __name__ == '__main__':

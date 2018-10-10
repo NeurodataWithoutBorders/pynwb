@@ -29,7 +29,7 @@ H5_REGREF = special_dtype(ref=RegionReference)
 
 class HDF5IO(FORMIO):
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file to write to'},
+    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'mode', 'type': str,
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'},
