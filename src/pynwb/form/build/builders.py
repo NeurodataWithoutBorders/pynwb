@@ -263,7 +263,7 @@ class GroupBuilder(BaseBuilder):
     @docval({'name': 'builder', 'type': 'GroupBuilder', 'doc': 'the GroupBuilder that represents this subgroup'})
     def set_group(self, **kwargs):
         ''' Add a subgroup to this group '''
-        name, builder, = getargs('name', 'builder', kwargs)
+        builder = getargs('builder', kwargs)
         self.__set_builder(builder, GroupBuilder.__group)
 
     @docval({'name': 'target', 'type': ('GroupBuilder', 'DatasetBuilder'), 'doc': 'the target Builder'},
