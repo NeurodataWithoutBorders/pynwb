@@ -369,12 +369,15 @@ class HDF5IO(FORMIO):
         return ret
 
     def __read_ref(self, h5obj):
+        ret = None
         if isinstance(h5obj, Dataset):
-            return self.__read_dataset(h5obj)
+            ret = self.__read_dataset(h5obj)
         elif isinstance(h5obj, Group):
-            return self.__read_group(h5obj)
+            ret = self.__read_group(h5obj)
         else:
             raise ValueError("h5obj must be a Dataset or a Group - got %s" % str(h5obj))
+        self.__set_built(h5obj.file.filename, h5obj.name, ret)
+        return ret
 
     def open(self):
         open_flag = self.__mode
