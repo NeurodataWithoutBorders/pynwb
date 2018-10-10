@@ -190,6 +190,8 @@ class BuildManager(object):
             if parent_builder is not None:
                 result.parent = self.__get_proxy_builder(parent_builder)
             else:
+                # we are at the top of the hierarchy,
+                # so it must be time to resolve parents
                 self.__resolve_parents(result)
             self.prebuilt(result, builder)
         result.set_modified(False)
@@ -470,12 +472,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             n = spec.name
         elif hasattr(spec, 'data_type_def') and spec.data_type_def is not None:
             n = spec.data_type_def  # noqa: F841
-        # AJTRITT 05-Oct-18 pdb I don't think we need this anymore.
-        # if attr_name in self.__attr2spec:
-        #     existing = self.__attr2spec.pop(attr_name)
-        #     if existing is not spec:
-        #
-        #         self.__spec2attr.pop(existing)
         self.__spec2attr[spec] = attr_name
         self.__attr2spec[attr_name] = spec
 
