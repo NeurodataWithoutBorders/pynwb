@@ -265,14 +265,17 @@ class PlaneSegmentation(DynamicTable):
         """
         Add ROI data to this
         """
-        pixel_mask, image_mask = getargs('pixel_mask', 'image_mask', kwargs)
+        pixel_mask, image_mask = popargs('pixel_mask', 'image_mask', kwargs)
         if image_mask is None and pixel_mask is None:
             raise ValueError("Must provide either 'image_mask' or 'pixel_mask' or both")
+        rkwargs = dict(kwargs)
         if image_mask is not None:
             self.__check_image_mask()
+            rkwargs['image_mask'] = image_mask
         if pixel_mask is not None:
             self.__check_pixel_mask()
-        return super(PlaneSegmentation, self).add_row(**kwargs)
+            rkwargs['pixel_mask'] = pixel_mask
+        return super(PlaneSegmentation, self).add_row(**rkwargs)
 
     @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what the region is'},
             {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table', 'default': slice(None)},
