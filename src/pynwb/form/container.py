@@ -83,6 +83,8 @@ class Container(with_metaclass(abc.ABCMeta, object)):
             if isinstance(self.__parent, Container):
                 raise Exception('cannot reassign parent')
             else:
+                if parent_container is None:
+                    raise ValueError("got None for parent of '%s' - cannot overwrite Proxy with NoneType" % self.name)
                 if self.__parent.matches(parent_container):
                     self.__parent = parent_container
                 else:
