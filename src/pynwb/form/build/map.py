@@ -19,7 +19,7 @@ class Proxy(object):
     A temporary object to represent a Container. This gets used when resolving the true location of a
     Container's parent.
 
-    Proxy objects allow simple bookeeping of all potential parents a Container may have.
+    Proxy objects allow simple bookkeeping of all potential parents a Container may have.
 
     This object is used by providing all the necessary information for describing the object. This object
     gets passed around and candidates are accumulated. Upon calling resolve, all saved candidates are matched
@@ -207,7 +207,7 @@ class BuildManager(object):
     def __get_parent_dt_builder(self, builder):
         '''
         Get the next builder above the given builder
-        that has a data type
+        that has a data_type
         '''
         tmp = builder.parent
         ret = None
@@ -598,7 +598,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             {"name": "spec_ext", "type": Spec, "doc": "a spec extension", 'default': None},
             returns="the Builder representing the given Container", rtype=Builder)
     def build(self, **kwargs):
-        ''' Convert an Container to a Builder representation '''
+        ''' Convert a Container to a Builder representation '''
         container, manager, parent, source = getargs('container', 'manager', 'parent', 'source', kwargs)
         builder = getargs('builder', kwargs)
         name = manager.get_builder_name(container)
@@ -1105,7 +1105,6 @@ class TypeMap(object):
             fields = dict()
             for k, field_spec in attr_names.items():
                 if not spec.is_inherited_spec(field_spec):
-                    # fields.append(k)
                     fields[k] = field_spec
             d = {'__init__': self.__get_constructor(parent_cls, fields)}
             cls = type(str(name), bases, d)
@@ -1119,8 +1118,6 @@ class TypeMap(object):
             return None
         ret = self.__container_types[namespace][data_type]
         if isinstance(ret, TypeSource):
-            # ret = self.__container_types[ret.namespace][ret.data_type]
-            # self.register_container_type(namespace, data_type, ret)
             ret = self.__get_container_cls(ret.namespace, ret.data_type)
             if ret is not None:
                 self.register_container_type(namespace, data_type, ret)
@@ -1214,7 +1211,7 @@ class TypeMap(object):
             container_cls = obj.__class__
             namespace, data_type = self.get_container_ns_dt(obj)
             if namespace is None:
-                raise ValueError("class %s does not mapped to a data_type" % container_cls)
+                raise ValueError("class %s is not mapped to a data_type" % container_cls)
         else:
             data_type = self.get_builder_dt(obj)
             namespace = self.get_builder_ns(obj)
@@ -1235,7 +1232,7 @@ class TypeMap(object):
         return mapper
 
     @docval({"name": "namespace", "type": str, "doc": "the namespace containing the data_type to map the class to"},
-            {"name": "data_type", "type": str, "doc": "the data_type to mape the class to"},
+            {"name": "data_type", "type": str, "doc": "the data_type to map the class to"},
             {"name": "container_cls", "type": (TypeSource, type), "doc": "the class to map to the specified data_type"})
     def register_container_type(self, **kwargs):
         ''' Map a container class to a data_type '''
