@@ -203,10 +203,10 @@ ps = mod['ImageSegmentation'].get_plane_segmentation()
 # image masks and pixel masks using :py:func:`~pynwb.ophys.PlaneSegmentation.get_image_mask`
 # :py:func:`~pynwb.ophys.PlaneSegmentation.get_pixel_mask`, respectively.
 
-img_mask1 = ps.get_image_mask(0)
-pix_mask1 = ps.get_pixel_mask(0)
-img_mask2 = ps.get_image_mask(1)
-pix_mask2 = ps.get_pixel_mask(1)
+img_mask1 = ps['image_mask'][0]
+pix_mask1 = ps['pixel_mask'][0]
+img_mask2 = ps['image_mask'][1]
+pix_mask2 = ps['pixel_mask'][1]
 
 ####################
 # To get back the fluorescence time series data, first access the :py:class:`~pynwb.ophys.Fluorescence` object we added
@@ -223,9 +223,9 @@ rrs_rois = rrs.rois
 
 ####################
 #
-# .. [#] If you pass in the image data directily,
+# .. [#] If you pass in the image data directly,
 #    you will not need to worry about distributing the image files with your NWB file. However, we recognize that
-#    using commong image formats have tools built around them, so working with the original file formats can make
+#    common image formats have tools built around them, so working with the original file formats can make
 #    one's life much simpler. NWB currently does not have the ability to read and parse native image formats. It
 #    is up to downstream users to read these file formats.
 #
