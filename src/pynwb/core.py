@@ -859,7 +859,7 @@ class DynamicTable(NWBDataInterface):
         if len(columns) > 0:
             if isinstance(columns[0], dict):
                 columns = tuple(TableColumn(**d) for d in columns)
-            elif not isinstance(columns[0], TableColumn):
+            elif not isinstance(columns[0], (VectorData, VectorIndex, TableColumn)):
                 raise ValueError("'columns' must be a list of TableColumns or dicts")
             if not all(len(c) == len(columns[0]) for c in columns if isinstance(c, TableColumn)):
                 raise ValueError("columns must be the same length")
