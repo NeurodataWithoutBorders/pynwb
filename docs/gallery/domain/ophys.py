@@ -107,13 +107,13 @@ img_mask1 = [[0.0 for x in range(w)] for y in range(h)]
 img_mask1[0][0] = 1.1
 img_mask1[1][1] = 1.2
 img_mask1[2][2] = 1.3
-ps.add_roi('1234', pix_mask1, img_mask1)
+ps.add_roi(pixel_mask=pix_mask1, image_mask=img_mask1)
 
 pix_mask2 = [(0, 0, 2.1), (1, 1, 2.2)]
 img_mask2 = [[0.0 for x in range(w)] for y in range(h)]
 img_mask2[0][0] = 2.1
 img_mask2[1][1] = 2.2
-ps.add_roi('5678', pix_mask2, img_mask2)
+ps.add_roi(pixel_mask=pix_mask2, image_mask=img_mask2)
 
 
 ####################
@@ -140,14 +140,6 @@ mod.add_data_interface(fl)
 
 
 rt_region = ps.create_roi_table_region('the first of two ROIs', region=[0])
-
-####################
-# Alternatively, you can get create a region using the names of the ROIs you added by passing in
-# the ROI names with the *names* argument. We will create the same region we did above, but
-# by using the name of the ROI.
-
-
-rt_region = ps.create_roi_table_region('the first of two ROIs', names=['1234'])
 
 ####################
 # Now that you have an :py:class:`~pynwb.ophys.ROITableRegion`, you can create your an
