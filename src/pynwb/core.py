@@ -885,7 +885,7 @@ class DynamicTable(NWBDataInterface):
                 elif not all(isinstance(c, (VectorData, VectorIndex, TableColumn)) for c in columns):
                     raise ValueError("'columns' must be a list of TableColumns, VectorData, or VectorIndex")
                 lens = [len(c) for c in columns if isinstance(c, (TableColumn, VectorIndex))]
-                if not all(l == lens[0] for l in lens):
+                if not all(i == lens[0] for i in lens):
                     raise ValueError("columns must be the same length")
                 if lens[0] != len(id):
                     if len(id) > 0:
@@ -894,7 +894,6 @@ class DynamicTable(NWBDataInterface):
                         id.data.extend(range(lens[0]))
         else:
             columns = list()
-            #raise ValueError("must provide both 'id' and 'columns' or neither")
 
         self.id = id
 
