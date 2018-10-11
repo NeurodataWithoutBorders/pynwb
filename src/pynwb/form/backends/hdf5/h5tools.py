@@ -266,6 +266,7 @@ class HDF5IO(FORMIO):
             if not (sub_h5obj is None):
                 link_type = h5obj.get(k, getlink=True)
                 if isinstance(link_type, SoftLink) or isinstance(link_type, ExternalLink):
+                    # Reading links might be better suited in its own function
                     # get path of link (the key used for tracking what's been built)
                     target_path = link_type.path
                     builder_name = os.path.basename(target_path)
@@ -278,7 +279,9 @@ class HDF5IO(FORMIO):
                         else:
                             builder = self.__read_group(sub_h5obj, builder_name, ignore=ignore)
                         self.__set_built(sub_h5obj.file.filename, target_path, builder)
-                    kwargs['links'][builder_name] = LinkBuilder(builder, k, source=self.__path)
+                    link_builder = LinkBuilder(builder, k, source=self.__path)
+                    link_builder.written = True
+                    kwargs['links'][builder_name] = link_builder
                 else:
                     builder = self.__get_built(sub_h5obj.file.filename, sub_h5obj.name)
                     obj_type = None
@@ -579,6 +582,9 @@ class HDF5IO(FORMIO):
         else:
             msg = 'cannot create external link to %s' % path
             raise ValueError(msg)
+        if name in parent:
+            import pdb
+            pdb.set_trace()
         parent[name] = link_obj
         builder.written = True
         return link_obj
