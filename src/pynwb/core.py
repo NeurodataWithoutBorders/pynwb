@@ -186,26 +186,46 @@ class NWBContainer(NWBBaseType, Container):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
         self.source = getargs('source', kwargs)
 
+    __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc'}
+
     @classmethod
     def _setter(cls, nwbfield):
         super_setter = NWBBaseType._setter(nwbfield)
-        ret = super_setter
-        if isinstance(nwbfield, dict) and nwbfield.get('child', False):
+        ret = [super_setter]
+        if isinstance(nwbfield, dict):
+            for k in nwbfield.keys():
+                if k not in cls.__pconf_allowed_keys:
+                    msg = "Unrecognized key '%s' in __nwbfield__ config '%s' on %s" %\
+                           (k, nwbfield['name'], cls.__name__)
+                    raise ValueError(msg)
+            if nwbfield.get('required_name', None) is not None:
+                name = nwbfield['required_name']
+                idx1 = len(ret) - 1
 
-            def nwbdi_setter(self, val):
-                super_setter(self, val)
-                if val is not None:
-                    if isinstance(val, (tuple, list)):
-                        pass
-                    elif isinstance(val, dict):
-                        val = val.values()
-                    else:
-                        val = [val]
-                    for v in val:
-                        self.add_child(v)
+                def nwbdi_setter(self, val):
+                    if val is not None and val.name != name:
+                        msg = "%s field on %s must be named '%s'" % (nwbfield['name'], self.__class__.__name__, name)
+                        raise ValueError(msg)
+                    ret[idx1](self, val)
 
-            ret = nwbdi_setter
-        return ret
+                ret.append(nwbdi_setter)
+            if nwbfield.get('child', False):
+                idx2 = len(ret) - 1
+
+                def nwbdi_setter(self, val):
+                    ret[idx2](self, val)
+                    if val is not None:
+                        if isinstance(val, (tuple, list)):
+                            pass
+                        elif isinstance(val, dict):
+                            val = val.values()
+                        else:
+                            val = [val]
+                        for v in val:
+                            self.add_child(v)
+
+                ret.append(nwbdi_setter)
+        return ret[-1]
 
     def _to_dict(self, arg, label="NULL"):
         return_dict = LabelledDict(label)
@@ -339,7 +359,8 @@ class VectorIndex(Index):
 class ElementIdentifiers(NWBData):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this ElementIdentifiers'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'a 1D dataset containing identifiers'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'a 1D dataset containing identifiers',
+             'default': list()},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
@@ -841,42 +862,41 @@ class DynamicTable(NWBDataInterface):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},    # noqa: C901
             {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
-            {'name': 'ids', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
-             'default': list()},
-            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': list()},
+            {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
+             'default': None},
+            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
             {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
              'default': None})
     def __init__(self, **kwargs):
-        ids, columns, desc, colnames = popargs('ids', 'columns', 'description', 'colnames', kwargs)
+        id, columns, desc, colnames = popargs('id', 'columns', 'description', 'colnames', kwargs)
         call_docval_func(super(DynamicTable, self).__init__, kwargs)
         self.description = desc
 
-        if not isinstance(ids, ElementIdentifiers):
-            self.id = ElementIdentifiers('id', data=ids)
+        if id is not None:
+            if not isinstance(id, ElementIdentifiers):
+                id = ElementIdentifiers('id', data=id)
         else:
-            self.id = ids
+            id = ElementIdentifiers('id')
 
-        if len(columns) > 0:
-            if isinstance(columns[0], dict):
-                columns = tuple(TableColumn(**d) for d in columns)
-            elif not isinstance(columns[0], (VectorData, VectorIndex, TableColumn)):
-                raise ValueError("'columns' must be a list of TableColumns or dicts")
-            if not all(len(c) == len(columns[0]) for c in columns if isinstance(c, TableColumn)):
-                raise ValueError("columns must be the same length")
+        if columns is not None:
+            if len(columns) > 0:
+                if isinstance(columns[0], dict):
+                    columns = tuple(TableColumn(**d) for d in columns)
+                elif not all(isinstance(c, (VectorData, VectorIndex, TableColumn)) for c in columns):
+                    raise ValueError("'columns' must be a list of TableColumns, VectorData, or VectorIndex")
+                lens = [len(c) for c in columns if isinstance(c, (TableColumn, VectorIndex))]
+                if not all(l == lens[0] for l in lens):
+                    raise ValueError("columns must be the same length")
+                if lens[0] != len(id):
+                    if len(id) > 0:
+                        raise ValueError("must provide same number of ids as length of columns")
+                    else:
+                        id.data.extend(range(lens[0]))
+        else:
+            columns = list()
+            #raise ValueError("must provide both 'id' and 'columns' or neither")
 
-            ni = len(self.id)
-            nc = len(columns[0])
-
-            if ni != nc:
-                if ni != 0 and nc != 0:
-                    raise ValueError("must provide same number of ids as length of columns if specifying ids")
-                elif nc != 0:
-                    for i in range(nc):
-                        self.id.data.append(i)
-                elif nc != 0:
-                    raise ValueError("cannot provide ids with no rows")
-
-        # column names for convenience
+        self.id = id
 
         if colnames is None:
             if columns is None:
@@ -1169,7 +1189,7 @@ class DynamicTable(NWBDataInterface):
                 'description': column_descriptions.get(column_name, '')
             })
 
-        return cls(name=name, source=source, ids=ids, columns=columns, description=table_description, **kwargs)
+        return cls(name=name, source=source, id=ids, columns=columns, description=table_description, **kwargs)
 
 
 @register_class('DynamicTableRegion', CORE_NAMESPACE)
