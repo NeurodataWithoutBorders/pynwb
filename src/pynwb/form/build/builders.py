@@ -37,6 +37,8 @@ class Builder(with_metaclass(ABCMeta, dict)):
 
     @written.setter
     def written(self, s):
+        if self.__written and not s:
+            raise ValueError("cannot change written to not written")
         self.__written = s
 
     @property
