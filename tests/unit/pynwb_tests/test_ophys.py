@@ -149,11 +149,8 @@ class ImageSegmentationConstructor(unittest.TestCase):
 
 
 class PlaneSegmentationConstructor(unittest.TestCase):
-    def test_init(self):
-        w, h = 5, 5
-        img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
-        pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
-                    [7, 8, 2.0], [9, 10, 2.0]]
+
+    def getBoilerPlateObjects(self):
 
         iSS = ImageSeries(name='test_iS', source='a hypothetical source', data=list(), unit='unit',
                           external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
@@ -162,6 +159,16 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         oc = OpticalChannel('test_optical_channel', 'test_source', 'description', 500.)
         ip = ImagingPlane('test_imaging_plane', 'test_source', oc, 'description', device, 600.,
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+        return (iSS, ip)
+
+
+    def test_init(self):
+        w, h = 5, 5
+        img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
+        pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
+                    [7, 8, 2.0], [9, 10, 2.0]]
+
+        iSS, ip = self.getBoilerPlateObjects()
 
         pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
         pS.add_roi(pixel_mask=pix_mask[0:3], image_mask=img_mask[0])
@@ -176,6 +183,45 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS['pixel_mask'].target.data, pix_mask)
         self.assertEqual(pS['pixel_mask'][0], pix_mask[0:3])
         self.assertEqual(pS['pixel_mask'][1], pix_mask[3:5])
+        self.assertEqual(pS['image_mask'].data, img_mask)
+
+    def test_init_pixel_mask(self):
+        w, h = 5, 5
+        pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
+                    [7, 8, 2.0], [9, 10, 2.0]]
+
+        iSS, ip = self.getBoilerPlateObjects()
+
+        pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
+        pS.add_roi(pixel_mask=pix_mask[0:3])
+        pS.add_roi(pixel_mask=pix_mask[3:5])
+
+        self.assertEqual(pS.description, 'description')
+        self.assertEqual(pS.source, 'test source')
+
+        self.assertEqual(pS.imaging_plane, ip)
+        self.assertEqual(pS.reference_images, iSS)
+
+        self.assertEqual(pS['pixel_mask'].target.data, pix_mask)
+        self.assertEqual(pS['pixel_mask'][0], pix_mask[0:3])
+        self.assertEqual(pS['pixel_mask'][1], pix_mask[3:5])
+
+    def test_init_image_mask(self):
+        w, h = 5, 5
+        img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
+
+        iSS, ip = self.getBoilerPlateObjects()
+
+        pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
+        pS.add_roi(image_mask=img_mask[0])
+        pS.add_roi(image_mask=img_mask[1])
+
+        self.assertEqual(pS.description, 'description')
+        self.assertEqual(pS.source, 'test source')
+
+        self.assertEqual(pS.imaging_plane, ip)
+        self.assertEqual(pS.reference_images, iSS)
+
         self.assertEqual(pS['image_mask'].data, img_mask)
 
 
