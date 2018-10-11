@@ -1,3 +1,4 @@
+import unittest2 as unittest
 from copy import deepcopy
 
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
@@ -333,6 +334,52 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         mod = nwbfile.get_processing_module('plane_seg_test_module')
         img_seg = mod.get_data_interface('ImageSegmentation')
         return img_seg.get_plane_segmentation('test_plane_seg_name')
+
+
+class MaskRoundTrip(TestPlaneSegmentation):
+
+    def setBoilerPlateObjects(self):
+        ts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        self.image_series = ImageSeries(name='test_iS', source='a hypothetical source', dimension=[2],
+                                        external_file=['images.tiff'],
+                                        starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
+        self.device = Device(name='dev1', source='a test source')
+        self.optical_channel = OpticalChannel('test_optical_channel', 'optical channel source',
+                                              'optical channel description', 500.)
+        self.imaging_plane = ImagingPlane('test_imaging_plane',
+                                          'ophys integration tests',
+                                          self.optical_channel,
+                                          'imaging plane description',
+                                          self.device,
+                                          600., '2.718', 'GFP', 'somewhere in the brain',
+                                          (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+        return PlaneSegmentation('test source', 'description', self.imaging_plane, 'test_plane_seg_name',
+                                 self.image_series)
+
+    def setUpBuilder(self):
+        raise unittest.SkipTest("no builder")
+
+
+class PixelMaskRoundtrip(MaskRoundTrip):
+
+    def setUpContainer(self):
+        pix_mask = [(1, 2, 1.0), (3, 4, 1.0), (5, 6, 1.0),
+                    (7, 8, 2.0), (9, 10, 2.)]
+        pS = self.setBoilerPlateObjects()
+        pS.add_roi(pixel_mask=pix_mask[0:3])
+        pS.add_roi(pixel_mask=pix_mask[3:5])
+        return pS
+
+
+class ImageMaskRoundtrip(MaskRoundTrip):
+
+    def setUpContainer(self):
+        w, h = 5, 5
+        img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
+        pS = self.setBoilerPlateObjects()
+        pS.add_roi(image_mask=img_mask[0])
+        pS.add_roi(image_mask=img_mask[1])
+        return pS
 
 
 class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):

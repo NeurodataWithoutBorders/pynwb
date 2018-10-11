@@ -161,7 +161,6 @@ class PlaneSegmentationConstructor(unittest.TestCase):
                           'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
         return (iSS, ip)
 
-
     def test_init(self):
         w, h = 5, 5
         img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
@@ -186,7 +185,6 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS['image_mask'].data, img_mask)
 
     def test_init_pixel_mask(self):
-        w, h = 5, 5
         pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
                     [7, 8, 2.0], [9, 10, 2.0]]
 
