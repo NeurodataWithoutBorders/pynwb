@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 from datetime import datetime
 import os
 from h5py import File, Dataset, Reference
