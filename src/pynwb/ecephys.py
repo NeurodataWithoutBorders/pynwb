@@ -2,7 +2,7 @@ import numpy as np
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, call_docval_func
-from .form.data_utils import DataChunkIterator, ShapeValidator
+from .form.data_utils import DataChunkIterator, assertEqualShape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -68,7 +68,7 @@ class ElectricalSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
             {'name': 'electrodes', 'type': DynamicTableRegion,
@@ -233,11 +233,12 @@ class Clustering(NWBDataInterface):
             {'name': 'description', 'type': str,
              'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, \
              clusters curated using Klusters, etc).'},
-            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.'},
+            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.', 'shape': (None,)},
             {'name': 'peak_over_rms', 'type': Iterable,
              'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster\
              (provides a basic clustering metric).'},
-            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.'},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.',
+             'shape': (None,)},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
         source, description, num, peak_over_rms, times = popargs(
@@ -360,29 +361,29 @@ class FeatureExtraction(NWBDataInterface):
         # Validate the shape of the inputs
         # Validate event times compared to features
         shape_validators = []
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=times,
-                                                                axes1=0,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='times',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=times,
+                                                 axes1=0,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='times',
+                                                 ignore_undetermined=True))
         # Validate electrodes compared to features
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=electrodes,
-                                                                axes1=1,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='electrodes',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=electrodes,
+                                                 axes1=1,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='electrodes',
+                                                 ignore_undetermined=True))
         # Valided description compared to features
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=description,
-                                                                axes1=2,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='description',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=description,
+                                                 axes1=2,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='description',
+                                                 ignore_undetermined=True))
         # Raise an error if any of the shapes do not match
         raise_error = False
         error_msg = ""
@@ -391,7 +392,7 @@ class FeatureExtraction(NWBDataInterface):
             if not sv.result:
                 error_msg += sv.message + "\n"
         if raise_error:
-            raise TypeError(error_msg)
+            raise ValueError(error_msg)
 
         # Initialize the object
         super(FeatureExtraction, self).__init__(source, **kwargs)
