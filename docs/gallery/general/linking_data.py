@@ -56,14 +56,15 @@ PyNWB supports linking between files using external links.
 
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile
 from pynwb import TimeSeries
 from pynwb import NWBHDF5IO
 import numpy as np
 
 # Create the base data
-start_time = datetime(2017, 4, 3, 11, 0, 0)
-create_date = datetime(2017, 4, 15, 12, 0, 0)
+start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 data = np.arange(1000).reshape((100, 10))
 timestamps = np.arange(100)
 filename1 = 'external1_example.nwb'

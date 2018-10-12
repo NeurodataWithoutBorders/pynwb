@@ -63,10 +63,9 @@ class UnitTimesConstructor(unittest.TestCase):
         ut.add_spike_times(1, [3, 4, 5])
         self.assertEqual(ut.unit_ids.data, [0, 1])
         self.assertEqual(ut.spike_times.data, [0, 1, 2, 3, 4, 5])
-        self.assertEqual(len(ut.spike_times_index), 2)
-        self.assertEqual(ut.spike_times_index[0].target.data, [0, 1, 2, 3, 4, 5])
-        self.assertEqual(ut.spike_times_index[0].slice, slice(0, 3))
-        self.assertEqual(ut.spike_times_index[1].target.data, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(ut.spike_times_index.data, [3, 6])
+        self.assertEqual(ut.spike_times_index[0], [0, 1, 2])
+        self.assertEqual(ut.spike_times_index[1], [3, 4, 5])
 
     def test_get_spike_times(self):
         ut = UnitTimes('UnitTimes add_spike_times unit test')
@@ -74,6 +73,13 @@ class UnitTimesConstructor(unittest.TestCase):
         ut.add_spike_times(1, [3, 4, 5])
         self.assertTrue(all(ut.get_unit_spike_times(0) == np.array([0, 1, 2])))
         self.assertTrue(all(ut.get_unit_spike_times(1) == np.array([3, 4, 5])))
+
+    def test_times(self):
+        ut = UnitTimes('UnitTimes add_spike_times unit test')
+        ut.add_spike_times(0, [0, 1, 2])
+        ut.add_spike_times(1, [3, 4, 5])
+        self.assertTrue(all(ut.times[0] == np.array([0, 1, 2])))
+        self.assertTrue(all(ut.times[1] == np.array([3, 4, 5])))
 
 
 if __name__ == '__main__':

@@ -1,5 +1,9 @@
-from datetime import datetime
 import os
+from datetime import datetime
+from dateutil.tz import tzlocal, tzutc
+
+import pandas as pd
+import numpy as np
 
 from pynwb.form.build import GroupBuilder, DatasetBuilder
 from pynwb.form.backends.hdf5 import HDF5IO
@@ -7,6 +11,7 @@ from pynwb.form.backends.hdf5 import HDF5IO
 from pynwb import NWBFile, TimeSeries
 from pynwb.file import Subject
 from pynwb.ecephys import Clustering
+from pynwb.epoch import Epochs
 
 from . import base
 
@@ -14,8 +19,8 @@ from . import base
 class TestNWBFileIO(base.TestMapNWBContainer):
 
     def setUp(self):
-        self.start_time = datetime(1970, 1, 1, 12, 0, 0)
-        self.create_date = datetime(2017, 4, 15, 12, 0, 0)
+        self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
+        self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         super(TestNWBFileIO, self).setUp()
         self.path = "test_pynwb_io_hdf5.h5"
 
@@ -94,10 +99,11 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                                 'templates': GroupBuilder('templates')})},
                             datasets={
                                 'file_create_date':
-                                DatasetBuilder('file_create_date', [str(self.create_date)]),
+                                DatasetBuilder('file_create_date', [self.create_date.isoformat()]),
                                 'identifier': DatasetBuilder('identifier', 'TEST123'),
                                 'session_description': DatasetBuilder('session_description', 'a test NWB File'),
-                                'session_start_time': DatasetBuilder('session_start_time', str(self.start_time))},
+                                'session_start_time': DatasetBuilder('session_start_time', self.start_time.isoformat())
+                                },
                             attributes={'namespace': base.CORE_NAMESPACE,
                                         'nwb_version': '2.0b',
                                         'neurodata_type': 'NWBFile',
@@ -198,3 +204,68 @@ class TestSubjectIO(base.TestDataInterfaceIO):
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
         return nwbfile.subject
+
+
+class TestEpochsRoundtrip(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return Epochs('epochs', 'epochs integration test')
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_epoch_metadata_column(
+            name='temperature',
+            description='average temperture (c) during epoch'
+        )
+
+        nwbfile.create_epoch(
+            start_time=5.3,
+            stop_time=6.1,
+            timeseries=[],
+            tags='ambient',
+            description='ambient data epoch',
+            metadata={'temperature': 26.4}
+        )
+
+        # reset the thing
+        self.container = nwbfile.epochs
+
+    def getContainer(self, nwbfile):
+        return nwbfile.epochs
+
+
+class TestEpochsRoundtripDf(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return Epochs('epochs', 'epochs integration test')
+
+    def addContainer(self, nwbfile):
+
+        tsa, tsb = [
+            TimeSeries(name='a', source='test', timestamps=np.linspace(0, 1, 11)),
+            TimeSeries(name='b', source='test', timestamps=np.linspace(0.1, 5, 13)),
+        ]
+
+        nwbfile.add_acquisition(tsa)
+        nwbfile.add_acquisition(tsb)
+
+        nwbfile.epochs = Epochs.from_dataframe(
+            pd.DataFrame({
+                'foo': [1, 2, 3, 4],
+                'bar': ['fish', 'fowl', 'dog', 'cat'],
+                'start_time': [0.2, 0.25, 0.30, 0.35],
+                'stop_time': [0.25, 0.30, 0.40, 0.45],
+                'timeseries': [[tsa], [tsb], [tsb], [tsb, tsa]],
+                'description': ['q', 'w', 'e', 'r'],
+                'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
+            }),
+            'epochs integration test',
+            'epochs'
+        )
+
+        # reset the thing
+        self.container = nwbfile.epochs
+
+    def getContainer(self, nwbfile):
+        return nwbfile.epochs

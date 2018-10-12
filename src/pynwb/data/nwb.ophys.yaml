@@ -1,75 +1,3 @@
-datasets:
-- neurodata_type_def: ImageMasks
-  neurodata_type_inc: NWBData
-  dtype: float
-  doc: ROI mask, represented in 2D ([y][x]) intensity image
-  attributes:
-  - name: help
-    dtype: text
-    doc: a help string
-    value: an array of image masks
-  dims:
-  - num_roi
-  - num_x
-  - num_y
-  shape:
-  - null
-  - null
-  - null
-- neurodata_type_def: PixelMasks
-  neurodata_type_inc: VectorData
-  dtype:
-  - name: x
-    dtype: uint
-    doc: the pixel x-coordinate
-  - name: y
-    dtype: uint
-    doc: the pixel y-coordinate
-  - name: weight
-    dtype: float
-    doc: the weight of the pixel
-  doc: a table for storing pixel masks
-  attributes:
-  - name: help
-    dtype: text
-    doc: a help string
-    value: a concatenated array of pixel masks
-- neurodata_type_def: ROITable
-  neurodata_type_inc: NWBData
-  dtype:
-  - name: name
-    dtype: ascii
-    doc: a name for this ROI
-  - name: pixel_mask
-    dtype:
-      reftype: region
-      target_type: PixelMasks
-    doc: a reference into a the dataset of pixel masks
-  - name: image_mask
-    dtype:
-      reftype: region
-      target_type: ImageMasks
-    doc: a reference into a the dataset of image masks
-  doc: A table for storing references to the image mask and pixel mask for each ROI
-  attributes:
-  - name: help
-    dtype: text
-    doc: a help string
-    value: A table for storing ROI data
-- neurodata_type_def: ROITableRegion
-  neurodata_type_inc: NWBData
-  dtype:
-    target_type: ROITable
-    reftype: region
-  doc: A region reference for subsetting an ROITable
-  attributes:
-  - name: help
-    dtype: text
-    doc: a help string
-    value: A region reference to an ROITable
-  - name: description
-    dtype: utf8
-    doc: a description of this subset of ROIs
 groups:
 - neurodata_type_def: TwoPhotonSeries
   neurodata_type_inc: ImageSeries
@@ -123,7 +51,7 @@ groups:
     shape:
     - null
     - null
-  - neurodata_type_inc: ROITableRegion
+  - neurodata_type_inc: DynamicTableRegion
     name: rois
     doc: a dataset referencing into an ROITable containing information on the ROIs
       stored in this timeseries
@@ -178,30 +106,47 @@ groups:
     value: Stores groups of pixels that define regions of interest from one or more
       imaging planes
   groups:
+  ######### BEGIN: ROITable Refactor
   - neurodata_type_def: PlaneSegmentation
-    neurodata_type_inc: NWBContainer
-    doc: Group name is human-readable description of imaging plane
+    neurodata_type_inc: DynamicTable
+    doc: results for image segmentation of a specific imaging plane
     attributes:
     - name: help
       dtype: text
       doc: Value is 'Results from segmentation of an imaging plane'
       value: Results from segmentation of an imaging plane
     datasets:
-    - name: description
-      dtype: text
-      doc: Description of image plane, recording wavelength, depth, etc
-      quantity: '?'
-    - neurodata_type_inc: PixelMasks
-      name: pixel_masks
-      doc: Pixel masks for each ROI. Pixel masks are concatenated and parsing of this
-        dataset is maintained by the ROITable
-    - neurodata_type_inc: ImageMasks
-      name: image_masks
+    - neurodata_type_inc: TableColumn
+      name: image_mask
       doc: ROI masks for each ROI
-    - neurodata_type_inc: ROITable
-      name: rois
-      doc: ROIs resulting from the segmentation of the imaging plane linked in this
-        PlaneSegmentation
+      dims:
+      - num_roi
+      - num_x
+      - num_y
+      shape:
+      - null
+      - null
+      - null
+      quantity: '?'
+    - neurodata_type_inc: VectorIndex
+      name: pixel_mask_index
+      doc: index into pixel_mask
+      quantity: '?'
+    - neurodata_type_inc: VectorData
+      name: pixel_mask
+      doc: Pixel masks for each ROI. Pixel masks are concatenated and parsing of this
+        dataset is maintained by the PlaneSegmentation
+      dtype:
+      - name: x
+        dtype: uint
+        doc: the pixel x-coordinate
+      - name: y
+        dtype: uint
+        doc: the pixel y-coordinate
+      - name: weight
+        dtype: float
+        doc: the weight of the pixel
+      quantity: '?'
     groups:
     - name: reference_images
       doc: Stores image stacks segmentation mask apply to.
@@ -214,6 +159,7 @@ groups:
       doc: link to ImagingPlane group from which this TimeSeries data was generated
       target_type: ImagingPlane
     quantity: '*'
+  ######### END: ROITable Refactor
   default_name: ImageSegmentation
 - neurodata_type_def: ImagingPlane
   neurodata_type_inc: NWBContainer

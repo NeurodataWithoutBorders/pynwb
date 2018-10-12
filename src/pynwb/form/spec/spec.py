@@ -36,7 +36,8 @@ class DtypeHelper():
             'uint32': ["uint32", "uint"],
             'uint64': ["uint64"],
             'object': ['object'],
-            'region': ['region']
+            'region': ['region'],
+            'isodatetime': ["isodatetime", "datetime", "datetime64"]
         }
 
     # List of recommended primary dtype strings. These are the keys of primary_dtype_string_synonyms
@@ -862,11 +863,24 @@ class GroupSpec(BaseStorageSpec):
             self.set_link(link)
         # resolve inherited data_types
         for dt_spec in data_types:
-            dt = getattr(dt_spec, 'data_type_def',
-                         getattr(dt_spec, 'data_type_inc', None))
+            if isinstance(dt_spec, LinkSpec):
+                dt = dt_spec.target_type
+            else:
+                dt = dt_spec.data_type_def
+                if dt is None:
+                    dt = dt_spec.data_type_inc
             self.__new_data_types.discard(dt)
-            if dt not in self.__data_types:
+            existing_dt_spec = self.get_data_type(dt)
+            if existing_dt_spec is None:
                 self.__add_data_type_inc(dt_spec)
+            else:
+                if existing_dt_spec.name is not None and dt_spec.name is None:
+                    if isinstance(dt_spec, DatasetSpec):
+                        self.set_dataset(dt_spec)
+                    elif isinstance(dt_spec, GroupSpec):
+                        self.set_group(dt_spec)
+                    else:
+                        self.set_link(dt_spec)
         super(GroupSpec, self).resolve_spec(inc_spec)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
@@ -1014,19 +1028,27 @@ class GroupSpec(BaseStorageSpec):
             raise TypeError("spec does not have '%s' or '%s' defined" % (self.def_key(), self.inc_key()))
         if dt in self.__data_types:
             curr = self.__data_types[dt]
+            if curr is spec:
+                return
             if spec.name is None:
-                if curr.name is None:
-                    raise TypeError('Cannot have multiple data types of the same type without specifying name')
-                else:
-                    # unnamed data types will be stored as data_types
+                if isinstance(curr, list):
                     self.__data_types[dt] = spec
-            else:
-                if curr.name is None:
-                    # leave the existing data type as is, since the new one can be retrieved by name
-                    return
                 else:
-                    # store both specific instances of a data type
-                    self.__data_types[dt] = [curr, spec]
+                    if curr.name is None:
+                        raise TypeError('Cannot have multiple data types of the same type without specifying name')
+                    else:
+                        # unnamed data types will be stored as data_types
+                        self.__data_types[dt] = spec
+            else:
+                if isinstance(curr, list):
+                    self.__data_types[dt].append(spec)
+                else:
+                    if curr.name is None:
+                        # leave the existing data type as is, since the new one can be retrieved by name
+                        return
+                    else:
+                        # store both specific instances of a data type
+                        self.__data_types[dt] = [curr, spec]
         else:
             self.__data_types[dt] = spec
 

@@ -1,9 +1,11 @@
 import unittest2 as unittest
 
-from pynwb.core import DynamicTable, TableColumn, ElementIdentifiers
+from pynwb.core import DynamicTable, TableColumn, ElementIdentifiers, NWBTable
 from pynwb import NWBFile
 
+import pandas as pd
 from datetime import datetime
+from dateutil.tz import tzlocal
 
 
 class TestDynamicTable(unittest.TestCase):
@@ -24,6 +26,13 @@ class TestDynamicTable(unittest.TestCase):
         cols = [TableColumn(**d) for d in self.spec]
         table = DynamicTable("with_table_columns", 'PyNWB unit test', 'a test table', columns=cols)
         return table
+
+    def with_columns_and_data(self):
+        columns = [
+            TableColumn(name=s['name'], description=s['description'], data=d)
+            for s, d in zip(self.spec, self.data)
+        ]
+        return DynamicTable("with_columns_and_data", 'PyNWB unit test', 'a test table', columns=columns)
 
     def with_spec(self):
         table = DynamicTable("with_spec", 'PyNWB unit test', 'a test table', columns=self.spec)
@@ -60,22 +69,22 @@ class TestDynamicTable(unittest.TestCase):
     def test_constructor_ids(self):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
-        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', ids=[0, 1, 2, 3, 4], columns=columns)
+        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', id=[0, 1, 2, 3, 4], columns=columns)
         self.check_table(table)
 
     def test_constructor_ElementIdentifier_ids(self):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
         ids = ElementIdentifiers('ids', [0, 1, 2, 3, 4])
-        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', ids=ids, columns=columns)
+        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', id=ids, columns=columns)
         self.check_table(table)
 
     def test_constructor_ids_bad_ids(self):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
-        msg = "must provide same number of ids as length of columns if specifying ids"
+        msg = "must provide same number of ids as length of columns"
         with self.assertRaisesRegex(ValueError, msg):
-            DynamicTable("with_columns", 'PyNWB unit test', 'a test table', ids=[0, 1], columns=columns)
+            DynamicTable("with_columns", 'PyNWB unit test', 'a test table', id=[0, 1], columns=columns)
 
     def add_rows(self, table):
         table.add_row({'foo': 1, 'bar': 10.0, 'baz': 'cat'})
@@ -144,8 +153,122 @@ class TestDynamicTable(unittest.TestCase):
         self.add_rows(table)
 
         nwbfile = NWBFile(source='source', session_description='session_description',
-                          identifier='identifier', session_start_time=datetime.now())
+                          identifier='identifier', session_start_time=datetime.now(tzlocal()))
 
         module_behavior = nwbfile.create_processing_module('a', 'b', 'c')
 
         module_behavior.add_container(table)
+
+    def test_pandas_roundtrip(self):
+        df = pd.DataFrame({
+            'a': [1, 2, 3, 4],
+            'b': ['a', 'b', 'c', '4']
+        }, index=pd.Index(name='an_index', data=[2, 4, 6, 8]))
+
+        table = DynamicTable.from_dataframe(df, 'foo', 'baz')
+        obtained = table.to_dataframe()
+
+        assert df.equals(obtained)
+
+    def test_to_dataframe(self):
+        table = self.with_columns_and_data()
+        expected_df = pd.DataFrame({
+            'foo': [1, 2, 3, 4, 5],
+            'bar': [10.0, 20.0, 30.0, 40.0, 50.0],
+            'baz': ['cat', 'dog', 'bird', 'fish', 'lizard']
+        })
+        obtained_df = table.to_dataframe()
+        assert expected_df.equals(obtained_df)
+
+    def test_from_dataframe(self):
+        df = pd.DataFrame({
+            'foo': [1, 2, 3, 4, 5],
+            'bar': [10.0, 20.0, 30.0, 40.0, 50.0],
+            'baz': ['cat', 'dog', 'bird', 'fish', 'lizard']
+        }).loc[:, ('foo', 'bar', 'baz')]
+
+        obtained_table = DynamicTable.from_dataframe(df, 'test', 'test')
+        self.check_table(obtained_table)
+
+    def test_missing_columns(self):
+        table = self.with_spec()
+
+        with self.assertRaises(ValueError):
+            table.add_row({'bar': 60.0, 'foo': [6]}, None)
+
+    def test_extra_columns(self):
+        table = self.with_spec()
+
+        with self.assertRaises(ValueError):
+            table.add_row({'bar': 60.0, 'foo': 6, 'baz': 'oryx', 'qax': -1}, None)
+
+
+class TestNWBTable(unittest.TestCase):
+
+    def setUp(self):
+        class MyTable(NWBTable):
+            __columns__ = [
+                {'name': 'foo', 'type': str, 'doc': 'the foo column'},
+                {'name': 'bar', 'type': int, 'doc': 'the bar column'},
+            ]
+        self.cls = MyTable
+
+    def basic_data(self):
+        return [
+            [1, 'a'],
+            [2, 'b'],
+            [3, 'c']
+        ]
+
+    def table_with_data(self):
+        return self.cls(
+            name='testing table',
+            data=self.basic_data()
+        )
+
+    def test_init(self):
+        table = self.table_with_data()
+        assert(table['foo', 1]) == 2
+
+    def test_to_dataframe(self):
+        obtained = self.table_with_data().to_dataframe()
+        expected = pd.DataFrame({
+            'foo': [1, 2, 3],
+            'bar': ['a', 'b', 'c']
+        })
+
+        assert expected.equals(obtained)
+
+    def test_from_dataframe(self):
+        df = pd.DataFrame({
+            'bar': ['a', 'b', 'c']
+        }, index=pd.Index(name='foo', data=[1, 2, 3], dtype=int))
+        table = self.cls.from_dataframe(df=df, name='test table')
+
+        assert table['foo', 1] == 2
+
+    def test_dataframe_roundtrip(self):
+        expected = pd.DataFrame({
+            'foo': [1, 2, 3],
+            'bar': ['a', 'b', 'c']
+        })
+        obtained = self.cls.from_dataframe(df=expected, name='test table').to_dataframe()
+        assert expected.equals(obtained)
+
+    def test_from_dataframe_missing_columns(self):
+        df = pd.DataFrame({
+            'bar': ['a', 'b', 'c']
+        })
+
+        with self.assertRaises(ValueError):
+            self.cls.from_dataframe(df=df, name='test_table')
+
+    def test_from_dataframe_extra_columns(self):
+        df = pd.DataFrame({
+            'foo': [1, 2, 3],
+            'bar': ['a', 'b', 'c'],
+            'baz': [-1, -2, -3]
+        })
+
+        with self.assertRaises(ValueError):
+            self.cls.from_dataframe(df=df, name='test_table')

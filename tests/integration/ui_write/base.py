@@ -1,5 +1,6 @@
 import unittest2 as unittest
 from datetime import datetime
+from dateutil.tz import tzlocal, tzutc
 import os
 import numpy as np
 
@@ -43,7 +44,8 @@ class TestMapNWBContainer(unittest.TestCase):
             raise unittest.SkipTest("cannot run construct test for %s -- setUpBuilder not implemented" %
                                     self.__class__.__name__)
         self.maxDiff = None
-        result = self.manager.build(self.container)
+        source = self.__class__.__name__ + ".test_build"
+        result = self.manager.build(self.container, source=source)
         # do something here to validate the result Builder against the spec
         self.assertDictEqual(result, self.builder)
 
@@ -128,8 +130,8 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
         self.container = self.setUpContainer()
-        self.start_time = datetime(1971, 1, 1, 12, 0, 0)
-        self.create_date = datetime(2018, 4, 15, 12, 0, 0)
+        self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
+        self.create_date = datetime(2018, 4, 15, 12, tzinfo=tzlocal())
         self.container_type = self.container.__class__.__name__
         self.filename = 'test_%s.nwb' % self.container_type
         self.writer = None
@@ -163,10 +165,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
             raise e
 
     def test_roundtrip(self):
-        read_container = self.roundtripContainer()
+        self.read_container = self.roundtripContainer()
         # make sure we get a completely new object
-        self.assertNotEqual(id(self.container), id(read_container))
-        self.assertContainerEqual(self.container, read_container)
+        self.assertNotEqual(id(self.container), id(self.read_container))
+        self.assertContainerEqual(self.container, self.read_container)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''

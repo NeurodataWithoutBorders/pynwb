@@ -5,7 +5,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer, NWBDataInterface, ElementIdentifiers, VectorData, VectorIndex, IndexedVector
+from .core import NWBContainer, NWBDataInterface, ElementIdentifiers, VectorData, VectorIndex
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -216,17 +216,20 @@ class UnitTimes(NWBDataInterface):
         if not isinstance(spike_times, VectorData):
             spike_times = VectorData('spike_times', spike_times)
         if not isinstance(spike_times_index, VectorIndex):
-            spike_times_index = VectorIndex('spike_times_index', spike_times_index)
+            spike_times_index = VectorIndex('spike_times_index', spike_times_index, spike_times)
         self.unit_ids = unit_ids
         self.spike_times = spike_times
         self.spike_times_index = spike_times_index
-        self.__iv = IndexedVector(self.spike_times, self.spike_times_index)
+
+    @property
+    def times(self):
+        return self.spike_times_index
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
     def get_unit_spike_times(self, **kwargs):
         index = getargs('index', kwargs)
-        return np.array(self.__iv.get_vector(index))
+        return np.asarray(self.spike_times_index[index])
 
     @docval({'name': 'unit_id', 'type': int, 'doc': 'the unit to add spike times for'},
             {'name': 'spike_times', 'type': ('array_data',), 'doc': 'the spike times for the unit'},
@@ -234,4 +237,4 @@ class UnitTimes(NWBDataInterface):
     def add_spike_times(self, **kwargs):
         unit_id, spike_times = getargs('unit_id', 'spike_times', kwargs)
         self.unit_ids.append(unit_id)
-        return self.__iv.add_vector(spike_times)
+        return self.spike_times_index.add_vector(spike_times)
