@@ -134,7 +134,7 @@ class LFPTest(unittest.TestCase):
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         eS = ElectricalSeries(  # noqa: F405
-            'test_eS', 'a hypothetical source', [[0], [1], [2], [3]], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+            'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         lfp = LFP('test_lfp', eS)  # noqa: F405
         self.assertEqual(lfp.source, 'test_lfp')
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
@@ -148,7 +148,7 @@ class LFPTest(unittest.TestCase):
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         eS = ElectricalSeries(  # noqa: F405
-            'test_eS', 'a hypothetical source', [[0], [1], [2], [3]], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+            'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
         self.assertEqual(lfp['test_eS'], lfp.electrical_series.get('test_eS'))
@@ -162,7 +162,7 @@ class FilteredEphysTest(unittest.TestCase):
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         eS = ElectricalSeries(  # noqa: F405
-            'test_eS', 'a hypothetical source', [[0], [1], [2], [3]], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+            'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         fe = FilteredEphys('test_fe', eS)  # noqa: F405
         self.assertEqual(fe.source, 'test_fe')
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
@@ -176,7 +176,7 @@ class FilteredEphysTest(unittest.TestCase):
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         eS = ElectricalSeries(  # noqa: F405
-            'test_eS', 'a hypothetical source', [[0], [1], [2], [3]], region, timestamps=[0.1, 0.2, 0.3, 0.4])
+            'test_eS', 'a hypothetical source', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         fe.add_electrical_series(eS)
         self.assertEqual(fe.electrical_series.get('test_eS'), eS)
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))
