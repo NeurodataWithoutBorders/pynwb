@@ -33,7 +33,7 @@ class ElectricalSeriesConstructor(unittest.TestCase):
         eS = ElectricalSeries('test_eS', 'a hypothetical source', data, region, timestamps=ts)  # noqa: F405
         self.assertEqual(eS.name, 'test_eS')
         self.assertEqual(eS.source, 'a hypothetical source')
-        self.assertTrue(np.all(eS.data == data))
+        self.assertEqual(eS.data, data)
         self.assertEqual(eS.timestamps, ts)
 
 
@@ -41,7 +41,7 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
     def test_init(self):
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [1, 3], 'the second and fourth electrodes', table)
-        data = np.zeros((10, 10))
+        data = np.zeros(10)
         timestamps = np.arange(10)
         sES = SpikeEventSeries('test_sES', 'a hypothetical source', data, timestamps, region)  # noqa: F405
         self.assertEqual(sES.name, 'test_sES')
