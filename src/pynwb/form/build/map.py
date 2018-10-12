@@ -793,7 +793,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                               % (value.name, getattr(value, self.spec.type_key()),
                                  builder.name, self.spec.data_type_def)
                 warnings.warn(msg, OrphanContainerWarning)
-            if value.modified:
+
+            if value.modified:                   # writing a new container
                 rendered_obj = build_manager.build(value, source=source)
                 # use spec to determine what kind of HDF5
                 # object this Container corresponds to
@@ -804,10 +805,14 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     builder.set_dataset(rendered_obj)
                 else:
                     builder.set_group(rendered_obj)
-            elif value.container_source:
-                if value.container_source != parent_container.container_source:
+            elif value.container_source:        # make a link to an existing container
+                if value.container_source != parent_container.container_source or\
+                   value.parent is not parent_container:
                     rendered_obj = build_manager.build(value, source=source)
                     builder.set_link(LinkBuilder(rendered_obj, parent=builder))
+            else:
+                raise ValueError("Found unmodified Container with no source - '%s' with parent '%s'" %
+                                 (value.name, parent_container.name))
         else:
             if any(isinstance(value, t) for t in (list, tuple)):
                 values = value

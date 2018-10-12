@@ -582,9 +582,6 @@ class HDF5IO(FORMIO):
         else:
             msg = 'cannot create external link to %s' % path
             raise ValueError(msg)
-        if name in parent:
-            import pdb
-            pdb.set_trace()
         parent[name] = link_obj
         builder.written = True
         return link_obj
