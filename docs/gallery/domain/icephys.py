@@ -17,10 +17,11 @@ clarity, we define them here:
 # argument is the source of the NWB file, and the second argument is a brief description of the dataset.
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile
 import numpy as np
 
-nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
                   experimenter='Dr. Bilbo Baggins',
                   lab='Bag End Laboratory',
                   institution='University of Middle Earth at the Shire',
@@ -31,8 +32,8 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 # Device metadata
 # ^^^^^^^^^^^^^^^
 #
-# Device metadata is represented by :py:class:`~pynwb.ecephys.Device` objects.
-# To create a device, you can use the :py:class:`~pynwb.ecephys.Device` instance method
+# Device metadata is represented by :py:class:`~pynwb.device.Device` objects.
+# To create a device, you can use the :py:class:`~pynwb.device.Device` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_device`.
 
 device = nwbfile.create_device(name='Heka ITC-1600', source='a source')
@@ -46,8 +47,9 @@ device = nwbfile.create_device(name='Heka ITC-1600', source='a source')
 # :py:meth:`~pynwb.file.NWBFile.create_ic_electrode`.
 
 elec = nwbfile.create_ic_electrode(
-    name="elec0", source='', slice='', resistance='', seal='', description='',
-    location='', filtering='', initial_access_resistance='', device=device.name)
+    name="elec0", source='PyNWB tutorial example',
+    description='a mock intracellular electrode',
+    device=device)
 
 #######################
 # Stimulus data
@@ -73,6 +75,7 @@ ccss = CurrentClampStimulusSeries(
 
 nwbfile.add_stimulus(ccss)
 
+#######################
 # Here, we will use :py:class:`~pynwb.icephys.VoltageClampSeries` to store voltage clamp
 # data and then add it to our NWBFile as acquired data using the :py:class:`~pynwb.file.NWBFile` method
 # :py:meth:`~pynwb.file.NWBFile.add_acquisition`.
@@ -123,6 +126,7 @@ nwbfile = io.read()
 
 ccss = nwbfile.get_stimulus('ccss')
 
+####################
 # Grabbing acquisition data an be done via :py:meth:`~pynwb.file.NWBFile.get_acquisition`
 
 vcs = nwbfile.get_acquisition('vcs')

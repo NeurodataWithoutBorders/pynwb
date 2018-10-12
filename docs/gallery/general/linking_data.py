@@ -56,14 +56,15 @@ PyNWB supports linking between files using external links.
 
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile
 from pynwb import TimeSeries
 from pynwb import NWBHDF5IO
 import numpy as np
 
 # Create the base data
-start_time = datetime(2017, 4, 3, 11, 0, 0)
-create_date = datetime(2017, 4, 15, 12, 0, 0)
+start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 data = np.arange(1000).reshape((100, 10))
 timestamps = np.arange(100)
 filename1 = 'external1_example.nwb'
@@ -184,7 +185,7 @@ io4.close()
 # .. note::
 #
 #   In the case of TimeSeries one advantage of linking to just the main dataset is that we can now
-#   use our own timestamps in case the timestamps in the original file are not alligned with the
+#   use our own timestamps in case the timestamps in the original file are not aligned with the
 #   clock of the NWBFile we are creating. In this way we can use the linking to "re-align" different
 #   TimeSeries without having to copy the main data.
 

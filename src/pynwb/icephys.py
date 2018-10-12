@@ -5,6 +5,7 @@ from .form.utils import docval, popargs, fmt_docval_args
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer
+from .device import Device
 
 
 @register_class('IntracellularElectrode', CORE_NAMESPACE)
@@ -22,18 +23,19 @@ class IntracellularElectrode(NWBContainer):
                      'device')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode'},
             {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.'},
-            {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.'},
             {'name': 'description', 'type': str,
              'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc) \
              COMMENT: Free-form text (can be from Methods)'},
+            {'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.', 'default': None},
+            {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.', 'default': None},
             {'name': 'location', 'type': str,
-             'doc': 'Area, layer, comments on estimation, stereotaxis coordinates (if in vivo, etc).'},
-            {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance COMMENT: unit: Ohm.'},
-            {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.'},
-            {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.'},
-            {'name': 'device', 'type': str, 'doc': 'Name(s) of devices in general/devices.'})
+             'doc': 'Area, layer, comments on estimation, stereotaxis coordinates (if in vivo, etc).', 'default': None},
+            {'name': 'resistance', 'type': str, 'doc': 'Electrode resistance COMMENT: unit: Ohm.', 'default': None},
+            {'name': 'filtering', 'type': str, 'doc': 'Electrode specific filtering.', 'default': None},
+            {'name': 'initial_access_resistance', 'type': str, 'doc': 'Initial access resistance.', 'default': None},
+            )
     def __init__(self, **kwargs):
         slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs(
             'slice', 'seal', 'description', 'location', 'resistance',
@@ -58,7 +60,8 @@ class PatchClampSeries(TimeSeries):
     '''
 
     __nwbfields__ = ('electrode',
-                     'gain')
+                     'gain',
+                     'stimulus_description')
 
     _ancestry = "TimeSeries,PatchClampSeries"
     _help = "Superclass definition for patch-clamp data."
@@ -76,6 +79,7 @@ class PatchClampSeries(TimeSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
              or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
 
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -99,11 +103,13 @@ class PatchClampSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
+        name, source, data, unit, stimulus_description = popargs('name', 'source', 'data',
+                                                                 'unit', 'stimulus_description', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
         super(PatchClampSeries, self).__init__(name, source, data, unit, **kwargs)
         self.electrode = electrode
         self.gain = gain
+        self.stimulus_description = stimulus_description
 
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)
@@ -134,6 +140,7 @@ class CurrentClampSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or \
              record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
 
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp'},
             {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm'},
@@ -199,6 +206,7 @@ class IZeroClampSeries(CurrentClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
              or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
 
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': 0.0},
             {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': 0.0},
@@ -257,6 +265,7 @@ class CurrentClampStimulusSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to \
              apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
 
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -316,6 +325,7 @@ class VoltageClampSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to \
              apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
             {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad'},
             {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad'},
             {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz'},
@@ -385,6 +395,7 @@ class VoltageClampStimulusSeries(PatchClampSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was \
              used to apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},

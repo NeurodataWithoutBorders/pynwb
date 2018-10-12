@@ -44,7 +44,7 @@ class ImageSeries(TimeSeries):
              This serves as an index to what frames each file contains.', 'default': None},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'Number of bit per image pixel', 'default': None},
             {'name': 'dimension', 'type': Iterable,
-             'doc': 'Number of pixels on x, y, (and z) axes.', 'default': [np.nan]},
+             'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
@@ -68,6 +68,8 @@ class ImageSeries(TimeSeries):
         bits_per_pixel, dimension, external_file, starting_frame, format = popargs(
             'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
         call_docval_func(super(ImageSeries, self).__init__, kwargs)
+        if external_file is None and self.data is None:
+            raise ValueError('must supply either external_file or data to ' + self.name)
         self.bits_per_pixel = bits_per_pixel
         self.dimension = dimension
         self.external_file = external_file

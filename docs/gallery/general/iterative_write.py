@@ -24,7 +24,7 @@ writing large arrays without loading all data into memory and streaming data wri
 # Why Iterative Data Write?
 # ^^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# The possible applications for iterative data write are broad. Here we list a few typcial applications
+# The possible applications for iterative data write are broad. Here we list a few typical applications
 # for iterative data write in practice.
 #
 # * **Large data arrays** A central challenge when dealing with large data arrays is that it is often
@@ -101,6 +101,7 @@ writing large arrays without loading all data into memory and streaming data wri
 # avoid repition of the same code and to allow us to focus on the important parts of this tutorial.
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
 
@@ -113,8 +114,8 @@ def write_test_file(filename, data):
     """
 
     # Create a test NWBfile
-    start_time = datetime(2017, 4, 3, 11, 0, 0)
-    create_date = datetime(2017, 4, 15, 12, 0, 0)
+    start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+    create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
     nwbfile = NWBFile('PyNWB tutorial',
                       'demonstrate NWBFile basics',
                       'NWB123',
@@ -206,7 +207,7 @@ print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
 # in its ``maxshape`` that the first dimensions of our array should be unlimited (``None``) and the second
 # dimension be ``10`` (i.e., the length of our chunk. Since :py:class:`~pynwb.form.data_utils.DataChunkIterator`
 # has no way of knowing the minimum size of the array it automatically recommends the size of the first
-# chunk as the minimum size (i.e, ``(1, 10)`` and also infers the data type automatically from the first chunk.
+# chunk as the minimum size (i.e, ``(1, 10)``) and also infers the data type automatically from the first chunk.
 # To further customize this behavior we may also define the ``maxshape``, ``dtype``, and ``buffer_size`` when
 # we create the :py:class:`~pynwb.form.data_utils.DataChunkIterator`.
 #
@@ -359,7 +360,7 @@ write_test_file(filename='basic_sparse_iterwrite_largechunks_compressed_example.
 # Check the results
 # ^^^^^^^^^^^^^^^^^
 #
-# Now lets check out the size of our data file and compare it agains the expected full size of our matrix
+# Now lets check out the size of our data file and compare it against the expected full size of our matrix
 import os
 
 expected_size = xsize * ysize * 8              # This is the full size of our matrix in byte
@@ -500,7 +501,7 @@ def iter_largearray(filename, shape, dtype='float64'):
     for i in range(shape[0]):
         # Open the file and read the next chunk
         newfp = np.memmap(filename, dtype=dtype, mode='r', shape=shape)
-        curr_data = newfp[i:(i + 1), ...]
+        curr_data = newfp[i:(i + 1), ...][0]
         del newfp  # Reopen the file in each iterator to prevent accumulation of data in memory
         yield curr_data
     return
@@ -516,7 +517,7 @@ from pynwb.form.data_utils import DataChunkIterator
 data = DataChunkIterator(data=iter_largearray(filename='basic_sparse_iterwrite_testdata.npy',
                                               shape=datashape),
                          maxshape=datashape,
-                         buffersize=10)   # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
+                         buffer_size=10)   # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
 
 
 ####################
@@ -551,7 +552,7 @@ data_match = np.all(arrdata == data[:])   # Don't do this for very large arrays!
 if data_match:
     print("Success: All data values match")
 else:
-    print("ERROR: Mismathch between data")
+    print("ERROR: Mismatch between data")
 
 
 ####################

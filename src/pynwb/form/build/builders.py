@@ -37,6 +37,8 @@ class Builder(with_metaclass(ABCMeta, dict)):
 
     @written.setter
     def written(self, s):
+        if self.__written and not s:
+            raise ValueError("cannot change written to not written")
         self.__written = s
 
     @property
@@ -210,7 +212,8 @@ class GroupBuilder(BaseBuilder):
                     #         To allow read to get past this special case, this will skip the issue.
                     warnings.warn("'%s' already exists as %s; skipping..." % (name, self.obj_type[name]))
                 else:
-                    raise KeyError("'%s' already exists as %s" % (name, self.obj_type[name]))
+                    raise KeyError("'%s' already exists as %s in %s, cannot set as %s" %
+                                   (name, self.obj_type[name], self.name, obj_type))
         super(GroupBuilder, self).__getitem__(obj_type)[name] = builder
         self.obj_type[name] = obj_type
         if builder.parent is None:
@@ -262,7 +265,7 @@ class GroupBuilder(BaseBuilder):
     @docval({'name': 'builder', 'type': 'GroupBuilder', 'doc': 'the GroupBuilder that represents this subgroup'})
     def set_group(self, **kwargs):
         ''' Add a subgroup to this group '''
-        name, builder, = getargs('name', 'builder', kwargs)
+        builder = getargs('builder', kwargs)
         self.__set_builder(builder, GroupBuilder.__group)
 
     @docval({'name': 'target', 'type': ('GroupBuilder', 'DatasetBuilder'), 'doc': 'the target Builder'},
@@ -405,7 +408,7 @@ class DatasetBuilder(BaseBuilder):
             'name', 'data', 'dtype', 'attributes', 'maxshape', 'chunks', 'parent', 'source', kwargs)
         super(DatasetBuilder, self).__init__(name, attributes, parent, source)
         self['data'] = data
-        self['attributes'] = _copy.deepcopy(attributes)
+        self['attributes'] = _copy.copy(attributes)
         self.__chunks = chunks
         self.__maxshape = maxshape
         if isinstance(data, BaseBuilder):

@@ -1,4 +1,3 @@
-import collections as _collections
 import itertools as _itertools
 import copy as _copy
 from abc import ABCMeta
@@ -25,7 +24,7 @@ def docval_macro(macro):
 def __type_okay(value, argtype, allow_none=False):
     """Check a value against a type
 
-       The differance between this function and :py:func:`isinstance` is that
+       The difference between this function and :py:func:`isinstance` is that
        it allows specifying a type as a string. Furthermore, strings allow for specifying more general
        types, such as a simple numeric type (i.e. ``argtype``="num").
 
@@ -47,8 +46,6 @@ def __type_okay(value, argtype, allow_none=False):
             return __is_int(value)
         elif argtype is 'float':
             return __is_float(value)
-        elif argtype is 'num':
-            return __is_int(value) or __is_float(value)
         return argtype in [cls.__name__ for cls in value.__class__.__mro__]
     elif isinstance(argtype, type):
         if argtype == six.text_type:
@@ -62,10 +59,8 @@ def __type_okay(value, argtype, allow_none=False):
         return isinstance(value, argtype)
     elif isinstance(argtype, tuple) or isinstance(argtype, list):
         return any(__type_okay(value, i) for i in argtype)
-    elif argtype is None:
+    else:    # argtype is None
         return True
-    else:
-        raise ValueError("argtype must be a type, a str, a list, a tuple, or None")
 
 
 def __is_int(value):
@@ -96,7 +91,7 @@ def __format_type(argtype):
         raise ValueError("argtype must be a type, str, list, or tuple")
 
 
-def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
+def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, allow_extra=False):   # noqa: 901
     """
     Internal helper function used by the docval decroator to parse and validate function arguments
 
@@ -115,6 +110,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
     ret = dict()
     errors = list()
     argsi = 0
+    extras = dict(kwargs)
     try:
         it = iter(validator)
         arg = next(it)
@@ -126,7 +122,8 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
             argname = arg['name']
             argval_set = False
             if argname in kwargs:
-                argval = kwargs[argname]
+                argval = kwargs.get(argname)
+                extras.pop(argname, None)
                 argval_set = True
             elif argsi < len(args):
                 argval = args[argsi]
@@ -148,7 +145,8 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
         while True:
             argname = arg['name']
             if argname in kwargs:
-                ret[argname] = kwargs[argname]
+                ret[argname] = kwargs.get(argname)
+                extras.pop(argname, None)
             elif len(args) > argsi:
                 ret[argname] = args[argsi]
                 argsi += 1
@@ -162,6 +160,14 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True):
             arg = next(it)
     except StopIteration:
         pass
+    if not allow_extra:
+        for key in extras.keys():
+            errors.append("unrecognized argument: '%s'" % key)
+    else:
+        # TODO: Extras get stripped out if function arguments are composed with fmt_docval_args.
+        # allow_extra needs to be tracked on a function so that fmt_docval_args doesn't strip them out
+        for key in extras.keys():
+            ret[key] = extras[key]
     return {'args': ret, 'errors': errors}
 
 
@@ -213,14 +219,19 @@ def fmt_docval_args(func, kwargs):
     func_docval = getattr(func, docval_attr_name, None)
     ret_args = list()
     ret_kwargs = dict()
+    kwargs_copy = _copy.copy(kwargs)
     if func_docval:
         for arg in func_docval[__docval_args_loc]:
-            val = kwargs.get(arg['name'])
+            val = kwargs_copy.pop(arg['name'], None)
             if 'default' in arg:
                 if val is not None:
                     ret_kwargs[arg['name']] = val
             else:
                 ret_args.append(val)
+        if func_docval['allow_extra']:
+            ret_kwargs.update(kwargs_copy)
+    else:
+        raise ValueError('no docval found on %s' % str(func))
     return (ret_args, ret_kwargs)
 
 
@@ -229,29 +240,7 @@ def call_docval_func(func, kwargs):
     return func(*fargs, **fkwargs)
 
 
-def get_docval_args(func):
-    '''get_docval_args(func)
-    Like get_docval, but return only positional arguments
-    '''
-    func_docval = getattr(func, docval_attr_name, None)
-    if func_docval:
-        return tuple(a for a in func_docval[__docval_args_loc] if 'default' not in a)
-    else:
-        return tuple()
-
-
-def get_docval_kwargs(func):
-    '''get_docval_kwargs(func)
-    Like get_docval, but return only keyword arguments
-    '''
-    func_docval = getattr(func, docval_attr_name, None)
-    if func_docval:
-        return tuple(a for a in func_docval[__docval_args_loc] if 'default' in a)
-    else:
-        return tuple()
-
-
-def __resolve_macros(t):
+def __resolve_type(t):
     if t is None:
         return t
     if isinstance(t, str):
@@ -261,15 +250,18 @@ def __resolve_macros(t):
             return t
     elif isinstance(t, type):
         return t
-    else:
+    elif isinstance(t, (list, tuple)):
         ret = list()
         for i in t:
-            resolved = __resolve_macros(i)
+            resolved = __resolve_type(i)
             if isinstance(resolved, tuple):
                 ret.extend(resolved)
             else:
                 ret.append(resolved)
         return tuple(ret)
+    else:
+        msg = "argtype must be a type, a str, a list, a tuple, or None - got %s" % type(t)
+        raise ValueError(msg)
 
 
 def docval(*validator, **options):
@@ -316,16 +308,18 @@ def docval(*validator, **options):
     returns = options.pop('returns', None)
     rtype = options.pop('rtype', None)
     is_method = options.pop('is_method', True)
+    allow_extra = options.pop('allow_extra', False)
     val_copy = __sort_args(_copy.deepcopy(validator))
 
     def dec(func):
         _docval = _copy.copy(options)
+        _docval['allow_extra'] = allow_extra
         func.__name__ = _docval.get('func_name', func.__name__)
         func.__doc__ = _docval.get('doc', func.__doc__)
         pos = list()
         kw = list()
         for a in val_copy:
-            a['type'] = __resolve_macros(a['type'])
+            a['type'] = __resolve_type(a['type'])
             if 'default' in a:
                 kw.append(a)
             else:
@@ -336,10 +330,12 @@ def docval(*validator, **options):
             def func_call(*args, **kwargs):
                 self = args[0]
                 parsed = __parse_args(
-                    _copy.deepcopy(
-                        loc_val), args[1:], kwargs,
-                    enforce_type=enforce_type,
-                    enforce_ndim=enforce_ndim)
+                            _copy.deepcopy(loc_val),
+                            args[1:],
+                            kwargs,
+                            enforce_type=enforce_type,
+                            enforce_ndim=enforce_ndim,
+                            allow_extra=allow_extra)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
@@ -347,7 +343,11 @@ def docval(*validator, **options):
                 return func(self, **parsed['args'])
         else:
             def func_call(*args, **kwargs):
-                parsed = __parse_args(_copy.deepcopy(loc_val), args, kwargs, enforce_type=enforce_type)
+                parsed = __parse_args(_copy.deepcopy(loc_val),
+                                      args,
+                                      kwargs,
+                                      enforce_type=enforce_type,
+                                      allow_extra=allow_extra)
                 parse_err = parsed.get('errors')
                 if parse_err:
                     msg = ', '.join(parse_err)
@@ -495,43 +495,13 @@ class ExtenderMeta(ABCMeta):
             func(name, bases, classdict)
 
 
-class frozendict(_collections.Mapping):
-    '''An immutable dict
-
-    This will be useful for getter of dicts that we don't want to support
-    '''
-    def __init__(self, somedict):
-        self._dict = somedict   # make a copy
-        self._hash = None
-
-    def __getitem__(self, key):
-        return self._dict[key]
-
-    def get(self, key, default=None):
-        return self._dict.get(key, default)
-
-    def __len__(self):
-        return len(self._dict)
-
-    def __iter__(self):
-        return iter(self._dict)
-
-    def __hash__(self):
-        if self._hash is None:
-            self._hash = hash(frozenset(self._dict.items()))
-        return self._hash
-
-    def __eq__(self, other):
-        return self._dict == other._dict
-
-    def __contains__(self, key):
-        return self._dict.__contains__(key)
-
-    def keys(self):
-        return self._dict.keys()
-
-    def values(self):
-        return self._dict.values()
-
-    def items(self):
-        return self._dict.items()
+def pystr(s):
+    """
+    Cross-version support for convertin a string of characters to Python str object
+    """
+    if six.PY2 and isinstance(s, six.text_type):
+        return s.encode('ascii', 'ignore')
+    elif six.PY3 and isinstance(s, six.binary_type):
+        return s.decode('utf-8')
+    else:
+        return s

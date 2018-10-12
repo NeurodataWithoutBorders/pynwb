@@ -284,6 +284,11 @@ class DataChunk(object):
         else:
             return 0
 
+    # Delegate attribute lookup to data object (See issue #636
+    # https://github.com/NeurodataWithoutBorders/pynwb/issues/636#issuecomment-426742988)
+    def __getattr__(self, attr):
+        return getattr(self.data, attr)
+
 
 class ShapeValidator(object):
     """
@@ -310,7 +315,7 @@ class ShapeValidator(object):
                     along each dimensions would potentially be loaded into memory. By setting this option
                     we enforce that this does not happen, at the cost that we may not be able to determine
                     the shape of the array.
-        :return: Tuple of ints indicating the size of known dimensions. Dimenions for which the size is unknown
+        :return: Tuple of ints indicating the size of known dimensions. Dimensions for which the size is unknown
                  will be set to None.
         """
         def __get_shape_helper(local_data):
@@ -399,7 +404,7 @@ class ShapeValidator(object):
             elif np.max(response.axes2) >= num_dims_2:
                 response.message += "Insufficient number of dimensions for %s -- Expected %i found %i" % \
                                     (n2, np.max(response.axes2)+1, num_dims_2)
-        # 4) Compare the lenght of the dimensions we should validate
+        # 4) Compare the length of the dimensions we should validate
         else:
             unmatched = []
             ignored = []
@@ -412,7 +417,7 @@ class ShapeValidator(object):
             response.unmatched = unmatched
             response.ignored = ignored
 
-            # Check if everyting checked out
+            # Check if everything checked out
             if len(response.unmatched) == 0:
                 response.result = True
                 response.error = None
@@ -451,7 +456,7 @@ class ShapeValidatorResult(object):
                    'AXIS_OUT_OF_BOUNDS': "Axis index for comparison out of bounds.",
                    'AXIS_LEN_ERROR': "Unequal length of axes."}
     """
-    Dict where the Keys are the type of errors that may have occured during shape comparison and the
+    Dict where the Keys are the type of errors that may have occurred during shape comparison and the
     values are strings with default error messages for the type.
     """
 
@@ -512,6 +517,19 @@ class DataIO(with_metaclass(ABCMeta, object)):
     @property
     def data(self):
         return self.__data
+
+    # Delegate attribute lookup to data object (See issue #636
+    # https://github.com/NeurodataWithoutBorders/pynwb/issues/636#issuecomment-426742988)
+    def __getattr__(self, attr):
+        return getattr(self.data, attr)
+
+    # Delegate iteration interface to data object:
+    def __next__(self):
+        return self.data.__next__()
+
+    # Delegate iteration interface to data object:
+    def __iter__(self):
+        return self.data.__iter__()
 
 
 class RegionSlicer(with_metaclass(ABCMeta, DataRegion)):

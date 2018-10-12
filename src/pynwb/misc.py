@@ -5,7 +5,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer, NWBDataInterface, ElementIdentifiers, VectorData, VectorIndex, IndexedVector
+from .core import NWBContainer, NWBDataInterface, ElementIdentifiers, VectorData, VectorIndex
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -16,9 +16,6 @@ class AnnotationSeries(TimeSeries):
     add_annotation() and then call finalize(). Alternatively, if
     all annotations are already stored in a list, use set_data()
     and set_timestamps()
-
-    All time series are created by calls to  NWB.create_timeseries().
-    They should not not be instantiated directly
     """
 
     __nwbfields__ = ()
@@ -45,7 +42,7 @@ class AnnotationSeries(TimeSeries):
     def __init__(self, **kwargs):
         name, source, data, timestamps = popargs('name', 'source', 'data', 'timestamps', kwargs)
         super(AnnotationSeries, self).__init__(name, source, data, 'n/a',
-                                               resolution=np.nan, conversion=np.nan,
+                                               resolution=-1.0, conversion=1.0,
                                                timestamps=timestamps, **kwargs)
 
     @docval({'name': 'time', 'type': float, 'doc': 'The time for the anotation'},
@@ -68,9 +65,6 @@ class AbstractFeatureSeries(TimeSeries):
     and not of high value, while the salient characteristics (eg,
     orientation, spatial frequency, contrast, etc) are what important
     and are what are used for analysis
-
-    All time series are created by calls to  NWB.create_timeseries().
-    They should not not be instantiated directly
     """
 
     __nwbfields__ = ('feature_units',
@@ -111,10 +105,11 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'parent', 'type': NWBContainer,
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data = popargs('name', 'source', 'data', kwargs)
+        name, source, data, features, feature_units = popargs('name', 'source', 'data',
+                                                              'features', 'feature_units', kwargs)
         super(AbstractFeatureSeries, self).__init__(name, source, data, "see 'feature_units'", **kwargs)
-        self.features = getargs('features', kwargs)
-        self.feature_units = getargs('feature_units', kwargs)
+        self.features = features
+        self.feature_units = feature_units
 
     @docval({'name': 'time', 'type': float, 'doc': 'the time point of this feature'},
             {'name': 'features', 'type': (list, np.ndarray), 'doc': 'the feature values for this time point'})
@@ -166,8 +161,8 @@ class IntervalSeries(TimeSeries):
         self.__interval_data = data
         super(IntervalSeries, self).__init__(name, source, data, unit,
                                              timestamps=timestamps,
-                                             resolution=_default_resolution,
-                                             conversiont=_default_conversion,
+                                             resolution=-1.0,
+                                             conversion=1.0,
                                              **kwargs)
 
     @docval({'name': 'start', 'type': float, 'doc': 'The name of this TimeSeries dataset'},
@@ -221,17 +216,20 @@ class UnitTimes(NWBDataInterface):
         if not isinstance(spike_times, VectorData):
             spike_times = VectorData('spike_times', spike_times)
         if not isinstance(spike_times_index, VectorIndex):
-            spike_times_index = VectorIndex('spike_times_index', spike_times_index)
+            spike_times_index = VectorIndex('spike_times_index', spike_times_index, spike_times)
         self.unit_ids = unit_ids
         self.spike_times = spike_times
         self.spike_times_index = spike_times_index
-        self.__iv = IndexedVector(self.spike_times, self.spike_times_index)
+
+    @property
+    def times(self):
+        return self.spike_times_index
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
     def get_unit_spike_times(self, **kwargs):
         index = getargs('index', kwargs)
-        return self.__iv.get_vector(index)
+        return np.asarray(self.spike_times_index[index])
 
     @docval({'name': 'unit_id', 'type': int, 'doc': 'the unit to add spike times for'},
             {'name': 'spike_times', 'type': ('array_data',), 'doc': 'the spike times for the unit'},
@@ -239,4 +237,4 @@ class UnitTimes(NWBDataInterface):
     def add_spike_times(self, **kwargs):
         unit_id, spike_times = getargs('unit_id', 'spike_times', kwargs)
         self.unit_ids.append(unit_id)
-        return self.__iv.add_vector(spike_times)
+        return self.spike_times_index.add_vector(spike_times)

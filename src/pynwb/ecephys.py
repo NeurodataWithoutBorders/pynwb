@@ -1,5 +1,4 @@
 import numpy as np
-from h5py import RegionReference
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, call_docval_func
@@ -7,22 +6,8 @@ from .form.data_utils import DataChunkIterator, ShapeValidator
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, NWBTable, NWBTableRegion, NWBDataInterface, MultiContainerInterface
-
-
-@register_class('Device', CORE_NAMESPACE)
-class Device(NWBContainer):
-    """
-    """
-
-    __nwbfields__ = ('name',)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
-    def __init__(self, **kwargs):
-        call_docval_func(super(Device, self).__init__, kwargs)
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
+from .device import Device
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
@@ -64,40 +49,6 @@ _et_docval = [
 ]
 
 
-@register_class('ElectrodeTable', CORE_NAMESPACE)
-class ElectrodeTable(NWBTable):
-    '''A table of all electrodes'''
-
-    __columns__ = _et_docval
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
-    def __init__(self, **kwargs):
-        data, name = getargs('data', 'name', kwargs)
-        colnames = [i['name'] for i in _et_docval]
-        super(ElectrodeTable, self).__init__(colnames, name, data)
-
-    @docval(*_et_docval)
-    def add_row(self, **kwargs):
-        kwargs['group_name'] = kwargs['group'].name
-        super(ElectrodeTable, self).add_row(kwargs)
-
-
-@register_class('ElectrodeTableRegion', CORE_NAMESPACE)
-class ElectrodeTableRegion(NWBTableRegion):
-    '''A subsetting of an ElectrodeTable'''
-
-    __nwbfields__ = ('description',)
-
-    @docval({'name': 'table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable this region applies to'},
-            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
-    def __init__(self, **kwargs):
-        call_docval_func(super(ElectrodeTableRegion, self).__init__, kwargs)
-        self.description = getargs('description', kwargs)
-
-
 @register_class('ElectricalSeries', CORE_NAMESPACE)
 class ElectricalSeries(TimeSeries):
     """
@@ -120,7 +71,7 @@ class ElectricalSeries(TimeSeries):
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -175,7 +126,7 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data'},
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -345,7 +296,6 @@ class LFP(MultiContainerInterface):
         'add': 'add_electrical_series',
         'get': 'get_electrical_series',
         'create': 'create_electrical_series',
-        'get': 'get_electrical_series'
     }
 
     __help = ("LFP data from one or more channels. Filter properties "
@@ -393,7 +343,7 @@ class FeatureExtraction(NWBDataInterface):
     __help = "Container for salient features of detected events"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data'},
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator),
              'doc': 'A description for each feature extracted', 'ndim': 1},
@@ -443,7 +393,7 @@ class FeatureExtraction(NWBDataInterface):
         if raise_error:
             raise TypeError(error_msg)
 
-        # Initalize the object
+        # Initialize the object
         super(FeatureExtraction, self).__init__(source, **kwargs)
         self.electrodes = electrodes
         self.description = description

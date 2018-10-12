@@ -30,7 +30,7 @@ crcns-ret-1: Meister lab retina data
 * **Comparison to NWB 1.0.x`:**
 
     * **Notebook:** https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/docs/notebooks/convert-crcns-ret-1-meisterlab-compare-nwb-1.0.6.ipynb
-    * **Description:** This notebook shows the convert of the same data using the orginal NWB 1.0.x API to allow for comparison of the
+    * **Description:** This notebook shows the convert of the same data using the original NWB 1.0.x API to allow for comparison of the
       NWB 1.0.x and NWB 2.x file.
 
 

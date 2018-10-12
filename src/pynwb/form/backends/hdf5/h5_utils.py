@@ -6,6 +6,7 @@ import json
 import h5py
 import numpy as np
 import warnings
+import os
 
 from ...query import FORMDataset
 from ...array import Array
@@ -151,6 +152,8 @@ class H5SpecReader(SpecReader):
     @docval({'name': 'group', 'type': Group, 'doc': 'the HDF5 file to read specs from'})
     def __init__(self, **kwargs):
         self.__group = getargs('group', kwargs)
+        super_kwargs = {'source': "%s:%s" % (os.path.abspath(self.__group.file.name), self.__group.name)}
+        call_docval_func(super(H5SpecReader, self).__init__, super_kwargs)
 
     def __read(self, path):
         s = self.__group[path][()]
@@ -220,7 +223,7 @@ class H5DataIO(DataIO):
              'default': None},
             {'name': 'fillvalue',
              'type': None,
-             'doc': 'Value to eb returned when reading uninitalized parts of the dataset',
+             'doc': 'Value to eb returned when reading uninitialized parts of the dataset',
              'default': None},
             {'name': 'shuffle',
              'type': bool,

@@ -3,7 +3,7 @@
 Validating NWB files
 ====================
 
-Validating NWB files is handled by a command-line tool availble in :py:mod:`~pynwb`. The validator can be invoked like so:
+Validating NWB files is handled by a command-line tool available in :py:mod:`~pynwb`. The validator can be invoked like so:
 
 .. code-block:: bash
 

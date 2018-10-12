@@ -1,12 +1,15 @@
 from bisect import bisect_left
 
-from .form.utils import docval, getargs, popargs, call_docval_func
+from .form.utils import docval, getargs, popargs, call_docval_func, get_docval
 from .form.data_utils import DataIO, RegionSlicer
 from .form import get_region_slicer
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import NWBContainer, NWBTable, NWBTableRegion
+from .core import NWBContainer, NWBTable, NWBTableRegion, DynamicTable
+
+import pandas as pd
+import six
 
 
 _evtable_docval = [
@@ -71,7 +74,8 @@ class Epochs(NWBContainer):
 
     __nwbfields__ = (
             {'name': 'epochs', 'child': True},
-            {'name': 'timeseries_index', 'child': True}
+            {'name': 'timeseries_index', 'child': True},
+            {'name': 'metadata', 'child': True}
     )
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
@@ -79,21 +83,30 @@ class Epochs(NWBContainer):
             {'name': 'epochs', 'type': EpochTable, 'doc': 'the EpochTable holding information about each epoch',
              'default': None},
             {'name': 'timeseries_index', 'type': TimeSeriesIndex,
-             'doc': 'the TimeSeriesIndex table holding indices into each TimeSeries for each epoch', 'default': None})
+             'doc': 'the TimeSeriesIndex table holding indices into each TimeSeries for each epoch', 'default': None},
+            {'name': 'metadata', 'type': DynamicTable, 'doc': 'a metadata table for the epochs',
+             'default': None})
     def __init__(self, **kwargs):
-        epochs, timeseries_index = popargs('epochs', 'timeseries_index', kwargs)
+        epochs, timeseries_index, metadata = popargs('epochs', 'timeseries_index', 'metadata', kwargs)
         call_docval_func(super(Epochs, self).__init__, kwargs)
         self.epochs = epochs if epochs is not None else EpochTable()
         self.timeseries_index = timeseries_index if timeseries_index else TimeSeriesIndex()
+        if metadata is not None:
+            self.metadata = metadata
+
+    def __check_metadata(self):
+        if self.metadata is None:
+            self.metadata = DynamicTable('metadata', self.source, 'a table for metadata about each epoch')
 
     @docval({'name': 'description', 'type': str, 'doc': 'a description of this epoch'},
             {'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
             {'name': 'stop_time', 'type': float, 'doc': 'Stop time of epoch, in seconds'},
             {'name': 'tags', 'type': (str, list, tuple), 'doc': 'user-defined tags uesd throughout epochs'},
-            {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to'})
+            {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to'},
+            {'name': 'metadata', 'type': dict, 'doc': 'the metadata about this epoch', 'default': None})
     def add_epoch(self, **kwargs):
-        description, start_time, stop_time, tags, timeseries =\
-            getargs('description', 'start_time', 'stop_time', 'tags', 'timeseries', kwargs)
+        description, start_time, stop_time, tags, timeseries, metadata =\
+            getargs('description', 'start_time', 'stop_time', 'tags', 'timeseries', 'metadata', kwargs)
         if isinstance(timeseries, TimeSeries):
             timeseries = [timeseries]
         n_tsi = len(self.timeseries_index)
@@ -105,6 +118,24 @@ class Epochs(NWBContainer):
         if isinstance(tags, (tuple, list)):
             tags = ",".join(tags)
         self.epochs.add_row(start_time, stop_time, tags, tsi_region, description)
+        if metadata is None:
+            if self.metadata is not None:
+                raise ValueError("must consistently provide metdata for epochs")
+        else:
+            self.__check_metadata()
+            if len(self.metadata) != len(self.epochs) - 1:
+                raise ValueError("must consistently provide metdata for epochs")
+            self.metadata.add_row(metadata)
+
+    @docval(*get_docval(DynamicTable.add_column))
+    def add_metadata_column(self, **kwargs):
+        """
+        Add a column to the trial table. See DynamicTable.add_column for more details
+        """
+        self.__check_metadata()
+        if len(self.epochs) > 0 or len(self.metadata) > 0:
+            raise ValueError("cannot add columns after table has been populated")
+        call_docval_func(self.metadata.add_column, kwargs)
 
     def get_timeseries(self, epoch_idx, ts_name):
         ep_row = self.epochs[epoch_idx]
@@ -137,3 +168,97 @@ class Epochs(NWBContainer):
         count = stop_idx - start_idx
         idx_start = start_idx
         return (int(idx_start), int(count))
+
+    def to_dataframe(self):
+        '''Produce a pandas DataFrame from this Epochs' data
+        '''
+
+        epochs_df = self.epochs.to_dataframe()
+        metadata_df = self.metadata.to_dataframe()
+
+        timeseries_arr = []
+        for ep_idx in range(len(self.epochs)):
+            ep = self.epochs[ep_idx]
+            current = []
+            for timeseries in ep[3]:
+                current.append(timeseries[2])
+            timeseries_arr.append(current)
+        epochs_df['timeseries'] = timeseries_arr
+
+        return epochs_df.merge(metadata_df, left_index=True, right_index=True)
+
+    @classmethod
+    @docval(
+        {'name': 'df', 'type': pd.DataFrame, 'doc': 'source dataframe'},
+        {'name': 'source', 'type': str, 'doc': 'the source of the data'},
+        {'name': 'name', 'type': str, 'doc': 'name of this epochs container'},
+        {
+            'name': 'descriptions',
+            'type': list(six.string_types) + [list, tuple, 'array_data'],
+            'description': (
+                'either a string naming a dataframe column whose values are descriptions or an array of descriptions'
+            ),
+            'default': 'description'
+        },
+        {
+            'name': 'start_times',
+            'type': list(six.string_types) + [list, tuple, 'array_data'],  # TODO: support TimeSeries here?
+            'description': 'a string naming a dataframe column whose values are start times or an array of start times',
+            'default': 'start_time'
+        },
+        {
+            'name': 'stop_times',
+            'type': list(six.string_types) + [list, tuple, 'array_data'],  # TODO: support TimeSeries here?
+            'description': 'a string naming a dataframe column whose values are stop times or an array of stop times',
+            'default': 'stop_time'
+        },
+        {
+            'name': 'timeseries',
+            'type': list(six.string_types) + [list, tuple, 'array_data'],
+            'description': 'a string naming a dataframe column whose values are timeseries or an array of timeseries',
+            'default': 'timeseries'
+        },
+        {
+            'name': 'tags',
+            'type': list(six.string_types) + [list, tuple, 'array_data'],
+            'description': 'either a string naming a dataframe column whose values are tags or an array of tags',
+            'default': 'tags'
+        }
+    )
+    def from_dataframe(cls, **kwargs):
+        '''Instantiate an Epochs from a pandas DataFrame.
+        '''
+
+        df, source, name, descriptions, start_times, stop_times, timeseries, tags = getargs(
+            'df', 'source', 'name', 'descriptions', 'start_times', 'stop_times', 'timeseries', 'tags',
+            kwargs
+        )
+
+        df = df.copy()
+        if isinstance(descriptions, six.string_types):
+            descriptions = df.pop(descriptions).values.tolist()
+        if isinstance(start_times, six.string_types):
+            start_times = df.pop(start_times).values.tolist()
+        if isinstance(stop_times, six.string_types):
+            stop_times = df.pop(stop_times).values.tolist()
+        if isinstance(timeseries, six.string_types):
+            timeseries = df.pop(timeseries).values.tolist()
+        if isinstance(tags, six.string_types):
+            tags = df.pop(tags).values.tolist()
+
+        obj = cls(source=source, name=name)
+
+        for colname in df.columns.values:
+            obj.add_metadata_column(name=colname)
+
+        for ii, row in df.iterrows():
+            obj.add_epoch(
+                description=descriptions[ii],
+                start_time=start_times[ii],
+                stop_time=stop_times[ii],
+                tags=tags[ii],
+                timeseries=timeseries[ii],
+                metadata=row.to_dict()
+            )
+
+        return obj

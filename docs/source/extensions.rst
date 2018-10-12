@@ -5,6 +5,11 @@ Extending NWB
 
 The following page will discuss how to extend NWB using PyNWB.
 
+.. note::
+
+    A simple example demonstrating the creation and use of a custom extension is available as part of the
+    tutorial :ref:`tutorial-extending-nwb`.
+
 .. _creating-extensions:
 
 Creating new Extensions
@@ -35,6 +40,7 @@ Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
     from pynwb.spec import NWBDatasetSpec
 
     spec = NWBDatasetSpec('A custom NWB type',
+                        name='qux',
                         attribute=[
                             NWBAttributeSpec('baz', 'a value for baz', 'str'),
                         ],
@@ -52,6 +58,7 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
     from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
 
     spec = NWBDatasetSpec('A custom NWB type',
+                        name='qux',
                         attribute=[
                             NWBAttributeSpec('baz', 'a value for baz', 'str'),
                         ],
@@ -60,20 +67,20 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
                             NWBDtypeSpec('bar', 'a column for bar', 'float')
                         ])
 
-Compound data types can be nested.
-
-.. code-block:: python
-
-    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
-
-    spec = NWBDatasetSpec('A custom NWB type',
-                        attribute=[
-                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
-                        ],
-                        dtype=[
-                            NWBDtypeSpec('foo', 'a column for foo', 'int'),
-                            NWBDtypeSpec('bar', 'a column for bar', 'float')
-                        ])
+# Compound data types can be nested.
+#
+# .. code-block:: python
+#
+#     from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
+#
+#     spec = NWBDatasetSpec('A custom NWB type',
+#                         attribute=[
+#                             NWBAttributeSpec('baz', 'a value for baz', 'str'),
+#                         ],
+#                         dtype=[
+#                             NWBDtypeSpec('foo', 'a column for foo', 'int'),
+#                             NWBDtypeSpec('bar', 'a column for bar', 'float')
+#                         ])
 
 Group Specifications
 ^^^^^^^^^^^^^^^^^^^^
@@ -85,9 +92,10 @@ Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
     from pynwb.spec import NWBGroupSpec
 
     spec = NWBGroupSpec('A custom NWB type',
-                        attributes = [...],
-                        datasets = [...],
-                        groups = [...])
+                        name='quux',
+                        attributes=[...],
+                        datasets=[...],
+                        groups=[...])
 
 Neurodata Type Specifications
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -109,9 +117,9 @@ Create a new type
     # A list of NWBDatasetSpec objects to specify new groups
     addl_groups = [...]
     spec = NWBGroupSpec('A custom NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
-                        groups = addl_groups,
+                        attributes=addl_attributes,
+                        datasets=addl_datasets,
+                        groups=addl_groups,
                         neurodata_type_def='MyNewNWBType')
 
 Extend an existing type
@@ -120,16 +128,16 @@ Extend an existing type
 
     from pynwb.spec import NWBGroupSpec
 
-    # A list of NWBAttributeSpec objects to specify additional attributes or attributes to be overriden
+    # A list of NWBAttributeSpec objects to specify additional attributes or attributes to be overridden
     addl_attributes = [...]
-    # A list of NWBDatasetSpec objects to specify additional datasets or datasets to be overriden
+    # A list of NWBDatasetSpec objects to specify additional datasets or datasets to be overridden
     addl_datasets = [...]
-    # A list of NWBGroupSpec objects to specify additional groups or groups to be overriden
+    # A list of NWBGroupSpec objects to specify additional groups or groups to be overridden
     addl_groups = [...]
     spec = NWBGroupSpec('An extended NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
-                        groups = addl_groups,
+                        attributes=addl_attributes,
+                        datasets=addl_datasets,
+                        groups=addl_groups,
                         neurodata_type_inc='Clustering',
                         neurodata_type_def='MyExtendedClustering')
 
@@ -145,7 +153,7 @@ Existing types can be instantiated by specifying `neurodata_type_inc` alone.
                                  neurodata_type_inc='ElectricalSeries') ]
 
     spec = NWBGroupSpec('An extended NWB type',
-                        groups = addl_groups,
+                        groups=addl_groups,
                         neurodata_type_inc='Clustering',
                         neurodata_type_def='MyExtendedClustering')
 
@@ -177,16 +185,16 @@ Create a new namespace with extensions
 
     # create extensions
     ext1 = NWBGroupSpec('A custom Clustering interface',
-                        attributes = [...]
-                        datasets = [...],
-                        groups = [...],
+                        attributes=[...]
+                        datasets=[...],
+                        groups=[...],
                         neurodata_type_inc='Clustering',
                         neurodata_type_def='MyExtendedClustering')
 
     ext2 = NWBGroupSpec('A custom ClusterWaveforms interface',
-                        attributes = [...]
-                        datasets = [...],
-                        groups = [...],
+                        attributes=[...]
+                        datasets=[...],
+                        groups=[...],
                         neurodata_type_inc='ClusterWaveforms',
                         neurodata_type_def='MyExtendedClusterWaveforms')
 
@@ -208,7 +216,7 @@ Create a new namespace with extensions
 
     Using the API to generate extensions (rather than writing YAML sources directly) helps avoid errors in the specification
     (e.g., due to missing required keys or invalid values) and ensure compliance of the extension definition with the
-    NWB specification language. It also helps with maintanence of extensions, e.g., if extensions have to be ported to
+    NWB specification language. It also helps with maintenance of extensions, e.g., if extensions have to be ported to
     newer versions of the `specification language <https://schema-language.readthedocs.io/en/latest/>`_
     in the future.
 
@@ -232,6 +240,9 @@ The following code demonstrates how to load custom namespaces.
 
     This will register all namespaces defined in the file ``'my_namespace.yaml'``.
 
+NWBContainer : Representing custom data
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
 To read and write custom data, corresponding :py:class:`~pynwb.core.NWBContainer` classes must be associated with their respective specifications.
 :py:class:`~pynwb.core.NWBContainer` classes are associated with their respective specification using the decorator :py:func:`~pynwb.register_class`.
 
@@ -240,7 +251,7 @@ The following code demonstrates how to associate a specification with the :py:cl
 .. code-block:: python
 
     from pynwb import register_class
-    @register_class('my_namespace', 'MyExtension')
+    @register_class('MyExtension', 'my_namespace')
     class MyExtensionContainer(NWBContainer):
         ...
 
@@ -252,6 +263,24 @@ The following code demonstrates how to associate a specification with the :py:cl
     class MyExtensionContainer(NWBContainer):
         ...
     register_class('my_namespace', 'MyExtension', MyExtensionContainer)
+
+If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your extension specification,
+a dynamically created class is created by default.
+
+To use the dynamic class, you will need to retrieve the class object using the function :py:func:`~pynwb.get_class`.
+Once you have retrieved the class object, you can use it just like you would a statically defined class.
+
+.. code-block:: python
+
+    from pynwb import get_class
+    MyExtensionContainer = get_class('my_namespace', 'MyExtension')
+    my_ext_inst = MyExtensionContainer(...)
+
+
+If using iPython, you can access documentation for the class's constructor using the help command.
+
+ObjectMapper : Customizing the mapping between NWBContainer and the Spec
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer`
 class for reading and writing, you will need to implement and register a custom :py:class:`~pynwb.form.build.map.ObjectMapper`.
@@ -276,21 +305,20 @@ class for reading and writing, you will need to implement and register a custom 
         ...
     register_map(MyExtensionContainer, MyExtensionMapper)
 
+.. tip::
 
-If you do not have an :py:class:`~pynwb.core.NWBContainer` subclass to associate with your extension specification,
-a dynamically created class is created by default.
+    ObjectMappers allow you to customize how objects in the spec are mapped to attributes of your NWBContainer in
+    Python. This is useful, e.g., in cases where you want ot customize the default mapping. For example in
+    TimeSeries the attribute ``unit`` which is defined on the dataset ``data`` (i.e., ``data.unit``) would
+    by default be mapped to the attribute ``data_unit`` on :py:class:`~pynwb.base.TimeSeries`. The ObjectMapper
+    :py:class:`~pynwb.io.base.TimeSeriesMap` then changes this mapping to map ``data.unit`` to the attribute ``unit``
+    on :py:class:`~pynwb.base.TimeSeries` . ObjectMappers also allow you to customize how constructor arguments
+    for your ``NWBContainer`` are constructed. E.g., in TimeSeries instead of explicit ``timestamps`` we
+    may only have a ``starting_time`` and ``rate``. In the ObjectMapper we could then construct ``timestamps``
+    from this data on data load to always have ``timestamps`` available for the user.
+    For an overview of the concepts of containers, spec, builders, object mappers in PyNWB see also
+    :ref:`software-architecture`
 
-To use the dynamic class, you will need to retrieve the class object using the function :py:func:`~pynwb.get_class`.
-Once you have retrieved the class object, you can use it just like you would a statically defined class.
-
-.. code-block:: python
-
-    from pynwb import get_class
-    MyExtensionContainer = get_class('my_namespace', 'MyExtension')
-    my_ext_inst = MyExtensionContainer(...)
-
-
-If using iPython, you can access documentation for the class's constructor using the help command.
 
 .. _documenting-extensions:
 
@@ -300,30 +328,34 @@ Documenting Extensions
 Using the same tools used to generate the documentation for the `NWB-N core format <https://nwb-schema.readthedocs.io/en/latest/>`_
 one can easily generate documentation in HTML, PDF, ePub and many other format for extensions as well.
 
-Code to generate this documentation is maintained in a separate repo: https://github.com/NeurodataWithoutBorders/nwb-docutils
-
-For the purpose of this example we assume that our current directory has the following structure.
+Code to generate this documentation is maintained in a separate repo: https://github.com/NeurodataWithoutBorders/nwb-docutils. To use these utilities, install the package with pip:
 
 .. code-block:: text
 
-    - nwb_schema (cloned from `https://github.com/NeurodataWithoutBorders/nwb-schema`)
-    - my_extension/
-        - my_extension_source/
-            - mylab.namespace.yaml
-            - mylab.specs.yaml
-            - ...
-            - docs/  (Optional)
-                - mylab_description.rst
-                - mylab_release_notes.rst
+    pip install nwb-docutils
 
-In addition to Python 3.x you will also need ``sphinx`` (including the ``sphinx-quickstart`` tool) installed.
-Sphinx is availble here http://www.sphinx-doc.org/en/stable/install.html .
+For the purpose of this example, we assume that our current directory has the following structure.
+
+
+.. code-block:: text
+
+    - my_extension/
+      - my_extension_source/
+          - mylab.namespace.yaml
+          - mylab.specs.yaml
+          - ...
+          - docs/  (Optional)
+              - mylab_description.rst
+              - mylab_release_notes.rst
+
+In addition to Python 3.x, you will also need ``sphinx`` (including the ``sphinx-quickstart`` tool) installed.
+Sphinx is available here http://www.sphinx-doc.org/en/stable/install.html .
 
 We can now create the sources of our documentation as follows:
 
 .. code-block:: text
 
-    python3 nwb-schema/docs/utils/init_sphinx_extension_doc.py \
+    python3 nwb_init_sphinx_extension_doc  \
                  --project test \
                  --author "Dr. Master Expert" \
                  --version "1.2.3" \

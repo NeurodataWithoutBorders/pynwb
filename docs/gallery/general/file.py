@@ -16,10 +16,11 @@ including writing and reading of and NWB file.
 #
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile
 
-start_time = datetime(2017, 4, 3, 11, 0, 0)
-create_date = datetime(2017, 4, 15, 12, 0, 0)
+start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
 nwbfile = NWBFile('PyNWB tutorial', 'demonstrate NWBFile basics', 'NWB123', start_time,
                   file_create_date=create_date)
@@ -141,6 +142,59 @@ nwbfile.create_epoch('the first epoch', 2.0, 4.0, ['first', 'example'], [test_ts
 nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 
 ####################
+# .. _basic_trials:
+#
+# Trials
+# ------
+#
+# Trials can be added to an NWB file using the methods :py:func:`~pynwb.file.NWBFile.add_trial`
+# and :py:func:`~pynwb.file.NWBFile.add_trial_column`. Together, these methods maintains a
+# table-like structure that can define arbitrary columns without having to go through the
+# extension process.
+#
+# By default, NWBFile only requires trial start time and trial end time. Additional columns
+# can be added using :py:func:`~pynwb.file.NWBFile.add_trial_column`. This method takes a name
+# for the column and a description of what the column stores. You do not need to supply data
+# type, as this will inferred.
+# Once all columns have been added, trial data can be populated using :py:func:`~pynwb.file.NWBFile.add_trial`.
+# This method takes a dict with keys that correspond to column names.
+#
+# Lets add an additional column and some trial data.
+
+nwbfile.add_trial_column('stim', 'the visual stimuli during the trial')
+
+nwbfile.add_trial({'start': 0, 'end': 2, 'stim': 'person'})
+nwbfile.add_trial({'start': 3, 'end': 5, 'stim': 'ocean'})
+nwbfile.add_trial({'start': 6, 'end': 8, 'stim': 'desert'})
+
+####################
+# .. _basic_units:
+#
+# Units
+# ------
+#
+# Unit metadata can be added to an NWB file using the methods :py:func:`~pynwb.file.NWBFile.add_unit`
+# and :py:func:`~pynwb.file.NWBFile.add_unit_column`. These methods work like the methods for adding
+# trials described :ref:`above <basic_trials>`
+#
+# By default, NWBFile only requires a unique identifier for each unit. Additional columns
+# can be added using :py:func:`~pynwb.file.NWBFile.add_unit_column`. Like
+# :py:func:`~pynwb.file.NWBFile.add_trial_column`, this method also takes a name
+# for the column, a description of what the column stores and does not need a data type.
+# Once all columns have been added, unit data can be populated using :py:func:`~pynwb.file.NWBFile.add_unit`.
+# Again, like :py:func:`~pynwb.file.NWBFile.add_trial_column`, this method takes a dict with keys that correspond
+# to column names.
+#
+# Lets specify some unit metadata and then add some units
+
+nwbfile.add_unit_column('location', 'the anatomical location of this unit')
+nwbfile.add_unit_column('quality', 'the quality for the inference of this unit')
+
+nwbfile.add_unit({'id': 1, 'location': 'CA1', 'quality': 0.95})
+nwbfile.add_unit({'id': 2, 'location': 'CA3', 'quality': 0.85})
+nwbfile.add_unit({'id': 3, 'location': 'CA1', 'quality': 0.90})
+
+####################
 # .. _basic_writing:
 #
 # Writing an NWB file
@@ -153,7 +207,7 @@ nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_
 
 from pynwb import NWBHDF5IO
 
-io = NWBHDF5IO('basic_example.nwb', 'w')
+io = NWBHDF5IO('basic_example.nwb', mode='w')
 io.write(nwbfile)
 io.close()
 
@@ -238,6 +292,39 @@ mod_ts = added_mod.get_data_interface('ts_for_mod')
 mod_ts = added_mod['ts_for_mod']
 
 ####################
+# .. _basic_appending:
+#
+# Appending to an NWB file
+# ------------------------
+#
+# Using functionality discussed above, NWB allows appending to fles. To append to a file, you must read the file, add
+# new components, and then write the file. Reading and writing is carried out using :py:class:`~pynwb.NWBHDF5IO`.
+# When reading the NWBFile, you must specify that you indend to modify it by setting the *mode* argument in the
+# :py:class:`~pynwb.NWBHDF5IO` constructor to ``'a'``. After you have read the file, you can add [#]_ new data to it
+# using the standard write/add functionality demonstrated above.
+#
+# Let's see how this works by adding another :py:class:`~pynwb.base.TimeSeries` to the file we have already written.
+#
+# First, read the file.
+
+io = NWBHDF5IO('basic_example.nwb', mode='a')
+nwbfile = io.read()
+
+####################
+# Next, add a new :py:class:`~pynwb.base.TimeSeries`.
+
+data = list(range(300, 400, 10))
+timestamps = list(range(10))
+test_ts2 = TimeSeries('test_timeseries2', 'PyNWB tutorial', data, 'SIunit', timestamps=timestamps)
+nwbfile.add_acquisition(test_ts2)
+
+####################
+# Finally, write the changes back to the file and close it.
+
+io.write(nwbfile)
+io.close()
+
+####################
 # .. [#] Stimulus template data may change in the near future. The NWB team will work with interested parties
 #    at the `4th NWB Hackathon <hck04_>`_ to refine the schema for storing stimulus template data.
 #
@@ -250,6 +337,8 @@ mod_ts = added_mod['ts_for_mod']
 # .. [#] Some data interface objects have a default name. This default name is the type of the data interface. For
 #    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation" and the default
 #    name for :py:class:`~pynwb.ecephys.EventWaveform` is "EventWaveform".
+#
+# .. [#] NWB only supports *adding* to files. Removal and modifying of existing data is not allowed.
 
 ####################
 # .. _hck04: https://github.com/NeurodataWithoutBorders/nwb_hackathons/tree/master/HCK04_2018_Seattle
