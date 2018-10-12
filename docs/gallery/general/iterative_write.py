@@ -101,6 +101,7 @@ writing large arrays without loading all data into memory and streaming data wri
 # avoid repition of the same code and to allow us to focus on the important parts of this tutorial.
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
 
@@ -113,8 +114,8 @@ def write_test_file(filename, data):
     """
 
     # Create a test NWBfile
-    start_time = datetime(2017, 4, 3, 11, 0, 0)
-    create_date = datetime(2017, 4, 15, 12, 0, 0)
+    start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+    create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
     nwbfile = NWBFile('PyNWB tutorial',
                       'demonstrate NWBFile basics',
                       'NWB123',

@@ -5,6 +5,7 @@ import numpy as np
 import os
 
 from datetime import datetime
+from dateutil.tz import tzlocal, tzutc
 
 from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
@@ -13,11 +14,15 @@ from pynwb.file import Subject, ElectrodeTable
 
 class NWBFileTest(unittest.TestCase):
     def setUp(self):
-        self.start = datetime(2017, 5, 1, 12, 0, 0)
+        self.start = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
+        self.create = [datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
+                       datetime(2017, 5, 2, 13, 0, 0, 1, tzinfo=tzutc()),
+                       datetime(2017, 5, 2, 14, tzinfo=tzutc())]
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile('a fake source', 'a test session description for a test NWBFile',
                                'FILE123',
                                self.start,
+                               file_create_date=self.create,
                                experimenter='A test experimenter',
                                lab='a test lab',
                                institution='a test institution',
@@ -40,6 +45,7 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.session_description, 'a test session description for a test NWBFile')
         self.assertEqual(self.nwbfile.identifier, 'FILE123')
         self.assertEqual(self.nwbfile.session_start_time, self.start)
+        self.assertEqual(self.nwbfile.file_create_date, self.create)
         self.assertEqual(self.nwbfile.lab, 'a test lab')
         self.assertEqual(self.nwbfile.experimenter, 'A test experimenter')
         self.assertEqual(self.nwbfile.institution, 'a test institution')
@@ -66,7 +72,7 @@ class NWBFileTest(unittest.TestCase):
         Test the case where the user creates an electrode table region with
         indexes that are out of range of the amount of electrodes added.
         """
-        nwbfile = NWBFile('a', 'b', 'c', datetime.now())
+        nwbfile = NWBFile('a', 'b', 'c', datetime.now(tzlocal()))
         device = nwbfile.create_device('a', 'b')
         elecgrp = nwbfile.create_electrode_group('a', 'b', 'c', device=device, location='a')
         for i in range(4):
@@ -218,7 +224,7 @@ class SubjectTest(unittest.TestCase):
                                subject_id='RAT123',
                                weight='2 lbs',
                                source='Subject unittest')
-        self.start = datetime(2017, 5, 1, 12, 0, 0)
+        self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile('a fake source', 'a test session description for a test NWBFile',
                                'FILE123',
@@ -255,7 +261,7 @@ class TestCacheSpec(unittest.TestCase):
 
     def test_simple(self):
         nwbfile = NWBFile('source', ' ', ' ',
-                          datetime.now(), datetime.now(),
+                          datetime.now(tzlocal()), datetime.now(tzlocal()),
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:

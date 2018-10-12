@@ -1,6 +1,7 @@
+import unittest2 as unittest
 from copy import deepcopy
 
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, RegionBuilder
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
 
 from pynwb.ophys import (
     ImagingPlane,
@@ -199,10 +200,11 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
 
         self.img_mask = deepcopy(img_mask)
         self.pix_mask = deepcopy(pix_mask)
+        self.pxmsk_index = [3, 5]
         pS = PlaneSegmentation('integration test PlaneSegmentation', 'plane segmentation description',
                                self.imaging_plane, 'test_plane_seg_name', self.image_series)
-        pS.add_roi('1234', pix_mask[0:3], img_mask[0])
-        pS.add_roi('5678', pix_mask[3:5], img_mask[1])
+        pS.add_roi(pixel_mask=pix_mask[0:3], image_mask=img_mask[0])
+        pS.add_roi(pixel_mask=pix_mask[3:5], image_mask=img_mask[1])
         return pS
 
     @staticmethod
@@ -264,40 +266,44 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                                  'dimension': DatasetBuilder('dimension', [2]),
                                                  })
 
-        self.pixel_masks_builder = DatasetBuilder('pixel_masks', self.pix_mask,
+        self.pixel_masks_builder = DatasetBuilder('pixel_mask', self.pix_mask,
                                                   attributes={
                                                    'namespace': 'core',
-                                                   'neurodata_type': 'PixelMasks',
-                                                   'help': 'a concatenated array of pixel masks'})
+                                                   'neurodata_type': 'VectorData',
+                                                   'description': 'Pixel masks for each ROI',
+                                                   'help': 'Values for a list of elements'})
 
-        self.image_masks_builder = DatasetBuilder('image_masks', self.img_mask,
+        self.pxmsk_index_builder = DatasetBuilder('pixel_mask_index', self.pxmsk_index,
                                                   attributes={
                                                    'namespace': 'core',
-                                                   'neurodata_type': 'ImageMasks',
-                                                   'help': 'an array of image masks'})
+                                                   'neurodata_type': 'VectorIndex',
+                                                   'target': ReferenceBuilder(self.pixel_masks_builder),
+                                                   'help': 'indexes into a list of values for a list of elements'})
 
-        self.rois_builder = DatasetBuilder('rois', [
-                                            ('1234', RegionBuilder(slice(0, 3), self.pixel_masks_builder),
-                                             RegionBuilder([0], self.image_masks_builder)),
-                                            ('5678', RegionBuilder(slice(3, 5), self.pixel_masks_builder),
-                                             RegionBuilder([1], self.image_masks_builder))
-                                        ],
-                                        attributes={
-                                         'namespace': 'core',
-                                         'neurodata_type': 'ROITable',
-                                         'help': 'A table for storing ROI data'})
+        self.image_masks_builder = DatasetBuilder('image_mask', self.img_mask,
+                                                  attributes={
+                                                   'namespace': 'core',
+                                                   'neurodata_type': 'TableColumn',
+                                                   'description': 'Image masks for each ROI',
+                                                   'help': 'One of many columns that can be added to a DynamicTable'})
+
         ps_builder = GroupBuilder(
             'test_plane_seg_name',
             attributes={
                 'neurodata_type': 'PlaneSegmentation',
                 'namespace': 'core',
                 'source': 'integration test PlaneSegmentation',
+                'description': 'plane segmentation description',
+                'colnames': ('image_mask', 'pixel_mask'),
                 'help': 'Results from segmentation of an imaging plane'},
             datasets={
-                'description': DatasetBuilder('description', 'plane segmentation description'),
-                'rois': self.rois_builder,
-                'pixel_masks': self.pixel_masks_builder,
-                'image_masks': self.image_masks_builder,
+                'id': DatasetBuilder('id', data=[0, 1],
+                                     attributes={'help': 'unique identifiers for a list of elements',
+                                                 'namespace': 'core',
+                                                 'neurodata_type': 'ElementIdentifiers'}),
+                'pixel_mask': self.pixel_masks_builder,
+                'pixel_mask_index': self.pxmsk_index_builder,
+                'image_mask': self.image_masks_builder,
             },
             groups={
                 'reference_images': GroupBuilder('reference_images', groups={'test_iS': self.is_builder}),
@@ -330,6 +336,52 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         return img_seg.get_plane_segmentation('test_plane_seg_name')
 
 
+class MaskRoundTrip(TestPlaneSegmentation):
+
+    def setBoilerPlateObjects(self):
+        ts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        self.image_series = ImageSeries(name='test_iS', source='a hypothetical source', dimension=[2],
+                                        external_file=['images.tiff'],
+                                        starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
+        self.device = Device(name='dev1', source='a test source')
+        self.optical_channel = OpticalChannel('test_optical_channel', 'optical channel source',
+                                              'optical channel description', 500.)
+        self.imaging_plane = ImagingPlane('test_imaging_plane',
+                                          'ophys integration tests',
+                                          self.optical_channel,
+                                          'imaging plane description',
+                                          self.device,
+                                          600., '2.718', 'GFP', 'somewhere in the brain',
+                                          (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+        return PlaneSegmentation('test source', 'description', self.imaging_plane, 'test_plane_seg_name',
+                                 self.image_series)
+
+    def setUpBuilder(self):
+        raise unittest.SkipTest("no builder")
+
+
+class PixelMaskRoundtrip(MaskRoundTrip):
+
+    def setUpContainer(self):
+        pix_mask = [(1, 2, 1.0), (3, 4, 1.0), (5, 6, 1.0),
+                    (7, 8, 2.0), (9, 10, 2.)]
+        pS = self.setBoilerPlateObjects()
+        pS.add_roi(pixel_mask=pix_mask[0:3])
+        pS.add_roi(pixel_mask=pix_mask[3:5])
+        return pS
+
+
+class ImageMaskRoundtrip(MaskRoundTrip):
+
+    def setUpContainer(self):
+        w, h = 5, 5
+        img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
+        pS = self.setBoilerPlateObjects()
+        pS.add_roi(image_mask=img_mask[0])
+        pS.add_roi(image_mask=img_mask[1])
+        return pS
+
+
 class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
 
     def setUpContainer(self):
@@ -343,7 +395,7 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
                                  data, 'lumens', self.rt_region, timestamps=timestamps)
 
     def setUpBuilder(self):
-        TestPlaneSegmentation.get_plane_segmentation_builder(self)
+        ps_builder = TestPlaneSegmentation.get_plane_segmentation_builder(self)
         return GroupBuilder(
             'test_roi_response_series',
             attributes={
@@ -364,11 +416,12 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
                 ),
                 'timestamps': DatasetBuilder('timestamps', [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
                                              attributes={'unit': 'Seconds', 'interval': 1}),
-                'rois': DatasetBuilder('rois', RegionBuilder([0], self.rois_builder),
-                                       attributes={'help': 'A region reference to an ROITable',
+                'rois': DatasetBuilder('rois', data=[0],
+                                       attributes={'help': 'a subset (i.e. slice or region) of a DynamicTable',
                                                    'description': 'the first of two ROIs',
+                                                   'table': ReferenceBuilder(ps_builder),
                                                    'namespace': 'core',
-                                                   'neurodata_type': 'ROITableRegion'}),
+                                                   'neurodata_type': 'DynamicTableRegion'}),
             })
 
     def addContainer(self, nwbfile):

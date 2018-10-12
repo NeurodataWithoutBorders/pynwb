@@ -19,6 +19,7 @@ import tempfile
 import warnings
 import numpy as np
 from datetime import datetime
+from dateutil.tz import tzlocal
 
 
 class H5IOTest(unittest.TestCase):
@@ -364,8 +365,8 @@ class TestCacheSpec(unittest.TestCase):
         self.test_temp_file.close()
         self.io = NWBHDF5IO(self.test_temp_file.name)
         # Setup all the data we need
-        start_time = datetime(2017, 4, 3, 11, 0, 0)
-        create_date = datetime(2017, 4, 15, 12, 0, 0)
+        start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+        create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         data = np.arange(1000).reshape((100, 10))
         timestamps = np.arange(100)
         # Create the first file
@@ -405,7 +406,7 @@ class TestCacheSpec(unittest.TestCase):
 class TestLinkResolution(unittest.TestCase):
 
     def test_link_resolve(self):
-        nwbfile = NWBFile("source", "a file with header data", "NB123A", '2018-06-01T00:00:00')
+        nwbfile = NWBFile("source", "a file with header data", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal()))
         device = nwbfile.create_device('device_name', 'source')
         electrode_group = nwbfile.create_electrode_group(
             name='electrode_group_name',
@@ -472,8 +473,8 @@ class NWBHDF5IOMultiFileTest(unittest.TestCase):
 
     def test_copy_file_with_external_links(self):
         # Setup all the data we need
-        start_time = datetime(2017, 4, 3, 11, 0, 0)
-        create_date = datetime(2017, 4, 15, 12, 0, 0)
+        start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+        create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         data = np.arange(1000).reshape((100, 10))
         timestamps = np.arange(100)
         # Create the first file
