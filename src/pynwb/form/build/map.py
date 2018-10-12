@@ -191,6 +191,8 @@ class BuildManager(object):
             if parent_builder is not None:
                 result.parent = self.__get_proxy_builder(parent_builder)
             else:
+                # we are at the top of the hierarchy,
+                # so it must be time to resolve parents
                 self.__resolve_parents(result)
             self.prebuilt(result, builder)
         result.set_modified(False)
@@ -243,6 +245,24 @@ class BuildManager(object):
         '''
         spec, builder = getargs('spec', 'builder', kwargs)
         return self.__type_map.get_subspec(spec, builder)
+
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder),
+             'doc': 'the builder to get the sub-specification for'})
+    def get_builder_ns(self, **kwargs):
+        '''
+        Get the namespace of a builder
+        '''
+        builder = getargs('builder', kwargs)
+        return self.__type_map.get_builder_ns(builder)
+
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder),
+             'doc': 'the builder to get the data_type for'})
+    def get_builder_dt(self, **kwargs):
+        '''
+        Get the data_type of a builder
+        '''
+        builder = getargs('builder', kwargs)
+        return self.__type_map.get_builder_dt(builder)
 
 
 _const_arg = '__constructor_arg'
@@ -453,10 +473,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             n = spec.name
         elif hasattr(spec, 'data_type_def') and spec.data_type_def is not None:
             n = spec.data_type_def  # noqa: F841
-        if attr_name in self.__attr2spec:
-            existing = self.__attr2spec.pop(attr_name)
-            if existing is not spec:
-                self.__spec2attr.pop(existing)
         self.__spec2attr[spec] = attr_name
         self.__attr2spec[attr_name] = spec
 
@@ -477,10 +493,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     def map_const_arg(self, **kwargs):
         """ Map an attribute to spec. Use this to override default behavior """
         const_arg, spec = getargs('const_arg', 'spec', kwargs)
-        if const_arg in self.__carg2spec:
-            existing = self.__carg2spec.pop(const_arg)
-            if existing is not spec:
-                self.__spec2carg.pop(existing)
         self.__spec2carg[spec] = const_arg
         self.__carg2spec[const_arg] = spec
 
@@ -784,7 +796,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                               % (value.name, getattr(value, self.spec.type_key()),
                                  builder.name, self.spec.data_type_def)
                 warnings.warn(msg, OrphanContainerWarning)
-            if value.modified:
+
+            if value.modified:                   # writing a new container
                 rendered_obj = build_manager.build(value, source=source)
                 # use spec to determine what kind of HDF5
                 # object this Container corresponds to
@@ -795,10 +808,14 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     builder.set_dataset(rendered_obj)
                 else:
                     builder.set_group(rendered_obj)
-            elif value.container_source:
-                if value.container_source != parent_container.container_source:
+            elif value.container_source:        # make a link to an existing container
+                if value.container_source != parent_container.container_source or\
+                   value.parent is not parent_container:
                     rendered_obj = build_manager.build(value, source=source)
                     builder.set_link(LinkBuilder(rendered_obj, parent=builder))
+            else:
+                raise ValueError("Found unmodified Container with no source - '%s' with parent '%s'" %
+                                 (value.name, parent_container.name))
         else:
             if any(isinstance(value, t) for t in (list, tuple)):
                 values = value
@@ -815,46 +832,96 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
     def __get_subspec_values(self, builder, spec, manager):
         ret = dict()
-        for h5attr_name, h5attr_val in builder.attributes.items():
-            subspec = spec.get_attribute(h5attr_name)
-            if subspec is None:
+        # First get attributes
+        attributes = builder.attributes
+        for attr_spec in spec.attributes:
+            attr_val = attributes.get(attr_spec.name)
+            if attr_val is None:
                 continue
-            if isinstance(h5attr_val, (GroupBuilder, DatasetBuilder)):
-                ret[subspec] = manager.construct(h5attr_val)
-            elif isinstance(h5attr_val, RegionBuilder):
+            if isinstance(attr_val, (GroupBuilder, DatasetBuilder)):
+                ret[attr_spec] = manager.construct(attr_val)
+            elif isinstance(attr_val, RegionBuilder):
                 raise ValueError("RegionReferences as attributes is not yet supported")
-            elif isinstance(h5attr_val, ReferenceBuilder):
-                ret[subspec] = manager.construct(h5attr_val.builder)
+            elif isinstance(attr_val, ReferenceBuilder):
+                ret[attr_spec] = manager.construct(attr_val.builder)
             else:
-                ret[subspec] = h5attr_val
-        if isinstance(builder, GroupBuilder):
-            for sub_builder_name, sub_builder in builder.items():
-                # GroupBuilder.items will return attributes as well, need to skip non Builder items
-                if not isinstance(sub_builder, Builder):
-                    continue
-                subspec = manager.get_subspec(spec, sub_builder)
-                link_name = None
-                if isinstance(sub_builder, LinkBuilder):
-                    link_name = sub_builder.name  # noqa: F841
-                if subspec is not None:
-                    if isinstance(sub_builder, LinkBuilder):
-                        sub_builder = sub_builder.builder
-                    if self.__data_type_key in sub_builder.attributes or \
-                       not (subspec.data_type_inc is None and subspec.data_type_def is None):
-                        val = manager.construct(sub_builder)
-                        if subspec.is_many():
-                            if subspec in ret:
-                                ret[subspec].append(val)
-                            else:
-                                ret[subspec] = [val]
-                        else:
-                            ret[subspec] = val
-                    else:
-                        result = self.__get_subspec_values(sub_builder, subspec, manager)
-                        ret.update(result)
-        else:
+                ret[attr_spec] = attr_val
+        if isinstance(spec, GroupSpec):
+            if not isinstance(builder, GroupBuilder):
+                raise ValueError("__get_subspec_values - must pass GroupBuilder with GroupSpec")
+            # first aggregate links by data type and separate them
+            # by group and dataset
+            groups = dict(builder.groups)             # make a copy so we can separate links
+            datasets = dict(builder.datasets)         # make a copy so we can separate links
+            links = builder.links
+            link_dt = dict()
+            for link_builder in links.values():
+                target = link_builder.builder
+                if isinstance(target, DatasetBuilder):
+                    datasets[link_builder.name] = target
+                else:
+                    groups[link_builder.name] = target
+                dt = manager.get_builder_dt(target)
+                if dt is not None:
+                    link_dt.setdefault(dt, list()).append(target)
+            # now assign links to their respective specification
+            for subspec in spec.links:
+                if subspec.name is not None:
+                    ret[subspec] = manager.construct(links[subspec.name].builder)
+                else:
+                    sub_builder = link_dt.get(subspec.target_type)
+                    if sub_builder is not None:
+                        ret[subspec] = self.__flatten(sub_builder, subspec, manager)
+            # now process groups and datasets
+            self.__get_sub_builders(groups, spec.groups, manager, ret)
+            self.__get_sub_builders(datasets, spec.datasets, manager, ret)
+        elif isinstance(spec, DatasetSpec):
+            if not isinstance(builder, DatasetBuilder):
+                raise ValueError("__get_subspec_values - must pass DatasetBuilder with DatasetSpec")
             ret[spec] = builder.data
         return ret
+
+    def __get_sub_builders(self, sub_builders, subspecs, manager, ret):
+        # index builders by data_type
+        builder_dt = dict()
+        for g in sub_builders.values():
+            try:
+                dt = manager.get_builder_dt(g)
+                ns = manager.get_builder_ns(g)
+            except ValueError as v:
+                continue
+            if dt is not None:
+                for parent_dt in manager.namespace_catalog.get_hierarchy(ns, dt):
+                    builder_dt.setdefault(parent_dt, list()).append(g)
+        for subspec in subspecs:
+            # first get data type for the spec
+            if subspec.data_type_def is not None:
+                dt = subspec.data_type_def
+            elif subspec.data_type_inc is not None:
+                dt = subspec.data_type_inc
+            else:
+                dt = None
+            # use name if we can, otherwise use data_data
+            if subspec.name is None:
+                sub_builder = builder_dt.get(dt)
+                if sub_builder is not None:
+                    sub_builder = self.__flatten(sub_builder, subspec, manager)
+                    ret[subspec] = sub_builder
+            else:
+                sub_builder = sub_builders.get(subspec.name)
+                if sub_builder is None:
+                    continue
+                if dt is None:
+                    # recurse
+                    ret.update(self.__get_subspec_values(sub_builder, subspec, manager))
+                else:
+                    ret[subspec] = manager.construct(sub_builder)
+
+    def __flatten(self, sub_builder, subspec, manager):
+        tmp = [manager.construct(b) for b in sub_builder]
+        if len(tmp) == 1 and not subspec.is_many():
+            tmp = tmp[0]
+        return tmp
 
     @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder),
              'doc': 'the builder to construct the Container from'},
@@ -865,11 +932,15 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         cls = manager.get_cls(builder)
         # gather all subspecs
         subspecs = self.__get_subspec_values(builder, self.spec, manager)
-        # get the constructor argument each specification corresponds to
+        # get the constructor argument that each specification corresponds to
         const_args = dict()
         for subspec, value in subspecs.items():
             const_arg = self.get_const_arg(subspec)
             if const_arg is not None:
+                if isinstance(subspec, BaseStorageSpec) and subspec.is_many():
+                    existing_value = const_args.get(const_arg)
+                    if isinstance(existing_value, list):
+                        value = existing_value + value
                 const_args[const_arg] = value
         # build kwargs for the constructor
         kwargs = dict()
@@ -1127,7 +1198,13 @@ class TypeMap(object):
                 self.register_container_type(namespace, data_type, ret)
         return ret
 
-    def get_builder_dt(self, builder):
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder),
+             'doc': 'the builder to get the data_type for'})
+    def get_builder_dt(self, **kwargs):
+        '''
+        Get the data_type of a builder
+        '''
+        builder = getargs('builder', kwargs)
         ret = builder.attributes.get(self.__ns_catalog.group_spec_cls.type_key())
         if ret is None:
             msg = "builder '%s' does not have a data_type" % builder.name
@@ -1138,7 +1215,13 @@ class TypeMap(object):
 
         return ret
 
-    def get_builder_ns(self, builder):
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder),
+             'doc': 'the builder to get the sub-specification for'})
+    def get_builder_ns(self, **kwargs):
+        '''
+        Get the namespace of a builder
+        '''
+        builder = getargs('builder', kwargs)
         if isinstance(builder, LinkBuilder):
             builder = builder.builder
         ret = builder.attributes.get('namespace')

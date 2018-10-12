@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 from datetime import datetime
 from dateutil.tz import tzlocal
 import os
@@ -263,4 +263,13 @@ class TestHDF5Writer(GroupBuilderTestCase):
         io.write_builder(self.builder)
         builder = io.read_builder()
         self.assertBuilderEqual(builder, self.builder)
+        io.close()
+
+    def test_overwrite_written(self):
+        self.maxDiff = None
+        io = HDF5IO(self.path, self.manager)
+        io.write_builder(self.builder)
+        builder = io.read_builder()
+        with self.assertRaisesRegex(ValueError, "cannot change written to not written"):
+            builder.written = False
         io.close()

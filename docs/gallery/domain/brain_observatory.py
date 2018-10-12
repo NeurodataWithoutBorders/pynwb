@@ -176,9 +176,9 @@ plane_segmentation = image_segmentation_interface.create_plane_segmentation(
     imaging_plane=imaging_plane)
 
 for cell_specimen_id in cell_specimen_ids:
-    curr_name = str(cell_specimen_id)
+    curr_name = cell_specimen_id
     curr_image_mask = dataset.get_roi_mask_array([cell_specimen_id])[0]
-    plane_segmentation.add_roi(curr_name, [], curr_image_mask)
+    plane_segmentation.add_roi(id=curr_name, image_mask=curr_image_mask)
 
 ########################################
 # 7) Next, we add a dF/F  interface to the module.  This allows us to write the dF/F timeseries data associated with
@@ -189,7 +189,6 @@ ophys_module.add_data_interface(dff_interface)
 
 rt_region = plane_segmentation.create_roi_table_region(
     description='segmented cells with cell_specimen_ids',
-    names=[str(x) for x in cell_specimen_ids],
 )
 
 dFF_series = dff_interface.create_roi_response_series(

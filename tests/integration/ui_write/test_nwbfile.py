@@ -260,8 +260,8 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
                 'description': ['q', 'w', 'e', 'r'],
                 'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
             }),
-            'epochs',
-            'epochs integration test'
+            'epochs integration test',
+            'epochs'
         )
 
         # reset the thing
@@ -269,8 +269,3 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         return nwbfile.epochs
-
-    def test_roundtrip(self):
-        super(TestEpochsRoundtripDf, self).test_roundtrip()
-        obtained = self.read_container.to_dataframe()
-        assert obtained.loc[2, 'bar'] == 'dog'

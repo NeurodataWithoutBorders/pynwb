@@ -161,11 +161,11 @@ class NWBFile(MultiContainerInterface):
                      'surgery',
                      'virus',
                      'stimulus_notes',
-                     {'name': 'electrodes', 'child': True},
-                     {'name': 'epochs', 'child': True},
-                     {'name': 'trials', 'child': True},
-                     {'name': 'units', 'child': True},
-                     {'name': 'subject', 'child': True},
+                     {'name': 'electrodes', 'child': True,  'required_name': 'electrodes'},
+                     {'name': 'epochs', 'child': True, 'required_name': 'epochs'},
+                     {'name': 'trials', 'child': True, 'required_name': 'trials'},
+                     {'name': 'units', 'child': True, 'required_name': 'units'},
+                     {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      'epoch_tags',)
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
@@ -267,6 +267,8 @@ class NWBFile(MultiContainerInterface):
         self.modules = getargs('modules', kwargs)
         epochs = getargs('epochs', kwargs)
         if epochs is not None:
+            if epochs.name != 'epochs':
+                raise ValueError("NWBFile.epochs must be named 'epochs'")
             self.epochs = epochs
         self.epoch_tags = getargs('epoch_tags', kwargs)
 
@@ -395,8 +397,6 @@ class NWBFile(MultiContainerInterface):
             {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
             {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
-            {'name': 'group_name', 'type': str, 'doc': 'the ElectrodeGroup object to add to this NWBFile',
-             'default': None},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
             allow_extra=True)
     def add_electrode(self, **kwargs):
@@ -405,7 +405,7 @@ class NWBFile(MultiContainerInterface):
         See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
 
         Required fields are *x*, *y*, *z*, *imp*, *location*, *filtering*,
-        *description*, *group* and any columns that have been added
+        *group* and any columns that have been added
         (through calls to `add_electrode_columns`).
         """
         self.__check_electrodes()

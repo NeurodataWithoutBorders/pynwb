@@ -266,6 +266,7 @@ class HDF5IO(FORMIO):
             if not (sub_h5obj is None):
                 link_type = h5obj.get(k, getlink=True)
                 if isinstance(link_type, SoftLink) or isinstance(link_type, ExternalLink):
+                    # Reading links might be better suited in its own function
                     # get path of link (the key used for tracking what's been built)
                     target_path = link_type.path
                     builder_name = os.path.basename(target_path)
@@ -278,7 +279,9 @@ class HDF5IO(FORMIO):
                         else:
                             builder = self.__read_group(sub_h5obj, builder_name, ignore=ignore)
                         self.__set_built(sub_h5obj.file.filename, target_path, builder)
-                    kwargs['links'][builder_name] = LinkBuilder(builder, k, source=self.__path)
+                    link_builder = LinkBuilder(builder, k, source=self.__path)
+                    link_builder.written = True
+                    kwargs['links'][builder_name] = link_builder
                 else:
                     builder = self.__get_built(sub_h5obj.file.filename, sub_h5obj.name)
                     obj_type = None
@@ -369,12 +372,17 @@ class HDF5IO(FORMIO):
         return ret
 
     def __read_ref(self, h5obj):
-        if isinstance(h5obj, Dataset):
-            return self.__read_dataset(h5obj)
-        elif isinstance(h5obj, Group):
-            return self.__read_group(h5obj)
-        else:
-            raise ValueError("h5obj must be a Dataset or a Group - got %s" % str(h5obj))
+        ret = None
+        ret = self.__get_built(h5obj.file.filename, h5obj.name)
+        if ret is None:
+            if isinstance(h5obj, Dataset):
+                ret = self.__read_dataset(h5obj)
+            elif isinstance(h5obj, Group):
+                ret = self.__read_group(h5obj)
+            else:
+                raise ValueError("h5obj must be a Dataset or a Group - got %s" % str(h5obj))
+            self.__set_built(h5obj.file.filename, h5obj.name, ret)
+        return ret
 
     def open(self):
         open_flag = self.__mode
