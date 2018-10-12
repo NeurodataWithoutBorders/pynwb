@@ -5,6 +5,7 @@ from pynwb import NWBFile
 
 import pandas as pd
 from datetime import datetime
+from dateutil.tz import tzlocal
 
 
 class TestDynamicTable(unittest.TestCase):
@@ -68,22 +69,22 @@ class TestDynamicTable(unittest.TestCase):
     def test_constructor_ids(self):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
-        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', ids=[0, 1, 2, 3, 4], columns=columns)
+        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', id=[0, 1, 2, 3, 4], columns=columns)
         self.check_table(table)
 
     def test_constructor_ElementIdentifier_ids(self):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
         ids = ElementIdentifiers('ids', [0, 1, 2, 3, 4])
-        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', ids=ids, columns=columns)
+        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', id=ids, columns=columns)
         self.check_table(table)
 
     def test_constructor_ids_bad_ids(self):
         columns = [TableColumn(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
-        msg = "must provide same number of ids as length of columns if specifying ids"
+        msg = "must provide same number of ids as length of columns"
         with self.assertRaisesRegex(ValueError, msg):
-            DynamicTable("with_columns", 'PyNWB unit test', 'a test table', ids=[0, 1], columns=columns)
+            DynamicTable("with_columns", 'PyNWB unit test', 'a test table', id=[0, 1], columns=columns)
 
     def add_rows(self, table):
         table.add_row({'foo': 1, 'bar': 10.0, 'baz': 'cat'})
@@ -152,7 +153,7 @@ class TestDynamicTable(unittest.TestCase):
         self.add_rows(table)
 
         nwbfile = NWBFile(source='source', session_description='session_description',
-                          identifier='identifier', session_start_time=datetime.now())
+                          identifier='identifier', session_start_time=datetime.now(tzlocal()))
 
         module_behavior = nwbfile.create_processing_module('a', 'b', 'c')
 

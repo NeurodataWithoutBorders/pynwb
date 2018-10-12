@@ -1,5 +1,5 @@
 from datetime import datetime
-from dateutil.parser import parse as parse_date
+from dateutil.tz import tzlocal
 from collections import Iterable
 from warnings import warn
 import copy as _copy
@@ -161,19 +161,19 @@ class NWBFile(MultiContainerInterface):
                      'surgery',
                      'virus',
                      'stimulus_notes',
-                     {'name': 'electrodes', 'child': True},
-                     {'name': 'epochs', 'child': True},
-                     {'name': 'trials', 'child': True},
-                     {'name': 'units', 'child': True},
-                     {'name': 'subject', 'child': True},
+                     {'name': 'electrodes', 'child': True,  'required_name': 'electrodes'},
+                     {'name': 'epochs', 'child': True, 'required_name': 'epochs'},
+                     {'name': 'trials', 'child': True, 'required_name': 'trials'},
+                     {'name': 'units', 'child': True, 'required_name': 'units'},
+                     {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      'epoch_tags',)
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'session_description', 'type': str,
              'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
-            {'name': 'session_start_time', 'type': (datetime, str), 'doc': 'the start time of the recording session'},
-            {'name': 'file_create_date', 'type': ('array_data', 'data', datetime, str),
+            {'name': 'session_start_time', 'type': datetime, 'doc': 'the start time of the recording session'},
+            {'name': 'file_create_date', 'type': ('array_data', datetime),
              'doc': 'the time the file was created and subsequent modifications made', 'default': None},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str,
@@ -247,16 +247,17 @@ class NWBFile(MultiContainerInterface):
         super(NWBFile, self).__init__(*pargs, **pkwargs)
         self.__session_description = getargs('session_description', kwargs)
         self.__identifier = getargs('identifier', kwargs)
+
         self.__session_start_time = getargs('session_start_time', kwargs)
-        if isinstance(self.__session_start_time, str):
-            self.__session_start_time = parse_date(self.__session_start_time)
+        if self.__session_start_time.tzinfo is None:
+            self.__session_start_time = _add_missing_timezone(self.__session_start_time)
+
         self.__file_create_date = getargs('file_create_date', kwargs)
         if self.__file_create_date is None:
-            self.__file_create_date = datetime.utcnow().isoformat() + "Z"
+            self.__file_create_date = datetime.now(tzlocal())
         if isinstance(self.__file_create_date, datetime):
             self.__file_create_date = [self.__file_create_date]
-        elif isinstance(self.__file_create_date, str):
-            self.__file_create_date = [parse_date(self.__file_create_date)]
+        self.__file_create_date = list(map(_add_missing_timezone, self.__file_create_date))
 
         self.acquisition = getargs('acquisition', kwargs)
         self.stimulus = getargs('stimulus', kwargs)
@@ -266,6 +267,8 @@ class NWBFile(MultiContainerInterface):
         self.modules = getargs('modules', kwargs)
         epochs = getargs('epochs', kwargs)
         if epochs is not None:
+            if epochs.name != 'epochs':
+                raise ValueError("NWBFile.epochs must be named 'epochs'")
             self.epochs = epochs
         self.epoch_tags = getargs('epoch_tags', kwargs)
 
@@ -394,8 +397,6 @@ class NWBFile(MultiContainerInterface):
             {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
             {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
-            {'name': 'group_name', 'type': str, 'doc': 'the ElectrodeGroup object to add to this NWBFile',
-             'default': None},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
             allow_extra=True)
     def add_electrode(self, **kwargs):
@@ -404,7 +405,7 @@ class NWBFile(MultiContainerInterface):
         See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
 
         Required fields are *x*, *y*, *z*, *imp*, *location*, *filtering*,
-        *description*, *group* and any columns that have been added
+        *group* and any columns that have been added
         (through calls to `add_electrode_columns`).
         """
         self.__check_electrodes()
@@ -490,6 +491,18 @@ class NWBFile(MultiContainerInterface):
             raise ValueError(msg)
         electrode_table = getargs('electrode_table', kwargs)
         self.electrodes = electrode_table
+
+
+def _add_missing_timezone(date):
+    """
+    Add local timezone information on a datetime object if it is missing.
+    """
+    if not isinstance(date, datetime):
+        raise ValueError("require datetime object")
+    if date.tzinfo is None:
+        warn("Date is missing timezone information. Updating to local timezone.")
+        return date.replace(tzinfo=tzlocal())
+    return date
 
 
 def _tablefunc(table_name, description, columns, source='autogenerated by PyNWB API'):

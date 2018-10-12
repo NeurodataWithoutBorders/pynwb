@@ -6,6 +6,7 @@ from form.backends.hdf5 import HDF5IO
 import numpy as np
 import os
 from datetime import datetime
+from dateutil.tz import tzlocal
 
 data_len = 1000
 filename = 'test.nwb'
@@ -15,7 +16,7 @@ if os.path.exists(filename):
     print('removing %s' % filename)
     os.remove(filename)
 
-f = NWBFile(filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+f = NWBFile(filename, 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
             experimenter='Dr. Bilbo Baggins',
             lab='Bag End Labatory',
             institution='University of Middle Earth at the Shire',
