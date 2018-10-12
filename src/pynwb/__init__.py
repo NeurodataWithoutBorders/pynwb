@@ -19,6 +19,17 @@ from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa: E402
 __core_ns_file_name = 'nwb.namespace.yaml'
 
 
+def some_function(arg):
+    if arg == 'mouse':
+        print("some code that will be hit by coverage")
+        ret = arg
+    else:
+        print("some code that won't be hit by coverage")
+        ret = arg
+
+    return ret
+
+
 def __get_resources():
     from pkg_resources import resource_filename
     from os.path import join
