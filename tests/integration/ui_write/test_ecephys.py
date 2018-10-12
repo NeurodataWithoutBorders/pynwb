@@ -381,7 +381,7 @@ class FeatureExtractionConstructor(base.TestDataInterfaceIO):
 
 class EventDetectionConstructor(base.TestDataInterfaceIO):
     def setUpContainer(self):
-        data = list(map(list, zip(range(10))))  # transpose data
+        data = list(range(10))  # transpose data
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         TestElectricalSeriesIO.make_electrode_table(self)
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
