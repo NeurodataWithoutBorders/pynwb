@@ -1,5 +1,7 @@
 import unittest2 as unittest
 
+import numpy as np
+
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
 
 from pynwb.ecephys import ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, Clustering, ClusterWaveforms,\
