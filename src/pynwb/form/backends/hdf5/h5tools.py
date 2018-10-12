@@ -455,6 +455,7 @@ class HDF5IO(FORMIO):
         "utf-8": H5_TEXT,
         "ascii": H5_BINARY,
         "str": H5_BINARY,
+        "isodatetime": H5_TEXT,
         "uint32": np.uint32,
         "uint16": np.uint16,
         "uint8": np.uint8,
@@ -582,9 +583,6 @@ class HDF5IO(FORMIO):
         else:
             msg = 'cannot create external link to %s' % path
             raise ValueError(msg)
-        if name in parent:
-            import pdb
-            pdb.set_trace()
         parent[name] = link_obj
         builder.written = True
         return link_obj

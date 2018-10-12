@@ -19,10 +19,11 @@ from PyNWB.
 #
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile
 
-start_time = datetime(2017, 4, 3, 11, 0, 0)
-create_date = datetime(2017, 4, 15, 12, 0, 0)
+start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
 nwbfile = NWBFile(source='PyNWB tutorial',
                   session_description='demonstrate advanced HDF5 I/O features',

@@ -3,8 +3,9 @@ import re
 import warnings
 from collections import OrderedDict
 from copy import copy
-
+from datetime import datetime
 from six import with_metaclass, raise_from, text_type, binary_type
+
 from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args, call_docval_func
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec,\
@@ -580,6 +581,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                         string_type = text_type
                     elif 'ascii' in spec.dtype:
                         string_type = binary_type
+                    elif 'isodatetime' in spec.dtype:
+                        string_type = datetime.isoformat
                     if string_type is not None:
                         if spec.dims is not None:
                             ret = list(map(string_type, value))
@@ -793,7 +796,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                               % (value.name, getattr(value, self.spec.type_key()),
                                  builder.name, self.spec.data_type_def)
                 warnings.warn(msg, OrphanContainerWarning)
-            if value.modified:
+
+            if value.modified:                   # writing a new container
                 rendered_obj = build_manager.build(value, source=source)
                 # use spec to determine what kind of HDF5
                 # object this Container corresponds to
@@ -804,10 +808,14 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     builder.set_dataset(rendered_obj)
                 else:
                     builder.set_group(rendered_obj)
-            elif value.container_source:
-                if value.container_source != parent_container.container_source:
+            elif value.container_source:        # make a link to an existing container
+                if value.container_source != parent_container.container_source or\
+                   value.parent is not parent_container:
                     rendered_obj = build_manager.build(value, source=source)
                     builder.set_link(LinkBuilder(rendered_obj, parent=builder))
+            else:
+                raise ValueError("Found unmodified Container with no source - '%s' with parent '%s'" %
+                                 (value.name, parent_container.name))
         else:
             if any(isinstance(value, t) for t in (list, tuple)):
                 values = value
@@ -1074,7 +1082,8 @@ class TypeMap(object):
         'float': float,
         'float64': float,
         'int': int,
-        'int32': int
+        'int32': int,
+        'isodatetime': datetime
     }
 
     def __get_type(self, spec):
