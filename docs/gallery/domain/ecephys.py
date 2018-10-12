@@ -20,9 +20,10 @@ import numpy as np
 # argument is the name of the NWB file, and the second argument is a brief description of the dataset.
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile
 
-nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
                   experimenter='Dr. Bilbo Baggins',
                   lab='Bag End Laboratory',
                   institution='University of Middle Earth at the Shire',

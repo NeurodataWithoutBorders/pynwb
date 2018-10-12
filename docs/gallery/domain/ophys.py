@@ -18,6 +18,7 @@ clarity, we define them here:
 '''
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 
 from pynwb import NWBFile
 from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluorescence
@@ -31,7 +32,7 @@ from pynwb.device import Device
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`.
 
 
-nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
                   experimenter='Dr. Bilbo Baggins',
                   lab='Bag End Laboratory',
                   institution='University of Middle Earth at the Shire',

@@ -1,5 +1,6 @@
 import unittest2 as unittest
 from datetime import datetime
+from dateutil.tz import tzlocal, tzutc
 import os
 import numpy as np
 
@@ -129,8 +130,8 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
         self.container = self.setUpContainer()
-        self.start_time = datetime(1971, 1, 1, 12, 0, 0)
-        self.create_date = datetime(2018, 4, 15, 12, 0, 0)
+        self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
+        self.create_date = datetime(2018, 4, 15, 12, tzinfo=tzlocal())
         self.container_type = self.container.__class__.__name__
         self.filename = 'test_%s.nwb' % self.container_type
         self.writer = None

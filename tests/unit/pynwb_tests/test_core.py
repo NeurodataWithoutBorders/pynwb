@@ -5,6 +5,7 @@ from pynwb import NWBFile
 
 import pandas as pd
 from datetime import datetime
+from dateutil.tz import tzlocal
 
 
 class TestDynamicTable(unittest.TestCase):
@@ -152,7 +153,7 @@ class TestDynamicTable(unittest.TestCase):
         self.add_rows(table)
 
         nwbfile = NWBFile(source='source', session_description='session_description',
-                          identifier='identifier', session_start_time=datetime.now())
+                          identifier='identifier', session_start_time=datetime.now(tzlocal()))
 
         module_behavior = nwbfile.create_processing_module('a', 'b', 'c')
 
