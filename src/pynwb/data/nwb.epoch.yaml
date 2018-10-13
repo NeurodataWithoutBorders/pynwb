@@ -72,7 +72,7 @@ datasets:
     value: a subset (i.e. slice or region) of an EpochTable
 groups:
 - neurodata_type_def: Epochs
-  neurodata_type_inc: NWBContainer
+  neurodata_type_inc: DynamicTable
   doc: A container for aggregating epoch data and the TimeSeries that each epoch applies
     to
   attributes:
@@ -81,13 +81,34 @@ groups:
     doc: Value is 'A general epoch object'
     value: A general epoch object
   datasets:
-  - neurodata_type_inc: EpochTable
-    name: epochs
-    doc: the EpochTable holding information about each Epoch
-  - neurodata_type_inc: TimeSeriesIndex
-    name: timeseries_index
-    doc: the TimeSeriesIndex table holding indices into each TimeSeries for each Epoch
-  groups:
-  - neurodata_type_inc: DynamicTable
-    name: metadata
-    doc: a DynamicTable for storing metadata about epochs
+  - neurodata_type_inc: TableColumn
+    name: start_time
+    dtype: float
+    doc: Start time of epoch, in seconds
+    attributes:
+    - name: description
+      dtype: text
+      doc: value is 'start time of the epoch, in seconds'
+      value: start time of the epoch, in seconds
+  - neurodata_type_inc: TableColumn
+    name: stop_time
+    dtype: float
+    doc: Stop time of epoch, in seconds
+    attributes:
+    - name: description
+      dtype: text
+      doc: value is 'stop time of the epoch, in seconds'
+      value: stop time of the epoch, in seconds
+  - neurodata_type_inc: VectorData
+    name: tags
+    dtype: ascii
+    doc: User-defined tags that identify events. Tags are to help identify or categorize
+      events.
+    attributes:
+    - name: description
+      dtype: text
+      doc: value is 'user-defined tags'
+      value: user-defined tags
+  - neurodata_type_inc: VectorIndex
+    name: tags_index
+    doc: Index for tags
