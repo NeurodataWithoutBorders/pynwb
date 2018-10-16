@@ -1,6 +1,6 @@
 import unittest
 
-from pynwb.epoch import EpochTable, TimeSeriesIndex, Epochs
+from pynwb.epoch import EpochTable
 from pynwb import TimeSeries
 from pynwb.form.data_utils import ListSlicer
 
@@ -8,36 +8,32 @@ import numpy as np
 import pandas as pd
 
 
-class TimeSeriesIndexTest(unittest.TestCase):
-
-    def test_init(self):
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
-        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        tsi = TimeSeriesIndex()
-        self.assertEqual(tsi.name, 'timeseries_index')
-        tsi.add_row(40, 105, ts)
-        self.assertEqual(tsi['count', 0], 105)
-        self.assertEqual(tsi['idx_start', 0], 40)
-        self.assertEqual(tsi['timeseries', 0], ts)
-
+#class TimeSeriesIndexTest(unittest.TestCase):
+#
+#    def test_init(self):
+#        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+#        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
+#        tsi = TimeSeriesIndex()
+#        self.assertEqual(tsi.name, 'timeseries_index')
+#        tsi.add_row(40, 105, ts)
+#        self.assertEqual(tsi['count', 0], 105)
+#        self.assertEqual(tsi['idx_start', 0], 40)
+#        self.assertEqual(tsi['timeseries', 0], ts)
+#
 
 class EpochTableTest(unittest.TestCase):
 
     def test_init(self):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
         ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        tsi = TimeSeriesIndex()
-        tsi.add_row(40, 105, ts)
-        ept = EpochTable()
+        ept = EpochTable("EpochTable unittest")
         self.assertEqual(ept.name, 'epochs')
-        ept.add_row(10.0, 20.0, "test,unittest,pynwb", ListSlicer(tsi.data, slice(0, 1)), 'a test epoch')
+        ept.add_epoch(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
         row = ept[0]
-        self.assertEqual(row[0], 10.0)
-        self.assertEqual(row[1], 20.0)
-        self.assertEqual(row[2], "test,unittest,pynwb")
-        self.assertEqual(row[3].data, tsi.data)
-        self.assertEqual(row[3].region, slice(0, 1))
-        self.assertEqual(row[4], 'a test epoch')
+        self.assertEqual(row[1], 10.0)
+        self.assertEqual(row[2], 20.0)
+        self.assertEqual(row[3], ["test", "unittest", "pynwb"])
+        self.assertEqual(row[4], [(90, 100, ts)])
 
 
 class EpochSetters(unittest.TestCase):
@@ -84,7 +80,7 @@ class TestEpochsDf(unittest.TestCase):
 
     def test_dataframe_roundtrip(self):
         df = self.get_dataframe()
-        epochs = Epochs.from_dataframe(df, name='test epochs', source='testing', stop_times='end')
+        epochs = EpochTable.from_dataframe(df, name='test epochs', source='testing', stop_times='end')
         obtained = epochs.to_dataframe()
 
         assert set(df.columns) ^ set(obtained.columns) == set(['stop_time', 'end'])
