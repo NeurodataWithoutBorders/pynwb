@@ -873,7 +873,7 @@ class GroupSpec(BaseStorageSpec):
             if existing_dt_spec is None:
                 self.__add_data_type_inc(dt_spec)
             else:
-                if existing_dt_spec.name is not None and dt_spec.name is None:
+                if (isinstance(existing_dt_spec, list) or existing_dt_spec.name is not None) and dt_spec.name is None:
                     if isinstance(dt_spec, DatasetSpec):
                         self.set_dataset(dt_spec)
                     elif isinstance(dt_spec, GroupSpec):
