@@ -32,11 +32,97 @@ _eptable_docval = _evtable_docval + [
 
 
 @register_class('EpochTable', CORE_NAMESPACE)
-class EpochTable(NWBTable):
-
-    __columns__ = _eptable_docval
+class EpochTable(DynamicTable):
+    """
+    Table for storing Epoch data
+    """
 
     __defaultname__ = 'epochs'
+
+    __nwbfields__ = ('description',
+                     'imaging_plane',
+                     {'name': 'reference_images', 'child': True})
+
+    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
+            {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None},
+            {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
+             'default': None},
+            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
+            {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
+            'default': None})
+    def __init__(self, **kwargs):
+        imaging_plane, reference_images = popargs('imaging_plane', 'reference_images', kwargs)
+        if kwargs.get('name') is None:
+            kwargs['name'] = imaging_plane.name
+        columns, colnames = getargs('columns', 'colnames', kwargs)
+        pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
+        super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
+        self.__has_timeseries = False
+        self.__has_tags = False
+        if len(colnames) == 0:
+            self.add_column(name='start_time', description='Start time of epoch, in seconds')
+            self.add_column(name='stop_time', description='Stop time of epoch, in seconds')
+            if 'tags' in colnames:
+                self.__has_tags = True
+            if 'timeseries_index' in colnames:
+                self.__has_timeseries = True
+
+    def __check_tags(self):
+        if not self.__has_tags:
+            self.add_vector_column(name='tags', description='user-defined tags')
+            self.__has_tags = True
+
+    def __check_timeseries(self):
+        if not self.__has_timeseries:
+            self.add_vector_column(name='timeseries_index', description='index into a TimeSeries object')
+            self.__has_timeseries = True
+
+    @docval({'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
+            {'name': 'stop_time', 'type': float, 'doc': 'Stop time of epoch, in seconds'},
+            {'name': 'tags', 'type': (str, list, tuple), 'doc': 'user-defined tags uesd throughout epochs', 'default': None},
+            {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to', 'default': None},
+            allow_extra=True)
+    def add_epoch(self, **kwargs):
+        tags, timeseries = popargs('tags', 'timeseries', kwargs)
+        start_time, stop_time = getargs('start_time', 'stop_time', kwargs)
+        rkwargs = dict(kwargs)
+        if timeseries is not None:
+            self.__check_timeseries()
+            if isinstance(timeseries, TimeSeries):
+                timeseries = [timeseries]
+            tmp = list()
+            for ts in timeseries:
+                idx_start, count = self.__calculate_idx_count(start_time, stop_time, ts)
+                tmp.append((idx_start, count, ts))
+            timeseries = tmp
+            rkwargs['timeseries'] = timeseries
+        if tags is not None:
+            self.__check_tags()
+            rkwargs['tags'] = tags
+        return super(EpochTable, self).add_row(**rkwargs)
+
+    def __calculate_idx_count(self, start_time, stop_time, ts_data):
+        if isinstance(ts_data.timestamps, DataIO):
+            ts_timestamps = ts_data.timestamps.data
+            ts_starting_time = ts_data.starting_time
+            ts_rate = ts_data.rate
+        else:
+            ts = ts_data
+            ts_timestamps = ts.timestamps
+            ts_starting_time = ts.starting_time
+            ts_rate = ts.rate
+        if ts_starting_time is not None and ts_rate:
+            start_idx = int((start_time - ts_starting_time)*ts_rate)
+            stop_idx = int((stop_time - ts_starting_time)*ts_rate)
+        elif len(ts_timestamps) > 0:
+            timestamps = ts_timestamps
+            start_idx = bisect_left(timestamps, start_time)
+            stop_idx = bisect_left(timestamps, stop_time)
+        else:
+            raise ValueError("TimeSeries object must have timestamps or starting_time and rate")
+        count = stop_idx - start_idx
+        idx_start = start_idx
+        return (int(idx_start), int(count))
 
 
 @register_class('EpochTableRegion', CORE_NAMESPACE)
