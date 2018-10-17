@@ -72,7 +72,7 @@ class TestEpochsDf(unittest.TestCase):
             'foo': [1, 2, 3, 4],
             'bar': ['fish', 'fowl', 'dog', 'cat'],
             'start_time': [0.2, 0.25, 0.30, 0.35],
-            'end': [0.25, 0.30, 0.40, 0.45],
+            'stop_time': [0.25, 0.30, 0.40, 0.45],
             'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
             'description': ['q', 'w', 'e', 'r'],
             'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
@@ -80,12 +80,11 @@ class TestEpochsDf(unittest.TestCase):
 
     def test_dataframe_roundtrip(self):
         df = self.get_dataframe()
-        epochs = EpochTable.from_dataframe(df, name='test epochs', source='testing', stop_times='end')
+        epochs = EpochTable.from_dataframe(df, name='test epochs', source='testing')
         obtained = epochs.to_dataframe()
 
-        assert set(df.columns) ^ set(obtained.columns) == set(['stop_time', 'end'])
-        assert obtained.loc[3, 'timeseries'][1] is df.loc[3, 'timeseries'][1]
-        assert obtained.loc[2, 'foo'] == df.loc[2, 'foo']
+        self.assertIs(obtained.loc[3, 'timeseries'][1], df.loc[3, 'timeseries'][1])
+        self.assertEqual(obtained.loc[2, 'foo'], df.loc[2, 'foo'])
 
 
 if __name__ == '__main__':
