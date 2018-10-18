@@ -237,6 +237,7 @@ nwbfile = io.read()
 
 ####################
 # .. _MultiContainerInterface:
+#
 # Creating and using a custom MultiContainerInterface
 # -----------------------------------------------------
 # It is sometimes the case that we need a group to hold zero-or-more or
