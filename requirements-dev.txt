@@ -3,7 +3,6 @@ chardet==3.0.4
 codecov==2.0.15
 configparser==3.5.0
 coverage==4.5.1
-enum34==1.1.6
 flake8==3.5.0
 idna==2.6
 linecache2==1.0.0
