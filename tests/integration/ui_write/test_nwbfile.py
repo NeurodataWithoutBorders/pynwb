@@ -10,7 +10,7 @@ from pynwb.form.backends.hdf5 import HDF5IO
 from pynwb import NWBFile, TimeSeries
 from pynwb.file import Subject
 from pynwb.ecephys import Clustering
-from pynwb.epoch import Epochs
+from pynwb.epoch import EpochTable
 
 from . import base
 
@@ -208,7 +208,7 @@ class TestEpochsRoundtrip(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
-        return Epochs('epochs', 'epochs integration test')
+        return EpochTable('epochs', 'epochs integration test')
 
     def addContainer(self, nwbfile):
         nwbfile.add_epoch_metadata_column(
@@ -221,8 +221,7 @@ class TestEpochsRoundtrip(base.TestMapRoundTrip):
             stop_time=6.1,
             timeseries=[],
             tags='ambient',
-            description='ambient data epoch',
-            metadata={'temperature': 26.4}
+            temperature=26.4,
         )
 
         # reset the thing
@@ -236,7 +235,7 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
-        return Epochs('epochs', 'epochs integration test')
+        return EpochTable('epochs', 'epochs integration test')
 
     def addContainer(self, nwbfile):
 
@@ -248,18 +247,24 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
         nwbfile.add_acquisition(tsa)
         nwbfile.add_acquisition(tsb)
 
-        nwbfile.epochs = Epochs.from_dataframe(
+        nwbfile.epochs = EpochTable.from_dataframe(
             pd.DataFrame({
                 'foo': [1, 2, 3, 4],
                 'bar': ['fish', 'fowl', 'dog', 'cat'],
                 'start_time': [0.2, 0.25, 0.30, 0.35],
                 'stop_time': [0.25, 0.30, 0.40, 0.45],
-                'timeseries': [[tsa], [tsb], [tsb], [tsb, tsa]],
-                'description': ['q', 'w', 'e', 'r'],
+                'timeseries': [[(2, 1, tsa)],
+                               [(3, 1, tsa)],
+                               [(3, 1, tsa)],
+                               [(4, 1, tsa)]],
                 'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
             }),
+            'epochs',
             'epochs integration test',
-            'epochs'
+            columns=[
+                {'name': 'foo', 'description': 'a column of integers'},
+                {'name': 'bar', 'description': 'a column of strings'},
+            ]
         )
 
         # reset the thing

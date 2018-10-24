@@ -81,8 +81,8 @@ class NWBFileTest(unittest.TestCase):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
         ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
         expected_tags = tags1 + tags2
-        self.nwbfile.create_epoch('a fake epoch', 0.0, 1.0, tags1, ts)
-        self.nwbfile.create_epoch('a second fake epoch', 0.0, 1.0, tags2, ts)
+        self.nwbfile.create_epoch(0.0, 1.0, tags1, ts)
+        self.nwbfile.create_epoch(0.0, 1.0, tags2, ts)
         tags = self.nwbfile.epoch_tags
         six.assertCountEqual(self, expected_tags, tags)
 

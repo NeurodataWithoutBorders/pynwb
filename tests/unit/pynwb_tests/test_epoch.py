@@ -2,24 +2,10 @@ import unittest
 
 from pynwb.epoch import EpochTable
 from pynwb import TimeSeries
-from pynwb.form.data_utils import ListSlicer
 
 import numpy as np
 import pandas as pd
 
-
-#class TimeSeriesIndexTest(unittest.TestCase):
-#
-#    def test_init(self):
-#        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
-#        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-#        tsi = TimeSeriesIndex()
-#        self.assertEqual(tsi.name, 'timeseries_index')
-#        tsi.add_row(40, 105, ts)
-#        self.assertEqual(tsi['count', 0], 105)
-#        self.assertEqual(tsi['idx_start', 0], 40)
-#        self.assertEqual(tsi['timeseries', 0], ts)
-#
 
 class EpochTableTest(unittest.TestCase):
 

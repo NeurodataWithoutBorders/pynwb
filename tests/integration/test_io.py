@@ -106,6 +106,7 @@ class TestHDF5Writer(unittest.TestCase):
         HDF5IO.load_namespaces(ns_catalog, self.path, namespaces=['core'])
         original_ns = self.manager.namespace_catalog.get_namespace('core')
         cached_ns = ns_catalog.get_namespace('core')
+        self.maxDiff = None
         for key in ('author', 'contact', 'doc', 'full_name', 'name'):
             with self.subTest(namespace_field=key):
                 self.assertEqual(original_ns[key], cached_ns[key])
