@@ -202,7 +202,7 @@ class TestMapRoundTripWithExistingFileObject(TestMapRoundTrip):
         nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
 
-        file_obj = h5py.File(self.filename, driver='core', backing_store=False)
+        file_obj = h5py.File(self.filename)
         self.writer = HDF5IO(self.filename, get_manager(), file=file_obj)
         self.writer.write(nwbfile)
 
