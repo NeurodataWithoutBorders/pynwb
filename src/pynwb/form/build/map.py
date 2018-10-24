@@ -655,7 +655,15 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     def __is_reftype(self, data):
         tmp = data
         while hasattr(tmp, '__len__') and not isinstance(tmp, (Container, text_type, binary_type)):
-            tmp = tmp[0]
+            tmptmp = None
+            for t in tmp:
+                if hasattr(t, '__len__') and not isinstance(t, (Container, text_type, binary_type)) and len(t) > 0:
+                    tmptmp = tmp[0]
+                    break
+            if tmptmp is not None:
+                break
+            else:
+                tmp = tmp[0]
         if isinstance(tmp, Container):
             return True
         else:
@@ -730,7 +738,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         for spec in datasets:
             attr_value = self.get_attr_value(spec, container, build_manager)
             # TODO: add check for required datasets
-            if attr_value is None:
+            if attr_value is None or (hasattr(attr_value, '__len__') and len(attr_value) == 0):
                 if spec.required:
                     msg = "dataset '%s' for '%s' of type (%s)"\
                                   % (spec.name, builder.name, self.spec.data_type_def)
@@ -793,7 +801,6 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                               % (value.name, getattr(value, self.spec.type_key()),
                                  builder.name, self.spec.data_type_def)
                 warnings.warn(msg, OrphanContainerWarning)
-
             if value.modified:                   # writing a new container
                 rendered_obj = build_manager.build(value, source=source)
                 # use spec to determine what kind of HDF5
@@ -802,6 +809,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     name = spec.name
                     builder.set_link(LinkBuilder(rendered_obj, name, builder))
                 elif isinstance(spec, DatasetSpec):
+                    if rendered_obj.dtype is None and spec.dtype is not None:
+                        rendered_obj.dtype = self.convert_dtype(spec.dtype)
                     builder.set_dataset(rendered_obj)
                 else:
                     builder.set_group(rendered_obj)

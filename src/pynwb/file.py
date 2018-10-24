@@ -360,9 +360,10 @@ class NWBFile(MultiContainerInterface):
         """
         self.__check_epochs()
         self.epoch_tags.update(kwargs.pop('tags', list()))
-        call_docval_func(self.epochs.add_metadata_column, kwargs)
+        call_docval_func(self.epochs.add_column, kwargs)
 
-    @docval(*get_docval(EpochTable.add_epoch))
+    @docval(*get_docval(EpochTable.add_epoch),
+            allow_extra=True)
     def create_epoch(self, **kwargs):
         """
 

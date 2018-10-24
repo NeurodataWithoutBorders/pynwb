@@ -443,6 +443,14 @@ class DatasetBuilder(BaseBuilder):
         ''' The data type of this object '''
         return self.__dtype
 
+    @dtype.setter
+    def dtype(self, val):
+        ''' The data type of this object '''
+        if self.__dtype is None:
+            self.__dtype = val
+        else:
+            raise AttributeError("cannot overwrite dtype")
+
     @docval({'name': 'dataset', 'type': 'DatasetBuilder',
              'doc': 'the DatasetBuilder to merge into this DatasetBuilder'})
     def deep_update(self, **kwargs):
