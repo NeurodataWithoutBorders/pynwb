@@ -888,7 +888,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             try:
                 dt = manager.get_builder_dt(g)
                 ns = manager.get_builder_ns(g)
-            except ValueError as v:
+            except ValueError:
                 continue
             if dt is not None:
                 for parent_dt in manager.namespace_catalog.get_hierarchy(ns, dt):

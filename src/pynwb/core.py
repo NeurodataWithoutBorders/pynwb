@@ -370,7 +370,7 @@ class ElementIdentifiers(NWBData):
 
 
 class NWBTable(NWBData):
-    '''
+    r'''
     Subclasses should specify the class attribute \_\_columns\_\_.
 
     This should be a list of dictionaries with the following keys:
