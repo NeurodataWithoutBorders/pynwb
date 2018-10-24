@@ -269,3 +269,7 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         return nwbfile.epochs
+
+
+class TestExistingFileObject(TestEpochsRoundtrip, base.TestMapRoundTripWithExistingFileObject):
+    pass

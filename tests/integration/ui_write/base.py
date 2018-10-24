@@ -3,6 +3,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import os
 import numpy as np
+import h5py
 
 from pynwb import NWBContainer, get_manager, NWBFile, NWBData
 from pynwb.form.backends.hdf5 import HDF5IO
@@ -151,11 +152,13 @@ class TestMapRoundTrip(TestMapNWBContainer):
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
+
         self.writer = HDF5IO(self.filename, get_manager())
         self.writer.write(nwbfile)
         self.writer.close()
         self.reader = HDF5IO(self.filename, get_manager())
         read_nwbfile = self.reader.read()
+
         try:
             tmp = self.getContainer(read_nwbfile)
             return tmp
@@ -188,3 +191,28 @@ class TestDataInterfaceIO(TestMapRoundTrip):
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
         return nwbfile.get_acquisition(self.container.name)
+
+
+class TestMapRoundTripWithExistingFileObject(TestMapRoundTrip):
+
+    def roundtripContainer(self):
+        description = 'a file to test writing and reading a %s' % self.container_type
+        source = 'test_roundtrip for %s' % self.container_type
+        identifier = 'TEST_%s' % self.container_type
+        nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
+        self.addContainer(nwbfile)
+
+        file_obj = h5py.File(self.filename, driver='core', backing_store=False)
+        self.writer = HDF5IO(self.filename, get_manager(), file=file_obj)
+        self.writer.write(nwbfile)
+
+        self.reader = HDF5IO(self.filename, get_manager(), file=file_obj)
+        read_nwbfile = self.reader.read()
+
+        try:
+            tmp = self.getContainer(read_nwbfile)
+            return tmp
+        except Exception as e:
+            self.reader.close()
+            self.reader = None
+            raise e
