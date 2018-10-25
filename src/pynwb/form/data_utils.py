@@ -518,6 +518,9 @@ class DataIO(with_metaclass(ABCMeta, object)):
     def data(self):
         return self.__data
 
+    def __len__(self):
+        return len(self.__data)
+
     # Delegate attribute lookup to data object (See issue #636
     # https://github.com/NeurodataWithoutBorders/pynwb/issues/636#issuecomment-426742988)
     def __getattr__(self, attr):

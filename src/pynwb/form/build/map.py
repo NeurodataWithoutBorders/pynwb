@@ -9,6 +9,7 @@ from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args, 
 from ..container import Container, Data, DataRegion
 from ..spec import Spec, AttributeSpec, DatasetSpec, GroupSpec, LinkSpec, NAME_WILDCARD, NamespaceCatalog, RefSpec,\
                    SpecReader
+from ..data_utils import DataIO, AbstractDataChunkIterator
 from ..spec.spec import BaseStorageSpec
 from .builders import DatasetBuilder, GroupBuilder, LinkBuilder, Builder, ReferenceBuilder, RegionBuilder, BaseBuilder
 from .warnings import OrphanContainerWarning, MissingRequiredWarning
@@ -734,11 +735,24 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 continue
             self.__add_containers(builder, spec, attr_value, build_manager, source, container)
 
+    def __is_empty(self, val):
+        if val is None:
+            return True
+        if isinstance(val, DataIO):
+            val = val.data
+        if isinstance(val, AbstractDataChunkIterator):
+            return False
+        else:
+            if (hasattr(val, '__len__') and len(val) == 0):
+                return True
+            else:
+                return False
+
     def __add_datasets(self, builder, datasets, container, build_manager, source):
         for spec in datasets:
             attr_value = self.get_attr_value(spec, container, build_manager)
             # TODO: add check for required datasets
-            if attr_value is None or (hasattr(attr_value, '__len__') and len(attr_value) == 0):
+            if self.__is_empty(attr_value):
                 if spec.required:
                     msg = "dataset '%s' for '%s' of type (%s)"\
                                   % (spec.name, builder.name, self.spec.data_type_def)
@@ -894,7 +908,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             try:
                 dt = manager.get_builder_dt(g)
                 ns = manager.get_builder_ns(g)
-            except ValueError as v:
+            except ValueError:
                 continue
             if dt is not None:
                 for parent_dt in manager.namespace_catalog.get_hierarchy(ns, dt):

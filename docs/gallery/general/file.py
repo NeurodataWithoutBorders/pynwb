@@ -137,8 +137,8 @@ added_mod.add_data_interface(mod_ts)
 # and the fifth argument is a list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
 # to.
 
-nwbfile.create_epoch('the first epoch', 2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
-nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
+nwbfile.create_epoch(2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
+nwbfile.create_epoch(6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 
 ####################
 # .. _basic_trials:
