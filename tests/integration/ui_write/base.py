@@ -3,7 +3,6 @@ from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import os
 import numpy as np
-import h5py
 
 from pynwb import NWBContainer, get_manager, NWBFile, NWBData
 from pynwb.form.backends.hdf5 import HDF5IO
@@ -11,20 +10,6 @@ from pynwb.form.backends.hdf5 import HDF5IO
 CORE_NAMESPACE = 'core'
 
 container_tests = dict()
-
-
-def skip_by_attribute(attribute, test=lambda x: bool(x), reason=None):
-    if reason is None:
-        reason = attribute
-
-    def decorator(f):
-        def wrapper(self, *args, **kwargs):
-            if test(getattr(self, attribute)):
-                return f(self, *args, **kwargs)
-            else:
-                raise unittest.SkipTest(reason)
-        return wrapper
-    return decorator
 
 
 def container_test(container):
@@ -161,25 +146,18 @@ class TestMapRoundTrip(TestMapNWBContainer):
         if os.path.exists(self.filename) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
             os.remove(self.filename)
 
-    def roundtripContainer(self, use_injected_container=False):
+    def roundtripContainer(self):
         description = 'a file to test writing and reading a %s' % self.container_type
         source = 'test_roundtrip for %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
 
-        if use_injected_container:
-            file_obj = h5py.File(self.filename)
-            self.writer = HDF5IO(self.filename, get_manager(), file=file_obj)
-            self.writer.write(nwbfile)
-            self.reader = HDF5IO(self.filename, get_manager(), file=file_obj)
-            read_nwbfile = self.reader.read()
-        else:
-            self.writer = HDF5IO(self.filename, get_manager(), mode='w')
-            self.writer.write(nwbfile)
-            self.writer.close()
-            self.reader = HDF5IO(self.filename, get_manager(), mode='r')
-            read_nwbfile = self.reader.read()
+        self.writer = HDF5IO(self.filename, get_manager(), mode='w')
+        self.writer.write(nwbfile)
+        self.writer.close()
+        self.reader = HDF5IO(self.filename, get_manager(), mode='r')
+        read_nwbfile = self.reader.read()
 
         try:
             tmp = self.getContainer(read_nwbfile)
@@ -194,13 +172,6 @@ class TestMapRoundTrip(TestMapNWBContainer):
         # make sure we get a completely new object
         self.assertNotEqual(id(self.container), id(self.read_container))
         self.assertContainerEqual(self.container, self.read_container)
-
-    @skip_by_attribute('run_injected_file_test', reason='run_injected_file_test is False')
-    def test_injected_file_roundtrip(self):
-        read_container = self.roundtripContainer(use_injected_container=True)
-        # make sure we get a completely new object
-        self.assertNotEqual(id(self.container), id(read_container))
-        self.assertContainerEqual(self.container, read_container)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
@@ -220,28 +191,3 @@ class TestDataInterfaceIO(TestMapRoundTrip):
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
         return nwbfile.get_acquisition(self.container.name)
-
-
-class TestMapRoundTripWithExistingFileObject(TestMapRoundTrip):
-
-    def roundtripContainer(self):
-        description = 'a file to test writing and reading a %s' % self.container_type
-        source = 'test_roundtrip for %s' % self.container_type
-        identifier = 'TEST_%s' % self.container_type
-        nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
-        self.addContainer(nwbfile)
-
-        file_obj = h5py.File(self.filename)
-        self.writer = HDF5IO(self.filename, get_manager(), file=file_obj)
-        self.writer.write(nwbfile)
-
-        self.reader = HDF5IO(self.filename, get_manager(), file=file_obj)
-        read_nwbfile = self.reader.read()
-
-        try:
-            tmp = self.getContainer(read_nwbfile)
-            return tmp
-        except Exception as e:
-            self.reader.close()
-            self.reader = None
-            raise e

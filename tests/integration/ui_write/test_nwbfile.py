@@ -274,7 +274,3 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         return nwbfile.epochs
-
-
-class TestInjectedFileObjectUsingEpochs(TestEpochsRoundtripDf):
-    run_injected_file_test = True
