@@ -157,10 +157,11 @@ AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
 # To demonstrate this, first we will make some fake data using our extensions.
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile
 
-start_time = datetime(2017, 4, 3, 11, 0, 0)
-create_date = datetime(2017, 4, 15, 12, 0, 0)
+start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
 nwbfile = NWBFile('PyNWB tutorial', 'demonstrate caching', 'NWB456', start_time,
                   file_create_date=create_date)
@@ -327,12 +328,13 @@ class PotatoSack(MultiContainerInterface):
 # Then use the objects (again, this would often be done in a different file).
 
 from pynwb import NWBHDF5IO, NWBFile
+from datetime import datetime
 
 potato_sack = PotatoSack(source='pantry',
                          potatos=Potato(name='potato1', age=2.3, weight=3.0,
                                         source='the ground'))
 
-nwbfile = NWBFile("source", "a file with metadata", "NB123A", '2018-06-01T00:00:00')
+nwbfile = NWBFile("source", "a file with metadata", "NB123A", datetime(2018, 6, 1))
 
 pmod = nwbfile.create_processing_module('module_name', 'source', 'desc')
 pmod.add_container(potato_sack)

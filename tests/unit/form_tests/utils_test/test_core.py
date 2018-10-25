@@ -63,6 +63,28 @@ class TestDocValidator(unittest.TestCase):
                 pass
             method(self, arg1=1234560)
 
+    def test_bad_shape(self):
+        @docval({'name': 'arg1', 'type': 'array_data', 'doc': 'this is a bad shape', 'shape': (None, 2)})
+        def method(self, **kwargs):
+            pass
+        with self.assertRaises(ValueError):
+            method(self, arg1=[[1]])
+        with self.assertRaises(ValueError):
+            method(self, arg1=[1])
+        # this should work
+        method(self, arg1=[[1, 1]])
+
+    def test_multi_shape(self):
+        @docval({'name': 'arg1', 'type': 'array_data', 'doc': 'this is a bad shape',
+                 'shape': ((None,), (None, 2))})
+        def method1(self, **kwargs):
+            pass
+
+        method1(self, arg1=[[1, 1]])
+        method1(self, arg1=[1, 2])
+        with self.assertRaises(ValueError):
+            method1(self, arg1=[[1, 1, 1]])
+
     def test_fmt_docval_args(self):
         """ Test that fmt_docval_args works """
         test_kwargs = {
