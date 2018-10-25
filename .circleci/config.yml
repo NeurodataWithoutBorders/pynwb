@@ -9,7 +9,7 @@ references:
       pip install flake8
       flake8 src/pynwb
       flake8 tests
-      flake8 --ignore E402,E501 docs/gallery
+      flake8 --ignore E402,E501,W504 docs/gallery
 
   initialize-venv: &initialize-venv
     name: Initialize Virtual Environment
