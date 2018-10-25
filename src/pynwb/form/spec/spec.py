@@ -978,7 +978,7 @@ class GroupSpec(BaseStorageSpec):
         if isinstance(spec, Spec):
             name = spec.name
             if name is None:
-                if spec.is_many(): # this is a wildcard spec, so it cannot be overridden
+                if spec.is_many():  # this is a wildcard spec, so it cannot be overridden
                     return False
                 name = spec.data_type_def
             if name is None:
