@@ -271,5 +271,5 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
         return nwbfile.epochs
 
 
-class TestExistingFileObject(TestEpochsRoundtrip, base.TestMapRoundTripWithExistingFileObject):
-    pass
+class TestInjectedFileObjectUsingEpochs(TestEpochsRoundtripDf):
+    run_injected_file_test = True

@@ -13,6 +13,20 @@ CORE_NAMESPACE = 'core'
 container_tests = dict()
 
 
+def skip_by_attribute(attribute, test=lambda x: bool(x), reason=None):
+    if reason is None:
+        reason = attribute
+
+    def decorator(f):
+        def wrapper(self, *args, **kwargs):
+            if test(getattr(self, attribute)):
+                return f(self, *args, **kwargs)
+            else:
+                raise unittest.SkipTest(reason)
+        return wrapper
+    return decorator
+
+
 def container_test(container):
     global container_tests
 
@@ -127,6 +141,7 @@ class TestMapNWBContainer(unittest.TestCase):
 class TestMapRoundTrip(TestMapNWBContainer):
 
     _required_tests = ('test_build', 'test_construct', 'test_roundtrip')
+    run_injected_file_test = False
 
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
@@ -146,18 +161,25 @@ class TestMapRoundTrip(TestMapNWBContainer):
         if os.path.exists(self.filename):
             os.remove(self.filename)
 
-    def roundtripContainer(self):
+    def roundtripContainer(self, use_injected_container=False):
         description = 'a file to test writing and reading a %s' % self.container_type
         source = 'test_roundtrip for %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
 
-        self.writer = HDF5IO(self.filename, get_manager())
-        self.writer.write(nwbfile)
-        self.writer.close()
-        self.reader = HDF5IO(self.filename, get_manager())
-        read_nwbfile = self.reader.read()
+        if use_injected_container:
+            file_obj = h5py.File(self.filename)
+            self.writer = HDF5IO(self.filename, get_manager(), file=file_obj)
+            self.writer.write(nwbfile)
+            self.reader = HDF5IO(self.filename, get_manager(), file=file_obj)
+            read_nwbfile = self.reader.read()
+        else:
+            self.writer = HDF5IO(self.filename, get_manager())
+            self.writer.write(nwbfile)
+            self.writer.close()
+            self.reader = HDF5IO(self.filename, get_manager())
+            read_nwbfile = self.reader.read()
 
         try:
             tmp = self.getContainer(read_nwbfile)
@@ -172,6 +194,13 @@ class TestMapRoundTrip(TestMapNWBContainer):
         # make sure we get a completely new object
         self.assertNotEqual(id(self.container), id(self.read_container))
         self.assertContainerEqual(self.container, self.read_container)
+
+    @skip_by_attribute('run_injected_file_test', reason='run_injected_file_test is False')
+    def test_injected_file_roundtrip(self):
+        read_container = self.roundtripContainer(use_injected_container=True)
+        # make sure we get a completely new object
+        self.assertNotEqual(id(self.container), id(read_container))
+        self.assertContainerEqual(self.container, read_container)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
