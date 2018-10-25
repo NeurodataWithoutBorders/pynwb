@@ -874,7 +874,7 @@ class GroupSpec(BaseStorageSpec):
             if existing_dt_spec is None:
                 self.__add_data_type_inc(dt_spec)
             else:
-                if existing_dt_spec.name is not None and dt_spec.name is None:
+                if (isinstance(existing_dt_spec, list) or existing_dt_spec.name is not None) and dt_spec.name is None:
                     if isinstance(dt_spec, DatasetSpec):
                         self.set_dataset(dt_spec)
                     elif isinstance(dt_spec, GroupSpec):
@@ -979,6 +979,8 @@ class GroupSpec(BaseStorageSpec):
         if isinstance(spec, Spec):
             name = spec.name
             if name is None:
+                if spec.is_many():  # this is a wildcard spec, so it cannot be overridden
+                    return False
                 name = spec.data_type_def
             if name is None:
                 name = spec.data_type_inc
@@ -1015,7 +1017,17 @@ class GroupSpec(BaseStorageSpec):
             if spec.data_type_def is None:
                 raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
             spec = spec.data_type_def
-        # return spec.data_type_def in self.__inherited_data_type_defs
+        return spec not in self.__new_data_types
+
+    @docval({'name': 'spec', 'type': (BaseStorageSpec, str), 'doc': 'the specification to check'},
+            raises="ValueError, if 'name' is not part of this spec")
+    def is_overridden_type(self, **kwargs):
+        ''' Returns True if `spec` represents a spec that was overriden by the subtype'''
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, BaseStorageSpec):
+            if spec.data_type_def is None:
+                raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
+            spec = spec.data_type_def
         return spec not in self.__new_data_types
 
     def __add_data_type_inc(self, spec):

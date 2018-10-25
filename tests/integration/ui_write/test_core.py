@@ -1,4 +1,4 @@
-from pynwb.form.build import GroupBuilder, DatasetBuilder
+from pynwb.form.build import GroupBuilder
 
 from pynwb.core import DynamicTable
 
@@ -13,12 +13,6 @@ class TestDynamicTableIO(base.TestMapRoundTrip):
         return DynamicTable('trials', 'DynamicTable integration test', 'a test table')
 
     def setUpBuilder(self):
-        id_builder = DatasetBuilder('id', data=[],
-                                    attributes={
-                                         'help': 'unique identifiers for a list of elements',
-                                         'namespace': 'core',
-                                         'neurodata_type': 'ElementIdentifiers',
-                                    })
         return GroupBuilder('trials',
                             attributes={
                                 'help': 'A column-centric table',
@@ -28,8 +22,7 @@ class TestDynamicTableIO(base.TestMapRoundTrip):
                                 'source': 'DynamicTable integration test',
                                 'colnames': tuple(),
 
-                            },
-                            datasets={'id': id_builder})
+                            })
 
     def addContainer(self, nwbfile):
         nwbfile.trials = self.container

@@ -9,7 +9,7 @@ from .form import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
-from .epoch import Epochs
+from .epoch import EpochTable
 from .ecephys import ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
@@ -217,7 +217,7 @@ class NWBFile(MultiContainerInterface):
              'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'stimulus_template', 'type': (list, tuple),
              'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
-            {'name': 'epochs', 'type': Epochs,
+            {'name': 'epochs', 'type': EpochTable,
              'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
             {'name': 'epoch_tags', 'type': (tuple, list, set),
              'doc': 'A sorted list of tags used across all epochs', 'default': set()},
@@ -351,7 +351,7 @@ class NWBFile(MultiContainerInterface):
 
     def __check_epochs(self):
         if self.epochs is None:
-            self.epochs = Epochs(self.source)
+            self.epochs = EpochTable(self.source)
 
     @docval(*get_docval(DynamicTable.add_column))
     def add_epoch_metadata_column(self, **kwargs):
@@ -361,9 +361,10 @@ class NWBFile(MultiContainerInterface):
         """
         self.__check_epochs()
         self.epoch_tags.update(kwargs.pop('tags', list()))
-        call_docval_func(self.epochs.add_metadata_column, kwargs)
+        call_docval_func(self.epochs.add_column, kwargs)
 
-    @docval(*get_docval(Epochs.add_epoch))
+    @docval(*get_docval(EpochTable.add_epoch),
+            allow_extra=True)
     def create_epoch(self, **kwargs):
         """
 
