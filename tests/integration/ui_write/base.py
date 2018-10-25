@@ -158,7 +158,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
             self.writer.close()
         if self.reader is not None:
             self.reader.close()
-        if os.path.exists(self.filename):
+        if os.path.exists(self.filename) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
             os.remove(self.filename)
 
     def roundtripContainer(self, use_injected_container=False):
@@ -175,10 +175,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
             self.reader = HDF5IO(self.filename, get_manager(), file=file_obj)
             read_nwbfile = self.reader.read()
         else:
-            self.writer = HDF5IO(self.filename, get_manager())
+            self.writer = HDF5IO(self.filename, get_manager(), mode='w')
             self.writer.write(nwbfile)
             self.writer.close()
-            self.reader = HDF5IO(self.filename, get_manager())
+            self.reader = HDF5IO(self.filename, get_manager(), mode='r')
             read_nwbfile = self.reader.read()
 
         try:

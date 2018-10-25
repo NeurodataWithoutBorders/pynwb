@@ -57,7 +57,7 @@ class ElectricalSeries(TimeSeries):
     channels] (or [num_times] for single electrode).
     """
 
-    __nwbfields__ = ({'name': 'electrodes',
+    __nwbfields__ = ({'name': 'electrodes', 'required_name': 'electrodes',
                       'doc': 'the electrodes that generated this electrical series', 'child': True},)
 
     __ancestry = "TimeSeries,ElectricalSeries"
