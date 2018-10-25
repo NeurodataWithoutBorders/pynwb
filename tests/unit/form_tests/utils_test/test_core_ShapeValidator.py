@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from pynwb.form.data_utils import ShapeValidator, ShapeValidatorResult, DataChunkIterator
+from pynwb.form.data_utils import ShapeValidatorResult, DataChunkIterator, assertEqualShape
 import numpy as np
 
 
@@ -16,7 +16,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Test match
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(10).reshape(2, 5)
-        res = ShapeValidator.assertEqualShape(d1, d2)
+        res = assertEqualShape(d1, d2)
         self.assertTrue(res.result)
         self.assertIsNone(res.error)
         self.assertTupleEqual(res.ignored, ())
@@ -30,7 +30,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Test unmatched
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(10).reshape(5, 2)
-        res = ShapeValidator.assertEqualShape(d1, d2)
+        res = assertEqualShape(d1, d2)
         self.assertFalse(res.result)
         self.assertEqual(res.error, 'AXIS_LEN_ERROR')
         self.assertTupleEqual(res.ignored, ())
@@ -44,7 +44,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Test unequal num dims
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(20).reshape(5, 2, 2)
-        res = ShapeValidator.assertEqualShape(d1, d2)
+        res = assertEqualShape(d1, d2)
         self.assertFalse(res.result)
         self.assertEquals(res.error, 'NUM_AXES_ERROR')
         self.assertTupleEqual(res.ignored, ())
@@ -58,7 +58,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Test unequal num dims compare one axis
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(20).reshape(2, 5, 2)
-        res = ShapeValidator.assertEqualShape(d1, d2, 0, 0)
+        res = assertEqualShape(d1, d2, 0, 0)
         self.assertTrue(res.result)
         self.assertIsNone(res.error)
         self.assertTupleEqual(res.ignored, ())
@@ -72,7 +72,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Test unequal num dims compare multiple axes
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(20).reshape(5, 2, 2)
-        res = ShapeValidator.assertEqualShape(d1, d2, [0, 1], [1, 0])
+        res = assertEqualShape(d1, d2, [0, 1], [1, 0])
         self.assertTrue(res.result)
         self.assertIsNone(res.error)
         self.assertTupleEqual(res.ignored, ())
@@ -86,7 +86,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Test unequal num axes for comparison
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(20).reshape(5, 2, 2)
-        res = ShapeValidator.assertEqualShape(d1, d2, [0, 1], 1)
+        res = assertEqualShape(d1, d2, [0, 1], 1)
         self.assertFalse(res.result)
         self.assertEquals(res.error, "NUM_AXES_ERROR")
         self.assertTupleEqual(res.ignored, ())
@@ -100,7 +100,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Test too large frist axis
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(20).reshape(5, 2, 2)
-        res = ShapeValidator.assertEqualShape(d1, d2, 4, 1)
+        res = assertEqualShape(d1, d2, 4, 1)
         self.assertFalse(res.result)
         self.assertEquals(res.error, 'AXIS_OUT_OF_BOUNDS')
         self.assertTupleEqual(res.ignored, ())
@@ -114,7 +114,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Test too large second axis
         d1 = np.arange(10).reshape(2, 5)
         d2 = np.arange(20).reshape(5, 2, 2)
-        res = ShapeValidator.assertEqualShape(d1, d2, [0, 1], [5, 0])
+        res = assertEqualShape(d1, d2, [0, 1], [5, 0])
         self.assertFalse(res.result)
         self.assertEquals(res.error, 'AXIS_OUT_OF_BOUNDS')
         self.assertTupleEqual(res.ignored, ())
@@ -128,7 +128,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Compare data chunk iterators
         d1 = DataChunkIterator(data=np.arange(10).reshape(2, 5))
         d2 = DataChunkIterator(data=np.arange(10).reshape(2, 5))
-        res = ShapeValidator.assertEqualShape(d1, d2)
+        res = assertEqualShape(d1, d2)
         self.assertTrue(res.result)
         self.assertIsNone(res.error)
         self.assertTupleEqual(res.ignored, ())
@@ -142,7 +142,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Compare data chunk iterators with undetermined axis (ignore axis)
         d1 = DataChunkIterator(data=np.arange(10).reshape(2, 5), maxshape=(None, 5))
         d2 = DataChunkIterator(data=np.arange(10).reshape(2, 5))
-        res = ShapeValidator.assertEqualShape(d1, d2, ignore_undetermined=True)
+        res = assertEqualShape(d1, d2, ignore_undetermined=True)
         self.assertTrue(res.result)
         self.assertIsNone(res.error)
         self.assertTupleEqual(res.ignored, ((0, 0),))
@@ -156,7 +156,7 @@ class ShapeValidatorTests(unittest.TestCase):
         # Compare data chunk iterators with undetermined axis (error on undetermined axis)
         d1 = DataChunkIterator(data=np.arange(10).reshape(2, 5), maxshape=(None, 5))
         d2 = DataChunkIterator(data=np.arange(10).reshape(2, 5))
-        res = ShapeValidator.assertEqualShape(d1, d2, ignore_undetermined=False)
+        res = assertEqualShape(d1, d2, ignore_undetermined=False)
         self.assertFalse(res.result)
         self.assertEquals(res.error, 'AXIS_LEN_ERROR')
         self.assertTupleEqual(res.ignored, ())

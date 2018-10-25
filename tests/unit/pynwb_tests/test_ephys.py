@@ -197,34 +197,39 @@ class FeatureExtractionConstructor(unittest.TestCase):
 
     def test_invalid_init_mismatched_event_times(self):
         event_times = []  # Need 1 event time but give 0
-        electrodes = ['elec1', 'elec2']
+        table = make_electrode_table()
+        electrodes = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
         self.assertRaises(
-            TypeError, FeatureExtraction, 'test_fe', electrodes, description, event_times, features)   # noqa: F405
+            ValueError, FeatureExtraction, 'test_fe', electrodes,
+            description, event_times, features)
 
     def test_invalid_init_mismatched_electrodes(self):
         event_times = [1]
-        electrodes = ['elec1']  # Need 2 electrodes but give 1
+        table = make_electrode_table()
+        electrodes = DynamicTableRegion('electrodes', [0], 'the first electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]]]
-        self.assertRaises(TypeError, FeatureExtraction, 'test_fe', electrodes,   # noqa: F405
+        self.assertRaises(ValueError, FeatureExtraction, 'test_fe', electrodes,
                           description, event_times, features)
 
     def test_invalid_init_mismatched_description(self):
         event_times = [1]
-        electrodes = ['elec1', 'elec2']
+        table = make_electrode_table()
+        electrodes = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3', 'desc4']  # Need 3 descriptions but give 4
         features = [[[0, 1, 2], [3, 4, 5]]]
-        self.assertRaises(TypeError, FeatureExtraction, 'test_fe',   # noqa: F405
-                          electrodes, description, event_times, features)
+        self.assertRaises(
+            ValueError, FeatureExtraction, 'test_fe', electrodes, description, event_times, features)
 
-    def test_invalid_init_mismatched_description(self):  # noqa: F811
+    def test_invalid_init_mismatched_description2(self):  # noqa: F811
         event_times = [1]
-        electrodes = ['elec1', 'elec2']
+        table = make_electrode_table()
+        electrodes = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[0, 1, 2], [3, 4, 5]]  # Need 3D feature array but give only 2D array
-        self.assertRaises(TypeError, FeatureExtraction, 'test_fe',   # noqa: F405
+        self.assertRaises(ValueError, FeatureExtraction, 'test_fe',   # noqa: F405
                           electrodes, description, event_times, features)
 
 

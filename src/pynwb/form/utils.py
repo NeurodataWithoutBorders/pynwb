@@ -1,10 +1,12 @@
-import itertools as _itertools
 import copy as _copy
+import itertools as _itertools
 from abc import ABCMeta
-import six
-from six import raise_from
-import numpy as np
+
 import h5py
+import numpy as np
+import six
+from six import raise_from, text_type, binary_type
+
 
 __macros = {
     'array_data': [np.ndarray, list, tuple, h5py.Dataset],
@@ -63,6 +65,23 @@ def __type_okay(value, argtype, allow_none=False):
         return True
 
 
+def __shape_okay_multi(value, argshape):
+    if type(argshape[0]) in (tuple, list):  # if multiple shapes are present
+        return any(__shape_okay(value, a) for a in argshape)
+    else:
+        return __shape_okay(value, argshape)
+
+
+def __shape_okay(value, argshape):
+    valshape = get_data_shape(value)
+    if not len(valshape) == len(argshape):
+        return False
+    for a, b in zip(valshape, argshape):
+        if b not in (a, None):
+            return False
+    return True
+
+
 def __is_int(value):
     return any(isinstance(value, i) for i in (int, np.int8, np.int16, np.int32, np.int64))
 
@@ -91,7 +110,7 @@ def __format_type(argtype):
         raise ValueError("argtype must be a type, str, list, or tuple")
 
 
-def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, allow_extra=False):   # noqa: 901
+def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True, allow_extra=False):   # noqa: 901
     """
     Internal helper function used by the docval decroator to parse and validate function arguments
 
@@ -100,15 +119,16 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
     :param kwargs: Dict keyword arguments supplied by the caller where keys are the argument name and
                    values are the argument value.
     :param enforce_type: Boolean indicating whether the type of arguments should be enforced
-    :param enforce_ndim: Boolean indicating whether the number of dimensions of array arguments
-                         should be enforced if possible.
+    :param enforce_shape: Boolean indicating whether the dimensions of array arguments
+                          should be enforced if possible.
 
     :return: Dict with:
         * 'args' : Dict all arguments where keys are the names and values are the values of the arguments.
         * 'errors' : List of string with error messages
     """
     ret = dict()
-    errors = list()
+    type_errors = list()
+    value_errors = list()
     argsi = 0
     extras = dict(kwargs)
     try:
@@ -130,15 +150,19 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
                 argval_set = True
 
             if not argval_set:
-                errors.append("missing argument '%s'" % argname)
+                type_errors.append("missing argument '%s'" % argname)
             else:
                 if argname in ret:
-                    errors.append("'got multiple arguments for '%s" % argname)
+                    type_errors.append("'got multiple arguments for '%s" % argname)
                 else:
                     if enforce_type:
                         if not __type_okay(argval, arg['type']):
                             fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
-                            errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+                            type_errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+                    if enforce_shape and 'shape' in arg:
+                        if not __shape_okay_multi(argval, arg['shape']):
+                            fmt_val = (argname, get_data_shape(argval), arg['shape'])
+                            value_errors.append("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
                     ret[argname] = argval
             argsi += 1
             arg = next(it)
@@ -156,19 +180,23 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_ndim=True, 
                 argval = ret[argname]
                 if not __type_okay(argval, arg['type'], arg['default'] is None):
                     fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
-                    errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+                    type_errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
+            if enforce_shape and 'shape' in arg:
+                if not __shape_okay_multi(argval, arg['shape']):
+                    fmt_val = (argname, get_data_shape(argval), arg['shape'])
+                    value_errors.append("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
             arg = next(it)
     except StopIteration:
         pass
     if not allow_extra:
         for key in extras.keys():
-            errors.append("unrecognized argument: '%s'" % key)
+            type_errors.append("unrecognized argument: '%s'" % key)
     else:
         # TODO: Extras get stripped out if function arguments are composed with fmt_docval_args.
         # allow_extra needs to be tracked on a function so that fmt_docval_args doesn't strip them out
         for key in extras.keys():
             ret[key] = extras[key]
-    return {'args': ret, 'errors': errors}
+    return {'args': ret, 'type_errors': type_errors, 'value_errors': value_errors}
 
 
 def __sort_args(validator):
@@ -232,7 +260,7 @@ def fmt_docval_args(func, kwargs):
             ret_kwargs.update(kwargs_copy)
     else:
         raise ValueError('no docval found on %s' % str(func))
-    return (ret_args, ret_kwargs)
+    return ret_args, ret_kwargs
 
 
 def call_docval_func(func, kwargs):
@@ -274,8 +302,8 @@ def docval(*validator, **options):
     arguments and keyword arguments of the decorated function. These dictionaries
     must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a
     positional argument. To define a keyword argument, specify a default value
-    using the key ``'default'``. To validate the number of dimensions of an input array
-    add the optional ``'ndim'`` parameter.
+    using the key ``'default'``. To validate the dimensions of an input array
+    add the optional ``'shape'`` parameter.
 
     The decorated method must take ``self`` and ``**kwargs`` as arguments.
 
@@ -299,12 +327,12 @@ def docval(*validator, **options):
     :param returns: String describing the return values
     :param rtype: String describing the data type of the return values
     :param is_method: True if this is decorating an instance or class method, False otherwise (Default=True)
-    :param enforce_ndim: Enforce the number of dimensions of input arrays (Default=True)
+    :param enforce_shape: Enforce the dimensions of input arrays (Default=True)
     :param validator: :py:func:`dict` objects specifying the method parameters
     :param options: additional options for documenting and validating method parameters
     '''
     enforce_type = options.pop('enforce_type', True)
-    enforce_ndim = options.pop('enforce_ndim', True)
+    enforce_shape = options.pop('enforce_shape', True)
     returns = options.pop('returns', None)
     rtype = options.pop('rtype', None)
     is_method = options.pop('is_method', True)
@@ -334,12 +362,16 @@ def docval(*validator, **options):
                             args[1:],
                             kwargs,
                             enforce_type=enforce_type,
-                            enforce_ndim=enforce_ndim,
+                            enforce_shape=enforce_shape,
                             allow_extra=allow_extra)
-                parse_err = parsed.get('errors')
-                if parse_err:
-                    msg = ', '.join(parse_err)
-                    raise_from(TypeError(msg), None)
+
+                for error_type, ExceptionType in (('type_errors', TypeError),
+                                                  ('value_errors', ValueError)):
+                    parse_err = parsed.get(error_type)
+                    if parse_err:
+                        msg = ', '.join(parse_err)
+                        raise_from(ExceptionType(msg), None)
+
                 return func(self, **parsed['args'])
         else:
             def func_call(*args, **kwargs):
@@ -348,10 +380,13 @@ def docval(*validator, **options):
                                       kwargs,
                                       enforce_type=enforce_type,
                                       allow_extra=allow_extra)
-                parse_err = parsed.get('errors')
-                if parse_err:
-                    msg = ', '.join(parse_err)
-                    raise_from(TypeError(msg), None)
+                for error_type, ExceptionType in (('type_errors', TypeError),
+                                                  ('value_errors', ValueError)):
+                    parse_err = parsed.get(error_type)
+                    if parse_err:
+                        msg = ', '.join(parse_err)
+                        raise_from(ExceptionType(msg), None)
+
                 return func(**parsed['args'])
         _rtype = rtype
         if isinstance(rtype, type):
@@ -493,6 +528,41 @@ class ExtenderMeta(ABCMeta):
         it = (a for a in it if hasattr(a, cls.__postinit))
         for func in it:
             func(name, bases, classdict)
+
+
+def get_data_shape(data, strict_no_data_load=False):
+    """
+    Helper function used to determine the shape of the given array.
+
+    :param data: Array for which we should determine the shape.
+    :type data: List, numpy.ndarray, DataChunkIterator, any object that support __len__ or .shape.
+    :param strict_no_data_load: In order to determin the shape of nested tuples and lists, this function
+                recursively inspects elements along the dimensions, assuming that the data has a regular,
+                rectangular shape. In the case of out-of-core iterators this means that the first item
+                along each dimensions would potentially be loaded into memory. By setting this option
+                we enforce that this does not happen, at the cost that we may not be able to determine
+                the shape of the array.
+    :return: Tuple of ints indicating the size of known dimensions. Dimensions for which the size is unknown
+             will be set to None.
+    """
+    def __get_shape_helper(local_data):
+        shape = list()
+        if hasattr(local_data, '__len__'):
+            shape.append(len(local_data))
+            if len(local_data) and not isinstance(local_data[0], (text_type, binary_type)):
+                shape.extend(__get_shape_helper(local_data[0]))
+        return tuple(shape)
+    if hasattr(data, 'maxshape'):
+        return data.maxshape
+    if hasattr(data, 'shape'):
+        return data.shape
+    if hasattr(data, '__len__') and not isinstance(data, (text_type, binary_type)):
+        if not strict_no_data_load or (isinstance(data, list) or isinstance(data, tuple) or isinstance(data, set)):
+            return __get_shape_helper(data)
+        else:
+            return None
+    else:
+        return None
 
 
 def pystr(s):

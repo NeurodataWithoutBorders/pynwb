@@ -15,12 +15,16 @@ groups:
     value: 2.0b
   datasets:
   - name: file_create_date
-    dtype: text
-    doc: 'Time file was created, UTC, and subsequent modifications to file. COMMENT:
-      Date + time, Use ISO format (eg, ISO 8601) or a format that is easy to read
-      and unambiguous. File can be created after the experiment was run, so this may
-      differ from experiment start time. Each modification to file adds new entry
-      to array.'
+    dtype: isodatetime
+    doc: 'A record of the date the file was created and of subsequent modifications.
+      COMMENT:
+        - The date is stored in UTC with local timezone offset as ISO 8601
+          formatted strings: 2018-09-28T14:43:54.123+02:00
+        - Dates stored in UTC end in "Z" with no timezone offset.
+        - Date accuracy is up to milliseconds.
+        - The file can be created after the experiment was run, so this may
+          differ from the experiment start time.
+        - Each modification to the nwb file adds a new entry to the array.'
     dims:
     - '*unlimited*'
     shape:
@@ -34,10 +38,14 @@ groups:
     dtype: text
     doc: One or two sentences describing the experiment and data in the file.
   - name: session_start_time
-    dtype: text
-    doc: 'Time of experiment/session start, UTC.  COMMENT: Date + time, Use ISO format
-      (eg, ISO 8601) or an easy-to-read and unambiguous format. All times stored in
-      the file use this time as reference (ie, time zero).'
+    dtype: isodatetime
+    doc: 'Date and time of the experiment/session start.
+      COMMENT:
+        - The date is stored in UTC with local timezone offset as ISO 8601
+          formatted string: 2018-09-28T14:43:54.123+02:00
+        - Dates stored in UTC end in "Z" with no timezone offset.
+        - Date accuracy is up to milliseconds.
+        - All times stored in the file use this time as reference (ie, time zero).'
   groups:
   - name: acquisition
     doc: 'Data streams recorded from the system, including ephys, ophys, tracking,
