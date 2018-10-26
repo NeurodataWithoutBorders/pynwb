@@ -126,6 +126,7 @@ class TestMapNWBContainer(unittest.TestCase):
 class TestMapRoundTrip(TestMapNWBContainer):
 
     _required_tests = ('test_build', 'test_construct', 'test_roundtrip')
+    run_injected_file_test = False
 
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
@@ -151,11 +152,13 @@ class TestMapRoundTrip(TestMapNWBContainer):
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
+
         self.writer = HDF5IO(self.filename, get_manager(), mode='w')
         self.writer.write(nwbfile)
         self.writer.close()
         self.reader = HDF5IO(self.filename, get_manager(), mode='r')
         read_nwbfile = self.reader.read()
+
         try:
             tmp = self.getContainer(read_nwbfile)
             return tmp

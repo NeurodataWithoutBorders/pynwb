@@ -34,19 +34,24 @@ class HDF5IO(FORMIO):
             {'name': 'mode', 'type': str,
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'},
             {'name': 'comm', 'type': 'Intracom',
-             'doc': 'the MPI communicator to use for parallel I/O', 'default': None})
+             'doc': 'the MPI communicator to use for parallel I/O', 'default': None},
+            {'name': 'file', 'type': File, 'doc': 'a pre-existing h5py.File object', 'default': None})
     def __init__(self, **kwargs):
         '''Open an HDF5 file for IO
 
         For `mode`, see `h5py.File <http://docs.h5py.org/en/latest/high/file.html#opening-creating-files>_`.
         '''
-        path, manager, mode, comm = popargs('path', 'manager', 'mode', 'comm', kwargs)
+        path, manager, mode, comm, file_obj = popargs('path', 'manager', 'mode', 'comm', 'file', kwargs)
+
+        if file_obj is not None and os.path.abspath(file_obj.filename) != os.path.abspath(path):
+            raise ValueError('You argued {} as this object\'s path, but supplied a file with filename: {}'.format())
+
         if manager is None:
             manager = BuildManager(TypeMap(NamespaceCatalog()))
         self.__comm = comm
         self.__mode = mode
         self.__path = path
-        self.__file = None
+        self.__file = file_obj
         super(HDF5IO, self).__init__(manager, source=path)
         self.__built = dict()       # keep track of which files have been read
         self.__read = dict()        # keep track of each builder for each dataset/group/link
@@ -385,11 +390,12 @@ class HDF5IO(FORMIO):
         return ret
 
     def open(self):
-        open_flag = self.__mode
-        self.__file = File(self.__path, open_flag)
+        if self.__file is None:
+            open_flag = self.__mode
+            self.__file = File(self.__path, open_flag)
 
     def close(self):
-        if self.__file:
+        if self.__file is not None:
             self.__file.close()
 
     @docval({'name': 'builder', 'type': GroupBuilder, 'doc': 'the GroupBuilder object representing the NWBFile'},

@@ -107,8 +107,8 @@ class TetrodeSeries(ElectricalSeries):
 
     __nwbfields__ = ('trode_id',)
 
-    @docval(*get_docval(ElectricalSeries.__init__) +
-            ({'name': 'trode_id', 'type': int, 'doc': 'the tetrode id'},))
+    @docval(*get_docval(ElectricalSeries.__init__) + (
+        {'name': 'trode_id', 'type': int, 'doc': 'the tetrode id'},))
     def __init__(self, **kwargs):
         call_docval_func(super(TetrodeSeries, self).__init__, kwargs)
         self.trode_id = getargs('trode_id', kwargs)
