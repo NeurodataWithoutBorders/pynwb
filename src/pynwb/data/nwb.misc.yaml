@@ -109,25 +109,20 @@ groups:
     - num_times
     shape:
     - null
-- neurodata_type_def: UnitTimes
-  neurodata_type_inc: NWBDataInterface
-  doc: Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group
-    contains a group for each unit. The name of the group should match the value in
-    the source module, if that is possible/relevant (e.g., name of ROIs from Segmentation
-    module).
+- neurodata_type_def: Units
+  neurodata_type_inc: DynamicTable
+  doc: Data about spiking units. Event times of observed units (e.g. cell, synapse, etc.)
+    should be concatenated and stored in spike_times.
   attributes:
   - name: help
     dtype: text
-    doc: Value is 'Estimated spike times from a single unit'
-    value: Estimated spike times from a single unit
+    doc: Value is 'Data about spiking units'
+    value: Data about spiking units
   datasets:
-  - neurodata_type_inc: ElementIdentifiers
-    name: unit_ids
-    doc: a unique identifier for each element
   - neurodata_type_inc: VectorIndex
     name: spike_times_index
     doc: the index into the spike times dataset
   - neurodata_type_inc: VectorData
     name: spike_times
     doc: the index into the vector data
-  default_name: UnitTimes
+  default_name: Units
