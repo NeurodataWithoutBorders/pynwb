@@ -5,7 +5,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer, NWBDataInterface, ElementIdentifiers, DynamicTable
+from .core import NWBContainer, ElementIdentifiers, DynamicTable
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -196,9 +196,11 @@ class Units(DynamicTable):
              'doc': 'the identifiers for the units stored in this interface', 'default': None},
             {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
             {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
-             'default': None})
+             'default': None},
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None})
     def __init__(self, **kwargs):
+        if kwargs.get('description', None) is None:
+            kwargs['description'] = kwargs['source']
         call_docval_func(super(Units, self).__init__, kwargs)
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False
@@ -208,7 +210,7 @@ class Units(DynamicTable):
             self.add_vector_column(name='spike_times', description='spike times for each unit')
             self.__has_spike_times = True
 
-    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for the unit'},
+    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
             {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_unit(self, **kwargs):
