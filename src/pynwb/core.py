@@ -993,9 +993,6 @@ class DynamicTable(NWBDataInterface):
     def __len__(self):
         return len(self.id)
 
-    def __getattr__(self, key):
-        return self[key]
-
     @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row', 'default': None},
             {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None},
             allow_extra=True)
