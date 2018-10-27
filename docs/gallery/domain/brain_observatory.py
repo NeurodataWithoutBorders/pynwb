@@ -107,15 +107,13 @@ for ri, row in trial_table.iterrows():
     nwbfile.create_epoch(start_time=row.start,
                          stop_time=row.end,
                          timeseries=[running_speed],
-                         tags='trials',
-                         description=str(ri))
+                         tags='trials')
 
 for ri, row in epoch_table.iterrows():
     nwbfile.create_epoch(start_time=row.start,
                          stop_time=row.end,
                          timeseries=[running_speed],
-                         tags='stimulus',
-                         description=row.stimulus)
+                         tags='stimulus')
 
 ########################################
 # 5) In the brain observatory, a two-photon microscope is used to acquire images of the calcium activity of neurons

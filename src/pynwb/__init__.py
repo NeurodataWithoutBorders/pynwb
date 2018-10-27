@@ -5,6 +5,8 @@ import os.path
 from copy import deepcopy
 from warnings import warn
 
+import h5py
+
 CORE_NAMESPACE = 'core'
 
 from .form.spec import NamespaceCatalog  # noqa: E402
@@ -194,10 +196,11 @@ class NWBHDF5IO(HDF5IO):
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
-             to namespaces and TypeMaps', 'default': None})
+             to namespaces and TypeMaps', 'default': None},
+            {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', kwargs)
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -223,7 +226,7 @@ class NWBHDF5IO(HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager, mode=mode)
+        super(NWBHDF5IO, self).__init__(path, manager, mode=mode, file=file_obj)
 
 
 from . import io as __io  # noqa: F401,E402

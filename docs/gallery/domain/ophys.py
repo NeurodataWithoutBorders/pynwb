@@ -75,7 +75,7 @@ imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
 
 image_series = TwoPhotonSeries(name='test_iS', source='Ca2+ imaging example', dimension=[2],
                                external_file=['images.tiff'], imaging_plane=imaging_plane,
-                               starting_frame=[0], format='tiff', timestamps=list())
+                               starting_frame=[0], format='tiff', starting_time=0.0, rate=1.0)
 nwbfile.add_acquisition(image_series)
 
 

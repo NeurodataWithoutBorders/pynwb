@@ -349,10 +349,20 @@ class VectorIndex(Index):
         self.target.extend(arg)
         self.data.append(len(self.target))
 
-    def __getitem__(self, arg):
+    def __getitem_helper(self, arg):
         start = 0 if arg == 0 else self.data[arg-1]
         end = self.data[arg]
         return self.target[start:end]
+
+    def __getitem__(self, arg):
+        if isinstance(arg, slice):
+            indices = list(range(*arg.indices(len(self.data))))
+            ret = list()
+            for i in indices:
+                ret.append(self.__getitem_helper(i))
+            return ret
+        else:
+            return self.__getitem_helper(arg)
 
 
 @register_class('ElementIdentifiers', CORE_NAMESPACE)
@@ -370,7 +380,7 @@ class ElementIdentifiers(NWBData):
 
 
 class NWBTable(NWBData):
-    '''
+    r'''
     Subclasses should specify the class attribute \_\_columns\_\_.
 
     This should be a list of dictionaries with the following keys:
@@ -386,7 +396,7 @@ class NWBTable(NWBData):
     The class attribute __defaultname__ can also be set to specify a default name
     for the table class. If \_\_defaultname\_\_ is not specified, then ``name`` will
     need to be specified when the class is instantiated.
-    '''
+    '''  # noqa: W605
 
     @ExtenderMeta.pre_init
     def __build_table_class(cls, name, bases, classdict):
@@ -847,9 +857,10 @@ class TableColumn(NWBData):
 class DynamicTable(NWBDataInterface):
     """
     A column-based table. Columns are defined by the argument *columns*. This argument
-    must be a list/tuple of TableColumns or a list/tuple of dicts containing the keys
+    must be a list/tuple of TableColumns and VectorIndexes or a list/tuple of dicts containing the keys
     'name' and 'description' that provide the name and description of each column
-    in the table.
+    in the table. If specifying columns with a list/tuple of dicts, VectorData columns can
+    be specified by setting the key 'vector_data' to True.
     """
 
     __nwbfields__ = (
@@ -881,7 +892,7 @@ class DynamicTable(NWBDataInterface):
         if columns is not None:
             if len(columns) > 0:
                 if isinstance(columns[0], dict):
-                    columns = tuple(TableColumn(**d) for d in columns)
+                    columns = self.__build_columns(columns)
                 elif not all(isinstance(c, (VectorData, VectorIndex, TableColumn)) for c in columns):
                     raise ValueError("'columns' must be a list of TableColumns, VectorData, or VectorIndex")
                 lens = [len(c) for c in columns if isinstance(c, (TableColumn, VectorIndex))]
@@ -946,7 +957,38 @@ class DynamicTable(NWBDataInterface):
                 col_dict[col.target.name] = col  # use target name for reference and VectorIndex for retrieval
 
         self.__df_cols = [self.id] + [col_dict[name] for name in self.colnames]
-        self.__colids = {name: i for i, name in enumerate(self.colnames)}
+        self.__colids = {name: i+1 for i, name in enumerate(self.colnames)}
+
+    @staticmethod
+    def __build_columns(columns, df=None):
+        tmp = list()
+        for d in columns:
+            name = d['name']
+            desc = d.get('description', 'no description')
+            data = None
+            if df is not None:
+                data = list(df[name].values)
+            if d.get('vector_data', False):
+                index_data = None
+                if data is not None:
+                    index_data = [len(data[0])]
+                    for i in range(1, len(data)):
+                        index_data.append(len(data[i]) + index_data[i-1])
+                    # assume data came in through a DataFrame, so we need
+                    # to concatenate it
+                    tmp_data = list()
+                    for d in data:
+                        tmp_data.extend(d)
+                    data = tmp_data
+                vdata = VectorData(name, data, description=desc)
+                vindex = VectorIndex("%s_index" % name, index_data, target=vdata)
+                tmp.append(vindex)
+                tmp.append(vdata)
+            else:
+                if data is None:
+                    data = list()
+                tmp.append(TableColumn(name, desc, data=data))
+        return tmp
 
     def __len__(self):
         return len(self.id)
@@ -981,7 +1023,7 @@ class DynamicTable(NWBDataInterface):
         for colname, colnum in self.__colids.items():
             if colname not in data:
                 raise ValueError("column '%s' missing" % colname)
-            c = self.columns[colnum]
+            c = self.__df_cols[colnum]
             if isinstance(c, VectorIndex):
                 c.add_vector(data[colname])
             else:
@@ -1016,7 +1058,7 @@ class DynamicTable(NWBDataInterface):
         self.add_child(col)
         if len(data) != len(self.id):
             raise ValueError("column must have the same number of rows as 'id'")
-        self.__colids[name] = len(self.columns)
+        self.__colids[name] = len(self.__df_cols)
         self.fields['colnames'] = tuple(list(self.colnames)+[name])
         self.fields['columns'] = tuple(list(self.columns)+[col])
         self.__df_cols.append(col)
@@ -1056,7 +1098,7 @@ class DynamicTable(NWBDataInterface):
         self.add_child(data)
         if len(index) != len(self.id):
             raise ValueError("'index' must have the same number of rows as 'id'")
-        self.__colids[name] = len(self.columns)
+        self.__colids[name] = len(self.__df_cols)
         self.fields['colnames'] = tuple(list(self.colnames)+[name])
         self.fields['columns'] = tuple(list(self.columns)+[index, data])
         self.__df_cols.append(index)
@@ -1088,43 +1130,35 @@ class DynamicTable(NWBDataInterface):
             arg1 = key[0]
             arg2 = key[1]
             if isinstance(arg2, str):
-                arg2 = self.__colids[arg2] + 1
+                arg2 = self.__colids[arg2]
             ret = self.__df_cols[arg2][arg1]
         else:
             arg = key
             if isinstance(arg, str):
                 # index by one string, return column
-                ret = self.__df_cols[self.__colids[arg]+1]
-                # # keeping this around in case anyone wants to resurrect it
-                # dt = self.get_dtype(ret)[1]
-                # ret = np.array(ret.data, dtype=dt)
+                ret = self.__df_cols[self.__colids[arg]]
             elif isinstance(arg, (int, np.int8, np.int16, np.int32, np.int64)):
                 # index by int, return row
                 ret = tuple(col[arg] for col in self.__df_cols)
-                # # keeping this around in case anyone wants to resurrect it
-                # dt = [self.get_dtype(col) for col in self.__df_cols]
-                # ret = np.array([ret], dtype=dt)
-
             elif isinstance(arg, (tuple, list)):
                 # index by a list of ints, return multiple rows
-                # # keeping this around in case anyone wants to resurrect it
-                # dt = [self.get_dtype(col) for col in self.__df_cols]
-                # ret = np.zeros((len(arg),), dtype=dt)
-                # for name, col in zip(self.__df_colnames, self.__df_cols):
-                #     ret[name] = col[arg]
                 ret = list()
                 for i in arg:
                     ret.append(tuple(col[i] for col in self.__df_cols))
 
         return ret
 
+    def __contains__(self, val):
+        return val in self.__colids
+
     def to_dataframe(self):
         '''Produce a pandas DataFrame containing this table's data.
         '''
 
         data = {}
-        for column in self.columns:
-            data[column.name] = column.data
+        for name in self.colnames:
+            col = self.__df_cols[self.__colids[name]]
+            data[name] = col[:]
 
         return pd.DataFrame(data, index=pd.Index(name=self.id.name, data=self.id.data))
 
@@ -1146,9 +1180,9 @@ class DynamicTable(NWBDataInterface):
             'default': ''
         },
         {
-            'name': 'column_descriptions',
-            'type': dict,
-            'help': 'a dictionary mapping column names to descriptions of their contents',
+            'name': 'columns',
+            'type': (list, tuple),
+            'help': 'a list/tuple of dictionaries specifying columns in the table',
             'default': None
         },
         allow_extra=True
@@ -1157,8 +1191,8 @@ class DynamicTable(NWBDataInterface):
         '''Construct an instance of DynamicTable (or a subclass) from a pandas DataFrame. The columns of the resulting
         table are defined by the columns of the dataframe and the index by the dataframe's index (make sure it has a
         name!) or by a column whose name is supplied to the index_column parameter. We recommend that you supply
-        column_descriptions - a dictionary mapping column names to string descriptions - to help others understand
-        the contents of your table.
+        *columns* - a list/tuple of dictionaries containing the name and description of the column- to help others
+        understand the contents of your table. See :py:class:`~pynwb.core.DynamicTable` for more details on *columns*.
         '''
 
         df = kwargs.pop('df')
@@ -1166,10 +1200,16 @@ class DynamicTable(NWBDataInterface):
         source = kwargs.pop('source')
         index_column = kwargs.pop('index_column')
         table_description = kwargs.pop('table_description')
-        column_descriptions = kwargs.pop('column_descriptions')
+        columns = kwargs.pop('columns')
 
-        if column_descriptions is None:
-            column_descriptions = {}
+        if columns is None:
+            columns = [{'name': s} for s in df.columns]
+        else:
+            columns = list(columns)
+            existing = set(c['name'] for c in columns)
+            for c in df.columns:
+                if c not in existing:
+                    columns.append({'name': c})
 
         if index_column is not None:
             ids = ElementIdentifiers(name=index_column, data=df[index_column].values.tolist())
@@ -1177,16 +1217,7 @@ class DynamicTable(NWBDataInterface):
             index_name = df.index.name if df.index.name is not None else 'id'
             ids = ElementIdentifiers(name=index_name, data=df.index.values.tolist())
 
-        columns = []
-        for column_name in df.columns:
-            if index_column is not None and column_name == index_column:
-                continue
-
-            columns.append({
-                'name': column_name,
-                'data': df[column_name].values.tolist(),
-                'description': column_descriptions.get(column_name, '')
-            })
+        columns = cls.__build_columns(columns, df=df)
 
         return cls(name=name, source=source, id=ids, columns=columns, description=table_description, **kwargs)
 
