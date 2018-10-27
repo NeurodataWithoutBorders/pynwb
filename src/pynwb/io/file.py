@@ -1,3 +1,4 @@
+from dateutil.parser import parse as dateutil_parse
 from ..form.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile
@@ -12,11 +13,9 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('acquisition', raw_ts_spec)
 
         stimulus_spec = self.spec.get_group('stimulus')
-        presentation_ts_spec = stimulus_spec.get_group('presentation')\
-                                            .get_neurodata_type('TimeSeries')
-        self.map_spec('stimulus', presentation_ts_spec)
-        stimulus_ts_spec = stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries')
-        self.map_spec('stimulus_template', stimulus_ts_spec)
+        self.unmap(stimulus_spec)
+        self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries'))
+        self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries'))
 
         epochs_spec = self.spec.get_group('epochs')
         self.map_spec('epochs', epochs_spec)
@@ -27,8 +26,8 @@ class NWBFileMap(ObjectMapper):
             general_spec.get_group('intracellular_ephys')
             .get_neurodata_type('IntracellularElectrode'))
         ecephys_spec = general_spec.get_group('extracellular_ephys')
-        self.map_spec('ec_electrodes', ecephys_spec.get_dataset('electrodes'))
-        self.map_spec('ec_electrode_groups', ecephys_spec.get_neurodata_type('ElectrodeGroup'))
+        self.map_spec('electrodes', ecephys_spec.get_group('electrodes'))
+        self.map_spec('electrode_groups', ecephys_spec.get_neurodata_type('ElectrodeGroup'))
         self.map_spec(
             'optogenetic_sites',
             general_spec.get_group('optogenetics').get_neurodata_type('OptogeneticStimulusSite'))
@@ -45,6 +44,18 @@ class NWBFileMap(ObjectMapper):
 
         self.map_spec('subject', general_spec.get_group('subject'))
         self.map_spec('devices', general_spec.get_group('devices').get_neurodata_type('Device'))
+
+    @ObjectMapper.constructor_arg('session_start_time')
+    def dateconversion(self, builder, manager):
+        datestr = builder.get('session_start_time').data
+        date = dateutil_parse(datestr)
+        return date
+
+    @ObjectMapper.constructor_arg('file_create_date')
+    def dateconversion_list(self, builder, manager):
+        datestr = builder.get('file_create_date').data
+        dates = list(map(dateutil_parse, datestr))
+        return dates
 
     @ObjectMapper.constructor_arg('file_name')
     def name(self, builder, manager):

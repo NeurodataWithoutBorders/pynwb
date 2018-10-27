@@ -31,15 +31,15 @@ groups:
       - y
       - x
     shape:
-    - - 
-      - 
-    - - 
-      - 
-      - 
-    - - 
-      - 
-      - 
-      - 
+    - - null
+      - null
+    - - null
+      - null
+      - null
+    - - null
+      - null
+      - null
+      - null
   - name: dimension
     dtype: int32
     doc: Number of pixels on x, y, (and z) axes.
@@ -47,7 +47,7 @@ groups:
     - rank
     quantity: '?'
     shape:
-    - 
+    - null
   - name: external_file
     dtype: text
     doc: 'Path or URL to one or more external file(s). Field only present if format=external.
@@ -64,12 +64,12 @@ groups:
       dims:
       - num_files
       shape:
-      - 
+      - null
     dims:
     - num_files
     quantity: '?'
     shape:
-    - 
+    - null
   - name: format
     dtype: text
     doc: Format of image. If this is 'external' then the field external_file contains
@@ -149,7 +149,7 @@ groups:
     dims:
     - num_times
     shape:
-    - 
+    - null
   links:
   - name: indexed_timeseries
     doc: HDF5 link to TimeSeries containing images that are indexed.

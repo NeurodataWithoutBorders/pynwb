@@ -1,5 +1,6 @@
 import unittest2 as unittest
 from datetime import datetime
+from dateutil.tz import tzlocal, tzutc
 import os
 import numpy as np
 
@@ -43,7 +44,8 @@ class TestMapNWBContainer(unittest.TestCase):
             raise unittest.SkipTest("cannot run construct test for %s -- setUpBuilder not implemented" %
                                     self.__class__.__name__)
         self.maxDiff = None
-        result = self.manager.build(self.container)
+        source = self.__class__.__name__ + ".test_build"
+        result = self.manager.build(self.container, source=source)
         # do something here to validate the result Builder against the spec
         self.assertDictEqual(result, self.builder)
 
@@ -124,12 +126,13 @@ class TestMapNWBContainer(unittest.TestCase):
 class TestMapRoundTrip(TestMapNWBContainer):
 
     _required_tests = ('test_build', 'test_construct', 'test_roundtrip')
+    run_injected_file_test = False
 
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
         self.container = self.setUpContainer()
-        self.start_time = datetime(1971, 1, 1, 12, 0, 0)
-        self.create_date = datetime(2018, 4, 15, 12, 0, 0)
+        self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
+        self.create_date = datetime(2018, 4, 15, 12, tzinfo=tzlocal())
         self.container_type = self.container.__class__.__name__
         self.filename = 'test_%s.nwb' % self.container_type
         self.writer = None
@@ -140,7 +143,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
             self.writer.close()
         if self.reader is not None:
             self.reader.close()
-        if os.path.exists(self.filename):
+        if os.path.exists(self.filename) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
             os.remove(self.filename)
 
     def roundtripContainer(self):
@@ -149,11 +152,13 @@ class TestMapRoundTrip(TestMapNWBContainer):
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(source, description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
-        self.writer = HDF5IO(self.filename, get_manager())
+
+        self.writer = HDF5IO(self.filename, get_manager(), mode='w')
         self.writer.write(nwbfile)
         self.writer.close()
-        self.reader = HDF5IO(self.filename, get_manager())
+        self.reader = HDF5IO(self.filename, get_manager(), mode='r')
         read_nwbfile = self.reader.read()
+
         try:
             tmp = self.getContainer(read_nwbfile)
             return tmp
@@ -163,10 +168,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
             raise e
 
     def test_roundtrip(self):
-        read_container = self.roundtripContainer()
+        self.read_container = self.roundtripContainer()
         # make sure we get a completely new object
-        self.assertNotEqual(id(self.container), id(read_container))
-        self.assertContainerEqual(self.container, read_container)
+        self.assertNotEqual(id(self.container), id(self.read_container))
+        self.assertContainerEqual(self.container, self.read_container)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''

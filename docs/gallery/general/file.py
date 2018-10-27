@@ -16,10 +16,11 @@ including writing and reading of and NWB file.
 #
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile
 
-start_time = datetime(2017, 4, 3, 11, 0, 0)
-create_date = datetime(2017, 4, 15, 12, 0, 0)
+start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
+create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
 nwbfile = NWBFile('PyNWB tutorial', 'demonstrate NWBFile basics', 'NWB123', start_time,
                   file_create_date=create_date)
@@ -137,8 +138,8 @@ added_mod.add_data_interface(mod_ts)
 # and the fifth argument is a list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
 # to.
 
-nwbfile.create_epoch('the first epoch', 2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
-nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
+nwbfile.create_epoch(2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
+nwbfile.create_epoch(6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 
 ####################
 # .. _basic_trials:
@@ -291,6 +292,39 @@ mod_ts = added_mod.get_data_interface('ts_for_mod')
 mod_ts = added_mod['ts_for_mod']
 
 ####################
+# .. _basic_appending:
+#
+# Appending to an NWB file
+# ------------------------
+#
+# Using functionality discussed above, NWB allows appending to fles. To append to a file, you must read the file, add
+# new components, and then write the file. Reading and writing is carried out using :py:class:`~pynwb.NWBHDF5IO`.
+# When reading the NWBFile, you must specify that you indend to modify it by setting the *mode* argument in the
+# :py:class:`~pynwb.NWBHDF5IO` constructor to ``'a'``. After you have read the file, you can add [#]_ new data to it
+# using the standard write/add functionality demonstrated above.
+#
+# Let's see how this works by adding another :py:class:`~pynwb.base.TimeSeries` to the file we have already written.
+#
+# First, read the file.
+
+io = NWBHDF5IO('basic_example.nwb', mode='a')
+nwbfile = io.read()
+
+####################
+# Next, add a new :py:class:`~pynwb.base.TimeSeries`.
+
+data = list(range(300, 400, 10))
+timestamps = list(range(10))
+test_ts2 = TimeSeries('test_timeseries2', 'PyNWB tutorial', data, 'SIunit', timestamps=timestamps)
+nwbfile.add_acquisition(test_ts2)
+
+####################
+# Finally, write the changes back to the file and close it.
+
+io.write(nwbfile)
+io.close()
+
+####################
 # .. [#] Stimulus template data may change in the near future. The NWB team will work with interested parties
 #    at the `4th NWB Hackathon <hck04_>`_ to refine the schema for storing stimulus template data.
 #
@@ -303,6 +337,8 @@ mod_ts = added_mod['ts_for_mod']
 # .. [#] Some data interface objects have a default name. This default name is the type of the data interface. For
 #    example, the default name for :py:class:`~pynwb.ophys.ImageSegmentation` is "ImageSegmentation" and the default
 #    name for :py:class:`~pynwb.ecephys.EventWaveform` is "EventWaveform".
+#
+# .. [#] NWB only supports *adding* to files. Removal and modifying of existing data is not allowed.
 
 ####################
 # .. _hck04: https://github.com/NeurodataWithoutBorders/nwb_hackathons/tree/master/HCK04_2018_Seattle

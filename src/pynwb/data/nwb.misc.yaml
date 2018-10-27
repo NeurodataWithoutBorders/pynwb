@@ -23,18 +23,18 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
+      doc: 'The base unit of measure used to store data. This should be in the SI
+        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
+        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
+        below describes how to convert the data to the specified SI unit.'
       default_value: see 'feature_units'
       required: false
     dims:
     - num_times
     - num_features
     shape:
-    - 
-    - 
+    - null
+    - null
   - name: feature_units
     dtype: text
     doc: Units of each feature.
@@ -42,14 +42,14 @@ groups:
     - num_features
     quantity: '?'
     shape:
-    - 
+    - null
   - name: features
     dtype: text
     doc: Description of the features represented in TimeSeries::data.
     dims:
     - num_features
     shape:
-    - 
+    - null
 - neurodata_type_def: AnnotationSeries
   neurodata_type_inc: TimeSeries
   doc: Stores, eg, user annotations made during an experiment. The TimeSeries::data[]
@@ -66,14 +66,10 @@ groups:
     dtype: text
     doc: Annotations made during an experiment.
     attributes:
-    - name: conversion
-      dtype: float
-      doc: Value is 'float('NaN')'
-      value: NaN
     - name: resolution
       dtype: float
-      doc: Value is 'float('NaN')'
-      value: NaN
+      doc: Value is -1.0
+      value: -1.0
     - name: unit
       dtype: text
       doc: Value is 'n/a'
@@ -81,7 +77,7 @@ groups:
     dims:
     - num_times
     shape:
-    - 
+    - null
 - neurodata_type_def: IntervalSeries
   neurodata_type_inc: TimeSeries
   doc: Stores intervals of data. The timestamps field stores the beginning and end
@@ -101,14 +97,10 @@ groups:
     dtype: int8
     doc: '>0 if interval started, <0 if interval ended.'
     attributes:
-    - name: conversion
-      dtype: float
-      doc: Value is 'float('NaN')'
-      value: NaN
     - name: resolution
       dtype: float
-      doc: Value is 'float('NaN')'
-      value: NaN
+      doc: Value is -1.0
+      value: -1.0
     - name: unit
       dtype: text
       doc: Value is 'n/a'
@@ -116,7 +108,7 @@ groups:
     dims:
     - num_times
     shape:
-    - 
+    - null
 - neurodata_type_def: UnitTimes
   neurodata_type_inc: NWBDataInterface
   doc: Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group

@@ -3,6 +3,7 @@ from .container import Container, Data, DataRegion
 from .utils import docval, getargs
 from .data_utils import ListSlicer
 from .backends.hdf5.h5_utils import H5RegionSlicer, H5Dataset
+from . import query
 
 
 @docval({'name': 'dataset', 'type': None, 'doc': 'the HDF5 dataset to slice'},

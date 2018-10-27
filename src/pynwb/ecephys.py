@@ -1,13 +1,12 @@
 import numpy as np
-from h5py import RegionReference
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, call_docval_func
-from .form.data_utils import DataChunkIterator, ShapeValidator
+from .form.data_utils import DataChunkIterator, assertEqualShape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, NWBTable, NWBTableRegion, NWBDataInterface, MultiContainerInterface
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
 
 
@@ -50,40 +49,6 @@ _et_docval = [
 ]
 
 
-@register_class('ElectrodeTable', CORE_NAMESPACE)
-class ElectrodeTable(NWBTable):
-    '''A table of all electrodes'''
-
-    __columns__ = _et_docval
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
-    def __init__(self, **kwargs):
-        data, name = getargs('data', 'name', kwargs)
-        colnames = [i['name'] for i in _et_docval]
-        super(ElectrodeTable, self).__init__(colnames, name, data)
-
-    @docval(*_et_docval)
-    def add_row(self, **kwargs):
-        kwargs['group_name'] = kwargs['group'].name
-        super(ElectrodeTable, self).add_row(kwargs)
-
-
-@register_class('ElectrodeTableRegion', CORE_NAMESPACE)
-class ElectrodeTableRegion(NWBTableRegion):
-    '''A subsetting of an ElectrodeTable'''
-
-    __nwbfields__ = ('description',)
-
-    @docval({'name': 'table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable this region applies to'},
-            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
-    def __init__(self, **kwargs):
-        call_docval_func(super(ElectrodeTableRegion, self).__init__, kwargs)
-        self.description = getargs('description', kwargs)
-
-
 @register_class('ElectricalSeries', CORE_NAMESPACE)
 class ElectricalSeries(TimeSeries):
     """
@@ -92,7 +57,7 @@ class ElectricalSeries(TimeSeries):
     channels] (or [num_times] for single electrode).
     """
 
-    __nwbfields__ = ({'name': 'electrodes',
+    __nwbfields__ = ({'name': 'electrodes', 'required_name': 'electrodes',
                       'doc': 'the electrodes that generated this electrical series', 'child': True},)
 
     __ancestry = "TimeSeries,ElectricalSeries"
@@ -103,10 +68,10 @@ class ElectricalSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -161,7 +126,7 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data'},
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -268,11 +233,12 @@ class Clustering(NWBDataInterface):
             {'name': 'description', 'type': str,
              'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, \
              clusters curated using Klusters, etc).'},
-            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.'},
+            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.', 'shape': (None,)},
             {'name': 'peak_over_rms', 'type': Iterable,
              'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster\
              (provides a basic clustering metric).'},
-            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.'},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.',
+             'shape': (None,)},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
         source, description, num, peak_over_rms, times = popargs(
@@ -378,7 +344,7 @@ class FeatureExtraction(NWBDataInterface):
     __help = "Container for salient features of detected events"
 
     @docval({'name': 'source', 'type': str, 'doc': 'The source of the data'},
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator),
              'doc': 'A description for each feature extracted', 'ndim': 1},
@@ -395,29 +361,29 @@ class FeatureExtraction(NWBDataInterface):
         # Validate the shape of the inputs
         # Validate event times compared to features
         shape_validators = []
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=times,
-                                                                axes1=0,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='times',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=times,
+                                                 axes1=0,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='times',
+                                                 ignore_undetermined=True))
         # Validate electrodes compared to features
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=electrodes,
-                                                                axes1=1,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='electrodes',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=electrodes,
+                                                 axes1=1,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='electrodes',
+                                                 ignore_undetermined=True))
         # Valided description compared to features
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=description,
-                                                                axes1=2,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='description',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=description,
+                                                 axes1=2,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='description',
+                                                 ignore_undetermined=True))
         # Raise an error if any of the shapes do not match
         raise_error = False
         error_msg = ""
@@ -426,7 +392,7 @@ class FeatureExtraction(NWBDataInterface):
             if not sv.result:
                 error_msg += sv.message + "\n"
         if raise_error:
-            raise TypeError(error_msg)
+            raise ValueError(error_msg)
 
         # Initialize the object
         super(FeatureExtraction, self).__init__(source, **kwargs)
