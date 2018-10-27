@@ -2,7 +2,7 @@ import unittest
 
 import numpy as np
 
-from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, UnitTimes
+from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units
 
 
 class AnnotationSeriesConstructor(unittest.TestCase):
@@ -48,38 +48,36 @@ class IntervalSeriesConstructor(unittest.TestCase):
         self.assertEqual(iS.timestamps, timestamps)
 
 
-class UnitTimesConstructor(unittest.TestCase):
+class UnitsTests(unittest.TestCase):
     def test_init(self):
-        ut = UnitTimes('UnitTimes constructor unit test')
-        self.assertEqual(ut.source, 'UnitTimes constructor unit test')
-        self.assertEqual(ut.name, 'UnitTimes')
-        self.assertEqual(ut.unit_ids.data, list())
-        self.assertEqual(ut.spike_times.data, list())
-        self.assertEqual(ut.spike_times_index.data, list())
+        ut = Units('Units constructor unit test')
+        self.assertEqual(ut.source, 'Units constructor unit test')
+        self.assertEqual(ut.name, 'Units')
+        self.assertFalse(ut.columns)
 
     def test_add_spike_times(self):
-        ut = UnitTimes('UnitTimes add_spike_times unit test')
-        ut.add_spike_times(0, [0, 1, 2])
-        ut.add_spike_times(1, [3, 4, 5])
-        self.assertEqual(ut.unit_ids.data, [0, 1])
-        self.assertEqual(ut.spike_times.data, [0, 1, 2, 3, 4, 5])
-        self.assertEqual(ut.spike_times_index.data, [3, 6])
-        self.assertEqual(ut.spike_times_index[0], [0, 1, 2])
-        self.assertEqual(ut.spike_times_index[1], [3, 4, 5])
+        ut = Units('Units add_unit unit test')
+        ut.add_unit(spike_times=[0, 1, 2])
+        ut.add_unit(spike_times=[3, 4, 5])
+        self.assertEqual(ut.id.data, [0, 1])
+        self.assertEqual(ut['spike_times'].target.data, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(ut['spike_times'].data, [3, 6])
+        self.assertEqual(ut['spike_times'][0], [0, 1, 2])
+        self.assertEqual(ut['spike_times'][1], [3, 4, 5])
 
     def test_get_spike_times(self):
-        ut = UnitTimes('UnitTimes add_spike_times unit test')
-        ut.add_spike_times(0, [0, 1, 2])
-        ut.add_spike_times(1, [3, 4, 5])
+        ut = Units('Units add_unit unit test')
+        ut.add_unit(spike_times=[0, 1, 2])
+        ut.add_unit(spike_times=[3, 4, 5])
         self.assertTrue(all(ut.get_unit_spike_times(0) == np.array([0, 1, 2])))
         self.assertTrue(all(ut.get_unit_spike_times(1) == np.array([3, 4, 5])))
 
     def test_times(self):
-        ut = UnitTimes('UnitTimes add_spike_times unit test')
-        ut.add_spike_times(0, [0, 1, 2])
-        ut.add_spike_times(1, [3, 4, 5])
-        self.assertTrue(all(ut.times[0] == np.array([0, 1, 2])))
-        self.assertTrue(all(ut.times[1] == np.array([3, 4, 5])))
+        ut = Units('Units add_unit unit test')
+        ut.add_unit(spike_times=[0, 1, 2])
+        ut.add_unit(spike_times=[3, 4, 5])
+        self.assertTrue(all(ut['spike_times'][0] == np.array([0, 1, 2])))
+        self.assertTrue(all(ut['spike_times'][1] == np.array([3, 4, 5])))
 
 
 if __name__ == '__main__':
