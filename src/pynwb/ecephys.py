@@ -274,6 +274,8 @@ class ClusterWaveforms(NWBDataInterface):
             {'name': 'waveform_sd', 'type': Iterable, 'doc': 'the standard deviations of waveforms for each cluster'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ClusterWaveforms'})
     def __init__(self, **kwargs):
+        import warnings
+        warnings.warn("use pynwb.misc.Units or NWBFile.units instead", DeprecationWarning)
         source, clustering_interface, waveform_filtering, waveform_mean, waveform_sd = popargs(
             'source', 'clustering_interface', 'waveform_filtering', 'waveform_mean', 'waveform_sd', kwargs)
         super(ClusterWaveforms, self).__init__(source, **kwargs)
