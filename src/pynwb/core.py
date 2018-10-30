@@ -1028,7 +1028,7 @@ class DynamicTable(NWBDataInterface):
         if extra_columns:
             for col in self.__columns__:
                 if col['name'] in extra_columns:
-                    if data[col['name']]:
+                    if data[col['name']] is not None:
                         if not col.get('vector_data', False):
                             self.add_column(col['name'], col['description'])
                         else:
