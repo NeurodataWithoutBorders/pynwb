@@ -270,7 +270,7 @@ class OpticalSeries(ImageSeries):
         self.orientation = orientation
 
 
-@register_class('GrayscaleImage')
+@register_class('GrayscaleImage', CORE_NAMESPACE)
 class GrayscaleImage(Image):
     __nwbfields__ = ('data', 'resolution', 'description')
 
@@ -278,7 +278,7 @@ class GrayscaleImage(Image):
             {'name': 'source', 'type': str, 'doc': 'source of image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None)},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image'})
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
         name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description',
                                                               kwargs)
@@ -289,7 +289,7 @@ class GrayscaleImage(Image):
         self.description = description
 
 
-@register_class('RGBImage')
+@register_class('RGBImage', CORE_NAMESPACE)
 class RGBImage(Image):
     __nwbfields__ = ('data', 'resolution')
 
@@ -297,7 +297,7 @@ class RGBImage(Image):
             {'name': 'source', 'type': str, 'doc': 'source of image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 3)},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image'})
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
         name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description',
                                                               kwargs)
@@ -308,15 +308,15 @@ class RGBImage(Image):
         self.description = description
 
 
-@register_class('RGBAImage')
-class RGBImage(Image):
+@register_class('RGBAImage', CORE_NAMESPACE)
+class RGBAImage(Image):
     __nwbfields__ = ('data', 'resolution')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
             {'name': 'source', 'type': str, 'doc': 'source of image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 4)},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image'})
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
         name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description', kwargs)
         super(Image, self).__init__(name=name, source=source)

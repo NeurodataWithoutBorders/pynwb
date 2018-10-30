@@ -93,7 +93,7 @@ groups:
   doc: An abstract data type for differentiating experimental data from metadata
 - neurodata_type_def: Image
   neurodata_type_inc: NWBDataInterface
-  doc: Image base type. Origin is top left.
+  doc: Image base type.
   attributes:
   - name: help
     dtype: text
@@ -104,8 +104,11 @@ groups:
     required: False
   - name: description
     dtype: text
+    required: False
+    doc: description of image
   datasets:
   - name: data
+    doc: image data. Origin is top left.
 - neurodata_type_def: TimeSeries
   neurodata_type_inc: NWBDataInterface
   doc: General purpose time series.

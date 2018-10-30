@@ -217,7 +217,7 @@ class TimeSeries(NWBDataInterface):
         return self.__time_unit
 
 
-@register_class('Image')
+@register_class('Image', CORE_NAMESPACE)
 class Image(NWBDataInterface):
     __nwbfields__ = ('data', 'resolution')
 
@@ -225,13 +225,15 @@ class Image(NWBDataInterface):
             {'name': 'source', 'type': str, 'doc': 'source'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image'},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image'})
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
-        name, source, resolution, data = popargs('name', 'source', 'resolution', 'data', kwargs)
+        name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description',
+                                                              kwargs)
         super(Image, self).__init__(name=name, source=source)
 
         self.resolution = resolution
         self.data = data
+        self.description = description
 
 
 @register_class('Images', CORE_NAMESPACE)
