@@ -349,7 +349,7 @@ class NWBFile(MultiContainerInterface):
 
     def __check_epochs(self):
         if self.epochs is None:
-            self.epochs = TimeIntervals()
+            self.epochs = TimeIntervals(self.source)
 
     @docval(*get_docval(DynamicTable.add_column))
     def add_epoch_metadata_column(self, **kwargs):

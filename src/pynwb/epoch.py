@@ -25,7 +25,7 @@ class TimeIntervals(DynamicTable):
         {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'vector_data': True}
     )
 
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeIntervals',
+    @docval({'name': 'description', 'type': str, 'doc': 'Description of this TimeIntervals',
              'default': "experimental intervals"},
             {'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals', 'default': 'epochs'},
             {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
