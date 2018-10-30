@@ -318,7 +318,8 @@ class RGBAImage(Image):
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
-        name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description', kwargs)
+        name, source, resolution, data, description = popargs(
+            'name', 'source', 'resolution', 'data', 'description', kwargs)
         super(Image, self).__init__(name=name, source=source)
 
         self.resolution = resolution

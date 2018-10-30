@@ -1,7 +1,7 @@
 import unittest2 as unittest
 import numpy as np
 
-from pynwb.base import ProcessingModule, TimeSeries
+from pynwb.base import ProcessingModule, TimeSeries, Images, Image
 from pynwb.form.data_utils import DataChunkIterator
 from pynwb.form.backends.hdf5 import H5DataIO
 
@@ -119,3 +119,16 @@ class TestTimeSeries(unittest.TestCase):
         with self.assertRaises(ValueError):
             TimeSeries('test_ts2', 'unit test test_data_timeseries', [10, 11, 12, 13, 14, 15], 'grams',
                        starting_time=30., timestamps=[.3, .4, .5, .6, .7, .8])
+
+
+class TestImage(unittest.TestCase):
+
+    def test_image(self):
+        Image(name='test_image', source='image source', data=np.ones((10, 10)))
+
+
+class TestImages(unittest.TestCase):
+
+    def test_images(self):
+        image = Image(name='test_image', source='image source', data=np.ones((10, 10)))
+        Images(images=[image, image])

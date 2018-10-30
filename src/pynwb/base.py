@@ -249,4 +249,3 @@ class Images(NWBDataInterface):
     def __init__(self, **kwargs):
         super(Images, self).__init__(name=kwargs['name'], source=kwargs['source'])
         self.description = popargs('description', kwargs)
-
