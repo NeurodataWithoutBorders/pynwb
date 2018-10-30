@@ -282,7 +282,8 @@ class GrayscaleImage(Image):
     def __init__(self, **kwargs):
         name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description',
                                                               kwargs)
-        super(Image, self).__init__(name=name, source=source, data=data, description=description, resolution=resolution)
+        super(GrayscaleImage, self).__init__(name=name, source=source, data=data, description=description,
+                                             resolution=resolution)
 
 
 @register_class('RGBImage', CORE_NAMESPACE)
@@ -297,7 +298,8 @@ class RGBImage(Image):
     def __init__(self, **kwargs):
         name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description',
                                                               kwargs)
-        super(Image, self).__init__(name=name, source=source, data=data, description=description, resolution=resolution)
+        super(RGBImage, self).__init__(name=name, source=source, data=data, description=description,
+                                       resolution=resolution)
 
 
 @register_class('RGBAImage', CORE_NAMESPACE)
@@ -312,4 +314,5 @@ class RGBAImage(Image):
     def __init__(self, **kwargs):
         name, source, resolution, data, description = popargs(
             'name', 'source', 'resolution', 'data', 'description', kwargs)
-        super(Image, self).__init__(name=name, source=source, data=data, description=description, resolution=resolution)
+        super(RGBAImage, self).__init__(name=name, source=source, data=data, description=description,
+                                        resolution=resolution)
