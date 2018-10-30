@@ -22,7 +22,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
         st_builder = DatasetBuilder('spike_times', [0, 1, 2, 3, 4, 5],
                                     attributes={'neurodata_type': 'VectorData',
                                                 'namespace': 'core',
-                                                'description': 'spike times for each unit',
+                                                'description': 'the spike times for each unit',
                                                 'help': 'Values for a list of elements'})
         sti_builder = DatasetBuilder('spike_times_index',
                                      [3, 6],

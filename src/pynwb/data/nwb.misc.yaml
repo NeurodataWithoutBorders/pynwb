@@ -121,11 +121,11 @@ groups:
   datasets:
   - neurodata_type_inc: VectorIndex
     name: spike_times_index
-    doc: the index into the spike times dataset
+    doc: the index into the spike_times dataset
     quantity: '?'
   - neurodata_type_inc: VectorData
     name: spike_times
-    doc: the index into the vector data
+    doc: the spike times for each unit
     quantity: '?'
   - neurodata_type_inc: DynamicTableRegion
     name: electrode
