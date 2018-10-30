@@ -454,6 +454,7 @@ class HDF5IO(FORMIO):
         "int32": np.int32,
         "int16": np.int16,
         "int8": np.int8,
+        "bool": np.bool_,
         "text": H5_TEXT,
         "text": H5_TEXT,
         "utf": H5_TEXT,
