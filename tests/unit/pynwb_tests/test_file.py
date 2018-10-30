@@ -156,10 +156,10 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.units.colnames, ('unit_type',))
 
     def test_add_unit(self):
-        self.nwbfile.add_unit({'id': 1})
+        self.nwbfile.add_unit(id=1)
         self.assertEqual(len(self.nwbfile.units), 1)
-        self.nwbfile.add_unit({'id': 2})
-        self.nwbfile.add_unit({'id': 3})
+        self.nwbfile.add_unit(id=2)
+        self.nwbfile.add_unit(id=3)
         self.assertEqual(len(self.nwbfile.units), 3)
 
     def test_add_trial_column(self):

@@ -870,6 +870,24 @@ class DynamicTable(NWBDataInterface):
         'description'
     )
 
+    __columns__ = tuple()
+
+    @ExtenderMeta.pre_init
+    def __gather_columns(cls, name, bases, classdict):
+        '''
+        This classmethod will be called during class declaration in the metaclass to automatically
+        create setters and getters for NWB fields that need to be exported
+        '''
+        if not isinstance(cls.__columns__, tuple):
+            msg = "'__columns__' must be of type tuple, found %s" % type(cls.__columns__)
+            raise TypeError(msg)
+
+        if len(bases) and 'DynamicTable' in globals() and issubclass(bases[-1], NWBContainer) \
+           and bases[-1].__columns__ is not cls.__columns__:
+                new_columns = list(cls.__columns__)
+                new_columns[0:0] = bases[-1].__columns__
+                cls.__columns__ = tuple(new_columns)
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},    # noqa: C901
             {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
@@ -1002,14 +1020,20 @@ class DynamicTable(NWBDataInterface):
         '''
         data, row_id = popargs('data', 'id', kwargs)
         data = data if data is not None else kwargs
-        if row_id is None:
-            row_id = data.pop('id', None)
-        if row_id is None:
-            row_id = len(self)
-        self.id.data.append(row_id)
 
         extra_columns = set(list(data.keys())) - set(list(self.__colids.keys()))
         missing_columns = set(list(self.__colids.keys())) - set(list(data.keys()))
+
+        # check to see if any of the extra columns just need to be added
+        if extra_columns:
+            for col in self.__columns__:
+                if col['name'] in extra_columns:
+                    if data[col['name']] is not None:
+                        if not col.get('vector_data', False):
+                            self.add_column(col['name'], col['description'])
+                        else:
+                            self.add_vector_column(col['name'], col['description'])
+                    extra_columns.remove(col['name'])
 
         if extra_columns or missing_columns:
             raise ValueError(
@@ -1020,6 +1044,12 @@ class DynamicTable(NWBDataInterface):
                 ])
             )
 
+        if row_id is None:
+            row_id = data.pop('id', None)
+        if row_id is None:
+            row_id = len(self)
+        self.id.data.append(row_id)
+
         for colname, colnum in self.__colids.items():
             if colname not in data:
                 raise ValueError("column '%s' missing" % colname)
@@ -1028,21 +1058,6 @@ class DynamicTable(NWBDataInterface):
                 c.add_vector(data[colname])
             else:
                 c.add_row(data[colname])
-
-    # # keeping this around in case anyone wants to resurrect it
-    # # this was used to return a numpy structured array. this does not
-    # # work across platforms (it breaks on windows). instead, return
-    # # tuples and lists of tuples
-    # def get_dtype(self, col):
-    #     x = col.data[0]
-    #     shape = get_shape(x)
-    #     shape = None if shape is None else shape
-    #     while hasattr(x, '__len__') and not isinstance(x, (text_type, binary_type)):
-    #         x = x[0]
-    #     t = type(x)
-    #     if t in (text_type, binary_type):
-    #         t = np.string_
-    #     return (col.name, t, shape)
 
     @docval(*get_docval(TableColumn.__init__))
     def add_column(self, **kwargs):
