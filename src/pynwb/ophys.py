@@ -224,6 +224,11 @@ class PlaneSegmentation(DynamicTable):
                      'imaging_plane',
                      {'name': 'reference_images', 'child': True})
 
+    __columns__ = (
+        {'name': 'image_mask', 'description': 'Image masks for each ROI'},
+        {'name': 'pixel_mask', 'description': 'Pixel masks for each ROI', 'vector_data': True}
+    )
+
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.'},
@@ -246,18 +251,6 @@ class PlaneSegmentation(DynamicTable):
         super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
-        self.__has_image_masks = False
-        self.__has_pixel_masks = False
-
-    def __check_image_mask(self):
-        if not self.__has_image_masks:
-            self.add_column(name='image_mask', description='Image masks for each ROI')
-            self.__has_image_masks = True
-
-    def __check_pixel_mask(self):
-        if not self.__has_pixel_masks:
-            self.add_vector_column(name='pixel_mask', description='Pixel masks for each ROI')
-            self.__has_pixel_masks = True
 
     @docval({'name': 'pixel_mask', 'type': 'array_data', 'doc': 'the pixel mask', 'default': None},
             {'name': 'image_mask', 'type': 'array_data', 'doc': 'the image mask for this ROI', 'default': None},
@@ -272,10 +265,8 @@ class PlaneSegmentation(DynamicTable):
             raise ValueError("Must provide either 'image_mask' or 'pixel_mask' or both")
         rkwargs = dict(kwargs)
         if image_mask is not None:
-            self.__check_image_mask()
             rkwargs['image_mask'] = image_mask
         if pixel_mask is not None:
-            self.__check_pixel_mask()
             rkwargs['pixel_mask'] = pixel_mask
         return super(PlaneSegmentation, self).add_row(**rkwargs)
 

@@ -5,7 +5,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer, NWBDataInterface, ElementIdentifiers, VectorData, VectorIndex
+from .core import NWBContainer, ElementIdentifiers, DynamicTable, DynamicTableRegion
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -183,58 +183,51 @@ class IntervalSeries(TimeSeries):
         return self.__interval_timestamps
 
 
-@register_class('UnitTimes', CORE_NAMESPACE)
-class UnitTimes(NWBDataInterface):
+@register_class('Units', CORE_NAMESPACE)
+class Units(DynamicTable):
     """
-    Event times of observed units (e.g. cell, synapse, etc.). The UnitTimes group contains a group
-    for each unit. The name of the group should match the value in the source module, if that is
-    possible/relevant (e.g., name of ROIs from Segmentation module).
+    Event times of observed units (e.g. cell, synapse, etc.).
     """
 
-    __nwbfields__ = (
-        {'name': 'unit_ids', 'child': True},
-        {'name': 'spike_times_index', 'child': True},
-        {'name': 'spike_times', 'child': True},
-        )
+    __columns__ = (
+        {'name': 'spike_times', 'description': 'the spike times for each unit', 'vector_data': True},
+        {'name': 'electrode', 'description': 'the electrode that each spike unit came from'},
+        {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
+        {'name': 'waveform_mean', 'description': 'the spike waveform mean for each spike unit'},
+        {'name': 'waveform_sd', 'description': 'the spike waveform standard deviation for each spike unit'}
+    )
 
     @docval({'name': 'source', 'type': str,
              'doc': 'Name, path or description of where unit times originated.'},
-            {'name': 'unit_ids', 'type': ('array_data', 'data', ElementIdentifiers),
-             'doc': 'the identifiers for the units stored in this interface', 'default': list()},
-            {'name': 'spike_times', 'type': ('array_data', 'data', VectorData),
-             'doc': 'a concatenated list of spike times for the units stored in this interface',
-             'default': list()},
-            {'name': 'spike_times_index', 'type': ('array_data', 'data', VectorIndex),
-             'doc': 'the indices in spike_times that correspond to each unit in unit_ids',
-             'default': list()},
-            {'name': 'name', 'type': str, 'doc': 'Name of this UnitTimes interface', 'default': 'UnitTimes'})
+            {'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
+            {'name': 'id', 'type': ('array_data', ElementIdentifiers),
+             'doc': 'the identifiers for the units stored in this interface', 'default': None},
+            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
+            {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
+             'default': None},
+            {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None})
     def __init__(self, **kwargs):
-        unit_ids, spike_times, spike_times_index = popargs('unit_ids', 'spike_times', 'spike_times_index', kwargs)
-        call_docval_func(super(UnitTimes, self).__init__, kwargs)
-        if not isinstance(unit_ids, ElementIdentifiers):
-            unit_ids = ElementIdentifiers('unit_ids', unit_ids)
-        if not isinstance(spike_times, VectorData):
-            spike_times = VectorData('spike_times', spike_times)
-        if not isinstance(spike_times_index, VectorIndex):
-            spike_times_index = VectorIndex('spike_times_index', spike_times_index, spike_times)
-        self.unit_ids = unit_ids
-        self.spike_times = spike_times
-        self.spike_times_index = spike_times_index
+        if kwargs.get('description', None) is None:
+            kwargs['description'] = kwargs['source']
+        call_docval_func(super(Units, self).__init__, kwargs)
+        if 'spike_times' not in self.colnames:
+            self.__has_spike_times = False
 
-    @property
-    def times(self):
-        return self.spike_times_index
+    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
+            {'name': 'electrode', 'type': DynamicTableRegion, 'doc': 'the spike times for the unit', 'default': None},
+            {'name': 'electrode_group', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
+            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
+            {'name': 'waveform_sd', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
+            {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
+            allow_extra=True)
+    def add_unit(self, **kwargs):
+        """
+        Add a unit to this table
+        """
+        super(Units, self).add_row(**kwargs)
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
     def get_unit_spike_times(self, **kwargs):
         index = getargs('index', kwargs)
-        return np.asarray(self.spike_times_index[index])
-
-    @docval({'name': 'unit_id', 'type': int, 'doc': 'the unit to add spike times for'},
-            {'name': 'spike_times', 'type': ('array_data',), 'doc': 'the spike times for the unit'},
-            rtype=int, returns="the index of the added unit in this UnitTimes")
-    def add_spike_times(self, **kwargs):
-        unit_id, spike_times = getargs('unit_id', 'spike_times', kwargs)
-        self.unit_ids.append(unit_id)
-        return self.spike_times_index.add_vector(spike_times)
+        return np.asarray(self['spike_times'][index])

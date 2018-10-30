@@ -855,7 +855,7 @@ class GroupSpec(BaseStorageSpec):
                 self.set_group(group)
         # resolve inherited links
         for link in inc_spec.links:
-            if link.data_type_inc is not None:
+            if link.name is None:
                 data_types.append(link)
             self.__new_links.discard(link.name)
             if link.name in self.__links:
@@ -872,16 +872,15 @@ class GroupSpec(BaseStorageSpec):
                     dt = dt_spec.data_type_inc
             self.__new_data_types.discard(dt)
             existing_dt_spec = self.get_data_type(dt)
-            if existing_dt_spec is None:
-                self.__add_data_type_inc(dt_spec)
-            else:
-                if (isinstance(existing_dt_spec, list) or existing_dt_spec.name is not None) and dt_spec.name is None:
-                    if isinstance(dt_spec, DatasetSpec):
-                        self.set_dataset(dt_spec)
-                    elif isinstance(dt_spec, GroupSpec):
-                        self.set_group(dt_spec)
-                    else:
-                        self.set_link(dt_spec)
+            if existing_dt_spec is None or \
+               ((isinstance(existing_dt_spec, list) or existing_dt_spec.name is not None)) and \
+               dt_spec.name is None:
+                if isinstance(dt_spec, DatasetSpec):
+                    self.set_dataset(dt_spec)
+                elif isinstance(dt_spec, GroupSpec):
+                    self.set_group(dt_spec)
+                else:
+                    self.set_link(dt_spec)
         super(GroupSpec, self).resolve_spec(inc_spec)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
