@@ -5,7 +5,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer, ElementIdentifiers, DynamicTable
+from .core import NWBContainer, ElementIdentifiers, DynamicTable, DynamicTableRegion
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -189,6 +189,14 @@ class Units(DynamicTable):
     Event times of observed units (e.g. cell, synapse, etc.).
     """
 
+    __columns__ = (
+        {'name': 'spike_times', 'description': 'the spike times for each unit', 'vector_data': True},
+        {'name': 'electrode', 'description': 'the electrode that each spike unit came from'},
+        {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
+        {'name': 'waveform_mean', 'description': 'the spike waveform mean for each spike unit'},
+        {'name': 'waveform_sd', 'description': 'the spike waveform standard deviation for each spike unit'}
+    )
+
     @docval({'name': 'source', 'type': str,
              'doc': 'Name, path or description of where unit times originated.'},
             {'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
@@ -205,24 +213,18 @@ class Units(DynamicTable):
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False
 
-    def __check_spike_times(self):
-        if not self.__has_spike_times:
-            self.add_vector_column(name='spike_times', description='spike times for each unit')
-            self.__has_spike_times = True
-
     @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
+            {'name': 'electrode', 'type': DynamicTableRegion, 'doc': 'the spike times for the unit', 'default': None},
+            {'name': 'electrode_group', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
+            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
+            {'name': 'waveform_sd', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
             {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_unit(self, **kwargs):
         """
         Add a unit to this table
         """
-        spike_times = popargs('spike_times', kwargs)
-        rkwargs = dict(kwargs)
-        if spike_times is not None:
-            self.__check_spike_times()
-            rkwargs['spike_times'] = spike_times
-        return super(Units, self).add_row(**rkwargs)
+        super(Units, self).add_row(**kwargs)
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'})

@@ -18,13 +18,12 @@ class EpochTable(DynamicTable):
 
     __defaultname__ = 'epochs'
 
-    __col_desc = {
-        'start_time': 'Start time of epoch, in seconds',
-        'stop_time': 'Stop time of epoch, in seconds',
-        'tags': 'user-defined tags',
-        'timeseries': 'index into a TimeSeries object'
-
-    }
+    __columns__ = (
+        {'name': 'start_time', 'description': 'Start time of epoch, in seconds', 'required': True},
+        {'name': 'stop_time', 'description': 'Stop time of epoch, in seconds', 'required': True},
+        {'name': 'tags', 'description': 'user-defined tags', 'vector_data': True},
+        {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'vector_data': True}
+    )
 
     @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of this EpochTable',
@@ -37,25 +36,6 @@ class EpochTable(DynamicTable):
             'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(EpochTable, self).__init__, kwargs)
-        self.__has_timeseries = False
-        self.__has_tags = False
-        if len(self.colnames) == 0:
-            self.add_column(name='start_time', description=self.__col_desc['start_time'])
-            self.add_column(name='stop_time', description=self.__col_desc['stop_time'])
-            if 'tags' in self.colnames:
-                self.__has_tags = True
-            if 'timeseries' in self.colnames:
-                self.__has_timeseries = True
-
-    def __check_tags(self):
-        if not self.__has_tags:
-            self.add_vector_column(name='tags', description=self.__col_desc['tags'])
-            self.__has_tags = True
-
-    def __check_timeseries(self):
-        if not self.__has_timeseries:
-            self.add_vector_column(name='timeseries', description=self.__col_desc['timeseries'])
-            self.__has_timeseries = True
 
     @docval({'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
             {'name': 'stop_time', 'type': float, 'doc': 'Stop time of epoch, in seconds'},
@@ -69,12 +49,10 @@ class EpochTable(DynamicTable):
         start_time, stop_time = getargs('start_time', 'stop_time', kwargs)
         rkwargs = dict(kwargs)
         if tags is not None:
-            self.__check_tags()
             if isinstance(tags, str):
                 tags = [s.strip() for s in tags.split(",") if not s.isspace()]
             rkwargs['tags'] = tags
         if not (timeseries is None or (isinstance(timeseries, (tuple, list)) and len(timeseries) == 0)):
-            self.__check_timeseries()
             if isinstance(timeseries, TimeSeries):
                 timeseries = [timeseries]
             tmp = list()
@@ -141,18 +119,15 @@ class EpochTable(DynamicTable):
         the contents of your table.
         '''
         tmp_columns = popargs('columns', kwargs)
-        columns = [
-            {'name': 'start_time', 'description': cls.__col_desc['start_time']},
-            {'name': 'stop_time', 'description': cls.__col_desc['stop_time']},
-            {'name': 'tags', 'description': cls.__col_desc['tags'], 'vector_data': True},
-            {'name': 'timeseries', 'description': cls.__col_desc['timeseries'], 'vector_data': True},
-        ]
+        columns = list(cls.__columns__)
         if tmp_columns is not None:
+            exist = {c['name'] for c in columns}
             for d in tmp_columns:
                 if not isinstance(d, dict):
                     raise ValueError("'columns' must be a list/tuple of dictionaries")
-                if d['name'] in cls.__col_desc:
-                    continue
+                if d['name'] in exist:
+                    msg = "cannot override specification for column '%s'" % d['name']
+                    raise ValueError(msg)
                 columns.append(d)
         pkwargs = dict(kwargs)
         pkwargs['columns'] = columns
