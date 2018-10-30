@@ -4,7 +4,7 @@ from collections import Iterable
 from .form.utils import docval, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_resolution, _default_conversion
+from .base import TimeSeries, _default_resolution, _default_conversion, Image
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)
@@ -268,3 +268,59 @@ class OpticalSeries(ImageSeries):
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
+
+
+@register_class('GrayscaleImage')
+class GrayscaleImage(Image):
+    __nwbfields__ = ('data', 'resolution', 'description')
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
+            {'name': 'source', 'type': str, 'doc': 'source of image'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None)},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image'})
+    def __init__(self, **kwargs):
+        name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description',
+                                                              kwargs)
+        super(Image, self).__init__(name=name, source=source)
+
+        self.resolution = resolution
+        self.data = data
+        self.description = description
+
+
+@register_class('RGBImage')
+class RGBImage(Image):
+    __nwbfields__ = ('data', 'resolution')
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
+            {'name': 'source', 'type': str, 'doc': 'source of image'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 3)},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image'})
+    def __init__(self, **kwargs):
+        name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description',
+                                                              kwargs)
+        super(Image, self).__init__(name=name, source=source)
+
+        self.resolution = resolution
+        self.data = data
+        self.description = description
+
+
+@register_class('RGBAImage')
+class RGBImage(Image):
+    __nwbfields__ = ('data', 'resolution')
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
+            {'name': 'source', 'type': str, 'doc': 'source of image'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 4)},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image'})
+    def __init__(self, **kwargs):
+        name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description', kwargs)
+        super(Image, self).__init__(name=name, source=source)
+
+        self.resolution = resolution
+        self.data = data
+        self.description = description

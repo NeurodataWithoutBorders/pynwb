@@ -154,3 +154,32 @@ groups:
   - name: indexed_timeseries
     doc: HDF5 link to TimeSeries containing images that are indexed.
     target_type: ImageSeries
+datasets:
+- neurodata_type_def: GrayscaleImage
+  neurodata_type_inc: Image
+  shape:
+  - null
+  - null
+  dims:
+  - 'y'
+  - 'x'
+- neurodata_type_def: RGBImage
+  neurodata_type_inc: Image
+  shape:
+  - null
+  - null
+  - 3
+  dims:
+  - 'y'
+  - 'x'
+  - 'R,G,B'
+- neurodata_type_def: RGBAImage
+  neurodata_type_inc: Image
+  shape:
+  - null
+  - null
+  - 4
+  dims:
+  - 'y'
+  - 'x'
+  - 'R,G,B,A'
