@@ -291,7 +291,7 @@ class GrayscaleImage(Image):
 
 @register_class('RGBImage', CORE_NAMESPACE)
 class RGBImage(Image):
-    __nwbfields__ = ('data', 'resolution')
+    __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
             {'name': 'source', 'type': str, 'doc': 'source of image'},
@@ -310,7 +310,7 @@ class RGBImage(Image):
 
 @register_class('RGBAImage', CORE_NAMESPACE)
 class RGBAImage(Image):
-    __nwbfields__ = ('data', 'resolution')
+    __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
             {'name': 'source', 'type': str, 'doc': 'source of image'},

@@ -219,7 +219,7 @@ class TimeSeries(NWBDataInterface):
 
 @register_class('Image', CORE_NAMESPACE)
 class Image(NWBDataInterface):
-    __nwbfields__ = ('data', 'resolution')
+    __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'source', 'type': str, 'doc': 'source'},
