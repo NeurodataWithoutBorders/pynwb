@@ -20,6 +20,8 @@ clarity, we define them here:
 from datetime import datetime
 from dateutil.tz import tzlocal
 
+import numpy as np
+
 from pynwb import NWBFile
 from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluorescence
 from pynwb.device import Device
@@ -58,7 +60,8 @@ imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
                                              'a very interesting part of the brain',
                                              device,
                                              600., '2.718', 'GFP', 'my favorite brain location',
-                                             [], 4.0, 'manifold unit', 'A frame to refer to')
+                                             np.ones((5, 5, 3)), 4.0, 'manifold unit',
+                                             'A frame to refer to')
 
 
 ####################
