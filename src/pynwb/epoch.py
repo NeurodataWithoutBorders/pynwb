@@ -10,8 +10,8 @@ from .core import DynamicTable, ElementIdentifiers
 import pandas as pd
 
 
-@register_class('EpochTable', CORE_NAMESPACE)
-class EpochTable(DynamicTable):
+@register_class('TimeIntervals', CORE_NAMESPACE)
+class TimeIntervals(DynamicTable):
     """
     Table for storing Epoch data
     """
@@ -25,16 +25,16 @@ class EpochTable(DynamicTable):
         {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'vector_data': True}
     )
 
-    @docval({'name': 'description', 'type': str, 'doc': 'Description of this EpochTable',
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeIntervals',
              'default': "experimental intervals"},
-            {'name': 'name', 'type': str, 'doc': 'name of this EpochTable', 'default': 'epochs'},
+            {'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals', 'default': 'epochs'},
             {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
              'default': None},
             {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
             {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
             'default': None})
     def __init__(self, **kwargs):
-        call_docval_func(super(EpochTable, self).__init__, kwargs)
+        call_docval_func(super(TimeIntervals, self).__init__, kwargs)
 
     @docval({'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
             {'name': 'stop_time', 'type': float, 'doc': 'Stop time of epoch, in seconds'},
@@ -60,7 +60,7 @@ class EpochTable(DynamicTable):
                 tmp.append((idx_start, count, ts))
             timeseries = tmp
             rkwargs['timeseries'] = timeseries
-        return super(EpochTable, self).add_row(**rkwargs)
+        return super(TimeIntervals, self).add_row(**rkwargs)
 
     def __calculate_idx_count(self, start_time, stop_time, ts_data):
         if isinstance(ts_data.timestamps, DataIO):
@@ -129,4 +129,4 @@ class EpochTable(DynamicTable):
                 columns.append(d)
         pkwargs = dict(kwargs)
         pkwargs['columns'] = columns
-        return super(EpochTable, cls).from_dataframe(**pkwargs)
+        return super(TimeIntervals, cls).from_dataframe(**pkwargs)
