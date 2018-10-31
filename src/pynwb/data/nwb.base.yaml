@@ -78,21 +78,8 @@ datasets:
   - name: description
     dtype: text
     doc: Description of what this table region points to
-groups:
-- neurodata_type_def: NWBContainer
-  doc: The attributes specified here are included in all interfaces.
-  attributes:
-  - name: help
-    dtype: text
-    doc: Short description of what this type of NWBContainer contains.
-  - name: source
-    dtype: text
-    doc: Path to the origin of the data represented in this interface.
-- neurodata_type_def: NWBDataInterface
-  neurodata_type_inc: NWBContainer
-  doc: An abstract data type for differentiating experimental data from metadata
 - neurodata_type_def: Image
-  neurodata_type_inc: NWBDataInterface
+  neurodata_type_inc: NWBData
   doc: Image base type.
   attributes:
   - name: help
@@ -106,9 +93,25 @@ groups:
     dtype: text
     required: False
     doc: description of image
-  datasets:
-  - name: data
-    doc: image data. Origin is top left.
+  shape:
+  - - null
+    - null
+  - - null
+    - null
+    - null
+groups:
+- neurodata_type_def: NWBContainer
+  doc: The attributes specified here are included in all interfaces.
+  attributes:
+  - name: help
+    dtype: text
+    doc: Short description of what this type of NWBContainer contains.
+  - name: source
+    dtype: text
+    doc: Path to the origin of the data represented in this interface.
+- neurodata_type_def: NWBDataInterface
+  neurodata_type_inc: NWBContainer
+  doc: An abstract data type for differentiating experimental data from metadata
 - neurodata_type_def: TimeSeries
   neurodata_type_inc: NWBDataInterface
   doc: General purpose time series.
