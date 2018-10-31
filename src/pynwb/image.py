@@ -255,7 +255,6 @@ class OpticalSeries(ImageSeries):
 
 @register_class('GrayscaleImage', CORE_NAMESPACE)
 class GrayscaleImage(Image):
-    __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None)},
@@ -267,7 +266,6 @@ class GrayscaleImage(Image):
 
 @register_class('RGBImage', CORE_NAMESPACE)
 class RGBImage(Image):
-    __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 3)},
@@ -279,7 +277,6 @@ class RGBImage(Image):
 
 @register_class('RGBAImage', CORE_NAMESPACE)
 class RGBAImage(Image):
-    __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 4)},
