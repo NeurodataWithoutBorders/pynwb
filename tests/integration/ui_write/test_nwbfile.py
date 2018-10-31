@@ -26,8 +26,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
 
     def setUpBuilder(self):
         ts_builder = GroupBuilder('test_timeseries',
-                                  attributes={'source': 'example_source',
-                                              'namespace': base.CORE_NAMESPACE,
+                                  attributes={'namespace': base.CORE_NAMESPACE,
                                               'neurodata_type': 'TimeSeries',
                                               'comments': 'no comments',
                                               'description': 'no description',
@@ -43,7 +42,6 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         module_builder = GroupBuilder('test_module',
                                       attributes={'namespace': base.CORE_NAMESPACE,
                                                   'neurodata_type': 'ProcessingModule',
-                                                  'source': 'a test source for a ProcessingModule',
                                                   'help': 'A collection of analysis outputs from processing of data',
                                                   'description': 'a test module'},
                                       groups={
@@ -51,7 +49,6 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                           GroupBuilder('Clustering',
                                                        attributes={
                                                            'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',  # noqa: E501
-                                                           'source': "an example source for Clustering",
                                                            'neurodata_type': 'Clustering',
                                                            'namespace': base.CORE_NAMESPACE},
                                                        datasets={
@@ -107,11 +104,10 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                             attributes={'namespace': base.CORE_NAMESPACE,
                                         'nwb_version': '2.0b',
                                         'neurodata_type': 'NWBFile',
-                                        'help': 'an NWB:N file for storing cellular-based neurophysiology data',
-                                        'source': 'a test source'})
+                                        'help': 'an NWB:N file for storing cellular-based neurophysiology data'})
 
     def setUpContainer(self):
-        container = NWBFile('a test source', 'a test NWB File', 'TEST123',
+        container = NWBFile('a test NWB File', 'TEST123',
                             self.start_time,
                             file_create_date=self.create_date,
                             experimenter='test experimenter',
@@ -130,14 +126,12 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                             surgery='nosurgery',
                             virus='novirus',
                             source_script_file_name='nofilename')
-        self.ts = TimeSeries('test_timeseries', 'example_source', list(range(100, 200, 10)),
+        self.ts = TimeSeries('test_timeseries', list(range(100, 200, 10)),
                              'SIunit', timestamps=list(range(10)), resolution=0.1)
         container.add_acquisition(self.ts)
         self.mod = container.create_processing_module('test_module',
-                                                      'a test source for a ProcessingModule',
                                                       'a test module')
-        self.clustering = Clustering("an example source for Clustering",
-                                     "A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102],
+        self.clustering = Clustering("A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102],
                                      list(range(10, 61, 10)))
         self.mod.add_container(self.clustering)
         return container
@@ -180,13 +174,11 @@ class TestSubjectIO(base.TestDataInterfaceIO):
                        sex='M',
                        species='Rattus norvegicus',
                        subject_id='RAT123',
-                       weight='2 lbs',
-                       source='Subject integration test')
+                       weight='2 lbs')
 
     def setUpBuilder(self):
         return GroupBuilder('subject',
-                            attributes={'source': 'Subject integration test',
-                                        'namespace': base.CORE_NAMESPACE,
+                            attributes={'namespace': base.CORE_NAMESPACE,
                                         'neurodata_type': 'Subject',
                                         'help': 'Information about the subject'},
                             datasets={'age': DatasetBuilder('age', '12 mo'),
@@ -210,7 +202,7 @@ class TestEpochsRoundtrip(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
-        return EpochTable('epochs', 'epochs integration test')
+        return EpochTable('epochs')
 
     def addContainer(self, nwbfile):
         nwbfile.add_epoch_metadata_column(
@@ -237,13 +229,13 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
-        return EpochTable('epochs', 'epochs integration test')
+        return EpochTable('epochs')
 
     def addContainer(self, nwbfile):
 
         tsa, tsb = [
-            TimeSeries(name='a', source='test', timestamps=np.linspace(0, 1, 11)),
-            TimeSeries(name='b', source='test', timestamps=np.linspace(0.1, 5, 13)),
+            TimeSeries(name='a', timestamps=np.linspace(0, 1, 11)),
+            TimeSeries(name='b', timestamps=np.linspace(0.1, 5, 13)),
         ]
 
         nwbfile.add_acquisition(tsa)
@@ -262,7 +254,6 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
                 'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
             }),
             'epochs',
-            'epochs integration test',
             columns=[
                 {'name': 'foo', 'description': 'a column of integers'},
                 {'name': 'bar', 'description': 'a column of strings'},

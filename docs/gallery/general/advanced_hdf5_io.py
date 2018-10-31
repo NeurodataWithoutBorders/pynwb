@@ -25,8 +25,7 @@ from pynwb import NWBFile
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
 create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
-nwbfile = NWBFile(source='PyNWB tutorial',
-                  session_description='demonstrate advanced HDF5 I/O features',
+nwbfile = NWBFile(session_description='demonstrate advanced HDF5 I/O features',
                   identifier='NWB123',
                   session_start_time=start_time,
                   file_create_date=create_date)
@@ -41,7 +40,6 @@ import numpy as np
 data = np.arange(100, 200, 10)
 timestamps = np.arange(10)
 test_ts = TimeSeries(name='test_regular_timeseries',
-                     source='PyNWB tutorial',
                      data=data,
                      unit='SIunit',
                      timestamps=timestamps)
@@ -54,7 +52,6 @@ nwbfile.add_acquisition(test_ts)
 from pynwb.form.backends.hdf5.h5_utils import H5DataIO
 wrapped_data = H5DataIO(data=data, compression=True)     # <----
 test_ts = TimeSeries(name='test_compressed_timeseries',
-                     source='PyNWB tutorial',
                      data=wrapped_data,                  # <----
                      unit='SIunit',
                      timestamps=timestamps)
@@ -93,7 +90,6 @@ wrapped_data = H5DataIO(data=data,
                         maxshape=(None, 10)   # <---- Make the time dimension unlimited and hence resizeable
                         )
 test_ts = TimeSeries(name='test_chunked_timeseries',
-                     source='PyNWB tutorial',
                      data=wrapped_data,                  # <----
                      unit='SIunit',
                      starting_time=0.0,
@@ -134,7 +130,6 @@ wrapped_data = H5DataIO(data=data,
                         compression_opts=4,              # <---- Optional GZip aggression option
                         )
 test_ts = TimeSeries(name='test_gzipped_timeseries',
-                     source='PyNWB tutorial',
                      data=wrapped_data,                  # <----
                      unit='SIunit',
                      starting_time=0.0,

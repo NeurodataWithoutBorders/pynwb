@@ -9,7 +9,7 @@ from pynwb.misc import Units
 class TestUnitsIO(base.TestDataInterfaceIO):
 
     def setUpContainer(self):
-        ut = Units('Units integration test', name='UnitsTest', description='a simple table for testing Units')
+        ut = Units(name='UnitsTest', description='a simple table for testing Units')
         ut.add_unit(spike_times=[0, 1, 2])
         ut.add_unit(spike_times=[3, 4, 5])
         return ut
@@ -35,8 +35,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
                                         'namespace': 'core',
                                         'help': 'Data about spiking units',
                                         'description': 'a simple table for testing Units',
-                                        'colnames': ('spike_times',),
-                                        'source': 'Units integration test'},
+                                        'colnames': ('spike_times',)},
                             datasets={'id': ids_builder,
                                       'spike_times': st_builder,
                                       'spike_times_index': sti_builder})
