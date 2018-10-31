@@ -280,10 +280,7 @@ class GrayscaleImage(Image):
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
-        name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description',
-                                                              kwargs)
-        super(GrayscaleImage, self).__init__(name=name, source=source, data=data, description=description,
-                                             resolution=resolution)
+        super(GrayscaleImage, self).__init__(**kwargs)
 
 
 @register_class('RGBImage', CORE_NAMESPACE)
@@ -296,10 +293,7 @@ class RGBImage(Image):
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
-        name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description',
-                                                              kwargs)
-        super(RGBImage, self).__init__(name=name, source=source, data=data, description=description,
-                                       resolution=resolution)
+        super(RGBImage, self).__init__(**kwargs)
 
 
 @register_class('RGBAImage', CORE_NAMESPACE)
@@ -312,7 +306,4 @@ class RGBAImage(Image):
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
-        name, source, resolution, data, description = popargs(
-            'name', 'source', 'resolution', 'data', 'description', kwargs)
-        super(RGBAImage, self).__init__(name=name, source=source, data=data, description=description,
-                                        resolution=resolution)
+        super(RGBAImage, self).__init__(**kwargs)
