@@ -160,7 +160,6 @@ class TestHDF5Writer(GroupBuilderTestCase):
 
         self.ts_builder = GroupBuilder('test_timeseries',
                                        attributes={'ancestry': 'TimeSeries',
-                                                   'source': 'example_source',
                                                    'neurodata_type': 'TimeSeries',
                                                    'int_array_attribute': [0, 1, 2, 3],
                                                    'str_array_attribute': ['a', 'b', 'c', 'd'],
@@ -172,7 +171,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
                                                  'timestamps': DatasetBuilder(
                                                      'timestamps', list(range(10)),
                                                      attributes={'unit': 'Seconds', 'interval': 1})})
-        self.ts = TimeSeries('test_timeseries', 'example_source', list(range(100, 200, 10)),
+        self.ts = TimeSeries('test_timeseries', list(range(100, 200, 10)),
                              unit='SIunit', resolution=0.1, timestamps=list(range(10)))
         self.manager.prebuilt(self.ts, self.ts_builder)
         self.builder = GroupBuilder(
