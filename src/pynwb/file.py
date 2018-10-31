@@ -22,12 +22,6 @@ def _not_parent(arg):
     return arg['name'] != 'parent'
 
 
-# @register_class('Image', CORE_NAMESPACE)
-class Image(NWBData):
-    # TODO: Implement this
-    pass
-
-
 @register_class('SpecFile', CORE_NAMESPACE)
 class SpecFile(Container):
     # TODO: Implement this
