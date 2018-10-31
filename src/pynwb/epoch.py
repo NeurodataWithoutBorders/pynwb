@@ -25,8 +25,7 @@ class EpochTable(DynamicTable):
         {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'vector_data': True}
     )
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this EpochTable',
+    @docval({'name': 'description', 'type': str, 'doc': 'Description of this EpochTable',
              'default': "experimental intervals"},
             {'name': 'name', 'type': str, 'doc': 'name of this EpochTable', 'default': 'epochs'},
             {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
@@ -90,7 +89,6 @@ class EpochTable(DynamicTable):
     @docval(
         {'name': 'df', 'type': pd.DataFrame, 'doc': 'source DataFrame'},
         {'name': 'name', 'type': str, 'doc': 'the name of this table'},
-        {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
         {
             'name': 'index_column',
             'type': str,

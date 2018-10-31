@@ -10,13 +10,13 @@ groups:
   - name: pmt_gain
     dtype: float32
     doc: Photomultiplier gain
-    quantity: '?'
+    required: false
   - name: scan_line_rate
     dtype: float32
     doc: Lines imaged per second. This is also stored in /general/optophysiology but
       is kept here as it is useful information for analysis, and so good to be stored
       w/ the actual data.
-    quantity: '?'
+    required: false
   datasets:
   - name: field_of_view
     dtype: float32
@@ -24,6 +24,7 @@ groups:
     dims:
     - width|height|depth
     quantity: '?'
+    required: false
     shape:
     - 3
   links:

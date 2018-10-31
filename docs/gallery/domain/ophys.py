@@ -20,6 +20,8 @@ clarity, we define them here:
 from datetime import datetime
 from dateutil.tz import tzlocal
 
+import numpy as np
+
 from pynwb import NWBFile
 from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluorescence
 from pynwb.device import Device
@@ -32,7 +34,7 @@ from pynwb.device import Device
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`.
 
 
-nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
+nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
                   experimenter='Dr. Bilbo Baggins',
                   lab='Bag End Laboratory',
                   institution='University of Middle Earth at the Shire',
@@ -48,17 +50,16 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 # This amounts describing the device, imaging plane and the optical channel used.
 
 
-device = Device('imaging_device_1', source='a source')
+device = Device('imaging_device_1')
 nwbfile.add_device(device)
-optical_channel = OpticalChannel('my_optchan', 'Ca2+ imaging example',
-                                 'pi wavelength', 500.)
+optical_channel = OpticalChannel('my_optchan', 'pi wavelength', 500.)
 imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
-                                             'Ca2+ imaging example',
                                              optical_channel,
                                              'a very interesting part of the brain',
                                              device,
                                              600., '2.718', 'GFP', 'my favorite brain location',
-                                             [], 4.0, 'manifold unit', 'A frame to refer to')
+                                             np.ones((5, 5, 3)), 4.0, 'manifold unit',
+                                             'A frame to refer to')
 
 
 ####################
@@ -73,7 +74,7 @@ imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
 # considering how you want to store this data [#]_.
 
 
-image_series = TwoPhotonSeries(name='test_iS', source='Ca2+ imaging example', dimension=[2],
+image_series = TwoPhotonSeries(name='test_iS', dimension=[2],
                                external_file=['images.tiff'], imaging_plane=imaging_plane,
                                starting_frame=[0], format='tiff', starting_time=0.0, rate=1.0)
 nwbfile.add_acquisition(image_series)
@@ -88,10 +89,10 @@ nwbfile.add_acquisition(image_series)
 # from one or more imaging planes; hence the :py:class:`~pynwb.ophys.PlaneSegmentation` class.
 
 
-mod = nwbfile.create_processing_module('my_ca_imaging_module', 'Ca2+ imaging example', 'example data module')
-img_seg = ImageSegmentation('Ca2+ imaging example')
+mod = nwbfile.create_processing_module('my_ca_imaging_module', 'example data module')
+img_seg = ImageSegmentation()
 mod.add_data_interface(img_seg)
-ps = img_seg.create_plane_segmentation('Ca2+ imaging example', 'output from segmenting my favorite imaging plane',
+ps = img_seg.create_plane_segmentation('output from segmenting my favorite imaging plane',
                                        imaging_plane, 'my_planeseg', image_series)
 
 
@@ -130,7 +131,7 @@ ps.add_roi(pixel_mask=pix_mask2, image_mask=img_mask2)
 # First, create a data interface to store this data in
 
 
-fl = Fluorescence('Ca2+ imaging example')
+fl = Fluorescence()
 mod.add_data_interface(fl)
 
 
@@ -149,8 +150,7 @@ rt_region = ps.create_roi_table_region('the first of two ROIs', region=[0])
 
 data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-rrs = fl.create_roi_response_series('my_rrs', 'Ca2+ imaging example',
-                                    data, 'lumens', rt_region, timestamps=timestamps)
+rrs = fl.create_roi_response_series('my_rrs', data, 'lumens', rt_region, timestamps=timestamps)
 
 
 ####################
