@@ -229,10 +229,9 @@ class Image(NWBData):
     def __init__(self, **kwargs):
         name, source, resolution, data, description = popargs('name', 'source', 'resolution', 'data', 'description',
                                                               kwargs)
-        super(Image, self).__init__(name=name, source=source)
+        super(Image, self).__init__(name=name, source=source, data=data)
 
         self.resolution = resolution
-        self.data = data
         self.description = description
 
 
