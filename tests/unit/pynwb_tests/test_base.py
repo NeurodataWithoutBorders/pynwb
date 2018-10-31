@@ -124,7 +124,7 @@ class TestTimeSeries(unittest.TestCase):
 class TestImage(unittest.TestCase):
 
     def test_image(self):
-        Image(name='test_image', source='image source', data=np.ones((10, 10)))
+        Image(name='test_image', data=np.ones((10, 10)))
 
 
 class TestImages(unittest.TestCase):

@@ -72,13 +72,13 @@ class OpticalSeriesConstructor(unittest.TestCase):
 class TestImageSubtypes(unittest.TestCase):
 
     def test_grayscale_image(self):
-        GrayscaleImage(name='test_image', source='image source', data=np.ones((10, 10)))
+        GrayscaleImage(name='test_image', data=np.ones((10, 10)))
 
     def test_rgb_image(self):
-        RGBImage(name='test_image', source='image source', data=np.ones((10, 10, 3)))
+        RGBImage(name='test_image', data=np.ones((10, 10, 3)))
 
     def test_rgba_image(self):
-        RGBAImage(name='test_image', source='image source', data=np.ones((10, 10, 4)))
+        RGBAImage(name='test_image', data=np.ones((10, 10, 4)))
 
 
 if __name__ == '__main__':
