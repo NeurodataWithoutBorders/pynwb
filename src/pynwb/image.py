@@ -275,7 +275,6 @@ class GrayscaleImage(Image):
     __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
-            {'name': 'source', 'type': str, 'doc': 'source of image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None)},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
@@ -288,7 +287,6 @@ class RGBImage(Image):
     __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
-            {'name': 'source', 'type': str, 'doc': 'source of image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 3)},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
@@ -301,7 +299,6 @@ class RGBAImage(Image):
     __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
-            {'name': 'source', 'type': str, 'doc': 'source of image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 4)},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
