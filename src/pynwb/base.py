@@ -238,9 +238,8 @@ class Images(NWBDataInterface):
     }
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str, 'doc': 'source'},
             {'name': 'images', 'type': (list, tuple, dict), 'doc': 'images'},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
-        super(Images, self).__init__(name=kwargs['name'], source=kwargs['source'])
+        super(Images, self).__init__(name=kwargs['name'])
         self.description = popargs('description', kwargs)
