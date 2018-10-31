@@ -109,9 +109,6 @@ groups:
   - name: help
     dtype: text
     doc: Short description of what this type of NWBContainer contains.
-  - name: source
-    dtype: text
-    doc: Path to the origin of the data represented in this interface.
 - neurodata_type_def: NWBDataInterface
   neurodata_type_inc: NWBContainer
   doc: An abstract data type for differentiating experimental data from metadata
@@ -135,10 +132,6 @@ groups:
     dtype: text
     doc: Value is 'General time series object'
     value: General time series object
-  - name: source
-    dtype: text
-    doc: Name of TimeSeries or Modules that serve as the source for the data contained
-      here. It can also be the name of a device, for stimulus or acquisition data
   datasets:
   - name: control
     dtype: uint8

@@ -27,10 +27,6 @@ class SpatialSeries(TimeSeries):
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this SpatialSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
@@ -60,8 +56,8 @@ class SpatialSeries(TimeSeries):
         """
         Create a SpatialSeries TimeSeries dataset
         """
-        name, source, data, reference_frame = popargs('name', 'source', 'data', 'reference_frame', kwargs)
-        super(SpatialSeries, self).__init__(name, source, data, 'meters', **kwargs)
+        name, data, reference_frame = popargs('name', 'data', 'reference_frame', kwargs)
+        super(SpatialSeries, self).__init__(name, data, 'meters', **kwargs)
         self.reference_frame = reference_frame
 
 

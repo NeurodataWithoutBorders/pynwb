@@ -19,7 +19,6 @@ class OpticalChannel(NWBContainer):
                      'emission_lambda')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},
             {'name': 'emission_lambda', 'type': float, 'doc': 'Emission lambda for channel.'},
             {'name': 'parent', 'type': 'NWBContainer',
@@ -50,7 +49,6 @@ class ImagingPlane(NWBContainer):
                      'reference_frame')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'optical_channel', 'type': (list, OpticalChannel),
              'doc': 'One of possibly many groups storing channelspecific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
@@ -108,10 +106,6 @@ class TwoPhotonSeries(ImageSeries):
     _help = "Image stack recorded from 2-photon microscope."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
@@ -181,7 +175,6 @@ class CorrectedImageStack(NWBContainer):
 
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'corrected', 'type': ImageSeries,
              'doc': 'Image stack with frames shifted to the common coordinates.'},
             {'name': 'original', 'type': ImageSeries,
@@ -229,8 +222,7 @@ class PlaneSegmentation(DynamicTable):
         {'name': 'pixel_mask', 'description': 'Pixel masks for each ROI', 'vector_data': True}
     )
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'description', 'type': str,
+    @docval({'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.'},
             {'name': 'imaging_plane', 'type': ImagingPlane,
              'doc': 'the ImagingPlane this ROI applies to'},
@@ -300,10 +292,8 @@ class ImageSegmentation(MultiContainerInterface):
     @docval({'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'the ImagingPlane this ROI applies to'},
             {'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.', 'default': None},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data', 'default': None},
             {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None})
     def add_segmentation(self, **kwargs):
-        kwargs.setdefault('source', self.source)
         kwargs.setdefault('description', kwargs['imaging_plane'].description)
         return self.create_plane_segmentation(**kwargs)
 
@@ -320,10 +310,6 @@ class RoiResponseSeries(TimeSeries):
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},

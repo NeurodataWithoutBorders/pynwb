@@ -31,7 +31,6 @@ class ProcessingModule(MultiContainerInterface):
     }
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
             {'name': 'data_interfaces', 'type': (list, tuple, dict),
              'doc': 'NWBDataInterfacess that belong to this ProcessingModule', 'default': None},
@@ -90,10 +89,6 @@ class TimeSeries(NWBDataInterface):
     __time_unit = "Seconds"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
