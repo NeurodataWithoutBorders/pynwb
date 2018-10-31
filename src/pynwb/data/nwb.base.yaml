@@ -98,7 +98,10 @@ datasets:
     - null
   - - null
     - null
+    - 3
+  - - null
     - null
+    - 4
 groups:
 - neurodata_type_def: NWBContainer
   doc: The attributes specified here are included in all interfaces.

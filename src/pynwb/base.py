@@ -223,16 +223,13 @@ class Image(NWBData):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
-             'shape': ((None, None), (None, None, None))},
+             'shape': ((None, None), (None, None, 3), (None, None, 4))},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
-        name, resolution, data, description = popargs('name', 'resolution', 'data', 'description',
-                                                              kwargs)
-        super(Image, self).__init__(name=name, data=data)
-
-        self.resolution = resolution
-        self.description = description
+        super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
+        self.resolution = kwargs['resolution']
+        self.description = kwargs['description']
 
 
 @register_class('Images', CORE_NAMESPACE)
