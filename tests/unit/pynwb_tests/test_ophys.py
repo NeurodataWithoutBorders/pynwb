@@ -204,6 +204,24 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS['pixel_mask'][0], pix_mask[0:3])
         self.assertEqual(pS['pixel_mask'][1], pix_mask[3:5])
 
+    def test_init_3d_pixel_mask(self):
+        pix_masks = np.random.randn(2, 20, 30, 4)
+
+        iSS, ip = self.getBoilerPlateObjects()
+
+        pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
+        pS.add_roi(pixel_mask=pix_masks[0].tolist())
+        pS.add_roi(pixel_mask=pix_masks[1].tolist())
+
+        self.assertEqual(pS.description, 'description')
+        self.assertEqual(pS.source, 'test source')
+
+        self.assertEqual(pS.imaging_plane, ip)
+        self.assertEqual(pS.reference_images, iSS)
+
+        self.assertTrue(np.allclose(pS['pixel_mask'][0], pix_masks[0]))
+        self.assertTrue(np.allclose(pS['pixel_mask'][1], pix_masks[1]))
+
     def test_init_image_mask(self):
         w, h = 5, 5
         img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
