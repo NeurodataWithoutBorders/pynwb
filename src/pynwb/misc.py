@@ -24,10 +24,6 @@ class AnnotationSeries(TimeSeries):
     _help = "Time-stamped annotations about an experiment."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': list()},
@@ -40,8 +36,8 @@ class AnnotationSeries(TimeSeries):
             {'name': 'parent', 'type': NWBContainer,
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, timestamps = popargs('name', 'source', 'data', 'timestamps', kwargs)
-        super(AnnotationSeries, self).__init__(name, source, data, 'n/a',
+        name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
+        super(AnnotationSeries, self).__init__(name, data, 'n/a',
                                                resolution=-1.0, conversion=1.0,
                                                timestamps=timestamps, **kwargs)
 
@@ -74,10 +70,6 @@ class AbstractFeatureSeries(TimeSeries):
     _help = "Features of an applied stimulus. This is useful when storing the raw stimulus is impractical."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'feature_units', 'type': (str, Iterable), 'doc': 'The unit of each feature'},
             {'name': 'features', 'type': (str, Iterable), 'doc': 'Description of each feature'},
 
@@ -105,9 +97,9 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'parent', 'type': NWBContainer,
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, features, feature_units = popargs('name', 'source', 'data',
+        name, data, features, feature_units = popargs('name', 'data',
                                                               'features', 'feature_units', kwargs)
-        super(AbstractFeatureSeries, self).__init__(name, source, data, "see 'feature_units'", **kwargs)
+        super(AbstractFeatureSeries, self).__init__(name, data, "see 'feature_units'", **kwargs)
         self.features = features
         self.feature_units = feature_units
 
@@ -136,10 +128,6 @@ class IntervalSeries(TimeSeries):
     _help = "Stores the start and stop times for events."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
@@ -155,11 +143,11 @@ class IntervalSeries(TimeSeries):
             {'name': 'parent', 'type': NWBContainer,
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, timestamps = popargs('name', 'source', 'data', 'timestamps', kwargs)
+        name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         unit = 'n/a'
         self.__interval_timestamps = timestamps
         self.__interval_data = data
-        super(IntervalSeries, self).__init__(name, source, data, unit,
+        super(IntervalSeries, self).__init__(name, data, unit,
                                              timestamps=timestamps,
                                              resolution=-1.0,
                                              conversion=1.0,
@@ -197,9 +185,7 @@ class Units(DynamicTable):
         {'name': 'waveform_sd', 'description': 'the spike waveform standard deviation for each spike unit'}
     )
 
-    @docval({'name': 'source', 'type': str,
-             'doc': 'Name, path or description of where unit times originated.'},
-            {'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
+    @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
             {'name': 'id', 'type': ('array_data', ElementIdentifiers),
              'doc': 'the identifiers for the units stored in this interface', 'default': None},
             {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
@@ -208,7 +194,7 @@ class Units(DynamicTable):
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None})
     def __init__(self, **kwargs):
         if kwargs.get('description', None) is None:
-            kwargs['description'] = kwargs['source']
+            kwargs['description'] = ""
         call_docval_func(super(Units, self).__init__, kwargs)
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False

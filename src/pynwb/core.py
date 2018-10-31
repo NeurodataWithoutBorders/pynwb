@@ -173,18 +173,15 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBBaseType, Container):
 
-    __nwbfields__ = ('source',
-                     'help')
+    __nwbfields__ = ('help',)
 
-    @docval({'name': 'source', 'type': str, 'doc': 'a description of where this NWBContainer came from'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container'},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
-        self.source = getargs('source', kwargs)
 
     __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc'}
 
@@ -709,14 +706,13 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_constructor(cls, attr_name, add_name, container_type):
-        @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-                {'name': attr_name, 'type': (list, tuple, dict, container_type),
+        @docval({'name': attr_name, 'type': (list, tuple, dict, container_type),
                  'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()},
                 {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__},
                 func_name='__init__')
         def _func(self, **kwargs):
-            source, container = popargs('source', attr_name, kwargs)
-            super(cls, self).__init__(source, **kwargs)
+            container = popargs(attr_name, kwargs)
+            super(cls, self).__init__(**kwargs)
             add = getattr(self, add_name)
             add(container)
         return _func
@@ -889,7 +885,6 @@ class DynamicTable(NWBDataInterface):
                 cls.__columns__ = tuple(new_columns)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},    # noqa: C901
-            {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
             {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
              'default': None},
@@ -1028,7 +1023,7 @@ class DynamicTable(NWBDataInterface):
         if extra_columns:
             for col in self.__columns__:
                 if col['name'] in extra_columns:
-                    if data[col['name']]:
+                    if data[col['name']] is not None:
                         if not col.get('vector_data', False):
                             self.add_column(col['name'], col['description'])
                         else:
@@ -1181,7 +1176,6 @@ class DynamicTable(NWBDataInterface):
     @docval(
         {'name': 'df', 'type': pd.DataFrame, 'doc': 'source DataFrame'},
         {'name': 'name', 'type': str, 'doc': 'the name of this table'},
-        {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
         {
             'name': 'index_column',
             'type': str,
@@ -1212,7 +1206,6 @@ class DynamicTable(NWBDataInterface):
 
         df = kwargs.pop('df')
         name = kwargs.pop('name')
-        source = kwargs.pop('source')
         index_column = kwargs.pop('index_column')
         table_description = kwargs.pop('table_description')
         columns = kwargs.pop('columns')
@@ -1234,7 +1227,7 @@ class DynamicTable(NWBDataInterface):
 
         columns = cls.__build_columns(columns, df=df)
 
-        return cls(name=name, source=source, id=ids, columns=columns, description=table_description, **kwargs)
+        return cls(name=name, id=ids, columns=columns, description=table_description, **kwargs)
 
 
 @register_class('DynamicTableRegion', CORE_NAMESPACE)

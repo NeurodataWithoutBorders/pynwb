@@ -23,7 +23,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
 
-nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
+nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
                   experimenter='Dr. Bilbo Baggins',
                   lab='Bag End Laboratory',
                   institution='University of Middle Earth at the Shire',
@@ -43,19 +43,17 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 # device that was used to record from the electrode. This is done by creating a :py:class:`~pynwb.ecephys.Device`
 # object using the instance method :py:meth:`~pynwb.file.NWBFile.create_device`.
 
-device = nwbfile.create_device(name='trodes_rig123', source="a source")
+device = nwbfile.create_device(name='trodes_rig123')
 
 #######################
 # Once you have created the :py:class:`~pynwb.device.Device`, you can create an
 # :py:class:`~pynwb.ecephys.ElectrodeGroup`.
 
 electrode_name = 'tetrode1'
-source = "an hypothetical source"
 description = "an example tetrode"
 location = "somewhere in the hippocampus"
 
 electrode_group = nwbfile.create_electrode_group(electrode_name,
-                                                 source=source,
                                                  description=description,
                                                  location=location,
                                                  device=device)
@@ -118,7 +116,6 @@ ephys_data = np.random.rand(data_len * 2).reshape((data_len, 2))
 ephys_timestamps = np.arange(data_len) / rate
 
 ephys_ts = ElectricalSeries('test_ephys_data',
-                            'an hypothetical source',
                             ephys_data,
                             electrode_table_region,
                             timestamps=ephys_timestamps,
