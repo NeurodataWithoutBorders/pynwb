@@ -6,7 +6,7 @@ from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_f
 from .form.data_utils import AbstractDataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBDataInterface, MultiContainerInterface
+from .core import NWBDataInterface, MultiContainerInterface, NWBData
 
 _default_conversion = 1.0
 _default_resolution = 0.0
@@ -218,7 +218,7 @@ class TimeSeries(NWBDataInterface):
 
 
 @register_class('Image', CORE_NAMESPACE)
-class Image(NWBDataInterface):
+class Image(NWBData):
     __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
