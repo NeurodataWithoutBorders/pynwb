@@ -993,6 +993,12 @@ class DynamicTable(NWBDataInterface):
 
         self.__df_cols = [self.id] + [col_dict[name] for name in self.colnames]
         self.__colids = {name: i+1 for i, name in enumerate(self.colnames)}
+        for col in self.__columns__:
+            if col.get('required', False) and col['name'] not in self.__colids:
+                if not col.get('vector_data', False):
+                    self.add_column(col['name'], col['description'])
+                else:
+                    self.add_vector_column(col['name'], col['description'])
 
     @staticmethod
     def __build_columns(columns, df=None):

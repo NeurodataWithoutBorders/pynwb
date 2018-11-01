@@ -1,5 +1,5 @@
 groups:
-- neurodata_type_def: EpochTable
+- neurodata_type_def: TimeIntervals
   neurodata_type_inc: DynamicTable
   doc: A container for aggregating epoch data and the TimeSeries that each epoch applies
     to
