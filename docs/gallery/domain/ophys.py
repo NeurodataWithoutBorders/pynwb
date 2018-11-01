@@ -52,14 +52,10 @@ nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzl
 
 device = Device('imaging_device_1')
 nwbfile.add_device(device)
-optical_channel = OpticalChannel('my_optchan', 300., 500.)
-imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
-                                             optical_channel,
-                                             'a very interesting part of the brain',
-                                             device,
-                                             600., '2.718', 'GFP', 'my favorite brain location',
-                                             np.ones((5, 5, 3)), 4.0, 'manifold unit',
-                                             'A frame to refer to')
+optical_channel = OpticalChannel('my_optchan', 'description', 500.)
+imaging_plane = nwbfile.create_imaging_plane('my_imgpln', optical_channel, 'a very interesting part of the brain',
+                                             device, 600., '2.718', 'GFP', 'my favorite brain location',
+                                             np.ones((5, 5, 3)), 4.0, 'manifold unit', 'A frame to refer to')
 
 
 ####################
