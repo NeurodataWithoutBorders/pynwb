@@ -78,6 +78,30 @@ datasets:
   - name: description
     dtype: text
     doc: Description of what this table region points to
+- neurodata_type_def: Image
+  neurodata_type_inc: NWBData
+  doc: Image base type.
+  attributes:
+  - name: help
+    dtype: text
+    doc: base image (use GrayscaleImage, RGBImage, RGBAImage, etc.)
+  - name: resolution
+    dtype: float
+    doc: pixels / cm
+    required: False
+  - name: description
+    dtype: text
+    required: False
+    doc: description of image
+  shape:
+  - - null
+    - null
+  - - null
+    - null
+    - 3
+  - - null
+    - null
+    - 4
 groups:
 - neurodata_type_def: NWBContainer
   doc: The attributes specified here are included in all interfaces.
