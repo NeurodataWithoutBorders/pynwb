@@ -454,7 +454,7 @@ groups:
         doc: Value is 'the end time of each trial'
         value: the end time of each trial
     quantity: '?'
-  - neurodata_type_inc: DynamicTable
+  - neurodata_type_inc: Units
     name: units
     doc: Data about units
     quantity: '?'

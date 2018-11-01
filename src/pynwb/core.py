@@ -198,18 +198,15 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBBaseType, Container):
 
-    __nwbfields__ = ('source',
-                     'help')
+    __nwbfields__ = ('help',)
 
-    @docval({'name': 'source', 'type': str, 'doc': 'a description of where this NWBContainer came from'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container'},
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
              'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
-        self.source = getargs('source', kwargs)
 
     __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc'}
 
@@ -734,14 +731,13 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_constructor(cls, attr_name, add_name, container_type):
-        @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-                {'name': attr_name, 'type': (list, tuple, dict, container_type),
+        @docval({'name': attr_name, 'type': (list, tuple, dict, container_type),
                  'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()},
                 {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__},
                 func_name='__init__')
         def _func(self, **kwargs):
-            source, container = popargs('source', attr_name, kwargs)
-            super(cls, self).__init__(source, **kwargs)
+            container = popargs(attr_name, kwargs)
+            super(cls, self).__init__(**kwargs)
             add = getattr(self, add_name)
             add(container)
         return _func
@@ -895,8 +891,25 @@ class DynamicTable(NWBDataInterface):
         'description'
     )
 
+    __columns__ = tuple()
+
+    @ExtenderMeta.pre_init
+    def __gather_columns(cls, name, bases, classdict):
+        '''
+        This classmethod will be called during class declaration in the metaclass to automatically
+        create setters and getters for NWB fields that need to be exported
+        '''
+        if not isinstance(cls.__columns__, tuple):
+            msg = "'__columns__' must be of type tuple, found %s" % type(cls.__columns__)
+            raise TypeError(msg)
+
+        if len(bases) and 'DynamicTable' in globals() and issubclass(bases[-1], NWBContainer) \
+           and bases[-1].__columns__ is not cls.__columns__:
+                new_columns = list(cls.__columns__)
+                new_columns[0:0] = bases[-1].__columns__
+                cls.__columns__ = tuple(new_columns)
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},    # noqa: C901
-            {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
             {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
              'default': None},
@@ -1027,14 +1040,20 @@ class DynamicTable(NWBDataInterface):
         '''
         data, row_id = popargs('data', 'id', kwargs)
         data = data if data is not None else kwargs
-        if row_id is None:
-            row_id = data.pop('id', None)
-        if row_id is None:
-            row_id = len(self)
-        self.id.data.append(row_id)
 
         extra_columns = set(list(data.keys())) - set(list(self.__colids.keys()))
         missing_columns = set(list(self.__colids.keys())) - set(list(data.keys()))
+
+        # check to see if any of the extra columns just need to be added
+        if extra_columns:
+            for col in self.__columns__:
+                if col['name'] in extra_columns:
+                    if data[col['name']] is not None:
+                        if not col.get('vector_data', False):
+                            self.add_column(col['name'], col['description'])
+                        else:
+                            self.add_vector_column(col['name'], col['description'])
+                    extra_columns.remove(col['name'])
 
         if extra_columns or missing_columns:
             raise ValueError(
@@ -1045,6 +1064,12 @@ class DynamicTable(NWBDataInterface):
                 ])
             )
 
+        if row_id is None:
+            row_id = data.pop('id', None)
+        if row_id is None:
+            row_id = len(self)
+        self.id.data.append(row_id)
+
         for colname, colnum in self.__colids.items():
             if colname not in data:
                 raise ValueError("column '%s' missing" % colname)
@@ -1053,21 +1078,6 @@ class DynamicTable(NWBDataInterface):
                 c.add_vector(data[colname])
             else:
                 c.add_row(data[colname])
-
-    # # keeping this around in case anyone wants to resurrect it
-    # # this was used to return a numpy structured array. this does not
-    # # work across platforms (it breaks on windows). instead, return
-    # # tuples and lists of tuples
-    # def get_dtype(self, col):
-    #     x = col.data[0]
-    #     shape = get_shape(x)
-    #     shape = None if shape is None else shape
-    #     while hasattr(x, '__len__') and not isinstance(x, (text_type, binary_type)):
-    #         x = x[0]
-    #     t = type(x)
-    #     if t in (text_type, binary_type):
-    #         t = np.string_
-    #     return (col.name, t, shape)
 
     @docval(*get_docval(TableColumn.__init__))
     def add_column(self, **kwargs):
@@ -1191,7 +1201,6 @@ class DynamicTable(NWBDataInterface):
     @docval(
         {'name': 'df', 'type': pd.DataFrame, 'doc': 'source DataFrame'},
         {'name': 'name', 'type': str, 'doc': 'the name of this table'},
-        {'name': 'source', 'type': str, 'doc': 'a description of where this table came from'},
         {
             'name': 'index_column',
             'type': str,
@@ -1222,7 +1231,6 @@ class DynamicTable(NWBDataInterface):
 
         df = kwargs.pop('df')
         name = kwargs.pop('name')
-        source = kwargs.pop('source')
         index_column = kwargs.pop('index_column')
         table_description = kwargs.pop('table_description')
         columns = kwargs.pop('columns')
@@ -1244,7 +1252,7 @@ class DynamicTable(NWBDataInterface):
 
         columns = cls.__build_columns(columns, df=df)
 
-        return cls(name=name, source=source, id=ids, columns=columns, description=table_description, **kwargs)
+        return cls(name=name, id=ids, columns=columns, description=table_description, **kwargs)
 
 
 @register_class('DynamicTableRegion', CORE_NAMESPACE)

@@ -4,7 +4,7 @@ from collections import Iterable
 from .form.utils import docval, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_resolution, _default_conversion
+from .base import TimeSeries, _default_resolution, _default_conversion, Image
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)
@@ -24,10 +24,6 @@ class ImageSeries(TimeSeries):
     _help = "Storage object for time-series 2-D image data"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
@@ -94,10 +90,6 @@ class IndexSeries(TimeSeries):
     an arbitrary order. The data[] field stores frame number in reference stack."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
@@ -124,9 +116,9 @@ class IndexSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
+        name, data, unit = popargs('name', 'data', 'unit', kwargs)
         indexed_timeseries = popargs('indexed_timeseries', kwargs)
-        super(IndexSeries, self).__init__(name, source, data, unit, **kwargs)
+        super(IndexSeries, self).__init__(name, data, unit, **kwargs)
         self.indexed_timeseries = indexed_timeseries
 
 
@@ -145,10 +137,6 @@ class ImageMaskSeries(ImageSeries):
     _help = "An alpha mask that is applied to a presented visual stimulus."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
@@ -186,11 +174,10 @@ class ImageMaskSeries(ImageSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit, external_file, starting_frame, format = popargs(
-            'name', 'source', 'data', 'unit', 'external_file', 'starting_frame', 'format', kwargs)
+        name, data, unit, external_file, starting_frame, format = popargs(
+            'name', 'data', 'unit', 'external_file', 'starting_frame', 'format', kwargs)
         masked_imageseries = popargs('masked_imageseries', kwargs)
-        super(ImageMaskSeries, self).__init__(name=name, source=source,
-                                              data=data, unit=unit,
+        super(ImageMaskSeries, self).__init__(name=name, data=data, unit=unit,
                                               external_file=external_file,
                                               starting_frame=starting_frame, format=format, **kwargs)
         self.masked_imageseries = masked_imageseries
@@ -214,10 +201,6 @@ class OpticalSeries(ImageSeries):
     _help = "Time-series image stack for optical recording or stimulus."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
@@ -259,12 +242,45 @@ class OpticalSeries(ImageSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit, external_file, starting_frame, format = popargs(
-            'name', 'source', 'data', 'unit', 'external_file', 'starting_frame', 'format', kwargs)
+        name, data, unit, external_file, starting_frame, format = popargs(
+            'name', 'data', 'unit', 'external_file', 'starting_frame', 'format', kwargs)
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
-        super(OpticalSeries, self).__init__(name=name, source=source, data=data, unit=unit,
+        super(OpticalSeries, self).__init__(name=name, data=data, unit=unit,
                                             external_file=external_file, starting_frame=starting_frame,
                                             format=format, **kwargs)
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
+
+
+@register_class('GrayscaleImage', CORE_NAMESPACE)
+class GrayscaleImage(Image):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None)},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    def __init__(self, **kwargs):
+        super(GrayscaleImage, self).__init__(**kwargs)
+
+
+@register_class('RGBImage', CORE_NAMESPACE)
+class RGBImage(Image):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 3)},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    def __init__(self, **kwargs):
+        super(RGBImage, self).__init__(**kwargs)
+
+
+@register_class('RGBAImage', CORE_NAMESPACE)
+class RGBAImage(Image):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 4)},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    def __init__(self, **kwargs):
+        super(RGBAImage, self).__init__(**kwargs)

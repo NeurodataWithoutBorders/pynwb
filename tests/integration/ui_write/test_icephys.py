@@ -10,8 +10,8 @@ from six import with_metaclass
 class TestIntracellularElectrode(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        self.device = Device(name='device_name', source='device_source')
-        self.elec = IntracellularElectrode(name="elec0", source='ice source', slice='tissue slice',
+        self.device = Device(name='device_name')
+        self.elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                            resistance='something measured in ohms',
                                            seal='sealing method', description='a fake electrode object',
                                            location='Springfield Elementary School',
@@ -34,8 +34,8 @@ class TestPCS(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
 
     def setUpElectrode(self):
 
-        self.device = Device(name='device_name', source='device_source')
-        self.elec = IntracellularElectrode(name="elec0", source='ice source', slice='tissue slice',
+        self.device = Device(name='device_name')
+        self.elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                            resistance='something measured in ohms',
                                            seal='sealing method', description='a fake electrode object',
                                            location='Springfield Elementary School',
@@ -54,6 +54,6 @@ class TestCCSS(TestPCS):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        ccss = CurrentClampStimulusSeries(name="ccss", source="command", data=[1, 2, 3, 4, 5], unit='A',
+        ccss = CurrentClampStimulusSeries(name="ccss", data=[1, 2, 3, 4, 5], unit='A',
                                           starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
         return ccss

@@ -10,13 +10,13 @@ groups:
   - name: pmt_gain
     dtype: float32
     doc: Photomultiplier gain
-    quantity: '?'
+    required: false
   - name: scan_line_rate
     dtype: float32
     doc: Lines imaged per second. This is also stored in /general/optophysiology but
       is kept here as it is useful information for analysis, and so good to be stored
       w/ the actual data.
-    quantity: '?'
+    required: false
   datasets:
   - name: field_of_view
     dtype: float32
@@ -24,6 +24,7 @@ groups:
     dims:
     - width|height|depth
     quantity: '?'
+    required: false
     shape:
     - 3
   links:
@@ -106,7 +107,6 @@ groups:
     value: Stores groups of pixels that define regions of interest from one or more
       imaging planes
   groups:
-  ######### BEGIN: ROITable Refactor
   - neurodata_type_def: PlaneSegmentation
     neurodata_type_inc: DynamicTable
     doc: results for image segmentation of a specific imaging plane
@@ -120,13 +120,21 @@ groups:
       name: image_mask
       doc: ROI masks for each ROI
       dims:
-      - num_roi
-      - num_x
-      - num_y
+      - - num_roi
+        - num_x
+        - num_y
+      - - num_roi
+        - num_x
+        - num_y
+        - num_z
       shape:
-      - null
-      - null
-      - null
+      - - null
+        - null
+        - null
+      - - null
+        - null
+        - null
+        - null
       quantity: '?'
     - neurodata_type_inc: VectorIndex
       name: pixel_mask_index
@@ -147,6 +155,28 @@ groups:
         dtype: float
         doc: the weight of the pixel
       quantity: '?'
+    - neurodata_type_inc: VectorIndex
+      name: voxel_mask_index
+      doc: index into voxel_mask
+      quantity: '?'
+    - neurodata_type_inc: VectorData
+      name: voxel_mask
+      doc: Voxel masks for each ROI. Voxel masks are concatenated and parsing of this
+        dataset is maintained by the PlaneSegmentation
+      dtype:
+      - name: x
+        dtype: uint
+        doc: the voxel x-coordinate
+      - name: y
+        dtype: uint
+        doc: the voxel y-coordinate
+      - name: z
+        dtype: uint
+        doc: the voxel y-coordinate
+      - name: weight
+        dtype: float
+        doc: the weight of the voxel
+      quantity: '?'
     groups:
     - name: reference_images
       doc: Stores image stacks segmentation mask apply to.
@@ -159,7 +189,6 @@ groups:
       doc: link to ImagingPlane group from which this TimeSeries data was generated
       target_type: ImagingPlane
     quantity: '*'
-  ######### END: ROITable Refactor
   default_name: ImageSegmentation
 - neurodata_type_def: ImagingPlane
   neurodata_type_inc: NWBContainer
@@ -205,13 +234,21 @@ groups:
       default_value: Meter
       required: false
     dims:
-    - height
-    - weight
-    - x|y|z
+    -  - height
+       - width
+       - x|y|z
+    -  - height
+       - width
+       - depth
+       - x|y|z
     shape:
-    - null
-    - null
-    - 3
+    -  - null
+       - null
+       - 3
+    -  - null
+       - null
+       - null
+       - 3
   - name: reference_frame
     dtype: text
     doc: 'Describes position and reference frame of manifold based on position of

@@ -8,13 +8,12 @@ from . import base
 class TestTimeSeriesIO(base.TestDataInterfaceIO):
 
     def setUpContainer(self):
-        return TimeSeries('test_timeseries', 'example_source', list(range(100, 200, 10)),
+        return TimeSeries('test_timeseries', list(range(100, 200, 10)),
                           'SIunit', timestamps=list(range(10)), resolution=0.1)
 
     def setUpBuilder(self):
         return GroupBuilder('test_timeseries',
-                            attributes={'source': 'example_source',
-                                        'namespace': base.CORE_NAMESPACE,
+                            attributes={'namespace': base.CORE_NAMESPACE,
                                         'neurodata_type': 'TimeSeries',
                                         'description': 'no description',
                                         'comments': 'no comments',
