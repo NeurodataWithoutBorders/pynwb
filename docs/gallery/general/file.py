@@ -163,9 +163,9 @@ nwbfile.create_epoch(6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 
 nwbfile.add_trial_column('stim', 'the visual stimuli during the trial')
 
-nwbfile.add_trial({'start': 0, 'end': 2, 'stim': 'person'})
-nwbfile.add_trial({'start': 3, 'end': 5, 'stim': 'ocean'})
-nwbfile.add_trial({'start': 6, 'end': 8, 'stim': 'desert'})
+nwbfile.add_trial(start_time=0.0, stop_time=2.0, stim='person')
+nwbfile.add_trial(start_time=3.0, stop_time=5.0, stim='ocean')
+nwbfile.add_trial(start_time=6.0, stop_time=8.0, stim='desert')
 
 ####################
 # .. _basic_units:
