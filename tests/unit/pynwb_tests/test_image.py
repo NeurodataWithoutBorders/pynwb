@@ -1,7 +1,10 @@
 import unittest
 
+import numpy as np
+
 from pynwb import TimeSeries
-from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries
+from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, \
+    GrayscaleImage, RGBImage, RGBAImage
 
 
 class ImageSeriesConstructor(unittest.TestCase):
@@ -60,6 +63,18 @@ class OpticalSeriesConstructor(unittest.TestCase):
         self.assertEqual(ts.external_file, ['external_file'])
         self.assertEqual(ts.starting_frame, [1, 2, 3])
         self.assertEqual(ts.format, 'tiff')
+
+
+class TestImageSubtypes(unittest.TestCase):
+
+    def test_grayscale_image(self):
+        GrayscaleImage(name='test_image', data=np.ones((10, 10)))
+
+    def test_rgb_image(self):
+        RGBImage(name='test_image', data=np.ones((10, 10, 3)))
+
+    def test_rgba_image(self):
+        RGBAImage(name='test_image', data=np.ones((10, 10, 4)))
 
 
 if __name__ == '__main__':

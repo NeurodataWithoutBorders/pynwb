@@ -4,7 +4,7 @@ from collections import Iterable
 from .form.utils import docval, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_resolution, _default_conversion
+from .base import TimeSeries, _default_resolution, _default_conversion, Image
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)
@@ -251,3 +251,36 @@ class OpticalSeries(ImageSeries):
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
+
+
+@register_class('GrayscaleImage', CORE_NAMESPACE)
+class GrayscaleImage(Image):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None)},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    def __init__(self, **kwargs):
+        super(GrayscaleImage, self).__init__(**kwargs)
+
+
+@register_class('RGBImage', CORE_NAMESPACE)
+class RGBImage(Image):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 3)},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    def __init__(self, **kwargs):
+        super(RGBImage, self).__init__(**kwargs)
+
+
+@register_class('RGBAImage', CORE_NAMESPACE)
+class RGBAImage(Image):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 4)},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    def __init__(self, **kwargs):
+        super(RGBAImage, self).__init__(**kwargs)
