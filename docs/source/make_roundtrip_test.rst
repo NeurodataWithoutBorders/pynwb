@@ -13,6 +13,14 @@ with the following command::
 
     $ python test.py -i
 
+The roundtrip test will generate a new NWB file with the name ``test_<CLASS_NAME>.nwb`` where ``CLASS_NAME`` is
+the class name of the :py:class:`~pynwb.form.container.Container` class you are roundtripping. The test
+will write an NWB file with an instance of the container to disk, read this instance back in, and compare it
+to the instance that was used for writing to disk. Once the test is complete, the NWB file will be deleted.
+You can keep the NWB file around after the test completes by setting the environment variable ``CLEAN_NWB``
+to ``0``, ``false``, ``False``, or ``FALSE``. Setting ``CLEAN_NWB`` to any value not listed here will
+cause the roundtrip NWB file to be deleted once the test has completed
+
 Before writing tests, we also suggest you familiarize yourself with the
 :ref:`software architecture <software-architecture>` of PyNWB.
 

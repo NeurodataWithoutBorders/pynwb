@@ -22,7 +22,7 @@ from pynwb import NWBFile
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
 create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
-nwbfile = NWBFile('PyNWB tutorial', 'demonstrate NWBFile basics', 'NWB123', start_time,
+nwbfile = NWBFile('demonstrate NWBFile basics', 'NWB123', start_time,
                   file_create_date=create_date)
 
 ####################
@@ -39,13 +39,13 @@ from pynwb import TimeSeries
 
 data = list(range(100, 200, 10))
 timestamps = list(range(10))
-test_ts = TimeSeries('test_timeseries', 'PyNWB tutorial', data, 'SIunit', timestamps=timestamps)
+test_ts = TimeSeries('test_timeseries', data, 'SIunit', timestamps=timestamps)
 
 ####################
 # Alternatively, if your recordings are sampled at a uniform rate, you can supply *starting_time*
 # and *rate*.
 
-test_ts = TimeSeries('test_timeseries', 'PyNWB tutorial', data, 'SIunit', starting_time=0.0, rate=1.0)
+test_ts = TimeSeries('test_timeseries', data, 'SIunit', starting_time=0.0, rate=1.0)
 
 ####################
 # Using this scheme says that this :py:class:`~pynwb.base.TimeSeries` started recording 0 seconds after
@@ -81,7 +81,7 @@ nwbfile.add_acquisition(test_ts)
 
 from pynwb.ecephys import LFP
 
-lfp = LFP('PyNWB tutorial')
+lfp = LFP()
 nwbfile.add_acquisition(lfp)
 
 ####################
@@ -104,7 +104,7 @@ nwbfile.add_acquisition(lfp)
 #
 # Processing modules can be created using :py:func:`~pynwb.file.NWBFile.create_processing_module`:
 
-created_mod = nwbfile.create_processing_module('created_mod', 'PyNWB tutorial', 'example module')
+created_mod = nwbfile.create_processing_module('created_mod', 'example module')
 
 ####################
 # or by directly calling the constructor and adding to the :py:class:`~pynwb.file.NWBFile` using
@@ -112,7 +112,7 @@ created_mod = nwbfile.create_processing_module('created_mod', 'PyNWB tutorial', 
 
 from pynwb import ProcessingModule
 
-added_mod = ProcessingModule('added_mod', 'PyNWB tutorial', 'example module')
+added_mod = ProcessingModule('added_mod', 'example module')
 nwbfile.add_processing_module(added_mod)
 
 ####################
@@ -123,7 +123,7 @@ nwbfile.add_processing_module(added_mod)
 
 data = list(range(0, 100, 10))
 timestamps = list(range(10))
-mod_ts = TimeSeries('ts_for_mod', 'PyNWB tutorial', data, 'SIunit', timestamps=timestamps)
+mod_ts = TimeSeries('ts_for_mod', data, 'SIunit', timestamps=timestamps)
 added_mod.add_data_interface(mod_ts)
 
 ####################
@@ -138,8 +138,8 @@ added_mod.add_data_interface(mod_ts)
 # and the fifth argument is a list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
 # to.
 
-nwbfile.create_epoch('the first epoch', 2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
-nwbfile.create_epoch('the second epoch', 6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
+nwbfile.create_epoch(2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
+nwbfile.create_epoch(6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 
 ####################
 # .. _basic_trials:
@@ -190,9 +190,9 @@ nwbfile.add_trial({'start': 6, 'end': 8, 'stim': 'desert'})
 nwbfile.add_unit_column('location', 'the anatomical location of this unit')
 nwbfile.add_unit_column('quality', 'the quality for the inference of this unit')
 
-nwbfile.add_unit({'id': 1, 'location': 'CA1', 'quality': 0.95})
-nwbfile.add_unit({'id': 2, 'location': 'CA3', 'quality': 0.85})
-nwbfile.add_unit({'id': 3, 'location': 'CA1', 'quality': 0.90})
+nwbfile.add_unit(id=1, location='CA1', quality=0.95)
+nwbfile.add_unit(id=2, location='CA3', quality=0.85)
+nwbfile.add_unit(id=3, location='CA1', quality=0.90)
 
 ####################
 # .. _basic_writing:
@@ -315,7 +315,7 @@ nwbfile = io.read()
 
 data = list(range(300, 400, 10))
 timestamps = list(range(10))
-test_ts2 = TimeSeries('test_timeseries2', 'PyNWB tutorial', data, 'SIunit', timestamps=timestamps)
+test_ts2 = TimeSeries('test_timeseries2', data, 'SIunit', timestamps=timestamps)
 nwbfile.add_acquisition(test_ts2)
 
 ####################

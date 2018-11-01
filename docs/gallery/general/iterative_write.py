@@ -116,15 +116,13 @@ def write_test_file(filename, data):
     # Create a test NWBfile
     start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
     create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
-    nwbfile = NWBFile('PyNWB tutorial',
-                      'demonstrate NWBFile basics',
+    nwbfile = NWBFile('demonstrate NWBFile basics',
                       'NWB123',
                       start_time,
                       file_create_date=create_date)
 
     # Create our time series
     test_ts = TimeSeries(name='synthetic_timeseries',
-                         source='PyNWB tutorial',
                          data=data,                     # <---------
                          unit='SIunit',
                          rate=1.0,

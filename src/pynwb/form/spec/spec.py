@@ -30,6 +30,7 @@ class DtypeHelper():
             'long': ["int64", "long"],
             'utf': ["text", "utf", "utf8", "utf-8"],
             'ascii': ["ascii", "bytes"],
+            'bool': ["bool"],
             'int8': ["int8"],
             'uint8': ["uint8"],
             'uint16': ["uint16"],
@@ -854,7 +855,7 @@ class GroupSpec(BaseStorageSpec):
                 self.set_group(group)
         # resolve inherited links
         for link in inc_spec.links:
-            if link.data_type_inc is not None:
+            if link.name is None:
                 data_types.append(link)
             self.__new_links.discard(link.name)
             if link.name in self.__links:
@@ -871,16 +872,15 @@ class GroupSpec(BaseStorageSpec):
                     dt = dt_spec.data_type_inc
             self.__new_data_types.discard(dt)
             existing_dt_spec = self.get_data_type(dt)
-            if existing_dt_spec is None:
-                self.__add_data_type_inc(dt_spec)
-            else:
-                if existing_dt_spec.name is not None and dt_spec.name is None:
-                    if isinstance(dt_spec, DatasetSpec):
-                        self.set_dataset(dt_spec)
-                    elif isinstance(dt_spec, GroupSpec):
-                        self.set_group(dt_spec)
-                    else:
-                        self.set_link(dt_spec)
+            if existing_dt_spec is None or \
+               ((isinstance(existing_dt_spec, list) or existing_dt_spec.name is not None)) and \
+               dt_spec.name is None:
+                if isinstance(dt_spec, DatasetSpec):
+                    self.set_dataset(dt_spec)
+                elif isinstance(dt_spec, GroupSpec):
+                    self.set_group(dt_spec)
+                else:
+                    self.set_link(dt_spec)
         super(GroupSpec, self).resolve_spec(inc_spec)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
@@ -979,6 +979,8 @@ class GroupSpec(BaseStorageSpec):
         if isinstance(spec, Spec):
             name = spec.name
             if name is None:
+                if spec.is_many():  # this is a wildcard spec, so it cannot be overridden
+                    return False
                 name = spec.data_type_def
             if name is None:
                 name = spec.data_type_inc
@@ -1015,7 +1017,17 @@ class GroupSpec(BaseStorageSpec):
             if spec.data_type_def is None:
                 raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
             spec = spec.data_type_def
-        # return spec.data_type_def in self.__inherited_data_type_defs
+        return spec not in self.__new_data_types
+
+    @docval({'name': 'spec', 'type': (BaseStorageSpec, str), 'doc': 'the specification to check'},
+            raises="ValueError, if 'name' is not part of this spec")
+    def is_overridden_type(self, **kwargs):
+        ''' Returns True if `spec` represents a spec that was overriden by the subtype'''
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, BaseStorageSpec):
+            if spec.data_type_def is None:
+                raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
+            spec = spec.data_type_def
         return spec not in self.__new_data_types
 
     def __add_data_type_inc(self, spec):

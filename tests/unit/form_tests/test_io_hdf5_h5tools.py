@@ -370,14 +370,12 @@ class TestCacheSpec(unittest.TestCase):
         data = np.arange(1000).reshape((100, 10))
         timestamps = np.arange(100)
         # Create the first file
-        nwbfile1 = NWBFile(source='PyNWB tutorial',
-                           session_description='demonstrate external files',
+        nwbfile1 = NWBFile(session_description='demonstrate external files',
                            identifier='NWBE1',
                            session_start_time=start_time,
                            file_create_date=create_date)
 
         test_ts1 = TimeSeries(name='test_timeseries',
-                              source='PyNWB tutorial',
                               data=data,
                               unit='SIunit',
                               timestamps=timestamps)
@@ -406,11 +404,10 @@ class TestCacheSpec(unittest.TestCase):
 class TestLinkResolution(unittest.TestCase):
 
     def test_link_resolve(self):
-        nwbfile = NWBFile("source", "a file with header data", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal()))
-        device = nwbfile.create_device('device_name', 'source')
+        nwbfile = NWBFile("a file with header data", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal()))
+        device = nwbfile.create_device('device_name')
         electrode_group = nwbfile.create_electrode_group(
             name='electrode_group_name',
-            source='source',
             description='desc',
             device=device,
             location='unknown')
@@ -423,7 +420,6 @@ class TestLinkResolution(unittest.TestCase):
         etr = nwbfile.create_electrode_table_region([0], 'etr_name')
         for passband in ('theta', 'gamma'):
             electrical_series = ElectricalSeries(name=passband + '_phase',
-                                                 source='ephys_analysis',
                                                  data=[1., 2., 3.],
                                                  rate=0.0,
                                                  electrodes=etr)
@@ -478,14 +474,12 @@ class NWBHDF5IOMultiFileTest(unittest.TestCase):
         data = np.arange(1000).reshape((100, 10))
         timestamps = np.arange(100)
         # Create the first file
-        nwbfile1 = NWBFile(source='PyNWB tutorial',
-                           session_description='demonstrate external files',
+        nwbfile1 = NWBFile(session_description='demonstrate external files',
                            identifier='NWBE1',
                            session_start_time=start_time,
                            file_create_date=create_date)
 
         test_ts1 = TimeSeries(name='test_timeseries',
-                              source='PyNWB tutorial',
                               data=data,
                               unit='SIunit',
                               timestamps=timestamps)
@@ -495,14 +489,12 @@ class NWBHDF5IOMultiFileTest(unittest.TestCase):
         nwbfile1_read = self.io[0].read()
 
         # Create the second file
-        nwbfile2 = NWBFile(source='PyNWB tutorial',
-                           session_description='demonstrate external files',
+        nwbfile2 = NWBFile(session_description='demonstrate external files',
                            identifier='NWBE1',
                            session_start_time=start_time,
                            file_create_date=create_date)
 
         test_ts2 = TimeSeries(name='test_timeseries',
-                              source='PyNWB tutorial',
                               data=nwbfile1_read.get_acquisition('test_timeseries').data,
                               unit='SIunit',
                               timestamps=timestamps)
