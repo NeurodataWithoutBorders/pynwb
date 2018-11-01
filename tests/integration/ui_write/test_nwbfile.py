@@ -11,7 +11,7 @@ from pynwb.form.backends.hdf5 import HDF5IO
 from pynwb import NWBFile, TimeSeries
 from pynwb.file import Subject
 from pynwb.ecephys import Clustering
-from pynwb.epoch import EpochTable
+from pynwb.epoch import TimeIntervals
 
 from . import base
 
@@ -202,10 +202,10 @@ class TestEpochsRoundtrip(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
-        return EpochTable('epochs')
+        return TimeIntervals('epochs')
 
     def addContainer(self, nwbfile):
-        nwbfile.add_epoch_metadata_column(
+        nwbfile.add_epoch_column(
             name='temperature',
             description='average temperture (c) during epoch'
         )
@@ -229,7 +229,7 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
-        return EpochTable('epochs')
+        return TimeIntervals('epochs')
 
     def addContainer(self, nwbfile):
 
@@ -241,7 +241,7 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
         nwbfile.add_acquisition(tsa)
         nwbfile.add_acquisition(tsb)
 
-        nwbfile.epochs = EpochTable.from_dataframe(
+        nwbfile.epochs = TimeIntervals.from_dataframe(
             pd.DataFrame({
                 'foo': [1, 2, 3, 4],
                 'bar': ['fish', 'fowl', 'dog', 'cat'],
