@@ -58,8 +58,9 @@ class TestUnits(base.TestMapRoundTrip):
 
     def addContainer(self, nwbfile):
         nwbfile.add_unit_column('foo', 'an int column')
-        nwbfile.add_unit(foo=27)
-        nwbfile.add_unit(foo=37)
+        nwbfile.add_unit_column('my_bool', 'a bool column')
+        nwbfile.add_unit(foo=27, my_bool=True)
+        nwbfile.add_unit(foo=37, my_bool=False)
         # reset the thing
         self.container = nwbfile.units
 

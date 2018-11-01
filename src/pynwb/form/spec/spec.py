@@ -30,6 +30,7 @@ class DtypeHelper():
             'long': ["int64", "long"],
             'utf': ["text", "utf", "utf8", "utf-8"],
             'ascii': ["ascii", "bytes"],
+            'bool': ["bool"],
             'int8': ["int8"],
             'uint8': ["uint8"],
             'uint16': ["uint16"],
