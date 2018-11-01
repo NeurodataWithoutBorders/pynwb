@@ -417,15 +417,14 @@ groups:
     groups:
     - neurodata_type_inc: TimeIntervals
       name: epochs
-      doc: divisions in time, either inferred from analysis of acquired data, or established in
-        an experimental protocol
+      doc: divisions in time marking experimental stages or sub-divisions of a single recording session
       quantity: '?'
     - neurodata_type_inc: TimeIntervals
       name: trials
-      doc: repeated experimental events that have logical grouping for analysis of acquired data
+      doc: repeated experimental events that have a logical grouping
       quantity: '?'
     - neurodata_type_inc: TimeIntervals
-      doc: any additional table that stores data about experimental intervals
+      doc: an optional additional table for describing other experimental time intervals
       quantity: '*'
     quantity: '?'
   - neurodata_type_inc: Units
