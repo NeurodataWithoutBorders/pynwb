@@ -450,6 +450,7 @@ class HDF5IO(FORMIO):
         "float64": np.float64,
         "long": np.int64,
         "int64": np.int64,
+        "uint64": np.uint64,
         "int": np.int32,
         "int32": np.int32,
         "int16": np.int16,
