@@ -6,7 +6,7 @@ from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_f
 from .form.data_utils import AbstractDataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBDataInterface, MultiContainerInterface
+from .core import NWBDataInterface, MultiContainerInterface, NWBData
 
 _default_conversion = 1.0
 _default_resolution = 0.0
@@ -210,3 +210,36 @@ class TimeSeries(NWBDataInterface):
     @property
     def time_unit(self):
         return self.__time_unit
+
+
+@register_class('Image', CORE_NAMESPACE)
+class Image(NWBData):
+    __nwbfields__ = ('data', 'resolution', 'description')
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
+             'shape': ((None, None), (None, None, 3), (None, None, 4))},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    def __init__(self, **kwargs):
+        super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
+        self.resolution = kwargs['resolution']
+        self.description = kwargs['description']
+
+
+@register_class('Images', CORE_NAMESPACE)
+class Images(NWBDataInterface):
+
+    __clsconf__ = {
+        'attr': 'images',
+        'add': 'add_image',
+        'type': Image,
+        'get': 'get_image'
+    }
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'images', 'type': (list, tuple, dict), 'doc': 'images'},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    def __init__(self, **kwargs):
+        super(Images, self).__init__(name=kwargs['name'])
+        self.description = popargs('description', kwargs)

@@ -15,17 +15,11 @@ from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
 
 
 def _not_parent(arg):
     return arg['name'] != 'parent'
-
-
-# @register_class('Image', CORE_NAMESPACE)
-class Image(NWBData):
-    # TODO: Implement this
-    pass
 
 
 @register_class('SpecFile', CORE_NAMESPACE)
