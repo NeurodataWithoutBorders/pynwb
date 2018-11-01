@@ -200,12 +200,11 @@ class PlaneSegmentationConstructor(unittest.TestCase):
 
         iSS, ip = self.getBoilerPlateObjects()
 
-        pS = PlaneSegmentation('test source', 'description', ip, 'test_name', iSS)
+        pS = PlaneSegmentation('description', ip, 'test_name', iSS)
         pS.add_roi(pixel_mask=pix_masks[0].tolist())
         pS.add_roi(pixel_mask=pix_masks[1].tolist())
 
         self.assertEqual(pS.description, 'description')
-        self.assertEqual(pS.source, 'test source')
 
         self.assertEqual(pS.imaging_plane, ip)
         self.assertEqual(pS.reference_images, iSS)
