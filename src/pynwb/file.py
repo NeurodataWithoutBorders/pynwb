@@ -359,7 +359,7 @@ class NWBFile(MultiContainerInterface):
 
     def __check_epochs(self):
         if self.epochs is None:
-            self.epochs = TimeIntervals(self.source)
+            self.epochs = TimeIntervals('epochs', 'experimental epochs')
 
     @docval(*get_docval(TimeIntervals.add_column))
     def add_epoch_column(self, **kwargs):
@@ -376,9 +376,9 @@ class NWBFile(MultiContainerInterface):
         This method is deprecated and will be removed in future versions. Please
         use :py:meth:`~pynwb.file.NWBFile.add_epoch_column` instead
         """
-        raise DeprecationWarning("Pease use NWBFile.add_epoch_column")
+        raise DeprecationWarning("Please use NWBFile.add_epoch_column")
 
-    @docval(*get_docval(TimeIntervals.add_epoch),
+    @docval(*get_docval(TimeIntervals.add_interval),
             allow_extra=True)
     def create_epoch(self, **kwargs):
         """
@@ -391,7 +391,7 @@ class NWBFile(MultiContainerInterface):
         """
         self.__check_epochs()
         self.epoch_tags.update(kwargs.get('tags', list()))
-        call_docval_func(self.epochs.add_epoch, kwargs)
+        call_docval_func(self.epochs.add_interval, kwargs)
 
     def __check_electrodes(self):
         if self.electrodes is None:
@@ -493,7 +493,7 @@ class NWBFile(MultiContainerInterface):
         been added (through calls to `add_trial_columns`).
         """
         self.__check_trials()
-        call_docval_func(self.trials.add_row, kwargs)
+        call_docval_func(self.trials.add_interval, kwargs)
 
     @docval({'name': 'electrode_table', 'type': DynamicTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):

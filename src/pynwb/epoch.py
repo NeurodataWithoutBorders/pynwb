@@ -25,9 +25,9 @@ class TimeIntervals(DynamicTable):
         {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'vector_data': True}
     )
 
-    @docval({'name': 'description', 'type': str, 'doc': 'Description of this TimeIntervals',
+    @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeIntervals',
              'default': "experimental intervals"},
-            {'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals', 'default': 'epochs'},
             {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
              'default': None},
             {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
@@ -43,7 +43,7 @@ class TimeIntervals(DynamicTable):
             {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to',
              'default': None},
             allow_extra=True)
-    def add_epoch(self, **kwargs):
+    def add_interval(self, **kwargs):
         tags, timeseries = popargs('tags', 'timeseries', kwargs)
         start_time, stop_time = getargs('start_time', 'stop_time', kwargs)
         rkwargs = dict(kwargs)
