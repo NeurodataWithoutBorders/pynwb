@@ -12,9 +12,9 @@ class TimeIntervalsTest(unittest.TestCase):
     def test_init(self):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
         ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        ept = TimeIntervals("TimeIntervals unittest")
+        ept = TimeIntervals('epochs', "TimeIntervals unittest")
         self.assertEqual(ept.name, 'epochs')
-        ept.add_epoch(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
+        ept.add_interval(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
         row = ept[0]
         self.assertEqual(row[1], 10.0)
         self.assertEqual(row[2], 20.0)
