@@ -1,50 +1,25 @@
 import unittest
 
-from pynwb.epoch import EpochTable
+from pynwb.epoch import TimeIntervals
 from pynwb import TimeSeries
 
 import numpy as np
 import pandas as pd
 
 
-class EpochTableTest(unittest.TestCase):
+class TimeIntervalsTest(unittest.TestCase):
 
     def test_init(self):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
         ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        ept = EpochTable("EpochTable unittest")
+        ept = TimeIntervals('epochs', "TimeIntervals unittest")
         self.assertEqual(ept.name, 'epochs')
-        ept.add_epoch(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
+        ept.add_interval(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
         row = ept[0]
         self.assertEqual(row[1], 10.0)
         self.assertEqual(row[2], 20.0)
         self.assertEqual(row[3], ["test", "unittest", "pynwb"])
         self.assertEqual(row[4], [(90, 100, ts)])
-
-
-class EpochSetters(unittest.TestCase):
-
-    def setUp(self):
-        # self.epoch = Epoch("test_epoch", 10.0, 20.0, "this is an epoch")
-        pass
-
-    def test_add_tags(self):
-        # self.epoch.add_tag("tag1")
-        # self.epoch.add_tag("tag2")
-        # self.assertListEqual(self.epoch.tags, ["tag1", "tag2"])
-        pass
-
-    def test_add_timeseries(self):
-        # tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
-        # ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        # epoch_ts = self.epoch.add_timeseries(ts)
-        # self.assertEqual(epoch_ts.count, 100)
-        # self.assertEqual(epoch_ts.idx_start, 90)
-        # self.assertIs(self.epoch.get_timeseries("test_ts"), epoch_ts)
-        pass
-
-
-class TestEpochsDf(unittest.TestCase):
 
     def get_timeseries(self):
         return [
@@ -66,7 +41,7 @@ class TestEpochsDf(unittest.TestCase):
 
     def test_dataframe_roundtrip(self):
         df = self.get_dataframe()
-        epochs = EpochTable.from_dataframe(df, name='test epochs')
+        epochs = TimeIntervals.from_dataframe(df, name='test epochs')
         obtained = epochs.to_dataframe()
 
         self.assertIs(obtained.loc[3, 'timeseries'][1], df.loc[3, 'timeseries'][1])

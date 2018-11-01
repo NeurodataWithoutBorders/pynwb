@@ -17,8 +17,12 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries'))
         self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries'))
 
-        epochs_spec = self.spec.get_group('epochs')
+        intervals_spec = self.spec.get_group('intervals')
+        epochs_spec = intervals_spec.get_group('epochs')
         self.map_spec('epochs', epochs_spec)
+        trials_spec = intervals_spec.get_group('trials')
+        self.map_spec('trials', trials_spec)
+        self.map_spec('intervals', intervals_spec.get_neurodata_type('TimeIntervals'))
 
         general_spec = self.spec.get_group('general')
         self.map_spec(
