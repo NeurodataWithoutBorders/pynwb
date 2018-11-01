@@ -424,6 +424,7 @@ groups:
     - neurodata_type_inc: TimeIntervals
       doc: any additional table that stores data about intervals
       quantity: '*'
+    quantity: '?'
   - neurodata_type_inc: Units
     name: units
     doc: Data about units
