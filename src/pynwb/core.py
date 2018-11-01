@@ -77,7 +77,7 @@ def nwb_repr(nwb_object, verbose=False):
 
     Returns
     -------
-    str
+    str/repr of nwb_object
 
     """
     try:
