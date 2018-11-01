@@ -411,18 +411,21 @@ groups:
         quantity: '*'
       quantity: '?'
   - name: intervals
-    doc: 'tables for storing experimental intervals'
+    doc: Experimental intervals, whether that be logically distinct sub-experiments
+      having a particular scientific goal, trials (see trials subgroup) during an experiment, or
+      epochs (see epochs subgroup) deriving from analysis of data.
     groups:
     - neurodata_type_inc: TimeIntervals
       name: epochs
-      doc: a predefined location for storing epoch data
+      doc: divisions in time, either inferred from analysis of acquired data, or established in
+        an experimental protocol
       quantity: '?'
     - neurodata_type_inc: TimeIntervals
       name: trials
-      doc: a predefined location for storing trial data
+      doc: repeated experimental events that have logical grouping for analysis of acquired data
       quantity: '?'
     - neurodata_type_inc: TimeIntervals
-      doc: any additional table that stores data about intervals
+      doc: any additional table that stores data about experimental intervals
       quantity: '*'
     quantity: '?'
   - neurodata_type_inc: Units
