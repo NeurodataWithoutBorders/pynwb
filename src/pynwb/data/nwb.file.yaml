@@ -74,27 +74,6 @@ groups:
     - neurodata_type_inc: NWBContainer
       doc: Custom analysis results
       quantity: '*'
-  - neurodata_type_inc: Epochs
-    name: epochs
-    doc: 'Experimental intervals, whether that be logically distinct sub-experiments
-        having a particular scientific goal, trials during an experiment, or epochs
-        deriving from analysis of data.  COMMENT: Epochs provide pointers to time
-        series that are relevant to the epoch, and windows into the data in those
-        time series (i.e., the start and end indices of TimeSeries::data[] that overlap
-        with the epoch). This allows easy access to a range of data in specific experimental
-        intervals. MORE_INFO: An experiment can be separated into one or many logical
-        intervals, with the order and duration of these intervals often definable
-        before the experiment starts. In this document, and in the context of NWB,
-        these intervals are called ''epochs''. Epochs have acquisition and stimulus
-        data associated with them, and different epochs can overlap. Examples of epochs
-        are the time when a rat runs around an enclosure or maze as well as intervening
-        sleep sessions; the presentation of a set of visual stimuli to a mouse running
-        on a wheel; or the uninterrupted presentation of current to a patch-clamped
-        cell. Epochs can be limited to the interval of a particular stimulus, or they
-        can span multiple stimuli. Different windows into the same time series can
-        be achieved by including multiple instances of that time series, each with
-        different start/stop times.'
-    quantity: '?'
   - name: processing
     doc: 'The home for ProcessingModules. These modules perform intermediate analysis
         of data that is necessary to perform before scientific analysis. Examples
@@ -431,30 +410,24 @@ groups:
           and also ImageSegmentation and DfOverF interfaces.'
         quantity: '*'
       quantity: '?'
-  - neurodata_type_inc: DynamicTable
-    name: trials
-    doc: Data about experimental trials
-    datasets:
-    - neurodata_type_inc: TableColumn
-      name: start
-      dtype: float
-      doc: The start time of each trial
-      attributes:
-      - name: description
-        dtype: text
-        doc: Value is 'the start time of each trial'
-        value: the start time of each trial
-    - neurodata_type_inc: TableColumn
-      name: end
-      dtype: float
-      doc: The end time of each trial
-      attributes:
-      - name: description
-        dtype: text
-        doc: Value is 'the end time of each trial'
-        value: the end time of each trial
+  - name: intervals
+    doc: Experimental intervals, whether that be logically distinct sub-experiments
+      having a particular scientific goal, trials (see trials subgroup) during an experiment, or
+      epochs (see epochs subgroup) deriving from analysis of data.
+    groups:
+    - neurodata_type_inc: TimeIntervals
+      name: epochs
+      doc: divisions in time marking experimental stages or sub-divisions of a single recording session
+      quantity: '?'
+    - neurodata_type_inc: TimeIntervals
+      name: trials
+      doc: repeated experimental events that have a logical grouping
+      quantity: '?'
+    - neurodata_type_inc: TimeIntervals
+      doc: an optional additional table for describing other experimental time intervals
+      quantity: '*'
     quantity: '?'
-  - neurodata_type_inc: DynamicTable
+  - neurodata_type_inc: Units
     name: units
     doc: Data about units
     quantity: '?'

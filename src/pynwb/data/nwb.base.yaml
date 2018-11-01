@@ -62,7 +62,7 @@ datasets:
   shape:
   - null
 - neurodata_type_def: DynamicTableRegion
-  neurodata_type_inc: NWBData
+  neurodata_type_inc: TableColumn
   dtype: int
   doc: a region/index into a DynamicTable
   attributes:
@@ -78,6 +78,30 @@ datasets:
   - name: description
     dtype: text
     doc: Description of what this table region points to
+- neurodata_type_def: Image
+  neurodata_type_inc: NWBData
+  doc: Image base type.
+  attributes:
+  - name: help
+    dtype: text
+    doc: base image (use GrayscaleImage, RGBImage, RGBAImage, etc.)
+  - name: resolution
+    dtype: float
+    doc: pixels / cm
+    required: False
+  - name: description
+    dtype: text
+    required: False
+    doc: description of image
+  shape:
+  - - null
+    - null
+  - - null
+    - null
+    - 3
+  - - null
+    - null
+    - 4
 groups:
 - neurodata_type_def: NWBContainer
   doc: The attributes specified here are included in all interfaces.
@@ -85,9 +109,6 @@ groups:
   - name: help
     dtype: text
     doc: Short description of what this type of NWBContainer contains.
-  - name: source
-    dtype: text
-    doc: Path to the origin of the data represented in this interface.
 - neurodata_type_def: NWBDataInterface
   neurodata_type_inc: NWBContainer
   doc: An abstract data type for differentiating experimental data from metadata
@@ -111,10 +132,6 @@ groups:
     dtype: text
     doc: Value is 'General time series object'
     value: General time series object
-  - name: source
-    dtype: text
-    doc: Name of TimeSeries or Modules that serve as the source for the data contained
-      here. It can also be the name of a device, for stimulus or acquisition data
   datasets:
   - name: control
     dtype: uint8

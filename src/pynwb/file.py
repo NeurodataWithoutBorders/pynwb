@@ -9,22 +9,17 @@ from .form import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
-from .epoch import Epochs
+from .epoch import TimeIntervals
 from .ecephys import ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
-from .core import NWBContainer, NWBData, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
+from .misc import Units
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
 
 
 def _not_parent(arg):
     return arg['name'] != 'parent'
-
-
-# @register_class('Image', CORE_NAMESPACE)
-class Image(NWBData):
-    # TODO: Implement this
-    pass
 
 
 @register_class('SpecFile', CORE_NAMESPACE)
@@ -52,11 +47,9 @@ class Subject(NWBContainer):
             {'name': 'sex', 'type': str, 'doc': 'the sex of the subject', 'default': None},
             {'name': 'species', 'type': str, 'doc': 'the species of the subject', 'default': None},
             {'name': 'subject_id', 'type': str, 'doc': 'a unique identifier for the subject', 'default': None},
-            {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None},
-            {'name': 'source', 'type': str, 'doc': 'the source of this information', 'default': None})
+            {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None})
     def __init__(self, **kwargs):
         kwargs['name'] = 'subject'
-        kwargs['source'] = getargs('source', kwargs)
         pargs, pkwargs = fmt_docval_args(super(Subject, self).__init__, kwargs)
         super(Subject, self).__init__(*pargs, **pkwargs)
         self.age = getargs('age', kwargs)
@@ -141,6 +134,13 @@ class NWBFile(MultiContainerInterface):
             'create': 'create_ogen_site',
             'get': 'get_ogen_site'
         },
+        {
+            'attr': 'time_intervals',
+            'add': 'add_time_intervals',
+            'type': TimeIntervals,
+            'create': 'create_time_intervals',
+            'get': 'get_time_intervals'
+        },
     ]
 
     __nwbfields__ = ('experimenter',
@@ -168,8 +168,7 @@ class NWBFile(MultiContainerInterface):
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      'epoch_tags',)
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'session_description', 'type': str,
+    @docval({'name': 'session_description', 'type': str,
              'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
             {'name': 'session_start_time', 'type': datetime, 'doc': 'the start time of the recording session'},
@@ -217,12 +216,14 @@ class NWBFile(MultiContainerInterface):
              'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'stimulus_template', 'type': (list, tuple),
              'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
-            {'name': 'epochs', 'type': Epochs,
+            {'name': 'epochs', 'type': TimeIntervals,
              'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
             {'name': 'epoch_tags', 'type': (tuple, list, set),
              'doc': 'A sorted list of tags used across all epochs', 'default': set()},
-            {'name': 'trials', 'type': DynamicTable,
+            {'name': 'trials', 'type': TimeIntervals,
              'doc': 'A table containing trial data', 'default': None},
+            {'name': 'time_intervals', 'type': (list, tuple),
+             'doc': 'any TimeIntervals tables storing time intervals', 'default': None},
             {'name': 'units', 'type': DynamicTable,
              'doc': 'A table containing unit metadata', 'default': None},
             {'name': 'modules', 'type': (list, tuple),
@@ -285,6 +286,7 @@ class NWBFile(MultiContainerInterface):
         self.ic_electrodes = getargs('ic_electrodes', kwargs)
         self.imaging_planes = getargs('imaging_planes', kwargs)
         self.ogen_sites = getargs('ogen_sites', kwargs)
+        self.time_intervals = getargs('time_intervals', kwargs)
 
         self.subject = getargs('subject', kwargs)
 
@@ -351,19 +353,27 @@ class NWBFile(MultiContainerInterface):
 
     def __check_epochs(self):
         if self.epochs is None:
-            self.epochs = Epochs(self.source)
+            self.epochs = TimeIntervals('epochs', 'experimental epochs')
 
-    @docval(*get_docval(DynamicTable.add_column))
-    def add_epoch_metadata_column(self, **kwargs):
+    @docval(*get_docval(TimeIntervals.add_column))
+    def add_epoch_column(self, **kwargs):
         """
         Add a column to the electrode table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        See :py:meth:`~pynwb.core.TimeIntervals.add_column` for more details
         """
         self.__check_epochs()
         self.epoch_tags.update(kwargs.pop('tags', list()))
-        call_docval_func(self.epochs.add_metadata_column, kwargs)
+        call_docval_func(self.epochs.add_column, kwargs)
 
-    @docval(*get_docval(Epochs.add_epoch))
+    def add_epoch_metadata_column(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.add_epoch_column` instead
+        """
+        raise DeprecationWarning("Please use NWBFile.add_epoch_column")
+
+    @docval(*get_docval(TimeIntervals.add_interval),
+            allow_extra=True)
     def create_epoch(self, **kwargs):
         """
 
@@ -375,7 +385,7 @@ class NWBFile(MultiContainerInterface):
         """
         self.__check_epochs()
         self.epoch_tags.update(kwargs.get('tags', list()))
-        call_docval_func(self.epochs.add_epoch, kwargs)
+        call_docval_func(self.epochs.add_interval, kwargs)
 
     def __check_electrodes(self):
         if self.electrodes is None:
@@ -433,9 +443,9 @@ class NWBFile(MultiContainerInterface):
 
     def __check_units(self):
         if self.units is None:
-            self.units = UnitTable()
+            self.units = Units(name='units', description='Autogenerated by NWBFile')
 
-    @docval(*get_docval(DynamicTable.add_column))
+    @docval(*get_docval(Units.add_column))
     def add_unit_column(self, **kwargs):
         """
         Add a column to the unit table.
@@ -444,21 +454,19 @@ class NWBFile(MultiContainerInterface):
         self.__check_units()
         call_docval_func(self.units.add_column, kwargs)
 
-    @docval(*get_docval(DynamicTable.add_row), allow_extra=True)
+    @docval(*get_docval(Units.add_unit), allow_extra=True)
     def add_unit(self, **kwargs):
         """
         Add a unit to the unit table.
         See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
 
-        Required fields are *start*, *end*, and any columns that have
-        been added (through calls to `add_unit_columns`).
         """
         self.__check_units()
-        call_docval_func(self.units.add_row, kwargs)
+        call_docval_func(self.units.add_unit, kwargs)
 
     def __check_trials(self):
         if self.trials is None:
-            self.trials = TrialTable()
+            self.trials = TimeIntervals('trials', 'experimental trials')
 
     @docval(*get_docval(DynamicTable.add_column))
     def add_trial_column(self, **kwargs):
@@ -469,7 +477,7 @@ class NWBFile(MultiContainerInterface):
         self.__check_trials()
         call_docval_func(self.trials.add_column, kwargs)
 
-    @docval(*get_docval(DynamicTable.add_row), allow_extra=True)
+    @docval(*get_docval(TimeIntervals.add_row), allow_extra=True)
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
@@ -479,7 +487,7 @@ class NWBFile(MultiContainerInterface):
         been added (through calls to `add_trial_columns`).
         """
         self.__check_trials()
-        call_docval_func(self.trials.add_row, kwargs)
+        call_docval_func(self.trials.add_interval, kwargs)
 
     @docval({'name': 'electrode_table', 'type': DynamicTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):
@@ -505,8 +513,8 @@ def _add_missing_timezone(date):
     return date
 
 
-def _tablefunc(table_name, description, columns, source='autogenerated by PyNWB API'):
-    t = DynamicTable(table_name, source, description)
+def _tablefunc(table_name, description, columns):
+    t = DynamicTable(table_name, description)
     for c in columns:
         if isinstance(c, tuple):
             t.add_column(c[0], c[1])
@@ -518,8 +526,7 @@ def _tablefunc(table_name, description, columns, source='autogenerated by PyNWB 
 
 
 def ElectrodeTable(name='electrodes',
-                   description='metadata about extracellular electrodes',
-                   source='autogenerated by PyNWB API'):
+                   description='metadata about extracellular electrodes'):
     return _tablefunc(name, description,
                       [('x', 'the x coordinate of the channel location'),
                        ('y', 'the y coordinate of the channel location'),
@@ -528,17 +535,10 @@ def ElectrodeTable(name='electrodes',
                        ('location', 'the location of channel within the subject e.g. brain region'),
                        ('filtering', 'description of hardware filtering'),
                        ('group', 'a reference to the ElectrodeGroup this electrode is a part of'),
-                       ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')],
-                      source)
-
-
-def UnitTable(name='units',
-              description='metadata about experimental units',
-              source='autogenerated by PyNWB API'):
-    return _tablefunc(name, description, list(), source)
+                       ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')]
+                      )
 
 
 def TrialTable(name='trials',
-               description='metadata about experimental trials',
-               source='autogenerated by PyNWB API'):
-    return _tablefunc(name, description, ['start', 'end'], source)
+               description='metadata about experimental trials'):
+    return _tablefunc(name, description, ['start', 'end'])

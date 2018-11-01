@@ -63,3 +63,6 @@ tests/coverage/htmlcov
 
 # vscode
 .vscode/
+
+#mypy
+.mypy_cache/

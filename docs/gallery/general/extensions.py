@@ -107,8 +107,8 @@ class TetrodeSeries(ElectricalSeries):
 
     __nwbfields__ = ('trode_id',)
 
-    @docval(*get_docval(ElectricalSeries.__init__) +
-            ({'name': 'trode_id', 'type': int, 'doc': 'the tetrode id'},))
+    @docval(*get_docval(ElectricalSeries.__init__) + (
+        {'name': 'trode_id', 'type': int, 'doc': 'the tetrode id'},))
     def __init__(self, **kwargs):
         call_docval_func(super(TetrodeSeries, self).__init__, kwargs)
         self.trode_id = getargs('trode_id', kwargs)
@@ -163,18 +163,16 @@ from pynwb import NWBFile
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
 create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
-nwbfile = NWBFile('PyNWB tutorial', 'demonstrate caching', 'NWB456', start_time,
+nwbfile = NWBFile('demonstrate caching', 'NWB456', start_time,
                   file_create_date=create_date)
 
-device = nwbfile.create_device(name='trodes_rig123', source="a source")
+device = nwbfile.create_device(name='trodes_rig123')
 
 electrode_name = 'tetrode1'
-source = "an hypothetical source"
 description = "an example tetrode"
 location = "somewhere in the hippocampus"
 
 electrode_group = nwbfile.create_electrode_group(electrode_name,
-                                                 source=source,
                                                  description=description,
                                                  location=location,
                                                  device=device)
@@ -195,7 +193,6 @@ data = np.random.rand(data_len * 2).reshape((data_len, 2))
 timestamps = np.arange(data_len) / rate
 
 ts = TetrodeSeries('test_ephys_data',
-                   'an hypothetical source',
                    data,
                    electrode_table_region,
                    timestamps=timestamps,
@@ -298,15 +295,13 @@ load_namespaces(ns_path)
 
 @register_class('Potato', name)
 class Potato(NWBContainer):
-    __nwbfields__ = ('name', 'weight', 'age', 'source')
+    __nwbfields__ = ('name', 'weight', 'age')
 
     @docval({'name': 'name', 'type': str, 'doc': 'who names a potato?'},
             {'name': 'weight', 'type': float, 'doc': 'weight of potato in grams'},
-            {'name': 'age', 'type': float, 'doc': 'age of potato in days'},
-            {'name': 'source', 'type': str, 'doc': 'source of potato',
-             'default': 'the ground'})
+            {'name': 'age', 'type': float, 'doc': 'age of potato in days'})
     def __init__(self, **kwargs):
-        super(Potato, self).__init__(kwargs['source'], name=kwargs['name'])
+        super(Potato, self).__init__(name=kwargs['name'])
         self.weight = kwargs['weight']
         self.age = kwargs['age']
 
@@ -331,13 +326,11 @@ class PotatoSack(MultiContainerInterface):
 from pynwb import NWBHDF5IO, NWBFile
 from datetime import datetime
 
-potato_sack = PotatoSack(source='pantry',
-                         potatos=Potato(name='potato1', age=2.3, weight=3.0,
-                                        source='the ground'))
+potato_sack = PotatoSack(potatos=Potato(name='potato1', age=2.3, weight=3.0))
 
-nwbfile = NWBFile("source", "a file with metadata", "NB123A", datetime(2018, 6, 1))
+nwbfile = NWBFile("a file with metadata", "NB123A", datetime(2018, 6, 1))
 
-pmod = nwbfile.create_processing_module('module_name', 'source', 'desc')
+pmod = nwbfile.create_processing_module('module_name', 'desc')
 pmod.add_container(potato_sack)
 
 

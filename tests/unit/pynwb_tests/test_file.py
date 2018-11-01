@@ -19,7 +19,7 @@ class NWBFileTest(unittest.TestCase):
                        datetime(2017, 5, 2, 13, 0, 0, 1, tzinfo=tzutc()),
                        datetime(2017, 5, 2, 14, tzinfo=tzutc())]
         self.path = 'nwbfile_test.h5'
-        self.nwbfile = NWBFile('a fake source', 'a test session description for a test NWBFile',
+        self.nwbfile = NWBFile('a test session description for a test NWBFile',
                                'FILE123',
                                self.start,
                                file_create_date=self.create,
@@ -61,8 +61,8 @@ class NWBFileTest(unittest.TestCase):
         name = 'example_electrode_group'
         desc = 'An example electrode'
         loc = 'an example location'
-        d = self.nwbfile.create_device('a fake device', 'a fake source')
-        elecgrp = self.nwbfile.create_electrode_group(name, 'a fake source', desc, loc, d)
+        d = self.nwbfile.create_device('a fake device')
+        elecgrp = self.nwbfile.create_electrode_group(name, desc, loc, d)
         self.assertEqual(elecgrp.description, desc)
         self.assertEqual(elecgrp.location, loc)
         self.assertIs(elecgrp.device, d)
@@ -72,9 +72,9 @@ class NWBFileTest(unittest.TestCase):
         Test the case where the user creates an electrode table region with
         indexes that are out of range of the amount of electrodes added.
         """
-        nwbfile = NWBFile('a', 'b', 'c', datetime.now(tzlocal()))
-        device = nwbfile.create_device('a', 'b')
-        elecgrp = nwbfile.create_electrode_group('a', 'b', 'c', device=device, location='a')
+        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        device = nwbfile.create_device('a')
+        elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
         for i in range(4):
             nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i)
         with self.assertRaises(IndexError) as err:
@@ -85,33 +85,33 @@ class NWBFileTest(unittest.TestCase):
         tags1 = ['t1', 't2']
         tags2 = ['t3', 't4']
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
-        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
+        ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
         expected_tags = tags1 + tags2
-        self.nwbfile.create_epoch('a fake epoch', 0.0, 1.0, tags1, ts)
-        self.nwbfile.create_epoch('a second fake epoch', 0.0, 1.0, tags2, ts)
+        self.nwbfile.create_epoch(0.0, 1.0, tags1, ts)
+        self.nwbfile.create_epoch(0.0, 1.0, tags2, ts)
         tags = self.nwbfile.epoch_tags
         six.assertCountEqual(self, expected_tags, tags)
 
     def test_add_acquisition(self):
-        self.nwbfile.add_acquisition(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+        self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.acquisition), 1)
 
     def test_add_stimulus(self):
-        self.nwbfile.add_stimulus(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+        self.nwbfile.add_stimulus(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                              'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.stimulus), 1)
 
     def test_add_stimulus_template(self):
-        self.nwbfile.add_stimulus_template(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+        self.nwbfile.add_stimulus_template(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                       'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.stimulus_template), 1)
 
     def test_add_acquisition_check_dups(self):
-        self.nwbfile.add_acquisition(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+        self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         with self.assertRaises(ValueError):
-            self.nwbfile.add_acquisition(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+            self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                     'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
 
     def test_get_acquisition_empty(self):
@@ -119,16 +119,16 @@ class NWBFileTest(unittest.TestCase):
             self.nwbfile.get_acquisition()
 
     def test_get_acquisition_multiple_elements(self):
-        self.nwbfile.add_acquisition(TimeSeries('test_ts1', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+        self.nwbfile.add_acquisition(TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
-        self.nwbfile.add_acquisition(TimeSeries('test_ts2', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+        self.nwbfile.add_acquisition(TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         msg = "more than one element in acquisition of NWBFile 'root' -- must specify a name"
         with self.assertRaisesRegex(ValueError,  msg):
             self.nwbfile.get_acquisition()
 
     def test_add_acquisition_invalid_name(self):
-        self.nwbfile.add_acquisition(TimeSeries('test_ts', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+        self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         msg = "'TEST_TS' not found in acquisition of NWBFile 'root'"
         with self.assertRaisesRegex(KeyError, msg):
@@ -136,8 +136,8 @@ class NWBFileTest(unittest.TestCase):
 
     def test_set_electrode_table(self):
         table = ElectrodeTable()  # noqa: F405
-        dev1 = self.nwbfile.create_device('dev1', 'a test source')  # noqa: F405
-        group = self.nwbfile.create_electrode_group('tetrode1', 'a test source',
+        dev1 = self.nwbfile.create_device('dev1')  # noqa: F405
+        group = self.nwbfile.create_electrode_group('tetrode1',
                                                     'tetrode description', 'tetrode location', dev1)
         table.add_row(x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=group,
                       group_name='tetrode1')
@@ -156,26 +156,26 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.units.colnames, ('unit_type',))
 
     def test_add_unit(self):
-        self.nwbfile.add_unit({'id': 1})
+        self.nwbfile.add_unit(id=1)
         self.assertEqual(len(self.nwbfile.units), 1)
-        self.nwbfile.add_unit({'id': 2})
-        self.nwbfile.add_unit({'id': 3})
+        self.nwbfile.add_unit(id=2)
+        self.nwbfile.add_unit(id=3)
         self.assertEqual(len(self.nwbfile.units), 3)
 
     def test_add_trial_column(self):
         self.nwbfile.add_trial_column('trial_type', 'the type of trial')
-        self.assertEqual(self.nwbfile.trials.colnames, ('start', 'end', 'trial_type'))
+        self.assertEqual(self.nwbfile.trials.colnames, ('start_time', 'stop_time', 'trial_type'))
 
     def test_add_trial(self):
-        self.nwbfile.add_trial({'start': 10, 'end': 20})
+        self.nwbfile.add_trial(start_time=10.0, stop_time=20.0)
         self.assertEqual(len(self.nwbfile.trials), 1)
-        self.nwbfile.add_trial({'start': 30, 'end': 40})
-        self.nwbfile.add_trial({'start': 50, 'end': 70})
+        self.nwbfile.add_trial(start_time=30.0, stop_time=40.0)
+        self.nwbfile.add_trial(start_time=50.0, stop_time=70.0)
         self.assertEqual(len(self.nwbfile.trials), 3)
 
     def test_add_electrode(self):
-        dev1 = self.nwbfile.create_device('dev1', 'a test source')  # noqa: F405
-        group = self.nwbfile.create_electrode_group('tetrode1', 'a test source',
+        dev1 = self.nwbfile.create_device('dev1')  # noqa: F405
+        group = self.nwbfile.create_electrode_group('tetrode1',
                                                     'tetrode description', 'tetrode location', dev1)
         self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1',
                                    'none', group=group, id=1)
@@ -189,17 +189,17 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.ec_electrodes[0][7], group)
 
     def test_all_children(self):
-        ts1 = TimeSeries('test_ts1', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
                          'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        ts2 = TimeSeries('test_ts2', 'unit test test_add_acquisition', [0, 1, 2, 3, 4, 5],
+        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
                          'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.nwbfile.add_acquisition(ts1)
         self.nwbfile.add_acquisition(ts2)
         name = 'example_electrode_group'
         desc = 'An example electrode'
         loc = 'an example location'
-        device = self.nwbfile.create_device('a fake device', 'a fake source')
-        elecgrp = self.nwbfile.create_electrode_group(name, 'a fake source', desc, loc, device)
+        device = self.nwbfile.create_device('a fake device')
+        elecgrp = self.nwbfile.create_electrode_group(name, desc, loc, device)
         children = self.nwbfile.all_children()
         self.assertIn(ts1, children)
         self.assertIn(ts2, children)
@@ -209,7 +209,7 @@ class NWBFileTest(unittest.TestCase):
     def test_fail_if_source_script_file_name_without_source_script(self):
         with self.assertRaises(ValueError):
             # <-- source_script_file_name without source_script is not allowed
-            NWBFile('a fake source', 'a test session description for a test NWBFile', 'FILE123', self.start,
+            NWBFile('a test session description for a test NWBFile', 'FILE123', self.start,
                     source_script=None,
                     source_script_file_name='nofilename')
 
@@ -222,11 +222,10 @@ class SubjectTest(unittest.TestCase):
                                sex='M',
                                species='Rattus norvegicus',
                                subject_id='RAT123',
-                               weight='2 lbs',
-                               source='Subject unittest')
+                               weight='2 lbs')
         self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
-        self.nwbfile = NWBFile('a fake source', 'a test session description for a test NWBFile',
+        self.nwbfile = NWBFile('a test session description for a test NWBFile',
                                'FILE123',
                                self.start,
                                experimenter='A test experimenter',
@@ -244,7 +243,6 @@ class SubjectTest(unittest.TestCase):
         self.assertEqual(self.subject.species, 'Rattus norvegicus')
         self.assertEqual(self.subject.subject_id, 'RAT123')
         self.assertEqual(self.subject.weight, '2 lbs')
-        self.assertEqual(self.subject.source, 'Subject unittest')
 
     def test_nwbfile_constructor(self):
         self.assertIs(self.nwbfile.subject, self.subject)
@@ -260,7 +258,7 @@ class TestCacheSpec(unittest.TestCase):
             os.remove(self.path)
 
     def test_simple(self):
-        nwbfile = NWBFile('source', ' ', ' ',
+        nwbfile = NWBFile(' ', ' ',
                           datetime.now(tzlocal()), datetime.now(tzlocal()),
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
