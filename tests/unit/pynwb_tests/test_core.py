@@ -1,7 +1,7 @@
 import unittest2 as unittest
 
 from pynwb.core import DynamicTable, TableColumn, ElementIdentifiers, NWBTable
-from pynwb import NWBFile
+from pynwb import NWBFile, TimeSeries
 
 import pandas as pd
 from datetime import datetime
@@ -272,3 +272,17 @@ class TestNWBTable(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.cls.from_dataframe(df=df, name='test_table')
+
+
+class TestPrint(unittest.TestCase):
+
+    def test_print_file(self):
+        nwbfile = NWBFile(session_description='session_description',
+                          identifier='identifier', session_start_time=datetime.now(tzlocal()))
+        print(nwbfile)
+
+    def test_print_data(self):
+        ts = TimeSeries('name', [1, 2, 3], timestamps=[1, 2, 3])
+        print(ts)
+        print(ts.data)
+
