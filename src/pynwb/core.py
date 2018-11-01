@@ -65,23 +65,21 @@ def list2str(v):
     return str(np.array(v)) + '\n'
 
 
-""" This works for 1D arrays but not 2D arrays
-    template = ''
-    if len(v) < 7:
-        for item in v:
-            template += prepend_string(nwb_repr(item, verbose=False)) + ', '
-    else:
-        for item in v[:3]:
-            template += prepend_string(nwb_repr(item, verbose=False)) + ', '
-        template += '...'
-        for item in v[-3:]:
-            template += prepend_string(nwb_repr(item, verbose=False)) + ', '
-    template += '\n'
-    return template
-"""
+def nwb_repr(nwb_object, verbose=False):
+    """
 
+    Parameters
+    ----------
+    nwb_object
+    verbose: bool, optional
+        If set to True, a print call will recursively crawl through the entire object. If False (default) it will only
+        show the first layer
 
-def nwb_repr(nwb_object, verbose=True):
+    Returns
+    -------
+    str
+
+    """
     try:
         template = "{} {}\nFields:\n""".format(getattr(nwb_object, 'name'), type(nwb_object))
 
@@ -93,9 +91,8 @@ def nwb_repr(nwb_object, verbose=True):
                 else:
                     template += prepend_string(str(v)) + '\n'
         else:
-            for field in ('description', ):
-                template += "  {}:\n".format(field)
-                template += prepend_string(str(getattr(nwb_object, field)))+'\n'
+            for k in nwb_object.fields:
+                template += "  {}\n".format(k)
 
         return template
     except AttributeError:
