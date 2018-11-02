@@ -384,9 +384,7 @@ class NWBFile(MultiContainerInterface):
         enclosure versus sleeping between explorations)
         """
         self.__check_epochs()
-        if kwargs['tags'] is None:
-            self.epoch_tags.update(list())
-        else:
+        if kwargs['tags'] is not None:
             self.epoch_tags.update(kwargs['tags'])
         call_docval_func(self.epochs.add_interval, kwargs)
 
