@@ -374,7 +374,7 @@ class NWBFile(MultiContainerInterface):
 
     @docval(*get_docval(TimeIntervals.add_interval),
             allow_extra=True)
-    def create_epoch(self, **kwargs):
+    def add_epoch(self, **kwargs):
         """
 
         Creates a new Epoch object. Epochs are used to track intervals

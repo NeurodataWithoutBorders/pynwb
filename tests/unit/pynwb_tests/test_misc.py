@@ -9,7 +9,6 @@ class AnnotationSeriesConstructor(unittest.TestCase):
     def test_init(self):
         aS = AnnotationSeries('test_aS', timestamps=list())
         self.assertEqual(aS.name, 'test_aS')
-
         aS.add_annotation(2.0, 'comment')
 
 
