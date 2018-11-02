@@ -1,12 +1,9 @@
-from ..form.utils import docval, getargs
-from ..form.build import BuildManager
-from ..form.spec import Spec
-from ..form.container import Container
-
-from ..form.build import ObjectMapper
 from .. import register_map
-
 from ..base import TimeSeries, ProcessingModule, DynamicTable
+from ..form.build import BuildManager, ObjectMapper
+from ..form.container import Container
+from ..form.spec import Spec
+from ..form.utils import docval, getargs
 
 
 @register_map(ProcessingModule)

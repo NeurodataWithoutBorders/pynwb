@@ -1,7 +1,7 @@
 from .. import register_map
 
 from ..ophys import PlaneSegmentation
-from .core import DynamicTableMap
+from .base import DynamicTableMap
 
 
 @register_map(PlaneSegmentation)
