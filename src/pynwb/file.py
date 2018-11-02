@@ -11,7 +11,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
 from .epoch import TimeIntervals
 from .ecephys import ElectrodeGroup, Device
-from .icephys import IntracellularElectrode
+from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
@@ -70,7 +70,7 @@ class NWBFile(MultiContainerInterface):
     __clsconf__ = [
         {
             'attr': 'acquisition',
-            'add': 'add_acquisition',
+            'add': '_add_acquisition_internal',
             'type': NWBDataInterface,
             'get': 'get_acquisition'
         },
@@ -82,13 +82,13 @@ class NWBFile(MultiContainerInterface):
         },
         {
             'attr': 'stimulus',
-            'add': 'add_stimulus',
+            'add': '_add_stimulus_internal',
             'type': TimeSeries,
             'get': 'get_stimulus'
         },
         {
             'attr': 'stimulus_template',
-            'add': 'add_stimulus_template',
+            'add': '_add_stimulus_template_internal',
             'type': TimeSeries,
             'get': 'get_stimulus_template'
         },
@@ -166,6 +166,7 @@ class NWBFile(MultiContainerInterface):
                      {'name': 'trials', 'child': True, 'required_name': 'trials'},
                      {'name': 'units', 'child': True, 'required_name': 'units'},
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
+                     {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
                      'epoch_tags',)
 
     @docval({'name': 'session_description', 'type': str,
@@ -234,6 +235,8 @@ class NWBFile(MultiContainerInterface):
              'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
             {'name': 'ic_electrodes', 'type': (list, tuple),
              'doc': 'IntracellularElectrodes that belong to this NWBFile', 'default': None},
+            {'name': 'sweep_table', 'type': SweepTable,
+             'doc': 'the SweepTable that belong to this NWBFile', 'default': None},
             {'name': 'imaging_planes', 'type': (list, tuple),
              'doc': 'ImagingPlanes that belong to this NWBFile', 'default': None},
             {'name': 'ogen_sites', 'type': (list, tuple),
@@ -288,6 +291,7 @@ class NWBFile(MultiContainerInterface):
         self.ogen_sites = getargs('ogen_sites', kwargs)
         self.time_intervals = getargs('time_intervals', kwargs)
         self.subject = getargs('subject', kwargs)
+        self.sweep_table = getargs('sweep_table', kwargs)
 
         recommended = [
             'experimenter',
@@ -499,6 +503,38 @@ class NWBFile(MultiContainerInterface):
             raise ValueError(msg)
         electrode_table = getargs('electrode_table', kwargs)
         self.electrodes = electrode_table
+
+    def _check_sweep_table(self):
+        """
+        Create a SweepTable if not yet done.
+        """
+        if self.sweep_table is None:
+            self.sweep_table = SweepTable(name='sweep_table')
+
+    def _update_sweep_table(self, nwbdata):
+        """
+        Add all PatchClampSeries with a valid sweep number to the sweep_table
+        """
+
+        if isinstance(nwbdata, PatchClampSeries):
+            if nwbdata.sweep_number is not None:
+                self._check_sweep_table()
+                self.sweep_table.add_entry(nwbdata)
+
+    @docval({'name': 'nwbdata', 'type': NWBDataInterface})
+    def add_acquisition(self, nwbdata):
+        self._add_acquisition_internal(nwbdata)
+        self._update_sweep_table(nwbdata)
+
+    @docval({'name': 'timeseries', 'type': TimeSeries})
+    def add_stimulus(self, timeseries):
+        self._add_stimulus_internal(timeseries)
+        self._update_sweep_table(timeseries)
+
+    @docval({'name': 'timeseries', 'type': TimeSeries})
+    def add_stimulus_template(self, timeseries):
+        self._add_stimulus_template_internal(timeseries)
+        self._update_sweep_table(timeseries)
 
 
 def _add_missing_timezone(date):
