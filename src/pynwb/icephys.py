@@ -24,7 +24,6 @@ class IntracellularElectrode(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str,
              'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc) \
              COMMENT: Free-form text (can be from Methods)'},
@@ -67,11 +66,7 @@ class PatchClampSeries(TimeSeries):
     _help = "Superclass definition for patch-clamp data."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
@@ -103,10 +98,10 @@ class PatchClampSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit, stimulus_description = popargs('name', 'source', 'data',
-                                                                 'unit', 'stimulus_description', kwargs)
+        name, data, unit, stimulus_description = popargs('name', 'data',
+                                                         'unit', 'stimulus_description', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
-        super(PatchClampSeries, self).__init__(name, source, data, unit, **kwargs)
+        super(PatchClampSeries, self).__init__(name, data, unit, **kwargs)
         self.electrode = electrode
         self.gain = gain
         self.stimulus_description = stimulus_description
@@ -128,10 +123,6 @@ class CurrentClampSeries(PatchClampSeries):
     _help = "Voltage recorded from cell during current-clamprecording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
@@ -170,11 +161,11 @@ class CurrentClampSeries(PatchClampSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
+        name, data, unit = popargs('name', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
         bias_current, bridge_balance, capacitance_compensation = popargs(
             'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
-        super(CurrentClampSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
+        super(CurrentClampSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
         self.bias_current = bias_current
         self.bridge_balance = bridge_balance
         self.capacitance_compensation = capacitance_compensation
@@ -195,10 +186,6 @@ class IZeroClampSeries(CurrentClampSeries):
     _help = "Voltage from intracellular recordings when all current and amplifier settings are off,"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
@@ -232,11 +219,11 @@ class IZeroClampSeries(CurrentClampSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
+        name, data, unit = popargs('name', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
         bias_current, bridge_balance, capacitance_compensation = popargs(
             'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
-        super(IZeroClampSeries, self).__init__(name, source, data, unit, electrode, gain, bias_current,
+        super(IZeroClampSeries, self).__init__(name, data, unit, electrode, gain, bias_current,
                                                bridge_balance, capacitance_compensation, **kwargs)
 
 
@@ -253,10 +240,6 @@ class CurrentClampStimulusSeries(PatchClampSeries):
     _help = "Stimulus current applied during current clamp recording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
@@ -288,9 +271,9 @@ class CurrentClampStimulusSeries(PatchClampSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
+        name, data, unit = popargs('name', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
-        super(CurrentClampStimulusSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
+        super(CurrentClampStimulusSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
 
 
 @register_class('VoltageClampSeries', CORE_NAMESPACE)
@@ -313,10 +296,6 @@ class VoltageClampSeries(PatchClampSeries):
     _help = "Current recorded from cell during voltage-clamp recording"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
@@ -354,14 +333,14 @@ class VoltageClampSeries(PatchClampSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
+        name, data, unit = popargs('name', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
         capacitance_fast, capacitance_slow, resistance_comp_bandwidth, resistance_comp_correction, \
             resistance_comp_prediction, whole_cell_capacitance_comp, whole_cell_series_resistance_comp = popargs(
                 'capacitance_fast', 'capacitance_slow', 'resistance_comp_bandwidth',
                 'resistance_comp_correction', 'resistance_comp_prediction', 'whole_cell_capacitance_comp',
                 'whole_cell_series_resistance_comp', kwargs)
-        super(VoltageClampSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
+        super(VoltageClampSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
         self.capacitance_fast = capacitance_fast
         self.capacitance_slow = capacitance_slow
         self.resistance_comp_bandwidth = resistance_comp_bandwidth
@@ -384,10 +363,6 @@ class VoltageClampStimulusSeries(PatchClampSeries):
     _help = "Stimulus voltage applied during voltage clamp recording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
@@ -417,6 +392,6 @@ class VoltageClampStimulusSeries(PatchClampSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, source, data, unit = popargs('name', 'source', 'data', 'unit', kwargs)
+        name, data, unit = popargs('name', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
-        super(VoltageClampStimulusSeries, self).__init__(name, source, data, unit, electrode, gain, **kwargs)
+        super(VoltageClampStimulusSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)

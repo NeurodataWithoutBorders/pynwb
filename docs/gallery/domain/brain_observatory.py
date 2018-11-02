@@ -55,7 +55,6 @@ epoch_table['end'] = timestamps[epoch_table['end'].values]
 # the script.
 
 nwbfile = NWBFile(
-    source='Allen Brain Observatory: Visual Coding',
     session_description='Allen Brain Observatory dataset',
     identifier=str(metadata['ophys_experiment_id']),
     session_start_time=metadata['session_start_time'],
@@ -69,14 +68,12 @@ nwbfile = NWBFile(
 for stimulus in stimulus_list:
     visual_stimulus_images = ImageSeries(
         name=stimulus,
-        source='NA',
         data=dataset.get_stimulus_template(stimulus),
         unit='NA',
         format='raw',
         timestamps=[0.0])
     image_index = IndexSeries(
         name=stimulus,
-        source='NA',
         data=dataset.get_stimulus_table(stimulus).frame.values,
         unit='NA',
         indexed_timeseries=visual_stimulus_images,
@@ -90,7 +87,6 @@ for stimulus in stimulus_list:
 
 running_speed = TimeSeries(
     name='running_speed',
-    source='Allen Brain Observatory: Visual Coding',
     data=running_data,
     timestamps=timestamps,
     unit='cm/s')
@@ -103,17 +99,17 @@ nwbfile.add_acquisition(running_speed)
 # not copied multiple times.  Here, we extract the stimulus epochs (both fine and coarse-grained) from the Brain
 # Observatory experiment using the allensdk.
 
-for ri, row in trial_table.iterrows():
-    nwbfile.create_epoch(start_time=row.start,
-                         stop_time=row.end,
-                         timeseries=[running_speed],
-                         tags='trials')
+for _, row in trial_table.iterrows():
+    nwbfile.add_epoch(start_time=row.start,
+                      stop_time=row.end,
+                      timeseries=[running_speed],
+                      tags='trials')
 
-for ri, row in epoch_table.iterrows():
-    nwbfile.create_epoch(start_time=row.start,
-                         stop_time=row.end,
-                         timeseries=[running_speed],
-                         tags='stimulus')
+for _, row in epoch_table.iterrows():
+    nwbfile.add_epoch(start_time=row.start,
+                      stop_time=row.end,
+                      timeseries=[running_speed],
+                      tags='stimulus')
 
 ########################################
 # 5) In the brain observatory, a two-photon microscope is used to acquire images of the calcium activity of neurons
@@ -122,22 +118,20 @@ for ri, row in epoch_table.iterrows():
 # hardware and experimental setup:
 optical_channel = OpticalChannel(
     name='optical_channel',
-    source='Allen Brain Observatory: Visual Coding',
     description='2P Optical Channel',
     emission_lambda=520.,
 )
 
-device = Device(metadata['device'], source='a source')
+device = Device(metadata['device'])
 nwbfile.add_device(device)
 
 imaging_plane = nwbfile.create_imaging_plane(
     name='imaging_plane',
-    source='Allen Brain Observatory: Visual Coding',
     optical_channel=optical_channel,
     description='Imaging plane ',
     device=device,
     excitation_lambda=float(metadata['excitation_lambda'].split(' ')[0]),
-    imaging_rate='30.',
+    imaging_rate=30.,
     indicator='GCaMP6f',
     location=metadata['targeted_structure'],
     manifold=[],
@@ -153,7 +147,6 @@ imaging_plane = nwbfile.create_imaging_plane(
 # interfaces that simplify and standarize the process of adding the steps in this provenance chain to the file:
 ophys_module = nwbfile.create_processing_module(
     name='ophys_module',
-    source='Allen Brain Observatory: Visual Coding',
     description='Processing module for 2P calcium responses',
 )
 
@@ -162,14 +155,12 @@ ophys_module = nwbfile.create_processing_module(
 # API that facilitates writing segmentation masks for ROI's:
 
 image_segmentation_interface = ImageSegmentation(
-    name='image_segmentation',
-    source='Allen Brain Observatory: Visual Coding')
+    name='image_segmentation')
 
 ophys_module.add_data_interface(image_segmentation_interface)
 
 plane_segmentation = image_segmentation_interface.create_plane_segmentation(
     name='plane_segmentation',
-    source='NA',
     description='Segmentation for imaging plane',
     imaging_plane=imaging_plane)
 
@@ -182,7 +173,7 @@ for cell_specimen_id in cell_specimen_ids:
 # 7) Next, we add a dF/F  interface to the module.  This allows us to write the dF/F timeseries data associated with
 # each ROI.
 
-dff_interface = DfOverF(name='dff_interface', source='Flourescence data container')
+dff_interface = DfOverF(name='dff_interface')
 ophys_module.add_data_interface(dff_interface)
 
 rt_region = plane_segmentation.create_roi_table_region(
@@ -191,7 +182,6 @@ rt_region = plane_segmentation.create_roi_table_region(
 
 dFF_series = dff_interface.create_roi_response_series(
     name='df_over_f',
-    source='NA',
     data=dFF,
     unit='NA',
     rois=rt_region,

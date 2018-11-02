@@ -19,7 +19,6 @@ class OptogeneticStimulusSite(NWBContainer):
                      'location')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this stimulus site'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used'},
             {'name': 'description', 'type': str, 'doc': 'Description of site.'},
             {'name': 'excitation_lambda', 'type': str, 'doc': 'Excitation wavelength.'},
@@ -47,10 +46,6 @@ class OptogeneticSeries(TimeSeries):
     _help = "Optogenetic stimulus."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'Value is the string "Watt".', 'default': 'Watt'},
