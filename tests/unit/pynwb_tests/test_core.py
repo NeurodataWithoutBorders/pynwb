@@ -285,4 +285,3 @@ class TestPrint(unittest.TestCase):
         ts = TimeSeries('name', [1, 2, 3], timestamps=[1, 2, 3])
         print(ts)
         print(ts.data)
-
