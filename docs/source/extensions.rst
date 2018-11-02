@@ -67,21 +67,6 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
                             NWBDtypeSpec('bar', 'a column for bar', 'float')
                         ])
 
-# Compound data types can be nested.
-#
-# .. code-block:: python
-#
-#     from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
-#
-#     spec = NWBDatasetSpec('A custom NWB type',
-#                         attribute=[
-#                             NWBAttributeSpec('baz', 'a value for baz', 'str'),
-#                         ],
-#                         dtype=[
-#                             NWBDtypeSpec('foo', 'a column for foo', 'int'),
-#                             NWBDtypeSpec('bar', 'a column for bar', 'float')
-#                         ])
-
 Group Specifications
 ^^^^^^^^^^^^^^^^^^^^
 

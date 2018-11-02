@@ -374,7 +374,7 @@ class NWBFile(MultiContainerInterface):
 
     @docval(*get_docval(TimeIntervals.add_interval),
             allow_extra=True)
-    def create_epoch(self, **kwargs):
+    def add_epoch(self, **kwargs):
         """
 
         Creates a new Epoch object. Epochs are used to track intervals
@@ -384,7 +384,8 @@ class NWBFile(MultiContainerInterface):
         enclosure versus sleeping between explorations)
         """
         self.__check_epochs()
-        self.epoch_tags.update(kwargs.get('tags', list()))
+        if kwargs['tags'] is not None:
+            self.epoch_tags.update(kwargs['tags'])
         call_docval_func(self.epochs.add_interval, kwargs)
 
     def __check_electrodes(self):
