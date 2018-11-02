@@ -4,8 +4,9 @@ from collections import Iterable
 from .form.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer, ElementIdentifiers, DynamicTable, DynamicTableRegion
+from .base import TimeSeries, _default_conversion, _default_resolution, ElementIdentifiers, DynamicTable, \
+    DynamicTableRegion
+from .core import NWBContainer
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)

@@ -5,8 +5,8 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 from .form.data_utils import DataChunkIterator, assertEqualShape
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
+from .base import TimeSeries, _default_resolution, _default_conversion, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
 from .device import Device
 
 

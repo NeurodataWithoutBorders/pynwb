@@ -4,9 +4,10 @@ import numpy as np
 from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_resolution, _default_conversion
+from .base import TimeSeries, _default_resolution, _default_conversion, DynamicTable, DynamicTableRegion, \
+    ElementIdentifiers
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, ElementIdentifiers
+from .core import NWBContainer, MultiContainerInterface
 from .device import Device
 
 

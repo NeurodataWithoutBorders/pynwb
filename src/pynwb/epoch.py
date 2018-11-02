@@ -4,8 +4,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 from .form.data_utils import DataIO
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries
-from .core import DynamicTable, ElementIdentifiers
+from .base import TimeSeries, DynamicTable, ElementIdentifiers
 
 import pandas as pd
 

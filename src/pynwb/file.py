@@ -8,14 +8,14 @@ from .form.utils import docval, getargs, fmt_docval_args, call_docval_func, get_
 from .form import Container
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, ProcessingModule
+from .base import TimeSeries, ProcessingModule, DynamicTable, DynamicTableRegion
 from .epoch import TimeIntervals
 from .ecephys import ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
 
 
 def _not_parent(arg):
