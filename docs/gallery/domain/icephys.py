@@ -91,6 +91,12 @@ vcs = VoltageClampSeries(
 nwbfile.add_acquisition(vcs)
 
 ####################
+# If you are interested in all PatchClampSeries with a given sweep number, use get_series()
+# exposed via the :py:meth:`~pynwb.icephys.SweepTable.get_series` attribute.
+
+series = nwbfile.sweep_table.get_series(15)
+
+####################
 # .. _icephys_writing:
 #
 # Once you have finished adding all of your data to the :py:class:`~pynwb.file.NWBFile`,
