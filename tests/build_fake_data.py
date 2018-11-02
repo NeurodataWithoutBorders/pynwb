@@ -81,11 +81,11 @@ spatial_ts = SpatialSeries('test_spatial_data',
                            numpy.cumsum(numpy.random.normal(size=(2,len(spatial_timestamps))), axis=-1).T")
 
 # Create experimental epochs
-epoch_tags = ('test_example')
+epoch_tags = ('test_example',)
 ep1 = f.add_epoch('epoch1', ephys_timestamps[100], ephys_timestamps[200],
-                     tags=epoch_tags, description="the first test epoch")
+                  tags=epoch_tags, description="the first test epoch")
 ep2 = f.add_epoch('epoch2', ephys_timestamps[600], ephys_timestamps[700],
-                     tags=epoch_tags, description="the second test epoch")
+                  tags=epoch_tags, description="the second test epoch")
 
 # Add the time series data and include the epochs it is apart of
 f.add_raw_timeseries(ephys_ts, [ep1, ep2])
