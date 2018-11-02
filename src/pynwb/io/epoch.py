@@ -1,7 +1,7 @@
 from .. import register_map
 
 from pynwb.epoch import TimeIntervals
-from .core import DynamicTableMap
+from .base import DynamicTableMap
 
 
 @register_map(TimeIntervals)
