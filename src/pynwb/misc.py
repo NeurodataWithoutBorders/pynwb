@@ -28,10 +28,10 @@ class AnnotationSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': list()},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'comments', 'type': str,
              'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
@@ -78,10 +78,12 @@ class AbstractFeatureSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'feature_units', 'type': (str, Iterable), 'doc': 'The unit of each feature'},
-            {'name': 'features', 'type': (str, Iterable), 'doc': 'Description of each feature'},
+            {'name': 'feature_units', 'type': (str, Iterable), 'doc': 'The unit of each feature',
+             'shape': (None, )},
+            {'name': 'features', 'type': (str, Iterable), 'doc': 'Description of each feature',
+             'shape': (None,)},
 
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, None),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': list()},
             {'name': 'resolution', 'type': float,
@@ -140,9 +142,9 @@ class IntervalSeries(TimeSeries):
              'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
                      'contained here. It can also be the name of a device, for stimulus or '
                      'acquisition data')},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': list()},
             {'name': 'comments', 'type': str,
              'doc': 'Human-readable comments about this TimeSeries dataset', 'default':  'no comments'},
