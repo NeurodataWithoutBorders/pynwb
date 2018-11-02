@@ -222,8 +222,8 @@ class Clustering(NWBDataInterface):
     @docval({'name': 'description', 'type': str,
              'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, \
              clusters curated using Klusters, etc).'},
-            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.', 'shape': (None,)},
-            {'name': 'peak_over_rms', 'type': Iterable,
+            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.', 'shape': (None, )},
+            {'name': 'peak_over_rms', 'type': Iterable, 'shape': (None, ),
              'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster\
              (provides a basic clustering metric).'},
             {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.',
@@ -258,8 +258,10 @@ class ClusterWaveforms(NWBDataInterface):
              'doc': 'the clustered spike data used as input for computing waveforms'},
             {'name': 'waveform_filtering', 'type': str,
              'doc': 'filter applied to data before calculating mean and standard deviation'},
-            {'name': 'waveform_mean', 'type': Iterable, 'doc': 'the mean waveform for each cluster'},
-            {'name': 'waveform_sd', 'type': Iterable, 'doc': 'the standard deviations of waveforms for each cluster'},
+            {'name': 'waveform_mean', 'type': Iterable, 'shape': (None, None),
+             'doc': 'the mean waveform for each cluster'},
+            {'name': 'waveform_sd', 'type': Iterable, 'shape': (None, None),
+            'doc': 'the standard deviations of waveforms for each cluster'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ClusterWaveforms'})
     def __init__(self, **kwargs):
         import warnings
@@ -336,10 +338,10 @@ class FeatureExtraction(NWBDataInterface):
     @docval({'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator),
-             'doc': 'A description for each feature extracted', 'ndim': 1},
-            {'name': 'times', 'type': ('array_data', 'data'),
-             'doc': 'The times of events that features correspond to', 'ndim': 1},
-            {'name': 'features', 'type': ('array_data', 'data'),
+             'doc': 'A description for each feature extracted', 'shape': (None, )},
+            {'name': 'times', 'type': ('array_data', 'data'), 'shape': (None, ),
+             'doc': 'The times of events that features correspond to'},
+            {'name': 'features', 'type': ('array_data', 'data'), 'shape': (None, None, None),
              'doc': 'Features for each channel', 'ndim': 3},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'})
     def __init__(self, **kwargs):
