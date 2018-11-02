@@ -11,6 +11,10 @@ groups:
   - name: stimulus_description
     dtype: text
     doc: the protocol/stimulus name for this patch-clamp dataset
+  - name: sweep_number
+    dtype: uint64
+    doc: 'Sweep number, allows to group different PatchClampSeries together.'
+    required: false
   datasets:
   - name: data
     dtype: float

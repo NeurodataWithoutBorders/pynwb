@@ -60,7 +60,8 @@ class PatchClampSeries(TimeSeries):
 
     __nwbfields__ = ('electrode',
                      'gain',
-                     'stimulus_description')
+                     'stimulus_description',
+                     'sweep_number')
 
     _ancestry = "TimeSeries,PatchClampSeries"
     _help = "Superclass definition for patch-clamp data."
@@ -95,16 +96,25 @@ class PatchClampSeries(TimeSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, data, unit, stimulus_description = popargs('name', 'data',
                                                          'unit', 'stimulus_description', kwargs)
-        electrode, gain = popargs('electrode', 'gain', kwargs)
+        electrode, gain, sweep_number = popargs('electrode', 'gain', 'sweep_number', kwargs)
         super(PatchClampSeries, self).__init__(name, data, unit, **kwargs)
         self.electrode = electrode
         self.gain = gain
         self.stimulus_description = stimulus_description
+
+        if sweep_number is not None:
+            if not (sweep_number >= 0):
+                raise ValueError("sweep_number must be a non-negative integer")
+
+            self.sweep_number = sweep_number
 
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)
@@ -158,6 +168,9 @@ class CurrentClampSeries(PatchClampSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
@@ -216,6 +229,9 @@ class IZeroClampSeries(CurrentClampSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
@@ -268,6 +284,9 @@ class CurrentClampStimulusSeries(PatchClampSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
@@ -330,6 +349,9 @@ class VoltageClampSeries(PatchClampSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
@@ -389,6 +411,9 @@ class VoltageClampStimulusSeries(PatchClampSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
