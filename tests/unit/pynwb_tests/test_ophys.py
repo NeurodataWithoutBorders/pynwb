@@ -21,7 +21,8 @@ def CreatePlaneSegmentation():
     oc = OpticalChannel('test_optical_channel', 'description', 500.)
     device = Device(name='device_name')
     ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
-                      'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+                      300., 'indicator', 'location', (1, 2, 1, 2, 3), 4.0,
+                      'unit', 'reference_frame')
 
     pS = PlaneSegmentation('description', ip, 'test_name', iSS)
     pS.add_roi(pixel_mask=pix_mask[0:3], image_mask=img_mask[0])
@@ -37,11 +38,11 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
 
         device = Device(name='device_name')
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
-                          'imaging_rate', 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
+                          300., 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
         self.assertEqual(ip.optical_channel[0], oc)
         self.assertEqual(ip.device, device)
         self.assertEqual(ip.excitation_lambda, 600.)
-        self.assertEqual(ip.imaging_rate, 'imaging_rate')
+        self.assertEqual(ip.imaging_rate, 300.)
         self.assertEqual(ip.indicator, 'indicator')
         self.assertEqual(ip.location, 'location')
         self.assertEqual(ip.manifold, (50, 100, 3))
@@ -67,7 +68,7 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         oc = OpticalChannel('test_name', 'description', 500.)
         device = Device(name='device_name')
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
-                          'imaging_rate', 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
+                          300., 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
         with self.assertRaises(ValueError):  # no data or external file
             TwoPhotonSeries('test_tPS', unit='unit', field_of_view=list(),
                             imaging_plane=ip, pmt_gain=1.0, scan_line_rate=2.0,
@@ -151,8 +152,8 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         device = Device(name='device_name')
         oc = OpticalChannel('test_optical_channel', 'description', 500.)
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
-                          'imaging_rate', 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
-        return (iSS, ip)
+                          300., 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+        return iSS, ip
 
     def test_init(self):
         w, h = 5, 5
