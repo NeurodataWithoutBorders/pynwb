@@ -99,17 +99,17 @@ nwbfile.add_acquisition(running_speed)
 # not copied multiple times.  Here, we extract the stimulus epochs (both fine and coarse-grained) from the Brain
 # Observatory experiment using the allensdk.
 
-for ri, row in trial_table.iterrows():
+for _, row in trial_table.iterrows():
     nwbfile.add_epoch(start_time=row.start,
-                         stop_time=row.end,
-                         timeseries=[running_speed],
-                         tags='trials')
+                      stop_time=row.end,
+                      timeseries=[running_speed],
+                      tags='trials')
 
-for ri, row in epoch_table.iterrows():
+for _, row in epoch_table.iterrows():
     nwbfile.add_epoch(start_time=row.start,
-                         stop_time=row.end,
-                         timeseries=[running_speed],
-                         tags='stimulus')
+                      stop_time=row.end,
+                      timeseries=[running_speed],
+                      tags='stimulus')
 
 ########################################
 # 5) In the brain observatory, a two-photon microscope is used to acquire images of the calcium activity of neurons

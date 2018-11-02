@@ -128,10 +128,10 @@ def main():
     epoch_tags = ('example_epoch',)
 
     f.add_epoch(name='epoch1', start_time=0.0, stop_time=1.0, tags=epoch_tags,
-                   description="the first test epoch", timeseries=[ephys_ts, spatial_ts])
+                description="the first test epoch", timeseries=[ephys_ts, spatial_ts])
 
     f.add_epoch(name='epoch2', start_time=0.0, stop_time=1.0, tags=epoch_tags,
-                   description="the second test epoch", timeseries=[ephys_ts, spatial_ts])
+                description="the second test epoch", timeseries=[ephys_ts, spatial_ts])
     # create-epochs: end
 
     # create-compressed-timeseries: start
