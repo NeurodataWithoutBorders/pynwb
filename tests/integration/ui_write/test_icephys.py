@@ -54,6 +54,5 @@ class TestCurrentClampStimulusSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        ccss = CurrentClampStimulusSeries(name="ccss", data=[1, 2, 3, 4, 5], unit='A',
+        return CurrentClampStimulusSeries(name="ccss", data=[1, 2, 3, 4, 5], unit='A',
                                           starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
-        return ccss
