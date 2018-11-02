@@ -30,7 +30,7 @@ class TestIntracellularElectrode(base.TestMapRoundTrip):
         return nwbfile.get_ic_electrode(self.container.name)
 
 
-class TestPCS(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
+class TestPatchClampSeries(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
 
     def setUpElectrode(self):
 
@@ -47,10 +47,10 @@ class TestPCS(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
         ''' Should take an NWBFile object and add the container to it '''
         nwbfile.add_ic_electrode(self.elec)
         nwbfile.add_device(self.device)
-        super(TestPCS, self).addContainer(nwbfile)
+        super(TestPatchClampSeries, self).addContainer(nwbfile)
 
 
-class TestCCSS(TestPCS):
+class TestCurrentClampStimulusSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
