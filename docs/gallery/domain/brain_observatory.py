@@ -100,13 +100,13 @@ nwbfile.add_acquisition(running_speed)
 # Observatory experiment using the allensdk.
 
 for ri, row in trial_table.iterrows():
-    nwbfile.create_epoch(start_time=row.start,
+    nwbfile.add_epoch(start_time=row.start,
                          stop_time=row.end,
                          timeseries=[running_speed],
                          tags='trials')
 
 for ri, row in epoch_table.iterrows():
-    nwbfile.create_epoch(start_time=row.start,
+    nwbfile.add_epoch(start_time=row.start,
                          stop_time=row.end,
                          timeseries=[running_speed],
                          tags='stimulus')

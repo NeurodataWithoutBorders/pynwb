@@ -210,7 +210,7 @@ class TestEpochsRoundtrip(base.TestMapRoundTrip):
             description='average temperture (c) during epoch'
         )
 
-        nwbfile.create_epoch(
+        nwbfile.add_epoch(
             start_time=5.3,
             stop_time=6.1,
             timeseries=[],
