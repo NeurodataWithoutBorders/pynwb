@@ -150,7 +150,6 @@ groups:
     quantity: '?'
     shape:
     - - 2
-    - - 3
   - name: orientation
     dtype: text
     doc: Description of image relative to some reference frame (e.g., which way is
