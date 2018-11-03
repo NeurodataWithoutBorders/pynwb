@@ -144,10 +144,11 @@ groups:
     doc: Width, height and depth of image, or imaged area (meters).
     dims:
     - - width|height
-      - width|height|depth
+    - - width|height|depth
     quantity: '?'
     shape:
-    - 2
+    - - 2
+    - - 3
   - name: orientation
     dtype: text
     doc: Description of image relative to some reference frame (e.g., which way is
