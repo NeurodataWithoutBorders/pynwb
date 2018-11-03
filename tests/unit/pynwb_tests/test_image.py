@@ -53,12 +53,12 @@ class OpticalSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
         ts = OpticalSeries(name='test_ts', data=list(), unit='unit', distance=1.0,
-                           field_of_view=list(), orientation='orientation', external_file=['external_file'],
+                           field_of_view=[4, 5], orientation='orientation', external_file=['external_file'],
                            starting_frame=[1, 2, 3], format='tiff', timestamps=list())
         self.assertEqual(ts.name, 'test_ts')
         self.assertEqual(ts.unit, 'unit')
         self.assertEqual(ts.distance, 1.0)
-        self.assertEqual(ts.field_of_view, list())
+        self.assertEqual(ts.field_of_view, [4, 5])
         self.assertEqual(ts.orientation, 'orientation')
         self.assertEqual(ts.external_file, ['external_file'])
         self.assertEqual(ts.starting_frame, [1, 2, 3])
