@@ -279,15 +279,14 @@ class NWBFile(MultiContainerInterface):
         units = getargs('units', kwargs)
         if units is not None:
             self.units = units
+
         self.electrodes = getargs('electrodes', kwargs)
         self.electrode_groups = getargs('electrode_groups', kwargs)
         self.devices = getargs('devices', kwargs)
-
         self.ic_electrodes = getargs('ic_electrodes', kwargs)
         self.imaging_planes = getargs('imaging_planes', kwargs)
         self.ogen_sites = getargs('ogen_sites', kwargs)
         self.time_intervals = getargs('time_intervals', kwargs)
-
         self.subject = getargs('subject', kwargs)
 
         recommended = [
