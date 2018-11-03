@@ -10,7 +10,7 @@ from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries
 class ImageSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        iS = ImageSeries(name='test_iS', data=list(), unit='unit',
+        iS = ImageSeries(name='test_iS', data=np.ones((3, 3, 3)), unit='unit',
                          external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.unit, 'unit')
