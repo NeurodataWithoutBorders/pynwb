@@ -20,7 +20,6 @@ class ImageSeries(TimeSeries):
                      'starting_frame',
                      'format')
 
-    _ancestry = "TimeSeries,ImageSeries"
     _help = "Storage object for time-series 2-D image data"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -85,7 +84,6 @@ class IndexSeries(TimeSeries):
 
     __nwbfields__ = ('indexed_timeseries',)
 
-    _ancestry = "TimeSeries,IndexSeries"
     _help = "A sequence that is generated from an existing image stack. Frames can be presented in \
     an arbitrary order. The data[] field stores frame number in reference stack."
 
@@ -133,7 +131,6 @@ class ImageMaskSeries(ImageSeries):
 
     __nwbfields__ = ('masked_imageseries',)
 
-    _ancestry = "TimeSeries,ImageSeries,ImageMaskSeries"
     _help = "An alpha mask that is applied to a presented visual stimulus."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -197,7 +194,6 @@ class OpticalSeries(ImageSeries):
                      'field_of_view',
                      'orientation')
 
-    _ancestry = "TimeSeries,ImageSeries,OpticalSeries"
     _help = "Time-series image stack for optical recording or stimulus."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},

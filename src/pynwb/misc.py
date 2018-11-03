@@ -20,7 +20,6 @@ class AnnotationSeries(TimeSeries):
 
     __nwbfields__ = ()
 
-    _ancestry = "TimeSeries,AnnotationSeries"
     _help = "Time-stamped annotations about an experiment."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -66,7 +65,6 @@ class AbstractFeatureSeries(TimeSeries):
     __nwbfields__ = ('feature_units',
                      'features')
 
-    _ancestry = "TimeSeries,AbstractFeatureSeries"
     _help = "Features of an applied stimulus. This is useful when storing the raw stimulus is impractical."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -124,7 +122,6 @@ class IntervalSeries(TimeSeries):
 
     __nwbfields__ = ()
 
-    _ancestry = "TimeSeries,IntervalSeries"
     _help = "Stores the start and stop times for events."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
