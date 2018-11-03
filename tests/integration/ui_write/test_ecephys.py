@@ -5,7 +5,7 @@ from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, Referenc
 from pynwb.ecephys import ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, Clustering, ClusterWaveforms,\
                           SpikeEventSeries, EventWaveform, EventDetection, FeatureExtraction
 from pynwb.device import Device
-from pynwb.core import DynamicTableRegion
+from pynwb.base import DynamicTableRegion
 from pynwb.file import ElectrodeTable as get_electrode_table
 
 from . import base
