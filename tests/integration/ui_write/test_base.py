@@ -1,11 +1,9 @@
-from pynwb.form.build import GroupBuilder, DatasetBuilder
-from pynwb.base import DynamicTable
-
+import pandas as pd
 from pynwb import TimeSeries
+from pynwb.base import DynamicTable
+from pynwb.form.build import GroupBuilder, DatasetBuilder
 
 from . import base
-
-import pandas as pd
 
 
 class TestTimeSeriesIO(base.TestDataInterfaceIO):
