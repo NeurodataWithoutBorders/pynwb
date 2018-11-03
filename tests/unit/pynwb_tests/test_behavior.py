@@ -1,5 +1,7 @@
 import unittest
 
+import numpy as np
+
 from pynwb import TimeSeries
 from pynwb.misc import IntervalSeries
 from pynwb.behavior import SpatialSeries, BehavioralEpochs, BehavioralEvents, BehavioralTimeSeries, PupilTracking, EyeTracking, CompassDirection, Position  # noqa: E501
@@ -7,7 +9,7 @@ from pynwb.behavior import SpatialSeries, BehavioralEpochs, BehavioralEvents, Be
 
 class SpatialSeriesConstructor(unittest.TestCase):
     def test_init(self):
-        sS = SpatialSeries('test_sS', list(), 'reference_frame', timestamps=list())
+        sS = SpatialSeries('test_sS', np.ones((2, 2)), 'reference_frame', timestamps=[1., 2., 3.])
         self.assertEqual(sS.name, 'test_sS')
         self.assertEqual(sS.unit, 'meters')
         self.assertEqual(sS.reference_frame, 'reference_frame')
@@ -16,7 +18,7 @@ class SpatialSeriesConstructor(unittest.TestCase):
 class BehavioralEpochsConstructor(unittest.TestCase):
     def test_init(self):
         data = [0, 1, 0, 1]
-        iS = IntervalSeries('test_iS', data, timestamps=list())
+        iS = IntervalSeries('test_iS', data, timestamps=[1., 2., 3.])
 
         bE = BehavioralEpochs(iS)
         self.assertEqual(bE.interval_series['test_iS'], iS)
@@ -24,7 +26,7 @@ class BehavioralEpochsConstructor(unittest.TestCase):
 
 class BehavioralEventsConstructor(unittest.TestCase):
     def test_init(self):
-        ts = TimeSeries('test_ts', list(), 'unit', timestamps=list())
+        ts = TimeSeries('test_ts', np.ones((2, 2)), 'unit', timestamps=[1., 2., 3.])
 
         bE = BehavioralEvents(ts)
         self.assertEqual(bE.time_series['test_ts'], ts)
@@ -32,7 +34,7 @@ class BehavioralEventsConstructor(unittest.TestCase):
 
 class BehavioralTimeSeriesConstructor(unittest.TestCase):
     def test_init(self):
-        ts = TimeSeries('test_ts', list(), 'unit', timestamps=list())
+        ts = TimeSeries('test_ts', np.ones((2, 2)), 'unit', timestamps=[1., 2., 3.])
 
         bts = BehavioralTimeSeries(ts)
         self.assertEqual(bts.time_series['test_ts'], ts)
@@ -40,7 +42,7 @@ class BehavioralTimeSeriesConstructor(unittest.TestCase):
 
 class PupilTrackingConstructor(unittest.TestCase):
     def test_init(self):
-        ts = TimeSeries('test_ts', list(), 'unit', timestamps=list())
+        ts = TimeSeries('test_ts', np.ones((2, 2)), 'unit', timestamps=[1., 2., 3.])
 
         pt = PupilTracking(ts)
         self.assertEqual(pt.time_series['test_ts'], ts)
@@ -48,7 +50,7 @@ class PupilTrackingConstructor(unittest.TestCase):
 
 class EyeTrackingConstructor(unittest.TestCase):
     def test_init(self):
-        sS = SpatialSeries('test_sS', list(), 'reference_frame', timestamps=list())
+        sS = SpatialSeries('test_sS', np.ones((2, 2)), 'reference_frame', timestamps=[1., 2., 3.])
 
         et = EyeTracking(sS)
         self.assertEqual(et.spatial_series['test_sS'], sS)
@@ -56,7 +58,7 @@ class EyeTrackingConstructor(unittest.TestCase):
 
 class CompassDirectionConstructor(unittest.TestCase):
     def test_init(self):
-        sS = SpatialSeries('test_sS', list(), 'reference_frame', timestamps=list())
+        sS = SpatialSeries('test_sS', np.ones(2, 2), 'reference_frame', timestamps=[1., 2., 3.])
 
         cd = CompassDirection(sS)
         self.assertEqual(cd.spatial_series['test_sS'], sS)
@@ -64,7 +66,7 @@ class CompassDirectionConstructor(unittest.TestCase):
 
 class PositionConstructor(unittest.TestCase):
     def test_init(self):
-        sS = SpatialSeries('test_sS', list(), 'reference_frame', timestamps=list())
+        sS = SpatialSeries('test_sS', np.ones((2, 2)), 'reference_frame', timestamps=[1., 2., 3.])
 
         pc = Position(sS)
         self.assertEqual(pc.spatial_series.get('test_sS'), sS)
