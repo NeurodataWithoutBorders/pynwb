@@ -70,9 +70,9 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
                           300., 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
         with self.assertRaises(ValueError):  # no data or external file
-            TwoPhotonSeries('test_tPS', unit='unit', field_of_view=list(),
+            TwoPhotonSeries('test_tPS', unit='unit', field_of_view=[2., 3.],
                             imaging_plane=ip, pmt_gain=1.0, scan_line_rate=2.0,
-                            starting_frame=[1, 2, 3], format='tiff', timestamps=list())
+                            starting_frame=[1, 2, 3], format='tiff', timestamps=[1., 2.])
 
 
 class MotionCorrectionConstructor(unittest.TestCase):
@@ -82,10 +82,10 @@ class MotionCorrectionConstructor(unittest.TestCase):
 
 class CorrectedImageStackConstructor(unittest.TestCase):
     def test_init(self):
-        is1 = ImageSeries(name='is1', data=list(), unit='unit',
-                          external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
-        is2 = ImageSeries(name='is2', data=list(), unit='unit',
-                          external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
+        is1 = ImageSeries(name='is1', data=np.ones((2, 2, 2)), unit='unit',
+                          external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=[1., 2.])
+        is2 = ImageSeries(name='is2', data=np.ones((2, 2, 2)), unit='unit',
+                          external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=[1., 2.])
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
         ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
         cis = CorrectedImageStack(is1, is2, ts)
