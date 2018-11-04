@@ -207,7 +207,7 @@ class OpticalSeries(ImageSeries):
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
             {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},
-            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'shape': (2, 3),
+            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'orientation', 'type': str,
              'doc': 'Description of image relative to some reference frame (e.g., which way is up). \

@@ -70,19 +70,17 @@ class AbstractFeatureSeries(TimeSeries):
     _help = "Features of an applied stimulus. This is useful when storing the raw stimulus is impractical."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'feature_units', 'type': (str, Iterable), 'shape': (None, ), 'doc': 'The unit of each feature'},
-            {'name': 'features', 'type': (str, Iterable), 'shape': (None, ), 'doc': 'Description of each feature'},
-
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, None),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
-             'default': list()},
+            {'name': 'feature_units', 'type': Iterable, 'shape': (None, ), 'doc': 'The unit of each feature'},
+            {'name': 'features', 'type': Iterable, 'shape': (None, ), 'doc': 'Description of each feature'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None,), (None, None)), 'default': list(),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
              'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -107,8 +105,11 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'features', 'type': (list, np.ndarray), 'doc': 'the feature values for this time point'})
     def add_features(self, **kwargs):
         time, features = getargs('time', 'features', kwargs)
-        self.timestamps.append(time)
-        self.data.append(features)
+        if type(self.timestamps) == list and type(self.data) is list:
+            self.timestamps.append(time)
+            self.data.append(features)
+        else:
+            raise ValueError('Can only add feature if timestamps and data are lists')
 
 
 @register_class('IntervalSeries', CORE_NAMESPACE)

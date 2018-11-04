@@ -14,12 +14,12 @@ class AnnotationSeriesConstructor(unittest.TestCase):
 
 class AbstractFeatureSeriesConstructor(unittest.TestCase):
     def test_init(self):
-        aFS = AbstractFeatureSeries('test_aFS', 'feature units', 'features', timestamps=list())
+        aFS = AbstractFeatureSeries('test_aFS', ['feature units'], ['features'], timestamps=list())
         self.assertEqual(aFS.name, 'test_aFS')
-        self.assertEqual(aFS.feature_units, 'feature units')
-        self.assertEqual(aFS.features, 'features')
+        self.assertEqual(aFS.feature_units, ['feature units'])
+        self.assertEqual(aFS.features, ['features'])
 
-        aFS.add_features(2.0, list())
+        aFS.add_features(2.0, [1.])
 
 
 class IntervalSeriesConstructor(unittest.TestCase):

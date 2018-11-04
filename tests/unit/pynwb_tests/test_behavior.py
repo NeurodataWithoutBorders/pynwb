@@ -58,7 +58,7 @@ class EyeTrackingConstructor(unittest.TestCase):
 
 class CompassDirectionConstructor(unittest.TestCase):
     def test_init(self):
-        sS = SpatialSeries('test_sS', np.ones(2, 2), 'reference_frame', timestamps=[1., 2., 3.])
+        sS = SpatialSeries('test_sS', np.ones((2, 2)), 'reference_frame', timestamps=[1., 2., 3.])
 
         cd = CompassDirection(sS)
         self.assertEqual(cd.spatial_series['test_sS'], sS)

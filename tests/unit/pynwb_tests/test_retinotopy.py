@@ -1,12 +1,14 @@
 import unittest
 
+import numpy as np
+
 from pynwb.retinotopy import ImagingRetinotopy, AxisMap, AImage
 
 
 class ImageRetinotopyConstructor(unittest.TestCase):
 
     def test_init(self):
-        data = list()
+        data = np.ones((2, 2))
         field_of_view = [1, 2, 3]
         dimension = [1, 2, 3]
         sign_map = AxisMap('sign_map', data, field_of_view, 'unit', dimension)
