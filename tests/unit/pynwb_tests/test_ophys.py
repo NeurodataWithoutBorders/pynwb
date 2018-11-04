@@ -15,8 +15,8 @@ def CreatePlaneSegmentation():
     pix_mask = [[1, 2, 1.0], [3, 4, 1.0], [5, 6, 1.0],
                 [7, 8, 2.0], [9, 10, 2.0]]
 
-    iSS = ImageSeries(name='test_iS', data=list(), unit='unit',
-                      external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
+    iSS = ImageSeries(name='test_iS', data=np.ones((2, 2, 2)), unit='unit',
+                      external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=[1., 2.])
 
     oc = OpticalChannel('test_optical_channel', 'description', 500.)
     device = Device(name='device_name')
@@ -50,12 +50,12 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(ip.unit, 'unit')
         self.assertEqual(ip.reference_frame, 'reference_frame')
 
-        tPS = TwoPhotonSeries('test_tPS', unit='unit', field_of_view=list(),
+        tPS = TwoPhotonSeries('test_tPS', unit='unit', field_of_view=[2., 3.],
                               imaging_plane=ip, pmt_gain=1.0, scan_line_rate=2.0, external_file=['external_file'],
                               starting_frame=[1, 2, 3], format='tiff', timestamps=list())
         self.assertEqual(tPS.name, 'test_tPS')
         self.assertEqual(tPS.unit, 'unit')
-        self.assertEqual(tPS.field_of_view, list())
+        self.assertEqual(tPS.field_of_view, [2., 3.])
         self.assertEqual(tPS.imaging_plane, ip)
         self.assertEqual(tPS.pmt_gain, 1.0)
         self.assertEqual(tPS.scan_line_rate, 2.0)
@@ -146,7 +146,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
 
     def getBoilerPlateObjects(self):
 
-        iSS = ImageSeries(name='test_iS', data=list(), unit='unit',
+        iSS = ImageSeries(name='test_iS', data=np.ones((2, 2, 2)), unit='unit',
                           external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
         device = Device(name='device_name')

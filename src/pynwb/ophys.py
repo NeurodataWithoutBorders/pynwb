@@ -114,7 +114,7 @@ class TwoPhotonSeries(ImageSeries):
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
-            {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': (3,),
+            {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
             {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.', 'default': None},
             {'name': 'scan_line_rate', 'type': float,
