@@ -74,11 +74,8 @@ def __shape_okay_multi(value, argshape):
 
 def __shape_okay(value, argshape):
     valshape = get_data_shape(value)
-    try:
-        if not len(valshape) == len(argshape):
-            return False
-    except:
-        import pdb; pdb.set_trace()
+    if not len(valshape) == len(argshape):
+        return False
     for a, b in zip(valshape, argshape):
         if b not in (a, None):
             return False

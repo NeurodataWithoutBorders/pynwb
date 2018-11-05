@@ -72,7 +72,8 @@ class AbstractFeatureSeries(TimeSeries):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'feature_units', 'type': Iterable, 'shape': (None, ), 'doc': 'The unit of each feature'},
             {'name': 'features', 'type': Iterable, 'shape': (None, ), 'doc': 'Description of each feature'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None,), (None, None)), 'default': list(),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None,), (None, None)),
+             'default': list(),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -119,7 +120,7 @@ class IntervalSeries(TimeSeries):
     data field stores whether the interval just started (>0 value) or ended (<0 value). Different interval
     types can be represented in the same series by using multiple key values (eg, 1 for feature A, 2
     for feature B, 3 for feature C, etc). The field data stores an 8-bit integer. This is largely an alias
-    of a standard TimeSeries but that is identifiable as representing time intervals in a machinereadable
+    of a standard TimeSeries but that is identifiable as representing time intervals in a machine-readable
     way.
     """
 
