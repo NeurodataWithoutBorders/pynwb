@@ -9,7 +9,7 @@ from .form import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
-from .epoch import EpochTable
+from .epoch import TimeIntervals
 from .ecephys import ElectrodeGroup, Device
 from .icephys import IntracellularElectrode
 from .ophys import ImagingPlane
@@ -134,6 +134,13 @@ class NWBFile(MultiContainerInterface):
             'create': 'create_ogen_site',
             'get': 'get_ogen_site'
         },
+        {
+            'attr': 'time_intervals',
+            'add': 'add_time_intervals',
+            'type': TimeIntervals,
+            'create': 'create_time_intervals',
+            'get': 'get_time_intervals'
+        },
     ]
 
     __nwbfields__ = ('experimenter',
@@ -209,12 +216,14 @@ class NWBFile(MultiContainerInterface):
              'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'stimulus_template', 'type': (list, tuple),
              'doc': 'Stimulus template TimeSeries objects belonging to this NWBFile', 'default': None},
-            {'name': 'epochs', 'type': EpochTable,
+            {'name': 'epochs', 'type': TimeIntervals,
              'doc': 'Epoch objects belonging to this NWBFile', 'default': None},
             {'name': 'epoch_tags', 'type': (tuple, list, set),
              'doc': 'A sorted list of tags used across all epochs', 'default': set()},
-            {'name': 'trials', 'type': DynamicTable,
+            {'name': 'trials', 'type': TimeIntervals,
              'doc': 'A table containing trial data', 'default': None},
+            {'name': 'time_intervals', 'type': (list, tuple),
+             'doc': 'any TimeIntervals tables storing time intervals', 'default': None},
             {'name': 'units', 'type': DynamicTable,
              'doc': 'A table containing unit metadata', 'default': None},
             {'name': 'modules', 'type': (list, tuple),
@@ -277,6 +286,7 @@ class NWBFile(MultiContainerInterface):
         self.ic_electrodes = getargs('ic_electrodes', kwargs)
         self.imaging_planes = getargs('imaging_planes', kwargs)
         self.ogen_sites = getargs('ogen_sites', kwargs)
+        self.time_intervals = getargs('time_intervals', kwargs)
 
         self.subject = getargs('subject', kwargs)
 
@@ -343,21 +353,28 @@ class NWBFile(MultiContainerInterface):
 
     def __check_epochs(self):
         if self.epochs is None:
-            self.epochs = EpochTable()
+            self.epochs = TimeIntervals('epochs', 'experimental epochs')
 
-    @docval(*get_docval(DynamicTable.add_column))
-    def add_epoch_metadata_column(self, **kwargs):
+    @docval(*get_docval(TimeIntervals.add_column))
+    def add_epoch_column(self, **kwargs):
         """
         Add a column to the electrode table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        See :py:meth:`~pynwb.core.TimeIntervals.add_column` for more details
         """
         self.__check_epochs()
         self.epoch_tags.update(kwargs.pop('tags', list()))
         call_docval_func(self.epochs.add_column, kwargs)
 
-    @docval(*get_docval(EpochTable.add_epoch),
+    def add_epoch_metadata_column(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.add_epoch_column` instead
+        """
+        raise DeprecationWarning("Please use NWBFile.add_epoch_column")
+
+    @docval(*get_docval(TimeIntervals.add_interval),
             allow_extra=True)
-    def create_epoch(self, **kwargs):
+    def add_epoch(self, **kwargs):
         """
 
         Creates a new Epoch object. Epochs are used to track intervals
@@ -367,8 +384,9 @@ class NWBFile(MultiContainerInterface):
         enclosure versus sleeping between explorations)
         """
         self.__check_epochs()
-        self.epoch_tags.update(kwargs.get('tags', list()))
-        call_docval_func(self.epochs.add_epoch, kwargs)
+        if kwargs['tags'] is not None:
+            self.epoch_tags.update(kwargs['tags'])
+        call_docval_func(self.epochs.add_interval, kwargs)
 
     def __check_electrodes(self):
         if self.electrodes is None:
@@ -449,7 +467,7 @@ class NWBFile(MultiContainerInterface):
 
     def __check_trials(self):
         if self.trials is None:
-            self.trials = TrialTable()
+            self.trials = TimeIntervals('trials', 'experimental trials')
 
     @docval(*get_docval(DynamicTable.add_column))
     def add_trial_column(self, **kwargs):
@@ -460,7 +478,7 @@ class NWBFile(MultiContainerInterface):
         self.__check_trials()
         call_docval_func(self.trials.add_column, kwargs)
 
-    @docval(*get_docval(DynamicTable.add_row), allow_extra=True)
+    @docval(*get_docval(TimeIntervals.add_row), allow_extra=True)
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
@@ -470,7 +488,7 @@ class NWBFile(MultiContainerInterface):
         been added (through calls to `add_trial_columns`).
         """
         self.__check_trials()
-        call_docval_func(self.trials.add_row, kwargs)
+        call_docval_func(self.trials.add_interval, kwargs)
 
     @docval({'name': 'electrode_table', 'type': DynamicTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):

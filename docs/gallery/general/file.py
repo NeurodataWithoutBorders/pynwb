@@ -132,14 +132,14 @@ added_mod.add_data_interface(mod_ts)
 # Epochs
 # ------
 #
-# Epochs can be added to an NWB file using the method :py:func:`~pynwb.file.NWBFile.create_epoch`.
+# Epochs can be added to an NWB file using the method :py:func:`~pynwb.file.NWBFile.add_epoch`.
 # The first argument is a description of the epoch, the second and third argument are the start time
 # and stop time, respectively. The fourth argument is one or more tags for labelling the epoch,
 # and the fifth argument is a list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
 # to.
 
-nwbfile.create_epoch(2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
-nwbfile.create_epoch(6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
+nwbfile.add_epoch(2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
+nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 
 ####################
 # .. _basic_trials:
@@ -163,9 +163,9 @@ nwbfile.create_epoch(6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 
 nwbfile.add_trial_column('stim', 'the visual stimuli during the trial')
 
-nwbfile.add_trial({'start': 0, 'end': 2, 'stim': 'person'})
-nwbfile.add_trial({'start': 3, 'end': 5, 'stim': 'ocean'})
-nwbfile.add_trial({'start': 6, 'end': 8, 'stim': 'desert'})
+nwbfile.add_trial(start_time=0.0, stop_time=2.0, stim='person')
+nwbfile.add_trial(start_time=3.0, stop_time=5.0, stim='ocean')
+nwbfile.add_trial(start_time=6.0, stop_time=8.0, stim='desert')
 
 ####################
 # .. _basic_units:

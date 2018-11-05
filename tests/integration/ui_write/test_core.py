@@ -1,33 +1,8 @@
-from pynwb.form.build import GroupBuilder
-
 from pynwb.core import DynamicTable
 
 from . import base
 
 import pandas as pd
-
-
-class TestDynamicTableIO(base.TestMapRoundTrip):
-
-    def setUpContainer(self):
-        return DynamicTable('trials', 'a test table')
-
-    def setUpBuilder(self):
-        return GroupBuilder('trials',
-                            attributes={
-                                'help': 'A column-centric table',
-                                'description': 'a test table',
-                                'namespace': 'core',
-                                'neurodata_type': 'DynamicTable',
-                                'colnames': tuple(),
-
-                            })
-
-    def addContainer(self, nwbfile):
-        nwbfile.trials = self.container
-
-    def getContainer(self, nwbfile):
-        return nwbfile.trials
 
 
 class TestTrials(base.TestMapRoundTrip):
@@ -41,8 +16,8 @@ class TestTrials(base.TestMapRoundTrip):
         nwbfile.add_trial_column('bar', 'a float column')
         nwbfile.add_trial_column('baz', 'a string column')
         nwbfile.add_trial_column('qux', 'a boolean column')
-        nwbfile.add_trial({'start': 0., 'end': 1., 'foo': 27, 'bar': 28.0, 'baz': "29", 'qux': True})
-        nwbfile.add_trial({'start': 2., 'end': 3., 'foo': 37, 'bar': 38.0, 'baz': "39", 'qux': False})
+        nwbfile.add_trial(start_time=0., stop_time=1., foo=27, bar=28.0, baz="29", qux=True)
+        nwbfile.add_trial(start_time=2., stop_time=3., foo=37, bar=38.0, baz="39", qux=False)
         # reset the thing
         self.container = nwbfile.trials
 

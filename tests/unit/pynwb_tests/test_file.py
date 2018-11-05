@@ -87,8 +87,8 @@ class NWBFileTest(unittest.TestCase):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
         ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
         expected_tags = tags1 + tags2
-        self.nwbfile.create_epoch(0.0, 1.0, tags1, ts)
-        self.nwbfile.create_epoch(0.0, 1.0, tags2, ts)
+        self.nwbfile.add_epoch(0.0, 1.0, tags1, ts)
+        self.nwbfile.add_epoch(0.0, 1.0, tags2, ts)
         tags = self.nwbfile.epoch_tags
         six.assertCountEqual(self, expected_tags, tags)
 
@@ -164,13 +164,13 @@ class NWBFileTest(unittest.TestCase):
 
     def test_add_trial_column(self):
         self.nwbfile.add_trial_column('trial_type', 'the type of trial')
-        self.assertEqual(self.nwbfile.trials.colnames, ('start', 'end', 'trial_type'))
+        self.assertEqual(self.nwbfile.trials.colnames, ('start_time', 'stop_time', 'trial_type'))
 
     def test_add_trial(self):
-        self.nwbfile.add_trial({'start': 10, 'end': 20})
+        self.nwbfile.add_trial(start_time=10.0, stop_time=20.0)
         self.assertEqual(len(self.nwbfile.trials), 1)
-        self.nwbfile.add_trial({'start': 30, 'end': 40})
-        self.nwbfile.add_trial({'start': 50, 'end': 70})
+        self.nwbfile.add_trial(start_time=30.0, stop_time=40.0)
+        self.nwbfile.add_trial(start_time=50.0, stop_time=70.0)
         self.assertEqual(len(self.nwbfile.trials), 3)
 
     def test_add_electrode(self):
