@@ -297,9 +297,9 @@ mod_ts = added_mod['ts_for_mod']
 # Appending to an NWB file
 # ------------------------
 #
-# Using functionality discussed above, NWB allows appending to fles. To append to a file, you must read the file, add
+# Using functionality discussed above, NWB allows appending to files. To append to a file, you must read the file, add
 # new components, and then write the file. Reading and writing is carried out using :py:class:`~pynwb.NWBHDF5IO`.
-# When reading the NWBFile, you must specify that you indend to modify it by setting the *mode* argument in the
+# When reading the NWBFile, you must specify that you intend to modify it by setting the *mode* argument in the
 # :py:class:`~pynwb.NWBHDF5IO` constructor to ``'a'``. After you have read the file, you can add [#]_ new data to it
 # using the standard write/add functionality demonstrated above.
 #
