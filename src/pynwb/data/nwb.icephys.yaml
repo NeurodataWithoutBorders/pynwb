@@ -11,6 +11,10 @@ groups:
   - name: stimulus_description
     dtype: text
     doc: the protocol/stimulus name for this patch-clamp dataset
+  - name: sweep_number
+    dtype: uint64
+    doc: 'Sweep number, allows to group different PatchClampSeries together.'
+    required: false
   datasets:
   - name: data
     dtype: float
@@ -226,3 +230,35 @@ groups:
   - name: device
     doc: the device that was used to record from this electrode
     target_type: Device
+- neurodata_type_def: SweepTable
+  neurodata_type_inc: DynamicTable
+  doc: The table which groups different PatchClampSeries together.
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'The table which groups different PatchClampSeries together'
+    value: The table which groups different PatchClampSeries together
+  datasets:
+  - neurodata_type_inc: TableColumn
+    name: sweep_number
+    dtype: uint64
+    doc: The sweep number of the PatchClampSeries in that row.
+    attributes:
+    - name: description
+      dtype: text
+      doc: value is 'The sweep number of the PatchClampSeries in that row'
+      value: The sweep number of the PatchClampSeries in that row
+  - neurodata_type_inc: VectorData
+    name: series
+    dtype:
+      target_type: PatchClampSeries
+      reftype: object
+    doc: The PatchClampSeries with the sweep number in that row
+    attributes:
+    - name: help
+      dtype: text
+      doc: Value is 'The PatchClampSeries with the sweep number in that row'
+      value: The PatchClampSeries with the sweep number in that row
+  - neurodata_type_inc: VectorIndex
+    name: series_index
+    doc: Index for series
