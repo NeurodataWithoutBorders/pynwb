@@ -1,8 +1,6 @@
 import unittest2 as unittest
 from copy import deepcopy
 
-import numpy as np
-
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
 
 from pynwb.ophys import (
@@ -88,7 +86,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
 
     def setUpContainer(self):
         self.make_imaging_plane()
-        data = np.ones((2, 2, 2))
+        data = [[[1., 1.] * 2] * 2]
         timestamps = list(map(lambda x: x/10, range(10)))
         fov = [2.0, 2.0, 5.0]
         ret = TwoPhotonSeries('test_2ps', self.imaging_plane, data, 'image_unit', 'raw', fov, 1.7, 3.4,
@@ -130,7 +128,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
             }
         )
 
-        data = np.ones((2, 2, 2))
+        data = [[[1., 1.] * 2] * 2]
         timestamps = list(map(lambda x: x/10, range(10)))
         return GroupBuilder(
             'test_2ps',
