@@ -130,7 +130,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
             }
         )
 
-        data = list(zip(range(10), range(10, 20)))
+        data = np.ones((2, 2, 2))
         timestamps = list(map(lambda x: x/10, range(10)))
         return GroupBuilder(
             'test_2ps',
