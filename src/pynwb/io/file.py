@@ -54,6 +54,12 @@ class NWBFileMap(ObjectMapper):
         date = dateutil_parse(datestr)
         return date
 
+    @ObjectMapper.constructor_arg('timestamps_reference_time')
+    def dateconversion_trt(self, builder, manager):
+        datestr = builder.get('timestamps_reference_time').data
+        date = dateutil_parse(datestr)
+        return date
+
     @ObjectMapper.constructor_arg('file_create_date')
     def dateconversion_list(self, builder, manager):
         datestr = builder.get('file_create_date').data

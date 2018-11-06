@@ -15,6 +15,7 @@ from pynwb.file import Subject, ElectrodeTable
 class NWBFileTest(unittest.TestCase):
     def setUp(self):
         self.start = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
+        self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
         self.create = [datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
                        datetime(2017, 5, 2, 13, 0, 0, 1, tzinfo=tzutc()),
                        datetime(2017, 5, 2, 14, tzinfo=tzutc())]
@@ -23,6 +24,7 @@ class NWBFileTest(unittest.TestCase):
                                'FILE123',
                                self.start,
                                file_create_date=self.create,
+                               timestamps_reference_time=self.ref_time,
                                experimenter='A test experimenter',
                                lab='a test lab',
                                institution='a test institution',
@@ -56,6 +58,7 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.source_script, 'noscript')
         self.assertEqual(self.nwbfile.source_script_file_name, 'nofilename')
         self.assertEqual(self.nwbfile.keywords, ('these', 'are', 'keywords'))
+        self.assertEqual(self.nwbfile.timestamps_reference_time, self.ref_time)
 
     def test_create_electrode_group(self):
         name = 'example_electrode_group'
@@ -259,10 +262,37 @@ class TestCacheSpec(unittest.TestCase):
 
     def test_simple(self):
         nwbfile = NWBFile(' ', ' ',
-                          datetime.now(tzlocal()), datetime.now(tzlocal()),
+                          datetime.now(tzlocal()),
+                          file_create_date=datetime.now(tzlocal()),
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile, cache_spec=True)
         reader = NWBHDF5IO(self.path, 'r', load_namespaces=True)
         nwbfile = reader.read()
+
+
+class TestTimestampsRefDefault(unittest.TestCase):
+    def setUp(self):
+        self.start_time = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
+        self.nwbfile = NWBFile('test session description',
+                               'TEST123',
+                               self.start_time)
+
+    def test_reftime_default(self):
+        # 'timestamps_reference_time' should default to 'session_start_time'
+        self.assertEqual(self.nwbfile.timestamps_reference_time, self.start_time)
+
+        
+class TestTimestampsRefAware(unittest.TestCase):
+    def setUp(self):
+        self.start_time = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
+        self.ref_time_notz = datetime(1979, 1, 1, 0, 0, 0)
+
+    def test_reftime_tzaware(self):
+        with self.assertRaises(ValueError):
+            # 'timestamps_reference_time' must be a timezone-aware datetime
+            NWBFile('test session description',
+                    'TEST124',
+                    self.start_time,
+                    timestamps_reference_time=self.ref_time_notz)
