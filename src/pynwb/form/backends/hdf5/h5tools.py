@@ -187,7 +187,7 @@ class HDF5IO(FORMIO):
         dest_file.close()
 
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'},
-            {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': False},
+            {'name': 'cache_spec', 'type': bool, 'doc': 'cache specification to file', 'default': True},
             {'name': 'link_data', 'type': bool,
              'doc': 'If not specified otherwise link (True) or copy (False) HDF5 Datasets', 'default': True})
     def write(self, **kwargs):
