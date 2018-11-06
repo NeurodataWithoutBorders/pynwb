@@ -283,7 +283,7 @@ class TestTimestampsRefDefault(unittest.TestCase):
         # 'timestamps_reference_time' should default to 'session_start_time'
         self.assertEqual(self.nwbfile.timestamps_reference_time, self.start_time)
 
-        
+
 class TestTimestampsRefAware(unittest.TestCase):
     def setUp(self):
         self.start_time = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())

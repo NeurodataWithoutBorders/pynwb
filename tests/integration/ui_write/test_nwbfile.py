@@ -101,7 +101,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                 'identifier': DatasetBuilder('identifier', 'TEST123'),
                                 'session_description': DatasetBuilder('session_description', 'a test NWB File'),
                                 'session_start_time': DatasetBuilder('session_start_time', self.start_time.isoformat()),
-                                'timestamps_reference_time': DatasetBuilder('timestamps_reference_time', 
+                                'timestamps_reference_time': DatasetBuilder('timestamps_reference_time',
                                                                             self.ref_time.isoformat())
                                 },
                             attributes={'namespace': base.CORE_NAMESPACE,
