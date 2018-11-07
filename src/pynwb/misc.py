@@ -200,10 +200,14 @@ class Units(DynamicTable):
             self.__has_spike_times = False
 
     @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
-            {'name': 'electrode', 'type': DynamicTableRegion, 'doc': 'the spike times for the unit', 'default': None},
-            {'name': 'electrode_group', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
-            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
-            {'name': 'waveform_sd', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
+            {'name': 'electrode', 'type': DynamicTableRegion, 'doc': 'the electrode that each spike unit came from',
+             'default': None},
+            {'name': 'electrode_group', 'type': 'array_data', 'default': None,
+             'doc': 'the electrode group that each spike unit came from'},
+            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each spike unit',
+             'default': None},
+            {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
+             'doc': 'the spike waveform standard deviation for each spike unit'},
             {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_unit(self, **kwargs):
