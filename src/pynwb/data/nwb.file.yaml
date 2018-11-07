@@ -18,7 +18,7 @@ groups:
     dtype: isodatetime
     doc: 'A record of the date the file was created and of subsequent modifications.
       COMMENT:
-        - The date is stored in UTC with local timezone offset as ISO 8601
+        - The date is stored in UTC with local timezone offset as ISO 8601 extended
           formatted strings: 2018-09-28T14:43:54.123+02:00
         - Dates stored in UTC end in "Z" with no timezone offset.
         - Date accuracy is up to milliseconds.
@@ -41,7 +41,15 @@ groups:
     dtype: isodatetime
     doc: 'Date and time of the experiment/session start.
       COMMENT:
-        - The date is stored in UTC with local timezone offset as ISO 8601
+        - The date is stored in UTC with local timezone offset as ISO 8601 extended
+          formatted string: 2018-09-28T14:43:54.123+02:00
+        - Dates stored in UTC end in "Z" with no timezone offset.
+        - Date accuracy is up to milliseconds.'
+  - name: timestamps_reference_time
+    dtype: isodatetime
+    doc: 'Date and time corresponding to time zero of all timestamps.
+      COMMENT:
+        - The date is stored in UTC with local timezone offset as ISO 8601 extended
           formatted string: 2018-09-28T14:43:54.123+02:00
         - Dates stored in UTC end in "Z" with no timezone offset.
         - Date accuracy is up to milliseconds.
