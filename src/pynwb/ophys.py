@@ -263,8 +263,7 @@ class PlaneSegmentation(DynamicTable):
         return super(PlaneSegmentation, self).add_row(**rkwargs)
 
     @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what the region is'},
-            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table', 'default': slice(None),
-            'shape': ([None] * 2, [None] * 3)},
+            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table', 'default': slice(None)},
             {'name': 'name', 'type': str, 'doc': 'the name of the ROITableRegion', 'default': 'rois'})
     def create_roi_table_region(self, **kwargs):
         return call_docval_func(self.create_region, kwargs)
