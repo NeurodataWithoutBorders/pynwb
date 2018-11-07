@@ -197,7 +197,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS['pixel_mask'][1], pix_mask[3:5])
 
     def test_init_3d_pixel_mask(self):
-        pix_masks = np.random.randn(2, 20, 30, 4)
+        pix_masks = np.random.randn(2, 30, 4)
 
         iSS, ip = self.getBoilerPlateObjects()
 
