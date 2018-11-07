@@ -244,8 +244,10 @@ class PlaneSegmentation(DynamicTable):
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
 
-    @docval({'name': 'pixel_mask', 'type': 'array_data', 'doc': 'the pixel mask', 'default': None},
-            {'name': 'image_mask', 'type': 'array_data', 'doc': 'the image mask for this ROI', 'default': None},
+    @docval({'name': 'pixel_mask', 'type': 'array_data', 'doc': 'the pixel mask', 'default': None,
+             'shape': ((None, 3), (None, 4))},
+            {'name': 'image_mask', 'type': 'array_data', 'doc': 'the image mask for this ROI', 'default': None,
+             'shape': [[None]*2, [None]*3]},
             {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_roi(self, **kwargs):
