@@ -98,7 +98,7 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
-        rt_region = ip.create_roi_table_region('the second ROI', region=[1])
+        rt_region = ip.create_roi_table_region('the second ROI', region=[[0], [0], [0]])
 
         ts = RoiResponseSeries('test_ts', list(), 'unit', rt_region, timestamps=list())
         self.assertEqual(ts.name, 'test_ts')
@@ -110,7 +110,7 @@ class DfOverFConstructor(unittest.TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
-        rt_region = ip.create_roi_table_region('the second ROI', region=[1])
+        rt_region = ip.create_roi_table_region('the second ROI', region=[[1], [1], [1]])
 
         rrs = RoiResponseSeries('test_ts', list(), 'unit', rt_region, timestamps=list())
 
