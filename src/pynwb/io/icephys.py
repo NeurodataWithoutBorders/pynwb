@@ -1,7 +1,7 @@
 from .. import register_map
 
 from pynwb.icephys import SweepTable
-from .core import DynamicTableMap
+from .base import DynamicTableMap
 
 
 @register_map(SweepTable)
