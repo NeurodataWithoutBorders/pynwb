@@ -391,6 +391,10 @@ groups:
       - neurodata_type_inc: IntracellularElectrode
         doc: 'One of possibly many. COMMENT: Name should be informative.'
         quantity: '*'
+      - neurodata_type_inc: SweepTable
+        name: sweep_table
+        doc: The table which groups different PatchClampSeries together.
+        quantity: '?'
       quantity: '?'
     - name: optogenetics
       doc: Metadata describing optogenetic stimuluation
