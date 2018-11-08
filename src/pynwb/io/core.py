@@ -4,11 +4,23 @@ from ..form.spec import Spec
 from ..form.container import Container
 from .. import register_map
 
-from pynwb.core import NWBData, DynamicTable
+from pynwb.file import NWBFile
+from pynwb.core import NWBData, DynamicTable, NWBContainer
+
+@register_map(NWBContainer)
+class NWBContainerMapper(ObjectMapper):
+
+    @staticmethod
+    def get_nwb_file(container):
+        curr = container
+        while curr is not None:
+            if isinstance(curr, NWBFile):
+                return curr
+            curr = container.parent
 
 
 @register_map(DynamicTable)
-class DynamicTableMap(ObjectMapper):
+class DynamicTableMap(NWBContainerMapper):
 
     def __init__(self, spec):
         super(DynamicTableMap, self).__init__(spec)
@@ -36,6 +48,12 @@ class DynamicTableMap(ObjectMapper):
         if attr_value is None and spec.name in container:
             if spec.neurodata_type_inc == 'TableColumn':
                 attr_value = container[spec.name]
+            elif spec.neurodata_type_inc == 'DynamicTableRegion':
+                attr_value = container[spec.name]
+                if attr_value.table is None:
+                    msg = "empty or missing table for DynamicTableRegion '%s' in DynamicTable '%s'" %\
+                          (attr_value.name, container.name)
+                    raise ValueError(msg)
             elif spec.neurodata_type_inc == 'VectorData':
                 attr_value = container[spec.name].target
         return attr_value
