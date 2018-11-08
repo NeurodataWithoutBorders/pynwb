@@ -136,10 +136,10 @@ nwbfile.add_acquisition(ephys_ts)
 # The :ref:`PyNWB Basics tutorial <basics>` demonstrates how to add data about units and specifying custom metadata
 # about units. As mentioned :ref:`here <units_fields_ref>`, there are some optional fields for units, one of these
 # is *electrodes*. This field takes the *id* for the electrode that the unit corresponds to. For example, if two units
-# were inferred from the first electrode (*id* = 0), you would be specify that like so:
+# were inferred from the first electrode (*id* = 1), you would be specify that like so:
 
-nwbfile.add_unit(id=1, electrode=0)
-nwbfile.add_unit(id=2, electrode=0)
+nwbfile.add_unit(id=1, electrode=1)
+nwbfile.add_unit(id=2, electrode=1)
 
 #######################
 # Designating electrophysiology data
