@@ -42,7 +42,6 @@ class OptogeneticSeries(TimeSeries):
 
     __nwbfields__ = ('site',)
 
-    _ancestry = "TimeSeries,OptogeneticSeries"
     _help = "Optogenetic stimulus."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},

@@ -59,7 +59,6 @@ class ElectricalSeries(TimeSeries):
     __nwbfields__ = ({'name': 'electrodes', 'required_name': 'electrodes',
                       'doc': 'the electrodes that generated this electrical series', 'child': True},)
 
-    __ancestry = "TimeSeries,ElectricalSeries"
     __help = "Stores acquired voltage data from extracellular recordings."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -109,7 +108,6 @@ class SpikeEventSeries(ElectricalSeries):
 
     __nwbfields__ = ()
 
-    __ancestry = "TimeSeries,ElectricalSeries,SpikeSeries"
     __help = "Snapshots of spike events from data."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
