@@ -6,6 +6,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
 from .core import NWBContainer, ElementIdentifiers, DynamicTable
+from .ecephys import ElectrodeGroup
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -199,7 +200,7 @@ class Units(DynamicTable):
     @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
             {'name': 'electrode', 'type': int, 'doc': 'the electrode that each spike unit came from',
              'default': None},
-            {'name': 'electrode_group', 'type': 'array_data', 'default': None,
+            {'name': 'electrode_group', 'type': ElectrodeGroup, 'default': None,
              'doc': 'the electrode group that each spike unit came from'},
             {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each spike unit',
              'default': None},

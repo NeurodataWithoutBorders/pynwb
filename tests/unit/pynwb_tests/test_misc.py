@@ -3,6 +3,8 @@ import unittest
 import numpy as np
 
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units
+from pynwb.device import Device
+from pynwb.ecephys import ElectrodeGroup
 
 
 class AnnotationSeriesConstructor(unittest.TestCase):
@@ -73,6 +75,13 @@ class UnitsTests(unittest.TestCase):
         ut.add_unit(spike_times=[3, 4, 5])
         self.assertTrue(all(ut['spike_times'][0] == np.array([0, 1, 2])))
         self.assertTrue(all(ut['spike_times'][1] == np.array([3, 4, 5])))
+
+    def test_elecgroups(self):
+        dev1 = Device('dev1')
+        elec_group = ElectrodeGroup('tetrode1', 'tetrode description', 'tetrode location', dev1)
+        ut = Units()
+        ut.add_unit(electrode_group=elec_group)
+        self.assertEqual(ut['electrode_group'][0], elec_group)
 
 
 if __name__ == '__main__':
