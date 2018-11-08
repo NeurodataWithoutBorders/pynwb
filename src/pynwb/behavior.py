@@ -22,8 +22,6 @@ class SpatialSeries(TimeSeries):
 
     __nwbfields__ = ('reference_frame',)
 
-    _ancestry = "TimeSeries,SpatialSeries"
-
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this SpatialSeries dataset'},

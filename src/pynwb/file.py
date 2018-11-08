@@ -143,14 +143,13 @@ class NWBFile(MultiContainerInterface):
         },
     ]
 
-    __nwbfields__ = ('experimenter',
-                     'data_collection',
-                     'description',
+    __nwbfields__ = ('timestamps_reference_time',
+                     'file_create_date',
+                     'experimenter',
                      'experiment_description',
                      'session_id',
-                     'keywords',
-                     'lab',
                      'institution',
+                     'keywords',
                      'notes',
                      'pharmacology',
                      'protocol',
@@ -158,9 +157,11 @@ class NWBFile(MultiContainerInterface):
                      'slices',
                      'source_script',
                      'source_script_file_name',
+                     'data_collection',
                      'surgery',
                      'virus',
                      'stimulus_notes',
+                     'lab',
                      {'name': 'electrodes', 'child': True,  'required_name': 'electrodes'},
                      {'name': 'epochs', 'child': True, 'required_name': 'epochs'},
                      {'name': 'trials', 'child': True, 'required_name': 'trials'},
@@ -172,9 +173,12 @@ class NWBFile(MultiContainerInterface):
     @docval({'name': 'session_description', 'type': str,
              'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
-            {'name': 'session_start_time', 'type': datetime, 'doc': 'the start time of the recording session'},
+            {'name': 'session_start_time', 'type': datetime, 'doc': 'the start date and time of the recording session'},
             {'name': 'file_create_date', 'type': ('array_data', datetime),
-             'doc': 'the time the file was created and subsequent modifications made', 'default': None},
+             'doc': 'the date and time the file was created and subsequent modifications made', 'default': None},
+            {'name': 'timestamps_reference_time', 'type': datetime,
+             'doc': 'date and time corresponding to time zero of all timestamps; defaults to value '
+                    'of session_start_time', 'default': None},
             {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str,
              'doc': 'general description of the experiment', 'default': None},
@@ -199,7 +203,7 @@ class NWBFile(MultiContainerInterface):
             {'name': 'source_script', 'type': str,
              'doc': 'Script file used to create this NWB file.', 'default': None},
             {'name': 'source_script_file_name', 'type': str,
-             'doc': 'Name of the sourc_script file', 'default': None},
+             'doc': 'Name of the source_script file', 'default': None},
             {'name': 'data_collection', 'type': str,
              'doc': 'Notes about data collection and analysis.', 'default': None},
             {'name': 'surgery', 'type': str,
@@ -255,6 +259,12 @@ class NWBFile(MultiContainerInterface):
         self.__session_start_time = getargs('session_start_time', kwargs)
         if self.__session_start_time.tzinfo is None:
             self.__session_start_time = _add_missing_timezone(self.__session_start_time)
+
+        self.__timestamps_reference_time = getargs('timestamps_reference_time', kwargs)
+        if self.__timestamps_reference_time is None:
+            self.__timestamps_reference_time = self.__session_start_time
+        elif self.__timestamps_reference_time.tzinfo is None:
+            raise ValueError("'timestamps_reference_time' must be a timezone-aware datetime object.")
 
         self.__file_create_date = getargs('file_create_date', kwargs)
         if self.__file_create_date is None:
@@ -353,6 +363,10 @@ class NWBFile(MultiContainerInterface):
     @property
     def session_start_time(self):
         return self.__session_start_time
+
+    @property
+    def timestamps_reference_time(self):
+        return self.__timestamps_reference_time
 
     def __check_epochs(self):
         if self.epochs is None:
