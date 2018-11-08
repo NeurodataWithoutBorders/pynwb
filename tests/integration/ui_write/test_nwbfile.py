@@ -20,6 +20,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
 
     def setUp(self):
         self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
+        self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
         self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         super(TestNWBFileIO, self).setUp()
         self.path = "test_pynwb_io_hdf5.h5"
@@ -99,7 +100,9 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                 DatasetBuilder('file_create_date', [self.create_date.isoformat()]),
                                 'identifier': DatasetBuilder('identifier', 'TEST123'),
                                 'session_description': DatasetBuilder('session_description', 'a test NWB File'),
-                                'session_start_time': DatasetBuilder('session_start_time', self.start_time.isoformat())
+                                'session_start_time': DatasetBuilder('session_start_time', self.start_time.isoformat()),
+                                'timestamps_reference_time': DatasetBuilder('timestamps_reference_time',
+                                                                            self.ref_time.isoformat())
                                 },
                             attributes={'namespace': base.CORE_NAMESPACE,
                                         'nwb_version': '2.0b',
@@ -109,6 +112,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
     def setUpContainer(self):
         container = NWBFile('a test NWB File', 'TEST123',
                             self.start_time,
+                            timestamps_reference_time=self.ref_time,
                             file_create_date=self.create_date,
                             experimenter='test experimenter',
                             stimulus_notes='test stimulus notes',
