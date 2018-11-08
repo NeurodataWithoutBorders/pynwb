@@ -102,7 +102,6 @@ class TwoPhotonSeries(ImageSeries):
                      'pmt_gain',
                      'scan_line_rate')
 
-    _ancestry = "TimeSeries,ImageSeries,TwoPhotonSeries"
     _help = "Image stack recorded from 2-photon microscope."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -308,7 +307,6 @@ class RoiResponseSeries(TimeSeries):
 
     __nwbfields__ = ({'name': 'rois', 'child': True},)
 
-    _ancestry = "TimeSeries,ImageSeries,ImageMaskSeries"
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -323,7 +321,7 @@ class RoiResponseSeries(TimeSeries):
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
