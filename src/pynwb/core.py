@@ -1151,7 +1151,7 @@ class DynamicTable(NWBDataInterface):
                 if idx < 0 or idx >= len(self):
                     raise IndexError('The index ' + str(idx) +
                                      ' is out of range for this DynamicTable of length '
-                                     + str(len(self.electrodes)))
+                                     + str(len(self)))
         desc = getargs('description', kwargs)
         name = getargs('name', kwargs)
         return DynamicTableRegion(name, region, desc, self)
@@ -1284,6 +1284,24 @@ class DynamicTableRegion(AbstractColumn):
         call_docval_func(super(DynamicTableRegion, self).__init__, kwargs)
         self.table = t
         self.description = d
+
+    @property
+    def table(self):
+        return self.fields.get('table')
+
+    @table.setter
+    def table(self, val):
+        if val is None:
+            return
+        if 'table' in self.fields:
+            msg = "can't set attribute 'table' -- already set"
+            raise AttributeError(msg)
+        for idx in self.data:
+            if idx < 0 or idx >= len(val):
+                raise IndexError('The index ' + str(idx) +
+                                 ' is out of range for this DynamicTable of length '
+                                 + str(len(val)))
+        self.fields['table'] = val
 
     def __getitem__(self, key):
         # treat the list of indices as data that can be indexed. then pass the
