@@ -7,6 +7,7 @@ from .. import register_map
 from pynwb.file import NWBFile
 from pynwb.core import NWBData, DynamicTable, NWBContainer
 
+
 @register_map(NWBContainer)
 class NWBContainerMapper(ObjectMapper):
 
