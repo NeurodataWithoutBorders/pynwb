@@ -1,3 +1,4 @@
+from abc import ABCMeta
 from h5py import RegionReference
 import numpy as np
 import pandas as pd
@@ -828,8 +829,16 @@ class MultiContainerInterface(NWBDataInterface):
             setattr(cls, '__getitem__', cls.__make_getitem(attr, container_type))
 
 
+class AbstractColumn(with_metaclass(ABCMeta, NWBData)):
+
+    @docval({'name': 'val', 'type': None, 'doc': 'the value to add to this column'})
+    def add_row(self, **kwargs):
+        val = getargs('val', kwargs)
+        self.data.append(val)
+
+
 @register_class('TableColumn', CORE_NAMESPACE)
-class TableColumn(NWBData):
+class TableColumn(AbstractColumn):
 
     __nwbfields__ = (
         'description',
@@ -842,11 +851,6 @@ class TableColumn(NWBData):
         desc = popargs('description', kwargs)
         call_docval_func(super(TableColumn, self).__init__, kwargs)
         self.description = desc
-
-    @docval({'name': 'val', 'type': None, 'doc': 'the value to add to this column'})
-    def add_row(self, **kwargs):
-        val = getargs('val', kwargs)
-        self.data.append(val)
 
 
 @register_class('DynamicTable', CORE_NAMESPACE)
@@ -906,9 +910,9 @@ class DynamicTable(NWBDataInterface):
             if len(columns) > 0:
                 if isinstance(columns[0], dict):
                     columns = self.__build_columns(columns)
-                elif not all(isinstance(c, (VectorData, VectorIndex, TableColumn)) for c in columns):
+                elif not all(isinstance(c, (VectorData, VectorIndex, AbstractColumn)) for c in columns):
                     raise ValueError("'columns' must be a list of TableColumns, VectorData, or VectorIndex")
-                lens = [len(c) for c in columns if isinstance(c, (TableColumn, VectorIndex))]
+                lens = [len(c) for c in columns if isinstance(c, (AbstractColumn, VectorIndex))]
                 if not all(i == lens[0] for i in lens):
                     raise ValueError("columns must be the same length")
                 if lens[0] != len(id):
@@ -950,7 +954,7 @@ class DynamicTable(NWBDataInterface):
                     i = i + 1
                 tmp = [None] * i
                 for col in columns:
-                    if isinstance(col, TableColumn):
+                    if isinstance(col, AbstractColumn):
                         pos = order[col.name]
                         tmp[pos] = col
                     elif isinstance(col, VectorData):
@@ -964,7 +968,7 @@ class DynamicTable(NWBDataInterface):
         # to make generating DataFrames and Series easier
         col_dict = dict()
         for col in self.columns:
-            if isinstance(col, TableColumn):
+            if isinstance(col, AbstractColumn):
                 col_dict[col.name] = col
             elif isinstance(col, VectorIndex):
                 col_dict[col.target.name] = col  # use target name for reference and VectorIndex for retrieval
@@ -974,7 +978,7 @@ class DynamicTable(NWBDataInterface):
         for col in self.__columns__:
             if col.get('required', False) and col['name'] not in self.__colids:
                 if not col.get('vector_data', False):
-                    self.add_column(col['name'], col['description'])
+                    self.add_column(col['name'], col['description'], table_region=col.get('table_region', False))
                 else:
                     self.add_vector_column(col['name'], col['description'])
 
@@ -1006,7 +1010,10 @@ class DynamicTable(NWBDataInterface):
             else:
                 if data is None:
                     data = list()
-                tmp.append(TableColumn(name, desc, data=data))
+                cls = TableColumn
+                if d.get('table_region', False):
+                    cls = DynamicTableRegion
+                tmp.append(cls(name, desc, data=data))
         return tmp
 
     def __len__(self):
@@ -1031,7 +1038,8 @@ class DynamicTable(NWBDataInterface):
                 if col['name'] in extra_columns:
                     if data[col['name']] is not None:
                         if not col.get('vector_data', False):
-                            self.add_column(col['name'], col['description'])
+                            self.add_column(col['name'], col['description'],
+                                            table_region=col.get('table_region', False))
                         else:
                             self.add_vector_column(col['name'], col['description'])
                     extra_columns.remove(col['name'])
@@ -1060,17 +1068,26 @@ class DynamicTable(NWBDataInterface):
             else:
                 c.add_row(data[colname])
 
-    @docval(*get_docval(TableColumn.__init__))
+    @docval(*get_docval(TableColumn.__init__) + (
+            {'name': 'table_region', 'type': (bool, 'DynamicTable'),
+             'doc': 'whether or not this is a table region or the table the region applies to', 'default': False},))
     def add_column(self, **kwargs):
         """
         Add a column to this table. If data is provided, it must
         contain the same number of rows as the current state of the table.
         """
         name, data = getargs('name', 'data', kwargs)
+        table_region = popargs('table_region', kwargs)
         if name in self.__colids:
             msg = "column '%s' already exists in DynamicTable '%s'" % (name, self.name)
             raise ValueError(msg)
-        col = TableColumn(**kwargs)
+        ckwargs = dict(kwargs)
+        cls = TableColumn
+        if table_region is not False:
+            cls = DynamicTableRegion
+            if isinstance(table_region, DynamicTable):
+                ckwargs['table'] = table_region
+        col = cls(**ckwargs)
         self.add_child(col)
         if len(data) != len(self.id):
             raise ValueError("column must have the same number of rows as 'id'")
@@ -1167,6 +1184,11 @@ class DynamicTable(NWBDataInterface):
     def __contains__(self, val):
         return val in self.__colids
 
+    def get(self, key, default=None):
+        if key in self:
+            return self[key]
+        return default
+
     def to_dataframe(self):
         '''Produce a pandas DataFrame containing this table's data.
         '''
@@ -1237,7 +1259,7 @@ class DynamicTable(NWBDataInterface):
 
 
 @register_class('DynamicTableRegion', CORE_NAMESPACE)
-class DynamicTableRegion(NWBData):
+class DynamicTableRegion(AbstractColumn):
     """
     An object for easily slicing into a DynamicTable
     """
@@ -1252,7 +1274,7 @@ class DynamicTableRegion(NWBData):
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
             {'name': 'description', 'type': str, 'doc': 'a description of what this region represents'},
             {'name': 'table', 'type': DynamicTable,
-             'doc': 'the DynamicTable this region applies to'},
+             'doc': 'the DynamicTable this region applies to', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
