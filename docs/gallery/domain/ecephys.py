@@ -138,8 +138,8 @@ nwbfile.add_acquisition(ephys_ts)
 # is *electrodes*. This field takes the *id* for the electrode that the unit corresponds to. For example, if two units
 # were inferred from the first electrode (*id* = 1), you would be specify that like so:
 
-nwbfile.add_unit(id=1, electrode=1)
-nwbfile.add_unit(id=2, electrode=1)
+nwbfile.add_unit(id=1, electrode=0)
+nwbfile.add_unit(id=2, electrode=0)
 
 #######################
 # Designating electrophysiology data
