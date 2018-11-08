@@ -63,7 +63,6 @@ class PatchClampSeries(TimeSeries):
                      'stimulus_description',
                      'sweep_number')
 
-    _ancestry = "TimeSeries,PatchClampSeries"
     _help = "Superclass definition for patch-clamp data."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -129,7 +128,6 @@ class CurrentClampSeries(PatchClampSeries):
                      'bridge_balance',
                      'capacitance_compensation')
 
-    _ancestry = "TimeSeries,PatchClampSeries,CurrentClampSeries"
     _help = "Voltage recorded from cell during current-clamprecording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -195,7 +193,6 @@ class IZeroClampSeries(CurrentClampSeries):
 
     __nwbfields__ = ()
 
-    _ancestry = "TimeSeries,PatchClampSeries,CurrentClampSeries,IZeroClampSeries"
     _help = "Voltage from intracellular recordings when all current and amplifier settings are off,"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -252,7 +249,6 @@ class CurrentClampStimulusSeries(PatchClampSeries):
 
     __nwbfields__ = ()
 
-    _ancestry = "TimeSeries,PatchClampSeries,CurrentClampStimulusSeries"
     _help = "Stimulus current applied during current clamp recording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -311,7 +307,6 @@ class VoltageClampSeries(PatchClampSeries):
                      'whole_cell_capacitance_comp',
                      'whole_cell_series_resistance_comp')
 
-    _ancestry = "TimeSeries,PatchClampSeries,VoltageClampSeries"
     _help = "Current recorded from cell during voltage-clamp recording"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -381,7 +376,6 @@ class VoltageClampStimulusSeries(PatchClampSeries):
 
     __nwbfields__ = ()
 
-    _ancestry = "TimeSeries,PatchClampSeries,VoltageClampStimulusSeries"
     _help = "Stimulus voltage applied during voltage clamp recording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
