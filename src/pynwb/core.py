@@ -988,7 +988,7 @@ class DynamicTable(NWBDataInterface):
                 if not col.get('vector', False):
                     self.add_column(col['name'], col['description'], table=col.get('table', False))
                 else:
-                    self.add_vector_column(col['name'], col['description'])
+                    self.add_column(col['name'], col['description'], vector=True)
 
     @staticmethod
     def __build_columns(columns, df=None):
@@ -1049,7 +1049,7 @@ class DynamicTable(NWBDataInterface):
                             self.add_column(col['name'], col['description'],
                                             table=col.get('table', False))
                         else:
-                            self.add_vector_column(col['name'], col['description'])
+                            self.add_column(col['name'], col['description'], vector=True)
                     extra_columns.remove(col['name'])
 
         if extra_columns or missing_columns:
@@ -1076,73 +1076,60 @@ class DynamicTable(NWBDataInterface):
             else:
                 c.add_row(data[colname])
 
-    @docval(*get_docval(VectorData.__init__) + (
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
+            {'name': 'description', 'type': str, 'doc': 'a description for this column'},
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors', 'default': list()},
             {'name': 'table', 'type': (bool, 'DynamicTable'),
-             'doc': 'whether or not this is a table region or the table the region applies to', 'default': False},))
+             'doc': 'whether or not this is a table region or the table the region applies to', 'default': False},
+            {'name': 'vector', 'type': (bool, VectorIndex, 'array_data'),
+             'doc': 'whether or not this column should be indexed', 'default': False})
     def add_column(self, **kwargs):
         """
         Add a column to this table. If data is provided, it must
         contain the same number of rows as the current state of the table.
         """
         name, data = getargs('name', 'data', kwargs)
-        table = popargs('table', kwargs)
+        vector, table = popargs('vector', 'table', kwargs)
         if name in self.__colids:
             msg = "column '%s' already exists in DynamicTable '%s'" % (name, self.name)
             raise ValueError(msg)
+
         ckwargs = dict(kwargs)
         cls = VectorData
+
+        # Add table if it's been specified
         if table is not False:
             cls = DynamicTableRegion
             if isinstance(table, DynamicTable):
                 ckwargs['table'] = table
+
         col = cls(**ckwargs)
         self.add_child(col)
-        if len(data) != len(self.id):
+        columns = [col]
+
+        # Add index if it's been specified
+        if vector is not False:
+            if isinstance(vector, VectorIndex):
+                col_index = vector
+            elif isinstance(vector, bool):        # make empty VectorIndex
+                if len(col) > 0:
+                    raise ValueError("cannot supply empty index with non-empty data to index")
+                col_index = VectorIndex(name +"_index", list(), col)
+            else:
+                if len(col) == 0:
+                    raise ValueError("cannot supply non-empty index with empty data to index")
+                col_index = VectorIndex(name +"_index", vector, col)
+            columns.insert(0, col_index)
+            self.add_child(col_index)
+            col = col_index
+
+        if len(col) != len(self.id):
             raise ValueError("column must have the same number of rows as 'id'")
         self.__colids[name] = len(self.__df_cols)
         self.fields['colnames'] = tuple(list(self.colnames)+[name])
-        self.fields['columns'] = tuple(list(self.columns)+[col])
+        self.fields['columns'] = tuple(list(self.columns)+columns)
         self.__df_cols.append(col)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this vector column', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'a description for this vector column', 'default': None},
-            {'name': 'index', 'type': 'array_data', 'doc': 'the index for this vector column', 'default': None},
-            {'name': 'data', 'type': 'array_data', 'doc': 'the data contained in this vector column', 'default': None})
-    def add_vector_column(self, **kwargs):
-        """
-        Add a column comprised of vector data (i.e. where the cells of
-        the column are vectors rather than scalars) to this table
-
-        If *name* and *description* are given, the index will be named *<name>_index*
-        """
-        index, data, name, description = getargs('index', 'data', 'name', 'description', kwargs)
-        if index is None and data is None:
-            if name is not None and description is not None:
-                data = VectorData(name, description)
-                index = VectorIndex(name + "_index", list(), data)
-            else:
-                raise ValueError("Must supply 'index' and 'data' or 'name' and 'description'")
-        elif index is not None and data is not None:
-            if not isinstance(index, VectorIndex) and not isinstance(data, VectorData):
-                pass
-            else:
-                if name is not None and description is not None:
-                    data = VectorData(name, description, data=data)
-                    index = VectorIndex(name + "_index", index, data)
-                else:
-                    msg = ("Must supply 'name' and 'description' if 'index' and 'data' ",
-                           "are not VectorIndex and VectorData, respectively")
-                    raise ValueError(msg)
-        else:
-            raise ValueError("Must supply both 'index' and 'data' or neither")
-        self.add_child(index)
-        self.add_child(data)
-        if len(index) != len(self.id):
-            raise ValueError("'index' must have the same number of rows as 'id'")
-        self.__colids[name] = len(self.__df_cols)
-        self.fields['colnames'] = tuple(list(self.colnames)+[name])
-        self.fields['columns'] = tuple(list(self.columns)+[index, data])
-        self.__df_cols.append(index)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the DynamicTableRegion object'},
             {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
