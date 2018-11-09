@@ -21,8 +21,8 @@ class TimeIntervals(DynamicTable):
     __columns__ = (
         {'name': 'start_time', 'description': 'Start time of epoch, in seconds', 'required': True},
         {'name': 'stop_time', 'description': 'Stop time of epoch, in seconds', 'required': True},
-        {'name': 'tags', 'description': 'user-defined tags', 'vector_data': True},
-        {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'vector_data': True}
+        {'name': 'tags', 'description': 'user-defined tags', 'vector': True},
+        {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'vector': True}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},

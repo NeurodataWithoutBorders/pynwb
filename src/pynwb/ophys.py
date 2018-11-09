@@ -218,7 +218,7 @@ class PlaneSegmentation(DynamicTable):
 
     __columns__ = (
         {'name': 'image_mask', 'description': 'Image masks for each ROI'},
-        {'name': 'pixel_mask', 'description': 'Pixel masks for each ROI', 'vector_data': True}
+        {'name': 'pixel_mask', 'description': 'Pixel masks for each ROI', 'vector': True}
     )
 
     @docval({'name': 'description', 'type': str,
