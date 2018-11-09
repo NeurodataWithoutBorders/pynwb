@@ -62,7 +62,7 @@ datasets:
   shape:
   - null
 - neurodata_type_def: DynamicTableRegion
-  neurodata_type_inc: TableColumn
+  neurodata_type_inc: VectorData
   dtype: int
   doc: a region/index into a DynamicTable
   attributes:
