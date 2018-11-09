@@ -311,7 +311,7 @@ groups:
         doc: A table of all electrodes (i.e. channels) used for recording.
         quantity: '?'
         datasets:
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: x
           dtype: float
           doc: the x coordinate of the channel location
@@ -320,7 +320,7 @@ groups:
             dtype: text
             doc: value is 'the x coordinate of the channel location'
             value: the x coordinate of the channel location
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: y
           dtype: float
           doc: the y coordinate of the channel location
@@ -329,7 +329,7 @@ groups:
             dtype: text
             doc: value is 'the y coordinate of the channel location'
             value: the y coordinate of the channel location
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: z
           dtype: float
           doc: the z coordinate of the channel location
@@ -338,7 +338,7 @@ groups:
             dtype: text
             doc: value is 'the z coordinate of the channel location'
             value: the z coordinate of the channel location
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: imp
           dtype: float
           doc: the impedance of the channel
@@ -347,7 +347,7 @@ groups:
             dtype: text
             doc: value is 'the impedance of the channel'
             value: the impedance of the channel
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: location
           dtype: ascii
           doc: the location of channel within the subject e.g. brain region
@@ -356,7 +356,7 @@ groups:
             dtype: text
             doc: value is 'the location of channel within the subject e.g. brain region'
             value: the location of channel within the subject e.g. brain region
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: filtering
           dtype: float
           doc: description of hardware filtering
@@ -365,7 +365,7 @@ groups:
             dtype: text
             doc: value is 'description of hardware filtering'
             value: description of hardware filtering
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: group
           dtype:
             target_type: ElectrodeGroup
@@ -376,7 +376,7 @@ groups:
             dtype: text
             doc: value is 'a reference to the ElectrodeGroup this electrode is a part of'
             value: a reference to the ElectrodeGroup this electrode is a part of
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: group_name
           dtype: ascii
           doc: name of the ElectrodeGroup this electrode is a part of

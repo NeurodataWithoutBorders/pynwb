@@ -846,16 +846,11 @@ class AbstractColumn(with_metaclass(ABCMeta, NWBData)):
         self.data.append(val)
 
 
-@register_class('TableColumn', CORE_NAMESPACE)
-class TableColumn(VectorData):
-    pass
-
-
 @register_class('DynamicTable', CORE_NAMESPACE)
 class DynamicTable(NWBDataInterface):
     """
     A column-based table. Columns are defined by the argument *columns*. This argument
-    must be a list/tuple of TableColumns and VectorIndexes or a list/tuple of dicts containing the keys
+    must be a list/tuple of VectorDatas and VectorIndexes or a list/tuple of dicts containing the keys
     'name' and 'description' that provide the name and description of each column
     in the table. If specifying columns with a list/tuple of dicts, VectorData columns can
     be specified by setting the key 'vector_data' to True.
@@ -909,7 +904,7 @@ class DynamicTable(NWBDataInterface):
                 if isinstance(columns[0], dict):
                     columns = self.__build_columns(columns)
                 elif not all(isinstance(c, (VectorData, VectorIndex, AbstractColumn)) for c in columns):
-                    raise ValueError("'columns' must be a list of TableColumns, VectorData, or VectorIndex")
+                    raise ValueError("'columns' must be a list of VectorData, DynamicTableRegion or VectorIndex")
                 colset = {c.name: c for c in columns}
                 for c in columns:
                     if isinstance(c, VectorIndex):
@@ -1026,7 +1021,7 @@ class DynamicTable(NWBDataInterface):
             else:
                 if data is None:
                     data = list()
-                cls = TableColumn
+                cls = VectorData
                 if d.get('table_region', False):
                     cls = DynamicTableRegion
                 tmp.append(cls(name, desc, data=data))
@@ -1084,7 +1079,7 @@ class DynamicTable(NWBDataInterface):
             else:
                 c.add_row(data[colname])
 
-    @docval(*get_docval(TableColumn.__init__) + (
+    @docval(*get_docval(VectorData.__init__) + (
             {'name': 'table_region', 'type': (bool, 'DynamicTable'),
              'doc': 'whether or not this is a table region or the table the region applies to', 'default': False},))
     def add_column(self, **kwargs):
@@ -1098,7 +1093,7 @@ class DynamicTable(NWBDataInterface):
             msg = "column '%s' already exists in DynamicTable '%s'" % (name, self.name)
             raise ValueError(msg)
         ckwargs = dict(kwargs)
-        cls = TableColumn
+        cls = VectorData
         if table_region is not False:
             cls = DynamicTableRegion
             if isinstance(table_region, DynamicTable):

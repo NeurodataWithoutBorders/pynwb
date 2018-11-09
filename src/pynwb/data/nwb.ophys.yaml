@@ -116,7 +116,7 @@ groups:
       doc: Value is 'Results from segmentation of an imaging plane'
       value: Results from segmentation of an imaging plane
     datasets:
-    - neurodata_type_inc: TableColumn
+    - neurodata_type_inc: VectorData
       name: image_mask
       doc: ROI masks for each ROI
       dims:

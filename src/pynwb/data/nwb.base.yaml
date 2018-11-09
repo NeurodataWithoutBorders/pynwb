@@ -5,17 +5,6 @@ datasets:
   - name: help
     dtype: text
     doc: Short description of what this type of Interface contains.
-- neurodata_type_def: TableColumn
-  neurodata_type_inc: NWBData
-  doc: The attributes specified here are included in all interfaces.
-  attributes:
-  - name: help
-    dtype: text
-    doc: Value is 'One of many columns that can be added to a DynamicTable'.
-    value: One of many columns that can be added to a DynamicTable
-  - name: description
-    dtype: text
-    doc: A short description of what this column stores
 - neurodata_type_def: Index
   neurodata_type_inc: NWBData
   doc: Pointers that index data values
@@ -262,7 +251,7 @@ groups:
   doc: A group containing multiple datasets that are aligned on the first dimension
     (Currently, this requirement if left up to APIs to check and enforce). Apart from
     a column that contains unique identifiers for each row there are no other required
-    datasets. Users are free to add any number of TableColumn objects here. Table
+    datasets. Users are free to add any number of VectorData objects here. Table
     functionality is already supported through compound types, which is analogous
     to storing an array-of-structs. DynamicTable can be thought of as a struct-of-arrays.
     This provides an alternative structure to choose from when optimizing storage
@@ -300,9 +289,6 @@ groups:
     doc: The unique identifier for the rows in this dynamic table
     shape:
     - null
-  - neurodata_type_inc: TableColumn
-    doc: The columns in this dynamic table
-    quantity: '*'
   - neurodata_type_inc: VectorData
     doc: The vector columns in this dynamic table
     quantity: '*'

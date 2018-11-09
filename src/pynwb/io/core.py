@@ -5,7 +5,7 @@ from ..form.container import Container
 from .. import register_map
 
 from pynwb.file import NWBFile
-from pynwb.core import NWBData, DynamicTable, NWBContainer
+from pynwb.core import NWBData, DynamicTable, NWBContainer, VectorIndex
 
 
 @register_map(NWBContainer)
@@ -25,8 +25,6 @@ class DynamicTableMap(NWBContainerMapper):
 
     def __init__(self, spec):
         super(DynamicTableMap, self).__init__(spec)
-        columns_spec = spec.get_neurodata_type('TableColumn')
-        self.map_spec('columns', columns_spec)
         vector_data_spec = spec.get_neurodata_type('VectorData')
         vector_index_spec = spec.get_neurodata_type('VectorIndex')
         self.map_spec('columns', vector_data_spec)
@@ -47,16 +45,16 @@ class DynamicTableMap(NWBContainerMapper):
         spec, container, manager = getargs('spec', 'container', 'manager', kwargs)
         attr_value = super(DynamicTableMap, self).get_attr_value(spec, container, manager)
         if attr_value is None and spec.name in container:
-            if spec.neurodata_type_inc == 'TableColumn':
+            if spec.neurodata_type_inc == 'VectorData':
                 attr_value = container[spec.name]
+                if isinstance(attr_value, VectorIndex):
+                    attr_value = attr_value.target
             elif spec.neurodata_type_inc == 'DynamicTableRegion':
                 attr_value = container[spec.name]
                 if attr_value.table is None:
                     msg = "empty or missing table for DynamicTableRegion '%s' in DynamicTable '%s'" %\
                           (attr_value.name, container.name)
                     raise ValueError(msg)
-            elif spec.neurodata_type_inc == 'VectorData':
-                attr_value = container[spec.name].target
         return attr_value
 
 
