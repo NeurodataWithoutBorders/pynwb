@@ -128,6 +128,10 @@ groups:
     doc: the spike times for each unit
     quantity: '?'
   - neurodata_type_inc: DynamicTableRegion
+    name: electrodes_index
+    doc: the index into electrodes
+    quantity: '?'
+  - neurodata_type_inc: DynamicTableRegion
     name: electrodes
     doc: the electrode that each spike unit came from
     quantity: '?'
