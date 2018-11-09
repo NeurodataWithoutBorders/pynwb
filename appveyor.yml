@@ -14,13 +14,6 @@ environment:
       BUILD_TOX_ENV: build-py27
       TEST_WHEELINSTALL_ENV: wheelinstall-py27
 
-    - PYTHON_VERSION: 3.5
-      PYTHON: C:\\Python35-x64
-      TEST_TOX_ENV: py35
-      COVERAGE_TOX_ENV: coverage-py35
-      BUILD_TOX_ENV: build-py35
-      TEST_WHEELINSTALL_ENV: wheelinstall-py35
-
     - PYTHON_VERSION: 3.6
       PYTHON: C:\\Python36-x64
       TEST_TOX_ENV: py36
