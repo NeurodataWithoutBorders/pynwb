@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from pynwb.core import DynamicTable, TableColumn, ElementIdentifiers, NWBTable
+from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable
 from pynwb import NWBFile
 
 import pandas as pd
@@ -23,13 +23,13 @@ class TestDynamicTable(unittest.TestCase):
         ]
 
     def with_table_columns(self):
-        cols = [TableColumn(**d) for d in self.spec]
+        cols = [VectorData(**d) for d in self.spec]
         table = DynamicTable("with_table_columns", 'a test table', columns=cols)
         return table
 
     def with_columns_and_data(self):
         columns = [
-            TableColumn(name=s['name'], description=s['description'], data=d)
+            VectorData(name=s['name'], description=s['description'], data=d)
             for s, d in zip(self.spec, self.data)
         ]
         return DynamicTable("with_columns_and_data", 'a test table', columns=columns)
@@ -39,7 +39,7 @@ class TestDynamicTable(unittest.TestCase):
         return table
 
     def check_empty_table(self, table):
-        self.assertIsInstance(table.columns[0], TableColumn)
+        self.assertIsInstance(table.columns[0], VectorData)
         self.assertEqual(len(table.columns), 3)
         self.assertEqual(table.colnames, ('foo', 'bar', 'baz'))
 
@@ -61,26 +61,26 @@ class TestDynamicTable(unittest.TestCase):
         self.assertEqual(table.id.data, [0, 1, 2, 3, 4])
 
     def test_constructor_ids_default(self):
-        columns = [TableColumn(name=s['name'], description=s['description'], data=d)
+        columns = [VectorData(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
         table = DynamicTable("with_spec", 'a test table', columns=columns)
         self.check_table(table)
 
     def test_constructor_ids(self):
-        columns = [TableColumn(name=s['name'], description=s['description'], data=d)
+        columns = [VectorData(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
         table = DynamicTable("with_columns", 'a test table', id=[0, 1, 2, 3, 4], columns=columns)
         self.check_table(table)
 
     def test_constructor_ElementIdentifier_ids(self):
-        columns = [TableColumn(name=s['name'], description=s['description'], data=d)
+        columns = [VectorData(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
         ids = ElementIdentifiers('ids', [0, 1, 2, 3, 4])
         table = DynamicTable("with_columns", 'a test table', id=ids, columns=columns)
         self.check_table(table)
 
     def test_constructor_ids_bad_ids(self):
-        columns = [TableColumn(name=s['name'], description=s['description'], data=d)
+        columns = [VectorData(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
         msg = "must provide same number of ids as length of columns"
         with self.assertRaisesRegex(ValueError, msg):
