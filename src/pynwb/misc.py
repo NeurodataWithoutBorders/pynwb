@@ -176,7 +176,7 @@ class Units(DynamicTable):
 
     __columns__ = (
         {'name': 'spike_times', 'description': 'the spike times for each unit', 'vector_data': True},
-        {'name': 'electrode', 'description': 'the electrode that each spike unit came from', 'table_region': True},
+        {'name': 'electrodes', 'description': 'the electrodes that each spike unit came from', 'table_region': True},
         {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
         {'name': 'waveform_mean', 'description': 'the spike waveform mean for each spike unit'},
         {'name': 'waveform_sd', 'description': 'the spike waveform standard deviation for each spike unit'}
@@ -197,7 +197,7 @@ class Units(DynamicTable):
             self.__has_spike_times = False
 
     @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
-            {'name': 'electrode', 'type': int, 'doc': 'the electrode that each spike unit came from',
+            {'name': 'electrodes', 'type': int, 'doc': 'the electrodes that each spike unit came from',
              'default': None},
             {'name': 'electrode_group', 'type': 'array_data', 'default': None,
              'doc': 'the electrode group that each spike unit came from'},
