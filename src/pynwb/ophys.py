@@ -218,7 +218,8 @@ class PlaneSegmentation(DynamicTable):
 
     __columns__ = (
         {'name': 'image_mask', 'description': 'Image masks for each ROI'},
-        {'name': 'pixel_mask', 'description': 'Pixel masks for each ROI', 'vector_data': True}
+        {'name': 'pixel_mask', 'description': 'Pixel masks for each ROI', 'vector_data': True},
+        {'name': 'voxel_mask', 'description': 'Voxel masks for each ROI', 'vector_data': True}
     )
 
     @docval({'name': 'description', 'type': str,
@@ -243,9 +244,14 @@ class PlaneSegmentation(DynamicTable):
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
 
-    @docval({'name': 'pixel_mask', 'type': 'array_data', 'doc': 'the pixel mask', 'default': None,
-             'shape': ((None, 3), (None, 4))},
-            {'name': 'image_mask', 'type': 'array_data', 'doc': 'the image mask for this ROI', 'default': None,
+    @docval({'name': 'pixel_mask', 'type': 'array_data', 'default': None,
+             'doc': 'pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]',
+             'shape': (None, 3)},
+            {'name': 'voxel_mask', 'type': 'array_data', 'default': None,
+             'doc': 'voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z1, weight2), ...]',
+             'shape': (None, 4)},
+            {'name': 'image_mask', 'type': 'array_data', 'default': None,
+             'doc': 'image with the same size of image where positive values mark this ROI',
              'shape': [[None]*2, [None]*3]},
             {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
             allow_extra=True)
@@ -253,14 +259,16 @@ class PlaneSegmentation(DynamicTable):
         """
         Add ROI data to this
         """
-        pixel_mask, image_mask = popargs('pixel_mask', 'image_mask', kwargs)
-        if image_mask is None and pixel_mask is None:
-            raise ValueError("Must provide either 'image_mask' or 'pixel_mask' or both")
+        pixel_mask, voxel_mask, image_mask = popargs('pixel_mask', 'voxel_mask', 'image_mask', kwargs)
+        if image_mask is None and pixel_mask is None and voxel_mask is None:
+            raise ValueError("Must provide 'image_mask' and/or 'pixel_mask'")
         rkwargs = dict(kwargs)
         if image_mask is not None:
             rkwargs['image_mask'] = image_mask
         if pixel_mask is not None:
             rkwargs['pixel_mask'] = pixel_mask
+        if voxel_mask is not None:
+            rkwargs['voxel_mask'] = voxel_mask
         return super(PlaneSegmentation, self).add_row(**rkwargs)
 
     @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what the region is'},
