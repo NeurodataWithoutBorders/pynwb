@@ -196,17 +196,36 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS['pixel_mask'][0], pix_mask[0:3])
         self.assertEqual(pS['pixel_mask'][1], pix_mask[3:5])
 
-    def test_init_3d_pixel_mask(self):
-        pix_masks = np.random.randn(2, 20, 30, 4)
+    def test_init_voxel_mask(self):
+        vox_mask = [[1, 2, 3, 1.0], [3, 4, 1, 1.0], [5, 6, 3, 1.0],
+                    [7, 8, 3, 2.0], [9, 10, 2, 2.0]]
 
         iSS, ip = self.getBoilerPlateObjects()
 
         pS = PlaneSegmentation('description', ip, 'test_name', iSS)
-        pS.add_roi(pixel_mask=pix_masks[0].tolist())
-        pS.add_roi(pixel_mask=pix_masks[1].tolist())
+        pS.add_roi(voxel_mask=vox_mask[0:3])
+        pS.add_roi(voxel_mask=vox_mask[3:5])
 
-        self.assertTrue(np.allclose(pS['pixel_mask'][0], pix_masks[0]))
-        self.assertTrue(np.allclose(pS['pixel_mask'][1], pix_masks[1]))
+        self.assertEqual(pS.description, 'description')
+
+        self.assertEqual(pS.imaging_plane, ip)
+        self.assertEqual(pS.reference_images, iSS)
+
+        self.assertEqual(pS['voxel_mask'].target.data, vox_mask)
+        self.assertEqual(pS['voxel_mask'][0], vox_mask[0:3])
+        self.assertEqual(pS['voxel_mask'][1], vox_mask[3:5])
+
+    def test_init_3d_image_mask(self):
+        img_masks = np.random.randn(2, 20, 30, 4)
+
+        iSS, ip = self.getBoilerPlateObjects()
+
+        pS = PlaneSegmentation('description', ip, 'test_name', iSS)
+        pS.add_roi(image_mask=img_masks[0])
+        pS.add_roi(image_mask=img_masks[1])
+
+        self.assertTrue(np.allclose(pS['image_mask'][0], img_masks[0]))
+        self.assertTrue(np.allclose(pS['image_mask'][1], img_masks[1]))
 
     def test_init_image_mask(self):
         w, h = 5, 5
