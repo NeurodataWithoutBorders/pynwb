@@ -947,6 +947,8 @@ class DynamicTable(NWBDataInterface):
                     if isinstance(col, VectorIndex):
                         indexed[col.target.name] = True
                     else:
+                        if col.name in indexed:
+                            continue
                         indexed[col.name] = False
                 i = 0
                 for name in self.colnames:
@@ -957,6 +959,8 @@ class DynamicTable(NWBDataInterface):
                     i = i + 1
                 tmp = [None] * i
                 for col in columns:
+                    if indexed.get(col.name, False):
+                        continue
                     if isinstance(col, VectorData):
                         pos = order[col.name]
                         tmp[pos] = col
@@ -980,7 +984,8 @@ class DynamicTable(NWBDataInterface):
                             raise ValueError("duplicate column does not target VectorData '%s'" % col.name)
                     else:
                         raise ValueError("duplicate column found: '%s'" % col.name)
-                col_dict[col.name] = col
+                else:
+                    col_dict[col.name] = col
             elif isinstance(col, VectorIndex):
                 col_dict[col.target.name] = col  # use target name for reference and VectorIndex for retrieval
 
