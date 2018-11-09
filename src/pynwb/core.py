@@ -1259,7 +1259,7 @@ class DynamicTable(NWBDataInterface):
 
 
 @register_class('DynamicTableRegion', CORE_NAMESPACE)
-class DynamicTableRegion(AbstractColumn):
+class DynamicTableRegion(TableColumn):
     """
     An object for easily slicing into a DynamicTable
     """
