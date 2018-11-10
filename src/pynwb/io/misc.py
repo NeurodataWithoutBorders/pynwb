@@ -13,6 +13,6 @@ class UnitsMap(DynamicTableMap):
         if ret is None:
             return ret
         # set the electrode table if it hasn't been set yet
-        if ret.table is None:
-            ret.table = self.get_nwb_file(container).electrodes
+        if ret.target.table is None:
+            ret.target.table = self.get_nwb_file(container).electrodes
         return ret

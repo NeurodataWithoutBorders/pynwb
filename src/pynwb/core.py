@@ -845,7 +845,7 @@ class DynamicTable(NWBDataInterface):
     must be a list/tuple of VectorDatas and VectorIndexes or a list/tuple of dicts containing the keys
     'name' and 'description' that provide the name and description of each column
     in the table. If specifying columns with a list/tuple of dicts, VectorData columns can
-    be specified by setting the key 'vector' to True.
+    be specified by setting the key 'index' to True.
     """
 
     __nwbfields__ = (
@@ -985,10 +985,9 @@ class DynamicTable(NWBDataInterface):
         self.__colids = {name: i+1 for i, name in enumerate(self.colnames)}
         for col in self.__columns__:
             if col.get('required', False) and col['name'] not in self.__colids:
-                if not col.get('vector', False):
-                    self.add_column(col['name'], col['description'], table=col.get('table', False))
-                else:
-                    self.add_column(col['name'], col['description'], vector=True)
+                self.add_column(col['name'], col['description'],
+                                index=col.get('index', False),
+                                table=col.get('table', False))
 
     @staticmethod
     def __build_columns(columns, df=None):
@@ -999,7 +998,7 @@ class DynamicTable(NWBDataInterface):
             data = None
             if df is not None:
                 data = list(df[name].values)
-            if d.get('vector', False):
+            if d.get('index', False):
                 index_data = None
                 if data is not None:
                     index_data = [len(data[0])]
@@ -1045,11 +1044,9 @@ class DynamicTable(NWBDataInterface):
             for col in self.__columns__:
                 if col['name'] in extra_columns:
                     if data[col['name']] is not None:
-                        if not col.get('vector', False):
-                            self.add_column(col['name'], col['description'],
-                                            table=col.get('table', False))
-                        else:
-                            self.add_column(col['name'], col['description'], vector=True)
+                        self.add_column(col['name'], col['description'],
+                                        index=col.get('index', False),
+                                        table=col.get('table', False))
                     extra_columns.remove(col['name'])
 
         if extra_columns or missing_columns:
@@ -1082,7 +1079,7 @@ class DynamicTable(NWBDataInterface):
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors', 'default': list()},
             {'name': 'table', 'type': (bool, 'DynamicTable'),
              'doc': 'whether or not this is a table region or the table the region applies to', 'default': False},
-            {'name': 'vector', 'type': (bool, VectorIndex, 'array_data'),
+            {'name': 'index', 'type': (bool, VectorIndex, 'array_data'),
              'doc': 'whether or not this column should be indexed', 'default': False})
     def add_column(self, **kwargs):
         """
@@ -1090,7 +1087,7 @@ class DynamicTable(NWBDataInterface):
         contain the same number of rows as the current state of the table.
         """
         name, data = getargs('name', 'data', kwargs)
-        vector, table = popargs('vector', 'table', kwargs)
+        index, table = popargs('index', 'table', kwargs)
         if name in self.__colids:
             msg = "column '%s' already exists in DynamicTable '%s'" % (name, self.name)
             raise ValueError(msg)
@@ -1109,17 +1106,17 @@ class DynamicTable(NWBDataInterface):
         columns = [col]
 
         # Add index if it's been specified
-        if vector is not False:
-            if isinstance(vector, VectorIndex):
-                col_index = vector
-            elif isinstance(vector, bool):        # make empty VectorIndex
+        if index is not False:
+            if isinstance(index, VectorIndex):
+                col_index = index
+            elif isinstance(index, bool):        # make empty VectorIndex
                 if len(col) > 0:
-                    raise ValueError("cannot supply empty index with non-empty data to index")
+                    raise ValueError("cannot pass empty index with non-empty data to index")
                 col_index = VectorIndex(name +"_index", list(), col)
-            else:
+            else:                                # make VectorIndex with supplied data
                 if len(col) == 0:
-                    raise ValueError("cannot supply non-empty index with empty data to index")
-                col_index = VectorIndex(name +"_index", vector, col)
+                    raise ValueError("cannot pass non-empty index with empty data to index")
+                col_index = VectorIndex(name +"_index", index, col)
             columns.insert(0, col_index)
             self.add_child(col_index)
             col = col_index
