@@ -1,24 +1,24 @@
-from ..form.build import ObjectMapper
+from .core import NWBContainerMapper
 from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
 
 
 @register_map(ProcessingModule)
-class ModuleMap(ObjectMapper):
+class ModuleMap(NWBContainerMapper):
 
     def __init__(self, spec):
         super(ModuleMap, self).__init__(spec)
         containers_spec = self.spec.get_neurodata_type('NWBDataInterface')
         self.map_spec('data_interfaces', containers_spec)
 
-    @ObjectMapper.constructor_arg('name')
+    @NWBContainerMapper.constructor_arg('name')
     def name(self, builder, manager):
         return builder.name
 
 
 @register_map(TimeSeries)
-class TimeSeriesMap(ObjectMapper):
+class TimeSeriesMap(NWBContainerMapper):
 
     def __init__(self, spec):
         super(TimeSeriesMap, self).__init__(spec)
@@ -34,6 +34,6 @@ class TimeSeriesMap(ObjectMapper):
         self.map_attr('starting_time_unit', startingtime_spec.get_attribute('unit'))
         self.map_attr('rate', startingtime_spec.get_attribute('rate'))
 
-    @ObjectMapper.constructor_arg('name')
+    @NWBContainerMapper.constructor_arg('name')
     def name(self, builder, manager):
         return builder.name

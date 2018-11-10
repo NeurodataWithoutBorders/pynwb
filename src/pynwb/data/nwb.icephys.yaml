@@ -239,7 +239,7 @@ groups:
     doc: Value is 'The table which groups different PatchClampSeries together'
     value: The table which groups different PatchClampSeries together
   datasets:
-  - neurodata_type_inc: TableColumn
+  - neurodata_type_inc: VectorData
     name: sweep_number
     dtype: uint64
     doc: The sweep number of the PatchClampSeries in that row.

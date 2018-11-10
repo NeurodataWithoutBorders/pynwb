@@ -195,6 +195,14 @@ nwbfile.add_unit(id=2, location='CA3', quality=0.85)
 nwbfile.add_unit(id=3, location='CA1', quality=0.90)
 
 ####################
+# .. _units_fields_ref:
+#
+# .. note::
+#    The Units table has some predefined optional columns. Please review the documentation for
+#    :py:func:`~pynwb.file.NWBFile.add_unit` before adding custom columns.
+
+
+####################
 # .. _basic_writing:
 #
 # Writing an NWB file
