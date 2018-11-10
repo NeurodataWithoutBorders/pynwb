@@ -176,7 +176,8 @@ class Units(DynamicTable):
 
     __columns__ = (
         {'name': 'spike_times', 'description': 'the spike times for each unit', 'index': True},
-        {'name': 'electrodes', 'description': 'the electrodes that each spike unit came from', 'index': True, 'table': True},
+        {'name': 'electrodes', 'description': 'the electrodes that each spike unit came from',
+         'index': True, 'table': True},
         {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
         {'name': 'waveform_mean', 'description': 'the spike waveform mean for each spike unit'},
         {'name': 'waveform_sd', 'description': 'the spike waveform standard deviation for each spike unit'}

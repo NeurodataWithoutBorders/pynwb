@@ -1,4 +1,3 @@
-from abc import ABCMeta
 from h5py import RegionReference
 import numpy as np
 import pandas as pd
@@ -1112,11 +1111,11 @@ class DynamicTable(NWBDataInterface):
             elif isinstance(index, bool):        # make empty VectorIndex
                 if len(col) > 0:
                     raise ValueError("cannot pass empty index with non-empty data to index")
-                col_index = VectorIndex(name +"_index", list(), col)
+                col_index = VectorIndex(name + "_index", list(), col)
             else:                                # make VectorIndex with supplied data
                 if len(col) == 0:
                     raise ValueError("cannot pass non-empty index with empty data to index")
-                col_index = VectorIndex(name +"_index", index, col)
+                col_index = VectorIndex(name + "_index", index, col)
             columns.insert(0, col_index)
             self.add_child(col_index)
             col = col_index
