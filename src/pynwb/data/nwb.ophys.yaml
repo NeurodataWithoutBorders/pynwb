@@ -118,7 +118,8 @@ groups:
     datasets:
     - neurodata_type_inc: VectorData
       name: image_mask
-      doc: ROI masks for each ROI
+      doc: ROI masks for each ROI. Each image mask is the size of the original imaging
+        plane (or volume) and members of the ROI are finite non-zero
       dims:
       - - num_roi
         - num_x
@@ -142,8 +143,9 @@ groups:
       quantity: '?'
     - neurodata_type_inc: VectorData
       name: pixel_mask
-      doc: Pixel masks for each ROI. Pixel masks are concatenated and parsing of this
-        dataset is maintained by the PlaneSegmentation
+      doc: 'Pixel masks for each ROI: a list of indices and weights for the ROI. Pixel
+        masks are concatenated and parsing of this dataset is maintained by the
+        PlaneSegmentation'
       dtype:
       - name: x
         dtype: uint
@@ -161,8 +163,9 @@ groups:
       quantity: '?'
     - neurodata_type_inc: VectorData
       name: voxel_mask
-      doc: Voxel masks for each ROI. Voxel masks are concatenated and parsing of this
-        dataset is maintained by the PlaneSegmentation
+      doc: 'Voxel masks for each ROI: a list of indices and weights for the ROI. Voxel
+        masks are concatenated and parsing of this dataset is maintained by the
+        PlaneSegmentation'
       dtype:
       - name: x
         dtype: uint
