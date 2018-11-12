@@ -61,47 +61,6 @@ def prepend_string(string, prepend='    '):
     return prepend + prepend.join(string.splitlines(True))
 
 
-def list2str(v):
-    return str(np.array(v)) + '\n'
-
-
-def nwb_repr(nwb_object, verbose=False):
-    """
-
-    Parameters
-    ----------
-    nwb_object
-    verbose: bool, optional
-        If set to True, a print call will recursively crawl through the entire object. If False (default) it will only
-        show the first layer
-
-    Returns
-    -------
-    str/repr of nwb_object
-
-    """
-    try:
-        template = "{} {}\nFields:\n""".format(getattr(nwb_object, 'name'), type(nwb_object))
-
-        if verbose:
-            for k, v in iteritems(nwb_object.fields):
-                template += "  {}:\n".format(k)
-                if isinstance(v, list):
-                    template += list2str(v)
-                else:
-                    template += prepend_string(str(v)) + '\n'
-        else:
-            for k in nwb_object.fields:
-                template += "  {}\n".format(k)
-
-        return template
-    except AttributeError:
-        if isinstance(nwb_object, list):
-            return list2str(nwb_object)
-        else:
-            return str(nwb_object)
-
-
 class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     '''The base class to any NWB types.
 
@@ -185,11 +144,27 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
             new_nwbfields.append(pname)
         cls.__nwbfields__ = tuple(new_nwbfields)
 
-    def __str__(self):
-        return nwb_repr(self)
-
     def __repr__(self):
-        return self.__str__()
+        template = "{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
+        for k, v in iteritems(self.fields):
+            template += "  {}: {} \n".format(k, self.smart_str(v))
+        return template
+
+    def smart_str(self, v):
+        if isinstance(v, list):
+            return str(np.array(v))
+        elif isinstance(v, dict):
+            template = '{'
+            keys = list(v.keys())
+            for k in keys[:-1]:
+                template += " {} {}, ".format(k, type(v[k]))
+            if keys:
+                template += " {} {}".format(keys[-1], type(v[keys[-1]]))
+            return template + ' }'
+        elif isinstance(v, NWBBaseType):
+            "{} {}".format(getattr(v, 'name'), type(v))
+        else:
+            return str(v)
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)

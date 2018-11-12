@@ -279,9 +279,10 @@ class TestPrint(unittest.TestCase):
     def test_print_file(self):
         nwbfile = NWBFile(session_description='session_description',
                           identifier='identifier', session_start_time=datetime.now(tzlocal()))
+        ts = TimeSeries('name', [1., 2., 3.] * 1000, timestamps=[1, 2, 3])
+        ts2 = TimeSeries('name2', [1, 2, 3] * 1000, timestamps=[1, 2, 3])
+        print(ts)
+        nwbfile.add_acquisition(ts)
+        nwbfile.add_acquisition(ts2)
         print(nwbfile)
 
-    def test_print_data(self):
-        ts = TimeSeries('name', [1, 2, 3], timestamps=[1, 2, 3])
-        print(ts)
-        print(ts.data)
