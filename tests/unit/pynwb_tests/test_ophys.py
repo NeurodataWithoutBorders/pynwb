@@ -142,9 +142,7 @@ class ImageSegmentationConstructor(unittest.TestCase):
         self.assertEqual(iS[ps.name], iS.plane_segmentations[ps.name])
 
 
-class PlaneSegmentationConstructor(unit
-                                   
-                                   test.TestCase):
+class PlaneSegmentationConstructor(unittest.TestCase):
 
     def getBoilerPlateObjects(self):
 
