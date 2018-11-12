@@ -130,17 +130,21 @@ groups:
     doc: the spike times for each unit
     quantity: '?'
   - neurodata_type_inc: DynamicTableRegion
-    name: electrode
+    name: electrodes_index
+    doc: the index into electrodes
+    quantity: '?'
+  - neurodata_type_inc: DynamicTableRegion
+    name: electrodes
     doc: the electrode that each spike unit came from
     quantity: '?'
-  - neurodata_type_inc: TableColumn
+  - neurodata_type_inc: VectorData
     name: electrode_group
     doc: the electrode group that each spike unit came from
     dtype:
         target_type: ElectrodeGroup
         reftype: object
     quantity: '?'
-  - neurodata_type_inc: TableColumn
+  - neurodata_type_inc: VectorData
     name: waveform_mean
     doc: the spike waveform mean for each spike unit
     dtype: float
@@ -148,7 +152,7 @@ groups:
     - null
     - null
     quantity: '?'
-  - neurodata_type_inc: TableColumn
+  - neurodata_type_inc: VectorData
     name: waveform_sd
     doc: the spike waveform standard deviation for each spike unit
     dtype: float

@@ -270,9 +270,9 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         self.image_masks_builder = DatasetBuilder('image_mask', self.img_mask,
                                                   attributes={
                                                    'namespace': 'core',
-                                                   'neurodata_type': 'TableColumn',
+                                                   'neurodata_type': 'VectorData',
                                                    'description': 'Image masks for each ROI',
-                                                   'help': 'One of many columns that can be added to a DynamicTable'})
+                                                   'help': 'Values for a list of elements'})
 
         ps_builder = GroupBuilder(
             'test_plane_seg_name',

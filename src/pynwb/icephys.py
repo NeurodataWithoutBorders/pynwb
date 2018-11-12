@@ -424,7 +424,7 @@ class SweepTable(DynamicTable):
 
     __columns__ = (
             {'name': 'series', 'description': 'PatchClampSeries with the same sweep number',
-             'required': True, 'vector_data': True},
+             'required': True, 'index': True},
             {'name': 'sweep_number', 'description': 'Sweep number of the entries in that row', 'required': True}
     )
 

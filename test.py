@@ -47,7 +47,7 @@ class SuccessRecordingResult(unittest.TextTestResult):
 def run_test_suite(directory, description="", verbose=True):
     global TOTAL, FAILURES, ERRORS
     logging.info("running %s" % description)
-
+    directory = os.path.join(os.path.dirname(__file__), directory)
     runner = unittest.TextTestRunner(verbosity=verbose, resultclass=SuccessRecordingResult)
     pynwb_test_result = runner.run(unittest.TestLoader().discover(directory))
 
