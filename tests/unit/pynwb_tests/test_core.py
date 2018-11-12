@@ -285,4 +285,3 @@ class TestPrint(unittest.TestCase):
         nwbfile.add_acquisition(ts)
         nwbfile.add_acquisition(ts2)
         print(nwbfile)
-
