@@ -1,4 +1,4 @@
-from .form.utils import docval, call_docval_func
+from .form.utils import docval, call_docval_func, popargs
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
 
@@ -8,10 +8,13 @@ class Device(NWBContainer):
     """
     """
 
-    __nwbfields__ = ('name',)
+    __nwbfields__ = ('description',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
+        d = popargs('description', kwargs)
         call_docval_func(super(Device, self).__init__, kwargs)
+        self.description = d

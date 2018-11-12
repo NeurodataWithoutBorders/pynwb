@@ -235,6 +235,10 @@ groups:
           dtype: text
           doc: Value is 'A recording device e.g. amplifier'.
           value: A recording device e.g. amplifier
+        datasets:
+        - name: description
+          dtype: text
+          doc: A short description of what this device is
         quantity: '+'
       quantity: '?'
     - name: specifications
