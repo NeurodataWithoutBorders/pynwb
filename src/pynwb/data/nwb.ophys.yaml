@@ -22,11 +22,13 @@ groups:
     dtype: float32
     doc: Width, height and depth of image, or imaged area (meters).
     dims:
+    - width|height
     - width|height|depth
     quantity: '?'
     required: false
     shape:
-    - 3
+    - - 2
+    - - 3
   links:
   - name: imaging_plane
     doc: link to ImagingPlane group from which this TimeSeries data was generated

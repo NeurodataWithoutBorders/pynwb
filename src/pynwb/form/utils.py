@@ -176,12 +176,12 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True,
                 argsi += 1
             else:
                 ret[argname] = arg['default']
+            argval = ret[argname]
             if enforce_type:
-                argval = ret[argname]
                 if not __type_okay(argval, arg['type'], arg['default'] is None):
                     fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                     type_errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
-            if enforce_shape and 'shape' in arg:
+            if enforce_shape and 'shape' in arg and argval is not None:
                 if not __shape_okay_multi(argval, arg['shape']):
                     fmt_val = (argname, get_data_shape(argval), arg['shape'])
                     value_errors.append("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)

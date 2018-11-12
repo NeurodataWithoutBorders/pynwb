@@ -23,7 +23,7 @@ class ImageSeries(TimeSeries):
     _help = "Storage object for time-series 2-D image data"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
             {'name': 'unit', 'type': str,
@@ -88,7 +88,7 @@ class IndexSeries(TimeSeries):
     an arbitrary order. The data[] field stores frame number in reference stack."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
@@ -203,7 +203,7 @@ class OpticalSeries(ImageSeries):
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
             {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},
-            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'),
+            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'orientation', 'type': str,
              'doc': 'Description of image relative to some reference frame (e.g., which way is up). \

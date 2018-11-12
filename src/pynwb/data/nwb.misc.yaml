@@ -30,11 +30,13 @@ groups:
       default_value: see 'feature_units'
       required: false
     dims:
-    - num_times
-    - num_features
+    - - num_times
+    - - num_times
+      - num_features
     shape:
-    - null
-    - null
+    - - null
+    - - null
+      - null
   - name: feature_units
     dtype: text
     doc: Units of each feature.

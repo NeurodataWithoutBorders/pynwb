@@ -106,14 +106,14 @@ class TwoPhotonSeries(ImageSeries):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
-            {'name': 'field_of_view', 'type': (Iterable, TimeSeries),
+            {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
             {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.', 'default': None},
             {'name': 'scan_line_rate', 'type': float,
@@ -245,11 +245,14 @@ class PlaneSegmentation(DynamicTable):
         self.reference_images = reference_images
 
     @docval({'name': 'pixel_mask', 'type': 'array_data', 'default': None,
-             'doc': 'pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]'},
+             'doc': 'pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]',
+             'shape': (None, 3)},
             {'name': 'voxel_mask', 'type': 'array_data', 'default': None,
-             'doc': 'voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z1, weight2), ...]'},
+             'doc': 'voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z1, weight2), ...]',
+             'shape': (None, 4)},
             {'name': 'image_mask', 'type': 'array_data', 'default': None,
-             'doc': 'image with the same size of image where positive values mark this ROI', },
+             'doc': 'image with the same size of image where positive values mark this ROI',
+             'shape': [[None]*2, [None]*3]},
             {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_roi(self, **kwargs):

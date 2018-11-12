@@ -110,8 +110,8 @@ class ClusterWaveformsConstructor(unittest.TestCase):
         peak_over_rms = [5.3, 6.3]
         cc = Clustering('description', num, peak_over_rms, times)  # noqa: F405
 
-        means = [7.3, 7.3]
-        stdevs = [8.3, 8.3]
+        means = [[7.3, 7.3]]
+        stdevs = [[8.3, 8.3]]
 
         cw = ClusterWaveforms(cc, 'filtering', means, stdevs)  # noqa: F405
         self.assertEqual(cw.clustering_interface, cc)

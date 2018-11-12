@@ -338,8 +338,8 @@ class ClusterWaveformsConstructor(base.TestDataInterfaceIO):
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
         self.clustering = Clustering('description', num, peak_over_rms, times)
-        means = [7.3, 7.3]
-        stdevs = [8.3, 8.3]
+        means = [[7.3, 7.3]]
+        stdevs = [[8.3, 8.3]]
         cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
         return cw
 

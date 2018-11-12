@@ -45,7 +45,7 @@ class OptogeneticSeries(TimeSeries):
     _help = "Optogenetic stimulus."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'Value is the string "Watt".', 'default': 'Watt'},
             {'name': 'site', 'type': OptogeneticStimulusSite,
@@ -55,7 +55,7 @@ class OptogeneticSeries(TimeSeries):
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
