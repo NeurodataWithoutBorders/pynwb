@@ -122,7 +122,7 @@ optical_channel = OpticalChannel(
     emission_lambda=520.,
 )
 
-device = Device(metadata['device'])
+device = Device(metadata['device'], description='a mock device for testing')
 nwbfile.add_device(device)
 
 imaging_plane = nwbfile.create_imaging_plane(

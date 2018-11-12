@@ -50,7 +50,7 @@ nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzl
 # This amounts describing the device, imaging plane and the optical channel used.
 
 
-device = Device('imaging_device_1')
+device = Device('imaging_device_1', description='a mock device for testing')
 nwbfile.add_device(device)
 optical_channel = OpticalChannel('my_optchan', 'description', 500.)
 imaging_plane = nwbfile.create_imaging_plane('my_imgpln', optical_channel, 'a very interesting part of the brain',

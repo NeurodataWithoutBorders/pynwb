@@ -43,7 +43,7 @@ nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzl
 # device that was used to record from the electrode. This is done by creating a :py:class:`~pynwb.ecephys.Device`
 # object using the instance method :py:meth:`~pynwb.file.NWBFile.create_device`.
 
-device = nwbfile.create_device(name='trodes_rig123')
+device = nwbfile.create_device(name='trodes_rig123', description='a mock device for testing')
 
 #######################
 # Once you have created the :py:class:`~pynwb.device.Device`, you can create an
