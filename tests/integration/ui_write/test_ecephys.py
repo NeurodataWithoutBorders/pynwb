@@ -17,7 +17,7 @@ from six import with_metaclass
 class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        self.dev1 = Device('dev1')
+        self.dev1 = Device('dev1', description='a mock device for testing')
         return ElectrodeGroup('elec1', 'a test ElectrodeGroup',
                                        'a nonexistent place',
                                        self.dev1)
@@ -25,6 +25,7 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
                                       attributes={'neurodata_type': 'Device',
+                                                  'description': 'a mock device for testing',
                                                   'namespace': 'core',
                                                   'help': 'A recording device e.g. amplifier'})
         return GroupBuilder('elec1',
@@ -52,7 +53,7 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
     @staticmethod
     def make_electrode_table(self):
         self.table = get_electrode_table()
-        self.dev1 = Device('dev1')
+        self.dev1 = Device('dev1', description='a mock device for testing')
         self.group = ElectrodeGroup('tetrode1',
                                     'tetrode description', 'tetrode location', self.dev1)
         self.table.add_row(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
@@ -68,6 +69,7 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
     def get_table_builder(self):
         self.device_builder = GroupBuilder('dev1',
                                            attributes={'neurodata_type': 'Device',
+                                                       'description': 'a mock device for testing',
                                                        'namespace': 'core',
                                                        'help': 'A recording device e.g. amplifier'})
         self.eg_builder = GroupBuilder('tetrode1',

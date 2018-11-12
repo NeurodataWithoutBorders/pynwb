@@ -405,7 +405,7 @@ class TestLinkResolution(unittest.TestCase):
 
     def test_link_resolve(self):
         nwbfile = NWBFile("a file with header data", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal()))
-        device = nwbfile.create_device('device_name')
+        device = nwbfile.create_device('device_name', description='a mock device for testing')
         electrode_group = nwbfile.create_electrode_group(
             name='electrode_group_name',
             description='desc',

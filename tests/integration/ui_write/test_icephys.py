@@ -12,7 +12,7 @@ from six import with_metaclass
 class TestIntracellularElectrode(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        self.device = Device(name='device_name')
+        self.device = Device(name='device_name', description='a mock device for testing')
         self.elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                            resistance='something measured in ohms',
                                            seal='sealing method', description='a fake electrode object',
@@ -36,7 +36,7 @@ class TestPatchClampSeries(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
 
     def setUpElectrode(self):
 
-        self.device = Device(name='device_name')
+        self.device = Device(name='device_name', description='a mock device for testing')
         self.elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                            resistance='something measured in ohms',
                                            seal='sealing method', description='a fake electrode object',
@@ -112,7 +112,7 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
         return None
 
     def addContainer(self, nwbfile):
-        device = Device(name='device_name')
+        device = Device(name='device_name', description='a mock device for testing')
         nwbfile.add_device(device)
         elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                       resistance='something measured in ohms',
@@ -143,7 +143,7 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
         return None
 
     def addContainer(self, nwbfile):
-        device = Device(name='device_name')
+        device = Device(name='device_name', description='a mock device for testing')
         nwbfile.add_device(device)
         elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                       resistance='something measured in ohms',

@@ -279,7 +279,7 @@ class TestUnitElectrodes(base.TestMapRoundTrip):
         return Units('placeholder_units')
 
     def addContainer(self, nwbfile):
-        device = nwbfile.create_device(name='trodes_rig123')
+        device = nwbfile.create_device(name='trodes_rig123', description='a mock device for testing')
         electrode_name = 'tetrode1'
         description = "an example tetrode"
         location = "somewhere in the hippocampus"

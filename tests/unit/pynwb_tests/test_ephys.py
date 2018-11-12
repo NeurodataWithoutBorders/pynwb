@@ -11,7 +11,7 @@ from pynwb.core import DynamicTableRegion
 
 def make_electrode_table():
     table = ElectrodeTable()
-    dev1 = Device('dev1')  # noqa: F405
+    dev1 = Device('dev1', description='a mock device for testing')  # noqa: F405
     group = ElectrodeGroup('tetrode1', 'tetrode description', 'tetrode location', dev1)  # noqa: F405
     table.add_row(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none',
                   group=group, group_name='tetrode1')
@@ -51,7 +51,7 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
 
 class ElectrodeGroupConstructor(unittest.TestCase):
     def test_init(self):
-        dev1 = Device('dev1')  # noqa: F405
+        dev1 = Device('dev1', description='a mock device for testing')  # noqa: F405
         group = ElectrodeGroup(  # noqa: F405
             'elec1', 'electrode description', 'electrode location', dev1)
         self.assertEqual(group.name, 'elec1')
@@ -77,7 +77,7 @@ class EventDetectionConstructor(unittest.TestCase):
 
 class EventWaveformConstructor(unittest.TestCase):
     def test_init(self):
-        dev1 = Device('dev1')  # noqa: F405
+        dev1 = Device('dev1', description='a mock device for testing')  # noqa: F405
         group = ElectrodeGroup(  # noqa: F405, F841
             'tetrode1', 'tetrode description', 'tetrode location', dev1)
         table = make_electrode_table()
@@ -122,7 +122,7 @@ class ClusterWaveformsConstructor(unittest.TestCase):
 
 class LFPTest(unittest.TestCase):
     def test_init(self):
-        dev1 = Device('dev1')  # noqa: F405
+        dev1 = Device('dev1', description='a mock device for testing')  # noqa: F405
         group = ElectrodeGroup(  # noqa: F405, F841
             'tetrode1', 'tetrode description', 'tetrode location', dev1)
         table = make_electrode_table()
@@ -135,7 +135,7 @@ class LFPTest(unittest.TestCase):
 
     def test_add_electrical_series(self):
         lfp = LFP()  # noqa: F405
-        dev1 = Device('dev1')  # noqa: F405
+        dev1 = Device('dev1', description='a mock device for testing')  # noqa: F405
         group = ElectrodeGroup(  # noqa: F405, F841
             'tetrode1', 'tetrode description', 'tetrode location', dev1)
         table = make_electrode_table()
@@ -149,7 +149,7 @@ class LFPTest(unittest.TestCase):
 
 class FilteredEphysTest(unittest.TestCase):
     def test_init(self):
-        dev1 = Device('dev1')  # noqa: F405
+        dev1 = Device('dev1', description='a mock device for testing')  # noqa: F405
         group = ElectrodeGroup(  # noqa: F405, F841
             'tetrode1', 'tetrode description', 'tetrode location', dev1)
         table = make_electrode_table()
@@ -162,7 +162,7 @@ class FilteredEphysTest(unittest.TestCase):
 
     def test_add_electrical_series(self):
         fe = FilteredEphys()  # noqa: F405
-        dev1 = Device('dev1')  # noqa: F405
+        dev1 = Device('dev1', description='a mock device for testing')  # noqa: F405
         group = ElectrodeGroup(  # noqa: F405, F841
             'tetrode1', 'tetrode description', 'tetrode location', dev1)
         table = make_electrode_table()

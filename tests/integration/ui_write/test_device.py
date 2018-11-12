@@ -6,7 +6,7 @@ from . import base
 class TestDevice(base.TestMapRoundTrip):
 
     def setUpContainer(self):
-        self.device = Device(name='device_name')
+        self.device = Device(name='device_name', description='a mock device for testing')
         return self.device
 
     def addContainer(self, nwbfile):

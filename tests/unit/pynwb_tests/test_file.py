@@ -64,7 +64,7 @@ class NWBFileTest(unittest.TestCase):
         name = 'example_electrode_group'
         desc = 'An example electrode'
         loc = 'an example location'
-        d = self.nwbfile.create_device('a fake device')
+        d = self.nwbfile.create_device('a fake device', description='a mock device for testing')
         elecgrp = self.nwbfile.create_electrode_group(name, desc, loc, d)
         self.assertEqual(elecgrp.description, desc)
         self.assertEqual(elecgrp.location, loc)
@@ -76,7 +76,7 @@ class NWBFileTest(unittest.TestCase):
         indexes that are out of range of the amount of electrodes added.
         """
         nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
-        device = nwbfile.create_device('a')
+        device = nwbfile.create_device('a', description='a mock device for testing')
         elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
         for i in range(4):
             nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i)
@@ -139,7 +139,7 @@ class NWBFileTest(unittest.TestCase):
 
     def test_set_electrode_table(self):
         table = ElectrodeTable()  # noqa: F405
-        dev1 = self.nwbfile.create_device('dev1')  # noqa: F405
+        dev1 = self.nwbfile.create_device('dev1', description='a mock device for testing')  # noqa: F405
         group = self.nwbfile.create_electrode_group('tetrode1',
                                                     'tetrode description', 'tetrode location', dev1)
         table.add_row(x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=group,
@@ -177,7 +177,7 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(len(self.nwbfile.trials), 3)
 
     def test_add_electrode(self):
-        dev1 = self.nwbfile.create_device('dev1')  # noqa: F405
+        dev1 = self.nwbfile.create_device('dev1', description='a mock device for testing')  # noqa: F405
         group = self.nwbfile.create_electrode_group('tetrode1',
                                                     'tetrode description', 'tetrode location', dev1)
         self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1',
@@ -201,7 +201,7 @@ class NWBFileTest(unittest.TestCase):
         name = 'example_electrode_group'
         desc = 'An example electrode'
         loc = 'an example location'
-        device = self.nwbfile.create_device('a fake device')
+        device = self.nwbfile.create_device('a fake device', description='a mock device for testing')
         elecgrp = self.nwbfile.create_electrode_group(name, desc, loc, device)
         children = self.nwbfile.all_children()
         self.assertIn(ts1, children)

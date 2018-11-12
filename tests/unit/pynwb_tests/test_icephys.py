@@ -8,7 +8,7 @@ from pynwb.device import Device
 
 
 def GetElectrode():
-        device = Device(name='device_name')
+        device = Device(name='device_name', description='a mock device for testing')
         elec = IntracellularElectrode('test_iS',
                                       device,
                                       'slice',
@@ -24,7 +24,7 @@ def GetElectrode():
 class IntracellularElectrodeConstructor(unittest.TestCase):
 
     def GetElectrode(self):
-        device = Device(name='device_name')
+        device = Device(name='device_name', description='a mock device for testing')
         elec = IntracellularElectrode('slice', 'seal', 'description', 'location', 'resistance',
                                       'filtering', 'initial_access_resistance',
                                       device)

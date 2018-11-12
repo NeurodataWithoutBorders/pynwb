@@ -24,7 +24,7 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
     """
 
     def setUpContainer(self):
-        self.device = Device(name='dev1')
+        self.device = Device(name='dev1', description='a mock device for testing')
         self.optical_channel = OpticalChannel('optchan1',
                                               'a fake OpticalChannel', 500.)
         return ImagingPlane('imgpln1', self.optical_channel,
@@ -43,6 +43,7 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         )
         device_builder = GroupBuilder('dev1',
                                       attributes={'neurodata_type': 'Device',
+                                                  'description': 'a mock device for testing',
                                                   'namespace': 'core',
                                                   'help': 'A recording device e.g. amplifier'})
         return GroupBuilder(
@@ -78,7 +79,7 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
 class TestTwoPhotonSeries(base.TestDataInterfaceIO):
 
     def make_imaging_plane(self):
-        self.device = Device(name='dev1')
+        self.device = Device(name='dev1', description='a mock device for testing')
         self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
         self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel,
                                           'a fake ImagingPlane',
@@ -106,6 +107,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
         )
         device_builder = GroupBuilder('dev1',
                                       attributes={'neurodata_type': 'Device',
+                                                  'description': 'a mock device for testing',
                                                   'namespace': 'core',
                                                   'help': 'A recording device e.g. amplifier'})
         imgpln_builder = GroupBuilder(
@@ -179,7 +181,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                         external_file=['images.tiff'],
                                         starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
 
-        self.device = Device(name='dev1')
+        self.device = Device(name='dev1', description='a mock device for testing')
         self.optical_channel = OpticalChannel('test_optical_channel',
                                               'optical channel description', 500.)
         self.imaging_plane = ImagingPlane('ophys integration tests',
@@ -212,6 +214,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         )
         device_builder = GroupBuilder('dev1',
                                       attributes={'neurodata_type': 'Device',
+                                                  'description': 'a mock device for testing',
                                                   'namespace': 'core',
                                                   'help': 'A recording device e.g. amplifier'})
         self.imgpln_builder = GroupBuilder(
@@ -328,7 +331,7 @@ class MaskRoundTrip(TestPlaneSegmentation):
         self.image_series = ImageSeries(name='test_iS', dimension=[2],
                                         external_file=['images.tiff'],
                                         starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
-        self.device = Device(name='dev1')
+        self.device = Device(name='dev1', description='a mock device for testing')
         self.optical_channel = OpticalChannel('test_optical_channel',
                                               'optical channel description', 500.)
         self.imaging_plane = ImagingPlane('test_imaging_plane',

@@ -19,7 +19,7 @@ def CreatePlaneSegmentation():
                       external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=[1., 2.])
 
     oc = OpticalChannel('test_optical_channel', 'description', 500.)
-    device = Device(name='device_name')
+    device = Device(name='device_name', description='a mock device for testing')
     ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
                       300., 'indicator', 'location', (1, 2, 1, 2, 3), 4.0,
                       'unit', 'reference_frame')
@@ -36,7 +36,7 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(oc.description, 'description')
         self.assertEqual(oc.emission_lambda, 500.)
 
-        device = Device(name='device_name')
+        device = Device(name='device_name', description='a mock device for testing')
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
                           300., 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
         self.assertEqual(ip.optical_channel[0], oc)
@@ -66,7 +66,7 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
 
     def test_args(self):
         oc = OpticalChannel('test_name', 'description', 500.)
-        device = Device(name='device_name')
+        device = Device(name='device_name', description='a mock device for testing')
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
                           300., 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
         with self.assertRaises(ValueError):  # no data or external file
@@ -149,7 +149,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         iSS = ImageSeries(name='test_iS', data=np.ones((2, 2, 2)), unit='unit',
                           external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 
-        device = Device(name='device_name')
+        device = Device(name='device_name', description='a mock device for testing')
         oc = OpticalChannel('test_optical_channel', 'description', 500.)
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
                           300., 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
