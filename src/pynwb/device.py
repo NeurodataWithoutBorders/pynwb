@@ -11,7 +11,8 @@ class Device(NWBContainer):
     __nwbfields__ = ('description',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this processing module',
+             'default': 'no description provided'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
