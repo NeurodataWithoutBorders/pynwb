@@ -166,7 +166,7 @@ create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 nwbfile = NWBFile('demonstrate caching', 'NWB456', start_time,
                   file_create_date=create_date)
 
-device = nwbfile.create_device(name='trodes_rig123')
+device = nwbfile.create_device(name='trodes_rig123', description='a mock device for testing')
 
 electrode_name = 'tetrode1'
 description = "an example tetrode"

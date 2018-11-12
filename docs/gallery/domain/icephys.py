@@ -36,7 +36,7 @@ nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzl
 # To create a device, you can use the :py:class:`~pynwb.device.Device` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_device`.
 
-device = nwbfile.create_device(name='Heka ITC-1600')
+device = nwbfile.create_device(name='Heka ITC-1600', description='a mock device for testing')
 
 #######################
 # Electrode metadata
