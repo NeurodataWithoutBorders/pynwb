@@ -127,6 +127,20 @@ ephys_ts = ElectricalSeries('test_ephys_data',
                             description="Random numbers generated with numpy.random.rand")
 nwbfile.add_acquisition(ephys_ts)
 
+####################
+# .. _units_electrode:
+#
+# Associate electrodes with units
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# The :ref:`PyNWB Basics tutorial <basics>` demonstrates how to add data about units and specifying custom metadata
+# about units. As mentioned :ref:`here <units_fields_ref>`, there are some optional fields for units, one of these
+# is *electrodes*. This field takes a list of indices into the electrode table for the electrodes that the unit
+# corresponds to. For example, if two units were inferred from the first electrode (*id* = 1, index = 0), you would
+# specify that like so:
+
+nwbfile.add_unit(id=1, electrodes=[0])
+nwbfile.add_unit(id=2, electrodes=[0])
 
 #######################
 # Designating electrophysiology data

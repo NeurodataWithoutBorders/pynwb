@@ -47,10 +47,11 @@ class AxisMap(NWBContainer):
                      'dimension')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this axis map'},
-            {'name': 'data', 'type': Iterable, 'doc': 'data field.'},
+            {'name': 'data', 'type': Iterable, 'shape': (None, None), 'doc': 'data field.'},
             {'name': 'field_of_view', 'type': Iterable, 'doc': 'Size of viewing area, in meters.'},
             {'name': 'unit', 'type': str, 'doc': 'Unit that axis data is stored in (e.g., degrees)'},
-            {'name': 'dimension', 'type': Iterable, 'doc': 'Number of rows and columns in the image'})
+            {'name': 'dimension', 'type': Iterable, 'shape': (None, ),
+             'doc': 'Number of rows and columns in the image'})
     def __init__(self, **kwargs):
         data, field_of_view, unit, dimension = popargs('data', 'field_of_view', 'unit', 'dimension', kwargs)
         pargs, pkwargs = fmt_docval_args(super(AxisMap, self).__init__, kwargs)
