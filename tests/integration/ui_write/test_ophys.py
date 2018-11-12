@@ -42,8 +42,9 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
                 'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
         )
         device_builder = GroupBuilder('dev1',
+                                      datasets={'description': DatasetBuilder('description',
+                                                                              data='a mock device for testing')},
                                       attributes={'neurodata_type': 'Device',
-                                                  'description': 'a mock device for testing',
                                                   'namespace': 'core',
                                                   'help': 'A recording device e.g. amplifier'})
         return GroupBuilder(
@@ -106,8 +107,9 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
                  'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
         )
         device_builder = GroupBuilder('dev1',
+                                      datasets={'description': DatasetBuilder('description',
+                                                                              data='a mock device for testing')},
                                       attributes={'neurodata_type': 'Device',
-                                                  'description': 'a mock device for testing',
                                                   'namespace': 'core',
                                                   'help': 'A recording device e.g. amplifier'})
         imgpln_builder = GroupBuilder(
@@ -213,8 +215,9 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
         )
         device_builder = GroupBuilder('dev1',
+                                      datasets={'description': DatasetBuilder('description',
+                                                                              data='a mock device for testing')},
                                       attributes={'neurodata_type': 'Device',
-                                                  'description': 'a mock device for testing',
                                                   'namespace': 'core',
                                                   'help': 'A recording device e.g. amplifier'})
         self.imgpln_builder = GroupBuilder(

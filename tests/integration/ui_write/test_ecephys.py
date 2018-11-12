@@ -24,8 +24,9 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
+                                      datasets={'description': DatasetBuilder('description',
+                                                                              data='a mock device for testing')},
                                       attributes={'neurodata_type': 'Device',
-                                                  'description': 'a mock device for testing',
                                                   'namespace': 'core',
                                                   'help': 'A recording device e.g. amplifier'})
         return GroupBuilder('elec1',
@@ -68,8 +69,9 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
     @staticmethod
     def get_table_builder(self):
         self.device_builder = GroupBuilder('dev1',
+                                           datasets={'description': DatasetBuilder('description',
+                                                                                   data='a mock device for testing')},
                                            attributes={'neurodata_type': 'Device',
-                                                       'description': 'a mock device for testing',
                                                        'namespace': 'core',
                                                        'help': 'A recording device e.g. amplifier'})
         self.eg_builder = GroupBuilder('tetrode1',
