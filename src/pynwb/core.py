@@ -147,10 +147,30 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     def __repr__(self):
         template = "{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
         for k, v in iteritems(self.fields):
-            template += "  {}: {} \n".format(k, self.smart_str(v))
+            template += "  {}: {} \n".format(k, self.__smart_str(v))
         return template
 
-    def smart_str(self, v):
+    def __smart_str(self, v):
+        """
+        Print compact string representation of data.
+
+        If v is a list, print it using numpy. This will condense the string
+        representation of datasets with many elements.
+
+        If v is a dictionary, print the name and type of each element
+
+        If v is a neurodata_type, print the name of type
+
+        Otherwise, use the built-in str()
+        Parameters
+        ----------
+        v
+
+        Returns
+        -------
+        str
+
+        """
         if isinstance(v, list):
             return str(np.array(v))
         elif isinstance(v, dict):
