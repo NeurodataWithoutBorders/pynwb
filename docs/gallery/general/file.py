@@ -132,14 +132,14 @@ added_mod.add_data_interface(mod_ts)
 # Epochs
 # ------
 #
-# Epochs can be added to an NWB file using the method :py:func:`~pynwb.file.NWBFile.create_epoch`.
+# Epochs can be added to an NWB file using the method :py:func:`~pynwb.file.NWBFile.add_epoch`.
 # The first argument is a description of the epoch, the second and third argument are the start time
 # and stop time, respectively. The fourth argument is one or more tags for labelling the epoch,
 # and the fifth argument is a list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
 # to.
 
-nwbfile.create_epoch(2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
-nwbfile.create_epoch(6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
+nwbfile.add_epoch(2.0, 4.0, ['first', 'example'], [test_ts, mod_ts])
+nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 
 ####################
 # .. _basic_trials:
@@ -193,6 +193,14 @@ nwbfile.add_unit_column('quality', 'the quality for the inference of this unit')
 nwbfile.add_unit(id=1, location='CA1', quality=0.95)
 nwbfile.add_unit(id=2, location='CA3', quality=0.85)
 nwbfile.add_unit(id=3, location='CA1', quality=0.90)
+
+####################
+# .. _units_fields_ref:
+#
+# .. note::
+#    The Units table has some predefined optional columns. Please review the documentation for
+#    :py:func:`~pynwb.file.NWBFile.add_unit` before adding custom columns.
+
 
 ####################
 # .. _basic_writing:
@@ -297,9 +305,9 @@ mod_ts = added_mod['ts_for_mod']
 # Appending to an NWB file
 # ------------------------
 #
-# Using functionality discussed above, NWB allows appending to fles. To append to a file, you must read the file, add
+# Using functionality discussed above, NWB allows appending to files. To append to a file, you must read the file, add
 # new components, and then write the file. Reading and writing is carried out using :py:class:`~pynwb.NWBHDF5IO`.
-# When reading the NWBFile, you must specify that you indend to modify it by setting the *mode* argument in the
+# When reading the NWBFile, you must specify that you intend to modify it by setting the *mode* argument in the
 # :py:class:`~pynwb.NWBHDF5IO` constructor to ``'a'``. After you have read the file, you can add [#]_ new data to it
 # using the standard write/add functionality demonstrated above.
 #

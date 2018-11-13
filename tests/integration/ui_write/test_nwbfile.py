@@ -12,6 +12,7 @@ from pynwb import NWBFile, TimeSeries
 from pynwb.file import Subject
 from pynwb.ecephys import Clustering
 from pynwb.epoch import TimeIntervals
+from pynwb.misc import Units
 
 from . import base
 
@@ -20,6 +21,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
 
     def setUp(self):
         self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
+        self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
         self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         super(TestNWBFileIO, self).setUp()
         self.path = "test_pynwb_io_hdf5.h5"
@@ -99,7 +101,9 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                 DatasetBuilder('file_create_date', [self.create_date.isoformat()]),
                                 'identifier': DatasetBuilder('identifier', 'TEST123'),
                                 'session_description': DatasetBuilder('session_description', 'a test NWB File'),
-                                'session_start_time': DatasetBuilder('session_start_time', self.start_time.isoformat())
+                                'session_start_time': DatasetBuilder('session_start_time', self.start_time.isoformat()),
+                                'timestamps_reference_time': DatasetBuilder('timestamps_reference_time',
+                                                                            self.ref_time.isoformat())
                                 },
                             attributes={'namespace': base.CORE_NAMESPACE,
                                         'nwb_version': '2.0b',
@@ -109,6 +113,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
     def setUpContainer(self):
         container = NWBFile('a test NWB File', 'TEST123',
                             self.start_time,
+                            timestamps_reference_time=self.ref_time,
                             file_create_date=self.create_date,
                             experimenter='test experimenter',
                             stimulus_notes='test stimulus notes',
@@ -210,7 +215,7 @@ class TestEpochsRoundtrip(base.TestMapRoundTrip):
             description='average temperture (c) during epoch'
         )
 
-        nwbfile.create_epoch(
+        nwbfile.add_epoch(
             start_time=5.3,
             stop_time=6.1,
             timeseries=[],
@@ -265,3 +270,33 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         return nwbfile.epochs
+
+
+class TestUnitElectrodes(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return Units('placeholder_units')
+
+    def addContainer(self, nwbfile):
+        device = nwbfile.create_device(name='trodes_rig123')
+        electrode_name = 'tetrode1'
+        description = "an example tetrode"
+        location = "somewhere in the hippocampus"
+        electrode_group = nwbfile.create_electrode_group(electrode_name,
+                                                         description=description,
+                                                         location=location,
+                                                         device=device)
+        for idx in [1, 2, 3, 4]:
+            nwbfile.add_electrode(idx,
+                                  x=1.0, y=2.0, z=3.0,
+                                  imp=float(-idx),
+                                  location='CA1', filtering='none',
+                                  group=electrode_group)
+
+        nwbfile.add_unit(id=1, electrodes=[1])
+        nwbfile.add_unit(id=2, electrodes=[1])
+        self.container = nwbfile.units
+
+    def getContainer(self, nwbfile):
+        return nwbfile.units

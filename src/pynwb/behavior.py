@@ -22,12 +22,10 @@ class SpatialSeries(TimeSeries):
 
     __nwbfields__ = ('reference_frame',)
 
-    _ancestry = "TimeSeries,SpatialSeries"
-
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this SpatialSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, None),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
             {'name': 'conversion', 'type': float,
@@ -36,7 +34,7 @@ class SpatialSeries(TimeSeries):
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
-            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'),
+            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None, ),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},

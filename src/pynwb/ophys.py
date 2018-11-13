@@ -53,8 +53,8 @@ class ImagingPlane(NWBContainer):
              'doc': 'One of possibly many groups storing channelspecific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},
-            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength.'},
-            {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
+            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},
+            {'name': 'imaging_rate', 'type': float, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
             {'name': 'manifold', 'type': Iterable,
@@ -102,19 +102,18 @@ class TwoPhotonSeries(ImageSeries):
                      'pmt_gain',
                      'scan_line_rate')
 
-    _ancestry = "TimeSeries,ImageSeries,TwoPhotonSeries"
     _help = "Image stack recorded from 2-photon microscope."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
-            {'name': 'field_of_view', 'type': (Iterable, TimeSeries),
+            {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
             {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.', 'default': None},
             {'name': 'scan_line_rate', 'type': float,
@@ -134,7 +133,7 @@ class TwoPhotonSeries(ImageSeries):
             between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -219,7 +218,8 @@ class PlaneSegmentation(DynamicTable):
 
     __columns__ = (
         {'name': 'image_mask', 'description': 'Image masks for each ROI'},
-        {'name': 'pixel_mask', 'description': 'Pixel masks for each ROI', 'vector_data': True}
+        {'name': 'pixel_mask', 'description': 'Pixel masks for each ROI', 'index': True},
+        {'name': 'voxel_mask', 'description': 'Voxel masks for each ROI', 'index': True}
     )
 
     @docval({'name': 'description', 'type': str,
@@ -244,22 +244,31 @@ class PlaneSegmentation(DynamicTable):
         self.imaging_plane = imaging_plane
         self.reference_images = reference_images
 
-    @docval({'name': 'pixel_mask', 'type': 'array_data', 'doc': 'the pixel mask', 'default': None},
-            {'name': 'image_mask', 'type': 'array_data', 'doc': 'the image mask for this ROI', 'default': None},
+    @docval({'name': 'pixel_mask', 'type': 'array_data', 'default': None,
+             'doc': 'pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]',
+             'shape': (None, 3)},
+            {'name': 'voxel_mask', 'type': 'array_data', 'default': None,
+             'doc': 'voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z1, weight2), ...]',
+             'shape': (None, 4)},
+            {'name': 'image_mask', 'type': 'array_data', 'default': None,
+             'doc': 'image with the same size of image where positive values mark this ROI',
+             'shape': [[None]*2, [None]*3]},
             {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_roi(self, **kwargs):
         """
         Add ROI data to this
         """
-        pixel_mask, image_mask = popargs('pixel_mask', 'image_mask', kwargs)
-        if image_mask is None and pixel_mask is None:
-            raise ValueError("Must provide either 'image_mask' or 'pixel_mask' or both")
+        pixel_mask, voxel_mask, image_mask = popargs('pixel_mask', 'voxel_mask', 'image_mask', kwargs)
+        if image_mask is None and pixel_mask is None and voxel_mask is None:
+            raise ValueError("Must provide 'image_mask' and/or 'pixel_mask'")
         rkwargs = dict(kwargs)
         if image_mask is not None:
             rkwargs['image_mask'] = image_mask
         if pixel_mask is not None:
             rkwargs['pixel_mask'] = pixel_mask
+        if voxel_mask is not None:
+            rkwargs['voxel_mask'] = voxel_mask
         return super(PlaneSegmentation, self).add_row(**rkwargs)
 
     @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what the region is'},
@@ -306,7 +315,6 @@ class RoiResponseSeries(TimeSeries):
 
     __nwbfields__ = ({'name': 'rois', 'child': True},)
 
-    _ancestry = "TimeSeries,ImageSeries,ImageMaskSeries"
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -321,7 +329,7 @@ class RoiResponseSeries(TimeSeries):
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},

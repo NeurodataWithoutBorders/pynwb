@@ -1,7 +1,9 @@
 import unittest
+from datetime import datetime
+from dateutil import tz
 
 from pynwb.epoch import TimeIntervals
-from pynwb import TimeSeries
+from pynwb import TimeSeries, NWBFile
 
 import numpy as np
 import pandas as pd
@@ -46,6 +48,12 @@ class TimeIntervalsTest(unittest.TestCase):
 
         self.assertIs(obtained.loc[3, 'timeseries'][1], df.loc[3, 'timeseries'][1])
         self.assertEqual(obtained.loc[2, 'foo'], df.loc[2, 'foo'])
+
+    def test_no_tags(self):
+        nwbfile = NWBFile("a file with header data", "NB123A", datetime(1970, 1, 1, tzinfo=tz.tzutc()))
+        df = self.get_dataframe()
+        for i, row in df.iterrows():
+            nwbfile.add_epoch(start_time=row['start_time'], stop_time=row['stop_time'])
 
 
 if __name__ == '__main__':

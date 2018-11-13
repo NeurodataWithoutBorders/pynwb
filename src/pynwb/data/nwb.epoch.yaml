@@ -9,7 +9,7 @@ groups:
     doc: Value is 'A general epoch object'
     value: A general epoch object
   datasets:
-  - neurodata_type_inc: TableColumn
+  - neurodata_type_inc: VectorData
     name: start_time
     dtype: float
     doc: Start time of epoch, in seconds
@@ -18,7 +18,7 @@ groups:
       dtype: text
       doc: value is 'start time of the epoch, in seconds'
       value: start time of the epoch, in seconds
-  - neurodata_type_inc: TableColumn
+  - neurodata_type_inc: VectorData
     name: stop_time
     dtype: float
     doc: Stop time of epoch, in seconds

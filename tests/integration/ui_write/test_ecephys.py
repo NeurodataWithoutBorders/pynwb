@@ -85,40 +85,40 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
                            attributes={'help': 'unique identifiers for a list of elements',
                                        'neurodata_type': 'ElementIdentifiers', 'namespace': 'core'}),
             DatasetBuilder('x', data=[1.0, 1.0, 1.0, 1.0],
-                           attributes={'help': 'One of many columns that can be added to a DynamicTable',
+                           attributes={'help': 'Values for a list of elements',
                                        'description': 'the x coordinate of the channel location',
-                                       'neurodata_type': 'TableColumn', 'namespace': 'core'}),
+                                       'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('y', data=[2.0, 2.0, 2.0, 2.0],
-                           attributes={'help': 'One of many columns that can be added to a DynamicTable',
+                           attributes={'help': 'Values for a list of elements',
                                        'description': 'the y coordinate of the channel location',
-                                       'neurodata_type': 'TableColumn', 'namespace': 'core'}),
+                                       'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('z', data=[3.0, 3.0, 3.0, 3.0],
-                           attributes={'help': 'One of many columns that can be added to a DynamicTable',
+                           attributes={'help': 'Values for a list of elements',
                                        'description': 'the z coordinate of the channel location',
-                                       'neurodata_type': 'TableColumn', 'namespace': 'core'}),
+                                       'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('imp', data=[-1.0, -2.0, -3.0, -4.0],
-                           attributes={'help': 'One of many columns that can be added to a DynamicTable',
+                           attributes={'help': 'Values for a list of elements',
                                        'description': 'the impedance of the channel',
-                                       'neurodata_type': 'TableColumn', 'namespace': 'core'}),
+                                       'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('location', data=['CA1', 'CA1', 'CA1', 'CA1'],
-                           attributes={'help': 'One of many columns that can be added to a DynamicTable',
+                           attributes={'help': 'Values for a list of elements',
                                        'description': 'the location of channel within the subject e.g. brain region',
-                                       'neurodata_type': 'TableColumn', 'namespace': 'core'}),
+                                       'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('filtering', data=['none', 'none', 'none', 'none'],
-                           attributes={'help': 'One of many columns that can be added to a DynamicTable',
+                           attributes={'help': 'Values for a list of elements',
                                        'description': 'description of hardware filtering',
-                                       'neurodata_type': 'TableColumn', 'namespace': 'core'}),
+                                       'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('group', data=[ReferenceBuilder(self.eg_builder),
                                           ReferenceBuilder(self.eg_builder),
                                           ReferenceBuilder(self.eg_builder),
                                           ReferenceBuilder(self.eg_builder)],
-                           attributes={'help': 'One of many columns that can be added to a DynamicTable',
+                           attributes={'help': 'Values for a list of elements',
                                        'description': 'a reference to the ElectrodeGroup this electrode is a part of',
-                                       'neurodata_type': 'TableColumn', 'namespace': 'core'}),
+                                       'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('group_name', data=['tetrode1', 'tetrode1', 'tetrode1', 'tetrode1'],
-                           attributes={'help': 'One of many columns that can be added to a DynamicTable',
+                           attributes={'help': 'Values for a list of elements',
                                        'description': 'the name of the ElectrodeGroup this electrode is a part of',
-                                       'neurodata_type': 'TableColumn', 'namespace': 'core'}),
+                                       'neurodata_type': 'VectorData', 'namespace': 'core'}),
         ]
         return GroupBuilder('electrodes', datasets={d.name: d for d in datasets},
                             attributes={'colnames': ('x',
@@ -338,8 +338,8 @@ class ClusterWaveformsConstructor(base.TestDataInterfaceIO):
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
         self.clustering = Clustering('description', num, peak_over_rms, times)
-        means = [7.3, 7.3]
-        stdevs = [8.3, 8.3]
+        means = [[7.3, 7.3]]
+        stdevs = [[8.3, 8.3]]
         cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
         return cw
 

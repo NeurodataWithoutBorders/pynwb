@@ -1,10 +1,10 @@
 from collections import Iterable
 
-from .form.utils import docval, popargs, fmt_docval_args
+from .form.utils import docval, popargs, fmt_docval_args, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer
+from .core import NWBContainer, DynamicTable, ElementIdentifiers
 from .device import Device
 
 
@@ -60,9 +60,9 @@ class PatchClampSeries(TimeSeries):
 
     __nwbfields__ = ('electrode',
                      'gain',
-                     'stimulus_description')
+                     'stimulus_description',
+                     'sweep_number')
 
-    _ancestry = "TimeSeries,PatchClampSeries"
     _help = "Superclass definition for patch-clamp data."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -95,16 +95,25 @@ class PatchClampSeries(TimeSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, data, unit, stimulus_description = popargs('name', 'data',
                                                          'unit', 'stimulus_description', kwargs)
-        electrode, gain = popargs('electrode', 'gain', kwargs)
+        electrode, gain, sweep_number = popargs('electrode', 'gain', 'sweep_number', kwargs)
         super(PatchClampSeries, self).__init__(name, data, unit, **kwargs)
         self.electrode = electrode
         self.gain = gain
         self.stimulus_description = stimulus_description
+
+        if sweep_number is not None:
+            if not (sweep_number >= 0):
+                raise ValueError("sweep_number must be a non-negative integer")
+
+            self.sweep_number = sweep_number
 
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)
@@ -119,7 +128,6 @@ class CurrentClampSeries(PatchClampSeries):
                      'bridge_balance',
                      'capacitance_compensation')
 
-    _ancestry = "TimeSeries,PatchClampSeries,CurrentClampSeries"
     _help = "Voltage recorded from cell during current-clamprecording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -158,6 +166,9 @@ class CurrentClampSeries(PatchClampSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
@@ -182,7 +193,6 @@ class IZeroClampSeries(CurrentClampSeries):
 
     __nwbfields__ = ()
 
-    _ancestry = "TimeSeries,PatchClampSeries,CurrentClampSeries,IZeroClampSeries"
     _help = "Voltage from intracellular recordings when all current and amplifier settings are off,"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -216,6 +226,9 @@ class IZeroClampSeries(CurrentClampSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
@@ -236,7 +249,6 @@ class CurrentClampStimulusSeries(PatchClampSeries):
 
     __nwbfields__ = ()
 
-    _ancestry = "TimeSeries,PatchClampSeries,CurrentClampStimulusSeries"
     _help = "Stimulus current applied during current clamp recording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -268,6 +280,9 @@ class CurrentClampStimulusSeries(PatchClampSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
@@ -292,7 +307,6 @@ class VoltageClampSeries(PatchClampSeries):
                      'whole_cell_capacitance_comp',
                      'whole_cell_series_resistance_comp')
 
-    _ancestry = "TimeSeries,PatchClampSeries,VoltageClampSeries"
     _help = "Current recorded from cell during voltage-clamp recording"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -330,6 +344,9 @@ class VoltageClampSeries(PatchClampSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
@@ -359,7 +376,6 @@ class VoltageClampStimulusSeries(PatchClampSeries):
 
     __nwbfields__ = ()
 
-    _ancestry = "TimeSeries,PatchClampSeries,VoltageClampStimulusSeries"
     _help = "Stimulus voltage applied during voltage clamp recording."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
@@ -389,9 +405,74 @@ class VoltageClampStimulusSeries(PatchClampSeries):
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
+            {'name': 'sweep_number', 'type': (int, 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
+                     via the sweep_table', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, data, unit = popargs('name', 'data', 'unit', kwargs)
         electrode, gain = popargs('electrode', 'gain', kwargs)
         super(VoltageClampStimulusSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
+
+
+@register_class('SweepTable', CORE_NAMESPACE)
+class SweepTable(DynamicTable):
+    """
+    A SweepTable allows to group PatchClampSeries together which stem from the same sweep.
+    """
+
+    __columns__ = (
+            {'name': 'series', 'description': 'PatchClampSeries with the same sweep number',
+             'required': True, 'index': True},
+            {'name': 'sweep_number', 'description': 'Sweep number of the entries in that row', 'required': True}
+    )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'name of this SweepTable', 'default': 'sweep_table'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this SweepTable',
+             'default': "A sweep table groups different PatchClampSeries together."},
+            {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
+             'default': None},
+            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
+            {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
+             'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(SweepTable, self).__init__, kwargs)
+
+    @docval({'name': 'pcs', 'type': PatchClampSeries, 'doc': 'PatchClampSeries to add to the table ' +
+            'must have a valid sweep_number'})
+    def add_entry(self, pcs):
+        """
+        Add the passed PatchClampSeries to the sweep table.
+        """
+
+        kwargs = {'sweep_number': pcs.sweep_number, 'series': [pcs]}
+
+        # FIXME appending to an existing entry would be nicer
+        # but this seems to be not possible
+        self.add_row(**kwargs)
+
+    def get_series(self, sweep_number):
+        """
+        Return a list of PatchClampSeries for the given sweep number.
+        """
+
+        ids = self.__get_row_ids(sweep_number)
+
+        if len(ids) == 0:
+            return None
+
+        matches = []
+
+        for x in ids:
+            for y in self[(x, 'series')]:
+                matches.append(y)
+
+        return matches
+
+    def __get_row_ids(self, sweep_number):
+        """
+        Return the row ids for the given sweep number.
+        """
+
+        return [index for index, elem in enumerate(self['sweep_number'].data) if elem == sweep_number]

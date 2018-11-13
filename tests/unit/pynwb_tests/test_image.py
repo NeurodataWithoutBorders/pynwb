@@ -10,7 +10,7 @@ from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries
 class ImageSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        iS = ImageSeries(name='test_iS', data=list(), unit='unit',
+        iS = ImageSeries(name='test_iS', data=np.ones((3, 3, 3)), unit='unit',
                          external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.unit, 'unit')
@@ -34,13 +34,13 @@ class IndexSeriesConstructor(unittest.TestCase):
 class ImageMaskSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        iS = ImageSeries(name='test_iS', data=list(), unit='unit',
+        iS = ImageSeries(name='test_iS', data=np.ones((2, 2, 2)), unit='unit',
                          external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff',
-                         timestamps=list())
+                         timestamps=[1., .2])
 
-        ims = ImageMaskSeries(name='test_ims', data=list(), unit='unit',
+        ims = ImageMaskSeries(name='test_ims', data=np.ones((2, 2, 2)), unit='unit',
                               masked_imageseries=iS, external_file=['external_file'], starting_frame=[1, 2, 3],
-                              format='tiff', timestamps=list())
+                              format='tiff', timestamps=[1., 2.])
         self.assertEqual(ims.name, 'test_ims')
         self.assertEqual(ims.unit, 'unit')
         self.assertEqual(ims.masked_imageseries, iS)
@@ -52,13 +52,13 @@ class ImageMaskSeriesConstructor(unittest.TestCase):
 class OpticalSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
-        ts = OpticalSeries(name='test_ts', data=list(), unit='unit', distance=1.0,
-                           field_of_view=list(), orientation='orientation', external_file=['external_file'],
-                           starting_frame=[1, 2, 3], format='tiff', timestamps=list())
+        ts = OpticalSeries(name='test_ts', data=np.ones((2, 2, 2)), unit='unit', distance=1.0,
+                           field_of_view=[4, 5], orientation='orientation', external_file=['external_file'],
+                           starting_frame=[1, 2, 3], format='tiff', timestamps=[1., 2.])
         self.assertEqual(ts.name, 'test_ts')
         self.assertEqual(ts.unit, 'unit')
         self.assertEqual(ts.distance, 1.0)
-        self.assertEqual(ts.field_of_view, list())
+        self.assertEqual(ts.field_of_view, [4, 5])
         self.assertEqual(ts.orientation, 'orientation')
         self.assertEqual(ts.external_file, ['external_file'])
         self.assertEqual(ts.starting_frame, [1, 2, 3])

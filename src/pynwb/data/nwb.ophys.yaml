@@ -22,11 +22,13 @@ groups:
     dtype: float32
     doc: Width, height and depth of image, or imaged area (meters).
     dims:
+    - width|height
     - width|height|depth
     quantity: '?'
     required: false
     shape:
-    - 3
+    - - 2
+    - - 3
   links:
   - name: imaging_plane
     doc: link to ImagingPlane group from which this TimeSeries data was generated
@@ -116,9 +118,10 @@ groups:
       doc: Value is 'Results from segmentation of an imaging plane'
       value: Results from segmentation of an imaging plane
     datasets:
-    - neurodata_type_inc: TableColumn
+    - neurodata_type_inc: VectorData
       name: image_mask
-      doc: ROI masks for each ROI
+      doc: ROI masks for each ROI. Each image mask is the size of the original imaging
+        plane (or volume) and members of the ROI are finite non-zero
       dims:
       - - num_roi
         - num_x
@@ -142,8 +145,9 @@ groups:
       quantity: '?'
     - neurodata_type_inc: VectorData
       name: pixel_mask
-      doc: Pixel masks for each ROI. Pixel masks are concatenated and parsing of this
-        dataset is maintained by the PlaneSegmentation
+      doc: 'Pixel masks for each ROI: a list of indices and weights for the ROI. Pixel
+        masks are concatenated and parsing of this dataset is maintained by the
+        PlaneSegmentation'
       dtype:
       - name: x
         dtype: uint
@@ -161,8 +165,9 @@ groups:
       quantity: '?'
     - neurodata_type_inc: VectorData
       name: voxel_mask
-      doc: Voxel masks for each ROI. Voxel masks are concatenated and parsing of this
-        dataset is maintained by the PlaneSegmentation
+      doc: 'Voxel masks for each ROI: a list of indices and weights for the ROI. Voxel
+        masks are concatenated and parsing of this dataset is maintained by the
+        PlaneSegmentation'
       dtype:
       - name: x
         dtype: uint
@@ -207,9 +212,9 @@ groups:
     quantity: '?'
   - name: excitation_lambda
     dtype: float
-    doc: Excitation wavelength
+    doc: Excitation wavelength in nm
   - name: imaging_rate
-    dtype: text
+    dtype: float
     doc: Rate images are acquired, in Hz.
   - name: indicator
     dtype: text
@@ -273,7 +278,7 @@ groups:
       doc: Any notes or comments about the channel
     - name: emission_lambda
       dtype: float
-      doc: Emission lambda for channel
+      doc: Emission wavelength for channel in nm
   links:
   - name: device
     doc: the device that was used to record from this electrode

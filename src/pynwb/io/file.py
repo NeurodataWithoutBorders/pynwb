@@ -25,11 +25,10 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('intervals', intervals_spec.get_neurodata_type('TimeIntervals'))
 
         general_spec = self.spec.get_group('general')
-        self.map_spec(
-            'ic_electrodes',
-            general_spec.get_group('intracellular_ephys')
-            .get_neurodata_type('IntracellularElectrode'))
+        icephys_spec = general_spec.get_group('intracellular_ephys')
+        self.map_spec('ic_electrodes', icephys_spec.get_neurodata_type('IntracellularElectrode'))
         ecephys_spec = general_spec.get_group('extracellular_ephys')
+        self.map_spec('sweep_table', icephys_spec.get_neurodata_type('SweepTable'))
         self.map_spec('electrodes', ecephys_spec.get_group('electrodes'))
         self.map_spec('electrode_groups', ecephys_spec.get_neurodata_type('ElectrodeGroup'))
         self.map_spec(
@@ -52,6 +51,12 @@ class NWBFileMap(ObjectMapper):
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
         datestr = builder.get('session_start_time').data
+        date = dateutil_parse(datestr)
+        return date
+
+    @ObjectMapper.constructor_arg('timestamps_reference_time')
+    def dateconversion_trt(self, builder, manager):
+        datestr = builder.get('timestamps_reference_time').data
         date = dateutil_parse(datestr)
         return date
 
