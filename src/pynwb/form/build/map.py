@@ -835,7 +835,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 if value.container_source != parent_container.container_source or\
                    value.parent is not parent_container:
                     rendered_obj = build_manager.build(value, source=source)
-                    builder.set_link(LinkBuilder(rendered_obj, parent=builder))
+                    builder.set_link(LinkBuilder(rendered_obj, name=spec.name, parent=builder))
             else:
                 raise ValueError("Found unmodified Container with no source - '%s' with parent '%s'" %
                                  (value.name, parent_container.name))
