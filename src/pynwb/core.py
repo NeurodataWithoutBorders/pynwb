@@ -6,7 +6,7 @@ from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
 from .form import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
-from six import with_metaclass, iteritems
+from six import with_metaclass
 
 
 def _not_parent(arg):
