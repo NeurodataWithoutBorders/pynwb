@@ -281,19 +281,18 @@ class TestPrint(unittest.TestCase):
                           identifier='identifier', session_start_time=datetime.now(tzlocal()))
         ts = TimeSeries('name', [1., 2., 3.] * 1000, timestamps=[1, 2, 3])
         ts2 = TimeSeries('name2', [1, 2, 3] * 1000, timestamps=[1, 2, 3])
-        self.assertEqual(str(ts),
-                        """
+        self.assertEqual(str(ts), """
 name <class 'pynwb.base.TimeSeries'>
 Fields:
-  comments: no comments 
-  conversion: 1.0 
-  data: [1. 2. 3. ... 1. 2. 3.] 
-  description: no description 
-  interval: 1 
-  num_samples: 3000 
-  resolution: 0.0 
-  timestamps: [1 2 3] 
-  timestamps_unit: Seconds 
+  comments: no comments
+  conversion: 1.0
+  data: [1. 2. 3. ... 1. 2. 3.]
+  description: no description
+  interval: 1
+  num_samples: 3000
+  resolution: 0.0
+  timestamps: [1 2 3]
+  timestamps_unit: Seconds
 """
                          )
         nwbfile.add_acquisition(ts)
@@ -303,16 +302,16 @@ Fields:
                          """
 root <class 'pynwb.file.NWBFile'>
 Fields:
-  acquisition: { name <class 'pynwb.base.TimeSeries'>,  name2 <class 'pynwb.base.TimeSeries'> } 
-  analysis: { } 
-  devices: { } 
-  electrode_groups: { } 
-  epoch_tags: """ + empty_set_str + """ 
-  ic_electrodes: { } 
-  imaging_planes: { } 
-  modules: { } 
-  ogen_sites: { } 
-  stimulus: { } 
-  stimulus_template: { } 
-  time_intervals: { } 
+  acquisition: { name <class 'pynwb.base.TimeSeries'>,  name2 <class 'pynwb.base.TimeSeries'> }
+  analysis: { }
+  devices: { }
+  electrode_groups: { }
+  epoch_tags: """ + empty_set_str + """
+  ic_electrodes: { }
+  imaging_planes: { }
+  modules: { }
+  ogen_sites: { }
+  stimulus: { }
+  stimulus_template: { }
+  time_intervals: { }
 """)

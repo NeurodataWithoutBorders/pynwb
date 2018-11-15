@@ -148,7 +148,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
         for k in sorted(self.fields):  # sorted to enable tests
             v = self.fields[k]
-            template += "  {}: {} \n".format(k, self.__smart_str(v))
+            template += "  {}: {}\n".format(k, self.__smart_str(v))
         return template
 
     @staticmethod
