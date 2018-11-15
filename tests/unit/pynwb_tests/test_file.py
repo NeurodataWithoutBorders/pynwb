@@ -176,6 +176,23 @@ class NWBFileTest(unittest.TestCase):
         self.nwbfile.add_trial(start_time=50.0, stop_time=70.0)
         self.assertEqual(len(self.nwbfile.trials), 3)
 
+    def test_add_invalid_times_column(self):
+        self.nwbfile.add_invalid_times_column('comments', 'description of reason for omitting time')
+        self.assertEqual(self.nwbfile.invalid_times.colnames, ('start_time', 'stop_time', 'comments'))
+
+    def test_add_invalid_time_interval(self):
+
+        self.nwbfile.add_invalid_time_interval(start_time=0.0, stop_time=12.0)
+        self.assertEqual(len(self.nwbfile.invalid_times), 1)
+        self.nwbfile.add_invalid_time_interval(start_time=15.0, stop_time=16.0)
+        self.nwbfile.add_invalid_time_interval(start_time=17.0, stop_time=20.5)
+        self.assertEqual(len(self.nwbfile.invalid_times), 3)
+
+    def test_add_invalid_time_w_ts(self):
+        ts = TimeSeries(name='name', data=[1.2], rate=1.0, unit='na')
+        self.nwbfile.add_invalid_time_interval(start_time=18.0, stop_time=20.6,
+                                               timeseries=ts, tags=('hi', 'there'))
+
     def test_add_electrode(self):
         dev1 = self.nwbfile.create_device('dev1')  # noqa: F405
         group = self.nwbfile.create_electrode_group('tetrode1',
