@@ -145,17 +145,19 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         cls.__nwbfields__ = tuple(new_nwbfields)
 
     def __repr__(self):
-        template = "{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
-        for k, v in iteritems(self.fields):
+        template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
+        for k in sorted(self.fields):  # sorted to enable tests
+            v = self.fields[k]
             template += "  {}: {} \n".format(k, self.__smart_str(v))
         return template
 
-    def __smart_str(self, v):
+    @staticmethod
+    def __smart_str(v):
         """
         Print compact string representation of data.
 
-        If v is a list, print it using numpy. This will condense the string
-        representation of datasets with many elements.
+        If v is a list, try to print it using numpy. This will condense the string
+        representation of datasets with many elements. If that doesn't work, just print the list.
 
         If v is a dictionary, print the name and type of each element
 
@@ -172,10 +174,13 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
         """
         if isinstance(v, list):
-            return str(np.array(v))
+            try:
+                return str(np.array(v))
+            except ValueError:
+                return str(v)
         elif isinstance(v, dict):
             template = '{'
-            keys = list(v.keys())
+            keys = list(sorted(v.keys()))
             for k in keys[:-1]:
                 template += " {} {}, ".format(k, type(v[k]))
             if keys:

@@ -168,6 +168,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def test_roundtrip(self):
         self.read_container = self.roundtripContainer()
         # make sure we get a completely new object
+        str(self.container)  # added as a test to make sure printing works
         self.assertNotEqual(id(self.container), id(self.read_container))
         self.assertContainerEqual(self.container, self.read_container)
 
