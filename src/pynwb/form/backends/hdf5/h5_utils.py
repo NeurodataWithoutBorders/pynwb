@@ -101,7 +101,10 @@ class H5ReferenceDataset(H5Dataset):
 
     def __getitem__(self, arg):
         ref = super(H5ReferenceDataset, self).__getitem__(arg)
-        return self.io.get_container(self.dataset.file[ref])
+        if isinstance(ref, np.ndarray):
+            return [self.io.get_container(self.dataset.file[x]) for x in ref]
+        else:
+            return self.io.get_container(self.dataset.file[ref])
 
     @property
     def dtype(self):
