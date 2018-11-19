@@ -80,7 +80,7 @@ class NWBFileTest(unittest.TestCase):
         elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
         for i in range(4):
             nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i)
-        with self.assertRaises(IndexError) as err:
+        with self.assertRaises(IndexError):
             nwbfile.create_electrode_table_region(list(range(6)), 'test')
 
     def test_access_group_after_io(self):
