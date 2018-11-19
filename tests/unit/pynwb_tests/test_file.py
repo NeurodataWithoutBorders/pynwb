@@ -90,8 +90,19 @@ class NWBFileTest(unittest.TestCase):
         nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
         device = nwbfile.create_device('a')
         elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
+        nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=0)
+
+        with NWBHDF5IO('electrodes_mwe.nwb', 'w') as io:
+            io.write(nwbfile)
+
+        with NWBHDF5IO('electrodes_mwe.nwb', 'a') as io:
+            nwbfile_i = io.read()
+            for aa, bb in zip(nwbfile_i.electrodes['group'][:], nwbfile.electrodes['group'][:]):
+                self.assertEqual(aa.name, bb.name)
+
         for i in range(4):
-            nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i)
+            nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i + 1)
+
         with NWBHDF5IO('electrodes_mwe.nwb', 'w') as io:
             io.write(nwbfile)
 
