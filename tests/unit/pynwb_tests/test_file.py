@@ -82,7 +82,25 @@ class NWBFileTest(unittest.TestCase):
             nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i)
         with self.assertRaises(IndexError) as err:
             nwbfile.create_electrode_table_region(list(range(6)), 'test')
-        self.assertTrue('out of range' in str(err.exception))
+
+    def test_access_group_after_io(self):
+        """
+        Motivated by #739
+        """
+        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        device = nwbfile.create_device('a')
+        elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
+        for i in range(4):
+            nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i)
+        with NWBHDF5IO('electrodes_mwe.nwb', 'w') as io:
+            io.write(nwbfile)
+
+        with NWBHDF5IO('electrodes_mwe.nwb', 'a') as io:
+            nwbfile_i = io.read()
+            for aa, bb in zip(nwbfile_i.electrodes['group'][:], nwbfile.electrodes['group'][:]):
+                self.assertEqual(aa.name, bb.name)
+
+        os.remove("electrodes_mwe.nwb")
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
@@ -151,7 +169,7 @@ class NWBFileTest(unittest.TestCase):
         table.add_row(x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none', group=group,
                       group_name='tetrode1')
         self.nwbfile.set_electrode_table(table)
-        self.assertIs(self.nwbfile.ec_electrodes, table)
+        self.assertIs(self.nwbfile.electrodes, table)
         self.assertIs(table.parent, self.nwbfile)
 
     def test_add_unit_column(self):
