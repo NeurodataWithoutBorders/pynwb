@@ -190,7 +190,7 @@ class NWBHDF5IO(HDF5IO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
             {'name': 'mode', 'type': str,
-             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'},
+             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")'},
             {'name': 'load_namespaces', 'type': bool,
              'doc': 'whether or not to load cached namespaces from given path', 'default': False},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
@@ -226,7 +226,7 @@ class NWBHDF5IO(HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager, mode=mode, file=file_obj)
+        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj)
 
 
 from . import io as __io  # noqa: F401,E402
