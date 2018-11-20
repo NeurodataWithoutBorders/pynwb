@@ -25,7 +25,7 @@ class SpatialSeries(TimeSeries):
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this SpatialSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, None),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
             {'name': 'conversion', 'type': float,
