@@ -29,7 +29,7 @@ class SpatialSeries(TimeSeries):
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to meters',
+             'doc': 'Scalar to multiply each element by to convert to meters',
              'default': _default_conversion},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
