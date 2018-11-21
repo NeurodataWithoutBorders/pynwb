@@ -168,6 +168,7 @@ class NWBFile(MultiContainerInterface):
                      {'name': 'units', 'child': True, 'required_name': 'units'},
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
+                     {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
                      'epoch_tags',)
 
     @docval({'name': 'session_description', 'type': str,
@@ -227,6 +228,8 @@ class NWBFile(MultiContainerInterface):
              'doc': 'A sorted list of tags used across all epochs', 'default': set()},
             {'name': 'trials', 'type': TimeIntervals,
              'doc': 'A table containing trial data', 'default': None},
+            {'name': 'invalid_times', 'type': TimeIntervals,
+             'doc': 'A table containing times to be omitted from analysis', 'default': None},
             {'name': 'time_intervals', 'type': (list, tuple),
              'doc': 'any TimeIntervals tables storing time intervals', 'default': None},
             {'name': 'units', 'type': DynamicTable,
@@ -289,6 +292,9 @@ class NWBFile(MultiContainerInterface):
         trials = getargs('trials', kwargs)
         if trials is not None:
             self.trials = trials
+        invalid_times = getargs('invalid_times', kwargs)
+        if invalid_times is not None:
+            self.invalid_times = invalid_times
         units = getargs('units', kwargs)
         if units is not None:
             self.units = units
@@ -507,6 +513,30 @@ class NWBFile(MultiContainerInterface):
         self.__check_trials()
         call_docval_func(self.trials.add_interval, kwargs)
 
+    def __check_invalid_times(self):
+        if self.invalid_times is None:
+            self.invalid_times = TimeIntervals('invalid_times', 'time intervals to be removed from analysis')
+
+    @docval(*get_docval(DynamicTable.add_column))
+    def add_invalid_times_column(self, **kwargs):
+        """
+        Add a column to the trial table.
+        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        """
+        self.__check_invalid_times()
+        call_docval_func(self.invalid_times.add_column, kwargs)
+
+    def add_invalid_time_interval(self, **kwargs):
+        """
+        Add a trial to the trial table.
+        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+
+        Required fields are *start_time*, *stop_time*, and any columns that have
+        been added (through calls to `add_invalid_times_columns`).
+        """
+        self.__check_invalid_times()
+        call_docval_func(self.invalid_times.add_interval, kwargs)
+
     @docval({'name': 'electrode_table', 'type': DynamicTable, 'doc': 'the ElectrodeTable for this file'})
     def set_electrode_table(self, **kwargs):
         """
@@ -589,6 +619,8 @@ def ElectrodeTable(name='electrodes',
                       )
 
 
-def TrialTable(name='trials',
-               description='metadata about experimental trials'):
+def TrialTable(name='trials', description='metadata about experimental trials'):
+    return _tablefunc(name, description, ['start_time', 'stop_time'])
+
+def InvalidTimesTable(name='invalid_times', description='time intervals to be removed from analysis'):
     return _tablefunc(name, description, ['start_time', 'stop_time'])

@@ -228,13 +228,13 @@ class TestHDF5Writer(GroupBuilderTestCase):
         return f
 
     def test_write_builder(self):
-        writer = HDF5IO(self.path, self.manager)
+        writer = HDF5IO(self.path, manager=self.manager, mode='a')
         writer.write_builder(self.builder)
         writer.close()
         self.check_fields()
 
     def test_write_attribute_reference_container(self):
-        writer = HDF5IO(self.path, self.manager)
+        writer = HDF5IO(self.path, manager=self.manager, mode='a')
         self.builder.set_attribute('ref_attribute', self.ts)
         writer.write_builder(self.builder)
         writer.close()
@@ -243,7 +243,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.assertEqual(f['acquisition/timeseries/test_timeseries'], f[f.attrs['ref_attribute']])
 
     def test_write_attribute_reference_builder(self):
-        writer = HDF5IO(self.path, self.manager)
+        writer = HDF5IO(self.path, manager=self.manager, mode='a')
         self.builder.set_attribute('ref_attribute', self.ts_builder)
         writer.write_builder(self.builder)
         writer.close()
@@ -252,13 +252,13 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.assertEqual(f['acquisition/timeseries/test_timeseries'], f[f.attrs['ref_attribute']])
 
     def test_write_context_manager(self):
-        with HDF5IO(self.path, self.manager) as writer:
+        with HDF5IO(self.path, manager=self.manager, mode='a') as writer:
             writer.write_builder(self.builder)
         self.check_fields()
 
     def test_read_builder(self):
         self.maxDiff = None
-        io = HDF5IO(self.path, self.manager)
+        io = HDF5IO(self.path, manager=self.manager, mode='a')
         io.write_builder(self.builder)
         builder = io.read_builder()
         self.assertBuilderEqual(builder, self.builder)
@@ -266,7 +266,7 @@ class TestHDF5Writer(GroupBuilderTestCase):
 
     def test_overwrite_written(self):
         self.maxDiff = None
-        io = HDF5IO(self.path, self.manager)
+        io = HDF5IO(self.path, manager=self.manager, mode='a')
         io.write_builder(self.builder)
         builder = io.read_builder()
         with self.assertRaisesRegex(ValueError, "cannot change written to not written"):
