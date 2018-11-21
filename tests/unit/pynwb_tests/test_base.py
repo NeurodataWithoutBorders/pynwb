@@ -130,4 +130,5 @@ class TestImages(unittest.TestCase):
 
     def test_images(self):
         image = Image(name='test_image', data=np.ones((10, 10)))
-        Images(name='images_name', images=[image, image])
+        image2 = Image(name='test_image2', data=np.ones((10, 10)))
+        Images(name='images_name', images=[image, image2])

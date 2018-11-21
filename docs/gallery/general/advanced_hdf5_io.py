@@ -174,7 +174,7 @@ io.close()
 #
 # Again, nothing has changed for read. All of the above advanced I/O features are handled transparently.
 
-io = NWBHDF5IO('advanced_io_example.nwb')
+io = NWBHDF5IO('advanced_io_example.nwb', 'r')
 nwbfile = io.read()
 
 ####################

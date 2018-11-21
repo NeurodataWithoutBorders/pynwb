@@ -151,10 +151,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
         nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
 
-        self.writer = HDF5IO(self.filename, get_manager(), mode='w')
+        self.writer = HDF5IO(self.filename, manager=get_manager(), mode='w')
         self.writer.write(nwbfile)
         self.writer.close()
-        self.reader = HDF5IO(self.filename, get_manager(), mode='r')
+        self.reader = HDF5IO(self.filename, manager=get_manager(), mode='r')
         read_nwbfile = self.reader.read()
 
         try:

@@ -449,7 +449,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 #
 #   .. code-block:: python
 #
-#       io = NWBHDF5IO('basic_sparse_iterwrite_example.nwb')
+#       io = NWBHDF5IO('basic_sparse_iterwrite_example.nwb', 'r')
 #       nwbfile = io.read()
 #       data = nwbfile.get_acquisition('synthetic_timeseries').data  # <-- PyNWB does lazy load; no problem
 #       subset = data[10:100, 10:100]                                # <-- Loading a subset is fine too
@@ -541,7 +541,7 @@ write_test_file(filename='basic_sparse_iterwrite_largearray.nwb',
 # Read the NWB file
 from pynwb import NWBHDF5IO    # noqa
 
-io = NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb')
+io = NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb', 'r')
 nwbfile = io.read()
 data = nwbfile.get_acquisition('synthetic_timeseries').data
 # Compare all the data values of our two arrays
