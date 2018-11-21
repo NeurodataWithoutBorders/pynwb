@@ -236,7 +236,7 @@ with NWBHDF5IO('basic_example.nwb', 'w') as io:
 # and use the :py:func:`~pynwb.form.backends.io.FORMIO.read` method to retrieve an
 # :py:class:`~pynwb.file.NWBFile` object.
 
-io = NWBHDF5IO('basic_example.nwb')
+io = NWBHDF5IO('basic_example.nwb', 'r')
 nwbfile = io.read()
 
 ####################
@@ -298,6 +298,11 @@ mod_ts = added_mod.get_data_interface('ts_for_mod')
 # the name of the object we want back.
 
 mod_ts = added_mod['ts_for_mod']
+
+####################
+# Close the file when we are done with it.
+
+io.close()
 
 ####################
 # .. _basic_appending:

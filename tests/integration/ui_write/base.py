@@ -151,10 +151,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
         nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
 
-        self.writer = HDF5IO(self.filename, get_manager(), mode='w')
+        self.writer = HDF5IO(self.filename, manager=get_manager(), mode='w')
         self.writer.write(nwbfile)
         self.writer.close()
-        self.reader = HDF5IO(self.filename, get_manager(), mode='r')
+        self.reader = HDF5IO(self.filename, manager=get_manager(), mode='r')
         read_nwbfile = self.reader.read()
 
         try:
@@ -168,6 +168,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def test_roundtrip(self):
         self.read_container = self.roundtripContainer()
         # make sure we get a completely new object
+        str(self.container)  # added as a test to make sure printing works
         self.assertNotEqual(id(self.container), id(self.read_container))
         self.assertContainerEqual(self.container, self.read_container)
 

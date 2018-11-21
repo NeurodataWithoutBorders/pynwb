@@ -128,7 +128,7 @@ nwbfile4 = NWBFile(session_description='demonstrate external files',
 #
 
 # Get the first timeseries
-io1 = NWBHDF5IO(filename1)
+io1 = NWBHDF5IO(filename1, 'r')
 nwbfile1 = io1.read()
 timeseries_1 = nwbfile1.get_acquisition('test_timeseries1')
 timeseries_1_data = timeseries_1.data
@@ -208,12 +208,12 @@ manager = get_manager()
 #
 
 # Get the first timeseries
-io1 = NWBHDF5IO(filename1, manager=manager)
+io1 = NWBHDF5IO(filename1, 'r', manager=manager)
 nwbfile1 = io1.read()
 timeseries_1 = nwbfile1.get_acquisition('test_timeseries1')
 
 # Get the second timeseries
-io2 = NWBHDF5IO(filename2, manager=manager)
+io2 = NWBHDF5IO(filename2, 'r', manager=manager)
 nwbfile2 = io2.read()
 timeseries_2 = nwbfile2.get_acquisition('test_timeseries2')
 

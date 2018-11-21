@@ -36,7 +36,7 @@ def main():
         print('%s not found' % args.path, file=sys.stderr)
         sys.exit(1)
 
-    io = HDF5IO(args.path, get_manager())
+    io = HDF5IO(args.path, get_manager(), mode='r')
 
     if args.nspath is not None:
         namespaces = load_namespaces(args.nspath)
