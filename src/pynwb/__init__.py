@@ -1,4 +1,4 @@
-'''This ackage will contain functions, classes, and objects
+'''This package will contain functions, classes, and objects
 for reading and writing data in NWB format
 '''
 import os.path
