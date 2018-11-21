@@ -80,9 +80,38 @@ class NWBFileTest(unittest.TestCase):
         elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
         for i in range(4):
             nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i)
-        with self.assertRaises(IndexError) as err:
+        with self.assertRaises(IndexError):
             nwbfile.create_electrode_table_region(list(range(6)), 'test')
-        self.assertTrue('out of range' in str(err.exception))
+
+    def test_access_group_after_io(self):
+        """
+        Motivated by #739
+        """
+        nwbfile = NWBFile('a', 'b', datetime.now(tzlocal()))
+        device = nwbfile.create_device('a')
+        elecgrp = nwbfile.create_electrode_group('a', 'b', device=device, location='a')
+        nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=0)
+
+        with NWBHDF5IO('electrodes_mwe.nwb', 'w') as io:
+            io.write(nwbfile)
+
+        with NWBHDF5IO('electrodes_mwe.nwb', 'a') as io:
+            nwbfile_i = io.read()
+            for aa, bb in zip(nwbfile_i.electrodes['group'][:], nwbfile.electrodes['group'][:]):
+                self.assertEqual(aa.name, bb.name)
+
+        for i in range(4):
+            nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=i + 1)
+
+        with NWBHDF5IO('electrodes_mwe.nwb', 'w') as io:
+            io.write(nwbfile)
+
+        with NWBHDF5IO('electrodes_mwe.nwb', 'a') as io:
+            nwbfile_i = io.read()
+            for aa, bb in zip(nwbfile_i.electrodes['group'][:], nwbfile.electrodes['group'][:]):
+                self.assertEqual(aa.name, bb.name)
+
+        os.remove("electrodes_mwe.nwb")
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
@@ -151,7 +180,7 @@ class NWBFileTest(unittest.TestCase):
         table.add_row(x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none', group=group,
                       group_name='tetrode1')
         self.nwbfile.set_electrode_table(table)
-        self.assertIs(self.nwbfile.ec_electrodes, table)
+        self.assertIs(self.nwbfile.electrodes, table)
         self.assertIs(table.parent, self.nwbfile)
 
     def test_add_unit_column(self):
@@ -175,6 +204,23 @@ class NWBFileTest(unittest.TestCase):
         self.nwbfile.add_trial(start_time=30.0, stop_time=40.0)
         self.nwbfile.add_trial(start_time=50.0, stop_time=70.0)
         self.assertEqual(len(self.nwbfile.trials), 3)
+
+    def test_add_invalid_times_column(self):
+        self.nwbfile.add_invalid_times_column('comments', 'description of reason for omitting time')
+        self.assertEqual(self.nwbfile.invalid_times.colnames, ('start_time', 'stop_time', 'comments'))
+
+    def test_add_invalid_time_interval(self):
+
+        self.nwbfile.add_invalid_time_interval(start_time=0.0, stop_time=12.0)
+        self.assertEqual(len(self.nwbfile.invalid_times), 1)
+        self.nwbfile.add_invalid_time_interval(start_time=15.0, stop_time=16.0)
+        self.nwbfile.add_invalid_time_interval(start_time=17.0, stop_time=20.5)
+        self.assertEqual(len(self.nwbfile.invalid_times), 3)
+
+    def test_add_invalid_time_w_ts(self):
+        ts = TimeSeries(name='name', data=[1.2], rate=1.0, unit='na')
+        self.nwbfile.add_invalid_time_interval(start_time=18.0, stop_time=20.6,
+                                               timeseries=ts, tags=('hi', 'there'))
 
     def test_add_electrode(self):
         dev1 = self.nwbfile.create_device('dev1', description='a mock device for testing')  # noqa: F405

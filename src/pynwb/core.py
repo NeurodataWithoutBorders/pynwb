@@ -6,7 +6,7 @@ from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
 from .form import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
-from six import with_metaclass, iteritems
+from six import with_metaclass
 
 
 def _not_parent(arg):
@@ -59,28 +59,6 @@ class LabelledDict(dict):
 
 def prepend_string(string, prepend='    '):
     return prepend + prepend.join(string.splitlines(True))
-
-
-def nwb_repr(nwb_object, verbose=True):
-    try:
-        template = "{} {}\nFields:\n""".format(getattr(nwb_object, 'name'), type(nwb_object))
-
-        if verbose:
-            for k, v in iteritems(nwb_object.fields):
-                template += "  {}:\n".format(k)
-                if isinstance(v, list):
-                    for item in v:
-                        template += prepend_string(nwb_repr(item, verbose=False)) + '\n'
-                else:
-                    template += prepend_string(str(v)) + '\n'
-        else:
-            for field in ('description', ):
-                template += "  {}:\n".format(field)
-                template += prepend_string(str(getattr(nwb_object, field)))+'\n'
-
-        return template
-    except AttributeError:
-        return str(nwb_object)
 
 
 class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
@@ -166,8 +144,52 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
             new_nwbfields.append(pname)
         cls.__nwbfields__ = tuple(new_nwbfields)
 
-    def __str__(self):
-        return nwb_repr(self)
+    def __repr__(self):
+        template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
+        for k in sorted(self.fields):  # sorted to enable tests
+            v = self.fields[k]
+            template += "  {}: {}\n".format(k, self.__smart_str(v))
+        return template
+
+    @staticmethod
+    def __smart_str(v):
+        """
+        Print compact string representation of data.
+
+        If v is a list, try to print it using numpy. This will condense the string
+        representation of datasets with many elements. If that doesn't work, just print the list.
+
+        If v is a dictionary, print the name and type of each element
+
+        If v is a neurodata_type, print the name of type
+
+        Otherwise, use the built-in str()
+        Parameters
+        ----------
+        v
+
+        Returns
+        -------
+        str
+
+        """
+        if isinstance(v, list):
+            try:
+                return str(np.array(v))
+            except ValueError:
+                return str(v)
+        elif isinstance(v, dict):
+            template = '{'
+            keys = list(sorted(v.keys()))
+            for k in keys[:-1]:
+                template += " {} {}, ".format(k, type(v[k]))
+            if keys:
+                template += " {} {}".format(keys[-1], type(v[keys[-1]]))
+            return template + ' }'
+        elif isinstance(v, NWBBaseType):
+            "{} {}".format(getattr(v, 'name'), type(v))
+        else:
+            return str(v)
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)

@@ -440,6 +440,10 @@ groups:
       doc: repeated experimental events that have a logical grouping
       quantity: '?'
     - neurodata_type_inc: TimeIntervals
+      name: invalid_times
+      doc: time intervals that should be removed from analysis
+      quantity: '?'
+    - neurodata_type_inc: TimeIntervals
       doc: an optional additional table for describing other experimental time intervals
       quantity: '*'
     quantity: '?'

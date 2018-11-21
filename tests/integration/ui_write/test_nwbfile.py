@@ -151,16 +151,16 @@ class TestNWBFileIO(base.TestMapNWBContainer):
             os.remove(self.path)
 
     def test_write(self):
-        hdf5io = HDF5IO(self.path, self.manager)
+        hdf5io = HDF5IO(self.path, manager=self.manager, mode='a')
         hdf5io.write(self.container)
         hdf5io.close()
         # TODO add some asserts
 
     def test_read(self):
-        hdf5io = HDF5IO(self.path, self.manager)
+        hdf5io = HDF5IO(self.path, manager=self.manager, mode='a')
         hdf5io.write(self.container)
         hdf5io.close()
-        hdf5io = HDF5IO(self.path, self.manager)
+        hdf5io = HDF5IO(self.path, manager=self.manager, mode='a')
         container = hdf5io.read()
         self.assertIsInstance(container, NWBFile)
         raw_ts = container.acquisition

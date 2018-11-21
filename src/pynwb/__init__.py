@@ -1,4 +1,4 @@
-'''This ackage will contain functions, classes, and objects
+'''This package will contain functions, classes, and objects
 for reading and writing data in NWB format
 '''
 import os.path
@@ -12,7 +12,7 @@ CORE_NAMESPACE = 'core'
 from .form.spec import NamespaceCatalog  # noqa: E402
 from .form.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
 from .form.backends.io import FORMIO  # noqa: E402
-from .form.backends.hdf5 import HDF5IO  # noqa: E402
+from .form.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
 from .form.validate import ValidatorMap  # noqa: E402
 from .form.build import BuildManager  # noqa: E402
 
@@ -186,11 +186,11 @@ def validate(**kwargs):
     return validator.validate(builder)
 
 
-class NWBHDF5IO(HDF5IO):
+class NWBHDF5IO(_HDF5IO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
             {'name': 'mode', 'type': str,
-             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")', 'default': 'a'},
+             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")'},
             {'name': 'load_namespaces', 'type': bool,
              'doc': 'whether or not to load cached namespaces from given path', 'default': False},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
@@ -226,7 +226,7 @@ class NWBHDF5IO(HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager, mode=mode, file=file_obj)
+        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj)
 
 
 from . import io as __io  # noqa: F401,E402
