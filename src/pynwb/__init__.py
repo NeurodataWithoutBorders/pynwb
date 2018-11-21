@@ -12,7 +12,7 @@ CORE_NAMESPACE = 'core'
 from .form.spec import NamespaceCatalog  # noqa: E402
 from .form.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
 from .form.backends.io import FORMIO  # noqa: E402
-from .form.backends.hdf5 import HDF5IO  # noqa: E402
+from .form.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
 from .form.validate import ValidatorMap  # noqa: E402
 from .form.build import BuildManager  # noqa: E402
 
@@ -186,7 +186,7 @@ def validate(**kwargs):
     return validator.validate(builder)
 
 
-class NWBHDF5IO(HDF5IO):
+class NWBHDF5IO(_HDF5IO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
             {'name': 'mode', 'type': str,
