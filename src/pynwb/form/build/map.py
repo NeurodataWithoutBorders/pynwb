@@ -4,7 +4,7 @@ import warnings
 from collections import OrderedDict
 from copy import copy
 from datetime import datetime
-from six import with_metaclass, raise_from, text_type, binary_type
+from six import with_metaclass, raise_from, text_type, binary_type, integer_types
 
 from ..utils import docval, getargs, ExtenderMeta, get_docval, fmt_docval_args, call_docval_func
 from ..container import Container, Data, DataRegion
@@ -661,6 +661,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         while hasattr(tmp, '__len__') and not isinstance(tmp, (Container, text_type, binary_type)):
             tmptmp = None
             for t in tmp:
+                # In case of a numeric array stop the iteration at the first element to avoid long-running loop
+                if isinstance(t, (integer_types, float, complex, bool)):
+                    break
                 if hasattr(t, '__len__') and not isinstance(t, (Container, text_type, binary_type)) and len(t) > 0:
                     tmptmp = tmp[0]
                     break
