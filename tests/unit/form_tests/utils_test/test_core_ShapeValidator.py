@@ -46,7 +46,7 @@ class ShapeValidatorTests(unittest.TestCase):
         d2 = np.arange(20).reshape(5, 2, 2)
         res = assertEqualShape(d1, d2)
         self.assertFalse(res.result)
-        self.assertEquals(res.error, 'NUM_AXES_ERROR')
+        self.assertEqual(res.error, 'NUM_AXES_ERROR')
         self.assertTupleEqual(res.ignored, ())
         self.assertTupleEqual(res.unmatched, ())
         self.assertTupleEqual(res.shape1, (2, 5))
@@ -88,7 +88,7 @@ class ShapeValidatorTests(unittest.TestCase):
         d2 = np.arange(20).reshape(5, 2, 2)
         res = assertEqualShape(d1, d2, [0, 1], 1)
         self.assertFalse(res.result)
-        self.assertEquals(res.error, "NUM_AXES_ERROR")
+        self.assertEqual(res.error, "NUM_AXES_ERROR")
         self.assertTupleEqual(res.ignored, ())
         self.assertTupleEqual(res.unmatched, ())
         self.assertTupleEqual(res.shape1, (2, 5))
@@ -102,7 +102,7 @@ class ShapeValidatorTests(unittest.TestCase):
         d2 = np.arange(20).reshape(5, 2, 2)
         res = assertEqualShape(d1, d2, 4, 1)
         self.assertFalse(res.result)
-        self.assertEquals(res.error, 'AXIS_OUT_OF_BOUNDS')
+        self.assertEqual(res.error, 'AXIS_OUT_OF_BOUNDS')
         self.assertTupleEqual(res.ignored, ())
         self.assertTupleEqual(res.unmatched, ())
         self.assertTupleEqual(res.shape1, (2, 5))
@@ -116,7 +116,7 @@ class ShapeValidatorTests(unittest.TestCase):
         d2 = np.arange(20).reshape(5, 2, 2)
         res = assertEqualShape(d1, d2, [0, 1], [5, 0])
         self.assertFalse(res.result)
-        self.assertEquals(res.error, 'AXIS_OUT_OF_BOUNDS')
+        self.assertEqual(res.error, 'AXIS_OUT_OF_BOUNDS')
         self.assertTupleEqual(res.ignored, ())
         self.assertTupleEqual(res.unmatched, ())
         self.assertTupleEqual(res.shape1, (2, 5))
@@ -158,7 +158,7 @@ class ShapeValidatorTests(unittest.TestCase):
         d2 = DataChunkIterator(data=np.arange(10).reshape(2, 5))
         res = assertEqualShape(d1, d2, ignore_undetermined=False)
         self.assertFalse(res.result)
-        self.assertEquals(res.error, 'AXIS_LEN_ERROR')
+        self.assertEqual(res.error, 'AXIS_LEN_ERROR')
         self.assertTupleEqual(res.ignored, ())
         self.assertTupleEqual(res.unmatched, ((0, 0),))
         self.assertTupleEqual(res.shape1, (None, 5))
@@ -178,7 +178,7 @@ class ShapeValidatorResultTests(unittest.TestCase):
     def test_default_message(self):
         temp = ShapeValidatorResult()
         temp.error = 'AXIS_LEN_ERROR'
-        self.assertEquals(temp.default_message, ShapeValidatorResult.SHAPE_ERROR[temp.error])
+        self.assertEqual(temp.default_message, ShapeValidatorResult.SHAPE_ERROR[temp.error])
 
     def test_set_error_to_illegal_type(self):
         temp = ShapeValidatorResult()
