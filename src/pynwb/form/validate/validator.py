@@ -13,7 +13,7 @@ from ..spec import SpecNamespace
 from ..build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder, RegionBuilder
 from ..build.builders import BaseBuilder
 
-from .errors import DtypeError, MissingError, MissingDataType, ShapeError
+from .errors import Error, DtypeError, MissingError, MissingDataType, ShapeError
 from six import with_metaclass, raise_from, text_type, binary_type
 
 
@@ -186,9 +186,12 @@ class AttributeValidator(Validator):
         if spec.required and value is None:
             ret.append(MissingError(self.get_spec_loc(spec)))
         else:
-            dtype = get_type(value)
-            if not check_type(spec.dtype, dtype):
-                ret.append(DtypeError(self.get_spec_loc(spec), spec.dtype, dtype))
+            if spec.dtype is None:
+                ret.append(Error(self.get_spec_loc(spec)))
+            else:
+                dtype = get_type(value)
+                if not check_type(spec.dtype, dtype):
+                    ret.append(DtypeError(self.get_spec_loc(spec), spec.dtype, dtype))
             shape = get_shape(value)
             if not check_shape(spec.shape, shape):
                 ret.append(ShapeError(self.get_spec_loc(spec), spec.shape, shape))
@@ -328,9 +331,12 @@ class DatasetValidator(BaseStorageValidator):
         ret = super(DatasetValidator, self).validate(builder)
         data = builder.data
         dtype = get_type(data)
-        if not check_type(self.spec.dtype, dtype):
-            ret.append(DtypeError(self.get_spec_loc(self.spec), self.spec.dtype, dtype,
-                                  location=self.get_builder_loc(builder)))
+        if self.spec.dtype is None:
+            ret.append(MissingError(self.get_spec_loc(self.spec)))
+        else:
+            if not check_type(self.spec.dtype, dtype):
+                ret.append(DtypeError(self.get_spec_loc(self.spec), self.spec.dtype, dtype,
+                                      location=self.get_builder_loc(builder)))
         shape = get_shape(data)
         if not check_shape(self.spec.shape, shape):
             ret.append(ShapeError(self.get_spec_loc(self.spec), self.spec.shape, shape,
