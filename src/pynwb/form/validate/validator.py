@@ -73,9 +73,9 @@ def check_type(expected, received):
                     raise ValueError("Unrecognized type: '%s'" % received)
                 received = 'utf' if received is text_type else 'ascii'
             elif received.char == 'U':
-                received in 'utf'
+                received = 'utf'
             elif received.char == 'S':
-                received in 'ascii'
+                received = 'ascii'
             else:
                 received = received.name
         elif isinstance(received, type):
