@@ -1,3 +1,5 @@
+from pynwb.form.build import GroupBuilder, LinkBuilder, DatasetBuilder
+
 from pynwb.icephys import (IntracellularElectrode, PatchClampSeries, CurrentClampStimulusSeries,
                            VoltageClampStimulusSeries, CurrentClampSeries,
                            VoltageClampSeries, IZeroClampSeries)
@@ -21,6 +23,31 @@ class TestIntracellularElectrode(base.TestMapRoundTrip):
                                            initial_access_resistance='I guess this changes',
                                            device=self.device)
         return self.elec
+
+    def setUpBuilder(self):
+        device = GroupBuilder('device_name',
+                              attributes={'help': 'A recording device e.g. amplifier',
+                                          'namespace': 'core',
+                                          'neurodata_type': 'Device'})
+        datasets = [
+            DatasetBuilder('slice', data=u'tissue slice'),
+            DatasetBuilder('resistance', data=u'something measured in ohms'),
+            DatasetBuilder('seal', data=u'sealing method'),
+            DatasetBuilder('description', data=u'a fake electrode object'),
+            DatasetBuilder('location', data=u'Springfield Elementary School'),
+            DatasetBuilder('filtering', data=u'a meaningless free-form text field'),
+            DatasetBuilder('initial_access_resistance', data=u'I guess this changes'),
+        ]
+        elec = GroupBuilder('elec0',
+                            attributes={'help': 'Metadata about an intracellular electrode',
+                                        'namespace': 'core',
+                                        'neurodata_type': 'IntracellularElectrode',
+                                        },
+                            datasets={d.name: d for d in datasets},
+                            links={
+                                'device': LinkBuilder(device, 'device')
+                            })
+        return elec
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
