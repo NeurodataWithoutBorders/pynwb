@@ -618,7 +618,6 @@ def ElectrodeTable(name='electrodes',
                        ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')]
                       )
 
-
 def TrialTable(name='trials', description='metadata about experimental trials'):
     return _tablefunc(name, description, ['start_time', 'stop_time'])
 
