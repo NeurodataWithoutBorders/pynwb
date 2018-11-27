@@ -32,7 +32,7 @@ class H5IOTest(unittest.TestCase):
         # The temp file will be closed before h5py truncates it
         # and will be removed during the tearDown step.
         self.test_temp_file.close()
-        self.io = HDF5IO(self.test_temp_file.name)
+        self.io = HDF5IO(self.test_temp_file.name, mode='a')
         self.f = self.io._file
 
     def tearDown(self):
@@ -363,7 +363,7 @@ class TestCacheSpec(unittest.TestCase):
         # The temp file will be closed before h5py truncates it
         # and will be removed during the tearDown step.
         self.test_temp_file.close()
-        self.io = NWBHDF5IO(self.test_temp_file.name)
+        self.io = NWBHDF5IO(self.test_temp_file.name, mode='a')
         # Setup all the data we need
         start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
         create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
@@ -449,7 +449,7 @@ class NWBHDF5IOMultiFileTest(unittest.TestCase):
         # and will be removed during the tearDown step.
         for i in self.test_temp_files:
             i.close()
-        self.io = [NWBHDF5IO(i.name) for i in self.test_temp_files]
+        self.io = [NWBHDF5IO(i.name, mode='a') for i in self.test_temp_files]
         self.f = [i._file for i in self.io]
 
     def tearDown(self):

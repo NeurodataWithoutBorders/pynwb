@@ -228,18 +228,14 @@ class Image(NWBData):
 
 
 @register_class('Images', CORE_NAMESPACE)
-class Images(NWBDataInterface):
+class Images(MultiContainerInterface):
 
     __clsconf__ = {
         'attr': 'images',
         'add': 'add_image',
         'type': Image,
-        'get': 'get_image'
+        'get': 'get_image',
+        'create': 'create_image'
     }
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'images', 'type': (list, tuple, dict), 'doc': 'images'},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
-    def __init__(self, **kwargs):
-        super(Images, self).__init__(name=kwargs['name'])
-        self.description = popargs('description', kwargs)
+    __help = "Contains images"
