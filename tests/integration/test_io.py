@@ -62,7 +62,7 @@ class TestHDF5Writer(unittest.TestCase):
         os.remove(self.path)
 
     def test_nwbio(self):
-        io = HDF5IO(self.path, self.manager)
+        io = HDF5IO(self.path, manager=self.manager, mode='a')
         io.write(self.container)
         io.close()
         f = File(self.path)
@@ -78,7 +78,7 @@ class TestHDF5Writer(unittest.TestCase):
         self.assertIn('test_timeseries', acq)
 
     def test_write_clobber(self):
-        io = HDF5IO(self.path, self.manager)
+        io = HDF5IO(self.path, manager=self.manager, mode='a')
         io.write(self.container)
         io.close()
         f = File(self.path)  # noqa: F841
@@ -89,7 +89,7 @@ class TestHDF5Writer(unittest.TestCase):
             assert_file_exists = OSError
 
         with self.assertRaises(assert_file_exists):
-            io = HDF5IO(self.path, self.manager, mode='w-')
+            io = HDF5IO(self.path, manager=self.manager, mode='w-')
             io.write(self.container)
             io.close()
 
@@ -97,7 +97,7 @@ class TestHDF5Writer(unittest.TestCase):
         '''
         Round-trip test for writing spec and reading it back in
         '''
-        io = HDF5IO(self.path, self.manager)
+        io = HDF5IO(self.path, manager=self.manager, mode="a")
         io.write(self.container, cache_spec=True)
         io.close()
         f = File(self.path)
@@ -170,7 +170,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
 
     def test_nwbio(self):
         fil = File(self.path)
-        io = HDF5IO(self.path, self.manager, file=fil)
+        io = HDF5IO(self.path, manager=self.manager, file=fil, mode="a")
         io.write(self.container)
         io.close()
         f = File(self.path)
@@ -187,7 +187,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
 
     def test_write_clobber(self):
         fil = File(self.path)
-        io = HDF5IO(self.path, self.manager, file=fil)
+        io = HDF5IO(self.path, manager=self.manager, file=fil, mode="a")
         io.write(self.container)
         io.close()
         f = File(self.path)  # noqa: F841
@@ -198,7 +198,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
             assert_file_exists = OSError
 
         with self.assertRaises(assert_file_exists):
-            io = HDF5IO(self.path, self.manager, mode='w-')
+            io = HDF5IO(self.path, manager=self.manager, mode='w-')
             io.write(self.container)
             io.close()
 
@@ -208,7 +208,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
         '''
 
         fil = File(self.path)
-        io = HDF5IO(self.path, self.manager, file=fil)
+        io = HDF5IO(self.path, manager=self.manager, file=fil, mode='a')
         io.write(self.container, cache_spec=True)
         io.close()
         f = File(self.path)
