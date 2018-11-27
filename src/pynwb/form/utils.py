@@ -66,6 +66,19 @@ def __type_okay(value, argtype, allow_none=False):
 
 
 def __shape_okay_multi(value, argshape):
+    """Check value against shape
+
+    First, check if there are multiple shape specs provided.
+    Then, either check the one or check that one of the multiple provided work.
+
+    Args:
+        value (any): the value to check
+        argshape (tuple): the shape spec to check against
+
+    Returns:
+        bool: True if the shape is permitted
+
+    """
     if type(argshape[0]) in (tuple, list):  # if multiple shapes are present
         return any(__shape_okay(value, a) for a in argshape)
     else:
@@ -73,13 +86,39 @@ def __shape_okay_multi(value, argshape):
 
 
 def __shape_okay(value, argshape):
+    """check a single shape spec
+
+    Args:
+        value (any): the value to check
+        argshape (tuple): The single shape specification to check
+
+    Returns:
+        bool: whether the value matches the shape spec
+
+    """
     valshape = get_data_shape(value)
     if not len(valshape) == len(argshape):
         return False
-    for a, b in zip(valshape, argshape):
-        if b not in (a, None):
-            return False
-    return True
+    return all(argdim in (valdim, None) for argdim, valdim in zip(argshape, valshape))
+
+
+def ___validate_shape_spec(argshape):
+    """Ensure that the shape specification provided as valid
+
+    Args:
+        argshape (tuple): shape specification to check
+
+    """
+    if type(argshape[0]) in (tuple, list):
+        [__validate_single_shape_spec(x) for x in argshape]
+    else:
+        __validate_single_shape_spec(argshape)
+
+
+def __validate_single_shape_spec(argshape):
+    for x in argshape:
+        if not (isinstance(x, int) or x is None):
+            raise ValueError('shape specification error: {} is not a valid shape specification'.format(argshape))
 
 
 def __is_int(value):
@@ -160,6 +199,7 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True,
                             fmt_val = (argname, type(argval).__name__, __format_type(arg['type']))
                             type_errors.append("incorrect type for '%s' (got '%s', expected '%s')" % fmt_val)
                     if enforce_shape and 'shape' in arg:
+                        ___validate_shape_spec(arg['shape'])
                         if not __shape_okay_multi(argval, arg['shape']):
                             fmt_val = (argname, get_data_shape(argval), arg['shape'])
                             value_errors.append("incorrect shape for '%s' (got '%s, expected '%s')" % fmt_val)
