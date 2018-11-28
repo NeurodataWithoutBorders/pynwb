@@ -340,7 +340,7 @@ class FeatureExtraction(NWBDataInterface):
             {'name': 'times', 'type': ('array_data', 'data'), 'shape': (None, ),
              'doc': 'The times of events that features correspond to'},
             {'name': 'features', 'type': ('array_data', 'data'), 'shape': (None, None, None),
-             'doc': 'Features for each channel', 'ndim': 3},
+             'doc': 'Features for each channel'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'})
     def __init__(self, **kwargs):
         # get the inputs
