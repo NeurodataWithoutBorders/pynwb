@@ -169,6 +169,7 @@ class NWBFile(MultiContainerInterface):
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
                      {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
+                     {'name': 'environment_electrodes', 'child': True, 'required_name': 'environment_electrodes'},
                      'epoch_tags',)
 
     @docval({'name': 'session_description', 'type': str,
@@ -450,20 +451,26 @@ class NWBFile(MultiContainerInterface):
 
     @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
             {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
+            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'},
+            {'name': 'table', 'type': DynamicTable, 'doc': 'the table to be referenced', 'default': None})
     def create_electrode_table_region(self, **kwargs):
-        if self.electrodes is None:
-            msg = "no electrodes available. add electrodes before creating a region"
-            raise RuntimeError(msg)
+        if kwargs['table'] is None:
+            if self.electrodes is None:
+                msg = "no electrodes available. add electrodes before creating a region"
+                raise RuntimeError(msg)
+            table = self.electrodes
+        else:
+            table = kwargs['table']
+
         region = getargs('region', kwargs)
         for idx in region:
-            if idx < 0 or idx >= len(self.electrodes):
+            if idx < 0 or idx >= len(table):
                 raise IndexError('The index ' + str(idx) +
                                  ' is out of range for the ElectrodeTable of length '
-                                 + str(len(self.electrodes)))
+                                 + str(len(table)))
         desc = getargs('description', kwargs)
         name = getargs('name', kwargs)
-        return DynamicTableRegion(name, region, desc, self.electrodes)
+        return DynamicTableRegion(name, region, desc, table)
 
     def __check_units(self):
         if self.units is None:

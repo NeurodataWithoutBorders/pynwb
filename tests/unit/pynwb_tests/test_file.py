@@ -11,6 +11,8 @@ from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
 from pynwb.file import Subject, ElectrodeTable
 
+from pynwb.core import DynamicTable
+
 
 class NWBFileTest(unittest.TestCase):
     def setUp(self):
@@ -261,6 +263,14 @@ class NWBFileTest(unittest.TestCase):
             NWBFile('a test session description for a test NWBFile', 'FILE123', self.start,
                     source_script=None,
                     source_script_file_name='nofilename')
+
+    def test_environment_electrodes(self):
+        self.nwbfile.environment_electrodes = DynamicTable(name='environment_electrodes',
+                                                           description='my description')
+        self.nwbfile.environment_electrodes.add_column('label', 'label of electrode')
+
+        self.nwbfile.environment_electrodes.add_row({'label': 'EKG'})
+        self.assertEqual(self.nwbfile.environment_electrodes['label'].data[0], 'EKG')
 
 
 class SubjectTest(unittest.TestCase):
