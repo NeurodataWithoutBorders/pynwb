@@ -112,7 +112,7 @@ def __format_type(argtype):
 
 def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True, allow_extra=False):   # noqa: 901
     """
-    Internal helper function used by the docval decroator to parse and validate function arguments
+    Internal helper function used by the docval decorator to parse and validate function arguments
 
     :param validator: List of dicts from docval with the description of the arguments
     :param args: List of the values of positional arguments supplied by the caller
@@ -134,6 +134,12 @@ def __parse_args(validator, args, kwargs, enforce_type=True, enforce_shape=True,
     try:
         it = iter(validator)
         arg = next(it)
+        # catch unsupported keys
+        allowable_terms = ('name', 'doc', 'type', 'shape', 'default', 'help')
+        unsupported_terms = set(arg.keys()) - set(allowable_terms)
+        if unsupported_terms:
+            raise ValueError('docval for {}: {} are not supported by docval'.format(arg['name'],
+                                                                                    list(unsupported_terms)))
         # process positional arguments
         while True:
             #
