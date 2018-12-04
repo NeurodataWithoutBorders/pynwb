@@ -236,7 +236,7 @@ class SpectralAnalysis(TimeSeries):
 
     __help = "Container for storing phase or analytic amplitude of a timeseries"
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of spectral analysis',},
+    @docval({'name': 'name', 'type': str, 'doc': 'name of spectral analysis'},
             {'name': 'description', 'type': str, 'doc': 'description of spectral analysis'},
             {'name': 'timestamps', 'type': ('array_data', 'data'), 'shape': (None, ),
              'doc': 'The times of events that features correspond to'},
