@@ -2,7 +2,9 @@ import unittest
 
 import numpy as np
 
-from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units
+from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units,\
+    SpectralAnalysis
+from pynwb.file import TimeSeries
 
 
 class AnnotationSeriesConstructor(unittest.TestCase):
@@ -20,6 +22,29 @@ class AbstractFeatureSeriesConstructor(unittest.TestCase):
         self.assertEqual(aFS.features, ['features'])
 
         aFS.add_features(2.0, [1.])
+
+
+class SpectralAnalysisConstructor(unittest.TestCase):
+    def test_init(self):
+        timeseries = TimeSeries(name='dummy timeseries', description='desc',
+                                data=np.ones((3, 3)),
+                                timestamps=np.ones((3, )))
+        spec_anal = SpectralAnalysis(name='LFPSpectralAnalysis',
+                                     description='my description',
+                                     data=np.ones((3, 3, 3)),
+                                     timestamps=np.ones((3,)),
+                                     band_name=['alpha', 'beta', 'gamma'],
+                                     band_limits=np.ones((3, 2)),
+                                     timeseries=timeseries,
+                                     metric='amplitude')
+        self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
+        self.assertEqual(spec_anal.description, 'my description')
+        np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
+        np.testing.assert_equal(spec_anal.timestamps, np.ones((3,)))
+        self.assertEqual(spec_anal.band_name, ['alpha', 'beta', 'gamma'])
+        np.testing.assert_equal(spec_anal.band_limits, np.ones((3, 2)))
+        self.assertEqual(spec_anal.timeseries, timeseries)
+        self.assertEqual(spec_anal.metric, 'amplitude')
 
 
 class IntervalSeriesConstructor(unittest.TestCase):
