@@ -111,6 +111,7 @@ class TestExtension(unittest.TestCase):
 
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
 
+
 class TestCatchDupNS(unittest.TestCase):
 
     def setUp(self):
