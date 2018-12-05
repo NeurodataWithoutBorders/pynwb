@@ -309,6 +309,7 @@ Fields:
   epoch_tags: """ + empty_set_str + """
   ic_electrodes: { }
   imaging_planes: { }
+  lab_meta_data: { }
   modules: { }
   ogen_sites: { }
   stimulus: { }
