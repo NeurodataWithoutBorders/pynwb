@@ -47,6 +47,7 @@ class NWBFileMap(ObjectMapper):
 
         self.map_spec('subject', general_spec.get_group('subject'))
         self.map_spec('devices', general_spec.get_group('devices').get_neurodata_type('Device'))
+        self.map_spec('lab_meta_data', general_spec.get_neurodata_type('LabMetaData'))
 
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):

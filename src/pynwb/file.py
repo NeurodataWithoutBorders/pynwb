@@ -28,6 +28,12 @@ class SpecFile(Container):
     pass
 
 
+@register_class('LabMetaData', CORE_NAMESPACE)
+class LabMetaData(NWBContainer):
+    def __init__(self, **kwargs):
+        super(LabMetaData, self).__init__(kwargs['name'])
+
+
 @register_class('Subject', CORE_NAMESPACE)
 class Subject(NWBContainer):
 
@@ -141,6 +147,13 @@ class NWBFile(MultiContainerInterface):
             'create': 'create_time_intervals',
             'get': 'get_time_intervals'
         },
+        {
+            'attr': 'lab_meta_data',
+            'add': 'add_lab_meta_data',
+            'type': LabMetaData,
+            'create': 'create_lab_meta_data',
+            'get': 'get_lab_meta_data'
+        }
     ]
 
     __nwbfields__ = ('timestamps_reference_time',
