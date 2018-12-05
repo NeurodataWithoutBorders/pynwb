@@ -178,6 +178,7 @@ class Units(DynamicTable):
 
     __columns__ = (
         {'name': 'spike_times', 'description': 'the spike times for each unit', 'index': True},
+        {'name': 'obs_intervals', 'description': 'the observation intervals (valid times) for each unit', 'index': True},
         {'name': 'electrodes', 'description': 'the electrodes that each spike unit came from',
          'index': True, 'table': True},
         {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
@@ -199,16 +200,20 @@ class Units(DynamicTable):
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False
 
-    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
-            {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each spike unit came from',
+    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit', 'default': None},
+            {'name': 'obs_intervals', 'type': 'array_data', 
+             'doc': 'the observation intervals (valid times) for each unit', 
+             'default': None},
+            {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each unit came from',
              'default': None},
             {'name': 'electrode_group', 'type': 'array_data', 'default': None,
-             'doc': 'the electrode group that each spike unit came from'},
-            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each spike unit',
+             'doc': 'the electrode group that each unit came from'},
+            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each unit',
              'default': None},
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
-             'doc': 'the spike waveform standard deviation for each spike unit'},
-            {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
+             'doc': 'the spike waveform standard deviation for each unit'},
+            {'name': 'id', 'type': int, 'default': None, 
+             'help': 'the id for each unit'},
             allow_extra=True)
     def add_unit(self, **kwargs):
         """

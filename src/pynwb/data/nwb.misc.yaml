@@ -127,8 +127,24 @@ groups:
     quantity: '?'
   - neurodata_type_inc: VectorData
     name: spike_times
+    dtype: double
     doc: the spike times for each unit
     quantity: '?'
+  - neurodata_type_inc: VectorIndex
+    name: obs_intervals_index
+    doc: the index into the obs_intervals dataset
+    quantity: '?'
+  - neurodata_type_inc: VectorData
+    name: obs_intervals
+    doc: the valid observation time intervals for each unit
+    quantity: '?'
+    dtype:
+    - name: interval_start
+      dtype: double
+      doc: 'start time of an observation interval'
+    - name: interval_end
+      dtype: double
+      doc: 'end time of an observation interval'
   - neurodata_type_inc: DynamicTableRegion
     name: electrodes_index
     doc: the index into electrodes
