@@ -520,7 +520,7 @@ class NWBFile(MultiContainerInterface):
         Add a trial to the trial table.
         See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
 
-        Required fields are *start*, *end*, and any columns that have
+        Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_trial_columns`).
         """
         self.__check_trials()
@@ -632,9 +632,8 @@ def ElectrodeTable(name='electrodes',
                       )
 
 
-def TrialTable(name='trials',
-               description='metadata about experimental trials'):
-    return _tablefunc(name, description, ['start', 'end'])
+def TrialTable(name='trials', description='metadata about experimental trials'):
+    return _tablefunc(name, description, ['start_time', 'stop_time'])
 
 
 def InvalidTimesTable(name='invalid_times', description='time intervals to be removed from analysis'):
