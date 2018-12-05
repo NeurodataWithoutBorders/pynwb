@@ -2,6 +2,7 @@ import os
 import random
 import string
 from datetime import datetime
+from dateutil.tz import tzlocal
 from tempfile import gettempdir
 
 import unittest2 as unittest
@@ -107,7 +108,7 @@ class TestExtension(unittest.TestCase):
                 super(MyTestMetaData, self).__init__(**kwargs)
                 self.test_attr = test_attr
 
-        nwbfile = NWBFile("a file with header data", "NB123A", datetime.now().astimezone())
+        nwbfile = NWBFile("a file with header data", "NB123A",  datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
 
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
 
