@@ -260,6 +260,7 @@ class SpectralAnalysis(TimeSeries):
 
         # Initialize the object
         super(SpectralAnalysis, self).__init__(**kwargs)
+        self.bands = DynamicTable()
         self.band_limits = band_limits
         self.metric = metric
         self.timeseries = timeseries
