@@ -31,11 +31,13 @@ groups:
       default_value: meter
       required: false
     dims:
-    - num_times
-    - num_features
+    - - num_times
+    - - num_times
+      - num_features
     shape:
-    - null
-    - null
+    - - null
+    - - null
+      - null
   - name: reference_frame
     dtype: text
     doc: Description defining what exactly 'straight-ahead' means.
