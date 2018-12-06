@@ -229,19 +229,21 @@ class SpectralAnalysis(TimeSeries):
 
     """
 
-    __nwbfields__ = ('metric'
-                     'band_limits',
+    __nwbfields__ = ({'name': 'bands', 'child': True, 'doc': 'info for each band'},
                      {'name': 'timeseries', 'child': True},
-                     'band_name')
+                     'metric')
 
     __help = "Container for storing phase or analytic amplitude of a timeseries"
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of spectral analysis'},
             {'name': 'description', 'type': str, 'doc': 'description of spectral analysis'},
-            {'name': 'timestamps', 'type': ('array_data', 'data'), 'shape': (None, ),
-             'doc': 'The times of events that features correspond to'},
+
             {'name': 'data', 'type': ('array_data', 'data'), 'shape': (None, None, None),
              'doc': 'Features for each channel. time x channel x band'},
+            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+            {'name': 'timestamps', 'type': ('array_data', 'data'), 'shape': (None,),
+             'doc': 'The times of events that features correspond to'},
             {'name': 'band_limits', 'type': 'array_data', 'shape': (None, 2),
              'doc': 'Low and high limit of each band. If it is a Gaussian filter'
                     ', use 2 SD on either side of the center'},
@@ -253,15 +255,29 @@ class SpectralAnalysis(TimeSeries):
                     "be stored here"},
             {'name': 'band_name', 'type': 'array_data',
              'doc': 'recommended: alpha, beta, gamma, delta, theta, high gamma',
-             'shape': (None,)})
+             'shape': (None,), 'default': None},
+            {'name': 'resolution', 'type': float,
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': _default_resolution},
+            {'name': 'conversion', 'type': float,
+             'doc': 'Scalar to multiply each element by to convert to units', 'default': _default_conversion},
+            )
     def __init__(self, **kwargs):
         # get the inputs
         band_limits, metric, timeseries, band_name = popargs('band_limits', 'metric', 'timeseries', 'band_name', kwargs)
 
         # Initialize the object
         super(SpectralAnalysis, self).__init__(**kwargs)
-        self.bands = DynamicTable()
-        self.band_limits = band_limits
+        self.bands = DynamicTable("bands", "data about the frequency bands that the signal was decomposed into")
+        self.bands.add_column('band_limits', 'Low and high limit of each band. If it is a Gaussian'
+                                             ' filter, use 2 SD on either side of the center')
+        if band_name is None:
+            for ilimits in band_limits:
+                self.bands.add_row(band_limits=ilimits)
+        else:
+            self.bands.add_column('band_name', 'recommended: alpha, beta, gamma, delta, theta, high gamma')
+            for ilimits, iname in zip(band_limits, band_name):
+                self.bands.add_row(band_limits=ilimits, band_name=iname)
+
         self.metric = metric
         self.timeseries = timeseries
-        self.band_name = band_name

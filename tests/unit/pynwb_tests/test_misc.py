@@ -41,8 +41,8 @@ class SpectralAnalysisConstructor(unittest.TestCase):
         self.assertEqual(spec_anal.description, 'my description')
         np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
         np.testing.assert_equal(spec_anal.timestamps, np.ones((3,)))
-        self.assertEqual(spec_anal.band_name, ['alpha', 'beta', 'gamma'])
-        np.testing.assert_equal(spec_anal.band_limits, np.ones((3, 2)))
+        self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
+        np.testing.assert_equal(spec_anal.bands['band_limits'], np.ones((3, 2)))
         self.assertEqual(spec_anal.timeseries, timeseries)
         self.assertEqual(spec_anal.metric, 'amplitude')
 
