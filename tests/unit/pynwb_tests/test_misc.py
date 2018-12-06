@@ -37,12 +37,14 @@ class SpectralAnalysisConstructor(unittest.TestCase):
                                      band_limits=np.ones((3, 2)),
                                      timeseries=timeseries,
                                      metric='amplitude')
+        spec_anal.bands.add_column(name='test_add', data=[True, False, False], description='test add')
         self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
         self.assertEqual(spec_anal.description, 'my description')
         np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
         np.testing.assert_equal(spec_anal.timestamps, np.ones((3,)))
         self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
-        np.testing.assert_equal(spec_anal.bands['band_limits'], np.ones((3, 2)))
+        np.testing.assert_equal(spec_anal.bands['band_limits'].data, np.ones((3, 2)))
+        np.testing.assert_equal(spec_anal.bands['test_add'].data, [True, False, False])
         self.assertEqual(spec_anal.timeseries, timeseries)
         self.assertEqual(spec_anal.metric, 'amplitude')
 
