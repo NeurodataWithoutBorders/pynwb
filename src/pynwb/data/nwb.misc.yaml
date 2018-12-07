@@ -115,15 +115,6 @@ groups:
   neurodata_type_inc: TimeSeries
   doc: Holds spectral analysis of a timeseries. For instance of LFP or a speech signal
   datasets:
-  - name: band_limits
-    dtype: float
-    doc: Low and high limit of each band. If it is a Gaussian filter, use 2 SD on either side of the center
-    shape:
-    - null
-    - 2
-    dims:
-    - num_bands
-    - low, high
   - name: data
     dtype: float
     doc: The data goes here
