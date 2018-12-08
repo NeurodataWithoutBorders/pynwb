@@ -123,17 +123,6 @@ class ClusterWaveformsConstructor(unittest.TestCase):
 
 
 class LFPTest(unittest.TestCase):
-    def test_init(self):
-        dev1 = Device('dev1')  # noqa: F405
-        group = ElectrodeGroup(  # noqa: F405, F841
-            'tetrode1', 'tetrode description', 'tetrode location', dev1)
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
-        eS = ElectricalSeries(  # noqa: F405
-            'test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
-        lfp = LFP(eS)  # noqa: F405
-        self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
-        self.assertEqual(lfp['test_eS'], lfp.electrical_series.get('test_eS'))
 
     def test_add_electrical_series(self):
         lfp = LFP()  # noqa: F405
@@ -146,7 +135,6 @@ class LFPTest(unittest.TestCase):
             'test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
-        self.assertEqual(lfp['test_eS'], lfp.electrical_series.get('test_eS'))
 
     def test_add_spectral_analysis(self):
         lfp = LFP()
