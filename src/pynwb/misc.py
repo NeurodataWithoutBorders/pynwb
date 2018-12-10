@@ -227,7 +227,7 @@ class Units(DynamicTable):
     def get_unit_spike_times(self, **kwargs):
         index = getargs('index', kwargs)
         return np.asarray(self['spike_times'][index])
-    
+
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the unit in unit_ids to retrieve observation intervals for'})
     def get_unit_obs_intervals(self, **kwargs):

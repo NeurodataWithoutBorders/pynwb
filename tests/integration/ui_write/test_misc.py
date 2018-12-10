@@ -30,20 +30,20 @@ class TestUnitsIO(base.TestDataInterfaceIO):
                                                  'namespace': 'core',
                                                  'target': ReferenceBuilder(st_builder),
                                                  'help': 'indexes into a list of values for a list of elements'})
-        
+
         obs_builder = DatasetBuilder('obs_intervals', [(0, 1), (2, 3), (4, 5), (6, 7)],
                                      attributes={'neurodata_type': 'VectorData',
                                                  'namespace': 'core',
                                                  'description': 'the observation intervals for each unit',
                                                  'help': 'Values for a list of elements'})
-        
+
         obsi_builder = DatasetBuilder('obs_intervals_index',
                                       [2, 4],
                                       attributes={'neurodata_type': 'VectorIndex',
-                                                 'namespace': 'core',
-                                                 'target': ReferenceBuilder(obs_builder),
-                                                 'help': 'indexes into a list of values for a list of elements'})
-        
+                                                  'namespace': 'core',
+                                                  'target': ReferenceBuilder(obs_builder),
+                                                  'help': 'indexes into a list of values for a list of elements'})
+
         return GroupBuilder('UnitsTest',
                             attributes={'neurodata_type': 'Units',
                                         'namespace': 'core',
@@ -63,7 +63,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
         received = ut.get_unit_spike_times(1)
         self.assertTrue(np.array_equal(received, [3, 4, 5]))
         self.assertTrue(np.array_equal(ut['spike_times'][:], [[0, 1, 2], [3, 4, 5]]))
-        
+
     def test_get_obs_intervals(self):
         ut = self.roundtripContainer()
         received = ut.get_unit_obs_intervals(0)
