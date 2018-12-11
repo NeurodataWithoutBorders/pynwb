@@ -374,8 +374,7 @@ class VectorIndex(Index):
         self.data.append(len(self.target))
 
     def add_row(self, arg):
-        self.target.extend(arg)
-        self.data.append(len(self.target))
+        self.add_vector(arg)
 
     def __getitem_helper(self, arg):
         start = 0 if arg == 0 else self.data[arg-1]
