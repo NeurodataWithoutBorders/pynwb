@@ -10,8 +10,8 @@ class TestUnitsIO(base.TestDataInterfaceIO):
 
     def setUpContainer(self):
         ut = Units(name='UnitsTest', description='a simple table for testing Units')
-        ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[(0, 1), (2, 3)])
-        ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[(2, 5), (6, 7)])
+        ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 1], [2, 3]])
+        ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 5], [6, 7]])
         return ut
 
     def setUpBuilder(self):
@@ -31,7 +31,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
                                                  'target': ReferenceBuilder(st_builder),
                                                  'help': 'indexes into a list of values for a list of elements'})
 
-        obs_builder = DatasetBuilder('obs_intervals', [(0, 1), (2, 3), (2, 5), (6, 7)],
+        obs_builder = DatasetBuilder('obs_intervals', [[0, 1], [2, 3], [2, 5], [6, 7]],
                                      attributes={'neurodata_type': 'VectorData',
                                                  'namespace': 'core',
                                                  'description': 'the observation intervals for each unit',
