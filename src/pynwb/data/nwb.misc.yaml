@@ -136,15 +136,15 @@ groups:
     quantity: '?'
   - neurodata_type_inc: VectorData
     name: obs_intervals
-    doc: the valid observation time intervals for each unit
+    doc: the observation intervals for each unit
     quantity: '?'
-    dtype:
-    - name: interval_start
-      dtype: double
-      doc: 'start time of an observation interval'
-    - name: interval_end
-      dtype: double
-      doc: 'end time of an observation interval'
+    dtype: double
+    dims:
+    - num_intervals
+    - start|end
+    shape:
+    - null
+    - 2
   - neurodata_type_inc: DynamicTableRegion
     name: electrodes_index
     doc: the index into electrodes

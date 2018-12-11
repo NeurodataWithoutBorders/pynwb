@@ -178,7 +178,7 @@ class Units(DynamicTable):
 
     __columns__ = (
         {'name': 'spike_times', 'description': 'the spike times for each unit', 'index': True},
-        {'name': 'obs_intervals', 'description': 'the observation intervals (valid times) for each unit',
+        {'name': 'obs_intervals', 'description': 'the observation intervals for each unit',
          'index': True},
         {'name': 'electrodes', 'description': 'the electrodes that each spike unit came from',
          'index': True, 'table': True},
@@ -201,10 +201,12 @@ class Units(DynamicTable):
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False
 
-    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit', 'default': None},
+    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
+             'default': None, 'shape': (None,)},
             {'name': 'obs_intervals', 'type': 'array_data',
-             'doc': 'the observation intervals (valid times) for each unit',
-             'default': None},
+             'doc': 'the observation intervals (valid times) for each unit. All spike_times for a given unit ' +
+             'should fall within these intervals. [[start1, end1], [start2, end2], ...]',
+             'default': None, 'shape': (None, 2)},
             {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each unit came from',
              'default': None},
             {'name': 'electrode_group', 'type': 'array_data', 'default': None,

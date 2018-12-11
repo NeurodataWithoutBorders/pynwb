@@ -34,7 +34,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
         obs_builder = DatasetBuilder('obs_intervals', [(0, 1), (2, 3), (2, 5), (6, 7)],
                                      attributes={'neurodata_type': 'VectorData',
                                                  'namespace': 'core',
-                                                 'description': 'the observation intervals (valid times) for each unit',
+                                                 'description': 'the observation intervals for each unit',
                                                  'help': 'Values for a list of elements'})
 
         obsi_builder = DatasetBuilder('obs_intervals_index',
@@ -67,13 +67,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
     def test_get_obs_intervals(self):
         ut = self.roundtripContainer()
         received = ut.get_unit_obs_intervals(0)
-        self.assertTrue(np.array_equal(received, np.array([(0, 1), (2, 3)],
-                                                          dtype=[('interval_start', '<f8'),
-                                                                 ('interval_end', '<f8')])))
+        self.assertTrue(np.array_equal(received, [[0, 1], [2, 3]]))
         received = ut.get_unit_obs_intervals(1)
-        self.assertTrue(np.array_equal(received, np.array([(2, 5), (6, 7)],
-                                                          dtype=[('interval_start', '<f8'),
-                                                                 ('interval_end', '<f8')])))
-        self.assertTrue(np.array_equal(ut['obs_intervals'][:], np.array([[(0, 1), (2, 3)], [(2, 5), (6, 7)]],
-                                                                        dtype=[('interval_start', '<f8'),
-                                                                               ('interval_end', '<f8')])))
+        self.assertTrue(np.array_equal(received, [[2, 5], [6, 7]]))
+        self.assertTrue(np.array_equal(ut['obs_intervals'][:], [[[0, 1], [2, 3]], [[2, 5], [6, 7]]]))
