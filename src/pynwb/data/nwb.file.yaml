@@ -223,6 +223,10 @@ groups:
         date made, injection location, volume, etc.
       quantity: '?'
     groups:
+    - neurodata_type_def: LabMetaData
+      neurodata_type_inc: NWBContainer
+      doc: 'place-holder than can be extended so that lab-specific meta-data can be placed in /general'
+      quantity: '*'
     - name: devices
       doc: 'Description of hardware devices used during experiment. COMMENT: Eg, monitors,
         ADC boards, microscopes, etc'
