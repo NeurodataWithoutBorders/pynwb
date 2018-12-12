@@ -157,7 +157,6 @@ nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, mod_ts])
 # for the column and a description of what the column stores. You do not need to supply data
 # type, as this will inferred.
 # Once all columns have been added, trial data can be populated using :py:func:`~pynwb.file.NWBFile.add_trial`.
-# This method takes a dict with keys that correspond to column names.
 #
 # Lets add an additional column and some trial data.
 
@@ -177,22 +176,21 @@ nwbfile.add_trial(start_time=6.0, stop_time=8.0, stim='desert')
 # and :py:func:`~pynwb.file.NWBFile.add_unit_column`. These methods work like the methods for adding
 # trials described :ref:`above <basic_trials>`
 #
-# By default, NWBFile only requires a unique identifier for each unit. Additional columns
-# can be added using :py:func:`~pynwb.file.NWBFile.add_unit_column`. Like
+# By default, NWBFile only requires a unique identifier for each unit. Optional values for each unit
+# are: `spike_times`, `electrodes`, `electrode_group`, `waveform_mean`, and `waveform_sd`.
+# Additional columns can be added using :py:func:`~pynwb.file.NWBFile.add_unit_column`. Like
 # :py:func:`~pynwb.file.NWBFile.add_trial_column`, this method also takes a name
 # for the column, a description of what the column stores and does not need a data type.
 # Once all columns have been added, unit data can be populated using :py:func:`~pynwb.file.NWBFile.add_unit`.
-# Again, like :py:func:`~pynwb.file.NWBFile.add_trial_column`, this method takes a dict with keys that correspond
-# to column names.
 #
 # Lets specify some unit metadata and then add some units
 
 nwbfile.add_unit_column('location', 'the anatomical location of this unit')
 nwbfile.add_unit_column('quality', 'the quality for the inference of this unit')
 
-nwbfile.add_unit(id=1, location='CA1', quality=0.95)
-nwbfile.add_unit(id=2, location='CA3', quality=0.85)
-nwbfile.add_unit(id=3, location='CA1', quality=0.90)
+nwbfile.add_unit(id=1, spike_times=[2.2, 3.0, 4.5], location='CA1', quality=0.95)
+nwbfile.add_unit(id=2, spike_times=[2.2, 3.0], location='CA3', quality=0.85)
+nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5], location='CA1', quality=0.90)
 
 ####################
 # .. _units_fields_ref:
