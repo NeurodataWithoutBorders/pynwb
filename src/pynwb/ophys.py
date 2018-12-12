@@ -6,7 +6,8 @@ from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_f
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, ElementIdentifiers
+from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, ElementIdentifiers,\
+    NWBDataInterface
 from .device import Device
 
 
@@ -159,7 +160,7 @@ class TwoPhotonSeries(ImageSeries):
 
 
 @register_class('CorrectedImageStack', CORE_NAMESPACE)
-class CorrectedImageStack(NWBContainer):
+class CorrectedImageStack(NWBDataInterface):
     """
     An image stack where all frames are shifted (registered) to a common coordinate system, to
     account for movement and drift between frames. Note: each frame at each point in time is
