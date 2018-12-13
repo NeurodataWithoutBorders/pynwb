@@ -244,7 +244,7 @@ class SpectralAnalysis(TimeSeries):
     """
 
     __nwbfields__ = ({'name': 'bands', 'child': True, 'doc': 'info for each band'},
-                     'timeseries',  # include as link
+                     {'name': 'timeseries',  'child': False, 'doc': 'linked source timeseries'},# include as link
                      'metric')
 
     __help = "Container for storing phase or analytic amplitude of a timeseries"
