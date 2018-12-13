@@ -178,6 +178,8 @@ class Units(DynamicTable):
 
     __columns__ = (
         {'name': 'spike_times', 'description': 'the spike times for each unit', 'index': True},
+        {'name': 'obs_intervals', 'description': 'the observation intervals for each unit',
+         'index': True},
         {'name': 'electrodes', 'description': 'the electrodes that each spike unit came from',
          'index': True, 'table': True},
         {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
@@ -199,16 +201,22 @@ class Units(DynamicTable):
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False
 
-    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
-            {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each spike unit came from',
+    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
+             'default': None, 'shape': (None,)},
+            {'name': 'obs_intervals', 'type': 'array_data',
+             'doc': 'the observation intervals (valid times) for each unit. All spike_times for a given unit ' +
+             'should fall within these intervals. [[start1, end1], [start2, end2], ...]',
+             'default': None, 'shape': (None, 2)},
+            {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each unit came from',
              'default': None},
             {'name': 'electrode_group', 'type': 'array_data', 'default': None,
-             'doc': 'the electrode group that each spike unit came from'},
-            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each spike unit',
+             'doc': 'the electrode group that each unit came from'},
+            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each unit',
              'default': None},
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
-             'doc': 'the spike waveform standard deviation for each spike unit'},
-            {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
+             'doc': 'the spike waveform standard deviation for each unit'},
+            {'name': 'id', 'type': int, 'default': None,
+             'help': 'the id for each unit'},
             allow_extra=True)
     def add_unit(self, **kwargs):
         """
@@ -221,6 +229,12 @@ class Units(DynamicTable):
     def get_unit_spike_times(self, **kwargs):
         index = getargs('index', kwargs)
         return np.asarray(self['spike_times'][index])
+
+    @docval({'name': 'index', 'type': int,
+             'doc': 'the index of the unit in unit_ids to retrieve observation intervals for'})
+    def get_unit_obs_intervals(self, **kwargs):
+        index = getargs('index', kwargs)
+        return np.asarray(self['obs_intervals'][index])
 
 
 @register_class('SpectralAnalysis', CORE_NAMESPACE)
@@ -281,3 +295,4 @@ class SpectralAnalysis(TimeSeries):
 
         self.metric = metric
         self.timeseries = timeseries
+

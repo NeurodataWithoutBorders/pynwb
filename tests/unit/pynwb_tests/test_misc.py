@@ -101,6 +101,29 @@ class UnitsTests(unittest.TestCase):
         self.assertTrue(all(ut['spike_times'][0] == np.array([0, 1, 2])))
         self.assertTrue(all(ut['spike_times'][1] == np.array([3, 4, 5])))
 
+    def test_get_obs_intervals(self):
+        ut = Units()
+        ut.add_unit(obs_intervals=[[0, 1]])
+        ut.add_unit(obs_intervals=[[2, 3], [4, 5]])
+        self.assertTrue(np.all(ut.get_unit_obs_intervals(0) == np.array([[0, 1]])))
+        self.assertTrue(np.all(ut.get_unit_obs_intervals(1) == np.array([[2, 3], [4, 5]])))
+
+    def test_obs_intervals(self):
+        ut = Units()
+        ut.add_unit(obs_intervals=[[0, 1]])
+        ut.add_unit(obs_intervals=[[2, 3], [4, 5]])
+        self.assertTrue(np.all(ut['obs_intervals'][0] == np.array([[0, 1]])))
+        self.assertTrue(np.all(ut['obs_intervals'][1] == np.array([[2, 3], [4, 5]])))
+
+    def test_times_and_intervals(self):
+        ut = Units()
+        ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 2]])
+        ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 3], [4, 5]])
+        self.assertTrue(all(ut['spike_times'][0] == np.array([0, 1, 2])))
+        self.assertTrue(all(ut['spike_times'][1] == np.array([3, 4, 5])))
+        self.assertTrue(np.all(ut['obs_intervals'][0] == np.array([[0, 2]])))
+        self.assertTrue(np.all(ut['obs_intervals'][1] == np.array([[2, 3], [4, 5]])))
+
 
 if __name__ == '__main__':
     unittest.main()
