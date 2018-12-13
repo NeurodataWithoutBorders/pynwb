@@ -295,4 +295,3 @@ class SpectralAnalysis(TimeSeries):
 
         self.metric = metric
         self.timeseries = timeseries
-
