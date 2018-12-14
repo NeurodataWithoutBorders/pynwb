@@ -159,12 +159,38 @@ groups:
       dims:
       - num_bands
       - low, high
-      doc: Low and high limit of each band. If it is a Gaussian filter, use 2 SD on either side of the center
+      doc: Low and high limit of each band in Hz. If it is a Gaussian filter, use 2 SD on either side of the center
       attributes:
       - name: description
         dtype: text
-        doc: value is 'the mean of the sliding Gaussian'
-        value: the mean of the sliding Gaussian
+        doc: value is 'Low and high limit of each band in Hz. If it is a Gaussian filter, use 2 SD on either side of the center'
+        value: Low and high limit of each band in Hz. If it is a Gaussian filter, use 2 SD on either side of the center
+    - neurodata_type_inc: VectorData
+      name: band_mean
+      dtype: float
+      shape:
+      - null
+      dims:
+      - num_bands
+      doc: The mean Gaussian filters in Hz
+      attributes:
+      - name: description
+        dtype: text
+        doc: The mean Gaussian filters in Hz
+        value: The mean Gaussian filters in Hz
+    - neurodata_type_inc: VectorData
+      name: band_stdev
+      dtype: float
+      shape:
+      - null
+      dims:
+      - num_bands
+      doc: The standard devaition of Gaussian filters in Hz
+      attributes:
+      - name: description
+        dtype: text
+        doc: The standard devaition of Gaussian filters in Hz
+        value: The standard devaition of Gaussian filters in Hz
 - neurodata_type_def: Units
   neurodata_type_inc: DynamicTable
   doc: Data about spiking units. Event times of observed units (e.g. cell, synapse, etc.)
