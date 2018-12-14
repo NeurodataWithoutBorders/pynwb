@@ -136,22 +136,6 @@ class LFPTest(unittest.TestCase):
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
 
-    def test_add_spectral_analysis(self):
-        lfp = LFP()
-        timeseries = TimeSeries(name='dummy timeseries', description='desc',
-                                data=np.ones((3, 3)),
-                                timestamps=np.ones((3,)))
-        spec_anal = SpectralAnalysis(name='LFPSpectralAnalysis',
-                                     description='my description',
-                                     data=np.ones((3, 3, 3)),
-                                     timestamps=np.ones((3,)),
-                                     band_name=['alpha', 'beta', 'gamma'],
-                                     band_limits=np.ones((3, 2)),
-                                     timeseries=timeseries,
-                                     metric='amplitude')
-        lfp.add_spectral_analysis(spec_anal)
-        self.assertEqual(lfp.spectral_analysis.get('LFPSpectralAnalysis'), spec_anal)
-
 
 class FilteredEphysTest(unittest.TestCase):
     def test_init(self):
