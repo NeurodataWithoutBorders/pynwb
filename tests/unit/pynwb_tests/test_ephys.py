@@ -7,8 +7,6 @@ from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Cl
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable
 from pynwb.core import DynamicTableRegion
-from pynwb import TimeSeries
-from pynwb.misc import SpectralAnalysis
 
 
 def make_electrode_table():
