@@ -8,6 +8,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
+from .misc import SpectralAnalysis
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
@@ -281,13 +282,18 @@ class LFP(MultiContainerInterface):
     ElectricalSeries description or comments field.
     """
 
-    __clsconf__ = {
-        'attr': 'electrical_series',
-        'type': ElectricalSeries,
-        'add': 'add_electrical_series',
-        'get': 'get_electrical_series',
-        'create': 'create_electrical_series',
-    }
+    __clsconf__ = [
+        {'attr': 'electrical_series',
+         'type': ElectricalSeries,
+         'add': 'add_electrical_series',
+         'get': 'get_electrical_series',
+         'create': 'create_electrical_series'},
+
+        {'attr': 'spectral_analysis',
+         'type': SpectralAnalysis,
+         'add': 'add_spectral_analysis',
+         'get': 'get_spectral_analysis',
+         'create': 'create_spectral_analysis'}]
 
     __help = ("LFP data from one or more channels. Filter properties "
               "should be noted in the ElectricalSeries")
@@ -340,7 +346,7 @@ class FeatureExtraction(NWBDataInterface):
             {'name': 'times', 'type': ('array_data', 'data'), 'shape': (None, ),
              'doc': 'The times of events that features correspond to'},
             {'name': 'features', 'type': ('array_data', 'data'), 'shape': (None, None, None),
-             'doc': 'Features for each channel', 'ndim': 3},
+             'doc': 'Features for each channel'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'})
     def __init__(self, **kwargs):
         # get the inputs

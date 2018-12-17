@@ -2,7 +2,9 @@ import unittest
 
 import numpy as np
 
-from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units
+from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units,\
+    SpectralAnalysis
+from pynwb.file import TimeSeries
 
 
 class AnnotationSeriesConstructor(unittest.TestCase):
@@ -20,6 +22,31 @@ class AbstractFeatureSeriesConstructor(unittest.TestCase):
         self.assertEqual(aFS.features, ['features'])
 
         aFS.add_features(2.0, [1.])
+
+
+class SpectralAnalysisConstructor(unittest.TestCase):
+    def test_init(self):
+        timeseries = TimeSeries(name='dummy timeseries', description='desc',
+                                data=np.ones((3, 3)),
+                                timestamps=np.ones((3, )))
+        spec_anal = SpectralAnalysis(name='LFPSpectralAnalysis',
+                                     description='my description',
+                                     data=np.ones((3, 3, 3)),
+                                     timestamps=np.ones((3,)),
+                                     band_name=['alpha', 'beta', 'gamma'],
+                                     band_limits=np.ones((3, 2)),
+                                     timeseries=timeseries,
+                                     metric='amplitude')
+        spec_anal.bands.add_column(name='test_add', data=[True, False, False], description='test add')
+        self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
+        self.assertEqual(spec_anal.description, 'my description')
+        np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
+        np.testing.assert_equal(spec_anal.timestamps, np.ones((3,)))
+        self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
+        np.testing.assert_equal(spec_anal.bands['band_limits'].data, np.ones((3, 2)))
+        np.testing.assert_equal(spec_anal.bands['test_add'].data, [True, False, False])
+        self.assertEqual(spec_anal.timeseries, timeseries)
+        self.assertEqual(spec_anal.metric, 'amplitude')
 
 
 class IntervalSeriesConstructor(unittest.TestCase):
@@ -73,6 +100,29 @@ class UnitsTests(unittest.TestCase):
         ut.add_unit(spike_times=[3, 4, 5])
         self.assertTrue(all(ut['spike_times'][0] == np.array([0, 1, 2])))
         self.assertTrue(all(ut['spike_times'][1] == np.array([3, 4, 5])))
+
+    def test_get_obs_intervals(self):
+        ut = Units()
+        ut.add_unit(obs_intervals=[[0, 1]])
+        ut.add_unit(obs_intervals=[[2, 3], [4, 5]])
+        self.assertTrue(np.all(ut.get_unit_obs_intervals(0) == np.array([[0, 1]])))
+        self.assertTrue(np.all(ut.get_unit_obs_intervals(1) == np.array([[2, 3], [4, 5]])))
+
+    def test_obs_intervals(self):
+        ut = Units()
+        ut.add_unit(obs_intervals=[[0, 1]])
+        ut.add_unit(obs_intervals=[[2, 3], [4, 5]])
+        self.assertTrue(np.all(ut['obs_intervals'][0] == np.array([[0, 1]])))
+        self.assertTrue(np.all(ut['obs_intervals'][1] == np.array([[2, 3], [4, 5]])))
+
+    def test_times_and_intervals(self):
+        ut = Units()
+        ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 2]])
+        ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 3], [4, 5]])
+        self.assertTrue(all(ut['spike_times'][0] == np.array([0, 1, 2])))
+        self.assertTrue(all(ut['spike_times'][1] == np.array([3, 4, 5])))
+        self.assertTrue(np.all(ut['obs_intervals'][0] == np.array([[0, 2]])))
+        self.assertTrue(np.all(ut['obs_intervals'][1] == np.array([[2, 3], [4, 5]])))
 
 
 if __name__ == '__main__':

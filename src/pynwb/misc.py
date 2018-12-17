@@ -178,6 +178,8 @@ class Units(DynamicTable):
 
     __columns__ = (
         {'name': 'spike_times', 'description': 'the spike times for each unit', 'index': True},
+        {'name': 'obs_intervals', 'description': 'the observation intervals for each unit',
+         'index': True},
         {'name': 'electrodes', 'description': 'the electrodes that each spike unit came from',
          'index': True, 'table': True},
         {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
@@ -199,16 +201,22 @@ class Units(DynamicTable):
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False
 
-    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for the unit', 'default': None},
-            {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each spike unit came from',
+    @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
+             'default': None, 'shape': (None,)},
+            {'name': 'obs_intervals', 'type': 'array_data',
+             'doc': 'the observation intervals (valid times) for each unit. All spike_times for a given unit ' +
+             'should fall within these intervals. [[start1, end1], [start2, end2], ...]',
+             'default': None, 'shape': (None, 2)},
+            {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each unit came from',
              'default': None},
             {'name': 'electrode_group', 'type': 'array_data', 'default': None,
-             'doc': 'the electrode group that each spike unit came from'},
-            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each spike unit',
+             'doc': 'the electrode group that each unit came from'},
+            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each unit',
              'default': None},
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
-             'doc': 'the spike waveform standard deviation for each spike unit'},
-            {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
+             'doc': 'the spike waveform standard deviation for each unit'},
+            {'name': 'id', 'type': int, 'default': None,
+             'help': 'the id for each unit'},
             allow_extra=True)
     def add_unit(self, **kwargs):
         """
@@ -221,3 +229,69 @@ class Units(DynamicTable):
     def get_unit_spike_times(self, **kwargs):
         index = getargs('index', kwargs)
         return np.asarray(self['spike_times'][index])
+
+    @docval({'name': 'index', 'type': int,
+             'doc': 'the index of the unit in unit_ids to retrieve observation intervals for'})
+    def get_unit_obs_intervals(self, **kwargs):
+        index = getargs('index', kwargs)
+        return np.asarray(self['obs_intervals'][index])
+
+
+@register_class('SpectralAnalysis', CORE_NAMESPACE)
+class SpectralAnalysis(TimeSeries):
+    """
+
+    """
+
+    __nwbfields__ = ({'name': 'bands', 'child': True, 'doc': 'info for each band'},
+                     {'name': 'timeseries',  'child': False, 'doc': 'linked source timeseries'},
+                     'metric')
+
+    __help = "Container for storing phase or analytic amplitude of a timeseries"
+
+    @docval({'name': 'name', 'type': str, 'doc': 'name of spectral analysis'},
+            {'name': 'description', 'type': str, 'doc': 'description of spectral analysis'},
+
+            {'name': 'data', 'type': ('array_data', 'data'), 'shape': (None, None, None),
+             'doc': 'Features for each channel. time x channel x band'},
+            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+            {'name': 'timestamps', 'type': ('array_data', 'data'), 'shape': (None,),
+             'doc': 'The times of events that features correspond to'},
+            {'name': 'band_limits', 'type': 'array_data', 'shape': (None, 2),
+             'doc': 'Low and high limit of each band. If it is a Gaussian filter'
+                    ', use 2 SD on either side of the center'},
+            {'name': 'metric', 'type': str, 'doc': 'recommended: phase, amplitude, power'},
+            {'name': 'timeseries', 'type': TimeSeries,
+             'doc': "HDF5 link to TimesSeries that this data was calculated from. Metadata "
+                    "about electrodes and their position can be read from that "
+                    "ElectricalSeries so it's not necessary to mandate that information "
+                    "be stored here"},
+            {'name': 'band_name', 'type': 'array_data',
+             'doc': 'recommended: alpha, beta, gamma, delta, theta, high gamma',
+             'shape': (None,), 'default': None},
+            {'name': 'resolution', 'type': float,
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
+             'default': _default_resolution},
+            {'name': 'conversion', 'type': float,
+             'doc': 'Scalar to multiply each element by to convert to units', 'default': _default_conversion},
+            )
+    def __init__(self, **kwargs):
+        # get the inputs
+        band_limits, metric, timeseries, band_name = popargs('band_limits', 'metric', 'timeseries', 'band_name', kwargs)
+
+        # Initialize the object
+        super(SpectralAnalysis, self).__init__(**kwargs)
+        self.bands = DynamicTable("bands", "data about the frequency bands that the signal was decomposed into")
+        self.bands.add_column('band_limits', 'Low and high limit of each band. If it is a Gaussian'
+                                             ' filter, use 2 SD on either side of the center')
+        if band_name is None:
+            for ilimits in band_limits:
+                self.bands.add_row(band_limits=ilimits)
+        else:
+            self.bands.add_column('band_name', 'recommended: alpha, beta, gamma, delta, theta, high gamma')
+            for ilimits, iname in zip(band_limits, band_name):
+                self.bands.add_row(band_limits=ilimits, band_name=iname)
+
+        self.metric = metric
+        self.timeseries = timeseries

@@ -310,6 +310,13 @@ class TestDocValidator(unittest.TestCase):
         with self.assertRaises(TypeError):
             self.test_obj.basic_add2_kw('a string', 100, bar=1000)
 
+    def test_unsupported_docval_term(self):
+        @docval({'name': 'arg1', 'type': 'array_data', 'doc': 'this is a bad shape', 'unsupported': 'hi!'})
+        def method(self, **kwargs):
+            pass
+        with self.assertRaises(ValueError):
+            method(self, arg1=[[1, 1]])
+
 
 if __name__ == '__main__':
     unittest.main()
