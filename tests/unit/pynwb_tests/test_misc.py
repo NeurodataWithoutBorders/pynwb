@@ -51,6 +51,29 @@ class SpectralAnalysisConstructor(unittest.TestCase):
         self.assertEqual(spec_anal.source_timeseries, timeseries)
         self.assertEqual(spec_anal.metric, 'amplitude')
 
+    def test_init_delayed_bands(self):
+        timeseries = TimeSeries(name='dummy timeseries', description='desc',
+                                data=np.ones((3, 3)), unit='Volts',
+                                timestamps=np.ones((3,)))
+        spec_anal = SpectralAnalysis(name='LFPSpectralAnalysis',
+                                     description='my description',
+                                     data=np.ones((3, 3, 3)),
+                                     timestamps=np.ones((3,)),
+                                     source_timeseries=timeseries,
+                                     metric='amplitude')
+        for band_name in ['alpha', 'beta', 'gamma']:
+            spec_anal.add_band(band_name=band_name, band_limits=(1., 1.), band_mean=1., band_stdev=1.)
+
+        self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
+        self.assertEqual(spec_anal.description, 'my description')
+        np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
+        np.testing.assert_equal(spec_anal.timestamps, np.ones((3,)))
+        self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
+        np.testing.assert_equal(spec_anal.bands['band_limits'].data, np.ones((3, 2)))
+        self.assertEqual(spec_anal.source_timeseries, timeseries)
+        self.assertEqual(spec_anal.metric, 'amplitude')
+
+
 
 class IntervalSeriesConstructor(unittest.TestCase):
     def test_init(self):

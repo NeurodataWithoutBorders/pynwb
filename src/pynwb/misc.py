@@ -303,7 +303,7 @@ class SpectralAnalysis(TimeSeries):
         """
         Add ROI data to this
         """
-        band_name, band_limits, band_mean, band_stdev = popargs('band_name', 'band_limits', 'band_mean', 'band_stdev',
+        band_name, band_limits, band_mean, band_stdev = getargs('band_name', 'band_limits', 'band_mean', 'band_stdev',
                                                                 kwargs)
         if band_name is not None:
             self.__check_column('band_name', "the name of the frequency band (recommended: 'alpha', 'beta', 'gamma', "
@@ -314,3 +314,5 @@ class SpectralAnalysis(TimeSeries):
             self.__check_column('band_mean', 'the mean of Gaussian filters in Hz')
         if band_stdev is not None:
             self.__check_column('band_stdev', 'the standard deviation of Gaussian filters in Hz')
+
+        self.bands.add_row({k: v for k, v in kwargs.items() if v is not None})
