@@ -73,6 +73,25 @@ groups:
     - - null
       - null
       - null
+  - name: timestamps
+    dtype: float64
+    doc: 'Timestamps for samples stored in data.COMMENT: Timestamps here have all
+      been corrected to the common experiment master-clock. Time is stored as seconds
+      and all timestamps are relative to experiment start time. This is added here so
+      that the timestamps is required for SpikeEventTimes.'
+    attributes:
+    - name: interval
+      dtype: int32
+      doc: Value is '1'
+      value: 1
+    - name: unit
+      dtype: text
+      doc: Value is 'Seconds'
+      value: Seconds
+    dims:
+    - num_times
+    shape:
+    - null
 - neurodata_type_def: ClusterWaveforms
   neurodata_type_inc: NWBDataInterface
   doc: 'The mean waveform shape, including standard deviation, of the different clusters.
