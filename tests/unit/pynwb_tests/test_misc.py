@@ -74,7 +74,6 @@ class SpectralAnalysisConstructor(unittest.TestCase):
         self.assertEqual(spec_anal.metric, 'amplitude')
 
 
-
 class IntervalSeriesConstructor(unittest.TestCase):
     def test_init(self):
         data = [1.0, -1.0, 1.0, -1.0]
