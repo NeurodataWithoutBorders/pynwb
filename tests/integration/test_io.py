@@ -267,8 +267,7 @@ class TestAppend(unittest.TestCase):
         with NWBHDF5IO(FILENAME, mode='a') as io:
             nwb = io.read()
             elec = nwb.modules['test_proc_mod']['LFP'].electrical_series['test_device'].electrodes
-            ts2 = ElectricalSeries(name='timeseries2', data=[4, 5, 6],
-                                   rate=1.0, electrodes=elec)
+            ts2 = ElectricalSeries(name='timeseries2', data=[4, 5, 6], rate=1.0, electrodes=elec)
             nwb.add_acquisition(ts2)
             io.write(nwb)
 
