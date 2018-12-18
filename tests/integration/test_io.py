@@ -240,7 +240,8 @@ class TestAppend(unittest.TestCase):
 
         FILENAME = 'test_append.nwb'
 
-        nwb = NWBFile(session_description='hi', identifier='hi', session_start_time=datetime.now().astimezone())
+        nwb = NWBFile(session_description='hi', identifier='hi', session_start_time=datetime(1970, 1, 1, 12,
+                                                                                             tzinfo=tzutc()))
         proc_mod = nwb.create_processing_module(name='test_proc_mod', description='')
         proc_inter = LFP(name='test_proc_dset')
         proc_mod.add_data_interface(proc_inter)
