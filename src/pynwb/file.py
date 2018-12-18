@@ -45,6 +45,7 @@ class Subject(NWBContainer):
         'species',
         'subject_id',
         'weight',
+        'date_of_birth'
     )
 
     @docval({'name': 'age', 'type': str, 'doc': 'the age of the subject', 'default': None},
@@ -53,7 +54,9 @@ class Subject(NWBContainer):
             {'name': 'sex', 'type': str, 'doc': 'the sex of the subject', 'default': None},
             {'name': 'species', 'type': str, 'doc': 'the species of the subject', 'default': None},
             {'name': 'subject_id', 'type': str, 'doc': 'a unique identifier for the subject', 'default': None},
-            {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None})
+            {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None},
+            {'name': 'date_of_birth', 'type': datetime, 'default': None,
+             'doc': 'datetime of date of birth. May be supplied instead of age.'})
     def __init__(self, **kwargs):
         kwargs['name'] = 'subject'
         pargs, pkwargs = fmt_docval_args(super(Subject, self).__init__, kwargs)
@@ -65,6 +68,11 @@ class Subject(NWBContainer):
         self.species = getargs('species', kwargs)
         self.subject_id = getargs('subject_id', kwargs)
         self.weight = getargs('weight', kwargs)
+        date_of_birth = getargs('date_of_birth', kwargs)
+        if date_of_birth and date_of_birth.tzinfo is None:
+            self.date_of_birth = _add_missing_timezone(date_of_birth)
+        else:
+            self.date_of_birth = date_of_birth
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
