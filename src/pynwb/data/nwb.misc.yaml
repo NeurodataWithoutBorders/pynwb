@@ -111,7 +111,7 @@ groups:
     - num_times
     shape:
     - null
-- neurodata_type_def: SpectralAnalysis
+- neurodata_type_def: DecompositionSeries
   neurodata_type_inc: TimeSeries
   doc: Holds spectral analysis of a timeseries. For instance of LFP or a speech signal
   datasets:
@@ -133,7 +133,7 @@ groups:
   - name: source_timeseries
     doc: HDF5 link to TimesSeries that this data was calculated from. Metadata
       about electrodes and their position can be read from that ElectricalSeries so
-      it's not necessary to mandate that information be stored here
+      it's not necessary to store that information here
     target_type: TimeSeries
   groups:
   - neurodata_type_inc: DynamicTable

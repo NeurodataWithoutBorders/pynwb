@@ -5,7 +5,7 @@ from pynwb.form.build import GroupBuilder, DatasetBuilder, ReferenceBuilder
 from pynwb import TimeSeries
 from pynwb.core import DynamicTable, VectorData
 
-from pynwb.misc import Units, SpectralAnalysis
+from pynwb.misc import Units, DecompositionSeries
 
 
 class TestUnitsIO(base.TestDataInterfaceIO):
@@ -84,13 +84,13 @@ class TestSpectralAnalysis(base.TestDataInterfaceIO):
             VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
             VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2)))
         ])
-        spec_anal = SpectralAnalysis(name='LFPSpectralAnalysis',
-                                     description='my description',
-                                     data=np.ones((3, 3, 3)),
-                                     timestamps=np.ones((3,)),
-                                     source_timeseries=self.timeseries,
-                                     metric='amplitude',
-                                     bands=bands)
+        spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
+                                        description='my description',
+                                        data=np.ones((3, 3, 3)),
+                                        timestamps=np.ones((3,)),
+                                        source_timeseries=self.timeseries,
+                                        metric='amplitude',
+                                        bands=bands)
 
         return spec_anal
 

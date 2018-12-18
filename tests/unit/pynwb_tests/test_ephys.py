@@ -7,6 +7,8 @@ from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Cl
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable
 from pynwb.core import DynamicTableRegion
+from pynwb import TimeSeries
+from pynwb.misc import DecompositionSeries
 
 
 def make_electrode_table():
@@ -133,6 +135,19 @@ class LFPTest(unittest.TestCase):
             'test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
+
+    def test_add_decomposition_series(self):
+        lfp = LFP()
+        timeseries = TimeSeries(name='dummy timeseries', description='desc',
+                                data=np.ones((3, 3)), unit='Volts',
+                                timestamps=np.ones((3,)))
+        spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
+                                        description='my description',
+                                        data=np.ones((3, 3, 3)),
+                                        timestamps=np.ones((3,)),
+                                        source_timeseries=timeseries,
+                                        metric='amplitude')
+        lfp.add_decomposition_series(spec_anal)
 
 
 class FilteredEphysTest(unittest.TestCase):

@@ -40,7 +40,7 @@ class AnnotationSeries(TimeSeries):
                                                resolution=-1.0, conversion=1.0,
                                                timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'time', 'type': float, 'doc': 'The time for the anotation'},
+    @docval({'name': 'time', 'type': float, 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
     def add_annotation(self, **kwargs):
         '''
@@ -237,8 +237,8 @@ class Units(DynamicTable):
         return np.asarray(self['obs_intervals'][index])
 
 
-@register_class('SpectralAnalysis', CORE_NAMESPACE)
-class SpectralAnalysis(TimeSeries):
+@register_class('DecompositionSeries', CORE_NAMESPACE)
+class DecompositionSeries(TimeSeries):
     """
     Stores product of spectral analysis
     """
@@ -279,7 +279,7 @@ class SpectralAnalysis(TimeSeries):
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         metric, source_timeseries, bands = popargs('metric', 'source_timeseries', 'bands', kwargs)
-        super(SpectralAnalysis, self).__init__(**kwargs)
+        super(DecompositionSeries, self).__init__(**kwargs)
         self.source_timeseries = source_timeseries
         self.metric = metric
         if bands is None:
