@@ -277,6 +277,27 @@ class PlaneSegmentation(DynamicTable):
             rkwargs['voxel_mask'] = voxel_mask
         return super(PlaneSegmentation, self).add_row(**rkwargs)
 
+    def pixel_to_image(self, pixel_mask, width, height):
+        image_matrix = np.zeros((width, height))
+        for mask in pixel_mask:
+            col = mask[0]
+            row = mask[1]
+            weight = mask[-1]
+            if weight > 0:
+                image_matrix[row][col] = weight
+        return image_matrix
+
+    def image_to_pixel(self, image_mask):
+        """Convert a image_mask to a pixel_mask that contains all the elements of the form (x, y, weight)"""
+        width, height = np.shape(image_mask)
+        pixel_mask = []
+        for row in range(height):
+            img_row = image_mask[row]
+            for col in range(width):
+                if img_row[col] > 0:
+                    pixel_mask.append([row, col, img_row[col]])
+        return pixel_mask
+
     @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what the region is'},
             {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table', 'default': slice(None)},
             {'name': 'name', 'type': str, 'doc': 'the name of the ROITableRegion', 'default': 'rois'})
