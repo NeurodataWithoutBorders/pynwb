@@ -240,7 +240,8 @@ class TestAppend(unittest.TestCase):
 
         FILENAME = 'test_append.nwb'
 
-        nwb = NWBFile(session_description='hi', identifier='hi', session_start_time=datetime.now().astimezone())
+        nwb = NWBFile(session_description='hi', identifier='hi', session_start_time=datetime(1970, 1, 1, 12,
+                                                                                             tzinfo=tzutc()))
         proc_mod = nwb.create_processing_module(name='test_proc_mod', description='')
         proc_inter = LFP(name='test_proc_dset')
         proc_mod.add_data_interface(proc_inter)
@@ -267,8 +268,7 @@ class TestAppend(unittest.TestCase):
         with NWBHDF5IO(FILENAME, mode='a') as io:
             nwb = io.read()
             elec = nwb.modules['test_proc_mod']['LFP'].electrical_series['test_device'].electrodes
-            ts2 = ElectricalSeries(name='timeseries2', data=[4, 5, 6],
-                                   rate=1.0, electrodes=elec)
+            ts2 = ElectricalSeries(name='timeseries2', data=[4, 5, 6], rate=1.0, electrodes=elec)
             nwb.add_acquisition(ts2)
             io.write(nwb)
 
