@@ -5,6 +5,7 @@ from pynwb.ophys import TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescenc
 from pynwb.image import ImageSeries
 from pynwb.base import TimeSeries
 from pynwb.device import Device
+from pynwb.base import ProcessingModule
 
 import numpy as np
 
@@ -89,6 +90,7 @@ class CorrectedImageStackConstructor(unittest.TestCase):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
         ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
         cis = CorrectedImageStack(is1, is2, ts)
+        ProcessingModule('name', 'description').add_container(cis)
         self.assertEqual(cis.corrected, is1)
         self.assertEqual(cis.original, is2)
         self.assertEqual(cis.xy_translation, ts)
