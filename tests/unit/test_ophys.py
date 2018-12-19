@@ -230,40 +230,42 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertTrue(np.allclose(pS['image_mask'][1], img_masks[1]))
 
     def test_conversion_of_pixel_mask_to_image_mask(self):
-        width = 3
-        height = 3
-        pixel_mask = [[0, 0, 1], [1, 0, 2], [2, 0, 2]]
+        pixel_mask = [[0, 0, 1.0], [1, 0, 2.0], [2, 0, 2.0]]
 
         iSS, ip = self.getBoilerPlateObjects()
         ps = PlaneSegmentation('description', ip, 'test_name', iSS)
-        img_mask = ps.pixel_to_image(pixel_mask, width, height)
 
-        self.assertTrue(np.array_equal(img_mask, [[1, 2, 2], [0, 0, 0], [0, 0, 0]]))
+        img_mask = ps.pixel_to_image(pixel_mask)
+        np.testing.assert_allclose(img_mask, np.asarray([[1, 2, 2.0],
+                                                         [0, 0, 0.0],
+                                                         [0, 0, 0.0]]))
 
     def test_conversion_of_image_mask_to_pixel_mask(self):
-        image_mask = [[1, 0, 0],
-                      [0, 1, 0],
-                      [0, 0, 1]]
+        image_mask = np.asarray([[1.0, 0.0, 0.0],
+                                 [0.0, 1.0, 0.0],
+                                 [0.0, 0.0, 1.0]])
 
         iSS, ip = self.getBoilerPlateObjects()
         ps = PlaneSegmentation("description", ip, 'test_name', iSS)
         ps.add_roi(image_mask=image_mask)
 
         pixel_mask = ps.image_to_pixel(image_mask)
-        self.assertTrue(np.array_equal(pixel_mask,
-                                       [[0, 0, 1],
-                                        [1, 1, 1],
-                                        [2, 2, 1]]))
+        np.testing.assert_allclose(pixel_mask, np.asarray([[0, 0, 1.0], [1, 1, 1.0], [2, 2, 1.0]]))
 
-    def test_converting_mask_with_multiple_images(self):
-        """Image masks can have multiple images, so we test whether we can convert an image_mask with
-        multiple images into a pixel_image"""
-
-        # Image masks are usually 3D arrays of [num_img_masks, num_x_pixels, num_y_pixels
-        img_mask = [[[1, 1, 1], [1, 1, 1], [1, 0, 1]], [[2, 1.0, 3.0], [3.0, 2.0, 1.5], [1.0, 2.0, 3.0]]]
-
-    def test_conversion_of_image_to_pixel_and_back(self):
-        self.assertTrue(False)
+    def test_conversion_of_multiple_images_to_pixel(self):
+        image_mask = [
+            [[0, 0, 2],
+             [1, 2, 3],
+             [3, 3, 4]],
+            [[0, 1, 1],
+             [0, 0, 1],
+             [0, 0, 1]]
+        ]
+        iSS, ip = self.getBoilerPlateObjects()
+        ps = PlaneSegmentation("description", ip, "test_name", iSS)
+        pixel_masks = ps.image_to_pixel(image_mask)
+        np.testing.assert_allclose(pixel_masks,
+                                   [[2, 0, 2], [1, 0, 1], [1, 1, 2], [1, 2, 3], [2, 0, 3], [2, 1, 3], [2, 2, 4]])
 
     def test_init_image_mask(self):
         w, h = 5, 5

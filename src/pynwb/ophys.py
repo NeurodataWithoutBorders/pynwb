@@ -277,25 +277,25 @@ class PlaneSegmentation(DynamicTable):
             rkwargs['voxel_mask'] = voxel_mask
         return super(PlaneSegmentation, self).add_row(**rkwargs)
 
-    def pixel_to_image(self, pixel_mask, width, height):
-        image_matrix = np.zeros((width, height))
-        for mask in pixel_mask:
-            col = mask[0]
-            row = mask[1]
-            weight = mask[-1]
-            if weight > 0:
-                image_matrix[row][col] = weight
+    def pixel_to_image(self, pixel_mask):
+        image_matrix = np.zeros(np.shape(pixel_mask))
+        npmask = np.asarray(pixel_mask)
+        x_coords = tuple(map(int, npmask[:, 0]))
+        y_coords = tuple(map(int, npmask[:, 1]))
+        weights = npmask[:, -1]
+        image_matrix[y_coords, x_coords] = weights
         return image_matrix
 
     def image_to_pixel(self, image_mask):
-        """Convert a image_mask to a pixel_mask that contains all the elements of the form (x, y, weight)"""
-        width, height = np.shape(image_mask)
         pixel_mask = []
-        for row in range(height):
-            img_row = image_mask[row]
-            for col in range(width):
-                if img_row[col] > 0:
-                    pixel_mask.append([row, col, img_row[col]])
+        it = np.nditer(image_mask, flags=['multi_index'])
+        while not it.finished:
+            weight = it[0][()]
+            if weight > 0:
+                x = it.multi_index[0]
+                y = it.multi_index[1]
+                pixel_mask.append([x, y, weight])
+            it.iternext()
         return pixel_mask
 
     @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what the region is'},
@@ -303,7 +303,6 @@ class PlaneSegmentation(DynamicTable):
             {'name': 'name', 'type': str, 'doc': 'the name of the ROITableRegion', 'default': 'rois'})
     def create_roi_table_region(self, **kwargs):
         return call_docval_func(self.create_region, kwargs)
-
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
 class ImageSegmentation(MultiContainerInterface):
