@@ -225,7 +225,7 @@ groups:
     shape:
     - null
     - 2
-  - neurodata_type_inc: DynamicTableRegion
+  - neurodata_type_inc: VectorIndex
     name: electrodes_index
     doc: the index into electrodes
     quantity: '?'

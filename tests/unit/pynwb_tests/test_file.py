@@ -271,7 +271,8 @@ class SubjectTest(unittest.TestCase):
                                sex='M',
                                species='Rattus norvegicus',
                                subject_id='RAT123',
-                               weight='2 lbs')
+                               weight='2 lbs',
+                               date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()))
         self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile('a test session description for a test NWBFile',
