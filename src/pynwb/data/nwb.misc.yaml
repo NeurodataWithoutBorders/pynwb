@@ -111,7 +111,7 @@ groups:
     - num_times
     shape:
     - null
-- neurodata_type_def: SpectralAnalysis
+- neurodata_type_def: DecompositionSeries
   neurodata_type_inc: TimeSeries
   doc: Holds spectral analysis of a timeseries. For instance of LFP or a speech signal
   datasets:
@@ -133,7 +133,7 @@ groups:
   - name: source_timeseries
     doc: HDF5 link to TimesSeries that this data was calculated from. Metadata
       about electrodes and their position can be read from that ElectricalSeries so
-      it's not necessary to mandate that information be stored here
+      it's not necessary to store that information here
     target_type: TimeSeries
   groups:
   - neurodata_type_inc: DynamicTable
@@ -159,12 +159,38 @@ groups:
       dims:
       - num_bands
       - low, high
-      doc: Low and high limit of each band. If it is a Gaussian filter, use 2 SD on either side of the center
+      doc: Low and high limit of each band in Hz. If it is a Gaussian filter, use 2 SD on either side of the center
       attributes:
       - name: description
         dtype: text
-        doc: value is 'the mean of the sliding Gaussian'
-        value: the mean of the sliding Gaussian
+        doc: value is 'Low and high limit of each band in Hz. If it is a Gaussian filter, use 2 SD on either side of the center'
+        value: Low and high limit of each band in Hz. If it is a Gaussian filter, use 2 SD on either side of the center
+    - neurodata_type_inc: VectorData
+      name: band_mean
+      dtype: float
+      shape:
+      - null
+      dims:
+      - num_bands
+      doc: The mean Gaussian filters in Hz
+      attributes:
+      - name: description
+        dtype: text
+        doc: The mean Gaussian filters in Hz
+        value: The mean Gaussian filters in Hz
+    - neurodata_type_inc: VectorData
+      name: band_stdev
+      dtype: float
+      shape:
+      - null
+      dims:
+      - num_bands
+      doc: The standard devaition of Gaussian filters in Hz
+      attributes:
+      - name: description
+        dtype: text
+        doc: The standard devaition of Gaussian filters in Hz
+        value: The standard devaition of Gaussian filters in Hz
 - neurodata_type_def: Units
   neurodata_type_inc: DynamicTable
   doc: Data about spiking units. Event times of observed units (e.g. cell, synapse, etc.)
@@ -199,7 +225,7 @@ groups:
     shape:
     - null
     - 2
-  - neurodata_type_inc: DynamicTableRegion
+  - neurodata_type_inc: VectorIndex
     name: electrodes_index
     doc: the index into electrodes
     quantity: '?'

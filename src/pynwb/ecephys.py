@@ -8,7 +8,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
-from .misc import SpectralAnalysis
+from .misc import DecompositionSeries
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
@@ -289,11 +289,11 @@ class LFP(MultiContainerInterface):
          'get': 'get_electrical_series',
          'create': 'create_electrical_series'},
 
-        {'attr': 'spectral_analysis',
-         'type': SpectralAnalysis,
-         'add': 'add_spectral_analysis',
-         'get': 'get_spectral_analysis',
-         'create': 'create_spectral_analysis'}]
+        {'attr': 'decomposition_series',
+         'type': DecompositionSeries,
+         'add': 'add_decomposition_series',
+         'get': 'get_decomposition_series',
+         'create': 'create_decomposition_series'}]
 
     __help = ("LFP data from one or more channels. Filter properties "
               "should be noted in the ElectricalSeries")
