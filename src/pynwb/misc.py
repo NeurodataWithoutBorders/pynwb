@@ -40,7 +40,7 @@ class AnnotationSeries(TimeSeries):
                                                resolution=-1.0, conversion=1.0,
                                                timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'time', 'type': float, 'doc': 'The time for the anotation'},
+    @docval({'name': 'time', 'type': float, 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
     def add_annotation(self, **kwargs):
         '''
@@ -237,61 +237,82 @@ class Units(DynamicTable):
         return np.asarray(self['obs_intervals'][index])
 
 
-@register_class('SpectralAnalysis', CORE_NAMESPACE)
-class SpectralAnalysis(TimeSeries):
+@register_class('DecompositionSeries', CORE_NAMESPACE)
+class DecompositionSeries(TimeSeries):
+    """
+    Stores product of spectral analysis
     """
 
-    """
+    __nwbfields__ = ('metric',
+                     {'name': 'source_timeseries', 'child': False, 'doc': 'the input TimeSeries from this analysis'},
+                     {'name': 'bands',
+                      'doc': 'the bands that the signal is decomposed into', 'child': True})
 
-    __nwbfields__ = ({'name': 'bands', 'child': True, 'doc': 'info for each band'},
-                     {'name': 'timeseries',  'child': False, 'doc': 'linked source timeseries'},
-                     'metric')
-
-    __help = "Container for storing phase or analytic amplitude of a timeseries"
-
-    @docval({'name': 'name', 'type': str, 'doc': 'name of spectral analysis'},
-            {'name': 'description', 'type': str, 'doc': 'description of spectral analysis'},
-
-            {'name': 'data', 'type': ('array_data', 'data'), 'shape': (None, None, None),
-             'doc': 'Features for each channel. time x channel x band'},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-            {'name': 'timestamps', 'type': ('array_data', 'data'), 'shape': (None,),
-             'doc': 'The times of events that features correspond to'},
-            {'name': 'band_limits', 'type': 'array_data', 'shape': (None, 2),
-             'doc': 'Low and high limit of each band. If it is a Gaussian filter'
-                    ', use 2 SD on either side of the center'},
-            {'name': 'metric', 'type': str, 'doc': 'recommended: phase, amplitude, power'},
-            {'name': 'timeseries', 'type': TimeSeries,
-             'doc': "HDF5 link to TimesSeries that this data was calculated from. Metadata "
-                    "about electrodes and their position can be read from that "
-                    "ElectricalSeries so it's not necessary to mandate that information "
-                    "be stored here"},
-            {'name': 'band_name', 'type': 'array_data',
-             'doc': 'recommended: alpha, beta, gamma, delta, theta, high gamma',
-             'shape': (None,), 'default': None},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset'},
+            {'name': 'metric', 'type': str, 'doc': "metric of analysis. recommended: 'phase', 'amplitude', 'power'"},
+            {'name': 'unit', 'type': str, 'doc': 'SI unit of measurement', 'default': 'no unit'},
+            {'name': 'bands', 'type': DynamicTable,
+             'doc': 'a table for describing the frequency bands that the signal was decomposed into', 'default': None},
+            {'name': 'source_timeseries', 'type': TimeSeries,
+             'doc': 'the input TimeSeries from this analysis', 'default': None},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to convert to units', 'default': _default_conversion},
-            )
+             'doc': 'Scalar to multiply each element by to convert to unit', 'default': _default_conversion},
+
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+
+            {'name': 'comments', 'type': str,
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        # get the inputs
-        band_limits, metric, timeseries, band_name = popargs('band_limits', 'metric', 'timeseries', 'band_name', kwargs)
-
-        # Initialize the object
-        super(SpectralAnalysis, self).__init__(**kwargs)
-        self.bands = DynamicTable("bands", "data about the frequency bands that the signal was decomposed into")
-        self.bands.add_column('band_limits', 'Low and high limit of each band. If it is a Gaussian'
-                                             ' filter, use 2 SD on either side of the center')
-        if band_name is None:
-            for ilimits in band_limits:
-                self.bands.add_row(band_limits=ilimits)
-        else:
-            self.bands.add_column('band_name', 'recommended: alpha, beta, gamma, delta, theta, high gamma')
-            for ilimits, iname in zip(band_limits, band_name):
-                self.bands.add_row(band_limits=ilimits, band_name=iname)
-
+        metric, source_timeseries, bands = popargs('metric', 'source_timeseries', 'bands', kwargs)
+        super(DecompositionSeries, self).__init__(**kwargs)
+        self.source_timeseries = source_timeseries
         self.metric = metric
-        self.timeseries = timeseries
+        if bands is None:
+            bands = DynamicTable("bands", "data about the frequency bands that the signal was decomposed into")
+        self.bands = bands
+
+    def __check_column(self, name, desc):
+        if name not in self.bands.colnames:
+            self.bands.add_column(name, desc)
+
+    @docval({'name': 'band_name', 'type': str, 'doc': 'the name of the frequency band',
+             'default': None},
+            {'name': 'band_limits', 'type': ('array_data', 'data'),
+             'doc': 'low and high frequencies of bandpass filter in Hz'},
+            {'name': 'band_mean', 'type': float, 'doc': 'the mean of Gaussian filters in Hz',
+             'default': None},
+            {'name': 'band_stdev', 'type': float, 'doc': 'the standard deviation of Gaussian filters in Hz',
+             'default': None},
+            allow_extra=True)
+    def add_band(self, **kwargs):
+        """
+        Add ROI data to this
+        """
+        band_name, band_limits, band_mean, band_stdev = getargs('band_name', 'band_limits', 'band_mean', 'band_stdev',
+                                                                kwargs)
+        if band_name is not None:
+            self.__check_column('band_name', "the name of the frequency band (recommended: 'alpha', 'beta', 'gamma', "
+                                             "'delta', 'high gamma'")
+        if band_name is not None:
+            self.__check_column('band_limits', 'low and high frequencies of bandpass filter in Hz')
+        if band_mean is not None:
+            self.__check_column('band_mean', 'the mean of Gaussian filters in Hz')
+        if band_stdev is not None:
+            self.__check_column('band_stdev', 'the standard deviation of Gaussian filters in Hz')
+
+        self.bands.add_row({k: v for k, v in kwargs.items() if v is not None})
