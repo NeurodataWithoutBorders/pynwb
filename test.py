@@ -5,6 +5,7 @@ from __future__ import print_function
 import warnings
 import re
 import argparse
+import glob
 import inspect
 import logging
 import os.path
@@ -96,6 +97,35 @@ def run_example_tests():
             FAILURES += 1
             ERRORS += 1
 
+def validate_example_nwbs():
+    global TOTAL, FAILURES, ERRORS
+    logging.info('running validation tests on example files')
+    examples_nwbs = glob.glob('*.nwb')
+
+    import pynwb
+
+    TOTAL += len(examples_nwbs)
+    for nwb in examples_nwbs:
+        try:
+            logging.info("Validating file %s" % nwb)
+
+            ws = list()
+            with warnings.catch_warnings(record=True) as tmp:
+                with pynwb.NWBHDF5IO(nwb, mode='r') as io:
+                    errors = pynwb.validate(io)
+                    if errors:
+                        FAILURES += 1
+                        ERRORS += 1
+
+                for w in tmp:  # ignore RunTimeWarnings about importing
+                    if isinstance(w.message, RuntimeWarning) and not warning_re.match(str(w.message)):
+                        ws.append(w)
+            for w in ws:
+                warnings.showwarning(w.message, w.category, w.filename, w.lineno, w.line)
+        except Exception:
+            print(traceback.format_exc())
+            FAILURES += 1
+            ERRORS += 1
 
 def run_integration_tests(verbose=True):
     pynwb_test_result = run_test_suite("tests/integration", "integration tests", verbose=verbose)
@@ -187,6 +217,7 @@ def main():
     # Run example tests
     if flags['example'] in args.suites:
         run_example_tests()
+        validate_example_nwbs()
 
     # Run integration tests
     if flags['integration'] in args.suites:
