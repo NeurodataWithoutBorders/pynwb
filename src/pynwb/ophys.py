@@ -304,6 +304,7 @@ class PlaneSegmentation(DynamicTable):
     def create_roi_table_region(self, **kwargs):
         return call_docval_func(self.create_region, kwargs)
 
+
 @register_class('ImageSegmentation', CORE_NAMESPACE)
 class ImageSegmentation(MultiContainerInterface):
     """
