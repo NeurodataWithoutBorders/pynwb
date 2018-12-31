@@ -292,7 +292,7 @@ class DecompositionSeries(TimeSeries):
 
     @docval({'name': 'band_name', 'type': str, 'doc': 'the name of the frequency band',
              'default': None},
-            {'name': 'band_limits', 'type': ('array_data', 'data'),
+            {'name': 'band_limits', 'type': ('array_data', 'data'), 'default': None,
              'doc': 'low and high frequencies of bandpass filter in Hz'},
             {'name': 'band_mean', 'type': float, 'doc': 'the mean of Gaussian filters in Hz',
              'default': None},
