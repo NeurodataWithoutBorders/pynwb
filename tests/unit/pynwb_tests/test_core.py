@@ -1,7 +1,7 @@
 import unittest2 as unittest
 
 from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable
-from pynwb import NWBFile, TimeSeries
+from pynwb import NWBFile, TimeSeries, available_namespaces
 
 import pandas as pd
 from datetime import datetime
@@ -316,3 +316,8 @@ Fields:
   stimulus_template: { }
   time_intervals: { }
 """)
+
+
+class TestAvailableNamespaces(unittest.TestCase):
+    def test_available_namespaces(self):
+        self.assertEqual(available_namespaces(), ('core', ))

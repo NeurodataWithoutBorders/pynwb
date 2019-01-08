@@ -112,9 +112,8 @@ if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
 
 
-@docval(returns="a tuple of the available namespaces", rtype=tuple)
-def available_namespaces(**kwargs):
-    return tuple(__NS_CATALOG.namespaces.keys())
+def available_namespaces():
+    return __NS_CATALOG.namespaces
 
 
 # a function to register a container classes with the global map
