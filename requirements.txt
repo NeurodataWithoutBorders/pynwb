@@ -1,6 +1,6 @@
 certifi==2018.1.18
 chardet==3.0.4
-h5py==2.7.1
+h5py==2.9.0
 idna==2.6
 numpy==1.14.6
 python-dateutil==2.7.2
