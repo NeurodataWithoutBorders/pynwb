@@ -49,11 +49,13 @@ groups:
     dtype: float32
     doc: Signals from ROIs
     dims:
-    - num_times
-    - num_ROIs
+    - - num_times
+    - - num_times
+      - num_ROIs
     shape:
-    - null
-    - null
+    - - null
+    - - null
+      - null
   - neurodata_type_inc: DynamicTableRegion
     name: rois
     doc: a dataset referencing into an ROITable containing information on the ROIs

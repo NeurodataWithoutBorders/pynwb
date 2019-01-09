@@ -274,7 +274,7 @@ groups:
     doc: Value is 'A column-centric table'
     value: A column-centric table
   - name: colnames
-    dtype: text
+    dtype: ascii
     doc: The names of the columns in this table. This should be used to specifying
       an order to the columns
     shape:
