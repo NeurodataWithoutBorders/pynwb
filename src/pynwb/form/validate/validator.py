@@ -392,18 +392,25 @@ class GroupValidator(BaseStorageValidator):
                 dt = v_builder.attributes.get(self.spec.type_key())
                 if dt is not None:
                     data_types.setdefault(dt, list()).append(value)
-        for dt in self.__include_dts:
+        for dt, inc_spec in self.__include_dts.items():
             found = False
+            inc_name = inc_spec.name
             for sub_val in self.vmap.valid_types(dt):
                 spec = sub_val.spec
-                inc_name = self.__include_dts[dt].name
                 sub_dt = spec.data_type_def
                 dt_builders = data_types.get(sub_dt)
                 if dt_builders is not None:
                     if inc_name is not None:
                         dt_builders = filter(lambda x: x.name == inc_name, dt_builders)  # noqa: F405
                     for bldr in dt_builders:
-                        ret.extend(sub_val.validate(bldr))
+                        tmp = bldr
+                        if isinstance(bldr, LinkBuilder):
+                            if inc_spec.linkable:
+                                tmp = bldr.builder
+                            else:
+                                ret.append(IllegalLinkError(self.get_spec_loc(inc_spec),
+                                                            location=self.get_builder_loc(tmp)))
+                        ret.extend(sub_val.validate(tmp))
                         found = True
             if not found and self.__include_dts[dt].required:
                 ret.append(MissingDataType(self.get_spec_loc(self.spec), dt,
