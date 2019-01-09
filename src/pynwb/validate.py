@@ -53,6 +53,8 @@ def main():
         print('Validating against core namespace')
         _print_errors(errors)
 
+    sys.exit(errors and len(errors) > 0)
+
 
 if __name__ == '__main__':  # pragma: no cover
     main()
