@@ -168,9 +168,27 @@ groups:
         such as Volts. If the actual data is stored in millivolts, the field ''conversion''
         below describes how to convert the data to the specified SI unit.'
     dims:
-    - num_times
+    - - num_times
+    - - num_times
+      - num_DIM2
+    - - num_times
+      - num_DIM2
+      - num_DIM3
+    - - num_times
+      - num_DIM2
+      - num_DIM3
+      - num_DIM4
     shape:
-    - null
+    - - null
+    - - null
+      - null
+    - - null
+      - null
+      - null
+    - - null
+      - null
+      - null
+      - null
   - name: starting_time
     dtype: float64
     doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
