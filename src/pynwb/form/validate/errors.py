@@ -10,6 +10,8 @@ __all__ = [
     "MissingError",
     "ShapeError",
     "MissingDataType",
+    "IllegalLinkError",
+    "IncorrectDataType"
 ]
 
 
@@ -107,3 +109,29 @@ class ShapeError(Error):
         reason = "incorrect shape - expected '%s', got'%s'" % (expected, received)
         loc = getargs('location', kwargs)
         super(ShapeError, self).__init__(name, reason, location=loc)
+
+
+class IllegalLinkError(Error):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
+            {'name': 'location', 'type': str, 'doc': 'the location of the error', 'default': None})
+    def __init__(self, **kwargs):
+        name = getargs('name', kwargs)
+        reason = "illegal use of link"
+        loc = getargs('location', kwargs)
+        super(IllegalLinkError, self).__init__(name, reason, location=loc)
+
+
+class IncorrectDataType(Error):
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
+            {'name': 'expected', 'type': str, 'doc': 'the expected data_type'},
+            {'name': 'received', 'type': str, 'doc': 'the received data_type'},
+            {'name': 'location', 'type': str, 'doc': 'the location of the error', 'default': None})
+    def __init__(self, **kwargs):
+        name = getargs('name', kwargs)
+        expected = getargs('expected', kwargs)
+        received = getargs('received', kwargs)
+        reason = "incorrect data_type - expected '%s', got '%s'" % (expected, received)
+        loc = getargs('location', kwargs)
+        super(DtypeError, self).__init__(name, reason, location=loc)
