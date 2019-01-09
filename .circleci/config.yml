@@ -119,6 +119,7 @@ jobs:
           <<: *initialize-venv
       - run:
           <<: *run-style-check
+
   python27:
     docker:
       - image: circleci/python:2.7.14-jessie
@@ -220,7 +221,7 @@ jobs:
 
   gallery37:
     docker:
-      - image: circleci/python:3.7.0-stretch
+      - image: dozturk2/python37-hdf5
     environment:
      - TEST_TOX_ENV: "gallery-py37"
     <<: *gallery-steps
