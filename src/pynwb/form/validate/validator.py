@@ -1,6 +1,7 @@
 import numpy as np
 from abc import ABCMeta, abstractmethod
 from copy import copy
+import re
 from itertools import chain
 
 from ..utils import docval, getargs, call_docval_func
@@ -74,15 +75,35 @@ def check_type(expected, received):
         return received in __allowable[expected]
 
 
+def get_iso8601_regex():
+    isodate_re = (r'^(-?(?:[1-9][0-9]*)?[0-9]{4})-(1[0-2]|0[1-9])-(3[01]|0[1-9]|[12][0-9])T(2[0-3]|[01][0-9]):'
+                  r'([0-5][0-9]):([0-5][0-9])(\.[0-9]+)?(Z|[+-](?:2[0-3]|[01][0-9]):[0-5][0-9])?$')
+    return re.compile(isodate_re)
+
+
+_iso_re = get_iso8601_regex()
+
+
+def _check_isodatetime(s, default=None):
+    try:
+        if _iso_re.match(s) is not None:
+            return 'isodatetime'
+    except Exception:
+        pass
+    return default
+
+
 def get_type(data):
     if isinstance(data, text_type):
-        return 'utf'
+        return _check_isodatetime(data, 'utf')
     elif isinstance(data, binary_type):
-        return 'ascii'
+        return _check_isodatetime(data, 'ascii')
     elif isinstance(data, RegionBuilder):
         return 'region'
     elif isinstance(data, ReferenceBuilder):
         return 'object'
+    elif isinstance(data, np.ndarray):
+        return get_type(data[0])
     if not hasattr(data, '__len__'):
         return type(data).__name__
     else:
@@ -340,10 +361,8 @@ class DatasetValidator(BaseStorageValidator):
         builder = getargs('builder', kwargs)
         ret = super(DatasetValidator, self).validate(builder)
         data = builder.data
-        dtype = get_type(data)
-        if self.spec.dtype is None:
-            ret.append(MissingError(self.get_spec_loc(self.spec)))
-        else:
+        if self.spec.dtype is not None:
+            dtype = get_type(data)
             if not check_type(self.spec.dtype, dtype):
                 ret.append(DtypeError(self.get_spec_loc(self.spec), self.spec.dtype, dtype,
                                       location=self.get_builder_loc(builder)))
@@ -434,7 +453,7 @@ class GroupValidator(BaseStorageValidator):
                 spec = validator.spec
                 if isinstance(sub_builder, LinkBuilder):
                     if spec.linkable:
-                        sub_builder = sub_builder.target
+                        sub_builder = sub_builder.builder
                     else:
                         ret.append(IllegalLinkError(self.get_spec_loc(spec), location=self.get_builder_loc(builder)))
                         continue
