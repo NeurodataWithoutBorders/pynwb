@@ -116,7 +116,8 @@ def validate_example_nwbs():
                     if errors:
                         FAILURES += 1
                         ERRORS += 1
-
+                        for err in errors:
+                            print("Error: %s" % err)
                 for w in tmp:  # ignore RunTimeWarnings about importing
                     if isinstance(w.message, RuntimeWarning) and not warning_re.match(str(w.message)):
                         ws.append(w)
