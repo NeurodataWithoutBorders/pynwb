@@ -284,17 +284,23 @@ workflows:
           <<: *no_filters
       - python36:
           <<: *no_filters
+      - python37:
+          <<: *no_filters
       - miniconda27:
           <<: *no_filters
       - miniconda35:
           <<: *no_filters
       - miniconda36:
           <<: *no_filters
+      - miniconda37:
+          <<: *no_filters
       - gallery27:
           <<: *no_filters
       - gallery35:
           <<: *no_filters
       - gallery36:
+          <<: *no_filters
+      - gallery37:
           <<: *no_filters
       - deploy-dev:
           requires:
