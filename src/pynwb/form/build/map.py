@@ -1,5 +1,6 @@
 from __future__ import absolute_import
 import re
+import numpy as np
 import warnings
 from collections import OrderedDict
 from copy import copy
@@ -309,10 +310,94 @@ def _object_attr(**kwargs):
     return _dec
 
 
+def _unicode(s):
+    """
+    A helper function for converting to Unicode
+    """
+    if isinstance(s, text_type):
+        return s
+    elif isinstance(s, binary_type):
+        return s.decode('utf-8')
+    else:
+        raise ValueError("Expected unicode or ascii string, got %s" % type(s))
+
+
+def _ascii(s):
+    """
+    A helper function for converting to ASCII
+    """
+    if isinstance(s, text_type):
+        return s.encode('ascii', 'backslashreplace')
+    elif isinstance(s, binary_type):
+        return s
+    else:
+        raise ValueError("Expected unicode or ascii string, got %s" % type(s))
+
+
 class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     '''A class for mapping between Spec objects and Container attributes
 
     '''
+
+    __dtypes = {
+        "float": np.float32,
+        "float32": np.float32,
+        "double": np.float64,
+        "float64": np.float64,
+        "long": np.int64,
+        "int64": np.int64,
+        "uint64": np.uint64,
+        "int": np.int32,
+        "int32": np.int32,
+        "int16": np.int16,
+        "int8": np.int8,
+        "bool": np.bool_,
+        "text": _unicode,
+        "text": _unicode,
+        "utf": _unicode,
+        "utf8": _unicode,
+        "utf-8": _unicode,
+        "ascii": _ascii,
+        "str": _ascii,
+        "isodatetime": _ascii,
+        "uint32": np.uint32,
+        "uint16": np.uint16,
+        "uint8": np.uint8,
+    }
+
+    @classmethod
+    def __convert_dtype(cls, spec, value):
+        if spec.dtype is not None and spec.dtype not in cls.__dtypes:
+            msg = "unrecognized dtype: %s -- cannot convert value" % spec.dtype
+            raise ValueError(msg)
+        ret = None
+        if isinstance(value, np.ndarray):
+            dtype_func = cls.__dtypes[spec.dtype]
+            if dtype_func is _unicode:
+                ret = value.astype('U')
+            elif dtype_func is _ascii:
+                ret = value.astype('S')
+            else:
+                ret = value.astype(dtype_func)
+        elif isinstance(value, (tuple, list)):
+            ret = list()
+            for elem in value:
+                ret.append(cls.__convert_dtype(spec, elem))
+            ret = type(value)(ret)
+        else:
+            dtype_func = cls.__dtypes[spec.dtype]
+            if dtype_func in (_unicode, _ascii):
+                ret = dtype_func(value)
+            else:
+                # assume the given precision is a minimum size
+                # --> do not convert to a lower precision
+                spec_size = np.dtype(dtype_func).itemsize
+                val_size = np.dtype(type(value)).itemsize
+                if val_size <= spec_size:
+                    ret = dtype_func(value)
+                else:
+                    ret = value
+        return ret
 
     _const_arg = '__constructor_arg'
 
@@ -723,6 +808,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     raise ValueError(msg)
                 target_builder = build_manager.build(attr_value, source=source)
                 attr_value = ReferenceBuilder(target_builder)
+            else:
+                if attr_value is not None:
+                    attr_value = self.__convert_dtype(spec, attr_value)
 
             # do not write empty or null valued objects
             if attr_value is None:
