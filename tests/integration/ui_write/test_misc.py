@@ -51,7 +51,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
                                         'namespace': 'core',
                                         'help': 'Data about spiking units',
                                         'description': 'a simple table for testing Units',
-                                        'colnames': ('spike_times', 'obs_intervals',)},
+                                        'colnames': (b'spike_times', b'obs_intervals',)},
                             datasets={'id': ids_builder,
                                       'spike_times': st_builder,
                                       'spike_times_index': sti_builder,

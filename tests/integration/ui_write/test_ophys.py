@@ -1,4 +1,5 @@
 import unittest2 as unittest
+import numpy as np
 from copy import deepcopy
 
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
@@ -134,7 +135,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
             'test_2ps',
             attributes={
                 'pmt_gain':  1.7,
-                'scan_line_rate':  3.4,
+                'scan_line_rate':  np.float32(3.4),
                 'namespace': base.CORE_NAMESPACE,
                 'comments': 'no comments',
                 'description': 'no description',
@@ -280,7 +281,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'neurodata_type': 'PlaneSegmentation',
                 'namespace': 'core',
                 'description': 'plane segmentation description',
-                'colnames': ('image_mask', 'pixel_mask'),
+                'colnames': (b'image_mask', b'pixel_mask'),
                 'help': 'Results from segmentation of an imaging plane'},
             datasets={
                 'id': DatasetBuilder('id', data=[0, 1],
