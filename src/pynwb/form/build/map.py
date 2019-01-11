@@ -367,6 +367,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
     @classmethod
     def __convert_dtype(cls, spec, value):
+        """
+        Convert values to the specified dtype. For example, if a literal int
+        is passed in to a field that is specified as a unsigned integer, this function
+        will convert the Python int to a numpy unsigned int.
+        """
         if spec.dtype is not None and spec.dtype not in cls.__dtypes:
             msg = "unrecognized dtype: %s -- cannot convert value" % spec.dtype
             raise ValueError(msg)
@@ -391,9 +396,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             else:
                 # assume the given precision is a minimum size
                 # --> do not convert to a lower precision
+                # also convert to unsigned int if given signed int
                 spec_size = np.dtype(dtype_func).itemsize
                 val_size = np.dtype(type(value)).itemsize
-                if val_size <= spec_size:
+                if val_size <= spec_size or ('uint' in dtype_func.__name__ and 'uint' not in type(value).__name__):
                     ret = dtype_func(value)
                 else:
                     ret = value

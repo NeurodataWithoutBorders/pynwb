@@ -112,6 +112,10 @@ class ShapeError(Error):
 
 
 class IllegalLinkError(Error):
+    """
+    A validation error for indicating that a link was used where an actual object
+    (i.e. a dataset or a group) must be used
+    """
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
             {'name': 'location', 'type': str, 'doc': 'the location of the error', 'default': None})
@@ -123,6 +127,10 @@ class IllegalLinkError(Error):
 
 
 class IncorrectDataType(Error):
+    """
+    A validation error for indicating that the incorrect data_type (not dtype) was used.
+    """
+
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
             {'name': 'expected', 'type': str, 'doc': 'the expected data_type'},
