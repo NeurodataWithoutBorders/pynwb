@@ -366,6 +366,18 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     }
 
     @classmethod
+    def __dtype(cls, given, specified):
+        g = np.dtype(given)
+        s = np.dtype(specified)
+        if 'uint' in g.name and 'uint' not in s.name:
+            return g.type
+        else:
+            if g.itemsize <= s.itemsize:
+                return s.type
+            else:
+                return g.type
+
+    @classmethod
     def __convert_dtype(cls, spec, value):
         """
         Convert values to the specified dtype. For example, if a literal int
@@ -376,13 +388,14 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             msg = "unrecognized dtype: %s -- cannot convert value" % spec.dtype
             raise ValueError(msg)
         ret = None
+        dtype_func = cls.__dtypes[spec.dtype]
         if isinstance(value, np.ndarray):
-            dtype_func = cls.__dtypes[spec.dtype]
             if dtype_func is _unicode:
                 ret = value.astype('U')
             elif dtype_func is _ascii:
                 ret = value.astype('S')
             else:
+                dtype_func = cls.__dtype(dtype_func, value.dtype)
                 ret = value.astype(dtype_func)
         elif isinstance(value, (tuple, list)):
             ret = list()
@@ -390,19 +403,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 ret.append(cls.__convert_dtype(spec, elem))
             ret = type(value)(ret)
         else:
-            dtype_func = cls.__dtypes[spec.dtype]
             if dtype_func in (_unicode, _ascii):
                 ret = dtype_func(value)
             else:
-                # assume the given precision is a minimum size
-                # --> do not convert to a lower precision
-                # also convert to unsigned int if given signed int
-                spec_size = np.dtype(dtype_func).itemsize
-                val_size = np.dtype(type(value)).itemsize
-                if val_size <= spec_size or ('uint' in dtype_func.__name__ and 'uint' not in type(value).__name__):
-                    ret = dtype_func(value)
-                else:
-                    ret = value
+                dtype_func = cls.__dtype(dtype_func, type(value))
+                ret = dtype_func(value)
         return ret
 
     _const_arg = '__constructor_arg'
@@ -862,6 +867,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 if spec.name in builder.datasets:
                     sub_builder = builder.datasets[spec.name]
                 else:
+                    #pdb
                     sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
                 self.__add_attributes(sub_builder, spec.attributes, container, build_manager, source)
             else:
