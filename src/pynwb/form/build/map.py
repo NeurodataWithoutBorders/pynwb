@@ -384,31 +384,43 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         is passed in to a field that is specified as a unsigned integer, this function
         will convert the Python int to a numpy unsigned int.
         """
+        if spec.dtype is None:
+            return value, None
         if spec.dtype is not None and spec.dtype not in cls.__dtypes:
             msg = "unrecognized dtype: %s -- cannot convert value" % spec.dtype
             raise ValueError(msg)
         ret = None
+        ret_dtype = None
         dtype_func = cls.__dtypes[spec.dtype]
         if isinstance(value, np.ndarray):
             if dtype_func is _unicode:
                 ret = value.astype('U')
+                ret_dtype = "utf8"
             elif dtype_func is _ascii:
                 ret = value.astype('S')
+                ret_dtype = "ascii"
             else:
                 dtype_func = cls.__dtype(dtype_func, value.dtype)
                 ret = value.astype(dtype_func)
+                ret_dtype = ret.dtype.type
         elif isinstance(value, (tuple, list)):
             ret = list()
             for elem in value:
-                ret.append(cls.__convert_dtype(spec, elem))
+                tmp, tmp_dtype = cls.__convert_dtype(spec, elem)
+                ret.append(tmp)
             ret = type(value)(ret)
+            ret_dtype = tmp_dtype
         else:
             if dtype_func in (_unicode, _ascii):
+                ret_dtype = 'ascii'
+                if dtype_func == _unicode:
+                    ret_dtype = 'utf8'
                 ret = dtype_func(value)
             else:
                 dtype_func = cls.__dtype(dtype_func, type(value))
                 ret = dtype_func(value)
-        return ret
+                ret_dtype = type(ret)
+        return ret, ret_dtype
 
     _const_arg = '__constructor_arg'
 
@@ -726,8 +738,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 raise ValueError(msg)
             if isinstance(self.spec.dtype, RefSpec):
                 bldr_data = self.__get_ref_builder(self.spec.dtype, self.spec.shape, container, manager)
-                builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
-                                         dtype=self.convert_dtype(self.__spec.dtype))
+                bldr_data, dtype = self.__convert_dtype(self.spec, bldr_data)
+                builder = DatasetBuilder(name, bldr_data, parent=parent, source=source, dtype=dtype)
             elif isinstance(self.spec.dtype, list):
                 refs = [(i, subt) for i, subt in enumerate(self.spec.dtype) if isinstance(subt.dtype, RefSpec)]
                 bldr_data = copy(container.data)
@@ -737,8 +749,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     for j, subt in refs:
                         tmp[j] = self.__get_ref_builder(subt.dtype, None, row[j], manager)
                     bldr_data.append(tuple(tmp))
-                builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
-                                         dtype=self.convert_dtype(self.__spec.dtype))
+                bldr_data, dtype = self.__convert_dtype(self.spec, bldr_data)
+                builder = DatasetBuilder(name, bldr_data, parent=parent, source=source, dtype=dtype)
             else:
                 if self.__spec.dtype is None and self.__is_reftype(container.data):
                     bldr_data = list()
@@ -747,8 +759,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
                                              dtype='object')
                 else:
-                    builder = DatasetBuilder(name, container.data, parent=parent, source=source,
-                                             dtype=self.convert_dtype(self.__spec.dtype))
+                    bldr_data, dtype = self.__convert_dtype(self.spec, container.data)
+                    builder = DatasetBuilder(name, bldr_data, parent=parent, source=source, dtype=dtype)
         self.__add_attributes(builder, self.__spec.attributes, container, manager, source)
         return builder
 
@@ -821,7 +833,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 attr_value = ReferenceBuilder(target_builder)
             else:
                 if attr_value is not None:
-                    attr_value = self.__convert_dtype(spec, attr_value)
+                    attr_value, attr_dtype = self.__convert_dtype(spec, attr_value)
 
             # do not write empty or null valued objects
             if attr_value is None:
@@ -867,8 +879,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 if spec.name in builder.datasets:
                     sub_builder = builder.datasets[spec.name]
                 else:
-                    #pdb
-                    sub_builder = builder.add_dataset(spec.name, attr_value, dtype=self.convert_dtype(spec.dtype))
+                    data, dtype = self.__convert_dtype(spec, attr_value)
+                    sub_builder = builder.add_dataset(spec.name, data, dtype=dtype)
                 self.__add_attributes(sub_builder, spec.attributes, container, build_manager, source)
             else:
                 self.__add_containers(builder, spec, attr_value, build_manager, source, container)
