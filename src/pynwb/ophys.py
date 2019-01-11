@@ -243,6 +243,8 @@ class PlaneSegmentation(DynamicTable):
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
         super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
         self.imaging_plane = imaging_plane
+        if isinstance(reference_images, ImageSeries):
+            reference_images = (reference_images,)
         self.reference_images = reference_images
 
     @docval({'name': 'pixel_mask', 'type': 'array_data', 'default': None,
