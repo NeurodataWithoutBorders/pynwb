@@ -44,10 +44,6 @@ groups:
     doc: Value is 'Storage object for time-series 2-D image data'
     value: Storage object for time-series 2-D image data
   datasets:
-  - name: bits_per_pixel
-    dtype: int32
-    doc: Number of bit per image pixel.
-    quantity: '?'
   - name: data
     dtype: int8
     doc: Either binary data containing image or empty.
