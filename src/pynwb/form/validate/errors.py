@@ -131,7 +131,6 @@ class IncorrectDataType(Error):
     A validation error for indicating that the incorrect data_type (not dtype) was used.
     """
 
-
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the component that is erroneous'},
             {'name': 'expected', 'type': str, 'doc': 'the expected data_type'},
             {'name': 'received', 'type': str, 'doc': 'the received data_type'},
