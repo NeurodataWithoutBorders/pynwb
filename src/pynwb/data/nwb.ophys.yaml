@@ -75,7 +75,7 @@ groups:
   groups:
   - neurodata_type_inc: RoiResponseSeries
     doc: RoiResponseSeries object containing dF/F for a ROI
-    quantity: '*'
+    quantity: '+'
   default_name: DfOverF
 - neurodata_type_def: Fluorescence
   neurodata_type_inc: NWBDataInterface
@@ -191,11 +191,12 @@ groups:
       - neurodata_type_inc: ImageSeries
         doc: One or more image stacks that the masks apply to (can be one-element
           stack)
+        quantity: '*'
     links:
     - name: imaging_plane
       doc: link to ImagingPlane group from which this TimeSeries data was generated
       target_type: ImagingPlane
-    quantity: '*'
+    quantity: '+'
   default_name: ImageSegmentation
 - neurodata_type_def: ImagingPlane
   neurodata_type_inc: NWBContainer
