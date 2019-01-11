@@ -51,7 +51,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
                                         'namespace': 'core',
                                         'help': 'Data about spiking units',
                                         'description': 'a simple table for testing Units',
-                                        'colnames': ('spike_times', 'obs_intervals',)},
+                                        'colnames': (b'spike_times', b'obs_intervals',)},
                             datasets={'id': ids_builder,
                                       'spike_times': st_builder,
                                       'spike_times_index': sti_builder,
@@ -78,7 +78,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
 class TestSpectralAnalysis(base.TestDataInterfaceIO):
     def setUpContainer(self):
         self.timeseries = TimeSeries(name='dummy timeseries', description='desc',
-                                     data=np.ones((3, 3)),
+                                     data=np.ones((3, 3)), unit='flibs',
                                      timestamps=np.ones((3,)))
         bands = DynamicTable(name='bands', description='band info for LFPSpectralAnalysis', columns=[
             VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),

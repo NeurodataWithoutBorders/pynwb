@@ -68,10 +68,10 @@ nwbfile.add_acquisition(test_ts)
 #
 # NWB provides the concept of a *data interface*--an object for a standard
 # storage location of specific types of data--through the :py:class:`~pynwb.base.NWBDataInterface` class.
-# For example, :py:class:`~pynwb.ecephys.LFP` provides a container for holding one or more
-# :py:class:`~pynwb.ecephys.ElectricalSeries` objects that store local-field potential data. By putting
-# your LFP data into an :py:class:`~pynwb.ecephys.LFP` container,  downstream users and tools know where
-# to look to retrieve LFP data. For a comprehensive list of available data interfaces, see the
+# For example, :py:class:`~pynwb.behavior.BehavioralTimeSeries` provides a container for holding one or more
+# :py:class:`~pynwb.base.TimeSeries` objects that store time series behavioral data. By putting
+# your behavioral data into a :py:class:`~pynwb.behavior.BehavioralTimeSeries` container, downstream users and
+# tools know where to look to retrieve behavioral data. For a comprehensive list of available data interfaces, see the
 # :ref:`overview page <modules_overview>`
 #
 # :py:class:`~pynwb.base.NWBDataInterface` objects can be added as acquisition data, or as members
@@ -79,10 +79,10 @@ nwbfile.add_acquisition(test_ts)
 #
 # For the purposes of demonstration, we will use a :py:class:`~pynwb.ecephys.LFP` data interface.
 
-from pynwb.ecephys import LFP
+from pynwb.behavior import BehavioralTimeSeries
 
-lfp = LFP()
-nwbfile.add_acquisition(lfp)
+bts = BehavioralTimeSeries()
+nwbfile.add_acquisition(bts)
 
 ####################
 # Each data interface stores its own type of data. We suggest you read the documentation for the
@@ -269,7 +269,7 @@ ts = nwbfile.acquisition['test_timeseries']
 # We can also get the :py:class:`~pynwb.ecephys.LFP` object back. When we created the :py:class:`~pynwb.ecephys.LFP`
 # object, we did not supply a name, so the name defaulted to "LFP" [#]_.
 
-lfp = nwbfile.acquisition['LFP']
+bts = nwbfile.acquisition['BehavioralTimeSeries']
 
 ####################
 # Just like acquisition data, we can get processing modules back in the same manner. We created two above.
@@ -314,12 +314,14 @@ io.close()
 # :py:class:`~pynwb.NWBHDF5IO` constructor to ``'a'``. After you have read the file, you can add [#]_ new data to it
 # using the standard write/add functionality demonstrated above.
 #
-# Let's see how this works by adding another :py:class:`~pynwb.base.TimeSeries` to the file we have already written.
+# Let's see how this works by adding another :py:class:`~pynwb.base.TimeSeries` to the BehavioralTimeSeries interface
+# we created above.
 #
-# First, read the file.
+# First, read the file and get the interface object.
 
 io = NWBHDF5IO('basic_example.nwb', mode='a')
 nwbfile = io.read()
+bts = nwbfile.acquisition['BehavioralTimeSeries']
 
 ####################
 # Next, add a new :py:class:`~pynwb.base.TimeSeries`.
@@ -327,7 +329,7 @@ nwbfile = io.read()
 data = list(range(300, 400, 10))
 timestamps = list(range(10))
 test_ts2 = TimeSeries('test_timeseries2', data, 'SIunit', timestamps=timestamps)
-nwbfile.add_acquisition(test_ts2)
+bts.add_timeseries(test_ts2)
 
 ####################
 # Finally, write the changes back to the file and close it.

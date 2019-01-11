@@ -5,8 +5,7 @@ import sys
 
 from argparse import ArgumentParser
 
-from pynwb.form.backends.hdf5 import HDF5IO
-from pynwb import validate, load_namespaces, get_manager
+from pynwb import validate, load_namespaces, get_manager, NWBHDF5IO
 
 
 def _print_errors(validation_errors):
@@ -36,7 +35,7 @@ def main():
         print('%s not found' % args.path, file=sys.stderr)
         sys.exit(1)
 
-    io = HDF5IO(args.path, get_manager(), mode='r')
+    io = NWBHDF5IO(args.path, get_manager(), mode='r')
 
     if args.nspath is not None:
         namespaces = load_namespaces(args.nspath)
@@ -52,6 +51,8 @@ def main():
         errors = validate(io)
         print('Validating against core namespace')
         _print_errors(errors)
+
+    sys.exit(errors and len(errors) > 0)
 
 
 if __name__ == '__main__':  # pragma: no cover

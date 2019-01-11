@@ -239,8 +239,8 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
     def addContainer(self, nwbfile):
 
         tsa, tsb = [
-            TimeSeries(name='a', timestamps=np.linspace(0, 1, 11)),
-            TimeSeries(name='b', timestamps=np.linspace(0.1, 5, 13)),
+            TimeSeries(name='a', data=np.arange(11), unit='flubs', timestamps=np.linspace(0, 1, 11)),
+            TimeSeries(name='b', data=np.arange(13), unit='flubs', timestamps=np.linspace(0.1, 5, 13)),
         ]
 
         nwbfile.add_acquisition(tsa)

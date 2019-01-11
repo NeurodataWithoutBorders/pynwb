@@ -428,7 +428,7 @@ class BaseStorageSpec(Spec):
     @property
     def linkable(self):
         ''' True if object can be a link, False otherwise '''
-        return self.get('linkable', None)
+        return self.get('linkable', True)
 
     @classmethod
     def type_key(cls):
