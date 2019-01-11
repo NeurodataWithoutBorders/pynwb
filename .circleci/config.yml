@@ -159,7 +159,6 @@ jobs:
      - COVERAGE_TOX_ENV: "coverage-py37"
      - BUILD_TOX_ENV: "build-py37"
      - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
-     - UPLOAD_WHEELS: "true"
     <<: *ci-steps
 
   miniconda27:
