@@ -78,7 +78,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
 class TestSpectralAnalysis(base.TestDataInterfaceIO):
     def setUpContainer(self):
         self.timeseries = TimeSeries(name='dummy timeseries', description='desc',
-                                     data=np.ones((3, 3)),
+                                     data=np.ones((3, 3)), unit='flibs',
                                      timestamps=np.ones((3,)))
         bands = DynamicTable(name='bands', description='band info for LFPSpectralAnalysis', columns=[
             VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),

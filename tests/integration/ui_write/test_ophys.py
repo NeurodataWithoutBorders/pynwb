@@ -28,8 +28,8 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel('optchan1',
                                               'a fake OpticalChannel', 500.)
-        return ImagingPlane('imgpln1', self.optical_channel,
-                            'a fake ImagingPlane', self.device, 600., 300., 'GFP', 'somewhere in the brain')
+        return ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
+                            600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknonwn')
 
     def setUpBuilder(self):
         optchan_builder = GroupBuilder(
@@ -81,9 +81,8 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
     def make_imaging_plane(self):
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
-        self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel,
-                                          'a fake ImagingPlane',
-                                          self.device, 600., 300., 'GFP', 'somewhere in the brain')
+        self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
+                                          600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknonwn')
 
     def setUpContainer(self):
         self.make_imaging_plane()

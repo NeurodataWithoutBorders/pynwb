@@ -172,7 +172,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS.description, 'description')
 
         self.assertEqual(pS.imaging_plane, ip)
-        self.assertEqual(pS.reference_images, iSS)
+        self.assertEqual(pS.reference_images, (iSS,))
 
         self.assertEqual(pS['pixel_mask'].target.data, pix_mask)
         self.assertEqual(pS['pixel_mask'][0], pix_mask[0:3])
@@ -192,7 +192,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS.description, 'description')
 
         self.assertEqual(pS.imaging_plane, ip)
-        self.assertEqual(pS.reference_images, iSS)
+        self.assertEqual(pS.reference_images, (iSS,))
 
         self.assertEqual(pS['pixel_mask'].target.data, pix_mask)
         self.assertEqual(pS['pixel_mask'][0], pix_mask[0:3])
@@ -211,7 +211,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS.description, 'description')
 
         self.assertEqual(pS.imaging_plane, ip)
-        self.assertEqual(pS.reference_images, iSS)
+        self.assertEqual(pS.reference_images, (iSS,))
 
         self.assertEqual(pS['voxel_mask'].target.data, vox_mask)
         self.assertEqual(pS['voxel_mask'][0], vox_mask[0:3])
@@ -242,7 +242,7 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS.description, 'description')
 
         self.assertEqual(pS.imaging_plane, ip)
-        self.assertEqual(pS.reference_images, iSS)
+        self.assertEqual(pS.reference_images, (iSS,))
 
         self.assertEqual(pS['image_mask'].data, img_mask)
 
