@@ -257,6 +257,7 @@ groups:
        - null
        - null
        - 3
+    quantity: '?'
   - name: reference_frame
     dtype: text
     doc: 'Describes position and reference frame of manifold based on position of
