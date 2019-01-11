@@ -38,7 +38,12 @@ class TestMapNWBContainer(unittest.TestCase):
     def manager(self):
         return self.__manager
 
+    @unittest.skip("deprecated")
     def test_build(self):
+        """
+        As of 20190110, this test has been deprecated. Maintaining hardcoded builder objects has become
+        increasingly difficult, and offers little in the way of debugging and identifying problems
+        """
         try:
             self.builder = self.setUpBuilder()
         except unittest.SkipTest:
@@ -49,7 +54,12 @@ class TestMapNWBContainer(unittest.TestCase):
         # do something here to validate the result Builder against the spec
         self.assertDictEqual(result, self.builder)
 
+    @unittest.skip("deprecated")
     def test_construct(self):
+        """
+        As of 20190110, this test has been deprecated. Maintaining hardcoded builder objects has become
+        increasingly difficult, and offers little in the way of debugging and identifying problems
+        """
         try:
             self.builder = self.setUpBuilder()
         except unittest.SkipTest:
@@ -125,7 +135,7 @@ class TestMapNWBContainer(unittest.TestCase):
 
 class TestMapRoundTrip(TestMapNWBContainer):
 
-    _required_tests = ('test_build', 'test_construct', 'test_roundtrip')
+    _required_tests = ('test_roundtrip',)
     run_injected_file_test = False
 
     def setUp(self):

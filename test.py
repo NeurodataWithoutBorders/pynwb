@@ -56,10 +56,6 @@ def run_test_suite(directory, description="", verbose=True):
     FAILURES += len(pynwb_test_result.failures)
     ERRORS += len(pynwb_test_result.errors)
 
-    for tc, reason in pynwb_test_result.skipped:
-        if not hasattr(tc, '_abc_cache'):
-            print(tc.__class__.__name__, reason)
-
     return pynwb_test_result
 
 
