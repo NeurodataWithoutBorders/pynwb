@@ -369,10 +369,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     def __dtype(cls, given, specified):
         g = np.dtype(given)
         s = np.dtype(specified)
-        if 'uint' in g.name and 'uint' not in s.name:
-            return g.type
+        if g.itemsize <= s.itemsize:
+            return s.type
         else:
-            if g.itemsize <= s.itemsize:
+            if g.name[:3] != s.name[:3]:    # different types
                 return s.type
             else:
                 return g.type
@@ -391,16 +391,16 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             raise ValueError(msg)
         ret = None
         ret_dtype = None
-        dtype_func = cls.__dtypes[spec.dtype]
+        spec_dtype = cls.__dtypes[spec.dtype]
         if isinstance(value, np.ndarray):
-            if dtype_func is _unicode:
+            if spec_dtype is _unicode:
                 ret = value.astype('U')
                 ret_dtype = "utf8"
-            elif dtype_func is _ascii:
+            elif spec_dtype is _ascii:
                 ret = value.astype('S')
                 ret_dtype = "ascii"
             else:
-                dtype_func = cls.__dtype(dtype_func, value.dtype)
+                dtype_func = cls.__dtype(value.dtype, spec_dtype)
                 ret = value.astype(dtype_func)
                 ret_dtype = ret.dtype.type
         elif isinstance(value, (tuple, list)):
@@ -411,13 +411,13 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             ret = type(value)(ret)
             ret_dtype = tmp_dtype
         else:
-            if dtype_func in (_unicode, _ascii):
+            if spec_dtype in (_unicode, _ascii):
                 ret_dtype = 'ascii'
-                if dtype_func == _unicode:
+                if spec_dtype == _unicode:
                     ret_dtype = 'utf8'
-                ret = dtype_func(value)
+                ret = spec_dtype(value)
             else:
-                dtype_func = cls.__dtype(dtype_func, type(value))
+                dtype_func = cls.__dtype(type(value), spec_dtype)
                 ret = dtype_func(value)
                 ret_dtype = type(ret)
         return ret, ret_dtype
