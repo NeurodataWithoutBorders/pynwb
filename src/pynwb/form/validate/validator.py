@@ -4,7 +4,7 @@ from copy import copy
 import re
 from itertools import chain
 
-from ..utils import docval, getargs, call_docval_func
+from ..utils import docval, getargs, call_docval_func, pystr
 from ..data_utils import get_shape
 
 from ..spec import Spec, AttributeSpec, GroupSpec, DatasetSpec, RefSpec
@@ -86,7 +86,7 @@ _iso_re = get_iso8601_regex()
 
 def _check_isodatetime(s, default=None):
     try:
-        if _iso_re.match(s) is not None:
+        if _iso_re.match(pystr(s)) is not None:
             return 'isodatetime'
     except Exception:
         pass
