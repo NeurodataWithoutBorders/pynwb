@@ -1,5 +1,7 @@
 from collections import Iterable
 
+import numpy as np
+
 from .form.utils import docval, popargs, fmt_docval_args, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
@@ -113,7 +115,7 @@ class PatchClampSeries(TimeSeries):
             if not (sweep_number >= 0):
                 raise ValueError("sweep_number must be a non-negative integer")
 
-            self.sweep_number = sweep_number
+            self.sweep_number = np.uint64(sweep_number)
 
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)
