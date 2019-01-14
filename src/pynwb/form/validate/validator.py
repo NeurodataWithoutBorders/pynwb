@@ -22,8 +22,6 @@ __synonyms = DtypeHelper.primary_dtype_synonyms
 
 __additional = {
     'float': ['double'],
-    'short': ['int', 'long'],
-    'int': ['long'],
     'int8': ['short', 'int', 'long'],
     'short': ['int', 'long'],
     'int': ['long'],
