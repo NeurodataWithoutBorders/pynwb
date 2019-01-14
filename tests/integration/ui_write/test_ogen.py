@@ -4,6 +4,20 @@ from pynwb.device import Device
 from . import base
 
 
+class TestOptogeneticStimulusSite(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        self.device = Device(name='dev1')
+        return OptogeneticStimulusSite('stim_site', self.device, 'my stim site', 300., 'in the brain')
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_device(self.device)
+        nwbfile.add_ogen_site(self.container)
+
+    def getContainer(self, nwbfile):
+        return nwbfile.get_ogen_site(self.container.name)
+
+
 class TestOptogeneticStimulusSeries(base.TestMapRoundTrip):
     """
     A TestCase class for testing OptogeneticStimulusSeries
