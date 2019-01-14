@@ -17,6 +17,13 @@ def _print_errors(validation_errors):
         print(' - no errors found.')
 
 
+def _validate_helper(**kwargs):
+    errors = validate(**kwargs)
+    _print_errors(errors)
+
+    return (errors and len(errors) > 0)
+
+
 def main():
 
     ep = """
@@ -25,34 +32,37 @@ def main():
     """
 
     parser = ArgumentParser(description="Validate an NWB file", epilog=ep)
-    parser.add_argument("path", type=str, help="the path to the NWB file")
+    parser.add_argument("paths", type=str, nargs='+', help="NWB file paths")
     parser.add_argument('-p', '--nspath', type=str, help="the path to the namespace file")
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
 
     args = parser.parse_args()
+    ret = 0
 
-    if not os.path.exists(args.path):
-        print('%s not found' % args.path, file=sys.stderr)
-        sys.exit(1)
+    for path in args.paths:
 
-    io = NWBHDF5IO(args.path, get_manager(), mode='r')
+        if not os.path.exists(path):
+            print('%s not found' % path, file=sys.stderr)
+            ret = 1
+            continue
 
-    if args.nspath is not None:
-        namespaces = load_namespaces(args.nspath)
-        if args.ns is not None:
-            print('Validating against %s from %s.' % (args.ns, args.ns_path))
-        else:
-            print('Validating using namespaces in %s.' % args.nspath)
-            for ns in namespaces:
-                print('Validating against %s' % ns)
-                errors = validate(io, ns)
-                _print_errors(errors)
-    else:
-        errors = validate(io)
-        print('Validating against core namespace')
-        _print_errors(errors)
+        with NWBHDF5IO(path, get_manager(), mode='r') as io:
 
-    sys.exit(errors and len(errors) > 0)
+            if args.nspath is not None:
+                namespaces = load_namespaces(args.nspath)
+                if args.ns is not None:
+                    print('Validating %s against %s from %s.' % (path, args.ns, args.ns_path))
+                    ret = ret or _validate_helper(io=io, namespace=args.ns)
+                else:
+                    print('Validating %s using namespaces in %s.' % (path, args.nspath))
+                    for ns in namespaces:
+                        print('Validating against %s' % ns)
+                        ret = ret or _validate_helper(io=io, namespace=ns)
+            else:
+                print('Validating %s against core namespace' % path)
+                ret = ret or _validate_helper(io=io)
+
+    sys.exit(ret)
 
 
 if __name__ == '__main__':  # pragma: no cover
