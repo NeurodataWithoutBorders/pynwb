@@ -373,7 +373,7 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             return s.type
         else:
             if g.name[:3] != s.name[:3]:    # different types
-                if g.itemsize < 8:
+                if s.itemsize < 8:
                     msg = "expected %s, received %s - must supply %s or higher precision" % (s.name, g.name, s.name)
                 else:
                     msg = "expected %s, received %s - must supply %s" % (s.name, g.name, s.name)
@@ -389,6 +389,8 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         will convert the Python int to a numpy unsigned int.
         """
         if spec.dtype is None:
+            return value, None
+        if spec.dtype == 'numeric':
             return value, None
         if spec.dtype is not None and spec.dtype not in cls.__dtypes:
             msg = "unrecognized dtype: %s -- cannot convert value" % spec.dtype
@@ -742,7 +744,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 raise ValueError(msg)
             if isinstance(self.spec.dtype, RefSpec):
                 bldr_data = self.__get_ref_builder(self.spec.dtype, self.spec.shape, container, manager)
-                bldr_data, dtype = self.__convert_dtype(self.spec, bldr_data)
+                try:
+                    bldr_data, dtype = self.__convert_dtype(self.spec, bldr_data)
+                except Exception as ex:
+                    msg = 'could not resolve dtype for %s \'%s\'' % (type(container).__name__, container.name)
+                    raise_from(Exception(msg), ex)
                 builder = DatasetBuilder(name, bldr_data, parent=parent, source=source, dtype=dtype)
             elif isinstance(self.spec.dtype, list):
                 refs = [(i, subt) for i, subt in enumerate(self.spec.dtype) if isinstance(subt.dtype, RefSpec)]
@@ -753,7 +759,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     for j, subt in refs:
                         tmp[j] = self.__get_ref_builder(subt.dtype, None, row[j], manager)
                     bldr_data.append(tuple(tmp))
-                bldr_data, dtype = self.__convert_dtype(self.spec, bldr_data)
+                try:
+                    bldr_data, dtype = self.__convert_dtype(self.spec, bldr_data)
+                except Exception as ex:
+                    msg = 'could not resolve dtype for %s \'%s\'' % (type(container).__name__, container.name)
+                    raise_from(Exception(msg), ex)
                 builder = DatasetBuilder(name, bldr_data, parent=parent, source=source, dtype=dtype)
             else:
                 if self.__spec.dtype is None and self.__is_reftype(container.data):
@@ -763,7 +773,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     builder = DatasetBuilder(name, bldr_data, parent=parent, source=source,
                                              dtype='object')
                 else:
-                    bldr_data, dtype = self.__convert_dtype(self.spec, container.data)
+                    try:
+                        bldr_data, dtype = self.__convert_dtype(self.spec, container.data)
+                    except Exception as ex:
+                        msg = 'could not resolve dtype for %s \'%s\'' % (type(container).__name__, container.name)
+                        raise_from(Exception(msg), ex)
                     builder = DatasetBuilder(name, bldr_data, parent=parent, source=source, dtype=dtype)
         self.__add_attributes(builder, self.__spec.attributes, container, manager, source)
         return builder
@@ -837,7 +851,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 attr_value = ReferenceBuilder(target_builder)
             else:
                 if attr_value is not None:
-                    attr_value, attr_dtype = self.__convert_dtype(spec, attr_value)
+                    try:
+                        attr_value, attr_dtype = self.__convert_dtype(spec, attr_value)
+                    except Exception as ex:
+                        msg = 'could not convert %s for %s %s' % (spec.name, type(container).__name__, container.name)
+                        raise_from(Exception(msg), ex)
 
             # do not write empty or null valued objects
             if attr_value is None:
@@ -883,7 +901,12 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                 if spec.name in builder.datasets:
                     sub_builder = builder.datasets[spec.name]
                 else:
-                    data, dtype = self.__convert_dtype(spec, attr_value)
+                    try:
+                        data, dtype = self.__convert_dtype(spec, attr_value)
+                    except Exception as ex:
+                        msg = 'could not convert \'%s\' for %s \'%s\''
+                        msg = msg % (spec.name, type(container).__name__, container.name)
+                        raise_from(Exception(msg), ex)
                     sub_builder = builder.add_dataset(spec.name, data, dtype=dtype)
                 self.__add_attributes(sub_builder, spec.attributes, container, build_manager, source)
             else:

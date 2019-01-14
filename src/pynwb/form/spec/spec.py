@@ -38,6 +38,7 @@ class DtypeHelper():
             'uint64': ["uint64"],
             'object': ['object'],
             'region': ['region'],
+            'numeric': ['numeric'],
             'isodatetime': ["isodatetime", "datetime", "datetime64"]
         }
 
