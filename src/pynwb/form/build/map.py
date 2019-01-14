@@ -373,7 +373,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             return s.type
         else:
             if g.name[:3] != s.name[:3]:    # different types
-                return s.type
+                if g.itemsize < 8:
+                    msg = "expected %s, received %s - must supply %s or higher precision" % (s.name, g.name, s.name)
+                else:
+                    msg = "expected %s, received %s - must supply %s" % (s.name, g.name, s.name)
+                raise ValueError(msg)
             else:
                 return g.type
 
