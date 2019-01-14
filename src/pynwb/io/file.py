@@ -32,7 +32,7 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('electrodes', ecephys_spec.get_group('electrodes'))
         self.map_spec('electrode_groups', ecephys_spec.get_neurodata_type('ElectrodeGroup'))
         self.map_spec(
-            'optogenetic_sites',
+            'ogen_sites',
             general_spec.get_group('optogenetics').get_neurodata_type('OptogeneticStimulusSite'))
         self.map_spec(
             'imaging_planes',
