@@ -367,6 +367,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
     @classmethod
     def __dtype(cls, given, specified):
+        """
+        Determine the dtype to use from the dtype of the given value and the specified dtype.
+        This amounts to determining the greater precision of the two arguments, but also
+        checks to make sure the same base dtype is being used.
+        """
         g = np.dtype(given)
         s = np.dtype(specified)
         if g.itemsize <= s.itemsize:
