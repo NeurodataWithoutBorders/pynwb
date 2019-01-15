@@ -12,7 +12,7 @@ groups:
     value: Stores acquired voltage data from extracellular recordings
   datasets:
   - name: data
-    dtype: float
+    dtype: numeric
     doc: Recorded voltage data.
     attributes:
     - name: unit
@@ -50,7 +50,7 @@ groups:
     value: Snapshots of spike events from data.
   datasets:
   - name: data
-    dtype: float32
+    dtype: numeric
     doc: Spike waveforms.
     attributes:
     - name: unit

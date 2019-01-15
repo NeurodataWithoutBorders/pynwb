@@ -17,7 +17,7 @@ groups:
     required: false
   datasets:
   - name: data
-    dtype: float
+    dtype: numeric
     doc: Recorded voltage or current.
     dims:
     - num_times
