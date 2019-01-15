@@ -4,7 +4,7 @@ from copy import copy
 import re
 from itertools import chain
 
-from ..utils import docval, getargs, call_docval_func
+from ..utils import docval, getargs, call_docval_func, pystr
 from ..data_utils import get_shape
 
 from ..spec import Spec, AttributeSpec, GroupSpec, DatasetSpec, RefSpec
@@ -22,6 +22,7 @@ __synonyms = DtypeHelper.primary_dtype_synonyms
 
 __additional = {
     'float': ['double'],
+    'int8': ['short', 'int', 'long'],
     'short': ['int', 'long'],
     'int': ['long'],
     'uint8': ['uint16', 'uint32', 'uint64'],
@@ -37,6 +38,7 @@ for dt, dt_syn in __synonyms.items():
             allow.extend(__synonyms[addl])
     for syn in dt_syn:
         __allowable[syn] = allow
+__allowable['numeric'] = set(chain.from_iterable(__allowable[k] for k in __allowable if 'int' in k or 'float' in k))
 
 
 def check_type(expected, received):
@@ -86,7 +88,7 @@ _iso_re = get_iso8601_regex()
 
 def _check_isodatetime(s, default=None):
     try:
-        if _iso_re.match(s) is not None:
+        if _iso_re.match(pystr(s)) is not None:
             return 'isodatetime'
     except Exception:
         pass
