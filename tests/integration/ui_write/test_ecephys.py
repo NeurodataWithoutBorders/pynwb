@@ -306,13 +306,13 @@ class TestClusteringIO(base.TestDataInterfaceIO):
                                 'namespace': base.CORE_NAMESPACE},
                             datasets={
                                 'num': DatasetBuilder('num', [0, 1, 2, 0, 1, 2]),
-                                'times': DatasetBuilder('times', list(range(10, 61, 10))),
-                                'peak_over_rms': DatasetBuilder('peak_over_rms', [100, 101, 102]),
+                                'times': DatasetBuilder('times', list(range(10., 61., 10.))),
+                                'peak_over_rms': DatasetBuilder('peak_over_rms', [100., 101., 102.]),
                                 'description': DatasetBuilder('description', "A fake Clustering interface")})
 
     def setUpContainer(self):
         return Clustering("A fake Clustering interface",
-                          [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10, 61, 10)))
+                          [0, 1, 2, 0, 1, 2], [100., 101., 102.], [float(i) for i in range(10, 61, 10)])
 
 
 class EventWaveformConstructor(base.TestDataInterfaceIO):
@@ -355,7 +355,7 @@ class FeatureExtractionConstructor(base.TestDataInterfaceIO):
         TestElectricalSeriesIO.make_electrode_table(self)
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
         description = ['desc1', 'desc2', 'desc3']
-        features = [[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]]
+        features = [[[0., 1., 2.], [3., 4., 5.]], [[6., 7., 8.], [9., 10., 11.]]]
         fe = FeatureExtraction(region, description, event_times, features)
         return fe
 

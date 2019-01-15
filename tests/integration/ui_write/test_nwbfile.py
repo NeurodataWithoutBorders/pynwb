@@ -136,7 +136,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         container.add_acquisition(self.ts)
         self.mod = container.create_processing_module('test_module',
                                                       'a test module')
-        self.clustering = Clustering("A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100, 101, 102],
+        self.clustering = Clustering("A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100., 101., 102.],
                                      list(range(10, 61, 10)))
         self.mod.add_container(self.clustering)
         return container

@@ -187,7 +187,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                           'imaging plane description',
                                           self.device,
                                           600., 300., 'GFP', 'somewhere in the brain',
-                                          (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+                                          (1., 2., 1., 2., 3.), 4.0, 'manifold unit', 'A frame to refer to')
 
         self.img_mask = deepcopy(img_mask)
         self.pix_mask = deepcopy(pix_mask)
@@ -336,7 +336,7 @@ class MaskRoundTrip(TestPlaneSegmentation):
                                           'imaging plane description',
                                           self.device,
                                           600., 300., 'GFP', 'somewhere in the brain',
-                                          (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+                                          (1., 2., 1., 2., 3.), 4.0, 'manifold unit', 'A frame to refer to')
         return PlaneSegmentation('description', self.imaging_plane, 'test_plane_seg_name',
                                  self.image_series)
 
@@ -372,7 +372,7 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
         self.plane_segmentation = TestPlaneSegmentation.buildPlaneSegmentation(self)
         self.rt_region = self.plane_segmentation.create_roi_table_region('the first of two ROIs', region=[0])
 
-        data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
         timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
         return RoiResponseSeries('test_roi_response_series', data, 'lumens', self.rt_region, timestamps=timestamps)
