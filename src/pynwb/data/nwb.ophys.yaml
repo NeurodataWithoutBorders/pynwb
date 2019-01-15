@@ -46,7 +46,7 @@ groups:
       of data[] should correspond to the signal from one ROI
   datasets:
   - name: data
-    dtype: float32
+    dtype: numeric
     doc: Signals from ROIs
     dims:
     - - num_times

@@ -9,7 +9,7 @@ groups:
     value: Optogenetic stimulus
   datasets:
   - name: data
-    dtype: float32
+    dtype: numeric
     doc: Applied power for optogenetic stimulus.
     attributes:
     - name: unit
