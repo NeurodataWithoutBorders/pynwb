@@ -223,6 +223,11 @@ class Units(DynamicTable):
         Add a unit to this table
         """
         super(Units, self).add_row(**kwargs)
+        if 'electrodes' in self:
+            elec_col = self['electrodes'].target
+            if elec_col.table is None:
+                nwbfile = self.get_parent_neurodata_type()
+                elec_col.table = nwbfile.electrodes
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'})

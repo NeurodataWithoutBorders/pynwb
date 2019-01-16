@@ -80,6 +80,21 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
 
+    def get_parent_neurodata_type(self, neurodata_type='NWBFile'):
+        """
+        Traverse parent hierarchy and return first instance of the
+        specified neurodata_type
+
+        Args:
+            neurodata_type (str)    : the neurodata_type to search for. Search for *NWBFile* by default
+        """
+        p = self.parent
+        while p is not None:
+            if p.neurodata_type == neurodata_type:
+                return p
+            p = p.parent
+        return p
+
     @property
     def fields(self):
         return self.__fields
@@ -984,6 +999,7 @@ class DynamicTable(NWBDataInterface):
 
         # to make generating DataFrames and Series easier
         col_dict = dict()
+        self.__indices = dict()
         for col in self.columns:
             if isinstance(col, VectorData):
                 existing = col_dict.get(col.name)
@@ -1000,6 +1016,7 @@ class DynamicTable(NWBDataInterface):
                     col_dict[col.name] = col
             elif isinstance(col, VectorIndex):
                 col_dict[col.target.name] = col  # use target name for reference and VectorIndex for retrieval
+                self.__indices[col.name] = col
 
         self.__df_cols = [self.id] + [col_dict[name] for name in self.colnames]
         self.__colids = {name: i+1 for i, name in enumerate(self.colnames)}
@@ -1140,6 +1157,7 @@ class DynamicTable(NWBDataInterface):
             columns.insert(0, col_index)
             self.add_child(col_index)
             col = col_index
+            self.__indices[col_index.name] = col_index
 
         if len(col) != len(self.id):
             raise ValueError("column must have the same number of rows as 'id'")
@@ -1181,7 +1199,12 @@ class DynamicTable(NWBDataInterface):
             arg = key
             if isinstance(arg, str):
                 # index by one string, return column
-                ret = self.__df_cols[self.__colids[arg]]
+                if arg in self.__colids:
+                    ret = self.__df_cols[self.__colids[arg]]
+                elif arg in self.__indices:
+                    return self.__indices[arg]
+                else:
+                    raise KeyError(arg)
             elif isinstance(arg, (int, np.int8, np.int16, np.int32, np.int64)):
                 # index by int, return row
                 ret = tuple(col[arg] for col in self.__df_cols)
@@ -1194,7 +1217,7 @@ class DynamicTable(NWBDataInterface):
         return ret
 
     def __contains__(self, val):
-        return val in self.__colids
+        return val in self.__colids or val in self.__indices
 
     def get(self, key, default=None):
         if key in self:
