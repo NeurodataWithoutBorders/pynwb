@@ -886,13 +886,10 @@ class DynamicTable(NWBDataInterface):
     :class:`~pynwb.core.VectorIndex`). Setting the key ``table`` to ``True`` can be used to indicate that the column
     will store regions to another DynamicTable.
 
-    :ref:`NWBTable`
-
-
     Columns in DynamicTable subclasses can be statically defined by specifying the class attribute *\_\_columns\_\_*,
     rather than specifying them at runtime at the instance level. This is useful for defining a table structure
-    that will get reused. The requirements for *\_\_columns\_\_* are identical to those for specifying table columns
-    with the *columns* argument (see above).
+    that will get reused. The requirements for *\_\_columns\_\_* are the same as the requirements described above
+    for specifying table columns with the *columns* argument to the DynamicTable constructor.
     """
 
     __nwbfields__ = (
