@@ -1,5 +1,5 @@
 import os
-import unittest
+import unittest2 as unittest
 
 from pynwb.form.data_utils import DataChunkIterator
 from pynwb.form.backends.hdf5.h5tools import HDF5IO
