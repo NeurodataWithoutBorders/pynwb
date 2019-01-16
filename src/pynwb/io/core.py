@@ -8,8 +8,7 @@ from pynwb.file import NWBFile
 from pynwb.core import NWBData, DynamicTable, NWBContainer, VectorIndex
 
 
-@register_map(NWBContainer)
-class NWBContainerMapper(ObjectMapper):
+class NWBBaseTypeMapper(ObjectMapper):
 
     @staticmethod
     def get_nwb_file(container):
@@ -18,6 +17,12 @@ class NWBContainerMapper(ObjectMapper):
             if isinstance(curr, NWBFile):
                 return curr
             curr = container.parent
+
+
+@register_map(NWBContainer)
+class NWBContainerMapper(NWBBaseTypeMapper):
+
+    pass
 
 
 @register_map(DynamicTable)
@@ -55,11 +60,13 @@ class DynamicTableMap(NWBContainerMapper):
                     msg = "empty or missing table for DynamicTableRegion '%s' in DynamicTable '%s'" %\
                           (attr_value.name, container.name)
                     raise ValueError(msg)
+            elif spec.neurodata_type_inc == 'VectorIndex':
+                attr_value = container[spec.name]
         return attr_value
 
 
 @register_map(NWBData)
-class NWBDataMap(ObjectMapper):
+class NWBDataMap(NWBBaseTypeMapper):
 
     @ObjectMapper.constructor_arg('name')
     def carg_name(self, builder, manager):

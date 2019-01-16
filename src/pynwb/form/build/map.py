@@ -102,6 +102,10 @@ class BuildManager(object):
     def namespace_catalog(self):
         return self.__type_map.namespace_catalog
 
+    @property
+    def type_map(self):
+        return self.__type_map
+
     @docval({"name": "object", "type": (BaseBuilder, Container), "doc": "the container or builder to get a proxy for"},
             {"name": "source", "type": str,
              "doc": "the source of container being built i.e. file path", 'default': None})
@@ -854,7 +858,11 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
 
             if isinstance(spec.dtype, RefSpec):
                 if not self.__is_reftype(attr_value):
-                    msg = "invalid type for reference '%s' (%s) - must be Container" % (spec.name, type(attr_value))
+                    if attr_value is None:
+                        msg = "object of data_type %s not found on %s '%s'" % \
+                              (spec.dtype.target_type, type(container).__name__, container.name)
+                    else:
+                        msg = "invalid type for reference '%s' (%s) - must be Container" % (spec.name, type(attr_value))
                     raise ValueError(msg)
                 target_builder = build_manager.build(attr_value, source=source)
                 attr_value = ReferenceBuilder(target_builder)
