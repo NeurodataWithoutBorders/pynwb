@@ -19,7 +19,7 @@ groups:
       spatial dimensions]
   datasets:
   - name: data
-    dtype: float
+    dtype: numeric
     doc: 2-D array storing position or direction relative to some reference frame.
     attributes:
     - name: unit
