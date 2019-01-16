@@ -80,20 +80,20 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
 
-    def get_parent_neurodata_type(self, neurodata_type='NWBFile'):
+    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to search for', 'default': None})
+    def get_ancestor(self, **kwargs):
         """
-        Traverse parent hierarchy and return first instance of the
-        specified neurodata_type
-
-        Args:
-            neurodata_type (str)    : the neurodata_type to search for. Search for *NWBFile* by default
+        Traverse parent hierarchy and return first instance of the specified neurodata_type
         """
+        neurodata_type = getargs('neurodata_type', kwargs)
+        if neurodata_type is None:
+            return self.parent
         p = self.parent
         while p is not None:
             if p.neurodata_type == neurodata_type:
                 return p
             p = p.parent
-        return p
+        return None
 
     @property
     def fields(self):

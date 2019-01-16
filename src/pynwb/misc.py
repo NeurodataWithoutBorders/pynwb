@@ -193,13 +193,16 @@ class Units(DynamicTable):
             {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
             {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
              'default': None},
-            {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None})
+            {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None},
+            {'name': 'electrode_table', 'type': DynamicTable,
+             'doc': 'the table that the *electrodes* column indexes', 'default': None})
     def __init__(self, **kwargs):
         if kwargs.get('description', None) is None:
-            kwargs['description'] = ""
+            kwargs['description'] = "data on spiking units"
         call_docval_func(super(Units, self).__init__, kwargs)
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False
+        self.__electrode_table = getargs('electrode_table', kwargs)
 
     @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
              'default': None, 'shape': (None,)},
@@ -226,8 +229,11 @@ class Units(DynamicTable):
         if 'electrodes' in self:
             elec_col = self['electrodes'].target
             if elec_col.table is None:
-                nwbfile = self.get_parent_neurodata_type()
-                elec_col.table = nwbfile.electrodes
+                if self.__electrode_table is None:
+                    nwbfile = self.get_ancestor(neurodata_type='NWBFile')
+                    elec_col.table = nwbfile.electrodes
+                else:
+                    elec_col.table = self.__electrode_table
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
