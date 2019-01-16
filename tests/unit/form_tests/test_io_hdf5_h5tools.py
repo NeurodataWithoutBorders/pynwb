@@ -359,8 +359,8 @@ class H5IOTest(unittest.TestCase):
         self.assertTupleEqual(dset.shape, (0,))
 
     def test_list_fill_empty_no_dtype(self):
-        with self.assertRaisesRegex(Exception, "cannot add \S+ to [/\S]+ - could not determine type"):
-            dset = self.io.__list_fill__(self.f, 'empty_dataset', [])
+        with self.assertRaisesRegex(Exception, r"cannot add \S+ to [/\S]+ - could not determine type"):
+            self.io.__list_fill__(self.f, 'empty_dataset', [])
 
 
 class TestCacheSpec(unittest.TestCase):
