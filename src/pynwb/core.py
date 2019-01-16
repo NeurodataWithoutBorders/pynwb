@@ -426,9 +426,10 @@ class NWBTable(NWBData):
     Subclasses should specify the class attribute \_\_columns\_\_.
 
     This should be a list of dictionaries with the following keys:
-    ``'name'`` - the column name
-    ``'type'`` - the type of data in this column
-    ``'doc'``  - a brief description of what gets stored in this column
+
+    - ``name``            the column name
+    - ``type``            the type of data in this column
+    - ``doc``             a brief description of what gets stored in this column
 
     For reference, this list of dictionaries will be used with docval to autogenerate
     the ``add_row`` method for adding data to this table.
@@ -875,12 +876,20 @@ class MultiContainerInterface(NWBDataInterface):
 
 @register_class('DynamicTable', CORE_NAMESPACE)
 class DynamicTable(NWBDataInterface):
-    """
+    r"""
     A column-based table. Columns are defined by the argument *columns*. This argument
-    must be a list/tuple of VectorDatas and VectorIndexes or a list/tuple of dicts containing the keys
-    'name' and 'description' that provide the name and description of each column
-    in the table. If specifying columns with a list/tuple of dicts, VectorData columns can
-    be specified by setting the key 'index' to True.
+    must be a list/tuple of :class:`~pynwb.core.VectorData` and :class:`~pynwb.core.VectorIndex` objects
+    or a list/tuple of dicts containing the keys ``name`` and ``description`` that provide the name and description
+    of each column in the table. Additionally, the keys ``index`` and ``table`` for specifying additional structure to
+    the table columns. Setting the key ``index`` to ``True`` can be used to indicate that the
+    :class:`~pynwb.core.VectorData` column will store a ragged array (i.e. will be accompanied with a
+    :class:`~pynwb.core.VectorIndex`). Setting the key ``table`` to ``True`` can be used to indicate that the column
+    will store regions to another DynamicTable.
+
+    Columns in DynamicTable subclasses can be statically defined by specifying the class attribute *\_\_columns\_\_*,
+    rather than specifying them at runtime at the instance level. This is useful for defining a table structure
+    that will get reused. The requirements for *\_\_columns\_\_* are the same as the requirements described above
+    for specifying table columns with the *columns* argument to the DynamicTable constructor.
     """
 
     __nwbfields__ = (
