@@ -354,6 +354,14 @@ class H5IOTest(unittest.TestCase):
         self.assertListEqual(self.f['test_dataset'][:].tolist(),
                              self.f['test_copy'][:].tolist())
 
+    def test_list_fill_empty(self):
+        dset = self.io.__list_fill__(self.f, 'empty_dataset', [], options={'dtype': int, 'io_settings': {}})
+        self.assertTupleEqual(dset.shape, (0,))
+
+    def test_list_fill_empty_no_dtype(self):
+        with self.assertRaisesRegex(Exception, "cannot add \S+ to [/\S]+ - could not determine type"):
+            dset = self.io.__list_fill__(self.f, 'empty_dataset', [])
+
 
 class TestCacheSpec(unittest.TestCase):
 
