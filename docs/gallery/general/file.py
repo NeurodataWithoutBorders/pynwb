@@ -192,7 +192,7 @@ nwbfile.add_trial(start_time=6.0, stop_time=8.0, stim='desert')
 # below, all 3 units are observed during the time period from 1 to 10 s and fired spikes during that period.
 # Units 2 and 3 were also observed during the time period from 20-30s; but only unit 2 fired spikes in that
 # period.
-# 
+#
 # Lets specify some unit metadata and then add some units:
 
 nwbfile.add_unit_column('location', 'the anatomical location of this unit')
