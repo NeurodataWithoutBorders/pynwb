@@ -392,12 +392,18 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         Convert values to the specified dtype. For example, if a literal int
         is passed in to a field that is specified as a unsigned integer, this function
         will convert the Python int to a numpy unsigned int.
+
+        :return: The function returns a tuple consisting of 1) the value, and 2) the data type.
+                 The value is returned as the function may convert the input value to comply
+                 with the dtype specified in the schema.
         """
         if value is None:
             dt = spec.dtype
             if isinstance(dt, RefSpec):
                 dt = dt.reftype
             return None, dt
+        if isinstance(value, DataIO):
+            return value, cls.convert_dtype(spec, value.data)[1]
         if spec.dtype is None:
             return value, None
         if spec.dtype == 'numeric':
