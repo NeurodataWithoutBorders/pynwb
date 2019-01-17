@@ -96,11 +96,11 @@ nwbfile.add_acquisition(lfp)
 # ------------------
 #
 # *Processing modules* are used for storing a set of data interfaces that are related to a particular
-# processing workflow. For example, if you want to store intermediate and final results of a spike sorting workflow,
-# you would create a :py:class:`~pynwb.base.ProcessingModule` that contains data interfaces that represent
-# the common steps in spike sorting e.g. :py:class:`~pynwb.ecephys.EventDetection`,
-# :py:class:`~pynwb.ecephys.EventWaveform`,  :py:class:`~pynwb.ecephys.FeatureExtraction`,
-# :py:class:`~pynwb.ecephys.Clustering`, :py:class:`~pynwb.ecephys.ClusterWaveform`.
+# processing workflow. For example, if you want to store the intermediate results of a spike sorting workflow,
+# you could create a :py:class:`~pynwb.base.ProcessingModule` that contains data interfaces that represent
+# the common first steps in spike sorting e.g. :py:class:`~pynwb.ecephys.EventDetection`,
+# :py:class:`~pynwb.ecephys.EventWaveform`,  :py:class:`~pynwb.ecephys.FeatureExtraction`. The final results of
+# the sorting could then be stored in the top-level :py:class:`~pynwb.misc.Units` table (see below).
 #
 # Processing modules can be created using :py:func:`~pynwb.file.NWBFile.create_processing_module`:
 

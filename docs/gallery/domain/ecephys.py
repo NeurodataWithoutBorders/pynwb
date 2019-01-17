@@ -86,10 +86,12 @@ for idx in [1, 2, 3, 4]:
 # Extracellular recordings
 # ^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# The two main classes for storing extracellular recordings are :py:class:`~pynwb.ecephys.ElectricalSeries`
+# The main classes for storing extracellular recordings are :py:class:`~pynwb.ecephys.ElectricalSeries`
 # and :py:class:`~pynwb.ecephys.SpikeEventSeries`. :py:class:`~pynwb.ecephys.ElectricalSeries` should be used
 # for storing raw voltage traces, local-field potential and filtered voltage traces and
-# :py:class:`~pynwb.ecephys.SpikeEventSeries` is meant for storing spike waveforms.
+# :py:class:`~pynwb.ecephys.SpikeEventSeries` is meant for storing spike waveforms (typically in preparation for
+# clustering). The results of spike clustering (e.g. per-unit metadata and spike times) should be stored in the
+# top-level :py:class:`~pynwb.misc.Units` table.
 #
 # In addition to the *data* and *timestamps* fields inherited
 # from :py:class:`~pynwb.base.TimeSeries` class, these two classs will require metadata about the elctrodes
@@ -154,12 +156,16 @@ nwbfile.add_unit(id=2, electrodes=[0])
 # using these objects.
 #
 # For storing spike data, there are two options. Which one you choose depends on what data you have available.
-# If you need to store the raw voltage traces, you should store your the traces with
+# If you need to store the complete, continuous raw voltage traces, you should store your the traces with
 # :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data, and use
 # the :py:class:`~pynwb.ecephys.EventDetection` class for identifying the spike events in your raw traces.
-# If you do not want to store the raw voltage traces and only the spike events, you should use
-# the :py:class:`~pynwb.ecephys.EventWaveform` class, which can store one or more
+# If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
+# you should use the :py:class:`~pynwb.ecephys.EventWaveform` class, which can store one or more
 # :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
+#
+# The results of spike sorting (or clustering) should be stored in the top-level :py:class:`~pynwb.misc.Units` table.
+# Note that it is not required to store spike waveforms in order to store spike events or waveforms--if you only
+# want to store the spike times of clustered units you can use only the Units table.
 #
 # For local field potential data, there are two options. Again, which one you choose depends on what data you
 # have available. With both options, you should store your traces with :py:class:`~pynwb.ecephys.ElectricalSeries`
