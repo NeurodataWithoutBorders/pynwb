@@ -204,6 +204,7 @@ class EventWaveform(MultiContainerInterface):
 @register_class('Clustering', CORE_NAMESPACE)
 class Clustering(NWBDataInterface):
     """
+    DEPRECATED in favor of :py:meth:`~pynwb.misc.Units`.
     Specifies cluster event times and cluster metric for maximum ratio of
     waveform peak to RMS on any channel in cluster.
     """
@@ -215,7 +216,7 @@ class Clustering(NWBDataInterface):
         'times'
     )
 
-    __help = ("Clustered spike data, whether from automatic clustering "
+    __help = ("[DEPRECATED] Clustered spike data, whether from automatic clustering "
               "tools (eg, klustakwik) or as a result of manual sorting.")
 
     @docval({'name': 'description', 'type': str,
@@ -229,6 +230,8 @@ class Clustering(NWBDataInterface):
              'shape': (None,)},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
+        import warnings
+        warnings.warn("use pynwb.misc.Units or NWBFile.units instead", DeprecationWarning)
         description, num, peak_over_rms, times = popargs(
             'description', 'num', 'peak_over_rms', 'times', kwargs)
         super(Clustering, self).__init__(**kwargs)
@@ -241,6 +244,7 @@ class Clustering(NWBDataInterface):
 @register_class('ClusterWaveforms', CORE_NAMESPACE)
 class ClusterWaveforms(NWBDataInterface):
     """
+    DEPRECATED in favor of :py:meth:`~pynwb.misc.Units`. 
     Describe cluster waveforms by mean and standard deviation for at each sample.
     """
 
@@ -249,7 +253,7 @@ class ClusterWaveforms(NWBDataInterface):
                      'waveform_mean',
                      'waveform_sd')
 
-    __help = ("Mean waveform shape of clusters. Waveforms should be "
+    __help = ("[DEPRECATED] Mean waveform shape of clusters. Waveforms should be "
               "high-pass filtered (ie, not the same bandpass filter "
               "used waveform analysis and clustering)")
 

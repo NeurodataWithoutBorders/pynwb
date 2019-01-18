@@ -123,8 +123,8 @@ Extend an existing type
                         attributes=addl_attributes,
                         datasets=addl_datasets,
                         groups=addl_groups,
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
+                        neurodata_type_inc='SpikeEventSeries',
+                        neurodata_type_def='MyExtendedSpikeEventSeries')
 
 Existing types can be instantiated by specifying `neurodata_type_inc` alone.
 
@@ -139,8 +139,8 @@ Existing types can be instantiated by specifying `neurodata_type_inc` alone.
 
     spec = NWBGroupSpec('An extended NWB type',
                         groups=addl_groups,
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
+                        neurodata_type_inc='SpikeEventSeries',
+                        neurodata_type_def='MyExtendedSpikeEventSeries')
 
 
 Datasets can be extended in the same manner (with regard to `neurodata_type_inc` and `neurodata_type_def`,
@@ -169,19 +169,19 @@ Create a new namespace with extensions
     ns_builder = NWBNamespaceBuilder("Extension for use in my laboratory", "mylab", ...)
 
     # create extensions
-    ext1 = NWBGroupSpec('A custom Clustering interface',
+    ext1 = NWBGroupSpec('A custom SpikeEventSeries interface',
                         attributes=[...]
                         datasets=[...],
                         groups=[...],
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
+                        neurodata_type_inc='SpikeEventSeries',
+                        neurodata_type_def='MyExtendedSpikeEventSeries')
 
-    ext2 = NWBGroupSpec('A custom ClusterWaveforms interface',
+    ext2 = NWBGroupSpec('A custom EventDetection interface',
                         attributes=[...]
                         datasets=[...],
                         groups=[...],
-                        neurodata_type_inc='ClusterWaveforms',
-                        neurodata_type_def='MyExtendedClusterWaveforms')
+                        neurodata_type_inc='EventDetection',
+                        neurodata_type_def='MyExtendedEventDetection')
 
 
     # add the extension
