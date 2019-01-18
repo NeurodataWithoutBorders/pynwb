@@ -134,7 +134,6 @@ imaging_plane = nwbfile.create_imaging_plane(
     imaging_rate=30.,
     indicator='GCaMP6f',
     location=metadata['targeted_structure'],
-    manifold=[],
     conversion=1.0,
     unit='unknown',
     reference_frame='unknown',

@@ -3,6 +3,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import os
 import numpy as np
+import numpy.testing as npt
 
 from pynwb import NWBContainer, get_manager, NWBFile, NWBData
 from pynwb.form.backends.hdf5 import HDF5IO
@@ -37,7 +38,12 @@ class TestMapNWBContainer(unittest.TestCase):
     def manager(self):
         return self.__manager
 
+    @unittest.skip("deprecated")
     def test_build(self):
+        """
+        As of 20190110, this test has been deprecated. Maintaining hardcoded builder objects has become
+        increasingly difficult, and offers little in the way of debugging and identifying problems
+        """
         try:
             self.builder = self.setUpBuilder()
         except unittest.SkipTest:
@@ -48,7 +54,12 @@ class TestMapNWBContainer(unittest.TestCase):
         # do something here to validate the result Builder against the spec
         self.assertDictEqual(result, self.builder)
 
+    @unittest.skip("deprecated")
     def test_construct(self):
+        """
+        As of 20190110, this test has been deprecated. Maintaining hardcoded builder objects has become
+        increasingly difficult, and offers little in the way of debugging and identifying problems
+        """
         try:
             self.builder = self.setUpBuilder()
         except unittest.SkipTest:
@@ -112,8 +123,8 @@ class TestMapNWBContainer(unittest.TestCase):
                     elif isinstance(f2, NWBData):
                         self.assertTrue(np.array_equal(f1.data, f2))
                 else:
-                    if isinstance(f1, float):
-                        self.assertAlmostEqual(f1, f2)
+                    if isinstance(f1, (float, np.float32, np.float16)):
+                        npt.assert_almost_equal(f1, f2)
                     else:
                         self.assertEqual(f1, f2)
 
@@ -124,7 +135,7 @@ class TestMapNWBContainer(unittest.TestCase):
 
 class TestMapRoundTrip(TestMapNWBContainer):
 
-    _required_tests = ('test_build', 'test_construct', 'test_roundtrip')
+    _required_tests = ('test_roundtrip',)
     run_injected_file_test = False
 
     def setUp(self):

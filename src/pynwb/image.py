@@ -1,4 +1,5 @@
 import numpy as np
+import warnings
 from collections import Iterable
 
 from .form.utils import docval, popargs, call_docval_func
@@ -14,8 +15,7 @@ class ImageSeries(TimeSeries):
     The image data can be stored in the HDF5 file or it will be stored as an external image file.
     '''
 
-    __nwbfields__ = ('bits_per_pixel',
-                     'dimension',
+    __nwbfields__ = ('dimension',
                      'external_file',
                      'starting_frame',
                      'format')
@@ -70,6 +70,16 @@ class ImageSeries(TimeSeries):
         self.external_file = external_file
         self.starting_frame = starting_frame
         self.format = format
+
+    @property
+    def bits_per_pixel(self):
+        return self.fields.get('bits_per_pixel')
+
+    @bits_per_pixel.setter
+    def bits_per_pixel(self, val):
+        warnings.warn("bits_per_pixel is no longer used", DeprecationWarning)
+        if val is not None:
+            self.fields['bits_per_pixel'] = val
 
 
 @register_class('IndexSeries', CORE_NAMESPACE)

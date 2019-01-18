@@ -16,5 +16,5 @@ six==1.11.0
 tox==3.0.0
 traceback2==1.4.0
 unittest2==1.1.0
-urllib3==1.22
+urllib3==1.23
 virtualenv==15.2.0

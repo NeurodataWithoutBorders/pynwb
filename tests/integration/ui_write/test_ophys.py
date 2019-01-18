@@ -1,4 +1,5 @@
 import unittest2 as unittest
+import numpy as np
 from copy import deepcopy
 
 from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
@@ -27,8 +28,8 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel('optchan1',
                                               'a fake OpticalChannel', 500.)
-        return ImagingPlane('imgpln1', self.optical_channel,
-                            'a fake ImagingPlane', self.device, 600., 300., 'GFP', 'somewhere in the brain')
+        return ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
+                            600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknonwn')
 
     def setUpBuilder(self):
         optchan_builder = GroupBuilder(
@@ -80,9 +81,8 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
     def make_imaging_plane(self):
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
-        self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel,
-                                          'a fake ImagingPlane',
-                                          self.device, 600., 300., 'GFP', 'somewhere in the brain')
+        self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
+                                          600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknonwn')
 
     def setUpContainer(self):
         self.make_imaging_plane()
@@ -134,7 +134,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
             'test_2ps',
             attributes={
                 'pmt_gain':  1.7,
-                'scan_line_rate':  3.4,
+                'scan_line_rate':  np.float32(3.4),
                 'namespace': base.CORE_NAMESPACE,
                 'comments': 'no comments',
                 'description': 'no description',
@@ -187,7 +187,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                           'imaging plane description',
                                           self.device,
                                           600., 300., 'GFP', 'somewhere in the brain',
-                                          (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+                                          (1., 2., 1., 2., 3.), 4.0, 'manifold unit', 'A frame to refer to')
 
         self.img_mask = deepcopy(img_mask)
         self.pix_mask = deepcopy(pix_mask)
@@ -280,7 +280,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'neurodata_type': 'PlaneSegmentation',
                 'namespace': 'core',
                 'description': 'plane segmentation description',
-                'colnames': ('image_mask', 'pixel_mask'),
+                'colnames': (b'image_mask', b'pixel_mask'),
                 'help': 'Results from segmentation of an imaging plane'},
             datasets={
                 'id': DatasetBuilder('id', data=[0, 1],
@@ -336,7 +336,7 @@ class MaskRoundTrip(TestPlaneSegmentation):
                                           'imaging plane description',
                                           self.device,
                                           600., 300., 'GFP', 'somewhere in the brain',
-                                          (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+                                          (1., 2., 1., 2., 3.), 4.0, 'manifold unit', 'A frame to refer to')
         return PlaneSegmentation('description', self.imaging_plane, 'test_plane_seg_name',
                                  self.image_series)
 
@@ -372,7 +372,7 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
         self.plane_segmentation = TestPlaneSegmentation.buildPlaneSegmentation(self)
         self.rt_region = self.plane_segmentation.create_roi_table_region('the first of two ROIs', region=[0])
 
-        data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
         timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
         return RoiResponseSeries('test_roi_response_series', data, 'lumens', self.rt_region, timestamps=timestamps)

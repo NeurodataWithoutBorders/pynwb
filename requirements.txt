@@ -1,11 +1,11 @@
 certifi==2018.1.18
 chardet==3.0.4
-h5py==2.7.1
+h5py==2.9.0
 idna==2.6
 numpy==1.14.6
 python-dateutil==2.7.2
 requests==2.20.0
-ruamel.yaml==0.15.37
+ruamel.yaml==0.15.85
 six==1.11.0
-urllib3==1.22
+urllib3==1.23
 pandas==0.23.4

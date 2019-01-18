@@ -5,12 +5,16 @@ from dateutil.tz import tzlocal, tzutc
 import os
 from h5py import File
 
-from pynwb import NWBFile, TimeSeries, get_manager
+from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO
 
-from pynwb.form.backends.hdf5 import HDF5IO
+from pynwb.form.backends.hdf5 import HDF5IO, H5DataIO
+from pynwb.form.data_utils import DataChunkIterator
 from pynwb.form.build import GroupBuilder, DatasetBuilder
 from pynwb.form.spec import NamespaceCatalog
 from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
+from pynwb.ecephys import ElectricalSeries, LFP
+
+import numpy as np
 
 
 class TestHDF5Writer(unittest.TestCase):
@@ -229,3 +233,143 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
                     self.assertIsNotNone(cached_spec)
                 with self.subTest(test='cached spec preserved original spec'):
                     self.assertDictEqual(original_spec, cached_spec)
+
+
+class TestAppend(unittest.TestCase):
+
+    def test_append(self):
+
+        FILENAME = 'test_append.nwb'
+
+        nwb = NWBFile(session_description='hi', identifier='hi', session_start_time=datetime(1970, 1, 1, 12,
+                                                                                             tzinfo=tzutc()))
+        proc_mod = nwb.create_processing_module(name='test_proc_mod', description='')
+        proc_inter = LFP(name='test_proc_dset')
+        proc_mod.add_data_interface(proc_inter)
+        device = nwb.create_device(name='test_device')
+        e_group = nwb.create_electrode_group(
+            name='test_electrode_group',
+            description='',
+            location='',
+            device=device
+        )
+        nwb.add_electrode(x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
+        electrodes = nwb.create_electrode_table_region(region=[0], description='')
+        e_series = ElectricalSeries(
+            name='test_device',
+            electrodes=electrodes,
+            data=np.ones(shape=(100,)),
+            rate=10000.0,
+        )
+        proc_inter.add_electrical_series(e_series)
+
+        with NWBHDF5IO(FILENAME, mode='w') as io:
+            io.write(nwb)
+
+        with NWBHDF5IO(FILENAME, mode='a') as io:
+            nwb = io.read()
+            elec = nwb.modules['test_proc_mod']['LFP'].electrical_series['test_device'].electrodes
+            ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=elec)
+            nwb.add_acquisition(ts2)
+            io.write(nwb)
+
+        with NWBHDF5IO(FILENAME, mode='r') as io:
+            nwb = io.read()
+            np.testing.assert_equal(nwb.acquisition['timeseries2'].data[:], ts2.data)
+
+
+class TestH5DataIO(unittest.TestCase):
+    """
+    Test that H5DataIO functions correctly on round trip with the HDF5IO backend
+    """
+    def setUp(self):
+        self.nwbfile = NWBFile('a', 'b', datetime(1970, 1, 1, 12, tzinfo=tzutc()))
+        self.path = "test_pynwb_io_hdf5_h5dataIO.h5"
+
+    def tearDown(self):
+        if(os.path.exists(self.path)):
+            os.remove(self.path)
+
+    def test_gzip_timestamps(self):
+        ts = TimeSeries('ts_name', [1, 2, 3], 'A', timestamps=H5DataIO(np.array([1., 2., 3.]), compression='gzip'))
+        self.nwbfile.add_acquisition(ts)
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        # confirm that the dataset was indeed compressed
+        infile = File(self.path, 'r')
+        self.assertEquals(infile['/acquisition/ts_name/timestamps'].compression, 'gzip')
+
+    def test_write_dataset_custom_compress(self):
+        a = H5DataIO(np.arange(30).reshape(5, 2, 3),
+                     compression='gzip',
+                     compression_opts=5,
+                     shuffle=True,
+                     fletcher32=True)
+        ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
+        self.nwbfile.add_acquisition(ts)
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        infile = File(self.path, 'r')
+        dset = infile['/acquisition/ts_name/data']
+        self.assertTrue(np.all(dset[:] == a.data))
+        self.assertEqual(dset.compression, 'gzip')
+        self.assertEqual(dset.compression_opts, 5)
+        self.assertEqual(dset.shuffle, True)
+        self.assertEqual(dset.fletcher32, True)
+
+    def test_write_dataset_custom_chunks(self):
+        a = H5DataIO(np.arange(30).reshape(5, 2, 3),
+                     chunks=(1, 1, 3))
+        ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
+        self.nwbfile.add_acquisition(ts)
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        infile = File(self.path, 'r')
+        dset = infile['/acquisition/ts_name/data']
+        self.assertTrue(np.all(dset[:] == a.data))
+        self.assertEqual(dset.chunks, (1, 1, 3))
+
+    def test_write_dataset_custom_fillvalue(self):
+        a = H5DataIO(np.arange(20).reshape(5, 4), fillvalue=-1)
+        ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
+        self.nwbfile.add_acquisition(ts)
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        infile = File(self.path, 'r')
+        dset = infile['/acquisition/ts_name/data']
+        self.assertTrue(np.all(dset[:] == a.data))
+        self.assertEqual(dset.fillvalue, -1)
+
+    def test_write_dataset_datachunkiterator(self):
+        a = np.arange(30).reshape(5, 2, 3)
+        aiter = iter(a)
+        daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
+        ts = TimeSeries('ts_name', daiter, 'A', timestamps=np.arange(5))
+        self.nwbfile.add_acquisition(ts)
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        infile = File(self.path, 'r')
+        dset = infile['/acquisition/ts_name/data']
+        self.assertListEqual(dset[:].tolist(), a.tolist())
+
+    def test_write_dataset_datachunkiterator_with_compression(self):
+        a = np.arange(30).reshape(5, 2, 3)
+        aiter = iter(a)
+        daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
+        wrapped_daiter = H5DataIO(data=daiter,
+                                  compression='gzip',
+                                  compression_opts=5,
+                                  shuffle=True,
+                                  fletcher32=True)
+        ts = TimeSeries('ts_name', wrapped_daiter, 'A', timestamps=np.arange(5))
+        self.nwbfile.add_acquisition(ts)
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile)
+        infile = File(self.path, 'r')
+        dset = infile['/acquisition/ts_name/data']
+        self.assertEqual(dset.shape, a.shape)
+        self.assertListEqual(dset[:].tolist(), a.tolist())
+        self.assertEqual(dset.compression, 'gzip')
+        self.assertEqual(dset.compression_opts, 5)
+        self.assertEqual(dset.shuffle, True)
+        self.assertEqual(dset.fletcher32, True)

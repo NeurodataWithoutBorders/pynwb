@@ -80,6 +80,21 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
 
+    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to search for', 'default': None})
+    def get_ancestor(self, **kwargs):
+        """
+        Traverse parent hierarchy and return first instance of the specified neurodata_type
+        """
+        neurodata_type = getargs('neurodata_type', kwargs)
+        if neurodata_type is None:
+            return self.parent
+        p = self.parent
+        while p is not None:
+            if p.neurodata_type == neurodata_type:
+                return p
+            p = p.parent
+        return None
+
     @property
     def fields(self):
         return self.__fields
@@ -411,9 +426,10 @@ class NWBTable(NWBData):
     Subclasses should specify the class attribute \_\_columns\_\_.
 
     This should be a list of dictionaries with the following keys:
-    ``'name'`` - the column name
-    ``'type'`` - the type of data in this column
-    ``'doc'``  - a brief description of what gets stored in this column
+
+    - ``name``            the column name
+    - ``type``            the type of data in this column
+    - ``doc``             a brief description of what gets stored in this column
 
     For reference, this list of dictionaries will be used with docval to autogenerate
     the ``add_row`` method for adding data to this table.
@@ -860,12 +876,20 @@ class MultiContainerInterface(NWBDataInterface):
 
 @register_class('DynamicTable', CORE_NAMESPACE)
 class DynamicTable(NWBDataInterface):
-    """
+    r"""
     A column-based table. Columns are defined by the argument *columns*. This argument
-    must be a list/tuple of VectorDatas and VectorIndexes or a list/tuple of dicts containing the keys
-    'name' and 'description' that provide the name and description of each column
-    in the table. If specifying columns with a list/tuple of dicts, VectorData columns can
-    be specified by setting the key 'index' to True.
+    must be a list/tuple of :class:`~pynwb.core.VectorData` and :class:`~pynwb.core.VectorIndex` objects
+    or a list/tuple of dicts containing the keys ``name`` and ``description`` that provide the name and description
+    of each column in the table. Additionally, the keys ``index`` and ``table`` for specifying additional structure to
+    the table columns. Setting the key ``index`` to ``True`` can be used to indicate that the
+    :class:`~pynwb.core.VectorData` column will store a ragged array (i.e. will be accompanied with a
+    :class:`~pynwb.core.VectorIndex`). Setting the key ``table`` to ``True`` can be used to indicate that the column
+    will store regions to another DynamicTable.
+
+    Columns in DynamicTable subclasses can be statically defined by specifying the class attribute *\_\_columns\_\_*,
+    rather than specifying them at runtime at the instance level. This is useful for defining a table structure
+    that will get reused. The requirements for *\_\_columns\_\_* are the same as the requirements described above
+    for specifying table columns with the *columns* argument to the DynamicTable constructor.
     """
 
     __nwbfields__ = (
@@ -984,6 +1008,7 @@ class DynamicTable(NWBDataInterface):
 
         # to make generating DataFrames and Series easier
         col_dict = dict()
+        self.__indices = dict()
         for col in self.columns:
             if isinstance(col, VectorData):
                 existing = col_dict.get(col.name)
@@ -1000,6 +1025,7 @@ class DynamicTable(NWBDataInterface):
                     col_dict[col.name] = col
             elif isinstance(col, VectorIndex):
                 col_dict[col.target.name] = col  # use target name for reference and VectorIndex for retrieval
+                self.__indices[col.name] = col
 
         self.__df_cols = [self.id] + [col_dict[name] for name in self.colnames]
         self.__colids = {name: i+1 for i, name in enumerate(self.colnames)}
@@ -1140,6 +1166,7 @@ class DynamicTable(NWBDataInterface):
             columns.insert(0, col_index)
             self.add_child(col_index)
             col = col_index
+            self.__indices[col_index.name] = col_index
 
         if len(col) != len(self.id):
             raise ValueError("column must have the same number of rows as 'id'")
@@ -1181,7 +1208,12 @@ class DynamicTable(NWBDataInterface):
             arg = key
             if isinstance(arg, str):
                 # index by one string, return column
-                ret = self.__df_cols[self.__colids[arg]]
+                if arg in self.__colids:
+                    ret = self.__df_cols[self.__colids[arg]]
+                elif arg in self.__indices:
+                    return self.__indices[arg]
+                else:
+                    raise KeyError(arg)
             elif isinstance(arg, (int, np.int8, np.int16, np.int32, np.int64)):
                 # index by int, return row
                 ret = tuple(col[arg] for col in self.__df_cols)
@@ -1194,7 +1226,7 @@ class DynamicTable(NWBDataInterface):
         return ret
 
     def __contains__(self, val):
-        return val in self.__colids
+        return val in self.__colids or val in self.__indices
 
     def get(self, key, default=None):
         if key in self:
