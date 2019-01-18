@@ -241,6 +241,11 @@ class Clustering(NWBDataInterface):
 @register_class('ClusterWaveforms', CORE_NAMESPACE)
 class ClusterWaveforms(NWBDataInterface):
     """
+    DEPRECATED. `ClusterWaveforms` was deprecated in Oct 27, 2018 and will be removed in a future release.
+    Please use the `Units` table to store waveform mean and standard deviation
+    e.g. `NWBFile.units.add_unit(..., waveform_mean=..., waveform_sd=...)`
+
+
     Describe cluster waveforms by mean and standard deviation for at each sample.
     """
 
