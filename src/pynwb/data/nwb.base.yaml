@@ -210,7 +210,7 @@ groups:
       and all timestamps are relative to experiment start time.'
     attributes:
     - name: interval
-      dtype: int32
+      dtype: float32
       doc: Value is '1'
       value: 1
     - name: unit
