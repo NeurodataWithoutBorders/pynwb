@@ -8,6 +8,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
+from .misc import DecompositionSeries
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
@@ -281,13 +282,18 @@ class LFP(MultiContainerInterface):
     ElectricalSeries description or comments field.
     """
 
-    __clsconf__ = {
-        'attr': 'electrical_series',
-        'type': ElectricalSeries,
-        'add': 'add_electrical_series',
-        'get': 'get_electrical_series',
-        'create': 'create_electrical_series',
-    }
+    __clsconf__ = [
+        {'attr': 'electrical_series',
+         'type': ElectricalSeries,
+         'add': 'add_electrical_series',
+         'get': 'get_electrical_series',
+         'create': 'create_electrical_series'},
+
+        {'attr': 'decomposition_series',
+         'type': DecompositionSeries,
+         'add': 'add_decomposition_series',
+         'get': 'get_decomposition_series',
+         'create': 'create_decomposition_series'}]
 
     __help = ("LFP data from one or more channels. Filter properties "
               "should be noted in the ElectricalSeries")

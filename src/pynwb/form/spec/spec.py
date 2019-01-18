@@ -38,6 +38,7 @@ class DtypeHelper():
             'uint64': ["uint64"],
             'object': ['object'],
             'region': ['region'],
+            'numeric': ['numeric'],
             'isodatetime': ["isodatetime", "datetime", "datetime64"]
         }
 
@@ -428,7 +429,7 @@ class BaseStorageSpec(Spec):
     @property
     def linkable(self):
         ''' True if object can be a link, False otherwise '''
-        return self.get('linkable', None)
+        return self.get('linkable', True)
 
     @classmethod
     def type_key(cls):

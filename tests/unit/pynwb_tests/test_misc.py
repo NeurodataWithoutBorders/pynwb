@@ -2,7 +2,10 @@ import unittest
 
 import numpy as np
 
-from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units
+from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, \
+    DecompositionSeries
+from pynwb.file import TimeSeries, DynamicTable
+from pynwb.core import VectorData
 
 
 class AnnotationSeriesConstructor(unittest.TestCase):
@@ -20,6 +23,55 @@ class AbstractFeatureSeriesConstructor(unittest.TestCase):
         self.assertEqual(aFS.features, ['features'])
 
         aFS.add_features(2.0, [1.])
+
+
+class DecompositionSeriesConstructor(unittest.TestCase):
+    def test_init(self):
+        timeseries = TimeSeries(name='dummy timeseries', description='desc',
+                                data=np.ones((3, 3)), unit='Volts',
+                                timestamps=np.ones((3,)))
+        bands = DynamicTable(name='bands', description='band info for LFPSpectralAnalysis', columns=[
+            VectorData(name='band_name', description='name of bands', data=['alpha', 'beta', 'gamma']),
+            VectorData(name='band_limits', description='low and high cutoffs in Hz', data=np.ones((3, 2)))
+        ])
+        spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
+                                        description='my description',
+                                        data=np.ones((3, 3, 3)),
+                                        timestamps=np.ones((3,)),
+                                        source_timeseries=timeseries,
+                                        metric='amplitude',
+                                        bands=bands)
+
+        self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
+        self.assertEqual(spec_anal.description, 'my description')
+        np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
+        np.testing.assert_equal(spec_anal.timestamps, np.ones((3,)))
+        self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
+        np.testing.assert_equal(spec_anal.bands['band_limits'].data, np.ones((3, 2)))
+        self.assertEqual(spec_anal.source_timeseries, timeseries)
+        self.assertEqual(spec_anal.metric, 'amplitude')
+
+    def test_init_delayed_bands(self):
+        timeseries = TimeSeries(name='dummy timeseries', description='desc',
+                                data=np.ones((3, 3)), unit='Volts',
+                                timestamps=np.ones((3,)))
+        spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
+                                        description='my description',
+                                        data=np.ones((3, 3, 3)),
+                                        timestamps=np.ones((3,)),
+                                        source_timeseries=timeseries,
+                                        metric='amplitude')
+        for band_name in ['alpha', 'beta', 'gamma']:
+            spec_anal.add_band(band_name=band_name, band_limits=(1., 1.), band_mean=1., band_stdev=1.)
+
+        self.assertEqual(spec_anal.name, 'LFPSpectralAnalysis')
+        self.assertEqual(spec_anal.description, 'my description')
+        np.testing.assert_equal(spec_anal.data, np.ones((3, 3, 3)))
+        np.testing.assert_equal(spec_anal.timestamps, np.ones((3,)))
+        self.assertEqual(spec_anal.bands['band_name'].data, ['alpha', 'beta', 'gamma'])
+        np.testing.assert_equal(spec_anal.bands['band_limits'].data, np.ones((3, 2)))
+        self.assertEqual(spec_anal.source_timeseries, timeseries)
+        self.assertEqual(spec_anal.metric, 'amplitude')
 
 
 class IntervalSeriesConstructor(unittest.TestCase):

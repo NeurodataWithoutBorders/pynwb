@@ -46,14 +46,16 @@ groups:
       of data[] should correspond to the signal from one ROI
   datasets:
   - name: data
-    dtype: float32
+    dtype: numeric
     doc: Signals from ROIs
     dims:
-    - num_times
-    - num_ROIs
+    - - num_times
+    - - num_times
+      - num_ROIs
     shape:
-    - null
-    - null
+    - - null
+    - - null
+      - null
   - neurodata_type_inc: DynamicTableRegion
     name: rois
     doc: a dataset referencing into an ROITable containing information on the ROIs
@@ -73,7 +75,7 @@ groups:
   groups:
   - neurodata_type_inc: RoiResponseSeries
     doc: RoiResponseSeries object containing dF/F for a ROI
-    quantity: '*'
+    quantity: '+'
   default_name: DfOverF
 - neurodata_type_def: Fluorescence
   neurodata_type_inc: NWBDataInterface
@@ -189,11 +191,12 @@ groups:
       - neurodata_type_inc: ImageSeries
         doc: One or more image stacks that the masks apply to (can be one-element
           stack)
+        quantity: '*'
     links:
     - name: imaging_plane
       doc: link to ImagingPlane group from which this TimeSeries data was generated
       target_type: ImagingPlane
-    quantity: '*'
+    quantity: '+'
   default_name: ImageSegmentation
 - neurodata_type_def: ImagingPlane
   neurodata_type_inc: NWBContainer
@@ -254,6 +257,7 @@ groups:
        - null
        - null
        - 3
+    quantity: '?'
   - name: reference_frame
     dtype: text
     doc: 'Describes position and reference frame of manifold based on position of

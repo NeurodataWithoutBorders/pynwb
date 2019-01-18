@@ -277,6 +277,10 @@ groups:
         dtype: text
         doc: Age of subject
         quantity: '?'
+      - name: date_of_birth
+        dtype: isodatetime
+        doc: can be supplied instead of age
+        quantity: '?'
       - name: description
         dtype: text
         doc: Description of subject and where subject came from (e.g., breeder, if

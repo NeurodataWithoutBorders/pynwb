@@ -262,6 +262,18 @@ class NWBFileTest(unittest.TestCase):
                     source_script=None,
                     source_script_file_name='nofilename')
 
+    def test_get_neurodata_type(self):
+        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
+                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
+                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        self.nwbfile.add_acquisition(ts1)
+        self.nwbfile.add_acquisition(ts2)
+        p1 = ts1.get_ancestor(neurodata_type='NWBFile')
+        self.assertIs(p1, self.nwbfile)
+        p2 = ts2.get_ancestor(neurodata_type='NWBFile')
+        self.assertIs(p2, self.nwbfile)
+
 
 class SubjectTest(unittest.TestCase):
     def setUp(self):
@@ -271,7 +283,8 @@ class SubjectTest(unittest.TestCase):
                                sex='M',
                                species='Rattus norvegicus',
                                subject_id='RAT123',
-                               weight='2 lbs')
+                               weight='2 lbs',
+                               date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()))
         self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile('a test session description for a test NWBFile',

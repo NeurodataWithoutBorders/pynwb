@@ -68,10 +68,10 @@ nwbfile.add_acquisition(test_ts)
 #
 # NWB provides the concept of a *data interface*--an object for a standard
 # storage location of specific types of data--through the :py:class:`~pynwb.base.NWBDataInterface` class.
-# For example, :py:class:`~pynwb.ecephys.LFP` provides a container for holding one or more
-# :py:class:`~pynwb.ecephys.ElectricalSeries` objects that store local-field potential data. By putting
-# your LFP data into an :py:class:`~pynwb.ecephys.LFP` container,  downstream users and tools know where
-# to look to retrieve LFP data. For a comprehensive list of available data interfaces, see the
+# For example, :py:class:`~pynwb.behavior.BehavioralTimeSeries` provides a container for holding one or more
+# :py:class:`~pynwb.base.TimeSeries` objects that store time series behavioral data. By putting
+# your behavioral data into a :py:class:`~pynwb.behavior.BehavioralTimeSeries` container, downstream users and
+# tools know where to look to retrieve behavioral data. For a comprehensive list of available data interfaces, see the
 # :ref:`overview page <modules_overview>`
 #
 # :py:class:`~pynwb.base.NWBDataInterface` objects can be added as acquisition data, or as members
@@ -79,10 +79,10 @@ nwbfile.add_acquisition(test_ts)
 #
 # For the purposes of demonstration, we will use a :py:class:`~pynwb.ecephys.LFP` data interface.
 
-from pynwb.ecephys import LFP
+from pynwb.behavior import BehavioralTimeSeries
 
-lfp = LFP()
-nwbfile.add_acquisition(lfp)
+bts = BehavioralTimeSeries()
+nwbfile.add_acquisition(bts)
 
 ####################
 # Each data interface stores its own type of data. We suggest you read the documentation for the
@@ -176,21 +176,31 @@ nwbfile.add_trial(start_time=6.0, stop_time=8.0, stim='desert')
 # and :py:func:`~pynwb.file.NWBFile.add_unit_column`. These methods work like the methods for adding
 # trials described :ref:`above <basic_trials>`
 #
-# By default, NWBFile only requires a unique identifier for each unit. Optional values for each unit
-# are: `spike_times`, `electrodes`, `electrode_group`, `waveform_mean`, and `waveform_sd`.
-# Additional columns can be added using :py:func:`~pynwb.file.NWBFile.add_unit_column`. Like
+# A unit is only required to contain a unique integer identifier in the 'id' column
+# (this will be automatically assigned if not provided). Additional optional values for each unit
+# include: `spike_times`, `electrodes`, `electrode_group`, `obs_intervals`, `waveform_mean`, and `waveform_sd`.
+# Additional user-defined columns can be added using :py:func:`~pynwb.file.NWBFile.add_unit_column`. Like
 # :py:func:`~pynwb.file.NWBFile.add_trial_column`, this method also takes a name
 # for the column, a description of what the column stores and does not need a data type.
 # Once all columns have been added, unit data can be populated using :py:func:`~pynwb.file.NWBFile.add_unit`.
 #
-# Lets specify some unit metadata and then add some units
+# When providing `spike_times`, you may also wish to specify the time intervals during which the unit was
+# being observed, so that it is possible to distinguish times when the unit was silent from times when the
+# unit was not being recorded (and thus correctly compute firing rates, for example). This information
+# should be provided as a list of [start, end] time pairs in the `obs_intervals` field. If `obs_intervals` is
+# provided, then all entries in `spike_times` should occur within one of the listed intervals. In the example
+# below, all 3 units are observed during the time period from 1 to 10 s and fired spikes during that period.
+# Units 2 and 3 were also observed during the time period from 20-30s; but only unit 2 fired spikes in that
+# period.
+#
+# Lets specify some unit metadata and then add some units:
 
 nwbfile.add_unit_column('location', 'the anatomical location of this unit')
 nwbfile.add_unit_column('quality', 'the quality for the inference of this unit')
 
-nwbfile.add_unit(id=1, spike_times=[2.2, 3.0, 4.5], location='CA1', quality=0.95)
-nwbfile.add_unit(id=2, spike_times=[2.2, 3.0], location='CA3', quality=0.85)
-nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5], location='CA1', quality=0.90)
+nwbfile.add_unit(id=1, spike_times=[2.2, 3.0, 4.5], obs_intervals=[[1, 10]], location='CA1', quality=0.95)
+nwbfile.add_unit(id=2, spike_times=[2.2, 3.0, 25.0, 26.0], obs_intervals=[[1, 10], [20, 30]], location='CA3', quality=0.85)
+nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5], obs_intervals=[[1, 10], [20, 30]], location='CA1', quality=0.90)
 
 ####################
 # .. _units_fields_ref:
@@ -269,7 +279,7 @@ ts = nwbfile.acquisition['test_timeseries']
 # We can also get the :py:class:`~pynwb.ecephys.LFP` object back. When we created the :py:class:`~pynwb.ecephys.LFP`
 # object, we did not supply a name, so the name defaulted to "LFP" [#]_.
 
-lfp = nwbfile.acquisition['LFP']
+bts = nwbfile.acquisition['BehavioralTimeSeries']
 
 ####################
 # Just like acquisition data, we can get processing modules back in the same manner. We created two above.
@@ -314,12 +324,14 @@ io.close()
 # :py:class:`~pynwb.NWBHDF5IO` constructor to ``'a'``. After you have read the file, you can add [#]_ new data to it
 # using the standard write/add functionality demonstrated above.
 #
-# Let's see how this works by adding another :py:class:`~pynwb.base.TimeSeries` to the file we have already written.
+# Let's see how this works by adding another :py:class:`~pynwb.base.TimeSeries` to the BehavioralTimeSeries interface
+# we created above.
 #
-# First, read the file.
+# First, read the file and get the interface object.
 
 io = NWBHDF5IO('basic_example.nwb', mode='a')
 nwbfile = io.read()
+bts = nwbfile.acquisition['BehavioralTimeSeries']
 
 ####################
 # Next, add a new :py:class:`~pynwb.base.TimeSeries`.
@@ -327,7 +339,7 @@ nwbfile = io.read()
 data = list(range(300, 400, 10))
 timestamps = list(range(10))
 test_ts2 = TimeSeries('test_timeseries2', data, 'SIunit', timestamps=timestamps)
-nwbfile.add_acquisition(test_ts2)
+bts.add_timeseries(test_ts2)
 
 ####################
 # Finally, write the changes back to the file and close it.

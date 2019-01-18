@@ -7,6 +7,8 @@ from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Cl
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable
 from pynwb.core import DynamicTableRegion
+from pynwb import TimeSeries
+from pynwb.misc import DecompositionSeries
 
 
 def make_electrode_table():
@@ -47,6 +49,13 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
         # self.assertListEqual(sES.data, data)
         np.testing.assert_array_equal(sES.data, data)
         np.testing.assert_array_equal(sES.timestamps, timestamps)
+
+    def test_no_rate(self):
+        table = make_electrode_table()
+        region = DynamicTableRegion('electrodes', [1, 3], 'the second and fourth electrodes', table)
+        data = np.zeros(10)
+        with self.assertRaises(TypeError):
+            SpikeEventSeries('test_sES', data, region, rate=1.)  # noqa: F405
 
 
 class ElectrodeGroupConstructor(unittest.TestCase):
@@ -121,17 +130,6 @@ class ClusterWaveformsConstructor(unittest.TestCase):
 
 
 class LFPTest(unittest.TestCase):
-    def test_init(self):
-        dev1 = Device('dev1')  # noqa: F405
-        group = ElectrodeGroup(  # noqa: F405, F841
-            'tetrode1', 'tetrode description', 'tetrode location', dev1)
-        table = make_electrode_table()
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
-        eS = ElectricalSeries(  # noqa: F405
-            'test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
-        lfp = LFP(eS)  # noqa: F405
-        self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
-        self.assertEqual(lfp['test_eS'], lfp.electrical_series.get('test_eS'))
 
     def test_add_electrical_series(self):
         lfp = LFP()  # noqa: F405
@@ -144,7 +142,19 @@ class LFPTest(unittest.TestCase):
             'test_eS', [0, 1, 2, 3], region, timestamps=[0.1, 0.2, 0.3, 0.4])
         lfp.add_electrical_series(eS)
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
-        self.assertEqual(lfp['test_eS'], lfp.electrical_series.get('test_eS'))
+
+    def test_add_decomposition_series(self):
+        lfp = LFP()
+        timeseries = TimeSeries(name='dummy timeseries', description='desc',
+                                data=np.ones((3, 3)), unit='Volts',
+                                timestamps=np.ones((3,)))
+        spec_anal = DecompositionSeries(name='LFPSpectralAnalysis',
+                                        description='my description',
+                                        data=np.ones((3, 3, 3)),
+                                        timestamps=np.ones((3,)),
+                                        source_timeseries=timeseries,
+                                        metric='amplitude')
+        lfp.add_decomposition_series(spec_anal)
 
 
 class FilteredEphysTest(unittest.TestCase):

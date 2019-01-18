@@ -95,8 +95,8 @@ ps = img_seg.create_plane_segmentation('output from segmenting my favorite imagi
 ####################
 # Now that you have your :py:class:`~pynwb.ophys.PlaneSegmentation` object, you can add the resulting ROIs.
 # This is done using the method :py:func:`~pynwb.ophys.PlaneSegmentation.add_roi`. The first argument to this
-# method is the `pixel_mask` and the second method is the `image_mask`. Both of these arguments are required
-# for schema compliance--the NWB schema requires that you store both the image mask and the pixel mask.
+# method is the `pixel_mask` and the second method is the `image_mask`. The NWB schema allows for either argument
+# to be provided.
 
 
 w, h = 3, 3
@@ -144,7 +144,7 @@ rt_region = ps.create_roi_table_region('the first of two ROIs', region=[0])
 # :py:class:`~pynwb.ophys.RoiResponseSeries`.
 
 
-data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
 timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 rrs = fl.create_roi_response_series('my_rrs', data, 'lumens', rt_region, timestamps=timestamps)
 

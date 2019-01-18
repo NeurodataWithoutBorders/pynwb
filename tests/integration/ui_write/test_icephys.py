@@ -267,8 +267,8 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
         sweep_table = GroupBuilder('sweep_table', datasets={c.name: c for c in columns},
                                    attributes={'neurodata_type': 'SweepTable',
                                                'namespace': 'core',
-                                               'colnames': ('series',
-                                                            'sweep_number'),
+                                               'colnames': (b'series',
+                                                            b'sweep_number'),
                                                'help': 'The table which groups different PatchClampSeries together',
                                                'description':
                                                u'A sweep table groups different PatchClampSeries together.',
@@ -455,8 +455,8 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
         sweep_table = GroupBuilder('sweep_table', datasets={c.name: c for c in columns},
                                    attributes={'neurodata_type': 'SweepTable',
                                                'namespace': 'core',
-                                               'colnames': ('series',
-                                                            'sweep_number'),
+                                               'colnames': (b'series',
+                                                            b'sweep_number'),
                                                'help': 'The table which groups different PatchClampSeries together',
                                                'description':
                                                u'A sweep table groups different PatchClampSeries together.',
