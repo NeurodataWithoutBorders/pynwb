@@ -10,6 +10,7 @@ class TestLegacy(unittest.TestCase):
     def setUp(self):
         self.src_filename = os.path.join(os.path.dirname(os.path.abspath(__file__)), '496908818s.nwb')
         self.filename = 'test_496908818s.nwb'
+        raise unittest.SkipTest('Backwards compatibility not currently supported')
 
     def tearDown(self):
         if os.path.exists(self.filename):

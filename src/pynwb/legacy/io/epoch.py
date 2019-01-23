@@ -1,9 +1,10 @@
-from pynwb.epoch import Epoch, EpochTimeSeries
+# from pynwb.epoch import Epochs, EpochTimeSeries
 
-from .. import ObjectMapper, register_map
+from .. import ObjectMapper
+# from .. import register_map
 
 
-@register_map(Epoch)
+# @register_map(Epoch)
 class EpochMap(ObjectMapper):
 
     def __init__(self, spec):
@@ -20,7 +21,7 @@ class EpochMap(ObjectMapper):
         return builder.name
 
 
-@register_map(EpochTimeSeries)
+# @register_map(EpochTimeSeries)
 class EpochTimeSeriesMap(ObjectMapper):
 
     def __init__(self, spec):

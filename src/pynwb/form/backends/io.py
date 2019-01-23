@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from ..build import BuildManager
 from ..build import GroupBuilder
-from ..utils import docval, getargs
+from ..utils import docval, getargs, popargs
 from ..container import Container
 from six import with_metaclass
 
@@ -15,6 +15,7 @@ class FORMIO(with_metaclass(ABCMeta, object)):
         self.__manager = getargs('manager', kwargs)
         self.__built = dict()
         self.__source = getargs('source', kwargs)
+        self.open()
 
     @property
     def manager(self):
@@ -34,14 +35,14 @@ class FORMIO(with_metaclass(ABCMeta, object)):
 
     @docval({'name': 'container', 'type': Container, 'doc': 'the Container object to write'})
     def write(self, **kwargs):
-        container = getargs('container', kwargs)
+        container = popargs('container', kwargs)
         f_builder = self.__manager.build(container, source=self.__source)
-        self.write_builder(f_builder)
+        self.write_builder(f_builder, **kwargs)
 
     @abstractmethod
     @docval(returns='a GroupBuilder representing the read data', rtype='GroupBuilder')
     def read_builder(self):
-        ''' Read data and return the GroupBuilder represention '''
+        ''' Read data and return the GroupBuilder representing '''
         pass
 
     @abstractmethod
@@ -61,7 +62,6 @@ class FORMIO(with_metaclass(ABCMeta, object)):
         pass
 
     def __enter__(self):
-        self.open()
         return self
 
     def __exit__(self, type, value, traceback):

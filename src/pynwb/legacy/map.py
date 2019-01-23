@@ -32,6 +32,8 @@ class TypeMapLegacy(TypeMap):
 
         if builder.name == 'root':
             return 'NWBFile'
+        elif builder.name == 'subject' and builder.parent.name == 'general':
+            return 'Subject'
         else:
 
             attrs = builder.attributes
@@ -123,7 +125,7 @@ class TypeMapLegacy(TypeMap):
                         'pupil_location': None,
                         'pupil_location_spherical': None
                     }
-                    return decode(parent_names[builder.parent.name])
+                    return decode(parent_names.get(builder.parent.name))
 
     def get_builder_ns(self, builder):
         return 'core'

@@ -17,9 +17,10 @@ def main():
 
     # create-nwbfile: start
     from datetime import datetime
+    from dateutil.tz import tzlocal
     from pynwb import NWBFile
 
-    f = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+    f = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
                 experimenter='Dr. Bilbo Baggins',
                 lab='Bag End Laboratory',
                 institution='University of Middle Earth at the Shire',
@@ -28,28 +29,15 @@ def main():
     # create-nwbfile: end
 
     # save-nwbfile: start
-    from pynwb import get_manager
-    from pynwb.form.backends.hdf5 import HDF5IO
+    from pynwb import NWBHDF5IO
 
     filename = "example.h5"
-    io = HDF5IO(filename, manager=get_manager(), mode='w')
+    io = NWBHDF5IO(filename, mode='w')
     io.write(f)
     io.close()
     # save-nwbfile: end
 
     os.remove(filename)
-
-    # create-epochs: start
-    epoch_tags = ('example_epoch',)
-
-    ep1 = f.create_epoch(source='an hypothetical source', name='epoch1', start=0.0, stop=1.0,
-                         tags=epoch_tags,
-                         description="the first test epoch")
-
-    ep2 = f.create_epoch(source='an hypothetical source', name='epoch2', start=0.0, stop=1.0,
-                         tags=epoch_tags,
-                         description="the second test epoch")
-    # create-epochs: end
 
     # create-device: start
     device = f.create_device(name='trodes_rig123', source="a source")
@@ -95,7 +83,7 @@ def main():
                                 resolution=0.001,
                                 comments="This data was randomly generated with numpy, using 1234 as the seed",
                                 description="Random numbers generated with numpy.random.rand")
-    f.add_acquisition(ephys_ts, [ep1, ep2])
+    f.add_acquisition(ephys_ts)
 
     spatial_ts = SpatialSeries('test_spatial_timeseries',
                                'a stumbling rat',
@@ -106,8 +94,71 @@ def main():
                                comments="This data was generated with numpy, using 1234 as the seed",
                                description="This 2D Brownian process generated with "
                                            "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")
-    f.add_acquisition(spatial_ts, [ep1, ep2])
+    f.add_acquisition(spatial_ts)
     # create-timeseries: end
+
+    # create-data-interface: start
+    from pynwb.ecephys import LFP
+    from pynwb.behavior import Position
+
+    lfp = f.add_acquisition(LFP('a hypothetical source'))
+    ephys_ts = lfp.create_electrical_series('test_ephys_data',
+                                            'an hypothetical source',
+                                            ephys_data,
+                                            electrode_table_region,
+                                            timestamps=ephys_timestamps,
+                                            resolution=0.001,
+                                            comments="This data was randomly generated with numpy, using 1234 as the seed",  # noqa: E501
+                                            description="Random numbers generated with numpy.random.rand")
+
+    pos = f.add_acquisition(Position('a hypothetical source'))
+    spatial_ts = pos.create_spatial_series('test_spatial_timeseries',
+                                           'a stumbling rat',
+                                           spatial_data,
+                                           'origin on x,y-plane',
+                                           timestamps=spatial_timestamps,
+                                           resolution=0.1,
+                                           comments="This data was generated with numpy, using 1234 as the seed",
+                                           description="This 2D Brownian process generated with "
+                                                       "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")  # noqa: E501
+    # create-data-interface: end
+
+    # create-epochs: start
+    epoch_tags = ('example_epoch',)
+
+    f.add_epoch(name='epoch1', start_time=0.0, stop_time=1.0, tags=epoch_tags,
+                description="the first test epoch", timeseries=[ephys_ts, spatial_ts])
+
+    f.add_epoch(name='epoch2', start_time=0.0, stop_time=1.0, tags=epoch_tags,
+                description="the second test epoch", timeseries=[ephys_ts, spatial_ts])
+    # create-epochs: end
+
+    # create-compressed-timeseries: start
+    from pynwb.ecephys import ElectricalSeries
+    from pynwb.behavior import SpatialSeries
+    from pynwb.form.backends.hdf5 import H5DataIO
+
+    ephys_ts = ElectricalSeries('test_compressed_ephys_data',
+                                'an hypothetical source',
+                                H5DataIO(ephys_data, compress=True),
+                                electrode_table_region,
+                                timestamps=H5DataIO(ephys_timestamps, compress=True),
+                                resolution=0.001,
+                                comments="This data was randomly generated with numpy, using 1234 as the seed",
+                                description="Random numbers generated with numpy.random.rand")
+    f.add_acquisition(ephys_ts)
+
+    spatial_ts = SpatialSeries('test_compressed_spatial_timeseries',
+                               'a stumbling rat',
+                               H5DataIO(spatial_data, compress=True),
+                               'origin on x,y-plane',
+                               timestamps=H5DataIO(spatial_timestamps, compress=True),
+                               resolution=0.1,
+                               comments="This data was generated with numpy, using 1234 as the seed",
+                               description="This 2D Brownian process generated with "
+                                           "np.cumsum(np.random.normal(size=(2, len(spatial_timestamps))), axis=-1).T")
+    f.add_acquisition(spatial_ts)
+    # create-compressed-timeseries: end
 
 
 if __name__ == "__main__":

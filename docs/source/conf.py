@@ -16,18 +16,32 @@ import sys
 import os
 import sphinx_rtd_theme
 from sphinx.domains.python import PythonDomain
-from pynwb._version import get_versions
 
+
+# -- Support building doc without install --------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
 
+# Get the project root dir, which is the parent parent dir of this
+cwd = os.getcwd()
+project_root = os.path.dirname(os.path.dirname(cwd))
+
+# Insert the project root dir as the first element in the PYTHONPATH.
+# This lets us ensure that the source package is imported, and that its
+# version is used.
+sys.path.insert(0, os.path.join(project_root, 'src'))
+
+from pynwb._version import get_versions
+
+
+# -- Autodoc configuration -----------------------------------------------------
+
 autoclass_content = 'both'
 autodoc_docstring_signature = True
 autodoc_member_order = 'bysource'
-add_function_parentheses = False
 
 # -- General configuration -----------------------------------------------------
 
@@ -36,8 +50,33 @@ add_function_parentheses = False
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.intersphinx']
-intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None)}
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.intersphinx',
+    'sphinx_gallery.gen_gallery'
+]
+
+from sphinx_gallery.sorting import ExplicitOrder
+
+sphinx_gallery_conf = {
+    # path to your examples scripts
+    'examples_dirs': ['../gallery'],
+    # path where to save gallery generated examples
+    'gallery_dirs': ['tutorials'],
+    'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain']),
+    'backreferences_dir': 'gen_modules/backreferences',
+    'download_section_examples': False,
+    'min_reported_time': 5
+}
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3.5', None),
+    'numpy': ('http://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
+    'matplotlib': ('http://matplotlib.org', None),
+    'h5py': ('http://docs.h5py.org/en/latest/', None),
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -83,7 +122,7 @@ exclude_patterns = ['_build', 'test.py']
 # default_role = None
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
-# add_function_parentheses = True
+add_function_parentheses = False
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
@@ -259,6 +298,12 @@ latex_elements = {
 # texinfo_show_urls = 'footnote'
 
 
+# -- PyNWB sphinx extension ----------------------------------------------------
+
+#
+# see http://www.sphinx-doc.org/en/master/extdev/appapi.html
+#
+
 def run_apidoc(_):
     from sphinx.apidoc import main
     import os
@@ -278,7 +323,18 @@ class PatchedPythonDomain(PythonDomain):
             env, fromdocname, builder, typ, target, node, contnode)
 
 
+from abc import abstractmethod, abstractproperty
+
+def skip(app, what, name, obj, skip, options):
+    if isinstance(obj, abstractproperty) or getattr(obj, '__isabstractmethod__', False):
+        return False
+    elif name == "__getitem__":
+        return False
+    return skip
+
+
 def setup(app):
     app.connect('builder-inited', run_apidoc)
     app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
     app.override_domain(PatchedPythonDomain)
+    app.connect("autodoc-skip-member", skip)

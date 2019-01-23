@@ -8,6 +8,7 @@ from abc import ABCMeta, abstractmethod
 
 from .namespace import SpecNamespace
 from .spec import GroupSpec, DatasetSpec
+from .catalog import SpecCatalog
 
 from ..utils import docval, getargs, popargs
 
@@ -32,15 +33,53 @@ class YAMLSpecWriter(SpecWriter):
         self.__outdir = getargs('outdir', kwargs)
 
     def __dump_spec(self, specs, stream):
-        yaml.safe_dump(json.loads(json.dumps(specs)), stream, default_flow_style=False)
+        specs_plain_dict = json.loads(json.dumps(specs))
+        yaml.main.safe_dump(specs_plain_dict, stream, default_flow_style=False)
 
     def write_spec(self, spec_file_dict, path):
-        with open(os.path.join(self.__outdir, path), 'w') as stream:
-            self.__dump_spec(spec_file_dict, stream)
+        out_fullpath = os.path.join(self.__outdir, path)
+        spec_plain_dict = json.loads(json.dumps(spec_file_dict))
+        sorted_data = self.sort_keys(spec_plain_dict)
+        with open(out_fullpath, 'w') as fd_write:
+            yaml.dump(sorted_data, fd_write, Dumper=yaml.dumper.RoundTripDumper)
 
     def write_namespace(self, namespace, path):
         with open(os.path.join(self.__outdir, path), 'w') as stream:
             self.__dump_spec({'namespaces': [namespace]}, stream)
+
+    def reorder_yaml(self, path):
+        """
+        Open a YAML file, load it as python data, sort the data, and write it back out to the
+        same path.
+        """
+        with open(path, 'rb') as fd_read:
+            data = yaml.load(fd_read, Loader=yaml.loader.RoundTripLoader)
+        self.write_spec(data, path)
+
+    def sort_keys(self, obj):
+
+        # Represent None as null
+        def my_represent_none(self, data):
+            return self.represent_scalar(u'tag:yaml.org,2002:null', u'null')
+        yaml.representer.RoundTripRepresenter.add_representer(type(None), my_represent_none)
+
+        order = ['neurodata_type_def', 'neurodata_type_inc', 'name', 'dtype', 'doc',
+                 'attributes', 'datasets', 'groups']
+        if isinstance(obj, dict):
+            keys = list(obj.keys())
+            for k in order[::-1]:
+                if k in keys:
+                    keys.remove(k)
+                    keys.insert(0, k)
+            return yaml.comments.CommentedMap(
+                yaml.compat.ordereddict([(k, self.sort_keys(obj[k])) for k in keys])
+            )
+        elif isinstance(obj, list):
+            return [self.sort_keys(v) for v in obj]
+        elif isinstance(obj, tuple):
+            return (self.sort_keys(v) for v in obj)
+        else:
+            return obj
 
 
 class NamespaceBuilder(object):
@@ -59,6 +98,7 @@ class NamespaceBuilder(object):
         self.__ns_args = copy.deepcopy(kwargs)
         self.__namespaces = OrderedDict()
         self.__sources = OrderedDict()
+        self.__catalog = SpecCatalog()
         self.__dt_key = ns_cls.types_key()
 
     @docval({'name': 'source', 'type': str, 'doc': 'the path to write the spec to'},
@@ -66,6 +106,7 @@ class NamespaceBuilder(object):
     def add_spec(self, **kwargs):
         ''' Add a Spec to the namespace '''
         source, spec = getargs('source', 'spec', kwargs)
+        self.__catalog.auto_register(spec, source)
         self.add_source(source)
         self.__sources[source].setdefault(self.__dt_key, list()).append(spec)
 

@@ -1,12 +1,14 @@
-import unittest
+import unittest2 as unittest
 from datetime import datetime
+from dateutil.tz import tzlocal
 import os
-from h5py import File, Dataset
+from h5py import File, Dataset, Reference
 from six import text_type
 
 from pynwb.form.backends.hdf5 import HDF5IO
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager, TypeMap
-from pynwb.form.spec import NamespaceCatalog
+from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, BuildManager
+
+from pynwb import TimeSeries, get_type_map
 
 from numbers import Number
 
@@ -104,8 +106,8 @@ class GroupBuilderTestCase(unittest.TestCase):
                 b_sub = b[k]
                 b_keys.remove(k)
                 if isinstance(a_sub, LinkBuilder) and isinstance(a_sub, LinkBuilder):
-                    a_sub = a_sub['target']
-                    b_sub = b_sub['target']
+                    a_sub = a_sub['builder']
+                    b_sub = b_sub['builder']
                 elif isinstance(a_sub, LinkBuilder) != isinstance(a_sub, LinkBuilder):
                     reasons.append('%s != %s' % (a_sub, b_sub))
                 if isinstance(a_sub, DatasetBuilder) and isinstance(a_sub, DatasetBuilder):
@@ -115,7 +117,23 @@ class GroupBuilderTestCase(unittest.TestCase):
                 elif isinstance(a_sub, GroupBuilder) and isinstance(a_sub, GroupBuilder):
                     reasons.extend(self.__assert_helper(a_sub, b_sub))
                 else:
-                    if a_sub != b_sub:
+                    equal = None
+                    a_array = isinstance(a_sub, np.ndarray)
+                    b_array = isinstance(b_sub, np.ndarray)
+                    if a_array and b_array:
+                        equal = np.array_equal(a_sub, b_sub)
+                    elif a_array or b_array:
+                        # if strings, convert before comparing
+                        if b_array:
+                            if b_sub.dtype.char in ('S', 'U'):
+                                a_sub = [np.string_(s) for s in a_sub]
+                        else:
+                            if a_sub.dtype.char in ('S', 'U'):
+                                b_sub = [np.string_(s) for s in b_sub]
+                        equal = np.array_equal(a_sub, b_sub)
+                    else:
+                        equal = a_sub == b_sub
+                    if not equal:
                         reasons.append('%s != %s' % (self.__fmt(a_sub), self.__fmt(b_sub)))
             else:
                 reasons.append("'%s' not in both" % k)
@@ -134,41 +152,52 @@ class GroupBuilderTestCase(unittest.TestCase):
 class TestHDF5Writer(GroupBuilderTestCase):
 
     def setUp(self):
-        self.manager = BuildManager(TypeMap(NamespaceCatalog()))
+        type_map = get_type_map()
+        self.manager = BuildManager(type_map)
         self.path = "test_pynwb_io_hdf5.h5"
-        self.start_time = datetime(1970, 1, 1, 12, 0, 0)
-        self.create_date = datetime(2017, 4, 15, 12, 0, 0)
+        self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzlocal())
+        self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
-        ts_builder = GroupBuilder('test_timeseries',
-                                  attributes={'ancestry': 'TimeSeries',
-                                              'source': 'example_source',
-                                              'neurodata_type': 'TimeSeries',
-                                              'help': 'General purpose TimeSeries'},
-                                  datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
-                                                                   attributes={'unit': 'SIunit',
-                                                                               'conversion': 1.0,
-                                                                               'resolution': 0.1}),
-                                            'timestamps': DatasetBuilder(
-                                                'timestamps', list(range(10)),
-                                                attributes={'unit': 'Seconds', 'interval': 1})})
+        self.ts_builder = GroupBuilder('test_timeseries',
+                                       attributes={'ancestry': 'TimeSeries',
+                                                   'neurodata_type': 'TimeSeries',
+                                                   'int_array_attribute': [0, 1, 2, 3],
+                                                   'str_array_attribute': ['a', 'b', 'c', 'd'],
+                                                   'help': 'General purpose TimeSeries'},
+                                       datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
+                                                                        attributes={'unit': 'SIunit',
+                                                                                    'conversion': 1.0,
+                                                                                    'resolution': 0.1}),
+                                                 'timestamps': DatasetBuilder(
+                                                     'timestamps', list(range(10)),
+                                                     attributes={'unit': 'Seconds', 'interval': 1})})
+        self.ts = TimeSeries('test_timeseries', list(range(100, 200, 10)),
+                             unit='SIunit', resolution=0.1, timestamps=list(range(10)))
+        self.manager.prebuilt(self.ts, self.ts_builder)
         self.builder = GroupBuilder(
             'root',
+            source=self.path,
             groups={'acquisition':
                     GroupBuilder('acquisition',
                                  groups={'timeseries':
                                          GroupBuilder('timeseries',
-                                                      groups={'test_timeseries': ts_builder}),
+                                                      groups={'test_timeseries': self.ts_builder}),
                                          'images': GroupBuilder('images')}),
                     'analysis': GroupBuilder('analysis'),
                     'epochs': GroupBuilder('epochs'),
                     'general': GroupBuilder('general'),
-                    'processing': GroupBuilder('processing'),
+                    'processing': GroupBuilder('processing',
+                                               groups={'test_module':
+                                                       GroupBuilder('test_module',
+                                                                    links={'test_timeseries_link':
+                                                                           LinkBuilder(self.ts_builder,
+                                                                                       'test_timeseries_link')})}),
                     'stimulus': GroupBuilder(
                         'stimulus',
                         groups={'presentation':
                                 GroupBuilder('presentation'),
                                 'templates': GroupBuilder('templates')})},
-            datasets={'file_create_date': DatasetBuilder('file_create_date', [str(self.create_date)]),
+            datasets={'file_create_date': DatasetBuilder('file_create_date', [self.create_date.isoformat()]),
                       'identifier': DatasetBuilder('identifier', 'TEST123'),
                       'session_description': DatasetBuilder('session_description', 'a test NWB File'),
                       'nwb_version': DatasetBuilder('nwb_version', '1.0.6'),
@@ -196,22 +225,50 @@ class TestHDF5Writer(GroupBuilderTestCase):
         self.assertIn('timeseries', acq)
         ts = acq.get('timeseries')
         self.assertIn('test_timeseries', ts)
+        return f
 
     def test_write_builder(self):
-        writer = HDF5IO(self.path, self.manager)
+        writer = HDF5IO(self.path, manager=self.manager, mode='a')
         writer.write_builder(self.builder)
         writer.close()
         self.check_fields()
 
+    def test_write_attribute_reference_container(self):
+        writer = HDF5IO(self.path, manager=self.manager, mode='a')
+        self.builder.set_attribute('ref_attribute', self.ts)
+        writer.write_builder(self.builder)
+        writer.close()
+        f = self.check_fields()
+        self.assertIsInstance(f.attrs['ref_attribute'], Reference)
+        self.assertEqual(f['acquisition/timeseries/test_timeseries'], f[f.attrs['ref_attribute']])
+
+    def test_write_attribute_reference_builder(self):
+        writer = HDF5IO(self.path, manager=self.manager, mode='a')
+        self.builder.set_attribute('ref_attribute', self.ts_builder)
+        writer.write_builder(self.builder)
+        writer.close()
+        f = self.check_fields()
+        self.assertIsInstance(f.attrs['ref_attribute'], Reference)
+        self.assertEqual(f['acquisition/timeseries/test_timeseries'], f[f.attrs['ref_attribute']])
+
     def test_write_context_manager(self):
-        with HDF5IO(self.path, self.manager) as writer:
+        with HDF5IO(self.path, manager=self.manager, mode='a') as writer:
             writer.write_builder(self.builder)
         self.check_fields()
 
     def test_read_builder(self):
         self.maxDiff = None
-        io = HDF5IO(self.path, self.manager)
+        io = HDF5IO(self.path, manager=self.manager, mode='a')
         io.write_builder(self.builder)
         builder = io.read_builder()
         self.assertBuilderEqual(builder, self.builder)
+        io.close()
+
+    def test_overwrite_written(self):
+        self.maxDiff = None
+        io = HDF5IO(self.path, manager=self.manager, mode='a')
+        io.write_builder(self.builder)
+        builder = io.read_builder()
+        with self.assertRaisesRegex(ValueError, "cannot change written to not written"):
+            builder.written = False
         io.close()

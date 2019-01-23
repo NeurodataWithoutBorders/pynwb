@@ -1,55 +1,59 @@
 import unittest
+from datetime import datetime
+from dateutil import tz
 
-from pynwb.epoch import Epoch, EpochTimeSeries
-from pynwb import TimeSeries
+from pynwb.epoch import TimeIntervals
+from pynwb import TimeSeries, NWBFile
 
 import numpy as np
+import pandas as pd
 
 
-class EpochTimeSeriesConstructor(unittest.TestCase):
-
-    def test_init_timestamps(self):
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
-        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        epoch_ts = EpochTimeSeries('a fake source', ts, 40, 105)
-        self.assertEqual(epoch_ts.count, 105)
-        self.assertEqual(epoch_ts.idx_start, 40)
-
-    def test_init_sample_rate(self):
-        # self.ts.set_time_by_rate(1.0, 10.0)
-        ts = TimeSeries("test_ts", "a hypothetical source", list(range(200)), 'unit', starting_time=1.0, rate=10.0)
-        epoch_ts = EpochTimeSeries('a fake source', ts, 40, 105)
-        self.assertEqual(epoch_ts.count, 105)
-        self.assertEqual(epoch_ts.idx_start, 40)
-
-
-class EpochConstructor(unittest.TestCase):
+class TimeIntervalsTest(unittest.TestCase):
 
     def test_init(self):
-        epoch = Epoch("test_epoch", 'a fake source', 100.0, 200.0, "this is an epoch")
-        self.assertEqual(epoch.name, "test_epoch")
-        self.assertEqual(epoch.start_time, 100.0)
-        self.assertEqual(epoch.stop_time, 200.0)
-        self.assertEqual(epoch.description, "this is an epoch")
-
-
-class EpochSetters(unittest.TestCase):
-
-    def setUp(self):
-        self.epoch = Epoch("test_epoch", 'a fake source', 10.0, 20.0, "this is an epoch")
-
-    def test_add_tags(self):
-        self.epoch.add_tag("tag1")
-        self.epoch.add_tag("tag2")
-        self.assertListEqual(self.epoch.tags, ["tag1", "tag2"])
-
-    def test_add_timeseries(self):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
-        ts = TimeSeries("test_ts", "a hypothetical source", list(range(len(tstamps))), 'unit', timestamps=tstamps)
-        epoch_ts = self.epoch.add_timeseries(ts)
-        self.assertEqual(epoch_ts.count, 100)
-        self.assertEqual(epoch_ts.idx_start, 90)
-        self.assertIs(self.epoch.get_timeseries("test_ts"), epoch_ts)
+        ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
+        ept = TimeIntervals('epochs', "TimeIntervals unittest")
+        self.assertEqual(ept.name, 'epochs')
+        ept.add_interval(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
+        row = ept[0]
+        self.assertEqual(row[1], 10.0)
+        self.assertEqual(row[2], 20.0)
+        self.assertEqual(row[3], ["test", "unittest", "pynwb"])
+        self.assertEqual(row[4], [(90, 100, ts)])
+
+    def get_timeseries(self):
+        return [
+            TimeSeries(name='a', timestamps=np.linspace(0, 1, 11)),
+            TimeSeries(name='b', timestamps=np.linspace(0.1, 5, 13)),
+        ]
+
+    def get_dataframe(self):
+        tsa, tsb = self.get_timeseries()
+        return pd.DataFrame({
+            'foo': [1, 2, 3, 4],
+            'bar': ['fish', 'fowl', 'dog', 'cat'],
+            'start_time': [0.2, 0.25, 0.30, 0.35],
+            'stop_time': [0.25, 0.30, 0.40, 0.45],
+            'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
+            'description': ['q', 'w', 'e', 'r'],
+            'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
+        })
+
+    def test_dataframe_roundtrip(self):
+        df = self.get_dataframe()
+        epochs = TimeIntervals.from_dataframe(df, name='test epochs')
+        obtained = epochs.to_dataframe()
+
+        self.assertIs(obtained.loc[3, 'timeseries'][1], df.loc[3, 'timeseries'][1])
+        self.assertEqual(obtained.loc[2, 'foo'], df.loc[2, 'foo'])
+
+    def test_no_tags(self):
+        nwbfile = NWBFile("a file with header data", "NB123A", datetime(1970, 1, 1, tzinfo=tz.tzutc()))
+        df = self.get_dataframe()
+        for i, row in df.iterrows():
+            nwbfile.add_epoch(start_time=row['start_time'], stop_time=row['stop_time'])
 
 
 if __name__ == '__main__':

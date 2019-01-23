@@ -1,55 +1,70 @@
 groups:
-- attributes:
-  - doc: Value is 'A general epoch object'
+- neurodata_type_def: TimeIntervals
+  neurodata_type_inc: DynamicTable
+  doc: A container for aggregating epoch data and the TimeSeries that each epoch applies
+    to
+  attributes:
+  - name: help
     dtype: text
-    name: help
+    doc: Value is 'A general epoch object'
     value: A general epoch object
   datasets:
-  - doc: Description of this epoch (&lt;epoch_X&gt;).
-    dtype: text
-    name: description
-    quantity: '?'
-  - doc: Start time of epoch, in seconds
-    dtype: float64
+  - neurodata_type_inc: VectorData
     name: start_time
-  - doc: Stop time of epoch, in seconds
-    dtype: float64
-    name: stop_time
-  - dims:
-    - num_tags
-    doc: 'User-defined tags used throughout the epochs. Tags are to help identify
-      or categorize epochs. COMMENT: E.g., can describe stimulus (if template) or
-      behavioral characteristic (e.g., "lick left")'
-    dtype: text
-    name: tags
-    quantity: '?'
-    shape:
-    - null
-  doc: 'One of possibly many different experimental epochCOMMENT: Name is arbitrary
-    but must be unique within the experiment.'
-  groups:
-  - attributes:
-    - doc: Value is 'Data on how an epoch applies to a time series'
+    dtype: float
+    doc: Start time of epoch, in seconds
+    attributes:
+    - name: description
       dtype: text
-      name: help
+      doc: value is 'start time of the epoch, in seconds'
+      value: start time of the epoch, in seconds
+  - neurodata_type_inc: VectorData
+    name: stop_time
+    dtype: float
+    doc: Stop time of epoch, in seconds
+    attributes:
+    - name: description
+      dtype: text
+      doc: value is 'stop time of the epoch, in seconds'
+      value: stop time of the epoch, in seconds
+  - neurodata_type_inc: VectorData
+    name: tags
+    dtype: text
+    doc: User-defined tags that identify events. Tags are to help identify or categorize
+      events.
+    attributes:
+    - name: description
+      dtype: text
+      doc: value is 'user-defined tags'
+      value: user-defined tags
+    quantity: '?'
+  - neurodata_type_inc: VectorIndex
+    name: tags_index
+    doc: Index for tags
+    quantity: '?'
+  - neurodata_type_inc: VectorData
+    name: timeseries
+    dtype:
+    - name: idx_start
+      dtype: int32
+      doc: 'Start index into the TimeSeries data[] field. COMMENT: This can be used
+        to calculate location in TimeSeries timestamp[] field'
+    - name: count
+      dtype: int32
+      doc: Number of data samples available in this time series, during this epoch.
+    - name: timeseries
+      dtype:
+        target_type: TimeSeries
+        reftype: object
+      doc: the TimeSeries that this index applies to
+    doc: An index into a TimeSeries object
+    attributes:
+    - name: help
+      dtype: text
+      doc: Value is 'Data on how an epoch applies to a time series'
       value: Data on how an epoch applies to a time series
-    datasets:
-    - doc: Number of data samples available in this time series, during this epoch.
-      dtype: int32
-      name: count
-    - doc: "Epoch's start index in TimeSeries data[] field. COMMENT: This can be used\
-        \ to calculate location in TimeSeries timestamp[] field"
-      dtype: int32
-      name: idx_start
-    doc: 'One of possibly many input or output streams recorded during epoch. COMMENT:
-      Name is arbitrary and does not have to match the TimeSeries that it refers to.'
-    links:
-    - doc: Link to TimeSeries.  An HDF5 soft-link should be used.
-      name: timeseries
-      target_type: TimeSeries
-    neurodata_type_def: EpochTimeSeries
-    neurodata_type_inc: NWBContainer
-    quantity: '*'
-  neurodata_type_def: Epoch
-  neurodata_type_inc: NWBContainer
-  quantity: '*'
+    quantity: '?'
+  - neurodata_type_inc: VectorIndex
+    name: timeseries_index
+    doc: Index for timeseries
+    quantity: '?'

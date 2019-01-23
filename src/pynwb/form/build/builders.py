@@ -7,7 +7,7 @@ from abc import ABCMeta
 import warnings
 from collections import Iterable
 
-from ..utils import docval, getargs, call_docval_func, fmt_docval_args
+from ..utils import docval, getargs, popargs, call_docval_func, fmt_docval_args
 from six import with_metaclass
 
 
@@ -28,6 +28,18 @@ class Builder(with_metaclass(ABCMeta, dict)):
             self.__source = parent.source
         else:
             self.__source = None
+        self.__written = False
+
+    @property
+    def written(self):
+        ''' The source of this Builder '''
+        return self.__written
+
+    @written.setter
+    def written(self, s):
+        if self.__written and not s:
+            raise ValueError("cannot change written to not written")
+        self.__written = s
 
     @property
     def name(self):
@@ -200,7 +212,8 @@ class GroupBuilder(BaseBuilder):
                     #         To allow read to get past this special case, this will skip the issue.
                     warnings.warn("'%s' already exists as %s; skipping..." % (name, self.obj_type[name]))
                 else:
-                    raise KeyError("'%s' already exists as %s" % (name, self.obj_type[name]))
+                    raise KeyError("'%s' already exists as %s in %s, cannot set as %s" %
+                                   (name, self.obj_type[name], self.name, obj_type))
         super(GroupBuilder, self).__getitem__(obj_type)[name] = builder
         self.obj_type[name] = obj_type
         if builder.parent is None:
@@ -252,16 +265,16 @@ class GroupBuilder(BaseBuilder):
     @docval({'name': 'builder', 'type': 'GroupBuilder', 'doc': 'the GroupBuilder that represents this subgroup'})
     def set_group(self, **kwargs):
         ''' Add a subgroup to this group '''
-        name, builder, = getargs('name', 'builder', kwargs)
+        builder = getargs('builder', kwargs)
         self.__set_builder(builder, GroupBuilder.__group)
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this link'},
-            {'name': 'target', 'type': ('GroupBuilder', 'DatasetBuilder'), 'doc': 'the target Builder'},
+    @docval({'name': 'target', 'type': ('GroupBuilder', 'DatasetBuilder'), 'doc': 'the target Builder'},
+            {'name': 'name', 'type': str, 'doc': 'the name of this link', 'default': None},
             returns='the builder object for the soft link', rtype='LinkBuilder')
     def add_link(self, **kwargs):
         ''' Create a soft link and add it to this group '''
         name, target = getargs('name', 'target', kwargs)
-        builder = LinkBuilder(name, target, self)
+        builder = LinkBuilder(target, name, self)
         self.set_link(builder)
         return builder
 
@@ -378,7 +391,7 @@ class DatasetBuilder(BaseBuilder):
     REGION_REF_TYPE = 'region'
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'data', 'type': ('array_data', 'scalar_data', 'data', 'DatasetBuilder', Iterable),
+            {'name': 'data', 'type': ('array_data', 'scalar_data', 'data', 'DatasetBuilder', 'RegionBuilder', Iterable),
              'doc': 'the data in this dataset', 'default': None},
             {'name': 'dtype', 'type': (type, np.dtype, str, list),
              'doc': 'the datatype of this dataset', 'default': None},
@@ -395,7 +408,7 @@ class DatasetBuilder(BaseBuilder):
             'name', 'data', 'dtype', 'attributes', 'maxshape', 'chunks', 'parent', 'source', kwargs)
         super(DatasetBuilder, self).__init__(name, attributes, parent, source)
         self['data'] = data
-        self['attributes'] = _copy.deepcopy(attributes)
+        self['attributes'] = _copy.copy(attributes)
         self.__chunks = chunks
         self.__maxshape = maxshape
         if isinstance(data, BaseBuilder):
@@ -430,6 +443,14 @@ class DatasetBuilder(BaseBuilder):
         ''' The data type of this object '''
         return self.__dtype
 
+    @dtype.setter
+    def dtype(self, val):
+        ''' The data type of this object '''
+        if self.__dtype is None:
+            self.__dtype = val
+        else:
+            raise AttributeError("cannot overwrite dtype")
+
     @docval({'name': 'dataset', 'type': 'DatasetBuilder',
              'doc': 'the DatasetBuilder to merge into this DatasetBuilder'})
     def deep_update(self, **kwargs):
@@ -442,12 +463,14 @@ class DatasetBuilder(BaseBuilder):
 
 class LinkBuilder(Builder):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the target of this link'},
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the target of this link'},
+            {'name': 'name', 'type': str, 'doc': 'the name of the dataset', 'default': None},
             {'name': 'parent', 'type': GroupBuilder, 'doc': 'the parent builder of this Builder', 'default': None},
             {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
     def __init__(self, **kwargs):
         name, builder, parent, source = getargs('name', 'builder', 'parent', 'source', kwargs)
+        if name is None:
+            name = builder.name
         super(LinkBuilder, self).__init__(name, parent, source)
         self['builder'] = builder
 
@@ -457,24 +480,27 @@ class LinkBuilder(Builder):
         return self['builder']
 
 
-class RegionBuilder(DatasetBuilder):
+class ReferenceBuilder(dict):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
-            {'name': 'region', 'type': (slice, tuple, list, RegionReference),
-             'doc': 'the region i.e. slice or indices into the target Dataset'},
-            {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the Dataset this region applies to'},
-            {'name': 'attributes', 'type': dict,
-             'doc': 'a dictionary of attributes to create in this dataset', 'default': dict()},
-            {'name': 'parent', 'type': GroupBuilder, 'doc': 'the parent builder of this Builder', 'default': None},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data in this builder', 'default': None})
+    @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder), 'doc': 'the Dataset this region applies to'})
     def __init__(self, **kwargs):
-        region, builder = getargs('region', 'builder', kwargs)
-        skwargs = {'data': builder}
-        for key in ('name', 'parent', 'source'):
-            skwargs[key] = kwargs[key]
-        skwargs['attributes'] = getargs('attributes', kwargs)
-        skwargs['dtype'] = self.REGION_REF_TYPE
-        call_docval_func(super(RegionBuilder, self).__init__, skwargs)
+        builder = getargs('builder', kwargs)
+        self['builder'] = builder
+
+    @property
+    def builder(self):
+        ''' The target builder object '''
+        return self['builder']
+
+
+class RegionBuilder(ReferenceBuilder):
+
+    @docval({'name': 'region', 'type': (slice, tuple, list, RegionReference),
+             'doc': 'the region i.e. slice or indices into the target Dataset'},
+            {'name': 'builder', 'type': DatasetBuilder, 'doc': 'the Dataset this region applies to'})
+    def __init__(self, **kwargs):
+        region = popargs('region', kwargs)
+        call_docval_func(super(RegionBuilder, self).__init__, kwargs)
         self['region'] = region
 
     @property

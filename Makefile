@@ -1,4 +1,5 @@
 PYTHON = python
+FLAKE = flake8
 COVERAGE = coverage
 
 help:
@@ -35,6 +36,20 @@ develop: build
 test:
 	pip install -r requirements-dev.txt
 	tox
+
+flake:
+	$(FLAKE) src/
+	$(FLAKE) tests/
+	$(FLAKE) --ignore E402,W504 docs/gallery
+
+checkpdb:
+	find {src,tests} -name "*.py" -exec grep -Hn pdb {} \;
+
+devtest:
+	$(PYTHON) -W ignore:::pynwb.form.build.map: test.py -fpi
+
+testclean:
+	rm *.npy *.nwb *.yaml
 
 apidoc:
 	pip install -r requirements-doc.txt

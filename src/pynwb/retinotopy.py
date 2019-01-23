@@ -3,7 +3,7 @@ from collections import Iterable
 from .form.utils import docval, popargs, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer
+from .core import NWBContainer, NWBDataInterface
 
 
 class AImage(NWBContainer):
@@ -18,7 +18,6 @@ class AImage(NWBContainer):
                      'focal_depth')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this axis map'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'data', 'type': Iterable, 'doc': 'Data field.'},
             {'name': 'bits_per_pixel', 'type': int,
              'doc': 'Number of bits used to represent each value. This is necessary to determine maximum \
@@ -48,11 +47,11 @@ class AxisMap(NWBContainer):
                      'dimension')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this axis map'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'data', 'type': Iterable, 'doc': 'data field.'},
+            {'name': 'data', 'type': Iterable, 'shape': (None, None), 'doc': 'data field.'},
             {'name': 'field_of_view', 'type': Iterable, 'doc': 'Size of viewing area, in meters.'},
             {'name': 'unit', 'type': str, 'doc': 'Unit that axis data is stored in (e.g., degrees)'},
-            {'name': 'dimension', 'type': Iterable, 'doc': 'Number of rows and columns in the image'})
+            {'name': 'dimension', 'type': Iterable, 'shape': (None, ),
+             'doc': 'Number of rows and columns in the image'})
     def __init__(self, **kwargs):
         data, field_of_view, unit, dimension = popargs('data', 'field_of_view', 'unit', 'dimension', kwargs)
         pargs, pkwargs = fmt_docval_args(super(AxisMap, self).__init__, kwargs)
@@ -63,8 +62,8 @@ class AxisMap(NWBContainer):
         self.dimension = dimension
 
 
-@register_class('ImageRetinotopy', CORE_NAMESPACE)    # make sure to uncomment this after this class is implemented
-class ImagingRetinotopy(NWBContainer):
+@register_class('ImagingRetinotopy', CORE_NAMESPACE)
+class ImagingRetinotopy(NWBDataInterface):
     """
     Intrinsic signal optical imaging or widefield imaging for measuring retinotopy. Stores orthogonal
     maps (e.g., altitude/azimuth; radius/theta) of responses to specific stimuli and a combined
@@ -85,8 +84,7 @@ class ImagingRetinotopy(NWBContainer):
 
     _help = "Intrinsic signal optical imaging or Widefield imaging for measuring retinotopy."
 
-    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data represented in this Module Interface.'},
-            {'name': 'sign_map', 'type': AxisMap,
+    @docval({'name': 'sign_map', 'type': AxisMap,
              'doc': 'Sine of the angle between the direction of the gradient in axis_1 and axis_2.'},
             {'name': 'axis_1_phase_map', 'type': AxisMap,
              'doc': 'Phase response to stimulus on the first measured axis.'},

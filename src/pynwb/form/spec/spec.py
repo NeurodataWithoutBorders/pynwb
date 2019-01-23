@@ -20,6 +20,55 @@ FLAGS = {
 from six import with_metaclass  # noqa: E402
 
 
+class DtypeHelper():
+    # Dict where the keys are the primary data type and the values are list of strings with synonyms for the dtype
+    primary_dtype_synonyms = {
+            'float': ["float", "float32"],
+            'double': ["double", "float64"],
+            'short': ["int16", "short"],
+            'int': ["int32", "int"],
+            'long': ["int64", "long"],
+            'utf': ["text", "utf", "utf8", "utf-8"],
+            'ascii': ["ascii", "bytes"],
+            'bool': ["bool"],
+            'int8': ["int8"],
+            'uint8': ["uint8"],
+            'uint16': ["uint16"],
+            'uint32': ["uint32", "uint"],
+            'uint64': ["uint64"],
+            'object': ['object'],
+            'region': ['region'],
+            'numeric': ['numeric'],
+            'isodatetime': ["isodatetime", "datetime", "datetime64"]
+        }
+
+    # List of recommended primary dtype strings. These are the keys of primary_dtype_string_synonyms
+    recommended_primary_dtypes = list(primary_dtype_synonyms.keys())
+
+    # List of valid primary data type strings
+    valid_primary_dtypes = set(list(primary_dtype_synonyms.keys()) +
+                               [vi for v in primary_dtype_synonyms.values() for vi in v])
+
+    @staticmethod
+    def simplify_cpd_type(cpd_type):
+        '''
+        Transform a list of DtypeSpecs into a list of strings.
+        Use for simple representation of compound type and
+        validation.
+
+        :param cpd_type: The list of DtypeSpecs to simplify
+        :type cpd_type: list
+
+        '''
+        ret = list()
+        for exp in cpd_type:
+            exp_key = exp.dtype
+            if isinstance(exp_key, RefSpec):
+                exp_key = exp_key.reftype
+            ret.append(exp_key)
+        return ret
+
+
 class ConstructableDict(with_metaclass(abc.ABCMeta, dict)):
     @classmethod
     def build_const_args(cls, spec_dict):
@@ -29,9 +78,18 @@ class ConstructableDict(with_metaclass(abc.ABCMeta, dict)):
     @classmethod
     def build_spec(cls, spec_dict):
         ''' Build a Spec object from the given Spec dict '''
-        kwargs = cls.build_const_args(spec_dict)
+        vargs = cls.build_const_args(spec_dict)
+        args = list()
+        kwargs = dict()
         try:
-            args = [kwargs.pop(x['name']) for x in get_docval(cls.__init__) if 'default' not in x]
+
+            for x in get_docval(cls.__init__):
+                if not x['name'] in vargs:
+                    continue
+                if 'default' not in x:
+                    args.append(vargs.get(x['name']))
+                else:
+                    kwargs[x['name']] = vargs.get(x['name'])
         except KeyError as e:
             raise KeyError("'%s' not found in %s" % (e.args[0], str(spec_dict)))
         return cls(*args, **kwargs)
@@ -83,7 +141,8 @@ class Spec(ConstructableDict):
         ''' Build constructor arguments for this Spec class from a dictionary '''
         ret = super(Spec, cls).build_const_args(spec_dict)
         if 'doc' not in ret:
-            raise ValueError("'doc' missing")
+            msg = "'doc' missing: %s" % str(spec_dict)
+            raise ValueError(msg)
         return ret
 
     def __hash__(self):
@@ -93,15 +152,51 @@ class Spec(ConstructableDict):
 #        return id(self) == id(other)
 
 
+_target_type_key = 'target_type'
+
+_ref_args = [
+    {'name': _target_type_key, 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
+    {'name': 'reftype', 'type': str, 'doc': 'the type of references this is i.e. region or object'},
+]
+
+
+class RefSpec(ConstructableDict):
+
+    __allowable_types = ('object', 'region')
+
+    @docval(*_ref_args)
+    def __init__(self, **kwargs):
+        target_type, reftype = getargs(_target_type_key, 'reftype', kwargs)
+        self[_target_type_key] = target_type
+        if reftype not in self.__allowable_types:
+            msg = "reftype must be one of the following: %s" % ", ".join(self.__allowable_types)
+            raise ValueError(msg)
+        self['reftype'] = reftype
+
+    @property
+    def target_type(self):
+        '''The data_type of the target of the reference'''
+        return self[_target_type_key]
+
+    @property
+    def reftype(self):
+        '''The type of reference'''
+        return self['reftype']
+
+    @docval(rtype=bool, returns='True if this RefSpec specifies a region reference, False otherwise')
+    def is_region(self):
+        return self['reftype'] == 'region'
+
+
 _attr_args = [
         {'name': 'name', 'type': str, 'doc': 'The name of this attribute'},
         {'name': 'doc', 'type': str, 'doc': 'a description about what this specification represents'},
-        {'name': 'dtype', 'type': str, 'doc': 'The data type of this attribute'},
+        {'name': 'dtype', 'type': (str, RefSpec), 'doc': 'The data type of this attribute'},
         {'name': 'shape', 'type': (list, tuple), 'doc': 'the shape of this dataset', 'default': None},
         {'name': 'dims', 'type': (list, tuple), 'doc': 'the dimensions of this dataset', 'default': None},
         {'name': 'required', 'type': bool,
          'doc': 'whether or not this attribute is required. ignored when "value" is specified', 'default': True},
-        {'name': 'parent', 'type': 'AttributeSpec', 'doc': 'the parent of this spec', 'default': None},
+        {'name': 'parent', 'type': 'BaseStorageSpec', 'doc': 'the parent of this spec', 'default': None},
         {'name': 'value', 'type': None, 'doc': 'a constant value for this attribute', 'default': None},
         {'name': 'default_value', 'type': None, 'doc': 'a default value for this attribute', 'default': None}
 ]
@@ -116,10 +211,14 @@ class AttributeSpec(Spec):
         name, dtype, doc, dims, shape, required, parent, value, default_value = getargs(
             'name', 'dtype', 'doc', 'dims', 'shape', 'required', 'parent', 'value', 'default_value', kwargs)
         super(AttributeSpec, self).__init__(doc, name=name, required=required, parent=parent)
-        if isinstance(dtype, type):
-            self['dtype'] = dtype.__name__
-        elif dtype is not None:
+        if isinstance(dtype, RefSpec):
             self['dtype'] = dtype
+        else:
+            self['dtype'] = dtype
+            # Validate the dype string
+            if self['dtype'] not in DtypeHelper.valid_primary_dtypes:
+                raise ValueError('dtype %s not a valid primary data type %s' % (self['dtype'],
+                                                                                str(DtypeHelper.valid_primary_dtypes)))
         if value is not None:
             self.pop('required', None)
             self['value'] = value
@@ -128,13 +227,15 @@ class AttributeSpec(Spec):
                 raise ValueError("cannot specify 'value' and 'default_value'")
             self['default_value'] = default_value
             self['required'] = False
+        if shape is not None:
+            self['shape'] = shape
         if dims is not None:
             self['dims'] = dims
             if 'shape' not in self:
                 self['shape'] = tuple([None] * len(dims))
-            else:
-                if len(self['dims']) != len(self['shape']):
-                    raise ValueError("'dims' and 'shape' must be the same length")
+        if self.shape is not None and self.dims is not None:
+            if len(self['dims']) != len(self['shape']):
+                raise ValueError("'dims' and 'shape' must be the same length")
 
     @property
     def dtype(self):
@@ -165,6 +266,15 @@ class AttributeSpec(Spec):
     def shape(self):
         ''' The shape of this attribute's value '''
         return self.get('shape', None)
+
+    @classmethod
+    def build_const_args(cls, spec_dict):
+        ''' Build constructor arguments for this Spec class from a dictionary '''
+        ret = super(AttributeSpec, cls).build_const_args(spec_dict)
+        if 'dtype' in ret:
+            if isinstance(ret['dtype'], dict):
+                ret['dtype'] = RefSpec.build_spec(ret['dtype'])
+        return ret
 
 
 _attrbl_args = [
@@ -319,7 +429,7 @@ class BaseStorageSpec(Spec):
     @property
     def linkable(self):
         ''' True if object can be a link, False otherwise '''
-        return self.get('linkable', None)
+        return self.get('linkable', True)
 
     @classmethod
     def type_key(cls):
@@ -405,42 +515,6 @@ class BaseStorageSpec(Spec):
         return ret
 
 
-_target_type_key = 'target_type'
-
-_ref_args = [
-    {'name': _target_type_key, 'type': str, 'doc': 'the target type GroupSpec or DatasetSpec'},
-    {'name': 'reftype', 'type': str, 'doc': 'the type of references this is i.e. region or object'},
-]
-
-
-class RefSpec(ConstructableDict):
-
-    __allowable_types = ('object', 'region')
-
-    @docval(*_ref_args)
-    def __init__(self, **kwargs):
-        target_type, reftype = getargs(_target_type_key, 'reftype', kwargs)
-        self[_target_type_key] = target_type
-        if reftype not in self.__allowable_types:
-            msg = "reftype must be one of the following: %s" % ", ".join(self.__allowable_types)
-            raise ValueError(msg)
-        self['reftype'] = reftype
-
-    @property
-    def target_type(self):
-        '''The data_type of the target of the reference'''
-        return self[_target_type_key]
-
-    @property
-    def reftype(self):
-        '''The type of reference'''
-        return self['reftype']
-
-    @docval(rtype=bool, returns='True if this RefSpec specifies a region reference, False otherwise')
-    def is_region(self):
-        return self['reftype'] == 'region'
-
-
 _dt_args = [
     {'name': 'name', 'type': str, 'doc': 'the name of this column'},
     {'name': 'doc', 'type': str, 'doc': 'a description about what this data type is'},
@@ -480,15 +554,26 @@ class DtypeSpec(ConstructableDict):
             if _target_type_key not in dtype:
                 msg = "'dtype' must have the key '%s'" % _target_type_key
                 raise AssertionError(msg)
+        elif isinstance(dtype, RefSpec):
+            pass
+        else:
+            if dtype not in DtypeHelper.valid_primary_dtypes:
+                msg = "'dtype=%s' string not in valid primary data type: %s " % (str(dtype),
+                                                                                 str(DtypeHelper.valid_primary_dtypes))
+                raise AssertionError(msg)
         return True
 
     @staticmethod
     @docval({'name': 'spec', 'type': (str, dict), 'doc': 'the spec object to check'}, is_method=False)
     def is_ref(**kwargs):
         spec = getargs('spec', kwargs)
+        spec_is_ref = False
         if isinstance(spec, dict):
-            return _target_type_key in spec
-        return False
+            if _target_type_key in spec:
+                spec_is_ref = True
+            elif 'dtype' in spec and isinstance(spec['dtype'], dict) and _target_type_key in spec['dtype']:
+                spec_is_ref = True
+        return spec_is_ref
 
     @classmethod
     def build_const_args(cls, spec_dict):
@@ -535,18 +620,32 @@ class DatasetSpec(BaseStorageSpec):
             self['dims'] = dims
             if 'shape' not in self:
                 self['shape'] = tuple([None] * len(dims))
-            else:
-                if len(self['dims']) != len(self['shape']):
-                    raise ValueError("'dims' and 'shape' must be the same length")
+        if self.shape is not None and self.dims is not None:
+            if len(self['dims']) != len(self['shape']):
+                raise ValueError("'dims' and 'shape' must be the same length")
         if dtype is not None:
-            self['dtype'] = dtype
+            if isinstance(dtype, list):  # Dtype is a compound data type
+                for _i, col in enumerate(dtype):
+                    if not isinstance(col, DtypeSpec):
+                        msg = 'must use DtypeSpec if defining compound dtype - found %s at element %d' % \
+                                (type(col), _i)
+                        raise ValueError(msg)
+                self['dtype'] = dtype
+            elif isinstance(dtype, RefSpec):  # Dtype is a reference
+                self['dtype'] = dtype
+            else:   # Dtype is a string
+                self['dtype'] = dtype
+                if self['dtype'] not in DtypeHelper.valid_primary_dtypes:
+                    raise ValueError('dtype %s not a valid primary data type %s' %
+                                     (self['dtype'], str(DtypeHelper.valid_primary_dtypes)))
         super(DatasetSpec, self).__init__(doc, **kwargs)
         if default_value is not None:
             self['default_value'] = default_value
-            if self.name is not None:
-                self.pop('quantity')
-            else:
-                self['quantity'] = ZERO_OR_MORE  # noqa: F821
+        if self.name is not None:
+            valid_quant_vals = [1, 'zero_or_one', ZERO_OR_ONE]
+            if self.quantity not in valid_quant_vals:
+                raise ValueError("quantity %s invalid for spec with fixed name. Valid values are: %s" %
+                                 (self.quantity, str(valid_quant_vals)))
 
     @classmethod
     def __get_prec_level(cls, dtype):
@@ -559,12 +658,17 @@ class DatasetSpec(BaseStorageSpec):
 
     @classmethod
     def __is_sub_dtype(cls, orig, new):
-        orig_prec = cls.__get_prec_level(orig)
-        new_prec = cls.__get_prec_level(new)
-        if orig_prec[0] != new_prec[0]:
-            # cannot extend int to float and vice-versa
-            return False
-        return new_prec >= orig_prec
+        if isinstance(orig, RefSpec):
+            if not isinstance(new, RefSpec):
+                return False
+            return orig == new
+        else:
+            orig_prec = cls.__get_prec_level(orig)
+            new_prec = cls.__get_prec_level(new)
+            if orig_prec[0] != new_prec[0]:
+                # cannot extend int to float and vice-versa
+                return False
+            return new_prec >= orig_prec
 
     @docval({'name': 'inc_spec', 'type': 'DatasetSpec', 'doc': 'the data type this specification represents'})
     def resolve_spec(self, **kwargs):
@@ -607,6 +711,11 @@ class DatasetSpec(BaseStorageSpec):
     def shape(self):
         ''' The shape of the dataset '''
         return self.get('shape', None)
+
+    @property
+    def default_value(self):
+        '''The default value of the dataset or None if not specified'''
+        return self.get('default_value', None)
 
     @classmethod
     def __check_dim(cls, dim, data):
@@ -747,7 +856,7 @@ class GroupSpec(BaseStorageSpec):
                 self.set_group(group)
         # resolve inherited links
         for link in inc_spec.links:
-            if link.data_type_inc is not None:
+            if link.name is None:
                 data_types.append(link)
             self.__new_links.discard(link.name)
             if link.name in self.__links:
@@ -756,11 +865,23 @@ class GroupSpec(BaseStorageSpec):
             self.set_link(link)
         # resolve inherited data_types
         for dt_spec in data_types:
-            dt = getattr(dt_spec, 'data_type_def',
-                         getattr(dt_spec, 'data_type_inc', None))
+            if isinstance(dt_spec, LinkSpec):
+                dt = dt_spec.target_type
+            else:
+                dt = dt_spec.data_type_def
+                if dt is None:
+                    dt = dt_spec.data_type_inc
             self.__new_data_types.discard(dt)
-            if dt not in self.__data_types:
-                self.__add_data_type_inc(dt_spec)
+            existing_dt_spec = self.get_data_type(dt)
+            if existing_dt_spec is None or \
+               ((isinstance(existing_dt_spec, list) or existing_dt_spec.name is not None)) and \
+               dt_spec.name is None:
+                if isinstance(dt_spec, DatasetSpec):
+                    self.set_dataset(dt_spec)
+                elif isinstance(dt_spec, GroupSpec):
+                    self.set_group(dt_spec)
+                else:
+                    self.set_link(dt_spec)
         super(GroupSpec, self).resolve_spec(inc_spec)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the dataset'},
@@ -859,6 +980,8 @@ class GroupSpec(BaseStorageSpec):
         if isinstance(spec, Spec):
             name = spec.name
             if name is None:
+                if spec.is_many():  # this is a wildcard spec, so it cannot be overridden
+                    return False
                 name = spec.data_type_def
             if name is None:
                 name = spec.data_type_inc
@@ -895,7 +1018,17 @@ class GroupSpec(BaseStorageSpec):
             if spec.data_type_def is None:
                 raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
             spec = spec.data_type_def
-        # return spec.data_type_def in self.__inherited_data_type_defs
+        return spec not in self.__new_data_types
+
+    @docval({'name': 'spec', 'type': (BaseStorageSpec, str), 'doc': 'the specification to check'},
+            raises="ValueError, if 'name' is not part of this spec")
+    def is_overridden_type(self, **kwargs):
+        ''' Returns True if `spec` represents a spec that was overriden by the subtype'''
+        spec = getargs('spec', kwargs)
+        if isinstance(spec, BaseStorageSpec):
+            if spec.data_type_def is None:
+                raise ValueError('cannot check if something was inherited if it does not have a %s' % self.def_key())
+            spec = spec.data_type_def
         return spec not in self.__new_data_types
 
     def __add_data_type_inc(self, spec):
@@ -907,8 +1040,30 @@ class GroupSpec(BaseStorageSpec):
         if not dt:
             raise TypeError("spec does not have '%s' or '%s' defined" % (self.def_key(), self.inc_key()))
         if dt in self.__data_types:
-            raise TypeError('Cannot have multipled data types of the same type without specifying name')
-        self.__data_types[dt] = spec
+            curr = self.__data_types[dt]
+            if curr is spec:
+                return
+            if spec.name is None:
+                if isinstance(curr, list):
+                    self.__data_types[dt] = spec
+                else:
+                    if curr.name is None:
+                        raise TypeError('Cannot have multiple data types of the same type without specifying name')
+                    else:
+                        # unnamed data types will be stored as data_types
+                        self.__data_types[dt] = spec
+            else:
+                if isinstance(curr, list):
+                    self.__data_types[dt].append(spec)
+                else:
+                    if curr.name is None:
+                        # leave the existing data type as is, since the new one can be retrieved by name
+                        return
+                    else:
+                        # store both specific instances of a data type
+                        self.__data_types[dt] = [curr, spec]
+        else:
+            self.__data_types[dt] = spec
 
     @docval({'name': 'data_type', 'type': str, 'doc': 'the data_type to retrieve'})
     def get_data_type(self, **kwargs):
@@ -937,7 +1092,7 @@ class GroupSpec(BaseStorageSpec):
     def add_group(self, **kwargs):
         ''' Add a new specification for a subgroup to this group specification '''
         doc = kwargs.pop('doc')
-        spec = GroupSpec(doc, **kwargs)
+        spec = self.__class__(doc, **kwargs)
         self.set_group(spec)
         return spec
 
@@ -946,13 +1101,15 @@ class GroupSpec(BaseStorageSpec):
         ''' Add the given specification for a subgroup to this group specification '''
         spec = getargs('spec', kwargs)
         if spec.parent is not None:
-            spec = GroupSpec.build_spec(spec)
+            spec = self.build_spec(spec)
         if spec.name == NAME_WILDCARD:
             if spec.data_type_inc is not None or spec.data_type_def is not None:
                 self.__add_data_type_inc(spec)
             else:
                 raise TypeError("must specify 'name' or 'data_type_inc' in Group spec")
         else:
+            if spec.data_type_inc is not None or spec.data_type_def is not None:
+                self.__add_data_type_inc(spec)
             self.__groups[spec.name] = spec
         self.setdefault('groups', list()).append(spec)
         spec.parent = self
@@ -967,7 +1124,7 @@ class GroupSpec(BaseStorageSpec):
     def add_dataset(self, **kwargs):
         ''' Add a new specification for a dataset to this group specification '''
         doc = kwargs.pop('doc')
-        spec = DatasetSpec(doc, **kwargs)
+        spec = self.dataset_spec_cls()(doc, **kwargs)
         self.set_dataset(spec)
         return spec
 
@@ -976,13 +1133,15 @@ class GroupSpec(BaseStorageSpec):
         ''' Add the given specification for a dataset to this group specification '''
         spec = getargs('spec', kwargs)
         if spec.parent is not None:
-            spec = DatasetSpec.build_spec(spec)
+            spec = self.dataset_spec_cls().build_spec(spec)
         if spec.name == NAME_WILDCARD:
             if spec.data_type_inc is not None or spec.data_type_def is not None:
                 self.__add_data_type_inc(spec)
             else:
                 raise TypeError("must specify 'name' or 'data_type_inc' in Dataset spec")
         else:
+            if spec.data_type_inc is not None or spec.data_type_def is not None:
+                self.__add_data_type_inc(spec)
             self.__datasets[spec.name] = spec
         self.setdefault('datasets', list()).append(spec)
         spec.parent = self
@@ -997,7 +1156,7 @@ class GroupSpec(BaseStorageSpec):
     def add_link(self, **kwargs):
         ''' Add a new specification for a link to this group specification '''
         doc, target_type = popargs('doc', _target_type_key, kwargs)
-        spec = LinkSpec(doc, target_type, **kwargs)
+        spec = self.link_spec_cls()(doc, target_type, **kwargs)
         self.set_link(spec)
         return spec
 
@@ -1006,7 +1165,7 @@ class GroupSpec(BaseStorageSpec):
         ''' Add a given specification for a link to this group specification '''
         spec = getargs('spec', kwargs)
         if spec.parent is not None:
-            spec = LinkSpec.build_spec(spec)
+            spec = self.link_spec_cls().build_spec(spec)
         if spec.name == NAME_WILDCARD:
             if spec.data_type_inc is not None or spec.data_type_def is not None:
                 self.__add_data_type_inc(spec)
