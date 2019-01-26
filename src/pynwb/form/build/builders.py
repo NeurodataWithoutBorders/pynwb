@@ -202,6 +202,21 @@ class GroupBuilder(BaseBuilder):
         super(GroupBuilder, self).set_attribute(name, value)
         self.obj_type[name] = GroupBuilder.__attribute
 
+    @docval({'name': 'builder', 'type': 'Builder', 'doc': 'the Builder to add to this GroupBuilder'})
+    def set_builder(self, **kwargs):
+        '''
+        Add an existing builder to this this GroupBuilder
+        '''
+        builder = getargs('builder', kwargs)
+        if isinstance(builder, LinkBuilder):
+            self.__set_builder(builder, GroupBuilder.__link)
+        elif isinstance(builder, GroupBuilder):
+            self.__set_builder(builder, GroupBuilder.__dataset)
+        elif isinstance(builder, DatasetBuilder):
+            self.__set_builder(builder, GroupBuilder.__dataset)
+        else:
+            raise ValueError("Got unexpected builder type: %s" % type(builder))
+
     def __set_builder(self, builder, obj_type):
         name = builder.name
         if name in self.obj_type:

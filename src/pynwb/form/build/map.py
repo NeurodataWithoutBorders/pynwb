@@ -914,7 +914,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                                   % (spec.name, builder.name, self.spec.data_type_def)
                     warnings.warn(msg, MissingRequiredWarning)
                 continue
-            if spec.data_type_def is None and spec.data_type_inc is None:
+            if isinstance(attr_value, Builder):
+                builder.set_builder(attr_value)
+            elif spec.data_type_def is None and spec.data_type_inc is None:
                 if spec.name in builder.datasets:
                     sub_builder = builder.datasets[spec.name]
                 else:

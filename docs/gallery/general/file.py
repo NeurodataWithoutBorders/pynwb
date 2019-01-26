@@ -45,7 +45,7 @@ test_ts = TimeSeries('test_timeseries', data, 'SIunit', timestamps=timestamps)
 # Alternatively, if your recordings are sampled at a uniform rate, you can supply *starting_time*
 # and *rate*.
 
-test_ts = TimeSeries('test_timeseries', data, 'SIunit', starting_time=0.0, rate=1.0)
+rate_ts = TimeSeries('test_timeseries', data, 'SIunit', starting_time=0.0, rate=1.0)
 
 ####################
 # Using this scheme says that this :py:class:`~pynwb.base.TimeSeries` started recording 0 seconds after
@@ -59,6 +59,26 @@ test_ts = TimeSeries('test_timeseries', data, 'SIunit', starting_time=0.0, rate=
 # :py:func:`~pynwb.file.NWBFile.add_stimulus_template` to store stimulus templates [#]_.
 
 nwbfile.add_acquisition(test_ts)
+
+####################
+# .. _reuse_timestamps:
+#
+# Reusing timestamps
+# ~~~~~~~~~~~~~~~~~~
+#
+# When working with multimodal data, it can be convenient and efficient to store timestamps once and associate multiple
+# data with the single timestamps instance. PyNWB enables this by letting you reuse timestamps across
+# :class:`~pynwb.base.TimeSeries` objects. To reuse a :class:`~pynwb.base.TimeSeries` timestamps in a new
+# :class:`~pynwb.base.TimeSeries`, pass the exising :class:`~pynwb.base.TimeSeries` as the new
+# :class:`~pynwb.base.TimeSeries` timestamps:
+
+data = list(range(101, 201, 10))
+reuse_ts = TimeSeries('reusing_timeseries', data, 'SIunit', timestamps=test_ts)
+
+####################
+# And then add it to the NWBFile.
+
+nwbfile.add_acquisition(reuse_ts)
 
 ####################
 # .. _basic_data_interfaces:
