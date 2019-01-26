@@ -54,10 +54,12 @@ class TimeSeriesMap(NWBContainerMapper):
         return ret
 
     @NWBContainerMapper.constructor_arg("timestamps")
-    def timestamps_attr(self, builder, manager):
-        tstamps_builder = builder
-        if isinstance(builder, LinkBuilder):
-            target = builder.target
+    def timestamps_carg(self, builder, manager):
+        tstamps_builder = builder.get('timestamps')
+        if tstamps_builder is None:
+            return None
+        if isinstance(tstamps_builder, LinkBuilder):
+            target = tstamps_builder.builder
             return manager.construct(target.parent)
         else:
-            return builder.data
+            return tstamps_builder.data

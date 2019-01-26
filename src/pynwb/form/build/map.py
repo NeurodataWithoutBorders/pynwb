@@ -1391,9 +1391,6 @@ class TypeMap(object):
         '''
         builder = getargs('builder', kwargs)
         ret = builder.attributes.get(self.__ns_catalog.group_spec_cls.type_key())
-        if ret is None:
-            msg = "builder '%s' does not have a data_type" % builder.name
-            raise ValueError(msg)
 
         if isinstance(ret, bytes):
             ret = ret.decode('UTF-8')
@@ -1410,9 +1407,6 @@ class TypeMap(object):
         if isinstance(builder, LinkBuilder):
             builder = builder.builder
         ret = builder.attributes.get('namespace')
-        if ret is None:
-            msg = "builder '%s' does not have a namespace" % builder.name
-            raise ValueError(msg)
         return ret
 
     @docval({'name': 'builder', 'type': Builder,
