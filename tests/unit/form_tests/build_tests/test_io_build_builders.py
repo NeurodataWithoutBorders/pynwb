@@ -81,6 +81,13 @@ class GroupBuilderGetterTests(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_path(self):
+        self.assertEquals(self.subgroup1.path, 'gb/group1/subgroup1')
+        self.assertEquals(self.dataset1.path, 'gb/dataset1')
+        self.assertEquals(self.soft_link1.path, 'gb/soft_link1')
+        self.assertEquals(self.group1.path, 'gb/group1')
+        self.assertEquals(self.gb.path, 'gb')
+
     def test_get_item_group(self):
         """Test __get_item__ for groups"""
         self.assertIs(self.gb['group1'], self.group1)
