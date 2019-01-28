@@ -221,12 +221,11 @@ class BuildManager(object):
         tmp = builder.parent
         ret = None
         while tmp is not None:
-            try:
-                ret = tmp
-                self.__type_map.get_builder_dt(tmp)
+            ret = tmp
+            dt = self.__type_map.get_builder_dt(tmp)
+            if dt is not None:
                 break
-            except Exception:
-                tmp = tmp.parent
+            tmp = tmp.parent
         return ret
 
     @docval({'name': 'builder', 'type': Builder, 'doc': 'the Builder to get the class object for'})
@@ -1070,14 +1069,12 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
         # index builders by data_type
         builder_dt = dict()
         for g in sub_builders.values():
-            try:
-                dt = manager.get_builder_dt(g)
-                ns = manager.get_builder_ns(g)
-            except ValueError:
+            dt = manager.get_builder_dt(g)
+            ns = manager.get_builder_ns(g)
+            if dt is None or ns is None:
                 continue
-            if dt is not None:
-                for parent_dt in manager.namespace_catalog.get_hierarchy(ns, dt):
-                    builder_dt.setdefault(parent_dt, list()).append(g)
+            for parent_dt in manager.namespace_catalog.get_hierarchy(ns, dt):
+                builder_dt.setdefault(parent_dt, list()).append(g)
         for subspec in subspecs:
             # first get data type for the spec
             if subspec.data_type_def is not None:
@@ -1391,10 +1388,8 @@ class TypeMap(object):
         '''
         builder = getargs('builder', kwargs)
         ret = builder.attributes.get(self.__ns_catalog.group_spec_cls.type_key())
-
         if isinstance(ret, bytes):
             ret = ret.decode('UTF-8')
-
         return ret
 
     @docval({'name': 'builder', 'type': (DatasetBuilder, GroupBuilder, LinkBuilder),
@@ -1415,7 +1410,11 @@ class TypeMap(object):
         ''' Get the class object for the given Builder '''
         builder = getargs('builder', kwargs)
         data_type = self.get_builder_dt(builder)
+        if data_type is None:
+            raise ValueError("No data_type found for builder %s" % builder.get_path())
         namespace = self.get_builder_ns(builder)
+        if namespace is None:
+            raise ValueError("No namespace found for builder %s" % builder.get_path())
         return self.get_container_cls(namespace, data_type)
 
     @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},
@@ -1441,7 +1440,6 @@ class TypeMap(object):
             else:
                 dt = self.get_builder_dt(builder)
             if dt is not None:
-                # TODO: this returns None when using subclasses
                 ns = self.get_builder_ns(builder)
                 hierarchy = self.__ns_catalog.get_hierarchy(ns, dt)
                 for t in hierarchy:

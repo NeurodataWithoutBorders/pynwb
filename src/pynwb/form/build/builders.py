@@ -30,6 +30,14 @@ class Builder(with_metaclass(ABCMeta, dict)):
             self.__source = None
         self.__written = False
 
+    def get_path(self):
+        s = list()
+        c = self
+        while c is not None:
+            s.append(c.name)
+            c = c.parent
+        return "/".join(s[::-1])
+
     @property
     def written(self):
         ''' The source of this Builder '''

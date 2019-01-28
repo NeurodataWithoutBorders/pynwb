@@ -47,7 +47,7 @@ class TimeSeriesMap(NWBContainerMapper):
             curr = owner.fields.get('timestamps')
             while isinstance(curr, TimeSeries):
                 owner = curr
-                curr = parent.fields.get('timestamps')
+                curr = owner.fields.get('timestamps')
             ts_builder = manager.build(owner)
             tstamps_builder = ts_builder['timestamps']
             ret = LinkBuilder(tstamps_builder, 'timestamps')
