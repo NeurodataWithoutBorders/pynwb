@@ -1411,10 +1411,10 @@ class TypeMap(object):
         builder = getargs('builder', kwargs)
         data_type = self.get_builder_dt(builder)
         if data_type is None:
-            raise ValueError("No data_type found for builder %s" % builder.get_path())
+            raise ValueError("No data_type found for builder %s" % builder.path)
         namespace = self.get_builder_ns(builder)
         if namespace is None:
-            raise ValueError("No namespace found for builder %s" % builder.get_path())
+            raise ValueError("No namespace found for builder %s" % builder.path)
         return self.get_container_cls(namespace, data_type)
 
     @docval({'name': 'spec', 'type': (DatasetSpec, GroupSpec), 'doc': 'the parent spec to search'},

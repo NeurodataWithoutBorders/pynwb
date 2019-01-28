@@ -292,6 +292,23 @@ class TestNestedContainersSubgroupSubgroup(TestNestedBase):
                                      groups=[tmp_spec])
 
 
+class TestTypeMap(TestBase):
+
+    def test_get_ns_dt_missing(self):
+        bldr = GroupBuilder('my_foo', attributes={'attr1': 'value1'})
+        dt = self.type_map.get_builder_dt(bldr)
+        ns = self.type_map.get_builder_ns(bldr)
+        self.assertIsNone(dt)
+        self.assertIsNone(ns)
+
+    def test_get_ns_dt(self):
+        bldr = GroupBuilder('my_foo', attributes={'attr1': 'value1', 'namespace': 'CORE', 'data_type': 'Foo'})
+        dt = self.type_map.get_builder_dt(bldr)
+        ns = self.type_map.get_builder_ns(bldr)
+        self.assertEqual(dt, 'Foo')
+        self.assertEqual(ns, 'CORE')
+
+
 # TODO:
 class TestWildCardNamedSpecs(unittest.TestCase):
     pass

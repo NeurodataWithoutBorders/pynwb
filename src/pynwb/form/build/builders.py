@@ -30,7 +30,11 @@ class Builder(with_metaclass(ABCMeta, dict)):
             self.__source = None
         self.__written = False
 
-    def get_path(self):
+    @property
+    def path(self):
+        """
+        Get the path of this Builder
+        """
         s = list()
         c = self
         while c is not None:
