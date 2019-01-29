@@ -242,7 +242,7 @@ nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5],
 # NWB I/O is carried out using the :py:class:`~pynwb.NWBHDF5IO` class [#]_. This class is responsible
 # for mapping an :py:class:`~pynwb.file.NWBFile` object into HDF5 according to the NWB schema.
 #
-# To write an :py:class:`~pynwb.file.NWBFile`, use the :py:func:`~pynwb.form.backends.io.FORMIO.write` method.
+# To write an :py:class:`~pynwb.file.NWBFile`, use the :py:func:`~hdmf.backends.io.FORMIO.write` method.
 
 from pynwb import NWBHDF5IO
 
@@ -264,7 +264,7 @@ with NWBHDF5IO('basic_example.nwb', 'w') as io:
 #
 # As with writing, reading is also carried out using the :py:class:`~pynwb.NWBHDF5IO` class.
 # To read the NWB file we just wrote, using construct another :py:class:`~pynwb.NWBHDF5IO` object,
-# and use the :py:func:`~pynwb.form.backends.io.FORMIO.read` method to retrieve an
+# and use the :py:func:`~hdmf.backends.io.FORMIO.read` method to retrieve an
 # :py:class:`~pynwb.file.NWBFile` object.
 
 io = NWBHDF5IO('basic_example.nwb', 'r')

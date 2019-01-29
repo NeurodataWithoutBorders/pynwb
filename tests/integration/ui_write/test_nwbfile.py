@@ -5,8 +5,8 @@ from dateutil.tz import tzlocal, tzutc
 import pandas as pd
 import numpy as np
 
-from pynwb.form.build import GroupBuilder, DatasetBuilder
-from pynwb.form.backends.hdf5 import HDF5IO
+from hdmf.build import GroupBuilder, DatasetBuilder
+from hdmf.backends.hdf5 import HDF5IO
 
 from pynwb import NWBFile, TimeSeries
 from pynwb.file import Subject

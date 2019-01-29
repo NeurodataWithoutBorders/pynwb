@@ -1,4 +1,4 @@
-from pynwb.form.build import GroupBuilder, LinkBuilder, ReferenceBuilder, DatasetBuilder
+from hdmf.build import GroupBuilder, LinkBuilder, ReferenceBuilder, DatasetBuilder
 from pynwb import NWBFile
 from pynwb.icephys import (IntracellularElectrode, PatchClampSeries, CurrentClampStimulusSeries,
                            SweepTable,

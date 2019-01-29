@@ -1,7 +1,7 @@
 from . import base
 
 import numpy as np
-from pynwb.form.build import GroupBuilder, DatasetBuilder, ReferenceBuilder
+from hdmf.build import GroupBuilder, DatasetBuilder, ReferenceBuilder
 from pynwb import TimeSeries
 from pynwb.core import DynamicTable, VectorData
 

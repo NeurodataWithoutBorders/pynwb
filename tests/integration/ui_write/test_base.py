@@ -1,7 +1,7 @@
 import numpy as np
 import datetime as datetime
 
-from pynwb.form.build import GroupBuilder, DatasetBuilder
+from hdmf.build import GroupBuilder, DatasetBuilder
 
 from pynwb import TimeSeries, NWBFile, NWBHDF5IO
 

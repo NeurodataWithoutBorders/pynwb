@@ -2,8 +2,8 @@ import unittest2 as unittest
 import numpy as np
 
 from pynwb.base import ProcessingModule, TimeSeries, Images, Image
-from pynwb.form.data_utils import DataChunkIterator
-from pynwb.form.backends.hdf5 import H5DataIO
+from hdmf.data_utils import DataChunkIterator
+from hdmf.backends.hdf5 import H5DataIO
 
 
 class TestProcessingModule(unittest.TestCase):
