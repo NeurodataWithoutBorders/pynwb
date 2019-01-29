@@ -1,6 +1,6 @@
 
-from ..form.spec import NamespaceCatalog
-from ..form.utils import docval, getargs
+from hdmf.spec import NamespaceCatalog
+from hdmf.utils import docval, getargs
 from ..spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 from .. import _get_resources, get_type_map, NWBContainer
 
