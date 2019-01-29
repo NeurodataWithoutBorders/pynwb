@@ -2,7 +2,7 @@ import numpy as np
 import warnings
 from collections import Iterable
 
-from .form.utils import docval, popargs, call_docval_func
+from hdmf.utils import docval, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion, Image
@@ -69,7 +69,7 @@ class ImageSeries(TimeSeries):
         self.dimension = dimension
         self.external_file = external_file
         self.starting_frame = starting_frame
-        self.format = format
+        selfhdmfat = format
 
     @property
     def bits_per_pixel(self):

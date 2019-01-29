@@ -9,12 +9,12 @@ import h5py
 
 CORE_NAMESPACE = 'core'
 
-from .form.spec import NamespaceCatalog  # noqa: E402
-from .form.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
-from .form.backends.io import FORMIO  # noqa: E402
-from .form.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
-from .form.validate import ValidatorMap  # noqa: E402
-from .form.build import BuildManager  # noqa: E402
+from hdmf.spec import NamespaceCatalog  # noqa: E402
+from hdmf.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
+from hdmf.backends.io import FORMIO  # noqa: E402
+from hdmf.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
+from hdmf.validate import ValidatorMap  # noqa: E402
+from hdmf.build import BuildManager  # noqa: E402
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa: E402
 
@@ -40,7 +40,7 @@ global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-from .form.build import TypeMap as TypeMap  # noqa: E402
+from hdmf.build import TypeMap as TypeMap  # noqa: E402
 
 __TYPE_MAP = TypeMap(__NS_CATALOG)
 

@@ -2,8 +2,8 @@ from h5py import RegionReference
 import numpy as np
 import pandas as pd
 
-from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
-from .form import Container, Data, DataRegion, get_region_slicer
+from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
+from hdmf import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
@@ -160,10 +160,10 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         cls.__nwbfields__ = tuple(new_nwbfields)
 
     def __repr__(self):
-        template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
+        template = "\n{} {}\nFields:\n"""hdmfat(getattr(self, 'name'), type(self))
         for k in sorted(self.fields):  # sorted to enable tests
             v = self.fields[k]
-            template += "  {}: {}\n".format(k, self.__smart_str(v))
+            template += "  {}: {}\n"hdmfat(k, self.__smart_str(v))
         return template
 
     @staticmethod
@@ -197,12 +197,12 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
             template = '{'
             keys = list(sorted(v.keys()))
             for k in keys[:-1]:
-                template += " {} {}, ".format(k, type(v[k]))
+                template += " {} {}, "hdmfat(k, type(v[k]))
             if keys:
-                template += " {} {}".format(keys[-1], type(v[keys[-1]]))
+                template += " {} {}"hdmfat(keys[-1], type(v[keys[-1]]))
             return template + ' }'
         elif isinstance(v, NWBBaseType):
-            "{} {}".format(getattr(v, 'name'), type(v))
+            "{} {}"hdmfat(getattr(v, 'name'), type(v))
         else:
             return str(v)
 
@@ -576,7 +576,7 @@ class NWBTable(NWBData):
 
         if extra_columns:
             raise ValueError(
-                'unrecognized column(s) {} for table class {} (columns {})'.format(
+                'unrecognized column(s) {} for table class {} (columns {})'hdmfat(
                     extra_columns, cls.__name__, cls_cols
                 )
             )
@@ -587,7 +587,7 @@ class NWBTable(NWBData):
 
         elif missing_columns:
             raise ValueError(
-                'missing column(s) {} for table class {} (columns {}, provided {})'.format(
+                'missing column(s) {} for table class {} (columns {}, provided {})'hdmfat(
                     missing_columns, cls.__name__, cls_cols, df_cols
                 )
             )
@@ -1099,8 +1099,8 @@ class DynamicTable(NWBDataInterface):
             raise ValueError(
                 '\n'.join([
                     'row data keys don\'t match available columns',
-                    'you supplied {} extra keys: {}'.format(len(extra_columns), extra_columns),
-                    'and were missing {} keys: {}'.format(len(missing_columns), missing_columns)
+                    'you supplied {} extra keys: {}'hdmfat(len(extra_columns), extra_columns),
+                    'and were missing {} keys: {}'hdmfat(len(missing_columns), missing_columns)
                 ])
             )
 
