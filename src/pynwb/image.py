@@ -69,7 +69,7 @@ class ImageSeries(TimeSeries):
         self.dimension = dimension
         self.external_file = external_file
         self.starting_frame = starting_frame
-        selfhdmfat = format
+        self.format = format
 
     @property
     def bits_per_pixel(self):
