@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable
+from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable, DynamicTableRegion
 from pynwb import NWBFile, TimeSeries, available_namespaces
 
 import pandas as pd
@@ -14,7 +14,7 @@ class TestDynamicTable(unittest.TestCase):
         self.spec = [
             {'name': 'foo', 'description': 'foo column'},
             {'name': 'bar', 'description': 'bar column'},
-            {'name': 'baz', 'description': 'baz column'}
+            {'name': 'baz', 'description': 'baz column'},
         ]
         self.data = [
             [1, 2, 3, 4, 5],
@@ -201,6 +201,12 @@ class TestDynamicTable(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             table.add_row({'bar': 60.0, 'foo': 6, 'baz': 'oryx', 'qax': -1}, None)
+
+    def test_indexed_dynamic_table_region(self):
+        table = self.with_spec()
+
+        dynamic_table_region = DynamicTableRegion('dtr', [0, 1], 'desc', table)
+        assert dynamic_table_region[slice(0, 1)]
 
 
 class TestNWBTable(unittest.TestCase):
