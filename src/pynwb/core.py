@@ -912,10 +912,10 @@ class DynamicTable(NWBDataInterface):
             raise TypeError(msg)
 
         if len(bases) and 'DynamicTable' in globals() and issubclass(bases[-1], NWBContainer) \
-           and bases[-1].__columns__ is not cls.__columns__:
-                new_columns = list(cls.__columns__)
-                new_columns[0:0] = bases[-1].__columns__
-                cls.__columns__ = tuple(new_columns)
+                and bases[-1].__columns__ is not cls.__columns__:
+            new_columns = list(cls.__columns__)
+            new_columns[0:0] = bases[-1].__columns__
+            cls.__columns__ = tuple(new_columns)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},    # noqa: C901
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
