@@ -102,8 +102,8 @@ class TestMapNWBContainer(unittest.TestCase):
                         if len(f1) == 0:
                             continue
                         if isinstance(f1[0], float):
-                                for v1, v2 in zip(f1, f2):
-                                    self.assertAlmostEqual(v1, v2, places=6)
+                            for v1, v2 in zip(f1, f2):
+                                self.assertAlmostEqual(v1, v2, places=6)
                         else:
                             self.assertTrue(np.array_equal(f1, f2))
                 elif isinstance(f1, dict) and len(f1) and isinstance(next(iter(f1.values())), NWBContainer):

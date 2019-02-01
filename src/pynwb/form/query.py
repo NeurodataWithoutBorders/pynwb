@@ -27,10 +27,10 @@ class Query(with_metaclass(ExtenderMeta, object)):
             raise TypeError("'__operations__' must be of type tuple")
         # add any new operations
         if len(bases) and 'Query' in globals() and issubclass(bases[-1], Query) \
-           and bases[-1].__operations__ is not cls.__operations__:
-                new_operations = list(cls.__operations__)
-                new_operations[0:0] = bases[-1].__operations__
-                cls.__operations__ = tuple(new_operations)
+                and bases[-1].__operations__ is not cls.__operations__:
+            new_operations = list(cls.__operations__)
+            new_operations[0:0] = bases[-1].__operations__
+            cls.__operations__ = tuple(new_operations)
         for op in cls.__operations__:
             if not hasattr(cls, op):
                 setattr(cls, op, cls.__build_operation(op))
@@ -117,10 +117,10 @@ class FORMDataset(with_metaclass(ExtenderMeta, object)):
             raise TypeError("'__operations__' must be of type tuple")
         # add any new operations
         if len(bases) and 'Query' in globals() and issubclass(bases[-1], Query) \
-           and bases[-1].__operations__ is not cls.__operations__:
-                new_operations = list(cls.__operations__)
-                new_operations[0:0] = bases[-1].__operations__
-                cls.__operations__ = tuple(new_operations)
+                and bases[-1].__operations__ is not cls.__operations__:
+            new_operations = list(cls.__operations__)
+            new_operations[0:0] = bases[-1].__operations__
+            cls.__operations__ = tuple(new_operations)
         for op in cls.__operations__:
             setattr(cls, op, cls.__build_operation(op))
 

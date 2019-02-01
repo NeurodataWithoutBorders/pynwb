@@ -43,7 +43,7 @@ class TestUnits(base.TestMapRoundTrip):
         return nwbfile.units
 
 
-class TestUnitsDf(base.TestMapRoundTrip):
+class TestFromDataframe(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored

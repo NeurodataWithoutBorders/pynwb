@@ -40,7 +40,7 @@ metadata = dataset.get_metadata()
 cell_specimen_ids = dataset.get_cell_specimen_ids()
 timestamps, dFF = dataset.get_dff_traces()
 stimulus_list = [s for s in si.SESSION_STIMULUS_MAP[metadata['session_type']]
-                 if s is not 'spontaneous']
+                 if s != 'spontaneous']
 running_data, _ = dataset.get_running_speed()
 trial_table = dataset.get_stimulus_table('master')
 trial_table['start'] = timestamps[trial_table['start'].values]
