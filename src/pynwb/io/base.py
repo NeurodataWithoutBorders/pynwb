@@ -2,6 +2,7 @@ from .core import NWBContainerMapper
 from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
+from ..form.build import LinkBuilder
 
 
 @register_map(ProcessingModule)
@@ -37,3 +38,28 @@ class TimeSeriesMap(NWBContainerMapper):
     @NWBContainerMapper.constructor_arg('name')
     def name(self, builder, manager):
         return builder.name
+
+    @NWBContainerMapper.object_attr("timestamps")
+    def timestamps_attr(self, container, manager):
+        ret = container.fields.get('timestamps')
+        if isinstance(ret, TimeSeries):
+            owner = ret
+            curr = owner.fields.get('timestamps')
+            while isinstance(curr, TimeSeries):
+                owner = curr
+                curr = owner.fields.get('timestamps')
+            ts_builder = manager.build(owner)
+            tstamps_builder = ts_builder['timestamps']
+            ret = LinkBuilder(tstamps_builder, 'timestamps')
+        return ret
+
+    @NWBContainerMapper.constructor_arg("timestamps")
+    def timestamps_carg(self, builder, manager):
+        tstamps_builder = builder.get('timestamps')
+        if tstamps_builder is None:
+            return None
+        if isinstance(tstamps_builder, LinkBuilder):
+            target = tstamps_builder.builder
+            return manager.construct(target.parent)
+        else:
+            return tstamps_builder.data
