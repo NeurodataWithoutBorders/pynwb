@@ -46,6 +46,8 @@ before_install:
   - pyenv install -s $TRAVIS_PYTHON_VERSION
   - pyenv global $TRAVIS_PYTHON_VERSION
   - pip install tox
+  # Initialize the submodules
+  - git submodule update --init --recursive
 
 script:
   - tox -e $TEST_TOX_ENV

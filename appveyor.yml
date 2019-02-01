@@ -29,6 +29,8 @@ init:
 
 test_script:
   - cd %APPVEYOR_BUILD_FOLDER%
+  # Initialize the submodules
+  - git submodule update --init --recursive
   - tox -e %TEST_TOX_ENV%
   - tox -e %BUILD_TOX_ENV%
   - ps: (Get-Item $env:APPVEYOR_BUILD_FOLDER\dist\*none-any.whl).Name | ForEach-Object {tox -e $env:TEST_WHEELINSTALL_ENV --recreate --installpkg $env:APPVEYOR_BUILD_FOLDER\dist\$_}
