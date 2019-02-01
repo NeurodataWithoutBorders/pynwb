@@ -1353,6 +1353,9 @@ class DynamicTableRegion(VectorData):
             arg1 = key[0]
             arg2 = key[1]
             return self.table[self.data[arg1], arg2]
+        elif isinstance(key, slice):
+            data = np.arange(*key.indices(len(self.table)))
+            return DynamicTableRegion(name=self.name, data=data, description=self.description, table=self.table)
         else:
             if isinstance(key, int):
                 return self.table[self.data[key]]
