@@ -44,9 +44,9 @@ def __type_okay(value, argtype, allow_none=False):
     if isinstance(argtype, str):
         if argtype in __macros:
             return __type_okay(value, __macros[argtype], allow_none=allow_none)
-        elif argtype is 'int':
+        elif argtype == 'int':
             return __is_int(value)
-        elif argtype is 'float':
+        elif argtype == 'float':
             return __is_float(value)
         return argtype in [cls.__name__ for cls in value.__class__.__mro__]
     elif isinstance(argtype, type):

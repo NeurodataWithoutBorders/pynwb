@@ -144,10 +144,10 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
             raise TypeError("'__nwbfields__' must be of type tuple")
 
         if len(bases) and 'NWBContainer' in globals() and issubclass(bases[-1], NWBContainer) \
-           and bases[-1].__nwbfields__ is not cls.__nwbfields__:
-                new_nwbfields = list(cls.__nwbfields__)
-                new_nwbfields[0:0] = bases[-1].__nwbfields__
-                cls.__nwbfields__ = tuple(new_nwbfields)
+                and bases[-1].__nwbfields__ is not cls.__nwbfields__:
+            new_nwbfields = list(cls.__nwbfields__)
+            new_nwbfields[0:0] = bases[-1].__nwbfields__
+            cls.__nwbfields__ = tuple(new_nwbfields)
         new_nwbfields = list()
         docs = {dv['name']: dv['doc'] for dv in get_docval(cls.__init__)}
         for f in cls.__nwbfields__:
