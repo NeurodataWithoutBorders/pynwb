@@ -180,6 +180,8 @@ class NWBFileTest(unittest.TestCase):
         table.add_row(x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none', group=group,
                       group_name='tetrode1')
         self.nwbfile.set_electrode_table(table)
+
+        self.assertIs(self.nwbfile.ec_electrodes, self.nwbfile.electrodes)
         self.assertIs(self.nwbfile.electrodes, table)
         self.assertIs(table.parent, self.nwbfile)
 
