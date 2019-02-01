@@ -145,9 +145,9 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
         if len(bases) and 'NWBContainer' in globals() and issubclass(bases[-1], NWBContainer) \
            and bases[-1].__nwbfields__ is not cls.__nwbfields__:
-                new_nwbfields = list(cls.__nwbfields__)
-                new_nwbfields[0:0] = bases[-1].__nwbfields__
-                cls.__nwbfields__ = tuple(new_nwbfields)
+            new_nwbfields = list(cls.__nwbfields__)
+            new_nwbfields[0:0] = bases[-1].__nwbfields__
+            cls.__nwbfields__ = tuple(new_nwbfields)
         new_nwbfields = list()
         docs = {dv['name']: dv['doc'] for dv in get_docval(cls.__init__)}
         for f in cls.__nwbfields__:
@@ -913,9 +913,9 @@ class DynamicTable(NWBDataInterface):
 
         if len(bases) and 'DynamicTable' in globals() and issubclass(bases[-1], NWBContainer) \
            and bases[-1].__columns__ is not cls.__columns__:
-                new_columns = list(cls.__columns__)
-                new_columns[0:0] = bases[-1].__columns__
-                cls.__columns__ = tuple(new_columns)
+            new_columns = list(cls.__columns__)
+            new_columns[0:0] = bases[-1].__columns__
+            cls.__columns__ = tuple(new_columns)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},    # noqa: C901
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
