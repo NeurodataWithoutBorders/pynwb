@@ -8,17 +8,17 @@ from pynwb.device import Device
 
 
 def GetElectrode():
-        device = Device(name='device_name')
-        elec = IntracellularElectrode('test_iS',
-                                      device,
-                                      'slice',
-                                      'seal',
-                                      'description',
-                                      'location',
-                                      'resistance',
-                                      'filtering',
-                                      'initial_access_resistance')
-        return elec
+    device = Device(name='device_name')
+    elec = IntracellularElectrode('test_iS',
+                                  device,
+                                  'slice',
+                                  'seal',
+                                  'description',
+                                  'location',
+                                  'resistance',
+                                  'filtering',
+                                  'initial_access_resistance')
+    return elec
 
 
 class IntracellularElectrodeConstructor(unittest.TestCase):

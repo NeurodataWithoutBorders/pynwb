@@ -12,7 +12,6 @@ from pynwb import NWBFile, TimeSeries
 from pynwb.file import Subject
 from pynwb.ecephys import Clustering
 from pynwb.epoch import TimeIntervals
-from pynwb.misc import Units
 
 from . import base
 
@@ -270,4 +269,3 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         return nwbfile.epochs
-
