@@ -8,6 +8,7 @@ with open('README.rst', 'r') as fp:
     readme = fp.read()
 
 pkgs = find_packages('src', exclude=['data'])
+pkgs.extend(find_packages('src/hdmf/src'))
 print('found these packages:', pkgs)
 
 schema_dir = 'data'
@@ -34,7 +35,7 @@ setup_args = {
         'requests'
     ],
     'packages': pkgs,
-    'package_dir': {'': 'src'},
+    'package_dir': {'': 'src', 'pynwb': 'src/pynwb', 'hdmf': 'src/hdmf/src/hdmf'},
     'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
     'classifiers': [
         "Programming Language :: Python",
