@@ -144,7 +144,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
             raise TypeError("'__nwbfields__' must be of type tuple")
 
         if len(bases) and 'NWBContainer' in globals() and issubclass(bases[-1], NWBContainer) \
-           and bases[-1].__nwbfields__ is not cls.__nwbfields__:
+                and bases[-1].__nwbfields__ is not cls.__nwbfields__:
             new_nwbfields = list(cls.__nwbfields__)
             new_nwbfields[0:0] = bases[-1].__nwbfields__
             cls.__nwbfields__ = tuple(new_nwbfields)
@@ -912,7 +912,7 @@ class DynamicTable(NWBDataInterface):
             raise TypeError(msg)
 
         if len(bases) and 'DynamicTable' in globals() and issubclass(bases[-1], NWBContainer) \
-           and bases[-1].__columns__ is not cls.__columns__:
+                and bases[-1].__columns__ is not cls.__columns__:
             new_columns = list(cls.__columns__)
             new_columns[0:0] = bases[-1].__columns__
             cls.__columns__ = tuple(new_columns)
@@ -1353,6 +1353,9 @@ class DynamicTableRegion(VectorData):
             arg1 = key[0]
             arg2 = key[1]
             return self.table[self.data[arg1], arg2]
+        elif isinstance(key, slice):
+            data = np.arange(*key.indices(len(self.table)))
+            return DynamicTableRegion(name=self.name, data=data, description=self.description, table=self.table)
         else:
             if isinstance(key, int):
                 return self.table[self.data[key]]

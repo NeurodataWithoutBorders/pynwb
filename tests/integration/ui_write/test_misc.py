@@ -75,6 +75,37 @@ class TestUnitsIO(base.TestDataInterfaceIO):
         self.assertTrue(np.array_equal(ut['obs_intervals'][:], [[[0, 1], [2, 3]], [[2, 5], [6, 7]]]))
 
 
+class TestUnitElectrodes(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return Units('placeholder_units')
+
+    def addContainer(self, nwbfile):
+        device = nwbfile.create_device(name='trodes_rig123')
+        electrode_name = 'tetrode1'
+        description = "an example tetrode"
+        location = "somewhere in the hippocampus"
+        electrode_group = nwbfile.create_electrode_group(electrode_name,
+                                                         description=description,
+                                                         location=location,
+                                                         device=device)
+        for idx in [1, 2, 3, 4]:
+            nwbfile.add_electrode(idx,
+                                  x=1.0, y=2.0, z=3.0,
+                                  imp=float(-idx),
+                                  location='CA1', filtering='none',
+                                  group=electrode_group)
+
+        nwbfile.add_unit(id=1, electrodes=[1])
+        nwbfile.add_unit(id=2, electrodes=[1])
+        nwbfile.units.to_dataframe()
+        self.container = nwbfile.units
+
+    def getContainer(self, nwbfile):
+        return nwbfile.units
+
+
 class TestSpectralAnalysis(base.TestDataInterfaceIO):
     def setUpContainer(self):
         self.timeseries = TimeSeries(name='dummy timeseries', description='desc',
