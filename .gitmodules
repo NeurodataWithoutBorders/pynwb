@@ -1,3 +1,0 @@
-[submodule "src/hdmf"]
-	path = src/hdmf
-	url = https://github.com/hdmf-dev/hdmf.git
