@@ -18,4 +18,3 @@ traceback2==1.4.0
 unittest2==1.1.0
 urllib3==1.23
 virtualenv==15.2.0
-hdmf
