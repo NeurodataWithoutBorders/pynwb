@@ -320,8 +320,8 @@ class RoiResponseSeries(TimeSeries):
 
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this RioResponseSeries dataset'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
