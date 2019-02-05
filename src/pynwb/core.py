@@ -1240,10 +1240,10 @@ class DynamicTable(NWBDataInterface):
         data = {}
         for name in self.colnames:
             col = self.__df_cols[self.__colids[name]]
-            if col.data.ndim == 1:
-                data[name] = col[:]
-            else:
+            if isinstance(col.data, np.ndarray) and col.data.ndim > 1:
                 data[name] = [x for x in col[:]]
+            else:
+                data[name] = col[:]
 
         return pd.DataFrame(data, index=pd.Index(name=self.id.name, data=self.id.data))
 
