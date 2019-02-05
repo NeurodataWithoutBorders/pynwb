@@ -1,5 +1,6 @@
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 import unittest2 as unittest
 from dateutil.tz import tzlocal
@@ -206,6 +207,10 @@ class TestDynamicTable(unittest.TestCase):
 
         dynamic_table_region = DynamicTableRegion('dtr', [0, 1], 'desc', table=table)
         assert dynamic_table_region[slice(0, 1)]
+
+    def test_nd_array_to_df(self):
+        col = VectorData(name='name', description='desc', data=np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]]))
+        DynamicTable('test', 'desc', np.arange(3, dtype='int'), (col, )).to_dataframe()
 
 
 class TestNWBTable(unittest.TestCase):

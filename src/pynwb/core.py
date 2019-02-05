@@ -1240,7 +1240,10 @@ class DynamicTable(NWBDataInterface):
         data = {}
         for name in self.colnames:
             col = self.__df_cols[self.__colids[name]]
-            data[name] = col[:]
+            if col.data.ndim == 1:
+                data[name] = col[:]
+            else:
+                data[name] = [x for x in col[:]]
 
         return pd.DataFrame(data, index=pd.Index(name=self.id.name, data=self.id.data))
 
