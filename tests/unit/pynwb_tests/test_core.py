@@ -2,6 +2,7 @@ from datetime import datetime
 
 import numpy as np
 import pandas as pd
+from pandas.util.testing import assert_frame_equal
 import unittest2 as unittest
 from dateutil.tz import tzlocal
 from pynwb import NWBFile, TimeSeries, available_namespaces
@@ -209,8 +210,12 @@ class TestDynamicTable(unittest.TestCase):
         assert dynamic_table_region[slice(0, 1)]
 
     def test_nd_array_to_df(self):
-        col = VectorData(name='name', description='desc', data=np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]]))
-        DynamicTable('test', 'desc', np.arange(3, dtype='int'), (col, )).to_dataframe()
+        data = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
+        col = VectorData(name='name', description='desc', data=data)
+        df = DynamicTable('test', 'desc', np.arange(3, dtype='int'), (col, )).to_dataframe()
+        df2 = pd.DataFrame({'name': [x for x in data]},
+                           index=pd.Index(name='id', data=[0, 1, 2]))
+        assert_frame_equal(df, df2)
 
 
 class TestNWBTable(unittest.TestCase):
