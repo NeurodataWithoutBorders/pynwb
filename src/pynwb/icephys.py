@@ -155,8 +155,6 @@ class CurrentClampSeries(PatchClampSeries):
 
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
 
