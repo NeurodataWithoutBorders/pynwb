@@ -1,11 +1,12 @@
-import unittest2 as unittest
-
-from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable
-from pynwb import NWBFile, TimeSeries, available_namespaces
-
-import pandas as pd
 from datetime import datetime
+
+import numpy as np
+import pandas as pd
+from pandas.util.testing import assert_frame_equal
+import unittest2 as unittest
 from dateutil.tz import tzlocal
+from pynwb import NWBFile, TimeSeries, available_namespaces
+from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable, DynamicTableRegion
 
 
 class TestDynamicTable(unittest.TestCase):
@@ -14,7 +15,7 @@ class TestDynamicTable(unittest.TestCase):
         self.spec = [
             {'name': 'foo', 'description': 'foo column'},
             {'name': 'bar', 'description': 'bar column'},
-            {'name': 'baz', 'description': 'baz column'}
+            {'name': 'baz', 'description': 'baz column'},
         ]
         self.data = [
             [1, 2, 3, 4, 5],
@@ -202,6 +203,20 @@ class TestDynamicTable(unittest.TestCase):
         with self.assertRaises(ValueError):
             table.add_row({'bar': 60.0, 'foo': 6, 'baz': 'oryx', 'qax': -1}, None)
 
+    def test_indexed_dynamic_table_region(self):
+        table = self.with_columns_and_data()
+
+        dynamic_table_region = DynamicTableRegion('dtr', [0, 1], 'desc', table=table)
+        assert dynamic_table_region[slice(0, 1)]
+
+    def test_nd_array_to_df(self):
+        data = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
+        col = VectorData(name='name', description='desc', data=data)
+        df = DynamicTable('test', 'desc', np.arange(3, dtype='int'), (col, )).to_dataframe()
+        df2 = pd.DataFrame({'name': [x for x in data]},
+                           index=pd.Index(name='id', data=[0, 1, 2]))
+        assert_frame_equal(df, df2)
+
 
 class TestNWBTable(unittest.TestCase):
 
@@ -213,7 +228,8 @@ class TestNWBTable(unittest.TestCase):
             ]
         self.cls = MyTable
 
-    def basic_data(self):
+    @staticmethod
+    def basic_data():
         return [
             [1, 'a'],
             [2, 'b'],
