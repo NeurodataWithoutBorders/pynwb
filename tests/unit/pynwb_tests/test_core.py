@@ -322,7 +322,7 @@ Fields:
   analysis: { }
   devices: { }
   electrode_groups: { }
-  epoch_tags: ['tag1', 'tag2']
+  epoch_tags: {'tag1', 'tag2'}
   epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
   ic_electrodes: { }
   imaging_planes: { }
