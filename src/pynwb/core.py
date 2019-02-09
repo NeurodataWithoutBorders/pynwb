@@ -176,6 +176,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
         If v is a dictionary, print the name and type of each element
 
+        If v is a set, print it sorted
+
         If v is a neurodata_type, print the name of type
 
         Otherwise, use the built-in str()
@@ -201,8 +203,11 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
             if keys:
                 template += " {} {}".format(keys[-1], type(v[keys[-1]]))
             return template + ' }'
+        elif isinstance(v, set):
+            out = str(list(sorted(list(v))))
+            return '{' + out[1:-1] + '}'
         elif isinstance(v, NWBBaseType):
-            "{} {}".format(getattr(v, 'name'), type(v))
+            return "{} {}".format(getattr(v, 'name'), type(v))
         else:
             return str(v)
 
