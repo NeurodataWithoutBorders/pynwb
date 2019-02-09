@@ -313,7 +313,7 @@ Fields:
                          )
         nwbfile.add_acquisition(ts)
         nwbfile.add_acquisition(ts2)
-        empty_set_str = str(set())  # changes between py2 and py3
+        nwbfile.add_epoch(start_time=1.0, stop_time=10.0, tags=['tag1', 'tag2'])
         self.assertEqual(str(nwbfile),
                          """
 root <class 'pynwb.file.NWBFile'>
@@ -322,7 +322,8 @@ Fields:
   analysis: { }
   devices: { }
   electrode_groups: { }
-  epoch_tags: """ + empty_set_str + """
+  epoch_tags: {'tag1', 'tag2'}
+  epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
   ic_electrodes: { }
   imaging_planes: { }
   lab_meta_data: { }
