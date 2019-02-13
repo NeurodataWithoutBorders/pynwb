@@ -601,6 +601,27 @@ class NWBFile(MultiContainerInterface):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
 
+    def check_processing_module(self, name, description=None):
+        """If processing module exists, return it. If not, create it and return it.
+
+        Parameters
+        ----------
+        name: str
+        description: str | None
+
+        Returns
+        -------
+        pynwb.module
+
+        """
+
+        if name in self.modules:
+            return self.modules[name]
+        else:
+            if description is None:
+                description = name + ' description'
+            return self.create_processing_module(name, description)
+
 
 def _add_missing_timezone(date):
     """

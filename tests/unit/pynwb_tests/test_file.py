@@ -10,6 +10,7 @@ from dateutil.tz import tzlocal, tzutc
 from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
 from pynwb.file import Subject, ElectrodeTable
+from pynwb.base import ProcessingModule
 
 
 class NWBFileTest(unittest.TestCase):
@@ -275,6 +276,13 @@ class NWBFileTest(unittest.TestCase):
         self.assertIs(p1, self.nwbfile)
         p2 = ts2.get_ancestor(neurodata_type='NWBFile')
         self.assertIs(p2, self.nwbfile)
+
+    def test_check_processing_module(self):
+        behavior_mod = self.nwbfile.create_processing_module('behavior', 'behavior description')
+        self.assertEqual(self.nwbfile.check_processing_module('behavior'), behavior_mod)
+
+    def test_check_processing_module2(self):
+        assert(isinstance(self.nwbfile.check_processing_module('behavior'), ProcessingModule))
 
 
 class SubjectTest(unittest.TestCase):
