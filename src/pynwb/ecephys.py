@@ -8,7 +8,6 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
-from .misc import DecompositionSeries
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
@@ -25,14 +24,18 @@ class ElectrodeGroup(NWBContainer):
             {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
             {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
+            {'name': 'spike_event_series', 'type': 'SpikeEventSeries',
+             'doc': 'SpikeEventSeries recorded from this group', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(ElectrodeGroup, self).__init__, kwargs)
-        description, location, device = popargs("description", "location", "device", kwargs)
+        description, location, device, spike_event_series = popargs("description", "location", "device",
+                                                                    'spike_event_series', kwargs)
         self.description = description
         self.location = location
         self.device = device
+        self.spike_event_series = spike_event_series
 
 
 _et_docval = [
@@ -58,14 +61,16 @@ class ElectricalSeries(TimeSeries):
     """
 
     __nwbfields__ = ({'name': 'electrodes', 'required_name': 'electrodes',
-                      'doc': 'the electrodes that generated this electrical series', 'child': True},)
+                      'doc': 'the electrodes that generated this electrical series', 'child': True},
+                     {'name': 'electrode_group',
+                      'doc': 'the electrode group that generated this electrical series', 'child': False})
 
     __help = "Stores acquired voltage data from extracellular recordings."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+             'shape': ((None,), (None, None), (None, None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-
             {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'resolution', 'type': float,
@@ -116,13 +121,15 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data'},
+            {'name': 'unit_series', 'type': 'UnitSeries', 'doc': 'unit times that link waveforms to units table',
+             'default': None},
             {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
             {'name': 'comments', 'type': str,
              'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
             {'name': 'description', 'type': str,
@@ -134,7 +141,7 @@ class SpikeEventSeries(ElectricalSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, data, electrodes = popargs('name', 'data', 'electrodes', kwargs)
+        name, data, unit_series = popargs('name', 'data', 'unit_series', kwargs)
         timestamps = getargs('timestamps', kwargs)
         if not (isinstance(data, TimeSeries) and isinstance(timestamps, TimeSeries)):
             if not (isinstance(data, DataChunkIterator) and isinstance(timestamps, DataChunkIterator)):
@@ -143,7 +150,8 @@ class SpikeEventSeries(ElectricalSeries):
             else:
                 # TODO: add check when we have DataChunkIterators
                 pass
-        super(SpikeEventSeries, self).__init__(name, data, electrodes, **kwargs)
+        super(SpikeEventSeries, self).__init__(name, data, **kwargs)
+        self.unit_series = unit_series
 
 
 @register_class('EventDetection', CORE_NAMESPACE)
@@ -295,13 +303,7 @@ class LFP(MultiContainerInterface):
          'type': ElectricalSeries,
          'add': 'add_electrical_series',
          'get': 'get_electrical_series',
-         'create': 'create_electrical_series'},
-
-        {'attr': 'decomposition_series',
-         'type': DecompositionSeries,
-         'add': 'add_decomposition_series',
-         'get': 'get_decomposition_series',
-         'create': 'create_decomposition_series'}]
+         'create': 'create_electrical_series'}]
 
     __help = ("LFP data from one or more channels. Filter properties "
               "should be noted in the ElectricalSeries")

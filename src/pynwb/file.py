@@ -469,7 +469,7 @@ class NWBFile(MultiContainerInterface):
             d['group_name'] = d['group'].name
         call_docval_func(self.electrodes.add_row, d)
 
-    @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
+    @docval({'name': 'region', 'type': 'array_data', 'doc': 'the indices of the table'},
             {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
     def create_electrode_table_region(self, **kwargs):
