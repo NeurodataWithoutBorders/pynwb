@@ -18,7 +18,8 @@ class ElectrodeGroup(NWBContainer):
     __nwbfields__ = ('name',
                      'description',
                      'location',
-                     'device')
+                     'device',
+                     {'name': 'spike_event_series', 'child': False, 'doc': 'doc'})
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
@@ -112,7 +113,7 @@ class SpikeEventSeries(ElectricalSeries):
     electrode).
     """
 
-    __nwbfields__ = ()
+    __nwbfields__ = ({'name': 'unit_series', 'child': False, 'doc': 'doc'}, )
 
     __help = "Snapshots of spike events from data."
 
