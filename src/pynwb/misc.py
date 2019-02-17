@@ -6,6 +6,7 @@ from .form.utils import docval, getargs, popargs, call_docval_func
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
 from .core import NWBContainer, ElementIdentifiers, DynamicTable
+from .ecephys import ElectrodeGroup
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -212,7 +213,7 @@ class Units(DynamicTable):
              'default': None, 'shape': (None, 2)},
             {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each unit came from',
              'default': None},
-            {'name': 'electrode_group', 'type': 'array_data', 'default': None,
+            {'name': 'electrode_group', 'type': ElectrodeGroup, 'default': None,
              'doc': 'the electrode group that each unit came from'},
             {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each unit',
              'default': None},
@@ -246,6 +247,14 @@ class Units(DynamicTable):
     def get_unit_obs_intervals(self, **kwargs):
         index = getargs('index', kwargs)
         return np.asarray(self['obs_intervals'][index])
+
+    def get_spike_waveforms(self, row, spike_number=None):
+        ses = self['electrode_group'].data[row].spike_event_series
+        if spike_number is None:
+            return ses.data[ses.unit_series.data == row, ...]
+        else:
+            inds = np.where(ses.unit_series.data == row)[0]
+            return ses.data[inds[spike_number], ...]
 
 
 @register_class('DecompositionSeries', CORE_NAMESPACE)
@@ -327,3 +336,29 @@ class DecompositionSeries(TimeSeries):
             self.__check_column('band_stdev', 'the standard deviation of Gaussian filters in Hz')
 
         self.bands.add_row({k: v for k, v in kwargs.items() if v is not None})
+
+
+class UnitSeries(TimeSeries):
+
+    __nwbfields__ = ({'name': 'units', 'child': False, 'doc': 'link to Units table'},)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this UnitSeries dataset'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
+             'doc': 'Indices of Units table (0-indexed)'},
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'units', 'type': Units, 'doc': 'Units table', 'default': None},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': NWBContainer,
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    def __init__(self, **kwargs):
+        kwargs.update(conversion=np.nan, resolution=np.nan)
+
+        name, data, units = popargs('name', 'data', 'units', kwargs)
+        super(UnitSeries, self).__init__(name, data, **kwargs)
+        self.units = units

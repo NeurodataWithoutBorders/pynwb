@@ -92,13 +92,18 @@ groups:
     - num_times
     shape:
     - null
+  links:
+  - name: unit_series
+    doc: the UnitSeries that holds the unit ids for each waveform
+    quantity: '?'
+    target_type: UnitSeries
 - neurodata_type_def: ClusterWaveforms
   neurodata_type_inc: NWBDataInterface
-  doc: 'DEPRECATED The mean waveform shape, including standard deviation, of the
-    different clusters. Ideally, the waveform analysis should be performed on data that
-    is only high-pass filtered. This is a separate module because it is expected to require
-    updating. For example, IMEC probes may require different storage requirements to
-    store/display mean waveforms, requiring a new interface or an extension of this one.'
+  doc: 'DEPRECATED. The mean waveform shape, including standard deviation, of the different clusters.
+    Ideally, the waveform analysis should be performed on data that is only high-pass
+    filtered. This is a separate module because it is expected to require updating.
+    For example, IMEC probes may require different storage requirements to store/display
+    mean waveforms, requiring a new interface or an extension of this one.'
   attributes:
   - name: help
     dtype: text
@@ -334,3 +339,7 @@ groups:
     doc: the device that was used to record from this electrode group
     quantity: '?'
     target_type: Device
+  - name: spike_event_series
+    doc: the SpikeEventSeries that holds the recorded spike snippets for this electrode group
+    quantity: '?'
+    target_type: SpikeEventSeries
