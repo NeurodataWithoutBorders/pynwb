@@ -261,8 +261,8 @@ groups:
   - name: reference_frame
     dtype: text
     doc: 'Describes position and reference frame of manifold based on position of
-      first element in manifold. For example, text description of anotomical location
-      or vectors needed to rotate to common anotomical axis (eg, AP/DV/ML). COMMENT:
+      first element in manifold. For example, text description of anatomical location
+      or vectors needed to rotate to common anatomical axis (eg, AP/DV/ML). COMMENT:
       This field is necessary to interpret manifold. If manifold is not present then
       this field is not required'
     quantity: '?'
