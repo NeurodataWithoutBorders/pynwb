@@ -334,3 +334,7 @@ groups:
     doc: the device that was used to record from this electrode group
     quantity: '?'
     target_type: Device
+  - name: spike_event_series
+    doc: the SpikeEventSeries that holds the recorded spike snippets for this electrode group
+    quantity: '?'
+    target_type: SpikeEventSeries
