@@ -154,7 +154,7 @@ class UnitsTests(unittest.TestCase):
     def test_electrode_group(self):
         ut = Units()
         device = Device('test_device')
-        electrode_group = ElectrodeGroup('test_electrode_group', 'location', device)
+        electrode_group = ElectrodeGroup('test_electrode_group', 'description', 'location', device)
         ut.add_unit(electrode_group=electrode_group)
         self.assertEqual(ut['electrode_group'][0], electrode_group)
 
