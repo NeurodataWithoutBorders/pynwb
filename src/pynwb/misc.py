@@ -327,3 +327,29 @@ class DecompositionSeries(TimeSeries):
             self.__check_column('band_stdev', 'the standard deviation of Gaussian filters in Hz')
 
         self.bands.add_row({k: v for k, v in kwargs.items() if v is not None})
+
+
+class UnitSeries(TimeSeries):
+
+    __nwbfields__ = ({'name': 'units', 'child': False, 'doc': 'link to Units table'},)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this UnitSeries dataset'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
+             'doc': 'Indices of Units table (0-indexed)'},
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
+             'doc': 'Timestamps for samples stored in data', 'default': None},
+            {'name': 'units', 'type': Units, 'doc': 'Units table', 'default': None},
+            {'name': 'description', 'type': str,
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
+            {'name': 'control', 'type': Iterable,
+             'doc': 'Numerical labels that apply to each element in data', 'default': None},
+            {'name': 'control_description', 'type': Iterable,
+             'doc': 'Description of each control value', 'default': None},
+            {'name': 'parent', 'type': NWBContainer,
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    def __init__(self, **kwargs):
+        kwargs.update(conversion=np.nan, resolution=np.nan)
+
+        name, data, units = popargs('name', 'data', 'units', kwargs)
+        super(UnitSeries, self).__init__(name, data, **kwargs)
+        self.units = units

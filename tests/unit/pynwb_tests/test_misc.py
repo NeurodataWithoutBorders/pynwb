@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, \
-    DecompositionSeries
+    DecompositionSeries, UnitSeries
 from pynwb.file import TimeSeries, DynamicTable
 from pynwb.core import VectorData
 
@@ -148,6 +148,15 @@ class UnitsTests(unittest.TestCase):
         self.assertTrue(all(ut['spike_times'][1] == np.array([3, 4, 5])))
         self.assertTrue(np.all(ut['obs_intervals'][0] == np.array([[0, 2]])))
         self.assertTrue(np.all(ut['obs_intervals'][1] == np.array([[2, 3], [4, 5]])))
+
+
+class UnitSeriesConstructor(unittest.TestCase):
+    def test_init(self):
+        units = Units()
+        us = UnitSeries('test_unit_series', np.array([0, 0, 1, 1], dtype=int),
+                        timestamps=[.1, .2, .3, .4], units=units, description='description')
+        self.assertTrue(all(us.data == np.array([0, 0, 1, 1], dtype=int)))
+        self.assertEqual(units, us.units)
 
 
 if __name__ == '__main__':
