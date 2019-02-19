@@ -329,6 +329,7 @@ class DecompositionSeries(TimeSeries):
         self.bands.add_row({k: v for k, v in kwargs.items() if v is not None})
 
 
+@register_class('UnitSeries', CORE_NAMESPACE)
 class UnitSeries(TimeSeries):
 
     __nwbfields__ = ({'name': 'units', 'child': False, 'doc': 'link to Units table'},)

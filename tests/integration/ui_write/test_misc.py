@@ -5,7 +5,7 @@ from pynwb.form.build import GroupBuilder, DatasetBuilder, ReferenceBuilder
 from pynwb import TimeSeries
 from pynwb.core import DynamicTable, VectorData
 
-from pynwb.misc import Units, DecompositionSeries
+from pynwb.misc import Units, DecompositionSeries, UnitSeries
 
 
 class TestUnitsIO(base.TestDataInterfaceIO):
@@ -106,7 +106,7 @@ class TestUnitElectrodes(base.TestMapRoundTrip):
         return nwbfile.units
 
 
-class TestSpectralAnalysis(base.TestDataInterfaceIO):
+class TestDecompositionSeries(base.TestDataInterfaceIO):
     def setUpContainer(self):
         self.timeseries = TimeSeries(name='dummy timeseries', description='desc',
                                      data=np.ones((3, 3)), unit='flibs',
@@ -133,3 +133,21 @@ class TestSpectralAnalysis(base.TestDataInterfaceIO):
     def getContainer(self, nwbfile):
 
         return nwbfile.modules['test_mod']['LFPSpectralAnalysis']
+
+
+class TestUnitSeries(base.TestDataInterfaceIO):
+    def setUpContainer(self):
+        self.units = Units(name='units', description='a simple table for testing Units')
+        self.units.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 1], [2, 3]])
+
+        us = UnitSeries('test_unit_series', np.array([0, 0, 1, 1], dtype=int),
+                        timestamps=[.1, .2, .3, .4], units=self.units, description='description')
+        return us
+
+    def addContainer(self, nwbfile):
+        nwbfile.units = self.units
+        ecephys_mod = nwbfile.create_processing_module('ecephys', 'test_mod')
+        ecephys_mod.add_data_interface(self.container)
+
+    def getContainer(self, nwbfile):
+        return nwbfile.modules['ecephys']['test_unit_series']
