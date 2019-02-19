@@ -335,6 +335,20 @@ groups:
   - name: location
     dtype: text
     doc: description of location of this electrode group
+  datasets:
+    - name: acquisition
+      neurodata_type_inc: ElectricalSeries
+      doc: 'ElectricalSeries recorded by this ElectrodeGroup'
+      quantity: '?'
+  groups:
+    - neurodata_type_inc: LFP
+      name: lfp
+      doc: 'LFP recorded from this ElectrodeGroup'
+      quantity: '?'
+    - neurodata_type_inc: EventWaveform
+      name: event_waveform
+      doc: 'Spike waveforms recorded from this ElectrodeGroup'
+      quantity: '?'
   links:
   - name: device
     doc: the device that was used to record from this electrode group

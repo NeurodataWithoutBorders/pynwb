@@ -18,28 +18,19 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         self.dev1 = Device('dev1')
-        return ElectrodeGroup('elec1', 'a test ElectrodeGroup',
-                                       'a nonexistent place',
-                                       self.dev1)
+        self.event_waveform = EventWaveform()
+        self.lfp = LFP()
 
-    def setUpBuilder(self):
-        device_builder = GroupBuilder('dev1',
-                                      attributes={'neurodata_type': 'Device',
-                                                  'namespace': 'core',
-                                                  'help': 'A recording device e.g. amplifier'})
-        return GroupBuilder('elec1',
-                            attributes={'neurodata_type': 'ElectrodeGroup',
-                                        'namespace': 'core',
-                                        'help': 'A physical grouping of channels',
-                                        'description': 'a test ElectrodeGroup',
-                                        'location': 'a nonexistent place'},
-                            links={
-                                'device': LinkBuilder(device_builder, 'device')
-                            })
+        return ElectrodeGroup('elec1', 'a test ElectrodeGroup', 'a nonexistent place', self.dev1,
+                              event_waveform=self.event_waveform, lfp=self.lfp)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
         nwbfile.add_device(self.dev1)
+        ecephys_mod = nwbfile.create_processing_module('ecephys', 'description')
+        ecephys_mod.add_data_interface(self.event_waveform)
+        ecephys_mod.add_data_interface(self.lfp)
+
         nwbfile.add_electrode_group(self.container)
 
     def getContainer(self, nwbfile):
