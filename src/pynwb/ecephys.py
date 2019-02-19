@@ -296,13 +296,7 @@ class LFP(MultiContainerInterface):
          'type': ElectricalSeries,
          'add': 'add_electrical_series',
          'get': 'get_electrical_series',
-         'create': 'create_electrical_series'},
-
-        {'attr': 'decomposition_series',
-         'type': DecompositionSeries,
-         'add': 'add_decomposition_series',
-         'get': 'get_decomposition_series',
-         'create': 'create_decomposition_series'}]
+         'create': 'create_electrical_series'}]
 
     __help = ("LFP data from one or more channels. Filter properties "
               "should be noted in the ElectricalSeries")
