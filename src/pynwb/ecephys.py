@@ -20,7 +20,10 @@ class ElectrodeGroup(NWBContainer):
                      'description',
                      'location',
                      'device',
-                     {'name': 'spike_event_series', 'doc': 'doc', 'child': False})
+                     {'name': 'spike_event_series',
+                      'doc': 'the SpikeEventSeries that holds the recorded spike snippets for this electrode group',
+                      'child': False,
+                      'type': 'SpikeEventSeries'})
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
