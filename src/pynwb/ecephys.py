@@ -20,7 +20,7 @@ class ElectrodeGroup(NWBContainer):
                      'description',
                      'location',
                      'device',
-                     {'name': 'spike_event_series',
+                     {'name': 'electrical_series',
                       'doc': 'the ElectricalSeries that holds the recorded spike snippets for this electrode group',
                       'child': False,
                       'type': 'ElectricalSeries'})
