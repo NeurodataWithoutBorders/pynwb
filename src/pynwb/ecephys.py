@@ -108,7 +108,9 @@ class SpikeEventSeries(ElectricalSeries):
     electrode).
     """
 
-    __nwbfields__ = ({'name': 'unit_series', 'doc': 'doc', 'child': False},)
+    __nwbfields__ = ({'name': 'unit_series',
+                      'doc': 'the UnitSeries that holds the unit ids for each waveform',
+                      'child': False},)
 
     __help = "Snapshots of spike events from data."
 
