@@ -20,24 +20,24 @@ class ElectrodeGroup(NWBContainer):
                      'description',
                      'location',
                      'device',
-                     {'name': 'spike_event_series', 'doc': 'doc', 'child': False})
+                     {'name': 'electrical_series', 'doc': 'doc', 'child': False})
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
             {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
-            {'name': 'spike_event_series', 'type': 'SpikeEventSeries',
+            {'name': 'electrical_series', 'type': 'SpikeEventSeries',
              'doc': 'SpikeEventSeries recorded from this group', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(ElectrodeGroup, self).__init__, kwargs)
-        description, location, device, spike_event_series = popargs("description", "location", "device",
-                                                                    "spike_event_series", kwargs)
+        description, location, device, electrical_series = popargs("description", "location", "device",
+                                                                   "electrical_series", kwargs)
         self.description = description
         self.location = location
         self.device = device
-        self.spike_event_series = spike_event_series
+        self.electrical_series = electrical_series
 
 
 _et_docval = [
