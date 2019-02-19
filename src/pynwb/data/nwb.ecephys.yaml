@@ -27,9 +27,15 @@ groups:
     - - num_times
     - - num_times
       - num_channels
+    - - num_times
+      - num_channels
+      - num_samples
     shape:
     - - null
     - - null
+      - null
+    - - null
+      - null
       - null
   - neurodata_type_inc: DynamicTableRegion
     name: electrodes
