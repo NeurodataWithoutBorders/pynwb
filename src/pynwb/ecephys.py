@@ -63,7 +63,8 @@ class ElectricalSeries(TimeSeries):
     __help = "Stores acquired voltage data from extracellular recordings."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+             'shape': ((None, ), (None, None), (None, None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
             {'name': 'electrodes', 'type': DynamicTableRegion,
