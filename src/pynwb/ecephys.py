@@ -73,7 +73,7 @@ class ElectricalSeries(TimeSeries):
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
 
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
@@ -123,7 +123,7 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
             {'name': 'comments', 'type': str,
              'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
             {'name': 'description', 'type': str,
