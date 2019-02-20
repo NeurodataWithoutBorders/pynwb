@@ -8,7 +8,6 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
-from .misc import DecompositionSeries
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
