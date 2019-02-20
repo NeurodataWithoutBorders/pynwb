@@ -1,11 +1,13 @@
 from warnings import warn
+from bisect import bisect
+import numpy as np
 
 from collections import Iterable
 
 from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 from .form.data_utils import AbstractDataChunkIterator, DataIO
 
-from . import register_class, CORE_NAMESPACE
+from . import register_class, CORE_NAMESPACE, NWBFile
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
 
 _default_conversion = 1.0
@@ -210,6 +212,75 @@ class TimeSeries(NWBDataInterface):
     @property
     def time_unit(self):
         return self.__time_unit
+
+    def align_by_trials(self, **kwargs):
+        """
+
+        Args:
+            start_label: str
+                default: 'start_time'
+            stop_label: str
+                default: 'stop_time'
+            before: float
+                time after start_label in secs (positive goes back in time)
+            after:
+                time after stop_label in secs (positive goes forward in time)
+
+        Returns:
+            np.array(shape=(n_trials, n_time, ...))
+
+        """
+        trials = self.get_ancestor(NWBFile).intervals.trials
+        return self.align_by_intervals(trials, **kwargs)
+
+    def align_by_intervals(self, intervals, start_label='start_time',
+                           stop_label='stop_time', before=0., after=0.):
+        """
+
+        Args:
+            intervals: pynwb.Intervals
+            start_label: str
+                default: 'start_time'
+            stop_label: str
+                default: 'stop_time'
+            before: float
+                time after start_label in secs (positive goes back in time)
+            after:
+                time after stop_label in secs (positive goes forward in time)
+
+        Returns:
+            np.array(shape=(n_trials, n_time, ...))
+
+        """
+        if stop_label is None:
+            stop_label = 'start_time'
+
+        starts = intervals[start_label][:] - before
+        stops = intervals[stop_label][:] + after
+        return self.align_by_times(starts, stops)
+
+    def align_by_times(self, starts, stops):
+        """
+
+        Args:
+            starts: array-like
+            stops: array-like
+
+        Returns:
+            np.array(shape=(n_trials, n_time, ...))
+
+        """
+        out = []
+        for istart, istop in zip(starts, stops):
+            if self.timestamps is not None:
+                ind_start = bisect(self.timestamps, istart)
+                ind_stop = bisect(self.timestamps, istop)
+                out.append(self.data[ind_start:ind_stop, ...])
+            else:
+                ind_start = (istart - self.starting_time) / self.rate
+                ind_stop = ind_start + (istop - istart) / self.rate
+                out.append(self.data[ind_start:ind_stop, ...])
+        return np.array(out)
 
 
 @register_class('Image', CORE_NAMESPACE)
