@@ -945,9 +945,12 @@ class GroupSpec(BaseStorageSpec):
         if isinstance(spec, Spec):
             name = spec.name
             if name is None:
-                name = spec.data_type_def
-            if name is None:
-                name = spec.data_type_inc
+                if isinstance(spec, LinkSpec):
+                    name = spec.target_type
+                else:
+                    name = spec.data_type_def
+                    if name is None:
+                        name = spec.data_type_inc
             if name is None:
                 raise ValueError('received Spec with wildcard name but no data_type_inc or data_type_def')
             spec = name
