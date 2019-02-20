@@ -1,6 +1,5 @@
 import numpy as np
 import datetime as datetime
-import numpy.testing
 
 from pynwb.form.build import GroupBuilder, DatasetBuilder
 
@@ -53,11 +52,3 @@ class TestTimeSeriesIO(base.TestDataInterfaceIO):
         tsa = nwbfile.acquisition['a']
         tsb = nwbfile.acquisition['b']
         self.assertIs(tsa.timestamps, tsb.timestamps)
-
-    def test_align_by_trials(self):
-        nwbfile = NWBFile(identifier='foo', session_start_time=datetime.datetime.now(), session_description='bar')
-        nwbfile.add_trial(start_time=5., stop_time=10.)
-        nwbfile.add_trial(start_time=15., stop_time=20.)
-        ts = TimeSeries(name='a', data=np.arange(1000), timestamps=np.arange(1000), unit='m')
-        nwbfile.add_acquisition(ts)
-        numpy.testing.assert_equal(ts.align_by_trials(), [[6, 7, 8, 9, 10], [16, 17, 18, 19, 20]])
