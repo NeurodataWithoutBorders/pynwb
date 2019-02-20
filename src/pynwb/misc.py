@@ -261,7 +261,7 @@ class DecompositionSeries(TimeSeries):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+             'doc': 'dims: num_times * num_channels * num_bands', 'shape': (None, None, None)},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset'},
             {'name': 'metric', 'type': str, 'doc': "metric of analysis. recommended: 'phase', 'amplitude', 'power'"},
             {'name': 'unit', 'type': str, 'doc': 'SI unit of measurement', 'default': 'no unit'},
