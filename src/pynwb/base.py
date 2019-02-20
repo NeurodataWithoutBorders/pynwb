@@ -7,7 +7,7 @@ from collections import Iterable
 from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 from .form.data_utils import AbstractDataChunkIterator, DataIO
 
-from . import register_class, CORE_NAMESPACE, NWBFile
+from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
 
 _default_conversion = 1.0
@@ -223,14 +223,14 @@ class TimeSeries(NWBDataInterface):
                 default: 'stop_time'
             before: float
                 time after start_label in secs (positive goes back in time)
-            after:
+            after: float
                 time after stop_label in secs (positive goes forward in time)
 
         Returns:
             np.array(shape=(n_trials, n_time, ...))
 
         """
-        trials = self.get_ancestor(NWBFile).intervals.trials
+        trials = self.get_ancestor('NWBFile').trials
         return self.align_by_intervals(trials, **kwargs)
 
     def align_by_intervals(self, intervals, start_label='start_time',
@@ -245,7 +245,7 @@ class TimeSeries(NWBDataInterface):
                 default: 'stop_time'
             before: float
                 time after start_label in secs (positive goes back in time)
-            after:
+            after: float
                 time after stop_label in secs (positive goes forward in time)
 
         Returns:
@@ -255,8 +255,8 @@ class TimeSeries(NWBDataInterface):
         if stop_label is None:
             stop_label = 'start_time'
 
-        starts = intervals[start_label][:] - before
-        stops = intervals[stop_label][:] + after
+        starts = np.array(intervals[start_label][:]) - before
+        stops = np.array(intervals[stop_label][:]) + after
         return self.align_by_times(starts, stops)
 
     def align_by_times(self, starts, stops):
@@ -274,12 +274,11 @@ class TimeSeries(NWBDataInterface):
         for istart, istop in zip(starts, stops):
             if self.timestamps is not None:
                 ind_start = bisect(self.timestamps, istart)
-                ind_stop = bisect(self.timestamps, istop)
-                out.append(self.data[ind_start:ind_stop, ...])
+                ind_stop = bisect(self.timestamps, istop, ind_start)
             else:
                 ind_start = (istart - self.starting_time) / self.rate
                 ind_stop = ind_start + (istop - istart) / self.rate
-                out.append(self.data[ind_start:ind_stop, ...])
+            out.append(self.data[ind_start:ind_stop])
         return np.array(out)
 
 
