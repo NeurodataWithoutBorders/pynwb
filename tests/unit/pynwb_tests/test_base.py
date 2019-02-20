@@ -1,9 +1,12 @@
 import unittest2 as unittest
 import numpy as np
+import numpy.testing
+import datetime
 
 from pynwb.base import ProcessingModule, TimeSeries, Images, Image
 from pynwb.form.data_utils import DataChunkIterator
 from pynwb.form.backends.hdf5 import H5DataIO
+from pynwb import NWBFile
 
 
 class TestProcessingModule(unittest.TestCase):
@@ -118,6 +121,14 @@ class TestTimeSeries(unittest.TestCase):
         with self.assertRaises(ValueError):
             TimeSeries('test_ts2', [10, 11, 12, 13, 14, 15], 'grams',
                        starting_time=30., timestamps=[.3, .4, .5, .6, .7, .8])
+
+    def test_align_by_trials(self):
+        nwbfile = NWBFile(identifier='foo', session_start_time=datetime.datetime.now(), session_description='bar')
+        nwbfile.add_trial(start_time=5., stop_time=10.)
+        nwbfile.add_trial(start_time=15., stop_time=20.)
+        ts = TimeSeries(name='a', data=np.arange(1000), timestamps=np.arange(1000), unit='m')
+        nwbfile.add_acquisition(ts)
+        numpy.testing.assert_equal(ts.align_by_trials(), [[6, 7, 8, 9, 10], [16, 17, 18, 19, 20]])
 
 
 class TestImage(unittest.TestCase):
