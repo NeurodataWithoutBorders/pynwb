@@ -82,7 +82,7 @@ class PatchClampSeries(TimeSeries):
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
 
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
