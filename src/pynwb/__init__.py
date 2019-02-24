@@ -197,7 +197,8 @@ class NWBHDF5IO(_HDF5IO):
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
              to namespaces and TypeMaps', 'default': None},
             {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
-            {'name': 'comm', 'type': "Intracomm", 'doc': 'comm world for parallel I/O', 'default': None})
+            {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
+             'default': None})
     def __init__(self, **kwargs):
         path, mode, manager, extensions, load_namespaces, file_obj, comm =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
