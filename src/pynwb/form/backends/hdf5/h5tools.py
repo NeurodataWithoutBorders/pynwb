@@ -392,7 +392,11 @@ class HDF5IO(FORMIO):
     def open(self):
         if self.__file is None:
             open_flag = self.__mode
-            self.__file = File(self.__path, open_flag)
+            if self.comm:
+                kwargs = {'driver': 'mpio', 'comm': self.comm}
+            else:
+                kwargs = {}
+            self.__file = File(self.__path, open_flag, **kwargs)
 
     def close(self):
         if self.__file is not None:

@@ -196,10 +196,11 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
              to namespaces and TypeMaps', 'default': None},
-            {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None})
+            {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
+            {'name': 'comm', 'type': "Intracomm", 'doc': 'comm world for parallel I/O', 'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj, comm =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -225,7 +226,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj)
+        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
 
 
 from . import io as __io  # noqa: F401,E402
