@@ -212,7 +212,7 @@ class Units(DynamicTable):
              'default': None, 'shape': (None, 2)},
             {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each unit came from',
              'default': None},
-            {'name': 'electrode_group', 'type': 'array_data', 'default': None,
+            {'name': 'electrode_group', 'type': 'ElectrodeGroup', 'default': None,
              'doc': 'the electrode group that each unit came from'},
             {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each unit',
              'default': None},
