@@ -79,6 +79,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                             'slices': DatasetBuilder('slices', 'noslices'),
                                             'source_script': DatasetBuilder('source_script', 'nosources',
                                                                             attributes={'file_name': 'nofilename'}),
+                                            'keywords': DatasetBuilder('keywords', ['aa', 'bb']),
                                             'surgery': DatasetBuilder('surgery', 'nosurgery'),
                                             'virus': DatasetBuilder('virus', 'novirus')}
                                        )
@@ -129,7 +130,8 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                             source_script='nosources',
                             surgery='nosurgery',
                             virus='novirus',
-                            source_script_file_name='nofilename')
+                            source_script_file_name='nofilename',
+                            keywords=['aa', 'bb'])
         self.ts = TimeSeries('test_timeseries', list(range(100, 200, 10)),
                              'SIunit', timestamps=list(range(10)), resolution=0.1)
         container.add_acquisition(self.ts)

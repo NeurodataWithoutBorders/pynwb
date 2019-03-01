@@ -207,7 +207,7 @@ class NWBFile(MultiContainerInterface):
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
             {'name': 'institution', 'type': str,
              'doc': 'institution(s) where experiment is performed', 'default': None},
-            {'name': 'keywords', 'type': 'array_data', 'doc': 'Terms to search over', 'default': None},
+            {'name': 'keywords', 'type': (str, list, tuple), 'doc': 'Terms to search over', 'default': None},
             {'name': 'notes', 'type': str,
              'doc': 'Notes about the experiment.', 'default': None},
             {'name': 'pharmacology', 'type': str,
