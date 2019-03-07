@@ -522,11 +522,11 @@ class NWBFile(MultiContainerInterface):
         self.__check_trials()
         call_docval_func(self.trials.add_column, kwargs)
 
-    @docval(*get_docval(TimeIntervals.add_row), allow_extra=True)
+    @docval(*get_docval(TimeIntervals.add_interval), allow_extra=True)
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+        See :py:meth:`~pynwb.core.DynamicTable.add_interval` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_trial_columns`).
