@@ -59,7 +59,7 @@ rate_ts = TimeSeries('test_timeseries', data, 'SIunit', starting_time=0.0, rate=
 # and :py:func:`~pynwb.file.NWBFile.add_stimulus_template`. Which method you use depends on the source of the
 # data: use :py:func:`~pynwb.file.NWBFile.add_acquisition` to indicated *acquisition* data,
 # :py:func:`~pynwb.file.NWBFile.add_stimulus` to indicate *stimulus* data, and
-# :py:func:`~pynwb.file.NWBFile.add_stimulus_template` to store stimulus templates [#]_.
+# :py:func:`~pynwb.file.NWBFile.add_stimulus_template` to store stimulus templates.
 
 nwbfile.add_acquisition(test_ts)
 
@@ -67,6 +67,7 @@ nwbfile.add_acquisition(test_ts)
 # Access the :py:class:`~pynwb.base.TimeSeries` object `'test_timeseries'` from *acquisition* using
 
 nwbfile.acquisition['test_timeseries']
+####################
 # or
 nwbfile.get_acquisition('test_timeseries')
 
@@ -117,27 +118,59 @@ test_timeseries_in = nwbfile_in.acquisition['test_timeseries']
 print(test_timeseries_in)
 
 ####################
-# Accessing the data field, you will notice that it does not return the data values, but instead a `h5py.Dataset`.
+# ::
+#
+#    test_timeseries <class 'pynwb.base.TimeSeries'>
+#    Fields:
+#      comments: no comments
+#      conversion: 1.0
+#      data: <HDF5 dataset "data": shape (10,), type "<i8">
+#      description: no description
+#      interval: 1
+#      num_samples: 10
+#      resolution: 0.0
+#      timestamps: <HDF5 dataset "timestamps": shape (10,), type "<f8">
+#      timestamps_unit: Seconds
+#      unit: SIunit
+
+####################
+# Accessing the data field, you will notice that it does not return the data values, but instead an HDF5 dataset.
 
 print(test_timeseries_in.data)
 
 ####################
+# ::
+#
+#   <HDF5 dataset "data": shape (10,), type "<i8">
+#
 # This object lets you only read in a section of the dataset without reading the entire thing.
 
 print(test_timeseries_in.data[:2])
 
 ####################
+# ::
+#
+#   [100 110]
+#
 # To load the entire dataset, use `[:]`.
 
 print(test_timeseries_in.data[:])
 io.close()
 
 ####################
+# ::
+#
+#   [100 110 120 130 140 150 160 170 180 190]
+#
 # If you use :py:class:`~pynwb.NWBHDF5IO` as a context manager during read, be aware that the
 # :py:class:`~pynwb.NWBHDF5IO` gets closed and when the context completes and the data will not be
-# available outside of the context manager[#]_.
+# available outside of the context manager [#]_.
 
 ####################
+# Adding More Data
+# ------------
+# The following illustrates basic data organizational structures that are used throughout NWB:N.
+#
 # .. _reuse_timestamps:
 #
 # Reusing timestamps
@@ -165,14 +198,15 @@ reuse_ts = TimeSeries('reusing_timeseries', data, 'SIunit', timestamps=test_ts)
 # :py:class:`~pynwb.base.TimeSeries` that represents the spatial position of an animal over time. By putting
 # your position data into a :py:class:`~pynwb.behavior.Position` container, downstream users and
 # tools know where to look to retrieve position data. For a comprehensive list of available data interfaces, see the
-# :ref:`overview page <modules_overview>`
+# :ref:`overview page <modules_overview>`. Here is how tov create a :py:class:`~pynwb.behavior.Position` object
+# named '`Position'` [#]_.
 
 from pynwb.behavior import Position
 
 position = Position()
 
 ####################
-# You can add objects to a data interface as a method of the data interface,
+# You can add objects to a data interface as a method of the data interface:
 
 position.create_spatial_series(name='position1',
                                data=np.linspace(0, 1, 20),
@@ -180,7 +214,7 @@ position.create_spatial_series(name='position1',
                                reference_frame='starting gate')
 
 ####################
-# or you can add pre-existing objects,
+# or you can add pre-existing objects:
 
 from pynwb.behavior import SpatialSeries
 
@@ -192,9 +226,14 @@ spatial_series = SpatialSeries(name='position2',
 position.add_spatial_series(spatial_series)
 
 ####################
-# or include the object during construction.
+# or include the object during construction:
 
-#position = Position(spatial_series=spatial_series)
+spatial_series = SpatialSeries(name='position2',
+                               data=np.linspace(0, 1, 20),
+                               rate=50.,
+                               reference_frame='starting gate')
+
+position = Position(spatial_series=spatial_series)
 
 ####################
 # Each data interface stores its own type of data. We suggest you read the documentation for the
@@ -235,6 +274,20 @@ nwbfile.add_processing_module(ecephys_module)
 
 nwbfile.modules
 
+####################
+# which returns a `dict`:
+# ::
+#
+#    {'behavior':
+#     behavior <class 'pynwb.base.ProcessingModule'>
+#     Fields:
+#       data_interfaces: { Position <class 'pynwb.behavior.Position'> }
+#       description: preprocessed behavioral data, 'ecephys':
+#     ecephys <class 'pynwb.base.ProcessingModule'>
+#     Fields:
+#       data_interfaces: { }
+#       description: preprocessed extracellular electrophysiology}
+#
 # :py:class:`~pynwb.base.NWBDataInterface` objects can be added to the behavior :ref:`ProcessingModule <basic_procmod>`.
 
 nwbfile.modules['behavior'].add_data_interface(position)
@@ -283,6 +336,16 @@ nwbfile.add_trial(start_time=6.0, stop_time=8.0, stim='desert')
 # Tabular data such as trials can be converted to a `pandas.DataFrame`.
 
 print(nwbfile.trials.to_dataframe())
+
+####################
+# ::
+#
+#           start_time  stop_time    stim
+#       id
+#       0          0.0        2.0  person
+#       1          3.0        5.0   ocean
+#       2          6.0        8.0  desert
+#
 
 ####################
 # .. _basic_units:
@@ -374,9 +437,6 @@ io.write(nwbfile)
 io.close()
 
 ####################
-# .. [#] Stimulus template data may change in the near future. The NWB team will work with interested parties
-#    at the `4th NWB Hackathon <hck04_>`_ to refine the schema for storing stimulus template data.
-#
 # .. [#] HDF5 is currently the only backend supported by NWB.
 #
 # .. [#] Neurodata sets can be *very* large, so individual components of the dataset are only loaded into memory when
