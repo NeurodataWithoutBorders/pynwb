@@ -1,6 +1,6 @@
 from collections import Iterable
 
-from .form.utils import docval, popargs, fmt_docval_args
+from hdmf.utils import docval, popargs, fmt_docval_args
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer, NWBDataInterface
