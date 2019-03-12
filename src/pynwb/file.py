@@ -239,6 +239,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
             {'name': 'acquisition', 'type': (list, tuple),
              'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
+            {'name': 'analysis', 'type': (list, tuple),
+             'doc': 'result of analysis', 'default': None},
             {'name': 'stimulus', 'type': (list, tuple),
              'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'stimulus_template', 'type': (list, tuple),
@@ -298,6 +300,7 @@ class NWBFile(MultiContainerInterface):
         self.__file_create_date = list(map(_add_missing_timezone, self.__file_create_date))
 
         self.acquisition = getargs('acquisition', kwargs)
+        self.analysis = getargs('analysis', kwargs)
         self.stimulus = getargs('stimulus', kwargs)
         self.stimulus_template = getargs('stimulus_template', kwargs)
         self.keywords = getargs('keywords', kwargs)
