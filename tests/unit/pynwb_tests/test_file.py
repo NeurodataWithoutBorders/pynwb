@@ -139,6 +139,11 @@ class NWBFileTest(unittest.TestCase):
                                                       'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.assertEqual(len(self.nwbfile.stimulus_template), 1)
 
+    def test_add_analysis(self):
+        self.nwbfile.add_analysis(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
+                                             'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
+        self.assertEqual(len(self.nwbfile.analysis), 1)
+
     def test_add_acquisition_check_dups(self):
         self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
