@@ -8,7 +8,7 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
-from .misc import DecompositionSeries
+from .misc import DecompositionSeries, UnitSeries
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
@@ -108,7 +108,9 @@ class SpikeEventSeries(ElectricalSeries):
     electrode).
     """
 
-    __nwbfields__ = ()
+    __nwbfields__ = ({'name': 'unit_series',
+                      'doc': 'the UnitSeries that holds the unit ids for each waveform',
+                      'child': False},)
 
     __help = "Snapshots of spike events from data."
 
@@ -119,6 +121,8 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'Timestamps for samples stored in data'},
             {'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
+            {'name': 'unit_series', 'type': UnitSeries, 'default': None,
+             'doc': 'UnitSeries that matches waveforms to spikes in Units table'},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
@@ -135,7 +139,7 @@ class SpikeEventSeries(ElectricalSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        name, data, electrodes = popargs('name', 'data', 'electrodes', kwargs)
+        name, data, electrodes, unit_series = popargs('name', 'data', 'electrodes', 'unit_series', kwargs)
         timestamps = getargs('timestamps', kwargs)
         if not (isinstance(data, TimeSeries) and isinstance(timestamps, TimeSeries)):
             if not (isinstance(data, DataChunkIterator) and isinstance(timestamps, DataChunkIterator)):
@@ -145,6 +149,7 @@ class SpikeEventSeries(ElectricalSeries):
                 # TODO: add check when we have DataChunkIterators
                 pass
         super(SpikeEventSeries, self).__init__(name, data, electrodes, **kwargs)
+        self.unit_series = unit_series
 
 
 @register_class('EventDetection', CORE_NAMESPACE)

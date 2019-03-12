@@ -98,6 +98,11 @@ groups:
     - num_times
     shape:
     - null
+  links:
+  - name: unit_series
+    doc: the UnitSeries that holds the unit ids for each waveform
+    quantity: '?'
+    target_type: UnitSeries
 - neurodata_type_def: ClusterWaveforms
   neurodata_type_inc: NWBDataInterface
   doc: 'DEPRECATED The mean waveform shape, including standard deviation, of the
