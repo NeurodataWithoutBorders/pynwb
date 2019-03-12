@@ -540,12 +540,15 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
     def convert_dt_name(cls, **kwargs):
         '''Get the attribute name corresponding to a specification'''
         spec = getargs('spec', kwargs)
-        if spec.data_type_def is not None:
-            name = spec.data_type_def
-        elif spec.data_type_inc is not None:
-            name = spec.data_type_inc
+        if isinstance(spec, LinkSpec):
+            name = spec.target_type
         else:
-            raise ValueError('found spec without name or data_type')
+            if spec.data_type_def is not None:
+                name = spec.data_type_def
+            elif spec.data_type_inc is not None:
+                name = spec.data_type_inc
+            else:
+                raise ValueError('found spec without name or data_type')
         s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
         name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
         if name[-1] != 's' and spec.is_many():
@@ -1051,7 +1054,9 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
             # now assign links to their respective specification
             for subspec in spec.links:
                 if subspec.name is not None:
-                    ret[subspec] = manager.construct(links[subspec.name].builder)
+                    sub_builder = links.get(subspec.name)
+                    if sub_builder is not None:
+                        ret[subspec] = manager.construct(sub_builder.builder)
                 else:
                     sub_builder = link_dt.get(subspec.target_type)
                     if sub_builder is not None:
@@ -1100,6 +1105,10 @@ class ObjectMapper(with_metaclass(ExtenderMeta, object)):
                     ret[subspec] = manager.construct(sub_builder)
 
     def __flatten(self, sub_builder, subspec, manager):
+        """
+        Convert one-or-many to a single object or a list,
+        depending on the spec
+        """
         tmp = [manager.construct(b) for b in sub_builder]
         if len(tmp) == 1 and not subspec.is_many():
             tmp = tmp[0]

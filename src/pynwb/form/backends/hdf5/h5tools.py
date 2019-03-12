@@ -33,7 +33,7 @@ class HDF5IO(FORMIO):
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'mode', 'type': str,
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")'},
-            {'name': 'comm', 'type': 'Intracom',
+            {'name': 'comm', 'type': 'Intracomm',
              'doc': 'the MPI communicator to use for parallel I/O', 'default': None},
             {'name': 'file', 'type': File, 'doc': 'a pre-existing h5py.File object', 'default': None})
     def __init__(self, **kwargs):
