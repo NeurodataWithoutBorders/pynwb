@@ -239,6 +239,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
             {'name': 'acquisition', 'type': (list, tuple),
              'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
+            {'name': 'analysis', 'type': (list, tuple),
+             'doc': 'result of analysis', 'default': None},
             {'name': 'stimulus', 'type': (list, tuple),
              'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'stimulus_template', 'type': (list, tuple),
@@ -298,6 +300,7 @@ class NWBFile(MultiContainerInterface):
         self.__file_create_date = list(map(_add_missing_timezone, self.__file_create_date))
 
         self.acquisition = getargs('acquisition', kwargs)
+        self.analysis = getargs('analysis', kwargs)
         self.stimulus = getargs('stimulus', kwargs)
         self.stimulus_template = getargs('stimulus_template', kwargs)
         self.keywords = getargs('keywords', kwargs)
@@ -522,11 +525,11 @@ class NWBFile(MultiContainerInterface):
         self.__check_trials()
         call_docval_func(self.trials.add_column, kwargs)
 
-    @docval(*get_docval(TimeIntervals.add_row), allow_extra=True)
+    @docval(*get_docval(TimeIntervals.add_interval), allow_extra=True)
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+        See :py:meth:`~pynwb.core.DynamicTable.add_interval` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_trial_columns`).
