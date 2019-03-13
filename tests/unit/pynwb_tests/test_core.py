@@ -208,7 +208,7 @@ class TestDynamicTable(unittest.TestCase):
 
         dynamic_table_region = DynamicTableRegion('dtr', [0, 1, 1], 'desc', table=table)
         fetch_ids = [x[1] for x in dynamic_table_region[:3]]
-        assert fetch_ids == [1, 2, 2]
+        self.assertEqual(fetch_ids, [1, 2, 2])
 
     def test_nd_array_to_df(self):
         data = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
