@@ -11,7 +11,7 @@ CORE_NAMESPACE = 'core'
 
 from hdmf.spec import NamespaceCatalog  # noqa: E402
 from hdmf.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
-from hdmf.backends.io import FORMIO  # noqa: E402
+from hdmf.backends.io import HDMFIO  # noqa: E402
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
 from hdmf.validate import ValidatorMap  # noqa: E402
 from hdmf.build import BuildManager  # noqa: E402
@@ -171,8 +171,8 @@ def get_class(**kwargs):
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
 
 
-@docval({'name': 'io', 'type': FORMIO,
-         'doc': 'the FORMIO object to read from'},
+@docval({'name': 'io', 'type': HDMFIO,
+         'doc': 'the HDMFIO object to read from'},
         {'name': 'namespace', 'type': str,
          'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
         returns="errors in the file", rtype=list,
