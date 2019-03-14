@@ -1,4 +1,4 @@
-certifi==2018.1.18
+certifi==2019.3.9
 chardet==3.0.4
 codecov==2.0.15
 configparser==3.5.0

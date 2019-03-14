@@ -1,4 +1,4 @@
-certifi==2018.1.18
+certifi==2019.3.9
 chardet==3.0.4
 h5py==2.9.0
 idna==2.6
