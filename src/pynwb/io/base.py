@@ -2,7 +2,7 @@ from .core import NWBContainerMapper
 from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
-from ..form.build import LinkBuilder
+from hdmf.build import LinkBuilder
 
 
 @register_map(ProcessingModule)

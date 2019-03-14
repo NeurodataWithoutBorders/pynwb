@@ -6,7 +6,7 @@ import numpy as np
 import numpy.testing as npt
 
 from pynwb import NWBContainer, get_manager, NWBFile, NWBData
-from pynwb.form.backends.hdf5 import HDF5IO
+from hdmf.backends.hdf5 import HDF5IO
 
 CORE_NAMESPACE = 'core'
 

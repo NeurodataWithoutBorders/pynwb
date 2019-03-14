@@ -2,8 +2,8 @@ from warnings import warn
 
 from collections import Iterable
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
-from .form.data_utils import AbstractDataChunkIterator, DataIO
+from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from hdmf.data_utils import AbstractDataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData

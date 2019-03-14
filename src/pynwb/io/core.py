@@ -1,7 +1,7 @@
-from ..form.utils import docval, getargs
-from ..form.build import ObjectMapper, RegionBuilder, BuildManager
-from ..form.spec import Spec
-from ..form.container import Container
+from hdmf.utils import docval, getargs
+from hdmf.build import ObjectMapper, RegionBuilder, BuildManager
+from hdmf.spec import Spec
+from hdmf.container import Container
 from .. import register_map
 
 from pynwb.file import NWBFile

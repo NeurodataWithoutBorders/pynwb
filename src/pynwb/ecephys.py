@@ -1,8 +1,8 @@
 import numpy as np
 from collections import Iterable
 
-from .form.utils import docval, getargs, popargs, call_docval_func
-from .form.data_utils import DataChunkIterator, assertEqualShape
+from hdmf.utils import docval, getargs, popargs, call_docval_func
+from hdmf.data_utils import DataChunkIterator, assertEqualShape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
