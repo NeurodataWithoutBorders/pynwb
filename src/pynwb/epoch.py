@@ -38,7 +38,7 @@ class TimeIntervals(DynamicTable):
 
     @docval({'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
             {'name': 'stop_time', 'type': float, 'doc': 'Stop time of epoch, in seconds'},
-            {'name': 'tags', 'type': (str, list, tuple), 'doc': 'user-defined tags uesd throughout epochs',
+            {'name': 'tags', 'type': (str, list, tuple), 'doc': 'user-defined tags used throughout time intervals',
              'default': None},
             {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to',
              'default': None},
