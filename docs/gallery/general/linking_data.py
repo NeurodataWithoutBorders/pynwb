@@ -151,9 +151,9 @@ nwbfile4.add_acquisition(test_ts4)
 # our TimeSeries, this means that :py:class:`~pynwb.NWBHDF5IO` will need to
 # determine on write how to treat the dataset. We can make this explicit and customize this
 # behavior on a per-dataset basis by wrapping our dataset using
-# :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`
+# :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
 
-from pynwb.form.backends.hdf5.h5_utils import H5DataIO
+from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 # Create another timeseries that links to the same data
 test_ts5 = TimeSeries(name='test_timeseries5',
@@ -188,7 +188,7 @@ io4.close()
 # ---------------------------
 #
 # Appending to files and linking is made possible by passing around the same
-# :py:class:`~pynwb.form.build.map.BuildManager`. You can get a manager to pass around
+# :py:class:`~hdmf.build.map.BuildManager`. You can get a manager to pass around
 # using the :py:meth:`~pynwb.get_manager` function.
 #
 
@@ -245,5 +245,5 @@ io3.close()
 #
 # External links are convenient but to share data we may want to hand a single file with all the
 # data to our collaborator rather than having to collect all relevant files. To do this,
-# :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
-# provide the convenience function :py:func:`~pynwb.form.backends.hdf5.h5tools.HDF5IO.copy_file`
+# :py:class:`~hdmf.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
+# provide the convenience function :py:func:`~hdmf.backends.hdf5.h5tools.HDF5IO.copy_file`
