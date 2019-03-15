@@ -3,6 +3,7 @@ import unittest2 as unittest
 from pynwb.file import MultiContainerInterface, NWBDataInterface
 from hdmf.utils import docval, get_docval
 
+
 class Node(NWBDataInterface):
 
     __nwbfields__ = ('name',)
@@ -28,16 +29,16 @@ class Graph(MultiContainerInterface):
 
     __clsconf__ = [
         {
-        'attr': 'nodes',
-        'type': Node,
-        'add': 'add_node',
-        'get': 'get_node'
+            'attr': 'nodes',
+            'type': Node,
+            'add': 'add_node',
+            'get': 'get_node'
         },
         {
-        'attr': 'edges',
-        'type': Edge,
-        'add': 'add_edge',
-        'get': 'get_edge'
+            'attr': 'edges',
+            'type': Edge,
+            'add': 'add_edge',
+            'get': 'get_edge'
         }
     ]
 

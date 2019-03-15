@@ -760,7 +760,7 @@ class MultiContainerInterface(NWBDataInterface):
         args = list()
         for conf in clsconf:
             attr_name = conf['attr']
-            container_type= conf['type']
+            container_type = conf['type']
             args.append({'name': attr_name, 'type': (list, tuple, dict, container_type),
                          'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()})
 
@@ -869,7 +869,6 @@ class MultiContainerInterface(NWBDataInterface):
 
             # create the add method
             setattr(cls, add, cls.__make_add(add, attr, container_type))
-
 
             # get create method name
             create = d.get('create')
