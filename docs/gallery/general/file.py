@@ -5,7 +5,7 @@ NWB basics
 ==========
 
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` object,
-including writing and reading of and NWB file.
+including writing and reading of an NWB file.
 
 """
 
@@ -42,13 +42,13 @@ from pynwb import TimeSeries
 
 data = list(range(100, 200, 10))
 timestamps = list(range(10))
-test_ts = TimeSeries('test_timeseries', data, 'SIunit', timestamps=timestamps)
+test_ts = TimeSeries(name='test_timeseries', data=data, unit='m', timestamps=timestamps)
 
 ####################
 # Alternatively, if your recordings are sampled at a uniform rate, you can supply *starting_time*
 # and *rate*.
 
-rate_ts = TimeSeries('test_timeseries', data, 'SIunit', starting_time=0.0, rate=1.0)
+rate_ts = TimeSeries(name='test_timeseries', data=data, unit='m', starting_time=0.0, rate=1.0)
 
 ####################
 # Using this scheme says that this :py:class:`~pynwb.base.TimeSeries` started recording 0 seconds after
@@ -84,14 +84,14 @@ nwbfile.get_acquisition('test_timeseries')
 
 from pynwb import NWBHDF5IO
 
-io = NWBHDF5IO('basic_example.nwb', mode='w')
+io = NWBHDF5IO('example_file_path.nwb', mode='w')
 io.write(nwbfile)
 io.close()
 
 ####################
 # You can also use :py:func:`~pynwb.NWBHDF5IO` as a context manager:
 
-with NWBHDF5IO('basic_example.nwb', 'w') as io:
+with NWBHDF5IO('example_file_path.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
@@ -101,11 +101,11 @@ with NWBHDF5IO('basic_example.nwb', 'w') as io:
 # -------------------
 #
 # As with writing, reading is also carried out using the :py:class:`~pynwb.NWBHDF5IO` class.
-# To read the NWB file we just wrote, using construct another :py:class:`~pynwb.NWBHDF5IO` object,
-# and use the :py:func:`~pynwb.form.backends.io.FORMIO.read` method to retrieve an
+# To read the NWB file we just wrote, use another :py:class:`~pynwb.NWBHDF5IO` object,
+# and use the :py:func:`~pynwb.NWBHDF5IO.read` method to retrieve an
 # :py:class:`~pynwb.file.NWBFile` object.
 
-io = NWBHDF5IO('basic_example.nwb', 'r')
+io = NWBHDF5IO('example_file_path.nwb', 'r')
 nwbfile_in = io.read()
 
 ####################
@@ -198,7 +198,7 @@ reuse_ts = TimeSeries('reusing_timeseries', data, 'SIunit', timestamps=test_ts)
 # :py:class:`~pynwb.base.TimeSeries` that represents the spatial position of an animal over time. By putting
 # your position data into a :py:class:`~pynwb.behavior.Position` container, downstream users and
 # tools know where to look to retrieve position data. For a comprehensive list of available data interfaces, see the
-# :ref:`overview page <modules_overview>`. Here is how tov create a :py:class:`~pynwb.behavior.Position` object
+# :ref:`overview page <modules_overview>`. Here is how to create a :py:class:`~pynwb.behavior.Position` object
 # named '`Position'` [#]_.
 
 from pynwb.behavior import Position
@@ -254,7 +254,7 @@ position = Position(spatial_series=spatial_series)
 # Derived preprocessed data should go in a processing module, which you can create using
 # :py:func:`~pynwb.file.NWBFile.create_processing_module`:
 
-behavior_module = nwbfile.create_processing_module('behavior',
+behavior_module = nwbfile.create_processing_module(name='behavior',
                                                    description='preprocessed behavioral data')
 
 ####################
@@ -263,7 +263,7 @@ behavior_module = nwbfile.create_processing_module('behavior',
 
 from pynwb import ProcessingModule
 
-ecephys_module = ProcessingModule('ecephys',
+ecephys_module = ProcessingModule(name='ecephys',
                                   description='preprocessed extracellular electrophysiology')
 nwbfile.add_processing_module(ecephys_module)
 
@@ -326,7 +326,7 @@ nwbfile.add_epoch(6.0, 8.0, ['second', 'example'], [test_ts, ])
 #
 # Lets add an additional column and some trial data.
 
-nwbfile.add_trial_column('stim', 'the visual stimuli during the trial')
+nwbfile.add_trial_column(name='stim', description='the visual stimuli during the trial')
 
 nwbfile.add_trial(start_time=0.0, stop_time=2.0, stim='person')
 nwbfile.add_trial(start_time=3.0, stop_time=5.0, stim='ocean')
@@ -389,7 +389,7 @@ nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5],
 ####################
 # Now we overwrite the file with all of the data
 
-with NWBHDF5IO('basic_example.nwb', 'w') as io:
+with NWBHDF5IO('example_file_path.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
@@ -416,7 +416,7 @@ with NWBHDF5IO('basic_example.nwb', 'w') as io:
 #
 # First, read the file and get the interface object.
 
-io = NWBHDF5IO('basic_example.nwb', mode='a')
+io = NWBHDF5IO('example_file_path.nwb', mode='a')
 nwbfile = io.read()
 position = nwbfile.modules['behavior'].data_interfaces['Position']
 
