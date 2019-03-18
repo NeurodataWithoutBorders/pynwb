@@ -389,7 +389,7 @@ nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5],
 ####################
 # Now we overwrite the file with all of the data
 
-with NWBHDF5IO('basic_example.nwb', 'w') as io:
+with NWBHDF5IO('example_file_path.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
@@ -416,7 +416,7 @@ with NWBHDF5IO('basic_example.nwb', 'w') as io:
 #
 # First, read the file and get the interface object.
 
-io = NWBHDF5IO('basic_example.nwb', mode='a')
+io = NWBHDF5IO('example_file_path.nwb', mode='a')
 nwbfile = io.read()
 position = nwbfile.modules['behavior'].data_interfaces['Position']
 
