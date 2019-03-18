@@ -105,7 +105,7 @@ with NWBHDF5IO('example_file_path.nwb', 'w') as io:
 # and use the :py:func:`~pynwb.NWBHDF5IO.read` method to retrieve an
 # :py:class:`~pynwb.file.NWBFile` object.
 
-io = NWBHDF5IO('basic_example.nwb', 'r')
+io = NWBHDF5IO('example_file_path.nwb', 'r')
 nwbfile_in = io.read()
 
 ####################
