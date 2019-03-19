@@ -390,7 +390,17 @@ class VectorIndex(Index):
         self.target = getargs('target', kwargs)
 
     def add_vector(self, arg):
-        self.target.extend(arg)
+        if isinstance(self.target, NWBTable):
+            # if this is a compound type, we need to
+            # pass in arguments differently
+            for v in arg:
+                if isinstance(v, dict):
+                    self.target.add_row(**v)
+                else:
+                    self.target.add_row(*v)
+        else:
+            for v in arg:
+                self.target.add_row(v)
         self.data.append(len(self.target))
 
     def add_row(self, arg):
@@ -426,7 +436,7 @@ class ElementIdentifiers(NWBData):
         call_docval_func(super(ElementIdentifiers, self).__init__, kwargs)
 
 
-class NWBTable(NWBData):
+class NWBTable(VectorData):
     r'''
     Subclasses should specify the class attribute \_\_columns\_\_.
 
@@ -464,7 +474,8 @@ class NWBTable(NWBData):
 
                 @docval(name,
                         {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the data in this table',
-                         'default': list()})
+                         'default': list()},
+                        {'name': 'description', 'type': str, 'doc': 'a description for this column', 'default': 'n/a'})
                 def __init__(self, **kwargs):
                     name, data = getargs('name', 'data', kwargs)
                     colnames = [i['name'] for i in columns]
@@ -483,6 +494,7 @@ class NWBTable(NWBData):
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()},
+            {'name': 'description', 'type': str, 'doc': 'a description for this column', 'default': 'n/a'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
@@ -502,9 +514,8 @@ class NWBTable(NWBData):
         if not isinstance(self.data, list):
             msg = 'Cannot append row to %s' % type(self.data)
             raise ValueError(msg)
-        ret = len(self.data)
-        self.data.append(tuple(values[col] for col in self.columns))
-        return ret
+        val = tuple(values[col] for col in self.columns)
+        super(NWBTable, self).add_row(val)
 
     def which(self, **kwargs):
         '''
@@ -1046,6 +1057,7 @@ class DynamicTable(NWBDataInterface):
         for col in self.__columns__:
             if col.get('required', False) and col['name'] not in self.__colids:
                 self.add_column(col['name'], col['description'],
+                                colcls=col.get('colcls', None),
                                 index=col.get('index', False),
                                 table=col.get('table', False))
 
@@ -1105,6 +1117,7 @@ class DynamicTable(NWBDataInterface):
                 if col['name'] in extra_columns:
                     if data[col['name']] is not None:
                         self.add_column(col['name'], col['description'],
+                                        colcls=col.get('colcls', None),
                                         index=col.get('index', False),
                                         table=col.get('table', False))
                     extra_columns.remove(col['name'])
@@ -1140,14 +1153,15 @@ class DynamicTable(NWBDataInterface):
             {'name': 'table', 'type': (bool, 'DynamicTable'),
              'doc': 'whether or not this is a table region or the table the region applies to', 'default': False},
             {'name': 'index', 'type': (bool, VectorIndex, 'array_data'),
-             'doc': 'whether or not this column should be indexed', 'default': False})
+             'doc': 'whether or not this column should be indexed', 'default': False},
+            {'name': 'colcls', 'type': type, 'doc': 'the class to use for this column', 'default': None})
     def add_column(self, **kwargs):
         """
         Add a column to this table. If data is provided, it must
         contain the same number of rows as the current state of the table.
         """
         name, data = getargs('name', 'data', kwargs)
-        index, table = popargs('index', 'table', kwargs)
+        index, table, colcls = popargs('index', 'table', 'colcls', kwargs)
         if name in self.__colids:
             msg = "column '%s' already exists in DynamicTable '%s'" % (name, self.name)
             raise ValueError(msg)
@@ -1156,7 +1170,9 @@ class DynamicTable(NWBDataInterface):
         cls = VectorData
 
         # Add table if it's been specified
-        if table is not False:
+        if colcls is not None:
+            cls = colcls
+        elif table is not False:
             cls = DynamicTableRegion
             if isinstance(table, DynamicTable):
                 ckwargs['table'] = table

@@ -2,7 +2,7 @@ import unittest
 from datetime import datetime
 from dateutil import tz
 
-from pynwb.epoch import TimeIntervals
+from pynwb.epoch import TimeIntervals, TimeSeriesIndex
 from pynwb import TimeSeries, NWBFile
 
 import numpy as np
@@ -11,17 +11,42 @@ import pandas as pd
 
 class TimeIntervalsTest(unittest.TestCase):
 
-    def test_init(self):
+    def _get_time_intervals(self):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
         ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
         ept = TimeIntervals('epochs', "TimeIntervals unittest")
         self.assertEqual(ept.name, 'epochs')
         ept.add_interval(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
+        return ept, (ts,)
+
+    def test_init(self):
+        ept, ts = self._get_time_intervals()
         row = ept[0]
         self.assertEqual(row[1], 10.0)
         self.assertEqual(row[2], 20.0)
         self.assertEqual(row[3], ["test", "unittest", "pynwb"])
-        self.assertEqual(row[4], [(90, 100, ts)])
+        self.assertEqual(row[4], [(90, 100, ts[0])])
+
+    def setUp(self):
+        self.tsa, self.tsb = self.get_timeseries()
+        self.columns = (
+            [0.2, 0.25, 0.30, 0.35],
+            [0.25, 0.30, 0.40, 0.45],
+            [[], [], ['fizz', 'buzz'], ['qaz']],
+            [[self.tsa], [self.tsb], [], [self.tsb, self.tsa]],
+            ['q', 'w', 'e', 'r'],
+            [1, 2, 3, 4],
+            ['fish', 'fowl', 'dog', 'cat'],
+        )
+        self.colnames = (
+                          'start_time',
+                          'stop_time',
+                          'tags',
+                          'timeseries',
+                          'description',
+                          'foo',
+                          'bar'
+        )
 
     def get_timeseries(self):
         return [
@@ -30,16 +55,16 @@ class TimeIntervalsTest(unittest.TestCase):
         ]
 
     def get_dataframe(self):
-        tsa, tsb = self.get_timeseries()
-        return pd.DataFrame({
-            'foo': [1, 2, 3, 4],
-            'bar': ['fish', 'fowl', 'dog', 'cat'],
-            'start_time': [0.2, 0.25, 0.30, 0.35],
-            'stop_time': [0.25, 0.30, 0.40, 0.45],
-            'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
-            'description': ['q', 'w', 'e', 'r'],
-            'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
-        })
+        return pd.DataFrame(dict(zip(self.colnames, self.columns)))
+
+    def get_timeintervals(self):
+        ept = TimeIntervals('epochs', "TimeIntervals unittest")
+        for colname in self.colnames[4:]:
+            ept.add_column(name=colname, description="test column: %s" % colname)
+        for row in zip(*self.columns):
+            kwargs = dict(zip(self.colnames, row))
+            ept.add_interval(**kwargs)
+        return ept
 
     def test_dataframe_roundtrip(self):
         df = self.get_dataframe()
@@ -54,6 +79,11 @@ class TimeIntervalsTest(unittest.TestCase):
         df = self.get_dataframe()
         for i, row in df.iterrows():
             nwbfile.add_epoch(start_time=row['start_time'], stop_time=row['stop_time'])
+
+    def test_ts_index(self):
+        ept = self.get_timeintervals()
+        col = ept['timeseries']
+        self.assertIsInstance(col.target, TimeSeriesIndex)
 
 
 if __name__ == '__main__':

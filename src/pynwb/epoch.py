@@ -5,9 +5,22 @@ from hdmf.data_utils import DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import DynamicTable, ElementIdentifiers
+from .core import DynamicTable, ElementIdentifiers, NWBTable
 
 import pandas as pd
+
+
+class TimeSeriesIndex(NWBTable):
+
+    __columns__ = (
+        {'name': 'idx_start', 'type': int, 'doc': 'start index into the TimeSeries data field'},
+        {'name': 'count', 'type': int, 'doc': 'number of data samples in the TimeSeries'},
+        {'name': 'timeseries', 'type': TimeSeries, 'doc': 'the TimeSeries object'},
+    )
+
+    def __getitem__(self, *args):
+        result = super(NWBTable, self).__getitem__(args[0])
+        return result
 
 
 @register_class('TimeIntervals', CORE_NAMESPACE)
@@ -22,7 +35,8 @@ class TimeIntervals(DynamicTable):
         {'name': 'start_time', 'description': 'Start time of epoch, in seconds', 'required': True},
         {'name': 'stop_time', 'description': 'Stop time of epoch, in seconds', 'required': True},
         {'name': 'tags', 'description': 'user-defined tags', 'index': True},
-        {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'index': True}
+        {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'index': True,
+         'colcls': TimeSeriesIndex}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},
@@ -43,7 +57,7 @@ class TimeIntervals(DynamicTable):
             {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to',
              'default': None},
             allow_extra=True)
-    def add_interval(self, **kwargs):
+    def add_row(self, **kwargs):
         tags, timeseries = popargs('tags', 'timeseries', kwargs)
         start_time, stop_time = getargs('start_time', 'stop_time', kwargs)
         rkwargs = dict(kwargs)
@@ -60,7 +74,22 @@ class TimeIntervals(DynamicTable):
                 tmp.append((idx_start, count, ts))
             timeseries = tmp
             rkwargs['timeseries'] = timeseries
+        else:
+            rkwargs['timeseries'] = []
         return super(TimeIntervals, self).add_row(**rkwargs)
+
+    @docval({'name': 'start_time', 'type': float, 'doc': 'Start time of epoch, in seconds'},
+            {'name': 'stop_time', 'type': float, 'doc': 'Stop time of epoch, in seconds'},
+            {'name': 'tags', 'type': (str, list, tuple), 'doc': 'user-defined tags used throughout time intervals',
+             'default': None},
+            {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to',
+             'default': None},
+            allow_extra=True)
+    def add_interval(self, **kwargs):
+        """
+        An alias to add_row
+        """
+        call_docval_func(self.add_row, kwargs)
 
     def __calculate_idx_count(self, start_time, stop_time, ts_data):
         if isinstance(ts_data.timestamps, DataIO):

@@ -240,6 +240,7 @@ class TestNWBTable(unittest.TestCase):
     def table_with_data(self):
         return self.cls(
             name='testing table',
+            description='a table for doing a unittest',
             data=self.basic_data()
         )
 
