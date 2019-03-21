@@ -438,6 +438,8 @@ class ElementIdentifiers(NWBData):
 
 class NWBTable(VectorData):
     r'''
+    A class for representing a compound type column.
+
     Subclasses should specify the class attribute \_\_columns\_\_.
 
     This should be a list of dictionaries with the following keys:
