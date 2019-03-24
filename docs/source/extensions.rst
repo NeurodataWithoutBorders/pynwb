@@ -352,7 +352,7 @@ We can now create the sources of our documentation as follows:
                  --external_description my_extension_source/docs/mylab_description.rst \  (Optional)
                  --external_release_notes my_extension_source/docs/mylab_release_notes.rst \  (Optional)
 
-To automatically generate the RST documentation files from the YAML (or JSON) sources of the extension simply run:
+To automatically generate the RST documentation files from the YAML sources of the extension simply run:
 
 .. code-block:: text
 
