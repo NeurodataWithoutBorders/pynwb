@@ -20,8 +20,6 @@ API Documentation
    Miscellaneous <pynwb.misc>
    Epoch <pynwb.epoch>
    PyNWB <pynwb>
-   Flexible Object-Relational Mapping <hdmf>
-
 
 
 :ref:`modindex`
