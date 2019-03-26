@@ -1,7 +1,7 @@
 import numpy as np
 from collections import Iterable
 
-from .form.utils import docval, getargs, popargs, call_docval_func
+from hdmf.utils import docval, getargs, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_conversion, _default_resolution
@@ -212,7 +212,7 @@ class Units(DynamicTable):
              'default': None, 'shape': (None, 2)},
             {'name': 'electrodes', 'type': 'array_data', 'doc': 'the electrodes that each unit came from',
              'default': None},
-            {'name': 'electrode_group', 'type': 'array_data', 'default': None,
+            {'name': 'electrode_group', 'type': 'ElectrodeGroup', 'default': None,
              'doc': 'the electrode group that each unit came from'},
             {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each unit',
              'default': None},
@@ -261,7 +261,7 @@ class DecompositionSeries(TimeSeries):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+             'doc': 'dims: num_times * num_channels * num_bands', 'shape': (None, None, None)},
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset'},
             {'name': 'metric', 'type': str, 'doc': "metric of analysis. recommended: 'phase', 'amplitude', 'power'"},
             {'name': 'unit', 'type': str, 'doc': 'SI unit of measurement', 'default': 'no unit'},

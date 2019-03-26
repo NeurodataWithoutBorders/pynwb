@@ -28,7 +28,7 @@ PyNWB API.
 #
 # The following block of code demonstrates how to create a new namespace, and then add a new `neurodata_type`
 # to this namespace. Finally,
-# it calls :py:meth:`~pynwb.form.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
+# it calls :py:meth:`~hdmf.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
 
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 
@@ -96,7 +96,7 @@ ns_builder.export(ns_path)
 
 from pynwb import register_class, load_namespaces
 from pynwb.ecephys import ElectricalSeries
-from pynwb.form.utils import docval, call_docval_func, getargs, get_docval
+from hdmf.utils import docval, call_docval_func, getargs, get_docval
 
 ns_path = "mylab.namespace.yaml"
 load_namespaces(ns_path)
@@ -117,9 +117,9 @@ class TetrodeSeries(ElectricalSeries):
 ####################
 # .. note::
 #
-#     See the API docs for more information about :py:func:`~pynwb.form.utils.docval`
-#     :py:func:`~pynwb.form.utils.call_docval_func`, :py:func:`~pynwb.form.utils.getargs`
-#     and :py:func:`~pynwb.form.utils.get_docval`
+#     See the API docs for more information about :py:func:`~hdmf.utils.docval`
+#     :py:func:`~hdmf.utils.call_docval_func`, :py:func:`~hdmf.utils.getargs`
+#     and :py:func:`~hdmf.utils.get_docval`
 #
 # When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer`
 # subclasses, you should defining the class field ``__nwbfields__``. This will
@@ -151,7 +151,7 @@ AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
 # -----------------------------------------------------
 #
 # Extensions can be cached to file so that your NWB file will carry the extensions needed to read the file with it.
-# This is done by setting *cache_spec* to *True* when calling :py:meth:`~pynwb.form.backends.hdf5.h5tools.HDF5IO.write`
+# This is done by setting *cache_spec* to *True* when calling :py:meth:`~hdmf.backends.hdf5.h5tools.HDF5IO.write`
 # on :py:class:`~pynwb.NWBHDF5IO` (See :ref:`basic_writing` for more on writing NWB files).
 #
 # To demonstrate this, first we will make some fake data using our extensions.

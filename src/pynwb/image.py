@@ -2,7 +2,7 @@ import numpy as np
 import warnings
 from collections import Iterable
 
-from .form.utils import docval, popargs, call_docval_func
+from hdmf.utils import docval, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion, Image

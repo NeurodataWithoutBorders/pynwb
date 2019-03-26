@@ -1,8 +1,8 @@
 from copy import copy, deepcopy
 
-from .form.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace,\
+from hdmf.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace,\
                        NamespaceBuilder, AttributeSpec, DtypeSpec, RefSpec
-from .form.utils import docval, get_docval, fmt_docval_args
+from hdmf.utils import docval, get_docval, fmt_docval_args
 
 from . import CORE_NAMESPACE
 

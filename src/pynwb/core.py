@@ -2,8 +2,8 @@ from h5py import RegionReference
 import numpy as np
 import pandas as pd
 
-from .form.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
-from .form import Container, Data, DataRegion, get_region_slicer
+from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
+from hdmf import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
@@ -756,16 +756,25 @@ class MultiContainerInterface(NWBDataInterface):
         return _func
 
     @classmethod
-    def __make_constructor(cls, attr_name, add_name, container_type):
-        @docval({'name': attr_name, 'type': (list, tuple, dict, container_type),
-                 'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()},
-                {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__},
-                func_name='__init__')
+    def __make_constructor(cls, clsconf):
+        args = list()
+        for conf in clsconf:
+            attr_name = conf['attr']
+            container_type = conf['type']
+            args.append({'name': attr_name, 'type': (list, tuple, dict, container_type),
+                         'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()})
+
+        args.append({'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__})
+
+        @docval(*args, func_name='__init__')
         def _func(self, **kwargs):
-            container = popargs(attr_name, kwargs)
-            super(cls, self).__init__(**kwargs)
-            add = getattr(self, add_name)
-            add(container)
+            call_docval_func(super(cls, self).__init__, kwargs)
+            for conf in clsconf:
+                attr_name = conf['attr']
+                add_name = conf['add']
+                container = popargs(attr_name, kwargs)
+                add = getattr(self, add_name)
+                add(container)
         return _func
 
     @classmethod
@@ -861,11 +870,6 @@ class MultiContainerInterface(NWBDataInterface):
             # create the add method
             setattr(cls, add, cls.__make_add(add, attr, container_type))
 
-            # create the constructor, only if it has not been overridden
-            # i.e. it is the same method as the parent class constructor
-            if cls.__init__ == MultiContainerInterface.__init__:
-                setattr(cls, '__init__', cls.__make_constructor(attr, add, container_type))
-
             # get create method name
             create = d.get('create')
             if create is not None:
@@ -877,6 +881,11 @@ class MultiContainerInterface(NWBDataInterface):
 
         if len(clsconf) == 1:
             setattr(cls, '__getitem__', cls.__make_getitem(attr, container_type))
+
+        # create the constructor, only if it has not been overridden
+        # i.e. it is the same method as the parent class constructor
+        if cls.__init__ == MultiContainerInterface.__init__:
+            setattr(cls, '__init__', cls.__make_constructor(clsconf))
 
 
 @register_class('DynamicTable', CORE_NAMESPACE)
@@ -1361,11 +1370,7 @@ class DynamicTableRegion(VectorData):
             arg1 = key[0]
             arg2 = key[1]
             return self.table[self.data[arg1], arg2]
-        elif isinstance(key, slice):
-            data = np.arange(*key.indices(len(self.table)))
-            return DynamicTableRegion(name=self.name, data=data, description=self.description, table=self.table)
+        elif isinstance(key, (int, slice)):
+            return self.table[self.data[key]]
         else:
-            if isinstance(key, int):
-                return self.table[self.data[key]]
-            else:
-                raise ValueError("unrecognized argument: '%s'" % key)
+            raise ValueError("unrecognized argument: '%s'" % key)

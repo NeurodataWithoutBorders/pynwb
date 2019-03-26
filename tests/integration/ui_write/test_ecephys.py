@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
+from hdmf.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
 
 from pynwb.ecephys import ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, Clustering, ClusterWaveforms,\
                           SpikeEventSeries, EventWaveform, EventDetection, FeatureExtraction

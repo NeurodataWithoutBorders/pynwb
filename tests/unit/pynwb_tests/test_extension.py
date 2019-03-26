@@ -7,8 +7,8 @@ from tempfile import gettempdir
 
 import unittest2 as unittest
 from pynwb import get_type_map, TimeSeries, NWBFile, register_class, docval, load_namespaces, popargs
-from pynwb.form.spec.spec import RefSpec
-from pynwb.form.utils import get_docval
+from hdmf.spec.spec import RefSpec
+from hdmf.utils import get_docval
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
 from pynwb.file import LabMetaData
 

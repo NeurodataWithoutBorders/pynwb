@@ -7,10 +7,10 @@ from h5py import File
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO
 
-from pynwb.form.backends.hdf5 import HDF5IO, H5DataIO
-from pynwb.form.data_utils import DataChunkIterator
-from pynwb.form.build import GroupBuilder, DatasetBuilder
-from pynwb.form.spec import NamespaceCatalog
+from hdmf.backends.hdf5 import HDF5IO, H5DataIO
+from hdmf.data_utils import DataChunkIterator
+from hdmf.build import GroupBuilder, DatasetBuilder
+from hdmf.spec import NamespaceCatalog
 from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
 from pynwb.ecephys import ElectricalSeries, LFP
 

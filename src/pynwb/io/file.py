@@ -1,5 +1,5 @@
 from dateutil.parser import parse as dateutil_parse
-from ..form.build import ObjectMapper
+from hdmf.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile
 
@@ -11,6 +11,7 @@ class NWBFileMap(ObjectMapper):
         super(NWBFileMap, self).__init__(spec)
         raw_ts_spec = self.spec.get_group('acquisition').get_neurodata_type('NWBDataInterface')
         self.map_spec('acquisition', raw_ts_spec)
+        self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('NWBContainer'))
 
         stimulus_spec = self.spec.get_group('stimulus')
         self.unmap(stimulus_spec)

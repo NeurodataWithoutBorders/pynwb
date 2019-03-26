@@ -1,7 +1,7 @@
 from . import base
 
 import numpy as np
-from pynwb.form.build import GroupBuilder, DatasetBuilder, ReferenceBuilder
+from hdmf.build import GroupBuilder, DatasetBuilder, ReferenceBuilder
 from pynwb import TimeSeries
 from pynwb.core import DynamicTable, VectorData
 
@@ -97,8 +97,8 @@ class TestUnitElectrodes(base.TestMapRoundTrip):
                                   location='CA1', filtering='none',
                                   group=electrode_group)
 
-        nwbfile.add_unit(id=1, electrodes=[1])
-        nwbfile.add_unit(id=2, electrodes=[1])
+        nwbfile.add_unit(id=1, electrodes=[1], electrode_group=electrode_group)
+        nwbfile.add_unit(id=2, electrodes=[1], electrode_group=electrode_group)
         nwbfile.units.to_dataframe()
         self.container = nwbfile.units
 

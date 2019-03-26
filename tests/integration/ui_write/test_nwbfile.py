@@ -5,8 +5,8 @@ from dateutil.tz import tzlocal, tzutc
 import pandas as pd
 import numpy as np
 
-from pynwb.form.build import GroupBuilder, DatasetBuilder
-from pynwb.form.backends.hdf5 import HDF5IO
+from hdmf.build import GroupBuilder, DatasetBuilder
+from hdmf.backends.hdf5 import HDF5IO
 
 from pynwb import NWBFile, TimeSeries
 from pynwb.file import Subject
@@ -133,6 +133,9 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         self.ts = TimeSeries('test_timeseries', list(range(100, 200, 10)),
                              'SIunit', timestamps=list(range(10)), resolution=0.1)
         container.add_acquisition(self.ts)
+        self.ts2 = TimeSeries('test_timeseries2', list(range(200, 300, 10)),
+                              'SIunit', timestamps=list(range(10)), resolution=0.1)
+        container.add_analysis(self.ts2)
         self.mod = container.create_processing_module('test_module',
                                                       'a test module')
         self.clustering = Clustering("A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100., 101., 102.],
@@ -164,6 +167,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         self.assertIsInstance(container, NWBFile)
         raw_ts = container.acquisition
         self.assertEqual(len(raw_ts), 1)
+        self.assertEqual(len(container.analysis), 1)
         for v in raw_ts.values():
             self.assertIsInstance(v, TimeSeries)
         hdf5io.close()

@@ -6,6 +6,8 @@ from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, 
     DecompositionSeries
 from pynwb.file import TimeSeries, DynamicTable
 from pynwb.core import VectorData
+from pynwb.device import Device
+from pynwb.ecephys import ElectrodeGroup
 
 
 class AnnotationSeriesConstructor(unittest.TestCase):
@@ -148,6 +150,13 @@ class UnitsTests(unittest.TestCase):
         self.assertTrue(all(ut['spike_times'][1] == np.array([3, 4, 5])))
         self.assertTrue(np.all(ut['obs_intervals'][0] == np.array([[0, 2]])))
         self.assertTrue(np.all(ut['obs_intervals'][1] == np.array([[2, 3], [4, 5]])))
+
+    def test_electrode_group(self):
+        ut = Units()
+        device = Device('test_device')
+        electrode_group = ElectrodeGroup('test_electrode_group', 'description', 'location', device)
+        ut.add_unit(electrode_group=electrode_group)
+        self.assertEqual(ut['electrode_group'][0], electrode_group)
 
 
 if __name__ == '__main__':

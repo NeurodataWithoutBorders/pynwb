@@ -170,14 +170,14 @@ Create a new namespace with extensions
 
     # create extensions
     ext1 = NWBGroupSpec('A custom SpikeEventSeries interface',
-                        attributes=[...]
+                        attributes=[...],
                         datasets=[...],
                         groups=[...],
                         neurodata_type_inc='SpikeEventSeries',
                         neurodata_type_def='MyExtendedSpikeEventSeries')
 
     ext2 = NWBGroupSpec('A custom EventDetection interface',
-                        attributes=[...]
+                        attributes=[...],
                         datasets=[...],
                         groups=[...],
                         neurodata_type_inc='EventDetection',
