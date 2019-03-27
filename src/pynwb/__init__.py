@@ -9,8 +9,6 @@ import h5py
 
 CORE_NAMESPACE = 'core'
 
-import magic  # noqa: E402
-
 from hdmf.spec import NamespaceCatalog  # noqa: E402
 from hdmf.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
 from hdmf.backends.io import HDMFIO  # noqa: E402
@@ -241,13 +239,13 @@ class NWBHDF5IO(_HDF5IO):
          to namespaces and TypeMaps', 'default': None},
         {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
         is_method=False)
-def NWBIO(**kwargs):
+def nwb_io(**kwargs):
     path = popargs('path', kwargs)
-    ftype = magic.from_file(path)
-    if ftype == 'Hierarchical Data Format (version 5) data':
+    if os.path.isfile(path):
+        # hdf5 is the only single-file backend currently supported
         return NWBHDF5IO(path, **kwargs)
     else:
-        raise ValueError('Failed to import "{}". NWBIO for filetype "{}" not implemented'.format(path, ftype))
+        raise ValueError('Failed to import "{}" because it is not a file.'.format(path))
 
 
 from . import io as __io  # noqa: F401,E402
