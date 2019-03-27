@@ -9,6 +9,8 @@ import h5py
 
 CORE_NAMESPACE = 'core'
 
+import magic  # noqa: E402
+
 from hdmf.spec import NamespaceCatalog  # noqa: E402
 from hdmf.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
 from hdmf.backends.io import HDMFIO  # noqa: E402
@@ -226,6 +228,26 @@ class NWBHDF5IO(_HDF5IO):
             elif manager is None:
                 manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj)
+
+
+@docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
+        {'name': 'mode', 'type': str,
+         'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")'},
+        {'name': 'load_namespaces', 'type': bool,
+         'doc': 'whether or not to load cached namespaces from given path', 'default': False},
+        {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
+        {'name': 'extensions', 'type': (str, TypeMap, list),
+         'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
+         to namespaces and TypeMaps', 'default': None},
+        {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
+        is_method=False)
+def NWBIO(**kwargs):
+    path = popargs('path', kwargs)
+    ftype = magic.from_file(path)
+    if ftype == 'Hierarchical Data Format (version 5) data':
+        return NWBHDF5IO(path, **kwargs)
+    else:
+        raise ValueError('Failed to import "{}". NWBIO for filetype "{}" not implemented'.format(path, ftype))
 
 
 from . import io as __io  # noqa: F401,E402
