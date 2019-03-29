@@ -247,8 +247,11 @@ class Images(MultiContainerInterface):
     __help = "Contains images"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
-            {'name': 'description', 'type': str, 'doc': 'description of images'})
+            {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of images',
+             'default': 'no description'})
     def __init__(self, **kwargs):
-        name, description = popargs('name', 'description', kwargs)
+        name, description, images = popargs('name', 'description', 'images', kwargs)
         super(Images, self).__init__(name, **kwargs)
         self.description = description
+        self.images = images
