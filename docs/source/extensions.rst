@@ -268,9 +268,9 @@ ObjectMapper : Customizing the mapping between NWBContainer and the Spec
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer`
-class for reading and writing, you will need to implement and register a custom :py:class:`~pynwb.form.build.map.ObjectMapper`.
+class for reading and writing, you will need to implement and register a custom :py:class:`~hdmf.build.map.ObjectMapper`.
 
-:py:class:`~pynwb.form.build.map.ObjectMapper` extensions are registered with the decorator :py:func:`~pynwb.register_map`.
+:py:class:`~hdmf.build.map.ObjectMapper` extensions are registered with the decorator :py:func:`~pynwb.register_map`.
 
 .. code-block:: python
 
