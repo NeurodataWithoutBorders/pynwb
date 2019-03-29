@@ -220,15 +220,21 @@ class Image(NWBData):
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None},
+            {'name': 'help', 'type': str, 'doc': 'helpful hint for user',
+             'default': 'pixel values for an image'}
+            )
     def __init__(self, **kwargs):
         super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
         self.resolution = kwargs['resolution']
         self.description = kwargs['description']
+        self.help = kwargs['help']
 
 
 @register_class('Images', CORE_NAMESPACE)
 class Images(MultiContainerInterface):
+
+    __nwbfields__ = ('description',)
 
     __clsconf__ = {
         'attr': 'images',
@@ -239,3 +245,10 @@ class Images(MultiContainerInterface):
     }
 
     __help = "Contains images"
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
+            {'name': 'description', 'type': str, 'doc': 'description of images'})
+    def __init__(self, **kwargs):
+        name, description = popargs('name', 'description', kwargs)
+        super(Images, self).__init__(name, **kwargs)
+        self.description = description
