@@ -191,6 +191,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
         """
         if isinstance(v, list):
+            if len(v) and isinstance(v[0], NWBBaseType):
+                return str(v)
             try:
                 return str(np.array(v))
             except ValueError:
