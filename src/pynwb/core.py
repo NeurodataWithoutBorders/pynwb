@@ -68,7 +68,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     relationships in neurodata.
     '''
 
-    __fields__ = tuple()
+    __nwbfields__ = tuple()
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'parent', 'type': Container,
@@ -104,7 +104,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         tmp = nwbfield
         if isinstance(tmp, dict):
             if 'name' not in tmp:
-                raise ValueError("must specify 'name' if using dict in __fields__")
+                raise ValueError("must specify 'name' if using dict in __nwbfields__")
         else:
             tmp = {'name': tmp}
         return tmp
@@ -140,24 +140,24 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         This classmethod will be called during class declaration in the metaclass to automatically
         create setters and getters for NWB fields that need to be exported
         '''
-        if not isinstance(cls.__fields__, tuple):
-            raise TypeError("'__fields__' must be of type tuple")
+        if not isinstance(cls.__nwbfields__, tuple):
+            raise TypeError("'__nwbfields__' must be of type tuple")
 
         if len(bases) and 'NWBContainer' in globals() and issubclass(bases[-1], NWBContainer) \
-                and bases[-1].__fields__ is not cls.__fields__:
-            new_nwbfields = list(cls.__fields__)
-            new_nwbfields[0:0] = bases[-1].__fields__
-            cls.__fields__ = tuple(new_nwbfields)
+                and bases[-1].__nwbfields__ is not cls.__nwbfields__:
+            new_nwbfields = list(cls.__nwbfields__)
+            new_nwbfields[0:0] = bases[-1].__nwbfields__
+            cls.__nwbfields__ = tuple(new_nwbfields)
         new_nwbfields = list()
         docs = {dv['name']: dv['doc'] for dv in get_docval(cls.__init__)}
-        for f in cls.__fields__:
+        for f in cls.__nwbfields__:
             pconf = cls._transform_arg(f)
             pname = pconf['name']
             pconf.setdefault('doc', docs.get(pname))
             if not hasattr(cls, pname):
                 setattr(cls, pname, property(cls._getter(pconf), cls._setter(pconf)))
             new_nwbfields.append(pname)
-        cls.__fields__ = tuple(new_nwbfields)
+        cls.__nwbfields__ = tuple(new_nwbfields)
 
     def __repr__(self):
         template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
@@ -214,7 +214,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBBaseType, Container):
-    __fields__ = ('help',)
+
+    __nwbfields__ = ('help',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'parent', 'type': 'NWBContainer',
@@ -233,8 +234,8 @@ class NWBContainer(NWBBaseType, Container):
         if isinstance(nwbfield, dict):
             for k in nwbfield.keys():
                 if k not in cls.__pconf_allowed_keys:
-                    msg = "Unrecognized key '%s' in __field__ config '%s' on %s" % \
-                          (k, nwbfield['name'], cls.__name__)
+                    msg = "Unrecognized key '%s' in __nwbfield__ config '%s' on %s" %\
+                           (k, nwbfield['name'], cls.__name__)
                     raise ValueError(msg)
             if nwbfield.get('required_name', None) is not None:
                 name = nwbfield['required_name']
@@ -287,14 +288,15 @@ class NWBDataInterface(NWBContainer):
 
 @register_class('NWBData', CORE_NAMESPACE)
 class NWBData(NWBBaseType, Data):
-    __fields__ = ('help',)
+
+    __nwbfields__ = ('help',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+            'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBData, self).__init__, kwargs)
         self.__data = getargs('data', kwargs)
@@ -332,7 +334,8 @@ class NWBData(NWBBaseType, Data):
 
 @register_class('Index', CORE_NAMESPACE)
 class Index(NWBData):
-    __fields__ = ("target",)
+
+    __nwbfields__ = ("target",)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'data', 'type': ('array_data', 'data'),
@@ -342,14 +345,15 @@ class Index(NWBData):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+            'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(Index, self).__init__, kwargs)
 
 
 @register_class('VectorData', CORE_NAMESPACE)
 class VectorData(NWBData):
-    __fields__ = ("description",)
+
+    __nwbfields__ = ("description",)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'description', 'type': str, 'doc': 'a description for this column'},
@@ -358,7 +362,7 @@ class VectorData(NWBData):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+            'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorData, self).__init__, kwargs)
         self.description = getargs('description', kwargs)
@@ -380,7 +384,7 @@ class VectorIndex(Index):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+            'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorIndex, self).__init__, kwargs)
         self.target = getargs('target', kwargs)
@@ -393,7 +397,7 @@ class VectorIndex(Index):
         self.add_vector(arg)
 
     def __getitem_helper(self, arg):
-        start = 0 if arg == 0 else self.data[arg - 1]
+        start = 0 if arg == 0 else self.data[arg-1]
         end = self.data[arg]
         return self.target[start:end]
 
@@ -417,7 +421,7 @@ class ElementIdentifiers(NWBData):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+            'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(ElementIdentifiers, self).__init__, kwargs)
 
@@ -452,7 +456,7 @@ class NWBTable(NWBData):
                 idx[col['name']] = i
             setattr(cls, '__colidx__', idx)
 
-            if cls.__init__ == bases[-1].__init__:  # check if __init__ is overridden
+            if cls.__init__ == bases[-1].__init__:     # check if __init__ is overridden
                 name = {'name': 'name', 'type': str, 'doc': 'the name of this table'}
                 defname = getattr(cls, '__defaultname__', None)
                 if defname is not None:
@@ -468,7 +472,7 @@ class NWBTable(NWBData):
 
                 setattr(cls, '__init__', __init__)
 
-            if cls.add_row == bases[-1].add_row:  # check if add_row is overridden
+            if cls.add_row == bases[-1].add_row:     # check if add_row is overridden
 
                 @docval(*columns)
                 def add_row(self, **kwargs):
@@ -735,13 +739,12 @@ class MultiContainerInterface(NWBDataInterface):
                     raise ValueError(msg)
                 d[tmp.name] = tmp
             return container
-
         return _func
 
     @classmethod
     def __make_create(cls, func_name, add_name, container_type):
         doc = "Create %s and add it to this %s" % \
-              (cls.__add_article(container_type.__name__), cls.__name__)
+                       (cls.__add_article(container_type.__name__), cls.__name__)
 
         @docval(*filter(_not_parent, get_docval(container_type.__init__)), func_name=func_name, doc=doc,
                 returns="the %s object that was created" % container_type.__name__, rtype=container_type)
@@ -750,7 +753,6 @@ class MultiContainerInterface(NWBDataInterface):
             ret = container_type(*cargs, **ckwargs)
             getattr(self, add_name)(ret)
             return ret
-
         return _func
 
     @classmethod
@@ -773,7 +775,6 @@ class MultiContainerInterface(NWBDataInterface):
                 container = popargs(attr_name, kwargs)
                 add = getattr(self, add_name)
                 add(container)
-
         return _func
 
     @classmethod
@@ -905,7 +906,7 @@ class DynamicTable(NWBDataInterface):
     for specifying table columns with the *columns* argument to the DynamicTable constructor.
     """
 
-    __fields__ = (
+    __nwbfields__ = (
         {'name': 'id', 'child': True},
         {'name': 'columns', 'child': True},
         'colnames',
@@ -930,7 +931,7 @@ class DynamicTable(NWBDataInterface):
             new_columns[0:0] = bases[-1].__columns__
             cls.__columns__ = tuple(new_columns)
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},  # noqa: C901
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},    # noqa: C901
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
             {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
              'default': None},
@@ -1016,7 +1017,7 @@ class DynamicTable(NWBDataInterface):
                     elif isinstance(col, VectorIndex):
                         pos = order[col.target.name]
                         tmp[pos] = col
-                        tmp[pos + 1] = col.target
+                        tmp[pos+1] = col.target
                 self.columns = list(tmp)
 
         # to make generating DataFrames and Series easier
@@ -1041,7 +1042,7 @@ class DynamicTable(NWBDataInterface):
                 self.__indices[col.name] = col
 
         self.__df_cols = [self.id] + [col_dict[name] for name in self.colnames]
-        self.__colids = {name: i + 1 for i, name in enumerate(self.colnames)}
+        self.__colids = {name: i+1 for i, name in enumerate(self.colnames)}
         for col in self.__columns__:
             if col.get('required', False) and col['name'] not in self.__colids:
                 self.add_column(col['name'], col['description'],
@@ -1062,7 +1063,7 @@ class DynamicTable(NWBDataInterface):
                 if data is not None:
                     index_data = [len(data[0])]
                     for i in range(1, len(data)):
-                        index_data.append(len(data[i]) + index_data[i - 1])
+                        index_data.append(len(data[i]) + index_data[i-1])
                     # assume data came in through a DataFrame, so we need
                     # to concatenate it
                     tmp_data = list()
@@ -1168,11 +1169,11 @@ class DynamicTable(NWBDataInterface):
         if index is not False:
             if isinstance(index, VectorIndex):
                 col_index = index
-            elif isinstance(index, bool):  # make empty VectorIndex
+            elif isinstance(index, bool):        # make empty VectorIndex
                 if len(col) > 0:
                     raise ValueError("cannot pass empty index with non-empty data to index")
                 col_index = VectorIndex(name + "_index", list(), col)
-            else:  # make VectorIndex with supplied data
+            else:                                # make VectorIndex with supplied data
                 if len(col) == 0:
                     raise ValueError("cannot pass non-empty index with empty data to index")
                 col_index = VectorIndex(name + "_index", index, col)
@@ -1184,8 +1185,8 @@ class DynamicTable(NWBDataInterface):
         if len(col) != len(self.id):
             raise ValueError("column must have the same number of rows as 'id'")
         self.__colids[name] = len(self.__df_cols)
-        self.fields['colnames'] = tuple(list(self.colnames) + [name])
-        self.fields['columns'] = tuple(list(self.columns) + columns)
+        self.fields['colnames'] = tuple(list(self.colnames)+[name])
+        self.fields['columns'] = tuple(list(self.columns)+columns)
         self.__df_cols.append(col)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of the DynamicTableRegion object'},
@@ -1324,7 +1325,7 @@ class DynamicTableRegion(VectorData):
     An object for easily slicing into a DynamicTable
     """
 
-    __fields__ = (
+    __nwbfields__ = (
         'table',
         'description'
     )
@@ -1338,7 +1339,7 @@ class DynamicTableRegion(VectorData):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'the parent Container for this Container', 'default': None},
             {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+            'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
         t = popargs('table', kwargs)
         call_docval_func(super(DynamicTableRegion, self).__init__, kwargs)

@@ -16,10 +16,10 @@ class ElectrodeGroup(NWBContainer):
     """
     """
 
-    __fields__ = ('name',
-                  'description',
-                  'location',
-                  'device')
+    __nwbfields__ = ('name',
+                     'description',
+                     'location',
+                     'device')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
@@ -57,14 +57,14 @@ class ElectricalSeries(TimeSeries):
     channels] (or [num_times] for single electrode).
     """
 
-    __fields__ = ({'name': 'electrodes', 'required_name': 'electrodes',
-                   'doc': 'the electrodes that generated this electrical series', 'child': True},)
+    __nwbfields__ = ({'name': 'electrodes', 'required_name': 'electrodes',
+                      'doc': 'the electrodes that generated this electrical series', 'child': True},)
 
     __help = "Stores acquired voltage data from extracellular recordings."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'shape': ((None,), (None, None), (None, None, None)),
+             'shape': ((None, ), (None, None), (None, None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
             {'name': 'electrodes', 'type': DynamicTableRegion,
@@ -108,7 +108,7 @@ class SpikeEventSeries(ElectricalSeries):
     electrode).
     """
 
-    __fields__ = ()
+    __nwbfields__ = ()
 
     __help = "Snapshots of spike events from data."
 
@@ -153,10 +153,10 @@ class EventDetection(NWBDataInterface):
     Detected spike events from voltage trace(s).
     """
 
-    __fields__ = ('detection_method',
-                  'source_electricalseries',
-                  'source_idx',
-                  'times')
+    __nwbfields__ = ('detection_method',
+                     'source_electricalseries',
+                     'source_idx',
+                     'times')
 
     _help_statement = ("Description of how events were detected, such as voltage "
                        "threshold, or dV/dT threshold, as well as relevant values.")
@@ -210,7 +210,7 @@ class Clustering(NWBDataInterface):
     waveform peak to RMS on any channel in cluster.
     """
 
-    __fields__ = (
+    __nwbfields__ = (
         'description',
         'num',
         'peak_over_rms',
@@ -223,8 +223,8 @@ class Clustering(NWBDataInterface):
     @docval({'name': 'description', 'type': str,
              'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, \
              clusters curated using Klusters, etc).'},
-            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.', 'shape': (None,)},
-            {'name': 'peak_over_rms', 'type': Iterable, 'shape': (None,),
+            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.', 'shape': (None, )},
+            {'name': 'peak_over_rms', 'type': Iterable, 'shape': (None, ),
              'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster\
              (provides a basic clustering metric).'},
             {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.',
@@ -253,10 +253,10 @@ class ClusterWaveforms(NWBDataInterface):
     Describe cluster waveforms by mean and standard deviation for at each sample.
     """
 
-    __fields__ = ('clustering_interface',
-                  'waveform_filtering',
-                  'waveform_mean',
-                  'waveform_sd')
+    __nwbfields__ = ('clustering_interface',
+                     'waveform_filtering',
+                     'waveform_mean',
+                     'waveform_sd')
 
     __help = ("[DEPRECATED] Mean waveform shape of clusters. Waveforms should be "
               "high-pass filtered (ie, not the same bandpass filter "
@@ -269,7 +269,7 @@ class ClusterWaveforms(NWBDataInterface):
             {'name': 'waveform_mean', 'type': Iterable, 'shape': (None, None),
              'doc': 'the mean waveform for each cluster'},
             {'name': 'waveform_sd', 'type': Iterable, 'shape': (None, None),
-             'doc': 'the standard deviations of waveforms for each cluster'},
+            'doc': 'the standard deviations of waveforms for each cluster'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ClusterWaveforms'})
     def __init__(self, **kwargs):
         import warnings
@@ -341,18 +341,18 @@ class FeatureExtraction(NWBDataInterface):
     TimeSeries or other source.
     """
 
-    __fields__ = ('description',
-                  {'name': 'electrodes', 'child': True},
-                  'times',
-                  'features')
+    __nwbfields__ = ('description',
+                     {'name': 'electrodes', 'child': True},
+                     'times',
+                     'features')
 
     __help = "Container for salient features of detected events"
 
     @docval({'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator),
-             'doc': 'A description for each feature extracted', 'shape': (None,)},
-            {'name': 'times', 'type': ('array_data', 'data'), 'shape': (None,),
+             'doc': 'A description for each feature extracted', 'shape': (None, )},
+            {'name': 'times', 'type': ('array_data', 'data'), 'shape': (None, ),
              'doc': 'The times of events that features correspond to'},
             {'name': 'features', 'type': ('array_data', 'data'), 'shape': (None, None, None),
              'doc': 'Features for each channel'},

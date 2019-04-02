@@ -9,6 +9,7 @@ The following examples will reference variables that may not be defined within t
 clarity, we define them here:
 '''
 
+
 import numpy as np
 
 #######################
@@ -28,6 +29,7 @@ nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzl
                   institution='University of Middle Earth at the Shire',
                   experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
                   session_id='LONELYMTN')
+
 
 #######################
 # Electrode metadata
@@ -72,6 +74,7 @@ for idx in [1, 2, 3, 4]:
                           location='CA1', filtering='none',
                           group=electrode_group)
 
+
 #######################
 # .. note: :py:class:`~pynwb.file.NWBFile.add_electrode` returns the index of the electrode you just added.
 #    This can come in handy when creating with an :py:class:`~pynwb.ecephys.ElectrodeTableRegion`
@@ -99,6 +102,7 @@ for idx in [1, 2, 3, 4]:
 # indices of the electrodes you want in the region..
 
 electrode_table_region = nwbfile.create_electrode_table_region([0, 2], 'the first and third electrodes')
+
 
 ####################
 # Now that we have a :py:class:`~pynwb.ecephys.ElectrodeTableRegion`, we can create an

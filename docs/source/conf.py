@@ -17,6 +17,7 @@ import os
 import sphinx_rtd_theme
 from sphinx.domains.python import PythonDomain
 
+
 # -- Support building doc without install --------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
@@ -34,6 +35,7 @@ project_root = os.path.dirname(os.path.dirname(cwd))
 sys.path.insert(0, os.path.join(project_root, 'src'))
 
 from pynwb._version import get_versions
+
 
 # -- Autodoc configuration -----------------------------------------------------
 
@@ -221,6 +223,7 @@ html_static_path = ['_static']
 # Output file base name for HTML help builder.
 htmlhelp_basename = 'sampledoc'
 
+
 # -- Options for LaTeX output --------------------------------------------------
 
 latex_elements = {
@@ -233,7 +236,6 @@ latex_elements = {
     # Additional stuff for the LaTeX preamble.
     # 'print()reamble': '',
 }
-
 
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
@@ -323,7 +325,6 @@ class PatchedPythonDomain(PythonDomain):
 
 
 from abc import abstractmethod, abstractproperty
-
 
 def skip(app, what, name, obj, skip, options):
     if isinstance(obj, abstractproperty) or getattr(obj, '__isabstractmethod__', False):

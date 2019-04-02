@@ -43,7 +43,7 @@ class TestTimeSeries(unittest.TestCase):
         ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
                          'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         ts2 = TimeSeries('test_ts2', ts1, 'grams', timestamps=[1.0, 1.1, 1.2,
-                                                               1.3, 1.4, 1.5])
+                         1.3, 1.4, 1.5])
         self.assertEqual(ts2.data, [0, 1, 2, 3, 4, 5])
         self.assertEqual(ts1.num_samples, ts2.num_samples)
 
@@ -93,7 +93,7 @@ class TestTimeSeries(unittest.TestCase):
     def test_dci_data_arr(self):
 
         def generator_factory():
-            return (np.array([i, i + 1]) for i in range(100))
+            return (np.array([i, i+1]) for i in range(100))
 
         data = DataChunkIterator(data=generator_factory())
         ts1 = TimeSeries('test_ts1', data,

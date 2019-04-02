@@ -21,13 +21,13 @@ class ProcessingModule(MultiContainerInterface):
         They should not be instantiated directly
     """
 
-    __fields__ = ('description',)
+    __nwbfields__ = ('description',)
 
     __clsconf__ = {
-        'attr': 'data_interfaces',
-        'add': 'add_data_interface',
-        'type': NWBDataInterface,
-        'get': 'get_data_interface'
+            'attr': 'data_interfaces',
+            'add': 'add_data_interface',
+            'type': NWBDataInterface,
+            'get': 'get_data_interface'
     }
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
@@ -70,21 +70,21 @@ class ProcessingModule(MultiContainerInterface):
 @register_class('TimeSeries', CORE_NAMESPACE)
 class TimeSeries(NWBDataInterface):
     """A generic base class for time series data"""
-    __fields__ = ("comments",
-                  "description",
-                  "data",
-                  "resolution",
-                  "conversion",
-                  "unit",
-                  "num_samples",
-                  "timestamps",
-                  "timestamps_unit",
-                  "interval",
-                  "starting_time",
-                  "rate",
-                  "starting_time_unit",
-                  "control",
-                  "control_description")
+    __nwbfields__ = ("comments",
+                     "description",
+                     "data",
+                     "resolution",
+                     "conversion",
+                     "unit",
+                     "num_samples",
+                     "timestamps",
+                     "timestamps_unit",
+                     "interval",
+                     "starting_time",
+                     "rate",
+                     "starting_time_unit",
+                     "control",
+                     "control_description")
 
     __time_unit = "Seconds"
 
@@ -214,7 +214,7 @@ class TimeSeries(NWBDataInterface):
 
 @register_class('Image', CORE_NAMESPACE)
 class Image(NWBData):
-    __fields__ = ('data', 'resolution', 'description')
+    __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
@@ -229,6 +229,7 @@ class Image(NWBData):
 
 @register_class('Images', CORE_NAMESPACE)
 class Images(MultiContainerInterface):
+
     __clsconf__ = {
         'attr': 'images',
         'add': 'add_image',

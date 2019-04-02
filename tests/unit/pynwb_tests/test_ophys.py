@@ -147,6 +147,7 @@ class ImageSegmentationConstructor(unittest.TestCase):
 class PlaneSegmentationConstructor(unittest.TestCase):
 
     def getBoilerPlateObjects(self):
+
         iSS = ImageSeries(name='test_iS', data=np.ones((2, 2, 2)), unit='unit',
                           external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=list())
 

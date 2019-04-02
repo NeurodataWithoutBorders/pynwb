@@ -36,7 +36,8 @@ class LabMetaData(NWBContainer):
 
 @register_class('Subject', CORE_NAMESPACE)
 class Subject(NWBContainer):
-    __fields__ = (
+
+    __nwbfields__ = (
         'age',
         'description',
         'genotype',
@@ -163,33 +164,33 @@ class NWBFile(MultiContainerInterface):
         }
     ]
 
-    __fields__ = ('timestamps_reference_time',
-                  'file_create_date',
-                  'experimenter',
-                  'experiment_description',
-                  'session_id',
-                  'institution',
-                  'keywords',
-                  'notes',
-                  'pharmacology',
-                  'protocol',
-                  'related_publications',
-                  'slices',
-                  'source_script',
-                  'source_script_file_name',
-                  'data_collection',
-                  'surgery',
-                  'virus',
-                  'stimulus_notes',
-                  'lab',
-                  {'name': 'electrodes', 'child': True, 'required_name': 'electrodes'},
-                  {'name': 'epochs', 'child': True, 'required_name': 'epochs'},
-                  {'name': 'trials', 'child': True, 'required_name': 'trials'},
-                  {'name': 'units', 'child': True, 'required_name': 'units'},
-                  {'name': 'subject', 'child': True, 'required_name': 'subject'},
-                  {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
-                  {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
-                  'epoch_tags',)
+    __nwbfields__ = ('timestamps_reference_time',
+                     'file_create_date',
+                     'experimenter',
+                     'experiment_description',
+                     'session_id',
+                     'institution',
+                     'keywords',
+                     'notes',
+                     'pharmacology',
+                     'protocol',
+                     'related_publications',
+                     'slices',
+                     'source_script',
+                     'source_script_file_name',
+                     'data_collection',
+                     'surgery',
+                     'virus',
+                     'stimulus_notes',
+                     'lab',
+                     {'name': 'electrodes', 'child': True,  'required_name': 'electrodes'},
+                     {'name': 'epochs', 'child': True, 'required_name': 'epochs'},
+                     {'name': 'trials', 'child': True, 'required_name': 'trials'},
+                     {'name': 'units', 'child': True, 'required_name': 'units'},
+                     {'name': 'subject', 'child': True, 'required_name': 'subject'},
+                     {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
+                     {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
+                     'epoch_tags',)
 
     @docval({'name': 'session_description', 'type': str,
              'doc': 'a description of the session where this data was generated'},
@@ -216,11 +217,11 @@ class NWBFile(MultiContainerInterface):
              'doc': 'Experimental protocol, if applicable. E.g., include IACUC protocol', 'default': None},
             {'name': 'related_publications', 'type': str,
              'doc': 'Publication information.'
-                    'PMID, DOI, URL, etc. If multiple, concatenate together and describe which is which. '
-                    'such as PMID, DOI, URL, etc', 'default': None},
+             'PMID, DOI, URL, etc. If multiple, concatenate together and describe which is which. '
+             'such as PMID, DOI, URL, etc', 'default': None},
             {'name': 'slices', 'type': str,
              'doc': 'Description of slices, including information about preparation '
-                    'thickness, orientation, temperature and bath solution', 'default': None},
+             'thickness, orientation, temperature and bath solution', 'default': None},
             {'name': 'source_script', 'type': str,
              'doc': 'Script file used to create this NWB file.', 'default': None},
             {'name': 'source_script_file_name', 'type': str,

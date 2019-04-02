@@ -277,7 +277,6 @@ https://creativecommons.org/publicdomain/zero/1.0/ .
 """
 
 from __future__ import print_function
-
 try:
     import configparser
 except ImportError:
@@ -350,7 +349,6 @@ def get_config_from_root(root):
         if parser.has_option("versioneer", name):
             return parser.get("versioneer", name)
         return None
-
     cfg = VersioneerConfig()
     cfg.VCS = VCS
     cfg.style = get(parser, "style") or ""
@@ -375,14 +373,12 @@ HANDLERS = {}
 
 def register_vcs_handler(vcs, method):  # decorator
     """Decorator to mark a method as the handler for a particular VCS."""
-
     def decorate(f):
         """Store f in HANDLERS[vcs][method]."""
         if vcs not in HANDLERS:
             HANDLERS[vcs] = {}
         HANDLERS[vcs][method] = f
         return f
-
     return decorate
 
 
@@ -1584,7 +1580,6 @@ def get_cmdclass():
             print(" date: %s" % vers.get("date"))
             if vers["error"]:
                 print(" error: %s" % vers["error"])
-
     cmds["version"] = cmd_version
 
     # we override "build_py" in both distutils and setuptools
@@ -1621,7 +1616,6 @@ def get_cmdclass():
                                                   cfg.versionfile_build)
                 print("UPDATING %s" % target_versionfile)
                 write_to_version_file(target_versionfile, versions)
-
     cmds["build_py"] = cmd_build_py
 
     if "cx_Freeze" in sys.modules:  # cx_freeze enabled?
@@ -1653,7 +1647,6 @@ def get_cmdclass():
                              "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                              "VERSIONFILE_SOURCE": cfg.versionfile_source,
                              })
-
         cmds["build_exe"] = cmd_build_exe
         del cmds["build_py"]
 
@@ -1683,7 +1676,6 @@ def get_cmdclass():
                              "PARENTDIR_PREFIX": cfg.parentdir_prefix,
                              "VERSIONFILE_SOURCE": cfg.versionfile_source,
                              })
-
         cmds["py2exe"] = cmd_py2exe
 
     # we override different "sdist" commands for both environments
@@ -1712,7 +1704,6 @@ def get_cmdclass():
             print("UPDATING %s" % target_versionfile)
             write_to_version_file(target_versionfile,
                                   self._versioneer_generated_versions)
-
     cmds["sdist"] = cmd_sdist
 
     return cmds

@@ -10,12 +10,12 @@ class AImage(NWBContainer):
     """
     """
 
-    __fields__ = ('data',
-                  'bits_per_pixel',
-                  'dimension',
-                  'format',
-                  'field_of_view',
-                  'focal_depth')
+    __nwbfields__ = ('data',
+                     'bits_per_pixel',
+                     'dimension',
+                     'format',
+                     'field_of_view',
+                     'focal_depth')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this axis map'},
             {'name': 'data', 'type': Iterable, 'doc': 'Data field.'},
@@ -41,16 +41,16 @@ class AxisMap(NWBContainer):
     """
     """
 
-    __fields__ = ('data',
-                  'field_of_view',
-                  'unit',
-                  'dimension')
+    __nwbfields__ = ('data',
+                     'field_of_view',
+                     'unit',
+                     'dimension')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this axis map'},
             {'name': 'data', 'type': Iterable, 'shape': (None, None), 'doc': 'data field.'},
             {'name': 'field_of_view', 'type': Iterable, 'doc': 'Size of viewing area, in meters.'},
             {'name': 'unit', 'type': str, 'doc': 'Unit that axis data is stored in (e.g., degrees)'},
-            {'name': 'dimension', 'type': Iterable, 'shape': (None,),
+            {'name': 'dimension', 'type': Iterable, 'shape': (None, ),
              'doc': 'Number of rows and columns in the image'})
     def __init__(self, **kwargs):
         data, field_of_view, unit, dimension = popargs('data', 'field_of_view', 'unit', 'dimension', kwargs)
@@ -73,14 +73,14 @@ class ImagingRetinotopy(NWBDataInterface):
     (i.e., y before x).
     """
 
-    __fields__ = ('sign_map',
-                  'axis_1_phase_map',
-                  'axis_1_power_map',
-                  'axis_2_phase_map',
-                  'axis_2_power_map',
-                  'axis_descriptions',
-                  'focal_depth_image',
-                  'vasculature_image',)
+    __nwbfields__ = ('sign_map',
+                     'axis_1_phase_map',
+                     'axis_1_power_map',
+                     'axis_2_phase_map',
+                     'axis_2_power_map',
+                     'axis_descriptions',
+                     'focal_depth_image',
+                     'vasculature_image',)
 
     _help = "Intrinsic signal optical imaging or Widefield imaging for measuring retinotopy."
 
