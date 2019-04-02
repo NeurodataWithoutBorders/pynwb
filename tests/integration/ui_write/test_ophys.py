@@ -87,7 +87,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
     def setUpContainer(self):
         self.make_imaging_plane()
         data = [[[1., 1.] * 2] * 2]
-        timestamps = list(map(lambda x: x/10, range(10)))
+        timestamps = list(map(lambda x: x / 10, range(10)))
         fov = [2.0, 2.0, 5.0]
         ret = TwoPhotonSeries('test_2ps', self.imaging_plane, data, 'image_unit', 'raw', fov, 1.7, 3.4,
                               timestamps=timestamps, dimension=[2])
@@ -97,12 +97,12 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
         optchan_builder = GroupBuilder(
             'optchan1',
             attributes={
-                 'neurodata_type': 'OpticalChannel',
-                 'namespace': 'core',
-                 'help': 'Metadata about an optical channel used to record from an imaging plane'},
+                'neurodata_type': 'OpticalChannel',
+                'namespace': 'core',
+                'help': 'Metadata about an optical channel used to record from an imaging plane'},
             datasets={
-                 'description': DatasetBuilder('description', 'a fake OpticalChannel'),
-                 'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
+                'description': DatasetBuilder('description', 'a fake OpticalChannel'),
+                'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
         )
         device_builder = GroupBuilder('dev1',
                                       attributes={'neurodata_type': 'Device',
@@ -129,12 +129,12 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
         )
 
         data = [[[1., 1.] * 2] * 2]
-        timestamps = list(map(lambda x: x/10, range(10)))
+        timestamps = list(map(lambda x: x / 10, range(10)))
         return GroupBuilder(
             'test_2ps',
             attributes={
-                'pmt_gain':  1.7,
-                'scan_line_rate':  np.float32(3.4),
+                'pmt_gain': 1.7,
+                'scan_line_rate': np.float32(3.4),
                 'namespace': base.CORE_NAMESPACE,
                 'comments': 'no comments',
                 'description': 'no description',
@@ -248,31 +248,31 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                                                                           'interval': 1}),
                                                  'external_file': DatasetBuilder('external_file', ['images.tiff'],
                                                                                  attributes={
-                                                                                    'starting_frame': [1, 2, 3]}),
+                                                                                     'starting_frame': [1, 2, 3]}),
                                                  'format': DatasetBuilder('format', 'tiff'),
                                                  'dimension': DatasetBuilder('dimension', [2]),
                                                  })
 
         self.pixel_masks_builder = DatasetBuilder('pixel_mask', self.pix_mask,
                                                   attributes={
-                                                   'namespace': 'core',
-                                                   'neurodata_type': 'VectorData',
-                                                   'description': 'Pixel masks for each ROI',
-                                                   'help': 'Values for a list of elements'})
+                                                      'namespace': 'core',
+                                                      'neurodata_type': 'VectorData',
+                                                      'description': 'Pixel masks for each ROI',
+                                                      'help': 'Values for a list of elements'})
 
         self.pxmsk_index_builder = DatasetBuilder('pixel_mask_index', self.pxmsk_index,
                                                   attributes={
-                                                   'namespace': 'core',
-                                                   'neurodata_type': 'VectorIndex',
-                                                   'target': ReferenceBuilder(self.pixel_masks_builder),
-                                                   'help': 'indexes into a list of values for a list of elements'})
+                                                      'namespace': 'core',
+                                                      'neurodata_type': 'VectorIndex',
+                                                      'target': ReferenceBuilder(self.pixel_masks_builder),
+                                                      'help': 'indexes into a list of values for a list of elements'})
 
         self.image_masks_builder = DatasetBuilder('image_mask', self.img_mask,
                                                   attributes={
-                                                   'namespace': 'core',
-                                                   'neurodata_type': 'VectorData',
-                                                   'description': 'Image masks for each ROI',
-                                                   'help': 'Values for a list of elements'})
+                                                      'namespace': 'core',
+                                                      'neurodata_type': 'VectorData',
+                                                      'description': 'Image masks for each ROI',
+                                                      'help': 'Values for a list of elements'})
 
         ps_builder = GroupBuilder(
             'test_plane_seg_name',

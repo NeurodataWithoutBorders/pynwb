@@ -1,7 +1,7 @@
 from copy import copy, deepcopy
 
-from hdmf.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace,\
-                       NamespaceBuilder, AttributeSpec, DtypeSpec, RefSpec
+from hdmf.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace, \
+    NamespaceBuilder, AttributeSpec, DtypeSpec, RefSpec
 from hdmf.utils import docval, get_docval, fmt_docval_args
 
 from . import CORE_NAMESPACE
@@ -139,6 +139,7 @@ _group_docval = __swap_inc_def(GroupSpec)
 
 class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     ''' The Spec class to use for NWB specifications '''
+
     # TODO: add unit tests for this
 
     @staticmethod

@@ -132,6 +132,7 @@ def register_class(**kwargs):
     def _dec(cls):
         __TYPE_MAP.register_container_type(namespace, neurodata_type, cls)
         return cls
+
     if container_cls is None:
         return _dec
     else:
@@ -153,6 +154,7 @@ def register_map(**kwargs):
     def _dec(cls):
         __TYPE_MAP.register_map(container_cls, cls)
         return cls
+
     if mapper_cls is None:
         return _dec
     else:
@@ -165,7 +167,7 @@ def register_map(**kwargs):
         {'name': 'namespace', 'type': str, 'doc': 'the namespace the neurodata_type is defined in'},
         is_method=False)
 def get_class(**kwargs):
-    """Get the class object of the NWBContainer subclass corresponding to a given neurdata_type.
+    """Get the class object of the NWBContainer subclass corresponding to a given neurodata_type.
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
@@ -198,7 +200,7 @@ class NWBHDF5IO(_HDF5IO):
              to namespaces and TypeMaps', 'default': None},
             {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj =\
+        path, mode, manager, extensions, load_namespaces, file_obj = \
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', kwargs)
         if load_namespaces:
             if manager is not None:
@@ -246,5 +248,6 @@ from . import retinotopy  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
 
 from ._version import get_versions  # noqa: E402
+
 __version__ = get_versions()['version']
 del get_versions

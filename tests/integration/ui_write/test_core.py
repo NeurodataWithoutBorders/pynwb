@@ -70,7 +70,7 @@ class TestElectrodes(base.TestMapRoundTrip):
         ''' Should take an NWBFile object and add the container to it '''
         self.dev1 = nwbfile.create_device('dev1')  # noqa: F405
         self.group = nwbfile.create_electrode_group('tetrode1',  # noqa: F405
-                                    'tetrode description', 'tetrode location', self.dev1)
+                                                    'tetrode description', 'tetrode location', self.dev1)
 
         nwbfile.add_electrode(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
                               group_name='tetrode1')

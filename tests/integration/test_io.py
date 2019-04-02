@@ -18,7 +18,6 @@ import numpy as np
 
 
 class TestHDF5Writer(unittest.TestCase):
-
     _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec')
 
     @property
@@ -125,7 +124,6 @@ class TestHDF5Writer(unittest.TestCase):
 
 
 class TestHDF5WriterWithInjectedFile(unittest.TestCase):
-
     _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec')
 
     @property
@@ -238,7 +236,6 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
 class TestAppend(unittest.TestCase):
 
     def test_append(self):
-
         FILENAME = 'test_append.nwb'
 
         nwb = NWBFile(session_description='hi', identifier='hi', session_start_time=datetime(1970, 1, 1, 12,
@@ -282,12 +279,13 @@ class TestH5DataIO(unittest.TestCase):
     """
     Test that H5DataIO functions correctly on round trip with the HDF5IO backend
     """
+
     def setUp(self):
         self.nwbfile = NWBFile('a', 'b', datetime(1970, 1, 1, 12, tzinfo=tzutc()))
         self.path = "test_pynwb_io_hdf5_h5dataIO.h5"
 
     def tearDown(self):
-        if(os.path.exists(self.path)):
+        if (os.path.exists(self.path)):
             os.remove(self.path)
 
     def test_gzip_timestamps(self):

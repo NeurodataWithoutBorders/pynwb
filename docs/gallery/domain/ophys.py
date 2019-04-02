@@ -26,7 +26,6 @@ from pynwb import NWBFile
 from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluorescence
 from pynwb.device import Device
 
-
 ####################
 # Creating and Writing NWB files
 # ------------------------------
@@ -57,7 +56,6 @@ imaging_plane = nwbfile.create_imaging_plane('my_imgpln', optical_channel, 'a ve
                                              device, 600., 300., 'GFP', 'my favorite brain location',
                                              np.ones((5, 5, 3)), 4.0, 'manifold unit', 'A frame to refer to')
 
-
 ####################
 # Adding two-photon image data
 # ----------------------------
@@ -75,7 +73,6 @@ image_series = TwoPhotonSeries(name='test_iS', dimension=[2],
                                starting_frame=[0], format='tiff', starting_time=0.0, rate=1.0)
 nwbfile.add_acquisition(image_series)
 
-
 ####################
 # Storing image segmentation output
 # ---------------------------------
@@ -90,7 +87,6 @@ img_seg = ImageSegmentation()
 mod.add_data_interface(img_seg)
 ps = img_seg.create_plane_segmentation('output from segmenting my favorite imaging plane',
                                        imaging_plane, 'my_planeseg', image_series)
-
 
 ####################
 # Now that you have your :py:class:`~pynwb.ophys.PlaneSegmentation` object, you can add the resulting ROIs.
@@ -113,7 +109,6 @@ img_mask2[0][0] = 2.1
 img_mask2[1][1] = 2.2
 ps.add_roi(pixel_mask=pix_mask2, image_mask=img_mask2)
 
-
 ####################
 # Storing fluorescence measurements
 # ---------------------------------
@@ -129,7 +124,6 @@ ps.add_roi(pixel_mask=pix_mask2, image_mask=img_mask2)
 
 fl = Fluorescence()
 mod.add_data_interface(fl)
-
 
 ####################
 # Because this data stores information about specific ROIs, you will need to provide a reference to the ROIs
@@ -147,7 +141,6 @@ rt_region = ps.create_roi_table_region('the first of two ROIs', region=[0])
 data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
 timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 rrs = fl.create_roi_response_series('my_rrs', data, 'lumens', rt_region, timestamps=timestamps)
-
 
 ####################
 # .. note:: You can also store more than one :py:class:`~pynwb.ophys.RoiResponseSeries` by calling
@@ -173,7 +166,6 @@ with NWBHDF5IO('ophys_example.nwb', 'w') as io:
 
 io = NWBHDF5IO('ophys_example.nwb', 'r')
 nwbfile = io.read()
-
 
 ####################
 # Getting your data out
@@ -210,7 +202,6 @@ pix_mask2 = ps['pixel_mask'][1]
 # (like we did above with :py:class:`~pynwb.ophys.ImageSegmentation`) and then retrieve the
 # :py:class:`~pynwb.ophys.RoiResponseSeries` using :py:func:`~pynwb.ophys.Fluorescence.create_roi_response_series` [#]_.
 rrs = mod['Fluorescence'].get_roi_response_series()
-
 
 # get the data...
 rrs_data = rrs.data

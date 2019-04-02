@@ -15,10 +15,10 @@ class ImageSeries(TimeSeries):
     The image data can be stored in the HDF5 file or it will be stored as an external image file.
     '''
 
-    __nwbfields__ = ('dimension',
-                     'external_file',
-                     'starting_frame',
-                     'format')
+    __fields__ = ('dimension',
+                  'external_file',
+                  'starting_frame',
+                  'format')
 
     _help = "Storage object for time-series 2-D image data"
 
@@ -45,14 +45,14 @@ class ImageSeries(TimeSeries):
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
             {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default':  'no comments'},
+             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
             {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default':  'no description'},
+             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
             {'name': 'control', 'type': Iterable,
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
@@ -92,13 +92,13 @@ class IndexSeries(TimeSeries):
     array indicates when that image was displayed.
     '''
 
-    __nwbfields__ = ('indexed_timeseries',)
+    __fields__ = ('indexed_timeseries',)
 
     _help = "A sequence that is generated from an existing image stack. Frames can be presented in \
     an arbitrary order. The data[] field stores frame number in reference stack."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
@@ -139,7 +139,7 @@ class ImageMaskSeries(ImageSeries):
     pattern continues until it's explicitly changed.
     '''
 
-    __nwbfields__ = ('masked_imageseries',)
+    __fields__ = ('masked_imageseries',)
 
     _help = "An alpha mask that is applied to a presented visual stimulus."
 
@@ -200,9 +200,9 @@ class OpticalSeries(ImageSeries):
     important.
     '''
 
-    __nwbfields__ = ('distance',
-                     'field_of_view',
-                     'orientation')
+    __fields__ = ('distance',
+                  'field_of_view',
+                  'orientation')
 
     _help = "Time-series image stack for optical recording or stimulus."
 
@@ -213,7 +213,7 @@ class OpticalSeries(ImageSeries):
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
             {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},
-            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'shape': ((2, ), (3, )),
+            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'shape': ((2,), (3,)),
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'orientation', 'type': str,
              'doc': 'Description of image relative to some reference frame (e.g., which way is up). \

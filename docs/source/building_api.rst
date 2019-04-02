@@ -48,11 +48,11 @@ Alternatively, you can use :py:func:`~pynwb.register_class` as a decorator.
 :py:class:`~pynwb.core.NWBContainer`.
 
 
-``__nwbfields__``
+``__fields__``
 -----------------
 
 When subclassing :py:class:`~pynwb.core.NWBData` or :py:class:`~pynwb.core.NWBContainer`, you might want to
-define some properties on your class. This can be done using the ``__nwbfields__`` class property. This
+define some properties on your class. This can be done using the ``__fields__`` class property. This
 class property should be a tuple of strings that name the properties. Adding a property using this functionality
 will create a property than can be set *only once*.
 
@@ -67,7 +67,7 @@ and ``bar``.
 
     class MyContainer(NWBContainer):
 
-        __nwbfields__ = ('foo', 'bar')
+        __fields__ = ('foo', 'bar')
 
         ...
 
@@ -83,7 +83,7 @@ and ``bar``.
 
 If your specification extension contains a table definition i.e. a dataset with a compound data type, you should use
 the :py:class:`~pynwb.core.NWBTable` class to represent this specification. Since :py:class:`~pynwb.core.NWBTable`
-subclasses :py:class:`~pynwb.core.NWBData` you can still use ``__nwbfields__``. In addition, you can use the
+subclasses :py:class:`~pynwb.core.NWBData` you can still use ``__fields__``. In addition, you can use the
 ``__columns__`` class property to specify the columns of the table. ``__columns__`` should be a list or a tuple of
 :py:func:`~hdmf.utils.docval`-like dictionaries.
 

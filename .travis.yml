@@ -1,7 +1,6 @@
-
 branches:
- only:
-   - dev
+  only:
+    - dev
 
 sudo: false
 

@@ -161,7 +161,7 @@ class NWBFileTest(unittest.TestCase):
         self.nwbfile.add_acquisition(TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         msg = "more than one element in acquisition of NWBFile 'root' -- must specify a name"
-        with self.assertRaisesRegex(ValueError,  msg):
+        with self.assertRaisesRegex(ValueError, msg):
             self.nwbfile.get_acquisition()
 
     def test_add_acquisition_invalid_name(self):

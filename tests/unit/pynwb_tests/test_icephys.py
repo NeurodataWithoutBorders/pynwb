@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from pynwb.icephys import PatchClampSeries, CurrentClampSeries, IZeroClampSeries, CurrentClampStimulusSeries, \
-        VoltageClampSeries, VoltageClampStimulusSeries, IntracellularElectrode
+    VoltageClampSeries, VoltageClampStimulusSeries, IntracellularElectrode
 from pynwb.device import Device
 
 
@@ -65,12 +65,12 @@ class PatchClampSeriesConstructor(unittest.TestCase):
         electrode_name = GetElectrode()
 
         pCS = PatchClampSeries('test_pCS', list(), 'unit',
-                               electrode_name, 1.0, timestamps=list(), sweep_number=np.uint64(2**63-1))
+                               electrode_name, 1.0, timestamps=list(), sweep_number=np.uint64(2 ** 63 - 1))
         self.assertEqual(pCS.name, 'test_pCS')
         self.assertEqual(pCS.unit, 'unit')
         self.assertEqual(pCS.electrode, electrode_name)
         self.assertEqual(pCS.gain, 1.0)
-        self.assertEqual(pCS.sweep_number, 2**63-1)
+        self.assertEqual(pCS.sweep_number, 2 ** 63 - 1)
 
     def test_sweepNumber_throws_with_negative(self):
         electrode_name = GetElectrode()

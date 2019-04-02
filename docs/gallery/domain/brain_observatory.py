@@ -25,7 +25,6 @@ from pynwb.ophys import OpticalChannel, DfOverF, ImageSegmentation
 from pynwb.image import ImageSeries, IndexSeries
 from pynwb.device import Device
 
-
 # Settings:
 ophys_experiment_id = 562095852
 save_file_name = 'brain_observatory.nwb'
@@ -60,7 +59,6 @@ nwbfile = NWBFile(
     session_start_time=metadata['session_start_time'],
     file_create_date=datetime.now(tzlocal())
 )
-
 
 ########################################
 # 2) Next, we add stimuli templates (one for each type of stimulus), and a data series that indexes these templates to

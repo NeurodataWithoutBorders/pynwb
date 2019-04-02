@@ -5,8 +5,7 @@ from hdmf.utils import docval, get_docval
 
 
 class Node(NWBDataInterface):
-
-    __nwbfields__ = ('name',)
+    __fields__ = ('name',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this node'})
     def __init__(self, **kwargs):
@@ -14,8 +13,7 @@ class Node(NWBDataInterface):
 
 
 class Edge(NWBDataInterface):
-
-    __nwbfields__ = ('name',)
+    __fields__ = ('name',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this edge'})
     def __init__(self, **kwargs):
@@ -25,7 +23,7 @@ class Edge(NWBDataInterface):
 class Graph(MultiContainerInterface):
     """A multicontainer of nodes and undirected edges."""
 
-    __nwbfields__ = ('name', 'edges', 'nodes')
+    __fields__ = ('name', 'edges', 'nodes')
 
     __clsconf__ = [
         {

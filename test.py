@@ -93,6 +93,7 @@ def run_example_tests():
             FAILURES += 1
             ERRORS += 1
 
+
 def validate_example_nwbs():
     global TOTAL, FAILURES, ERRORS
     logging.info('running validation tests on example files')
@@ -123,6 +124,7 @@ def validate_example_nwbs():
             print(traceback.format_exc())
             FAILURES += 1
             ERRORS += 1
+
 
 def run_integration_tests(verbose=True):
     pynwb_test_result = run_test_suite("tests/integration", "integration tests", verbose=verbose)

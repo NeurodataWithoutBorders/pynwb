@@ -99,7 +99,7 @@ class TestExtension(unittest.TestCase):
 
         @register_class('MyTestMetaData', self.prefix)
         class MyTestMetaData(LabMetaData):
-            __nwbfields__ = ('test_attr',)
+            __fields__ = ('test_attr',)
 
             @docval({'name': 'name', 'type': str, 'doc': 'name'},
                     {'name': 'test_attr', 'type': float, 'doc': 'test attribute'})
@@ -108,7 +108,7 @@ class TestExtension(unittest.TestCase):
                 super(MyTestMetaData, self).__init__(**kwargs)
                 self.test_attr = test_attr
 
-        nwbfile = NWBFile("a file with header data", "NB123A",  datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
+        nwbfile = NWBFile("a file with header data", "NB123A", datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
 
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
 

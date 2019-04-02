@@ -32,7 +32,7 @@ class TimeIntervals(DynamicTable):
              'default': None},
             {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
             {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
-            'default': None})
+             'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(TimeIntervals, self).__init__, kwargs)
 
@@ -73,8 +73,8 @@ class TimeIntervals(DynamicTable):
             ts_starting_time = ts.starting_time
             ts_rate = ts.rate
         if ts_starting_time is not None and ts_rate:
-            start_idx = int((start_time - ts_starting_time)*ts_rate)
-            stop_idx = int((stop_time - ts_starting_time)*ts_rate)
+            start_idx = int((start_time - ts_starting_time) * ts_rate)
+            stop_idx = int((stop_time - ts_starting_time) * ts_rate)
         elif len(ts_timestamps) > 0:
             timestamps = ts_timestamps
             start_idx = bisect_left(timestamps, start_time)

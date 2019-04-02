@@ -6,7 +6,7 @@ from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_fu
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, ElementIdentifiers,\
+from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, ElementIdentifiers, \
     NWBDataInterface
 from .device import Device
 
@@ -16,8 +16,8 @@ class OpticalChannel(NWBContainer):
     """
     """
 
-    __nwbfields__ = ('description',
-                     'emission_lambda')
+    __fields__ = ('description',
+                  'emission_lambda')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},
@@ -37,17 +37,17 @@ class ImagingPlane(NWBContainer):
     """
     """
 
-    __nwbfields__ = ({'name': 'optical_channel', 'child': True},
-                     'description',
-                     'device',
-                     'excitation_lambda',
-                     'imaging_rate',
-                     'indicator',
-                     'location',
-                     'manifold',
-                     'conversion',
-                     'unit',
-                     'reference_frame')
+    __fields__ = ({'name': 'optical_channel', 'child': True},
+                  'description',
+                  'device',
+                  'excitation_lambda',
+                  'imaging_rate',
+                  'indicator',
+                  'location',
+                  'manifold',
+                  'conversion',
+                  'unit',
+                  'reference_frame')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'optical_channel', 'type': (list, OpticalChannel),
@@ -98,10 +98,10 @@ class TwoPhotonSeries(ImageSeries):
     A special case of optical imaging.
     """
 
-    __nwbfields__ = ('field_of_view',
-                     'imaging_plane',
-                     'pmt_gain',
-                     'scan_line_rate')
+    __fields__ = ('field_of_view',
+                  'imaging_plane',
+                  'pmt_gain',
+                  'scan_line_rate')
 
     _help = "Image stack recorded from 2-photon microscope."
 
@@ -114,7 +114,7 @@ class TwoPhotonSeries(ImageSeries):
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
-            {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2, ), (3, )),
+            {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2,), (3,)),
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
             {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.', 'default': None},
             {'name': 'scan_line_rate', 'type': float,
@@ -134,7 +134,7 @@ class TwoPhotonSeries(ImageSeries):
             between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -167,9 +167,9 @@ class CorrectedImageStack(NWBDataInterface):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ('corrected',
-                     'original',
-                     'xy_translation')
+    __fields__ = ('corrected',
+                  'original',
+                  'xy_translation')
 
     _help = ""
 
@@ -213,9 +213,9 @@ class PlaneSegmentation(DynamicTable):
     Image segmentation of a specific imaging plane
     """
 
-    __nwbfields__ = ('description',
-                     'imaging_plane',
-                     {'name': 'reference_images', 'child': True})
+    __fields__ = ('description',
+                  'imaging_plane',
+                  {'name': 'reference_images', 'child': True})
 
     __columns__ = (
         {'name': 'image_mask', 'description': 'Image masks for each ROI'},
@@ -234,7 +234,7 @@ class PlaneSegmentation(DynamicTable):
              'default': None},
             {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
             {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
-            'default': None})
+             'default': None})
     def __init__(self, **kwargs):
         imaging_plane, reference_images = popargs('imaging_plane', 'reference_images', kwargs)
         if kwargs.get('name') is None:
@@ -255,7 +255,7 @@ class PlaneSegmentation(DynamicTable):
              'shape': (None, 4)},
             {'name': 'image_mask', 'type': 'array_data', 'default': None,
              'doc': 'image with the same size of image where positive values mark this ROI',
-             'shape': [[None]*2, [None]*3]},
+             'shape': [[None] * 2, [None] * 3]},
             {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_roi(self, **kwargs):
@@ -316,12 +316,12 @@ class RoiResponseSeries(TimeSeries):
     ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one ROI.
     '''
 
-    __nwbfields__ = ({'name': 'rois', 'child': True},)
+    __fields__ = ({'name': 'rois', 'child': True},)
 
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this RioResponseSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None,), (None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 

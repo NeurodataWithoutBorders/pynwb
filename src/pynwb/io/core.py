@@ -21,7 +21,6 @@ class NWBBaseTypeMapper(ObjectMapper):
 
 @register_map(NWBContainer)
 class NWBContainerMapper(NWBBaseTypeMapper):
-
     pass
 
 
@@ -57,7 +56,7 @@ class DynamicTableMap(NWBContainerMapper):
             elif spec.neurodata_type_inc == 'DynamicTableRegion':
                 attr_value = container[spec.name]
                 if attr_value.table is None:
-                    msg = "empty or missing table for DynamicTableRegion '%s' in DynamicTable '%s'" %\
+                    msg = "empty or missing table for DynamicTableRegion '%s' in DynamicTable '%s'" % \
                           (attr_value.name, container.name)
                     raise ValueError(msg)
             elif spec.neurodata_type_inc == 'VectorIndex':

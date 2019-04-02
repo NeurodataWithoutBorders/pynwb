@@ -1,8 +1,8 @@
 build: false
 
 branches:
- only:
-  - dev
+  only:
+    - dev
 
 environment:
   matrix:

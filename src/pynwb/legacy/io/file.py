@@ -1,4 +1,3 @@
-
 from pynwb.file import NWBFile
 
 from .. import ObjectMapper, register_map

@@ -63,7 +63,6 @@ class TestIntracellularElectrode(base.TestMapRoundTrip):
 class TestPatchClampSeries(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
 
     def setUpElectrode(self):
-
         self.device = Device(name='device_name')
         self.elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                            resistance='something measured in ohms',
@@ -133,7 +132,6 @@ class TestIZeroClampSeries(TestPatchClampSeries):
 
 
 class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
-
     _required_tests = ('test_container', 'test_build', 'test_construct', 'test_roundtrip')
 
     def setUpContainer(self):
@@ -217,7 +215,7 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
                                        'unit': 'Seconds',
                                        }
                            ),
-                ]
+        ]
         pcs = GroupBuilder('pcs',
                            attributes={'neurodata_type': 'PatchClampSeries',
                                        'namespace': 'core',
@@ -271,7 +269,7 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
                                                             b'sweep_number'),
                                                'help': 'The table which groups different PatchClampSeries together',
                                                'description':
-                                               u'A sweep table groups different PatchClampSeries together.',
+                                                   u'A sweep table groups different PatchClampSeries together.',
                                                },
                                    )
 
@@ -279,7 +277,6 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
 
 
 class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
-
     _required_tests = ('test_container', 'test_build', 'test_construct', 'test_roundtrip')
 
     def setUpContainer(self):
@@ -393,7 +390,7 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
                                        'unit': 'Seconds',
                                        }
                            ),
-                ]
+        ]
         attributes = {'neurodata_type': 'PatchClampSeries',
                       'namespace': 'core',
                       'comments': u'no comments',
@@ -459,7 +456,7 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
                                                             b'sweep_number'),
                                                'help': 'The table which groups different PatchClampSeries together',
                                                'description':
-                                               u'A sweep table groups different PatchClampSeries together.',
+                                                   u'A sweep table groups different PatchClampSeries together.',
                                                },
                                    )
 

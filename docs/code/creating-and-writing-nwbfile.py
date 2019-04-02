@@ -1,6 +1,4 @@
-
 def main():
-
     import os.path
 
     # prerequisites: start
@@ -108,7 +106,8 @@ def main():
                                             electrode_table_region,
                                             timestamps=ephys_timestamps,
                                             resolution=0.001,
-                                            comments="This data was randomly generated with numpy, using 1234 as the seed",  # noqa: E501
+                                            comments="This data was randomly generated with numpy, using 1234 as the seed",
+                                            # noqa: E501
                                             description="Random numbers generated with numpy.random.rand")
 
     pos = f.add_acquisition(Position('a hypothetical source'))

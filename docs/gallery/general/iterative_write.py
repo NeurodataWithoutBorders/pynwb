@@ -123,7 +123,7 @@ def write_test_file(filename, data):
 
     # Create our time series
     test_ts = TimeSeries(name='synthetic_timeseries',
-                         data=data,                     # <---------
+                         data=data,  # <---------
                          unit='SIunit',
                          rate=1.0,
                          starting_time=0.0)
@@ -159,7 +159,7 @@ def iter_sin(chunk_length=10, max_chunks=100):
     """
     x = 0
     num_chunks = 0
-    while(x < 0.5 and num_chunks < max_chunks):
+    while (x < 0.5 and num_chunks < max_chunks):
         val = np.asarray([sin(random() * 2 * pi) for i in range(chunk_length)])
         x = random()
         num_chunks += 1
@@ -308,6 +308,7 @@ data = SparseMatrixIterator(shape=(xsize, ysize),
 # In order to also enable compression and other advanced HDF5 dataset I/O featurs we can then also
 # wrap our data via :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`.
 from hdmf.backends.hdf5.h5_utils import H5DataIO
+
 matrix2 = SparseMatrixIterator(shape=(xsize, ysize),
                                num_chunks=num_chunks,
                                chunk_shape=chunk_shape)
@@ -361,8 +362,8 @@ write_test_file(filename='basic_sparse_iterwrite_largechunks_compressed_example.
 # Now lets check out the size of our data file and compare it against the expected full size of our matrix
 import os
 
-expected_size = xsize * ysize * 8              # This is the full size of our matrix in byte
-occupied_size = num_values * 8    # Number of non-zero values in out matrix
+expected_size = xsize * ysize * 8  # This is the full size of our matrix in byte
+occupied_size = num_values * 8  # Number of non-zero values in out matrix
 file_size = os.stat('basic_sparse_iterwrite_example.nwb').st_size  # Real size of the file
 file_size_compressed = os.stat('basic_sparse_iterwrite_compressed_example.nwb').st_size
 file_size_largechunks = os.stat('basic_sparse_iterwrite_largechunks_example.nwb').st_size
@@ -475,14 +476,16 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 import numpy as np
+
 # Create the test data
-datashape = (100, 10)   # OK, this not really large, but we just want to show how it works
+datashape = (100, 10)  # OK, this not really large, but we just want to show how it works
 num_values = np.prod(datashape)
 arrdata = np.arange(num_values).reshape(datashape)
 # Write the test data to disk
 temp = np.memmap('basic_sparse_iterwrite_testdata.npy', dtype='float64', mode='w+', shape=datashape)
 temp[:] = arrdata
 del temp  # Flush to disk
+
 
 ####################
 # Step 1: Create a generator for our array
@@ -515,8 +518,7 @@ from hdmf.data_utils import DataChunkIterator
 data = DataChunkIterator(data=iter_largearray(filename='basic_sparse_iterwrite_testdata.npy',
                                               shape=datashape),
                          maxshape=datashape,
-                         buffer_size=10)   # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
-
+                         buffer_size=10)  # Buffer 10 elements into a chunk, i.e., create chunks of shape (10,10)
 
 ####################
 # Step 3: Write the data as usual
@@ -539,19 +541,18 @@ write_test_file(filename='basic_sparse_iterwrite_largearray.nwb',
 # Let's verify that our data was written correctly
 
 # Read the NWB file
-from pynwb import NWBHDF5IO    # noqa
+from pynwb import NWBHDF5IO  # noqa
 
 io = NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb', 'r')
 nwbfile = io.read()
 data = nwbfile.get_acquisition('synthetic_timeseries').data
 # Compare all the data values of our two arrays
-data_match = np.all(arrdata == data[:])   # Don't do this for very large arrays!
+data_match = np.all(arrdata == data[:])  # Don't do this for very large arrays!
 # Print result message
 if data_match:
     print("Success: All data values match")
 else:
     print("ERROR: Mismatch between data")
-
 
 ####################
 # ``[Out]:``
@@ -576,6 +577,7 @@ else:
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 import numpy as np
+
 # Create the test data
 num_channels = 10
 num_steps = 100
@@ -589,7 +591,7 @@ for f in channel_files:
 # Step 1: Create a data chunk iterator for our multifile array
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-from hdmf.data_utils import AbstractDataChunkIterator, DataChunk   # noqa
+from hdmf.data_utils import AbstractDataChunkIterator, DataChunk  # noqa
 
 
 class MultiFileArrayIterator(AbstractDataChunkIterator):
@@ -627,7 +629,7 @@ class MultiFileArrayIterator(AbstractDataChunkIterator):
     next = __next__
 
     def recommended_chunk_shape(self):
-        return None   # Use autochunking
+        return None  # Use autochunking
 
     def recommended_data_shape(self):
         return self.shape

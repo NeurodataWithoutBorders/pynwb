@@ -20,11 +20,11 @@ def container_test(container):
     def _dec(cls):
         container_tests[container] = cls
         return cls
+
     return _dec
 
 
 class TestMapNWBContainer(unittest.TestCase):
-
     _required_tests = ('test_build', 'test_construct')
 
     def setUp(self):
@@ -77,7 +77,7 @@ class TestMapNWBContainer(unittest.TestCase):
         ''' Should return the Container to build and read/write'''
         raise unittest.SkipTest('Cannot run test unless setUpContainer is implemented')
 
-    def assertContainerEqual(self, container1, container2):           # noqa: C901
+    def assertContainerEqual(self, container1, container2):  # noqa: C901
         '''
         container1 is what was read or generated
         container2 is what is hardcoded in the TestCase
@@ -85,7 +85,7 @@ class TestMapNWBContainer(unittest.TestCase):
         type1 = type(container1)
         type2 = type(container2)
         self.assertEqual(type1, type2)
-        for nwbfield in container1.__nwbfields__:
+        for nwbfield in container1.__fields__:
             with self.subTest(nwbfield=nwbfield, container_type=type1.__name__):
                 f1 = getattr(container1, nwbfield)
                 f2 = getattr(container2, nwbfield)
@@ -135,7 +135,6 @@ class TestMapNWBContainer(unittest.TestCase):
 
 
 class TestMapRoundTrip(TestMapNWBContainer):
-
     _required_tests = ('test_roundtrip',)
     run_injected_file_test = False
 

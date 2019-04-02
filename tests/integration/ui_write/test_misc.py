@@ -131,5 +131,4 @@ class TestSpectralAnalysis(base.TestDataInterfaceIO):
         prcs_mod.add_data_interface(self.container)
 
     def getContainer(self, nwbfile):
-
         return nwbfile.modules['test_mod']['LFPSpectralAnalysis']

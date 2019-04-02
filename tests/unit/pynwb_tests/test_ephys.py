@@ -2,8 +2,8 @@ import unittest
 
 import numpy as np
 
-from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Clustering, EventWaveform,\
-                          ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction, ElectrodeGroup
+from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Clustering, EventWaveform, \
+    ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction, ElectrodeGroup
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable
 from pynwb.core import DynamicTableRegion
@@ -191,7 +191,7 @@ class FeatureExtractionConstructor(unittest.TestCase):
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]]
-        fe = FeatureExtraction(region, description, event_times, features)   # noqa: F405
+        fe = FeatureExtraction(region, description, event_times, features)  # noqa: F405
         self.assertEqual(fe.description, description)
         self.assertEqual(fe.times, event_times)
         self.assertEqual(fe.features, features)

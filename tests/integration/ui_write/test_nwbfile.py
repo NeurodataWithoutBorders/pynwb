@@ -47,63 +47,65 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                                   'description': 'a test module'},
                                       groups={
                                           'Clustering':
-                                          GroupBuilder('Clustering',
-                                                       attributes={
-                                                           'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',  # noqa: E501
-                                                           'neurodata_type': 'Clustering',
-                                                           'namespace': base.CORE_NAMESPACE},
-                                                       datasets={
-                                                           'num': DatasetBuilder('num', [0, 1, 2, 0, 1, 2]),
-                                                           'times': DatasetBuilder('times', list(range(10, 61, 10))),
-                                                           'peak_over_rms':
-                                                           DatasetBuilder('peak_over_rms', [100, 101, 102]),
-                                                           'description':
-                                                           DatasetBuilder('description',
-                                                                          "A fake Clustering interface")})})
+                                              GroupBuilder('Clustering',
+                                                           attributes={
+                                                               'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',
+                                                               # noqa: E501
+                                                               'neurodata_type': 'Clustering',
+                                                               'namespace': base.CORE_NAMESPACE},
+                                                           datasets={
+                                                               'num': DatasetBuilder('num', [0, 1, 2, 0, 1, 2]),
+                                                               'times': DatasetBuilder('times',
+                                                                                       list(range(10, 61, 10))),
+                                                               'peak_over_rms':
+                                                                   DatasetBuilder('peak_over_rms', [100, 101, 102]),
+                                                               'description':
+                                                                   DatasetBuilder('description',
+                                                                                  "A fake Clustering interface")})})
 
         general_builder = GroupBuilder('general',
                                        datasets={
-                                            'experimenter': DatasetBuilder('experimenter', 'test experimenter'),
-                                            'stimulus': DatasetBuilder('stimulus', 'test stimulus notes'),
-                                            'experiment_description': DatasetBuilder('experiment_description',
-                                                                                     'test experiment description'),
-                                            'data_collection': DatasetBuilder('data_collection',
-                                                                              'test data collection notes'),
-                                            'institution': DatasetBuilder('institution', 'nomad'),
-                                            'lab': DatasetBuilder('lab', 'nolab'),
-                                            'notes': DatasetBuilder('notes', 'nonotes'),
-                                            'pharmacology': DatasetBuilder('pharmacology', 'nopharmacology'),
-                                            'protocol': DatasetBuilder('protocol', 'noprotocol'),
-                                            'related_publications': DatasetBuilder('related_publications', 'nopubs'),
-                                            'session_id': DatasetBuilder('session_id', '007'),
-                                            'slices': DatasetBuilder('slices', 'noslices'),
-                                            'source_script': DatasetBuilder('source_script', 'nosources',
-                                                                            attributes={'file_name': 'nofilename'}),
-                                            'surgery': DatasetBuilder('surgery', 'nosurgery'),
-                                            'virus': DatasetBuilder('virus', 'novirus')}
+                                           'experimenter': DatasetBuilder('experimenter', 'test experimenter'),
+                                           'stimulus': DatasetBuilder('stimulus', 'test stimulus notes'),
+                                           'experiment_description': DatasetBuilder('experiment_description',
+                                                                                    'test experiment description'),
+                                           'data_collection': DatasetBuilder('data_collection',
+                                                                             'test data collection notes'),
+                                           'institution': DatasetBuilder('institution', 'nomad'),
+                                           'lab': DatasetBuilder('lab', 'nolab'),
+                                           'notes': DatasetBuilder('notes', 'nonotes'),
+                                           'pharmacology': DatasetBuilder('pharmacology', 'nopharmacology'),
+                                           'protocol': DatasetBuilder('protocol', 'noprotocol'),
+                                           'related_publications': DatasetBuilder('related_publications', 'nopubs'),
+                                           'session_id': DatasetBuilder('session_id', '007'),
+                                           'slices': DatasetBuilder('slices', 'noslices'),
+                                           'source_script': DatasetBuilder('source_script', 'nosources',
+                                                                           attributes={'file_name': 'nofilename'}),
+                                           'surgery': DatasetBuilder('surgery', 'nosurgery'),
+                                           'virus': DatasetBuilder('virus', 'novirus')}
                                        )
 
         return GroupBuilder('root',
                             groups={'acquisition': GroupBuilder(
                                 'acquisition',
                                 groups={'test_timeseries': ts_builder}),
-                                    'analysis': GroupBuilder('analysis'),
-                                    'general': general_builder,
-                                    'processing': GroupBuilder('processing', groups={'test_module': module_builder}),
-                                    'stimulus': GroupBuilder(
-                                        'stimulus',
-                                        groups={'presentation':
+                                'analysis': GroupBuilder('analysis'),
+                                'general': general_builder,
+                                'processing': GroupBuilder('processing', groups={'test_module': module_builder}),
+                                'stimulus': GroupBuilder(
+                                    'stimulus',
+                                    groups={'presentation':
                                                 GroupBuilder('presentation'),
-                                                'templates': GroupBuilder('templates')})},
+                                            'templates': GroupBuilder('templates')})},
                             datasets={
                                 'file_create_date':
-                                DatasetBuilder('file_create_date', [self.create_date.isoformat()]),
+                                    DatasetBuilder('file_create_date', [self.create_date.isoformat()]),
                                 'identifier': DatasetBuilder('identifier', 'TEST123'),
                                 'session_description': DatasetBuilder('session_description', 'a test NWB File'),
                                 'session_start_time': DatasetBuilder('session_start_time', self.start_time.isoformat()),
                                 'timestamps_reference_time': DatasetBuilder('timestamps_reference_time',
                                                                             self.ref_time.isoformat())
-                                },
+                            },
                             attributes={'namespace': base.CORE_NAMESPACE,
                                         'nwb_version': '2.0b',
                                         'neurodata_type': 'NWBFile',
@@ -240,7 +242,6 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
         return TimeIntervals('epochs')
 
     def addContainer(self, nwbfile):
-
         tsa, tsb = [
             TimeSeries(name='a', data=np.arange(11), unit='flubs', timestamps=np.linspace(0, 1, 11)),
             TimeSeries(name='b', data=np.arange(13), unit='flubs', timestamps=np.linspace(0.1, 5, 13)),
