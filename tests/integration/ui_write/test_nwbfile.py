@@ -49,8 +49,9 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                           'Clustering':
                                               GroupBuilder('Clustering',
                                                            attributes={
-                                                               'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',
-                                                               # noqa: E501
+                                                               'help': 'Clustered spike data, whether from automatic '
+                                                                       'clustering tools (eg, klustakwik) or as a '
+                                                                       'result of manual sorting',
                                                                'neurodata_type': 'Clustering',
                                                                'namespace': base.CORE_NAMESPACE},
                                                            datasets={
@@ -94,8 +95,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                 'processing': GroupBuilder('processing', groups={'test_module': module_builder}),
                                 'stimulus': GroupBuilder(
                                     'stimulus',
-                                    groups={'presentation':
-                                                GroupBuilder('presentation'),
+                                    groups={'presentation': GroupBuilder('presentation'),
                                             'templates': GroupBuilder('templates')})},
                             datasets={
                                 'file_create_date':

@@ -301,8 +301,8 @@ class TestClusteringIO(base.TestDataInterfaceIO):
     def setUpBuilder(self):
         return GroupBuilder('Clustering',
                             attributes={
-                                'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',
-                                # noqa: E501
+                                'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik)'
+                                        ' or as a result of manual sorting',
                                 'neurodata_type': 'Clustering',
                                 'namespace': base.CORE_NAMESPACE},
                             datasets={
