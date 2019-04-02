@@ -199,7 +199,7 @@ class TestMultiElectricalSeries(with_metaclass(ABCMeta, base.TestDataInterfaceIO
     def setUpElectricalSeriesBuilders(self):
         table_builder = TestElectricalSeriesIO.get_table_builder(self)
         data = list(zip(range(10), range(10, 20)))
-        timestamps = list(map(lambda x: x / 10, range(10)))
+        timestamps = list(map(lambda x: x/10, range(10)))
         es1 = GroupBuilder('test_eS1',
                            attributes={'namespace': base.CORE_NAMESPACE,
                                        'comments': 'no comments',

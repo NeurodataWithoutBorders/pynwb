@@ -124,41 +124,41 @@ jobs:
     docker:
       - image: circleci/python:2.7.14-jessie
     environment:
-      - TEST_TOX_ENV: "py27"
-      - COVERAGE_TOX_ENV: "coverage-py27"
-      - BUILD_TOX_ENV: "build-py27"
-      - TEST_WHEELINSTALL_ENV: "wheelinstall-py27"
+     - TEST_TOX_ENV: "py27"
+     - COVERAGE_TOX_ENV: "coverage-py27"
+     - BUILD_TOX_ENV: "build-py27"
+     - TEST_WHEELINSTALL_ENV: "wheelinstall-py27"
     <<: *ci-steps
 
   python35:
     docker:
       - image: circleci/python:3.5.4-jessie
     environment:
-      - TEST_TOX_ENV: "py35"
-      - COVERAGE_TOX_ENV: "coverage-py35"
-      - BUILD_TOX_ENV: "build-py35"
-      - TEST_WHEELINSTALL_ENV: "wheelinstall-py35"
+     - TEST_TOX_ENV: "py35"
+     - COVERAGE_TOX_ENV: "coverage-py35"
+     - BUILD_TOX_ENV: "build-py35"
+     - TEST_WHEELINSTALL_ENV: "wheelinstall-py35"
     <<: *ci-steps
 
   python36:
     docker:
       - image: circleci/python:3.6.3-jessie
     environment:
-      - TEST_TOX_ENV: "py36"
-      - COVERAGE_TOX_ENV: "coverage-py36"
-      - BUILD_TOX_ENV: "build-py36"
-      - TEST_WHEELINSTALL_ENV: "wheelinstall-py36"
-      - UPLOAD_WHEELS: "true"
+     - TEST_TOX_ENV: "py36"
+     - COVERAGE_TOX_ENV: "coverage-py36"
+     - BUILD_TOX_ENV: "build-py36"
+     - TEST_WHEELINSTALL_ENV: "wheelinstall-py36"
+     - UPLOAD_WHEELS: "true"
     <<: *ci-steps
 
   python37:
     docker:
       - image: circleci/python:3.7.0-stretch
     environment:
-      - TEST_TOX_ENV: "py37"
-      - COVERAGE_TOX_ENV: "coverage-py37"
-      - BUILD_TOX_ENV: "build-py37"
-      - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
+     - TEST_TOX_ENV: "py37"
+     - COVERAGE_TOX_ENV: "coverage-py37"
+     - BUILD_TOX_ENV: "build-py37"
+     - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
     <<: *ci-steps
 
   miniconda27:
@@ -201,28 +201,28 @@ jobs:
     docker:
       - image: circleci/python:2.7.14-jessie
     environment:
-      - TEST_TOX_ENV: "gallery-py27"
+     - TEST_TOX_ENV: "gallery-py27"
     <<: *gallery-steps
 
   gallery35:
     docker:
       - image: circleci/python:3.5.4-jessie
     environment:
-      - TEST_TOX_ENV: "gallery-py35"
+     - TEST_TOX_ENV: "gallery-py35"
     <<: *gallery-steps
 
   gallery36:
     docker:
       - image: circleci/python:3.6.3-jessie
     environment:
-      - TEST_TOX_ENV: "gallery-py36"
+     - TEST_TOX_ENV: "gallery-py36"
     <<: *gallery-steps
 
   gallery37:
     docker:
       - image: dozturk2/python37-hdf5
     environment:
-      - TEST_TOX_ENV: "gallery-py37"
+     - TEST_TOX_ENV: "gallery-py37"
     <<: *gallery-steps
 
   deploy-dev:

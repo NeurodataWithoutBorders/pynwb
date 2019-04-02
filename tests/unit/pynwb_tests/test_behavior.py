@@ -4,8 +4,7 @@ import numpy as np
 
 from pynwb import TimeSeries
 from pynwb.misc import IntervalSeries
-from pynwb.behavior import SpatialSeries, BehavioralEpochs, BehavioralEvents, BehavioralTimeSeries, PupilTracking, \
-    EyeTracking, CompassDirection, Position  # noqa: E501
+from pynwb.behavior import SpatialSeries, BehavioralEpochs, BehavioralEvents, BehavioralTimeSeries, PupilTracking, EyeTracking, CompassDirection, Position  # noqa: E501
 
 
 class SpatialSeriesConstructor(unittest.TestCase):

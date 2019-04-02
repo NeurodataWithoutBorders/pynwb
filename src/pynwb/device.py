@@ -8,7 +8,7 @@ class Device(NWBContainer):
     """
     """
 
-    __fields__ = ('name',)
+    __nwbfields__ = ('name',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
             {'name': 'parent', 'type': 'NWBContainer',

@@ -213,7 +213,7 @@ class TestDynamicTable(unittest.TestCase):
     def test_nd_array_to_df(self):
         data = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
         col = VectorData(name='name', description='desc', data=data)
-        df = DynamicTable('test', 'desc', np.arange(3, dtype='int'), (col,)).to_dataframe()
+        df = DynamicTable('test', 'desc', np.arange(3, dtype='int'), (col, )).to_dataframe()
         df2 = pd.DataFrame({'name': [x for x in data]},
                            index=pd.Index(name='id', data=[0, 1, 2]))
         assert_frame_equal(df, df2)
@@ -227,7 +227,6 @@ class TestNWBTable(unittest.TestCase):
                 {'name': 'foo', 'type': str, 'doc': 'the foo column'},
                 {'name': 'bar', 'type': int, 'doc': 'the bar column'},
             ]
-
         self.cls = MyTable
 
     @staticmethod
@@ -246,7 +245,7 @@ class TestNWBTable(unittest.TestCase):
 
     def test_init(self):
         table = self.table_with_data()
-        assert (table['foo', 1]) == 2
+        assert(table['foo', 1]) == 2
 
     def test_to_dataframe(self):
         obtained = self.table_with_data().to_dataframe()
@@ -339,4 +338,4 @@ Fields:
 
 class TestAvailableNamespaces(unittest.TestCase):
     def test_available_namespaces(self):
-        self.assertEqual(available_namespaces(), ('core',))
+        self.assertEqual(available_namespaces(), ('core', ))

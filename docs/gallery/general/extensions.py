@@ -104,10 +104,11 @@ load_namespaces(ns_path)
 
 @register_class('TetrodeSeries', 'mylab')
 class TetrodeSeries(ElectricalSeries):
-    __fields__ = ('trode_id',)
+
+    __nwbfields__ = ('trode_id',)
 
     @docval(*get_docval(ElectricalSeries.__init__) + (
-            {'name': 'trode_id', 'type': int, 'doc': 'the tetrode id'},))
+        {'name': 'trode_id', 'type': int, 'doc': 'the tetrode id'},))
     def __init__(self, **kwargs):
         call_docval_func(super(TetrodeSeries, self).__init__, kwargs)
         self.trode_id = getargs('trode_id', kwargs)
@@ -121,7 +122,7 @@ class TetrodeSeries(ElectricalSeries):
 #     and :py:func:`~hdmf.utils.get_docval`
 #
 # When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer`
-# subclasses, you should defining the class field ``__fields__``. This will
+# subclasses, you should defining the class field ``__nwbfields__``. This will
 # tell PyNWB the properties of the :py:class:`~pynwb.core.NWBContainer` extension.
 #
 # If you do not want to write additional code to read your extensions, PyNWB is able to dynamically
@@ -294,7 +295,7 @@ load_namespaces(ns_path)
 
 @register_class('Potato', name)
 class Potato(NWBContainer):
-    __fields__ = ('name', 'weight', 'age')
+    __nwbfields__ = ('name', 'weight', 'age')
 
     @docval({'name': 'name', 'type': str, 'doc': 'who names a potato?'},
             {'name': 'weight', 'type': float, 'doc': 'weight of potato in grams'},
@@ -307,6 +308,7 @@ class Potato(NWBContainer):
 
 @register_class('PotatoSack', name)
 class PotatoSack(MultiContainerInterface):
+
     __clsconf__ = {
         'attr': 'potatos',
         'type': Potato,
@@ -330,6 +332,7 @@ nwbfile = NWBFile("a file with metadata", "NB123A", datetime(2018, 6, 1))
 
 pmod = nwbfile.create_processing_module('module_name', 'desc')
 pmod.add_container(potato_sack)
+
 
 with NWBHDF5IO('test_multicontainerinterface.nwb', 'w') as io:
     io.write(nwbfile)

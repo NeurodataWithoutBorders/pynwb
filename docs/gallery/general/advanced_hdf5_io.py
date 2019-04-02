@@ -30,6 +30,7 @@ nwbfile = NWBFile(session_description='demonstrate advanced HDF5 I/O features',
                   session_start_time=start_time,
                   file_create_date=create_date)
 
+
 ####################
 # Normally if we create a timeseries we would do
 
@@ -49,10 +50,9 @@ nwbfile.add_acquisition(test_ts)
 # Everything else remains the same
 
 from hdmf.backends.hdf5.h5_utils import H5DataIO
-
-wrapped_data = H5DataIO(data=data, compression=True)  # <----
+wrapped_data = H5DataIO(data=data, compression=True)     # <----
 test_ts = TimeSeries(name='test_compressed_timeseries',
-                     data=wrapped_data,  # <----
+                     data=wrapped_data,                  # <----
                      unit='SIunit',
                      timestamps=timestamps)
 nwbfile.add_acquisition(test_ts)
@@ -86,15 +86,16 @@ nwbfile.add_acquisition(test_ts)
 
 data = np.arange(10000).reshape((1000, 10))
 wrapped_data = H5DataIO(data=data,
-                        chunks=True,  # <---- Enable chunking
-                        maxshape=(None, 10)  # <---- Make the time dimension unlimited and hence resizeable
+                        chunks=True,          # <---- Enable chunking
+                        maxshape=(None, 10)   # <---- Make the time dimension unlimited and hence resizeable
                         )
 test_ts = TimeSeries(name='test_chunked_timeseries',
-                     data=wrapped_data,  # <----
+                     data=wrapped_data,                  # <----
                      unit='SIunit',
                      starting_time=0.0,
                      rate=10.0)
 nwbfile.add_acquisition(test_ts)
+
 
 ####################
 # .. hint::
@@ -125,11 +126,11 @@ nwbfile.add_acquisition(test_ts)
 # define the approbriate opions:
 
 wrapped_data = H5DataIO(data=data,
-                        compression='gzip',  # <---- Use GZip
-                        compression_opts=4,  # <---- Optional GZip aggression option
+                        compression='gzip',              # <---- Use GZip
+                        compression_opts=4,              # <---- Optional GZip aggression option
                         )
 test_ts = TimeSeries(name='test_gzipped_timeseries',
-                     data=wrapped_data,  # <----
+                     data=wrapped_data,                  # <----
                      unit='SIunit',
                      starting_time=0.0,
                      rate=10.0)

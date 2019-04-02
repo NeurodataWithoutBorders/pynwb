@@ -1,7 +1,7 @@
 from pynwb.ecephys import ElectricalSeries
 from pynwb.behavior import SpatialSeries
 from pynwb import NWBFile, get_build_manager
-from hdmf.backends.hdf5 import HDF5IO
+from form.backends.hdf5 import HDF5IO
 
 import numpy as np
 import os
@@ -10,6 +10,7 @@ from dateutil.tz import tzlocal
 
 data_len = 1000
 filename = 'test.nwb'
+
 
 if os.path.exists(filename):
     print('removing %s' % filename)
@@ -35,6 +36,7 @@ channel_impedance = [-1] * num_channels
 description = "an example tetrode"
 location = "somewhere in the hippocampus"
 device = f.create_device('trodes_rig123')
+
 
 electrode_group = f.create_electrode_group(electrode_name,
                                            channel_description,

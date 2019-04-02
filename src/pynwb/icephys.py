@@ -15,14 +15,14 @@ class IntracellularElectrode(NWBContainer):
     '''
     '''
 
-    __fields__ = ('slice',
-                  'seal',
-                  'description',
-                  'location',
-                  'resistance',
-                  'filtering',
-                  'initial_access_resistance',
-                  'device')
+    __nwbfields__ = ('slice',
+                     'seal',
+                     'description',
+                     'location',
+                     'resistance',
+                     'filtering',
+                     'initial_access_resistance',
+                     'device')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode'},
@@ -60,10 +60,10 @@ class PatchClampSeries(TimeSeries):
     (this class should not be instantiated directly).
     '''
 
-    __fields__ = ('electrode',
-                  'gain',
-                  'stimulus_description',
-                  'sweep_number')
+    __nwbfields__ = ('electrode',
+                     'gain',
+                     'stimulus_description',
+                     'sweep_number')
 
     _help = "Superclass definition for patch-clamp data."
 
@@ -126,9 +126,9 @@ class CurrentClampSeries(PatchClampSeries):
     injected.
     '''
 
-    __fields__ = ('bias_current',
-                  'bridge_balance',
-                  'capacitance_compensation')
+    __nwbfields__ = ('bias_current',
+                     'bridge_balance',
+                     'capacitance_compensation')
 
     _help = "Voltage recorded from cell during current-clamprecording."
 
@@ -191,7 +191,7 @@ class IZeroClampSeries(CurrentClampSeries):
     the cell.
     '''
 
-    __fields__ = ()
+    __nwbfields__ = ()
 
     _help = "Voltage from intracellular recordings when all current and amplifier settings are off,"
 
@@ -247,7 +247,7 @@ class CurrentClampStimulusSeries(PatchClampSeries):
     machine (and human) readability of the file.
     '''
 
-    __fields__ = ()
+    __nwbfields__ = ()
 
     _help = "Stimulus current applied during current clamp recording."
 
@@ -299,13 +299,13 @@ class VoltageClampSeries(PatchClampSeries):
     injected.
     '''
 
-    __fields__ = ('capacitance_fast',
-                  'capacitance_slow',
-                  'resistance_comp_bandwidth',
-                  'resistance_comp_correction',
-                  'resistance_comp_prediction',
-                  'whole_cell_capacitance_comp',
-                  'whole_cell_series_resistance_comp')
+    __nwbfields__ = ('capacitance_fast',
+                     'capacitance_slow',
+                     'resistance_comp_bandwidth',
+                     'resistance_comp_correction',
+                     'resistance_comp_prediction',
+                     'whole_cell_capacitance_comp',
+                     'whole_cell_series_resistance_comp')
 
     _help = "Current recorded from cell during voltage-clamp recording"
 
@@ -374,7 +374,7 @@ class VoltageClampStimulusSeries(PatchClampSeries):
     machine (and human) readability of the file.
     '''
 
-    __fields__ = ()
+    __nwbfields__ = ()
 
     _help = "Stimulus voltage applied during voltage clamp recording."
 
@@ -423,9 +423,9 @@ class SweepTable(DynamicTable):
     """
 
     __columns__ = (
-        {'name': 'series', 'description': 'PatchClampSeries with the same sweep number',
-         'required': True, 'index': True},
-        {'name': 'sweep_number', 'description': 'Sweep number of the entries in that row', 'required': True}
+            {'name': 'series', 'description': 'PatchClampSeries with the same sweep number',
+             'required': True, 'index': True},
+            {'name': 'sweep_number', 'description': 'Sweep number of the entries in that row', 'required': True}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of this SweepTable', 'default': 'sweep_table'},
@@ -440,7 +440,7 @@ class SweepTable(DynamicTable):
         call_docval_func(super(SweepTable, self).__init__, kwargs)
 
     @docval({'name': 'pcs', 'type': PatchClampSeries, 'doc': 'PatchClampSeries to add to the table ' +
-                                                             'must have a valid sweep_number'})
+            'must have a valid sweep_number'})
     def add_entry(self, pcs):
         """
         Add the passed PatchClampSeries to the sweep table.

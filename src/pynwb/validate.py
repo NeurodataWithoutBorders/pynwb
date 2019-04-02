@@ -25,6 +25,7 @@ def _validate_helper(**kwargs):
 
 
 def main():
+
     ep = """
     use --nspath to validate against an extension. If --ns is not specified,
     validate against all namespaces in namespace file.
