@@ -48,7 +48,9 @@ class TestFromDataframe(base.TestMapRoundTrip):
     def setUpContainer(self):
         # this will get ignored
         return DynamicTable.from_dataframe(pd.DataFrame({
-                'a': [1, 2, 3],
+                'a': [[1, 2, 3],
+                      [1, 2, 3],
+                      [1, 2, 3]],
                 'b': ['4', '5', '6']
             }), 'test_table')
 
@@ -57,7 +59,9 @@ class TestFromDataframe(base.TestMapRoundTrip):
         test_mod.add_data_interface(self.container)
 
     def getContainer(self, nwbfile):
-        return nwbfile.modules['test'].data_interfaces['test_table']
+        dyn_tab = nwbfile.modules['test'].data_interfaces['test_table']
+        dyn_tab.to_dataframe()  # also test 2D column round-trip
+        return dyn_tab
 
 
 class TestElectrodes(base.TestMapRoundTrip):
