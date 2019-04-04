@@ -255,7 +255,7 @@ class NWBFile(MultiContainerInterface):
              'doc': 'A table containing times to be omitted from analysis', 'default': None},
             {'name': 'time_intervals', 'type': (list, tuple),
              'doc': 'any TimeIntervals tables storing time intervals', 'default': None},
-            {'name': 'units', 'type': DynamicTable,
+            {'name': 'units', 'type': Units,
              'doc': 'A table containing unit metadata', 'default': None},
             {'name': 'modules', 'type': (list, tuple),
              'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},

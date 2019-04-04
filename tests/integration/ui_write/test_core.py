@@ -47,18 +47,17 @@ class TestFromDataframe(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
-        return DynamicTable('units', 'a placeholder table')
+        return DynamicTable.from_dataframe(pd.DataFrame({
+                'a': [1, 2, 3],
+                'b': ['4', '5', '6']
+            }), 'test_table')
 
     def addContainer(self, nwbfile):
-        nwbfile.units = DynamicTable.from_dataframe(pd.DataFrame({
-            'a': [1, 2, 3],
-            'b': ['4', '5', '6']
-        }), 'units')
-        # reset the thing
-        self.container = nwbfile.units
+        test_mod = nwbfile.create_processing_module('test', 'desc')
+        test_mod.add_data_interface(self.container)
 
     def getContainer(self, nwbfile):
-        return nwbfile.units
+        return nwbfile.modules['test'].data_interfaces['test_table']
 
 
 class TestElectrodes(base.TestMapRoundTrip):
