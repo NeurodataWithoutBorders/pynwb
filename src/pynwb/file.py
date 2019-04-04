@@ -30,6 +30,7 @@ class SpecFile(Container):
 
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
+    @docval({'name': 'name', 'type': str, 'doc': 'name of metadata'})
     def __init__(self, **kwargs):
         super(LabMetaData, self).__init__(kwargs['name'])
 
@@ -259,6 +260,8 @@ class NWBFile(MultiContainerInterface):
              'doc': 'A table containing unit metadata', 'default': None},
             {'name': 'modules', 'type': (list, tuple),
              'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
+            {'name': 'lab_meta_data', 'type': (list, tuple), 'default': None,
+             'doc': 'an extension that contains lab-specific meta-data'},
             {'name': 'electrodes', 'type': DynamicTable,
              'doc': 'the ElectrodeTable that belongs to this NWBFile', 'default': None},
             {'name': 'electrode_groups', 'type': Iterable,
@@ -332,6 +335,7 @@ class NWBFile(MultiContainerInterface):
         self.time_intervals = getargs('time_intervals', kwargs)
         self.subject = getargs('subject', kwargs)
         self.sweep_table = getargs('sweep_table', kwargs)
+        self.lab_meta_data = getargs('lab_meta_data', kwargs)
 
         recommended = [
             'experimenter',
