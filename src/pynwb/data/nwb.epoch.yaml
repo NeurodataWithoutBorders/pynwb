@@ -11,7 +11,7 @@ groups:
   datasets:
   - neurodata_type_inc: VectorData
     name: start_time
-    dtype: float
+    dtype: double
     doc: Start time of epoch, in seconds
     attributes:
     - name: description
@@ -20,7 +20,7 @@ groups:
       value: start time of the epoch, in seconds
   - neurodata_type_inc: VectorData
     name: stop_time
-    dtype: float
+    dtype: double
     doc: Stop time of epoch, in seconds
     attributes:
     - name: description
