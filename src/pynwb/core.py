@@ -1,4 +1,4 @@
-from h5py import RegionReference
+from h5py import RegionReference, Dataset
 import numpy as np
 import pandas as pd
 
@@ -1254,7 +1254,7 @@ class DynamicTable(NWBDataInterface):
         data = {}
         for name in self.colnames:
             col = self.__df_cols[self.__colids[name]]
-            if isinstance(col.data, np.ndarray) and col.data.ndim > 1:
+            if isinstance(col.data, (Dataset, np.ndarray)) and col.data.ndim > 1:
                 data[name] = [x for x in col[:]]
             else:
                 data[name] = col[:]
