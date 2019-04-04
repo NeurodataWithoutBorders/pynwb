@@ -30,6 +30,7 @@ class SpecFile(Container):
 
 @register_class('LabMetaData', CORE_NAMESPACE)
 class LabMetaData(NWBContainer):
+    @docval({'name': 'name', 'type': str, 'doc': 'name of metadata'})
     def __init__(self, **kwargs):
         super(LabMetaData, self).__init__(kwargs['name'])
 
