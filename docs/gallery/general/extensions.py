@@ -36,6 +36,9 @@ ns_path = "mylab.namespace.yaml"
 ext_source = "mylab.extensions.yaml"
 
 ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "mylab")
+
+ns_builder.include_type('ElectricalSeries', namespace='core')
+
 ext = NWBGroupSpec('A custom ElectricalSeries for my lab',
                    attributes=[NWBAttributeSpec('trode_id', 'the tetrode id', 'int')],
                    neurodata_type_inc='ElectricalSeries',
@@ -47,23 +50,23 @@ ns_builder.export(ns_path)
 ####################
 # Running this block will produce two YAML files.
 #
-# The first file contains the specification of the namespace.
+# The first file, mylab.namespace.yaml, contains the specification of the namespace.
 #
 # .. code-block:: yaml
 #
-#     # mylab.namespace.yaml
 #     namespaces:
 #     - doc: Extension for use in my Lab
 #       name: mylab
 #       schema:
 #       - namespace: core
-#       - source: fake_extension.yaml
+#         neurodata_type:
+#         - ElectricalSeries
+#       - source: mylab.extensions.yaml
 #
-# The second file contains the details on newly defined types.
+# The second file, mylab.extensions.yaml, contains the details on newly defined types.
 #
 # .. code-block:: yaml
 #
-#     # mylab.extensions.yaml
 #     groups:
 #     - attributes:
 #       - doc: the tetrode id
@@ -249,9 +252,12 @@ name = 'test_multicontainerinterface'
 ns_path = name + ".namespace.yaml"
 ext_source = name + ".extensions.yaml"
 
+ns_builder = NWBNamespaceBuilder(name + ' extensions', name)
+ns_builder.include_type('NWBDataInterface', namespace='core')
+
 potato = NWBGroupSpec(neurodata_type_def='Potato',
                       neurodata_type_inc='NWBDataInterface',
-                      doc='time of multicontainer', quantity='*',
+                      doc='object to put in a multi-container', quantity='*',
                       attributes=[
                           NWBAttributeSpec(name='weight',
                                            doc='weight of potato',
@@ -270,7 +276,7 @@ potato = NWBGroupSpec(neurodata_type_def='Potato',
 potato_sack = NWBGroupSpec(neurodata_type_def='PotatoSack',
                            neurodata_type_inc='NWBDataInterface',
                            name='potato_sack',
-                           doc='test of multicontainer', quantity='?',
+                           doc='test of multi-container', quantity='?',
                            groups=[potato],
                            attributes=[
                                NWBAttributeSpec(name='help',
@@ -279,7 +285,6 @@ potato_sack = NWBGroupSpec(neurodata_type_def='PotatoSack',
                                                 value="It's a sack of potatoes")
                            ])
 
-ns_builder = NWBNamespaceBuilder(name + ' extensions', name)
 ns_builder.add_spec(ext_source, potato_sack)
 ns_builder.export(ns_path)
 
@@ -325,10 +330,11 @@ class PotatoSack(MultiContainerInterface):
 
 from pynwb import NWBHDF5IO, NWBFile
 from datetime import datetime
+from dateutil.tz import tzlocal
 
 potato_sack = PotatoSack(potatos=Potato(name='potato1', age=2.3, weight=3.0))
 
-nwbfile = NWBFile("a file with metadata", "NB123A", datetime(2018, 6, 1))
+nwbfile = NWBFile("a file with metadata", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal()))
 
 pmod = nwbfile.create_processing_module('module_name', 'desc')
 pmod.add_container(potato_sack)
