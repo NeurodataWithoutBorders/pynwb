@@ -185,7 +185,7 @@ nwbfile = io.read()
 # :py:class:`~pynwb.base.ProcessingModule`.
 
 
-mod = nwbfile.modules['my_ca_imaging_module']
+mod = nwbfile.modules['ophys']
 
 ####################
 # Now you can retrieve the :py:class:`~pynwb.ophys.ImageSegmentation` object by indexing into the
