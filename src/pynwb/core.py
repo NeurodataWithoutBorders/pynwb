@@ -68,6 +68,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     relationships in neurodata.
     '''
 
+    _fieldsname = '__nwbfields__'
+
     __nwbfields__ = tuple()
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
