@@ -5,15 +5,13 @@ from dateutil.tz import tzlocal
 from pynwb import NWBFile
 
 
-
-
 class TestVectorData(unittest.TestCase):
     def setUp(self):
         self.nwbfile = NWBFile("a file with header data", "NB123A", datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
 
     def test_empty_data(self):
         data = []
-        index = [0,0,0]
+        index = [0, 0, 0]
         self.nwbfile.add_trial(start_time=.1, stop_time=.2)
         self.nwbfile.add_trial(start_time=.3, stop_time=.4)
         self.nwbfile.add_trial(start_time=.5, stop_time=.6)
@@ -24,7 +22,7 @@ class TestVectorData(unittest.TestCase):
 
     def test_empty_data_nonempty_index(self):
         data = []
-        index = [1,0,0]
+        index = [1, 0, 0]
         self.nwbfile.add_trial(start_time=.1, stop_time=.2)
         self.nwbfile.add_trial(start_time=.3, stop_time=.4)
         self.nwbfile.add_trial(start_time=.5, stop_time=.6)
