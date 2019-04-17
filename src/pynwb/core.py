@@ -369,7 +369,7 @@ class VectorData(NWBData):
         call_docval_func(super(VectorData, self).__init__, kwargs)
         self.description = getargs('description', kwargs)
 
-    @docval({'name': 'val', 'type': None, 'doc': 'the value to add to this column'})
+    @docval({'name': 'val', 'type': None, 'doc': 'the value to add to this column', 'default': None})
     def add_row(self, **kwargs):
         val = getargs('val', kwargs)
         self.data.append(val)
@@ -1177,7 +1177,8 @@ class DynamicTable(NWBDataInterface):
                 col_index = VectorIndex(name + "_index", list(), col)
             else:                                # make VectorIndex with supplied data
                 if len(col) == 0:
-                    raise ValueError("cannot pass non-empty index with empty data to index")
+                    if np.any(index):
+                        raise ValueError("cannot pass non-empty index with empty data to index")
                 col_index = VectorIndex(name + "_index", index, col)
             columns.insert(0, col_index)
             self.add_child(col_index)
