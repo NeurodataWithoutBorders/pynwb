@@ -1,6 +1,7 @@
 from h5py import RegionReference
 import numpy as np
 import pandas as pd
+from copy import copy
 
 from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
 from hdmf import Container, Data, DataRegion, get_region_slicer
@@ -1063,13 +1064,14 @@ class DynamicTable(NWBDataInterface):
                                 index=col.get('index', False),
                                 table=col.get('table', False))
 
-    @staticmethod
-    def __build_columns(columns, df=None):
+    @classmethod
+    def __build_columns(cls, columns, df=None):
         tmp = list()
         for d in columns:
             name = d['name']
             desc = d.get('description', 'no description')
             data = None
+            colcls = d.get('colcls', VectorData)
             if df is not None:
                 data = list(df[name].values)
             if d.get('index', False):
@@ -1084,17 +1086,16 @@ class DynamicTable(NWBDataInterface):
                     for d in data:
                         tmp_data.extend(d)
                     data = tmp_data
-                vdata = VectorData(name, desc, data=data)
+                vdata = colcls(name, desc, data=data)
                 vindex = VectorIndex("%s_index" % name, index_data, target=vdata)
                 tmp.append(vindex)
                 tmp.append(vdata)
             else:
                 if data is None:
                     data = list()
-                cls = VectorData
                 if d.get('table', False):
-                    cls = DynamicTableRegion
-                tmp.append(cls(name, desc, data=data))
+                    colcls = DynamicTableRegion
+                tmp.append(colcls(name, desc, data=data))
         return tmp
 
     def __len__(self):
