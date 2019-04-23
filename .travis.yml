@@ -11,7 +11,7 @@ matrix:
     - os: osx
       language: generic
       env:
-        - TRAVIS_PYTHON_VERSION=3.7.0
+        - TRAVIS_PYTHON_VERSION=3.7.0b3
         - TEST_TOX_ENV=py37
         - COVERAGE_TOX_ENV=coverage-py37
         - BUILD_TOX_ENV=build-py37
@@ -46,7 +46,7 @@ matrix:
 
 cache:
   directories:
-    - $HOME/.pyenv/versions/3.7.0
+    - $HOME/.pyenv/versions/3.7.0b3
     - $HOME/.pyenv/versions/3.6.3
     - $HOME/.pyenv/versions/3.5.4
     - $HOME/.pyenv/versions/2.7.14
