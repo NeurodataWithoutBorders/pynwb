@@ -1,7 +1,7 @@
-sphinx==1.6.5
+sphinx==1.8.5
 matplotlib
 pillow
 sphinx_rtd_theme
 sphinx-gallery
-allensdk
+allensdk==0.16.0
 -r requirements.txt
