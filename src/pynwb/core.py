@@ -1,7 +1,6 @@
 from h5py import RegionReference, Dataset
 import numpy as np
 import pandas as pd
-from copy import copy
 
 from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
 from hdmf import Container, Data, DataRegion, get_region_slicer
