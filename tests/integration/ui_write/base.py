@@ -3,6 +3,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import os
 import numpy as np
+import h5py
 import numpy.testing as npt
 
 from pynwb import NWBContainer, get_manager, NWBFile, NWBData
@@ -123,7 +124,7 @@ class TestMapNWBContainer(unittest.TestCase):
                     elif isinstance(f2, NWBData):
                         self.assertTrue(np.array_equal(f1.data, f2))
                 else:
-                    if isinstance(f1, (float, np.float32, np.float16)):
+                    if isinstance(f1, (float, np.float32, np.float16, h5py.Dataset)):
                         npt.assert_almost_equal(f1, f2)
                     else:
                         self.assertEqual(f1, f2)
@@ -181,7 +182,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
         # make sure we get a completely new object
         str(self.container)  # added as a test to make sure printing works
         self.assertNotEqual(id(self.container), id(self.read_container))
-        self.assertContainerEqual(self.container, self.read_container)
+        self.assertContainerEqual(self.read_container, self.container)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''

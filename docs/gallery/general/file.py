@@ -80,7 +80,7 @@ nwbfile.get_acquisition('test_timeseries')
 # NWB I/O is carried out using the :py:class:`~pynwb.NWBHDF5IO` class [#]_. This class is responsible
 # for mapping an :py:class:`~pynwb.file.NWBFile` object into HDF5 according to the NWB schema.
 #
-# To write an :py:class:`~pynwb.file.NWBFile`, use the :py:func:`~pynwb.form.backends.io.FORMIO.write` method.
+# To write an :py:class:`~pynwb.file.NWBFile`, use the :py:func:`~hdmf.backends.io.FORMIO.write` method.
 
 from pynwb import NWBHDF5IO
 

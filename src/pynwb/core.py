@@ -1,4 +1,4 @@
-from h5py import RegionReference
+from h5py import RegionReference, Dataset
 import numpy as np
 import pandas as pd
 
@@ -67,6 +67,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     The purpose of this class is to provide a mechanism for representing hierarchical
     relationships in neurodata.
     '''
+
+    _fieldsname = '__nwbfields__'
 
     __nwbfields__ = tuple()
 
@@ -191,6 +193,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
         """
         if isinstance(v, list):
+            if len(v) and isinstance(v[0], NWBBaseType):
+                return str(v)
             try:
                 return str(np.array(v))
             except ValueError:
@@ -1254,7 +1258,7 @@ class DynamicTable(NWBDataInterface):
         data = {}
         for name in self.colnames:
             col = self.__df_cols[self.__colids[name]]
-            if isinstance(col.data, np.ndarray) and col.data.ndim > 1:
+            if isinstance(col.data, (Dataset, np.ndarray)) and col.data.ndim > 1:
                 data[name] = [x for x in col[:]]
             else:
                 data[name] = col[:]
