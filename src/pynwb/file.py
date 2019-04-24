@@ -9,8 +9,9 @@ from hdmf import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
+from .device import Device
 from .epoch import TimeIntervals
-from .ecephys import ElectrodeGroup, Device
+from .ecephys import ElectrodeGroup
 from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
