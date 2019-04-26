@@ -59,6 +59,8 @@ class TimeSeriesMap(NWBContainerMapper):
         if tstamps_builder is None:
             return None
         if isinstance(tstamps_builder, LinkBuilder):
+            if tstamps_builder.builder.parent is None:
+                return
             target = tstamps_builder.builder
             return manager.construct(target.parent)
         else:
