@@ -246,7 +246,7 @@ for k, v in nwbfile.acquisition.items():
 #   rank = MPI.COMM_WORLD.rank  # The process ID (integer 0-3 for 4-process run)
 #
 #   # Create file on one rank. Here we only instantiate the dataset we want to write in parallel but we do not write any data
-#   if not rank:
+#   if rank == 0:
 #       nwbfile = NWBFile('aa', 'aa', start_time)
 #       data = DataChunkIterator(data=None, maxshape=(4,), dtype=np.dtype('int'))
 #
