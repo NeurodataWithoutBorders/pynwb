@@ -263,7 +263,6 @@ for k, v in nwbfile.acquisition.items():
 #
 #   # read from dataset in parallel
 #   with NWBHDF5IO(fname, 'r', comm=MPI.COMM_WORLD) as io:
-#       print(io.read().acquisition['ts_name'].data[:])
 #       print(io.read().acquisition['ts_name'].data[rank])
 
 ####################
