@@ -221,8 +221,8 @@ for k, v in nwbfile.acquisition.items():
 # -----------
 #
 # The HDF5 storage backend supports parallel I/O using the Message Passing Interface (MPI).
-# Using this feature requires that you install `hdf5` and `h5py` against an MPI driver, and you
-# install `mpi4py`. The basic installation of pynwb will not work. Setup can be tricky, and
+# Using this feature requires that you install ``hdf5`` and ``h5py`` against an MPI driver, and you
+# install ``mpi4py``. The basic installation of pynwb will not work. Setup can be tricky, and
 # is outside the scope of this tutorial (for now), and the following assumes that you have
 # HDF5 installed in a MPI configuration. Here we:
 #
@@ -250,7 +250,8 @@ for k, v in nwbfile.acquisition.items():
 #       nwbfile = NWBFile('aa', 'aa', start_time)
 #       data = DataChunkIterator(data=None, maxshape=(4,), dtype=np.dtype('int'))
 #
-#       nwbfile.add_acquisition(TimeSeries('ts_name', description='desc', data=data, rate=100., unit='m'))
+#       nwbfile.add_acquisition(TimeSeries('ts_name', description='desc', data=data,
+#                                          rate=100., unit='m'))
 #       with NWBHDF5IO(fname, 'w') as io:
 #           io.write(nwbfile)
 #
