@@ -1308,11 +1308,16 @@ class DynamicTable(NWBDataInterface):
         allow_extra=True
     )
     def from_dataframe(cls, **kwargs):
-        '''Construct an instance of DynamicTable (or a subclass) from a pandas DataFrame. The columns of the resulting
-        table are defined by the columns of the dataframe and the index by the dataframe's index (make sure it has a
-        name!) or by a column whose name is supplied to the index_column parameter. We recommend that you supply
-        *columns* - a list/tuple of dictionaries containing the name and description of the column- to help others
-        understand the contents of your table. See :py:class:`~pynwb.core.DynamicTable` for more details on *columns*.
+        '''
+        Construct an instance of DynamicTable (or a subclass) from a pandas DataFrame.
+
+        The columns of the resulting table are defined by the columns of the
+        dataframe and the index by the dataframe's index (make sure it has a
+        name!) or by a column whose name is supplied to the index_column
+        parameter. We recommend that you supply *columns* - a list/tuple of
+        dictionaries containing the name and description of the column- to help
+        others understand the contents of your table. See
+        :py:class:`~pynwb.core.DynamicTable` for more details on *columns*.
         '''
 
         df = kwargs.pop('df')
@@ -1393,6 +1398,8 @@ class DynamicTableRegion(VectorData):
             arg2 = key[1]
             return self.table[self.data[arg1], arg2]
         elif isinstance(key, (int, slice)):
+            if isinstance(key, int) and key >= len(self.data):
+                raise IndexError('index {} out of bounds for data of length {}'.format(key, len(self.data)))
             return self.table[self.data[key]]
         else:
             raise ValueError("unrecognized argument: '%s'" % key)
