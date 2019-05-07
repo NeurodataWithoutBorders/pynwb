@@ -89,6 +89,8 @@ class TestMapNWBContainer(unittest.TestCase):
             with self.subTest(nwbfield=nwbfield, container_type=type1.__name__):
                 f1 = getattr(container1, nwbfield)
                 f2 = getattr(container2, nwbfield)
+                if isinstance(f1, h5py.Dataset):
+                    f1 = f1[()]
                 if isinstance(f1, (tuple, list, np.ndarray)):
                     if len(f1) > 0:
                         if isinstance(f1[0], NWBContainer):
@@ -124,7 +126,7 @@ class TestMapNWBContainer(unittest.TestCase):
                     elif isinstance(f2, NWBData):
                         self.assertTrue(np.array_equal(f1.data, f2))
                 else:
-                    if isinstance(f1, (float, np.float32, np.float16, h5py.Dataset)):
+                    if isinstance(f1, (float, np.float32, np.float16)):
                         npt.assert_almost_equal(f1, f2)
                     else:
                         self.assertEqual(f1, f2)
