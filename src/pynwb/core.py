@@ -318,6 +318,8 @@ class NWBData(NWBBaseType, Data):
         return self.data[args]
 
     def append(self, arg):
+        if isinstance(self.data, Dataset):
+            self.__data = self.data[()]
         if isinstance(self.data, list):
             self.data.append(arg)
         elif isinstance(self.data, np.ndarray):
@@ -327,6 +329,8 @@ class NWBData(NWBBaseType, Data):
             raise ValueError(msg)
 
     def extend(self, arg):
+        if isinstance(self.data, Dataset):
+            self.__data = self.data[()]
         if isinstance(self.data, list):
             self.data.extend(arg)
         elif isinstance(self.data, np.ndarray):
@@ -374,7 +378,7 @@ class VectorData(NWBData):
     @docval({'name': 'val', 'type': None, 'doc': 'the value to add to this column'})
     def add_row(self, **kwargs):
         val = getargs('val', kwargs)
-        self.data.append(val)
+        self.append(val)
 
 
 @register_class('VectorIndex', CORE_NAMESPACE)
@@ -507,7 +511,7 @@ class NWBTable(NWBData):
             msg = 'Cannot append row to %s' % type(self.data)
             raise ValueError(msg)
         ret = len(self.data)
-        self.data.append(tuple(values[col] for col in self.columns))
+        self.append(tuple(values[col] for col in self.columns))
         return ret
 
     def which(self, **kwargs):
@@ -1126,7 +1130,7 @@ class DynamicTable(NWBDataInterface):
             row_id = data.pop('id', None)
         if row_id is None:
             row_id = len(self)
-        self.id.data.append(row_id)
+        self.id.append(row_id)
 
         for colname, colnum in self.__colids.items():
             if colname not in data:
