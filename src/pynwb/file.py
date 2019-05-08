@@ -555,6 +555,7 @@ class NWBFile(MultiContainerInterface):
         self.__check_invalid_times()
         call_docval_func(self.invalid_times.add_column, kwargs)
 
+    @docval(*get_docval(TimeIntervals.add_interval), allow_extra=True)
     def add_invalid_time_interval(self, **kwargs):
         """
         Add a trial to the trial table.
