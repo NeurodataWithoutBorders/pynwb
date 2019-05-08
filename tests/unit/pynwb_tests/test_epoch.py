@@ -69,13 +69,13 @@ class TimeIntervalsTest(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             df = pd.DataFrame({'start_time': [1., 2., 3.], 'label': ['a', 'b', 'c']})
-            ti = TimeIntervals.from_dataframe(df, name='ti_name')
+            TimeIntervals.from_dataframe(df, name='ti_name')
 
     def test_frorm_dataframe_missing_supplied_col(self):
 
         with self.assertRaises(ValueError):
             df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
-            ti = TimeIntervals.from_dataframe(df, name='ti_name', columns=[{'name': 'not there'}])
+            TimeIntervals.from_dataframe(df, name='ti_name', columns=[{'name': 'not there'}])
 
 
 if __name__ == '__main__':
