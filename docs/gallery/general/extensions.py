@@ -4,7 +4,7 @@
 Extensions
 =========================
 
-The NWB-N format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
+The NWB:N format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
 PyNWB API.
 
 .. note::
@@ -21,7 +21,7 @@ PyNWB API.
 # -----------------------------------------------------
 #
 # Extensions should be defined separately from the code that uses the extensions. This design decision is
-# based on the assumption that extension will be written once, and read or used multiple times. Here, we
+# based on the assumption that the extension will be written once, and read or used multiple times. Here, we
 # provide an example of how to create an extension for subsequent use.
 # (For more information on the available tools for creating extensions, see :ref:`extending-nwb`).
 #
@@ -125,7 +125,7 @@ class TetrodeSeries(ElectricalSeries):
 #     and :py:func:`~hdmf.utils.get_docval`
 #
 # When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer`
-# subclasses, you should defining the class field ``__nwbfields__``. This will
+# subclasses, you should define the class field ``__nwbfields__``. This will
 # tell PyNWB the properties of the :py:class:`~pynwb.core.NWBContainer` extension.
 #
 # If you do not want to write additional code to read your extensions, PyNWB is able to dynamically
