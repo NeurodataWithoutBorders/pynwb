@@ -55,6 +55,28 @@ class TimeIntervalsTest(unittest.TestCase):
         for i, row in df.iterrows():
             nwbfile.add_epoch(start_time=row['start_time'], stop_time=row['stop_time'])
 
+    def test_from_dataframe(self):
+
+        df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
+        ti = TimeIntervals.from_dataframe(df, name='ti_name')
+
+        self.assertEqual(ti.colnames, ('start_time', 'stop_time', 'label'))
+        self.assertEqual(ti.columns[0].data, [1.0, 2.0, 3.0])
+        self.assertEqual(ti.columns[2].data, ['a', 'b', 'c'])
+
+    def test_from_dataframe_missing_required_cols(self):
+
+        with self.assertRaises(ValueError):
+            df = pd.DataFrame({'start_time': [1., 2., 3.], 'label': ['a', 'b', 'c']})
+            ti = TimeIntervals.from_dataframe(df, name='ti_name')
+
+    def test_frorm_dataframe_missing_supplied_col(self):
+
+        with self.assertRaises(ValueError):
+            df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
+            ti = TimeIntervals.from_dataframe(df, name='ti_name', columns=[{'name': 'not there'}])
+
+
 
 if __name__ == '__main__':
     unittest.main()
