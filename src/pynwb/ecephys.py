@@ -1,4 +1,3 @@
-import numpy as np
 from collections import Iterable
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
@@ -350,7 +349,7 @@ class FeatureExtraction(NWBDataInterface):
 
     @docval({'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
-            {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator),
+            {'name': 'description', 'type': ('array_data', 'data'),
              'doc': 'A description for each feature extracted', 'shape': (None, )},
             {'name': 'times', 'type': ('array_data', 'data'), 'shape': (None, ),
              'doc': 'The times of events that features correspond to'},
