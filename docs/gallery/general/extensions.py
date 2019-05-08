@@ -4,7 +4,7 @@
 Extensions
 =========================
 
-The NWB-N format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
+The NWB:N format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
 PyNWB API.
 
 .. note::
@@ -21,7 +21,7 @@ PyNWB API.
 # -----------------------------------------------------
 #
 # Extensions should be defined separately from the code that uses the extensions. This design decision is
-# based on the assumption that extension will be written once, and read or used multiple times. Here, we
+# based on the assumption that the extension will be written once, and read or used multiple times. Here, we
 # provide an example of how to create an extension for subsequent use.
 # (For more information on the available tools for creating extensions, see :ref:`extending-nwb`).
 #
@@ -125,7 +125,7 @@ class TetrodeSeries(ElectricalSeries):
 #     and :py:func:`~hdmf.utils.get_docval`
 #
 # When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer`
-# subclasses, you should defining the class field ``__nwbfields__``. This will
+# subclasses, you should define the class field ``__nwbfields__``. This will
 # tell PyNWB the properties of the :py:class:`~pynwb.core.NWBContainer` extension.
 #
 # If you do not want to write additional code to read your extensions, PyNWB is able to dynamically
@@ -332,7 +332,10 @@ from pynwb import NWBHDF5IO, NWBFile
 from datetime import datetime
 from dateutil.tz import tzlocal
 
+# You can add potatoes to a potato sack in different ways
 potato_sack = PotatoSack(potatos=Potato(name='potato1', age=2.3, weight=3.0))
+potato_sack.add_potato(Potato('potato2', 3.0, 4.0))
+potato_sack.create_potato('big_potato', 10.0, 20.0)
 
 nwbfile = NWBFile("a file with metadata", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal()))
 
@@ -351,5 +354,10 @@ load_namespaces(ns_path)
 # from xxx import PotatoSack, Potato
 io = NWBHDF5IO('test_multicontainerinterface.nwb', 'r')
 nwb = io.read()
-print(nwb.get_processing_module()['potato_sack'].get_potato().weight)
+print(nwb.get_processing_module()['potato_sack'].get_potato('big_potato').weight)
+# note: you can call get_processing_module() with or without the module name as
+# an argument. however, if there is more than one module, the name is required.
+# here, there is more than one potato, so the name of the potato is required as
+# an argument to get get_potato
+
 io.close()
