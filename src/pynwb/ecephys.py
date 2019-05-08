@@ -1,4 +1,3 @@
-import numpy as np
 from collections import Iterable
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
