@@ -7,7 +7,6 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import DynamicTable, ElementIdentifiers
 
-import pandas as pd
 import numpy as np
 
 
