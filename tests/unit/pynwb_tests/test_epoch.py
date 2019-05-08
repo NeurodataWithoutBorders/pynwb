@@ -57,7 +57,8 @@ class TimeIntervalsTest(unittest.TestCase):
 
     def test_from_dataframe(self):
 
-        df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
+        df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']},
+                          columns=('start_time', 'stop_time', 'label'))
         ti = TimeIntervals.from_dataframe(df, name='ti_name')
 
         self.assertEqual(ti.colnames, ('start_time', 'stop_time', 'label'))
@@ -75,7 +76,6 @@ class TimeIntervalsTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
             ti = TimeIntervals.from_dataframe(df, name='ti_name', columns=[{'name': 'not there'}])
-
 
 
 if __name__ == '__main__':
