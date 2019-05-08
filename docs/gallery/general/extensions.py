@@ -332,7 +332,10 @@ from pynwb import NWBHDF5IO, NWBFile
 from datetime import datetime
 from dateutil.tz import tzlocal
 
+# You can add potatoes to a potato sack in different ways
 potato_sack = PotatoSack(potatos=Potato(name='potato1', age=2.3, weight=3.0))
+potato_sack.add_potato(Potato('potato2', 3.0, 4.0))
+potato_sack.create_potato('big_potato', 10.0, 20.0)
 
 nwbfile = NWBFile("a file with metadata", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal()))
 
@@ -351,5 +354,10 @@ load_namespaces(ns_path)
 # from xxx import PotatoSack, Potato
 io = NWBHDF5IO('test_multicontainerinterface.nwb', 'r')
 nwb = io.read()
-print(nwb.get_processing_module('module_name')['potato_sack'].get_potato().weight)
+print(nwb.get_processing_module()['potato_sack'].get_potato('big_potato').weight)
+# note: you can call get_processing_module() with or without the module name as
+# an argument. however, if there is more than one module, the name is required.
+# here, there is more than one potato, so the name of the potato is required as
+# an argument to get get_potato
+
 io.close()
