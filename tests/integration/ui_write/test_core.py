@@ -26,6 +26,28 @@ class TestTrials(base.TestMapRoundTrip):
     def getContainer(self, nwbfile):
         return nwbfile.trials
 
+    def actOnContainer(self, nwbfile):
+        nwbfile.add_trial(start_time=0., stop_time=1., foo=27, bar=28.0, baz="29", qux=True)
+
+
+class TestInvalidTimeInterval(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return DynamicTable('invalid_times', 'a placeholder table')
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_invalid_time_interval(start_time=1.0, stop_time=2.0)
+        nwbfile.add_invalid_time_interval(start_time=5.0, stop_time=7.0)
+        # reset the thing
+        self.container = nwbfile.invalid_times
+
+    def getContainer(self, nwbfile):
+        return nwbfile.invalid_times
+
+    def actOnContainer(self, nwbfile):
+        nwbfile.add_invalid_time_interval(start_time=8.0, stop_time=12.7)
+
 
 class TestUnits(base.TestMapRoundTrip):
 
@@ -43,6 +65,9 @@ class TestUnits(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         return nwbfile.units
+
+    def actOnContainer(self, nwbfile):
+        nwbfile.add_unit(foo=100, my_bool=False)
 
 
 class TestFromDataframe(base.TestMapRoundTrip):
@@ -94,6 +119,10 @@ class TestElectrodes(base.TestMapRoundTrip):
         super(TestElectrodes, self).test_roundtrip()
         self.assertContainerEqual(self.read_container[0][7], self.container[0][7])
 
+    def actOnContainer(self, nwbfile):
+        nwbfile.add_electrode(id=5, x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none', group=self.group,
+                              group_name='tetrode1')
+
 
 class TestElectrodesRegion(base.TestMapRoundTrip):
 
@@ -138,3 +167,16 @@ class TestElectrodesRegion(base.TestMapRoundTrip):
 
         for ii, item in enumerate(self.read_container):
             self.assertEqual(self.table[ii+1], item)
+
+    def actOnContainer(self, nwbfile):
+        region = nwbfile.create_electrode_table_region(
+            region=tuple([1, 2, 3]),
+            name='electrodes',
+            description='desc'
+        )
+        nwbfile.add_acquisition(pynwb.ecephys.ElectricalSeries(
+            name='test_data2',
+            data=np.arange(10),
+            timestamps=np.arange(10),
+            electrodes=region
+        ))

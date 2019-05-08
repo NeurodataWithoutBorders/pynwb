@@ -4,6 +4,7 @@ import pandas as pd
 
 from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
 from hdmf import Container, Data, DataRegion, get_region_slicer
+from hdmf.query import HDMFDataset
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
@@ -318,7 +319,7 @@ class NWBData(NWBBaseType, Data):
         return self.data[args]
 
     def append(self, arg):
-        if isinstance(self.data, Dataset):
+        if isinstance(self.data, HDMFDataset) or isinstance(self.data, Dataset):
             self.__data = self.data[()]
         if isinstance(self.data, list):
             self.data.append(arg)
@@ -329,7 +330,7 @@ class NWBData(NWBBaseType, Data):
             raise ValueError(msg)
 
     def extend(self, arg):
-        if isinstance(self.data, Dataset):
+        if isinstance(self.data, HDMFDataset) or isinstance(self.data, Dataset):
             self.__data = self.data[()]
         if isinstance(self.data, list):
             self.data.extend(arg)

@@ -186,6 +186,14 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.assertNotEqual(id(self.container), id(self.read_container))
         self.assertContainerEqual(self.read_container, self.container)
 
+        if hasattr(self, 'reader') and self.reader is not None:
+            try:
+                self.actOnContainer(self.reader.read())
+            except Exception as e:
+                self.reader.close()
+                self.reader = None
+                raise e
+
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
         raise unittest.SkipTest('Cannot run test unless addContainer is implemented')
@@ -193,6 +201,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def getContainer(self, nwbfile):
         ''' Should take an NWBFile object and return the Container'''
         raise unittest.SkipTest('Cannot run test unless getContainer is implemented')
+
+    def actOnContainer(self, nwbfile):
+        ''' Should take an NWBFile object and do something with the Container '''
+        raise unittest.SkipTest('Cannot run test unless actOnContainer is implemented')
 
 
 class TestDataInterfaceIO(TestMapRoundTrip):
