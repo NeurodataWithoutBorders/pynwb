@@ -18,21 +18,21 @@ class TestProcessingModule(unittest.TestCase):
     def test_add_container(self):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        self.pm.add_container(ts)
+        self.pm.add_data_interface(ts)
         self.assertIn(ts.name, self.pm.containers)
         self.assertIs(ts, self.pm.containers[ts.name])
 
     def test_get_container(self):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        self.pm.add_container(ts)
-        tmp = self.pm.get_container('test_ts')
+        self.pm.add_data_interface(ts)
+        tmp = self.pm.get_data_interface('test_ts')
         self.assertIs(tmp, ts)
 
     def test_getitem(self):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        self.pm.add_container(ts)
+        self.pm.add_data_interface(ts)
         tmp = self.pm['test_ts']
         self.assertIs(tmp, ts)
 

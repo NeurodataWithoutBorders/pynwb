@@ -186,7 +186,6 @@ class NWBFileTest(unittest.TestCase):
                       group_name='tetrode1')
         self.nwbfile.set_electrode_table(table)
 
-        self.assertIs(self.nwbfile.ec_electrodes, self.nwbfile.electrodes)
         self.assertIs(self.nwbfile.electrodes, table)
         self.assertIs(table.parent, self.nwbfile)
 
@@ -353,8 +352,10 @@ class TestCacheSpec(unittest.TestCase):
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile, cache_spec=True)
-        reader = NWBHDF5IO(self.path, 'r', load_namespaces=True)
+        with self.assertWarnsRegex(UserWarning, r"ignoring namespace '\S+' because it already exists"):
+            reader = NWBHDF5IO(self.path, 'r', load_namespaces=True)
         nwbfile = reader.read()
+        reader.close()
 
 
 class TestTimestampsRefDefault(unittest.TestCase):
