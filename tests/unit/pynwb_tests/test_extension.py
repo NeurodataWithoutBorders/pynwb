@@ -150,8 +150,6 @@ class TestExtension(unittest.TestCase):
 
         MyTestMetaData = get_class('MyTestMetaData', self.prefix)
 
-        nwbfile = NWBFile("a file with header data", "NB123A", datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
-
         with self.assertRaisesRegexp(TypeError, r"unrecognized argument: 'name'"):
             meta = MyTestMetaData(name='test_name', test_attr=5.)
 
