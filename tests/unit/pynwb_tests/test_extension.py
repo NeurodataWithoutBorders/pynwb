@@ -132,30 +132,6 @@ class TestExtension(unittest.TestCase):
 
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
 
-    def test_fixed_name(self):
-        ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix)
-        fixed_name = 'a fixed name for all instances'
-        test_meta_ext = NWBGroupSpec(
-            neurodata_type_def='MyTestMetaData',
-            neurodata_type_inc='LabMetaData',
-            doc='my test meta data',
-            name=fixed_name,
-            attributes=[
-                NWBAttributeSpec(name='test_attr', dtype='float', doc='test_dtype')])
-        ns_builder.add_spec(self.ext_source, test_meta_ext)
-        ns_builder.export(self.ns_path, outdir=self.tempdir)
-        ns_abs_path = os.path.join(self.tempdir, self.ns_path)
-
-        load_namespaces(ns_abs_path)
-
-        MyTestMetaData = get_class('MyTestMetaData', self.prefix)
-
-        with self.assertRaisesRegexp(TypeError, r"unrecognized argument: 'name'"):
-            meta = MyTestMetaData(name='test_name', test_attr=5.)
-
-        meta = MyTestMetaData(test_attr=5.)
-        self.assertEqual(meta.name, fixed_name)
-
 
 class TestCatchDupNS(unittest.TestCase):
 
