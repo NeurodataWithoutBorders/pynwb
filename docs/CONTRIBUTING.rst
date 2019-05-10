@@ -16,6 +16,12 @@ Types of Contributions
 Did you find a bug? or Do you intend to add a new feature or change an existing one?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+* **Identify the appropriate repository** for the change you are suggesting:
+
+   * Use `nwb_schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_ for any changes to the NWB:N format schema, schema language, storage and other NWB:N related documents
+   * Use `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_  for any changes regarding the PyNWB API and the corresponding documentation
+   * Use `MatNWB <https://github.com/NeurodataWithoutBorders/matnwb>`_  for any changes regarding the PyNWB API and the corresponding documentation
+
 * **Ensure the feature or change was not already reported** by searching on GitHub under `PyNWB Issues <https://github.com/NeurodataWithoutBorders/pynwb/issues>`_ and  `nwh-schema issues <https://github.com/NeurodataWithoutBorders/nwb-schema/issues>`_ , respectively .
 
 * If you are unable to find an open issue addressing the problem then open a new issue on the respective repository. Be sure to include:
