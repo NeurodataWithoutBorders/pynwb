@@ -16,11 +16,6 @@ Types of Contributions
 Did you find a bug? or Do you intend to add a new feature or change an existing one?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-* **Identify the appropriate repository** for the change you are suggesting:
-
-    * Use `nwb_schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_ for any changes to the NWB:N format schema, schema language, storage and other NWB:N related documents
-    * Use `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_  for any changes regarding the PyNWB API and the corresponding documentation
-
 * **Ensure the feature or change was not already reported** by searching on GitHub under `PyNWB Issues <https://github.com/NeurodataWithoutBorders/pynwb/issues>`_ and  `nwh-schema issues <https://github.com/NeurodataWithoutBorders/nwb-schema/issues>`_ , respectively .
 
 * If you are unable to find an open issue addressing the problem then open a new issue on the respective repository. Be sure to include:
@@ -37,11 +32,6 @@ Did you write a patch that fixes a bug or implements a new feature?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 See the ``Contributing Patches and Changes`` section below for details.
 
-
-Did you fix whitespace, format code, or make a purely cosmetic patch in source code?
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Source code changes that are purely cosmetic in nature and do not add anything substantial to the stability, functionality, or testability will generally not be accepted unless they have been approved beforehand. One of the main reasons is that there are a lot of hidden costs in addition to writing the code itself, and with the limited resources of the project, we need to optimize developer time. E.g,. someone needs to test and review PRs, backporting of bug fixes gets harder, it creates noise and pollutes the git repo and many other cost factors.
 
 Do you have questions about NWB:N?
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -60,9 +50,15 @@ The https://nwb-users.slack.com slack is currently used  mainly for internal dis
 Contributing Patches and Changes
 --------------------------------
 
-To contribute to the `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_ and `nwb_schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_, you must submit your changes to the ``dev`` branch via a `Pull Request <https://help.github.com/articles/creating-a-pull-request>`_.
+The ``dev`` branches of `PyNWB <https://github.com/NeurodataWithoutBorders/pynwb>`_ and `nwb_schema <https://github.com/NeurodataWithoutBorders/nwb-schema/>`_, are protected; you cannot push to them directly. You must upload your changes by pushing a new branch, then submit your changes to the ``dev`` branch via a `Pull Request <https://help.github.com/articles/creating-a-pull-request>`_. This allows us to conduct automated testing of your contribution, and gives us a space for developers to discuss the contribution and request changes. If you decide to tackle an issue, please make yourself an assignee on the issue to communicate this to the team. Don't worry - this does not commit you to solving this issue. It just lets others know who they should talk to about it. 
 
 From your local copy directory, use the following commands.
+
+If you have not already, you will need to clone the repo:
+
+.. code-block:: bash
+
+    $ git clone https://github.com/NeurodataWithoutBorders/pynwb.git
 
 1) First create a new branch to work on
 
@@ -72,17 +68,20 @@ From your local copy directory, use the following commands.
 
 2) Make your changes.
 
-3) Push your feature branch to origin (i.e. github)
+3) We will automatically run tests to ensure that your contributions didn't break anything and that they follow our style guide. You can speed up the testing cycle by running these tests locally on your own computer using ``tox`` and ``flake8``.
+
+4) Push your feature branch to origin (i.e. github)
 
 .. code-block:: bash
 
     $ git push origin <new_branch>
 
-4) Once you have tested and finalized your changes, create a pull request targeting ``dev`` as the base branch:
+5) Once you have tested and finalized your changes, create a pull request (PR) targeting ``dev`` as the base branch:
 
     * Ensure the PR description clearly describes the problem and solution.
-    * Include the relevant issue number if applicable.
+    * Include the relevant issue number if applicable. TIP: Writing e.g. "fix #613" will automatically close issue #613 when this PR is merged.
     * Before submitting, please ensure that the code follows the standard coding style of the respective repository.
+    * If you would like help with your contribution, or would like to communicate contributions that are not ready to merge, submit a PR where the title begins with "[WIP]."
     * **NOTE:** Contributed branches will be removed by the development team after the merge is complete and should, hence, not be used after the pull request is complete.
 
 
@@ -121,7 +120,7 @@ Git Commit Message Styleguide
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Use the present tense ("Add feature" not "Added feature")
-* The first should be short and descriptive.
+* The first line should be short and descriptive.
 * Additional details may be included in further paragraphs.
 * If a commit fixes an issues, then include "Fix #X" where X is the number of the issue.
 * Reference relevant issues and pull requests liberally after the first line.
@@ -130,6 +129,13 @@ Documentation Styleguide
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 All documentations is written in reStrcuturedText (RST) using Sphinx.
+
+
+Did you fix whitespace, format code, or make a purely cosmetic patch in source code?
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Source code changes that are purely cosmetic in nature and do not add anything substantial to the stability, functionality, or testability will generally not be accepted unless they have been approved beforehand. One of the main reasons is that there are a lot of hidden costs in addition to writing the code itself, and with the limited resources of the project, we need to optimize developer time. E.g,. someone needs to test and review PRs, backporting of bug fixes gets harder, it creates noise and pollutes the git repo and many other cost factors.
+
 
 Format Specification Styleguide
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
