@@ -6,9 +6,9 @@ from dateutil.tz import tzlocal
 from tempfile import gettempdir
 
 import unittest2 as unittest
-from pynwb import get_type_map, TimeSeries, NWBFile, register_class, docval, load_namespaces, popargs
-from pynwb.form.spec.spec import RefSpec
-from pynwb.form.utils import get_docval
+from pynwb import get_type_map, TimeSeries, NWBFile, register_class, docval, load_namespaces, popargs, get_class
+from hdmf.spec.spec import RefSpec
+from hdmf.utils import get_docval
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
 from pynwb.file import LabMetaData
 
@@ -109,6 +109,26 @@ class TestExtension(unittest.TestCase):
                 self.test_attr = test_attr
 
         nwbfile = NWBFile("a file with header data", "NB123A",  datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
+
+        nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
+
+    def test_lab_meta_auto(self):
+        ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix)
+        test_meta_ext = NWBGroupSpec(
+            neurodata_type_def='MyTestMetaData',
+            neurodata_type_inc='LabMetaData',
+            doc='my test meta data',
+            attributes=[
+                NWBAttributeSpec(name='test_attr', dtype='float', doc='test_dtype')])
+        ns_builder.add_spec(self.ext_source, test_meta_ext)
+        ns_builder.export(self.ns_path, outdir=self.tempdir)
+        ns_abs_path = os.path.join(self.tempdir, self.ns_path)
+
+        load_namespaces(ns_abs_path)
+
+        MyTestMetaData = get_class('MyTestMetaData', self.prefix)
+
+        nwbfile = NWBFile("a file with header data", "NB123A", datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
 
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
 

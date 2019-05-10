@@ -2,7 +2,7 @@ import unittest2 as unittest
 import numpy as np
 from copy import deepcopy
 
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
+from hdmf.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
 
 from pynwb.ophys import (
     ImagingPlane,

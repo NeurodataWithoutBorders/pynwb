@@ -9,12 +9,12 @@ import h5py
 
 CORE_NAMESPACE = 'core'
 
-from .form.spec import NamespaceCatalog  # noqa: E402
-from .form.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
-from .form.backends.io import FORMIO  # noqa: E402
-from .form.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
-from .form.validate import ValidatorMap  # noqa: E402
-from .form.build import BuildManager  # noqa: E402
+from hdmf.spec import NamespaceCatalog  # noqa: E402
+from hdmf.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
+from hdmf.backends.io import HDMFIO  # noqa: E402
+from hdmf.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
+from hdmf.validate import ValidatorMap  # noqa: E402
+from hdmf.build import BuildManager  # noqa: E402
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa: E402
 
@@ -40,7 +40,7 @@ global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-from .form.build import TypeMap as TypeMap  # noqa: E402
+from hdmf.build import TypeMap as TypeMap  # noqa: E402
 
 __TYPE_MAP = TypeMap(__NS_CATALOG)
 
@@ -171,8 +171,8 @@ def get_class(**kwargs):
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
 
 
-@docval({'name': 'io', 'type': FORMIO,
-         'doc': 'the FORMIO object to read from'},
+@docval({'name': 'io', 'type': HDMFIO,
+         'doc': 'the HDMFIO object to read from'},
         {'name': 'namespace', 'type': str,
          'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
         returns="errors in the file", rtype=list,
@@ -196,10 +196,12 @@ class NWBHDF5IO(_HDF5IO):
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
              to namespaces and TypeMaps', 'default': None},
-            {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None})
+            {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
+            {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
+             'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj, comm =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -225,7 +227,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj)
+        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
 
 
 from . import io as __io  # noqa: F401,E402

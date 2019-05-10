@@ -58,8 +58,7 @@ elec = nwbfile.create_ic_electrode(name="elec0",
 # :py:class:`~pynwb.icephys.PatchClampSeries`. There are two classes for representing stimulus
 # data--:py:class:`~pynwb.icephys.VoltageClampStimulusSeries` and
 # :py:class:`~pynwb.icephys.CurrentClampStimulusSeries`--, and three classes for representing response
-# data--:py:class:`~pynwb.icephys.VoltageClampSeries`,
-# :py:class:`~pynwb.icephys.VoltageClampSeries`, :py:class:`~pynwb.icephys.CurrentClampSeries`, and
+# data--:py:class:`~pynwb.icephys.VoltageClampSeries`, :py:class:`~pynwb.icephys.CurrentClampSeries`, and
 # :py:class:`~pynwb.icephys.IZeroClampSeries`.
 #
 # Here, we will use :py:class:`~pynwb.icephys.CurrentClampStimulusSeries` to store current clamp stimulus
