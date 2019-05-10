@@ -1,4 +1,3 @@
-import numpy as np
 from collections import Iterable
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
@@ -8,7 +7,6 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
-from .misc import DecompositionSeries
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
@@ -296,13 +294,7 @@ class LFP(MultiContainerInterface):
          'type': ElectricalSeries,
          'add': 'add_electrical_series',
          'get': 'get_electrical_series',
-         'create': 'create_electrical_series'},
-
-        {'attr': 'decomposition_series',
-         'type': DecompositionSeries,
-         'add': 'add_decomposition_series',
-         'get': 'get_decomposition_series',
-         'create': 'create_decomposition_series'}]
+         'create': 'create_electrical_series'}]
 
     __help = ("LFP data from one or more channels. Filter properties "
               "should be noted in the ElectricalSeries")
@@ -350,7 +342,7 @@ class FeatureExtraction(NWBDataInterface):
 
     @docval({'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
-            {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator),
+            {'name': 'description', 'type': ('array_data', 'data'),
              'doc': 'A description for each feature extracted', 'shape': (None, )},
             {'name': 'times', 'type': ('array_data', 'data'), 'shape': (None, ),
              'doc': 'The times of events that features correspond to'},

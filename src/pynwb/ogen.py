@@ -5,7 +5,7 @@ from hdmf.utils import docval, popargs, fmt_docval_args
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .core import NWBContainer
-from .ecephys import Device
+from .device import Device
 
 
 @register_class('OptogeneticStimulusSite', CORE_NAMESPACE)
