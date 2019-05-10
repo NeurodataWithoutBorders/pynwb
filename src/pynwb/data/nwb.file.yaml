@@ -18,7 +18,7 @@ groups:
     dtype: isodatetime
     doc: 'A record of the date the file was created and of subsequent modifications.
       COMMENT:
-        - The date is stored in UTC with local timezone offset as ISO 8601
+        - The date is stored in UTC with local timezone offset as ISO 8601 extended
           formatted strings: 2018-09-28T14:43:54.123+02:00
         - Dates stored in UTC end in "Z" with no timezone offset.
         - Date accuracy is up to milliseconds.
@@ -41,7 +41,15 @@ groups:
     dtype: isodatetime
     doc: 'Date and time of the experiment/session start.
       COMMENT:
-        - The date is stored in UTC with local timezone offset as ISO 8601
+        - The date is stored in UTC with local timezone offset as ISO 8601 extended
+          formatted string: 2018-09-28T14:43:54.123+02:00
+        - Dates stored in UTC end in "Z" with no timezone offset.
+        - Date accuracy is up to milliseconds.'
+  - name: timestamps_reference_time
+    dtype: isodatetime
+    doc: 'Date and time corresponding to time zero of all timestamps.
+      COMMENT:
+        - The date is stored in UTC with local timezone offset as ISO 8601 extended
           formatted string: 2018-09-28T14:43:54.123+02:00
         - Dates stored in UTC end in "Z" with no timezone offset.
         - Date accuracy is up to milliseconds.
@@ -74,27 +82,6 @@ groups:
     - neurodata_type_inc: NWBContainer
       doc: Custom analysis results
       quantity: '*'
-  - neurodata_type_inc: Epochs
-    name: epochs
-    doc: 'Experimental intervals, whether that be logically distinct sub-experiments
-        having a particular scientific goal, trials during an experiment, or epochs
-        deriving from analysis of data.  COMMENT: Epochs provide pointers to time
-        series that are relevant to the epoch, and windows into the data in those
-        time series (i.e., the start and end indices of TimeSeries::data[] that overlap
-        with the epoch). This allows easy access to a range of data in specific experimental
-        intervals. MORE_INFO: An experiment can be separated into one or many logical
-        intervals, with the order and duration of these intervals often definable
-        before the experiment starts. In this document, and in the context of NWB,
-        these intervals are called ''epochs''. Epochs have acquisition and stimulus
-        data associated with them, and different epochs can overlap. Examples of epochs
-        are the time when a rat runs around an enclosure or maze as well as intervening
-        sleep sessions; the presentation of a set of visual stimuli to a mouse running
-        on a wheel; or the uninterrupted presentation of current to a patch-clamped
-        cell. Epochs can be limited to the interval of a particular stimulus, or they
-        can span multiple stimuli. Different windows into the same time series can
-        be achieved by including multiple instances of that time series, each with
-        different start/stop times.'
-    quantity: '?'
   - name: processing
     doc: 'The home for ProcessingModules. These modules perform intermediate analysis
         of data that is necessary to perform before scientific analysis. Examples
@@ -236,6 +223,10 @@ groups:
         date made, injection location, volume, etc.
       quantity: '?'
     groups:
+    - neurodata_type_def: LabMetaData
+      neurodata_type_inc: NWBContainer
+      doc: 'place-holder than can be extended so that lab-specific meta-data can be placed in /general'
+      quantity: '*'
     - name: devices
       doc: 'Description of hardware devices used during experiment. COMMENT: Eg, monitors,
         ADC boards, microscopes, etc'
@@ -286,6 +277,10 @@ groups:
         dtype: text
         doc: Age of subject
         quantity: '?'
+      - name: date_of_birth
+        dtype: isodatetime
+        doc: can be supplied instead of age
+        quantity: '?'
       - name: description
         dtype: text
         doc: Description of subject and where subject came from (e.g., breeder, if
@@ -324,7 +319,7 @@ groups:
         doc: A table of all electrodes (i.e. channels) used for recording.
         quantity: '?'
         datasets:
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: x
           dtype: float
           doc: the x coordinate of the channel location
@@ -333,7 +328,7 @@ groups:
             dtype: text
             doc: value is 'the x coordinate of the channel location'
             value: the x coordinate of the channel location
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: y
           dtype: float
           doc: the y coordinate of the channel location
@@ -342,7 +337,7 @@ groups:
             dtype: text
             doc: value is 'the y coordinate of the channel location'
             value: the y coordinate of the channel location
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: z
           dtype: float
           doc: the z coordinate of the channel location
@@ -351,7 +346,7 @@ groups:
             dtype: text
             doc: value is 'the z coordinate of the channel location'
             value: the z coordinate of the channel location
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: imp
           dtype: float
           doc: the impedance of the channel
@@ -360,7 +355,7 @@ groups:
             dtype: text
             doc: value is 'the impedance of the channel'
             value: the impedance of the channel
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: location
           dtype: ascii
           doc: the location of channel within the subject e.g. brain region
@@ -369,7 +364,7 @@ groups:
             dtype: text
             doc: value is 'the location of channel within the subject e.g. brain region'
             value: the location of channel within the subject e.g. brain region
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: filtering
           dtype: float
           doc: description of hardware filtering
@@ -378,7 +373,7 @@ groups:
             dtype: text
             doc: value is 'description of hardware filtering'
             value: description of hardware filtering
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: group
           dtype:
             target_type: ElectrodeGroup
@@ -389,7 +384,7 @@ groups:
             dtype: text
             doc: value is 'a reference to the ElectrodeGroup this electrode is a part of'
             value: a reference to the ElectrodeGroup this electrode is a part of
-        - neurodata_type_inc: TableColumn
+        - neurodata_type_inc: VectorData
           name: group_name
           dtype: ascii
           doc: name of the ElectrodeGroup this electrode is a part of
@@ -412,6 +407,10 @@ groups:
       - neurodata_type_inc: IntracellularElectrode
         doc: 'One of possibly many. COMMENT: Name should be informative.'
         quantity: '*'
+      - neurodata_type_inc: SweepTable
+        name: sweep_table
+        doc: The table which groups different PatchClampSeries together.
+        quantity: '?'
       quantity: '?'
     - name: optogenetics
       doc: Metadata describing optogenetic stimuluation
@@ -431,30 +430,28 @@ groups:
           and also ImageSegmentation and DfOverF interfaces.'
         quantity: '*'
       quantity: '?'
-  - neurodata_type_inc: DynamicTable
-    name: trials
-    doc: Data about experimental trials
-    datasets:
-    - neurodata_type_inc: TableColumn
-      name: start
-      dtype: float
-      doc: The start time of each trial
-      attributes:
-      - name: description
-        dtype: text
-        doc: Value is 'the start time of each trial'
-        value: the start time of each trial
-    - neurodata_type_inc: TableColumn
-      name: end
-      dtype: float
-      doc: The end time of each trial
-      attributes:
-      - name: description
-        dtype: text
-        doc: Value is 'the end time of each trial'
-        value: the end time of each trial
+  - name: intervals
+    doc: Experimental intervals, whether that be logically distinct sub-experiments
+      having a particular scientific goal, trials (see trials subgroup) during an experiment, or
+      epochs (see epochs subgroup) deriving from analysis of data.
+    groups:
+    - neurodata_type_inc: TimeIntervals
+      name: epochs
+      doc: divisions in time marking experimental stages or sub-divisions of a single recording session
+      quantity: '?'
+    - neurodata_type_inc: TimeIntervals
+      name: trials
+      doc: repeated experimental events that have a logical grouping
+      quantity: '?'
+    - neurodata_type_inc: TimeIntervals
+      name: invalid_times
+      doc: time intervals that should be removed from analysis
+      quantity: '?'
+    - neurodata_type_inc: TimeIntervals
+      doc: an optional additional table for describing other experimental time intervals
+      quantity: '*'
     quantity: '?'
-  - neurodata_type_inc: DynamicTable
+  - neurodata_type_inc: Units
     name: units
     doc: Data about units
     quantity: '?'

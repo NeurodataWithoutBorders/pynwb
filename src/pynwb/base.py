@@ -2,11 +2,11 @@ from warnings import warn
 
 from collections import Iterable
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
-from .form.data_utils import AbstractDataChunkIterator, DataIO
+from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from hdmf.data_utils import AbstractDataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBDataInterface, MultiContainerInterface
+from .core import NWBDataInterface, MultiContainerInterface, NWBData
 
 _default_conversion = 1.0
 _default_resolution = 0.0
@@ -31,7 +31,6 @@ class ProcessingModule(MultiContainerInterface):
     }
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
             {'name': 'data_interfaces', 'type': (list, tuple, dict),
              'doc': 'NWBDataInterfacess that belong to this ProcessingModule', 'default': None},
@@ -90,10 +89,6 @@ class TimeSeries(NWBDataInterface):
     __time_unit = "Seconds"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
@@ -215,3 +210,48 @@ class TimeSeries(NWBDataInterface):
     @property
     def time_unit(self):
         return self.__time_unit
+
+
+@register_class('Image', CORE_NAMESPACE)
+class Image(NWBData):
+    __nwbfields__ = ('data', 'resolution', 'description')
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
+             'shape': ((None, None), (None, None, 3), (None, None, 4))},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None},
+            {'name': 'help', 'type': str, 'doc': 'helpful hint for user',
+             'default': 'pixel values for an image'}
+            )
+    def __init__(self, **kwargs):
+        super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
+        self.resolution = kwargs['resolution']
+        self.description = kwargs['description']
+        self.help = kwargs['help']
+
+
+@register_class('Images', CORE_NAMESPACE)
+class Images(MultiContainerInterface):
+
+    __nwbfields__ = ('description',)
+
+    __clsconf__ = {
+        'attr': 'images',
+        'add': 'add_image',
+        'type': Image,
+        'get': 'get_image',
+        'create': 'create_image'
+    }
+
+    __help = "Contains images"
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
+            {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of images',
+             'default': 'no description'})
+    def __init__(self, **kwargs):
+        name, description, images = popargs('name', 'description', 'images', kwargs)
+        super(Images, self).__init__(name, **kwargs)
+        self.description = description
+        self.images = images

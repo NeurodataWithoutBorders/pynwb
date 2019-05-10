@@ -9,7 +9,7 @@ references:
       pip install flake8
       flake8 src/pynwb
       flake8 tests
-      flake8 --ignore E402,E501 docs/gallery
+      flake8 --ignore E402,E501,W504 docs/gallery
 
   initialize-venv: &initialize-venv
     name: Initialize Virtual Environment
@@ -119,6 +119,7 @@ jobs:
           <<: *initialize-venv
       - run:
           <<: *run-style-check
+
   python27:
     docker:
       - image: circleci/python:2.7.14-jessie
@@ -150,6 +151,16 @@ jobs:
      - UPLOAD_WHEELS: "true"
     <<: *ci-steps
 
+  python37:
+    docker:
+      - image: circleci/python:3.7.0-stretch
+    environment:
+     - TEST_TOX_ENV: "py37"
+     - COVERAGE_TOX_ENV: "coverage-py37"
+     - BUILD_TOX_ENV: "build-py37"
+     - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
+    <<: *ci-steps
+
   miniconda27:
     docker:
       - image: continuumio/miniconda:4.3.14
@@ -177,6 +188,15 @@ jobs:
       - TEST_WHEELINSTALL_ENV: "wheelinstall-py36"
     <<: *conda-steps
 
+  miniconda37:
+    docker:
+      - image: continuumio/miniconda3:4.5.12
+    environment:
+      - TEST_TOX_ENV: "py37"
+      - BUILD_TOX_ENV: "build-py37"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
+    <<: *conda-steps
+
   gallery27:
     docker:
       - image: circleci/python:2.7.14-jessie
@@ -196,6 +216,13 @@ jobs:
       - image: circleci/python:3.6.3-jessie
     environment:
      - TEST_TOX_ENV: "gallery-py36"
+    <<: *gallery-steps
+
+  gallery37:
+    docker:
+      - image: dozturk2/python37-hdf5
+    environment:
+     - TEST_TOX_ENV: "gallery-py37"
     <<: *gallery-steps
 
   deploy-dev:
@@ -257,11 +284,15 @@ workflows:
           <<: *no_filters
       - python36:
           <<: *no_filters
+      - python37:
+          <<: *no_filters
       - miniconda27:
           <<: *no_filters
       - miniconda35:
           <<: *no_filters
       - miniconda36:
+          <<: *no_filters
+      - miniconda37:
           <<: *no_filters
       - gallery27:
           <<: *no_filters
@@ -269,18 +300,23 @@ workflows:
           <<: *no_filters
       - gallery36:
           <<: *no_filters
+      - gallery37:
+          <<: *no_filters
       - deploy-dev:
           requires:
             - flake8
             - python27
             - python35
             - python36
+            - python37
             - miniconda27
             - miniconda35
             - miniconda36
+            - miniconda37
             - gallery27
             - gallery35
             - gallery36
+            - gallery37
           filters:
             branches:
               only: dev
@@ -290,12 +326,15 @@ workflows:
             - python27
             - python35
             - python36
+            - python37
             - miniconda27
             - miniconda35
             - miniconda36
+            - miniconda37
             - gallery27
             - gallery35
             - gallery36
+            - gallery37
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/

@@ -67,21 +67,6 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
                             NWBDtypeSpec('bar', 'a column for bar', 'float')
                         ])
 
-# Compound data types can be nested.
-#
-# .. code-block:: python
-#
-#     from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
-#
-#     spec = NWBDatasetSpec('A custom NWB type',
-#                         attribute=[
-#                             NWBAttributeSpec('baz', 'a value for baz', 'str'),
-#                         ],
-#                         dtype=[
-#                             NWBDtypeSpec('foo', 'a column for foo', 'int'),
-#                             NWBDtypeSpec('bar', 'a column for bar', 'float')
-#                         ])
-
 Group Specifications
 ^^^^^^^^^^^^^^^^^^^^
 
@@ -138,8 +123,8 @@ Extend an existing type
                         attributes=addl_attributes,
                         datasets=addl_datasets,
                         groups=addl_groups,
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
+                        neurodata_type_inc='SpikeEventSeries',
+                        neurodata_type_def='MyExtendedSpikeEventSeries')
 
 Existing types can be instantiated by specifying `neurodata_type_inc` alone.
 
@@ -154,8 +139,8 @@ Existing types can be instantiated by specifying `neurodata_type_inc` alone.
 
     spec = NWBGroupSpec('An extended NWB type',
                         groups=addl_groups,
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
+                        neurodata_type_inc='SpikeEventSeries',
+                        neurodata_type_def='MyExtendedSpikeEventSeries')
 
 
 Datasets can be extended in the same manner (with regard to `neurodata_type_inc` and `neurodata_type_def`,
@@ -184,19 +169,19 @@ Create a new namespace with extensions
     ns_builder = NWBNamespaceBuilder("Extension for use in my laboratory", "mylab", ...)
 
     # create extensions
-    ext1 = NWBGroupSpec('A custom Clustering interface',
-                        attributes=[...]
+    ext1 = NWBGroupSpec('A custom SpikeEventSeries interface',
+                        attributes=[...],
                         datasets=[...],
                         groups=[...],
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
+                        neurodata_type_inc='SpikeEventSeries',
+                        neurodata_type_def='MyExtendedSpikeEventSeries')
 
-    ext2 = NWBGroupSpec('A custom ClusterWaveforms interface',
-                        attributes=[...]
+    ext2 = NWBGroupSpec('A custom EventDetection interface',
+                        attributes=[...],
                         datasets=[...],
                         groups=[...],
-                        neurodata_type_inc='ClusterWaveforms',
-                        neurodata_type_def='MyExtendedClusterWaveforms')
+                        neurodata_type_inc='EventDetection',
+                        neurodata_type_def='MyExtendedEventDetection')
 
 
     # add the extension
@@ -283,9 +268,9 @@ ObjectMapper : Customizing the mapping between NWBContainer and the Spec
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer`
-class for reading and writing, you will need to implement and register a custom :py:class:`~pynwb.form.build.map.ObjectMapper`.
+class for reading and writing, you will need to implement and register a custom :py:class:`~hdmf.build.map.ObjectMapper`.
 
-:py:class:`~pynwb.form.build.map.ObjectMapper` extensions are registered with the decorator :py:func:`~pynwb.register_map`.
+:py:class:`~hdmf.build.map.ObjectMapper` extensions are registered with the decorator :py:func:`~pynwb.register_map`.
 
 .. code-block:: python
 

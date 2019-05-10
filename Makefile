@@ -40,10 +40,10 @@ test:
 flake:
 	$(FLAKE) src/
 	$(FLAKE) tests/
-	$(FLAKE) --ignore E402 docs/gallery
+	$(FLAKE) --ignore E402,W504 docs/gallery
 
 checkpdb:
-	find {src,tests} -name "*.py" -exec grep -Hn pdb {} \;
+	find {src,tests} -name "*.py" -exec grep -Hn -e pdb -e breakpoint {} \;
 
 devtest:
 	$(PYTHON) -W ignore:::pynwb.form.build.map: test.py -fpi

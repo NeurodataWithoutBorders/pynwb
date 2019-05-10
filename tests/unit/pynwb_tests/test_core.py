@@ -1,11 +1,12 @@
-import unittest2 as unittest
-
-from pynwb.core import DynamicTable, TableColumn, ElementIdentifiers, NWBTable
-from pynwb import NWBFile
-
-import pandas as pd
 from datetime import datetime
+
+import numpy as np
+import pandas as pd
+from pandas.util.testing import assert_frame_equal
+import unittest2 as unittest
 from dateutil.tz import tzlocal
+from pynwb import NWBFile, TimeSeries, available_namespaces
+from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable, DynamicTableRegion
 
 
 class TestDynamicTable(unittest.TestCase):
@@ -14,7 +15,7 @@ class TestDynamicTable(unittest.TestCase):
         self.spec = [
             {'name': 'foo', 'description': 'foo column'},
             {'name': 'bar', 'description': 'bar column'},
-            {'name': 'baz', 'description': 'baz column'}
+            {'name': 'baz', 'description': 'baz column'},
         ]
         self.data = [
             [1, 2, 3, 4, 5],
@@ -23,23 +24,23 @@ class TestDynamicTable(unittest.TestCase):
         ]
 
     def with_table_columns(self):
-        cols = [TableColumn(**d) for d in self.spec]
-        table = DynamicTable("with_table_columns", 'PyNWB unit test', 'a test table', columns=cols)
+        cols = [VectorData(**d) for d in self.spec]
+        table = DynamicTable("with_table_columns", 'a test table', columns=cols)
         return table
 
     def with_columns_and_data(self):
         columns = [
-            TableColumn(name=s['name'], description=s['description'], data=d)
+            VectorData(name=s['name'], description=s['description'], data=d)
             for s, d in zip(self.spec, self.data)
         ]
-        return DynamicTable("with_columns_and_data", 'PyNWB unit test', 'a test table', columns=columns)
+        return DynamicTable("with_columns_and_data", 'a test table', columns=columns)
 
     def with_spec(self):
-        table = DynamicTable("with_spec", 'PyNWB unit test', 'a test table', columns=self.spec)
+        table = DynamicTable("with_spec", 'a test table', columns=self.spec)
         return table
 
     def check_empty_table(self, table):
-        self.assertIsInstance(table.columns[0], TableColumn)
+        self.assertIsInstance(table.columns[0], VectorData)
         self.assertEqual(len(table.columns), 3)
         self.assertEqual(table.colnames, ('foo', 'bar', 'baz'))
 
@@ -61,30 +62,30 @@ class TestDynamicTable(unittest.TestCase):
         self.assertEqual(table.id.data, [0, 1, 2, 3, 4])
 
     def test_constructor_ids_default(self):
-        columns = [TableColumn(name=s['name'], description=s['description'], data=d)
+        columns = [VectorData(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
-        table = DynamicTable("with_spec", 'PyNWB unit test', 'a test table', columns=columns)
+        table = DynamicTable("with_spec", 'a test table', columns=columns)
         self.check_table(table)
 
     def test_constructor_ids(self):
-        columns = [TableColumn(name=s['name'], description=s['description'], data=d)
+        columns = [VectorData(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
-        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', id=[0, 1, 2, 3, 4], columns=columns)
+        table = DynamicTable("with_columns", 'a test table', id=[0, 1, 2, 3, 4], columns=columns)
         self.check_table(table)
 
     def test_constructor_ElementIdentifier_ids(self):
-        columns = [TableColumn(name=s['name'], description=s['description'], data=d)
+        columns = [VectorData(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
         ids = ElementIdentifiers('ids', [0, 1, 2, 3, 4])
-        table = DynamicTable("with_columns", 'PyNWB unit test', 'a test table', id=ids, columns=columns)
+        table = DynamicTable("with_columns", 'a test table', id=ids, columns=columns)
         self.check_table(table)
 
     def test_constructor_ids_bad_ids(self):
-        columns = [TableColumn(name=s['name'], description=s['description'], data=d)
+        columns = [VectorData(name=s['name'], description=s['description'], data=d)
                    for s, d in zip(self.spec, self.data)]
         msg = "must provide same number of ids as length of columns"
         with self.assertRaisesRegex(ValueError, msg):
-            DynamicTable("with_columns", 'PyNWB unit test', 'a test table', id=[0, 1], columns=columns)
+            DynamicTable("with_columns", 'a test table', id=[0, 1], columns=columns)
 
     def add_rows(self, table):
         table.add_row({'foo': 1, 'bar': 10.0, 'baz': 'cat'})
@@ -152,10 +153,10 @@ class TestDynamicTable(unittest.TestCase):
         table = self.with_spec()
         self.add_rows(table)
 
-        nwbfile = NWBFile(source='source', session_description='session_description',
+        nwbfile = NWBFile(session_description='session_description',
                           identifier='identifier', session_start_time=datetime.now(tzlocal()))
 
-        module_behavior = nwbfile.create_processing_module('a', 'b', 'c')
+        module_behavior = nwbfile.create_processing_module('a', 'b')
 
         module_behavior.add_container(table)
 
@@ -165,7 +166,7 @@ class TestDynamicTable(unittest.TestCase):
             'b': ['a', 'b', 'c', '4']
         }, index=pd.Index(name='an_index', data=[2, 4, 6, 8]))
 
-        table = DynamicTable.from_dataframe(df, 'foo', 'baz')
+        table = DynamicTable.from_dataframe(df, 'foo')
         obtained = table.to_dataframe()
 
         assert df.equals(obtained)
@@ -187,7 +188,7 @@ class TestDynamicTable(unittest.TestCase):
             'baz': ['cat', 'dog', 'bird', 'fish', 'lizard']
         }).loc[:, ('foo', 'bar', 'baz')]
 
-        obtained_table = DynamicTable.from_dataframe(df, 'test', 'test')
+        obtained_table = DynamicTable.from_dataframe(df, 'test')
         self.check_table(obtained_table)
 
     def test_missing_columns(self):
@@ -202,6 +203,28 @@ class TestDynamicTable(unittest.TestCase):
         with self.assertRaises(ValueError):
             table.add_row({'bar': 60.0, 'foo': 6, 'baz': 'oryx', 'qax': -1}, None)
 
+    def test_indexed_dynamic_table_region(self):
+        table = self.with_columns_and_data()
+
+        dynamic_table_region = DynamicTableRegion('dtr', [0, 1, 1], 'desc', table=table)
+        fetch_ids = [x[1] for x in dynamic_table_region[:3]]
+        self.assertEqual(fetch_ids, [1, 2, 2])
+
+    def test_dynamic_table_iteration(self):
+        table = self.with_columns_and_data()
+
+        dynamic_table_region = DynamicTableRegion('dtr', [0, 1, 2, 3, 4], 'desc', table=table)
+        for ii, item in enumerate(dynamic_table_region):
+            self.assertEqual(table[ii], item)
+
+    def test_nd_array_to_df(self):
+        data = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
+        col = VectorData(name='name', description='desc', data=data)
+        df = DynamicTable('test', 'desc', np.arange(3, dtype='int'), (col, )).to_dataframe()
+        df2 = pd.DataFrame({'name': [x for x in data]},
+                           index=pd.Index(name='id', data=[0, 1, 2]))
+        assert_frame_equal(df, df2)
+
 
 class TestNWBTable(unittest.TestCase):
 
@@ -213,7 +236,8 @@ class TestNWBTable(unittest.TestCase):
             ]
         self.cls = MyTable
 
-    def basic_data(self):
+    @staticmethod
+    def basic_data():
         return [
             [1, 'a'],
             [2, 'b'],
@@ -272,3 +296,53 @@ class TestNWBTable(unittest.TestCase):
 
         with self.assertRaises(ValueError):
             self.cls.from_dataframe(df=df, name='test_table')
+
+
+class TestPrint(unittest.TestCase):
+
+    def test_print_file(self):
+        nwbfile = NWBFile(session_description='session_description',
+                          identifier='identifier', session_start_time=datetime.now(tzlocal()))
+        ts = TimeSeries('name', [1., 2., 3.] * 1000, timestamps=[1, 2, 3])
+        ts2 = TimeSeries('name2', [1, 2, 3] * 1000, timestamps=[1, 2, 3])
+        self.assertEqual(str(ts), """
+name <class 'pynwb.base.TimeSeries'>
+Fields:
+  comments: no comments
+  conversion: 1.0
+  data: [1. 2. 3. ... 1. 2. 3.]
+  description: no description
+  interval: 1
+  num_samples: 3000
+  resolution: 0.0
+  timestamps: [1 2 3]
+  timestamps_unit: Seconds
+"""
+                         )
+        nwbfile.add_acquisition(ts)
+        nwbfile.add_acquisition(ts2)
+        nwbfile.add_epoch(start_time=1.0, stop_time=10.0, tags=['tag1', 'tag2'])
+        self.assertEqual(str(nwbfile),
+                         """
+root <class 'pynwb.file.NWBFile'>
+Fields:
+  acquisition: { name <class 'pynwb.base.TimeSeries'>,  name2 <class 'pynwb.base.TimeSeries'> }
+  analysis: { }
+  devices: { }
+  electrode_groups: { }
+  epoch_tags: {'tag1', 'tag2'}
+  epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
+  ic_electrodes: { }
+  imaging_planes: { }
+  lab_meta_data: { }
+  modules: { }
+  ogen_sites: { }
+  stimulus: { }
+  stimulus_template: { }
+  time_intervals: { }
+""")
+
+
+class TestAvailableNamespaces(unittest.TestCase):
+    def test_available_namespaces(self):
+        self.assertEqual(available_namespaces(), ('core', ))

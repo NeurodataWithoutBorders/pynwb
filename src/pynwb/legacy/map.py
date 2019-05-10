@@ -1,6 +1,6 @@
 
-from ..form.build.map import ObjectMapper, TypeMap
-from ..form.build.builders import GroupBuilder
+from hdmf.build.map import ObjectMapper, TypeMap
+from hdmf.build.builders import GroupBuilder
 
 
 def decode(val):

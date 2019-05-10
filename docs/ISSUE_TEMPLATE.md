@@ -24,3 +24,4 @@ Briefly describe the needed feature as well as the reasoning behind it
 - [ ] Have you included a brief and descriptive title?
 - [ ] Have you included a clear description of the problem you are trying to solve?
 - [ ] Have you included a minimal code snippet that reproduces the issue you are encountering?
+- [ ] Have you checked our [Contributing](https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/docs/CONTRIBUTING.rst) document?

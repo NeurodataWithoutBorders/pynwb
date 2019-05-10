@@ -53,20 +53,20 @@ writing large arrays without loading all data into memory and streaming data wri
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # In PyNWB the process of iterating over large data arrays is implemented via the concept of
-# :py:class:`~pynwb.form.data_utils.DataChunk` and :py:class:`~pynwb.form.data_utils.AbstractDataChunkIterator`.
+# :py:class:`~hdmf.data_utils.DataChunk` and :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`.
 #
-# * :py:class:`~pynwb.form.data_utils.DataChunk` is a simple data structure used to describe
+# * :py:class:`~hdmf.data_utils.DataChunk` is a simple data structure used to describe
 #   a subset of a larger data array (i.e., a data chunk), consisting of:
 #
 #   * ``DataChunk.data`` : the array with the data value(s) of the chunk and
 #   * ``DataChunk.selection`` : the NumPy index tuple describing the location of the chunk in the whole array.
 #
-# * :py:class:`~pynwb.form.data_utils.AbstractDataChunkIterator` then defines a class for iterating over large
-#   data arrays one-:py:class:`~pynwb.form.data_utils.DataChunk`-at-a-time.
+# * :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` then defines a class for iterating over large
+#   data arrays one-:py:class:`~hdmf.data_utils.DataChunk`-at-a-time.
 #
-# * :py:class:`~pynwb.form.data_utils.DataChunkIterator` is a specific implementation of an
-#   :py:class:`~pynwb.form.data_utils.AbstractDataChunkIterator` that accepts any iterable and assumes
-#   that we iterate over the first dimension of the data array. :py:class:`~pynwb.form.data_utils.DataChunkIterator`
+# * :py:class:`~hdmf.data_utils.DataChunkIterator` is a specific implementation of an
+#   :py:class:`~hdmf.data_utils.AbstractDataChunkIterator` that accepts any iterable and assumes
+#   that we iterate over the first dimension of the data array. :py:class:`~hdmf.data_utils.DataChunkIterator`
 #   also supports buffered read, i.e., multiple values from the input iterator can be combined to a single chunk.
 #   This is useful for buffered I/O operations, e.g., to improve performance by accumulating data in memory and
 #   writing larger blocks at once.
@@ -77,17 +77,17 @@ writing large arrays without loading all data into memory and streaming data wri
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # On the front end, all a user needs to do is to create or wrap their data in a
-# :py:class:`~pynwb.form.data_utils.AbstractDataChunkIterator`. The I/O backend (e.g.,
-# :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` or :py:class:`~pynwb.NWBHDF5IO`) then
+# :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`. The I/O backend (e.g.,
+# :py:class:`~hdmf.backends.hdf5.h5tools.HDF5IO` or :py:class:`~pynwb.NWBHDF5IO`) then
 # implements the iterative processing of the data chunk iterators. PyNWB also provides with
-# :py:class:`~pynwb.form.data_utils.DataChunkIterator` a specific implementation of a data chunk iterator
+# :py:class:`~hdmf.data_utils.DataChunkIterator` a specific implementation of a data chunk iterator
 # which we can use to wrap common iterable types (e.g., generators, lists, or numpy arrays).
 # For more advanced use cases we then need to implement our own derived class of
-# :py:class:`~pynwb.form.data_utils.AbstractDataChunkIterator`.
+# :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`.
 #
 # .. tip::
 #
-#    Currently the HDF5 I/O backend of PyNWB (:py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO`,
+#    Currently the HDF5 I/O backend of PyNWB (:py:class:`~hdmf.backends.hdf5.h5tools.HDF5IO`,
 #    :py:class:`~pynwb.NWBHDF5IO`) processes itertive data writes one-dataset-at-a-time. This means, that
 #    while you may have an arbitrary number of iterative data writes, the write is performed in order.
 #    In the future we may use a queing process to enable the simultaneous processing of multiple iterative writes at
@@ -116,15 +116,13 @@ def write_test_file(filename, data):
     # Create a test NWBfile
     start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
     create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
-    nwbfile = NWBFile('PyNWB tutorial',
-                      'demonstrate NWBFile basics',
+    nwbfile = NWBFile('demonstrate NWBFile basics',
                       'NWB123',
                       start_time,
                       file_create_date=create_date)
 
     # Create our time series
     test_ts = TimeSeries(name='synthetic_timeseries',
-                         source='PyNWB tutorial',
                          data=data,                     # <---------
                          unit='SIunit',
                          rate=1.0,
@@ -174,7 +172,7 @@ def iter_sin(chunk_length=10, max_chunks=100):
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
-from pynwb.form.data_utils import DataChunkIterator
+from hdmf.data_utils import DataChunkIterator
 
 data = DataChunkIterator(data=iter_sin(10))
 
@@ -203,22 +201,22 @@ print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
 #
 #   maxshape=(None, 10), recommended_data_shape=(1, 10), dtype=float64
 #
-# As we can see :py:class:`~pynwb.form.data_utils.DataChunkIterator` automatically recommends
+# As we can see :py:class:`~hdmf.data_utils.DataChunkIterator` automatically recommends
 # in its ``maxshape`` that the first dimensions of our array should be unlimited (``None``) and the second
-# dimension be ``10`` (i.e., the length of our chunk. Since :py:class:`~pynwb.form.data_utils.DataChunkIterator`
+# dimension be ``10`` (i.e., the length of our chunk. Since :py:class:`~hdmf.data_utils.DataChunkIterator`
 # has no way of knowing the minimum size of the array it automatically recommends the size of the first
 # chunk as the minimum size (i.e, ``(1, 10)``) and also infers the data type automatically from the first chunk.
 # To further customize this behavior we may also define the ``maxshape``, ``dtype``, and ``buffer_size`` when
-# we create the :py:class:`~pynwb.form.data_utils.DataChunkIterator`.
+# we create the :py:class:`~hdmf.data_utils.DataChunkIterator`.
 #
 # .. tip::
 #
-#    We here used :py:class:`~pynwb.form.data_utils.DataChunkIterator` to conveniently wrap our data stream.
-#    :py:class:`~pynwb.form.data_utils.DataChunkIterator` assumes that our generators yields in **consecutive order**
+#    We here used :py:class:`~hdmf.data_utils.DataChunkIterator` to conveniently wrap our data stream.
+#    :py:class:`~hdmf.data_utils.DataChunkIterator` assumes that our generators yields in **consecutive order**
 #    **single** complete element along the **first dimension** of our a array (i.e., iterate over the first
 #    axis and yield one-element-at-a-time). This behavior is useful in many practical cases. However, if
 #    this strategy does not match our needs, then you can alternatively implement our own derived
-#    :py:class:`~pynwb.form.data_utils.AbstractDataChunkIterator`.  We show an example of this next.
+#    :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`.  We show an example of this next.
 #
 
 
@@ -229,7 +227,7 @@ print("maxshape=%s, recommended_data_shape=%s, dtype=%s" % (str(data.maxshape),
 # Step 1: Create a data chunk iterator for our sparse matrix
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-from pynwb.form.data_utils import AbstractDataChunkIterator, DataChunk
+from hdmf.data_utils import AbstractDataChunkIterator, DataChunk
 
 
 class SparseMatrixIterator(AbstractDataChunkIterator):
@@ -308,8 +306,8 @@ data = SparseMatrixIterator(shape=(xsize, ysize),
 
 #####################
 # In order to also enable compression and other advanced HDF5 dataset I/O featurs we can then also
-# wrap our data via :py:class:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`.
-from pynwb.form.backends.hdf5.h5_utils import H5DataIO
+# wrap our data via :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`.
+from hdmf.backends.hdf5.h5_utils import H5DataIO
 matrix2 = SparseMatrixIterator(shape=(xsize, ysize),
                                num_chunks=num_chunks,
                                chunk_shape=chunk_shape)
@@ -320,7 +318,7 @@ data2 = H5DataIO(data=matrix2,
 ######################
 # We can now also customize the chunking , fillvalue and other settings
 #
-from pynwb.form.backends.hdf5.h5_utils import H5DataIO
+from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 # Increase the chunk size and add compression
 matrix3 = SparseMatrixIterator(shape=(xsize, ysize),
@@ -429,7 +427,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 #
 # **Advantages:**
 #
-# * We only need to hold one :py:class:`~pynwb.form.data_utils.DataChunk` in memory at any given time
+# * We only need to hold one :py:class:`~hdmf.data_utils.DataChunk` in memory at any given time
 # * Only the data chunks in the HDF5 file that contain non-default values are ever being allocated
 # * The overall size of our file is reduced significantly
 # * Reduced I/O load
@@ -439,7 +437,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 #
 #    With great power comes great responsibility **!** I/O and storage cost will depend among others on the chunk size,
 #    compression options, and the write pattern, i.e., the number and structure of the
-#    :py:class:`~pynwb.form.data_utils.DataChunk` objects written. For example, using ``(1,1)`` chunks and writing them
+#    :py:class:`~hdmf.data_utils.DataChunk` objects written. For example, using ``(1,1)`` chunks and writing them
 #    one value at a time would result in poor I/O performance in most practical cases, because of the large number of
 #    chunks and large number of small I/O operations required.
 #
@@ -451,7 +449,7 @@ print("   Reduction     :  %.2f x" % (expected_size / file_size_largechunks_comp
 #
 #   .. code-block:: python
 #
-#       io = NWBHDF5IO('basic_sparse_iterwrite_example.nwb')
+#       io = NWBHDF5IO('basic_sparse_iterwrite_example.nwb', 'r')
 #       nwbfile = io.read()
 #       data = nwbfile.get_acquisition('synthetic_timeseries').data  # <-- PyNWB does lazy load; no problem
 #       subset = data[10:100, 10:100]                                # <-- Loading a subset is fine too
@@ -491,7 +489,7 @@ del temp  # Flush to disk
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # Note, we here use a generator for simplicity but we could equally well also implement our own
-# :py:class:`~pynwb.form.data_utils.AbstractDataChunkIterator`.
+# :py:class:`~hdmf.data_utils.AbstractDataChunkIterator`.
 
 
 def iter_largearray(filename, shape, dtype='float64'):
@@ -512,7 +510,7 @@ def iter_largearray(filename, shape, dtype='float64'):
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 
-from pynwb.form.data_utils import DataChunkIterator
+from hdmf.data_utils import DataChunkIterator
 
 data = DataChunkIterator(data=iter_largearray(filename='basic_sparse_iterwrite_testdata.npy',
                                               shape=datashape),
@@ -532,8 +530,8 @@ write_test_file(filename='basic_sparse_iterwrite_largearray.nwb',
 # .. tip::
 #
 #       Again, if we want to explicitly control how our data will be chunked (compressed etc.)
-#       in the HDF5 file then we need to wrap our :py:class:`~pynwb.form.data_utils.DataChunkIterator`
-#       using :py:class:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`
+#       in the HDF5 file then we need to wrap our :py:class:`~hdmf.data_utils.DataChunkIterator`
+#       using :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
 
 ####################
 # Discussion
@@ -543,7 +541,7 @@ write_test_file(filename='basic_sparse_iterwrite_largearray.nwb',
 # Read the NWB file
 from pynwb import NWBHDF5IO    # noqa
 
-io = NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb')
+io = NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb', 'r')
 nwbfile = io.read()
 data = nwbfile.get_acquisition('synthetic_timeseries').data
 # Compare all the data values of our two arrays
@@ -591,7 +589,7 @@ for f in channel_files:
 # Step 1: Create a data chunk iterator for our multifile array
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-from pynwb.form.data_utils import AbstractDataChunkIterator, DataChunk   # noqa
+from hdmf.data_utils import AbstractDataChunkIterator, DataChunk   # noqa
 
 
 class MultiFileArrayIterator(AbstractDataChunkIterator):
@@ -668,8 +666,8 @@ write_test_file(filename='basic_sparse_iterwrite_multifile.nwb',
 #
 #    Common mistakes that will result in errors on write:
 #
-#    * The size of a :py:class:`~pynwb.form.data_utils.DataChunk` does not match the selection.
-#    * The selection for the :py:class:`~pynwb.form.data_utils.DataChunk` is not supported by h5py
+#    * The size of a :py:class:`~hdmf.data_utils.DataChunk` does not match the selection.
+#    * The selection for the :py:class:`~hdmf.data_utils.DataChunk` is not supported by h5py
 #      (e.g., unordered lists etc.)
 #
 #    Other common mistakes:
@@ -677,7 +675,7 @@ write_test_file(filename='basic_sparse_iterwrite_multifile.nwb',
 #    * Choosing inappropriate chunk sizes. This typically means bad performance with regard to I/O and/or storage cost.
 #    * Using auto chunking without supplying a good recommended_data_shape. h5py auto chunking can only make a good
 #      guess of what the chunking should be if it (at least roughly) knows what the shape of the array will be.
-#    * Trying to wrap a data generator using the default :py:class:`~pynwb.form.data_utils.DataChunkIterator`
+#    * Trying to wrap a data generator using the default :py:class:`~hdmf.data_utils.DataChunkIterator`
 #      when the generator does not comply with the assumptions of the default implementation (i.e., yield
 #      individual, complete elements along the first dimension of the array one-at-a-time). Depending on the generator,
 #      this may or may not result in an error on write, but the array you are generating will probably end up

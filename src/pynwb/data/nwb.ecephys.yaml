@@ -12,7 +12,7 @@ groups:
     value: Stores acquired voltage data from extracellular recordings
   datasets:
   - name: data
-    dtype: float
+    dtype: numeric
     doc: Recorded voltage data.
     attributes:
     - name: unit
@@ -27,9 +27,15 @@ groups:
     - - num_times
     - - num_times
       - num_channels
+    - - num_times
+      - num_channels
+      - num_samples
     shape:
     - - null
     - - null
+      - null
+    - - null
+      - null
       - null
   - neurodata_type_inc: DynamicTableRegion
     name: electrodes
@@ -50,7 +56,7 @@ groups:
     value: Snapshots of spike events from data.
   datasets:
   - name: data
-    dtype: float32
+    dtype: numeric
     doc: Spike waveforms.
     attributes:
     - name: unit
@@ -73,20 +79,39 @@ groups:
     - - null
       - null
       - null
+  - name: timestamps
+    dtype: float64
+    doc: 'Timestamps for samples stored in data.COMMENT: Timestamps here have all
+      been corrected to the common experiment master-clock. Time is stored as seconds
+      and all timestamps are relative to experiment start time. This is added here so
+      that the timestamps is required for SpikeEventTimes.'
+    attributes:
+    - name: interval
+      dtype: int32
+      doc: Value is '1'
+      value: 1
+    - name: unit
+      dtype: text
+      doc: Value is 'Seconds'
+      value: Seconds
+    dims:
+    - num_times
+    shape:
+    - null
 - neurodata_type_def: ClusterWaveforms
   neurodata_type_inc: NWBDataInterface
-  doc: 'The mean waveform shape, including standard deviation, of the different clusters.
-    Ideally, the waveform analysis should be performed on data that is only high-pass
-    filtered. This is a separate module because it is expected to require updating.
-    For example, IMEC probes may require different storage requirements to store/display
-    mean waveforms, requiring a new interface or an extension of this one.'
+  doc: 'DEPRECATED The mean waveform shape, including standard deviation, of the
+    different clusters. Ideally, the waveform analysis should be performed on data that
+    is only high-pass filtered. This is a separate module because it is expected to require
+    updating. For example, IMEC probes may require different storage requirements to
+    store/display mean waveforms, requiring a new interface or an extension of this one.'
   attributes:
   - name: help
     dtype: text
     doc: Value is 'Mean waveform shape of clusters. Waveforms should be high-pass
       filtered (ie, not the same bandpass filter used waveform analysis and clustering)'
-    value: Mean waveform shape of clusters. Waveforms should be high-pass filtered
-      (ie, not the same bandpass filter used waveform analysis and clustering)
+    value: DEPRECATED Mean waveform shape of clusters. Waveforms should be high-pass
+      filtered (ie, not the same bandpass filter used waveform analysis and clustering)
   datasets:
   - name: waveform_filtering
     dtype: text
@@ -119,15 +144,15 @@ groups:
   default_name: ClusterWaveforms
 - neurodata_type_def: Clustering
   neurodata_type_inc: NWBDataInterface
-  doc: Clustered spike data, whether from automatic clustering tools (e.g., klustakwik)
-    or as a result of manual sorting.
+  doc: DEPRECATED Clustered spike data, whether from automatic clustering tools (e.g.,
+    klustakwik) or as a result of manual sorting.
   attributes:
   - name: help
     dtype: text
     doc: Value is 'Clustered spike data, whether from automatic clustering tools (eg,
       klustakwik) or as a result of manual sorting'
-    value: Clustered spike data, whether from automatic clustering tools (eg, klustakwik)
-      or as a result of manual sorting
+    value: DEPRECATED Clustered spike data, whether from automatic clustering tools
+      (eg, klustakwik) or as a result of manual sorting
   datasets:
   - name: description
     dtype: text

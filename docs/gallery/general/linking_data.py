@@ -73,14 +73,12 @@ filename3 = 'external_linkcontainer_example.nwb'
 filename4 = 'external_linkdataset_example.nwb'
 
 # Create the first file
-nwbfile1 = NWBFile(source='PyNWB tutorial',
-                   session_description='demonstrate external files',
+nwbfile1 = NWBFile(session_description='demonstrate external files',
                    identifier='NWBE1',
                    session_start_time=start_time,
                    file_create_date=create_date)
 # Create the second file
 test_ts1 = TimeSeries(name='test_timeseries1',
-                      source='PyNWB tutorial',
                       data=data,
                       unit='SIunit',
                       timestamps=timestamps)
@@ -91,14 +89,12 @@ io.write(nwbfile1)
 io.close()
 
 # Create the second file
-nwbfile2 = NWBFile(source='PyNWB tutorial',
-                   session_description='demonstrate external files',
+nwbfile2 = NWBFile(session_description='demonstrate external files',
                    identifier='NWBE2',
                    session_start_time=start_time,
                    file_create_date=create_date)
 # Create the second file
 test_ts2 = TimeSeries(name='test_timeseries2',
-                      source='PyNWB tutorial',
                       data=data,
                       unit='SIunit',
                       timestamps=timestamps)
@@ -119,8 +115,7 @@ io.close()
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # Create the first file
-nwbfile4 = NWBFile(source='PyNWB tutorial',
-                   session_description='demonstrate external files',
+nwbfile4 = NWBFile(session_description='demonstrate external files',
                    identifier='NWBE4',
                    session_start_time=start_time,
                    file_create_date=create_date)
@@ -133,7 +128,7 @@ nwbfile4 = NWBFile(source='PyNWB tutorial',
 #
 
 # Get the first timeseries
-io1 = NWBHDF5IO(filename1)
+io1 = NWBHDF5IO(filename1, 'r')
 nwbfile1 = io1.read()
 timeseries_1 = nwbfile1.get_acquisition('test_timeseries1')
 timeseries_1_data = timeseries_1.data
@@ -146,7 +141,6 @@ timeseries_1_data = timeseries_1.data
 
 # Create a new timeseries that links to our data
 test_ts4 = TimeSeries(name='test_timeseries4',
-                      source='PyNWB tutorial',
                       data=timeseries_1_data,   # <-------
                       unit='SIunit',
                       timestamps=timestamps)
@@ -157,13 +151,12 @@ nwbfile4.add_acquisition(test_ts4)
 # our TimeSeries, this means that :py:class:`~pynwb.NWBHDF5IO` will need to
 # determine on write how to treat the dataset. We can make this explicit and customize this
 # behavior on a per-dataset basis by wrapping our dataset using
-# :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`
+# :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
 
-from pynwb.form.backends.hdf5.h5_utils import H5DataIO
+from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 # Create another timeseries that links to the same data
 test_ts5 = TimeSeries(name='test_timeseries5',
-                      source='PyNWB tutorial',
                       data=H5DataIO(data=timeseries_1_data,     # <-------
                                     link_data=True),            # <-------
                       unit='SIunit',
@@ -195,7 +188,7 @@ io4.close()
 # ---------------------------
 #
 # Appending to files and linking is made possible by passing around the same
-# :py:class:`~pynwb.form.build.map.BuildManager`. You can get a manager to pass around
+# :py:class:`~hdmf.build.map.BuildManager`. You can get a manager to pass around
 # using the :py:meth:`~pynwb.get_manager` function.
 #
 
@@ -215,12 +208,12 @@ manager = get_manager()
 #
 
 # Get the first timeseries
-io1 = NWBHDF5IO(filename1, manager=manager)
+io1 = NWBHDF5IO(filename1, 'r', manager=manager)
 nwbfile1 = io1.read()
 timeseries_1 = nwbfile1.get_acquisition('test_timeseries1')
 
 # Get the second timeseries
-io2 = NWBHDF5IO(filename2, manager=manager)
+io2 = NWBHDF5IO(filename2, 'r', manager=manager)
 nwbfile2 = io2.read()
 timeseries_2 = nwbfile2.get_acquisition('test_timeseries2')
 
@@ -234,8 +227,7 @@ timeseries_2 = nwbfile2.get_acquisition('test_timeseries2')
 #
 
 # Create a new NWBFile that links to the external timeseries
-nwbfile3 = NWBFile(source='PyNWB tutorial',
-                   session_description='demonstrate external files',
+nwbfile3 = NWBFile(session_description='demonstrate external files',
                    identifier='NWBE3',
                    session_start_time=start_time,
                    file_create_date=create_date)
@@ -253,5 +245,5 @@ io3.close()
 #
 # External links are convenient but to share data we may want to hand a single file with all the
 # data to our collaborator rather than having to collect all relevant files. To do this,
-# :py:class:`~pynwb.form.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
-# provide the convenience function :py:func:`~pynwb.form.backends.hdf5.h5tools.HDF5IO.copy_file`
+# :py:class:`~hdmf.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
+# provide the convenience function :py:func:`~hdmf.backends.hdf5.h5tools.HDF5IO.copy_file`

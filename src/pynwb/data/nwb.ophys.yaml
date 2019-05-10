@@ -10,22 +10,25 @@ groups:
   - name: pmt_gain
     dtype: float32
     doc: Photomultiplier gain
-    quantity: '?'
+    required: false
   - name: scan_line_rate
     dtype: float32
     doc: Lines imaged per second. This is also stored in /general/optophysiology but
       is kept here as it is useful information for analysis, and so good to be stored
       w/ the actual data.
-    quantity: '?'
+    required: false
   datasets:
   - name: field_of_view
     dtype: float32
     doc: Width, height and depth of image, or imaged area (meters).
     dims:
+    - width|height
     - width|height|depth
     quantity: '?'
+    required: false
     shape:
-    - 3
+    - - 2
+    - - 3
   links:
   - name: imaging_plane
     doc: link to ImagingPlane group from which this TimeSeries data was generated
@@ -43,14 +46,16 @@ groups:
       of data[] should correspond to the signal from one ROI
   datasets:
   - name: data
-    dtype: float32
+    dtype: numeric
     doc: Signals from ROIs
     dims:
-    - num_times
-    - num_ROIs
+    - - num_times
+    - - num_times
+      - num_ROIs
     shape:
-    - null
-    - null
+    - - null
+    - - null
+      - null
   - neurodata_type_inc: DynamicTableRegion
     name: rois
     doc: a dataset referencing into an ROITable containing information on the ROIs
@@ -70,7 +75,7 @@ groups:
   groups:
   - neurodata_type_inc: RoiResponseSeries
     doc: RoiResponseSeries object containing dF/F for a ROI
-    quantity: '*'
+    quantity: '+'
   default_name: DfOverF
 - neurodata_type_def: Fluorescence
   neurodata_type_inc: NWBDataInterface
@@ -106,7 +111,6 @@ groups:
     value: Stores groups of pixels that define regions of interest from one or more
       imaging planes
   groups:
-  ######### BEGIN: ROITable Refactor
   - neurodata_type_def: PlaneSegmentation
     neurodata_type_inc: DynamicTable
     doc: results for image segmentation of a specific imaging plane
@@ -116,17 +120,26 @@ groups:
       doc: Value is 'Results from segmentation of an imaging plane'
       value: Results from segmentation of an imaging plane
     datasets:
-    - neurodata_type_inc: TableColumn
+    - neurodata_type_inc: VectorData
       name: image_mask
-      doc: ROI masks for each ROI
+      doc: ROI masks for each ROI. Each image mask is the size of the original imaging
+        plane (or volume) and members of the ROI are finite non-zero
       dims:
-      - num_roi
-      - num_x
-      - num_y
+      - - num_roi
+        - num_x
+        - num_y
+      - - num_roi
+        - num_x
+        - num_y
+        - num_z
       shape:
-      - null
-      - null
-      - null
+      - - null
+        - null
+        - null
+      - - null
+        - null
+        - null
+        - null
       quantity: '?'
     - neurodata_type_inc: VectorIndex
       name: pixel_mask_index
@@ -134,8 +147,9 @@ groups:
       quantity: '?'
     - neurodata_type_inc: VectorData
       name: pixel_mask
-      doc: Pixel masks for each ROI. Pixel masks are concatenated and parsing of this
-        dataset is maintained by the PlaneSegmentation
+      doc: 'Pixel masks for each ROI: a list of indices and weights for the ROI. Pixel
+        masks are concatenated and parsing of this dataset is maintained by the
+        PlaneSegmentation'
       dtype:
       - name: x
         dtype: uint
@@ -147,6 +161,29 @@ groups:
         dtype: float
         doc: the weight of the pixel
       quantity: '?'
+    - neurodata_type_inc: VectorIndex
+      name: voxel_mask_index
+      doc: index into voxel_mask
+      quantity: '?'
+    - neurodata_type_inc: VectorData
+      name: voxel_mask
+      doc: 'Voxel masks for each ROI: a list of indices and weights for the ROI. Voxel
+        masks are concatenated and parsing of this dataset is maintained by the
+        PlaneSegmentation'
+      dtype:
+      - name: x
+        dtype: uint
+        doc: the voxel x-coordinate
+      - name: y
+        dtype: uint
+        doc: the voxel y-coordinate
+      - name: z
+        dtype: uint
+        doc: the voxel y-coordinate
+      - name: weight
+        dtype: float
+        doc: the weight of the voxel
+      quantity: '?'
     groups:
     - name: reference_images
       doc: Stores image stacks segmentation mask apply to.
@@ -154,12 +191,12 @@ groups:
       - neurodata_type_inc: ImageSeries
         doc: One or more image stacks that the masks apply to (can be one-element
           stack)
+        quantity: '*'
     links:
     - name: imaging_plane
       doc: link to ImagingPlane group from which this TimeSeries data was generated
       target_type: ImagingPlane
-    quantity: '*'
-  ######### END: ROITable Refactor
+    quantity: '+'
   default_name: ImageSegmentation
 - neurodata_type_def: ImagingPlane
   neurodata_type_inc: NWBContainer
@@ -178,9 +215,9 @@ groups:
     quantity: '?'
   - name: excitation_lambda
     dtype: float
-    doc: Excitation wavelength
+    doc: Excitation wavelength in nm
   - name: imaging_rate
-    dtype: text
+    dtype: float
     doc: Rate images are acquired, in Hz.
   - name: indicator
     dtype: text
@@ -205,20 +242,30 @@ groups:
       default_value: Meter
       required: false
     dims:
-    - height
-    - weight
-    - x|y|z
+    -  - height
+       - width
+       - x|y|z
+    -  - height
+       - width
+       - depth
+       - x|y|z
     shape:
-    - null
-    - null
-    - 3
+    -  - null
+       - null
+       - 3
+    -  - null
+       - null
+       - null
+       - 3
+    quantity: '?'
   - name: reference_frame
     dtype: text
     doc: 'Describes position and reference frame of manifold based on position of
-      first element in manifold. For example, text description of anotomical location
-      or vectors needed to rotate to common anotomical axis (eg, AP/DV/ML). COMMENT:
+      first element in manifold. For example, text description of anatomical location
+      or vectors needed to rotate to common anatomical axis (eg, AP/DV/ML). COMMENT:
       This field is necessary to interpret manifold. If manifold is not present then
       this field is not required'
+    quantity: '?'
   groups:
   - neurodata_type_def: OpticalChannel
     neurodata_type_inc: NWBContainer
@@ -236,7 +283,7 @@ groups:
       doc: Any notes or comments about the channel
     - name: emission_lambda
       dtype: float
-      doc: Emission lambda for channel
+      doc: Emission wavelength for channel in nm
   links:
   - name: device
     doc: the device that was used to record from this electrode

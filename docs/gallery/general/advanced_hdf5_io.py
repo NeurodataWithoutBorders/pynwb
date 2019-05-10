@@ -8,11 +8,11 @@ from PyNWB.
 '''
 
 ####################
-# Wrapping data arrays with :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`
+# Wrapping data arrays with :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
 # ---------------------------------------------------------------------------------
 #
 # In order to customize the I/O of datasets using the HDF I/O backend we simply need to wrap our datasets
-# using :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`. Using H5DataIO allows us to keep the Container
+# using :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`. Using H5DataIO allows us to keep the Container
 # classes independent of the I/O backend while still allowing us to customize HDF5-specific I/O features.
 #
 # Before we get started, lets create an NWBFile for testing so that we can add our data to it.
@@ -25,8 +25,7 @@ from pynwb import NWBFile
 start_time = datetime(2017, 4, 3, 11, tzinfo=tzlocal())
 create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
 
-nwbfile = NWBFile(source='PyNWB tutorial',
-                  session_description='demonstrate advanced HDF5 I/O features',
+nwbfile = NWBFile(session_description='demonstrate advanced HDF5 I/O features',
                   identifier='NWB123',
                   session_start_time=start_time,
                   file_create_date=create_date)
@@ -41,7 +40,6 @@ import numpy as np
 data = np.arange(100, 200, 10)
 timestamps = np.arange(10)
 test_ts = TimeSeries(name='test_regular_timeseries',
-                     source='PyNWB tutorial',
                      data=data,
                      unit='SIunit',
                      timestamps=timestamps)
@@ -51,10 +49,9 @@ nwbfile.add_acquisition(test_ts)
 # Now let's say we want to compress the recorded data values. We now simply need to wrap our data with H5DataIO.
 # Everything else remains the same
 
-from pynwb.form.backends.hdf5.h5_utils import H5DataIO
+from hdmf.backends.hdf5.h5_utils import H5DataIO
 wrapped_data = H5DataIO(data=data, compression=True)     # <----
 test_ts = TimeSeries(name='test_compressed_timeseries',
-                     source='PyNWB tutorial',
                      data=wrapped_data,                  # <----
                      unit='SIunit',
                      timestamps=timestamps)
@@ -62,7 +59,7 @@ nwbfile.add_acquisition(test_ts)
 
 ####################
 # This simple approach gives us access to a broad range of advanced I/O features, such as, chunking and
-# compression. For a complete list of all available settings see :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`
+# compression. For a complete list of all available settings see :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
 
 ####################
 # Chunking
@@ -84,7 +81,7 @@ nwbfile.add_acquisition(test_ts)
 
 
 ####################
-# To use chunking we again, simply need to wrap our dataset via :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`.
+# To use chunking we again, simply need to wrap our dataset via :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`.
 # Using chunking then also allows to also create resizable arrays simply by defining the ``maxshape`` of the array.
 
 data = np.arange(10000).reshape((1000, 10))
@@ -93,7 +90,6 @@ wrapped_data = H5DataIO(data=data,
                         maxshape=(None, 10)   # <---- Make the time dimension unlimited and hence resizeable
                         )
 test_ts = TimeSeries(name='test_chunked_timeseries',
-                     source='PyNWB tutorial',
                      data=wrapped_data,                  # <----
                      unit='SIunit',
                      starting_time=0.0,
@@ -126,7 +122,7 @@ nwbfile.add_acquisition(test_ts)
 # read/write operations.  I/O filters operate on a per-chunk basis in HDF5 and as such require the use of chunking.
 # Chunking will be automatically enabled by h5py when compression and other I/O filters are enabled.
 #
-# To use compression, we can wrap our dataset using :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO` and
+# To use compression, we can wrap our dataset using :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO` and
 # define the approbriate opions:
 
 wrapped_data = H5DataIO(data=data,
@@ -134,7 +130,6 @@ wrapped_data = H5DataIO(data=data,
                         compression_opts=4,              # <---- Optional GZip aggression option
                         )
 test_ts = TimeSeries(name='test_gzipped_timeseries',
-                     source='PyNWB tutorial',
                      data=wrapped_data,                  # <----
                      unit='SIunit',
                      starting_time=0.0,
@@ -144,7 +139,7 @@ nwbfile.add_acquisition(test_ts)
 ####################
 # .. hint::
 #
-#   In addition to ``compression``, :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO` also allows us to
+#   In addition to ``compression``, :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO` also allows us to
 #   enable the ``shuffle`` and ``fletcher32`` HDF5 I/O filters.
 
 ####################
@@ -179,7 +174,7 @@ io.close()
 #
 # Again, nothing has changed for read. All of the above advanced I/O features are handled transparently.
 
-io = NWBHDF5IO('advanced_io_example.nwb')
+io = NWBHDF5IO('advanced_io_example.nwb', 'r')
 nwbfile = io.read()
 
 ####################
@@ -205,10 +200,10 @@ for k, v in nwbfile.acquisition.items():
 
 
 ####################
-# Wrapping ``h5py.Datasets`` with :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO`
+# Wrapping ``h5py.Datasets`` with :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
 # ------------------------------------------------------------------------------------------------
 #
-# Just for completeness, :py:meth:`~pynwb.form.backends.hdf5.h5_utils.H5DataIO` also allows us to customize
+# Just for completeness, :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO` also allows us to customize
 # how ``h5py.Dataset`` objects should be handled on write by the PyNWBs HDF5 backend via the ``link_data``
 # parameter. If ``link_data`` is set to ``True`` then a ``SoftLink`` or ``ExternalLink`` will be created to
 # point to the HDF5 dataset On the other hand, if ``link_data`` is set to ``False`` then the dataset
@@ -220,6 +215,72 @@ for k, v in nwbfile.acquisition.items():
 #   When wrapping an ``h5py.Dataset`` object using H5DataIO, then  all settings except ``link_data``
 #   will be ignored as the h5py.Dataset will either be linked to or copied as on write.
 #
+
+####################
+# Parallel I/O using MPI
+# -----------
+#
+# The HDF5 storage backend supports parallel I/O using the Message Passing Interface (MPI).
+# Using this feature requires that you install ``hdf5`` and ``h5py`` against an MPI driver, and you
+# install ``mpi4py``. The basic installation of pynwb will not work. Setup can be tricky, and
+# is outside the scope of this tutorial (for now), and the following assumes that you have
+# HDF5 installed in a MPI configuration. Here we:
+#
+# 1. **Instantiate a dataset for parallel write**: We create TimeSeries with 4 timestamps that we
+# will write in parallel
+#
+# 2. **Write to that file in parallel using MPI**: Here we assume 4 MPI ranks while each rank writes
+# the data for a different timestamp.
+#
+# 3. **Read from the file in parallel using MPI**: Here each of the 4 MPI ranks reads one time
+# step from the file
+#
+# .. code-block:: python
+#
+#   from mpi4py import MPI
+#   import numpy as np
+#   from dateutil import tz
+#   from pynwb import NWBHDF5IO, NWBFile, TimeSeries
+#   from datetime import datetime
+#   from hdmf.data_utils import DataChunkIterator
+#
+#   start_time = datetime(2018, 4, 25, 2, 30, 3, tzinfo=tz.gettz('US/Pacific'))
+#   fname = 'test_parallel_pynwb.nwb'
+#   rank = MPI.COMM_WORLD.rank  # The process ID (integer 0-3 for 4-process run)
+#
+#   # Create file on one rank. Here we only instantiate the dataset we want to
+#   # write in parallel but we do not write any data
+#   if rank == 0:
+#       nwbfile = NWBFile('aa', 'aa', start_time)
+#       data = DataChunkIterator(data=None, maxshape=(4,), dtype=np.dtype('int'))
+#
+#       nwbfile.add_acquisition(TimeSeries('ts_name', description='desc', data=data,
+#                                          rate=100., unit='m'))
+#       with NWBHDF5IO(fname, 'w') as io:
+#           io.write(nwbfile)
+#
+#   # write to dataset in parallel
+#   with NWBHDF5IO(fname, 'a', comm=MPI.COMM_WORLD) as io:
+#       nwbfile = io.read()
+#       print(rank)
+#       nwbfile.acquisition['ts_name'].data[rank] = rank
+#
+#   # read from dataset in parallel
+#   with NWBHDF5IO(fname, 'r', comm=MPI.COMM_WORLD) as io:
+#       print(io.read().acquisition['ts_name'].data[rank])
+
+####################
+# To specify details about chunking, compression and other HDF5-specific I/O options,
+# we can wrap data via ``H5DataIO``, e.g,
+#
+# .. code-block:: python
+#
+#   data = H5DataIO(DataChunkIterator(data=None, maxshape=(100000, 100),
+#                                     dtype=np.dtype('float')),
+#                                     chunks=(10, 10), maxshape=(None, None))
+#
+# would initialize your dataset with a shape of (100000, 100) and maxshape of (None, None)
+# and your own custom chunking of (10, 10).
 
 ####################
 # Disclaimer
