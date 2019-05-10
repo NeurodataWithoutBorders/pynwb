@@ -158,7 +158,7 @@ class TestDynamicTable(unittest.TestCase):
 
         module_behavior = nwbfile.create_processing_module('a', 'b')
 
-        module_behavior.add_container(table)
+        module_behavior.add_data_interface(table)
 
     def test_pandas_roundtrip(self):
         df = pd.DataFrame({

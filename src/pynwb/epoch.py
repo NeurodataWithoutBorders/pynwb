@@ -7,7 +7,6 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import DynamicTable, ElementIdentifiers, NWBTable
 
-import pandas as pd
 import numpy as np
 
 
@@ -113,50 +112,4 @@ class TimeIntervals(DynamicTable):
             raise ValueError("TimeSeries object must have timestamps or starting_time and rate")
         count = stop_idx - start_idx
         idx_start = start_idx
-        return (int(idx_start), int(count))
-
-    @classmethod
-    @docval(
-        {'name': 'df', 'type': pd.DataFrame, 'doc': 'source DataFrame'},
-        {'name': 'name', 'type': str, 'doc': 'the name of this table'},
-        {
-            'name': 'index_column',
-            'type': str,
-            'help': 'if provided, this column will become the table\'s index',
-            'default': None
-        },
-        {
-            'name': 'table_description',
-            'type': str,
-            'help': 'a description of what is in the resulting table',
-            'default': ''
-        },
-        {
-            'name': 'columns',
-            'type': (list, tuple),
-            'help': 'a list/tuple of dictionaries specifying columns in the table',
-            'default': None
-        },
-        allow_extra=True
-    )
-    def from_dataframe(cls, **kwargs):
-        '''Construct an instance of DynamicTable (or a subclass) from a pandas DataFrame. The columns of the resulting
-        table are defined by the columns of the dataframe and the index by the dataframe's index (make sure it has a
-        name!) or by a column whose name is supplied to the index_column parameter. We recommend that you supply
-        column_descriptions - a dictionary mapping column names to string descriptions - to help others understand
-        the contents of your table.
-        '''
-        tmp_columns = popargs('columns', kwargs)
-        columns = list(cls.__columns__)
-        if tmp_columns is not None:
-            exist = {c['name'] for c in columns}
-            for d in tmp_columns:
-                if not isinstance(d, dict):
-                    raise ValueError("'columns' must be a list/tuple of dictionaries")
-                if d['name'] in exist:
-                    msg = "cannot override specification for column '%s'" % d['name']
-                    raise ValueError(msg)
-                columns.append(d)
-        pkwargs = dict(kwargs)
-        pkwargs['columns'] = columns
-        return super(TimeIntervals, cls).from_dataframe(**pkwargs)
+        return int(idx_start), int(count)
