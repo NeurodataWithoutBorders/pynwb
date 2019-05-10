@@ -80,7 +80,6 @@ class TimeIntervalsTest(unittest.TestCase):
         for i, row in df.iterrows():
             nwbfile.add_epoch(start_time=row['start_time'], stop_time=row['stop_time'])
 
-
     def test_ts_index(self):
         ept = self.get_timeintervals()
         col = ept['timeseries']
@@ -107,7 +106,6 @@ class TimeIntervalsTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
             TimeIntervals.from_dataframe(df, name='ti_name', columns=[{'name': 'not there'}])
-
 
 
 if __name__ == '__main__':
