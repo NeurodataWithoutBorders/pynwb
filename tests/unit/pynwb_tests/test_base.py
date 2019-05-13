@@ -97,7 +97,9 @@ class TestTimeSeries(unittest.TestCase):
         data = DataChunkIterator(data=generator_factory())
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
-        self.assertIs(ts1.num_samples, None)
+        # with self.assertWarnsRegex(UserWarning, r'.*name: \'test_ts1\'.*'):
+        with self.assertWarns(UserWarning):
+            self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
 

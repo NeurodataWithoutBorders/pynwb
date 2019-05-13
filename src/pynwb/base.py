@@ -162,17 +162,31 @@ class TimeSeries(NWBDataInterface):
         ''' Tries to return the number of data samples. If this cannot be assessed, returns None.
         '''
 
-        if hasattr(self, 'timestamps') and hasattr(self.timestamps, '__len__'):
-            try:
-                return len(self.timestamps)
-            except TypeError:
-                pass
+        def unreadable_warning(attr):
+            return (
+                'The {} attribute on this TimeSeries (named: {}) has a __len__, '
+                'but it cannot be read'.format(attr, self.name)
+            )
+
+        def no_len_warning(attr):
+            return 'The {} attribute on this TimeSeries (named: {}) has no __len__, '.format(attr, self.name)
+
+        if hasattr(self, 'timestamps'):
+            if hasattr(self.timestamps, '__len__'):
+                try:
+                    return len(self.timestamps)
+                except TypeError:
+                    warn(unreadable_warning('timestamps'), UserWarning)
+            else:
+                warn(no_len_warning('timestamps'), UserWarning)
 
         if hasattr(self.data, '__len__'):
             try:
                 return len(self.data)  # for an ndarray this will return the first element of shape
             except TypeError:
-                pass
+                warn(unreadable_warning('data'), UserWarning)
+        else:
+            warn(no_len_warning('data'), UserWarning)
 
     @property
     def data(self):
