@@ -93,9 +93,9 @@ def run_example_tests():
             FAILURES += 1
             ERRORS += 1
 
-def validate_example_nwbs():
+def validate_nwbs():
     global TOTAL, FAILURES, ERRORS
-    logging.info('running validation tests on example files')
+    logging.info('running validation tests on NWB files')
     examples_nwbs = glob.glob('*.nwb')
 
     import pynwb
@@ -208,7 +208,7 @@ def main():
     # Run example tests
     if flags['example'] in args.suites:
         run_example_tests()
-        validate_example_nwbs()
+        validate_nwbs()
 
     # Run integration tests
     if flags['integration'] in args.suites:
