@@ -3,7 +3,6 @@ from warnings import warn
 from collections import Iterable
 
 from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
-from hdmf.data_utils import AbstractDataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
@@ -157,6 +156,23 @@ class TimeSeries(NWBDataInterface):
                 self.starting_time = 0.0
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
+
+    @property
+    def num_samples(self):
+        ''' Tries to return the number of data samples. If this cannot be assessed, returns None.
+        '''
+
+        if hasattr(self, 'timestamps') and hasattr(self.timestamps, '__len__'):
+            try:
+                return len(self.timestamps)
+            except TypeError:
+                pass
+
+        if hasattr(self.data, '__len__'):
+            try:
+                return len(self.data)  # for an ndarray this will return the first element of shape
+            except TypeError:
+                pass
 
     @property
     def data(self):

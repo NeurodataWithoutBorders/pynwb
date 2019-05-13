@@ -45,7 +45,7 @@ class TestTimeSeries(unittest.TestCase):
         ts2 = TimeSeries('test_ts2', ts1, 'grams', timestamps=[1.0, 1.1, 1.2,
                          1.3, 1.4, 1.5])
         self.assertEqual(ts2.data, [0, 1, 2, 3, 4, 5])
-        self.assertEqual(len(ts1.timestamps), len(ts2.timestamps))
+        self.assertEqual(ts1.num_samples, ts2.num_samples)
 
     def test_timestamps_timeseries(self):
         ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
@@ -62,7 +62,7 @@ class TestTimeSeries(unittest.TestCase):
         data = list(range(length))
         ts1 = TimeSeries('test_ts1', H5DataIO(data),
                          'grams', starting_time=0.0, rate=0.1)
-        self.assertEqual(len(ts1.data), length)
+        self.assertEqual(ts1.num_samples, length)
         assert data == list(ts1.data)
 
     def test_dataio_dci_data(self):
@@ -73,6 +73,7 @@ class TestTimeSeries(unittest.TestCase):
         data = H5DataIO(DataChunkIterator(data=generator_factory()))
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
+        self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
 
@@ -84,6 +85,7 @@ class TestTimeSeries(unittest.TestCase):
         data = DataChunkIterator(data=generator_factory())
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
+        self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
 
@@ -95,6 +97,7 @@ class TestTimeSeries(unittest.TestCase):
         data = DataChunkIterator(data=generator_factory())
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
+        self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
 
