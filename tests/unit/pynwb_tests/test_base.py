@@ -56,6 +56,8 @@ class TestTimeSeries(unittest.TestCase):
 
     def test_nodata(self):
         ts1 = TimeSeries('test_ts1', starting_time=0.0, rate=0.1)
+        with self.assertWarns(UserWarning):
+            self.assertIs(ts1.num_samples, None)
 
     def test_dataio_list_data(self):
         length = 100
