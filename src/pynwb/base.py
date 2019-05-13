@@ -76,7 +76,6 @@ class TimeSeries(NWBDataInterface):
                      "resolution",
                      "conversion",
                      "unit",
-                     "num_samples",
                      "timestamps",
                      "timestamps_unit",
                      "interval",
@@ -135,21 +134,6 @@ class TimeSeries(NWBDataInterface):
 
         data = getargs('data', kwargs)
         self.fields['data'] = data
-        if isinstance(data, TimeSeries):
-            data.__add_link('data_link', self)
-            self.fields['num_samples'] = data.num_samples
-        elif isinstance(data, AbstractDataChunkIterator):
-            self.fields['num_samples'] = -1
-        elif isinstance(data, DataIO):
-            this_data = data.data
-            if isinstance(this_data, AbstractDataChunkIterator):
-                self.fields['num_samples'] = -1
-            else:
-                self.fields['num_samples'] = len(this_data)
-        elif data is None:
-            self.fields['num_samples'] = 0
-        else:
-            self.fields['num_samples'] = len(data)
 
         timestamps = kwargs.get('timestamps')
         starting_time = kwargs.get('starting_time')
