@@ -212,7 +212,9 @@ def main():
 
     # Run integration tests
     if flags['integration'] in args.suites:
+        os.environ['CLEAN_NWB'] = 'False'
         run_integration_tests(verbose=args.verbosity)
+        validate_nwbs()
 
     final_message = 'Ran %s tests' % TOTAL
     exitcode = 0
