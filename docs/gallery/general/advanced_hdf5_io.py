@@ -156,7 +156,7 @@ nwbfile.add_acquisition(test_ts)
 
 ####################
 # Writing the data
-# -----------------------
+# ----------------
 #
 #
 # Writing the data now works as usual.
@@ -169,7 +169,7 @@ io.close()
 
 ####################
 # Reading the data
-# ---------------------
+# ----------------
 #
 #
 # Again, nothing has changed for read. All of the above advanced I/O features are handled transparently.
@@ -201,7 +201,7 @@ for k, v in nwbfile.acquisition.items():
 
 ####################
 # Wrapping ``h5py.Datasets`` with :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
-# ------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------
 #
 # Just for completeness, :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO` also allows us to customize
 # how ``h5py.Dataset`` objects should be handled on write by the PyNWBs HDF5 backend via the ``link_data``
@@ -218,7 +218,7 @@ for k, v in nwbfile.acquisition.items():
 
 ####################
 # Parallel I/O using MPI
-# -----------
+# ----------------------
 #
 # The HDF5 storage backend supports parallel I/O using the Message Passing Interface (MPI).
 # Using this feature requires that you install ``hdf5`` and ``h5py`` against an MPI driver, and you
