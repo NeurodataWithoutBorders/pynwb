@@ -31,8 +31,7 @@ environment:
 init:
   - "ECHO %PYTHON% %PYTHON_VERSION%"
   - "set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  - python -m pip install --upgrade pip
-  - pip install wheel
+  - python -m pip install -U pip setuptools wheel virtualenv
   - pip install tox
 
 test_script:
