@@ -168,7 +168,8 @@ io.close()
 
 ####################
 # Adding More Data
-# ------------
+# ----------------
+#
 # The following illustrates basic data organizational structures that are used throughout NWB:N.
 #
 # .. _reuse_timestamps:
@@ -242,6 +243,7 @@ position = Position(spatial_series=spatial_series)
 
 ####################
 # .. _basic_procmod:
+#
 # Processing modules
 # ------------------
 #
