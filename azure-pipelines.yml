@@ -4,16 +4,74 @@
 # https://aka.ms/yaml
 
 trigger:
-- master
+- dev
 
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- job: 'Test'
+  displayName: "Test PyNWB"
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  strategy:
+    matrix:
+      Linux-py3.7:
+        imageName: 'ubuntu-16.04'
+        pythonVersion: '3.7'
+        testToxEnv: 'py37'
+        coverageToxEnv: 'coverage-py37'
+        buildToxEnv: 'build-py37'
+        testWheelInstallEnv: 'wheelinstall-py37'
+
+      macOS-py3.7:
+        imageName: 'macos-10.13'
+        pythonVersion: '3.7'
+        testToxEnv: 'py37'
+        coverageToxEnv: 'coverage-py37'
+        buildToxEnv: 'build-py37'
+        testWheelInstallEnv: 'wheelinstall-py37'
+
+      Windows-py3.7:
+        imageName: 'vs2017-win2016'
+        pythonVersion: '3.7'
+        testToxEnv: 'py37'
+        coverageToxEnv: 'coverage-py37'
+        buildToxEnv: 'build-py37'
+        testWheelInstallEnv: 'wheelinstall-py37'
+        
+      Windows-py3.6:
+        imageName: 'vs2017-win2016'
+        pythonVersion: '3.6'
+        testToxEnv: 'py36'
+        coverageToxEnv: 'coverage-py36'
+        buildToxEnv: 'build-py36'
+        testWheelInstallEnv: 'wheelinstall-py36'
+        
+      Windows-py3.5:
+        imageName: 'vs2017-win2016'
+        pythonVersion: '3.5'
+        testToxEnv: 'py35'
+        coverageToxEnv: 'coverage-py35'
+        buildToxEnv: 'build-py35'
+        testWheelInstallEnv: 'wheelinstall-py35'
+
+  pool:
+    vmImage: $(imageName)
+
+  steps:
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(pythonVersion)'
+      architecture: 'x64'
+
+  - script: |
+      python -m pip install --upgrade pip
+      python -m pip install --upgrade setuptools
+      python -m pip install setuptools wheel virtualenv
+    displayName: 'Install build dependencies'
+    
+  - bash: |
+    - tox -e $(testToxEnv)
+    - tox -e $(coverageToxEnv)
+    - tox -e $(buildToxEnv)
+    - tox -e $(testWheelInstallEnv) --recreate --installpkg dist/*-none-any.whl
+    displayName: 'Run all tests'
