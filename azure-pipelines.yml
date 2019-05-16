@@ -22,7 +22,9 @@ jobs:
     displayName: 'Install build dependencies'
     
   - script: |
-      flake8
+      flake8 src/
+      flake8 tests/
+	    flake8 --ignore E402,W504 docs/gallery
     displayName: 'Run style check'
 
 - job: 'Test'
