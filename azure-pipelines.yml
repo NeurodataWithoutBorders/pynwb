@@ -65,8 +65,8 @@ jobs:
     displayName: 'Install build dependencies'
     
   - bash: |
-    - tox -e $(testToxEnv)
-    - tox -e $(coverageToxEnv)
-    - tox -e $(buildToxEnv)
-    - tox -e $(testWheelInstallEnv) --recreate --installpkg dist/*-none-any.whl
+      tox -e $(testToxEnv)
+      tox -e $(coverageToxEnv)
+      tox -e $(buildToxEnv)
+      tox -e $(testWheelInstallEnv) --recreate --installpkg dist/*-none-any.whl
     displayName: 'Run all tests'
