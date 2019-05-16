@@ -3,8 +3,8 @@ trigger:
 
 jobs:
 
-- job: 'StyleCheck'
-  displayName: 'Flake8 Style Check'
+- job: 'Dummy'
+  displayName: 'Dummy'
 
   pool:
     vmImage: 'ubuntu-16.04'
@@ -18,18 +18,15 @@ jobs:
 
   - script: |
       python -m pip install --upgrade pip
-      python -m pip install flake8
     displayName: 'Install build dependencies'
     
   - script: |
-      flake8 src/
-      flake8 tests/
-      flake8 --ignore E402,W504 docs/gallery
-    displayName: 'Run style check'
+      python -v
+    displayName: 'Check Python version'
 
 - job: 'Test'
   displayName: "Test PyNWB"
-  dependsOn: StyleCheck
+  dependsOn: Dummy
 
   strategy:
     matrix:
