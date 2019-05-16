@@ -21,7 +21,7 @@ jobs:
     displayName: 'Install build dependencies'
     
   - script: |
-      python -v
+      python --version
     displayName: 'Check Python version'
 
 - job: 'Test'
