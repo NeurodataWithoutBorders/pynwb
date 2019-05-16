@@ -3,8 +3,31 @@ trigger:
 
 jobs:
 
+- job: 'StyleCheck'
+  displayName: 'Flake8 Style Check'
+
+  pool:
+    vmImage: 'ubuntu-16.04'
+
+  steps:
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '3.7'
+      architecture: 'x64'
+
+  - script: |
+      python -m pip install --upgrade pip
+      python -m pip install flake8
+    displayName: 'Install build dependencies'
+    
+  - script: |
+      flake8
+    displayName: 'Run style check'
+
 - job: 'Test'
   displayName: "Test PyNWB"
+  dependsOn: StyleCheck
 
   strategy:
     matrix:
