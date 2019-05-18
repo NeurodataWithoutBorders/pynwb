@@ -2,10 +2,11 @@ from collections import Iterable
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
+from hdmf.container import MultiContainerInterface
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, DynamicTableRegion
 from .device import Device
 
 
@@ -183,7 +184,7 @@ class EventDetection(NWBDataInterface):
 
 
 @register_class('EventWaveform', CORE_NAMESPACE)
-class EventWaveform(MultiContainerInterface):
+class EventWaveform(MultiContainerInterface, NWBDataInterface):
     """
     Spike data for spike events detected in raw data
     stored in this NWBFile, or events detect at acquisition
@@ -282,7 +283,7 @@ class ClusterWaveforms(NWBDataInterface):
 
 
 @register_class('LFP', CORE_NAMESPACE)
-class LFP(MultiContainerInterface):
+class LFP(MultiContainerInterface, NWBDataInterface):
     """
     LFP data from one or more channels. The electrode map in each published ElectricalSeries will
     identify which channels are providing LFP data. Filter properties should be noted in the
@@ -301,7 +302,7 @@ class LFP(MultiContainerInterface):
 
 
 @register_class('FilteredEphys', CORE_NAMESPACE)
-class FilteredEphys(MultiContainerInterface):
+class FilteredEphys(MultiContainerInterface, NWBDataInterface):
     """
     Ephys data from one or more channels that has been subjected to filtering. Examples of filtered
     data include Theta and Gamma (LFP has its own interface). FilteredEphys modules publish an

@@ -2,12 +2,12 @@ from collections import Iterable
 import numpy as np
 
 from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from hdmf.container import MultiContainerInterface
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, ElementIdentifiers,\
-    NWBDataInterface
+from .core import NWBContainer, DynamicTable, DynamicTableRegion, ElementIdentifiers, NWBDataInterface
 from .device import Device
 
 
@@ -191,7 +191,7 @@ class CorrectedImageStack(NWBDataInterface):
 
 
 @register_class('MotionCorrection', CORE_NAMESPACE)
-class MotionCorrection(MultiContainerInterface):
+class MotionCorrection(MultiContainerInterface, NWBDataInterface):
     """
     A collection of corrected images stacks.
     """
@@ -282,7 +282,7 @@ class PlaneSegmentation(DynamicTable):
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
-class ImageSegmentation(MultiContainerInterface):
+class ImageSegmentation(MultiContainerInterface, NWBDataInterface):
     """
     Stores pixels in an image that represent different regions of interest (ROIs) or masks. All
     segmentation for a given imaging plane is stored together, with storage for multiple imaging
@@ -355,7 +355,7 @@ class RoiResponseSeries(TimeSeries):
 
 
 @register_class('DfOverF', CORE_NAMESPACE)
-class DfOverF(MultiContainerInterface):
+class DfOverF(MultiContainerInterface, NWBDataInterface):
     """
     dF/F information about a region of interest (ROI). Storage hierarchy of dF/F should be the same
     as for segmentation (ie, same names for ROIs and for image planes).
@@ -373,7 +373,7 @@ class DfOverF(MultiContainerInterface):
 
 
 @register_class('Fluorescence', CORE_NAMESPACE)
-class Fluorescence(MultiContainerInterface):
+class Fluorescence(MultiContainerInterface, NWBDataInterface):
     """
     Fluorescence information about a region of interest (ROI). Storage hierarchy of fluorescence
     should be the same as for segmentation (ie, same names for ROIs and for image planes).

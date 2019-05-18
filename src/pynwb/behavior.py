@@ -1,9 +1,10 @@
 from collections import Iterable
 
 from hdmf.utils import docval, popargs
+from hdmf.container import MultiContainerInterface
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer, MultiContainerInterface
+from .core import NWBContainer, NWBDataInterface
 from .misc import IntervalSeries
 from .base import TimeSeries, _default_conversion, _default_resolution
 
@@ -60,7 +61,7 @@ class SpatialSeries(TimeSeries):
 
 
 @register_class('BehavioralEpochs', CORE_NAMESPACE)
-class BehavioralEpochs(MultiContainerInterface):
+class BehavioralEpochs(MultiContainerInterface, NWBDataInterface):
     """
     TimeSeries for storing behavoioral epochs. The objective of this and the other two Behavioral
     interfaces (e.g. BehavioralEvents and BehavioralTimeSeries) is to provide generic hooks for
@@ -84,7 +85,7 @@ class BehavioralEpochs(MultiContainerInterface):
 
 
 @register_class('BehavioralEvents', CORE_NAMESPACE)
-class BehavioralEvents(MultiContainerInterface):
+class BehavioralEvents(MultiContainerInterface, NWBDataInterface):
     """
     TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
     """
@@ -101,7 +102,7 @@ class BehavioralEvents(MultiContainerInterface):
 
 
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)
-class BehavioralTimeSeries(MultiContainerInterface):
+class BehavioralTimeSeries(MultiContainerInterface, NWBDataInterface):
     """
     TimeSeries for storing Behavoioral time series data. See description of BehavioralEpochs for
     more details.
@@ -119,7 +120,7 @@ class BehavioralTimeSeries(MultiContainerInterface):
 
 
 @register_class('PupilTracking', CORE_NAMESPACE)
-class PupilTracking(MultiContainerInterface):
+class PupilTracking(MultiContainerInterface, NWBDataInterface):
     """
     Eye-tracking data, representing pupil size.
     """
@@ -134,7 +135,7 @@ class PupilTracking(MultiContainerInterface):
 
 
 @register_class('EyeTracking', CORE_NAMESPACE)
-class EyeTracking(MultiContainerInterface):
+class EyeTracking(MultiContainerInterface, NWBDataInterface):
     """
     Eye-tracking data, representing direction of gaze.
     """
@@ -151,7 +152,7 @@ class EyeTracking(MultiContainerInterface):
 
 
 @register_class('CompassDirection', CORE_NAMESPACE)
-class CompassDirection(MultiContainerInterface):
+class CompassDirection(MultiContainerInterface, NWBDataInterface):
     """
     With a CompassDirection interface, a module publishes a SpatialSeries object representing a
     floating point value for theta. The SpatialSeries::reference_frame field should indicate what
@@ -172,7 +173,7 @@ class CompassDirection(MultiContainerInterface):
 
 
 @register_class('Position', CORE_NAMESPACE)
-class Position(MultiContainerInterface):
+class Position(MultiContainerInterface, NWBDataInterface):
     """
     Position data, whether along the x, x/y or x/y/z axis.
     """

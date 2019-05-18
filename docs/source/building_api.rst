@@ -171,11 +171,11 @@ with neurodata type "MyContainer".
 .. code-block:: python
 
     from pynwb import register_class
-    from pynwb.core import MultiContainerInterface
+    from pynwb.core import MultiContainerInterface, NWBDataInterface
 
 
     @register_class("MyDataInterface", "my_ns")
-    class MyDataInterface(MultiContainerInterface):
+    class MyDataInterface(MultiContainerInterface, NWBDataInterface):
 
         __clsconf__ = {
             'type': MyContainer,

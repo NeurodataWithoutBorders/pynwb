@@ -6,6 +6,7 @@ import copy as _copy
 
 from hdmf.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
 from hdmf import Container
+from hdmf.container import MultiContainerInterface
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -16,7 +17,7 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, DynamicTable, DynamicTableRegion
 
 
 def _not_parent(arg):
@@ -78,7 +79,7 @@ class Subject(NWBContainer):
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
-class NWBFile(MultiContainerInterface):
+class NWBFile(MultiContainerInterface, NWBDataInterface):
     """
     A representation of an NWB file.
     """

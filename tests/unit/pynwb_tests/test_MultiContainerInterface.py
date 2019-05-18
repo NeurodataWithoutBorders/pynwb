@@ -22,7 +22,7 @@ class Edge(NWBDataInterface):
         super(Edge, self).__init__(name=kwargs['name'])
 
 
-class Graph(MultiContainerInterface):
+class Graph(MultiContainerInterface, NWBDataInterface):
     """A multicontainer of nodes and undirected edges."""
 
     __nwbfields__ = ('name', 'edges', 'nodes')

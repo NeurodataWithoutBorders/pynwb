@@ -3,16 +3,17 @@ from warnings import warn
 from collections import Iterable
 
 from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from hdmf.container import MultiContainerInterface
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBDataInterface, MultiContainerInterface, NWBData
+from .core import NWBDataInterface, NWBData
 
 _default_conversion = 1.0
 _default_resolution = 0.0
 
 
 @register_class('ProcessingModule', CORE_NAMESPACE)
-class ProcessingModule(MultiContainerInterface):
+class ProcessingModule(MultiContainerInterface, NWBDataInterface):
     """ Processing module. This is a container for one or more containers
         that provide data at intermediate levels of analysis
 
@@ -246,7 +247,7 @@ class Image(NWBData):
 
 
 @register_class('Images', CORE_NAMESPACE)
-class Images(MultiContainerInterface):
+class Images(MultiContainerInterface, NWBDataInterface):
 
     __nwbfields__ = ('description',)
 
