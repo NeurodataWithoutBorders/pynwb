@@ -30,14 +30,6 @@ jobs:
 
   strategy:
     matrix:
-      Linux-py3.7:
-        imageName: 'ubuntu-16.04'
-        pythonVersion: '3.7'
-        testToxEnv: 'py37'
-        coverageToxEnv: 'coverage-py37'
-        buildToxEnv: 'build-py37'
-        testWheelInstallEnv: 'wheelinstall-py37'
-
       macOS-py3.7:
         imageName: 'macos-10.13'
         pythonVersion: '3.7'
@@ -45,6 +37,30 @@ jobs:
         coverageToxEnv: 'coverage-py37'
         buildToxEnv: 'build-py37'
         testWheelInstallEnv: 'wheelinstall-py37'
+        
+      macOS-py3.6:
+        imageName: 'macos-10.13'
+        pythonVersion: '3.6'
+        testToxEnv: 'py36'
+        coverageToxEnv: 'coverage-py36'
+        buildToxEnv: 'build-py36'
+        testWheelInstallEnv: 'wheelinstall-py36'
+        
+      macOS-py3.5:
+        imageName: 'macos-10.13'
+        pythonVersion: '3.5'
+        testToxEnv: 'py35'
+        coverageToxEnv: 'coverage-py35'
+        buildToxEnv: 'build-py35'
+        testWheelInstallEnv: 'wheelinstall-py35'
+        
+      macOS-py2.7:
+        imageName: 'macos-10.13'
+        pythonVersion: '2.7'
+        testToxEnv: 'py27'
+        coverageToxEnv: 'coverage-py27'
+        buildToxEnv: 'build-py27'
+        testWheelInstallEnv: 'wheelinstall-py27'
 
       Windows-py3.7:
         imageName: 'vs2017-win2016'
@@ -69,6 +85,14 @@ jobs:
         coverageToxEnv: 'coverage-py35'
         buildToxEnv: 'build-py35'
         testWheelInstallEnv: 'wheelinstall-py35'
+        
+      Windows-py2.7:
+        imageName: 'vs2017-win2016'
+        pythonVersion: '2.7'
+        testToxEnv: 'py27'
+        coverageToxEnv: 'coverage-py27'
+        buildToxEnv: 'build-py27'
+        testWheelInstallEnv: 'wheelinstall-py27'
 
   pool:
     vmImage: $(imageName)
