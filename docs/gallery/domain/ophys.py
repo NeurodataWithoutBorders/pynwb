@@ -85,7 +85,7 @@ nwbfile.add_acquisition(image_series)
 # from one or more imaging planes; hence the :py:class:`~pynwb.ophys.PlaneSegmentation` class.
 
 
-mod = nwbfile.create_processing_module('my_ca_imaging_module', 'example data module')
+mod = nwbfile.create_processing_module('ophys', 'contains optical physiology processed data')
 img_seg = ImageSegmentation()
 mod.add_data_interface(img_seg)
 ps = img_seg.create_plane_segmentation('output from segmenting my favorite imaging plane',
@@ -185,7 +185,7 @@ nwbfile = io.read()
 # :py:class:`~pynwb.base.ProcessingModule`.
 
 
-mod = nwbfile.modules['my_ca_imaging_module']
+mod = nwbfile.modules['ophys']
 
 ####################
 # Now you can retrieve the :py:class:`~pynwb.ophys.ImageSegmentation` object by indexing into the

@@ -140,7 +140,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                                       'a test module')
         self.clustering = Clustering("A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100., 101., 102.],
                                      list(range(10, 61, 10)))
-        self.mod.add_container(self.clustering)
+        self.mod.add_data_interface(self.clustering)
         return container
 
     def test_children(self):
@@ -273,3 +273,47 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         return nwbfile.epochs
+
+    def test_df_comparison(self):
+        self.read_container = self.roundtripContainer()
+
+        tsa = self.read_nwbfile.get_acquisition('a')
+        df_exp = pd.DataFrame({
+                'foo': [1, 2, 3, 4],
+                'bar': ['fish', 'fowl', 'dog', 'cat'],
+                'start_time': [0.2, 0.25, 0.30, 0.35],
+                'stop_time': [0.25, 0.30, 0.40, 0.45],
+                'timeseries': [[(2, 1, tsa)],
+                               [(3, 1, tsa)],
+                               [(3, 1, tsa)],
+                               [(4, 1, tsa)]],
+                'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
+            },
+            index=pd.Index(np.arange(4), name='id')
+        )
+        ts_exp = df_exp.pop('timeseries')
+
+        df_obt = self.read_container.to_dataframe()
+        ts_obt = df_obt.pop('timeseries')
+
+        pd.testing.assert_frame_equal(df_exp, df_obt, check_like=True, check_dtype=False)
+        for ex, obt in zip(ts_exp, ts_obt):
+            assert ex[0][0] == obt[0][0]
+            assert ex[0][1] == obt[0][1]
+            self.assertContainerEqual(ex[0][2], obt[0][2])
+
+    def test_df_comparison_no_ts(self):
+        self.read_container = self.roundtripContainer()
+
+        df_exp = pd.DataFrame({
+                'foo': [1, 2, 3, 4],
+                'bar': ['fish', 'fowl', 'dog', 'cat'],
+                'start_time': [0.2, 0.25, 0.30, 0.35],
+                'stop_time': [0.25, 0.30, 0.40, 0.45],
+                'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
+            },
+            index=pd.Index(np.arange(4), name='id')
+        )
+
+        df_obt = self.read_container.to_dataframe(exclude=set(['timeseries', 'timeseries_index']))
+        pd.testing.assert_frame_equal(df_exp, df_obt, check_like=True, check_dtype=False)

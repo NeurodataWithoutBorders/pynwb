@@ -1,4 +1,4 @@
-from h5py import RegionReference
+from h5py import RegionReference, Dataset
 import numpy as np
 import pandas as pd
 
@@ -67,6 +67,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     The purpose of this class is to provide a mechanism for representing hierarchical
     relationships in neurodata.
     '''
+
+    _fieldsname = '__nwbfields__'
 
     __nwbfields__ = tuple()
 
@@ -191,6 +193,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
         """
         if isinstance(v, list):
+            if len(v) and isinstance(v[0], NWBBaseType):
+                return str(v)
             try:
                 return str(np.array(v))
             except ValueError:
@@ -1247,14 +1251,17 @@ class DynamicTable(NWBDataInterface):
             return self[key]
         return default
 
-    def to_dataframe(self):
+    def to_dataframe(self, exclude=set([])):
         '''Produce a pandas DataFrame containing this table's data.
         '''
 
         data = {}
         for name in self.colnames:
+            if name in exclude:
+                continue
             col = self.__df_cols[self.__colids[name]]
-            if isinstance(col.data, np.ndarray) and col.data.ndim > 1:
+
+            if isinstance(col.data, (Dataset, np.ndarray)) and col.data.ndim > 1:
                 data[name] = [x for x in col[:]]
             else:
                 data[name] = col[:]
@@ -1286,27 +1293,44 @@ class DynamicTable(NWBDataInterface):
         allow_extra=True
     )
     def from_dataframe(cls, **kwargs):
-        '''Construct an instance of DynamicTable (or a subclass) from a pandas DataFrame. The columns of the resulting
-        table are defined by the columns of the dataframe and the index by the dataframe's index (make sure it has a
-        name!) or by a column whose name is supplied to the index_column parameter. We recommend that you supply
-        *columns* - a list/tuple of dictionaries containing the name and description of the column- to help others
-        understand the contents of your table. See :py:class:`~pynwb.core.DynamicTable` for more details on *columns*.
+        '''
+        Construct an instance of DynamicTable (or a subclass) from a pandas DataFrame.
+
+        The columns of the resulting table are defined by the columns of the
+        dataframe and the index by the dataframe's index (make sure it has a
+        name!) or by a column whose name is supplied to the index_column
+        parameter. We recommend that you supply *columns* - a list/tuple of
+        dictionaries containing the name and description of the column- to help
+        others understand the contents of your table. See
+        :py:class:`~pynwb.core.DynamicTable` for more details on *columns*.
         '''
 
+        columns = kwargs.pop('columns')
         df = kwargs.pop('df')
         name = kwargs.pop('name')
         index_column = kwargs.pop('index_column')
         table_description = kwargs.pop('table_description')
-        columns = kwargs.pop('columns')
 
-        if columns is None:
-            columns = [{'name': s} for s in df.columns]
-        else:
-            columns = list(columns)
-            existing = set(c['name'] for c in columns)
-            for c in df.columns:
-                if c not in existing:
-                    columns.append({'name': c})
+        supplied_columns = dict()
+        if columns:
+            supplied_columns = {x['name']: x for x in columns}
+
+        class_cols = {x['name']: x for x in cls.__columns__}
+        required_cols = set(x['name'] for x in cls.__columns__ if 'required' in x and x['required'])
+        df_cols = df.columns
+        if required_cols - set(df_cols):
+            raise ValueError('missing required cols: ' + str(required_cols - set(df_cols)))
+        if set(supplied_columns.keys()) - set(df_cols):
+            raise ValueError('cols specified but not provided: ' + str(set(supplied_columns.keys()) - set(df_cols)))
+        columns = []
+        for col_name in df_cols:
+            if col_name in class_cols:
+                columns.append(class_cols[col_name])
+            elif col_name in supplied_columns:
+                columns.append(supplied_columns[col_name])
+            else:
+                columns.append({'name': col_name,
+                                'description': 'no description'})
 
         if index_column is not None:
             ids = ElementIdentifiers(name=index_column, data=df[index_column].values.tolist())
@@ -1371,6 +1395,8 @@ class DynamicTableRegion(VectorData):
             arg2 = key[1]
             return self.table[self.data[arg1], arg2]
         elif isinstance(key, (int, slice)):
+            if isinstance(key, int) and key >= len(self.data):
+                raise IndexError('index {} out of bounds for data of length {}'.format(key, len(self.data)))
             return self.table[self.data[key]]
         else:
             raise ValueError("unrecognized argument: '%s'" % key)

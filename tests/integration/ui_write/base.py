@@ -3,6 +3,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import os
 import numpy as np
+import h5py
 import numpy.testing as npt
 
 from pynwb import NWBContainer, get_manager, NWBFile, NWBData
@@ -88,6 +89,8 @@ class TestMapNWBContainer(unittest.TestCase):
             with self.subTest(nwbfield=nwbfield, container_type=type1.__name__):
                 f1 = getattr(container1, nwbfield)
                 f2 = getattr(container2, nwbfield)
+                if isinstance(f1, h5py.Dataset):
+                    f1 = f1[()]
                 if isinstance(f1, (tuple, list, np.ndarray)):
                     if len(f1) > 0:
                         if isinstance(f1[0], NWBContainer):
@@ -166,10 +169,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.writer.write(nwbfile)
         self.writer.close()
         self.reader = HDF5IO(self.filename, manager=get_manager(), mode='r')
-        read_nwbfile = self.reader.read()
+        self.read_nwbfile = self.reader.read()
 
         try:
-            tmp = self.getContainer(read_nwbfile)
+            tmp = self.getContainer(self.read_nwbfile)
             return tmp
         except Exception as e:
             self.reader.close()
@@ -181,7 +184,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
         # make sure we get a completely new object
         str(self.container)  # added as a test to make sure printing works
         self.assertNotEqual(id(self.container), id(self.read_container))
-        self.assertContainerEqual(self.container, self.read_container)
+        self.assertContainerEqual(self.read_container, self.container)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''

@@ -80,7 +80,7 @@ nwbfile.get_acquisition('test_timeseries')
 # NWB I/O is carried out using the :py:class:`~pynwb.NWBHDF5IO` class [#]_. This class is responsible
 # for mapping an :py:class:`~pynwb.file.NWBFile` object into HDF5 according to the NWB schema.
 #
-# To write an :py:class:`~pynwb.file.NWBFile`, use the :py:func:`~pynwb.form.backends.io.FORMIO.write` method.
+# To write an :py:class:`~pynwb.file.NWBFile`, use the :py:func:`~hdmf.backends.io.FORMIO.write` method.
 
 from pynwb import NWBHDF5IO
 
@@ -127,7 +127,6 @@ print(test_timeseries_in)
 #      data: <HDF5 dataset "data": shape (10,), type "<i8">
 #      description: no description
 #      interval: 1
-#      num_samples: 10
 #      resolution: 0.0
 #      timestamps: <HDF5 dataset "timestamps": shape (10,), type "<f8">
 #      timestamps_unit: Seconds
@@ -168,7 +167,8 @@ io.close()
 
 ####################
 # Adding More Data
-# ------------
+# ----------------
+#
 # The following illustrates basic data organizational structures that are used throughout NWB:N.
 #
 # .. _reuse_timestamps:
@@ -242,6 +242,7 @@ position = Position(spatial_series=spatial_series)
 
 ####################
 # .. _basic_procmod:
+#
 # Processing modules
 # ------------------
 #
