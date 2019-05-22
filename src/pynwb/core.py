@@ -1331,6 +1331,10 @@ class DynamicTable(NWBDataInterface):
             else:
                 columns.append({'name': col_name,
                                 'description': 'no description'})
+                if hasattr(df[col_name].iloc[0], '__len__') and not isinstance(df[col_name].iloc[0], str):
+                    lengths = [len(x) for x in df[col_name]]
+                    if not lengths[1:] == lengths[:-1]:
+                        columns[-1].update(index=True)
 
         if index_column is not None:
             ids = ElementIdentifiers(name=index_column, data=df[index_column].values.tolist())
