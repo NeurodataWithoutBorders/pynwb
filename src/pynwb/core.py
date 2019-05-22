@@ -1251,13 +1251,16 @@ class DynamicTable(NWBDataInterface):
             return self[key]
         return default
 
-    def to_dataframe(self):
+    def to_dataframe(self, exclude=set([])):
         '''Produce a pandas DataFrame containing this table's data.
         '''
 
         data = {}
         for name in self.colnames:
+            if name in exclude:
+                continue
             col = self.__df_cols[self.__colids[name]]
+
             if isinstance(col.data, (Dataset, np.ndarray)) and col.data.ndim > 1:
                 data[name] = [x for x in col[:]]
             else:

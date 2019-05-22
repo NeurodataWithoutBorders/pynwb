@@ -313,7 +313,6 @@ Fields:
   data: [1. 2. 3. ... 1. 2. 3.]
   description: no description
   interval: 1
-  num_samples: 3000
   resolution: 0.0
   timestamps: [1 2 3]
   timestamps_unit: Seconds

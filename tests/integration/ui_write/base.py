@@ -169,10 +169,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.writer.write(nwbfile)
         self.writer.close()
         self.reader = HDF5IO(self.filename, manager=get_manager(), mode='r')
-        read_nwbfile = self.reader.read()
+        self.read_nwbfile = self.reader.read()
 
         try:
-            tmp = self.getContainer(read_nwbfile)
+            tmp = self.getContainer(self.read_nwbfile)
             return tmp
         except Exception as e:
             self.reader.close()
