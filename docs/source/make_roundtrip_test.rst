@@ -14,7 +14,7 @@ with the following command::
     $ python test.py -i
 
 The roundtrip test will generate a new NWB file with the name ``test_<CLASS_NAME>.nwb`` where ``CLASS_NAME`` is
-the class name of the :py:class:`~pynwb.form.container.Container` class you are roundtripping. The test
+the class name of the :py:class:`~hdmf.container.Container` class you are roundtripping. The test
 will write an NWB file with an instance of the container to disk, read this instance back in, and compare it
 to the instance that was used for writing to disk. Once the test is complete, the NWB file will be deleted.
 You can keep the NWB file around after the test completes by setting the environment variable ``CLEAN_NWB``
@@ -34,8 +34,8 @@ its instance methods.
 ``TestMapRoundTrip`` provides four methods for testing the process of going from in-memory Python object to data
 stored on disk and back. Three of these methods--``setUpContainer``, ``addContainer``, and ``getContainer``--are
 required for carrying out the roundtrip test. The fourth method is required for testing the conversion
-from the container to the :py:mod:`builder <pynwb.form.build.builders>`--the intermediate data structure
-that gets used by :py:class:`~pynwb.form.backends.io.FORMIO` implementations for writing to disk.
+from the container to the :py:mod:`builder <hdmf.build.builders>`--the intermediate data structure
+that gets used by :py:class:`~hdmf.backends.io.FORMIO` implementations for writing to disk.
 
 If you do not want to test step of the process, you can just implement ``setUpContainer``, ``addContainer``, and
 ``getContainer``.
@@ -124,7 +124,7 @@ Continuing from the :py:class:`~pynwb.base.TimeSeries` example, lets add ``setUp
 
 .. code-block:: python
 
-    from pynwb.form.build import GroupBuilder
+    from hdmf.build import GroupBuilder
 
     class TimeSeriesRoundTrip(TestMapRoundTrip):
 

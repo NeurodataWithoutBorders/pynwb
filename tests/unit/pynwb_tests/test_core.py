@@ -158,7 +158,7 @@ class TestDynamicTable(unittest.TestCase):
 
         module_behavior = nwbfile.create_processing_module('a', 'b')
 
-        module_behavior.add_container(table)
+        module_behavior.add_data_interface(table)
 
     def test_pandas_roundtrip(self):
         df = pd.DataFrame({
@@ -209,6 +209,13 @@ class TestDynamicTable(unittest.TestCase):
         dynamic_table_region = DynamicTableRegion('dtr', [0, 1, 1], 'desc', table=table)
         fetch_ids = [x[1] for x in dynamic_table_region[:3]]
         self.assertEqual(fetch_ids, [1, 2, 2])
+
+    def test_dynamic_table_iteration(self):
+        table = self.with_columns_and_data()
+
+        dynamic_table_region = DynamicTableRegion('dtr', [0, 1, 2, 3, 4], 'desc', table=table)
+        for ii, item in enumerate(dynamic_table_region):
+            self.assertEqual(table[ii], item)
 
     def test_nd_array_to_df(self):
         data = np.array([[1, 1, 1], [2, 2, 2], [3, 3, 3]])
@@ -306,7 +313,6 @@ Fields:
   data: [1. 2. 3. ... 1. 2. 3.]
   description: no description
   interval: 1
-  num_samples: 3000
   resolution: 0.0
   timestamps: [1 2 3]
   timestamps_unit: Seconds

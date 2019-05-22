@@ -3,7 +3,6 @@ from warnings import warn
 from collections import Iterable
 
 from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
-from hdmf.data_utils import AbstractDataChunkIterator, DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
@@ -76,7 +75,6 @@ class TimeSeries(NWBDataInterface):
                      "resolution",
                      "conversion",
                      "unit",
-                     "num_samples",
                      "timestamps",
                      "timestamps_unit",
                      "interval",
@@ -135,21 +133,6 @@ class TimeSeries(NWBDataInterface):
 
         data = getargs('data', kwargs)
         self.fields['data'] = data
-        if isinstance(data, TimeSeries):
-            data.__add_link('data_link', self)
-            self.fields['num_samples'] = data.num_samples
-        elif isinstance(data, AbstractDataChunkIterator):
-            self.fields['num_samples'] = -1
-        elif isinstance(data, DataIO):
-            this_data = data.data
-            if isinstance(this_data, AbstractDataChunkIterator):
-                self.fields['num_samples'] = -1
-            else:
-                self.fields['num_samples'] = len(this_data)
-        elif data is None:
-            self.fields['num_samples'] = 0
-        else:
-            self.fields['num_samples'] = len(data)
 
         timestamps = kwargs.get('timestamps')
         starting_time = kwargs.get('starting_time')
@@ -173,6 +156,37 @@ class TimeSeries(NWBDataInterface):
                 self.starting_time = 0.0
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
+
+    @property
+    def num_samples(self):
+        ''' Tries to return the number of data samples. If this cannot be assessed, returns None.
+        '''
+
+        def unreadable_warning(attr):
+            return (
+                'The {} attribute on this TimeSeries (named: {}) has a __len__, '
+                'but it cannot be read'.format(attr, self.name)
+            )
+
+        def no_len_warning(attr):
+            return 'The {} attribute on this TimeSeries (named: {}) has no __len__, '.format(attr, self.name)
+
+        if hasattr(self, 'timestamps'):
+            if hasattr(self.timestamps, '__len__'):
+                try:
+                    return len(self.timestamps)
+                except TypeError:
+                    warn(unreadable_warning('timestamps'), UserWarning)
+            else:
+                warn(no_len_warning('timestamps'), UserWarning)
+
+        if hasattr(self.data, '__len__'):
+            try:
+                return len(self.data)  # for an ndarray this will return the first element of shape
+            except TypeError:
+                warn(unreadable_warning('data'), UserWarning)
+        else:
+            warn(no_len_warning('data'), UserWarning)
 
     @property
     def data(self):
@@ -220,15 +234,21 @@ class Image(NWBData):
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None},
+            {'name': 'help', 'type': str, 'doc': 'helpful hint for user',
+             'default': 'pixel values for an image'}
+            )
     def __init__(self, **kwargs):
         super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
         self.resolution = kwargs['resolution']
         self.description = kwargs['description']
+        self.help = kwargs['help']
 
 
 @register_class('Images', CORE_NAMESPACE)
 class Images(MultiContainerInterface):
+
+    __nwbfields__ = ('description',)
 
     __clsconf__ = {
         'attr': 'images',
@@ -239,3 +259,13 @@ class Images(MultiContainerInterface):
     }
 
     __help = "Contains images"
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
+            {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of images',
+             'default': 'no description'})
+    def __init__(self, **kwargs):
+        name, description, images = popargs('name', 'description', 'images', kwargs)
+        super(Images, self).__init__(name, **kwargs)
+        self.description = description
+        self.images = images

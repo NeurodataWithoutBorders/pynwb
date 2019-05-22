@@ -21,10 +21,17 @@ environment:
       BUILD_TOX_ENV: build-py36
       TEST_WHEELINSTALL_ENV: wheelinstall-py36
 
+    - PYTHON_VERSION: 3.7
+      PYTHON: C:\\Python37-x64
+      TEST_TOX_ENV: py37
+      COVERAGE_TOX_ENV: coverage-py37
+      BUILD_TOX_ENV: build-py37
+      TEST_WHEELINSTALL_ENV: wheelinstall-py37
+
 init:
   - "ECHO %PYTHON% %PYTHON_VERSION%"
   - "set PATH=%PYTHON%;%PYTHON%\\Scripts;%PATH%"
-  - pip install wheel
+  - python -m pip install -U pip setuptools wheel virtualenv
   - pip install tox
 
 test_script:
