@@ -127,7 +127,6 @@ print(test_timeseries_in)
 #      data: <HDF5 dataset "data": shape (10,), type "<i8">
 #      description: no description
 #      interval: 1
-#      num_samples: 10
 #      resolution: 0.0
 #      timestamps: <HDF5 dataset "timestamps": shape (10,), type "<f8">
 #      timestamps_unit: Seconds

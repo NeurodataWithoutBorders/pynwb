@@ -49,6 +49,14 @@ class TimeIntervalsTest(unittest.TestCase):
         self.assertIs(obtained.loc[3, 'timeseries'][1], df.loc[3, 'timeseries'][1])
         self.assertEqual(obtained.loc[2, 'foo'], df.loc[2, 'foo'])
 
+    def test_dataframe_roundtrip_drop_ts(self):
+        df = self.get_dataframe()
+        epochs = TimeIntervals.from_dataframe(df, name='test epochs')
+        obtained = epochs.to_dataframe(exclude=set(['timeseries', 'timeseries_index']))
+
+        self.assertNotIn('timeseries', obtained.columns)
+        self.assertEqual(obtained.loc[2, 'foo'], df.loc[2, 'foo'])
+
     def test_no_tags(self):
         nwbfile = NWBFile("a file with header data", "NB123A", datetime(1970, 1, 1, tzinfo=tz.tzutc()))
         df = self.get_dataframe()

@@ -56,14 +56,15 @@ class TestTimeSeries(unittest.TestCase):
 
     def test_nodata(self):
         ts1 = TimeSeries('test_ts1', starting_time=0.0, rate=0.1)
-        self.assertEqual(ts1.num_samples, 0)
+        with self.assertWarns(UserWarning):
+            self.assertIs(ts1.num_samples, None)
 
     def test_dataio_list_data(self):
-        num_samples = 100
-        data = list(range(num_samples))
+        length = 100
+        data = list(range(length))
         ts1 = TimeSeries('test_ts1', H5DataIO(data),
                          'grams', starting_time=0.0, rate=0.1)
-        self.assertEqual(ts1.num_samples, num_samples)
+        self.assertEqual(ts1.num_samples, length)
         assert data == list(ts1.data)
 
     def test_dataio_dci_data(self):
@@ -74,7 +75,7 @@ class TestTimeSeries(unittest.TestCase):
         data = H5DataIO(DataChunkIterator(data=generator_factory()))
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
-        self.assertEqual(ts1.num_samples, -1)
+        self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
 
@@ -86,7 +87,7 @@ class TestTimeSeries(unittest.TestCase):
         data = DataChunkIterator(data=generator_factory())
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
-        self.assertEqual(ts1.num_samples, -1)
+        self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
 
@@ -98,7 +99,9 @@ class TestTimeSeries(unittest.TestCase):
         data = DataChunkIterator(data=generator_factory())
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
-        self.assertEqual(ts1.num_samples, -1)
+        # with self.assertWarnsRegex(UserWarning, r'.*name: \'test_ts1\'.*'):
+        with self.assertWarns(UserWarning):
+            self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
 
