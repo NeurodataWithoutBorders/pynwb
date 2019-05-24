@@ -21,7 +21,7 @@ def _validate_helper(**kwargs):
     errors = validate(**kwargs)
     _print_errors(errors)
 
-    return (errors and len(errors) > 0)
+    return (errors is not None and len(errors) > 0)
 
 
 def main():
