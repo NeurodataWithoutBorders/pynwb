@@ -20,9 +20,10 @@ import numpy as np
 # argument is the name of the NWB file, and the second argument is a brief description of the dataset.
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile
 
-nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
                   experimenter='Dr. Bilbo Baggins',
                   lab='Bag End Laboratory',
                   institution='University of Middle Earth at the Shire',
@@ -42,19 +43,17 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 # device that was used to record from the electrode. This is done by creating a :py:class:`~pynwb.ecephys.Device`
 # object using the instance method :py:meth:`~pynwb.file.NWBFile.create_device`.
 
-device = nwbfile.create_device(name='trodes_rig123', source="a source")
+device = nwbfile.create_device(name='trodes_rig123')
 
 #######################
 # Once you have created the :py:class:`~pynwb.device.Device`, you can create an
 # :py:class:`~pynwb.ecephys.ElectrodeGroup`.
 
 electrode_name = 'tetrode1'
-source = "an hypothetical source"
 description = "an example tetrode"
 location = "somewhere in the hippocampus"
 
 electrode_group = nwbfile.create_electrode_group(electrode_name,
-                                                 source=source,
                                                  description=description,
                                                  location=location,
                                                  device=device)
@@ -73,7 +72,7 @@ for idx in [1, 2, 3, 4]:
                           x=1.0, y=2.0, z=3.0,
                           imp=float(-idx),
                           location='CA1', filtering='none',
-                          description='channel %s' % idx, group=electrode_group)
+                          group=electrode_group)
 
 
 #######################
@@ -87,10 +86,12 @@ for idx in [1, 2, 3, 4]:
 # Extracellular recordings
 # ^^^^^^^^^^^^^^^^^^^^^^^^
 #
-# The two main classes for storing extracellular recordings are :py:class:`~pynwb.ecephys.ElectricalSeries`
+# The main classes for storing extracellular recordings are :py:class:`~pynwb.ecephys.ElectricalSeries`
 # and :py:class:`~pynwb.ecephys.SpikeEventSeries`. :py:class:`~pynwb.ecephys.ElectricalSeries` should be used
 # for storing raw voltage traces, local-field potential and filtered voltage traces and
-# :py:class:`~pynwb.ecephys.SpikeEventSeries` is meant for storing spike waveforms.
+# :py:class:`~pynwb.ecephys.SpikeEventSeries` is meant for storing spike waveforms (typically in preparation for
+# clustering). The results of spike clustering (e.g. per-unit metadata and spike times) should be stored in the
+# top-level :py:class:`~pynwb.misc.Units` table.
 #
 # In addition to the *data* and *timestamps* fields inherited
 # from :py:class:`~pynwb.base.TimeSeries` class, these two classs will require metadata about the elctrodes
@@ -117,7 +118,6 @@ ephys_data = np.random.rand(data_len * 2).reshape((data_len, 2))
 ephys_timestamps = np.arange(data_len) / rate
 
 ephys_ts = ElectricalSeries('test_ephys_data',
-                            'an hypothetical source',
                             ephys_data,
                             electrode_table_region,
                             timestamps=ephys_timestamps,
@@ -129,6 +129,20 @@ ephys_ts = ElectricalSeries('test_ephys_data',
                             description="Random numbers generated with numpy.random.rand")
 nwbfile.add_acquisition(ephys_ts)
 
+####################
+# .. _units_electrode:
+#
+# Associate electrodes with units
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# The :ref:`PyNWB Basics tutorial <basics>` demonstrates how to add data about units and specifying custom metadata
+# about units. As mentioned :ref:`here <units_fields_ref>`, there are some optional fields for units, one of these
+# is *electrodes*. This field takes a list of indices into the electrode table for the electrodes that the unit
+# corresponds to. For example, if two units were inferred from the first electrode (*id* = 1, index = 0), you would
+# specify that like so:
+
+nwbfile.add_unit(id=1, electrodes=[0])
+nwbfile.add_unit(id=2, electrodes=[0])
 
 #######################
 # Designating electrophysiology data
@@ -142,12 +156,16 @@ nwbfile.add_acquisition(ephys_ts)
 # using these objects.
 #
 # For storing spike data, there are two options. Which one you choose depends on what data you have available.
-# If you need to store the raw voltage traces, you should store your the traces with
+# If you need to store the complete, continuous raw voltage traces, you should store your the traces with
 # :py:class:`~pynwb.ecephys.ElectricalSeries` objects as :ref:`acquisition <basic_timeseries>` data, and use
 # the :py:class:`~pynwb.ecephys.EventDetection` class for identifying the spike events in your raw traces.
-# If you do not want to store the raw voltage traces and only the spike events, you should use
-# the :py:class:`~pynwb.ecephys.EventWaveform` class, which can store one or more
+# If you do not want to store the raw voltage traces and only the waveform 'snippets' surrounding spike events,
+# you should use the :py:class:`~pynwb.ecephys.EventWaveform` class, which can store one or more
 # :py:class:`~pynwb.ecephys.SpikeEventSeries` objects.
+#
+# The results of spike sorting (or clustering) should be stored in the top-level :py:class:`~pynwb.misc.Units` table.
+# Note that it is not required to store spike waveforms in order to store spike events or waveforms--if you only
+# want to store the spike times of clustered units you can use only the Units table.
 #
 # For local field potential data, there are two options. Again, which one you choose depends on what data you
 # have available. With both options, you should store your traces with :py:class:`~pynwb.ecephys.ElectricalSeries`

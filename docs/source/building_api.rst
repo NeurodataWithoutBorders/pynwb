@@ -85,7 +85,7 @@ If your specification extension contains a table definition i.e. a dataset with 
 the :py:class:`~pynwb.core.NWBTable` class to represent this specification. Since :py:class:`~pynwb.core.NWBTable`
 subclasses :py:class:`~pynwb.core.NWBData` you can still use ``__nwbfields__``. In addition, you can use the
 ``__columns__`` class property to specify the columns of the table. ``__columns__`` should be a list or a tuple of
-:py:func:`~pynwb.form.utils.docval`-like dictionaries.
+:py:func:`~hdmf.utils.docval`-like dictionaries.
 
 The following example demonstrates how to define a table with the columns ``foo`` and ``bar`` that are of type
 str and int, respectively. We also register the class as the reppresentation of the *neurodata_type* "MyTable"

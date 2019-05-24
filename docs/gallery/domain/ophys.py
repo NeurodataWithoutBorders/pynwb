@@ -18,9 +18,13 @@ clarity, we define them here:
 '''
 
 from datetime import datetime
+from dateutil.tz import tzlocal
+
+import numpy as np
 
 from pynwb import NWBFile
 from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluorescence
+from pynwb.device import Device
 
 
 ####################
@@ -30,7 +34,7 @@ from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluo
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`.
 
 
-nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
                   experimenter='Dr. Bilbo Baggins',
                   lab='Bag End Laboratory',
                   institution='University of Middle Earth at the Shire',
@@ -43,18 +47,15 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 # ---------------------------------
 #
 # Before you can add your data, you will need to provide some information about how that data was generated.
-# This amounts describing the imaging plane and the optical channel used.
+# This amounts describing the device, imaging plane and the optical channel used.
 
 
-optical_channel = OpticalChannel('my_optchan', 'Ca2+ imaging example',
-                                 'pi wavelength', 500.)
-imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
-                                             'Ca2+ imaging example',
-                                             optical_channel,
-                                             'a very interesting part of the brain',
-                                             'imaging_device_1',
-                                             600., '2.718', 'GFP', 'my favorite brain location',
-                                             [], 4.0, 'manifold unit', 'A frame to refer to')
+device = Device('imaging_device_1')
+nwbfile.add_device(device)
+optical_channel = OpticalChannel('my_optchan', 'description', 500.)
+imaging_plane = nwbfile.create_imaging_plane('my_imgpln', optical_channel, 'a very interesting part of the brain',
+                                             device, 600., 300., 'GFP', 'my favorite brain location',
+                                             np.ones((5, 5, 3)), 4.0, 'manifold unit', 'A frame to refer to')
 
 
 ####################
@@ -69,9 +70,9 @@ imaging_plane = nwbfile.create_imaging_plane('my_imgpln',
 # considering how you want to store this data [#]_.
 
 
-image_series = TwoPhotonSeries(name='test_iS', source='Ca2+ imaging example', dimension=[2],
+image_series = TwoPhotonSeries(name='test_iS', dimension=[2],
                                external_file=['images.tiff'], imaging_plane=imaging_plane,
-                               starting_frame=[0], format='tiff', timestamps=list())
+                               starting_frame=[0], format='tiff', starting_time=0.0, rate=1.0)
 nwbfile.add_acquisition(image_series)
 
 
@@ -84,18 +85,18 @@ nwbfile.add_acquisition(image_series)
 # from one or more imaging planes; hence the :py:class:`~pynwb.ophys.PlaneSegmentation` class.
 
 
-mod = nwbfile.create_processing_module('my_ca_imaging_module', 'Ca2+ imaging example', 'example data module')
-img_seg = ImageSegmentation('Ca2+ imaging example')
+mod = nwbfile.create_processing_module('ophys', 'contains optical physiology processed data')
+img_seg = ImageSegmentation()
 mod.add_data_interface(img_seg)
-ps = img_seg.create_plane_segmentation('Ca2+ imaging example', 'output from segmenting my favorite imaging plane',
+ps = img_seg.create_plane_segmentation('output from segmenting my favorite imaging plane',
                                        imaging_plane, 'my_planeseg', image_series)
 
 
 ####################
 # Now that you have your :py:class:`~pynwb.ophys.PlaneSegmentation` object, you can add the resulting ROIs.
 # This is done using the method :py:func:`~pynwb.ophys.PlaneSegmentation.add_roi`. The first argument to this
-# method is the `pixel_mask` and the second method is the `image_mask`. Both of these arguments are required
-# for schema compliance--the NWB schema requires that you store both the image mask and the pixel mask.
+# method is the `pixel_mask` and the second method is the `image_mask`. The NWB schema allows for either argument
+# to be provided.
 
 
 w, h = 3, 3
@@ -104,13 +105,13 @@ img_mask1 = [[0.0 for x in range(w)] for y in range(h)]
 img_mask1[0][0] = 1.1
 img_mask1[1][1] = 1.2
 img_mask1[2][2] = 1.3
-ps.add_roi('1234', pix_mask1, img_mask1)
+ps.add_roi(pixel_mask=pix_mask1, image_mask=img_mask1)
 
 pix_mask2 = [(0, 0, 2.1), (1, 1, 2.2)]
 img_mask2 = [[0.0 for x in range(w)] for y in range(h)]
 img_mask2[0][0] = 2.1
 img_mask2[1][1] = 2.2
-ps.add_roi('5678', pix_mask2, img_mask2)
+ps.add_roi(pixel_mask=pix_mask2, image_mask=img_mask2)
 
 
 ####################
@@ -126,7 +127,7 @@ ps.add_roi('5678', pix_mask2, img_mask2)
 # First, create a data interface to store this data in
 
 
-fl = Fluorescence('Ca2+ imaging example')
+fl = Fluorescence()
 mod.add_data_interface(fl)
 
 
@@ -139,22 +140,13 @@ mod.add_data_interface(fl)
 rt_region = ps.create_roi_table_region('the first of two ROIs', region=[0])
 
 ####################
-# Alternatively, you can get create a region using the names of the ROIs you added by passing in
-# the ROI names with the *names* argument. We will create the same region we did above, but
-# by using the name of the ROI.
-
-
-rt_region = ps.create_roi_table_region('the first of two ROIs', names=['1234'])
-
-####################
 # Now that you have an :py:class:`~pynwb.ophys.ROITableRegion`, you can create your an
 # :py:class:`~pynwb.ophys.RoiResponseSeries`.
 
 
-data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
 timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-rrs = fl.create_roi_response_series('my_rrs', 'Ca2+ imaging example',
-                                    data, 'lumens', rt_region, timestamps=timestamps)
+rrs = fl.create_roi_response_series('my_rrs', data, 'lumens', rt_region, timestamps=timestamps)
 
 
 ####################
@@ -193,7 +185,7 @@ nwbfile = io.read()
 # :py:class:`~pynwb.base.ProcessingModule`.
 
 
-mod = nwbfile.modules['my_ca_imaging_module']
+mod = nwbfile.modules['ophys']
 
 ####################
 # Now you can retrieve the :py:class:`~pynwb.ophys.ImageSegmentation` object by indexing into the
@@ -208,10 +200,10 @@ ps = mod['ImageSegmentation'].get_plane_segmentation()
 # image masks and pixel masks using :py:func:`~pynwb.ophys.PlaneSegmentation.get_image_mask`
 # :py:func:`~pynwb.ophys.PlaneSegmentation.get_pixel_mask`, respectively.
 
-img_mask1 = ps.get_image_mask(0)
-pix_mask1 = ps.get_pixel_mask(0)
-img_mask2 = ps.get_image_mask(1)
-pix_mask2 = ps.get_pixel_mask(1)
+img_mask1 = ps['image_mask'][0]
+pix_mask1 = ps['pixel_mask'][0]
+img_mask2 = ps['image_mask'][1]
+pix_mask2 = ps['pixel_mask'][1]
 
 ####################
 # To get back the fluorescence time series data, first access the :py:class:`~pynwb.ophys.Fluorescence` object we added
@@ -228,9 +220,9 @@ rrs_rois = rrs.rois
 
 ####################
 #
-# .. [#] If you pass in the image data directily,
+# .. [#] If you pass in the image data directly,
 #    you will not need to worry about distributing the image files with your NWB file. However, we recognize that
-#    using commong image formats have tools built around them, so working with the original file formats can make
+#    common image formats have tools built around them, so working with the original file formats can make
 #    one's life much simpler. NWB currently does not have the ability to read and parse native image formats. It
 #    is up to downstream users to read these file formats.
 #
@@ -243,4 +235,4 @@ rrs_rois = rrs.rois
 # .. [#] If you added more than one :py:class:`~pynwb.ophys.RoiResponseSeries`, you will need to
 #    provide the name of the :py:class:`~pynwb.ophys.RoiResponseSeries` you want to retrieve to
 #    :py:func:`~pynwb.ophys.Fluorescence.create_roi_response_series`. This same behavior is exhibited
-#    with :py:class:`~pynwb.ophys.ImageSegmentation` and various other objects throught the PyNWB API.
+#    with :py:class:`~pynwb.ophys.ImageSegmentation` and various other objects through the PyNWB API.

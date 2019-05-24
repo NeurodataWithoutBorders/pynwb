@@ -1,15 +1,14 @@
 from collections import Iterable
-from h5py import RegionReference
 import numpy as np
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
-from .form.data_utils import RegionSlicer
-from .form import get_region_slicer
+from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, NWBData, VectorData, NWBTable, NWBTableRegion
+from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, ElementIdentifiers,\
+    NWBDataInterface
+from .device import Device
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -21,7 +20,6 @@ class OpticalChannel(NWBContainer):
                      'emission_lambda')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},
             {'name': 'emission_lambda', 'type': float, 'doc': 'Emission lambda for channel.'},
             {'name': 'parent', 'type': 'NWBContainer',
@@ -52,13 +50,12 @@ class ImagingPlane(NWBContainer):
                      'reference_frame')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'optical_channel', 'type': (list, OpticalChannel),
              'doc': 'One of possibly many groups storing channelspecific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},
-            {'name': 'device', 'type': str, 'doc': 'Name of device in /general/devices'},
-            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength.'},
-            {'name': 'imaging_rate', 'type': str, 'doc': 'Rate images are acquired, in Hz.'},
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},
+            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},
+            {'name': 'imaging_rate', 'type': float, 'doc': 'Rate images are acquired, in Hz.'},
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},
             {'name': 'manifold', 'type': Iterable,
@@ -106,23 +103,18 @@ class TwoPhotonSeries(ImageSeries):
                      'pmt_gain',
                      'scan_line_rate')
 
-    _ancestry = "TimeSeries,ImageSeries,TwoPhotonSeries"
     _help = "Image stack recorded from 2-photon microscope."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
-            {'name': 'field_of_view', 'type': (Iterable, TimeSeries),
+            {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
             {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.', 'default': None},
             {'name': 'scan_line_rate', 'type': float,
@@ -141,8 +133,8 @@ class TwoPhotonSeries(ImageSeries):
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) \
             between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -168,7 +160,7 @@ class TwoPhotonSeries(ImageSeries):
 
 
 @register_class('CorrectedImageStack', CORE_NAMESPACE)
-class CorrectedImageStack(NWBContainer):
+class CorrectedImageStack(NWBDataInterface):
     """
     An image stack where all frames are shifted (registered) to a common coordinate system, to
     account for movement and drift between frames. Note: each frame at each point in time is
@@ -183,7 +175,6 @@ class CorrectedImageStack(NWBContainer):
 
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'corrected', 'type': ImageSeries,
              'doc': 'Image stack with frames shifted to the common coordinates.'},
             {'name': 'original', 'type': ImageSeries,
@@ -216,161 +207,78 @@ class MotionCorrection(MultiContainerInterface):
     _help = "Image stacks whose frames have been shifted (registered) to account for motion."
 
 
-_roit_docval = [
-    {'name': 'name', 'type': str, 'help': 'a name for this ROI'},
-    {'name': 'pixel_mask', 'type': RegionSlicer, 'help': 'a region into a PixelMasks'},
-    {'name': 'image_mask', 'type': RegionSlicer, 'help': 'a region into an ImageMasks'},
-]
-
-
-@register_class('ROITable', CORE_NAMESPACE)
-class ROITable(NWBTable):
-
-    __columns__ = _roit_docval
-
-    __defaultname__ = 'rois'
-
-
-@register_class('ROITableRegion', CORE_NAMESPACE)
-class ROITableRegion(NWBTableRegion):
-    '''A subsetting of an ElectrodeTable'''
-
-    __nwbfields__ = ('description',)
-
-    @docval({'name': 'table', 'type': ROITable, 'doc': 'the ElectrodeTable this region applies to'},
-            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
-    def __init__(self, **kwargs):
-        call_docval_func(super(ROITableRegion, self).__init__, kwargs)
-        self.description = getargs('description', kwargs)
-
-
-@register_class('PixelMasks', CORE_NAMESPACE)
-class PixelMasks(VectorData):
-
-    @docval({'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the pixel mask data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'pixel_masks'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
-    def __init__(self, **kwargs):
-        call_docval_func(super(PixelMasks, self).__init__, kwargs)
-
-
-@register_class('ImageMasks', CORE_NAMESPACE)
-class ImageMasks(NWBData):
-
-    @docval({'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the image mask data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'image_masks'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
-    def __init__(self, **kwargs):
-        call_docval_func(super(ImageMasks, self).__init__, kwargs)
-
-
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
-class PlaneSegmentation(NWBContainer):
+class PlaneSegmentation(DynamicTable):
     """
     Image segmentation of a specific imaging plane
     """
 
     __nwbfields__ = ('description',
-                     {'name': 'rois', 'child': True},
-                     {'name': 'pixel_masks', 'child': True},
-                     {'name': 'image_masks', 'child': True},
                      'imaging_plane',
                      {'name': 'reference_images', 'child': True})
 
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'description', 'type': str,
+    __columns__ = (
+        {'name': 'image_mask', 'description': 'Image masks for each ROI'},
+        {'name': 'pixel_mask', 'description': 'Pixel masks for each ROI', 'index': True},
+        {'name': 'voxel_mask', 'description': 'Voxel masks for each ROI', 'index': True}
+    )
+
+    @docval({'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.'},
             {'name': 'imaging_plane', 'type': ImagingPlane,
              'doc': 'the ImagingPlane this ROI applies to'},
             {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None},
             {'name': 'reference_images', 'type': (ImageSeries, list, dict, tuple), 'default': None,
              'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'},
-            {'name': 'rois', 'type': ROITable, 'default': None,
-             'doc': 'the table holding references to pixel and image masks'},
-            {'name': 'pixel_masks', 'type': ('array_data', 'data', PixelMasks), 'default': list(),
-             'doc': 'a concatenated list of pixel masks for all ROIs stored in this PlaneSegmenation'},
-            {'name': 'image_masks', 'type': ('array_data', ImageMasks), 'default': list(),
-             'doc': 'an image mask for each ROI in this PlaneSegmentation'})
+            {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
+             'default': None},
+            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
+            {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
+            'default': None})
     def __init__(self, **kwargs):
-        description, imaging_plane, reference_images, rois, pm, im = popargs(
-            'description', 'imaging_plane', 'reference_images', 'rois', 'pixel_masks', 'image_masks', kwargs)
+        imaging_plane, reference_images = popargs('imaging_plane', 'reference_images', kwargs)
         if kwargs.get('name') is None:
             kwargs['name'] = imaging_plane.name
+        columns, colnames = getargs('columns', 'colnames', kwargs)
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
         super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
-        self.description = description
         self.imaging_plane = imaging_plane
+        if isinstance(reference_images, ImageSeries):
+            reference_images = (reference_images,)
         self.reference_images = reference_images
-        self.pixel_masks = pm if isinstance(pm, PixelMasks) else PixelMasks(pm)
-        self.image_masks = im if isinstance(im, ImageMasks) else ImageMasks(im)
-        self.rois = ROITable() if rois is None else rois
 
-    @docval({'name': 'name', 'type': str, 'help': 'a name for this ROI'},
-            {'name': 'pixel_mask', 'type': 'array_data',
-             'doc': 'the index of the ROI in roi_ids to retrieve the pixel mask for'},
-            {'name': 'image_mask', 'type': 'array_data',
-             'doc': 'the index of the ROI in roi_ids to retrieve the pixel mask for'})
+    @docval({'name': 'pixel_mask', 'type': 'array_data', 'default': None,
+             'doc': 'pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]',
+             'shape': (None, 3)},
+            {'name': 'voxel_mask', 'type': 'array_data', 'default': None,
+             'doc': 'voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z2, weight2), ...]',
+             'shape': (None, 4)},
+            {'name': 'image_mask', 'type': 'array_data', 'default': None,
+             'doc': 'image with the same size of image where positive values mark this ROI',
+             'shape': [[None]*2, [None]*3]},
+            {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
+            allow_extra=True)
     def add_roi(self, **kwargs):
-        name, pixel_mask, image_mask = getargs('name', 'pixel_mask', 'image_mask', kwargs)
-        n_rois = len(self.rois)
-        im_region = get_region_slicer(self.image_masks, [n_rois])
-        self.image_masks.append(image_mask)
-        n_pixels = len(self.pixel_masks)
-        self.pixel_masks.extend(pixel_mask)
-        pm_region = get_region_slicer(self.pixel_masks, slice(n_pixels, n_pixels + len(pixel_mask)))
-        self.rois.add_row(name, pm_region, im_region)
-        return n_rois+1
+        """
+        Add ROI data to this
+        """
+        pixel_mask, voxel_mask, image_mask = popargs('pixel_mask', 'voxel_mask', 'image_mask', kwargs)
+        if image_mask is None and pixel_mask is None and voxel_mask is None:
+            raise ValueError("Must provide 'image_mask' and/or 'pixel_mask'")
+        rkwargs = dict(kwargs)
+        if image_mask is not None:
+            rkwargs['image_mask'] = image_mask
+        if pixel_mask is not None:
+            rkwargs['pixel_mask'] = pixel_mask
+        if voxel_mask is not None:
+            rkwargs['voxel_mask'] = voxel_mask
+        return super(PlaneSegmentation, self).add_row(**rkwargs)
 
-    @docval({'name': 'index', 'type': int,
-             'doc': 'the index of the ROI to retrieve the pixel mask for'})
-    def get_pixel_mask(self, **kwargs):
-        index = getargs('index', kwargs)
-        return self.rois[index]['pixel_mask']
-
-    @docval({'name': 'index', 'type': int,
-             'doc': 'the index of the ROI to retrieve the image mask for'})
-    def get_image_mask(self, **kwargs):
-        index = getargs('index', kwargs)
-        return self.rois[index]['image_mask']
-
-    @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'names', 'type': (list, tuple), 'doc': 'the names of the ROIs', 'default': None},
-            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table',
-             'default': None},
+    @docval({'name': 'description', 'type': str, 'doc': 'a brief description of what the region is'},
+            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table', 'default': slice(None)},
             {'name': 'name', 'type': str, 'doc': 'the name of the ROITableRegion', 'default': 'rois'})
     def create_roi_table_region(self, **kwargs):
-        desc = getargs('description', kwargs)
-        name = getargs('name', kwargs)
-        region = getargs('region', kwargs)
-        names = getargs('names', kwargs)
-        if region is None and names is None:
-            msg = "must provide 'region' or 'names'"
-            raise ValueError(msg)
-        elif names is not None:
-            region = list()
-            for n in names:
-                idx = self.rois.which(name=n)
-                if len(idx) == 0:
-                    msg = "no ROI named '%s'" % n
-                    raise ValueError(msg)
-                region.append(idx[0])
-            # collapse into a slice if we can
-            consecutive = True
-            for i in range(1, len(region)):
-                if region[i] - region[i-1] != 1:
-                    consecutive = False
-                    break
-            if consecutive:
-                region = slice(region[0], region[-1]+1)
-        return ROITableRegion(self.rois, region, desc, name)
+        return call_docval_func(self.create_region, kwargs)
 
 
 @register_class('ImageSegmentation', CORE_NAMESPACE)
@@ -396,10 +304,8 @@ class ImageSegmentation(MultiContainerInterface):
     @docval({'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'the ImagingPlane this ROI applies to'},
             {'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.', 'default': None},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data', 'default': None},
             {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None})
     def add_segmentation(self, **kwargs):
-        kwargs.setdefault('source', self.source)
         kwargs.setdefault('description', kwargs['imaging_plane'].description)
         return self.create_plane_segmentation(**kwargs)
 
@@ -412,26 +318,21 @@ class RoiResponseSeries(TimeSeries):
 
     __nwbfields__ = ({'name': 'rois', 'child': True},)
 
-    _ancestry = "TimeSeries,ImageSeries,ImageMaskSeries"
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this RioResponseSeries dataset'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 
-            {'name': 'rois', 'type': ROITableRegion,
+            {'name': 'rois', 'type': DynamicTableRegion,
              'doc': 'a table region corresponding to the ROIs that were used to generate this data'},
 
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},

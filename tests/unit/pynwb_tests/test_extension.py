@@ -1,13 +1,16 @@
-import unittest2 as unittest
 import os
-from tempfile import gettempdir
 import random
 import string
+from datetime import datetime
+from dateutil.tz import tzlocal
+from tempfile import gettempdir
 
+import unittest2 as unittest
+from pynwb import get_type_map, TimeSeries, NWBFile, register_class, docval, load_namespaces, popargs, get_class
+from hdmf.spec.spec import RefSpec
+from hdmf.utils import get_docval
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
-from pynwb.form.spec.spec import RefSpec
-from pynwb import get_type_map, TimeSeries
-from pynwb.form.utils import get_docval
+from pynwb.file import LabMetaData
 
 
 def id_generator(N=10):
@@ -80,6 +83,55 @@ class TestExtension(unittest.TestCase):
         self.assertIsNotNone(docval)
         self.assertEqual(docval['type'], TimeSeries)
 
+    def test_lab_meta(self):
+        ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix)
+        test_meta_ext = NWBGroupSpec(
+            neurodata_type_def='MyTestMetaData',
+            neurodata_type_inc='LabMetaData',
+            doc='my test meta data',
+            attributes=[
+                NWBAttributeSpec(name='test_attr', dtype='float', doc='test_dtype')])
+        ns_builder.add_spec(self.ext_source, test_meta_ext)
+        ns_builder.export(self.ns_path, outdir=self.tempdir)
+        ns_abs_path = os.path.join(self.tempdir, self.ns_path)
+
+        load_namespaces(ns_abs_path)
+
+        @register_class('MyTestMetaData', self.prefix)
+        class MyTestMetaData(LabMetaData):
+            __nwbfields__ = ('test_attr',)
+
+            @docval({'name': 'name', 'type': str, 'doc': 'name'},
+                    {'name': 'test_attr', 'type': float, 'doc': 'test attribute'})
+            def __init__(self, **kwargs):
+                test_attr = popargs('test_attr', kwargs)
+                super(MyTestMetaData, self).__init__(**kwargs)
+                self.test_attr = test_attr
+
+        nwbfile = NWBFile("a file with header data", "NB123A",  datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
+
+        nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
+
+    def test_lab_meta_auto(self):
+        ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix)
+        test_meta_ext = NWBGroupSpec(
+            neurodata_type_def='MyTestMetaData',
+            neurodata_type_inc='LabMetaData',
+            doc='my test meta data',
+            attributes=[
+                NWBAttributeSpec(name='test_attr', dtype='float', doc='test_dtype')])
+        ns_builder.add_spec(self.ext_source, test_meta_ext)
+        ns_builder.export(self.ns_path, outdir=self.tempdir)
+        ns_abs_path = os.path.join(self.tempdir, self.ns_path)
+
+        load_namespaces(ns_abs_path)
+
+        MyTestMetaData = get_class('MyTestMetaData', self.prefix)
+
+        nwbfile = NWBFile("a file with header data", "NB123A", datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()))
+
+        nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
+
 
 class TestCatchDupNS(unittest.TestCase):
 
@@ -116,7 +168,7 @@ class TestCatchDupNS(unittest.TestCase):
         ns_builder2.add_spec(self.ext_source2, ext2)
         ns_builder2.export(self.ns_path2, outdir=self.tempdir)
         type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path1))
-        with self.assertWarnsRegex(UserWarning, "ignoring namespace '\S+' because it already exists"):
+        with self.assertWarnsRegex(UserWarning, r"ignoring namespace '\S+' because it already exists"):
             type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
 
 

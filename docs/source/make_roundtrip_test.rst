@@ -13,6 +13,14 @@ with the following command::
 
     $ python test.py -i
 
+The roundtrip test will generate a new NWB file with the name ``test_<CLASS_NAME>.nwb`` where ``CLASS_NAME`` is
+the class name of the :py:class:`~hdmf.container.Container` class you are roundtripping. The test
+will write an NWB file with an instance of the container to disk, read this instance back in, and compare it
+to the instance that was used for writing to disk. Once the test is complete, the NWB file will be deleted.
+You can keep the NWB file around after the test completes by setting the environment variable ``CLEAN_NWB``
+to ``0``, ``false``, ``False``, or ``FALSE``. Setting ``CLEAN_NWB`` to any value not listed here will
+cause the roundtrip NWB file to be deleted once the test has completed
+
 Before writing tests, we also suggest you familiarize yourself with the
 :ref:`software architecture <software-architecture>` of PyNWB.
 
@@ -26,8 +34,8 @@ its instance methods.
 ``TestMapRoundTrip`` provides four methods for testing the process of going from in-memory Python object to data
 stored on disk and back. Three of these methods--``setUpContainer``, ``addContainer``, and ``getContainer``--are
 required for carrying out the roundtrip test. The fourth method is required for testing the conversion
-from the container to the :py:mod:`builder <pynwb.form.build.builders>`--the intermediate data structure
-that gets used by :py:class:`~pynwb.form.backends.io.FORMIO` implementations for writing to disk.
+from the container to the :py:mod:`builder <hdmf.build.builders>`--the intermediate data structure
+that gets used by :py:class:`~hdmf.backends.io.FORMIO` implementations for writing to disk.
 
 If you do not want to test step of the process, you can just implement ``setUpContainer``, ``addContainer``, and
 ``getContainer``.
@@ -104,7 +112,7 @@ To finish off example from above, we will add the method for getting back our ge
 
 As mentioned above, there is an optional method to override. This method will add two additional tests. First, it will
 add a test for converting your container into a builder to make sure the intermerdiate data structure gets built
-appropriately. Second it will add a test for constructing your container from the builder returned by your overriden
+appropriately. Second it will add a test for constructing your container from the builder returned by your overridden
 ``setUpBuilder`` method.  This method takes no arguments, and should return the builder representation of your
 container class instance.
 
@@ -116,7 +124,7 @@ Continuing from the :py:class:`~pynwb.base.TimeSeries` example, lets add ``setUp
 
 .. code-block:: python
 
-    from pynwb.form.build import GroupBuilder
+    from hdmf.build import GroupBuilder
 
     class TimeSeriesRoundTrip(TestMapRoundTrip):
 
@@ -142,7 +150,7 @@ Continuing from the :py:class:`~pynwb.base.TimeSeries` example, lets add ``setUp
 -----------------------
 
 If you are testing something that can go in *acquisition*, you can avoid writing ``addContainer`` and ``getContainer``
-by extending ``TestDataInterfaceIO``.  This class has already overriden these methods to add your container object to
+by extending ``TestDataInterfaceIO``.  This class has already overridden these methods to add your container object to
 acquisition.
 
 Even if your container can go in acquisition, you may still need to override ``addContainer`` if your container depends

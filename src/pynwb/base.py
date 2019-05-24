@@ -2,11 +2,10 @@ from warnings import warn
 
 from collections import Iterable
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
-from .form.data_utils import AbstractDataChunkIterator, DataIO
+from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBDataInterface, MultiContainerInterface
+from .core import NWBDataInterface, MultiContainerInterface, NWBData
 
 _default_conversion = 1.0
 _default_resolution = 0.0
@@ -31,7 +30,6 @@ class ProcessingModule(MultiContainerInterface):
     }
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
             {'name': 'data_interfaces', 'type': (list, tuple, dict),
              'doc': 'NWBDataInterfacess that belong to this ProcessingModule', 'default': None},
@@ -77,23 +75,18 @@ class TimeSeries(NWBDataInterface):
                      "resolution",
                      "conversion",
                      "unit",
-                     "num_samples",
                      "timestamps",
                      "timestamps_unit",
                      "interval",
                      "starting_time",
                      "rate",
-                     "rate_unit",
+                     "starting_time_unit",
                      "control",
                      "control_description")
 
     __time_unit = "Seconds"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
@@ -140,26 +133,15 @@ class TimeSeries(NWBDataInterface):
 
         data = getargs('data', kwargs)
         self.fields['data'] = data
-        if isinstance(data, TimeSeries):
-            data.__add_link('data_link', self)
-            self.fields['num_samples'] = data.num_samples
-        elif isinstance(data, AbstractDataChunkIterator):
-            self.fields['num_samples'] = -1
-        elif isinstance(data, DataIO):
-            this_data = data.data
-            if isinstance(this_data, AbstractDataChunkIterator):
-                self.fields['num_samples'] = -1
-            else:
-                self.fields['num_samples'] = len(this_data)
-        elif data is None:
-            self.fields['num_samples'] = 0
-        else:
-            self.fields['num_samples'] = len(data)
 
         timestamps = kwargs.get('timestamps')
         starting_time = kwargs.get('starting_time')
         rate = kwargs.get('rate')
         if timestamps is not None:
+            if rate is not None:
+                raise ValueError('Specifying rate and timestamps is not supported.')
+            if starting_time is not None:
+                raise ValueError('Specifying starting_time and timestamps is not supported.')
             self.fields['timestamps'] = timestamps
             self.timestamps_unit = 'Seconds'
             self.interval = 1
@@ -167,13 +149,44 @@ class TimeSeries(NWBDataInterface):
                 timestamps.__add_link('timestamp_link', self)
         elif rate is not None:
             self.rate = rate
-            self.rate_unit = 'Seconds'
             if starting_time is not None:
                 self.starting_time = starting_time
+                self.starting_time_unit = 'Seconds'
             else:
                 self.starting_time = 0.0
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
+
+    @property
+    def num_samples(self):
+        ''' Tries to return the number of data samples. If this cannot be assessed, returns None.
+        '''
+
+        def unreadable_warning(attr):
+            return (
+                'The {} attribute on this TimeSeries (named: {}) has a __len__, '
+                'but it cannot be read'.format(attr, self.name)
+            )
+
+        def no_len_warning(attr):
+            return 'The {} attribute on this TimeSeries (named: {}) has no __len__, '.format(attr, self.name)
+
+        if hasattr(self, 'timestamps'):
+            if hasattr(self.timestamps, '__len__'):
+                try:
+                    return len(self.timestamps)
+                except TypeError:
+                    warn(unreadable_warning('timestamps'), UserWarning)
+            else:
+                warn(no_len_warning('timestamps'), UserWarning)
+
+        if hasattr(self.data, '__len__'):
+            try:
+                return len(self.data)  # for an ndarray this will return the first element of shape
+            except TypeError:
+                warn(unreadable_warning('data'), UserWarning)
+        else:
+            warn(no_len_warning('data'), UserWarning)
 
     @property
     def data(self):
@@ -211,3 +224,48 @@ class TimeSeries(NWBDataInterface):
     @property
     def time_unit(self):
         return self.__time_unit
+
+
+@register_class('Image', CORE_NAMESPACE)
+class Image(NWBData):
+    __nwbfields__ = ('data', 'resolution', 'description')
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
+             'shape': ((None, None), (None, None, 3), (None, None, 4))},
+            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None},
+            {'name': 'help', 'type': str, 'doc': 'helpful hint for user',
+             'default': 'pixel values for an image'}
+            )
+    def __init__(self, **kwargs):
+        super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
+        self.resolution = kwargs['resolution']
+        self.description = kwargs['description']
+        self.help = kwargs['help']
+
+
+@register_class('Images', CORE_NAMESPACE)
+class Images(MultiContainerInterface):
+
+    __nwbfields__ = ('description',)
+
+    __clsconf__ = {
+        'attr': 'images',
+        'add': 'add_image',
+        'type': Image,
+        'get': 'get_image',
+        'create': 'create_image'
+    }
+
+    __help = "Contains images"
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
+            {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of images',
+             'default': 'no description'})
+    def __init__(self, **kwargs):
+        name, description, images = popargs('name', 'description', 'images', kwargs)
+        super(Images, self).__init__(name, **kwargs)
+        self.description = description
+        self.images = images

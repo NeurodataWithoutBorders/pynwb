@@ -17,9 +17,10 @@ def main():
 
     # create-nwbfile: start
     from datetime import datetime
+    from dateutil.tz import tzlocal
     from pynwb import NWBFile
 
-    f = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+    f = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
                 experimenter='Dr. Bilbo Baggins',
                 lab='Bag End Laboratory',
                 institution='University of Middle Earth at the Shire',
@@ -28,11 +29,10 @@ def main():
     # create-nwbfile: end
 
     # save-nwbfile: start
-    from pynwb import get_manager
-    from pynwb.form.backends.hdf5 import HDF5IO
+    from pynwb import NWBHDF5IO
 
     filename = "example.h5"
-    io = HDF5IO(filename, manager=get_manager(), mode='w')
+    io = NWBHDF5IO(filename, mode='w')
     io.write(f)
     io.close()
     # save-nwbfile: end
@@ -126,17 +126,17 @@ def main():
     # create-epochs: start
     epoch_tags = ('example_epoch',)
 
-    f.create_epoch(name='epoch1', start_time=0.0, stop_time=1.0, tags=epoch_tags,
-                   description="the first test epoch", timeseries=[ephys_ts, spatial_ts])
+    f.add_epoch(name='epoch1', start_time=0.0, stop_time=1.0, tags=epoch_tags,
+                description="the first test epoch", timeseries=[ephys_ts, spatial_ts])
 
-    f.create_epoch(name='epoch2', start_time=0.0, stop_time=1.0, tags=epoch_tags,
-                   description="the second test epoch", timeseries=[ephys_ts, spatial_ts])
+    f.add_epoch(name='epoch2', start_time=0.0, stop_time=1.0, tags=epoch_tags,
+                description="the second test epoch", timeseries=[ephys_ts, spatial_ts])
     # create-epochs: end
 
     # create-compressed-timeseries: start
     from pynwb.ecephys import ElectricalSeries
     from pynwb.behavior import SpatialSeries
-    from pynwb.form.backends.hdf5 import H5DataIO
+    from hdmf.backends.hdf5 import H5DataIO
 
     ephys_ts = ElectricalSeries('test_compressed_ephys_data',
                                 'an hypothetical source',

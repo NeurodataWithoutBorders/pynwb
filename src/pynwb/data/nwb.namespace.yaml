@@ -1,5 +1,7 @@
 namespaces:
-- author:
+- name: core
+  doc: NWB namespace
+  author:
   - Keith Godfrey
   - Jeff Teeters
   - Oliver Ruebel
@@ -9,19 +11,39 @@ namespaces:
   - jteeters@berkeley.edu
   - oruebel@lbl.gov
   - ajtritt@lbl.gov
-  doc: NWB namespace
   full_name: NWB core
-  name: core
   schema:
   - source: nwb.base.yaml
+    title: Base data types
+    doc: This source module contains base data types used throughout the NWB:N data format.
   - source: nwb.epoch.yaml
+    title: Epochs
+    doc: This source module contains neurodata_types for epoch data.
   - source: nwb.image.yaml
+    title: Image data
+    doc: This source module contains neurodata_types for image data.
   - source: nwb.file.yaml
+    title: NWB:N file
+    doc: Main NWB:N file specification.
   - source: nwb.misc.yaml
+    title: Miscellaneous neurodata_types.
+    doc: Miscellaneous types.
   - source: nwb.behavior.yaml
+    title: Behavior
+    doc: This source module contains neurodata_types for behavior data.
   - source: nwb.ecephys.yaml
+    title: Extracellular electrophysiology
+    doc: This source module contains neurodata_types for extracellular electrophysiology data.
   - source: nwb.icephys.yaml
+    title: Intracellular electrophysiology
+    doc: This source module contains neurodata_types for intracellular electrophysiology data.
   - source: nwb.ogen.yaml
+    title: Optogenetics
+    doc: This source module contains neurodata_types for opto-genetics data.
   - source: nwb.ophys.yaml
+    title: Optical physiology
+    doc: This source module contains neurodata_types for optical physiology data.
   - source: nwb.retinotopy.yaml
-  version: 1.2.0
+    title: Retinotopy
+    doc: This source module contains neurodata_type for retinotopy data.
+  version: 2.0.1

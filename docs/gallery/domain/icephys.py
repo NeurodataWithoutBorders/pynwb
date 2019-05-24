@@ -14,13 +14,14 @@ clarity, we define them here:
 # ------------------------------
 #
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
-# argument is the source of the NWB file, and the second argument is a brief description of the dataset.
+# argument is is a brief description of the dataset.
 
 from datetime import datetime
+from dateutil.tz import tzlocal
 from pynwb import NWBFile
 import numpy as np
 
-nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE_ID', datetime.now(),
+nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
                   experimenter='Dr. Bilbo Baggins',
                   lab='Bag End Laboratory',
                   institution='University of Middle Earth at the Shire',
@@ -35,7 +36,7 @@ nwbfile = NWBFile('the PyNWB tutorial', 'my first synthetic recording', 'EXAMPLE
 # To create a device, you can use the :py:class:`~pynwb.device.Device` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_device`.
 
-device = nwbfile.create_device(name='Heka ITC-1600', source='a source')
+device = nwbfile.create_device(name='Heka ITC-1600')
 
 #######################
 # Electrode metadata
@@ -45,10 +46,9 @@ device = nwbfile.create_device(name='Heka ITC-1600', source='a source')
 # To create an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance method
 # :py:meth:`~pynwb.file.NWBFile.create_ic_electrode`.
 
-elec = nwbfile.create_ic_electrode(
-    name="elec0", source='PyNWB tutorial example',
-    description='a mock intracellular electrode',
-    device=device.name)
+elec = nwbfile.create_ic_electrode(name="elec0",
+                                   description='a mock intracellular electrode',
+                                   device=device)
 
 #######################
 # Stimulus data
@@ -58,8 +58,7 @@ elec = nwbfile.create_ic_electrode(
 # :py:class:`~pynwb.icephys.PatchClampSeries`. There are two classes for representing stimulus
 # data--:py:class:`~pynwb.icephys.VoltageClampStimulusSeries` and
 # :py:class:`~pynwb.icephys.CurrentClampStimulusSeries`--, and three classes for representing response
-# data--:py:class:`~pynwb.icephys.VoltageClampSeries`,
-# :py:class:`~pynwb.icephys.VoltageClampSeries`, :py:class:`~pynwb.icephys.CurrentClampSeries`, and
+# data--:py:class:`~pynwb.icephys.VoltageClampSeries`, :py:class:`~pynwb.icephys.CurrentClampSeries`, and
 # :py:class:`~pynwb.icephys.IZeroClampSeries`.
 #
 # Here, we will use :py:class:`~pynwb.icephys.CurrentClampStimulusSeries` to store current clamp stimulus
@@ -69,8 +68,8 @@ elec = nwbfile.create_ic_electrode(
 from pynwb.icephys import CurrentClampStimulusSeries
 
 ccss = CurrentClampStimulusSeries(
-    name="ccss", source="command", data=[1, 2, 3, 4, 5], unit='A',
-    starting_time=123.6, rate=10e3, electrode=elec, gain=0.02)
+    name="ccss", data=[1, 2, 3, 4, 5], unit='A',
+    starting_time=123.6, rate=10e3, electrode=elec, gain=0.02, sweep_number=15)
 
 nwbfile.add_stimulus(ccss)
 
@@ -82,13 +81,19 @@ nwbfile.add_stimulus(ccss)
 from pynwb.icephys import VoltageClampSeries
 
 vcs = VoltageClampSeries(
-    name='vcs', source="command", data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    name='vcs', data=[0.1, 0.2, 0.3, 0.4, 0.5],
     unit='A', conversion=1e-12, resolution=np.nan, starting_time=123.6, rate=20e3,
     electrode=elec, gain=0.02, capacitance_slow=100e-12, resistance_comp_correction=70.0,
     capacitance_fast=np.nan, resistance_comp_bandwidth=np.nan, resistance_comp_prediction=np.nan,
-    whole_cell_capacitance_comp=np.nan, whole_cell_series_resistance_comp=np.nan)
+    whole_cell_capacitance_comp=np.nan, whole_cell_series_resistance_comp=np.nan, sweep_number=15)
 
 nwbfile.add_acquisition(vcs)
+
+####################
+# If you are interested in all PatchClampSeries with a given sweep number, use get_series()
+# exposed via the :py:meth:`~pynwb.icephys.SweepTable.get_series` attribute.
+
+series = nwbfile.sweep_table.get_series(15)
 
 ####################
 # .. _icephys_writing:

@@ -1,6 +1,6 @@
 from collections import Iterable
 
-from .form.utils import docval, popargs
+from hdmf.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer, MultiContainerInterface
@@ -22,25 +22,19 @@ class SpatialSeries(TimeSeries):
 
     __nwbfields__ = ('reference_frame',)
 
-    _ancestry = "TimeSeries,SpatialSeries"
-
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this SpatialSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to meters',
+             'doc': 'Scalar to multiply each element by to convert to meters',
              'default': _default_conversion},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
-            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'),
+            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None, ),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
@@ -60,8 +54,8 @@ class SpatialSeries(TimeSeries):
         """
         Create a SpatialSeries TimeSeries dataset
         """
-        name, source, data, reference_frame = popargs('name', 'source', 'data', 'reference_frame', kwargs)
-        super(SpatialSeries, self).__init__(name, source, data, 'meters', **kwargs)
+        name, data, reference_frame = popargs('name', 'data', 'reference_frame', kwargs)
+        super(SpatialSeries, self).__init__(name, data, 'meters', **kwargs)
         self.reference_frame = reference_frame
 
 

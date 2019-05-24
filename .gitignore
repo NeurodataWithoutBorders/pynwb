@@ -60,3 +60,9 @@ tests/coverage/htmlcov
 
 # tox
 .tox
+
+# vscode
+.vscode/
+
+#mypy
+.mypy_cache/

@@ -1,16 +1,39 @@
-from ..form.build import ObjectMapper, RegionBuilder
+from hdmf.utils import docval, getargs
+from hdmf.build import ObjectMapper, RegionBuilder, BuildManager
+from hdmf.spec import Spec
+from hdmf.container import Container
 from .. import register_map
 
-from pynwb.core import NWBData, DynamicTable
+from pynwb.file import NWBFile
+from pynwb.core import NWBData, DynamicTable, NWBContainer, VectorIndex
+
+
+class NWBBaseTypeMapper(ObjectMapper):
+
+    @staticmethod
+    def get_nwb_file(container):
+        curr = container
+        while curr is not None:
+            if isinstance(curr, NWBFile):
+                return curr
+            curr = container.parent
+
+
+@register_map(NWBContainer)
+class NWBContainerMapper(NWBBaseTypeMapper):
+
+    pass
 
 
 @register_map(DynamicTable)
-class DynamicTableMap(ObjectMapper):
+class DynamicTableMap(NWBContainerMapper):
 
     def __init__(self, spec):
         super(DynamicTableMap, self).__init__(spec)
-        columns_spec = spec.get_neurodata_type('TableColumn')
-        self.map_spec('columns', columns_spec)
+        vector_data_spec = spec.get_neurodata_type('VectorData')
+        vector_index_spec = spec.get_neurodata_type('VectorIndex')
+        self.map_spec('columns', vector_data_spec)
+        self.map_spec('columns', vector_index_spec)
 
     @ObjectMapper.object_attr('colnames')
     def attr_columns(self, container, manager):
@@ -18,9 +41,32 @@ class DynamicTableMap(ObjectMapper):
             return tuple()
         return container.colnames
 
+    @docval({"name": "spec", "type": Spec, "doc": "the spec to get the attribute value for"},
+            {"name": "container", "type": Container, "doc": "the container to get the attribute value from"},
+            {"name": "manager", "type": BuildManager, "doc": "the BuildManager used for managing this build"},
+            returns='the value of the attribute')
+    def get_attr_value(self, **kwargs):
+        ''' Get the value of the attribute corresponding to this spec from the given container '''
+        spec, container, manager = getargs('spec', 'container', 'manager', kwargs)
+        attr_value = super(DynamicTableMap, self).get_attr_value(spec, container, manager)
+        if attr_value is None and spec.name in container:
+            if spec.neurodata_type_inc == 'VectorData':
+                attr_value = container[spec.name]
+                if isinstance(attr_value, VectorIndex):
+                    attr_value = attr_value.target
+            elif spec.neurodata_type_inc == 'DynamicTableRegion':
+                attr_value = container[spec.name]
+                if attr_value.table is None:
+                    msg = "empty or missing table for DynamicTableRegion '%s' in DynamicTable '%s'" %\
+                          (attr_value.name, container.name)
+                    raise ValueError(msg)
+            elif spec.neurodata_type_inc == 'VectorIndex':
+                attr_value = container[spec.name]
+        return attr_value
+
 
 @register_map(NWBData)
-class NWBDataMap(ObjectMapper):
+class NWBDataMap(NWBBaseTypeMapper):
 
     @ObjectMapper.constructor_arg('name')
     def carg_name(self, builder, manager):

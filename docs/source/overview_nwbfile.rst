@@ -72,18 +72,13 @@ Processing module objects are unique collections of analysis results. To standar
 common analyses, NWB provides the concept of an *NWBDataInterface*, where the output of
 common analyses are represented as objects that extend the :py:class:`~pynwb.core.NWBDataInterface` class.
 In most cases, you will not need to interact with the :py:class:`~pynwb.core.NWBDataInterface` class directly.
-More commonly, you will be creating instances of classes that extend this class. For example, a common
-analysis step for spike data (represented in NWB as a :py:class:`~pynwb.ecephys.SpikeEventSeries` object)
-is spike clustering. In NWB, the result of this kind of analysis will be represented with a
-:py:class:`~pynwb.ecephys.Clustering` object.
+More commonly, you will be creating instances of classes that extend this class.
 
 The following analysis :py:class:`~pynwb.core.NWBDataInterface` objects are provided by the API and NWB specification:
 
   * :py:class:`~pynwb.behavior.BehavioralEpochs`
   * :py:class:`~pynwb.behavior.BehavioralEvents`
   * :py:class:`~pynwb.behavior.BehavioralTimeSeries`
-  * :py:class:`~pynwb.ecephys.ClusterWaveforms`
-  * :py:class:`~pynwb.ecephys.Clustering`
   * :py:class:`~pynwb.behavior.CompassDirection`
   * :py:class:`~pynwb.ophys.DfOverF`
   * :py:class:`~pynwb.ecephys.EventDetection`

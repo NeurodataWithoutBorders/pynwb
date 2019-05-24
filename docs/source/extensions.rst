@@ -40,6 +40,7 @@ Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
     from pynwb.spec import NWBDatasetSpec
 
     spec = NWBDatasetSpec('A custom NWB type',
+                        name='qux',
                         attribute=[
                             NWBAttributeSpec('baz', 'a value for baz', 'str'),
                         ],
@@ -57,26 +58,12 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
     from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
 
     spec = NWBDatasetSpec('A custom NWB type',
+                        name='qux',
                         attribute=[
                             NWBAttributeSpec('baz', 'a value for baz', 'str'),
                         ],
                         dtype=[
                             NWBDtypeSpec('foo', 'column for foo', 'int'),
-                            NWBDtypeSpec('bar', 'a column for bar', 'float')
-                        ])
-
-Compound data types can be nested.
-
-.. code-block:: python
-
-    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
-
-    spec = NWBDatasetSpec('A custom NWB type',
-                        attribute=[
-                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
-                        ],
-                        dtype=[
-                            NWBDtypeSpec('foo', 'a column for foo', 'int'),
                             NWBDtypeSpec('bar', 'a column for bar', 'float')
                         ])
 
@@ -90,9 +77,10 @@ Specifying groups is done with the :py:class:`~pynwb.spec.NWBGroupSpec` class.
     from pynwb.spec import NWBGroupSpec
 
     spec = NWBGroupSpec('A custom NWB type',
-                        attributes = [...],
-                        datasets = [...],
-                        groups = [...])
+                        name='quux',
+                        attributes=[...],
+                        datasets=[...],
+                        groups=[...])
 
 Neurodata Type Specifications
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -114,9 +102,9 @@ Create a new type
     # A list of NWBDatasetSpec objects to specify new groups
     addl_groups = [...]
     spec = NWBGroupSpec('A custom NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
-                        groups = addl_groups,
+                        attributes=addl_attributes,
+                        datasets=addl_datasets,
+                        groups=addl_groups,
                         neurodata_type_def='MyNewNWBType')
 
 Extend an existing type
@@ -125,18 +113,18 @@ Extend an existing type
 
     from pynwb.spec import NWBGroupSpec
 
-    # A list of NWBAttributeSpec objects to specify additional attributes or attributes to be overriden
+    # A list of NWBAttributeSpec objects to specify additional attributes or attributes to be overridden
     addl_attributes = [...]
-    # A list of NWBDatasetSpec objects to specify additional datasets or datasets to be overriden
+    # A list of NWBDatasetSpec objects to specify additional datasets or datasets to be overridden
     addl_datasets = [...]
-    # A list of NWBGroupSpec objects to specify additional groups or groups to be overriden
+    # A list of NWBGroupSpec objects to specify additional groups or groups to be overridden
     addl_groups = [...]
     spec = NWBGroupSpec('An extended NWB type',
-                        attributes = addl_attributes,
-                        datasets = addl_datasets,
-                        groups = addl_groups,
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
+                        attributes=addl_attributes,
+                        datasets=addl_datasets,
+                        groups=addl_groups,
+                        neurodata_type_inc='SpikeEventSeries',
+                        neurodata_type_def='MyExtendedSpikeEventSeries')
 
 Existing types can be instantiated by specifying `neurodata_type_inc` alone.
 
@@ -150,9 +138,9 @@ Existing types can be instantiated by specifying `neurodata_type_inc` alone.
                                  neurodata_type_inc='ElectricalSeries') ]
 
     spec = NWBGroupSpec('An extended NWB type',
-                        groups = addl_groups,
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
+                        groups=addl_groups,
+                        neurodata_type_inc='SpikeEventSeries',
+                        neurodata_type_def='MyExtendedSpikeEventSeries')
 
 
 Datasets can be extended in the same manner (with regard to `neurodata_type_inc` and `neurodata_type_def`,
@@ -181,19 +169,19 @@ Create a new namespace with extensions
     ns_builder = NWBNamespaceBuilder("Extension for use in my laboratory", "mylab", ...)
 
     # create extensions
-    ext1 = NWBGroupSpec('A custom Clustering interface',
-                        attributes = [...]
-                        datasets = [...],
-                        groups = [...],
-                        neurodata_type_inc='Clustering',
-                        neurodata_type_def='MyExtendedClustering')
+    ext1 = NWBGroupSpec('A custom SpikeEventSeries interface',
+                        attributes=[...],
+                        datasets=[...],
+                        groups=[...],
+                        neurodata_type_inc='SpikeEventSeries',
+                        neurodata_type_def='MyExtendedSpikeEventSeries')
 
-    ext2 = NWBGroupSpec('A custom ClusterWaveforms interface',
-                        attributes = [...]
-                        datasets = [...],
-                        groups = [...],
-                        neurodata_type_inc='ClusterWaveforms',
-                        neurodata_type_def='MyExtendedClusterWaveforms')
+    ext2 = NWBGroupSpec('A custom EventDetection interface',
+                        attributes=[...],
+                        datasets=[...],
+                        groups=[...],
+                        neurodata_type_inc='EventDetection',
+                        neurodata_type_def='MyExtendedEventDetection')
 
 
     # add the extension
@@ -213,7 +201,7 @@ Create a new namespace with extensions
 
     Using the API to generate extensions (rather than writing YAML sources directly) helps avoid errors in the specification
     (e.g., due to missing required keys or invalid values) and ensure compliance of the extension definition with the
-    NWB specification language. It also helps with maintanence of extensions, e.g., if extensions have to be ported to
+    NWB specification language. It also helps with maintenance of extensions, e.g., if extensions have to be ported to
     newer versions of the `specification language <https://schema-language.readthedocs.io/en/latest/>`_
     in the future.
 
@@ -280,9 +268,9 @@ ObjectMapper : Customizing the mapping between NWBContainer and the Spec
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer`
-class for reading and writing, you will need to implement and register a custom :py:class:`~pynwb.form.build.map.ObjectMapper`.
+class for reading and writing, you will need to implement and register a custom :py:class:`~hdmf.build.map.ObjectMapper`.
 
-:py:class:`~pynwb.form.build.map.ObjectMapper` extensions are registered with the decorator :py:func:`~pynwb.register_map`.
+:py:class:`~hdmf.build.map.ObjectMapper` extensions are registered with the decorator :py:func:`~pynwb.register_map`.
 
 .. code-block:: python
 
@@ -346,7 +334,7 @@ For the purpose of this example, we assume that our current directory has the fo
               - mylab_release_notes.rst
 
 In addition to Python 3.x, you will also need ``sphinx`` (including the ``sphinx-quickstart`` tool) installed.
-Sphinx is availble here http://www.sphinx-doc.org/en/stable/install.html .
+Sphinx is available here http://www.sphinx-doc.org/en/stable/install.html .
 
 We can now create the sources of our documentation as follows:
 
