@@ -297,6 +297,12 @@ class TestNWBTable(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.cls.from_dataframe(df=df, name='test_table')
 
+    def test_auto_ragged_array(self):
+
+        df = pd.DataFrame({'a': [[1], [1, 2]]})
+        df2 = DynamicTable.from_dataframe(df, name='test').to_dataframe()
+        df.equals(df2)
+
 
 class TestPrint(unittest.TestCase):
 
@@ -333,12 +339,12 @@ Fields:
   epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
   ic_electrodes: { }
   imaging_planes: { }
+  intervals: { }
   lab_meta_data: { }
   modules: { }
   ogen_sites: { }
   stimulus: { }
   stimulus_template: { }
-  time_intervals: { }
 """)
 
 
