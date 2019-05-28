@@ -374,6 +374,11 @@ class NWBFile(MultiContainerInterface):
         return ret
 
     @property
+    def modules(self):
+        warn("replaced by NWBFile.processing", DeprecationWarning)
+        return self.processing
+
+    @property
     def ec_electrode_groups(self):
         warn("replaced by NWBFile.electrode_groups", DeprecationWarning)
         return self.electrode_groups
