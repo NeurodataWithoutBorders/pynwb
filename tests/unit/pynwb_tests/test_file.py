@@ -122,6 +122,11 @@ class NWBFileTest(unittest.TestCase):
 
         os.remove("electrodes_mwe.nwb")
 
+    def test_access_processing(self):
+        self.nwbfile.create_processing_module('test_mod', 'test_desciprion')
+        # test deprecate .modules
+        self.assertEqual(self.nwbfile.processing, self.nwbfile.modules)
+
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
         tags2 = ['t3', 't4']
