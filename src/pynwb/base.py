@@ -78,7 +78,6 @@ class ProcessingModule(MultiContainerInterface):
         return self.get(data_interface_name)
 
 
-
 @register_class('TimeSeries', CORE_NAMESPACE)
 class TimeSeries(NWBDataInterface):
     """A generic base class for time series data"""
