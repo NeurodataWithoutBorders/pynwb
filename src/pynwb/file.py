@@ -145,7 +145,7 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_ogen_site'
         },
         {
-            'attr': 'time_intervals',
+            'attr': 'intervals',
             'add': 'add_time_intervals',
             'type': TimeIntervals,
             'create': 'create_time_intervals',
@@ -249,7 +249,7 @@ class NWBFile(MultiContainerInterface):
              'doc': 'A table containing trial data', 'default': None},
             {'name': 'invalid_times', 'type': TimeIntervals,
              'doc': 'A table containing times to be omitted from analysis', 'default': None},
-            {'name': 'time_intervals', 'type': (list, tuple),
+            {'name': 'intervals', 'type': (list, tuple),
              'doc': 'any TimeIntervals tables storing time intervals', 'default': None},
             {'name': 'units', 'type': Units,
              'doc': 'A table containing unit metadata', 'default': None},
@@ -327,7 +327,7 @@ class NWBFile(MultiContainerInterface):
         self.ic_electrodes = getargs('ic_electrodes', kwargs)
         self.imaging_planes = getargs('imaging_planes', kwargs)
         self.ogen_sites = getargs('ogen_sites', kwargs)
-        self.time_intervals = getargs('time_intervals', kwargs)
+        self.intervals = getargs('intervals', kwargs)
         self.subject = getargs('subject', kwargs)
         self.sweep_table = getargs('sweep_table', kwargs)
         self.lab_meta_data = getargs('lab_meta_data', kwargs)

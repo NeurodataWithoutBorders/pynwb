@@ -71,7 +71,7 @@ Builder
    * :py:class:`~hdmf.build.builders.LinkBuilder` - represents soft-links
    * :py:class:`~hdmf.build.builders.RegionBuilder` - represents a slice into data (Subclass of :py:class:`~hdmf.build.builders.DatasetBuilder`)
 
-* **Main Module:** :py:class:`hdmf.build.builders`
+* **Main Module:** :py:mod:`hdmf.build.builders`
 
 Spec
 ^^^^
@@ -98,9 +98,9 @@ Spec
 
 * **Main Modules:**
 
-   * :py:class:`hdmf.spec` -- General specification classes.
-   * :py:class:`pynwb.spec` -- NWB specification classes. (Most of these are
-     specializations of the classes from :py:class:`hdmf.spec`)
+   * :py:mod:`hdmf.spec` -- General specification classes.
+   * :py:mod:`pynwb.spec` -- NWB specification classes. (Most of these are
+     specializations of the classes from :py:mod:`hdmf.spec`)
 
 .. note::
 
@@ -132,7 +132,7 @@ ObjectMapper
    * Given a `Container`_, return a Builder representation
 
 * PyNWB has many of these -- one for each type in NWB schema
-* **Main Module:** :py:class:`hdmf.build.map`
+* **Main Module:** :py:mod:`hdmf.build.map`
 
    * NWB-specific ObjectMappers are locate in submodules of :py:class:`pynwb.io`
 
@@ -177,8 +177,8 @@ TypeMap
 
 * PyNWB has two of these classes:
 
-   * the base class (i.e. :py:class:`~form.build.map.TypeMap`) - handles NWB 2.x
-   * :py:class:`pynwb.legacy.TypeMapLegacy` - handles NWB 1.x
+   * the base class (i.e. :py:class:`~hdmf.build.map.TypeMap`) - handles NWB 2.x
+   * :py:class:`pynwb.legacy.map.TypeMapLegacy` - handles NWB 1.x
 
 * PyNWB provides a “global” instance of TypeMap created at runtime
 * TypeMaps can be merged, which is useful when combining extensions
@@ -200,15 +200,15 @@ BuildManager
    Overview of `BuildManager`_ (and `TypeMap`_) (click to enlarge).
 
 
-FORMIO
+HDMFIO
 ^^^^^^
 
 * Abstract base class for I/O
-* :py:class:`FORMIO <hdmf.backends.io.FORMIO>` has two key abstract methods:
+* :py:class:`HDMFIO <hdmf.backends.io.HDMFIO>` has two key abstract methods:
 
-   * :py:meth:`~hdmf.backends.io.FORMIO.write_builder` – given a builder, write data to storage format
-   * :py:meth:`~hdmf.backends.io.FORMIO.read_builder` – given a handle to storage format, return builder representation
-   * Others: :py:meth:`~hdmf.backends.io.FORMIO.open` and :py:meth:`~hdmf.backends.io.FORMIO.close`
+   * :py:meth:`~hdmf.backends.io.HDMFIO.write_builder` – given a builder, write data to storage format
+   * :py:meth:`~hdmf.backends.io.HDMFIO.read_builder` – given a handle to storage format, return builder representation
+   * Others: :py:meth:`~hdmf.backends.io.HDMFIO.open` and :py:meth:`~hdmf.backends.io.HDMFIO.close`
 
 * Constructed with a `BuildManager`_
 * Extend this for creating a new I/O backend
@@ -224,4 +224,4 @@ FORMIO
    :width: 100%
    :alt: PyNWB Software Architecture FormIO
 
-   Overview of `FORMIO`_ (click to enlarge).
+   Overview of `HDMFIO`_ (click to enlarge).
