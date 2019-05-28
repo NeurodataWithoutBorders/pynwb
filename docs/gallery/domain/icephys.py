@@ -147,6 +147,6 @@ elec = nwbfile.get_ic_electrode('elec0')
 elec = ccss.electrode
 
 ####################
-# And the device name via :py:meth:`~pynbwb.file.NWBFile.get_device`
+# And the device name via :py:meth:`~pynwb.file.NWBFile.get_device`
 
 device = nwbfile.get_device('Heka ITC-1600')

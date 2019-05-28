@@ -133,8 +133,9 @@ groups:
   - name: source_timeseries
     doc: HDF5 link to TimesSeries that this data was calculated from. Metadata
       about electrodes and their position can be read from that ElectricalSeries so
-      it's not necessary to store that information here
+      it is not necessary to store that information here
     target_type: TimeSeries
+    quantity: '?'
   groups:
   - neurodata_type_inc: DynamicTable
     name: bands
