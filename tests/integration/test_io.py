@@ -245,7 +245,7 @@ class TestAppend(unittest.TestCase):
                                                                                              tzinfo=tzutc()))
         proc_mod = nwb.create_processing_module(name='test_proc_mod', description='')
         proc_inter = LFP(name='test_proc_dset')
-        proc_mod.add_data_interface(proc_inter)
+        proc_mod.add(proc_inter)
         device = nwb.create_device(name='test_device')
         e_group = nwb.create_electrode_group(
             name='test_electrode_group',
@@ -268,7 +268,7 @@ class TestAppend(unittest.TestCase):
 
         with NWBHDF5IO(FILENAME, mode='a') as io:
             nwb = io.read()
-            elec = nwb.modules['test_proc_mod']['LFP'].electrical_series['test_device'].electrodes
+            elec = nwb.processing['test_proc_mod']['LFP'].electrical_series['test_device'].electrodes
             ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=elec)
             nwb.add_acquisition(ts2)
             io.write(nwb)

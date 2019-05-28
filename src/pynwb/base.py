@@ -24,9 +24,9 @@ class ProcessingModule(MultiContainerInterface):
 
     __clsconf__ = {
             'attr': 'data_interfaces',
-            'add': 'add_data_interface',
+            'add': 'add',
             'type': NWBDataInterface,
-            'get': 'get_data_interface'
+            'get': 'get'
     }
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
@@ -45,7 +45,7 @@ class ProcessingModule(MultiContainerInterface):
         return self.data_interfaces
 
     def __getitem__(self, arg):
-        return self.get_data_interface(arg)
+        return self.get(arg)
 
     @docval({'name': 'container', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
     def add_container(self, **kwargs):
@@ -54,7 +54,7 @@ class ProcessingModule(MultiContainerInterface):
         '''
         container = getargs('container', kwargs)
         warn(PendingDeprecationWarning('add_container will be replaced by add_data_interface'))
-        self.add_data_interface(container)
+        self.add(container)
 
     @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_container(self, **kwargs):
@@ -63,7 +63,7 @@ class ProcessingModule(MultiContainerInterface):
         '''
         container_name = getargs('container_name', kwargs)
         warn(PendingDeprecationWarning('get_container will be replaced by get_data_interface'))
-        return self.get_data_interface(container_name)
+        return self.get(container_name)
 
 
 @register_class('TimeSeries', CORE_NAMESPACE)
