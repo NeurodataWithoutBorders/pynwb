@@ -40,7 +40,7 @@ nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzl
 # :py:class:`~pynwb.file.NWBFile` instance method :py:meth:`~pynwb.file.NWBFile.create_electrode_group`.
 #
 # Before creating an :py:class:`~pynwb.ecephys.ElectrodeGroup`, you need to provide some information about the
-# device that was used to record from the electrode. This is done by creating a :py:class:`~pynwb.ecephys.Device`
+# device that was used to record from the electrode. This is done by creating a :py:class:`~pynwb.device.Device`
 # object using the instance method :py:meth:`~pynwb.file.NWBFile.create_device`.
 
 device = nwbfile.create_device(name='trodes_rig123')
@@ -77,7 +77,7 @@ for idx in [1, 2, 3, 4]:
 
 #######################
 # .. note: :py:class:`~pynwb.file.NWBFile.add_electrode` returns the index of the electrode you just added.
-#    This can come in handy when creating with an :py:class:`~pynwb.ecephys.ElectrodeTableRegion`
+#    This can come in handy when creating with an :py:class:`~pynwb.core.DynamicTableRegion`
 #    :py:class:`~pynwb.file.NWBFile.create_electrode_table_region` (See :ref:`ec_recordings`).
 
 #######################
@@ -95,7 +95,7 @@ for idx in [1, 2, 3, 4]:
 #
 # In addition to the *data* and *timestamps* fields inherited
 # from :py:class:`~pynwb.base.TimeSeries` class, these two classs will require metadata about the elctrodes
-# from which *data* was generated. This is done by providing an :py:class:`~pynwb.ecephys.ElectrodeTableRegion`,
+# from which *data* was generated. This is done by providing an :py:class:`~pynwb.core.DynamicTableRegion`,
 # which you can create using the :py:class:`~pynwb.file.NWBFile.create_electrode_table_region`
 #
 # The first argument to :py:class:`~pynwb.file.NWBFile.create_electrode_table_region` a list of the
@@ -105,7 +105,7 @@ electrode_table_region = nwbfile.create_electrode_table_region([0, 2], 'the firs
 
 
 ####################
-# Now that we have a :py:class:`~pynwb.ecephys.ElectrodeTableRegion`, we can create an
+# Now that we have a :py:class:`~pynwb.core.DynamicTableRegion`, we can create an
 # :py:class:`~pynwb.ecephys.ElectricalSeries` and add it to our :py:class:`~pynwb.file.NWBFile`.
 
 

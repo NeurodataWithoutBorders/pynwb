@@ -54,6 +54,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
     'sphinx_gallery.gen_gallery'
 ]
 
@@ -77,6 +78,7 @@ intersphinx_mapping = {
     'matplotlib': ('http://matplotlib.org', None),
     'h5py': ('http://docs.h5py.org/en/latest/', None),
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
+    'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None)
 }
 
 # Add any paths that contain templates here, relative to this directory.
