@@ -5,7 +5,6 @@ from warnings import warn
 import copy as _copy
 
 from hdmf.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
-from hdmf import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
