@@ -8,11 +8,11 @@ from PyNWB.
 '''
 
 ####################
-# Wrapping data arrays with :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
-# ---------------------------------------------------------------------------------
+# Wrapping data arrays with :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
+# ---------------------------------------------------------------------------
 #
 # In order to customize the I/O of datasets using the HDF I/O backend we simply need to wrap our datasets
-# using :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`. Using H5DataIO allows us to keep the Container
+# using :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`. Using H5DataIO allows us to keep the Container
 # classes independent of the I/O backend while still allowing us to customize HDF5-specific I/O features.
 #
 # Before we get started, lets create an NWBFile for testing so that we can add our data to it.
@@ -59,7 +59,7 @@ nwbfile.add_acquisition(test_ts)
 
 ####################
 # This simple approach gives us access to a broad range of advanced I/O features, such as, chunking and
-# compression. For a complete list of all available settings see :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
+# compression. For a complete list of all available settings see :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
 
 ####################
 # Chunking
@@ -81,7 +81,7 @@ nwbfile.add_acquisition(test_ts)
 
 
 ####################
-# To use chunking we again, simply need to wrap our dataset via :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`.
+# To use chunking we again, simply need to wrap our dataset via :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`.
 # Using chunking then also allows to also create resizable arrays simply by defining the ``maxshape`` of the array.
 
 data = np.arange(10000).reshape((1000, 10))
@@ -122,7 +122,7 @@ nwbfile.add_acquisition(test_ts)
 # read/write operations.  I/O filters operate on a per-chunk basis in HDF5 and as such require the use of chunking.
 # Chunking will be automatically enabled by h5py when compression and other I/O filters are enabled.
 #
-# To use compression, we can wrap our dataset using :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO` and
+# To use compression, we can wrap our dataset using :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` and
 # define the approbriate opions:
 
 wrapped_data = H5DataIO(data=data,
@@ -139,7 +139,7 @@ nwbfile.add_acquisition(test_ts)
 ####################
 # .. hint::
 #
-#   In addition to ``compression``, :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO` also allows us to
+#   In addition to ``compression``, :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` also allows us to
 #   enable the ``shuffle`` and ``fletcher32`` HDF5 I/O filters.
 
 ####################
@@ -200,10 +200,10 @@ for k, v in nwbfile.acquisition.items():
 
 
 ####################
-# Wrapping ``h5py.Datasets`` with :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
-# --------------------------------------------------------------------------------
+# Wrapping ``h5py.Datasets`` with :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
+# ---------------------------------------------------------------------------------
 #
-# Just for completeness, :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO` also allows us to customize
+# Just for completeness, :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` also allows us to customize
 # how ``h5py.Dataset`` objects should be handled on write by the PyNWBs HDF5 backend via the ``link_data``
 # parameter. If ``link_data`` is set to ``True`` then a ``SoftLink`` or ``ExternalLink`` will be created to
 # point to the HDF5 dataset On the other hand, if ``link_data`` is set to ``False`` then the dataset

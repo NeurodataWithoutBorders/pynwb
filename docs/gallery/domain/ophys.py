@@ -133,14 +133,14 @@ mod.add_data_interface(fl)
 
 ####################
 # Because this data stores information about specific ROIs, you will need to provide a reference to the ROIs
-# that you will be storing data for. This is done using a :py:class:`~pynwb.ophys.ROITableRegion`, which can be
+# that you will be storing data for. This is done using a :py:class:`~pynwb.core.DynamicTableRegion`, which can be
 # created with :py:func:`~pynwb.ophys.PlaneSegmentation.create_roi_table_region`.
 
 
 rt_region = ps.create_roi_table_region('the first of two ROIs', region=[0])
 
 ####################
-# Now that you have an :py:class:`~pynwb.ophys.ROITableRegion`, you can create your an
+# Now that you have an :py:class:`~pynwb.core.DynamicTableRegion`, you can create your an
 # :py:class:`~pynwb.ophys.RoiResponseSeries`.
 
 
@@ -155,7 +155,7 @@ rrs = fl.create_roi_response_series('my_rrs', data, 'lumens', rt_region, timesta
 
 
 ####################
-# Once we have finished adding all of our data to our :py:class:`~pynwb.NWBFile`, make sure to write the file.
+# Once we have finished adding all of our data to our :py:class:`~pynwb.file.NWBFile`, make sure to write the file.
 # Writing (and reading) is carried out using :py:class:`~pynwb.NWBHDF5IO`.
 
 from pynwb import NWBHDF5IO
@@ -197,8 +197,8 @@ ps = mod['ImageSegmentation'].get_plane_segmentation()
 
 ####################
 # Once you have the original :py:class:`~pynwb.ophys.PlaneSegmentation` object, you can retrieve your
-# image masks and pixel masks using :py:func:`~pynwb.ophys.PlaneSegmentation.get_image_mask`
-# :py:func:`~pynwb.ophys.PlaneSegmentation.get_pixel_mask`, respectively.
+# image masks and pixel masks using standard indexing.
+#
 
 img_mask1 = ps['image_mask'][0]
 pix_mask1 = ps['pixel_mask'][0]

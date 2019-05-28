@@ -9,7 +9,7 @@
 # Example Use Case: Integrating data from multiple files
 # ---------------------------------------------------------
 #
-# NWBContainer classes (e.g., :py:meth:`~pynwb.base.TimeSeries`) support the integration of data stored in external
+# NBWContainer classes (e.g., :py:class:`~pynwb.base.TimeSeries`) support the integration of data stored in external
 # HDF5 files with NWB data files via external links. To make things more concrete, let's look at the following use
 # case. We want to simultaneously record multiple data streams during data acquisition. Using the concept of external
 # links allows us to save each data stream to an external HDF5 files during data acquisition and to
@@ -150,7 +150,7 @@ nwbfile4.add_acquisition(test_ts4)
 # our TimeSeries, this means that :py:class:`~pynwb.NWBHDF5IO` will need to
 # determine on write how to treat the dataset. We can make this explicit and customize this
 # behavior on a per-dataset basis by wrapping our dataset using
-# :py:meth:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
+# :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO`
 
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
@@ -221,7 +221,7 @@ timeseries_2 = nwbfile2.get_acquisition('test_timeseries2')
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 # To intergrate both :py:meth:`~pynwb.base.TimeSeries` into a single file we simply create a new
 # :py:meth:`~pynwb.file.NWBFile` and our existing :py:meth:`~pynwb.base.TimeSeries` to it. PyNWB's
-# :py:meth:`~pynwb.NWBHDF5IO` backend then automatically detects that the TimeSeries have already
+# :py:class:`~pynwb.NWBHDF5IO` backend then automatically detects that the TimeSeries have already
 # been written to another file and will create external links for us.
 #
 
@@ -242,9 +242,8 @@ io3.close()
 # Creating a single file for sharing
 # -----------------------------------
 #
-# External links are convenient, but to share data, we may want to hand a single file with all
-# the data to our collaborator rather than having to collect all relevant files. To do this, the
-# :py:class:`~hdmf.backends.hdf5.h5tools.HDF5IO` class (and in turn, the
-# :py:class:`~pynwb.NWBHDF5IO` class) provides the convenience function
-# :py:func:`~hdmf.backends.hdf5.h5tools.HDF5IO.copy_file` which copies an HDF5 file and
-# resolves all external links.
+# External links are convenient but to share data we may want to hand a single file with all the
+# data to our collaborator rather than having to collect all relevant files. To do this,
+# :py:class:`~hdmf.backends.hdf5.h5tools.HDF5IO` (and in turn :py:class:`~pynwb.NWBHDF5IO`)
+# provide the convenience function :py:meth:`~hdmf.backends.hdf5.h5tools.HDF5IO.copy_file`,
+# which copies an HDF5 file and resolves all external links.
