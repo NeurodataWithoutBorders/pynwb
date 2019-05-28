@@ -1137,6 +1137,9 @@ class DynamicTable(NWBDataInterface):
             else:
                 c.add_row(data[colname])
 
+    def __eq__(self, other):
+        return self.to_dataframe().equals(other.to_dataframe())
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'description', 'type': str, 'doc': 'a description for this column'},
             {'name': 'data', 'type': ('array_data', 'data'),

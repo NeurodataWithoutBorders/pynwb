@@ -333,12 +333,12 @@ Fields:
   epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
   ic_electrodes: { }
   imaging_planes: { }
+  intervals: { }
   lab_meta_data: { }
   modules: { }
   ogen_sites: { }
   stimulus: { }
   stimulus_template: { }
-  time_intervals: { }
 """)
 
 
