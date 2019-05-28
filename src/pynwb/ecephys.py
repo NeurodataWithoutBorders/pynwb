@@ -156,7 +156,7 @@ class EventDetection(NWBDataInterface):
                      'source_idx',
                      'times')
 
-    _help_statement = ("Description of how events were detected, such as voltage "
+    __help = ("Description of how events were detected, such as voltage "
                        "threshold, or dV/dT threshold, as well as relevant values.")
 
     @docval({'name': 'detection_method', 'type': str,
