@@ -12,7 +12,7 @@ groups:
     dtype: text
     doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
       format with trailing major, minor and patch numbers.'
-    value: 2.0b
+    value: 2.0.2
   datasets:
   - name: file_create_date
     dtype: isodatetime
