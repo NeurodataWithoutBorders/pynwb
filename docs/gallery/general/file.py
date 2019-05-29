@@ -419,7 +419,7 @@ with NWBHDF5IO('example_file_path.nwb', 'w') as io:
 
 io = NWBHDF5IO('example_file_path.nwb', mode='a')
 nwbfile = io.read()
-position = nwbfile.processings['behavior'].data_interfaces['Position']
+position = nwbfile.processing['behavior'].data_interfaces['Position']
 
 ####################
 # Next, add a new :py:class:`~pynwb.behavior.SpatialSeries`.
