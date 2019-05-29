@@ -258,3 +258,32 @@ groups:
     - null
     quantity: '?'
   default_name: Units
+- neurodata_type_def: UnitSeries
+  neurodata_type_inc: TimeSeries
+  doc: Unit spike times a stream of IDs of spiking units
+  attributes:
+  - name: help
+    dtype: text
+    doc: Value is 'Unit spike times a stream of IDs of spiking units'
+    value: Unit spike times a stream of IDs of spiking units
+  datasets:
+  - name: data
+    dtype: int
+    doc: the index of the spike unit in the DynamicTableRegion "units"
+    attributes:
+    - name: resolution
+      dtype: float
+      doc: Value is -1.0. Indices do not have resolution
+      value: -1.0
+    - name: unit
+      dtype: text
+      doc: Value is 'index'
+      value: index
+    dims:
+    - num_times
+    shape:
+    - null
+  links:
+   - name: units
+     doc: The units table that is being indexed
+     target_type: Units

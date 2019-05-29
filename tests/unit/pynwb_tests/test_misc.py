@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, \
-    DecompositionSeries
+    DecompositionSeries, UnitSeries
 from pynwb.file import TimeSeries, DynamicTable
 from pynwb.core import VectorData
 from pynwb.device import Device
@@ -157,6 +157,15 @@ class UnitsTests(unittest.TestCase):
         electrode_group = ElectrodeGroup('test_electrode_group', 'description', 'location', device)
         ut.add_unit(electrode_group=electrode_group)
         self.assertEqual(ut['electrode_group'][0], electrode_group)
+
+
+class UnitSeriesConstructor(unittest.TestCase):
+    def test_init(self):
+        units = Units()
+        us = UnitSeries('test_unit_series', np.array([0, 0, 1, 1], dtype=int),
+                        timestamps=[.1, .2, .3, .4], units=units, description='description')
+        self.assertTrue(all(us.data == np.array([0, 0, 1, 1], dtype=int)))
+        self.assertEqual(units, us.units)
 
 
 if __name__ == '__main__':
