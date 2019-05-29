@@ -46,4 +46,4 @@ namespaces:
   - source: nwb.retinotopy.yaml
     title: Retinotopy
     doc: This source module contains neurodata_type for retinotopy data.
-  version: 2.0.1
+  version: 2.0.2
