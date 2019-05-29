@@ -2,15 +2,19 @@ namespaces:
 - name: core
   doc: NWB namespace
   author:
+  - Andrew Tritt
+  - Oliver Ruebel
+  - Ryan Ly
+  - Ben Dichter
   - Keith Godfrey
   - Jeff Teeters
-  - Oliver Ruebel
-  - Andrew Tritt
   contact:
+  - ajtritt@lbl.gov
+  - oruebel@lbl.gov
+  - rly@lbl.gov
+  - bdichter@lbl.gov
   - keithg@alleninstitute.org
   - jteeters@berkeley.edu
-  - oruebel@lbl.gov
-  - ajtritt@lbl.gov
   full_name: NWB core
   schema:
   - source: nwb.base.yaml
