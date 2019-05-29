@@ -125,7 +125,7 @@ class NWBFileTest(unittest.TestCase):
     def test_access_processing(self):
         self.nwbfile.create_processing_module('test_mod', 'test_desciprion')
         # test deprecate .modules
-        self.assertEqual(self.nwbfile.processing, self.nwbfile.modules)
+        self.assertIs(self.nwbfile.processing['test_mod'], self.nwbfile.modules['test_mod'])
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
