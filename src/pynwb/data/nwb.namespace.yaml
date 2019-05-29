@@ -1,7 +1,7 @@
 namespaces:
 - name: core
   doc: NWB namespace
-author:
+  author:
   - Andrew Tritt
   - Oliver Ruebel
   - Ryan Ly
