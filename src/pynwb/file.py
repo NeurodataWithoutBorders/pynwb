@@ -109,7 +109,7 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_stimulus_template'
         },
         {
-            'attr': 'modules',
+            'attr': 'processing',
             'add': 'add_processing_module',
             'type': ProcessingModule,
             'create': 'create_processing_module',
@@ -259,7 +259,7 @@ class NWBFile(MultiContainerInterface):
              'doc': 'any TimeIntervals tables storing time intervals', 'default': None},
             {'name': 'units', 'type': Units,
              'doc': 'A table containing unit metadata', 'default': None},
-            {'name': 'modules', 'type': (list, tuple),
+            {'name': 'processing', 'type': (list, tuple),
              'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
             {'name': 'lab_meta_data', 'type': (list, tuple), 'default': None,
              'doc': 'an extension that contains lab-specific meta-data'},
@@ -309,7 +309,7 @@ class NWBFile(MultiContainerInterface):
         self.stimulus_template = getargs('stimulus_template', kwargs)
         self.keywords = getargs('keywords', kwargs)
 
-        self.modules = getargs('modules', kwargs)
+        self.processing = getargs('processing', kwargs)
         epochs = getargs('epochs', kwargs)
         if epochs is not None:
             if epochs.name != 'epochs':
@@ -372,6 +372,11 @@ class NWBFile(MultiContainerInterface):
                 for c in n.children:
                     stack.append(c)
         return ret
+
+    @property
+    def modules(self):
+        warn("replaced by NWBFile.processing", DeprecationWarning)
+        return self.processing
 
     @property
     def ec_electrode_groups(self):

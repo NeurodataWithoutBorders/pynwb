@@ -58,10 +58,10 @@ class TestFromDataframe(base.TestMapRoundTrip):
 
     def addContainer(self, nwbfile):
         test_mod = nwbfile.create_processing_module('test', 'desc')
-        test_mod.add_data_interface(self.container)
+        test_mod.add(self.container)
 
     def getContainer(self, nwbfile):
-        dyn_tab = nwbfile.modules['test'].data_interfaces['test_table']
+        dyn_tab = nwbfile.processing['test'].data_interfaces['test_table']
         dyn_tab.to_dataframe()  # also test 2D column round-trip
         return dyn_tab
 

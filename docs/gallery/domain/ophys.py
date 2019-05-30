@@ -87,7 +87,7 @@ nwbfile.add_acquisition(image_series)
 
 mod = nwbfile.create_processing_module('ophys', 'contains optical physiology processed data')
 img_seg = ImageSegmentation()
-mod.add_data_interface(img_seg)
+mod.add(img_seg)
 ps = img_seg.create_plane_segmentation('output from segmenting my favorite imaging plane',
                                        imaging_plane, 'my_planeseg', image_series)
 
@@ -128,7 +128,7 @@ ps.add_roi(pixel_mask=pix_mask2, image_mask=img_mask2)
 
 
 fl = Fluorescence()
-mod.add_data_interface(fl)
+mod.add(fl)
 
 
 ####################
@@ -181,11 +181,11 @@ nwbfile = io.read()
 #
 # After you read the NWB file, you can access individual components of your data file.
 # To get the :py:class:`~pynwb.base.ProcessingModule` back, you can index into the
-# :py:func:`~pynwb.file.NWBFile.modules` attribute with the name of the
+# :py:func:`~pynwb.file.NWBFile.processing` attribute with the name of the
 # :py:class:`~pynwb.base.ProcessingModule`.
 
 
-mod = nwbfile.modules['ophys']
+mod = nwbfile.processing['ophys']
 
 ####################
 # Now you can retrieve the :py:class:`~pynwb.ophys.ImageSegmentation` object by indexing into the

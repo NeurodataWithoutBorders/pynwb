@@ -140,7 +140,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                                       'a test module')
         self.clustering = Clustering("A fake Clustering interface", [0, 1, 2, 0, 1, 2], [100., 101., 102.],
                                      list(range(10, 61, 10)))
-        self.mod.add_data_interface(self.clustering)
+        self.mod.add(self.clustering)
         return container
 
     def test_children(self):
