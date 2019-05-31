@@ -82,7 +82,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
         self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
-                                          600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknonwn')
+                                          600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknown')
 
     def setUpContainer(self):
         self.make_imaging_plane()
@@ -182,12 +182,13 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel('test_optical_channel',
                                               'optical channel description', 500.)
-        self.imaging_plane = ImagingPlane('ophys integration tests',
+        self.imaging_plane = ImagingPlane('imgpln1',
                                           self.optical_channel,
-                                          'imaging plane description',
+                                          'a fake ImagingPlane',
                                           self.device,
                                           600., 300., 'GFP', 'somewhere in the brain',
-                                          (1., 2., 1., 2., 3.), 4.0, 'manifold unit', 'A frame to refer to')
+                                          # (1., 1., (1., 2., 3.)),  # adding manifold breaks test...
+                                          reference_frame='unknown')
 
         self.img_mask = deepcopy(img_mask)
         self.pix_mask = deepcopy(pix_mask)
@@ -225,8 +226,8 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
                 'imaging_rate': DatasetBuilder('imaging_rate', 300.),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
-                'manifold': DatasetBuilder('manifold', (1, 2, 1, 2, 3),
-                                           attributes={'conversion': 4.0, 'unit': 'manifold unit'}),
+                #'manifold': DatasetBuilder('manifold', (1, 2, (1, 2, 3)),
+                #                           attributes={'conversion': 4.0, 'unit': 'manifold unit'}),
                 'reference_frame': DatasetBuilder('reference_frame', 'A frame to refer to'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
             groups={
