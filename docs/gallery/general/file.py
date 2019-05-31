@@ -273,7 +273,7 @@ nwbfile.add_processing_module(ecephys_module)
 # These are: 'behavior', 'ecephys', 'icephys', 'ophys', 'ogen', 'retinotopy', and 'misc'. You may also create
 # a processing module with a custom name. Once these processing modules are added, access them with
 
-nwbfile.modules
+nwbfile.processing
 
 ####################
 # which returns a `dict`:
@@ -291,7 +291,7 @@ nwbfile.modules
 #
 # :py:class:`~pynwb.core.NWBDataInterface` objects can be added to the behavior :ref:`ProcessingModule <basic_procmod>`.
 
-nwbfile.modules['behavior'].add_data_interface(position)
+nwbfile.processing['behavior'].add(position)
 
 ####################
 # .. _basic_epochs:
@@ -419,7 +419,7 @@ with NWBHDF5IO('example_file_path.nwb', 'w') as io:
 
 io = NWBHDF5IO('example_file_path.nwb', mode='a')
 nwbfile = io.read()
-position = nwbfile.modules['behavior'].data_interfaces['Position']
+position = nwbfile.processing['behavior'].data_interfaces['Position']
 
 ####################
 # Next, add a new :py:class:`~pynwb.behavior.SpatialSeries`.

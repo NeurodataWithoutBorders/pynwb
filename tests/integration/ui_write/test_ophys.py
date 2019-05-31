@@ -314,11 +314,11 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         img_seg.add_plane_segmentation(self.container)
         mod = nwbfile.create_processing_module('plane_seg_test_module',
                                                'a plain module for testing')
-        mod.add_data_interface(img_seg)
+        mod.add(img_seg)
 
     def getContainer(self, nwbfile):
         mod = nwbfile.get_processing_module('plane_seg_test_module')
-        img_seg = mod.get_data_interface('ImageSegmentation')
+        img_seg = mod.get('ImageSegmentation')
         return img_seg.get_plane_segmentation('test_plane_seg_name')
 
 
@@ -414,5 +414,5 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
         img_seg.add_plane_segmentation(self.plane_segmentation)
         mod = nwbfile.create_processing_module('plane_seg_test_module',
                                                'a plain module for testing')
-        mod.add_data_interface(img_seg)
+        mod.add(img_seg)
         super(TestRoiResponseSeriesIO, self).addContainer(nwbfile)
