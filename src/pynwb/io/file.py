@@ -40,7 +40,7 @@ class NWBFileMap(ObjectMapper):
             general_spec.get_group('optophysiology').get_neurodata_type('ImagingPlane'))
 
         self.map_spec(
-            'modules',
+            'processing',
             self.spec.get_group('processing').get_neurodata_type('ProcessingModule'))
         # self.unmap(general_spec.get_dataset('stimulus'))
         self.map_spec('stimulus_notes', general_spec.get_dataset('stimulus'))
