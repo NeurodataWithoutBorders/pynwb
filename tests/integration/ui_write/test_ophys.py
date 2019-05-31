@@ -226,7 +226,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
                 'imaging_rate': DatasetBuilder('imaging_rate', 300.),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
-                #'manifold': DatasetBuilder('manifold', (1, 2, (1, 2, 3)),
+                # 'manifold': DatasetBuilder('manifold', (1, 2, (1, 2, 3)),
                 #                           attributes={'conversion': 4.0, 'unit': 'manifold unit'}),
                 'reference_frame': DatasetBuilder('reference_frame', 'A frame to refer to'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
