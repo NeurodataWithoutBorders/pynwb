@@ -1,5 +1,6 @@
 import numpy as np
 from collections import Iterable
+import warnings
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
 
@@ -292,6 +293,9 @@ class DecompositionSeries(TimeSeries):
         metric, source_timeseries, bands = popargs('metric', 'source_timeseries', 'bands', kwargs)
         super(DecompositionSeries, self).__init__(**kwargs)
         self.source_timeseries = source_timeseries
+        if self.source_timeseries is None:
+            warnings.warn("It is best practice to set `source_timeseries` if it is present to document "
+                          "where the DecompositionSeries was derived from. (Optional)")
         self.metric = metric
         if bands is None:
             bands = DynamicTable("bands", "data about the frequency bands that the signal was decomposed into")
