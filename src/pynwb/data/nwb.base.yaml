@@ -1,6 +1,6 @@
 datasets:
 - neurodata_type_def: NWBData
-  doc: 'The attributes specified here are included in all interfaces.'
+  doc: An abstract data type for a dataset
   attributes:
   - name: help
     dtype: text
@@ -93,14 +93,16 @@ datasets:
     - 4
 groups:
 - neurodata_type_def: NWBContainer
-  doc: The attributes specified here are included in all interfaces.
+  doc: An abstract data type for a generic container storing collections of data
+    and metadata. Base type for all data and metadata containers.
   attributes:
   - name: help
     dtype: text
     doc: Short description of what this type of NWBContainer contains.
 - neurodata_type_def: NWBDataInterface
   neurodata_type_inc: NWBContainer
-  doc: An abstract data type for differentiating experimental data from metadata
+  doc: An abstract data type for a generic container storing collections of data,
+    as opposed to metadata.
 - neurodata_type_def: TimeSeries
   neurodata_type_inc: NWBDataInterface
   doc: General purpose time series.
