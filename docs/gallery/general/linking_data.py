@@ -1,3 +1,7 @@
+'''
+Example for linking data in NWB files
+'''
+
 ####################
 # Modular Data Storage using External Files
 # ===========================================
