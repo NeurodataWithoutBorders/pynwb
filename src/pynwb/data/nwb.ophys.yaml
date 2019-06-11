@@ -303,7 +303,7 @@ groups:
       motion
   groups:
   - neurodata_type_def: CorrectedImageStack
-    neurodata_type_inc: NWBContainer
+    neurodata_type_inc: NWBDataInterface
     doc: One of possibly many.  Name should be informative.
     attributes:
     - name: help
