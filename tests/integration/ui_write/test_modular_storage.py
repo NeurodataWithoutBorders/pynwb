@@ -1,11 +1,12 @@
 import os
+import gc
 from datetime import datetime
 from dateutil.tz import tzutc
 
 import numpy as np
 
 from pynwb.base import TimeSeries
-from pynwb import get_manager, NWBFile
+from pynwb import get_manager, NWBFile, NWBHDF5IO, validate as pynwb_validate
 from hdmf.backends.hdf5 import HDF5IO
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
@@ -18,7 +19,7 @@ class TestTimeSeriesModular(base.TestMapRoundTrip):
 
     def remove_file(self, path):
         if os.path.exists(path) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
-            os.remove(path)
+                os.remove(path)
 
     def setUp(self):
         self.__manager = get_manager()
@@ -77,6 +78,23 @@ class TestTimeSeriesModular(base.TestMapRoundTrip):
 
         with HDF5IO(self.link_filename, 'r', manager=get_manager()) as self.link_file_reader:
             return self.getContainer(self.link_file_reader.read())
+
+    def validate(self):
+        filenames = [self.data_filename, self.link_filename]
+        for fn in filenames:
+            if os.path.exists(fn):
+                with NWBHDF5IO(fn, mode='r') as io:
+                    errors = pynwb_validate(io)
+                    if errors:
+                        for err in errors:
+                            raise Exception(err)
+
+                # necessary to remove all references to the file and garbage
+                # collect on windows in order to be able to truncate/overwrite
+                # the file later. see pynwb GH issue #975
+                if os.name == 'nt':
+                    del io
+                    gc.collect()
 
     def getContainer(self, nwbfile):
         return nwbfile.get_acquisition('test_mod_ts')
