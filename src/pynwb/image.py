@@ -77,8 +77,8 @@ class ImageSeries(TimeSeries):
 
     @bits_per_pixel.setter
     def bits_per_pixel(self, val):
-        warnings.warn("bits_per_pixel is no longer used", DeprecationWarning)
         if val is not None:
+            warnings.warn("bits_per_pixel is no longer used", DeprecationWarning)
             self.fields['bits_per_pixel'] = val
 
 

@@ -40,8 +40,8 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
     def test_init(self):
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [1, 3], 'the second and fourth electrodes', table)
-        data = np.zeros(10)
-        timestamps = np.arange(10)
+        data = ((1, 1, 1), (2, 2, 2))
+        timestamps = np.arange(2)
         sES = SpikeEventSeries('test_sES', data, timestamps, region)  # noqa: F405
         self.assertEqual(sES.name, 'test_sES')
         # self.assertListEqual(sES.data, data)
@@ -51,7 +51,7 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
     def test_no_rate(self):
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [1, 3], 'the second and fourth electrodes', table)
-        data = np.zeros(10)
+        data = ((1, 1, 1), (2, 2, 2))
         with self.assertRaises(TypeError):
             SpikeEventSeries('test_sES', data, region, rate=1.)  # noqa: F405
 

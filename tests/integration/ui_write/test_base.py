@@ -39,7 +39,6 @@ class TestTimeSeriesIO(base.TestDataInterfaceIO):
 
     def test_timestamps_linking(self):
         ''' Test that timestamps get linked to in TimeSeres '''
-        path = 'test_timestamps_linking.nwb'
         tsa = TimeSeries(name='a', data=np.linspace(0, 1, 1000), timestamps=np.arange(1000), unit='m')
         tsb = TimeSeries(name='b', data=np.linspace(0, 1, 1000), timestamps=tsa, unit='m')
         nwbfile = NWBFile(identifier='foo',
@@ -47,11 +46,10 @@ class TestTimeSeriesIO(base.TestDataInterfaceIO):
                           session_description='bar')
         nwbfile.add_acquisition(tsa)
         nwbfile.add_acquisition(tsb)
-        io = NWBHDF5IO(path, 'w')
-        io.write(nwbfile)
-        io.close()
-        io = NWBHDF5IO(path, 'r')
-        nwbfile = io.read()
+        with NWBHDF5IO(self.filename, 'w') as io:
+            io.write(nwbfile)
+        with NWBHDF5IO(self.filename, 'r') as io:
+            nwbfile = io.read()
         tsa = nwbfile.acquisition['a']
         tsb = nwbfile.acquisition['b']
         self.assertIs(tsa.timestamps, tsb.timestamps)
