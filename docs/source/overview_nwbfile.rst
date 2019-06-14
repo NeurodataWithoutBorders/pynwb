@@ -47,7 +47,7 @@ The following TimeSeries objects are provided by the API and NWB specification:
 
   * :py:class:`~pynwb.image.IndexSeries`
   * :py:class:`~pynwb.misc.IntervalSeries`
-  * :py:class:`~pynwb.ophys.OptogeneticSeries`
+  * :py:class:`~pynwb.ogen.OptogeneticSeries`
   * :py:class:`~pynwb.icephys.PatchClampSeries`
 
     * :py:class:`~pynwb.icephys.CurrentClampSeries`
@@ -90,7 +90,7 @@ The following analysis :py:class:`~pynwb.core.NWBDataInterface` objects are prov
   * :py:class:`~pynwb.ophys.ImageSegmentation`
   * :py:class:`~pynwb.retinotopy.ImagingRetinotopy`
   * :py:class:`~pynwb.ecephys.LFP`
-  * :py:class:`~pynwb.behavior.MotionCorrection`
+  * :py:class:`~pynwb.ophys.MotionCorrection`
   * :py:class:`~pynwb.behavior.Position`
 
 Additionally, the :py:class:`~pynwb.base.TimeSeries` described :ref:`above <timeseries_overview>`

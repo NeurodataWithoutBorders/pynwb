@@ -158,7 +158,7 @@ class TestDynamicTable(unittest.TestCase):
 
         module_behavior = nwbfile.create_processing_module('a', 'b')
 
-        module_behavior.add_data_interface(table)
+        module_behavior.add(table)
 
     def test_pandas_roundtrip(self):
         df = pd.DataFrame({
@@ -339,12 +339,12 @@ Fields:
   epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
   ic_electrodes: { }
   imaging_planes: { }
+  intervals: { }
   lab_meta_data: { }
-  modules: { }
   ogen_sites: { }
+  processing: { }
   stimulus: { }
   stimulus_template: { }
-  time_intervals: { }
 """)
 
 
