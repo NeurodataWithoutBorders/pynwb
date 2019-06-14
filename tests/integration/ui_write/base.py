@@ -6,7 +6,7 @@ import numpy as np
 import h5py
 import numpy.testing as npt
 
-from pynwb import NWBContainer, get_manager, NWBFile, NWBData
+from pynwb import NWBContainer, get_manager, NWBFile, NWBData, NWBHDF5IO, validate as pynwb_validate
 from hdmf.backends.hdf5 import HDF5IO
 
 CORE_NAMESPACE = 'core'
@@ -185,6 +185,16 @@ class TestMapRoundTrip(TestMapNWBContainer):
         str(self.container)  # added as a test to make sure printing works
         self.assertNotEqual(id(self.container), id(self.read_container))
         self.assertContainerEqual(self.read_container, self.container)
+        self.validate()
+
+    def validate(self):
+        # validate created file
+        if os.path.exists(self.filename):
+            with NWBHDF5IO(self.filename, mode='r') as io:
+                errors = pynwb_validate(io)
+                if errors:
+                    for err in errors:
+                        raise Exception(err)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
