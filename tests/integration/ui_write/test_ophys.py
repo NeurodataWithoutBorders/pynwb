@@ -186,8 +186,9 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                           self.optical_channel,
                                           'a fake ImagingPlane',
                                           self.device,
-                                          600., 300., 'GFP', 'somewhere in the brain',
-                                          # (1., 1., (1., 2., 3.)),  # adding manifold breaks test...
+                                          600., 200., 'GFP', 'somewhere in the brain',
+                                          (((1., 2., 3.), (4., 5., 6.)),),
+                                          2., 'a unit',
                                           reference_frame='unknown')
 
         self.img_mask = deepcopy(img_mask)
@@ -226,8 +227,8 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
                 'imaging_rate': DatasetBuilder('imaging_rate', 300.),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
-                # 'manifold': DatasetBuilder('manifold', (1, 2, (1, 2, 3)),
-                #                           attributes={'conversion': 4.0, 'unit': 'manifold unit'}),
+                'manifold': DatasetBuilder('manifold', (((1., 2., 3.), (4., 5., 6.)),),
+                                           attributes={'conversion': 4.0, 'unit': 'manifold unit'}),
                 'reference_frame': DatasetBuilder('reference_frame', 'A frame to refer to'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
             groups={
@@ -337,7 +338,8 @@ class MaskRoundTrip(TestPlaneSegmentation):
                                           'imaging plane description',
                                           self.device,
                                           600., 300., 'GFP', 'somewhere in the brain',
-                                          (1., 2., 1., 2., 3.), 4.0, 'manifold unit', 'A frame to refer to')
+                                          (((1., 2., 3.), (4., 5., 6.)),),
+                                          4.0, 'manifold unit', 'A frame to refer to')
         return PlaneSegmentation('description', self.imaging_plane, 'test_plane_seg_name',
                                  self.image_series)
 
