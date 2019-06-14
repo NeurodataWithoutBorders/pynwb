@@ -19,7 +19,7 @@ class TestTimeSeriesModular(base.TestMapRoundTrip):
 
     def remove_file(self, path):
         if os.path.exists(path) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
-                os.remove(path)
+            os.remove(path)
 
     def setUp(self):
         self.__manager = get_manager()
