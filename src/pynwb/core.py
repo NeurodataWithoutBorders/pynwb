@@ -192,7 +192,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         str
 
         """
-        indent = num_indent * 2 * ' '
 
         if isinstance(v, list) or isinstance(v, tuple):
             if len(v) and isinstance(v[0], NWBBaseType):
