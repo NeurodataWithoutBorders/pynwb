@@ -233,7 +233,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         left_br = '{'
         right_br = '}'
         if len(d) == 0:
-            return left_br + right_br
+            return left_br + ' ' + right_br
         indent = num_indent * 2 * ' '
         indent_in = (num_indent + 1) * 2 * ' '
         out = left_br
