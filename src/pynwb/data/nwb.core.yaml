@@ -2,56 +2,29 @@ datasets:
 
 - neurodata_type_def: NWBData
   doc: An abstract data type for a dataset
-  attributes:
-  - name: help
-    dtype: text
-    doc: Short description of what this type of Interface contains.
-
-- neurodata_type_def: Index
-  neurodata_type_inc: NWBData
-  doc: Pointers that index data values
-  attributes:
-  - name: help
-    dtype: text
-    doc: a help string
-    value: indexes into a list of values for a list of elements
-  - name: target
-    dtype:
-      target_type: NWBData
-      reftype: object
-    doc: the target dataset that this index applies to
 
 - neurodata_type_def: VectorData
   neurodata_type_inc: NWBData
-  doc: Data values indexed by pointer
+  doc: A dataset indexed by pointer (see VectorIndex)
   attributes:
-  - name: help
-    dtype: text
-    doc: a help string
-    value: Values for a list of elements
   - name: description
     dtype: text
-    doc: A short description of what these vectors are
+    doc: A description of what these vectors represent
 
 - neurodata_type_def: VectorIndex
-  neurodata_type_inc: Index
-  doc: Pointers that index data values
+  neurodata_type_inc: NWBData
+  doc: An array of pointers that index the first dimension of a target VectorData
   attributes:
   - name: target
     dtype:
       target_type: VectorData
       reftype: object
-    doc: the target dataset that this index applies to
+    doc: A reference to the target dataset that this index applies to
 
 - neurodata_type_def: ElementIdentifiers
   neurodata_type_inc: NWBData
   dtype: int
-  doc: a unique identifier for each element
-  attributes:
-  - name: help
-    dtype: text
-    doc: a help string
-    value: unique identifiers for a list of elements
+  doc: A unique identifier for values within a dataset, e.g. rows of a DynamicTable
   default_name: element_id
   shape:
   - null
@@ -61,28 +34,21 @@ datasets:
   dtype: int
   doc: a region/index into a DynamicTable
   attributes:
-  - name: help
-    dtype: text
-    doc: value is 'a subset (i.e. slice or region) of a DynamicTable'
-    value: a subset (i.e. slice or region) of a DynamicTable
   - name: table
     dtype:
       target_type: DynamicTable
       reftype: object
-    doc: a reference to the DynamicTable this region applies to
+    doc: A reference to the DynamicTable that this region applies to
   - name: description
     dtype: text
-    doc: Description of what this table region points to
+    doc: A description of what this table region points to
+
 
 groups:
 
 - neurodata_type_def: NWBContainer
   doc: An abstract data type for a generic container storing collections of data
     and metadata. Base type for all data and metadata containers.
-  attributes:
-  - name: help
-    dtype: text
-    doc: Short description of what this type of NWBContainer contains.
 
 - neurodata_type_def: NWBDataInterface
   neurodata_type_inc: NWBContainer
@@ -112,29 +78,25 @@ groups:
     and unit metadata tables are sufficiently diverse that performance implications
     can be overlooked in favor of usability.
   attributes:
-  - name: help
-    dtype: text
-    doc: Value is 'A column-centric table'
-    value: A column-centric table
   - name: colnames
     dtype: ascii
-    doc: The names of the columns in this table. This should be used to specifying
+    doc: The names of the columns of this table. This should be used to specify
       an order to the columns
     shape:
     - null
   - name: description
     dtype: text
-    doc: Description of what is in this dynamic table
+    doc: A description of what is in this dynamic table
   datasets:
   - neurodata_type_inc: ElementIdentifiers
     name: id
     dtype: int
-    doc: The unique identifier for the rows in this dynamic table
+    doc: The unique identifiers for the rows of this dynamic table
     shape:
     - null
   - neurodata_type_inc: VectorData
-    doc: The vector columns in this dynamic table
+    doc: The vector columns of this dynamic table
     quantity: '*'
   - neurodata_type_inc: VectorIndex
-    doc: The indices for the vector columns in this dynamic table
+    doc: The indices for the vector columns of this dynamic table
     quantity: '*'

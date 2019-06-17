@@ -336,24 +336,6 @@ class NWBData(NWBBaseType, Data):
             raise ValueError(msg)
 
 
-@register_class('Index', CORE_NAMESPACE)
-class Index(NWBData):
-
-    __nwbfields__ = ("target",)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
-            {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
-            {'name': 'target', 'type': NWBData,
-             'doc': 'the target dataset that this index applies to'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
-    def __init__(self, **kwargs):
-        call_docval_func(super(Index, self).__init__, kwargs)
-
-
 @register_class('VectorData', CORE_NAMESPACE)
 class VectorData(NWBData):
 
@@ -378,7 +360,7 @@ class VectorData(NWBData):
 
 
 @register_class('VectorIndex', CORE_NAMESPACE)
-class VectorIndex(Index):
+class VectorIndex(NWBData):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorIndex'},
             {'name': 'data', 'type': ('array_data', 'data'),
