@@ -211,9 +211,9 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
     @staticmethod
     def __smart_str_list(l, num_indent, left_br):
-        if left_br is '(':
+        if left_br == '(':
             right_br = ')'
-        if left_br is '{':
+        if left_br == '{':
             right_br = '}'
         if len(l) == 0:
             return left_br + ' ' + right_br
