@@ -17,20 +17,33 @@ class ElectrodeGroup(NWBContainer):
     __nwbfields__ = ('name',
                      'description',
                      'location',
-                     'device')
+                     'device',
+                     {'name': 'lfp', 'doc': 'LFP recorded from this ElectrodeGroup', 'child': False},
+                     {'name': 'event_waveform', 'doc': 'Spike waveforms recorded from this ElectrodeGroup',
+                      'child': False},
+                     {'name': 'acquisition', 'doc': 'ElectricalSeries recorded by this ElectrodeGroup', 'child': False})
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
             {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
+            {'name': 'lfp', 'type': 'LFP', 'doc': 'LFP recorded from this ElectrodeGroup', 'default': None},
+            {'name': 'event_waveform', 'type': 'EventWaveform',
+             'doc': 'Spike waveforms recorded from this ElectrodeGroup', 'default': None},
+            {'name': 'acquisition', 'type': 'ElectricalSeries',
+             'doc': 'ElectricalSeries recorded by this ElectrodeGroup', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(ElectrodeGroup, self).__init__, kwargs)
-        description, location, device = popargs("description", "location", "device", kwargs)
+        description, location, device, lfp, event_waveform, acquisition = popargs(
+            "description", "location", "device", "lfp", "event_waveform", "acquisition", kwargs)
         self.description = description
         self.location = location
         self.device = device
+        self.lfp = lfp
+        self.event_waveform = event_waveform
+        self.acquisition = acquisition
 
 
 _et_docval = [
