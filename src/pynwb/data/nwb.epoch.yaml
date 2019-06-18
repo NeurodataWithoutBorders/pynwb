@@ -6,44 +6,44 @@ groups:
   attributes:
   - name: help
     dtype: text
-    doc: Value is 'A general epoch object'
     value: A general epoch object
+    doc: Value is 'A general epoch object'
   datasets:
-  - neurodata_type_inc: VectorData
-    name: start_time
+  - name: start_time
+    neurodata_type_inc: VectorData
     dtype: float
     doc: Start time of epoch, in seconds
     attributes:
     - name: description
       dtype: text
-      doc: value is 'start time of the epoch, in seconds'
       value: start time of the epoch, in seconds
-  - neurodata_type_inc: VectorData
-    name: stop_time
+      doc: value is 'start time of the epoch, in seconds'
+  - name: stop_time
+    neurodata_type_inc: VectorData
     dtype: float
     doc: Stop time of epoch, in seconds
     attributes:
     - name: description
       dtype: text
-      doc: value is 'stop time of the epoch, in seconds'
       value: stop time of the epoch, in seconds
-  - neurodata_type_inc: VectorData
-    name: tags
+      doc: value is 'stop time of the epoch, in seconds'
+  - name: tags
+    neurodata_type_inc: VectorData
     dtype: text
     doc: User-defined tags that identify events. Tags are to help identify or categorize
       events.
+    quantity: '?'
     attributes:
     - name: description
       dtype: text
-      doc: value is 'user-defined tags'
       value: user-defined tags
-    quantity: '?'
-  - neurodata_type_inc: VectorIndex
-    name: tags_index
+      doc: value is 'user-defined tags'
+  - name: tags_index
+    neurodata_type_inc: VectorIndex
     doc: Index for tags
     quantity: '?'
-  - neurodata_type_inc: VectorData
-    name: timeseries
+  - name: timeseries
+    neurodata_type_inc: VectorData
     dtype:
     - name: idx_start
       dtype: int32
@@ -58,13 +58,13 @@ groups:
         reftype: object
       doc: the TimeSeries that this index applies to
     doc: An index into a TimeSeries object
+    quantity: '?'
     attributes:
     - name: help
       dtype: text
-      doc: Value is 'Data on how an epoch applies to a time series'
       value: Data on how an epoch applies to a time series
-    quantity: '?'
-  - neurodata_type_inc: VectorIndex
-    name: timeseries_index
+      doc: Value is 'Data on how an epoch applies to a time series'
+  - name: timeseries_index
+    neurodata_type_inc: VectorIndex
     doc: Index for timeseries
     quantity: '?'
