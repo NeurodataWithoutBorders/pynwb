@@ -3,6 +3,7 @@ import unittest2 as unittest
 import six
 import numpy as np
 import os
+import pandas as pd
 
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
@@ -10,6 +11,7 @@ from dateutil.tz import tzlocal, tzutc
 from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
 from pynwb.file import Subject, ElectrodeTable
+from pynwb.epoch import TimeIntervals
 
 
 class NWBFileTest(unittest.TestCase):
@@ -70,6 +72,13 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(elecgrp.location, loc)
         self.assertIs(elecgrp.device, d)
 
+    def test_create_custom_intervals(self):
+        df_words = pd.DataFrame({'start_time': [.1, 2.], 'stop_time': [.8, 2.3],
+                                 'label': ['hello', 'there']})
+        words = TimeIntervals.from_dataframe(df_words, name='words')
+        self.nwbfile.add_time_intervals(words)
+        self.assertEqual(self.nwbfile.intervals['words'], words)
+
     def test_create_electrode_group_invalid_index(self):
         """
         Test the case where the user creates an electrode table region with
@@ -112,6 +121,11 @@ class NWBFileTest(unittest.TestCase):
                 self.assertEqual(aa.name, bb.name)
 
         os.remove("electrodes_mwe.nwb")
+
+    def test_access_processing(self):
+        self.nwbfile.create_processing_module('test_mod', 'test_desciprion')
+        # test deprecate .modules
+        self.assertIs(self.nwbfile.processing['test_mod'], self.nwbfile.modules['test_mod'])
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']

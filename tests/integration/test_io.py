@@ -5,7 +5,7 @@ from dateutil.tz import tzlocal, tzutc
 import os
 from h5py import File
 
-from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO
+from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
 
 from hdmf.backends.hdf5 import HDF5IO, H5DataIO
 from hdmf.data_utils import DataChunkIterator
@@ -237,24 +237,29 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
 
 class TestAppend(unittest.TestCase):
 
+    def setUp(self):
+        self.nwbfile = NWBFile(session_description='hi',
+                               identifier='hi',
+                               session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
+        self.path = "test_append.nwb"
+
+    def tearDown(self):
+        if os.path.exists(self.path):
+            os.remove(self.path)
+
     def test_append(self):
-
-        FILENAME = 'test_append.nwb'
-
-        nwb = NWBFile(session_description='hi', identifier='hi', session_start_time=datetime(1970, 1, 1, 12,
-                                                                                             tzinfo=tzutc()))
-        proc_mod = nwb.create_processing_module(name='test_proc_mod', description='')
+        proc_mod = self.nwbfile.create_processing_module(name='test_proc_mod', description='')
         proc_inter = LFP(name='test_proc_dset')
-        proc_mod.add_data_interface(proc_inter)
-        device = nwb.create_device(name='test_device')
-        e_group = nwb.create_electrode_group(
+        proc_mod.add(proc_inter)
+        device = self.nwbfile.create_device(name='test_device')
+        e_group = self.nwbfile.create_electrode_group(
             name='test_electrode_group',
             description='',
             location='',
             device=device
         )
-        nwb.add_electrode(x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
-        electrodes = nwb.create_electrode_table_region(region=[0], description='')
+        self.nwbfile.add_electrode(x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
+        electrodes = self.nwbfile.create_electrode_table_region(region=[0], description='')
         e_series = ElectricalSeries(
             name='test_device',
             electrodes=electrodes,
@@ -263,19 +268,22 @@ class TestAppend(unittest.TestCase):
         )
         proc_inter.add_electrical_series(e_series)
 
-        with NWBHDF5IO(FILENAME, mode='w') as io:
-            io.write(nwb)
+        with NWBHDF5IO(self.path, mode='w') as io:
+            io.write(self.nwbfile)
 
-        with NWBHDF5IO(FILENAME, mode='a') as io:
+        with NWBHDF5IO(self.path, mode='a') as io:
             nwb = io.read()
-            elec = nwb.modules['test_proc_mod']['LFP'].electrical_series['test_device'].electrodes
+            elec = nwb.processing['test_proc_mod']['LFP'].electrical_series['test_device'].electrodes
             ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=elec)
             nwb.add_acquisition(ts2)
             io.write(nwb)
 
-        with NWBHDF5IO(FILENAME, mode='r') as io:
+        with NWBHDF5IO(self.path, mode='r') as io:
             nwb = io.read()
             np.testing.assert_equal(nwb.acquisition['timeseries2'].data[:], ts2.data)
+            errors = validate(io)
+            for e in errors:
+                print('ERROR', e)
 
 
 class TestH5DataIO(unittest.TestCase):
@@ -297,7 +305,7 @@ class TestH5DataIO(unittest.TestCase):
             io.write(self.nwbfile)
         # confirm that the dataset was indeed compressed
         infile = File(self.path, 'r')
-        self.assertEquals(infile['/acquisition/ts_name/timestamps'].compression, 'gzip')
+        self.assertEqual(infile['/acquisition/ts_name/timestamps'].compression, 'gzip')
 
     def test_write_dataset_custom_compress(self):
         a = H5DataIO(np.arange(30).reshape(5, 2, 3),

@@ -1137,6 +1137,9 @@ class DynamicTable(NWBDataInterface):
             else:
                 c.add_row(data[colname])
 
+    def __eq__(self, other):
+        return self.to_dataframe().equals(other.to_dataframe())
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'description', 'type': str, 'doc': 'a description for this column'},
             {'name': 'data', 'type': ('array_data', 'data'),
@@ -1252,13 +1255,16 @@ class DynamicTable(NWBDataInterface):
             return self[key]
         return default
 
-    def to_dataframe(self):
+    def to_dataframe(self, exclude=set([])):
         '''Produce a pandas DataFrame containing this table's data.
         '''
 
         data = {}
         for name in self.colnames:
+            if name in exclude:
+                continue
             col = self.__df_cols[self.__colids[name]]
+
             if isinstance(col.data, (Dataset, np.ndarray)) and col.data.ndim > 1:
                 data[name] = [x for x in col[:]]
             else:
@@ -1329,6 +1335,10 @@ class DynamicTable(NWBDataInterface):
             else:
                 columns.append({'name': col_name,
                                 'description': 'no description'})
+                if hasattr(df[col_name].iloc[0], '__len__') and not isinstance(df[col_name].iloc[0], str):
+                    lengths = [len(x) for x in df[col_name]]
+                    if not lengths[1:] == lengths[:-1]:
+                        columns[-1].update(index=True)
 
         if index_column is not None:
             ids = ElementIdentifiers(name=index_column, data=df[index_column].values.tolist())

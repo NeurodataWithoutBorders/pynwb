@@ -5,7 +5,6 @@ from warnings import warn
 import copy as _copy
 
 from hdmf.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
-from hdmf import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -21,12 +20,6 @@ from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, Dynam
 
 def _not_parent(arg):
     return arg['name'] != 'parent'
-
-
-@register_class('SpecFile', CORE_NAMESPACE)
-class SpecFile(Container):
-    # TODO: Implement this
-    pass
 
 
 @register_class('LabMetaData', CORE_NAMESPACE)
@@ -109,7 +102,7 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_stimulus_template'
         },
         {
-            'attr': 'modules',
+            'attr': 'processing',
             'add': 'add_processing_module',
             'type': ProcessingModule,
             'create': 'create_processing_module',
@@ -151,7 +144,7 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_ogen_site'
         },
         {
-            'attr': 'time_intervals',
+            'attr': 'intervals',
             'add': 'add_time_intervals',
             'type': TimeIntervals,
             'create': 'create_time_intervals',
@@ -255,11 +248,11 @@ class NWBFile(MultiContainerInterface):
              'doc': 'A table containing trial data', 'default': None},
             {'name': 'invalid_times', 'type': TimeIntervals,
              'doc': 'A table containing times to be omitted from analysis', 'default': None},
-            {'name': 'time_intervals', 'type': (list, tuple),
+            {'name': 'intervals', 'type': (list, tuple),
              'doc': 'any TimeIntervals tables storing time intervals', 'default': None},
             {'name': 'units', 'type': Units,
              'doc': 'A table containing unit metadata', 'default': None},
-            {'name': 'modules', 'type': (list, tuple),
+            {'name': 'processing', 'type': (list, tuple),
              'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
             {'name': 'lab_meta_data', 'type': (list, tuple), 'default': None,
              'doc': 'an extension that contains lab-specific meta-data'},
@@ -309,7 +302,7 @@ class NWBFile(MultiContainerInterface):
         self.stimulus_template = getargs('stimulus_template', kwargs)
         self.keywords = getargs('keywords', kwargs)
 
-        self.modules = getargs('modules', kwargs)
+        self.processing = getargs('processing', kwargs)
         epochs = getargs('epochs', kwargs)
         if epochs is not None:
             if epochs.name != 'epochs':
@@ -333,7 +326,7 @@ class NWBFile(MultiContainerInterface):
         self.ic_electrodes = getargs('ic_electrodes', kwargs)
         self.imaging_planes = getargs('imaging_planes', kwargs)
         self.ogen_sites = getargs('ogen_sites', kwargs)
-        self.time_intervals = getargs('time_intervals', kwargs)
+        self.intervals = getargs('intervals', kwargs)
         self.subject = getargs('subject', kwargs)
         self.sweep_table = getargs('sweep_table', kwargs)
         self.lab_meta_data = getargs('lab_meta_data', kwargs)
@@ -372,6 +365,11 @@ class NWBFile(MultiContainerInterface):
                 for c in n.children:
                     stack.append(c)
         return ret
+
+    @property
+    def modules(self):
+        warn("replaced by NWBFile.processing", DeprecationWarning)
+        return self.processing
 
     @property
     def ec_electrode_groups(self):

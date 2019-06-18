@@ -54,6 +54,7 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
     'sphinx_gallery.gen_gallery'
 ]
 
@@ -77,6 +78,7 @@ intersphinx_mapping = {
     'matplotlib': ('http://matplotlib.org', None),
     'h5py': ('http://docs.h5py.org/en/latest/', None),
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
+    'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None)
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -94,7 +96,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017, Neurodata Without Borders'
+copyright = u'2017-2019, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
