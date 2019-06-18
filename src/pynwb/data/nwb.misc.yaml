@@ -8,27 +8,11 @@ groups:
     1.0 for gray, 0.0 for actual stimulus) or by storing NaNs for feature values,
     or through use of the TimeSeries::control fields. A set of features is considered
     to persist until the next set of features is defined. The final set of features
-    stored should be the null set.
-  attributes:
-  - name: help
-    dtype: text
-    doc: Value is 'Features of an applied stimulus. This is useful when storing the
-      raw stimulus is impractical'
-    value: Features of an applied stimulus. This is useful when storing the raw stimulus
-      is impractical
+    stored should be the null set. This is useful when storing the raw stimulus is
+    impractical
   datasets:
   - name: data
     dtype: numeric
-    doc: Values of each feature at each time.
-    attributes:
-    - name: unit
-      dtype: text
-      doc: 'The base unit of measure used to store data. This should be in the SI
-        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
-        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
-        below describes how to convert the data to the specified SI unit.'
-      default_value: see 'feature_units'
-      required: false
     dims:
     - - num_times
     - - num_times
@@ -37,49 +21,56 @@ groups:
     - - null
     - - null
       - null
+    doc: Values of each feature at each time
+    attributes:
+    - name: unit
+      dtype: text
+      default_value: see 'feature_units'
+      doc: 'The base unit of measure used to store data. This should be in the SI
+        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
+        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
+        below describes how to convert the data to the specified SI unit.'
+      required: false
   - name: feature_units
     dtype: text
-    doc: Units of each feature.
     dims:
     - num_features
-    quantity: '?'
     shape:
     - null
+    doc: Units of each feature.
+    quantity: '?'
   - name: features
     dtype: text
-    doc: Description of the features represented in TimeSeries::data.
     dims:
     - num_features
     shape:
     - null
+    doc: Description of the features represented in TimeSeries::data.
+
 - neurodata_type_def: AnnotationSeries
   neurodata_type_inc: TimeSeries
-  doc: Stores, eg, user annotations made during an experiment. The TimeSeries::data[]
+  doc: Stores user annotations made during an experiment. The TimeSeries::data[]
     field stores a text array, and timestamps are stored for each annotation (ie,
     interval=1). This is largely an alias to a standard TimeSeries storing a text
     array but that is identifiable as storing annotations in a machine-readable way.
-  attributes:
-  - name: help
-    dtype: text
-    doc: Value is 'Time-stamped annotations about an experiment'
-    value: Time-stamped annotations about an experiment
   datasets:
   - name: data
     dtype: text
-    doc: Annotations made during an experiment.
-    attributes:
-    - name: resolution
-      dtype: float
-      doc: Value is -1.0
-      value: -1.0
-    - name: unit
-      dtype: text
-      doc: Value is 'n/a'
-      value: n/a
     dims:
     - num_times
     shape:
     - null
+    doc: Annotations made during an experiment.
+    attributes:
+    - name: resolution
+      dtype: float
+      value: -1.0
+      doc: Value is -1.0
+    - name: unit
+      dtype: text
+      value: n/a
+      doc: Value is 'n/a'
+
 - neurodata_type_def: IntervalSeries
   neurodata_type_inc: TimeSeries
   doc: Stores intervals of data. The timestamps field stores the beginning and end
@@ -88,29 +79,25 @@ groups:
     by using multiple key values (eg, 1 for feature A, 2 for feature B, 3 for feature
     C, etc). The field data stores an 8-bit integer. This is largely an alias of a
     standard TimeSeries but that is identifiable as representing time intervals in
-    a machine-readable way.
-  attributes:
-  - name: help
-    dtype: text
-    doc: Value is 'Stores the start and stop times for events'
-    value: Stores the start and stop times for events
+    a machine-readable way. Stores the start and stop times for events
   datasets:
   - name: data
     dtype: int8
-    doc: '>0 if interval started, <0 if interval ended.'
-    attributes:
-    - name: resolution
-      dtype: float
-      doc: Value is -1.0
-      value: -1.0
-    - name: unit
-      dtype: text
-      doc: Value is 'n/a'
-      value: n/a
     dims:
     - num_times
     shape:
     - null
+    doc: '>0 if interval started, <0 if interval ended.'
+    attributes:
+    - name: resolution
+      dtype: float
+      value: -1.0
+      doc: Value is -1.0
+    - name: unit
+      dtype: text
+      value: n/a
+      doc: Value is 'n/a'
+
 - neurodata_type_def: DecompositionSeries
   neurodata_type_inc: TimeSeries
   doc: Holds spectral analysis of a timeseries. For instance of LFP or a speech signal
@@ -129,13 +116,6 @@ groups:
   - name: metric
     dtype: text
     doc: 'recommended: phase, amplitude, power'
-  links:
-  - name: source_timeseries
-    doc: HDF5 link to TimesSeries that this data was calculated from. Metadata
-      about electrodes and their position can be read from that ElectricalSeries so
-      it is not necessary to store that information here
-    target_type: TimeSeries
-    quantity: '?'
   groups:
   - neurodata_type_inc: DynamicTable
     name: bands
@@ -192,33 +172,35 @@ groups:
         dtype: text
         doc: The standard devaition of Gaussian filters in Hz
         value: The standard devaition of Gaussian filters in Hz
+  links:
+  - name: source_timeseries
+    doc: Link to the TimeSeries object that this data was calculated from. Metadata
+      about electrodes and their position can be read from that ElectricalSeries so
+      it is not necessary to store that information here
+    target_type: TimeSeries
+    quantity: '?'
+
 - neurodata_type_def: Units
   neurodata_type_inc: DynamicTable
+  default_name: Units
   doc: Data about spiking units. Event times of observed units (e.g. cell, synapse, etc.)
     should be concatenated and stored in spike_times.
-  attributes:
-  - name: help
-    dtype: text
-    doc: Value is 'Data about spiking units'
-    value: Data about spiking units
   datasets:
-  - neurodata_type_inc: VectorIndex
-    name: spike_times_index
-    doc: the index into the spike_times dataset
+  - name: spike_times_index
+    neurodata_type_inc: VectorIndex
+    doc: Indices into the spike_times dataset
     quantity: '?'
-  - neurodata_type_inc: VectorData
-    name: spike_times
+  - name: spike_times
+    neurodata_type_inc: VectorData
+    doc: Spike times for each unit
     dtype: double
-    doc: the spike times for each unit
     quantity: '?'
-  - neurodata_type_inc: VectorIndex
-    name: obs_intervals_index
-    doc: the index into the obs_intervals dataset
+  - name: obs_intervals_index
+    neurodata_type_inc: VectorIndex
+    doc: Indices into the obs_intervals dataset
     quantity: '?'
-  - neurodata_type_inc: VectorData
-    name: obs_intervals
-    doc: the observation intervals for each unit
-    quantity: '?'
+  - name: obs_intervals
+    neurodata_type_inc: VectorData
     dtype: double
     dims:
     - num_intervals
@@ -226,35 +208,36 @@ groups:
     shape:
     - null
     - 2
-  - neurodata_type_inc: VectorIndex
-    name: electrodes_index
+    doc: Observation intervals for each unit
+    quantity: '?'
+  - name: electrodes_index
+    neurodata_type_inc: VectorIndex
     doc: the index into electrodes
     quantity: '?'
-  - neurodata_type_inc: DynamicTableRegion
-    name: electrodes
+  - name: electrodes
+    neurodata_type_inc: DynamicTableRegion
     doc: the electrode that each spike unit came from
     quantity: '?'
-  - neurodata_type_inc: VectorData
-    name: electrode_group
-    doc: the electrode group that each spike unit came from
+  - name: electrode_group
+    neurodata_type_inc: VectorData
     dtype:
         target_type: ElectrodeGroup
         reftype: object
+    doc: the electrode group that each spike unit came from
     quantity: '?'
-  - neurodata_type_inc: VectorData
-    name: waveform_mean
+  - name: waveform_mean
+    neurodata_type_inc: VectorData
+    dtype: float
+    shape:
+    - null
+    - null
     doc: the spike waveform mean for each spike unit
+    quantity: '?'
+  - name: waveform_sd
+    neurodata_type_inc: VectorData
     dtype: float
     shape:
     - null
     - null
-    quantity: '?'
-  - neurodata_type_inc: VectorData
-    name: waveform_sd
     doc: the spike waveform standard deviation for each spike unit
-    dtype: float
-    shape:
-    - null
-    - null
     quantity: '?'
-  default_name: Units

@@ -9,7 +9,7 @@ datasets:
   attributes:
   - name: description
     dtype: text
-    doc: A description of what these vectors represent
+    doc: Description of what these vectors represent
 
 - neurodata_type_def: VectorIndex
   neurodata_type_inc: NWBData
@@ -19,30 +19,31 @@ datasets:
     dtype:
       target_type: VectorData
       reftype: object
-    doc: A reference to the target dataset that this index applies to
+    doc: Reference to the target VectorData dataset that this index applies to
 
 - neurodata_type_def: ElementIdentifiers
   neurodata_type_inc: NWBData
   dtype: int
-  doc: A unique identifier for values within a dataset, e.g. rows of a DynamicTable
-  default_name: element_id
+  dims:
+  - num_ids
   shape:
   - null
+  doc: An array of unique identifiers for values within a dataset, e.g. rows of a DynamicTable
 
 - neurodata_type_def: DynamicTableRegion
   neurodata_type_inc: VectorData
   dtype: int
-  doc: a region/index into a DynamicTable
+  doc: A region/index into a DynamicTable
   attributes:
   - name: table
     dtype:
       target_type: DynamicTable
       reftype: object
-    doc: A reference to the DynamicTable that this region applies to
+    doc: Reference to the DynamicTable that this region applies to
+
   - name: description
     dtype: text
-    doc: A description of what this table region points to
-
+    doc: Description of what this table region points to
 
 groups:
 
@@ -80,23 +81,27 @@ groups:
   attributes:
   - name: colnames
     dtype: ascii
-    doc: The names of the columns of this table. This should be used to specify
-      an order to the columns
+    dims:
+    - num_columns
     shape:
     - null
+    doc: Names of the columns of this table. This should be used to specify
+      an order to the columns
   - name: description
     dtype: text
-    doc: A description of what is in this dynamic table
+    doc: Description of what is in this dynamic table
   datasets:
-  - neurodata_type_inc: ElementIdentifiers
-    name: id
+  - name: id
+    neurodata_type_inc: ElementIdentifiers
     dtype: int
-    doc: The unique identifiers for the rows of this dynamic table
+    dims:
+    - num_rows
     shape:
     - null
+    doc: Array of unique identifiers for the rows of this dynamic table
   - neurodata_type_inc: VectorData
-    doc: The vector columns of this dynamic table
+    doc: Vector columns of this dynamic table
     quantity: '*'
   - neurodata_type_inc: VectorIndex
-    doc: The indices for the vector columns of this dynamic table
+    doc: Indices for the vector columns of this dynamic table
     quantity: '*'

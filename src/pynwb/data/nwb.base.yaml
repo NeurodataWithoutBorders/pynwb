@@ -1,20 +1,15 @@
 datasets:
-
 - neurodata_type_def: Image
   neurodata_type_inc: NWBData
-  doc: Image base type.
-  attributes:
-  - name: help
-    dtype: text
-    doc: base image (use GrayscaleImage, RGBImage, RGBAImage, etc.)
-  - name: resolution
-    dtype: float
-    doc: pixels / cm
-    required: False
-  - name: description
-    dtype: text
-    required: False
-    doc: description of image
+  dims:
+  - - num_x
+    - num_y
+  - - num_x
+    - num_y
+    - (r, g, b)
+  - - num_x
+    - num_y
+    - (r, g, b, a)
   shape:
   - - null
     - null
@@ -24,75 +19,35 @@ datasets:
   - - null
     - null
     - 4
+  doc: An abstract data type for an image. Shape can be 2-D (x, y), or 3-D where the
+    third dimension can have three or four elements, e.g. (x, y, (r, g, b)) or
+    (x, y, (r, g, b, a)).
+  attributes:
+  - name: resolution
+    dtype: float
+    doc: Pixel resolution of the image, e.g. number of pixels per centimeter
+    required: False
+  - name: description
+    dtype: text
+    doc: Description of the image
+    required: False
 
 groups:
-
 - neurodata_type_def: TimeSeries
   neurodata_type_inc: NWBDataInterface
-  doc: General purpose time series.
+  doc: A general purpose time series, e.g. data that varies over time
   attributes:
+  - name: description
+    dtype: text
+    doc: Description of this time series data
   - name: comments
     dtype: text
     doc: Human-readable comments about the TimeSeries. This second descriptive field
       can be used to store additional information, or descriptive information if the
       primary description field is populated with a computer-readable string.
-    default_value: no comments
     required: false
-  - name: description
-    dtype: text
-    doc: Description of TimeSeries
-    default_value: no description
-    required: false
-  - name: help
-    dtype: text
-    doc: Value is 'General time series object'
-    value: General time series object
   datasets:
-  - name: control
-    dtype: uint8
-    doc: 'Numerical labels that apply to each element in data[]. COMMENT: Optional
-      field. If present, the control array should have the same number of elements
-      as data[].'
-    dims:
-    - num_times
-    quantity: '?'
-    shape:
-    - null
-  - name: control_description
-    dtype: text
-    doc: 'Description of each control value. COMMENT: Array length should be as long
-      as the highest number in control minus one, generating an zero-based indexed
-      array for control values.'
-    dims:
-    - num_control_values
-    quantity: '?'
-    shape:
-    - null
   - name: data
-    doc: 'Data values. Can also store binary data (eg, image frames) COMMENT: This
-      field may be a link to data stored in an external file, especially in the case
-      of raw data.'
-    attributes:
-    - name: conversion
-      dtype: float32
-      doc: Scalar to multiply each element in data to convert it to the specified
-        unit
-      default_value: 1.0
-      required: false
-    - name: resolution
-      dtype: float32
-      doc: 'Smallest meaningful difference between values in data, stored in the specified
-        by unit. COMMENT: E.g., the change in value of the least significant bit,
-        or a larger number if signal noise is known to be present. If unknown, use
-        -1.0'
-      default_value: 0.0
-      required: false
-    - name: unit
-      dtype: text
-      doc: 'The base unit of measure used to store data. This should be in the SI
-        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
-        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
-        below describes how to convert the data to the specified SI unit.'
     dims:
     - - num_times
     - - num_times
@@ -115,80 +70,111 @@ groups:
       - null
       - null
       - null
+    doc: Data values. Data can be in 1-D, 2-D, 3-D, or 4-D. The first dimension
+      should always represent time. This can also be used to store binary data
+      (e.g., image frames). This can also be a link to data stored in an external file.
+    attributes:
+    - name: conversion
+      dtype: float32
+      default_value: 1.0
+      doc: Scalar to multiply each element in data to convert it to the specified
+        unit in the attribute ''unit''
+      required: false
+    - name: resolution
+      dtype: float32
+      default_value: -1.0
+      doc: Smallest meaningful difference between values in data, stored in the specified
+        by unit, e.g., the change in value of the least significant bit, or a larger
+        number if signal noise is known to be present. If unknown, use -1.0.
+      required: false
+    - name: unit
+      dtype: text
+      doc: Base unit of measurement for working with the data. This should be
+        the SI unit, where appropriate, such as volts. If the data are stored
+        in non-standard units, the attribute ''conversion'' describes how to convert the
+        data to the specified SI unit. e.g. if the data are stored as int32 values,
+        where a difference of 1 corresponds to a difference of 4.5 * 10^-6 V, then store the
+        original int32 values here, set ''conversion'' to 4.5 * 10^-6, and to access the
+        data in volts, multiply ''data'' by ''conversion''.
   - name: starting_time
     dtype: float64
-    doc: 'The timestamp of the first sample. COMMENT: When timestamps are uniformly
+    doc: Timestamp of the first sample in seconds. When timestamps are uniformly
       spaced, the timestamp of the first sample can be specified and all subsequent
-      ones calculated from the sampling rate.'
+      ones calculated from the sampling rate attribute.
+    quantity: '?'
     attributes:
     - name: rate
       dtype: float32
-      doc: 'Sampling rate, in Hz COMMENT: Rate information is stored in Hz'
+      doc: Sampling rate, in Hz
     - name: unit
       dtype: text
-      doc: Value is 'Seconds'
-      value: Seconds
-    quantity: '?'
+      value: second
+      doc: Unit of measurement for time, which is fixed to 'second'
   - name: timestamps
     dtype: float64
-    doc: 'Timestamps for samples stored in data.COMMENT: Timestamps here have all
-      been corrected to the common experiment master-clock. Time is stored as seconds
-      and all timestamps are relative to experiment start time.'
-    attributes:
-    - name: interval
-      dtype: int32
-      doc: Value is '1'
-      value: 1
-    - name: unit
-      dtype: text
-      doc: Value is 'Seconds'
-      value: Seconds
     dims:
     - num_times
-    quantity: '?'
     shape:
     - null
+    doc: Timestamps for samples stored in data, in seconds, relative to the
+      common experiment master-clock stored in NWBFile.timestamps_reference_time
+    quantity: '?'
+    attributes:
+    - name: unit
+      dtype: text
+      doc: Unit of measurement for timestamps, which is fixed to 'second'
+      value: second
+  - name: control
+    dtype: uint8
+    dims:
+    - num_times
+    shape:
+    - null
+    doc: Numerical labels that apply to each time point in data for the purpose of
+      querying and slicing data by these values. If present, the length of this
+      array should be the same size as the first dimension of data.
+    quantity: '?'
+  - name: control_description
+    dtype: text
+    dims:
+    - num_control_values
+    shape:
+    - null
+    doc: Description of each control value. Must be present if control is present.
+      If present, control_description[0] should describe time points where control == 0.
+    quantity: '?'
+
   groups:
   - name: sync
-    doc: 'Lab specific time and sync information as provided directly from hardware
+    doc: Lab-specific time and sync information as provided directly from hardware
       devices and that is necessary for aligning all acquired time information to
       a common timebase. The timestamp array stores time in the common timebase.
-      COMMENT: This group will usually only be populated in TimeSeries that are
+      This group will usually only be populated in TimeSeries that are
       stored external to the NWB file, in files storing raw data. Once timestamp
-      data is calculated, the contents of ''sync'' are mostly for archival purposes.'
+      data is calculated, the contents of ''sync'' are mostly for archival purposes.
     quantity: '?'
 
 - neurodata_type_def: ProcessingModule
   neurodata_type_inc: NWBContainer
-  doc: Module.  Name should be descriptive. Stores a collection of related data organized
-    by contained interfaces.  Each interface is a contract specifying content related
-    to a particular type of data.
+  doc: A collection of processed data
   attributes:
   - name: description
     dtype: text
-    doc: Description of Module
-  - name: help
-    dtype: text
-    doc: Value is 'A collection of analysis outputs from processing of data'
-    value: A collection of analysis outputs from processing of data
+    doc: Description of this collection of processed data
   groups:
   - neurodata_type_inc: NWBDataInterface
-    doc: Interface objects containing data output from processing steps
+    doc: Data objects stored in this collection
     quantity: '*'
 
 - neurodata_type_def: Images
   neurodata_type_inc: NWBDataInterface
-  doc: A NWBDataInterface for storing images that have some relationship
+  doc: A collection of images
+  default_name: Images
   attributes:
   - name: description
     dtype: text
-    doc: Description of images in this container
-  - name: help
-    dtype: text
-    doc: Value is 'A collection of images that have some meaningful relationship'
-    value: A collection of images that have some meaningful relationship
+    doc: Description of this collection of images
   datasets:
   - neurodata_type_inc: Image
-    doc: Images stored in this NWBDataInterface
+    doc: Images stored in this collection
     quantity: '+'
-  default_name: Images

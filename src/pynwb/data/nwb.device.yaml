@@ -1,0 +1,5 @@
+groups:
+- neurodata_type_def: Device
+  neurodata_type_inc: NWBContainer
+  doc: A data acquisition device, e.g. recording system
+  

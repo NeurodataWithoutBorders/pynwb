@@ -32,6 +32,9 @@ namespaces:
   - source: nwb.file.yaml
     title: NWB:N file
     doc: Main NWB:N file specification.
+  - source: nwb.device.yaml
+    title: Device data
+    doc: This source module contains neurodata_types for device data and metadata.
   - source: nwb.misc.yaml
     title: Miscellaneous neurodata_types.
     doc: Miscellaneous types.

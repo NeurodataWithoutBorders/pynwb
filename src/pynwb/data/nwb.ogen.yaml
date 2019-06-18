@@ -2,54 +2,41 @@ groups:
 - neurodata_type_def: OptogeneticSeries
   neurodata_type_inc: TimeSeries
   doc: Optogenetic stimulus.  The data[] field is in unit of watts.
-  attributes:
-  - name: help
-    dtype: text
-    doc: Value is 'Optogenetic stimulus'
-    value: Optogenetic stimulus
   datasets:
   - name: data
     dtype: numeric
-    doc: Applied power for optogenetic stimulus.
-    attributes:
-    - name: unit
-      dtype: text
-      doc: 'The base unit of measure used to store data. This should be in the SI
-        unit. COMMENT: This is the SI unit (when appropriate) of the stored data,
-        such as Volts. If the actual data is stored in millivolts, the field ''conversion''
-        below describes how to convert the data to the specified SI unit.'
-      default_value: watt
-      required: false
+    doc: Applied power for optogenetic stimulus
     dims:
     - num_times
     shape:
     - null
+    attributes:
+    - name: unit
+      dtype: text
+      default_value: watt
+      doc: SI unit for the power of the optogenetic stimulus
+      required: false
   links:
   - name: site
-    doc: link to OptogeneticStimulusSite group that describes the site to which this
-      stimulus was applied
     target_type: OptogeneticStimulusSite
+    doc: Link to OptogeneticStimulusSite object that describes the site to which this
+      stimulus was applied
+
 - neurodata_type_def: OptogeneticStimulusSite
   neurodata_type_inc: NWBContainer
-  doc: 'One of possibly many groups describing an optogenetic stimulation site. COMMENT:
-    Name is arbitrary but should be meaningful. Name is referenced by OptogeneticSeries'
-  attributes:
-  - name: help
-    dtype: text
-    doc: Value is 'Metadata about an optogenetic stimulus site'
-    value: Metadata about an optogenetic stimulus site
+  doc: A data type representing a site of optogenetic stimulation and associated metadata
+  quantity: '*'
   datasets:
   - name: description
     dtype: text
     doc: Description of site
   - name: excitation_lambda
     dtype: float
-    doc: Excitation wavelength in nm
+    doc: Excitation wavelength, in nm
   - name: location
     dtype: text
     doc: Location of stimulation site
-  quantity: '*'
   links:
   - name: device
-    doc: Device that generated the stimulus
     target_type: Device
+    doc: Device that generated the stimulus
