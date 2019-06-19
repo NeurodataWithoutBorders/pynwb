@@ -112,7 +112,16 @@ jobs:
     
   - bash: |
       tox -e $(testToxEnv)
+    displayName: 'Run tox tests'
+    
+  - bash: |
       tox -e $(coverageToxEnv)
+    displayName: 'Run coverage tests'
+      
+  - bash: |
       tox -e $(buildToxEnv)
+    displayName: 'Run build tests'
+      
+  - bash: |
       tox -e $(testWheelInstallEnv) --recreate --installpkg dist/*-none-any.whl
-    displayName: 'Run all tests'
+    displayName: 'Run wheel install tests'
