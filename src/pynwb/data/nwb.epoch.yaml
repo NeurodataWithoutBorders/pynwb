@@ -30,8 +30,7 @@ groups:
   - name: tags
     neurodata_type_inc: VectorData
     dtype: text
-    doc: User-defined tags that identify events. Tags are to help identify or categorize
-      events.
+    doc: User-defined tags that identify or categorize events.
     quantity: '?'
     attributes:
     - name: description
@@ -47,8 +46,8 @@ groups:
     dtype:
     - name: idx_start
       dtype: int32
-      doc: 'Start index into the TimeSeries data[] field. COMMENT: This can be used
-        to calculate location in TimeSeries timestamp[] field'
+      doc: "Start index into the TimeSeries 'data' and 'timestamp' datasets of the
+        referenced TimeSeries. The first dimension of those arrays is always time."
     - name: count
       dtype: int32
       doc: Number of data samples available in this time series, during this epoch.

@@ -28,15 +28,20 @@ groups:
     - - null
     - - null
       - null
-    doc: 2-D array storing position or direction relative to some reference frame.
+    doc: 1-D or 2-D array storing position or direction relative to some reference frame
     attributes:
     - name: unit
       dtype: text
       default_value: meter
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
+      doc: "Base unit of measurement for working with the data. The default value
+        is 'meter'. If the data are stored in acquisition system units or other units
+        that require a conversion to be interpretable, the attribute 'conversion'
+        describes how to convert the data to the specified SI unit. e.g. if the data
+        acquisition system stores values as signed 16-bit integers (int16 range
+        -32,768 to 32,767) that correspond to a 5V range (-2.5V to 2.5V), and the data
+        acquisition system gain is 8000X, then the 'conversion' multiplier to get from
+        raw data acquisition values to recorded volts is 2.5/32768/8000 = 9.5367e-9.
+        To access the data in units of 'unit', multiply 'data' by 'conversion'."
       required: false
   - name: reference_frame
     dtype: text
@@ -80,13 +85,13 @@ groups:
     doc: Value is 'Position data, whether along the x, xy or xyz axis'
   groups:
   - neurodata_type_inc: TimeSeries
-    doc: TimeSeries object containing irregular behavioral events
+    doc: TimeSeries object containing behavioral events
     quantity: '*'
 
 - neurodata_type_def: BehavioralTimeSeries
   neurodata_type_inc: NWBDataInterface
   default_name: BehavioralTimeSeries
-  doc: TimeSeries for storing Behavoioral time series data.See description of <a href="#BehavioralEpochs">BehavioralEpochs</a>
+  doc: TimeSeries for storing Behavoioral time series data. See description of <a href="#BehavioralEpochs">BehavioralEpochs</a>
     for more details.
   attributes:
   - name: help
@@ -146,7 +151,7 @@ groups:
   - neurodata_type_inc: SpatialSeries
     doc: SpatialSeries object containing direction of gaze travel
     quantity: '*'
-    
+
 - neurodata_type_def: Position
   neurodata_type_inc: NWBDataInterface
   default_name: Position
