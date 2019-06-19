@@ -311,7 +311,7 @@ groups:
   groups:
   - neurodata_type_inc: ElectricalSeries
     doc: ElectricalSeries object containing filtered electrophysiology data
-    quantity: +
+    quantity: '+'
 
 - neurodata_type_def: LFP
   neurodata_type_inc: NWBDataInterface
@@ -329,7 +329,7 @@ groups:
   groups:
   - neurodata_type_inc: ElectricalSeries
     doc: ElectricalSeries object containing LFP data for one or more channels
-    quantity: +
+    quantity: '+'
     
 - neurodata_type_def: ElectrodeGroup
   neurodata_type_inc: NWBContainer

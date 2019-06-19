@@ -232,7 +232,7 @@ groups:
       - neurodata_type_def: Device
         neurodata_type_inc: NWBContainer
         doc: One of possibly many. Information about device and device description.
-        quantity: +
+        quantity: '+'
         attributes:
         - name: help
           dtype: text

@@ -78,7 +78,7 @@ groups:
   groups:
   - neurodata_type_inc: RoiResponseSeries
     doc: RoiResponseSeries object containing dF/F for a ROI
-    quantity: +
+    quantity: '+'
 
 - neurodata_type_def: Fluorescence
   neurodata_type_inc: NWBDataInterface
@@ -96,7 +96,7 @@ groups:
   groups:
   - neurodata_type_inc: RoiResponseSeries
     doc: RoiResponseSeries object containing fluorescence data for a ROI
-    quantity: +
+    quantity: '+'
 
 - neurodata_type_def: ImageSegmentation
   neurodata_type_inc: NWBDataInterface
@@ -119,7 +119,7 @@ groups:
   - neurodata_type_def: PlaneSegmentation
     neurodata_type_inc: DynamicTable
     doc: results for image segmentation of a specific imaging plane
-    quantity: +
+    quantity: '+'
     attributes:
     - name: help
       dtype: text
@@ -310,7 +310,7 @@ groups:
   - neurodata_type_def: CorrectedImageStack
     neurodata_type_inc: NWBDataInterface
     doc: One of possibly many.  Name should be informative.
-    quantity: +
+    quantity: '+'
     attributes:
     - name: help
       dtype: text

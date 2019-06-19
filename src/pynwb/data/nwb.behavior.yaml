@@ -110,7 +110,7 @@ groups:
   groups:
   - neurodata_type_inc: TimeSeries
     doc: TimeSeries object containing time series data on pupil size
-    quantity: +
+    quantity: '+'
 
 - neurodata_type_def: EyeTracking
   neurodata_type_inc: NWBDataInterface
@@ -159,4 +159,4 @@ groups:
   groups:
   - neurodata_type_inc: SpatialSeries
     doc: SpatialSeries object containing position data
-    quantity: +
+    quantity: '+'
