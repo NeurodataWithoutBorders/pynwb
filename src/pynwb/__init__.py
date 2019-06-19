@@ -181,7 +181,7 @@ def validate(**kwargs):
     """Validate an NWB file against a namespace"""
     io, namespace = getargs('io', 'namespace', kwargs)
     builder = io.read_builder()
-    validator = ValidatorMap(__NS_CATALOG.get_namespace(namespace))
+    validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
     return validator.validate(builder)
 
 
