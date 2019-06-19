@@ -165,11 +165,11 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
         for k in sorted(self.fields):  # sorted to enable tests
             v = self.fields[k]
-            template += "  {}: {}\n".format(k, self.__smart_str(v))
+            template += "  {}: {}\n".format(k, self.__smart_str(v, 1))
         return template
 
     @staticmethod
-    def __smart_str(v):
+    def __smart_str(v, num_indent):
         """
         Print compact string representation of data.
 
@@ -192,28 +192,57 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         str
 
         """
-        if isinstance(v, list):
+
+        if isinstance(v, list) or isinstance(v, tuple):
             if len(v) and isinstance(v[0], NWBBaseType):
-                return str(v)
+                return NWBBaseType.__smart_str_list(v, num_indent, '(')
             try:
-                return str(np.array(v))
+                return str(np.asarray(v))
             except ValueError:
-                return str(v)
+                return NWBBaseType.__smart_str_list(v, num_indent, '(')
         elif isinstance(v, dict):
-            template = '{'
-            keys = list(sorted(v.keys()))
-            for k in keys[:-1]:
-                template += " {} {}, ".format(k, type(v[k]))
-            if keys:
-                template += " {} {}".format(keys[-1], type(v[keys[-1]]))
-            return template + ' }'
+            return NWBBaseType.__smart_str_dict(v, num_indent)
         elif isinstance(v, set):
-            out = str(list(sorted(list(v))))
-            return '{' + out[1:-1] + '}'
+            return NWBBaseType.__smart_str_list(sorted(list(v)), num_indent, '{')
         elif isinstance(v, NWBBaseType):
             return "{} {}".format(getattr(v, 'name'), type(v))
         else:
             return str(v)
+
+    @staticmethod
+    def __smart_str_list(l, num_indent, left_br):
+        if left_br == '(':
+            right_br = ')'
+        if left_br == '{':
+            right_br = '}'
+        if len(l) == 0:
+            return left_br + ' ' + right_br
+        indent = num_indent * 2 * ' '
+        indent_in = (num_indent + 1) * 2 * ' '
+        out = left_br
+        for v in l[:-1]:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(v, num_indent + 1) + ','
+        if l:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(l[-1], num_indent + 1)
+        out += '\n' + indent + right_br
+        return out
+
+    @staticmethod
+    def __smart_str_dict(d, num_indent):
+        left_br = '{'
+        right_br = '}'
+        if len(d) == 0:
+            return left_br + ' ' + right_br
+        indent = num_indent * 2 * ' '
+        indent_in = (num_indent + 1) * 2 * ' '
+        out = left_br
+        keys = sorted(list(d.keys()))
+        for k in keys[:-1]:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(k, num_indent + 1) + ' ' + str(type(d[k])) + ','
+        if keys:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(keys[-1], num_indent + 1) + ' ' + str(type(d[keys[-1]]))
+        out += '\n' + indent + right_br
+        return out
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)
