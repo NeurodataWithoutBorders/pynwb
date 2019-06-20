@@ -189,9 +189,10 @@ class NWBHDF5IO(_HDF5IO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
             {'name': 'mode', 'type': str,
-             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")'},
+             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
             {'name': 'load_namespaces', 'type': bool,
-             'doc': 'whether or not to load cached namespaces from given path', 'default': False},
+             'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
+             'default': True},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
@@ -202,13 +203,16 @@ class NWBHDF5IO(_HDF5IO):
     def __init__(self, **kwargs):
         path, mode, manager, extensions, load_namespaces, file_obj, comm =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
-        if load_namespaces:
+        # namespaces are not loaded when creating an NWBHDF5IO object in write mode
+        if load_namespaces and 'w' not in mode and mode != 'x':
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
             if extensions is not None:
                 warn("loading namespaces from file - ignoring 'extensions' argument")
-            if 'w' in mode:
-                raise ValueError("cannot load namespaces from file when writing to it")
+
+            tm = get_type_map()
+            super(NWBHDF5IO, self).load_namespaces(tm, path)
+            manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
             #      loading cached namespaces
@@ -216,10 +220,6 @@ class NWBHDF5IO(_HDF5IO):
             # super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
             # tm = TypeMap(ns_catalog)
             # tm.copy_mappers(get_type_map())
-
-            tm = get_type_map()
-            super(NWBHDF5IO, self).load_namespaces(tm, path)
-            manager = BuildManager(tm)
         else:
             if manager is not None and extensions is not None:
                 raise ValueError("'manager' and 'extensions' cannot be specified together")
