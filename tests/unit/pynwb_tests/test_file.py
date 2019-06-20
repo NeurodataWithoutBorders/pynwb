@@ -365,6 +365,7 @@ class TestCacheSpec(unittest.TestCase):
             with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
                 nwbfile = reader.read()
 
+
 class TestNoCacheSpec(unittest.TestCase):
 
     def setUp(self):
