@@ -28,7 +28,7 @@ groups:
     - - null
     - - null
       - null
-    doc: 1-D or 2-D array storing position or direction relative to some reference frame
+    doc: 1-D or 2-D array storing position or direction relative to some reference frame.
     attributes:
     - name: unit
       dtype: text
@@ -70,7 +70,7 @@ groups:
     doc: Value is 'General container for storing behavioral epochs'
   groups:
   - neurodata_type_inc: IntervalSeries
-    doc: IntervalSeries object containing start and stop times of epochs
+    doc: IntervalSeries object containing start and stop times of epochs.
     quantity: '*'
 
 - neurodata_type_def: BehavioralEvents
@@ -85,7 +85,7 @@ groups:
     doc: Value is 'Position data, whether along the x, xy or xyz axis'
   groups:
   - neurodata_type_inc: TimeSeries
-    doc: TimeSeries object containing behavioral events
+    doc: TimeSeries object containing behavioral events.
     quantity: '*'
 
 - neurodata_type_def: BehavioralTimeSeries
@@ -100,7 +100,7 @@ groups:
     doc: Value is 'General container for storing continuously sampled behavioral data.'
   groups:
   - neurodata_type_inc: TimeSeries
-    doc: TimeSeries object containing continuous behavioral data
+    doc: TimeSeries object containing continuous behavioral data.
     quantity: '*'
 
 - neurodata_type_def: PupilTracking
@@ -114,7 +114,7 @@ groups:
     doc: Value is 'Eye-tracking data, representing pupil size'
   groups:
   - neurodata_type_inc: TimeSeries
-    doc: TimeSeries object containing time series data on pupil size
+    doc: TimeSeries object containing time series data on pupil size.
     quantity: '+'
 
 - neurodata_type_def: EyeTracking
@@ -128,7 +128,7 @@ groups:
     doc: Value is 'Eye-tracking data, representing direction of gaze'
   groups:
   - neurodata_type_inc: SpatialSeries
-    doc: SpatialSeries object containing data measuring direction of gaze
+    doc: SpatialSeries object containing data measuring direction of gaze.
     quantity: '*'
 
 - neurodata_type_def: CompassDirection
@@ -149,7 +149,7 @@ groups:
       of positive rotation'
   groups:
   - neurodata_type_inc: SpatialSeries
-    doc: SpatialSeries object containing direction of gaze travel
+    doc: SpatialSeries object containing direction of gaze travel.
     quantity: '*'
 
 - neurodata_type_def: Position
@@ -163,5 +163,5 @@ groups:
     doc: Value is 'Position data, whether along the x, xy or xyz axis'
   groups:
   - neurodata_type_inc: SpatialSeries
-    doc: SpatialSeries object containing position data
+    doc: SpatialSeries object containing position data.
     quantity: '+'

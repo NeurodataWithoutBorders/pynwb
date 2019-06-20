@@ -1,6 +1,6 @@
 datasets:
 - neurodata_type_def: NWBData
-  doc: An abstract data type for a dataset
+  doc: An abstract data type for a dataset.
   attributes:
   - name: help
     dtype: text
@@ -8,7 +8,7 @@ datasets:
 
 - neurodata_type_def: Index
   neurodata_type_inc: NWBData
-  doc: Pointers that index data values
+  doc: Pointers that index data values.
   attributes:
   - name: help
     dtype: text
@@ -18,7 +18,7 @@ datasets:
     dtype:
       target_type: NWBData
       reftype: object
-    doc: the target dataset that this index applies to
+    doc: Target dataset that this index applies to.
 
 - neurodata_type_def: VectorData
   neurodata_type_inc: NWBData
@@ -33,7 +33,7 @@ datasets:
     doc: a help string
   - name: description
     dtype: text
-    doc: A description of what these vectors represent
+    doc: Description of what these vectors represent.
 
 - neurodata_type_def: VectorIndex
   neurodata_type_inc: Index
@@ -44,7 +44,7 @@ datasets:
     dtype:
       target_type: VectorData
       reftype: object
-    doc: Reference to the target dataset that this index applies to
+    doc: Reference to the target dataset that this index applies to.
 
 - neurodata_type_def: ElementIdentifiers
   neurodata_type_inc: NWBData
@@ -54,7 +54,7 @@ datasets:
   - num_elements
   shape:
   - null
-  doc: A list of unique identifiers for values within a dataset, e.g. rows of a DynamicTable
+  doc: A list of unique identifiers for values within a dataset, e.g. rows of a DynamicTable.
   attributes:
   - name: help
     dtype: text
@@ -64,7 +64,7 @@ datasets:
 - neurodata_type_def: DynamicTableRegion
   neurodata_type_inc: VectorData
   dtype: int
-  doc: A region/index into a DynamicTable
+  doc: A region/index into a DynamicTable.
   attributes:
   - name: help
     dtype: text
@@ -74,10 +74,10 @@ datasets:
     dtype:
       target_type: DynamicTable
       reftype: object
-    doc: Reference to the DynamicTable that this region applies to
+    doc: Reference to the DynamicTable object that this region applies to.
   - name: description
     dtype: text
-    doc: Description of what this table region points to
+    doc: Description of what this table region points to.
 
 - neurodata_type_def: Image
   neurodata_type_inc: NWBData
@@ -108,11 +108,11 @@ datasets:
     doc: base image (use GrayscaleImage, RGBImage, RGBAImage, etc.)
   - name: resolution
     dtype: float
-    doc: Pixel resolution of the image, in pixels per centimeter
+    doc: Pixel resolution of the image, in pixels per centimeter.
     required: false
   - name: description
     dtype: text
-    doc: Description of the image
+    doc: Description of the image.
     required: false
 
 groups:
@@ -140,7 +140,7 @@ groups:
   - name: description
     dtype: text
     default_value: no description
-    doc: Description of TimeSeries
+    doc: Description of the time series.
     required: false
   - name: comments
     dtype: text
@@ -180,7 +180,7 @@ groups:
     - name: conversion
       dtype: float32
       default_value: 1.0
-      doc: Scalar to multiply each element in data to convert it to the specified 'unit'
+      doc: Scalar to multiply each element in data to convert it to the specified 'unit'.
       required: false
     - name: resolution
       dtype: float32
@@ -191,7 +191,7 @@ groups:
       required: false
     - name: unit
       dtype: text
-      doc: "Base unit of measurement for working with the data.
+      doc: Base unit of measurement for working with the data.
         If the data are stored in acquisition system units or other units
         that require a conversion to be interpretable, the attribute 'conversion'
         describes how to convert the data to the specified SI unit. e.g. if the data
@@ -199,7 +199,7 @@ groups:
         -32,768 to 32,767) that correspond to a 5V range (-2.5V to 2.5V), and the data
         acquisition system gain is 8000X, then the 'conversion' multiplier to get from
         raw data acquisition values to recorded volts is 2.5/32768/8000 = 9.5367e-9.
-        To access the data in units of 'unit', multiply 'data' by 'conversion'."
+        To access the data in units of 'unit', multiply 'data' by 'conversion'.
   - name: starting_time
     dtype: float64
     doc: Timestamp of the first sample in seconds. When timestamps are uniformly
@@ -213,7 +213,7 @@ groups:
     - name: unit
       dtype: text
       value: Seconds
-      doc: Unit of measurement for time, which is fixed to 'second'
+      doc: Unit of measurement for time, which is fixed to 'second'.
   - name: timestamps
     dtype: float64
     dims:
@@ -221,7 +221,7 @@ groups:
     shape:
     - null
     doc: Timestamps for samples stored in data, in seconds, relative to the
-      common experiment master-clock stored in NWBFile.timestamps_reference_time
+      common experiment master-clock stored in NWBFile.timestamps_reference_time.
     quantity: '?'
     attributes:
     - name: interval
@@ -231,7 +231,7 @@ groups:
     - name: unit
       dtype: text
       value: Seconds
-      doc: Unit of measurement for timestamps, which is fixed to 'second'
+      doc: Unit of measurement for timestamps, which is fixed to 'second'.
   - name: control
     dtype: uint8
     dims:
@@ -253,38 +253,38 @@ groups:
     quantity: '?'
   groups:
   - name: sync
-    doc: "Lab-specific time and sync information as provided directly from hardware
+    doc: Lab-specific time and sync information as provided directly from hardware
       devices and that is necessary for aligning all acquired time information to
       a common timebase. The timestamp array stores time in the common timebase.
       This group will usually only be populated in TimeSeries that are
       stored external to the NWB file, in files storing raw data. Once timestamp
-      data is calculated, the contents of 'sync' are mostly for archival purposes."
+      data is calculated, the contents of 'sync' are mostly for archival purposes.
     quantity: '?'
 
 - neurodata_type_def: ProcessingModule
   neurodata_type_inc: NWBContainer
-  doc: A collection of processed data
+  doc: A collection of processed data.
   attributes:
   - name: description
     dtype: text
-    doc: Description of this collection of processed data
+    doc: Description of this collection of processed data.
   - name: help
     dtype: text
     value: A collection of analysis outputs from processing of data
     doc: Value is 'A collection of analysis outputs from processing of data'
   groups:
   - neurodata_type_inc: NWBDataInterface
-    doc: Data objects stored in this collection
+    doc: Data objects stored in this collection.
     quantity: '*'
 
 - neurodata_type_def: Images
   neurodata_type_inc: NWBDataInterface
   default_name: Images
-  doc: A collection of images
+  doc: A collection of images.
   attributes:
   - name: description
     dtype: text
-    doc: Description of this collection of images
+    doc: Description of this collection of images.
   - name: help
     dtype: text
     value: A collection of images that have some meaningful relationship
@@ -328,10 +328,10 @@ groups:
     shape:
     - null
     doc: The names of the columns in this table. This should be used to specify
-      an order to the columns
+      an order to the columns.
   - name: description
     dtype: text
-    doc: Description of what is in this dynamic table
+    doc: Description of what is in this dynamic table.
   datasets:
   - name: id
     neurodata_type_inc: ElementIdentifiers
@@ -340,10 +340,10 @@ groups:
     - num_rows
     shape:
     - null
-    doc: Array of unique identifiers for the rows of this dynamic table
+    doc: Array of unique identifiers for the rows of this dynamic table.
   - neurodata_type_inc: VectorData
-    doc: Vector columns of this dynamic table
+    doc: Vector columns of this dynamic table.
     quantity: '*'
   - neurodata_type_inc: VectorIndex
-    doc: Indices for the vector columns of this dynamic table
+    doc: Indices for the vector columns of this dynamic table.
     quantity: '*'

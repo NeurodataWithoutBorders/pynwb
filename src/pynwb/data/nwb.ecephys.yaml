@@ -44,7 +44,7 @@ groups:
       required: false
   - name: electrodes
     neurodata_type_inc: DynamicTableRegion
-    doc: DynamicTableRegion pointer to the electrodes that this time series was generated from
+    doc: DynamicTableRegion pointer to the electrodes that this time series was generated from.
 
 - neurodata_type_def: SpikeEventSeries
   neurodata_type_inc: ElectricalSeries
@@ -108,7 +108,7 @@ groups:
     - name: unit
       dtype: text
       value: Seconds
-      doc: Unit of measurement for timestamps, which is fixed to 'second'
+      doc: Unit of measurement for timestamps, which is fixed to 'Seconds'.
 
 - neurodata_type_def: FeatureExtraction
   neurodata_type_inc: NWBDataInterface
@@ -148,7 +148,7 @@ groups:
     doc: Times of events that features correspond to (can be a link).
   - name: electrodes
     neurodata_type_inc: DynamicTableRegion
-    doc: DynamicTableRegion pointer to the electrodes that this time series was generated from
+    doc: DynamicTableRegion pointer to the electrodes that this time series was generated from.
 
 - neurodata_type_def: EventDetection
   neurodata_type_inc: NWBDataInterface
@@ -180,12 +180,12 @@ groups:
     - num_events
     shape:
     - null
-    doc: Timestamps of events, in seconds
+    doc: Timestamps of events, in seconds.
     attributes:
     - name: unit
       dtype: text
       default_value: Seconds
-      doc: Unit of measurement for event times, which is fixed to 'second'
+      doc: Unit of measurement for event times, which is fixed to 'Seconds'
       required: false
   links:
   - name: source_electricalseries
@@ -207,7 +207,7 @@ groups:
     doc: Value is 'Waveform of detected extracellularly recorded spike events'
   groups:
   - neurodata_type_inc: SpikeEventSeries
-    doc: SpikeEventSeries object(s) containing detected spike event waveforms
+    doc: SpikeEventSeries object(s) containing detected spike event waveforms.
     quantity: '*'
 
 - neurodata_type_def: FilteredEphys
@@ -233,7 +233,7 @@ groups:
       properties should be noted in the ElectricalSeries'
   groups:
   - neurodata_type_inc: ElectricalSeries
-    doc: ElectricalSeries object(s) containing filtered electrophysiology data
+    doc: ElectricalSeries object(s) containing filtered electrophysiology data.
     quantity: '+'
 
 - neurodata_type_def: LFP
@@ -251,12 +251,12 @@ groups:
       noted in the ElectricalSeries'
   groups:
   - neurodata_type_inc: ElectricalSeries
-    doc: ElectricalSeries object(s) containing LFP data for one or more channels
+    doc: ElectricalSeries object(s) containing LFP data for one or more channels.
     quantity: '+'
 
 - neurodata_type_def: ElectrodeGroup
   neurodata_type_inc: NWBContainer
-  doc: A physical grouping of electrodes, e.g. a shank of an array
+  doc: A physical grouping of electrodes, e.g. a shank of an array.
   attributes:
   - name: help
     dtype: text
@@ -264,14 +264,14 @@ groups:
     doc: Value is 'Metadata about a physical grouping of channels'
   - name: description
     dtype: text
-    doc: Description of this electrode group
+    doc: Description of this electrode group.
   - name: location
     dtype: text
-    doc: Location of this electrode group
+    doc: Location of this electrode group.
   links:
   - name: device
     target_type: Device
-    doc: Link to the device that was used to record from this electrode group
+    doc: Link to the device that was used to record from this electrode group.
     quantity: '?'
 
 # The types below have been deprecated

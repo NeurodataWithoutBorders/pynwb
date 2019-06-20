@@ -7,40 +7,39 @@ datasets:
   shape:
   - null
   - null
-  doc: Grayscale image
+  doc: A grayscale image
 
 - neurodata_type_def: RGBImage
   neurodata_type_inc: Image
   dims:
   - y
   - x
-  - R,G,B
+  - R, G, B
   shape:
   - null
   - null
   - 3
-  doc: Color image
+  doc: A color image
 
 - neurodata_type_def: RGBAImage
   neurodata_type_inc: Image
   dims:
   - y
   - x
-  - R,G,B,A
+  - R, G, B, A
   shape:
   - null
   - null
   - 4
-  doc: Color image with transparency
+  doc: A color image with transparency
 
 groups:
 - neurodata_type_def: ImageSeries
   neurodata_type_inc: TimeSeries
-  doc: 'General image data that is common between acquisition and stimulus time series.
+  doc: General image data that is common between acquisition and stimulus time series.
     Sometimes the image data is stored in the HDF5 file in a raw format while other
     times it will be stored as an external image file in the host file system. The
-    data field will either be binary data or empty. TimeSeries::data array structure:
-    [frame] [y][x] or [frame][z][y][x].'
+    data field will either be binary data or empty. [frame][y][x] or [frame][z][y][x].
   attributes:
   - name: help
     dtype: text
@@ -65,7 +64,7 @@ groups:
       - null
       - null
       - null
-    doc: Either binary data containing image or empty.
+    doc: Binary data representing images across frames.
     quantity: '?'
   - name: dimension
     dtype: int32
@@ -81,10 +80,10 @@ groups:
     - num_files
     shape:
     - null
-    doc: 'Path or URL to one or more external file(s). Field only present if format=external.
-      NOTE: this is only relevant if the image is stored in the file system as one
+    doc: Paths or URLs to one or more external file(s). Field only present if format=external.
+      This is only relevant if the image is stored in the file system as one
       or more image file(s). This field should NOT be used if the image is stored
-      in another HDF5 file and that file is HDF5 linked to this file.'
+      in another NWB file and that file is HDF5 linked to this file.
     quantity: '?'
     attributes:
     - name: starting_frame
@@ -96,19 +95,19 @@ groups:
       doc: Each entry is the frame number (within the full ImageSeries) of the first
         frame in the corresponding external_file entry. This serves as an index to
         what frames each file contains, allowing random access.Zero-based indexing
-        is used.  (The first element will always be zero).
+        is used. (The first element will always be zero).
   - name: format
     dtype: text
     doc: Format of image. If this is 'external' then the field external_file contains
       the path or URL information to that file. For tiff, png, jpg, etc, the binary
       representation of the image is stored in data. If the format is raw then the
       fields bit_per_pixel and dimension are used. For raw images, only a single channel
-      is stored (eg, red).
+      is stored (e.g., red).
     quantity: '?'
 
 - neurodata_type_def: ImageMaskSeries
   neurodata_type_inc: ImageSeries
-  doc: An alpha mask that is applied to a presented visual stimulus. The data[] array
+  doc: An alpha mask that is applied to a presented visual stimulus. The 'data' array
     contains an array of mask values that are applied to the displayed image. Mask
     values are stored as RGBA. Mask can vary with time. The timestamps array indicates
     the starting time of a mask, and that mask pattern continues until it's explicitly
@@ -121,13 +120,13 @@ groups:
   links:
   - name: masked_imageseries
     target_type: ImageSeries
-    doc: Link to ImageSeries that mask is applied to.
+    doc: Link to ImageSeries object that this image mask is applied to
 
 - neurodata_type_def: OpticalSeries
   neurodata_type_inc: ImageSeries
   doc: Image data that is presented or recorded. A stimulus template movie will be
     stored only as an image. When the image is presented as stimulus, additional data
-    is required, such as field of view (eg, how much of the visual field the image
+    is required, such as field of view (e.g., how much of the visual field the image
     covers, or how what is the area of the target being imaged). If the OpticalSeries
     represents acquired imaging data, orientation is also important.
   attributes:
@@ -143,19 +142,19 @@ groups:
   - name: field_of_view
     dtype: float32
     dims:
-    - - width|height
-    - - width|height|depth
+    - - width, height
+    - - width, height, depth
     shape:
     - - 2
     - - 3
-    doc: Width, height and depth of image, or imaged area (meters).
+    doc: Width, height and depth of image, or imaged area, in meters.
     quantity: '?'
   - name: orientation
     dtype: text
     doc: Description of image relative to some reference frame (e.g., which way is
       up). Must also specify frame of reference.
     quantity: '?'
-    
+
 - neurodata_type_def: IndexSeries
   neurodata_type_inc: TimeSeries
   doc: Stores indices to image frames stored in an ImageSeries. The purpose of the
@@ -184,4 +183,4 @@ groups:
   links:
   - name: indexed_timeseries
     target_type: ImageSeries
-    doc: HDF5 link to TimeSeries containing images that are indexed.
+    doc: Link to ImageSeries object containing images that are indexed.

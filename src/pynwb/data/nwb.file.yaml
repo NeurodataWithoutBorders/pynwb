@@ -38,9 +38,10 @@ groups:
     doc: A description of the experimental session and data in the file.
   - name: session_start_time
     dtype: isodatetime
-    doc: 'Date and time of the experiment/session start. COMMENT: - The date is stored
-      in UTC with local timezone offset as ISO 8601 extended formatted string: 2018-09-28T14:43:54.123+02:00
-      - Dates stored in UTC end in "Z" with no timezone offset. - Date accuracy is
+    doc: 'Date and time of the experiment/session start. The date is stored
+      in UTC with local timezone offset as ISO 8601 extended formatted string:
+      2018-09-28T14:43:54.123+02:00.
+      Dates stored in UTC end in "Z" with no timezone offset. Date accuracy is
       up to milliseconds.'
   - name: timestamps_reference_time
     dtype: isodatetime
@@ -51,7 +52,7 @@ groups:
       in the file use this time as reference (i.e., time zero).'
   groups:
   - name: acquisition
-    doc: 'Data streams recorded from the system, including ephys, ophys, tracking,
+    doc: Data streams recorded from the system, including ephys, ophys, tracking,
       etc. This group should be read-only after the experiment is completed and
       timestamps are corrected to a common timebase. The data stored here may be links
       to raw data stored in external HDF5 files. This will allow keeping bulky raw
@@ -59,20 +60,20 @@ groups:
       file. Acquired data includes tracking and experimental data streams
       (i.e., everything measured from the system). If bulky data is stored in the /acquisition
       group, the data can exist in a separate HDF5 file that is linked to by the file
-      being used for processing and analysis.'
+      being used for processing and analysis.
     groups:
     - neurodata_type_inc: NWBDataInterface
       doc: Acquired, raw data.
       quantity: '*'
   - name: analysis
-    doc: 'Lab-specific and custom scientific analysis of data. There is no defined
+    doc: Lab-specific and custom scientific analysis of data. There is no defined
       format for the content of this group - the format is up to the individual user/lab.
       To facilitate sharing analysis data between labs, the contents here
       should be stored in standard types (eg, INCF types) and appropriately documented.
       The file can store lab-specific and custom data analysis without
       restriction on its form or schema, reducing data formatting restrictions on
       end users. Such data should be placed in the analysis group. The analysis data
-      should be documented so that it could be shared with other labs.'
+      should be documented so that it could be shared with other labs.
     groups:
     - neurodata_type_inc: NWBContainer
       doc: Custom analysis results.
