@@ -274,7 +274,7 @@ class TestAppend(unittest.TestCase):
             electrodes = nwb.create_electrode_table_region(region=[0], description='')
             ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=electrodes)
             nwb.add_acquisition(ts2)
-            io.write(nwb, cache_spec=False)
+            io.write(nwb)  # attempt to write same spec again
 
         with NWBHDF5IO(self.path, mode='r') as io:
             nwb = io.read()
