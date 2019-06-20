@@ -192,7 +192,7 @@ class NWBHDF5IO(_HDF5IO):
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
             {'name': 'load_namespaces', 'type': bool,
              'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
-             'default': True},
+             'default': False},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
@@ -203,12 +203,14 @@ class NWBHDF5IO(_HDF5IO):
     def __init__(self, **kwargs):
         path, mode, manager, extensions, load_namespaces, file_obj, comm =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
-        # namespaces are not loaded when creating an NWBHDF5IO object in write mode
-        if load_namespaces and 'w' not in mode and mode != 'x':
+        if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
             if extensions is not None:
                 warn("loading namespaces from file - ignoring 'extensions' argument")
+            # namespaces are not loaded when creating an NWBHDF5IO object in write mode
+            if 'w' in mode or mode == 'x':
+                raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
             super(NWBHDF5IO, self).load_namespaces(tm, path)

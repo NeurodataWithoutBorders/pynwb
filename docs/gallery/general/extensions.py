@@ -153,7 +153,7 @@ AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
 # Caching extensions to file
 # -----------------------------------------------------
 #
-# By default, extensions are  cached to file so that your NWB file will carry the extensions needed to read the file
+# By default, extensions are cached to file so that your NWB file will carry the extensions needed to read the file
 # with it.
 #
 # To demonstrate this, first we will make some fake data using our extensions.
@@ -228,9 +228,11 @@ io.close()
 #     For more information on writing NWB files, see :ref:`basic_writing`.
 
 ####################
-# Now, you can read the file.
+# By default, PyNWB does not use the namespaces cached in a file--you must
+# explicitly specify this. This behavior is enabled by the *load_namespaces*
+# argument to the :py:class:`~pynwb.NWBHDF5IO` constructor.
 
-io = NWBHDF5IO('cache_spec_example.nwb', mode='r')
+io = NWBHDF5IO('cache_spec_example.nwb', mode='r', load_namespaces=True)
 nwbfile = io.read()
 
 ####################
