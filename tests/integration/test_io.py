@@ -267,14 +267,14 @@ class TestAppend(unittest.TestCase):
         proc_inter.add_electrical_series(e_series)
 
         with NWBHDF5IO(self.path, mode='w') as io:
-            io.write(self.nwbfile)
+            io.write(self.nwbfile, cache_spec=False)
 
         with NWBHDF5IO(self.path, mode='a') as io:
             nwb = io.read()
             electrodes = nwb.create_electrode_table_region(region=[0], description='')
             ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=electrodes)
             nwb.add_acquisition(ts2)
-            io.write(nwb)
+            io.write(nwb, cache_spec=False)
 
         with NWBHDF5IO(self.path, mode='r') as io:
             nwb = io.read()
@@ -300,7 +300,7 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', [1, 2, 3], 'A', timestamps=H5DataIO(np.array([1., 2., 3.]), compression='gzip'))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
+            io.write(self.nwbfile, cache_spec=False)
         # confirm that the dataset was indeed compressed
         with File(self.path, 'r') as f:
             self.assertEqual(f['/acquisition/ts_name/timestamps'].compression, 'gzip')
@@ -314,7 +314,7 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
+            io.write(self.nwbfile, cache_spec=False)
         with File(self.path, 'r') as f:
             dset = f['/acquisition/ts_name/data']
             self.assertTrue(np.all(dset[:] == a.data))
@@ -329,7 +329,7 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
+            io.write(self.nwbfile, cache_spec=False)
         with File(self.path, 'r') as f:
             dset = f['/acquisition/ts_name/data']
             self.assertTrue(np.all(dset[:] == a.data))
@@ -340,7 +340,7 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
+            io.write(self.nwbfile, cache_spec=False)
         with File(self.path, 'r') as f:
             dset = f['/acquisition/ts_name/data']
             self.assertTrue(np.all(dset[:] == a.data))
@@ -353,7 +353,7 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', daiter, 'A', timestamps=np.arange(5))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
+            io.write(self.nwbfile, cache_spec=False)
         with File(self.path, 'r') as f:
             dset = f['/acquisition/ts_name/data']
             self.assertListEqual(dset[:].tolist(), a.tolist())
@@ -370,7 +370,7 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', wrapped_daiter, 'A', timestamps=np.arange(5))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
+            io.write(self.nwbfile, cache_spec=False)
         with File(self.path, 'r') as f:
             dset = f['/acquisition/ts_name/data']
             self.assertEqual(dset.shape, a.shape)
