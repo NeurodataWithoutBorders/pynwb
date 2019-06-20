@@ -98,7 +98,7 @@ class TestHDF5Writer(unittest.TestCase):
         Round-trip test for writing spec and reading it back in
         '''
         io = HDF5IO(self.path, manager=self.manager, mode="a")
-        io.write(self.container, cache_spec=True)
+        io.write(self.container)
         io.close()
         f = File(self.path)
         self.assertIn('specifications', f)
@@ -205,7 +205,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
 
         fil = File(self.path)
         io = HDF5IO(self.path, manager=self.manager, file=fil, mode='a')
-        io.write(self.container, cache_spec=True)
+        io.write(self.container)
         io.close()
         f = File(self.path)
         self.assertIn('specifications', f)

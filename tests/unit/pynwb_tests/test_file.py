@@ -360,7 +360,7 @@ class TestCacheSpec(unittest.TestCase):
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(nwbfile, cache_spec=True)
+            io.write(nwbfile)
         with self.assertWarnsRegex(UserWarning, r"ignoring namespace '\S+' because it already exists"):
             reader = NWBHDF5IO(self.path, 'r', load_namespaces=True)
         nwbfile = reader.read()
