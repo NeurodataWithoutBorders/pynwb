@@ -1,12 +1,13 @@
 import unittest2 as unittest
-import six
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import os
+import re
 from h5py import File
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
 
+from hdmf.backends.io import UnsupportedOperation
 from hdmf.backends.hdf5 import HDF5IO, H5DataIO
 from hdmf.data_utils import DataChunkIterator
 from hdmf.build import GroupBuilder, DatasetBuilder
@@ -85,17 +86,12 @@ class TestHDF5Writer(unittest.TestCase):
         io = HDF5IO(self.path, manager=self.manager, mode='a')
         io.write(self.container)
         io.close()
-        f = File(self.path)  # noqa: F841
 
-        if six.PY2:
-            assert_file_exists = IOError
-        elif six.PY3:
-            assert_file_exists = OSError
-
-        with self.assertRaises(assert_file_exists):
-            io = HDF5IO(self.path, manager=self.manager, mode='w-')
-            io.write(self.container)
-            io.close()
+        with self.assertRaisesRegex(UnsupportedOperation,
+                                    re.escape("Unable to open file %s in 'w-' mode. File already exists."
+                                              % self.path)):
+            with HDF5IO(self.path, manager=self.manager, mode='w-') as io:
+                pass
 
     def test_write_cache_spec(self):
         '''
@@ -134,7 +130,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
 
     def setUp(self):
         self.manager = get_manager()
-        self.path = "test_pynwb_io_hdf5.h5"
+        self.path = "test_pynwb_io_hdf5_injected.h5"
         self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
         self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         self.container = NWBFile('a test NWB File', 'TEST123',
@@ -170,7 +166,8 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
             attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        os.remove(self.path)
+        if os.path.exists(self.path):
+            os.remove(self.path)
 
     def test_nwbio(self):
         fil = File(self.path)
@@ -194,17 +191,12 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
         io = HDF5IO(self.path, manager=self.manager, file=fil, mode="a")
         io.write(self.container)
         io.close()
-        f = File(self.path)  # noqa: F841
 
-        if six.PY2:
-            assert_file_exists = IOError
-        elif six.PY3:
-            assert_file_exists = OSError
-
-        with self.assertRaises(assert_file_exists):
-            io = HDF5IO(self.path, manager=self.manager, mode='w-')
-            io.write(self.container)
-            io.close()
+        with self.assertRaisesRegex(UnsupportedOperation,
+                                    re.escape("Unable to open file %s in 'w-' mode. File already exists."
+                                              % self.path)):
+            with HDF5IO(self.path, manager=self.manager, mode='w-') as io:
+                pass
 
     def test_write_cache_spec(self):
         '''
@@ -261,7 +253,7 @@ class TestAppend(unittest.TestCase):
         self.nwbfile.add_electrode(x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
         electrodes = self.nwbfile.create_electrode_table_region(region=[0], description='')
         e_series = ElectricalSeries(
-            name='test_device',
+            name='test_es',
             electrodes=electrodes,
             data=np.ones(shape=(100,)),
             rate=10000.0,
@@ -273,8 +265,8 @@ class TestAppend(unittest.TestCase):
 
         with NWBHDF5IO(self.path, mode='a') as io:
             nwb = io.read()
-            elec = nwb.processing['test_proc_mod']['LFP'].electrical_series['test_device'].electrodes
-            ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=elec)
+            electrodes = nwb.create_electrode_table_region(region=[0], description='')
+            ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=electrodes)
             nwb.add_acquisition(ts2)
             io.write(nwb)
 
