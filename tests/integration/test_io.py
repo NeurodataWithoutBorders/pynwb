@@ -20,7 +20,7 @@ import numpy as np
 
 class TestHDF5Writer(unittest.TestCase):
 
-    _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec')
+    _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec', 'test_write_no_cache_spec')
 
     @property
     def required_tests(self):
@@ -117,6 +117,15 @@ class TestHDF5Writer(unittest.TestCase):
                     self.assertIsNotNone(cached_spec)
                 with self.subTest(test='cached spec preserved original spec'):
                     self.assertDictEqual(original_spec, cached_spec)
+
+    def test_write_no_cache_spec(self):
+        '''
+        Round-trip test for not writing spec
+        '''
+        with HDF5IO(self.path, manager=self.manager, mode="a") as io:
+            io.write(self.container, cache_spec=False)
+        with File(self.path) as f:
+            self.assertNotIn('specifications', f)
 
 
 class TestHDF5WriterWithInjectedFile(unittest.TestCase):
