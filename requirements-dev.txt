@@ -5,7 +5,7 @@ configparser==3.5.0
 coverage==4.5.1
 flake8==3.5.0
 h5py==2.9.0
-hdmf==1.0.3
+hdmf==1.0.4
 idna==2.6
 linecache2==1.0.0
 mccabe==0.6.1
