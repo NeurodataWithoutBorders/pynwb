@@ -355,16 +355,26 @@ class NWBFile(MultiContainerInterface):
         if getargs('source_script', kwargs) is None and getargs('source_script_file_name', kwargs) is not None:
             raise ValueError("'source_script' cannot be None when 'source_script_file_name' is set")
 
+        self.__obj = None
+
     def all_children(self):
         stack = [self]
         ret = list()
+        self.__obj = LabelledDict(label='all_objects', def_key_name='neurodata_id')
         while len(stack):
             n = stack.pop()
             ret.append(n)
+            self.obj[n.neurodata_id] = n
             if hasattr(n, 'children'):
                 for c in n.children:
                     stack.append(c)
         return ret
+
+    @property
+    def objects(self):
+        if self.__obj is None:
+            self.all_children()
+        return self.__obj
 
     @property
     def modules(self):
