@@ -32,10 +32,12 @@ class LabelledDict(dict):
     from the standard locations
     '''
 
-    @docval({'name': 'label', 'type': str, 'doc': 'the TimeSeries type ('})
+    @docval({'name': 'label', 'type': str, 'doc': 'the label on this dictionary'},
+            {'name': 'def_key_name', 'type': str, 'doc': 'the default key name', 'default': 'name'})
     def __init__(self, **kwargs):
-        label = getargs('label', kwargs)
+        label, def_key_name = getargs('label', 'def_key_name', kwargs)
         self.__label = label
+        self.__defkey = def_key_name
 
     @property
     def label(self):
@@ -47,7 +49,7 @@ class LabelledDict(dict):
             key, val = args.split("==")
             key = key.strip()
             val = val.strip()
-            if key != 'name':
+            if key != self.__defkey:
                 ret = list()
                 for item in self.values():
                     if getattr(item, key, None) == val:
@@ -81,6 +83,10 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         parent, container_source = getargs('parent', 'container_source', kwargs)
         call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
+
+    @property
+    def neurodata_id(self):
+        return self.data_id
 
     @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to search for', 'default': None})
     def get_ancestor(self, **kwargs):
