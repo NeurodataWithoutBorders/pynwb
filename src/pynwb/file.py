@@ -15,7 +15,8 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion,\
+                  LabelledDict
 
 
 def _not_parent(arg):
@@ -364,7 +365,7 @@ class NWBFile(MultiContainerInterface):
         while len(stack):
             n = stack.pop()
             ret.append(n)
-            self.obj[n.object_id] = n
+            self.__obj[n.object_id] = n
             if hasattr(n, 'children'):
                 for c in n.children:
                     stack.append(c)
