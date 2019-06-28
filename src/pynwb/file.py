@@ -360,11 +360,11 @@ class NWBFile(MultiContainerInterface):
     def all_children(self):
         stack = [self]
         ret = list()
-        self.__obj = LabelledDict(label='all_objects', def_key_name='neurodata_id')
+        self.__obj = LabelledDict(label='all_objects', def_key_name='object_id')
         while len(stack):
             n = stack.pop()
             ret.append(n)
-            self.obj[n.neurodata_id] = n
+            self.obj[n.object_id] = n
             if hasattr(n, 'children'):
                 for c in n.children:
                     stack.append(c)

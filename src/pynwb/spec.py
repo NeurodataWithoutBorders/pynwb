@@ -68,7 +68,6 @@ class BaseStorageOverride(object):
     '''
 
     __type_key = 'neurodata_type'
-    __id_key = 'neurodata_id'
     __inc_key = 'neurodata_type_inc'
     __def_key = 'neurodata_type_def'
 
@@ -86,11 +85,6 @@ class BaseStorageOverride(object):
     def def_key(cls):
         ''' Get the key used to define a data_type definition.'''
         return cls.__def_key
-
-    @classmethod
-    def id_key(cls):
-        ''' Get the key used to store data_id on an instance.'''
-        return cls.__id_key
 
     @property
     def neurodata_type_inc(self):

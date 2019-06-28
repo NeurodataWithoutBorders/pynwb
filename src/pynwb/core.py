@@ -84,10 +84,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
 
-    @property
-    def neurodata_id(self):
-        return self.data_id
-
     @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to search for', 'default': None})
     def get_ancestor(self, **kwargs):
         """
