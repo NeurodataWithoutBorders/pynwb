@@ -77,7 +77,8 @@ class TestTimeSeriesModular(base.TestMapRoundTrip):
                 link_write_io.write(link_file)
 
         with HDF5IO(self.link_filename, 'r', manager=get_manager()) as self.link_file_reader:
-            return self.getContainer(self.link_file_reader.read())
+            self.read_nwbfile = self.link_file_reader.read()
+            return self.getContainer(self.read_nwbfile)
 
     def validate(self):
         filenames = [self.data_filename, self.link_filename]

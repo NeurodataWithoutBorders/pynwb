@@ -185,7 +185,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
         # make sure we get a completely new object
         str(self.container)  # added as a test to make sure printing works
         self.assertNotEqual(id(self.container), id(self.read_container))
-        self.assertIs(self.read_nwbfile.objects[self.object_id], self.read_container)
+        self.assertIs(self.read_nwbfile.objects[self.container.object_id], self.read_container)
         self.assertContainerEqual(self.read_container, self.container)
         self.validate()
 
