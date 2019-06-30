@@ -72,6 +72,7 @@ class NWBFileMap(ObjectMapper):
     def name(self, builder, manager):
         return builder.name
 
+
 @register_map(Subject)
 class SubjectMap(ObjectMapper):
 
