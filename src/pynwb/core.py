@@ -296,7 +296,7 @@ class NWBContainer(NWBBaseType, Container):
                         else:
                             val = [val]
                         for v in val:
-                            self.add_child(v)
+                            v.parent = self
 
                 ret.append(nwbdi_setter)
         return ret[-1]
@@ -768,7 +768,7 @@ class MultiContainerInterface(NWBDataInterface):
                 containers = container
             d = getattr(self, attr_name)
             for tmp in containers:
-                self.add_child(tmp)
+                tmp.parent = self
                 if tmp.name in d:
                     msg = "'%s' already exists in '%s'" % (tmp.name, self.name)
                     raise ValueError(msg)
@@ -1200,7 +1200,7 @@ class DynamicTable(NWBDataInterface):
                 ckwargs['table'] = table
 
         col = cls(**ckwargs)
-        self.add_child(col)
+        col.parent = self
         columns = [col]
 
         # Add index if it's been specified
@@ -1216,7 +1216,7 @@ class DynamicTable(NWBDataInterface):
                     raise ValueError("cannot pass non-empty index with empty data to index")
                 col_index = VectorIndex(name + "_index", index, col)
             columns.insert(0, col_index)
-            self.add_child(col_index)
+            col_index.parent = self
             col = col_index
             self.__indices[col_index.name] = col_index
 
