@@ -365,7 +365,10 @@ class NWBFile(MultiContainerInterface):
         while len(stack):
             n = stack.pop()
             ret.append(n)
-            self.__obj[n.object_id] = n
+            if n.object_id is not None:
+                self.__obj[n.object_id] = n
+            else:
+                warn('%s "%s" does not have an object_id' % (n.neurodata_type, n.name))
             if hasattr(n, 'children'):
                 for c in n.children:
                     stack.append(c)
