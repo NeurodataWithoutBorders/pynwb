@@ -1,7 +1,7 @@
 from dateutil.parser import parse as dateutil_parse
 from hdmf.build import ObjectMapper
 from .. import register_map
-from ..file import NWBFile
+from ..file import NWBFile, Subject
 
 
 @register_map(NWBFile)
@@ -89,3 +89,13 @@ class NWBFileMap(ObjectMapper):
         if isinstance(container.experimenter, str):
             ret = (container.experimenter,)
         return ret
+
+
+@register_map(Subject)
+class SubjectMap(ObjectMapper):
+
+    @ObjectMapper.constructor_arg('date_of_birth')
+    def dateconversion(self, builder, manager):
+        datestr = builder.get('date_of_birth').data
+        date = dateutil_parse(datestr)
+        return date
