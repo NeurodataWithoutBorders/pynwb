@@ -65,7 +65,7 @@ class ProcessingModule(MultiContainerInterface):
         Retrieve an NWBContainer from this ProcessingModule
         '''
         container_name = getargs('container_name', kwargs)
-        warn(PendingDeprecationWarning('get_container will be replaced by get_data_interface'))
+        warn(PendingDeprecationWarning('get_container will be replaced by get'))
         return self.get(container_name)
 
     @docval({'name': 'NWBDataInterface', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
