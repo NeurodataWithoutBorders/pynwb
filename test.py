@@ -183,6 +183,8 @@ def main():
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
+    warnings.simplefilter('always')
+
     # Run unit tests for pynwb package
     if flags['pynwb'] in args.suites:
         run_test_suite("tests/unit", "pynwb unit tests", verbose=args.verbosity)
