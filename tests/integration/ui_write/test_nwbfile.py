@@ -262,7 +262,7 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
                                [(3, 1, tsa)],
                                [(3, 1, tsa)],
                                [(4, 1, tsa)]],
-                'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
+                'tags': [[''], [''], ['fizz', 'buzz'], ['qaz']]
             }),
             'epochs',
             columns=[
@@ -290,7 +290,7 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
                                [(3, 1, tsa)],
                                [(3, 1, tsa)],
                                [(4, 1, tsa)]],
-                'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
+                'tags': [[''], [''], ['fizz', 'buzz'], ['qaz']]
             },
             index=pd.Index(np.arange(4), name='id')
         )
@@ -313,7 +313,7 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
                 'bar': ['fish', 'fowl', 'dog', 'cat'],
                 'start_time': [0.2, 0.25, 0.30, 0.35],
                 'stop_time': [0.25, 0.30, 0.40, 0.45],
-                'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
+                'tags': [[''], [''], ['fizz', 'buzz'], ['qaz']]
             },
             index=pd.Index(np.arange(4), name='id')
         )
