@@ -182,7 +182,8 @@ class TestSubjectIO(base.TestDataInterfaceIO):
                        sex='M',
                        species='Rattus norvegicus',
                        subject_id='RAT123',
-                       weight='2 lbs')
+                       weight='2 lbs',
+                       date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
 
     def setUpBuilder(self):
         return GroupBuilder('subject',
@@ -195,7 +196,9 @@ class TestSubjectIO(base.TestDataInterfaceIO):
                                       'sex': DatasetBuilder('sex', 'M'),
                                       'species': DatasetBuilder('species', 'Rattus norvegicus'),
                                       'subject_id': DatasetBuilder('subject_id', 'RAT123'),
-                                      'weight': DatasetBuilder('weight', '2 lbs')})
+                                      'weight': DatasetBuilder('weight', '2 lbs'),
+                                      'date_of_birth': DatasetBuilder('date_of_birth',
+                                                                      datetime(1970, 1, 1, 12, tzinfo=tzutc()))})
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''

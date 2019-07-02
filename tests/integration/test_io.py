@@ -271,14 +271,18 @@ class TestAppend(unittest.TestCase):
 
         with NWBHDF5IO(self.path, mode='a') as io:
             nwb = io.read()
-            electrodes = nwb.create_electrode_table_region(region=[0], description='')
-            ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=electrodes)
+            link_electrodes = nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes
+            ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=link_electrodes)
             nwb.add_acquisition(ts2)
-            io.write(nwb)  # attempt to write same spec again
+            io.write(nwb)  # also attempt to write same spec again
+            self.assertIs(nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes,
+                          nwb.acquisition['timeseries2'].electrodes)
 
         with NWBHDF5IO(self.path, mode='r') as io:
             nwb = io.read()
             np.testing.assert_equal(nwb.acquisition['timeseries2'].data[:], ts2.data)
+            self.assertIs(nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes,
+                          nwb.acquisition['timeseries2'].electrodes)
             errors = validate(io)
             for e in errors:
                 print('ERROR', e)
