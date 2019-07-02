@@ -88,7 +88,7 @@ class Table(object):
         self.allow_newlines = allow_newlines
 
     def __len__(self, x):
-        return len(re.sub("\033\[[0-9];[0-9];[0-9]{1,2}m", "", x))
+        return len(re.sub(r"\033\[[0-9];[0-9];[0-9]{1,2}m", "", x))
 
     def addRow(self, row):
         rows = [[''] for l in range(len(row))]
