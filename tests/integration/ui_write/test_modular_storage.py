@@ -22,7 +22,6 @@ class TestTimeSeriesModular(base.TestMapNWBContainer):
             os.remove(path)
 
     def setUp(self):
-        self.__manager = get_manager()
         self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
 
         self.data = np.arange(2000).reshape((2, 1000))
@@ -35,15 +34,12 @@ class TestTimeSeriesModular(base.TestMapNWBContainer):
             timestamps=self.timestamps
         )
 
-        self.data_filename = 'test_time_series_modular_data.nwb'
-        self.link_filename = 'test_time_series_modular_link.nwb'
+        self.data_filename = os.path.join(os.getcwd(), 'test_time_series_modular_data.nwb')
+        self.link_filename = os.path.join(os.getcwd(), 'test_time_series_modular_link.nwb')
 
     def tearDown(self):
-        self.read_container.data.file.close()
-        self.read_container.timestamps.file.close()
-
-        self.remove_file(self.data_filename)
         self.remove_file(self.link_filename)
+        self.remove_file(self.data_filename)
 
     def roundtripContainer(self):
         # create and write data file
@@ -82,20 +78,67 @@ class TestTimeSeriesModular(base.TestMapNWBContainer):
                 link_write_io.write(link_file)
 
         # read the link file
-        with HDF5IO(self.link_filename, 'r', manager=get_manager()) as self.link_file_reader:
-            self.read_nwbfile = self.link_file_reader.read()
+        with HDF5IO(self.link_filename, 'r', manager=get_manager()) as link_file_reader:
+            self.read_nwbfile = link_file_reader.read()
             return self.getContainer(self.read_nwbfile)
 
     def test_roundtrip(self):
-        self.read_container = self.roundtripContainer()
+        read_container = self.roundtripContainer()
         # make sure we get a completely new object
         self.assertIsNotNone(str(self.container))  # added as a test to make sure printing works
         self.assertIsNotNone(str(self.link_container))
-        self.assertIsNotNone(str(self.read_container))
-        self.assertNotEqual(id(self.link_container), id(self.read_container))
-        self.assertIs(self.read_nwbfile.objects[self.link_container.object_id], self.read_container)
-        self.assertContainerEqual(self.read_container, self.container)
+        self.assertIsNotNone(str(read_container))
+        self.assertNotEqual(id(self.link_container), id(read_container))
+        self.assertIs(self.read_nwbfile.objects[self.link_container.object_id], read_container)
+        self.assertContainerEqual(read_container, self.container)
         self.validate()
+
+    def test_link_root(self):
+        # create and write data file
+        data_file = NWBFile(
+            session_description='a test file',
+            identifier='data_file',
+            session_start_time=self.start_time
+        )
+        data_file.add_acquisition(self.container)
+
+        with HDF5IO(self.data_filename, 'w', manager=get_manager()) as data_write_io:
+            data_write_io.write(data_file)
+
+        # read data file
+        manager = get_manager()
+        with HDF5IO(self.data_filename, 'r', manager=manager) as data_read_io:
+            data_file_obt = data_read_io.read()
+
+            link_file = NWBFile(
+                session_description='a test file',
+                identifier='link_file',
+                session_start_time=self.start_time
+            )
+            link_container = data_file_obt.acquisition[self.container.name]
+            link_file.add_acquisition(link_container)
+            self.assertIs(link_container.parent, data_file_obt)
+
+            with HDF5IO(self.link_filename, 'w', manager=manager) as link_write_io:
+                link_write_io.write(link_file)
+
+        # read the link file, check container sources
+        with HDF5IO(self.link_filename, 'r+', manager=get_manager()) as link_file_reader:
+            read_nwbfile = link_file_reader.read()
+            breakpoint()
+            self.assertNotEqual(read_nwbfile.acquisition[self.container.name].container_source,
+                                read_nwbfile.container_source)
+            self.assertEqual(read_nwbfile.acquisition[self.container.name].container_source,
+                             self.data_filename)
+            self.assertEqual(read_nwbfile.container_source, self.link_filename)
+
+        # necessary to remove all references to the file and garbage
+        # collect on windows in order to be able to truncate/overwrite
+        # the file later. see pynwb GH issue #975
+        if os.name == 'nt':
+            del link_file_reader
+            del read_nwbfile
+            gc.collect()
 
     def validate(self):
         filenames = [self.data_filename, self.link_filename]
