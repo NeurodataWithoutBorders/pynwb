@@ -185,6 +185,10 @@ def main():
 
     warnings.simplefilter('always')
 
+    warnings.filterwarnings("ignore", category=ImportWarning, module='importlib._bootstrap',
+                            message=("can't resolve package from __spec__ or __package__, falling back on __name__ "
+                                     "and __path__"))
+
     # Run unit tests for pynwb package
     if flags['pynwb'] in args.suites:
         run_test_suite("tests/unit", "pynwb unit tests", verbose=args.verbosity)
