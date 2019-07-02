@@ -186,15 +186,6 @@ class TimeSeries(NWBDataInterface):
         def no_len_warning(attr):
             return 'The {} attribute on this TimeSeries (named: {}) has no __len__, '.format(attr, self.name)
 
-        if hasattr(self, 'timestamps'):
-            if hasattr(self.timestamps, '__len__'):
-                try:
-                    return len(self.timestamps)
-                except TypeError:
-                    warn(unreadable_warning('timestamps'), UserWarning)
-            else:
-                warn(no_len_warning('timestamps'), UserWarning)
-
         if hasattr(self.data, '__len__'):
             try:
                 return len(self.data)  # for an ndarray this will return the first element of shape
@@ -202,6 +193,15 @@ class TimeSeries(NWBDataInterface):
                 warn(unreadable_warning('data'), UserWarning)
         else:
             warn(no_len_warning('data'), UserWarning)
+
+        if hasattr(self, 'timestamps'):
+            if hasattr(self.timestamps, '__len__'):
+                try:
+                    return len(self.timestamps)
+                except TypeError:
+                    warn(unreadable_warning('timestamps'), UserWarning)
+            elif not (hasattr(self, 'rate') and hasattr(self, 'starting_time')):
+                warn(no_len_warning('timestamps'), UserWarning)
 
     @property
     def data(self):
