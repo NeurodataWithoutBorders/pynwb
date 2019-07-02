@@ -13,19 +13,6 @@ def _not_parent(arg):
     return arg['name'] != 'parent'
 
 
-def set_parents(container, parent):
-    if isinstance(container, list):
-        for c in container:
-            if c.parent is None:
-                c.parent = parent
-        ret = container
-    else:
-        ret = [container]
-        if container.parent is None:
-            container.parent = parent
-    return ret
-
-
 class LabelledDict(dict):
     '''
     A dict wrapper class for aggregating Timeseries
@@ -127,6 +114,9 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     @classmethod
     def _setter(cls, nwbfield):
         name = nwbfield['name']
+
+        if not nwbfield.get('settable', True):
+            return None
 
         def nwbbt_setter(self, val):
             if val is None:
@@ -260,7 +250,7 @@ class NWBContainer(NWBBaseType, Container):
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
 
-    __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc'}
+    __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc', 'settable'}
 
     @classmethod
     def _setter(cls, nwbfield):
@@ -296,7 +286,8 @@ class NWBContainer(NWBBaseType, Container):
                         else:
                             val = [val]
                         for v in val:
-                            v.parent = self
+                            if v.parent is None:
+                                v.parent = self
 
                 ret.append(nwbdi_setter)
         return ret[-1]
@@ -768,7 +759,8 @@ class MultiContainerInterface(NWBDataInterface):
                 containers = container
             d = getattr(self, attr_name)
             for tmp in containers:
-                tmp.parent = self
+                if tmp.parent is None:
+                    tmp.parent = self
                 if tmp.name in d:
                     msg = "'%s' already exists in '%s'" % (tmp.name, self.name)
                     raise ValueError(msg)
@@ -1379,6 +1371,15 @@ class DynamicTable(NWBDataInterface):
         columns = cls.__build_columns(columns, df=df)
 
         return cls(name=name, id=ids, columns=columns, description=table_description, **kwargs)
+
+    def copy(self):
+        """
+        Return a copy of this DynamicTable.
+        This is useful for linking.
+        """
+        kwargs = dict(name=self.name, id=self.id, columns=self.columns, description=self.description,
+                      colnames=self.colnames)
+        return self.__class__(**kwargs)
 
 
 @register_class('DynamicTableRegion', CORE_NAMESPACE)

@@ -160,8 +160,11 @@ class NWBFile(MultiContainerInterface):
         }
     ]
 
-    __nwbfields__ = ('timestamps_reference_time',
-                     'file_create_date',
+    __nwbfields__ = ({'name': 'session_description', 'settable': False},
+                     {'name': 'identifier', 'settable': False},
+                     {'name': 'session_start_time', 'settable': False},
+                     {'name': 'timestamps_reference_time', 'settable': False},
+                     {'name': 'file_create_date', 'settable': False},
                      'experimenter',
                      'experiment_description',
                      'session_id',
@@ -277,62 +280,48 @@ class NWBFile(MultiContainerInterface):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
         pkwargs['name'] = 'root'
         super(NWBFile, self).__init__(*pargs, **pkwargs)
-        self.__session_description = getargs('session_description', kwargs)
-        self.__identifier = getargs('identifier', kwargs)
+        self.fields['session_description'] = getargs('session_description', kwargs)
+        self.fields['identifier'] = getargs('identifier', kwargs)
 
-        self.__session_start_time = getargs('session_start_time', kwargs)
-        if self.__session_start_time.tzinfo is None:
-            self.__session_start_time = _add_missing_timezone(self.__session_start_time)
+        self.fields['session_start_time'] = getargs('session_start_time', kwargs)
+        if self.fields['session_start_time'].tzinfo is None:
+            self.fields['session_start_time'] = _add_missing_timezone(self.fields['session_start_time'])
 
-        self.__timestamps_reference_time = getargs('timestamps_reference_time', kwargs)
-        if self.__timestamps_reference_time is None:
-            self.__timestamps_reference_time = self.__session_start_time
-        elif self.__timestamps_reference_time.tzinfo is None:
+        self.fields['timestamps_reference_time'] = getargs('timestamps_reference_time', kwargs)
+        if self.fields['timestamps_reference_time'] is None:
+            self.fields['timestamps_reference_time'] = self.fields['session_start_time']
+        elif self.fields['timestamps_reference_time'].tzinfo is None:
             raise ValueError("'timestamps_reference_time' must be a timezone-aware datetime object.")
 
-        self.__file_create_date = getargs('file_create_date', kwargs)
-        if self.__file_create_date is None:
-            self.__file_create_date = datetime.now(tzlocal())
-        if isinstance(self.__file_create_date, datetime):
-            self.__file_create_date = [self.__file_create_date]
-        self.__file_create_date = list(map(_add_missing_timezone, self.__file_create_date))
-
-        self.acquisition = getargs('acquisition', kwargs)
-        self.analysis = getargs('analysis', kwargs)
-        self.stimulus = getargs('stimulus', kwargs)
-        self.stimulus_template = getargs('stimulus_template', kwargs)
-        self.keywords = getargs('keywords', kwargs)
-
-        self.processing = getargs('processing', kwargs)
-        epochs = getargs('epochs', kwargs)
-        if epochs is not None:
-            if epochs.name != 'epochs':
-                raise ValueError("NWBFile.epochs must be named 'epochs'")
-            self.epochs = epochs
-        self.epoch_tags = getargs('epoch_tags', kwargs)
-
-        trials = getargs('trials', kwargs)
-        if trials is not None:
-            self.trials = trials
-        invalid_times = getargs('invalid_times', kwargs)
-        if invalid_times is not None:
-            self.invalid_times = invalid_times
-        units = getargs('units', kwargs)
-        if units is not None:
-            self.units = units
-
-        self.electrodes = getargs('electrodes', kwargs)
-        self.electrode_groups = getargs('electrode_groups', kwargs)
-        self.devices = getargs('devices', kwargs)
-        self.ic_electrodes = getargs('ic_electrodes', kwargs)
-        self.imaging_planes = getargs('imaging_planes', kwargs)
-        self.ogen_sites = getargs('ogen_sites', kwargs)
-        self.intervals = getargs('intervals', kwargs)
-        self.subject = getargs('subject', kwargs)
-        self.sweep_table = getargs('sweep_table', kwargs)
-        self.lab_meta_data = getargs('lab_meta_data', kwargs)
+        self.fields['file_create_date'] = getargs('file_create_date', kwargs)
+        if self.fields['file_create_date'] is None:
+            self.fields['file_create_date'] = datetime.now(tzlocal())
+        if isinstance(self.fields['file_create_date'], datetime):
+            self.fields['file_create_date'] = [self.fields['file_create_date']]
+        self.fields['file_create_date'] = list(map(_add_missing_timezone, self.fields['file_create_date']))
 
         recommended = [
+            'acquisition',
+            'analysis',
+            'stimulus',
+            'stimulus_template',
+            'keywords',
+            'processing',
+            'epoch_tags',
+            'electrodes',
+            'electrode_groups',
+            'devices',
+            'ic_electrodes',
+            'imaging_planes',
+            'ogen_sites',
+            'intervals',
+            'subject',
+            'sweep_table',
+            'lab_meta_data',
+            'epochs',
+            'trials',
+            'invalid_times',
+            'units',
             'experimenter',
             'experiment_description',
             'session_id',
@@ -394,26 +383,6 @@ class NWBFile(MultiContainerInterface):
     def ec_electrodes(self):
         warn("replaced by NWBFile.electrodes", DeprecationWarning)
         return self.electrodes
-
-    @property
-    def identifier(self):
-        return self.__identifier
-
-    @property
-    def session_description(self):
-        return self.__session_description
-
-    @property
-    def file_create_date(self):
-        return self.__file_create_date
-
-    @property
-    def session_start_time(self):
-        return self.__session_start_time
-
-    @property
-    def timestamps_reference_time(self):
-        return self.__timestamps_reference_time
 
     def __check_epochs(self):
         if self.epochs is None:
@@ -620,6 +589,26 @@ class NWBFile(MultiContainerInterface):
     def add_stimulus_template(self, timeseries):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
+
+    def copy(self):
+        """
+        Shallow copy all fields except for DynamicTables.
+        Useful for linking across files.
+        """
+        kwargs = self.fields.copy()
+        for key in self.fields.keys():
+            if isinstance(self.fields[key], LabelledDict):
+                kwargs[key] = list(self.fields[key].values())
+
+        fields_to_copy = ['electrodes', 'epochs', 'trials', 'units', 'subject', 'sweep_table', 'invalid_times']
+        for field in fields_to_copy:
+            if field in kwargs.keys():
+                if isinstance(self.fields[field], DynamicTable):
+                    kwargs[field] = self.fields[field].copy()
+                else:
+                    warn('Cannot copy child of NWBFile that is not a DynamicTable.')
+
+        return NWBFile(**kwargs)
 
 
 def _add_missing_timezone(date):
