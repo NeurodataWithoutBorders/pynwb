@@ -311,8 +311,9 @@ class TestClusteringIO(base.TestDataInterfaceIO):
                                 'description': DatasetBuilder('description', "A fake Clustering interface")})
 
     def setUpContainer(self):
-        return Clustering("A fake Clustering interface",
-                          [0, 1, 2, 0, 1, 2], [100., 101., 102.], [float(i) for i in range(10, 61, 10)])
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            return Clustering("A fake Clustering interface",
+                              [0, 1, 2, 0, 1, 2], [100., 101., 102.], [float(i) for i in range(10, 61, 10)])
 
 
 class EventWaveformConstructor(base.TestDataInterfaceIO):
@@ -337,10 +338,12 @@ class ClusterWaveformsConstructor(base.TestDataInterfaceIO):
         times = [1.3, 2.3]
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
-        self.clustering = Clustering('description', num, peak_over_rms, times)
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            self.clustering = Clustering('description', num, peak_over_rms, times)
         means = [[7.3, 7.3]]
         stdevs = [[8.3, 8.3]]
-        cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
         return cw
 
     def addContainer(self, nwbfile):
