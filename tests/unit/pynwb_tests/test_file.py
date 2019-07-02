@@ -399,11 +399,33 @@ class TestCacheSpec(unittest.TestCase):
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(nwbfile, cache_spec=True)
+            io.write(nwbfile)
         with self.assertWarnsRegex(UserWarning, r"ignoring namespace '\S+' because it already exists"):
-            reader = NWBHDF5IO(self.path, 'r', load_namespaces=True)
-        nwbfile = reader.read()
-        reader.close()
+            with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
+                nwbfile = reader.read()
+
+
+class TestNoCacheSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.path = 'unittest_cached_spec.nwb'
+
+    def tearDown(self):
+        if os.path.exists(self.path):
+            os.remove(self.path)
+
+    def test_simple(self):
+        nwbfile = NWBFile(' ', ' ',
+                          datetime.now(tzlocal()),
+                          file_create_date=datetime.now(tzlocal()),
+                          institution='University of California, San Francisco',
+                          lab='Chang Lab')
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(nwbfile, cache_spec=False)
+
+        with self.assertWarnsRegex(UserWarning, r"No cached namespaces found in %s" % self.path):
+            with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
+                nwbfile = reader.read()
 
 
 class TestTimestampsRefDefault(unittest.TestCase):
