@@ -1,6 +1,9 @@
 from warnings import warn
 
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
 from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 
