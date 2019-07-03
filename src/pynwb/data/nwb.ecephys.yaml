@@ -107,8 +107,8 @@ groups:
       doc: Value is '1'
     - name: unit
       dtype: text
-      value: Seconds
-      doc: Unit of measurement for timestamps, which is fixed to 'Seconds'.
+      value: second
+      doc: Unit of measurement for timestamps, which is fixed to 'second'.
 
 - neurodata_type_def: FeatureExtraction
   neurodata_type_inc: NWBDataInterface
@@ -184,8 +184,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: Seconds
-      doc: Unit of measurement for event times, which is fixed to 'Seconds'.
+      default_value: second
+      doc: Unit of measurement for event times, which is fixed to 'second'.
       required: false
   links:
   - name: source_electricalseries

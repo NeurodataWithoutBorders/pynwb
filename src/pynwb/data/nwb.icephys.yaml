@@ -98,8 +98,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: Farad
-      doc: Unit of measurement for capacitance_fast. Default value is 'Farad'.
+      default_value: farad
+      doc: Unit of measurement for capacitance_fast. Default value is 'farad'.
       required: false
   - name: capacitance_slow
     dtype: float32
@@ -108,8 +108,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: Farad
-      doc: Unit of measurement for capacitance_slow. Default value is 'Farad'.
+      default_value: farad
+      doc: Unit of measurement for capacitance_slow. Default value is 'farad'.
       required: false
   - name: resistance_comp_bandwidth
     dtype: float32
@@ -118,8 +118,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: Hz
-      doc: Unit of measurement for resistance_comp_bandwidth. Default value is 'Hz'.
+      default_value: hertz
+      doc: Unit of measurement for resistance_comp_bandwidth. Default value is 'hertz'.
       required: false
   - name: resistance_comp_correction
     dtype: float32
@@ -128,8 +128,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: pecent
-      doc: Unit of measurement for resistance_comp_correction. Default value is 'pecent'.
+      default_value: percent
+      doc: Unit of measurement for resistance_comp_correction. Default value is 'percent'.
       required: false
   - name: resistance_comp_prediction
     dtype: float32
@@ -138,8 +138,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: pecent
-      doc: Unit of measurement for resistance_comp_prediction. Default value is 'pecent'.
+      default_value: percent
+      doc: Unit of measurement for resistance_comp_prediction. Default value is 'percent'.
       required: false
   - name: whole_cell_capacitance_comp
     dtype: float32
@@ -148,8 +148,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: Farad
-      doc: Unit of measurement for whole_cell_capacitance_comp. Default value is 'Farad'.
+      default_value: farad
+      doc: Unit of measurement for whole_cell_capacitance_comp. Default value is 'farad'.
       required: false
   - name: whole_cell_series_resistance_comp
     dtype: float32
@@ -158,8 +158,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: Ohm
-      doc: Unit of measurement for whole_cell_capacitance_comp. Default value is 'Ohm'.
+      default_value: ohm
+      doc: Unit of measurement for whole_cell_capacitance_comp. Default value is 'ohm'.
       required: false
 
 - neurodata_type_def: VoltageClampStimulusSeries
