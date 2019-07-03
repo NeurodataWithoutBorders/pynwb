@@ -1,6 +1,9 @@
 from warnings import warn
 
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
 from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 
@@ -62,7 +65,7 @@ class ProcessingModule(MultiContainerInterface):
         Retrieve an NWBContainer from this ProcessingModule
         '''
         container_name = getargs('container_name', kwargs)
-        warn(PendingDeprecationWarning('get_container will be replaced by get_data_interface'))
+        warn(PendingDeprecationWarning('get_container will be replaced by get'))
         return self.get(container_name)
 
     @docval({'name': 'NWBDataInterface', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
@@ -183,15 +186,6 @@ class TimeSeries(NWBDataInterface):
         def no_len_warning(attr):
             return 'The {} attribute on this TimeSeries (named: {}) has no __len__, '.format(attr, self.name)
 
-        if hasattr(self, 'timestamps'):
-            if hasattr(self.timestamps, '__len__'):
-                try:
-                    return len(self.timestamps)
-                except TypeError:
-                    warn(unreadable_warning('timestamps'), UserWarning)
-            else:
-                warn(no_len_warning('timestamps'), UserWarning)
-
         if hasattr(self.data, '__len__'):
             try:
                 return len(self.data)  # for an ndarray this will return the first element of shape
@@ -199,6 +193,15 @@ class TimeSeries(NWBDataInterface):
                 warn(unreadable_warning('data'), UserWarning)
         else:
             warn(no_len_warning('data'), UserWarning)
+
+        if hasattr(self, 'timestamps'):
+            if hasattr(self.timestamps, '__len__'):
+                try:
+                    return len(self.timestamps)
+                except TypeError:
+                    warn(unreadable_warning('timestamps'), UserWarning)
+            elif not (hasattr(self, 'rate') and hasattr(self, 'starting_time')):
+                warn(no_len_warning('timestamps'), UserWarning)
 
     @property
     def data(self):
