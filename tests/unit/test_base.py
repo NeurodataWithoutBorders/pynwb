@@ -108,8 +108,8 @@ class TestTimeSeries(unittest.TestCase):
         data = H5DataIO(DataChunkIterator(data=generator_factory()))
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
-        with self.assertWarnsRegex(UserWarning, r'The data attribute on this TimeSeries \(named: test_ts1\) has a '\
-                                                 '__len__, but it cannot be read'):
+        with self.assertWarnsRegex(UserWarning, r'The data attribute on this TimeSeries \(named: test_ts1\) has a '
+                                   '__len__, but it cannot be read'):
             self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
@@ -122,8 +122,8 @@ class TestTimeSeries(unittest.TestCase):
         data = DataChunkIterator(data=generator_factory())
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
-        with self.assertWarnsRegex(UserWarning, r'The data attribute on this TimeSeries \(named: test_ts1\) has no '\
-                                                 '__len__'):
+        with self.assertWarnsRegex(UserWarning, r'The data attribute on this TimeSeries \(named: test_ts1\) has no '
+                                   '__len__'):
             self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)

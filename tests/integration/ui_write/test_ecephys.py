@@ -320,6 +320,7 @@ class TestClusteringIO(base.TestDataInterfaceIO):
         with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
             return super(TestClusteringIO, self).roundtripContainer(cache_spec)
 
+
 class EventWaveformConstructor(base.TestDataInterfaceIO):
     def setUpContainer(self):
         TestElectricalSeriesIO.make_electrode_table(self)

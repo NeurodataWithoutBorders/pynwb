@@ -39,18 +39,18 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                                                          attributes={'unit': 'Seconds',
                                                                                      'interval': 1})})
         ts_builder2 = GroupBuilder('test_timeseries2',
-                                  attributes={'namespace': base.CORE_NAMESPACE,
-                                              'neurodata_type': 'TimeSeries',
-                                              'comments': 'no comments',
-                                              'description': 'no description',
-                                              'help': 'General time series object'},
-                                  datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
-                                                                   attributes={'unit': 'SIunit',
-                                                                               'conversion': 1.0,
-                                                                               'resolution': 0.1}),
-                                            'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                         attributes={'unit': 'Seconds',
-                                                                                     'interval': 1})})
+                                   attributes={'namespace': base.CORE_NAMESPACE,
+                                               'neurodata_type': 'TimeSeries',
+                                               'comments': 'no comments',
+                                               'description': 'no description',
+                                               'help': 'General time series object'},
+                                   datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
+                                                                    attributes={'unit': 'SIunit',
+                                                                                'conversion': 1.0,
+                                                                                'resolution': 0.1}),
+                                             'timestamps': DatasetBuilder('timestamps', list(range(10)),
+                                                                          attributes={'unit': 'Seconds',
+                                                                                      'interval': 1})})
 
         module_builder = GroupBuilder('test_module',
                                       attributes={'namespace': base.CORE_NAMESPACE,
@@ -137,7 +137,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         self.mod = container.create_processing_module('test_module',
                                                       'a test module')
         self.ts2 = TimeSeries('test_timeseries2', list(range(100, 200, 10)),
-                             'SIunit', timestamps=list(range(10)), resolution=0.1)
+                              'SIunit', timestamps=list(range(10)), resolution=0.1)
         self.mod.add(self.ts2)
         return container
 
