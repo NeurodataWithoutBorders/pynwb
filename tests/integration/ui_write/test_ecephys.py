@@ -315,6 +315,10 @@ class TestClusteringIO(base.TestDataInterfaceIO):
             return Clustering("A fake Clustering interface",
                               [0, 1, 2, 0, 1, 2], [100., 101., 102.], [float(i) for i in range(10, 61, 10)])
 
+    def roundtripContainer(self, cache_spec=False):
+        # self.reader.read() will throw DeprecationWarning when reading the Clustering object
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            return super(TestClusteringIO, self).roundtripContainer(cache_spec)
 
 class EventWaveformConstructor(base.TestDataInterfaceIO):
     def setUpContainer(self):
@@ -350,6 +354,11 @@ class ClusterWaveformsConstructor(base.TestDataInterfaceIO):
         ''' Should take an NWBFile object and add the container to it '''
         nwbfile.add_acquisition(self.clustering)
         nwbfile.add_acquisition(self.container)
+
+    def roundtripContainer(self, cache_spec=False):
+        # self.reader.read() will throw DeprecationWarning when reading the ClusterWaveformsConstructor object
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            return super(ClusterWaveformsConstructor, self).roundtripContainer(cache_spec)
 
 
 class FeatureExtractionConstructor(base.TestDataInterfaceIO):
