@@ -173,7 +173,7 @@ groups:
 
 - neurodata_type_def: IntracellularElectrode
   neurodata_type_inc: NWBContainer
-  doc: An intracellular electrode and its metadata
+  doc: An intracellular electrode and its metadata.
   attributes:
   - name: help
     dtype: text

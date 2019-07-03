@@ -69,7 +69,7 @@ groups:
       - row_col
       shape:
       - null
-      doc: Size of viewing area, in meters
+      doc: Size of viewing area, in meters.
     - name: unit
       dtype: text
       doc: Unit that axis data is stored in (e.g., degrees).
@@ -97,7 +97,7 @@ groups:
       - row_col
       shape:
       - null
-      doc: Size of viewing area, in meters
+      doc: Size of viewing area, in meters.
     - name: unit
       dtype: text
       doc: Unit that axis data is stored in (e.g., degrees).
@@ -127,7 +127,7 @@ groups:
       - row_col
       shape:
       - null
-      doc: Size of viewing area, in meters
+      doc: Size of viewing area, in meters.
     - name: unit
       dtype: text
       doc: Unit that axis data is stored in (e.g., degrees).
@@ -139,7 +139,7 @@ groups:
     - null
     doc: Two-element array describing the contents of the two response axis fields.
       Description should be something like ['altitude', 'azimuth'] or '['radius',
-      'theta']
+      'theta'].
   - name: focal_depth_image
     dtype: uint16
     dims:
@@ -149,7 +149,7 @@ groups:
     - null
     - null
     doc: 'Gray-scale image taken with same settings/parameters (e.g., focal depth,
-      wavelength) as data collection. Array format: [rows][columns]'
+      wavelength) as data collection. Array format: [rows][columns].'
     attributes:
     - name: bits_per_pixel
       dtype: int32
@@ -169,10 +169,10 @@ groups:
       - row_col
       shape:
       - null
-      doc: Size of viewing area, in meters
+      doc: Size of viewing area, in meters.
     - name: focal_depth
       dtype: float
-      doc: Focal depth offset, in meters
+      doc: Focal depth offset, in meters.
     - name: format
       dtype: text
       doc: Format of image. Right now only 'raw' is supported.

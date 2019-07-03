@@ -25,7 +25,7 @@ groups:
   - name: site
     target_type: OptogeneticStimulusSite
     doc: Link to OptogeneticStimulusSite object that describes the site to which this
-      stimulus was applied
+      stimulus was applied.
 
 - neurodata_type_def: OptogeneticStimulusSite
   neurodata_type_inc: NWBContainer

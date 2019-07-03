@@ -214,16 +214,16 @@ groups:
   datasets:
   - name: spike_times_index
     neurodata_type_inc: VectorIndex
-    doc: Index into the spike_times dataset
+    doc: Index into the spike_times dataset.
     quantity: '?'
   - name: spike_times
     neurodata_type_inc: VectorData
     dtype: double
-    doc: Spike times for each unit
+    doc: Spike times for each unit.
     quantity: '?'
   - name: obs_intervals_index
     neurodata_type_inc: VectorIndex
-    doc: Index into the obs_intervals dataset
+    doc: Index into the obs_intervals dataset.
     quantity: '?'
   - name: obs_intervals
     neurodata_type_inc: VectorData
@@ -234,22 +234,22 @@ groups:
     shape:
     - null
     - 2
-    doc: Observation intervals for each unit
+    doc: Observation intervals for each unit.
     quantity: '?'
   - name: electrodes_index
     neurodata_type_inc: VectorIndex
-    doc: Index into electrodes
+    doc: Index into electrodes.
     quantity: '?'
   - name: electrodes
     neurodata_type_inc: DynamicTableRegion
-    doc: Electrode that each spike unit came from, specified using a DynamicTableRegion
+    doc: Electrode that each spike unit came from, specified using a DynamicTableRegion.
     quantity: '?'
   - name: electrode_group
     neurodata_type_inc: VectorData
     dtype:
       target_type: ElectrodeGroup
       reftype: object
-    doc: Electrode group that each spike unit came from
+    doc: Electrode group that each spike unit came from.
     quantity: '?'
   - name: waveform_mean
     neurodata_type_inc: VectorData
@@ -260,7 +260,7 @@ groups:
     shape:
     - null
     - null
-    doc: Spike waveform mean for each spike unit
+    doc: Spike waveform mean for each spike unit.
     quantity: '?'
   - name: waveform_sd
     neurodata_type_inc: VectorData
@@ -271,5 +271,5 @@ groups:
     shape:
     - null
     - null
-    doc: Spike waveform standard deviation for each spike unit
+    doc: Spike waveform standard deviation for each spike unit.
     quantity: '?'

@@ -75,7 +75,7 @@ groups:
     - - null
       - null
       - null
-    doc: Spike waveforms
+    doc: Spike waveforms.
     attributes:
     - name: unit
       dtype: text
@@ -185,7 +185,7 @@ groups:
     - name: unit
       dtype: text
       default_value: Seconds
-      doc: Unit of measurement for event times, which is fixed to 'Seconds'
+      doc: Unit of measurement for event times, which is fixed to 'Seconds'.
       required: false
   links:
   - name: source_electricalseries

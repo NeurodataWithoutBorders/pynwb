@@ -209,7 +209,7 @@ groups:
     attributes:
     - name: rate
       dtype: float32
-      doc: Sampling rate, in Hz
+      doc: Sampling rate, in Hz.
     - name: unit
       dtype: text
       value: Seconds
@@ -291,7 +291,7 @@ groups:
     doc: Value is 'A collection of images that have some meaningful relationship'
   datasets:
   - neurodata_type_inc: Image
-    doc: Images stored in this collection
+    doc: Images stored in this collection.
     quantity: '+'
 
 - neurodata_type_def: DynamicTable

@@ -57,7 +57,7 @@ groups:
     - - null
     - - null
       - null
-    doc: Signals from ROIs
+    doc: Signals from ROIs.
   - name: rois
     neurodata_type_inc: DynamicTableRegion
     doc: DynamicTableRegion referencing into an ROITable containing information on the ROIs
@@ -119,7 +119,7 @@ groups:
   groups:
   - neurodata_type_def: PlaneSegmentation
     neurodata_type_inc: DynamicTable
-    doc: Results from image segmentation of a specific imaging plane
+    doc: Results from image segmentation of a specific imaging plane.
     quantity: '+'
     attributes:
     - name: help
@@ -163,7 +163,7 @@ groups:
         doc: Pixel y-coordinate.
       - name: weight
         dtype: float
-        doc: Weight of the pixel
+        doc: Weight of the pixel.
       doc: 'Pixel masks for each ROI: a list of indices and weights for the ROI. Pixel
         masks are concatenated and parsing of this dataset is maintained by the PlaneSegmentation'
       quantity: '?'
@@ -176,16 +176,16 @@ groups:
       dtype:
       - name: x
         dtype: uint
-        doc: Voxel x-coordinate
+        doc: Voxel x-coordinate.
       - name: y
         dtype: uint
-        doc: Voxel y-coordinate
+        doc: Voxel y-coordinate.
       - name: z
         dtype: uint
-        doc: Voxel y-coordinate
+        doc: Voxel z-coordinate.
       - name: weight
         dtype: float
-        doc: Weight of the voxel
+        doc: Weight of the voxel.
       doc: 'Voxel masks for each ROI: a list of indices and weights for the ROI. Voxel
         masks are concatenated and parsing of this dataset is maintained by the PlaneSegmentation'
       quantity: '?'
@@ -247,7 +247,7 @@ groups:
       - null
       - 3
     doc: "Physical position of each pixel. 'xyz' represents the position\
-      \ of the pixel relative to the defined coordinate space"
+      \ of the pixel relative to the defined coordinate space."
     quantity: '?'
     attributes:
     - name: conversion
@@ -294,7 +294,7 @@ groups:
   links:
   - name: device
     target_type: Device
-    doc: Link to the Device object that was used to record from this electrode
+    doc: Link to the Device object that was used to record from this electrode.
 
 - neurodata_type_def: MotionCorrection
   neurodata_type_inc: NWBDataInterface

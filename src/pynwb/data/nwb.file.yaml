@@ -111,7 +111,7 @@ groups:
       doc: Stimuli presented during the experiment.
       groups:
       - neurodata_type_inc: TimeSeries
-        doc: TimeSeries objects containing data of presented stimuli
+        doc: TimeSeries objects containing data of presented stimuli.
         quantity: '*'
     - name: templates
       doc: 'Template stimuli. Timestamps in templates are based on stimulus
@@ -120,7 +120,7 @@ groups:
         time reference frame.'
       groups:
       - neurodata_type_inc: TimeSeries
-        doc: TimeSeries objects containing template data of presented stimuli
+        doc: TimeSeries objects containing template data of presented stimuli.
         quantity: '*'
   - name: general
     doc: "Experimental metadata, including protocol, notes and description of hardware\
@@ -166,7 +166,7 @@ groups:
       quantity: '?'
     - name: lab
       dtype: text
-      doc: Lab where experiment was performed
+      doc: Laboratory where experiment was performed.
       quantity: '?'
     - name: notes
       dtype: text
@@ -179,7 +179,7 @@ groups:
       quantity: '?'
     - name: protocol
       dtype: text
-      doc: Experimental protocol, if applicable. e.g., include IACUC protocol number
+      doc: Experimental protocol, if applicable. e.g., include IACUC protocol number.
       quantity: '?'
     - name: related_publications
       dtype: text
@@ -202,7 +202,7 @@ groups:
       attributes:
       - name: file_name
         dtype: text
-        doc: Name of script file
+        doc: Name of script file.
     - name: stimulus
       dtype: text
       doc: Notes about stimuli, such as how and where they were presented.
@@ -230,7 +230,7 @@ groups:
       groups:
       - neurodata_type_def: Device
         neurodata_type_inc: NWBContainer
-        doc: A data acquisition device, e.g. recording system
+        doc: A data acquisition device, e.g. recording system.
         quantity: '+'
         attributes:
         - name: help
@@ -297,7 +297,7 @@ groups:
         - name: x
           neurodata_type_inc: VectorData
           dtype: float
-          doc: x coordinate of the channel location
+          doc: x coordinate of the channel location.
           attributes:
           - name: description
             dtype: text
@@ -306,7 +306,7 @@ groups:
         - name: y
           neurodata_type_inc: VectorData
           dtype: float
-          doc: y coordinate of the channel location
+          doc: y coordinate of the channel location.
           attributes:
           - name: description
             dtype: text
@@ -315,7 +315,7 @@ groups:
         - name: z
           neurodata_type_inc: VectorData
           dtype: float
-          doc: z coordinate of the channel location
+          doc: z coordinate of the channel location.
           attributes:
           - name: description
             dtype: text
@@ -324,7 +324,7 @@ groups:
         - name: imp
           neurodata_type_inc: VectorData
           dtype: float
-          doc: Impedance of the channel
+          doc: Impedance of the channel.
           attributes:
           - name: description
             dtype: text
@@ -333,7 +333,7 @@ groups:
         - name: location
           neurodata_type_inc: VectorData
           dtype: ascii
-          doc: Location of the channel within the subject e.g. brain region
+          doc: Location of the channel within the subject e.g. brain region.
           attributes:
           - name: description
             dtype: text
@@ -342,7 +342,7 @@ groups:
         - name: filtering
           neurodata_type_inc: VectorData
           dtype: float
-          doc: Description of hardware filtering
+          doc: Description of hardware filtering.
           attributes:
           - name: description
             dtype: text
@@ -353,7 +353,7 @@ groups:
           dtype:
             target_type: ElectrodeGroup
             reftype: object
-          doc: Reference to the ElectrodeGroup this electrode is a part of
+          doc: Reference to the ElectrodeGroup this electrode is a part of.
           attributes:
           - name: description
             dtype: text
@@ -363,7 +363,7 @@ groups:
         - name: group_name
           neurodata_type_inc: VectorData
           dtype: ascii
-          doc: Name of the ElectrodeGroup this electrode is a part of
+          doc: Name of the ElectrodeGroup this electrode is a part of.
           attributes:
           - name: description
             dtype: text
@@ -411,20 +411,20 @@ groups:
     - name: epochs
       neurodata_type_inc: TimeIntervals
       doc: Divisions in time marking experimental stages or sub-divisions of a single
-        recording session
+        recording session.
       quantity: '?'
     - name: trials
       neurodata_type_inc: TimeIntervals
-      doc: Repeated experimental events that have a logical grouping
+      doc: Repeated experimental events that have a logical grouping.
       quantity: '?'
     - name: invalid_times
       neurodata_type_inc: TimeIntervals
-      doc: Time intervals that should be removed from analysis
+      doc: Time intervals that should be removed from analysis.
       quantity: '?'
     - neurodata_type_inc: TimeIntervals
-      doc: Optional additional table(s) for describing other experimental time intervals
+      doc: Optional additional table(s) for describing other experimental time intervals.
       quantity: '*'
   - name: units
     neurodata_type_inc: Units
-    doc: Data about sorted spike units
+    doc: Data about sorted spike units.
     quantity: '?'

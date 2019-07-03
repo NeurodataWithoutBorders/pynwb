@@ -7,7 +7,7 @@ datasets:
   shape:
   - null
   - null
-  doc: A grayscale image
+  doc: A grayscale image.
 
 - neurodata_type_def: RGBImage
   neurodata_type_inc: Image
@@ -19,7 +19,7 @@ datasets:
   - null
   - null
   - 3
-  doc: A color image
+  doc: A color image.
 
 - neurodata_type_def: RGBAImage
   neurodata_type_inc: Image
@@ -31,7 +31,7 @@ datasets:
   - null
   - null
   - 4
-  doc: A color image with transparency
+  doc: A color image with transparency.
 
 groups:
 - neurodata_type_def: ImageSeries
@@ -120,7 +120,7 @@ groups:
   links:
   - name: masked_imageseries
     target_type: ImageSeries
-    doc: Link to ImageSeries object that this image mask is applied to
+    doc: Link to ImageSeries object that this image mask is applied to.
 
 - neurodata_type_def: OpticalSeries
   neurodata_type_inc: ImageSeries
