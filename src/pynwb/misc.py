@@ -237,12 +237,14 @@ class Units(DynamicTable):
                 else:
                     elec_col.table = self.__electrode_table
 
-    @docval({'name': 'index', 'type': int,
+    @docval({'name': 'index', 'type': (int, list, tuple, np.ndarray),
              'doc': 'the index of the unit in unit_ids to retrieve spike times for'},
             {'name': 'in_interval', 'type': (tuple, list), 'doc': 'only return values within this interval',
              'default': None, 'shape': (2,)})
     def get_unit_spike_times(self, **kwargs):
         index, in_interval = getargs('index', 'in_interval', kwargs)
+        if type(index) in (list, tuple):
+            return [self.get_unit_spike_times(i, in_interval=in_interval) for i in index]
         if in_interval is None:
             return np.asarray(self['spike_times'][index])
         else:
