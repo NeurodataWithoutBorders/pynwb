@@ -1,12 +1,13 @@
 import unittest2 as unittest
-import six
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import os
+import re
 from h5py import File
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
 
+from hdmf.backends.io import UnsupportedOperation
 from hdmf.backends.hdf5 import HDF5IO, H5DataIO
 from hdmf.data_utils import DataChunkIterator
 from hdmf.build import GroupBuilder, DatasetBuilder
@@ -19,7 +20,7 @@ import numpy as np
 
 class TestHDF5Writer(unittest.TestCase):
 
-    _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec')
+    _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec', 'test_write_no_cache_spec')
 
     @property
     def required_tests(self):
@@ -27,7 +28,7 @@ class TestHDF5Writer(unittest.TestCase):
 
     def setUp(self):
         self.manager = get_manager()
-        self.path = "test_pynwb_io_hdf5.h5"
+        self.path = "test_pynwb_io_hdf5.nwb"
         self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
         self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         self.container = NWBFile('a test NWB File', 'TEST123',
@@ -63,49 +64,43 @@ class TestHDF5Writer(unittest.TestCase):
             attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        os.remove(self.path)
+        if os.path.exists(self.path):
+            os.remove(self.path)
 
     def test_nwbio(self):
-        io = HDF5IO(self.path, manager=self.manager, mode='a')
-        io.write(self.container)
-        io.close()
-        f = File(self.path)
-        self.assertIn('acquisition', f)
-        self.assertIn('analysis', f)
-        self.assertIn('general', f)
-        self.assertIn('processing', f)
-        self.assertIn('file_create_date', f)
-        self.assertIn('identifier', f)
-        self.assertIn('session_description', f)
-        self.assertIn('session_start_time', f)
-        acq = f.get('acquisition')
-        self.assertIn('test_timeseries', acq)
+        with HDF5IO(self.path, manager=self.manager, mode='a') as io:
+            io.write(self.container)
+        with File(self.path) as f:
+            self.assertIn('acquisition', f)
+            self.assertIn('analysis', f)
+            self.assertIn('general', f)
+            self.assertIn('processing', f)
+            self.assertIn('file_create_date', f)
+            self.assertIn('identifier', f)
+            self.assertIn('session_description', f)
+            self.assertIn('session_start_time', f)
+            acq = f.get('acquisition')
+            self.assertIn('test_timeseries', acq)
 
     def test_write_clobber(self):
-        io = HDF5IO(self.path, manager=self.manager, mode='a')
-        io.write(self.container)
-        io.close()
-        f = File(self.path)  # noqa: F841
-
-        if six.PY2:
-            assert_file_exists = IOError
-        elif six.PY3:
-            assert_file_exists = OSError
-
-        with self.assertRaises(assert_file_exists):
-            io = HDF5IO(self.path, manager=self.manager, mode='w-')
+        with HDF5IO(self.path, manager=self.manager, mode='a') as io:
             io.write(self.container)
-            io.close()
+
+        with self.assertRaisesRegex(UnsupportedOperation,
+                                    re.escape("Unable to open file %s in 'w-' mode. File already exists."
+                                              % self.path)):
+            with HDF5IO(self.path, manager=self.manager, mode='w-') as io:
+                pass
 
     def test_write_cache_spec(self):
         '''
         Round-trip test for writing spec and reading it back in
         '''
-        io = HDF5IO(self.path, manager=self.manager, mode="a")
-        io.write(self.container, cache_spec=True)
-        io.close()
-        f = File(self.path)
-        self.assertIn('specifications', f)
+        with HDF5IO(self.path, manager=self.manager, mode="a") as io:
+            io.write(self.container)
+        with File(self.path) as f:
+            self.assertIn('specifications', f)
+
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
         HDF5IO.load_namespaces(ns_catalog, self.path, namespaces=['core'])
         original_ns = self.manager.namespace_catalog.get_namespace('core')
@@ -123,6 +118,15 @@ class TestHDF5Writer(unittest.TestCase):
                 with self.subTest(test='cached spec preserved original spec'):
                     self.assertDictEqual(original_spec, cached_spec)
 
+    def test_write_no_cache_spec(self):
+        '''
+        Round-trip test for not writing spec
+        '''
+        with HDF5IO(self.path, manager=self.manager, mode="a") as io:
+            io.write(self.container, cache_spec=False)
+        with File(self.path) as f:
+            self.assertNotIn('specifications', f)
+
 
 class TestHDF5WriterWithInjectedFile(unittest.TestCase):
 
@@ -134,7 +138,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
 
     def setUp(self):
         self.manager = get_manager()
-        self.path = "test_pynwb_io_hdf5.h5"
+        self.path = "test_pynwb_io_hdf5_injected.nwb"
         self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
         self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         self.container = NWBFile('a test NWB File', 'TEST123',
@@ -170,53 +174,47 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
             attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        os.remove(self.path)
+        if os.path.exists(self.path):
+            os.remove(self.path)
 
     def test_nwbio(self):
-        fil = File(self.path)
-        io = HDF5IO(self.path, manager=self.manager, file=fil, mode="a")
-        io.write(self.container)
-        io.close()
-        f = File(self.path)
-        self.assertIn('acquisition', f)
-        self.assertIn('analysis', f)
-        self.assertIn('general', f)
-        self.assertIn('processing', f)
-        self.assertIn('file_create_date', f)
-        self.assertIn('identifier', f)
-        self.assertIn('session_description', f)
-        self.assertIn('session_start_time', f)
-        acq = f.get('acquisition')
-        self.assertIn('test_timeseries', acq)
+        with File(self.path) as fil:
+            with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
+                io.write(self.container)
+        with File(self.path) as f:
+            self.assertIn('acquisition', f)
+            self.assertIn('analysis', f)
+            self.assertIn('general', f)
+            self.assertIn('processing', f)
+            self.assertIn('file_create_date', f)
+            self.assertIn('identifier', f)
+            self.assertIn('session_description', f)
+            self.assertIn('session_start_time', f)
+            acq = f.get('acquisition')
+            self.assertIn('test_timeseries', acq)
 
     def test_write_clobber(self):
-        fil = File(self.path)
-        io = HDF5IO(self.path, manager=self.manager, file=fil, mode="a")
-        io.write(self.container)
-        io.close()
-        f = File(self.path)  # noqa: F841
+        with File(self.path) as fil:
+            with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
+                io.write(self.container)
 
-        if six.PY2:
-            assert_file_exists = IOError
-        elif six.PY3:
-            assert_file_exists = OSError
-
-        with self.assertRaises(assert_file_exists):
-            io = HDF5IO(self.path, manager=self.manager, mode='w-')
-            io.write(self.container)
-            io.close()
+        with self.assertRaisesRegex(UnsupportedOperation,
+                                    re.escape("Unable to open file %s in 'w-' mode. File already exists."
+                                              % self.path)):
+            with HDF5IO(self.path, manager=self.manager, mode='w-') as io:
+                pass
 
     def test_write_cache_spec(self):
         '''
         Round-trip test for writing spec and reading it back in
         '''
 
-        fil = File(self.path)
-        io = HDF5IO(self.path, manager=self.manager, file=fil, mode='a')
-        io.write(self.container, cache_spec=True)
-        io.close()
-        f = File(self.path)
-        self.assertIn('specifications', f)
+        with File(self.path) as fil:
+            with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
+                io.write(self.container)
+        with File(self.path) as f:
+            self.assertIn('specifications', f)
+
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
         HDF5IO.load_namespaces(ns_catalog, self.path, namespaces=['core'])
         original_ns = self.manager.namespace_catalog.get_namespace('core')
@@ -261,7 +259,7 @@ class TestAppend(unittest.TestCase):
         self.nwbfile.add_electrode(x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
         electrodes = self.nwbfile.create_electrode_table_region(region=[0], description='')
         e_series = ElectricalSeries(
-            name='test_device',
+            name='test_es',
             electrodes=electrodes,
             data=np.ones(shape=(100,)),
             rate=10000.0,
@@ -269,18 +267,22 @@ class TestAppend(unittest.TestCase):
         proc_inter.add_electrical_series(e_series)
 
         with NWBHDF5IO(self.path, mode='w') as io:
-            io.write(self.nwbfile)
+            io.write(self.nwbfile, cache_spec=False)
 
         with NWBHDF5IO(self.path, mode='a') as io:
             nwb = io.read()
-            elec = nwb.processing['test_proc_mod']['LFP'].electrical_series['test_device'].electrodes
-            ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=elec)
+            link_electrodes = nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes
+            ts2 = ElectricalSeries(name='timeseries2', data=[4., 5., 6.], rate=1.0, electrodes=link_electrodes)
             nwb.add_acquisition(ts2)
-            io.write(nwb)
+            io.write(nwb)  # also attempt to write same spec again
+            self.assertIs(nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes,
+                          nwb.acquisition['timeseries2'].electrodes)
 
         with NWBHDF5IO(self.path, mode='r') as io:
             nwb = io.read()
             np.testing.assert_equal(nwb.acquisition['timeseries2'].data[:], ts2.data)
+            self.assertIs(nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes,
+                          nwb.acquisition['timeseries2'].electrodes)
             errors = validate(io)
             for e in errors:
                 print('ERROR', e)
@@ -302,10 +304,10 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', [1, 2, 3], 'A', timestamps=H5DataIO(np.array([1., 2., 3.]), compression='gzip'))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
+            io.write(self.nwbfile, cache_spec=False)
         # confirm that the dataset was indeed compressed
-        infile = File(self.path, 'r')
-        self.assertEqual(infile['/acquisition/ts_name/timestamps'].compression, 'gzip')
+        with File(self.path, 'r') as f:
+            self.assertEqual(f['/acquisition/ts_name/timestamps'].compression, 'gzip')
 
     def test_write_dataset_custom_compress(self):
         a = H5DataIO(np.arange(30).reshape(5, 2, 3),
@@ -316,14 +318,14 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
-        infile = File(self.path, 'r')
-        dset = infile['/acquisition/ts_name/data']
-        self.assertTrue(np.all(dset[:] == a.data))
-        self.assertEqual(dset.compression, 'gzip')
-        self.assertEqual(dset.compression_opts, 5)
-        self.assertEqual(dset.shuffle, True)
-        self.assertEqual(dset.fletcher32, True)
+            io.write(self.nwbfile, cache_spec=False)
+        with File(self.path, 'r') as f:
+            dset = f['/acquisition/ts_name/data']
+            self.assertTrue(np.all(dset[:] == a.data))
+            self.assertEqual(dset.compression, 'gzip')
+            self.assertEqual(dset.compression_opts, 5)
+            self.assertEqual(dset.shuffle, True)
+            self.assertEqual(dset.fletcher32, True)
 
     def test_write_dataset_custom_chunks(self):
         a = H5DataIO(np.arange(30).reshape(5, 2, 3),
@@ -331,22 +333,22 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
-        infile = File(self.path, 'r')
-        dset = infile['/acquisition/ts_name/data']
-        self.assertTrue(np.all(dset[:] == a.data))
-        self.assertEqual(dset.chunks, (1, 1, 3))
+            io.write(self.nwbfile, cache_spec=False)
+        with File(self.path, 'r') as f:
+            dset = f['/acquisition/ts_name/data']
+            self.assertTrue(np.all(dset[:] == a.data))
+            self.assertEqual(dset.chunks, (1, 1, 3))
 
     def test_write_dataset_custom_fillvalue(self):
         a = H5DataIO(np.arange(20).reshape(5, 4), fillvalue=-1)
         ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
-        infile = File(self.path, 'r')
-        dset = infile['/acquisition/ts_name/data']
-        self.assertTrue(np.all(dset[:] == a.data))
-        self.assertEqual(dset.fillvalue, -1)
+            io.write(self.nwbfile, cache_spec=False)
+        with File(self.path, 'r') as f:
+            dset = f['/acquisition/ts_name/data']
+            self.assertTrue(np.all(dset[:] == a.data))
+            self.assertEqual(dset.fillvalue, -1)
 
     def test_write_dataset_datachunkiterator(self):
         a = np.arange(30).reshape(5, 2, 3)
@@ -355,10 +357,10 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', daiter, 'A', timestamps=np.arange(5))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
-        infile = File(self.path, 'r')
-        dset = infile['/acquisition/ts_name/data']
-        self.assertListEqual(dset[:].tolist(), a.tolist())
+            io.write(self.nwbfile, cache_spec=False)
+        with File(self.path, 'r') as f:
+            dset = f['/acquisition/ts_name/data']
+            self.assertListEqual(dset[:].tolist(), a.tolist())
 
     def test_write_dataset_datachunkiterator_with_compression(self):
         a = np.arange(30).reshape(5, 2, 3)
@@ -372,12 +374,12 @@ class TestH5DataIO(unittest.TestCase):
         ts = TimeSeries('ts_name', wrapped_daiter, 'A', timestamps=np.arange(5))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(self.nwbfile)
-        infile = File(self.path, 'r')
-        dset = infile['/acquisition/ts_name/data']
-        self.assertEqual(dset.shape, a.shape)
-        self.assertListEqual(dset[:].tolist(), a.tolist())
-        self.assertEqual(dset.compression, 'gzip')
-        self.assertEqual(dset.compression_opts, 5)
-        self.assertEqual(dset.shuffle, True)
-        self.assertEqual(dset.fletcher32, True)
+            io.write(self.nwbfile, cache_spec=False)
+        with File(self.path, 'r') as f:
+            dset = f['/acquisition/ts_name/data']
+            self.assertEqual(dset.shape, a.shape)
+            self.assertListEqual(dset[:].tolist(), a.tolist())
+            self.assertEqual(dset.compression, 'gzip')
+            self.assertEqual(dset.compression_opts, 5)
+            self.assertEqual(dset.shuffle, True)
+            self.assertEqual(dset.fletcher32, True)
