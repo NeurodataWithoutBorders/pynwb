@@ -118,6 +118,8 @@ class UnitsTests(unittest.TestCase):
         ut = Units()
         ut.add_unit(spike_times=[0, 1, 2])
         ut.add_unit(spike_times=[3, 4, 5])
+        np.testing.assert_array_equal(ut.get_unit_spike_times(0, (.5, 3)), [1, 2])
+        np.testing.assert_array_equal(ut.get_unit_spike_times(0, (-.5, 1.1)), [0, 1])
         self.assertTrue(all(ut.get_unit_spike_times(0) == np.array([0, 1, 2])))
         self.assertTrue(all(ut.get_unit_spike_times(1) == np.array([3, 4, 5])))
 

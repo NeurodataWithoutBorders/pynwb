@@ -229,7 +229,7 @@ class PlaneSegmentation(DynamicTable):
              'doc': 'the ImagingPlane this ROI applies to'},
             {'name': 'name', 'type': str, 'doc': 'name of PlaneSegmentation.', 'default': None},
             {'name': 'reference_images', 'type': (ImageSeries, list, dict, tuple), 'default': None,
-             'doc': 'One or more image stacks that the masks apply to (can be oneelement stack).'},
+             'doc': 'One or more image stacks that the masks apply to (can be one element stack).'},
             {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
              'default': None},
             {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},

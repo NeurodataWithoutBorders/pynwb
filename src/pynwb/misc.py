@@ -1,6 +1,7 @@
 import numpy as np
 from collections import Iterable
 import warnings
+from bisect import bisect
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
 
@@ -237,10 +238,23 @@ class Units(DynamicTable):
                     elec_col.table = self.__electrode_table
 
     @docval({'name': 'index', 'type': int,
-             'doc': 'the index of the unit in unit_ids to retrieve spike times for'})
+             'doc': 'the index of the unit in unit_ids to retrieve spike times for'},
+            {'name': 'in_interval', 'type': (tuple, list), 'doc': 'only return values within this interval',
+             'default': None, 'shape': (2,)})
     def get_unit_spike_times(self, **kwargs):
-        index = getargs('index', kwargs)
-        return np.asarray(self['spike_times'][index])
+        index, in_interval = getargs('index', 'in_interval', kwargs)
+        if in_interval is None:
+            return np.asarray(self['spike_times'][index])
+        else:
+            st = self['spike_times']
+            unit_start = 0 if index == 0 else st.data[index - 1]
+            unit_stop = st.data[index]
+            start_time, stop_time = in_interval
+
+            ind_start = bisect(st.target, start_time, unit_start, unit_stop)
+            ind_stop = bisect(st.target, stop_time, ind_start, unit_stop)
+
+            return np.asarray(st.target[ind_start:ind_stop])
 
     @docval({'name': 'index', 'type': int,
              'doc': 'the index of the unit in unit_ids to retrieve observation intervals for'})
