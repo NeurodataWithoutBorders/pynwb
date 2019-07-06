@@ -4,7 +4,7 @@ try:
 except ImportError:
     from collections import Iterable  # Python 2.7
 import warnings
-from bisect import bisect
+from bisect import bisect_left, bisect_right
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
 
@@ -256,8 +256,8 @@ class Units(DynamicTable):
             unit_stop = st.data[index]
             start_time, stop_time = in_interval
 
-            ind_start = bisect(st.target, start_time, unit_start, unit_stop)
-            ind_stop = bisect(st.target, stop_time, ind_start, unit_stop)
+            ind_start = bisect_left(st.target, start_time, unit_start, unit_stop)
+            ind_stop = bisect_right(st.target, stop_time, ind_start, unit_stop)
 
             return np.asarray(st.target[ind_start:ind_stop])
 
