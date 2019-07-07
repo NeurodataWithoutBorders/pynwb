@@ -90,10 +90,11 @@ class ElectricalSeries(TimeSeries):
             {'name': 'control_description', 'type': Iterable,
              'doc': 'Description of each control value', 'default': None},
             {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': 'volt'})
     def __init__(self, **kwargs):
-        name, electrodes, data = popargs('name', 'electrodes', 'data', kwargs)
-        super(ElectricalSeries, self).__init__(name, data, 'volt', **kwargs)
+        name, electrodes, data, unit = popargs('name', 'electrodes', 'data', 'unit', kwargs)
+        super(ElectricalSeries, self).__init__(name, data, unit, **kwargs)
         self.electrodes = electrodes
 
 
