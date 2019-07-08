@@ -254,17 +254,18 @@ groups:
       dtype: float
       default_value: 1.0
       doc: Scalar to multiply each element in data to convert it to the specified 'unit'.
+        If the data are stored in acquisition system units or other units
+        that require a conversion to be interpretable, multiply the data by 'conversion'
+        to convert the data to the specified 'unit'. e.g. if the data acquisition system
+        stores values in this object as pixels from x = -500 to 499, y = -500 to 499
+        that correspond to a 2 m x 2 m range, then the 'conversion' multiplier to get
+        from raw data acquisition pixel units to meters is 2/1000.
       required: false
     - name: unit
       dtype: text
-      default_value: Meter
+      default_value: meter
       doc: Base unit of measurement for working with the data. The default value
         is 'meter'.
-        If the data are stored in acquisition system units or other units
-        that require a conversion to be interpretable, the attribute 'conversion'
-        describes how to convert the data to the specified SI unit. e.g. if the data
-        are stored in millimeters, 'conversion' should be set to 1000 and 'unit'
-        should be set to 'meters'.
       required: false
   - name: reference_frame
     dtype: text

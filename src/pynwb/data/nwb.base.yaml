@@ -22,8 +22,8 @@ datasets:
 
 - neurodata_type_def: VectorData
   neurodata_type_inc: NWBData
-  doc: A dataset indexed by pointer (see VectorIndex). Together with VectorIndex,
-    this can encode a 2-dimensional ragged array in 1 dimension. The first vector
+  doc: A 1-dimensional dataset. This can be indexed using a VectorIndex to
+    encode a 2-dimensional ragged array in 1 dimension. The first vector
     is at VectorData[0:VectorIndex(0)+1]. The second vector is at
     VectorData[VectorIndex(0)+1:VectorIndex(1)+1]. And so on.
   attributes:
@@ -181,6 +181,13 @@ groups:
       dtype: float32
       default_value: 1.0
       doc: Scalar to multiply each element in data to convert it to the specified 'unit'.
+        If the data are stored in acquisition system units or other units
+        that require a conversion to be interpretable, multiply the data by 'conversion'
+        to convert the data to the specified 'unit'. e.g. if the data acquisition system
+        stores values in this object as signed 16-bit integers (int16 range
+        -32,768 to 32,767) that correspond to a 5V range (-2.5V to 2.5V), and the data
+        acquisition system gain is 8000X, then the 'conversion' multiplier to get from
+        raw data acquisition values to recorded volts is 2.5/32768/8000 = 9.5367e-9.
       required: false
     - name: resolution
       dtype: float32
@@ -191,15 +198,9 @@ groups:
       required: false
     - name: unit
       dtype: text
-      doc: Base unit of measurement for working with the data.
-        If the data are stored in acquisition system units or other units
-        that require a conversion to be interpretable, the attribute 'conversion'
-        describes how to convert the data to the specified SI unit. e.g. if the data
-        acquisition system stores values as signed 16-bit integers (int16 range
-        -32,768 to 32,767) that correspond to a 5V range (-2.5V to 2.5V), and the data
-        acquisition system gain is 8000X, then the 'conversion' multiplier to get from
-        raw data acquisition values to recorded volts is 2.5/32768/8000 = 9.5367e-9.
-        To access the data in units of 'unit', multiply 'data' by 'conversion'.
+      doc: Base unit of measurement for working with the data. Actual stored values are
+        not necessarily stored in these units. To access the data in these units,
+        multiply 'data' by 'conversion'.
   - name: starting_time
     dtype: float64
     doc: Timestamp of the first sample in seconds. When timestamps are uniformly
