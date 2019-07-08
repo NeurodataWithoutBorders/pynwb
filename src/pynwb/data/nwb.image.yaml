@@ -37,7 +37,7 @@ groups:
 - neurodata_type_def: ImageSeries
   neurodata_type_inc: TimeSeries
   doc: General image data that is common between acquisition and stimulus time series.
-    Sometimes the image data is stored in the HDF5 file in a raw format while other
+    Sometimes the image data is stored in the file in a raw format while other
     times it will be stored as an external image file in the host file system. The
     data field will either be binary data or empty. [frame][y][x] or [frame][z][y][x].
   attributes:
@@ -83,7 +83,7 @@ groups:
     doc: Paths or URLs to one or more external file(s). Field only present if format=external.
       This is only relevant if the image is stored in the file system as one
       or more image file(s). This field should NOT be used if the image is stored
-      in another NWB file and that file is HDF5 linked to this file.
+      in another NWB file and that file is linked to this file.
     quantity: '?'
     attributes:
     - name: starting_frame

@@ -319,7 +319,7 @@ groups:
   links:
   - name: clustering_interface
     target_type: Clustering
-    doc: HDF5 link to Clustering interface that was the source of the clustered data
+    doc: Link to Clustering interface that was the source of the clustered data
 
 - neurodata_type_def: Clustering
   neurodata_type_inc: NWBDataInterface

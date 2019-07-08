@@ -55,11 +55,11 @@ groups:
     doc: Data streams recorded from the system, including ephys, ophys, tracking,
       etc. This group should be read-only after the experiment is completed and
       timestamps are corrected to a common timebase. The data stored here may be links
-      to raw data stored in external HDF5 files. This will allow keeping bulky raw
+      to raw data stored in external NWB files. This will allow keeping bulky raw
       data out of the file while preserving the option of keeping some/all in the
       file. Acquired data includes tracking and experimental data streams
       (i.e., everything measured from the system). If bulky data is stored in the /acquisition
-      group, the data can exist in a separate HDF5 file that is linked to by the file
+      group, the data can exist in a separate NWB file that is linked to by the file
       being used for processing and analysis.
     groups:
     - neurodata_type_inc: NWBDataInterface
@@ -105,7 +105,7 @@ groups:
       stimuli, and stimuli can be re-used during an experiment. The stimulus group
       is organized so that one version of template stimuli can be stored and these
       be used multiple times. These templates can exist in the present file or can
-      be HDF5-linked to a remote library file.'
+      be linked to a remote library file.'
     groups:
     - name: presentation
       doc: Stimuli presented during the experiment.
