@@ -44,7 +44,9 @@ groups:
     doc: Excitation wavelength, in nm.
   - name: location
     dtype: text
-    doc: Location of stimulation site.
+    doc: Location of the stimulation site. Specify the area, layer, comments on estimation 
+      of area/layer, stereotaxic coordinates if in vivo, etc. Use standard atlas
+      names for anatomical regions when possible.
   links:
   - name: device
     target_type: Device

@@ -333,7 +333,9 @@ groups:
         - name: location
           neurodata_type_inc: VectorData
           dtype: ascii
-          doc: Location of the channel within the subject e.g. brain region.
+          doc: Location of the electrode (channel). Specify the area, layer, comments
+            on estimation of area/layer, stereotaxic coordinates if in vivo, etc. Use
+            standard atlas names for anatomical regions when possible.
           attributes:
           - name: description
             dtype: text

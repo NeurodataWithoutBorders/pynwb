@@ -250,7 +250,9 @@ groups:
     doc: Description of this electrode group.
   - name: location
     dtype: text
-    doc: Location of this electrode group.
+    doc: Location of electrode group. Specify the area, layer, comments on estimation 
+      of area/layer, stereotaxic coordinates if in vivo, etc. Use standard atlas
+      names for anatomical regions when possible.
   links:
   - name: device
     target_type: Device

@@ -186,7 +186,9 @@ groups:
     quantity: '?'
   - name: location
     dtype: text
-    doc: Area, layer, comments on estimation, stereotaxis coordinates if in vivo, etc.
+    doc: Location of the electrode. Specify the area, layer, comments on estimation 
+      of area/layer, stereotaxic coordinates if in vivo, etc. Use standard atlas
+      names for anatomical regions when possible.
     quantity: '?'
   - name: resistance
     dtype: text

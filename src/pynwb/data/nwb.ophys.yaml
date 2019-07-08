@@ -227,7 +227,9 @@ groups:
     doc: Calcium indicator.
   - name: location
     dtype: text
-    doc: Location of image plane.
+    doc: Location of the imaging plane. Specify the area, layer, comments on estimation 
+      of area/layer, stereotaxic coordinates if in vivo, etc. Use standard atlas
+      names for anatomical regions when possible.
   - name: manifold
     dtype: float32
     dims:
