@@ -33,15 +33,9 @@ groups:
     - name: unit
       dtype: text
       default_value: meter
-      doc: "Base unit of measurement for working with the data. The default value
-        is 'meter'. If the data are stored in acquisition system units or other units
-        that require a conversion to be interpretable, the attribute 'conversion'
-        describes how to convert the data to the specified SI unit. e.g. if the data
-        acquisition system stores values as signed 16-bit integers (int16 range
-        -32,768 to 32,767) that correspond to a 5V range (-2.5V to 2.5V), and the data
-        acquisition system gain is 8000X, then the 'conversion' multiplier to get from
-        raw data acquisition values to recorded volts is 2.5/32768/8000 = 9.5367e-9.
-        To access the data in units of 'unit', multiply 'data' by 'conversion'."
+      doc: Base unit of measurement for working with the data. The default value
+        is 'meter'. Actual stored values are not necessarily stored in these units.
+        To access the data in these units, multiply 'data' by 'conversion'.
       required: false
   - name: reference_frame
     dtype: text
