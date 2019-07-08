@@ -31,17 +31,10 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: volt
-      doc: "Base unit of measurement for working with the data. The default value
-        is 'volt'. If the data are stored in acquisition system units or other units
-        that require a conversion to be interpretable, the attribute 'conversion'
-        describes how to convert the data to the specified SI unit. e.g. if the data
-        acquisition system stores values as signed 16-bit integers (int16 range
-        -32,768 to 32,767) that correspond to a 5V range (-2.5V to 2.5V), and the data
-        acquisition system gain is 8000X, then the 'conversion' multiplier to get from
-        raw data acquisition values to recorded volts is 2.5/32768/8000 = 9.5367e-9.
-        To access the data in units of 'unit', multiply 'data' by 'conversion'."
-      required: false
+      value: volt
+      doc: Base unit of measurement for working with the data. This value is fixed to
+        'volt'. Actual stored values are not necessarily stored in these units. To
+        access the data in these units, multiply 'data' by 'conversion'.
   - name: electrodes
     neurodata_type_inc: DynamicTableRegion
     doc: DynamicTableRegion pointer to the electrodes that this time series was generated from.
@@ -79,17 +72,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: volt
-      doc: "Base unit of measurement for working with the data. The default value
-        is 'volt'. If the data are stored in acquisition system units or other units
-        that require a conversion to be interpretable, the attribute 'conversion'
-        describes how to convert the data to the specified SI unit. e.g. if the data
-        acquisition system stores values as signed 16-bit integers (int16 range
-        -32,768 to 32,767) that correspond to a 5V range (-2.5V to 2.5V), and the data
-        acquisition system gain is 8000X, then the 'conversion' multiplier to get from
-        raw data acquisition values to recorded volts is 2.5/32768/8000 = 9.5367e-9.
-        To access the data in units of 'unit', multiply 'data' by 'conversion'."
-      required: false
+      value: volt
+      doc: Unit of measurement for waveforms, which is fixed to 'volt'.
   - name: timestamps
     dtype: float64
     dims:
@@ -184,9 +168,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: second
+      value: second
       doc: Unit of measurement for event times, which is fixed to 'second'.
-      required: false
   links:
   - name: source_electricalseries
     target_type: ElectricalSeries

@@ -18,9 +18,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      default_value: watt
-      doc: Unit of measurement for data. Default value is 'watt'.
-      required: false
+      value: watt
+      doc: Unit of measurement for data, which is fixed to 'watt'.
   links:
   - name: site
     target_type: OptogeneticStimulusSite
