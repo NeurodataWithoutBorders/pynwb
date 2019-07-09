@@ -207,6 +207,18 @@ class TestSubjectIO(base.TestDataInterfaceIO):
         return nwbfile.subject
 
 
+class TestEmptySubjectIO(TestSubjectIO):
+    def setUpContainer(self):
+        return Subject()
+
+    def setUpBuilder(self):
+        return GroupBuilder('subject',
+                            attributes={'namespace': base.CORE_NAMESPACE,
+                                        'neurodata_type': 'Subject',
+                                        'help': 'Information about the subject'},
+                            datasets={})
+
+
 class TestEpochsRoundtrip(base.TestMapRoundTrip):
 
     def setUpContainer(self):
