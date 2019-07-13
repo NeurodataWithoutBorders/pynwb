@@ -98,8 +98,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      value: farad
-      doc: Unit of measurement for capacitance_fast, which is fixed to 'farad'.
+      value: farads
+      doc: Unit of measurement for capacitance_fast, which is fixed to 'farads'.
   - name: capacitance_slow
     dtype: float32
     doc: Slow capacitance, in farads.
@@ -107,8 +107,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      value: farad
-      doc: Unit of measurement for capacitance_fast, which is fixed to 'farad'.
+      value: farads
+      doc: Unit of measurement for capacitance_fast, which is fixed to 'farads'.
   - name: resistance_comp_bandwidth
     dtype: float32
     doc: Resistance compensation bandwidth, in hertz.
@@ -143,8 +143,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      value: farad
-      doc: Unit of measurement for whole_cell_capacitance_comp, which is fixed to 'farad'.
+      value: farads
+      doc: Unit of measurement for whole_cell_capacitance_comp, which is fixed to 'farads'.
   - name: whole_cell_series_resistance_comp
     dtype: float32
     doc: Whole cell series resistance compensation, in ohms.
@@ -152,8 +152,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      value: ohm
-      doc: Unit of measurement for whole_cell_series_resistance_comp, which is fixed to 'ohm'.
+      value: ohms
+      doc: Unit of measurement for whole_cell_series_resistance_comp, which is fixed to 'ohms'.
 
 - neurodata_type_def: VoltageClampStimulusSeries
   neurodata_type_inc: PatchClampSeries
@@ -186,7 +186,7 @@ groups:
     quantity: '?'
   - name: location
     dtype: text
-    doc: Location of the electrode. Specify the area, layer, comments on estimation 
+    doc: Location of the electrode. Specify the area, layer, comments on estimation
       of area/layer, stereotaxic coordinates if in vivo, etc. Use standard atlas
       names for anatomical regions when possible.
     quantity: '?'

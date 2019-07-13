@@ -18,8 +18,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      value: watt
-      doc: Unit of measurement for data, which is fixed to 'watt'.
+      value: watts
+      doc: Unit of measurement for data, which is fixed to 'watts'.
   links:
   - name: site
     target_type: OptogeneticStimulusSite
@@ -44,7 +44,7 @@ groups:
     doc: Excitation wavelength, in nm.
   - name: location
     dtype: text
-    doc: Location of the stimulation site. Specify the area, layer, comments on estimation 
+    doc: Location of the stimulation site. Specify the area, layer, comments on estimation
       of area/layer, stereotaxic coordinates if in vivo, etc. Use standard atlas
       names for anatomical regions when possible.
   links:

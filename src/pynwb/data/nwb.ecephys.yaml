@@ -31,9 +31,9 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      value: volt
+      value: volts
       doc: Base unit of measurement for working with the data. This value is fixed to
-        'volt'. Actual stored values are not necessarily stored in these units. To
+        'volts'. Actual stored values are not necessarily stored in these units. To
         access the data in these units, multiply 'data' by 'conversion'.
   - name: electrodes
     neurodata_type_inc: DynamicTableRegion
@@ -72,8 +72,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      value: volt
-      doc: Unit of measurement for waveforms, which is fixed to 'volt'.
+      value: volts
+      doc: Unit of measurement for waveforms, which is fixed to 'volts'.
   - name: timestamps
     dtype: float64
     dims:
@@ -91,8 +91,8 @@ groups:
       doc: Value is '1'
     - name: unit
       dtype: text
-      value: second
-      doc: Unit of measurement for timestamps, which is fixed to 'second'.
+      value: seconds
+      doc: Unit of measurement for timestamps, which is fixed to 'seconds'.
 
 - neurodata_type_def: FeatureExtraction
   neurodata_type_inc: NWBDataInterface
@@ -168,8 +168,8 @@ groups:
     attributes:
     - name: unit
       dtype: text
-      value: second
-      doc: Unit of measurement for event times, which is fixed to 'second'.
+      value: seconds
+      doc: Unit of measurement for event times, which is fixed to 'seconds'.
   links:
   - name: source_electricalseries
     target_type: ElectricalSeries
@@ -250,7 +250,7 @@ groups:
     doc: Description of this electrode group.
   - name: location
     dtype: text
-    doc: Location of electrode group. Specify the area, layer, comments on estimation 
+    doc: Location of electrode group. Specify the area, layer, comments on estimation
       of area/layer, stereotaxic coordinates if in vivo, etc. Use standard atlas
       names for anatomical regions when possible.
   links:

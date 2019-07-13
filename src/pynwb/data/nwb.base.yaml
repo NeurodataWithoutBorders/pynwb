@@ -213,8 +213,8 @@ groups:
       doc: Sampling rate, in Hz.
     - name: unit
       dtype: text
-      value: second
-      doc: Unit of measurement for time, which is fixed to 'second'.
+      value: seconds
+      doc: Unit of measurement for time, which is fixed to 'seconds'.
   - name: timestamps
     dtype: float64
     dims:
@@ -231,8 +231,8 @@ groups:
       doc: Value is '1'
     - name: unit
       dtype: text
-      value: second
-      doc: Unit of measurement for timestamps, which is fixed to 'second'.
+      value: seconds
+      doc: Unit of measurement for timestamps, which is fixed to 'seconds'.
   - name: control
     dtype: uint8
     dims:

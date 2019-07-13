@@ -227,7 +227,7 @@ groups:
     doc: Calcium indicator.
   - name: location
     dtype: text
-    doc: Location of the imaging plane. Specify the area, layer, comments on estimation 
+    doc: Location of the imaging plane. Specify the area, layer, comments on estimation
       of area/layer, stereotaxic coordinates if in vivo, etc. Use standard atlas
       names for anatomical regions when possible.
   - name: manifold
@@ -265,9 +265,9 @@ groups:
       required: false
     - name: unit
       dtype: text
-      default_value: meter
+      default_value: meters
       doc: Base unit of measurement for working with the data. The default value
-        is 'meter'.
+        is 'meters'.
       required: false
   - name: reference_frame
     dtype: text
