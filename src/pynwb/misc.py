@@ -218,10 +218,11 @@ class Units(DynamicTable):
              'default': None},
             {'name': 'electrode_group', 'type': 'ElectrodeGroup', 'default': None,
              'doc': 'the electrode group that each unit came from'},
-            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each unit',
+            {'name': 'waveform_mean', 'type': 'array_data',
+             'doc': 'the spike waveform mean for each unit. Shape is (time,) or (time, electrodes)',
              'default': None},
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
-             'doc': 'the spike waveform standard deviation for each unit'},
+             'doc': 'the spike waveform standard deviation for each unit. Shape is (time,) or (time, electrodes)'},
             {'name': 'id', 'type': int, 'default': None,
              'help': 'the id for each unit'},
             allow_extra=True)
