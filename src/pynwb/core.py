@@ -42,15 +42,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
     __nwbfields__ = tuple()
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': Container,
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
-    def __init__(self, **kwargs):
-        call_docval_func(super(NWBBaseType, self).__init__, kwargs)
-        self.__fields = dict()
-
     @ExtenderMeta.pre_init
     def __gather_nwbfields(cls, name, bases, classdict):
         '''
