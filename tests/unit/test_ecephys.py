@@ -1,5 +1,5 @@
 import unittest2 as unittest
-
+import re
 import numpy as np
 
 from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Clustering, EventWaveform,\
@@ -40,8 +40,18 @@ class ElectricalSeriesConstructor(unittest.TestCase):
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         ts1 = ElectricalSeries('test_ts1', [0, 1, 2, 3, 4, 5], region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         ts2 = ElectricalSeries('test_ts2', ts1, region, timestamps=ts1)
+        ts3 = ElectricalSeries('test_ts3', ts2, region, timestamps=ts2)
         self.assertEqual(ts2.data, [0, 1, 2, 3, 4, 5])
         self.assertEqual(ts2.timestamps, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        self.assertEqual(ts3.data, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(ts3.timestamps, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+
+    def test_invalid_data_shape(self):
+        table = make_electrode_table()
+        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
+        with self.assertRaisesRegex(ValueError, re.escape("incorrect shape for 'data' (got '(2, 2, 2, 2), expected "
+                                                          "'((None,), (None, None), (None, None, None))')")):
+            ElectricalSeries('test_ts1', np.ones((2,2,2,2)), region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
 
 
 class SpikeEventSeriesConstructor(unittest.TestCase):
