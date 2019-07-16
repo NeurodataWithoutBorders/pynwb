@@ -29,11 +29,11 @@ class TimeSeriesConstructor(unittest.TestCase):
 
     def test_init_data(self):
         dat = [0, 1, 2, 3, 4]
-        ts = TimeSeries('test_ts', dat, 'Volts', timestamps=[0.1, 0.2, 0.3, 0.4])
+        ts = TimeSeries('test_ts', dat, 'volts', timestamps=[0.1, 0.2, 0.3, 0.4])
         self.assertIs(ts.data, dat)
         self.assertEqual(ts.conversion, 1.0)
         self.assertEqual(ts.resolution, 0.0)
-        self.assertEqual(ts.unit, 'Volts')
+        self.assertEqual(ts.unit, 'volts')
 
     def test_init_timestamps(self):
         dat = [0, 1, 2, 3, 4]
@@ -41,10 +41,10 @@ class TimeSeriesConstructor(unittest.TestCase):
         ts = TimeSeries('test_ts', dat, 'unit', timestamps=tstamps)
         self.assertIs(ts.timestamps, tstamps)
         self.assertEqual(ts.interval, 1)
-        self.assertEqual(ts.time_unit, "Seconds")
+        self.assertEqual(ts.time_unit, "seconds")
 
     def test_init_rate(self):
         ts = TimeSeries('test_ts', list(), 'unit', starting_time=0.0, rate=1.0)
         self.assertEqual(ts.starting_time, 0.0)
         self.assertEqual(ts.rate, 1.0)
-        self.assertEqual(ts.time_unit, "Seconds")
+        self.assertEqual(ts.time_unit, "seconds")

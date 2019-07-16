@@ -79,7 +79,7 @@ class EventDetectionConstructor(unittest.TestCase):
         self.assertEqual(eD.source_electricalseries, eS)
         self.assertEqual(eD.source_idx, (1, 2, 3))
         self.assertEqual(eD.times, (0.1, 0.2, 0.3))
-        self.assertEqual(eD.unit, 'Seconds')
+        self.assertEqual(eD.unit, 'seconds')
 
 
 class EventWaveformConstructor(unittest.TestCase):

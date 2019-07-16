@@ -45,7 +45,7 @@ class TestHDF5Writer(unittest.TestCase):
                                                                                'conversion': 1.0,
                                                                                'resolution': 0.1}),
                                             'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                         attributes={'unit': 'Seconds',
+                                                                         attributes={'unit': 'seconds',
                                                                                      'interval': 1})})
         self.builder = GroupBuilder(
             'root', groups={'acquisition': GroupBuilder('acquisition', groups={'test_timeseries': ts_builder}),
@@ -155,7 +155,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
                                                                                'conversion': 1.0,
                                                                                'resolution': 0.1}),
                                             'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                         attributes={'unit': 'Seconds',
+                                                                         attributes={'unit': 'seconds',
                                                                                      'interval': 1})})
         self.builder = GroupBuilder(
             'root', groups={'acquisition': GroupBuilder('acquisition', groups={'test_timeseries': ts_builder}),
