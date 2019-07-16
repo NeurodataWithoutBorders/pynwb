@@ -35,6 +35,14 @@ class ElectricalSeriesConstructor(unittest.TestCase):
         self.assertEqual(eS.data, data)
         self.assertEqual(eS.timestamps, ts)
 
+    def test_link(self):
+        table = make_electrode_table()
+        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
+        ts1 = ElectricalSeries('test_ts1', [0, 1, 2, 3, 4, 5], region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = ElectricalSeries('test_ts2', ts1, region, timestamps=ts1)
+        self.assertEqual(ts2.data, [0, 1, 2, 3, 4, 5])
+        self.assertEqual(ts2.timestamps, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+
 
 class SpikeEventSeriesConstructor(unittest.TestCase):
     def test_init(self):
