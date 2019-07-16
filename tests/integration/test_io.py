@@ -354,7 +354,7 @@ class TestH5DataIO(unittest.TestCase):
         a = np.arange(30).reshape(5, 2, 3)
         aiter = iter(a)
         daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
-        ts = TimeSeries('ts_name', daiter, 'A', timestamps=np.arange(5))
+        ts = TimeSeries('ts_name', daiter, 'A', timestamps=daiter)
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile, cache_spec=False)
