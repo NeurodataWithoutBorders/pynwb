@@ -63,7 +63,7 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(tPS.external_file, ['external_file'])
         self.assertEqual(tPS.starting_frame, [1, 2, 3])
         self.assertEqual(tPS.format, 'tiff')
-        self.assertEqual(tPS.dimension, [np.nan])
+        self.assertIsNone(tPS.dimension)
 
     def test_args(self):
         oc = OpticalChannel('test_name', 'description', 500.)
