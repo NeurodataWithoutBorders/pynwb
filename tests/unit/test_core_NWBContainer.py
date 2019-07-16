@@ -3,6 +3,7 @@ import unittest2 as unittest
 from pynwb.core import NWBContainer
 from hdmf.utils import docval, call_docval_func
 
+
 class MyTestClass(NWBContainer):
 
     __nwbfields__ = ('prop1', 'prop2')

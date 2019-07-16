@@ -51,7 +51,7 @@ class ElectricalSeriesConstructor(unittest.TestCase):
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
         with self.assertRaisesRegex(ValueError, re.escape("incorrect shape for 'data' (got '(2, 2, 2, 2), expected "
                                                           "'((None,), (None, None), (None, None, None))')")):
-            ElectricalSeries('test_ts1', np.ones((2,2,2,2)), region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+            ElectricalSeries('test_ts1', np.ones((2, 2, 2, 2)), region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
 
 
 class SpikeEventSeriesConstructor(unittest.TestCase):
