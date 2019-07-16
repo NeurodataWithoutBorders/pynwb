@@ -99,7 +99,7 @@ class TimeSeries(NWBDataInterface):
                      "control",
                      "control_description")
 
-    __time_unit = "Seconds"
+    __time_unit = "seconds"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
@@ -158,7 +158,7 @@ class TimeSeries(NWBDataInterface):
             if starting_time is not None:
                 raise ValueError('Specifying starting_time and timestamps is not supported.')
             self.fields['timestamps'] = timestamps
-            self.timestamps_unit = 'Seconds'
+            self.timestamps_unit = self.__time_unit
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
                 timestamps.__add_link('timestamp_link', self)
@@ -166,7 +166,7 @@ class TimeSeries(NWBDataInterface):
             self.rate = rate
             if starting_time is not None:
                 self.starting_time = starting_time
-                self.starting_time_unit = 'Seconds'
+                self.starting_time_unit = self.__time_unit
             else:
                 self.starting_time = 0.0
         else:

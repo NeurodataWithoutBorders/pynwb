@@ -93,7 +93,7 @@ class ElectricalSeries(TimeSeries):
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
         name, electrodes, data = popargs('name', 'electrodes', 'data', kwargs)
-        super(ElectricalSeries, self).__init__(name, data, 'volt', **kwargs)
+        super(ElectricalSeries, self).__init__(name, data, 'volts', **kwargs)
         self.electrodes = electrodes
 
 
@@ -182,7 +182,7 @@ class EventDetection(NWBDataInterface):
         self.source_electricalseries = source_electricalseries
         self.source_idx = source_idx
         self.times = times
-        self.unit = 'Seconds'
+        self.unit = 'seconds'
 
 
 @register_class('EventWaveform', CORE_NAMESPACE)

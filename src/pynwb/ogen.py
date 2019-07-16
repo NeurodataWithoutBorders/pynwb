@@ -50,7 +50,6 @@ class OptogeneticSeries(TimeSeries):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'Value is the string "Watt".', 'default': 'Watt'},
             {'name': 'site', 'type': OptogeneticStimulusSite, 'doc': 'The site to which this stimulus was applied.'},
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference \
             (in specified unit) between values in data', 'default': _default_resolution},
@@ -73,7 +72,6 @@ class OptogeneticSeries(TimeSeries):
             {'name': 'parent', 'type': 'NWBContainer',
              'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
     def __init__(self, **kwargs):
-        site = popargs('site', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(OptogeneticSeries, self).__init__, kwargs)
-        super(OptogeneticSeries, self).__init__(*pargs, **pkwargs)
+        name, data, site = popargs('name', 'data', 'site', kwargs)
+        super(OptogeneticSeries, self).__init__(name, data, 'watts', **kwargs)
         self.site = site
