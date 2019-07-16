@@ -1,48 +1,34 @@
 import unittest2 as unittest
 
 from pynwb.core import NWBContainer
-
+from hdmf.utils import docval, call_docval_func
 
 class MyTestClass(NWBContainer):
 
-    def __init__(self, name, parent=None):
-        super(MyTestClass, self).__init__(name, parent=parent)
+    __nwbfields__ = ('prop1', 'prop2')
 
-    def basic_add(self, **kwargs):
-        return kwargs
-
-    def basic_add2(self, **kwargs):
-        return kwargs
-
-    def basic_add2_kw(self, **kwargs):
-        return kwargs
-
-
-class MyTestSubclass(MyTestClass):
-
-    def basic_add(self, **kwargs):
-        return kwargs
-
-    def basic_add2_kw(self, **kwargs):
-        return kwargs
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this container'})
+    def __init__(self, **kwargs):
+        call_docval_func(super(MyTestClass, self).__init__, kwargs)
+        self.prop1 = 'test1'
 
 
 class TestNWBContainer(unittest.TestCase):
 
     def test_constructor(self):
-        """Test that constructor properly sets parent
+        """Test constructor
         """
-        parent_obj = MyTestClass('obj1')
-        child_obj = MyTestSubclass('obj2', parent=parent_obj)
-        self.assertIs(child_obj.parent, parent_obj)
+        obj = MyTestClass('obj1')
+        self.assertEqual(obj.name, 'obj1')
+        obj.prop2 = 'test2'
 
-    def test_set_parent_parent(self):
-        """Test that parent setter  properly sets parent
+    def test_nwbfields(self):
+        """Test that getters and setters work for nwbfields
         """
-        parent_obj = MyTestClass('obj1')
-        child_obj = MyTestSubclass('obj2')
-        child_obj.parent = parent_obj
-        self.assertIs(child_obj.parent, parent_obj)
+        obj = MyTestClass('obj1')
+        obj.prop2 = 'test2'
+        self.assertEqual(obj.prop1, 'test1')
+        self.assertEqual(obj.prop2, 'test2')
 
 
 if __name__ == '__main__':
