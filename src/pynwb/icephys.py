@@ -110,9 +110,9 @@ class CurrentClampSeries(PatchClampSeries):
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'unit', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
-            {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp'},  # required
-            {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm'},  # required
-            {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad'},  # required
+            {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': None},
+            {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
+            {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number'))
     def __init__(self, **kwargs):
@@ -181,13 +181,13 @@ class VoltageClampSeries(PatchClampSeries):
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'unit', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
-            {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad'},  # required
-            {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad'},  # required
-            {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz'},  # required
-            {'name': 'resistance_comp_correction', 'type': float, 'doc': 'Unit: %'},  # required
-            {'name': 'resistance_comp_prediction', 'type': float, 'doc': 'Unit: %'},  # required
-            {'name': 'whole_cell_capacitance_comp', 'type': float, 'doc': 'Unit: Farad'},  # required
-            {'name': 'whole_cell_series_resistance_comp', 'type': float, 'doc': 'Unit: Ohm'},  # required
+            {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz', 'default': None},
+            {'name': 'resistance_comp_correction', 'type': float, 'doc': 'Unit: %', 'default': None},
+            {'name': 'resistance_comp_prediction', 'type': float, 'doc': 'Unit: %', 'default': None},
+            {'name': 'whole_cell_capacitance_comp', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'whole_cell_series_resistance_comp', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number'))
     def __init__(self, **kwargs):
