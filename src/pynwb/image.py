@@ -85,15 +85,15 @@ class IndexSeries(TimeSeries):
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},  # required
+            *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
              'doc': 'HDF5 link to TimeSeries containing images that are indexed.'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data, unit = popargs('name', 'data', 'unit', kwargs)
+        name, data = popargs('name', 'data', kwargs)
         indexed_timeseries = popargs('indexed_timeseries', kwargs)
-        super(IndexSeries, self).__init__(name, data, unit, **kwargs)
+        super(IndexSeries, self).__init__(name, data, **kwargs)
         self.indexed_timeseries = indexed_timeseries
 
 
