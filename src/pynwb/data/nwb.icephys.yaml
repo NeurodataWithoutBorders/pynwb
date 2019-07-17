@@ -74,18 +74,15 @@ groups:
   - name: bias_current
     dtype: float32
     value: 0.0
-    doc: Bias current, in amps.
-    quantity: '?'
+    doc: Bias current, in amps, fixed to 0.0.
   - name: bridge_balance
     dtype: float32
     value: 0.0
-    doc: Bridge balance, in ohms.
-    quantity: '?'
+    doc: Bridge balance, in ohms, fixed to 0.0.
   - name: capacitance_compensation
     dtype: float32
     value: 0.0
-    doc: Capacitance compensation, in farads.
-    quantity: '?'
+    doc: Capacitance compensation, in farads, fixed to 0.0.
 
 - neurodata_type_def: CurrentClampStimulusSeries
   neurodata_type_inc: PatchClampSeries
