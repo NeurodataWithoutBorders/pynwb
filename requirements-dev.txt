@@ -1,14 +1,8 @@
 codecov==2.0.15
-configparser==3.7.4
 coverage==4.5.3
 flake8==3.7.8
-mccabe==0.6.1
-py==1.8.0
-pycodestyle==2.5.0
-pyflakes==2.1.1
 pytz==2019.1
 tox==3.13.2
 traceback2==1.4.0
 unittest2==1.1.0
-virtualenv==16.6.2
 -r requirements.txt
