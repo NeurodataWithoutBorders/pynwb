@@ -131,6 +131,12 @@ groups:
     - null
     - null
     doc: Data decomposed into frequency bands.
+    - name: unit
+      dtype: text
+      default_value: no unit
+      doc: Base unit of measurement for working with the data. Actual stored values are
+        not necessarily stored in these units. To access the data in these units,
+        multiply 'data' by 'conversion'.
   - name: metric
     dtype: text
     doc: The metric used, e.g. phase, amplitude, power.
