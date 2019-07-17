@@ -131,6 +131,7 @@ groups:
     - null
     - null
     doc: Data decomposed into frequency bands.
+    attributes:
     - name: unit
       dtype: text
       default_value: no unit
