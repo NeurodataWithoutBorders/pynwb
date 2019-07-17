@@ -143,9 +143,7 @@ class OpticalSeries(ImageSeries):
     _help = "Time-series image stack for optical recording or stimulus."
 
     @docval(*get_docval(ImageSeries.__init__, 'name', 'data'),  # required
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},  # required
-            {'name': 'format', 'type': str,  # required
-             'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
+            *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},  # required
             {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
@@ -156,12 +154,9 @@ class OpticalSeries(ImageSeries):
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
                         'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data, unit, external_file, starting_frame, format = popargs(
-            'name', 'data', 'unit', 'external_file', 'starting_frame', 'format', kwargs)
+        name, data, = popargs('name', 'data', kwargs)
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
-        super(OpticalSeries, self).__init__(name=name, data=data, unit=unit,
-                                            external_file=external_file, starting_frame=starting_frame,
-                                            format=format, **kwargs)
+        super(OpticalSeries, self).__init__(name, data, **kwargs)
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
