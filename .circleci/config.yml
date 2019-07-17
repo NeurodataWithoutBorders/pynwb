@@ -163,7 +163,7 @@ jobs:
 
   miniconda27:
     docker:
-      - image: continuumio/miniconda:4.3.14
+      - image: continuumio/miniconda:4.6.14
     environment:
       - TEST_TOX_ENV: "py27"
       - BUILD_TOX_ENV: "build-py27"
