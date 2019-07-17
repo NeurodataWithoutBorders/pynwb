@@ -33,9 +33,7 @@ class AnnotationSeries(TimeSeries):
             *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description'))
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
-        super(AnnotationSeries, self).__init__(name, data, 'n/a',
-                                               resolution=-1.0, conversion=1.0,
-                                               timestamps=timestamps, **kwargs)
+        super(AnnotationSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
     @docval({'name': 'time', 'type': float, 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
@@ -113,14 +111,9 @@ class IntervalSeries(TimeSeries):
             *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
-        unit = 'n/a'
         self.__interval_timestamps = timestamps
         self.__interval_data = data
-        super(IntervalSeries, self).__init__(name, data, unit,
-                                             timestamps=timestamps,
-                                             resolution=-1.0,
-                                             conversion=1.0,
-                                             **kwargs)
+        super(IntervalSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
     @docval({'name': 'start', 'type': float, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'stop', 'type': float, 'doc': 'The name of this TimeSeries dataset'})
