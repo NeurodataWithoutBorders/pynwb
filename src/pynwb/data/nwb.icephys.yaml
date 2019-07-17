@@ -70,6 +70,22 @@ groups:
       are off
     doc: Value is 'Voltage from intracellular recordings when all current and amplifier
       settings are off'
+  datasets:
+  - name: bias_current
+    dtype: float32
+    value: 0.0
+    doc: Bias current, in amps.
+    quantity: '?'
+  - name: bridge_balance
+    dtype: float32
+    value: 0.0
+    doc: Bridge balance, in ohms.
+    quantity: '?'
+  - name: capacitance_compensation
+    dtype: float32
+    value: 0.0
+    doc: Capacitance compensation, in farads.
+    quantity: '?'
 
 - neurodata_type_def: CurrentClampStimulusSeries
   neurodata_type_inc: PatchClampSeries
