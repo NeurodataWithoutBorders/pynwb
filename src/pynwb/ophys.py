@@ -290,7 +290,7 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'shape': ((None, ), (None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},  # required
+            *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'rois', 'type': DynamicTableRegion,  # required
              'doc': 'a table region corresponding to the ROIs that were used to generate this data'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
