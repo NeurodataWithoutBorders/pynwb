@@ -26,7 +26,6 @@ references:
           name: Run the tests
           command: |
             . ../venv/bin/activate
-            find / libpython2.7.so.1.0
             pip install tox
             tox -e $TEST_TOX_ENV
           # Install is expected to be quick. Increase timeout in case there are some network issues.
@@ -73,6 +72,8 @@ references:
             conda config --add channels conda-forge
             conda install virtualenv
             conda install tox
+            find / "libpython2.7.so.1.0"
+            export LD_LIBRARY_PATH=/opt/conda/lib/:$LD_LIBRARY_PATH
       - run:
           name: Run the tests
           command: |
