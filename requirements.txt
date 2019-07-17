@@ -1,12 +1,8 @@
-certifi==2019.6.16
 chardet==3.0.4
 h5py==2.9.0
 hdmf==1.0.5
-idna==2.8
 numpy==1.16.4
 pandas==0.24.2
 python-dateutil==2.8.0
-requests==2.22.0
 ruamel.yaml==0.15.99
 six==1.12.0
-urllib3==1.25.3
