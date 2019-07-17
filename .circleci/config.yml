@@ -26,7 +26,7 @@ references:
           name: Run the tests
           command: |
             . ../venv/bin/activate
-            locate libpython2.7.so.1.0
+            find / libpython2.7.so.1.0
             pip install tox
             tox -e $TEST_TOX_ENV
           # Install is expected to be quick. Increase timeout in case there are some network issues.
