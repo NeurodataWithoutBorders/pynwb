@@ -113,19 +113,16 @@ class ImageMaskSeries(ImageSeries):
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},  # required
+            *get_docval(ImageSeries.__init__, 'unit'),
             {'name': 'masked_imageseries', 'type': ImageSeries,  # required
              'doc': 'Link to ImageSeries that mask is applied to.'},
             *get_docval(ImageSeries.__init__, 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
                         'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data, unit, external_file, starting_frame, format = popargs(
-            'name', 'data', 'unit', 'external_file', 'starting_frame', 'format', kwargs)
+        name, data = popargs('name', 'data', kwargs)
         masked_imageseries = popargs('masked_imageseries', kwargs)
-        super(ImageMaskSeries, self).__init__(name=name, data=data, unit=unit,
-                                              external_file=external_file,
-                                              starting_frame=starting_frame, format=format, **kwargs)
+        super(ImageMaskSeries, self).__init__(name, data, **kwargs)
         self.masked_imageseries = masked_imageseries
 
 
