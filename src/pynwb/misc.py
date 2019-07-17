@@ -222,7 +222,7 @@ class DecompositionSeries(TimeSeries):
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'doc': 'dims: num_times * num_channels * num_bands', 'shape': (None, None, None)},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset'},  # required
+            *get_docval(TimeSeries.__init__, 'description'),
             {'name': 'metric', 'type': str,  # required
              'doc': "metric of analysis. recommended: 'phase', 'amplitude', 'power'"},
             {'name': 'unit', 'type': str, 'doc': 'SI unit of measurement', 'default': 'no unit'},
