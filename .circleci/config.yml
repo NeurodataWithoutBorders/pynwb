@@ -72,7 +72,6 @@ references:
             conda config --add channels conda-forge
             conda install virtualenv
             conda install tox
-            find / "libpython2.7.so.1.0"
             export LD_LIBRARY_PATH=/opt/conda/lib/:$LD_LIBRARY_PATH
       - run:
           name: Run the tests
