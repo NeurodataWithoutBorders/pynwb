@@ -70,7 +70,7 @@ references:
           command: |
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
-            conda install virtualenv==16.6.1
+            conda install virtualenv==16.0.0-py27_1000
             conda install tox
             export LD_LIBRARY_PATH=/opt/conda/lib/:$LD_LIBRARY_PATH
       - run:
