@@ -247,8 +247,8 @@ class NWBZarrIO(_ZarrIO):
             {'name': 'comm', 'type': 'Intracomm',
              'doc': 'the MPI communicator to use for parallel I/O', 'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
+        path, mode, manager, extensions, load_namespaces, comm =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'comm', kwargs)
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -268,7 +268,7 @@ class NWBZarrIO(_ZarrIO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBZarrIO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
+        super(NWBZarrIO, self).__init__(path, manager=manager, mode=mode, comm=comm)
 
 
 from . import io as __io  # noqa: F401,E402
