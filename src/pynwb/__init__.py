@@ -13,6 +13,7 @@ from hdmf.spec import NamespaceCatalog  # noqa: E402
 from hdmf.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
 from hdmf.backends.io import HDMFIO  # noqa: E402
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
+from hdmf.backends.zarr.zarr_tools import ZarrIO as _ZarrIO
 from hdmf.validate import ValidatorMap  # noqa: E402
 from hdmf.build import BuildManager  # noqa: E402
 
@@ -230,6 +231,44 @@ class NWBHDF5IO(_HDF5IO):
             elif manager is None:
                 manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
+
+class NWBZarrIO(_ZarrIO):
+
+    @docval({'name': 'path', 'type': str, 'doc': 'the path to the Zarr file'},
+            {'name': 'mode', 'type': str,
+             'doc': 'the mode to open the Zarr file with, one of ("w", "r", "r+", "a", "w-")'},
+            {'name': 'load_namespaces', 'type': bool,
+             'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
+             'default': False},
+            {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
+            {'name': 'extensions', 'type': (str, TypeMap, list),
+              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
+              to namespaces and TypeMaps', 'default': None},
+            {'name': 'comm', 'type': 'Intracomm',
+             'doc': 'the MPI communicator to use for parallel I/O', 'default': None})
+    def __init__(self, **kwargs):
+        path, mode, manager, extensions, load_namespaces, file_obj, comm =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
+        if load_namespaces:
+            if manager is not None:
+                warn("loading namespaces from file - ignoring 'manager'")
+            if extensions is not None:
+                warn("loading namespaces from file - ignoring 'extensions' argument")
+            # namespaces are not loaded when creating an NWBHDF5IO object in write mode
+            if 'w' in mode or mode == 'x':
+                raise ValueError("cannot load namespaces from file when writing to it")
+
+            tm = get_type_map()
+            super(NWBZarrIO, self).load_namespaces(tm, path)
+            manager = BuildManager(tm)
+        else:
+            if manager is not None and extensions is not None:
+                raise ValueError("'manager' and 'extensions' cannot be specified together")
+            elif extensions is not None:
+                manager = get_manager(extensions=extensions)
+            elif manager is None:
+                manager = get_manager()
+        super(NWBZarrIO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
 
 
 from . import io as __io  # noqa: F401,E402
