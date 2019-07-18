@@ -11,6 +11,8 @@ from pynwb import NWBContainer, get_manager, NWBFile, NWBData, NWBHDF5IO, NWBZar
 from hdmf.backends.hdf5 import HDF5IO
 from hdmf.backends.zarr import ZarrIO
 
+from zarr.core import Array as ZarrArray
+
 CORE_NAMESPACE = 'core'
 
 container_tests = dict()
@@ -93,6 +95,8 @@ class TestMapNWBContainer(unittest.TestCase):
                 f2 = getattr(container2, nwbfield)
                 if isinstance(f1, h5py.Dataset):
                     f1 = f1[()]
+                if isinstance(f1, ZarrArray):
+                    f1 = f1[:]
                 if isinstance(f1, (tuple, list, np.ndarray)):
                     if len(f1) > 0:
                         if isinstance(f1[0], NWBContainer):
@@ -196,6 +200,15 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.assertContainerEqual(self.read_container, self.container)
         self.validate()
 
+    def validate(self):
+        # validate created file
+        if os.path.exists(self.filename):
+            with NWBHDF5IO(self.filename, mode='r') as io:
+                errors = pynwb_validate(io)
+                if errors:
+                    for err in errors:
+                        raise Exception(err)
+
     def roundtripContainerZarrIO(self, cache_spec=False):
         description = 'a file to test writing and reading a %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
@@ -205,33 +218,35 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.writer = ZarrIO(self.filename, manager=get_manager(), mode='w')
         self.writer.write(nwbfile, cache_spec=cache_spec)
         self.writer.close()
-        #self.reader = ZarrIO(self.filename, manager=get_manager(), mode='r')
-        #self.read_nwbfile = self.reader.read()
+        self.reader = ZarrIO(self.filename, manager=get_manager(), mode='r')
+        self.read_nwbfile = self.reader.read()
 
-        #try:
-        #    tmp = self.getContainer(self.read_nwbfile)
-        #    return tmp
-        #except Exception as e:
-        #    self.reader.close()
-        #    self.reader = None
-        #    raise e
+        try:
+            tmp = self.getContainer(self.read_nwbfile)
+            return tmp
+        except Exception as e:
+            self.reader.close()
+            self.reader = None
+            raise e
 
     def test_zarr_roundtrip(self):
         self.read_container = self.roundtripContainerZarrIO()
         # make sure we get a completely new object
-        #str(self.container)  # added as a test to make sure printing works
-        #self.assertNotEqual(id(self.container), id(self.read_container))
-        #self.assertContainerEqual(self.read_container, self.container)
-        #self.validate()
+        str(self.container)  # added as a test to make sure printing works
+        self.assertNotEqual(id(self.container), id(self.read_container))
+        self.assertContainerEqual(self.read_container, self.container)
+        self.validate_zarr()
 
-    def validate(self):
+    def validate_zarr(self):
         # validate created file
         if os.path.exists(self.filename):
-            with NWBHDF5IO(self.filename, mode='r') as io:
-                errors = pynwb_validate(io)
-                if errors:
-                    for err in errors:
-                        raise Exception(err)
+            with NWBZarrIO(self.filename, mode='r') as io:
+                # TODO need to update the validator to support Zarr. For now well just read the file instead
+                #errors = pynwb_validate(io)
+                #if errors:
+                #    for err in errors:
+                #        raise Exception(err)
+                temp = io.read()
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
