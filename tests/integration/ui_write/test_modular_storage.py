@@ -22,6 +22,10 @@ class TestTimeSeriesModular(base.TestMapRoundTrip):
             os.remove(path)
 
     def setUp(self):
+        test_case_name = str(self.id()).split(".")[-1]
+        if test_case_name == "test_zarr_roundtrip":
+            self.skipTest("Modular storage testing does not apply to ZarrIO")
+
         self.__manager = get_manager()
         self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
 
