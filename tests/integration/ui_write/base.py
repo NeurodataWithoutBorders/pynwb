@@ -4,10 +4,12 @@ from dateutil.tz import tzlocal, tzutc
 import os
 import numpy as np
 import h5py
+import shutil
 import numpy.testing as npt
 
-from pynwb import NWBContainer, get_manager, NWBFile, NWBData, NWBHDF5IO, validate as pynwb_validate
+from pynwb import NWBContainer, get_manager, NWBFile, NWBData, NWBHDF5IO, NWBZarrIO, validate as pynwb_validate
 from hdmf.backends.hdf5 import HDF5IO
+from hdmf.backends.zarr import ZarrIO
 
 CORE_NAMESPACE = 'core'
 
@@ -147,7 +149,11 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
         self.create_date = datetime(2018, 4, 15, 12, tzinfo=tzlocal())
         self.container_type = self.container.__class__.__name__
-        self.filename = 'test_%s.nwb' % self.container_type
+        test_case_name = str(self.id()).split(".")[-1]
+        if test_case_name == "test_zarr_roundtrip":
+            self.filename = 'test_zarrio_%s' % self.container_type
+        else:
+            self.filename = 'test_%s.nwb' % self.container_type
         self.writer = None
         self.reader = None
 
@@ -157,7 +163,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
         if self.reader is not None:
             self.reader.close()
         if os.path.exists(self.filename) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
-            os.remove(self.filename)
+            if os.path.isfile(self.filename):
+                os.remove(self.filename)
+            elif os.path.isdir(self.filename):
+                shutil.rmtree(self.filename)
 
     def roundtripContainer(self, cache_spec=False):
         description = 'a file to test writing and reading a %s' % self.container_type
@@ -186,6 +195,34 @@ class TestMapRoundTrip(TestMapNWBContainer):
         self.assertNotEqual(id(self.container), id(self.read_container))
         self.assertContainerEqual(self.read_container, self.container)
         self.validate()
+
+    def roundtripContainerZarrIO(self, cache_spec=False):
+        description = 'a file to test writing and reading a %s' % self.container_type
+        identifier = 'TEST_%s' % self.container_type
+        nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
+        self.addContainer(nwbfile)
+
+        self.writer = ZarrIO(self.filename, manager=get_manager(), mode='w')
+        self.writer.write(nwbfile, cache_spec=cache_spec)
+        self.writer.close()
+        #self.reader = ZarrIO(self.filename, manager=get_manager(), mode='r')
+        #self.read_nwbfile = self.reader.read()
+
+        #try:
+        #    tmp = self.getContainer(self.read_nwbfile)
+        #    return tmp
+        #except Exception as e:
+        #    self.reader.close()
+        #    self.reader = None
+        #    raise e
+
+    def test_zarr_roundtrip(self):
+        self.read_container = self.roundtripContainerZarrIO()
+        # make sure we get a completely new object
+        #str(self.container)  # added as a test to make sure printing works
+        #self.assertNotEqual(id(self.container), id(self.read_container))
+        #self.assertContainerEqual(self.read_container, self.container)
+        #self.validate()
 
     def validate(self):
         # validate created file
