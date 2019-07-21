@@ -253,21 +253,33 @@ groups:
     neurodata_type_inc: VectorData
     dtype: float
     dims:
-    - num_units
-    - num_samples
+    - - num_units
+      - num_samples
+    - - num_units
+      - num_samples
+      - num_electrodes
     shape:
-    - null
-    - null
+    - - null
+      - null
+    - - null
+      - null
+      - null
     doc: the spike waveform mean for each spike unit
     quantity: '?'
   - name: waveform_sd
     neurodata_type_inc: VectorData
     dtype: float
     dims:
-    - num_units
-    - num_samples
+    - - num_units
+      - num_samples
+    - - num_units
+      - num_samples
+      - num_electrodes
     shape:
-    - null
-    - null
+    - - null
+      - null
+    - - null
+      - null
+      - null
     doc: the spike waveform standard deviation for each spike unit
     quantity: '?'
