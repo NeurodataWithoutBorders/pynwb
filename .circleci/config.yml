@@ -235,6 +235,7 @@ jobs:
       - run:
           name: Publish wheel and source distribution as a GitHub pre-release
           command: |
+            find . -regex '^.*\(__pycache__\|\.py[co]\)$' -delete
             python -m venv ../venv
             . ../venv/bin/activate
             pip install -U scikit-ci-addons
