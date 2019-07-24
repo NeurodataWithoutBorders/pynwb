@@ -235,7 +235,6 @@ jobs:
       - run:
           name: Publish wheel and source distribution as a GitHub pre-release
           command: |
-            find . -regex '^.*\(__pycache__\|\.py[co]\)$' -delete
             python -m venv ../venv
             . ../venv/bin/activate
             pip install -U scikit-ci-addons
@@ -258,7 +257,6 @@ jobs:
           name: Deploy release
           command: |
             echo "Deploy release"
-            find . -regex '^.*\(__pycache__\|\.py[co]\)$' -delete
             python -m venv ../venv
             . ../venv/bin/activate
             pip install twine
@@ -267,7 +265,6 @@ jobs:
       - run:
           name: Publish wheel and source distribution as a GitHub release
           command: |
-            find . -regex '^.*\(__pycache__\|\.py[co]\)$' -delete
             python -m venv ../venv
             . ../venv/bin/activate
             pip install githubrelease
