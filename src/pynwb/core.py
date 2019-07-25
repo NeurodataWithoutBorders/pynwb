@@ -13,19 +13,6 @@ def _not_parent(arg):
     return arg['name'] != 'parent'
 
 
-def set_parents(container, parent):
-    if isinstance(container, list):
-        for c in container:
-            if c.parent is None:
-                c.parent = parent
-        ret = container
-    else:
-        ret = [container]
-        if container.parent is None:
-            container.parent = parent
-    return ret
-
-
 class LabelledDict(dict):
     '''
     A dict wrapper class for aggregating Timeseries
