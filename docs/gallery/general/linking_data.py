@@ -1,9 +1,12 @@
-####################
-# Modular Data Storage using External Files
-# ===========================================
-#
-# PyNWB supports linking between files using external links.
-#
+"""
+.. _linking_data:
+
+Modular Data Storage using External Files
+===========================================
+
+PyNWB supports linking between files using external links.
+
+"""
 
 ####################
 # Example Use Case: Integrating data from multiple files
