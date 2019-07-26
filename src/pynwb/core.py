@@ -284,7 +284,7 @@ class NWBContainer(NWBBaseType, Container):
                         else:
                             val = [val]
                         for v in val:
-                            if v.parent is None:
+                            if not isinstance(v.parent, Container):
                                 v.parent = self
                             # else, the ObjectMapper will create a link from self (parent) to v (child with existing
                             # parent)
@@ -759,7 +759,7 @@ class MultiContainerInterface(NWBDataInterface):
                 containers = container
             d = getattr(self, attr_name)
             for tmp in containers:
-                if tmp.parent is None:
+                if not isinstance(tmp.parent, Container):
                     tmp.parent = self
                 # else, the ObjectMapper will create a link from self (parent) to tmp (child with existing parent)
                 if tmp.name in d:
@@ -1209,7 +1209,7 @@ class DynamicTable(NWBDataInterface):
                     raise ValueError("cannot pass non-empty index with empty data to index")
                 col_index = VectorIndex(name + "_index", index, col)
             columns.insert(0, col_index)
-            if col_index.parent is None:
+            if not isinstance(col_index.parent, Container):
                 col_index.parent = self
             # else, the ObjectMapper will create a link from self (parent) to col_index (child with existing parent)
             col = col_index
