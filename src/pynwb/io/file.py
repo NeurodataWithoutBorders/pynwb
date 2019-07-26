@@ -96,6 +96,10 @@ class SubjectMap(ObjectMapper):
 
     @ObjectMapper.constructor_arg('date_of_birth')
     def dateconversion(self, builder, manager):
-        datestr = builder.get('date_of_birth').data
-        date = dateutil_parse(datestr)
-        return date
+        dob_builder = builder.get('date_of_birth')
+        if dob_builder is None:
+            return
+        else:
+            datestr = dob_builder.data
+            date = dateutil_parse(datestr)
+            return date

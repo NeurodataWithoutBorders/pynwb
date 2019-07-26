@@ -153,9 +153,8 @@ AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
 # Caching extensions to file
 # -----------------------------------------------------
 #
-# Extensions can be cached to file so that your NWB file will carry the extensions needed to read the file with it.
-# This is done by setting *cache_spec* to *True* when calling :py:meth:`~hdmf.backends.hdf5.h5tools.HDF5IO.write`
-# on :py:class:`~pynwb.NWBHDF5IO` (See :ref:`basic_writing` for more on writing NWB files).
+# By default, extensions are cached to file so that your NWB file will carry the extensions needed to read the file
+# with it.
 #
 # To demonstrate this, first we will make some fake data using our extensions.
 
@@ -214,12 +213,13 @@ nwbfile.add_acquisition(ts)
 #     For more information on writing :py:class:`~pynwb.ecephys.ElectricalSeries`,
 #     see :ref:`ecephys_tutorial`.
 #
-# Now that we have some data, lets write our file while caching our spec:
+# Now that we have some data, lets write our file. You can choose not to cache the spec by setting
+# cache_spec=False in :py:meth:`~hdmf.backends.hdf5.h5tools.HDF5IO.write`
 
 from pynwb import NWBHDF5IO
 
 io = NWBHDF5IO('cache_spec_example.nwb', mode='w')
-io.write(nwbfile, cache_spec=True)
+io.write(nwbfile)
 io.close()
 
 ####################
