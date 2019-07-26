@@ -7,6 +7,9 @@ except ImportError:
 from warnings import warn
 import copy as _copy
 
+import numpy as np
+import pandas as pd
+
 from hdmf.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
@@ -91,6 +94,12 @@ class NWBFile(MultiContainerInterface):
             'add': 'add_analysis',
             'type': NWBContainer,
             'get': 'get_analysis'
+        },
+        {
+            'attr': 'scratch',
+            'add': '_add_scratch',
+            'type': (NWBContainer, ScratchData),
+            'get': '_get_scratch'
         },
         {
             'attr': 'stimulus',
@@ -609,6 +618,40 @@ class NWBFile(MultiContainerInterface):
     def add_stimulus_template(self, timeseries):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
+
+    @docval({'name': 'data', 'type': (np.array, list, tuple, pd.DataFrame, NWBContainer, ScratchData),
+             'help': 'the data to add to the scratch space'},
+            {'name': 'name', 'type': str,
+             'help': 'the name of the data. Only used when passing in np.array, list, or tuple', 'default': None},
+            {'name': 'notes', 'type': str,
+             'help': 'notes to add to the data. Only used when passing in np.array, list, or tuple', 'default': None},
+            {'name': 'table_description', 'type': str,
+             'help': 'description for table. Only used when passing in pd.DataFrame', 'default': None})
+    def add_scratch(self, **kwargs):
+        '''Add data to the scratch space'''
+        data = getargs('data', kwargs)
+        if isinstance(data, (np.array, pd.DataFrame, list, tuple)):
+            name, notes, table_description = getargs('name', 'notes', 'table_description', kwargs)
+            if name is None:
+                raise ValueError('please provide a name for scratch data')
+            if isinstance(data, pd.DataFrame):
+                data = DynamicTable.from_dataframe(df=data, name=name)
+            else:
+                data = ScratchData(name=name, data=data, notes=notes)
+        self._add_scratch(data)
+
+    @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get', 'default': None},
+            {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
+    def get_scratch(self, kwargs):
+        '''Get data from the scratch space'''
+        name, convert = getargs('name', 'convert', kwargs)
+        ret = self._get_scratch(name)
+        if convert:
+            if isinstance(ret, DynamicTable):
+                ret = ret.to_dataframe()
+            elif isinstance(ret, ScratchData):
+                ret = ret.data
+        return ret
 
 
 def _add_missing_timezone(date):
