@@ -365,6 +365,22 @@ class NWBData(NWBBaseType, Data):
             msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
             raise ValueError(msg)
 
+@register_class('ScratchData', CORE_NAMESPACE)
+class ScratchData(NWBData):
+
+    __nwbfields__ = ('notes',)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
+            {'name': 'notes', 'type': str, 'doc': 'the source of the data', 'default': 'none'},
+            {'name': 'parent', 'type': 'NWBContainer',
+             'doc': 'the parent Container for this Container', 'default': None},
+            {'name': 'container_source', 'type': object,
+            'doc': 'the source of this Container e.g. file name', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(NWBData, self).__init__, kwargs)
+        self.notes = getargs('notes', kwargs)
+
 
 @register_class('Index', CORE_NAMESPACE)
 class Index(NWBData):
