@@ -38,9 +38,24 @@ class TestTimeSeriesModular(base.TestMapNWBContainer):
         self.data_filename = 'test_time_series_modular_data.nwb'
         self.link_filename = 'test_time_series_modular_link.nwb'
 
+        self.read_container = None
+        self.link_read_io = None
+        self.data_read_io = None
+
     def tearDown(self):
-        self.read_container.data.file.close()
-        self.read_container.timestamps.file.close()
+        if self.read_container:
+            self.read_container.data.file.close()
+            self.read_container.timestamps.file.close()
+        if self.link_read_io:
+            self.link_read_io.close()
+        if self.data_read_io:
+            self.data_read_io.close()
+
+        # necessary to remove all references to the file and garbage
+        # collect on windows in order to be able to truncate/overwrite
+        # the file later. see pynwb GH issue #975
+        if os.name == 'nt':
+            gc.collect()
 
         self.remove_file(self.data_filename)
         self.remove_file(self.link_filename)
@@ -58,8 +73,8 @@ class TestTimeSeriesModular(base.TestMapNWBContainer):
             data_write_io.write(data_file)
 
         # read data file
-        with HDF5IO(self.data_filename, 'r', manager=get_manager()) as data_read_io:
-            data_file_obt = data_read_io.read()
+        with HDF5IO(self.data_filename, 'r', manager=get_manager()) as self.data_read_io:
+            data_file_obt = self.data_read_io.read()
 
             # write "link file" with timeseries.data that is an external link to the timeseries in "data file"
             # also link timeseries.timestamps.data to the timeseries.timestamps in "data file"
@@ -81,13 +96,16 @@ class TestTimeSeriesModular(base.TestMapNWBContainer):
                 link_file.add_acquisition(self.link_container)
                 link_write_io.write(link_file)
 
+        # NOTE that self.link_container contains a link to a dataset that is now closed
+
         # read the link file
-        with HDF5IO(self.link_filename, 'r', manager=get_manager()) as self.link_file_reader:
-            self.read_nwbfile = self.link_file_reader.read()
-            return self.getContainer(self.read_nwbfile)
+        self.link_read_io = HDF5IO(self.link_filename, 'r', manager=get_manager())
+        self.read_nwbfile = self.link_read_io.read()
+        return self.getContainer(self.read_nwbfile)
 
     def test_roundtrip(self):
         self.read_container = self.roundtripContainer()
+
         # make sure we get a completely new object
         self.assertIsNotNone(str(self.container))  # added as a test to make sure printing works
         self.assertIsNotNone(str(self.link_container))
@@ -106,13 +124,6 @@ class TestTimeSeriesModular(base.TestMapNWBContainer):
                     if errors:
                         for err in errors:
                             raise Exception(err)
-
-                # necessary to remove all references to the file and garbage
-                # collect on windows in order to be able to truncate/overwrite
-                # the file later. see pynwb GH issue #975
-                if os.name == 'nt':
-                    del io
-                    gc.collect()
 
     def getContainer(self, nwbfile):
         return nwbfile.get_acquisition('test_mod_ts')
