@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
+from hdmf.data_utils import DataIO
 from hdmf import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
@@ -154,7 +155,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
         for k in sorted(self.fields):  # sorted to enable tests
             v = self.fields[k]
-            if not hasattr(v, '__len__') or len(v) > 0:
+            if isinstance(v, DataIO) or not hasattr(v, '__len__') or len(v) > 0:
                 template += "  {}: {}\n".format(k, self.__smart_str(v, 1))
         return template
 
