@@ -328,7 +328,7 @@ Fields:
         nwbfile.add_acquisition(ts2)
         nwbfile.add_epoch(start_time=1.0, stop_time=10.0, tags=['tag1', 'tag2'])
         self.assertRegex(str(nwbfile),
-                         """
+                         r"""
 root <class 'pynwb\.file\.NWBFile'>
 Fields:
   acquisition: {
