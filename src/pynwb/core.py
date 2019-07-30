@@ -13,50 +13,6 @@ def _not_parent(arg):
     return arg['name'] != 'parent'
 
 
-def set_parents(container, parent):
-    if isinstance(container, list):
-        for c in container:
-            if c.parent is None:
-                c.parent = parent
-        ret = container
-    else:
-        ret = [container]
-        if container.parent is None:
-            container.parent = parent
-    return ret
-
-
-class LabelledDict(dict):
-    '''
-    A dict wrapper class for aggregating Timeseries
-    from the standard locations
-    '''
-
-    @docval({'name': 'label', 'type': str, 'doc': 'the TimeSeries type ('})
-    def __init__(self, **kwargs):
-        label = getargs('label', kwargs)
-        self.__label = label
-
-    @property
-    def label(self):
-        return self.__label
-
-    def __getitem__(self, args):
-        key = args
-        if '==' in args:
-            key, val = args.split("==")
-            key = key.strip()
-            val = val.strip()
-            if key != 'name':
-                ret = list()
-                for item in self.values():
-                    if getattr(item, key, None) == val:
-                        ret.append(item)
-                return ret if len(ret) else None
-            key = val
-        return super(LabelledDict, self).__getitem__(key)
-
-
 def prepend_string(string, prepend='    '):
     return prepend + prepend.join(string.splitlines(True))
 
@@ -1474,3 +1430,48 @@ class DynamicTableRegion(VectorData):
             return self.table[self.data[key]]
         else:
             raise ValueError("unrecognized argument: '%s'" % key)
+
+
+class LabelledDict(dict):
+    '''
+    A dict wrapper class for aggregating Timeseries
+    from the standard locations
+    '''
+
+    @docval({'name': 'label', 'type': str, 'doc': 'the label on this dictionary'},
+            {'name': 'def_key_name', 'type': str, 'doc': 'the default key name', 'default': 'name'})
+    def __init__(self, **kwargs):
+        label, def_key_name = getargs('label', 'def_key_name', kwargs)
+        self.__label = label
+        self.__defkey = def_key_name
+
+    @property
+    def label(self):
+        return self.__label
+
+    def __getitem__(self, args):
+        key = args
+        if '==' in args:
+            key, val = args.split("==")
+            key = key.strip()
+            val = val.strip()
+            if key != self.__defkey:
+                ret = list()
+                for item in self.values():
+                    if getattr(item, key, None) == val:
+                        ret.append(item)
+                return ret if len(ret) else None
+            key = val
+        return super(LabelledDict, self).__getitem__(key)
+
+    @docval({'name': 'container', 'type': (NWBData, NWBContainer), 'doc': 'the container to add to this LabelledDict'})
+    def add(self, **kwargs):
+        '''
+        Add a container to this LabelledDict
+        '''
+        container = getargs('container', kwargs)
+        key = getattr(container, self.__defkey, None)
+        if key is None:
+            msg = "container '%s' does not have attribute '%s'" % (container.name, self.__defkey)
+            raise ValueError(msg)
+        self[key] = container
