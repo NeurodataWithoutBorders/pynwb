@@ -365,6 +365,7 @@ class NWBData(NWBBaseType, Data):
             msg = "NWBData cannot extend object of type '%s'" % type(self.__data)
             raise ValueError(msg)
 
+
 @register_class('ScratchData', CORE_NAMESPACE)
 class ScratchData(NWBData):
 
@@ -378,7 +379,7 @@ class ScratchData(NWBData):
             {'name': 'container_source', 'type': object,
             'doc': 'the source of this Container e.g. file name', 'default': None})
     def __init__(self, **kwargs):
-        call_docval_func(super(NWBData, self).__init__, kwargs)
+        call_docval_func(super(ScratchData, self).__init__, kwargs)
         self.notes = getargs('notes', kwargs)
 
 
@@ -731,16 +732,34 @@ class MultiContainerInterface(NWBDataInterface):
 
     @staticmethod
     def __add_article(noun):
+        if isinstance(noun, tuple):
+            noun = noun[0]
+        if isinstance(noun, type):
+            noun = noun.__name__
         if noun[0] in ('aeiouAEIOU'):
             return 'an %s' % noun
         return 'a %s' % noun
 
+    @staticmethod
+    def __join(argtype):
+        def tostr(x):
+            return x.__name__ if isinstance(x, type) else x
+        if isinstance(argtype, (list, tuple)):
+            args = [tostr(x) for x in argtype]
+            if len(args) == 1:
+                return args[0].__name__
+            else:
+                ", ".join(tostr(x) for x in args[:-1]) + ' or ' + args[-1]
+        else:
+            return tostr(argtype)
+
     @classmethod
     def __make_get(cls, func_name, attr_name, container_type):
-        doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+        doc = "Get %s from this %s" % (cls.__add_article(container_type), cls.__name__)
 
-        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
-                 'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
+        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % cls.__join(container_type),
+                 'default': None},
+                rtype=container_type, returns='the %s with the given name' % cls.__join(container_type),
                 func_name=func_name, doc=doc)
         def _func(self, **kwargs):
             name = getargs('name', kwargs)
@@ -768,10 +787,10 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_add(cls, func_name, attr_name, container_type):
-        doc = "Add %s to this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+        doc = "Add %s to this %s" % (cls.__add_article(container_type), cls.__name__)
 
         @docval({'name': attr_name, 'type': (list, tuple, dict, container_type),
-                 'doc': 'the %s to add' % container_type.__name__},
+                 'doc': 'the %s to add' % cls.__join(container_type)},
                 func_name=func_name, doc=doc)
         def _func(self, **kwargs):
             container = getargs(attr_name, kwargs)
@@ -794,10 +813,10 @@ class MultiContainerInterface(NWBDataInterface):
     @classmethod
     def __make_create(cls, func_name, add_name, container_type):
         doc = "Create %s and add it to this %s" % \
-                       (cls.__add_article(container_type.__name__), cls.__name__)
+                       (cls.__add_article(container_type), cls.__name__)
 
         @docval(*filter(_not_parent, get_docval(container_type.__init__)), func_name=func_name, doc=doc,
-                returns="the %s object that was created" % container_type.__name__, rtype=container_type)
+                returns="the %s object that was created" % cls.__join(container_type), rtype=container_type)
         def _func(self, **kwargs):
             cargs, ckwargs = fmt_docval_args(container_type.__init__, kwargs)
             ret = container_type(*cargs, **ckwargs)
@@ -812,7 +831,7 @@ class MultiContainerInterface(NWBDataInterface):
             attr_name = conf['attr']
             container_type = conf['type']
             args.append({'name': attr_name, 'type': (list, tuple, dict, container_type),
-                         'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()})
+                         'doc': '%s to store in this interface' % cls.__join(container_type), 'default': dict()})
 
         args.append({'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__})
 
@@ -829,10 +848,11 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_getitem(cls, attr_name, container_type):
-        doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+        doc = "Get %s from this %s" % (cls.__add_article(container_type), cls.__name__)
 
-        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
-                 'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
+        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % cls.__join(container_type),
+                 'default': None},
+                rtype=container_type, returns='the %s with the given name' % cls.__join(container_type),
                 func_name='__getitem__', doc=doc)
         def _func(self, **kwargs):
             name = getargs('name', kwargs)
@@ -841,7 +861,7 @@ class MultiContainerInterface(NWBDataInterface):
                 msg = "%s '%s' is empty" % (cls.__name__, self.name)
                 raise ValueError(msg)
             if len(d) > 1 and name is None:
-                msg = "more than one %s in this %s -- must specify a name" % container_type.__name__, cls.__name__
+                msg = "more than one %s in this %s -- must specify a name" % cls.__join(container_type), cls.__name__
                 raise ValueError(msg)
             ret = None
             if len(d) == 1:
@@ -914,7 +934,8 @@ class MultiContainerInterface(NWBDataInterface):
             if not hasattr(cls, attr):
                 aconf = cls._transform_arg(attr)
                 getter = cls._getter(aconf)
-                doc = "a dictionary containing the %s in this %s container" % (container_type.__name__, cls.__name__)
+                doc = "a dictionary containing the %s in this %s container" % \
+                      (cls.__join(container_type), cls.__name__)
                 setattr(cls, attr, property(getter, cls.__make_setter(aconf, add), None, doc))
 
             # create the add method

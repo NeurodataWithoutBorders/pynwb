@@ -21,7 +21,8 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, \
+                  DynamicTableRegion, ScratchData
 
 
 def _not_parent(arg):
@@ -283,7 +284,9 @@ class NWBFile(MultiContainerInterface):
             {'name': 'devices', 'type': (list, tuple),
              'doc': 'Device objects belonging to this NWBFile', 'default': None},
             {'name': 'subject', 'type': Subject,
-             'doc': 'subject metadata', 'default': None})
+             'doc': 'subject metadata', 'default': None},
+            {'name': 'scratch', 'type': (list, tuple),
+             'doc': 'scratch data', 'default': None})
     def __init__(self, **kwargs):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
         pkwargs['name'] = 'root'
@@ -342,6 +345,7 @@ class NWBFile(MultiContainerInterface):
         self.subject = getargs('subject', kwargs)
         self.sweep_table = getargs('sweep_table', kwargs)
         self.lab_meta_data = getargs('lab_meta_data', kwargs)
+        self.scratch = getargs('scratch', kwargs)
 
         recommended = [
             'experimenter',
@@ -619,18 +623,20 @@ class NWBFile(MultiContainerInterface):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
 
-    @docval({'name': 'data', 'type': (np.array, list, tuple, pd.DataFrame, NWBContainer, ScratchData),
+    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, NWBContainer, ScratchData),
              'help': 'the data to add to the scratch space'},
             {'name': 'name', 'type': str,
-             'help': 'the name of the data. Only used when passing in np.array, list, or tuple', 'default': None},
+             'help': 'the name of the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'default': None},
             {'name': 'notes', 'type': str,
-             'help': 'notes to add to the data. Only used when passing in np.array, list, or tuple', 'default': None},
+             'help': 'notes to add to the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'default': None},
             {'name': 'table_description', 'type': str,
-             'help': 'description for table. Only used when passing in pd.DataFrame', 'default': None})
+             'help': 'description for table. Only used when passing in pandas.DataFrame', 'default': None})
     def add_scratch(self, **kwargs):
         '''Add data to the scratch space'''
         data = getargs('data', kwargs)
-        if isinstance(data, (np.array, pd.DataFrame, list, tuple)):
+        if isinstance(data, (np.ndarray, pd.DataFrame, list, tuple)):
             name, notes, table_description = getargs('name', 'notes', 'table_description', kwargs)
             if name is None:
                 raise ValueError('please provide a name for scratch data')
@@ -642,7 +648,7 @@ class NWBFile(MultiContainerInterface):
 
     @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get', 'default': None},
             {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
-    def get_scratch(self, kwargs):
+    def get_scratch(self, **kwargs):
         '''Get data from the scratch space'''
         name, convert = getargs('name', 'convert', kwargs)
         ret = self._get_scratch(name)
@@ -650,7 +656,7 @@ class NWBFile(MultiContainerInterface):
             if isinstance(ret, DynamicTable):
                 ret = ret.to_dataframe()
             elif isinstance(ret, ScratchData):
-                ret = ret.data
+                ret = np.asarray(ret.data)
         return ret
 
 
