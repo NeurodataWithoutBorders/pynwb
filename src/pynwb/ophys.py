@@ -1,12 +1,16 @@
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 import numpy as np
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, ElementIdentifiers
+from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, ElementIdentifiers,\
+    NWBDataInterface
 from .device import Device
 
 
@@ -132,7 +136,7 @@ class TwoPhotonSeries(ImageSeries):
             {'name': 'resolution', 'type': float, 'doc': 'The smallest meaningful difference (in specified unit) \
             between values in data', 'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
@@ -159,7 +163,7 @@ class TwoPhotonSeries(ImageSeries):
 
 
 @register_class('CorrectedImageStack', CORE_NAMESPACE)
-class CorrectedImageStack(NWBContainer):
+class CorrectedImageStack(NWBDataInterface):
     """
     An image stack where all frames are shifted (registered) to a common coordinate system, to
     account for movement and drift between frames. Note: each frame at each point in time is
@@ -242,13 +246,15 @@ class PlaneSegmentation(DynamicTable):
         pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
         super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
         self.imaging_plane = imaging_plane
+        if isinstance(reference_images, ImageSeries):
+            reference_images = (reference_images,)
         self.reference_images = reference_images
 
     @docval({'name': 'pixel_mask', 'type': 'array_data', 'default': None,
              'doc': 'pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]',
              'shape': (None, 3)},
             {'name': 'voxel_mask', 'type': 'array_data', 'default': None,
-             'doc': 'voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z1, weight2), ...]',
+             'doc': 'voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z2, weight2), ...]',
              'shape': (None, 4)},
             {'name': 'image_mask', 'type': 'array_data', 'default': None,
              'doc': 'image with the same size of image where positive values mark this ROI',
@@ -317,8 +323,8 @@ class RoiResponseSeries(TimeSeries):
 
     _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this RioResponseSeries dataset'},
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
 

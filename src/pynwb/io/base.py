@@ -2,6 +2,7 @@ from .core import NWBContainerMapper
 from .. import register_map
 
 from ..base import TimeSeries, ProcessingModule
+from hdmf.build import LinkBuilder
 
 
 @register_map(ProcessingModule)
@@ -37,3 +38,36 @@ class TimeSeriesMap(NWBContainerMapper):
     @NWBContainerMapper.constructor_arg('name')
     def name(self, builder, manager):
         return builder.name
+
+    @NWBContainerMapper.object_attr("timestamps")
+    def timestamps_attr(self, container, manager):
+        ret = container.fields.get('timestamps')
+        if isinstance(ret, TimeSeries):
+            owner = ret
+            curr = owner.fields.get('timestamps')
+            while isinstance(curr, TimeSeries):
+                owner = curr
+                curr = owner.fields.get('timestamps')
+            ts_builder = manager.build(owner)
+            tstamps_builder = ts_builder['timestamps']
+            ret = LinkBuilder(tstamps_builder, 'timestamps')
+        return ret
+
+    @NWBContainerMapper.constructor_arg("timestamps")
+    def timestamps_carg(self, builder, manager):
+        tstamps_builder = builder.get('timestamps')
+        if tstamps_builder is None:
+            return None
+        if isinstance(tstamps_builder, LinkBuilder):
+            # if the parent of our target is available, return the parent object
+            # Otherwise, return the dataset in the target builder
+            #
+            # NOTE: it is not available when data is externally linked
+            # and we haven't explicitly read that file
+            if tstamps_builder.builder.parent is not None:
+                target = tstamps_builder.builder
+                return manager.construct(target.parent)
+            else:
+                return tstamps_builder.builder.data
+        else:
+            return tstamps_builder.data

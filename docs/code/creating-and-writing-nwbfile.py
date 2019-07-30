@@ -136,7 +136,7 @@ def main():
     # create-compressed-timeseries: start
     from pynwb.ecephys import ElectricalSeries
     from pynwb.behavior import SpatialSeries
-    from pynwb.form.backends.hdf5 import H5DataIO
+    from hdmf.backends.hdf5 import H5DataIO
 
     ephys_ts = ElectricalSeries('test_compressed_ephys_data',
                                 'an hypothetical source',

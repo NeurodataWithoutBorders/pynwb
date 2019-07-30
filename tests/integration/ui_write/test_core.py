@@ -1,8 +1,10 @@
 from pynwb.core import DynamicTable
+import pynwb
 
 from . import base
 
 import pandas as pd
+import numpy as np
 
 
 class TestTrials(base.TestMapRoundTrip):
@@ -43,22 +45,25 @@ class TestUnits(base.TestMapRoundTrip):
         return nwbfile.units
 
 
-class TestUnitsDf(base.TestMapRoundTrip):
+class TestFromDataframe(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
-        return DynamicTable('units', 'a placeholder table')
+        return DynamicTable.from_dataframe(pd.DataFrame({
+                'a': [[1, 2, 3],
+                      [1, 2, 3],
+                      [1, 2, 3]],
+                'b': ['4', '5', '6']
+            }), 'test_table')
 
     def addContainer(self, nwbfile):
-        nwbfile.units = DynamicTable.from_dataframe(pd.DataFrame({
-            'a': [1, 2, 3],
-            'b': ['4', '5', '6']
-        }), 'units')
-        # reset the thing
-        self.container = nwbfile.units
+        test_mod = nwbfile.create_processing_module('test', 'desc')
+        test_mod.add(self.container)
 
     def getContainer(self, nwbfile):
-        return nwbfile.units
+        dyn_tab = nwbfile.processing['test'].data_interfaces['test_table']
+        dyn_tab.to_dataframe()  # also test 2D column round-trip
+        return dyn_tab
 
 
 class TestElectrodes(base.TestMapRoundTrip):
@@ -88,3 +93,48 @@ class TestElectrodes(base.TestMapRoundTrip):
     def test_roundtrip(self):
         super(TestElectrodes, self).test_roundtrip()
         self.assertContainerEqual(self.read_container[0][7], self.container[0][7])
+
+
+class TestElectrodesRegion(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        return DynamicTable('electrodes', 'metadata about extracellular electrodes')  # no-op
+
+    def addContainer(self, nwbfile):
+        ''' Should take an NWBFile object and add the container to it '''
+        self.dev1 = nwbfile.create_device('dev1')  # noqa: F405
+        self.group = nwbfile.create_electrode_group('tetrode1',  # noqa: F405
+                                    'tetrode description', 'tetrode location', self.dev1)
+
+        nwbfile.add_electrode(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
+                              group_name='tetrode1')
+        nwbfile.add_electrode(id=2, x=1.0, y=2.0, z=3.0, imp=-2.0, location='CA1', filtering='none', group=self.group,
+                              group_name='tetrode1')
+        nwbfile.add_electrode(id=3, x=1.0, y=2.0, z=3.0, imp=-3.0, location='CA1', filtering='none', group=self.group,
+                              group_name='tetrode1')
+        nwbfile.add_electrode(id=4, x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none', group=self.group,
+                              group_name='tetrode1')
+
+        region = nwbfile.create_electrode_table_region(
+            region=tuple([1, 2, 3]),
+            name='electrodes',
+            description='desc'
+        )
+        nwbfile.add_acquisition(pynwb.ecephys.ElectricalSeries(
+            name='test_data',
+            data=np.arange(10),
+            timestamps=np.arange(10),
+            electrodes=region
+        ))
+
+        self.container = region
+
+    def getContainer(self, nwbfile):
+        self.table = nwbfile.electrodes
+        return nwbfile.get_acquisition('test_data').electrodes
+
+    def test_roundtrip(self):
+        super(TestElectrodesRegion, self).test_roundtrip()
+
+        for ii, item in enumerate(self.read_container):
+            self.assertEqual(self.table[ii+1], item)

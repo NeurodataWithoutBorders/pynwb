@@ -1,9 +1,11 @@
 from warnings import warn
 
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
-from .form.data_utils import AbstractDataChunkIterator, DataIO
+from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
@@ -25,9 +27,9 @@ class ProcessingModule(MultiContainerInterface):
 
     __clsconf__ = {
             'attr': 'data_interfaces',
-            'add': 'add_data_interface',
+            'add': 'add',
             'type': NWBDataInterface,
-            'get': 'get_data_interface'
+            'get': 'get'
     }
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
@@ -46,7 +48,7 @@ class ProcessingModule(MultiContainerInterface):
         return self.data_interfaces
 
     def __getitem__(self, arg):
-        return self.get_data_interface(arg)
+        return self.get(arg)
 
     @docval({'name': 'container', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
     def add_container(self, **kwargs):
@@ -54,8 +56,8 @@ class ProcessingModule(MultiContainerInterface):
         Add an NWBContainer to this ProcessingModule
         '''
         container = getargs('container', kwargs)
-        warn(PendingDeprecationWarning('add_container will be replaced by add_data_interface'))
-        self.add_data_interface(container)
+        warn(PendingDeprecationWarning('add_container will be replaced by add'))
+        self.add(container)
 
     @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_container(self, **kwargs):
@@ -63,8 +65,20 @@ class ProcessingModule(MultiContainerInterface):
         Retrieve an NWBContainer from this ProcessingModule
         '''
         container_name = getargs('container_name', kwargs)
-        warn(PendingDeprecationWarning('get_container will be replaced by get_data_interface'))
-        return self.get_data_interface(container_name)
+        warn(PendingDeprecationWarning('get_container will be replaced by get'))
+        return self.get(container_name)
+
+    @docval({'name': 'NWBDataInterface', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
+    def add_data_interface(self, **kwargs):
+        NWBDataInterface = getargs('NWBDataInterface', kwargs)
+        warn(PendingDeprecationWarning('add_data_interface will be replaced by add'))
+        self.add(NWBDataInterface)
+
+    @docval({'name': 'data_interface_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
+    def get_data_interface(self, **kwargs):
+        data_interface_name = getargs('data_interface_name', kwargs)
+        warn(PendingDeprecationWarning('get_data_interface will be replaced by get'))
+        return self.get(data_interface_name)
 
 
 @register_class('TimeSeries', CORE_NAMESPACE)
@@ -76,7 +90,6 @@ class TimeSeries(NWBDataInterface):
                      "resolution",
                      "conversion",
                      "unit",
-                     "num_samples",
                      "timestamps",
                      "timestamps_unit",
                      "interval",
@@ -135,21 +148,6 @@ class TimeSeries(NWBDataInterface):
 
         data = getargs('data', kwargs)
         self.fields['data'] = data
-        if isinstance(data, TimeSeries):
-            data.__add_link('data_link', self)
-            self.fields['num_samples'] = data.num_samples
-        elif isinstance(data, AbstractDataChunkIterator):
-            self.fields['num_samples'] = -1
-        elif isinstance(data, DataIO):
-            this_data = data.data
-            if isinstance(this_data, AbstractDataChunkIterator):
-                self.fields['num_samples'] = -1
-            else:
-                self.fields['num_samples'] = len(this_data)
-        elif data is None:
-            self.fields['num_samples'] = 0
-        else:
-            self.fields['num_samples'] = len(data)
 
         timestamps = kwargs.get('timestamps')
         starting_time = kwargs.get('starting_time')
@@ -173,6 +171,37 @@ class TimeSeries(NWBDataInterface):
                 self.starting_time = 0.0
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
+
+    @property
+    def num_samples(self):
+        ''' Tries to return the number of data samples. If this cannot be assessed, returns None.
+        '''
+
+        def unreadable_warning(attr):
+            return (
+                'The {} attribute on this TimeSeries (named: {}) has a __len__, '
+                'but it cannot be read'.format(attr, self.name)
+            )
+
+        def no_len_warning(attr):
+            return 'The {} attribute on this TimeSeries (named: {}) has no __len__, '.format(attr, self.name)
+
+        if hasattr(self.data, '__len__'):
+            try:
+                return len(self.data)  # for an ndarray this will return the first element of shape
+            except TypeError:
+                warn(unreadable_warning('data'), UserWarning)
+        else:
+            warn(no_len_warning('data'), UserWarning)
+
+        if hasattr(self, 'timestamps'):
+            if hasattr(self.timestamps, '__len__'):
+                try:
+                    return len(self.timestamps)
+                except TypeError:
+                    warn(unreadable_warning('timestamps'), UserWarning)
+            elif not (hasattr(self, 'rate') and hasattr(self, 'starting_time')):
+                warn(no_len_warning('timestamps'), UserWarning)
 
     @property
     def data(self):
@@ -220,15 +249,21 @@ class Image(NWBData):
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
             {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None},
+            {'name': 'help', 'type': str, 'doc': 'helpful hint for user',
+             'default': 'pixel values for an image'}
+            )
     def __init__(self, **kwargs):
         super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
         self.resolution = kwargs['resolution']
         self.description = kwargs['description']
+        self.help = kwargs['help']
 
 
 @register_class('Images', CORE_NAMESPACE)
 class Images(MultiContainerInterface):
+
+    __nwbfields__ = ('description',)
 
     __clsconf__ = {
         'attr': 'images',
@@ -239,3 +274,13 @@ class Images(MultiContainerInterface):
     }
 
     __help = "Contains images"
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
+            {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of images',
+             'default': 'no description'})
+    def __init__(self, **kwargs):
+        name, description, images = popargs('name', 'description', 'images', kwargs)
+        super(Images, self).__init__(name, **kwargs)
+        self.description = description
+        self.images = images

@@ -1,6 +1,11 @@
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
-from .form.utils import docval, popargs, fmt_docval_args, call_docval_func
+import numpy as np
+
+from hdmf.utils import docval, popargs, fmt_docval_args, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -80,7 +85,7 @@ class PatchClampSeries(TimeSeries):
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
 
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
@@ -113,7 +118,7 @@ class PatchClampSeries(TimeSeries):
             if not (sweep_number >= 0):
                 raise ValueError("sweep_number must be a non-negative integer")
 
-            self.sweep_number = sweep_number
+            self.sweep_number = np.uint64(sweep_number)
 
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)
@@ -141,9 +146,9 @@ class CurrentClampSeries(PatchClampSeries):
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
             {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
 
-            {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp'},
-            {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm'},
-            {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad'},
+            {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': None},
+            {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
+            {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad', 'default': None},
 
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
@@ -151,8 +156,6 @@ class CurrentClampSeries(PatchClampSeries):
             {'name': 'conversion', 'type': float,
              'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
 
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
@@ -319,13 +322,13 @@ class VoltageClampSeries(PatchClampSeries):
              apply or record this data.'},
             {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
             {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
-            {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad'},
-            {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad'},
-            {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz'},
-            {'name': 'resistance_comp_correction', 'type': float, 'doc': 'Unit: %'},
-            {'name': 'resistance_comp_prediction', 'type': float, 'doc': 'Unit: %'},
-            {'name': 'whole_cell_capacitance_comp', 'type': float, 'doc': 'Unit: Farad'},
-            {'name': 'whole_cell_series_resistance_comp', 'type': float, 'doc': 'Unit: Ohm'},
+            {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz', 'default': None},
+            {'name': 'resistance_comp_correction', 'type': float, 'doc': 'Unit: %', 'default': None},
+            {'name': 'resistance_comp_prediction', 'type': float, 'doc': 'Unit: %', 'default': None},
+            {'name': 'whole_cell_capacitance_comp', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'whole_cell_series_resistance_comp', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},

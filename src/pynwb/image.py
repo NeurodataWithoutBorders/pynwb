@@ -1,7 +1,11 @@
 import numpy as np
-from collections import Iterable
+import warnings
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
-from .form.utils import docval, popargs, call_docval_func
+from hdmf.utils import docval, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion, Image
@@ -14,8 +18,7 @@ class ImageSeries(TimeSeries):
     The image data can be stored in the HDF5 file or it will be stored as an external image file.
     '''
 
-    __nwbfields__ = ('bits_per_pixel',
-                     'dimension',
+    __nwbfields__ = ('dimension',
                      'external_file',
                      'starting_frame',
                      'format')
@@ -44,7 +47,7 @@ class ImageSeries(TimeSeries):
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
@@ -70,6 +73,16 @@ class ImageSeries(TimeSeries):
         self.external_file = external_file
         self.starting_frame = starting_frame
         self.format = format
+
+    @property
+    def bits_per_pixel(self):
+        return self.fields.get('bits_per_pixel')
+
+    @bits_per_pixel.setter
+    def bits_per_pixel(self, val):
+        if val is not None:
+            warnings.warn("bits_per_pixel is no longer used", DeprecationWarning)
+            self.fields['bits_per_pixel'] = val
 
 
 @register_class('IndexSeries', CORE_NAMESPACE)

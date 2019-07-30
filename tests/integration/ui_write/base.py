@@ -3,9 +3,11 @@ from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import os
 import numpy as np
+import h5py
+import numpy.testing as npt
 
-from pynwb import NWBContainer, get_manager, NWBFile, NWBData
-from pynwb.form.backends.hdf5 import HDF5IO
+from pynwb import NWBContainer, get_manager, NWBFile, NWBData, NWBHDF5IO, validate as pynwb_validate
+from hdmf.backends.hdf5 import HDF5IO
 
 CORE_NAMESPACE = 'core'
 
@@ -37,7 +39,12 @@ class TestMapNWBContainer(unittest.TestCase):
     def manager(self):
         return self.__manager
 
+    @unittest.skip("deprecated")
     def test_build(self):
+        """
+        As of 20190110, this test has been deprecated. Maintaining hardcoded builder objects has become
+        increasingly difficult, and offers little in the way of debugging and identifying problems
+        """
         try:
             self.builder = self.setUpBuilder()
         except unittest.SkipTest:
@@ -48,7 +55,12 @@ class TestMapNWBContainer(unittest.TestCase):
         # do something here to validate the result Builder against the spec
         self.assertDictEqual(result, self.builder)
 
+    @unittest.skip("deprecated")
     def test_construct(self):
+        """
+        As of 20190110, this test has been deprecated. Maintaining hardcoded builder objects has become
+        increasingly difficult, and offers little in the way of debugging and identifying problems
+        """
         try:
             self.builder = self.setUpBuilder()
         except unittest.SkipTest:
@@ -77,6 +89,8 @@ class TestMapNWBContainer(unittest.TestCase):
             with self.subTest(nwbfield=nwbfield, container_type=type1.__name__):
                 f1 = getattr(container1, nwbfield)
                 f2 = getattr(container2, nwbfield)
+                if isinstance(f1, h5py.Dataset):
+                    f1 = f1[()]
                 if isinstance(f1, (tuple, list, np.ndarray)):
                     if len(f1) > 0:
                         if isinstance(f1[0], NWBContainer):
@@ -91,8 +105,8 @@ class TestMapNWBContainer(unittest.TestCase):
                         if len(f1) == 0:
                             continue
                         if isinstance(f1[0], float):
-                                for v1, v2 in zip(f1, f2):
-                                    self.assertAlmostEqual(v1, v2, places=6)
+                            for v1, v2 in zip(f1, f2):
+                                self.assertAlmostEqual(v1, v2, places=6)
                         else:
                             self.assertTrue(np.array_equal(f1, f2))
                 elif isinstance(f1, dict) and len(f1) and isinstance(next(iter(f1.values())), NWBContainer):
@@ -112,8 +126,8 @@ class TestMapNWBContainer(unittest.TestCase):
                     elif isinstance(f2, NWBData):
                         self.assertTrue(np.array_equal(f1.data, f2))
                 else:
-                    if isinstance(f1, float):
-                        self.assertAlmostEqual(f1, f2)
+                    if isinstance(f1, (float, np.float32, np.float16)):
+                        npt.assert_almost_equal(f1, f2)
                     else:
                         self.assertEqual(f1, f2)
 
@@ -124,7 +138,7 @@ class TestMapNWBContainer(unittest.TestCase):
 
 class TestMapRoundTrip(TestMapNWBContainer):
 
-    _required_tests = ('test_build', 'test_construct', 'test_roundtrip')
+    _required_tests = ('test_roundtrip',)
     run_injected_file_test = False
 
     def setUp(self):
@@ -145,20 +159,20 @@ class TestMapRoundTrip(TestMapNWBContainer):
         if os.path.exists(self.filename) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
             os.remove(self.filename)
 
-    def roundtripContainer(self):
+    def roundtripContainer(self, cache_spec=False):
         description = 'a file to test writing and reading a %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
 
         self.writer = HDF5IO(self.filename, manager=get_manager(), mode='w')
-        self.writer.write(nwbfile)
+        self.writer.write(nwbfile, cache_spec=cache_spec)
         self.writer.close()
         self.reader = HDF5IO(self.filename, manager=get_manager(), mode='r')
-        read_nwbfile = self.reader.read()
+        self.read_nwbfile = self.reader.read()
 
         try:
-            tmp = self.getContainer(read_nwbfile)
+            tmp = self.getContainer(self.read_nwbfile)
             return tmp
         except Exception as e:
             self.reader.close()
@@ -170,7 +184,17 @@ class TestMapRoundTrip(TestMapNWBContainer):
         # make sure we get a completely new object
         str(self.container)  # added as a test to make sure printing works
         self.assertNotEqual(id(self.container), id(self.read_container))
-        self.assertContainerEqual(self.container, self.read_container)
+        self.assertContainerEqual(self.read_container, self.container)
+        self.validate()
+
+    def validate(self):
+        # validate created file
+        if os.path.exists(self.filename):
+            with NWBHDF5IO(self.filename, mode='r') as io:
+                errors = pynwb_validate(io)
+                if errors:
+                    for err in errors:
+                        raise Exception(err)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''

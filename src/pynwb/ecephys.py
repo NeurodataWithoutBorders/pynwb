@@ -1,8 +1,10 @@
-import numpy as np
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
-from .form.utils import docval, getargs, popargs, call_docval_func
-from .form.data_utils import DataChunkIterator, assertEqualShape
+from hdmf.utils import docval, getargs, popargs, call_docval_func
+from hdmf.data_utils import DataChunkIterator, assertEqualShape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, _default_resolution, _default_conversion
@@ -62,7 +64,8 @@ class ElectricalSeries(TimeSeries):
     __help = "Stores acquired voltage data from extracellular recordings."
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+             'shape': ((None, ), (None, None), (None, None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
 
             {'name': 'electrodes', 'type': DynamicTableRegion,
@@ -71,7 +74,7 @@ class ElectricalSeries(TimeSeries):
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
 
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
              'doc': 'Timestamps for samples stored in data', 'default': None},
@@ -121,7 +124,7 @@ class SpikeEventSeries(ElectricalSeries):
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': _default_resolution},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
+             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
             {'name': 'comments', 'type': str,
              'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
             {'name': 'description', 'type': str,
@@ -156,8 +159,8 @@ class EventDetection(NWBDataInterface):
                      'source_idx',
                      'times')
 
-    _help_statement = ("Description of how events were detected, such as voltage "
-                       "threshold, or dV/dT threshold, as well as relevant values.")
+    __help = ("Description of how events were detected, such as voltage "
+              "threshold, or dV/dT threshold, as well as relevant values.")
 
     @docval({'name': 'detection_method', 'type': str,
              'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, \
@@ -203,6 +206,7 @@ class EventWaveform(MultiContainerInterface):
 @register_class('Clustering', CORE_NAMESPACE)
 class Clustering(NWBDataInterface):
     """
+    DEPRECATED in favor of :py:meth:`~pynwb.misc.Units`.
     Specifies cluster event times and cluster metric for maximum ratio of
     waveform peak to RMS on any channel in cluster.
     """
@@ -214,7 +218,7 @@ class Clustering(NWBDataInterface):
         'times'
     )
 
-    __help = ("Clustered spike data, whether from automatic clustering "
+    __help = ("[DEPRECATED] Clustered spike data, whether from automatic clustering "
               "tools (eg, klustakwik) or as a result of manual sorting.")
 
     @docval({'name': 'description', 'type': str,
@@ -228,6 +232,8 @@ class Clustering(NWBDataInterface):
              'shape': (None,)},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
+        import warnings
+        warnings.warn("use pynwb.misc.Units or NWBFile.units instead", DeprecationWarning)
         description, num, peak_over_rms, times = popargs(
             'description', 'num', 'peak_over_rms', 'times', kwargs)
         super(Clustering, self).__init__(**kwargs)
@@ -240,6 +246,11 @@ class Clustering(NWBDataInterface):
 @register_class('ClusterWaveforms', CORE_NAMESPACE)
 class ClusterWaveforms(NWBDataInterface):
     """
+    DEPRECATED. `ClusterWaveforms` was deprecated in Oct 27, 2018 and will be removed in a future release.
+    Please use the `Units` table to store waveform mean and standard deviation
+    e.g. `NWBFile.units.add_unit(..., waveform_mean=..., waveform_sd=...)`
+
+
     Describe cluster waveforms by mean and standard deviation for at each sample.
     """
 
@@ -248,7 +259,7 @@ class ClusterWaveforms(NWBDataInterface):
                      'waveform_mean',
                      'waveform_sd')
 
-    __help = ("Mean waveform shape of clusters. Waveforms should be "
+    __help = ("[DEPRECATED] Mean waveform shape of clusters. Waveforms should be "
               "high-pass filtered (ie, not the same bandpass filter "
               "used waveform analysis and clustering)")
 
@@ -281,13 +292,12 @@ class LFP(MultiContainerInterface):
     ElectricalSeries description or comments field.
     """
 
-    __clsconf__ = {
-        'attr': 'electrical_series',
-        'type': ElectricalSeries,
-        'add': 'add_electrical_series',
-        'get': 'get_electrical_series',
-        'create': 'create_electrical_series',
-    }
+    __clsconf__ = [
+        {'attr': 'electrical_series',
+         'type': ElectricalSeries,
+         'add': 'add_electrical_series',
+         'get': 'get_electrical_series',
+         'create': 'create_electrical_series'}]
 
     __help = ("LFP data from one or more channels. Filter properties "
               "should be noted in the ElectricalSeries")
@@ -335,12 +345,12 @@ class FeatureExtraction(NWBDataInterface):
 
     @docval({'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
-            {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator),
+            {'name': 'description', 'type': ('array_data', 'data'),
              'doc': 'A description for each feature extracted', 'shape': (None, )},
             {'name': 'times', 'type': ('array_data', 'data'), 'shape': (None, ),
              'doc': 'The times of events that features correspond to'},
             {'name': 'features', 'type': ('array_data', 'data'), 'shape': (None, None, None),
-             'doc': 'Features for each channel', 'ndim': 3},
+             'doc': 'Features for each channel'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'})
     def __init__(self, **kwargs):
         # get the inputs

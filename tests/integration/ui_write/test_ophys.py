@@ -1,7 +1,8 @@
 import unittest2 as unittest
+import numpy as np
 from copy import deepcopy
 
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
+from hdmf.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
 
 from pynwb.ophys import (
     ImagingPlane,
@@ -27,8 +28,8 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         self.device = Device(name='dev1', description='a mock device for testing')
         self.optical_channel = OpticalChannel('optchan1',
                                               'a fake OpticalChannel', 500.)
-        return ImagingPlane('imgpln1', self.optical_channel,
-                            'a fake ImagingPlane', self.device, 600., 300., 'GFP', 'somewhere in the brain')
+        return ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
+                            600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknonwn')
 
     def setUpBuilder(self):
         optchan_builder = GroupBuilder(
@@ -82,9 +83,8 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
     def make_imaging_plane(self):
         self.device = Device(name='dev1', description='a mock device for testing')
         self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
-        self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel,
-                                          'a fake ImagingPlane',
-                                          self.device, 600., 300., 'GFP', 'somewhere in the brain')
+        self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
+                                          600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknown')
 
     def setUpContainer(self):
         self.make_imaging_plane()
@@ -138,7 +138,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
             'test_2ps',
             attributes={
                 'pmt_gain':  1.7,
-                'scan_line_rate':  3.4,
+                'scan_line_rate':  np.float32(3.4),
                 'namespace': base.CORE_NAMESPACE,
                 'comments': 'no comments',
                 'description': 'no description',
@@ -186,12 +186,14 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         self.device = Device(name='dev1', description='a mock device for testing')
         self.optical_channel = OpticalChannel('test_optical_channel',
                                               'optical channel description', 500.)
-        self.imaging_plane = ImagingPlane('ophys integration tests',
+        self.imaging_plane = ImagingPlane('imgpln1',
                                           self.optical_channel,
-                                          'imaging plane description',
+                                          'a fake ImagingPlane',
                                           self.device,
-                                          600., 300., 'GFP', 'somewhere in the brain',
-                                          (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+                                          600., 200., 'GFP', 'somewhere in the brain',
+                                          (((1., 2., 3.), (4., 5., 6.)),),
+                                          2., 'a unit',
+                                          reference_frame='unknown')
 
         self.img_mask = deepcopy(img_mask)
         self.pix_mask = deepcopy(pix_mask)
@@ -231,7 +233,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
                 'imaging_rate': DatasetBuilder('imaging_rate', 300.),
                 'indicator': DatasetBuilder('indicator', 'GFP'),
-                'manifold': DatasetBuilder('manifold', (1, 2, 1, 2, 3),
+                'manifold': DatasetBuilder('manifold', (((1., 2., 3.), (4., 5., 6.)),),
                                            attributes={'conversion': 4.0, 'unit': 'manifold unit'}),
                 'reference_frame': DatasetBuilder('reference_frame', 'A frame to refer to'),
                 'location': DatasetBuilder('location', 'somewhere in the brain')},
@@ -286,7 +288,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'neurodata_type': 'PlaneSegmentation',
                 'namespace': 'core',
                 'description': 'plane segmentation description',
-                'colnames': ('image_mask', 'pixel_mask'),
+                'colnames': (b'image_mask', b'pixel_mask'),
                 'help': 'Results from segmentation of an imaging plane'},
             datasets={
                 'id': DatasetBuilder('id', data=[0, 1],
@@ -319,11 +321,11 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         img_seg.add_plane_segmentation(self.container)
         mod = nwbfile.create_processing_module('plane_seg_test_module',
                                                'a plain module for testing')
-        mod.add_data_interface(img_seg)
+        mod.add(img_seg)
 
     def getContainer(self, nwbfile):
         mod = nwbfile.get_processing_module('plane_seg_test_module')
-        img_seg = mod.get_data_interface('ImageSegmentation')
+        img_seg = mod.get('ImageSegmentation')
         return img_seg.get_plane_segmentation('test_plane_seg_name')
 
 
@@ -342,7 +344,8 @@ class MaskRoundTrip(TestPlaneSegmentation):
                                           'imaging plane description',
                                           self.device,
                                           600., 300., 'GFP', 'somewhere in the brain',
-                                          (1, 2, 1, 2, 3), 4.0, 'manifold unit', 'A frame to refer to')
+                                          (((1., 2., 3.), (4., 5., 6.)),),
+                                          4.0, 'manifold unit', 'A frame to refer to')
         return PlaneSegmentation('description', self.imaging_plane, 'test_plane_seg_name',
                                  self.image_series)
 
@@ -378,7 +381,7 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
         self.plane_segmentation = TestPlaneSegmentation.buildPlaneSegmentation(self)
         self.rt_region = self.plane_segmentation.create_roi_table_region('the first of two ROIs', region=[0])
 
-        data = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+        data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
         timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
         return RoiResponseSeries('test_roi_response_series', data, 'lumens', self.rt_region, timestamps=timestamps)
@@ -419,5 +422,5 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
         img_seg.add_plane_segmentation(self.plane_segmentation)
         mod = nwbfile.create_processing_module('plane_seg_test_module',
                                                'a plain module for testing')
-        mod.add_data_interface(img_seg)
+        mod.add(img_seg)
         super(TestRoiResponseSeriesIO, self).addContainer(nwbfile)

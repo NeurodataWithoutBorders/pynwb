@@ -9,12 +9,12 @@ import h5py
 
 CORE_NAMESPACE = 'core'
 
-from .form.spec import NamespaceCatalog  # noqa: E402
-from .form.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
-from .form.backends.io import FORMIO  # noqa: E402
-from .form.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
-from .form.validate import ValidatorMap  # noqa: E402
-from .form.build import BuildManager  # noqa: E402
+from hdmf.spec import NamespaceCatalog  # noqa: E402
+from hdmf.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
+from hdmf.backends.io import HDMFIO  # noqa: E402
+from hdmf.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
+from hdmf.validate import ValidatorMap  # noqa: E402
+from hdmf.build import BuildManager  # noqa: E402
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa: E402
 
@@ -40,7 +40,7 @@ global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-from .form.build import TypeMap as TypeMap  # noqa: E402
+from hdmf.build import TypeMap as TypeMap  # noqa: E402
 
 __TYPE_MAP = TypeMap(__NS_CATALOG)
 
@@ -112,9 +112,8 @@ if os.path.exists(__resources['namespace_path']):
     load_namespaces(__resources['namespace_path'])
 
 
-@docval(returns="a tuple of the available namespaces", rtype=tuple)
-def available_namespaces(**kwargs):
-    return tuple(__NS_CATALOG.namespaces.keys())
+def available_namespaces():
+    return __NS_CATALOG.namespaces
 
 
 # a function to register a container classes with the global map
@@ -172,8 +171,8 @@ def get_class(**kwargs):
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
 
 
-@docval({'name': 'io', 'type': FORMIO,
-         'doc': 'the FORMIO object to read from'},
+@docval({'name': 'io', 'type': HDMFIO,
+         'doc': 'the HDMFIO object to read from'},
         {'name': 'namespace', 'type': str,
          'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
         returns="errors in the file", rtype=list,
@@ -182,7 +181,7 @@ def validate(**kwargs):
     """Validate an NWB file against a namespace"""
     io, namespace = getargs('io', 'namespace', kwargs)
     builder = io.read_builder()
-    validator = ValidatorMap(__NS_CATALOG.get_namespace(namespace))
+    validator = ValidatorMap(io.manager.namespace_catalog.get_namespace(name=namespace))
     return validator.validate(builder)
 
 
@@ -190,24 +189,32 @@ class NWBHDF5IO(_HDF5IO):
 
     @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
             {'name': 'mode', 'type': str,
-             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-")'},
+             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
             {'name': 'load_namespaces', 'type': bool,
-             'doc': 'whether or not to load cached namespaces from given path', 'default': False},
+             'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
+             'default': False},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
              to namespaces and TypeMaps', 'default': None},
-            {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None})
+            {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
+            {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
+             'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj, comm =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
             if extensions is not None:
                 warn("loading namespaces from file - ignoring 'extensions' argument")
-            if 'w' in mode:
+            # namespaces are not loaded when creating an NWBHDF5IO object in write mode
+            if 'w' in mode or mode == 'x':
                 raise ValueError("cannot load namespaces from file when writing to it")
+
+            tm = get_type_map()
+            super(NWBHDF5IO, self).load_namespaces(tm, path)
+            manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
             #      loading cached namespaces
@@ -215,10 +222,6 @@ class NWBHDF5IO(_HDF5IO):
             # super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
             # tm = TypeMap(ns_catalog)
             # tm.copy_mappers(get_type_map())
-
-            tm = get_type_map()
-            super(NWBHDF5IO, self).load_namespaces(tm, path)
-            manager = BuildManager(tm)
         else:
             if manager is not None and extensions is not None:
                 raise ValueError("'manager' and 'extensions' cannot be specified together")
@@ -226,7 +229,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj)
+        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
 
 
 from . import io as __io  # noqa: F401,E402

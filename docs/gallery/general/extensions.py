@@ -4,7 +4,7 @@
 Extensions
 =========================
 
-The NWB-N format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
+The NWB:N format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
 PyNWB API.
 
 .. note::
@@ -21,14 +21,14 @@ PyNWB API.
 # -----------------------------------------------------
 #
 # Extensions should be defined separately from the code that uses the extensions. This design decision is
-# based on the assumption that extension will be written once, and read or used multiple times. Here, we
+# based on the assumption that the extension will be written once, and read or used multiple times. Here, we
 # provide an example of how to create an extension for subsequent use.
 # (For more information on the available tools for creating extensions, see :ref:`extending-nwb`).
 #
 #
 # The following block of code demonstrates how to create a new namespace, and then add a new `neurodata_type`
 # to this namespace. Finally,
-# it calls :py:meth:`~pynwb.form.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
+# it calls :py:meth:`~hdmf.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
 
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 
@@ -36,6 +36,9 @@ ns_path = "mylab.namespace.yaml"
 ext_source = "mylab.extensions.yaml"
 
 ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "mylab")
+
+ns_builder.include_type('ElectricalSeries', namespace='core')
+
 ext = NWBGroupSpec('A custom ElectricalSeries for my lab',
                    attributes=[NWBAttributeSpec('trode_id', 'the tetrode id', 'int')],
                    neurodata_type_inc='ElectricalSeries',
@@ -47,23 +50,23 @@ ns_builder.export(ns_path)
 ####################
 # Running this block will produce two YAML files.
 #
-# The first file contains the specification of the namespace.
+# The first file, mylab.namespace.yaml, contains the specification of the namespace.
 #
 # .. code-block:: yaml
 #
-#     # mylab.namespace.yaml
 #     namespaces:
 #     - doc: Extension for use in my Lab
 #       name: mylab
 #       schema:
 #       - namespace: core
-#       - source: fake_extension.yaml
+#         neurodata_type:
+#         - ElectricalSeries
+#       - source: mylab.extensions.yaml
 #
-# The second file contains the details on newly defined types.
+# The second file, mylab.extensions.yaml, contains the details on newly defined types.
 #
 # .. code-block:: yaml
 #
-#     # mylab.extensions.yaml
 #     groups:
 #     - attributes:
 #       - doc: the tetrode id
@@ -96,7 +99,7 @@ ns_builder.export(ns_path)
 
 from pynwb import register_class, load_namespaces
 from pynwb.ecephys import ElectricalSeries
-from pynwb.form.utils import docval, call_docval_func, getargs, get_docval
+from hdmf.utils import docval, call_docval_func, getargs, get_docval
 
 ns_path = "mylab.namespace.yaml"
 load_namespaces(ns_path)
@@ -117,12 +120,12 @@ class TetrodeSeries(ElectricalSeries):
 ####################
 # .. note::
 #
-#     See the API docs for more information about :py:func:`~pynwb.form.utils.docval`
-#     :py:func:`~pynwb.form.utils.call_docval_func`, :py:func:`~pynwb.form.utils.getargs`
-#     and :py:func:`~pynwb.form.utils.get_docval`
+#     See the API docs for more information about :py:func:`~hdmf.utils.docval`
+#     :py:func:`~hdmf.utils.call_docval_func`, :py:func:`~hdmf.utils.getargs`
+#     and :py:func:`~hdmf.utils.get_docval`
 #
 # When extending :py:class:`~pynwb.core.NWBContainer` or :py:class:`~pynwb.core.NWBContainer`
-# subclasses, you should defining the class field ``__nwbfields__``. This will
+# subclasses, you should define the class field ``__nwbfields__``. This will
 # tell PyNWB the properties of the :py:class:`~pynwb.core.NWBContainer` extension.
 #
 # If you do not want to write additional code to read your extensions, PyNWB is able to dynamically
@@ -150,9 +153,8 @@ AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
 # Caching extensions to file
 # -----------------------------------------------------
 #
-# Extensions can be cached to file so that your NWB file will carry the extensions needed to read the file with it.
-# This is done by setting *cache_spec* to *True* when calling :py:meth:`~pynwb.form.backends.hdf5.h5tools.HDF5IO.write`
-# on :py:class:`~pynwb.NWBHDF5IO` (See :ref:`basic_writing` for more on writing NWB files).
+# By default, extensions are cached to file so that your NWB file will carry the extensions needed to read the file
+# with it.
 #
 # To demonstrate this, first we will make some fake data using our extensions.
 
@@ -211,12 +213,13 @@ nwbfile.add_acquisition(ts)
 #     For more information on writing :py:class:`~pynwb.ecephys.ElectricalSeries`,
 #     see :ref:`ecephys_tutorial`.
 #
-# Now that we have some data, lets write our file while caching our spec:
+# Now that we have some data, lets write our file. You can choose not to cache the spec by setting
+# cache_spec=False in :py:meth:`~hdmf.backends.hdf5.h5tools.HDF5IO.write`
 
 from pynwb import NWBHDF5IO
 
 io = NWBHDF5IO('cache_spec_example.nwb', mode='w')
-io.write(nwbfile, cache_spec=True)
+io.write(nwbfile)
 io.close()
 
 ####################
@@ -249,9 +252,12 @@ name = 'test_multicontainerinterface'
 ns_path = name + ".namespace.yaml"
 ext_source = name + ".extensions.yaml"
 
+ns_builder = NWBNamespaceBuilder(name + ' extensions', name)
+ns_builder.include_type('NWBDataInterface', namespace='core')
+
 potato = NWBGroupSpec(neurodata_type_def='Potato',
                       neurodata_type_inc='NWBDataInterface',
-                      doc='time of multicontainer', quantity='*',
+                      doc='object to put in a multi-container', quantity='*',
                       attributes=[
                           NWBAttributeSpec(name='weight',
                                            doc='weight of potato',
@@ -270,7 +276,7 @@ potato = NWBGroupSpec(neurodata_type_def='Potato',
 potato_sack = NWBGroupSpec(neurodata_type_def='PotatoSack',
                            neurodata_type_inc='NWBDataInterface',
                            name='potato_sack',
-                           doc='test of multicontainer', quantity='?',
+                           doc='test of multi-container', quantity='?',
                            groups=[potato],
                            attributes=[
                                NWBAttributeSpec(name='help',
@@ -279,7 +285,6 @@ potato_sack = NWBGroupSpec(neurodata_type_def='PotatoSack',
                                                 value="It's a sack of potatoes")
                            ])
 
-ns_builder = NWBNamespaceBuilder(name + ' extensions', name)
 ns_builder.add_spec(ext_source, potato_sack)
 ns_builder.export(ns_path)
 
@@ -325,10 +330,14 @@ class PotatoSack(MultiContainerInterface):
 
 from pynwb import NWBHDF5IO, NWBFile
 from datetime import datetime
+from dateutil.tz import tzlocal
 
+# You can add potatoes to a potato sack in different ways
 potato_sack = PotatoSack(potatos=Potato(name='potato1', age=2.3, weight=3.0))
+potato_sack.add_potato(Potato('potato2', 3.0, 4.0))
+potato_sack.create_potato('big_potato', 10.0, 20.0)
 
-nwbfile = NWBFile("a file with metadata", "NB123A", datetime(2018, 6, 1))
+nwbfile = NWBFile("a file with metadata", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal()))
 
 pmod = nwbfile.create_processing_module('module_name', 'desc')
 pmod.add_container(potato_sack)
@@ -345,5 +354,10 @@ load_namespaces(ns_path)
 # from xxx import PotatoSack, Potato
 io = NWBHDF5IO('test_multicontainerinterface.nwb', 'r')
 nwb = io.read()
-print(nwb.get_processing_module()['potato_sack'].get_potato().weight)
+print(nwb.get_processing_module()['potato_sack'].get_potato('big_potato').weight)
+# note: you can call get_processing_module() with or without the module name as
+# an argument. however, if there is more than one module, the name is required.
+# here, there is more than one potato, so the name of the potato is required as
+# an argument to get get_potato
+
 io.close()

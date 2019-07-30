@@ -1,16 +1,19 @@
 from datetime import datetime
 from dateutil.tz import tzlocal
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 from warnings import warn
 import copy as _copy
 
-from .form.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
-from .form import Container
+from hdmf.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
+from .device import Device
 from .epoch import TimeIntervals
-from .ecephys import ElectrodeGroup, Device
+from .ecephys import ElectrodeGroup
 from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
@@ -22,10 +25,11 @@ def _not_parent(arg):
     return arg['name'] != 'parent'
 
 
-@register_class('SpecFile', CORE_NAMESPACE)
-class SpecFile(Container):
-    # TODO: Implement this
-    pass
+@register_class('LabMetaData', CORE_NAMESPACE)
+class LabMetaData(NWBContainer):
+    @docval({'name': 'name', 'type': str, 'doc': 'name of metadata'})
+    def __init__(self, **kwargs):
+        super(LabMetaData, self).__init__(kwargs['name'])
 
 
 @register_class('Subject', CORE_NAMESPACE)
@@ -39,6 +43,7 @@ class Subject(NWBContainer):
         'species',
         'subject_id',
         'weight',
+        'date_of_birth'
     )
 
     @docval({'name': 'age', 'type': str, 'doc': 'the age of the subject', 'default': None},
@@ -47,7 +52,9 @@ class Subject(NWBContainer):
             {'name': 'sex', 'type': str, 'doc': 'the sex of the subject', 'default': None},
             {'name': 'species', 'type': str, 'doc': 'the species of the subject', 'default': None},
             {'name': 'subject_id', 'type': str, 'doc': 'a unique identifier for the subject', 'default': None},
-            {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None})
+            {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None},
+            {'name': 'date_of_birth', 'type': datetime, 'default': None,
+             'doc': 'datetime of date of birth. May be supplied instead of age.'})
     def __init__(self, **kwargs):
         kwargs['name'] = 'subject'
         pargs, pkwargs = fmt_docval_args(super(Subject, self).__init__, kwargs)
@@ -59,6 +66,11 @@ class Subject(NWBContainer):
         self.species = getargs('species', kwargs)
         self.subject_id = getargs('subject_id', kwargs)
         self.weight = getargs('weight', kwargs)
+        date_of_birth = getargs('date_of_birth', kwargs)
+        if date_of_birth and date_of_birth.tzinfo is None:
+            self.date_of_birth = _add_missing_timezone(date_of_birth)
+        else:
+            self.date_of_birth = date_of_birth
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
@@ -93,7 +105,7 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_stimulus_template'
         },
         {
-            'attr': 'modules',
+            'attr': 'processing',
             'add': 'add_processing_module',
             'type': ProcessingModule,
             'create': 'create_processing_module',
@@ -135,12 +147,19 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_ogen_site'
         },
         {
-            'attr': 'time_intervals',
+            'attr': 'intervals',
             'add': 'add_time_intervals',
             'type': TimeIntervals,
             'create': 'create_time_intervals',
             'get': 'get_time_intervals'
         },
+        {
+            'attr': 'lab_meta_data',
+            'add': 'add_lab_meta_data',
+            'type': LabMetaData,
+            'create': 'create_lab_meta_data',
+            'get': 'get_lab_meta_data'
+        }
     ]
 
     __nwbfields__ = ('timestamps_reference_time',
@@ -218,6 +237,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'lab', 'type': str, 'doc': 'lab where experiment was performed', 'default': None},
             {'name': 'acquisition', 'type': (list, tuple),
              'doc': 'Raw TimeSeries objects belonging to this NWBFile', 'default': None},
+            {'name': 'analysis', 'type': (list, tuple),
+             'doc': 'result of analysis', 'default': None},
             {'name': 'stimulus', 'type': (list, tuple),
              'doc': 'Stimulus TimeSeries objects belonging to this NWBFile', 'default': None},
             {'name': 'stimulus_template', 'type': (list, tuple),
@@ -230,12 +251,14 @@ class NWBFile(MultiContainerInterface):
              'doc': 'A table containing trial data', 'default': None},
             {'name': 'invalid_times', 'type': TimeIntervals,
              'doc': 'A table containing times to be omitted from analysis', 'default': None},
-            {'name': 'time_intervals', 'type': (list, tuple),
+            {'name': 'intervals', 'type': (list, tuple),
              'doc': 'any TimeIntervals tables storing time intervals', 'default': None},
-            {'name': 'units', 'type': DynamicTable,
+            {'name': 'units', 'type': Units,
              'doc': 'A table containing unit metadata', 'default': None},
-            {'name': 'modules', 'type': (list, tuple),
+            {'name': 'processing', 'type': (list, tuple),
              'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
+            {'name': 'lab_meta_data', 'type': (list, tuple), 'default': None,
+             'doc': 'an extension that contains lab-specific meta-data'},
             {'name': 'electrodes', 'type': DynamicTable,
              'doc': 'the ElectrodeTable that belongs to this NWBFile', 'default': None},
             {'name': 'electrode_groups', 'type': Iterable,
@@ -277,11 +300,12 @@ class NWBFile(MultiContainerInterface):
         self.__file_create_date = list(map(_add_missing_timezone, self.__file_create_date))
 
         self.acquisition = getargs('acquisition', kwargs)
+        self.analysis = getargs('analysis', kwargs)
         self.stimulus = getargs('stimulus', kwargs)
         self.stimulus_template = getargs('stimulus_template', kwargs)
         self.keywords = getargs('keywords', kwargs)
 
-        self.modules = getargs('modules', kwargs)
+        self.processing = getargs('processing', kwargs)
         epochs = getargs('epochs', kwargs)
         if epochs is not None:
             if epochs.name != 'epochs':
@@ -305,9 +329,10 @@ class NWBFile(MultiContainerInterface):
         self.ic_electrodes = getargs('ic_electrodes', kwargs)
         self.imaging_planes = getargs('imaging_planes', kwargs)
         self.ogen_sites = getargs('ogen_sites', kwargs)
-        self.time_intervals = getargs('time_intervals', kwargs)
+        self.intervals = getargs('intervals', kwargs)
         self.subject = getargs('subject', kwargs)
         self.sweep_table = getargs('sweep_table', kwargs)
+        self.lab_meta_data = getargs('lab_meta_data', kwargs)
 
         recommended = [
             'experimenter',
@@ -343,6 +368,11 @@ class NWBFile(MultiContainerInterface):
                 for c in n.children:
                     stack.append(c)
         return ret
+
+    @property
+    def modules(self):
+        warn("replaced by NWBFile.processing", DeprecationWarning)
+        return self.processing
 
     @property
     def ec_electrode_groups(self):
@@ -501,13 +531,13 @@ class NWBFile(MultiContainerInterface):
         self.__check_trials()
         call_docval_func(self.trials.add_column, kwargs)
 
-    @docval(*get_docval(TimeIntervals.add_row), allow_extra=True)
+    @docval(*get_docval(TimeIntervals.add_interval), allow_extra=True)
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+        See :py:meth:`~pynwb.core.DynamicTable.add_interval` for more details.
 
-        Required fields are *start*, *end*, and any columns that have
+        Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_trial_columns`).
         """
         self.__check_trials()
@@ -619,9 +649,8 @@ def ElectrodeTable(name='electrodes',
                       )
 
 
-def TrialTable(name='trials',
-               description='metadata about experimental trials'):
-    return _tablefunc(name, description, ['start', 'end'])
+def TrialTable(name='trials', description='metadata about experimental trials'):
+    return _tablefunc(name, description, ['start_time', 'stop_time'])
 
 
 def InvalidTimesTable(name='invalid_times', description='time intervals to be removed from analysis'):

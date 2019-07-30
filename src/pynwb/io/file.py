@@ -1,7 +1,7 @@
 from dateutil.parser import parse as dateutil_parse
-from ..form.build import ObjectMapper
+from hdmf.build import ObjectMapper
 from .. import register_map
-from ..file import NWBFile
+from ..file import NWBFile, Subject
 
 
 @register_map(NWBFile)
@@ -11,6 +11,7 @@ class NWBFileMap(ObjectMapper):
         super(NWBFileMap, self).__init__(spec)
         raw_ts_spec = self.spec.get_group('acquisition').get_neurodata_type('NWBDataInterface')
         self.map_spec('acquisition', raw_ts_spec)
+        self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('NWBContainer'))
 
         stimulus_spec = self.spec.get_group('stimulus')
         self.unmap(stimulus_spec)
@@ -32,14 +33,14 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('electrodes', ecephys_spec.get_group('electrodes'))
         self.map_spec('electrode_groups', ecephys_spec.get_neurodata_type('ElectrodeGroup'))
         self.map_spec(
-            'optogenetic_sites',
+            'ogen_sites',
             general_spec.get_group('optogenetics').get_neurodata_type('OptogeneticStimulusSite'))
         self.map_spec(
             'imaging_planes',
             general_spec.get_group('optophysiology').get_neurodata_type('ImagingPlane'))
 
         self.map_spec(
-            'modules',
+            'processing',
             self.spec.get_group('processing').get_neurodata_type('ProcessingModule'))
         # self.unmap(general_spec.get_dataset('stimulus'))
         self.map_spec('stimulus_notes', general_spec.get_dataset('stimulus'))
@@ -47,6 +48,7 @@ class NWBFileMap(ObjectMapper):
 
         self.map_spec('subject', general_spec.get_group('subject'))
         self.map_spec('devices', general_spec.get_group('devices').get_neurodata_type('Device'))
+        self.map_spec('lab_meta_data', general_spec.get_neurodata_type('LabMetaData'))
 
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
@@ -69,3 +71,17 @@ class NWBFileMap(ObjectMapper):
     @ObjectMapper.constructor_arg('file_name')
     def name(self, builder, manager):
         return builder.name
+
+
+@register_map(Subject)
+class SubjectMap(ObjectMapper):
+
+    @ObjectMapper.constructor_arg('date_of_birth')
+    def dateconversion(self, builder, manager):
+        dob_builder = builder.get('date_of_birth')
+        if dob_builder is None:
+            return
+        else:
+            datestr = dob_builder.data
+            date = dateutil_parse(datestr)
+            return date

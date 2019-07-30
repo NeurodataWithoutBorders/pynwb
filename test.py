@@ -5,6 +5,7 @@ from __future__ import print_function
 import warnings
 import re
 import argparse
+import glob
 import inspect
 import logging
 import os.path
@@ -12,54 +13,30 @@ import os
 import sys
 import traceback
 import unittest2 as unittest
+from tests.coloredtestrunner import ColoredTestRunner, ColoredTestResult
 
-flags = {'form': 1, 'pynwb': 2, 'integration': 3, 'example': 4}
+flags = {'pynwb': 2, 'integration': 3, 'example': 4}
 
 TOTAL = 0
 FAILURES = 0
 ERRORS = 0
 
 
-class SuccessRecordingResult(unittest.TextTestResult):
-    '''A unittest test result class that stores successful test cases as well
-    as failures and skips.
-    '''
-
-    def addSuccess(self, test):
-        if not hasattr(self, 'successes'):
-            self.successes = [test]
-        else:
-            self.successes.append(test)
-
-    def get_all_cases_run(self):
-        '''Return a list of each test case which failed or succeeded
-        '''
-
-        cases = []
-
-        if hasattr(self, 'successes'):
-            cases.extend(self.successes)
-        cases.extend([failure[0] for failure in self.failures])
-
-        return cases
-
-
 def run_test_suite(directory, description="", verbose=True):
     global TOTAL, FAILURES, ERRORS
     logging.info("running %s" % description)
     directory = os.path.join(os.path.dirname(__file__), directory)
-    runner = unittest.TextTestRunner(verbosity=verbose, resultclass=SuccessRecordingResult)
-    pynwb_test_result = runner.run(unittest.TestLoader().discover(directory))
+    if verbose > 1:
+        runner = ColoredTestRunner(verbosity=verbose)
+    else:
+        runner = unittest.TextTestRunner(verbosity=verbose, resultclass=ColoredTestResult)
+    test_result = runner.run(unittest.TestLoader().discover(directory))
 
-    TOTAL += pynwb_test_result.testsRun
-    FAILURES += len(pynwb_test_result.failures)
-    ERRORS += len(pynwb_test_result.errors)
+    TOTAL += test_result.testsRun
+    FAILURES += len(test_result.failures)
+    ERRORS += len(test_result.errors)
 
-    for tc, reason in pynwb_test_result.skipped:
-        if not hasattr(tc, '_abc_cache'):
-            print(tc.__class__.__name__, reason)
-
-    return pynwb_test_result
+    return test_result
 
 
 def _import_from_file(script):
@@ -86,6 +63,38 @@ def run_example_tests():
             ws = list()
             with warnings.catch_warnings(record=True) as tmp:
                 _import_from_file(script)
+                for w in tmp:  # ignore RunTimeWarnings about importing
+                    if isinstance(w.message, RuntimeWarning) and not warning_re.match(str(w.message)):
+                        ws.append(w)
+            for w in ws:
+                warnings.showwarning(w.message, w.category, w.filename, w.lineno, w.line)
+        except Exception:
+            print(traceback.format_exc())
+            FAILURES += 1
+            ERRORS += 1
+
+
+def validate_nwbs():
+    global TOTAL, FAILURES, ERRORS
+    logging.info('running validation tests on NWB files')
+    examples_nwbs = glob.glob('*.nwb')
+
+    import pynwb
+
+    TOTAL += len(examples_nwbs)
+    for nwb in examples_nwbs:
+        try:
+            logging.info("Validating file %s" % nwb)
+
+            ws = list()
+            with warnings.catch_warnings(record=True) as tmp:
+                with pynwb.NWBHDF5IO(nwb, mode='r') as io:
+                    errors = pynwb.validate(io)
+                    if errors:
+                        FAILURES += 1
+                        ERRORS += 1
+                        for err in errors:
+                            print("Error: %s" % err)
                 for w in tmp:  # ignore RunTimeWarnings about importing
                     if isinstance(w.message, RuntimeWarning) and not warning_re.match(str(w.message)):
                         ws.append(w)
@@ -153,8 +162,6 @@ def main():
     parser.set_defaults(verbosity=1, suites=[])
     parser.add_argument('-v', '--verbose', const=2, dest='verbosity', action='store_const', help='run in verbose mode')
     parser.add_argument('-q', '--quiet', const=0, dest='verbosity', action='store_const', help='run disabling output')
-    parser.add_argument('-f', '--form', action='append_const', const=flags['form'], dest='suites',
-                        help='run unit tests for form package')
     parser.add_argument('-p', '--pynwb', action='append_const', const=flags['pynwb'], dest='suites',
                         help='run unit tests for pynwb package')
     parser.add_argument('-i', '--integration', action='append_const', const=flags['integration'], dest='suites',
@@ -176,17 +183,20 @@ def main():
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
-    # Run unit tests for form package
-    if flags['form'] in args.suites:
-        run_test_suite("tests/unit/form_tests", "form unit tests", verbose=args.verbosity)
+    warnings.simplefilter('always')
+
+    warnings.filterwarnings("ignore", category=ImportWarning, module='importlib._bootstrap',
+                            message=("can't resolve package from __spec__ or __package__, falling back on __name__ "
+                                     "and __path__"))
 
     # Run unit tests for pynwb package
     if flags['pynwb'] in args.suites:
-        run_test_suite("tests/unit/pynwb_tests", "pynwb unit tests", verbose=args.verbosity)
+        run_test_suite("tests/unit", "pynwb unit tests", verbose=args.verbosity)
 
     # Run example tests
     if flags['example'] in args.suites:
         run_example_tests()
+        validate_nwbs()
 
     # Run integration tests
     if flags['integration'] in args.suites:

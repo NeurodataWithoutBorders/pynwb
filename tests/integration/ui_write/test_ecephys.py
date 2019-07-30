@@ -1,6 +1,6 @@
 import unittest2 as unittest
 
-from pynwb.form.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
+from hdmf.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
 
 from pynwb.ecephys import ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, Clustering, ClusterWaveforms,\
                           SpikeEventSeries, EventWaveform, EventDetection, FeatureExtraction
@@ -125,14 +125,14 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
                                        'neurodata_type': 'VectorData', 'namespace': 'core'}),
         ]
         return GroupBuilder('electrodes', datasets={d.name: d for d in datasets},
-                            attributes={'colnames': ('x',
-                                                     'y',
-                                                     'z',
-                                                     'imp',
-                                                     'location',
-                                                     'filtering',
-                                                     'group',
-                                                     'group_name'),
+                            attributes={'colnames': (b'x',
+                                                     b'y',
+                                                     b'z',
+                                                     b'imp',
+                                                     b'location',
+                                                     b'filtering',
+                                                     b'group',
+                                                     b'group_name'),
                                         'description': 'metadata about extracellular electrodes',
                                         'neurodata_type': 'DynamicTable',
                                         'namespace': 'core',
@@ -310,13 +310,19 @@ class TestClusteringIO(base.TestDataInterfaceIO):
                                 'namespace': base.CORE_NAMESPACE},
                             datasets={
                                 'num': DatasetBuilder('num', [0, 1, 2, 0, 1, 2]),
-                                'times': DatasetBuilder('times', list(range(10, 61, 10))),
-                                'peak_over_rms': DatasetBuilder('peak_over_rms', [100, 101, 102]),
+                                'times': DatasetBuilder('times', list(range(10., 61., 10.))),
+                                'peak_over_rms': DatasetBuilder('peak_over_rms', [100., 101., 102.]),
                                 'description': DatasetBuilder('description', "A fake Clustering interface")})
 
     def setUpContainer(self):
-        return Clustering("A fake Clustering interface",
-                          [0, 1, 2, 0, 1, 2], [100, 101, 102], list(range(10, 61, 10)))
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            return Clustering("A fake Clustering interface",
+                              [0, 1, 2, 0, 1, 2], [100., 101., 102.], [float(i) for i in range(10, 61, 10)])
+
+    def roundtripContainer(self, cache_spec=False):
+        # self.reader.read() will throw DeprecationWarning when reading the Clustering object
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            return super(TestClusteringIO, self).roundtripContainer(cache_spec)
 
 
 class EventWaveformConstructor(base.TestDataInterfaceIO):
@@ -324,7 +330,7 @@ class EventWaveformConstructor(base.TestDataInterfaceIO):
         TestElectricalSeriesIO.make_electrode_table(self)
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
         sES = SpikeEventSeries(
-            'test_sES', list(range(10)), list(range(10)), region)
+            'test_sES', ((1, 1, 1), (2, 2, 2)), list(range(2)), region)
         ew = EventWaveform(sES)
         return ew
 
@@ -341,16 +347,23 @@ class ClusterWaveformsConstructor(base.TestDataInterfaceIO):
         times = [1.3, 2.3]
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
-        self.clustering = Clustering('description', num, peak_over_rms, times)
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            self.clustering = Clustering('description', num, peak_over_rms, times)
         means = [[7.3, 7.3]]
         stdevs = [[8.3, 8.3]]
-        cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            cw = ClusterWaveforms(self.clustering, 'filtering', means, stdevs)
         return cw
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
         nwbfile.add_acquisition(self.clustering)
         nwbfile.add_acquisition(self.container)
+
+    def roundtripContainer(self, cache_spec=False):
+        # self.reader.read() will throw DeprecationWarning when reading the ClusterWaveformsConstructor object
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            return super(ClusterWaveformsConstructor, self).roundtripContainer(cache_spec)
 
 
 class FeatureExtractionConstructor(base.TestDataInterfaceIO):
@@ -359,7 +372,7 @@ class FeatureExtractionConstructor(base.TestDataInterfaceIO):
         TestElectricalSeriesIO.make_electrode_table(self)
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
         description = ['desc1', 'desc2', 'desc3']
-        features = [[[0, 1, 2], [3, 4, 5]], [[6, 7, 8], [9, 10, 11]]]
+        features = [[[0., 1., 2.], [3., 4., 5.]], [[6., 7., 8.], [9., 10., 11.]]]
         fe = FeatureExtraction(region, description, event_times, features)
         return fe
 

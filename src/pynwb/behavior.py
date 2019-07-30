@@ -1,6 +1,9 @@
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
-from .form.utils import docval, popargs
+from hdmf.utils import docval, popargs
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer, MultiContainerInterface
@@ -25,11 +28,11 @@ class SpatialSeries(TimeSeries):
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this SpatialSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, None),
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
             {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to meters',
+             'doc': 'Scalar to multiply each element by to convert to meters',
              'default': _default_conversion},
             {'name': 'resolution', 'type': float,
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',

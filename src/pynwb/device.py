@@ -1,4 +1,4 @@
-from .form.utils import docval, call_docval_func, popargs
+from hdmf.utils import docval, call_docval_func, popargs
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
 
