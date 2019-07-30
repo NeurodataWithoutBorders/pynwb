@@ -2,6 +2,7 @@ from dateutil.parser import parse as dateutil_parse
 from hdmf.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile, Subject
+from ..core import ScratchData
 
 
 @register_map(NWBFile)
@@ -49,6 +50,39 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('subject', general_spec.get_group('subject'))
         self.map_spec('devices', general_spec.get_group('devices').get_neurodata_type('Device'))
         self.map_spec('lab_meta_data', general_spec.get_neurodata_type('LabMetaData'))
+
+        scratch_spec = self.spec.get_group('scratch')
+        self.unmap(scratch_spec)
+        self.map_spec('scratch_datas', scratch_spec.get_neurodata_type('ScratchData'))
+        self.map_spec('scratch_containers', scratch_spec.get_neurodata_type('NWBContainer'))
+
+    @ObjectMapper.object_attr('scratch_datas')
+    def scratch_datas(self, container, manager):
+        scratch = container.scratch
+        ret = list()
+        for s in scratch.values():
+            if isinstance(s, ScratchData):
+                ret.append(s)
+        return ret
+
+    @ObjectMapper.object_attr('scratch_containers')
+    def scratch_containers(self, container, manager):
+        scratch = container.scratch
+        ret = list()
+        for s in scratch.values():
+            if not isinstance(s, ScratchData):
+                ret.append(s)
+        return ret
+
+    @ObjectMapper.constructor_arg('scratch')
+    def scratch(self, builder, manager):
+        scratch = builder.get('scratch')
+        ret = list()
+        for g in scratch.groups.values():
+            ret.append(manager.construct(g))
+        for d in scratch.datasets.values():
+            ret.append(manager.construct(d))
+        return tuple(ret)
 
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
