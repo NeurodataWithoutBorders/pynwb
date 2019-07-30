@@ -165,11 +165,12 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
         for k in sorted(self.fields):  # sorted to enable tests
             v = self.fields[k]
-            template += "  {}: {}\n".format(k, self.__smart_str(v))
+            if not hasattr(v, '__len__') or len(v) > 0:
+                template += "  {}: {}\n".format(k, self.__smart_str(v, 1))
         return template
 
     @staticmethod
-    def __smart_str(v):
+    def __smart_str(v, num_indent):
         """
         Print compact string representation of data.
 
@@ -192,28 +193,57 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         str
 
         """
-        if isinstance(v, list):
+
+        if isinstance(v, list) or isinstance(v, tuple):
             if len(v) and isinstance(v[0], NWBBaseType):
-                return str(v)
+                return NWBBaseType.__smart_str_list(v, num_indent, '(')
             try:
-                return str(np.array(v))
+                return str(np.asarray(v))
             except ValueError:
-                return str(v)
+                return NWBBaseType.__smart_str_list(v, num_indent, '(')
         elif isinstance(v, dict):
-            template = '{'
-            keys = list(sorted(v.keys()))
-            for k in keys[:-1]:
-                template += " {} {}, ".format(k, type(v[k]))
-            if keys:
-                template += " {} {}".format(keys[-1], type(v[keys[-1]]))
-            return template + ' }'
+            return NWBBaseType.__smart_str_dict(v, num_indent)
         elif isinstance(v, set):
-            out = str(list(sorted(list(v))))
-            return '{' + out[1:-1] + '}'
+            return NWBBaseType.__smart_str_list(sorted(list(v)), num_indent, '{')
         elif isinstance(v, NWBBaseType):
             return "{} {}".format(getattr(v, 'name'), type(v))
         else:
             return str(v)
+
+    @staticmethod
+    def __smart_str_list(l, num_indent, left_br):
+        if left_br == '(':
+            right_br = ')'
+        if left_br == '{':
+            right_br = '}'
+        if len(l) == 0:
+            return left_br + ' ' + right_br
+        indent = num_indent * 2 * ' '
+        indent_in = (num_indent + 1) * 2 * ' '
+        out = left_br
+        for v in l[:-1]:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(v, num_indent + 1) + ','
+        if l:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(l[-1], num_indent + 1)
+        out += '\n' + indent + right_br
+        return out
+
+    @staticmethod
+    def __smart_str_dict(d, num_indent):
+        left_br = '{'
+        right_br = '}'
+        if len(d) == 0:
+            return left_br + ' ' + right_br
+        indent = num_indent * 2 * ' '
+        indent_in = (num_indent + 1) * 2 * ' '
+        out = left_br
+        keys = sorted(list(d.keys()))
+        for k in keys[:-1]:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(k, num_indent + 1) + ' ' + str(type(d[k])) + ','
+        if keys:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(keys[-1], num_indent + 1) + ' ' + str(type(d[keys[-1]]))
+        out += '\n' + indent + right_br
+        return out
 
 
 @register_class('NWBContainer', CORE_NAMESPACE)
@@ -1152,6 +1182,9 @@ class DynamicTable(NWBDataInterface):
             else:
                 c.add_row(data[colname])
 
+    def __eq__(self, other):
+        return self.to_dataframe().equals(other.to_dataframe())
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'description', 'type': str, 'doc': 'a description for this column'},
             {'name': 'data', 'type': ('array_data', 'data'),
@@ -1269,13 +1302,16 @@ class DynamicTable(NWBDataInterface):
             return self[key]
         return default
 
-    def to_dataframe(self):
+    def to_dataframe(self, exclude=set([])):
         '''Produce a pandas DataFrame containing this table's data.
         '''
 
         data = {}
         for name in self.colnames:
+            if name in exclude:
+                continue
             col = self.__df_cols[self.__colids[name]]
+
             if isinstance(col.data, (Dataset, np.ndarray)) and col.data.ndim > 1:
                 data[name] = [x for x in col[:]]
             else:
@@ -1346,6 +1382,10 @@ class DynamicTable(NWBDataInterface):
             else:
                 columns.append({'name': col_name,
                                 'description': 'no description'})
+                if hasattr(df[col_name].iloc[0], '__len__') and not isinstance(df[col_name].iloc[0], str):
+                    lengths = [len(x) for x in df[col_name]]
+                    if not lengths[1:] == lengths[:-1]:
+                        columns[-1].update(index=True)
 
         if index_column is not None:
             ids = ElementIdentifiers(name=index_column, data=df[index_column].values.tolist())

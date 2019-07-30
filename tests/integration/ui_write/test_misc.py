@@ -128,8 +128,8 @@ class TestSpectralAnalysis(base.TestDataInterfaceIO):
     def addContainer(self, nwbfile):
         nwbfile.add_acquisition(self.timeseries)
         prcs_mod = nwbfile.create_processing_module('test_mod', 'test_mod')
-        prcs_mod.add_data_interface(self.container)
+        prcs_mod.add(self.container)
 
     def getContainer(self, nwbfile):
 
-        return nwbfile.modules['test_mod']['LFPSpectralAnalysis']
+        return nwbfile.processing['test_mod']['LFPSpectralAnalysis']

@@ -1,4 +1,4 @@
-import unittest
+import unittest2 as unittest
 
 import numpy as np
 
@@ -40,8 +40,8 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
     def test_init(self):
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [1, 3], 'the second and fourth electrodes', table)
-        data = np.zeros(10)
-        timestamps = np.arange(10)
+        data = ((1, 1, 1), (2, 2, 2))
+        timestamps = np.arange(2)
         sES = SpikeEventSeries('test_sES', data, timestamps, region)  # noqa: F405
         self.assertEqual(sES.name, 'test_sES')
         # self.assertListEqual(sES.data, data)
@@ -51,7 +51,7 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
     def test_no_rate(self):
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [1, 3], 'the second and fourth electrodes', table)
-        data = np.zeros(10)
+        data = ((1, 1, 1), (2, 2, 2))
         with self.assertRaises(TypeError):
             SpikeEventSeries('test_sES', data, region, rate=1.)  # noqa: F405
 
@@ -103,7 +103,8 @@ class ClusteringConstructor(unittest.TestCase):
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
 
-        cc = Clustering('description', num, peak_over_rms, times)  # noqa: F405
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            cc = Clustering('description', num, peak_over_rms, times)  # noqa: F405
         self.assertEqual(cc.description, 'description')
         self.assertEqual(cc.num, num)
         self.assertEqual(cc.peak_over_rms, peak_over_rms)
@@ -115,12 +116,14 @@ class ClusterWaveformsConstructor(unittest.TestCase):
         times = [1.3, 2.3]
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
-        cc = Clustering('description', num, peak_over_rms, times)  # noqa: F405
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            cc = Clustering('description', num, peak_over_rms, times)  # noqa: F405
 
         means = [[7.3, 7.3]]
         stdevs = [[8.3, 8.3]]
 
-        cw = ClusterWaveforms(cc, 'filtering', means, stdevs)  # noqa: F405
+        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+            cw = ClusterWaveforms(cc, 'filtering', means, stdevs)  # noqa: F405
         self.assertEqual(cw.clustering_interface, cc)
         self.assertEqual(cw.waveform_filtering, 'filtering')
         self.assertEqual(cw.waveform_mean, means)

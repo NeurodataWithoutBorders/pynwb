@@ -1,5 +1,9 @@
 import numpy as np
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
+import warnings
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
 
@@ -214,10 +218,11 @@ class Units(DynamicTable):
              'default': None},
             {'name': 'electrode_group', 'type': 'ElectrodeGroup', 'default': None,
              'doc': 'the electrode group that each unit came from'},
-            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each unit',
+            {'name': 'waveform_mean', 'type': 'array_data',
+             'doc': 'the spike waveform mean for each unit. Shape is (time,) or (time, electrodes)',
              'default': None},
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
-             'doc': 'the spike waveform standard deviation for each unit'},
+             'doc': 'the spike waveform standard deviation for each unit. Shape is (time,) or (time, electrodes)'},
             {'name': 'id', 'type': int, 'default': None,
              'help': 'the id for each unit'},
             allow_extra=True)
@@ -292,6 +297,9 @@ class DecompositionSeries(TimeSeries):
         metric, source_timeseries, bands = popargs('metric', 'source_timeseries', 'bands', kwargs)
         super(DecompositionSeries, self).__init__(**kwargs)
         self.source_timeseries = source_timeseries
+        if self.source_timeseries is None:
+            warnings.warn("It is best practice to set `source_timeseries` if it is present to document "
+                          "where the DecompositionSeries was derived from. (Optional)")
         self.metric = metric
         if bands is None:
             bands = DynamicTable("bands", "data about the frequency bands that the signal was decomposed into")

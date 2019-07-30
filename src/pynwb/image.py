@@ -1,6 +1,9 @@
 import numpy as np
 import warnings
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
 from hdmf.utils import docval, popargs, call_docval_func
 
@@ -77,8 +80,8 @@ class ImageSeries(TimeSeries):
 
     @bits_per_pixel.setter
     def bits_per_pixel(self, val):
-        warnings.warn("bits_per_pixel is no longer used", DeprecationWarning)
         if val is not None:
+            warnings.warn("bits_per_pixel is no longer used", DeprecationWarning)
             self.fields['bits_per_pixel'] = val
 
 

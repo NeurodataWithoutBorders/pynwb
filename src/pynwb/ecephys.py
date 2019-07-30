@@ -1,4 +1,7 @@
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
@@ -156,8 +159,8 @@ class EventDetection(NWBDataInterface):
                      'source_idx',
                      'times')
 
-    _help_statement = ("Description of how events were detected, such as voltage "
-                       "threshold, or dV/dT threshold, as well as relevant values.")
+    __help = ("Description of how events were detected, such as voltage "
+              "threshold, or dV/dT threshold, as well as relevant values.")
 
     @docval({'name': 'detection_method', 'type': str,
              'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, \

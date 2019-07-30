@@ -84,8 +84,7 @@ vcs = VoltageClampSeries(
     name='vcs', data=[0.1, 0.2, 0.3, 0.4, 0.5],
     unit='A', conversion=1e-12, resolution=np.nan, starting_time=123.6, rate=20e3,
     electrode=elec, gain=0.02, capacitance_slow=100e-12, resistance_comp_correction=70.0,
-    capacitance_fast=np.nan, resistance_comp_bandwidth=np.nan, resistance_comp_prediction=np.nan,
-    whole_cell_capacitance_comp=np.nan, whole_cell_series_resistance_comp=np.nan, sweep_number=15)
+    sweep_number=15)
 
 nwbfile.add_acquisition(vcs)
 
@@ -147,6 +146,6 @@ elec = nwbfile.get_ic_electrode('elec0')
 elec = ccss.electrode
 
 ####################
-# And the device name via :py:meth:`~pynbwb.file.NWBFile.get_device`
+# And the device name via :py:meth:`~pynwb.file.NWBFile.get_device`
 
 device = nwbfile.get_device('Heka ITC-1600')

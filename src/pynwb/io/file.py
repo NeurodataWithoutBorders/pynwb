@@ -1,7 +1,7 @@
 from dateutil.parser import parse as dateutil_parse
 from hdmf.build import ObjectMapper
 from .. import register_map
-from ..file import NWBFile
+from ..file import NWBFile, Subject
 
 
 @register_map(NWBFile)
@@ -40,7 +40,7 @@ class NWBFileMap(ObjectMapper):
             general_spec.get_group('optophysiology').get_neurodata_type('ImagingPlane'))
 
         self.map_spec(
-            'modules',
+            'processing',
             self.spec.get_group('processing').get_neurodata_type('ProcessingModule'))
         # self.unmap(general_spec.get_dataset('stimulus'))
         self.map_spec('stimulus_notes', general_spec.get_dataset('stimulus'))
@@ -71,3 +71,17 @@ class NWBFileMap(ObjectMapper):
     @ObjectMapper.constructor_arg('file_name')
     def name(self, builder, manager):
         return builder.name
+
+
+@register_map(Subject)
+class SubjectMap(ObjectMapper):
+
+    @ObjectMapper.constructor_arg('date_of_birth')
+    def dateconversion(self, builder, manager):
+        dob_builder = builder.get('date_of_birth')
+        if dob_builder is None:
+            return
+        else:
+            datestr = dob_builder.data
+            date = dateutil_parse(datestr)
+            return date

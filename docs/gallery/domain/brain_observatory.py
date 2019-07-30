@@ -156,7 +156,7 @@ ophys_module = nwbfile.create_processing_module(
 image_segmentation_interface = ImageSegmentation(
     name='image_segmentation')
 
-ophys_module.add_data_interface(image_segmentation_interface)
+ophys_module.add(image_segmentation_interface)
 
 plane_segmentation = image_segmentation_interface.create_plane_segmentation(
     name='plane_segmentation',
@@ -173,7 +173,7 @@ for cell_specimen_id in cell_specimen_ids:
 # each ROI.
 
 dff_interface = DfOverF(name='dff_interface')
-ophys_module.add_data_interface(dff_interface)
+ophys_module.add(dff_interface)
 
 rt_region = plane_segmentation.create_roi_table_region(
     description='segmented cells with cell_specimen_ids',
