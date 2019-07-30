@@ -328,6 +328,8 @@ Fields:
         self.nwbfile.add_trial(start_time=50.0, stop_time=70.0)
         self.nwbfile.add_invalid_times_column('comments', 'description of reason for omitting time')
         self.nwbfile.create_processing_module('test_mod', 'test_description')
+        self.nwbfile.create_time_intervals('custom_interval', 'a custom time interval')
+        self.nwbfile.intervals['custom_interval'].add_interval(start_time=10., stop_time=20.)
         newfile = self.nwbfile.copy()
 
         # test dictionaries
@@ -348,6 +350,13 @@ Fields:
         self.assertIs(self.nwbfile.trials['stop_time'], newfile.trials['stop_time'])
         self.assertIsNot(self.nwbfile.invalid_times, newfile.invalid_times)
         self.assertTupleEqual(self.nwbfile.invalid_times.colnames, newfile.invalid_times.colnames)
+        self.assertIsNot(self.nwbfile.intervals['custom_interval'], newfile.intervals['custom_interval'])
+        self.assertTupleEqual(self.nwbfile.intervals['custom_interval'].colnames,
+                              newfile.intervals['custom_interval'].colnames)
+        self.assertIs(self.nwbfile.intervals['custom_interval']['start_time'],
+                      newfile.intervals['custom_interval']['start_time'])
+        self.assertIs(self.nwbfile.intervals['custom_interval']['stop_time'],
+                      newfile.intervals['custom_interval']['stop_time'])
 
 
 class SubjectTest(unittest.TestCase):

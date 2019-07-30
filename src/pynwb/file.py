@@ -595,23 +595,30 @@ class NWBFile(MultiContainerInterface):
 
     def copy(self):
         """
-        Shallow copy all fields except for DynamicTables. Columns of DynamicTables are copied over rather than
-        a link to the group itself.
+        Shallow copy of an NWB file.
         Useful for linking across files.
         """
         kwargs = self.fields.copy()
-        for key in self.fields.keys():
+        for key in self.fields:
             if isinstance(self.fields[key], LabelledDict):
                 kwargs[key] = list(self.fields[key].values())
 
-        # copy the columns of dynamic tables
+        # HDF5 object references cannot point to objects external to the file. Both DynamicTables such as TimeIntervals
+        # contain such object references and types such as ElectricalSeries contain references to DynamicTables.
+        # Below, copy the table and link to the columns so that object references work.
         fields_to_copy = ['electrodes', 'epochs', 'trials', 'units', 'subject', 'sweep_table', 'invalid_times']
         for field in fields_to_copy:
-            if field in kwargs.keys():
+            if field in kwargs:
                 if isinstance(self.fields[field], DynamicTable):
                     kwargs[field] = self.fields[field].copy()
                 else:
                     warn('Cannot copy child of NWBFile that is not a DynamicTable.')
+
+        # handle dictionaries of DynamicTables
+        dt_to_copy = ['scratch', 'intervals']
+        for dt in dt_to_copy:
+            if dt in kwargs:
+                kwargs[dt] = [v.copy() if isinstance(v, DynamicTable) else v for v in kwargs[dt]]
 
         return NWBFile(**kwargs)
 
