@@ -303,7 +303,7 @@ class NWBFile(MultiContainerInterface):
             self.fields['file_create_date'] = [self.fields['file_create_date']]
         self.fields['file_create_date'] = list(map(_add_missing_timezone, self.fields['file_create_date']))
 
-        recommended = [
+        fieldnames = [
             'acquisition',
             'analysis',
             'stimulus',
@@ -342,7 +342,7 @@ class NWBFile(MultiContainerInterface):
             'virus',
             'stimulus_notes',
         ]
-        for attr in recommended:
+        for attr in fieldnames:
             setattr(self, attr, kwargs.get(attr, None))
 
         if getargs('source_script', kwargs) is None and getargs('source_script_file_name', kwargs) is not None:
@@ -595,7 +595,8 @@ class NWBFile(MultiContainerInterface):
 
     def copy(self):
         """
-        Shallow copy all fields except for DynamicTables.
+        Shallow copy all fields except for DynamicTables. Columns of DynamicTables are copied over rather than
+        a link to the group itself.
         Useful for linking across files.
         """
         kwargs = self.fields.copy()
@@ -603,6 +604,7 @@ class NWBFile(MultiContainerInterface):
             if isinstance(self.fields[key], LabelledDict):
                 kwargs[key] = list(self.fields[key].values())
 
+        # copy the columns of dynamic tables
         fields_to_copy = ['electrodes', 'epochs', 'trials', 'units', 'subject', 'sweep_table', 'invalid_times']
         for field in fields_to_copy:
             if field in kwargs.keys():
