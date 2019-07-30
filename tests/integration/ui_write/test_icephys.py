@@ -153,9 +153,9 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
                                     starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                     stimulus_description="gotcha ya!", sweep_number=4711)
         self.sweep_table = SweepTable(name='sweep_table')
-        self.sweep_table.add_entry(self.pcs)
 
     def addContainer(self, nwbfile):
+        nwbfile.sweep_table = self.sweep_table
         nwbfile.add_device(self.device)
         nwbfile.add_ic_electrode(self.elec)
         nwbfile.add_acquisition(self.pcs)
@@ -306,12 +306,10 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
                                       stimulus_description="gotcha ya!", sweep_number=4712)
 
         self.sweep_table = SweepTable(name='sweep_table')
-        self.sweep_table.add_entry(self.pcs1)
-        self.sweep_table.add_entry(self.pcs2a)
-        self.sweep_table.add_entry(self.pcs2b)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the SweepTable container to it '''
+        nwbfile.sweep_table = self.sweep_table
         nwbfile.add_device(self.device)
         nwbfile.add_ic_electrode(self.elec)
 

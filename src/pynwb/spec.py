@@ -73,26 +73,17 @@ class BaseStorageOverride(object):
 
     @classmethod
     def type_key(cls):
-        ''' Get the key used to store data type on an instance
-
-        Override this method to use a different name for 'data_type'
-        '''
+        ''' Get the key used to store data type on an instance'''
         return cls.__type_key
 
     @classmethod
     def inc_key(cls):
-        ''' Get the key used to define a data_type include.
-
-        Override this method to use a different keyword for 'data_type_inc'
-        '''
+        ''' Get the key used to define a data_type include.'''
         return cls.__inc_key
 
     @classmethod
     def def_key(cls):
-        ''' Get the key used to define a data_type definition.
-
-        Override this method to use a different keyword for 'data_type_def'
-        '''
+        ''' Get the key used to define a data_type definition.'''
         return cls.__def_key
 
     @property
