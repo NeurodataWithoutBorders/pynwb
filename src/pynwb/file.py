@@ -18,7 +18,8 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion,\
+                  LabelledDict
 
 
 def _not_parent(arg):
@@ -358,16 +359,29 @@ class NWBFile(MultiContainerInterface):
         if getargs('source_script', kwargs) is None and getargs('source_script_file_name', kwargs) is not None:
             raise ValueError("'source_script' cannot be None when 'source_script_file_name' is set")
 
+        self.__obj = None
+
     def all_children(self):
         stack = [self]
         ret = list()
+        self.__obj = LabelledDict(label='all_objects', def_key_name='object_id')
         while len(stack):
             n = stack.pop()
             ret.append(n)
+            if n.object_id is not None:
+                self.__obj[n.object_id] = n
+            else:
+                warn('%s "%s" does not have an object_id' % (n.neurodata_type, n.name))
             if hasattr(n, 'children'):
                 for c in n.children:
                     stack.append(c)
         return ret
+
+    @property
+    def objects(self):
+        if self.__obj is None:
+            self.all_children()
+        return self.__obj
 
     @property
     def modules(self):
