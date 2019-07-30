@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
+from hdmf.data_utils import DataIO
 from hdmf import Container, Data, DataRegion, get_region_slicer
 
 from . import CORE_NAMESPACE, register_class
@@ -13,29 +14,18 @@ def _not_parent(arg):
     return arg['name'] != 'parent'
 
 
-def set_parents(container, parent):
-    if isinstance(container, list):
-        for c in container:
-            if c.parent is None:
-                c.parent = parent
-        ret = container
-    else:
-        ret = [container]
-        if container.parent is None:
-            container.parent = parent
-    return ret
-
-
 class LabelledDict(dict):
     '''
     A dict wrapper class for aggregating Timeseries
     from the standard locations
     '''
 
-    @docval({'name': 'label', 'type': str, 'doc': 'the TimeSeries type ('})
+    @docval({'name': 'label', 'type': str, 'doc': 'the label on this dictionary'},
+            {'name': 'def_key_name', 'type': str, 'doc': 'the default key name', 'default': 'name'})
     def __init__(self, **kwargs):
-        label = getargs('label', kwargs)
+        label, def_key_name = getargs('label', 'def_key_name', kwargs)
         self.__label = label
+        self.__defkey = def_key_name
 
     @property
     def label(self):
@@ -47,7 +37,7 @@ class LabelledDict(dict):
             key, val = args.split("==")
             key = key.strip()
             val = val.strip()
-            if key != 'name':
+            if key != self.__defkey:
                 ret = list()
                 for item in self.values():
                     if getattr(item, key, None) == val:
@@ -165,7 +155,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
         for k in sorted(self.fields):  # sorted to enable tests
             v = self.fields[k]
-            if not hasattr(v, '__len__') or len(v) > 0:
+            if isinstance(v, DataIO) or not hasattr(v, '__len__') or len(v) > 0:
                 template += "  {}: {}\n".format(k, self.__smart_str(v, 1))
         return template
 
@@ -295,7 +285,10 @@ class NWBContainer(NWBBaseType, Container):
                         else:
                             val = [val]
                         for v in val:
-                            self.add_child(v)
+                            if not isinstance(v.parent, Container):
+                                v.parent = self
+                            # else, the ObjectMapper will create a link from self (parent) to v (child with existing
+                            # parent)
 
                 ret.append(nwbdi_setter)
         return ret[-1]
@@ -767,7 +760,9 @@ class MultiContainerInterface(NWBDataInterface):
                 containers = container
             d = getattr(self, attr_name)
             for tmp in containers:
-                self.add_child(tmp)
+                if not isinstance(tmp.parent, Container):
+                    tmp.parent = self
+                # else, the ObjectMapper will create a link from self (parent) to tmp (child with existing parent)
                 if tmp.name in d:
                     msg = "'%s' already exists in '%s'" % (tmp.name, self.name)
                     raise ValueError(msg)
@@ -1199,7 +1194,7 @@ class DynamicTable(NWBDataInterface):
                 ckwargs['table'] = table
 
         col = cls(**ckwargs)
-        self.add_child(col)
+        col.parent = self
         columns = [col]
 
         # Add index if it's been specified
@@ -1215,7 +1210,9 @@ class DynamicTable(NWBDataInterface):
                     raise ValueError("cannot pass non-empty index with empty data to index")
                 col_index = VectorIndex(name + "_index", index, col)
             columns.insert(0, col_index)
-            self.add_child(col_index)
+            if not isinstance(col_index.parent, Container):
+                col_index.parent = self
+            # else, the ObjectMapper will create a link from self (parent) to col_index (child with existing parent)
             col = col_index
             self.__indices[col_index.name] = col_index
 
