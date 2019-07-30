@@ -646,7 +646,7 @@ class NWBFile(MultiContainerInterface):
                 data = ScratchData(name=name, data=data, notes=notes)
         self._add_scratch(data)
 
-    @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get', 'default': None},
+    @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
             {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
     def get_scratch(self, **kwargs):
         '''Get data from the scratch space'''

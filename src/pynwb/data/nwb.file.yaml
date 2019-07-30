@@ -78,7 +78,7 @@ groups:
       quantity: '*'
   - name: scratch
     doc: 'A place to store one-off analysis results. Data placed here is not intended for
-      sharing. By placing data here, users acknowledge that where will be no guarantee that
+      sharing. By placing data here, users acknowledge that there is no guarantee that
       their data meets any standard.'
     groups:
     - neurodata_type_inc: NWBContainer
