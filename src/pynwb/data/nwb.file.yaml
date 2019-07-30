@@ -80,6 +80,7 @@ groups:
     doc: 'A place to store one-off analysis results. Data placed here is not intended for
       sharing. By placing data here, users acknowledge that there is no guarantee that
       their data meets any standard.'
+    quantity: '?'
     groups:
     - neurodata_type_inc: NWBContainer
       doc: Any one-off containers

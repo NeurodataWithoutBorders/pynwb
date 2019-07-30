@@ -78,11 +78,12 @@ class NWBFileMap(ObjectMapper):
     def scratch(self, builder, manager):
         scratch = builder.get('scratch')
         ret = list()
-        for g in scratch.groups.values():
-            ret.append(manager.construct(g))
-        for d in scratch.datasets.values():
-            ret.append(manager.construct(d))
-        return tuple(ret)
+        if scratch is not None:
+            for g in scratch.groups.values():
+                ret.append(manager.construct(g))
+            for d in scratch.datasets.values():
+                ret.append(manager.construct(d))
+        return tuple(ret) if len(ret) > 0 else None
 
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
