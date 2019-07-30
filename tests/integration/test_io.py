@@ -350,11 +350,26 @@ class TestH5DataIO(unittest.TestCase):
             self.assertTrue(np.all(dset[:] == a.data))
             self.assertEqual(dset.fillvalue, -1)
 
-    def test_write_dataset_datachunkiterator(self):
+    def test_write_dataset_datachunkiterator_data_and_time(self):
         a = np.arange(30).reshape(5, 2, 3)
         aiter = iter(a)
         daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
-        ts = TimeSeries('ts_name', daiter, 'A', timestamps=np.arange(5))
+        tstamps = np.arange(5)
+        tsiter = DataChunkIterator.from_iterable(tstamps)
+        ts = TimeSeries('ts_name', daiter, 'A', timestamps=tsiter)
+        self.nwbfile.add_acquisition(ts)
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(self.nwbfile, cache_spec=False)
+        with File(self.path, 'r') as f:
+            dset = f['/acquisition/ts_name/data']
+            self.assertListEqual(dset[:].tolist(), a.tolist())
+
+    def test_write_dataset_datachunkiterator_data_only(self):
+        a = np.arange(30).reshape(5, 2, 3)
+        aiter = iter(a)
+        daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
+        tstamps = np.arange(5)
+        ts = TimeSeries('ts_name', daiter, 'A', timestamps=tstamps)
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile, cache_spec=False)

@@ -73,9 +73,9 @@ sphinx_gallery_conf = {
 
 intersphinx_mapping = {
     'python': ('https://docs.python.org/3.5', None),
-    'numpy': ('http://docs.scipy.org/doc/numpy/', None),
-    'scipy': ('http://docs.scipy.org/doc/scipy/reference', None),
-    'matplotlib': ('http://matplotlib.org', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
+    'matplotlib': ('https://matplotlib.org', None),
     'h5py': ('http://docs.h5py.org/en/latest/', None),
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
     'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None)

@@ -257,7 +257,6 @@ groups:
   - name: device
     target_type: Device
     doc: Link to the device that was used to record from this electrode group.
-    quantity: '?'
 
 # The types below have been deprecated
 - neurodata_type_def: ClusterWaveforms
