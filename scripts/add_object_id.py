@@ -8,7 +8,6 @@ Usage: python add_object_id filename
 """
 
 
-
 from h5py import File
 from uuid import uuid4
 import sys
@@ -19,10 +18,12 @@ def add_uuid(name, obj):
         obj.attrs['object_id'] = str(uuid4())
         print('Adding uuid4 %s to %s' % (obj.attrs['object_id'], str(obj)))
 
+
 def main():
     filename = sys.argv[1]
     with File(filename, 'a') as f:
         f.visititems(add_uuid)
+
 
 if __name__ == '__main__':
     main()

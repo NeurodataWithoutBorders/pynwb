@@ -126,7 +126,9 @@ class NWBFileTest(unittest.TestCase):
     def test_access_processing(self):
         self.nwbfile.create_processing_module('test_mod', 'test_description')
         # test deprecate .modules
-        self.assertIs(self.nwbfile.processing['test_mod'], self.nwbfile.modules['test_mod'])
+        with self.assertWarnsRegex(DeprecationWarning, r'replaced by NWBFile\.processing'):
+            modules = self.nwbfile.modules['test_mod']
+        self.assertIs(self.nwbfile.processing['test_mod'], modules)
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']

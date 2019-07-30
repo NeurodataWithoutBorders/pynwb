@@ -1,4 +1,7 @@
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
 from hdmf.utils import docval, popargs
 

@@ -25,14 +25,16 @@ class TestProcessingModule(unittest.TestCase):
     def test_deprecated_add_data_interface(self):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        self.pm.add_data_interface(ts)
+        with self.assertWarnsRegex(PendingDeprecationWarning, r'add_data_interface will be replaced by add'):
+            self.pm.add_data_interface(ts)
         self.assertIn(ts.name, self.pm.containers)
         self.assertIs(ts, self.pm.containers[ts.name])
 
     def test_deprecated_add_container(self):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        self.pm.add_container(ts)
+        with self.assertWarnsRegex(PendingDeprecationWarning, r'add_container will be replaced by add'):
+            self.pm.add_container(ts)
         self.assertIn(ts.name, self.pm.containers)
         self.assertIs(ts, self.pm.containers[ts.name])
 
@@ -48,14 +50,16 @@ class TestProcessingModule(unittest.TestCase):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.pm.add(ts)
-        tmp = self.pm.get_data_interface('test_ts')
+        with self.assertWarnsRegex(PendingDeprecationWarning, r'get_data_interface will be replaced by get'):
+            tmp = self.pm.get_data_interface('test_ts')
         self.assertIs(tmp, ts)
 
     def test_deprecated_get_container(self):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.pm.add(ts)
-        tmp = self.pm.get_container('test_ts')
+        with self.assertWarnsRegex(PendingDeprecationWarning, r'get_container will be replaced by get'):
+            tmp = self.pm.get_container('test_ts')
         self.assertIs(tmp, ts)
 
     def test_getitem(self):
@@ -104,7 +108,9 @@ class TestTimeSeries(unittest.TestCase):
         data = H5DataIO(DataChunkIterator(data=generator_factory()))
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
-        self.assertIs(ts1.num_samples, None)
+        with self.assertWarnsRegex(UserWarning, r'The data attribute on this TimeSeries \(named: test_ts1\) has a '
+                                   '__len__, but it cannot be read'):
+            self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
 
@@ -116,7 +122,9 @@ class TestTimeSeries(unittest.TestCase):
         data = DataChunkIterator(data=generator_factory())
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
-        self.assertIs(ts1.num_samples, None)
+        with self.assertWarnsRegex(UserWarning, r'The data attribute on this TimeSeries \(named: test_ts1\) has no '
+                                   '__len__'):
+            self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
 
