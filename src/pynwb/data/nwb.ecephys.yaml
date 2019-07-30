@@ -349,4 +349,3 @@ groups:
   - name: device
     target_type: Device
     doc: the device that was used to record from this electrode group
-    quantity: '?'
