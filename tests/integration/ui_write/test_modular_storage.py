@@ -96,7 +96,7 @@ class TestTimeSeriesModular(base.TestMapNWBContainer):
                 link_file.add_acquisition(self.link_container)
                 link_write_io.write(link_file)
 
-        # NOTE that self.link_container contains a link to a dataset that is now closed
+        # note that self.link_container contains a link to a dataset that is now closed
 
         # read the link file
         self.link_read_io = HDF5IO(self.link_filename, 'r', manager=get_manager())
@@ -110,6 +110,8 @@ class TestTimeSeriesModular(base.TestMapNWBContainer):
         self.assertIsNotNone(str(self.container))  # added as a test to make sure printing works
         self.assertIsNotNone(str(self.link_container))
         self.assertIsNotNone(str(self.read_container))
+        self.assertFalse(self.link_container.timestamps.valid)
+        self.assertTrue(self.read_container.timestamps.id.valid)
         self.assertNotEqual(id(self.link_container), id(self.read_container))
         self.assertIs(self.read_nwbfile.objects[self.link_container.object_id], self.read_container)
         self.assertContainerEqual(self.read_container, self.container)
