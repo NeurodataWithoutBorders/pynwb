@@ -277,16 +277,18 @@ class PlaneSegmentation(DynamicTable):
             rkwargs['voxel_mask'] = voxel_mask
         return super(PlaneSegmentation, self).add_row(**rkwargs)
 
-    def pixel_to_image(self, pixel_mask):
+    @staticmethod
+    def pixel_to_image(pixel_mask):
         image_matrix = np.zeros(np.shape(pixel_mask))
         npmask = np.asarray(pixel_mask)
-        x_coords = tuple(map(int, npmask[:, 0]))
-        y_coords = tuple(map(int, npmask[:, 1]))
+        x_coords = npmask[:, 0].astype(np.int)
+        y_coords = npmask[:, 1].astype(np.int)
         weights = npmask[:, -1]
         image_matrix[y_coords, x_coords] = weights
         return image_matrix
 
-    def image_to_pixel(self, image_mask):
+    @staticmethod
+    def image_to_pixel(image_mask):
         pixel_mask = []
         it = np.nditer(image_mask, flags=['multi_index'])
         while not it.finished:
