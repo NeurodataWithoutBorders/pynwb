@@ -173,6 +173,8 @@ groups:
       doc: 'Name of person who performed the experiment.COMMENT: More than one person
         OK. Can specify roles of different people involved.'
       quantity: '?'
+      shape:
+      - null
     - name: institution
       dtype: text
       doc: Institution(s) where experiment was performed
