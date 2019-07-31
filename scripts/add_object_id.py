@@ -7,6 +7,7 @@ to a UUID4 string on each group, dataset, and link that has a 'neurodata_type' a
 Usage: python add_object_id filename
 """
 
+
 from h5py import File
 from uuid import uuid4
 import sys

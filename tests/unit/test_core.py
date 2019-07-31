@@ -327,19 +327,24 @@ Fields:
         nwbfile.add_acquisition(ts)
         nwbfile.add_acquisition(ts2)
         nwbfile.add_epoch(start_time=1.0, stop_time=10.0, tags=['tag1', 'tag2'])
-        self.assertEqual(str(nwbfile),
-                         """
-root <class 'pynwb.file.NWBFile'>
+        self.assertRegex(str(nwbfile),
+                         r"""
+root <class 'pynwb\.file\.NWBFile'>
 Fields:
   acquisition: {
-    name <class 'pynwb.base.TimeSeries'>,
-    name2 <class 'pynwb.base.TimeSeries'>
+    name <class 'pynwb\.base\.TimeSeries'>,
+    name2 <class 'pynwb\.base\.TimeSeries'>
   }
   epoch_tags: {
     tag1,
     tag2
   }
   epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
+  file_create_date: \[datetime.datetime\(.*\)\]
+  identifier: identifier
+  session_description: session_description
+  session_start_time: .*
+  timestamps_reference_time: .*
 """)
 
 
