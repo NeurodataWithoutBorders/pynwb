@@ -24,8 +24,7 @@ class IndexSeriesConstructor(unittest.TestCase):
 
     def test_init(self):
         ts = TimeSeries('test_ts', list(), 'unit', timestamps=list())
-
-        iS = IndexSeries('test_iS', list(), 'unit', ts, timestamps=list())
+        iS = IndexSeries('test_iS', list(), ts, unit='unit', timestamps=list())
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.unit, 'unit')
         self.assertEqual(iS.indexed_timeseries, ts)
