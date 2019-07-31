@@ -1,35 +1,38 @@
 datasets:
 - neurodata_type_def: GrayscaleImage
   neurodata_type_inc: Image
-  doc: Grayscale image
+  dims:
+  - y
+  - x
   shape:
   - null
   - null
-  dims:
-  - 'y'
-  - 'x'
+  doc: Grayscale image
+
 - neurodata_type_def: RGBImage
   neurodata_type_inc: Image
-  doc: Color image
+  dims:
+  - y
+  - x
+  - R,G,B
   shape:
   - null
   - null
   - 3
-  dims:
-  - 'y'
-  - 'x'
-  - 'R,G,B'
+  doc: Color image
+
 - neurodata_type_def: RGBAImage
   neurodata_type_inc: Image
-  doc: Color image with transparency
+  dims:
+  - y
+  - x
+  - R,G,B,A
   shape:
   - null
   - null
   - 4
-  dims:
-  - 'y'
-  - 'x'
-  - 'R,G,B,A'
+  doc: Color image with transparency
+
 groups:
 - neurodata_type_def: ImageSeries
   neurodata_type_inc: TimeSeries
@@ -41,13 +44,11 @@ groups:
   attributes:
   - name: help
     dtype: text
-    doc: Value is 'Storage object for time-series 2-D image data'
     value: Storage object for time-series 2-D image data
+    doc: Value is 'Storage object for time-series 2-D image data'
   datasets:
   - name: data
     dtype: numeric
-    doc: Either binary data containing image or empty.
-    quantity: '?'
     dims:
     - - frame
       - y
@@ -64,36 +65,38 @@ groups:
       - null
       - null
       - null
+    doc: Either binary data containing image or empty.
+    quantity: '?'
   - name: dimension
     dtype: int32
-    doc: Number of pixels on x, y, (and z) axes.
     dims:
     - rank
-    quantity: '?'
     shape:
     - null
+    doc: Number of pixels on x, y, (and z) axes.
+    quantity: '?'
   - name: external_file
     dtype: text
+    dims:
+    - num_files
+    shape:
+    - null
     doc: 'Path or URL to one or more external file(s). Field only present if format=external.
       NOTE: this is only relevant if the image is stored in the file system as one
       or more image file(s). This field should NOT be used if the image is stored
       in another HDF5 file and that file is HDF5 linked to this file.'
+    quantity: '?'
     attributes:
     - name: starting_frame
       dtype: int
-      doc: Each entry is the frame number (within the full ImageSeries) of the first
-        frame in the corresponding external_file entry. This serves as an index to
-        what frames each file contains, allowing random access.Zero-based indexing
-        is used.  (The first element will always be zero).
       dims:
       - num_files
       shape:
       - null
-    dims:
-    - num_files
-    quantity: '?'
-    shape:
-    - null
+      doc: Each entry is the frame number (within the full ImageSeries) of the first
+        frame in the corresponding external_file entry. This serves as an index to
+        what frames each file contains, allowing random access.Zero-based indexing
+        is used.  (The first element will always be zero).
   - name: format
     dtype: text
     doc: Format of image. If this is 'external' then the field external_file contains
@@ -102,6 +105,7 @@ groups:
       fields bit_per_pixel and dimension are used. For raw images, only a single channel
       is stored (eg, red).
     quantity: '?'
+
 - neurodata_type_def: ImageMaskSeries
   neurodata_type_inc: ImageSeries
   doc: An alpha mask that is applied to a presented visual stimulus. The data[] array
@@ -112,12 +116,13 @@ groups:
   attributes:
   - name: help
     dtype: text
-    doc: Value is 'An alpha mask that is applied to a presented visual stimulus'
     value: An alpha mask that is applied to a presented visual stimulus
+    doc: Value is 'An alpha mask that is applied to a presented visual stimulus'
   links:
   - name: masked_imageseries
-    doc: Link to ImageSeries that mask is applied to.
     target_type: ImageSeries
+    doc: Link to ImageSeries that mask is applied to.
+
 - neurodata_type_def: OpticalSeries
   neurodata_type_inc: ImageSeries
   doc: Image data that is presented or recorded. A stimulus template movie will be
@@ -128,8 +133,8 @@ groups:
   attributes:
   - name: help
     dtype: text
-    doc: Value is 'Time-series image stack for optical recording or stimulus'
     value: Time-series image stack for optical recording or stimulus
+    doc: Value is 'Time-series image stack for optical recording or stimulus'
   datasets:
   - name: distance
     dtype: float32
@@ -137,19 +142,20 @@ groups:
     quantity: '?'
   - name: field_of_view
     dtype: float32
-    doc: Width, height and depth of image, or imaged area (meters).
     dims:
     - - width|height
     - - width|height|depth
-    quantity: '?'
     shape:
     - - 2
     - - 3
+    doc: Width, height and depth of image, or imaged area (meters).
+    quantity: '?'
   - name: orientation
     dtype: text
     doc: Description of image relative to some reference frame (e.g., which way is
       up). Must also specify frame of reference.
     quantity: '?'
+    
 - neurodata_type_def: IndexSeries
   neurodata_type_inc: TimeSeries
   doc: Stores indices to image frames stored in an ImageSeries. The purpose of the
@@ -161,21 +167,21 @@ groups:
   attributes:
   - name: help
     dtype: text
-    doc: Value is 'A sequence that is generated from an existing image stack. Frames
-      can be presented in an arbitrary order. The data[] field stores frame number
-      in reference stack'
     value: A sequence that is generated from an existing image stack. Frames can be
       presented in an arbitrary order. The data[] field stores frame number in reference
       stack
+    doc: Value is 'A sequence that is generated from an existing image stack. Frames
+      can be presented in an arbitrary order. The data[] field stores frame number
+      in reference stack'
   datasets:
   - name: data
     dtype: int
-    doc: Index of the frame in the referenced ImageSeries.
     dims:
     - num_times
     shape:
     - null
+    doc: Index of the frame in the referenced ImageSeries.
   links:
   - name: indexed_timeseries
-    doc: HDF5 link to TimeSeries containing images that are indexed.
     target_type: ImageSeries
+    doc: HDF5 link to TimeSeries containing images that are indexed.

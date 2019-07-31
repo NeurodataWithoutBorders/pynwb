@@ -331,20 +331,15 @@ Fields:
                          """
 root <class 'pynwb.file.NWBFile'>
 Fields:
-  acquisition: { name <class 'pynwb.base.TimeSeries'>,  name2 <class 'pynwb.base.TimeSeries'> }
-  analysis: { }
-  devices: { }
-  electrode_groups: { }
-  epoch_tags: {'tag1', 'tag2'}
+  acquisition: {
+    name <class 'pynwb.base.TimeSeries'>,
+    name2 <class 'pynwb.base.TimeSeries'>
+  }
+  epoch_tags: {
+    tag1,
+    tag2
+  }
   epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
-  ic_electrodes: { }
-  imaging_planes: { }
-  intervals: { }
-  lab_meta_data: { }
-  ogen_sites: { }
-  processing: { }
-  stimulus: { }
-  stimulus_template: { }
 """)
 
 
