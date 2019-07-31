@@ -279,6 +279,9 @@ class PlaneSegmentation(DynamicTable):
 
     @staticmethod
     def pixel_to_image(pixel_mask):
+        """
+        Converts a 2D pixel_mask of a ROI into an image_mask.
+        """
         image_matrix = np.zeros(np.shape(pixel_mask))
         npmask = np.asarray(pixel_mask)
         x_coords = npmask[:, 0].astype(np.int)
@@ -289,6 +292,9 @@ class PlaneSegmentation(DynamicTable):
 
     @staticmethod
     def image_to_pixel(image_mask):
+        """
+        Converts an image_mask of a ROI into a pixel_mask
+        """
         pixel_mask = []
         it = np.nditer(image_mask, flags=['multi_index'])
         while not it.finished:
