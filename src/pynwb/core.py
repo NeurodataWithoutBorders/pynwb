@@ -116,6 +116,9 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     def _setter(cls, nwbfield):
         name = nwbfield['name']
 
+        if not nwbfield.get('settable', True):
+            return None
+
         def nwbbt_setter(self, val):
             if val is None:
                 return
@@ -249,7 +252,7 @@ class NWBContainer(NWBBaseType, Container):
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
 
-    __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc'}
+    __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc', 'settable'}
 
     @classmethod
     def _setter(cls, nwbfield):
@@ -1376,6 +1379,15 @@ class DynamicTable(NWBDataInterface):
         columns = cls.__build_columns(columns, df=df)
 
         return cls(name=name, id=ids, columns=columns, description=table_description, **kwargs)
+
+    def copy(self):
+        """
+        Return a copy of this DynamicTable.
+        This is useful for linking.
+        """
+        kwargs = dict(name=self.name, id=self.id, columns=self.columns, description=self.description,
+                      colnames=self.colnames)
+        return self.__class__(**kwargs)
 
 
 @register_class('DynamicTableRegion', CORE_NAMESPACE)
