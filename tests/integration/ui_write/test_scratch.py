@@ -5,7 +5,6 @@ from pynwb import NWBFile, NWBHDF5IO
 from . import base
 
 import pandas as pd
-from pandas.testing import assert_frame_equal
 import numpy as np
 from numpy.testing import assert_array_equal
 
@@ -39,17 +38,17 @@ class TestScratchData(base.TestMapRoundTrip):
         return ret
 
     def test_scratch_convert_list(self):
-        data = [1,2,3,4]
+        data = [1, 2, 3, 4]
         ret = self.roundtripScratch(data, 'list')
         assert_array_equal(data, ret)
 
     def test_scratch_convert_ndarray(self):
-        data = np.array([1,2,3,4])
+        data = np.array([1, 2, 3, 4])
         ret = self.roundtripScratch(data, 'ndarray')
         assert_array_equal(data, ret)
 
     def test_scratch_convert_DataFrame(self):
-        data = pd.DataFrame(data={'col1':[1,2,3,4], 'col2':['a', 'b', 'c', 'd']})
+        data = pd.DataFrame(data={'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
         ret = self.roundtripScratch(data, 'DataFrame')
         assert_array_equal(data.values, ret.values)
         assert_array_equal(data.index.values, ret.index.values)
