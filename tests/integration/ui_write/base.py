@@ -150,6 +150,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
         self.container = self.setUpContainer()
+        self.object_id = self.container.object_id
         self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
         self.create_date = datetime(2018, 4, 15, 12, tzinfo=tzlocal())
         self.container_type = self.container.__class__.__name__
@@ -195,8 +196,10 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def test_roundtrip(self):
         self.read_container = self.roundtripContainer()
         # make sure we get a completely new object
-        str(self.container)  # added as a test to make sure printing works
+        self.assertIsNotNone(str(self.container))  # added as a test to make sure printing works
+        self.assertIsNotNone(str(self.read_container))
         self.assertNotEqual(id(self.container), id(self.read_container))
+        self.assertIs(self.read_nwbfile.objects[self.container.object_id], self.read_container)
         self.assertContainerEqual(self.read_container, self.container)
         self.validate()
 

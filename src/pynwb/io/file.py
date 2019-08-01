@@ -72,6 +72,24 @@ class NWBFileMap(ObjectMapper):
     def name(self, builder, manager):
         return builder.name
 
+    @ObjectMapper.constructor_arg('experimenter')
+    def experimenter_carg(self, builder, manager):
+        ret = None
+        exp_bldr = builder['general'].get('experimenter')
+        if exp_bldr is not None:
+            if isinstance(exp_bldr.data, str):
+                ret = (builder.data,)
+            else:
+                ret = tuple(exp_bldr.data)
+        return ret
+
+    @ObjectMapper.object_attr('experimenter')
+    def experimenter_obj_attr(self, container, manager):
+        ret = None
+        if isinstance(container.experimenter, str):
+            ret = (container.experimenter,)
+        return ret
+
 
 @register_map(Subject)
 class SubjectMap(ObjectMapper):
