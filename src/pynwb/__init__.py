@@ -245,10 +245,11 @@ class NWBZarrIO(_ZarrIO):
               'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
               to namespaces and TypeMaps', 'default': None},
             {'name': 'comm', 'type': 'Intracomm',
-             'doc': 'the MPI communicator to use for parallel I/O', 'default': None})
+             'doc': 'the MPI communicator to use for parallel I/O', 'default': None},
+            {'name': 'chunking', 'type': bool, 'doc': "Enable/Disable chunking of datasets by default", 'default': True})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, comm =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'comm', kwargs)
+        path, mode, manager, extensions, load_namespaces, comm, chunking =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'comm','chunking', kwargs)
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -268,7 +269,7 @@ class NWBZarrIO(_ZarrIO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBZarrIO, self).__init__(path, manager=manager, mode=mode, comm=comm)
+        super(NWBZarrIO, self).__init__(path, manager=manager, mode=mode, comm=comm, chunking=chunking)
 
 
 from . import io as __io  # noqa: F401,E402
