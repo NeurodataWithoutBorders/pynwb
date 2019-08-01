@@ -157,6 +157,11 @@ class PlaneSegmentationConstructor(unittest.TestCase):
                           300., 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
         return iSS, ip
 
+    def create_basic_plane_segmentation(self):
+        """Creates a basic plane segmentation used for testing"""
+        iSS, ip = self.getBoilerPlateObjects()
+        return PlaneSegmentation('description', ip, 'test_name', iSS)
+
     def test_init(self):
         w, h = 5, 5
         img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
@@ -220,14 +225,32 @@ class PlaneSegmentationConstructor(unittest.TestCase):
     def test_init_3d_image_mask(self):
         img_masks = np.random.randn(2, 20, 30, 4)
 
-        iSS, ip = self.getBoilerPlateObjects()
-
-        pS = PlaneSegmentation('description', ip, 'test_name', iSS)
+        pS = self.create_basic_plane_segmentation()
         pS.add_roi(image_mask=img_masks[0])
         pS.add_roi(image_mask=img_masks[1])
 
         self.assertTrue(np.allclose(pS['image_mask'][0], img_masks[0]))
         self.assertTrue(np.allclose(pS['image_mask'][1], img_masks[1]))
+
+    def test_conversion_of_2d_pixel_mask_to_image_mask(self):
+        pixel_mask = [[0, 0, 1.0], [1, 0, 2.0], [2, 0, 2.0]]
+
+        pS = self.create_basic_plane_segmentation()
+
+        img_mask = pS.pixel_to_image(pixel_mask)
+        np.testing.assert_allclose(img_mask, np.asarray([[1, 2, 2.0],
+                                                         [0, 0, 0.0],
+                                                         [0, 0, 0.0]]))
+
+    def test_conversion_of_2d_image_mask_to_pixel_mask(self):
+        image_mask = np.asarray([[1.0, 0.0, 0.0],
+                                 [0.0, 1.0, 0.0],
+                                 [0.0, 0.0, 1.0]])
+
+        pS = self.create_basic_plane_segmentation()
+
+        pixel_mask = pS.image_to_pixel(image_mask)
+        np.testing.assert_allclose(pixel_mask, np.asarray([[0, 0, 1.0], [1, 1, 1.0], [2, 2, 1.0]]))
 
     def test_init_image_mask(self):
         w, h = 5, 5
