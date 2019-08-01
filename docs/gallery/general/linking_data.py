@@ -241,6 +241,19 @@ io3 = NWBHDF5IO(filename3, 'w', manager=manager)
 io3.write(nwbfile3)
 io3.close()
 
+
+####################
+# Copying an NWBFile for linking
+# ------------------------------
+#
+# Using the :py:func:`~pynwb.file.NWBFile.copy` method allows us to easily create a shallow copy
+# of a whole NWB:N file with links to all data in the original file. For example, we may want to
+# store processed data in a new file separate from the raw data, while still being able to access
+# the raw data. See the :ref:`scratch` tutorial for a detailed example.
+#
+
+
+
 ####################
 # Creating a single file for sharing
 # -----------------------------------

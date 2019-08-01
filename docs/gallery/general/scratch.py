@@ -5,8 +5,16 @@ Exploratory data analysis with NWB
 ==================================
 
 This example will focus on the basics of working with an :py:class:`~pynwb.file.NWBFile` to do more than
-convert data for exchange. For example, you may want to store results from intermediate analyses or one-off
-analyses with unknown utility. This functionality is primarily accomplished with linking and scratch space.
+storing standardized data for use and exchange. For example, you may want to store results from intermediate
+analyses or one-off analyses with unknown utility. This functionality is primarily accomplished with linking
+and scratch space.
+
+
+.. note::
+    The scratch space is explicitly for non-standardized data that is not intended for reuse
+    by others. Standard NWB:N types, and extension if required, should always be used for any data that you
+    intend to share. As such, published data should not include scratch data and a user should be able
+    to ignore any data stored in scratch to use a file.
 
 
 
@@ -50,19 +58,21 @@ with NWBHDF5IO('raw_data.nwb', mode='w') as io:
 # Copying an NWB file
 # -------------------
 #
-# To copy a file, the file must first be read.
+# To copy a file, we must first read the file.
 #
 raw_io = NWBHDF5IO('raw_data.nwb', 'r')
 nwb_in = raw_io.read()
 
 ####################
-# And then copy the file with NWBFile.copy
+# And then create a shallow copy the file with the :py:func:`~pynwb.file.NWBFile.copy` method
+# of :py:class:`~pynwb.file.NWBFile` .
 
 nwb_proc = nwb_in.copy()
 
 ####################
 #
-# Now that we have a copy, lets process some data, and add the results back into a ProcessingModule
+# Now that we have a copy, lets process some data, and add the results as a :py:class:`~pynwb.base.ProcessingModule`
+# to our copy of the file. [#]_
 
 import scipy.signal as sps
 
@@ -77,17 +87,25 @@ mod.add_container(ts2)
 
 ####################
 #
-# Now write the copy, which contains processed data.
+# Now write the copy, which contains the processed data. [#]_
 
 with NWBHDF5IO('processed_data.nwb', mode='w', manager=raw_io.manager) as io:
     io.write(nwb_proc)
 
 
-
 ####################
 #
-# .. note::
-#    Notice here that we are reusing the timestamps to the original TimeSeries.
+# .. [#]
+#    .. note::
+#       Notice here that we are reusing the timestamps to the original TimeSeries.
+#
+# .. [#]
+#    .. note::
+#       The ``processed_data.nwb`` file (i.e., our copy) stores our processing module and contains external
+#       links to all data in our original file, i.e., the data from our raw file is being linked to, not copied.
+#       This allows us to isolate our processing data in a separate file while still allowing us to access the
+#       raw data from our ``processed_data.nwb`` file, without having to duplicate the data.
+#
 
 
 ####################
@@ -97,8 +115,8 @@ with NWBHDF5IO('processed_data.nwb', mode='w', manager=raw_io.manager) as io:
 # -------------------
 #
 # You may end up wanting to store results from some one-off analysis, and writing an extension
-# to get your data into an NWBFile is too much over head. This is faciliated by the scratch space
-# in NWB. [#]_
+# to get your data into an NWBFile is too much over head. This is facilitated by the scratch space
+# in NWB:N. [#]_
 #
 # First, lets read our processed data and then make a copy
 
@@ -134,7 +152,13 @@ with NWBHDF5IO('scratch_analysis.nwb', 'w', manager=proc_io.manager) as io:
 
 
 ####################
-# .. [#] This scratch space only exists if you add scratch data.
 #
-# .. [#] We recommend writing scratch data into copyies only. This will make it easier to
-#        discard data.
+# .. [#]
+#    .. note::
+#       This scratch space only exists if you add scratch data.
+#
+# .. [#]
+#    .. note::
+#       We recommend writing scratch data into copies of files only. This will make it easier to
+#       isolate and discard scratch data and avoids updating files that store precious data.
+
