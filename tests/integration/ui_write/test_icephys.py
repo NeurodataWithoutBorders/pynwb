@@ -115,6 +115,7 @@ class TestVoltageClampSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
+        print('hello')
         return VoltageClampSeries(name="vcs", data=[1, 2, 3, 4, 5], unit='A',
                                   starting_time=123.6, rate=10e3, electrode=self.elec,
                                   gain=0.126, capacitance_fast=1.2, capacitance_slow=2.3,
