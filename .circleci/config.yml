@@ -70,6 +70,7 @@ references:
           command: |
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
+            conda install python=$CONDA_PYTHON_VER
             conda install virtualenv==16.0.0
             conda install tox
       - run:
@@ -120,16 +121,6 @@ jobs:
       - run:
           <<: *run-style-check
 
-  python27:
-    docker:
-      - image: circleci/python:2.7.14-jessie
-    environment:
-     - TEST_TOX_ENV: "py27"
-     - COVERAGE_TOX_ENV: "coverage-py27"
-     - BUILD_TOX_ENV: "build-py27"
-     - TEST_WHEELINSTALL_ENV: "wheelinstall-py27"
-    <<: *ci-steps
-
   python35:
     docker:
       - image: circleci/python:3.5.4-jessie
@@ -161,19 +152,11 @@ jobs:
      - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
     <<: *ci-steps
 
-  miniconda27:
-    docker:
-      - image: continuumio/miniconda:4.6.14
-    environment:
-      - TEST_TOX_ENV: "py27"
-      - BUILD_TOX_ENV: "build-py27"
-      - TEST_WHEELINSTALL_ENV: "wheelinstall-py27"
-    <<: *conda-steps
-
   miniconda35:
     docker:
-      - image: continuumio/miniconda3:4.1.11
+      - image: continuumio/miniconda3:4.3.27p0
     environment:
+      - CONDA_PYTHON_VER: "3.5"
       - TEST_TOX_ENV: "py35"
       - BUILD_TOX_ENV: "build-py35"
       - TEST_WHEELINSTALL_ENV: "wheelinstall-py35"
@@ -181,8 +164,9 @@ jobs:
 
   miniconda36:
     docker:
-      - image: continuumio/miniconda3:4.3.14
+      - image: continuumio/miniconda3:4.6.14
     environment:
+      - CONDA_PYTHON_VER: "3.6"
       - TEST_TOX_ENV: "py36"
       - BUILD_TOX_ENV: "build-py36"
       - TEST_WHEELINSTALL_ENV: "wheelinstall-py36"
@@ -190,19 +174,13 @@ jobs:
 
   miniconda37:
     docker:
-      - image: continuumio/miniconda3:4.5.12
+      - image: continuumio/miniconda3:4.6.14
     environment:
+      - CONDA_PYTHON_VER: "3.7"
       - TEST_TOX_ENV: "py37"
       - BUILD_TOX_ENV: "build-py37"
       - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
     <<: *conda-steps
-
-  gallery27:
-    docker:
-      - image: circleci/python:2.7.14-jessie
-    environment:
-     - TEST_TOX_ENV: "gallery-py27"
-    <<: *gallery-steps
 
   gallery35:
     docker:
@@ -278,23 +256,17 @@ workflows:
     jobs:
       - flake8:
           <<: *no_filters
-      - python27:
-          <<: *no_filters
       - python35:
           <<: *no_filters
       - python36:
           <<: *no_filters
       - python37:
           <<: *no_filters
-      - miniconda27:
-          <<: *no_filters
       - miniconda35:
           <<: *no_filters
       - miniconda36:
           <<: *no_filters
       - miniconda37:
-          <<: *no_filters
-      - gallery27:
           <<: *no_filters
       - gallery35:
           <<: *no_filters
@@ -305,15 +277,12 @@ workflows:
       - deploy-dev:
           requires:
             - flake8
-            - python27
             - python35
             - python36
             - python37
-            - miniconda27
             - miniconda35
             - miniconda36
             - miniconda37
-            - gallery27
             - gallery35
             - gallery36
             - gallery37
@@ -323,15 +292,12 @@ workflows:
       - deploy-release:
           requires:
             - flake8
-            - python27
             - python35
             - python36
             - python37
-            - miniconda27
             - miniconda35
             - miniconda36
             - miniconda37
-            - gallery27
             - gallery35
             - gallery36
             - gallery37

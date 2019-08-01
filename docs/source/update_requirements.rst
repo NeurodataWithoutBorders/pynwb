@@ -37,7 +37,7 @@ the following script:
 requirements-(dev|doc).txt
 ==========================
 
-Any of these requirements files can be updated updated using
+Any of these requirements files can be updated using
 the following scripts:
 
 .. code::
@@ -63,5 +63,3 @@ the following scripts:
 
    deactivate
    rmvirtualenv pynwb-requirements
-
-Note: If you create requirements files using Python 2.x, you should manually remove any entries for the `enum34` package before committing. This package is only required for versions of Python < 3.4, and should not be installed in later versions. Since our requirements files are shared across Python 2 and 3 we instead rely on `pip` to install this package only when it is required. (See `issue #677 <https://github.com/NeurodataWithoutBorders/pynwb/issues/677>`_ for discussion.) 
