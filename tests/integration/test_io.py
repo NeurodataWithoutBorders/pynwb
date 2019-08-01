@@ -7,7 +7,10 @@ from h5py import File
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
 
-from hdmf.backends.io import UnsupportedOperation
+try: # In case we are using an older version of HDMF
+    from hdmf.backends.io import UnsupportedOperation
+except ImportError:
+    UnsupportedOperation = ValueError
 from hdmf.backends.hdf5 import HDF5IO, H5DataIO
 from hdmf.data_utils import DataChunkIterator
 from hdmf.build import GroupBuilder, DatasetBuilder
@@ -97,7 +100,7 @@ class TestHDF5Writer(unittest.TestCase):
         Round-trip test for writing spec and reading it back in
         '''
         with HDF5IO(self.path, manager=self.manager, mode="a") as io:
-            io.write(self.container)
+            io.write(self.container, cache_spec=True)
         with File(self.path) as f:
             self.assertIn('specifications', f)
 
@@ -211,7 +214,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
 
         with File(self.path) as fil:
             with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
-                io.write(self.container)
+                io.write(self.container, cache_spec=True)
         with File(self.path) as f:
             self.assertIn('specifications', f)
 
