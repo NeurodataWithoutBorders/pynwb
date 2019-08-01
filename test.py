@@ -195,7 +195,7 @@ def main():
 
     # Run example tests
     if flags['example'] in args.suites:
-        run_example_tests(verbose=args.verbosity)
+        run_example_tests()
         validate_nwbs()
 
     # Run integration tests
