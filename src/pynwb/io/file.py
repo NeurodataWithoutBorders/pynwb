@@ -10,7 +10,10 @@ class NWBFileMap(ObjectMapper):
 
     def __init__(self, spec):
         super(NWBFileMap, self).__init__(spec)
-        raw_ts_spec = self.spec.get_group('acquisition').get_neurodata_type('NWBDataInterface')
+
+        acq_spec = self.spec.get_group('acquisition')
+        self.unmap(acq_spec)
+        raw_ts_spec = acq_spec.get_neurodata_type('NWBDataInterface')
         self.map_spec('acquisition', raw_ts_spec)
         self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('NWBContainer'))
 
@@ -40,9 +43,10 @@ class NWBFileMap(ObjectMapper):
             'imaging_planes',
             general_spec.get_group('optophysiology').get_neurodata_type('ImagingPlane'))
 
-        self.map_spec(
-            'processing',
-            self.spec.get_group('processing').get_neurodata_type('ProcessingModule'))
+
+        proc_spec = self.spec.get_group('processing')
+        self.unmap(proc_spec)
+        self.map_spec('processing', proc_spec.get_neurodata_type('ProcessingModule'))
         # self.unmap(general_spec.get_dataset('stimulus'))
         self.map_spec('stimulus_notes', general_spec.get_dataset('stimulus'))
         self.map_spec('source_script_file_name', general_spec.get_dataset('source_script').get_attribute('file_name'))
