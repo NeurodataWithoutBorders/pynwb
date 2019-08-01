@@ -10,6 +10,7 @@ from .base import TimeSeries
 from .image import ImageSeries
 from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, NWBDataInterface
 from .device import Device
+import numpy as np
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
