@@ -152,6 +152,8 @@ groups:
       doc: Name of person(s) who performed the experiment. Can also specify roles
         of different people involved.
       quantity: '?'
+      shape:
+      - null
     - name: institution
       dtype: text
       doc: Institution(s) where experiment was performed.

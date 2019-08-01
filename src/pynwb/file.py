@@ -203,7 +203,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'timestamps_reference_time', 'type': datetime,
              'doc': 'date and time corresponding to time zero of all timestamps; defaults to value '
                     'of session_start_time', 'default': None},
-            {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
+            {'name': 'experimenter', 'type': (tuple, list, str),
+             'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str,
              'doc': 'general description of the experiment', 'default': None},
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
