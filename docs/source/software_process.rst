@@ -70,8 +70,8 @@ Versioning and Releasing
 
 PyNWB uses versioneer_ for versioning source and wheel distributions. Versioneer creates a semi-unique release
 name for the wheels that are created. It requires a version control system (git in PyNWB's case) to generate a release name.
-After all the tests pass, circleci creates both wheels(*.whl) and source distribution(*.tgz) for both Python 2 and Python 3
-and uploads them back to github as a release_. Versioneer makes it possible to get the source distribution from github and create
+After all the tests pass, CircleCI creates both wheels(*.whl) and source distribution(*.tgz) for Python 3
+and uploads them back to GitHub as a release_. Versioneer makes it possible to get the source distribution from GitHub and create
 wheels directly without having to use a version control system because it hardcodes versions in the source distribution.
 
 .. _versioneer: https://github.com/warner/python-versioneer
