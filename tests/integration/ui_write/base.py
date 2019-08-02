@@ -143,7 +143,6 @@ class TestMapRoundTrip(TestMapNWBContainer):
 
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
-        self.container = self.setUpContainer()
         self.object_id = self.container.object_id
         self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
         self.create_date = datetime(2018, 4, 15, 12, tzinfo=tzlocal())
