@@ -252,8 +252,6 @@ io3.close()
 # the raw data. See the :ref:`scratch` tutorial for a detailed example.
 #
 
-
-
 ####################
 # Creating a single file for sharing
 # -----------------------------------

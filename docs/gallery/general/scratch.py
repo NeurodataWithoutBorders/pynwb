@@ -37,13 +37,13 @@ start_time = datetime(2019, 4, 3, 11, tzinfo=tzlocal())
 create_date = datetime(2019, 4, 15, 12, tzinfo=tzlocal())
 
 nwb = NWBFile(session_description='demonstrate NWBFile scratch',  # required
-                  identifier='NWB456',  # required
-                  session_start_time=start_time,  # required
-                  file_create_date=create_date)  # optional
+              identifier='NWB456',  # required
+              session_start_time=start_time,  # required
+              file_create_date=create_date)  # optional
 
 # make some fake data
 timestamps = np.linspace(0, 100, 1024)
-data = np.sin(0.333*timestamps) + np.cos(0.1*timestamps) + np.random.randn(len(timestamps))
+data = np.sin(0.333 * timestamps) + np.cos(0.1 * timestamps) + np.random.randn(len(timestamps))
 test_ts = TimeSeries(name='raw_timeseries', data=data, unit='m', timestamps=timestamps)
 
 # add it to the NWBFile
@@ -79,7 +79,7 @@ import scipy.signal as sps
 mod = nwb_proc.create_processing_module('filtering_module', "a module to store filtering results")
 
 ts1 = nwb_in.acquisition['raw_timeseries']
-filt_data = sps.correlate(ts1.data, np.ones(128), mode='same')/128
+filt_data = sps.correlate(ts1.data, np.ones(128), mode='same') / 128
 ts2 = TimeSeries(name='filtered_timeseries', data=filt_data, unit='m', timestamps=ts1)
 
 mod.add_container(ts2)
@@ -123,13 +123,11 @@ with NWBHDF5IO('processed_data.nwb', mode='w', manager=raw_io.manager) as io:
 proc_io = NWBHDF5IO('processed_data.nwb', 'r')
 nwb_proc_in = proc_io.read()
 
-
 ####################
 #
 # Now make a copy to put our scratch data into [#]_
 
-
-nwb_scratch  = nwb_proc_in.copy()
+nwb_scratch = nwb_proc_in.copy()
 
 ####################
 #
@@ -161,4 +159,3 @@ with NWBHDF5IO('scratch_analysis.nwb', 'w', manager=proc_io.manager) as io:
 #    .. note::
 #       We recommend writing scratch data into copies of files only. This will make it easier to
 #       isolate and discard scratch data and avoids updating files that store precious data.
-
