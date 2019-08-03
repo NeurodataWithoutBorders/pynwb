@@ -3,11 +3,11 @@ try:
 except ImportError:
     from collections import Iterable  # Python 2.7
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.data_utils import DataChunkIterator, assertEqualShape
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_resolution, _default_conversion
+from .base import TimeSeries
 from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
 from .device import Device
 
@@ -25,29 +25,13 @@ class ElectrodeGroup(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
             {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
-            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'})
     def __init__(self, **kwargs):
         call_docval_func(super(ElectrodeGroup, self).__init__, kwargs)
         description, location, device = popargs("description", "location", "device", kwargs)
         self.description = description
         self.location = location
         self.device = device
-
-
-_et_docval = [
-    {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode'},
-    {'name': 'x', 'type': float, 'doc': 'the x coordinate of the position'},
-    {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position'},
-    {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position'},
-    {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode'},
-    {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
-    {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
-    {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-    {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
-    {'name': 'group_name', 'type': str, 'doc': 'the ElectrodeGroup object to add to this NWBFile', 'default': None}
-]
 
 
 @register_class('ElectricalSeries', CORE_NAMESPACE)
@@ -63,37 +47,17 @@ class ElectricalSeries(TimeSeries):
 
     __help = "Stores acquired voltage data from extracellular recordings."
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'shape': ((None, ), (None, None), (None, None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-
-            {'name': 'electrodes', 'type': DynamicTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,  # required
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
+                        'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         name, electrodes, data = popargs('name', 'electrodes', 'data', kwargs)
-        super(ElectricalSeries, self).__init__(name, data, 'volt', **kwargs)
+        super(ElectricalSeries, self).__init__(name, data, 'volts', **kwargs)
         self.electrodes = electrodes
 
 
@@ -113,28 +77,12 @@ class SpikeEventSeries(ElectricalSeries):
 
     __help = "Snapshots of spike events from data."
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
+    @docval(*get_docval(ElectricalSeries.__init__, 'name', 'data'),  # required
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),  # required
              'doc': 'Timestamps for samples stored in data'},
-            {'name': 'electrodes', 'type': DynamicTableRegion,
-             'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            *get_docval(ElectricalSeries.__init__, 'electrodes'),  # required
+            *get_docval(ElectricalSeries.__init__, 'resolution', 'conversion', 'comments', 'description', 'control',
+                        'control_description'))
     def __init__(self, **kwargs):
         name, data, electrodes = popargs('name', 'data', 'electrodes', kwargs)
         timestamps = getargs('timestamps', kwargs)
@@ -178,11 +126,10 @@ class EventDetection(NWBDataInterface):
             'detection_method', 'source_electricalseries', 'source_idx', 'times', kwargs)
         super(EventDetection, self).__init__(**kwargs)
         self.detection_method = detection_method
-        # do not set parent, since this is a link
         self.source_electricalseries = source_electricalseries
         self.source_idx = source_idx
         self.times = times
-        self.unit = 'Seconds'
+        self.unit = 'seconds'
 
 
 @register_class('EventWaveform', CORE_NAMESPACE)

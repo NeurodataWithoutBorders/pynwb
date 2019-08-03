@@ -62,13 +62,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
     __nwbfields__ = tuple()
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': Container,
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
     def __init__(self, **kwargs):
-        parent, container_source = getargs('parent', 'container_source', kwargs)
         call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
 
@@ -244,11 +239,7 @@ class NWBContainer(NWBBaseType, Container):
 
     __nwbfields__ = ('help',)
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
 
@@ -322,11 +313,7 @@ class NWBData(NWBBaseType, Data):
     __nwbfields__ = ('help',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBData, self).__init__, kwargs)
         self.__data = getargs('data', kwargs)
@@ -371,11 +358,7 @@ class Index(NWBData):
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
             {'name': 'target', 'type': NWBData,
-             'doc': 'the target dataset that this index applies to'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'doc': 'the target dataset that this index applies to'})
     def __init__(self, **kwargs):
         call_docval_func(super(Index, self).__init__, kwargs)
 
@@ -388,11 +371,7 @@ class VectorData(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'description', 'type': str, 'doc': 'a description for this column'},
             {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors', 'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors', 'default': list()})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorData, self).__init__, kwargs)
         self.description = getargs('description', kwargs)
@@ -410,11 +389,7 @@ class VectorIndex(Index):
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a 1D dataset containing indexes that apply to VectorData object'},
             {'name': 'target', 'type': VectorData,
-             'doc': 'the target dataset that this index applies to'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'doc': 'the target dataset that this index applies to'})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorIndex, self).__init__, kwargs)
         self.target = getargs('target', kwargs)
@@ -447,11 +422,7 @@ class ElementIdentifiers(NWBData):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this ElementIdentifiers'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'a 1D dataset containing identifiers',
-             'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'default': list()})
     def __init__(self, **kwargs):
         call_docval_func(super(ElementIdentifiers, self).__init__, kwargs)
 
@@ -512,11 +483,7 @@ class NWBTable(NWBData):
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
     def __init__(self, **kwargs):
         self.__columns = tuple(popargs('columns', kwargs))
         self.__col_index = {name: idx for idx, name in enumerate(self.__columns)}
@@ -1405,11 +1372,7 @@ class DynamicTableRegion(VectorData):
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
             {'name': 'description', 'type': str, 'doc': 'a description of what this region represents'},
             {'name': 'table', 'type': DynamicTable,
-             'doc': 'the DynamicTable this region applies to', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'doc': 'the DynamicTable this region applies to', 'default': None})
     def __init__(self, **kwargs):
         t = popargs('table', kwargs)
         call_docval_func(super(DynamicTableRegion, self).__init__, kwargs)

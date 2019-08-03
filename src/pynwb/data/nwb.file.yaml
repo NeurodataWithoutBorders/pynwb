@@ -2,7 +2,8 @@ groups:
 - neurodata_type_def: NWBFile
   neurodata_type_inc: NWBContainer
   name: root
-  doc: Top level of NWB file.
+  doc: An NWB:N file storing cellular-based neurophysiology data from a single
+    experimental session.
   attributes:
   - name: help
     dtype: text
@@ -21,111 +22,111 @@ groups:
     shape:
     - null
     doc: 'A record of the date the file was created and of subsequent modifications.
-      COMMENT: - The date is stored in UTC with local timezone offset as ISO 8601
-      extended formatted strings: 2018-09-28T14:43:54.123+02:00 - Dates stored in
-      UTC end in "Z" with no timezone offset. - Date accuracy is up to milliseconds.
-      - The file can be created after the experiment was run, so this may differ from
-      the experiment start time. - Each modification to the nwb file adds a new entry
+      The date is stored in UTC with local timezone offset as ISO 8601
+      extended formatted strings: 2018-09-28T14:43:54.123+02:00. Dates stored in
+      UTC end in "Z" with no timezone offset. Date accuracy is up to milliseconds.
+      The file can be created after the experiment was run, so this may differ from
+      the experiment start time. Each modification to the nwb file adds a new entry
       to the array.'
   - name: identifier
     dtype: text
-    doc: 'A unique text identifier for the file. COMMENT: Eg, concatenated lab name,
+    doc: A unique text identifier for the file. For example, concatenated lab name,
       file creation date/time and experimentalist, or a hash of these and/or other
-      values. The goal is that the string should be unique to all other files.'
+      values. The goal is that the string should be unique to all other files.
   - name: session_description
     dtype: text
-    doc: One or two sentences describing the experiment and data in the file.
+    doc: A description of the experimental session and data in the file.
   - name: session_start_time
     dtype: isodatetime
-    doc: 'Date and time of the experiment/session start. COMMENT: - The date is stored
-      in UTC with local timezone offset as ISO 8601 extended formatted string: 2018-09-28T14:43:54.123+02:00
-      - Dates stored in UTC end in "Z" with no timezone offset. - Date accuracy is
+    doc: 'Date and time of the experiment/session start. The date is stored
+      in UTC with local timezone offset as ISO 8601 extended formatted string:
+      2018-09-28T14:43:54.123+02:00.
+      Dates stored in UTC end in "Z" with no timezone offset. Date accuracy is
       up to milliseconds.'
   - name: timestamps_reference_time
     dtype: isodatetime
-    doc: 'Date and time corresponding to time zero of all timestamps. COMMENT: - The
+    doc: 'Date and time corresponding to time zero of all timestamps. The
       date is stored in UTC with local timezone offset as ISO 8601 extended formatted
-      string: 2018-09-28T14:43:54.123+02:00 - Dates stored in UTC end in "Z" with
-      no timezone offset. - Date accuracy is up to milliseconds. - All times stored
-      in the file use this time as reference (ie, time zero).'
+      string: 2018-09-28T14:43:54.123+02:00. Dates stored in UTC end in "Z" with
+      no timezone offset. Date accuracy is up to milliseconds. All times stored
+      in the file use this time as reference (i.e., time zero).'
   groups:
   - name: acquisition
-    doc: 'Data streams recorded from the system, including ephys, ophys, tracking,
-      etc. COMMENT: This group is read-only after the experiment is completed and
+    doc: Data streams recorded from the system, including ephys, ophys, tracking,
+      etc. This group should be read-only after the experiment is completed and
       timestamps are corrected to a common timebase. The data stored here may be links
-      to raw data stored in external HDF5 files. This will allow keeping bulky raw
+      to raw data stored in external NWB files. This will allow keeping bulky raw
       data out of the file while preserving the option of keeping some/all in the
-      file. MORE_INFO: Acquired data includes tracking and experimental data streams
-      (ie, everything measured from the system). If bulky data is stored in the /acquisition
-      group, the data can exist in a separate HDF5 file that is linked to by the file
-      being used for processing and analysis.'
+      file. Acquired data includes tracking and experimental data streams
+      (i.e., everything measured from the system). If bulky data is stored in the /acquisition
+      group, the data can exist in a separate NWB file that is linked to by the file
+      being used for processing and analysis.
     groups:
     - neurodata_type_inc: NWBDataInterface
-      doc: Any objects representing acquired data
+      doc: Acquired, raw data.
       quantity: '*'
   - name: analysis
-    doc: 'Lab-specific and custom scientific analysis of data. There is no defined
+    doc: Lab-specific and custom scientific analysis of data. There is no defined
       format for the content of this group - the format is up to the individual user/lab.
-      COMMENT: To facilitate sharing analysis data between labs, the contents here
+      To facilitate sharing analysis data between labs, the contents here
       should be stored in standard types (eg, INCF types) and appropriately documented.
-      MORE_INFO: The file can store lab-specific and custom data analysis without
+      The file can store lab-specific and custom data analysis without
       restriction on its form or schema, reducing data formatting restrictions on
       end users. Such data should be placed in the analysis group. The analysis data
-      should be documented so that it could be shared with other labs.'
+      should be documented so that it could be shared with other labs.
     groups:
     - neurodata_type_inc: NWBContainer
-      doc: Custom analysis results
+      doc: Custom analysis results.
       quantity: '*'
   - name: processing
     doc: "The home for ProcessingModules. These modules perform intermediate analysis\
       \ of data that is necessary to perform before scientific analysis. Examples\
       \ include spike clustering, extracting position from tracking data, stitching\
-      \ together image slices. COMMENT: Modules are defined below. They can be large\
+      \ together image slices. ProcessingModules can be large\
       \ and express many data sets from relatively complex analysis (e.g., spike detection\
       \ and clustering) or small, representing extraction of position information\
       \ from tracking video, or even binary lick/no-lick decisions. Common software\
-      \ tools (e.g., klustakwik, MClust) are expected to read/write data here. MORE_INFO:\
+      \ tools (e.g., klustakwik, MClust) are expected to read/write data here. \
       \ 'Processing' refers to intermediate analysis of the acquired data to make\
-      \ it more amenable to scientific analysis. These are performed using Modules,\
-      \ as defined above. All modules reside in the processing group."
+      \ it more amenable to scientific analysis."
     groups:
     - neurodata_type_inc: ProcessingModule
-      doc: Intermediate analysis of acquired data
+      doc: Intermediate analysis of acquired data.
       quantity: '*'
   - name: stimulus
     doc: 'Data pushed into the system (eg, video stimulus, sound, voltage, etc) and
       secondary representations of that data (eg, measurements of something used as
-      a stimulus) COMMENT: This group is read-only after experiment complete and timestamps
+      a stimulus). This group should be made read-only after experiment complete and timestamps
       are corrected to common timebase. Stores both presented stimuli and stimulus
       templates, the latter in case the same stimulus is presented multiple times,
-      or is pulled from an external stimulus library. MORE_INFO: Stimuli are here
+      or is pulled from an external stimulus library. Stimuli are here
       defined as any signal that is pushed into the system as part of the experiment
       (eg, sound, video, voltage, etc). Many different experiments can use the same
       stimuli, and stimuli can be re-used during an experiment. The stimulus group
       is organized so that one version of template stimuli can be stored and these
       be used multiple times. These templates can exist in the present file or can
-      be HDF5-linked to a remote library file.'
+      be linked to a remote library file.'
     groups:
     - name: presentation
       doc: Stimuli presented during the experiment.
       groups:
       - neurodata_type_inc: TimeSeries
-        doc: TimeSeries objects containing data of presented stimuli
+        doc: TimeSeries objects containing data of presented stimuli.
         quantity: '*'
     - name: templates
-      doc: 'Template stimuli. COMMENT: Time stamps in templates are based on stimulus
+      doc: 'Template stimuli. Timestamps in templates are based on stimulus
         design and are relative to the beginning of the stimulus. When templates are
         used, the stimulus instances must convert presentation times to the experiment`s
         time reference frame.'
       groups:
       - neurodata_type_inc: TimeSeries
-        doc: TimeSeries objects containing template data of presented stimuli
+        doc: TimeSeries objects containing template data of presented stimuli.
         quantity: '*'
   - name: general
     doc: "Experimental metadata, including protocol, notes and description of hardware\
-      \ device(s).  COMMENT: The metadata stored in this section should be used to\
+      \ device(s).  The metadata stored in this section should be used to\
       \ describe the experiment. Metadata necessary for interpreting the data is stored\
-      \ with the data. MORE_INFO: General experimental metadata, including animal\
+      \ with the data. General experimental metadata, including animal\
       \ strain, experimental protocols, experimenter, devices, etc, are stored under\
       \ 'general'. Core metadata (e.g., that required to interpret data fields) is\
       \ stored with the data itself, and implicitly defined by the file specification\
@@ -140,22 +141,22 @@ groups:
     datasets:
     - name: data_collection
       dtype: text
-      doc: 'Notes about data collection and analysis.COMMENT: Can be from Methods'
+      doc: Notes about data collection and analysis.
       quantity: '?'
     - name: experiment_description
       dtype: text
-      doc: 'General description of the experiment.COMMENT: Can be from Methods'
+      doc: General description of the experiment.
       quantity: '?'
     - name: experimenter
       dtype: text
-      doc: 'Name of person who performed the experiment.COMMENT: More than one person
-        OK. Can specify roles of different people involved.'
+      doc: Name of person(s) who performed the experiment. Can also specify roles
+        of different people involved.
       quantity: '?'
       shape:
       - null
     - name: institution
       dtype: text
-      doc: Institution(s) where experiment was performed
+      doc: Institution(s) where experiment was performed.
       quantity: '?'
     - name: keywords
       dtype: text
@@ -163,57 +164,55 @@ groups:
       - num_keywords
       shape:
       - null
-      doc: Terms to search over
+      doc: Terms to search over.
       quantity: '?'
     - name: lab
       dtype: text
-      doc: Lab where experiment was performed
+      doc: Laboratory where experiment was performed.
       quantity: '?'
     - name: notes
       dtype: text
-      doc: 'Notes about the experiment.  COMMENT: Things particular to this experiment'
+      doc: Notes about the experiment.
       quantity: '?'
     - name: pharmacology
       dtype: text
-      doc: 'Description of drugs used, including how and when they were administered.
-        COMMENT: Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.'
+      doc: Description of drugs used, including how and when they were administered.
+        Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.
       quantity: '?'
     - name: protocol
       dtype: text
-      doc: 'Experimental protocol, if applicable. COMMENT: E.g., include IACUC protocol.'
+      doc: Experimental protocol, if applicable. e.g., include IACUC protocol number.
       quantity: '?'
     - name: related_publications
       dtype: text
-      doc: 'Publication information. COMMENT: PMID, DOI, URL, etc. If multiple, concatenate
-        together and describe which is which. such as PMID, DOI, URL, etc'
+      doc: Publication information. PMID, DOI, URL, etc. If multiple, concatenate
+        together and describe which is which.
       quantity: '?'
     - name: session_id
       dtype: text
-      doc: 'Lab-specific ID for the session.COMMENT: Only 1 session_id per file, with
-        all time aligned to experiment start time.'
+      doc: Lab-specific ID for the session.
       quantity: '?'
     - name: slices
       dtype: text
       doc: Description of slices, including information about preparation thickness,
-        orientation, temperature and bath solution
+        orientation, temperature, and bath solution.
       quantity: '?'
     - name: source_script
       dtype: text
-      doc: Script file used to create this NWB file.
+      doc: Script file or link to public source code used to create this NWB file.
       quantity: '?'
       attributes:
       - name: file_name
         dtype: text
-        doc: Name of script file
+        doc: Name of script file.
     - name: stimulus
       dtype: text
-      doc: 'Notes about stimuli, such as how and where presented. COMMENT: Can be
-        from Methods.'
+      doc: Notes about stimuli, such as how and where they were presented.
       quantity: '?'
     - name: surgery
       dtype: text
-      doc: 'Narrative description about surgery/surgeries, including date(s) and who
-        performed surgery. COMMENT: Much can be copied from Methods.'
+      doc: Narrative description about surgery/surgeries, including date(s) and who
+        performed surgery.
       quantity: '?'
     - name: virus
       dtype: text
@@ -223,17 +222,17 @@ groups:
     groups:
     - neurodata_type_def: LabMetaData
       neurodata_type_inc: NWBContainer
-      doc: place-holder than can be extended so that lab-specific meta-data can be
-        placed in /general
+      doc: Place-holder than can be extended so that lab-specific meta-data can be
+        placed in /general.
       quantity: '*'
     - name: devices
-      doc: 'Description of hardware devices used during experiment. COMMENT: Eg, monitors,
-        ADC boards, microscopes, etc'
+      doc: Description of hardware devices used during experiment, e.g., monitors,
+        ADC boards, microscopes, etc.
       quantity: '?'
       groups:
       - neurodata_type_def: Device
         neurodata_type_inc: NWBContainer
-        doc: One of possibly many. Information about device and device description.
+        doc: A data acquisition device, e.g. recording system.
         quantity: '+'
         attributes:
         - name: help
@@ -253,11 +252,11 @@ groups:
       datasets:
       - name: age
         dtype: text
-        doc: Age of subject
+        doc: Age of subject. Can be supplied instead of 'date_of_birth'.
         quantity: '?'
       - name: date_of_birth
         dtype: isodatetime
-        doc: can be supplied instead of age
+        doc: Date of birth of subject. Can be supplied instead of 'age'.
         quantity: '?'
       - name: description
         dtype: text
@@ -266,31 +265,31 @@ groups:
         quantity: '?'
       - name: genotype
         dtype: text
-        doc: 'Genetic strain COMMENT: If absent, assume Wild Type (WT)'
+        doc: Genetic strain. If absent, assume Wild Type (WT).
         quantity: '?'
       - name: sex
         dtype: text
-        doc: Gender of subject
+        doc: Gender of subject.
         quantity: '?'
       - name: species
         dtype: text
-        doc: Species of subject
+        doc: Species of subject.
         quantity: '?'
       - name: subject_id
         dtype: text
-        doc: ID of animal/person used/participating in experiment (lab convention)
+        doc: ID of animal/person used/participating in experiment (lab convention).
         quantity: '?'
       - name: weight
         dtype: text
         doc: Weight at time of experiment, at time of surgery and at other important
-          times
+          times.
         quantity: '?'
     - name: extracellular_ephys
       doc: Metadata related to extracellular electrophysiology.
       quantity: '?'
       groups:
       - neurodata_type_inc: ElectrodeGroup
-        doc: One of possibly many groups, one for each electrode group.
+        doc: Physical group of electrodes.
         quantity: '*'
       - name: electrodes
         neurodata_type_inc: DynamicTable
@@ -300,7 +299,7 @@ groups:
         - name: x
           neurodata_type_inc: VectorData
           dtype: float
-          doc: the x coordinate of the channel location
+          doc: x coordinate of the channel location.
           attributes:
           - name: description
             dtype: text
@@ -309,7 +308,7 @@ groups:
         - name: y
           neurodata_type_inc: VectorData
           dtype: float
-          doc: the y coordinate of the channel location
+          doc: y coordinate of the channel location.
           attributes:
           - name: description
             dtype: text
@@ -318,7 +317,7 @@ groups:
         - name: z
           neurodata_type_inc: VectorData
           dtype: float
-          doc: the z coordinate of the channel location
+          doc: z coordinate of the channel location.
           attributes:
           - name: description
             dtype: text
@@ -327,7 +326,7 @@ groups:
         - name: imp
           neurodata_type_inc: VectorData
           dtype: float
-          doc: the impedance of the channel
+          doc: Impedance of the channel.
           attributes:
           - name: description
             dtype: text
@@ -336,7 +335,9 @@ groups:
         - name: location
           neurodata_type_inc: VectorData
           dtype: ascii
-          doc: the location of channel within the subject e.g. brain region
+          doc: Location of the electrode (channel). Specify the area, layer, comments
+            on estimation of area/layer, stereotaxic coordinates if in vivo, etc. Use
+            standard atlas names for anatomical regions when possible.
           attributes:
           - name: description
             dtype: text
@@ -345,7 +346,7 @@ groups:
         - name: filtering
           neurodata_type_inc: VectorData
           dtype: float
-          doc: description of hardware filtering
+          doc: Description of hardware filtering.
           attributes:
           - name: description
             dtype: text
@@ -356,7 +357,7 @@ groups:
           dtype:
             target_type: ElectrodeGroup
             reftype: object
-          doc: a reference to the ElectrodeGroup this electrode is a part of
+          doc: Reference to the ElectrodeGroup this electrode is a part of.
           attributes:
           - name: description
             dtype: text
@@ -366,7 +367,7 @@ groups:
         - name: group_name
           neurodata_type_inc: VectorData
           dtype: ascii
-          doc: name of the ElectrodeGroup this electrode is a part of
+          doc: Name of the ElectrodeGroup this electrode is a part of.
           attributes:
           - name: description
             dtype: text
@@ -374,40 +375,36 @@ groups:
             doc: value is 'the name of the ElectrodeGroup this electrode is a part
               of'
     - name: intracellular_ephys
-      doc: Metadata related to intracellular electrophysiology
+      doc: Metadata related to intracellular electrophysiology.
       quantity: '?'
       datasets:
       - name: filtering
         dtype: text
-        doc: 'Description of filtering used. COMMENT: Includes filtering type and
-          parameters, frequency fall- off, etc. If this changes between TimeSeries,
-          filter description should be stored as a text attribute for each TimeSeries.'
+        doc: Description of filtering used. Includes filtering type and
+          parameters, frequency fall-off, etc. If this changes between TimeSeries,
+          filter description should be stored as a text attribute for each TimeSeries.
         quantity: '?'
       groups:
       - neurodata_type_inc: IntracellularElectrode
-        doc: 'One of possibly many. COMMENT: Name should be informative.'
+        doc: An intracellular electrode.
         quantity: '*'
       - name: sweep_table
         neurodata_type_inc: SweepTable
         doc: The table which groups different PatchClampSeries together.
         quantity: '?'
     - name: optogenetics
-      doc: Metadata describing optogenetic stimuluation
+      doc: Metadata describing optogenetic stimuluation.
       quantity: '?'
       groups:
       - neurodata_type_inc: OptogeneticStimulusSite
-        doc: 'One of possibly many groups describing an optogenetic stimulation site.
-          COMMENT: Name is arbitrary but should be meaningful. Name is referenced
-          by OptogeneticSeries.'
+        doc: An optogenetic stimulation site.
         quantity: '*'
     - name: optophysiology
       doc: Metadata related to optophysiology.
       quantity: '?'
       groups:
       - neurodata_type_inc: ImagingPlane
-        doc: 'One of possibly many groups describing an imaging plane. COMMENT: Name
-          is arbitrary but should be meaningful. It is referenced by TwoPhotonSeries
-          and also ImageSegmentation and DfOverF interfaces.'
+        doc: An imaging plane.
         quantity: '*'
   - name: intervals
     doc: Experimental intervals, whether that be logically distinct sub-experiments
@@ -417,21 +414,21 @@ groups:
     groups:
     - name: epochs
       neurodata_type_inc: TimeIntervals
-      doc: divisions in time marking experimental stages or sub-divisions of a single
-        recording session
+      doc: Divisions in time marking experimental stages or sub-divisions of a single
+        recording session.
       quantity: '?'
     - name: trials
       neurodata_type_inc: TimeIntervals
-      doc: repeated experimental events that have a logical grouping
+      doc: Repeated experimental events that have a logical grouping.
       quantity: '?'
     - name: invalid_times
       neurodata_type_inc: TimeIntervals
-      doc: time intervals that should be removed from analysis
+      doc: Time intervals that should be removed from analysis.
       quantity: '?'
     - neurodata_type_inc: TimeIntervals
-      doc: an optional additional table for describing other experimental time intervals
+      doc: Optional additional table(s) for describing other experimental time intervals.
       quantity: '*'
   - name: units
     neurodata_type_inc: Units
-    doc: Data about units
+    doc: Data about sorted spike units.
     quantity: '?'

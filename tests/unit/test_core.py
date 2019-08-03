@@ -321,7 +321,7 @@ Fields:
   interval: 1
   resolution: 0.0
   timestamps: [1 2 3]
-  timestamps_unit: Seconds
+  timestamps_unit: seconds
 """
                          )
         nwbfile.add_acquisition(ts)

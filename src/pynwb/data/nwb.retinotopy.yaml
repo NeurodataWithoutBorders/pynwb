@@ -4,8 +4,8 @@ groups:
   default_name: ImagingRetinotopy
   doc: 'Intrinsic signal optical imaging or widefield imaging for measuring retinotopy.
     Stores orthogonal maps (e.g., altitude/azimuth; radius/theta) of responses to
-    specific stimuli and a combined polarity map from which to identify visual areas.<br
-    />Note: for data consistency, all images and arrays are stored in the format [row][column]
+    specific stimuli and a combined polarity map from which to identify visual areas.
+    Note: for data consistency, all images and arrays are stored in the format [row][column]
     and [row, col], which equates to [y][x]. Field of view and dimension arrays may
     appear backward (i.e., y before x).'
   attributes:
@@ -23,7 +23,7 @@ groups:
     shape:
     - null
     - null
-    doc: Phase response to stimulus on the first measured axis
+    doc: Phase response to stimulus on the first measured axis.
     attributes:
     - name: dimension
       dtype: int32
@@ -39,10 +39,10 @@ groups:
       - row|column
       shape:
       - null
-      doc: Size of viewing area, in meters
+      doc: Size of viewing area, in meters.
     - name: unit
       dtype: text
-      doc: Unit that axis data is stored in (e.g., degrees)
+      doc: Unit that axis data is stored in (e.g., degrees).
   - name: axis_1_power_map
     dtype: float32
     dims:
@@ -69,10 +69,10 @@ groups:
       - row_col
       shape:
       - null
-      doc: Size of viewing area, in meters
+      doc: Size of viewing area, in meters.
     - name: unit
       dtype: text
-      doc: Unit that axis data is stored in (e.g., degrees)
+      doc: Unit that axis data is stored in (e.g., degrees).
   - name: axis_2_phase_map
     dtype: float32
     dims:
@@ -81,7 +81,7 @@ groups:
     shape:
     - null
     - null
-    doc: Phase response to stimulus on the second measured axis
+    doc: Phase response to stimulus on the second measured axis.
     attributes:
     - name: dimension
       dtype: int32
@@ -97,10 +97,10 @@ groups:
       - row_col
       shape:
       - null
-      doc: Size of viewing area, in meters
+      doc: Size of viewing area, in meters.
     - name: unit
       dtype: text
-      doc: Unit that axis data is stored in (e.g., degrees)
+      doc: Unit that axis data is stored in (e.g., degrees).
   - name: axis_2_power_map
     dtype: float32
     dims:
@@ -127,10 +127,10 @@ groups:
       - row_col
       shape:
       - null
-      doc: Size of viewing area, in meters
+      doc: Size of viewing area, in meters.
     - name: unit
       dtype: text
-      doc: Unit that axis data is stored in (e.g., degrees)
+      doc: Unit that axis data is stored in (e.g., degrees).
   - name: axis_descriptions
     dtype: text
     dims:
@@ -139,7 +139,7 @@ groups:
     - null
     doc: Two-element array describing the contents of the two response axis fields.
       Description should be something like ['altitude', 'azimuth'] or '['radius',
-      'theta']
+      'theta'].
   - name: focal_depth_image
     dtype: uint16
     dims:
@@ -149,12 +149,12 @@ groups:
     - null
     - null
     doc: 'Gray-scale image taken with same settings/parameters (e.g., focal depth,
-      wavelength) as data collection. Array format: [rows][columns]'
+      wavelength) as data collection. Array format: [rows][columns].'
     attributes:
     - name: bits_per_pixel
       dtype: int32
       doc: Number of bits used to represent each value. This is necessary to determine
-        maximum (white) pixel value
+        maximum (white) pixel value.
     - name: dimension
       dtype: int32
       dims:
@@ -169,13 +169,13 @@ groups:
       - row_col
       shape:
       - null
-      doc: Size of viewing area, in meters
+      doc: Size of viewing area, in meters.
     - name: focal_depth
       dtype: float
-      doc: Focal depth offset, in meters
+      doc: Focal depth offset, in meters.
     - name: format
       dtype: text
-      doc: Format of image. Right now only 'raw' supported
+      doc: Format of image. Right now only 'raw' is supported.
   - name: sign_map
     dtype: float32
     dims:
@@ -184,7 +184,7 @@ groups:
     shape:
     - null
     - null
-    doc: Sine of the angle between the direction of the gradient in axis_1 and axis_2
+    doc: Sine of the angle between the direction of the gradient in axis_1 and axis_2.
     attributes:
     - name: dimension
       dtype: int32
@@ -229,7 +229,7 @@ groups:
       - row_col
       shape:
       - null
-      doc: Size of viewing area, in meters
+      doc: Size of viewing area, in meters.
     - name: format
       dtype: text
-      doc: Format of image. Right now only 'raw' supported
+      doc: Format of image. Right now only 'raw' is supported.
