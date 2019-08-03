@@ -108,6 +108,11 @@ groups:
     dtype: float32
     doc: Fast capacitance, in farads.
     quantity: '?'
+    attributes:
+    - name: unit
+      dtype: text
+      value: farads
+      doc: Unit of measurement for capacitance_fast, which is fixed to 'farads'.
   - name: capacitance_slow
     dtype: float32
     doc: Slow capacitance, in farads.
