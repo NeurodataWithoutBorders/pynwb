@@ -112,26 +112,56 @@ groups:
     dtype: float32
     doc: Slow capacitance, in farads.
     quantity: '?'
+    attributes:
+    - name: unit
+      dtype: text
+      value: farads
+      doc: Unit of measurement for capacitance_fast, which is fixed to 'farads'.
   - name: resistance_comp_bandwidth
     dtype: float32
     doc: Resistance compensation bandwidth, in hertz.
     quantity: '?'
+    attributes:
+    - name: unit
+      dtype: text
+      value: hertz
+      doc: Unit of measurement for resistance_comp_bandwidth, which is fixed to 'hertz'.
   - name: resistance_comp_correction
     dtype: float32
     doc: Resistance compensation correction, in percent.
     quantity: '?'
+    attributes:
+    - name: unit
+      dtype: text
+      value: percent
+      doc: Unit of measurement for resistance_comp_correction, which is fixed to 'percent'.
   - name: resistance_comp_prediction
     dtype: float32
     doc: Resistance compensation prediction, in percent.
     quantity: '?'
+    attributes:
+    - name: unit
+      dtype: text
+      value: percent
+      doc: Unit of measurement for resistance_comp_prediction, which is fixed to 'percent'.
   - name: whole_cell_capacitance_comp
     dtype: float32
     doc: Whole cell capacitance compensation, in farads.
     quantity: '?'
+    attributes:
+    - name: unit
+      dtype: text
+      value: farads
+      doc: Unit of measurement for whole_cell_capacitance_comp, which is fixed to 'farads'.
   - name: whole_cell_series_resistance_comp
     dtype: float32
     doc: Whole cell series resistance compensation, in ohms.
     quantity: '?'
+    attributes:
+    - name: unit
+      dtype: text
+      value: ohms
+      doc: Unit of measurement for whole_cell_series_resistance_comp, which is fixed to 'ohms'.
 
 - neurodata_type_def: VoltageClampStimulusSeries
   neurodata_type_inc: PatchClampSeries
