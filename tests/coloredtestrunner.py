@@ -295,7 +295,7 @@ class ColoredTestResult(unittest.TextTestResult):
     def addSkip(self, test, reason):
         self.skip_count += 1
         super(ColoredTestResult, self).addSkip(test, reason)
-        output = self.complete_output()
+        self.complete_output()
         sys.stdout.write('s')
         sys.stdout.flush()
 
