@@ -6,7 +6,7 @@ from pandas.util.testing import assert_frame_equal
 import unittest2 as unittest
 from dateutil.tz import tzlocal
 from pynwb import NWBFile, TimeSeries, available_namespaces
-from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable, DynamicTableRegion
+from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable, DynamicTableRegion, LabelledDict
 
 
 class TestDynamicTable(unittest.TestCase):
@@ -351,3 +351,21 @@ Fields:
 class TestAvailableNamespaces(unittest.TestCase):
     def test_available_namespaces(self):
         self.assertEqual(available_namespaces(), ('core', ))
+
+
+class TestLabelledDict(unittest.TestCase):
+
+    def setUp(self):
+        self.name = 'name'
+        self.container = TimeSeries(self.name, [1., 2., 3.] * 1000, timestamps=[1, 2, 3])
+        self.object_id = self.container.object_id
+
+    def test_add_default(self):
+        ld = LabelledDict('test_dict')
+        ld.add(self.container)
+        self.assertIs(ld[self.name], self.container)
+
+    def test_add_nondefault(self):
+        ld = LabelledDict('test_dict', def_key_name='object_id')
+        ld.add(self.container)
+        self.assertIs(ld[self.object_id], self.container)

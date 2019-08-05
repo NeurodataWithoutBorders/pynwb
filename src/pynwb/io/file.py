@@ -2,6 +2,7 @@ from dateutil.parser import parse as dateutil_parse
 from hdmf.build import ObjectMapper
 from .. import register_map
 from ..file import NWBFile, Subject
+from ..core import ScratchData
 
 
 @register_map(NWBFile)
@@ -9,7 +10,10 @@ class NWBFileMap(ObjectMapper):
 
     def __init__(self, spec):
         super(NWBFileMap, self).__init__(spec)
-        raw_ts_spec = self.spec.get_group('acquisition').get_neurodata_type('NWBDataInterface')
+
+        acq_spec = self.spec.get_group('acquisition')
+        self.unmap(acq_spec)
+        raw_ts_spec = acq_spec.get_neurodata_type('NWBDataInterface')
         self.map_spec('acquisition', raw_ts_spec)
         self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('NWBContainer'))
 
@@ -39,9 +43,9 @@ class NWBFileMap(ObjectMapper):
             'imaging_planes',
             general_spec.get_group('optophysiology').get_neurodata_type('ImagingPlane'))
 
-        self.map_spec(
-            'processing',
-            self.spec.get_group('processing').get_neurodata_type('ProcessingModule'))
+        proc_spec = self.spec.get_group('processing')
+        self.unmap(proc_spec)
+        self.map_spec('processing', proc_spec.get_neurodata_type('ProcessingModule'))
         # self.unmap(general_spec.get_dataset('stimulus'))
         self.map_spec('stimulus_notes', general_spec.get_dataset('stimulus'))
         self.map_spec('source_script_file_name', general_spec.get_dataset('source_script').get_attribute('file_name'))
@@ -49,6 +53,40 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('subject', general_spec.get_group('subject'))
         self.map_spec('devices', general_spec.get_group('devices').get_neurodata_type('Device'))
         self.map_spec('lab_meta_data', general_spec.get_neurodata_type('LabMetaData'))
+
+        scratch_spec = self.spec.get_group('scratch')
+        self.unmap(scratch_spec)
+        self.map_spec('scratch_datas', scratch_spec.get_neurodata_type('ScratchData'))
+        self.map_spec('scratch_containers', scratch_spec.get_neurodata_type('NWBContainer'))
+
+    @ObjectMapper.object_attr('scratch_datas')
+    def scratch_datas(self, container, manager):
+        scratch = container.scratch
+        ret = list()
+        for s in scratch.values():
+            if isinstance(s, ScratchData):
+                ret.append(s)
+        return ret
+
+    @ObjectMapper.object_attr('scratch_containers')
+    def scratch_containers(self, container, manager):
+        scratch = container.scratch
+        ret = list()
+        for s in scratch.values():
+            if not isinstance(s, ScratchData):
+                ret.append(s)
+        return ret
+
+    @ObjectMapper.constructor_arg('scratch')
+    def scratch(self, builder, manager):
+        scratch = builder.get('scratch')
+        ret = list()
+        if scratch is not None:
+            for g in scratch.groups.values():
+                ret.append(manager.construct(g))
+            for d in scratch.datasets.values():
+                ret.append(manager.construct(d))
+        return tuple(ret) if len(ret) > 0 else None
 
     @ObjectMapper.constructor_arg('session_start_time')
     def dateconversion(self, builder, manager):
