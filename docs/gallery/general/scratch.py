@@ -148,6 +148,17 @@ nwb_scratch.add_scratch(fft, name='dft_filtered', notes='discrete Fourier transf
 with NWBHDF5IO('scratch_analysis.nwb', 'w', manager=proc_io.manager) as io:
     io.write(nwb_scratch)
 
+####################
+#
+# To get your results back, you can index into :py:attr:`~pynwb.file.NWBFile.scratch` or use
+# :py:func:`~pynwb.file.NWBFile.get_scratch`:
+
+scratch_io = NWBHDF5IO('scratch_analysis.nwb', 'r')
+nwb_scratch_in = scratch_io.read()
+
+fft_in = nwb_scratch_in.scratch['dft_filtered']
+
+fft_in = nwb_scratch_in.get_scratch('dft_filtered')
 
 ####################
 #
