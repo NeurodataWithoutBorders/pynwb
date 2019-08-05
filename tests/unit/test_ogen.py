@@ -17,7 +17,7 @@ class OptogeneticSeriesConstructor(unittest.TestCase):
 
         iS = OptogeneticSeries('test_iS', list(), oS, timestamps=list())
         self.assertEqual(iS.name, 'test_iS')
-        self.assertEqual(iS.unit, 'Watt')
+        self.assertEqual(iS.unit, 'watts')
         self.assertEqual(iS.site, oS)
 
 

@@ -63,7 +63,7 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(tPS.external_file, ['external_file'])
         self.assertEqual(tPS.starting_frame, [1, 2, 3])
         self.assertEqual(tPS.format, 'tiff')
-        self.assertEqual(tPS.dimension, [np.nan])
+        self.assertIsNone(tPS.dimension)
 
     def test_args(self):
         oc = OpticalChannel('test_name', 'description', 500.)
@@ -102,7 +102,7 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
 
         rt_region = ip.create_roi_table_region('the second ROI', region=[0])
 
-        ts = RoiResponseSeries('test_ts', list(), 'unit', rt_region, timestamps=list())
+        ts = RoiResponseSeries('test_ts', list(), rt_region, unit='unit', timestamps=list())
         self.assertEqual(ts.name, 'test_ts')
         self.assertEqual(ts.unit, 'unit')
         self.assertEqual(ts.rois, rt_region)
@@ -114,7 +114,7 @@ class DfOverFConstructor(unittest.TestCase):
 
         rt_region = ip.create_roi_table_region('the second ROI', region=[1])
 
-        rrs = RoiResponseSeries('test_ts', list(), 'unit', rt_region, timestamps=list())
+        rrs = RoiResponseSeries('test_ts', list(), rt_region, unit='unit', timestamps=list())
 
         dof = DfOverF(rrs)
         self.assertEqual(dof.roi_response_series['test_ts'], rrs)
@@ -126,7 +126,7 @@ class FluorescenceConstructor(unittest.TestCase):
 
         rt_region = ip.create_roi_table_region('the second ROI', region=[1])
 
-        ts = RoiResponseSeries('test_ts', list(), 'unit', rt_region, timestamps=list())
+        ts = RoiResponseSeries('test_ts', list(), rt_region, unit='unit', timestamps=list())
 
         ff = Fluorescence(ts)
         self.assertEqual(ff.roi_response_series['test_ts'], ts)
