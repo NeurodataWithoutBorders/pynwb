@@ -305,7 +305,7 @@ class Potato(NWBContainer):
 class PotatoSack(MultiContainerInterface):
 
     __clsconf__ = {
-        'attr': 'potatoes',
+        'attr': 'potatos',
         'type': Potato,
         'add': 'add_potato',
         'get': 'get_potato',
@@ -321,7 +321,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 
 # You can add potatoes to a potato sack in different ways
-potato_sack = PotatoSack(potatoes=Potato(name='potato1', age=2.3, weight=3.0))
+potato_sack = PotatoSack(potatos=Potato(name='potato1', age=2.3, weight=3.0))
 potato_sack.add_potato(Potato('potato2', 3.0, 4.0))
 potato_sack.create_potato('big_potato', 10.0, 20.0)
 
