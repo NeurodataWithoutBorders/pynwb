@@ -266,7 +266,7 @@ potato = NWBGroupSpec(neurodata_type_def='Potato',
                           NWBAttributeSpec(name='age',
                                            doc='age of potato',
                                            dtype='float',
-                                           required=False))
+                                           required=False)
                       ])
 
 potato_sack = NWBGroupSpec(neurodata_type_def='PotatoSack',
