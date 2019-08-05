@@ -29,8 +29,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                   attributes={'namespace': base.CORE_NAMESPACE,
                                               'neurodata_type': 'TimeSeries',
                                               'comments': 'no comments',
-                                              'description': 'no description',
-                                              'help': 'General time series object'},
+                                              'description': 'no description'},
                                   datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                    attributes={'unit': 'SIunit',
                                                                                'conversion': 1.0,
@@ -42,8 +41,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                    attributes={'namespace': base.CORE_NAMESPACE,
                                                'neurodata_type': 'TimeSeries',
                                                'comments': 'no comments',
-                                               'description': 'no description',
-                                               'help': 'General time series object'},
+                                               'description': 'no description'},
                                    datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                     attributes={'unit': 'SIunit',
                                                                                 'conversion': 1.0,
@@ -55,7 +53,6 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         module_builder = GroupBuilder('test_module',
                                       attributes={'namespace': base.CORE_NAMESPACE,
                                                   'neurodata_type': 'ProcessingModule',
-                                                  'help': 'A collection of analysis outputs from processing of data',
                                                   'description': 'a test module'},
                                       groups={'test_timeseries': ts_builder2})
 
@@ -104,8 +101,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                 },
                             attributes={'namespace': base.CORE_NAMESPACE,
                                         'nwb_version': '2.0b',
-                                        'neurodata_type': 'NWBFile',
-                                        'help': 'an NWB:N file for storing cellular-based neurophysiology data'})
+                                        'neurodata_type': 'NWBFile'})
 
     def setUpContainer(self):
         container = NWBFile('a test NWB File', 'TEST123',
@@ -186,8 +182,7 @@ class TestSubjectIO(base.TestDataInterfaceIO):
     def setUpBuilder(self):
         return GroupBuilder('subject',
                             attributes={'namespace': base.CORE_NAMESPACE,
-                                        'neurodata_type': 'Subject',
-                                        'help': 'Information about the subject'},
+                                        'neurodata_type': 'Subject'},
                             datasets={'age': DatasetBuilder('age', '12 mo'),
                                       'description': DatasetBuilder('description', 'An unfortunate rat'),
                                       'genotype': DatasetBuilder('genotype', 'WT'),
@@ -214,8 +209,7 @@ class TestEmptySubjectIO(TestSubjectIO):
     def setUpBuilder(self):
         return GroupBuilder('subject',
                             attributes={'namespace': base.CORE_NAMESPACE,
-                                        'neurodata_type': 'Subject',
-                                        'help': 'Information about the subject'},
+                                        'neurodata_type': 'Subject'},
                             datasets={})
 
 

@@ -5,10 +5,6 @@ groups:
   doc: An NWB:N file storing cellular-based neurophysiology data from a single
     experimental session.
   attributes:
-  - name: help
-    dtype: text
-    value: an NWB:N file for storing cellular-based neurophysiology data
-    doc: Value is 'an NWB:N file for storing cellular-based neurophysiology data'
   - name: nwb_version
     dtype: text
     value: 2.0.2
@@ -234,21 +230,11 @@ groups:
         neurodata_type_inc: NWBContainer
         doc: A data acquisition device, e.g. recording system.
         quantity: '+'
-        attributes:
-        - name: help
-          dtype: text
-          value: A recording device e.g. amplifier
-          doc: Value is 'A recording device e.g. amplifier'.
     - neurodata_type_def: Subject
       neurodata_type_inc: NWBContainer
       name: subject
       doc: Information about the animal or person from which the data was measured.
       quantity: '?'
-      attributes:
-      - name: help
-        dtype: text
-        value: Information about the subject
-        doc: Value is 'Information about the subject'
       datasets:
       - name: age
         dtype: text
@@ -300,80 +286,38 @@ groups:
           neurodata_type_inc: VectorData
           dtype: float
           doc: x coordinate of the channel location.
-          attributes:
-          - name: description
-            dtype: text
-            value: the x coordinate of the channel location
-            doc: value is 'the x coordinate of the channel location'
         - name: y
           neurodata_type_inc: VectorData
           dtype: float
           doc: y coordinate of the channel location.
-          attributes:
-          - name: description
-            dtype: text
-            value: the y coordinate of the channel location
-            doc: value is 'the y coordinate of the channel location'
         - name: z
           neurodata_type_inc: VectorData
           dtype: float
           doc: z coordinate of the channel location.
-          attributes:
-          - name: description
-            dtype: text
-            value: the z coordinate of the channel location
-            doc: value is 'the z coordinate of the channel location'
         - name: imp
           neurodata_type_inc: VectorData
           dtype: float
           doc: Impedance of the channel.
-          attributes:
-          - name: description
-            dtype: text
-            value: the impedance of the channel
-            doc: value is 'the impedance of the channel'
         - name: location
           neurodata_type_inc: VectorData
           dtype: ascii
           doc: Location of the electrode (channel). Specify the area, layer, comments
             on estimation of area/layer, stereotaxic coordinates if in vivo, etc. Use
             standard atlas names for anatomical regions when possible.
-          attributes:
-          - name: description
-            dtype: text
-            value: the location of channel within the subject e.g. brain region
-            doc: value is 'the location of channel within the subject e.g. brain region'
         - name: filtering
           neurodata_type_inc: VectorData
           dtype: float
           doc: Description of hardware filtering.
-          attributes:
-          - name: description
-            dtype: text
-            value: description of hardware filtering
-            doc: value is 'description of hardware filtering'
         - name: group
           neurodata_type_inc: VectorData
           dtype:
             target_type: ElectrodeGroup
             reftype: object
           doc: Reference to the ElectrodeGroup this electrode is a part of.
-          attributes:
-          - name: description
-            dtype: text
-            value: a reference to the ElectrodeGroup this electrode is a part of
-            doc: value is 'a reference to the ElectrodeGroup this electrode is a part
-              of'
         - name: group_name
           neurodata_type_inc: VectorData
           dtype: ascii
           doc: Name of the ElectrodeGroup this electrode is a part of.
-          attributes:
-          - name: description
-            dtype: text
-            value: the name of the ElectrodeGroup this electrode is a part of
-            doc: value is 'the name of the ElectrodeGroup this electrode is a part
-              of'
     - name: intracellular_ephys
       doc: Metadata related to intracellular electrophysiology.
       quantity: '?'

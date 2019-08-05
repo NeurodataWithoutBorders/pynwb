@@ -101,8 +101,6 @@ class TwoPhotonSeries(ImageSeries):
                      'pmt_gain',
                      'scan_line_rate')
 
-    _help = "Image stack recorded from 2-photon microscope."
-
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
@@ -142,8 +140,6 @@ class CorrectedImageStack(NWBDataInterface):
                      'original',
                      'xy_translation')
 
-    _help = ""
-
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
             {'name': 'corrected', 'type': ImageSeries,
@@ -174,8 +170,6 @@ class MotionCorrection(MultiContainerInterface):
         'type': CorrectedImageStack,
         'attr': 'corrected_images_stacks'
     }
-
-    _help = "Image stacks whose frames have been shifted (registered) to account for motion."
 
 
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
@@ -223,7 +217,7 @@ class PlaneSegmentation(DynamicTable):
             {'name': 'image_mask', 'type': 'array_data', 'default': None,
              'doc': 'image with the same size of image where positive values mark this ROI',
              'shape': [[None]*2, [None]*3]},
-            {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
+            {'name': 'id', 'type': int, 'doc': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_roi(self, **kwargs):
         """
@@ -295,8 +289,6 @@ class ImageSegmentation(MultiContainerInterface):
         'create': 'create_plane_segmentation'
     }
 
-    _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
-
     @docval({'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'the ImagingPlane this ROI applies to'},
             {'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.', 'default': None},
@@ -313,8 +305,6 @@ class RoiResponseSeries(TimeSeries):
     '''
 
     __nwbfields__ = ({'name': 'rois', 'child': True},)
-
-    _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
@@ -347,8 +337,6 @@ class DfOverF(MultiContainerInterface):
         'create': 'create_roi_response_series'
     }
 
-    _help = "Df/f over time of one or more ROIs. TimeSeries names should correspond to imaging plane names"
-
 
 @register_class('Fluorescence', CORE_NAMESPACE)
 class Fluorescence(MultiContainerInterface):
@@ -364,5 +352,3 @@ class Fluorescence(MultiContainerInterface):
         'get': 'get_roi_response_series',
         'create': 'create_roi_response_series'
     }
-
-    _help = "Fluorescence over time of one or more ROIs. TimeSeries names should correspond to imaging plane names."

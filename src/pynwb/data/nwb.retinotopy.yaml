@@ -8,12 +8,6 @@ groups:
     Note: for data consistency, all images and arrays are stored in the format [row][column]
     and [row, col], which equates to [y][x]. Field of view and dimension arrays may
     appear backward (i.e., y before x).'
-  attributes:
-  - name: help
-    dtype: text
-    value: Intrinsic signal optical imaging or Widefield imaging for measuring retinotopy
-    doc: Value is 'Intrinsic signal optical imaging or Widefield imaging for measuring
-      retinotopy'
   datasets:
   - name: axis_1_phase_map
     dtype: float32

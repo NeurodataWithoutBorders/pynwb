@@ -1,19 +1,11 @@
 datasets:
 - neurodata_type_def: NWBData
   doc: An abstract data type for a dataset.
-  attributes:
-  - name: help
-    dtype: text
-    doc: Short description of what this type of Interface contains.
 
 - neurodata_type_def: Index
   neurodata_type_inc: NWBData
   doc: Pointers that index data values.
   attributes:
-  - name: help
-    dtype: text
-    value: indexes into a list of values for a list of elements
-    doc: a help string
   - name: target
     dtype:
       target_type: NWBData
@@ -27,10 +19,6 @@ datasets:
     is at VectorData[0:VectorIndex(0)+1]. The second vector is at
     VectorData[VectorIndex(0)+1:VectorIndex(1)+1]. And so on.
   attributes:
-  - name: help
-    dtype: text
-    value: Values for a list of elements
-    doc: a help string
   - name: description
     dtype: text
     doc: Description of what these vectors represent.
@@ -55,21 +43,12 @@ datasets:
   shape:
   - null
   doc: A list of unique identifiers for values within a dataset, e.g. rows of a DynamicTable.
-  attributes:
-  - name: help
-    dtype: text
-    value: unique identifiers for a list of elements
-    doc: a help string
 
 - neurodata_type_def: DynamicTableRegion
   neurodata_type_inc: VectorData
   dtype: int
   doc: A region/index into a DynamicTable.
   attributes:
-  - name: help
-    dtype: text
-    value: a subset (i.e. slice or region) of a DynamicTable
-    doc: value is 'a subset (i.e. slice or region) of a DynamicTable'
   - name: table
     dtype:
       target_type: DynamicTable
@@ -103,9 +82,6 @@ datasets:
     third dimension can have three or four elements, e.g. (x, y, (r, g, b)) or
     (x, y, (r, g, b, a)).
   attributes:
-  - name: help
-    dtype: text
-    doc: base image (use GrayscaleImage, RGBImage, RGBAImage, etc.)
   - name: resolution
     dtype: float
     doc: Pixel resolution of the image, in pixels per centimeter.
@@ -119,10 +95,6 @@ groups:
 - neurodata_type_def: NWBContainer
   doc: An abstract data type for a generic container storing collections of data and
     metadata. Base type for all data and metadata containers.
-  attributes:
-  - name: help
-    dtype: text
-    doc: Short description of what this type of NWBContainer contains.
 
 - neurodata_type_def: NWBDataInterface
   neurodata_type_inc: NWBContainer
@@ -133,10 +105,6 @@ groups:
   neurodata_type_inc: NWBDataInterface
   doc: General purpose time series.
   attributes:
-  - name: help
-    dtype: text
-    value: General time series object
-    doc: Value is 'General time series object'
   - name: description
     dtype: text
     default_value: no description
@@ -269,10 +237,6 @@ groups:
   - name: description
     dtype: text
     doc: Description of this collection of processed data.
-  - name: help
-    dtype: text
-    value: A collection of analysis outputs from processing of data
-    doc: Value is 'A collection of analysis outputs from processing of data'
   groups:
   - neurodata_type_inc: NWBDataInterface
     doc: Data objects stored in this collection.
@@ -286,10 +250,6 @@ groups:
   - name: description
     dtype: text
     doc: Description of this collection of images.
-  - name: help
-    dtype: text
-    value: A collection of images that have some meaningful relationship
-    doc: Value is 'A collection of images that have some meaningful relationship'
   datasets:
   - neurodata_type_inc: Image
     doc: Images stored in this collection.
@@ -318,10 +278,6 @@ groups:
     are sufficiently diverse that performance implications can be overlooked in favor
     of usability.
   attributes:
-  - name: help
-    dtype: text
-    value: A column-centric table
-    doc: Value is 'A column-centric table'
   - name: colnames
     dtype: ascii
     dims:
