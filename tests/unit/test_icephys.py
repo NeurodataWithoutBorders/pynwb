@@ -99,10 +99,9 @@ class CurrentClampSeriesConstructor(unittest.TestCase):
     def test_init(self):
         electrode_name = GetElectrode()
 
-        cCS = CurrentClampSeries('test_cCS', list(), 'unit',
-                                 electrode_name, 1.0, "stimset", 2.0, 3.0, 4.0, timestamps=list())
+        cCS = CurrentClampSeries('test_cCS', list(), electrode_name, 1.0, "stimset", 2.0, 3.0, 4.0, timestamps=list())
         self.assertEqual(cCS.name, 'test_cCS')
-        self.assertEqual(cCS.unit, 'unit')
+        self.assertEqual(cCS.unit, 'volts')
         self.assertEqual(cCS.electrode, electrode_name)
         self.assertEqual(cCS.stimulus_description, "stimset")
         self.assertEqual(cCS.gain, 1.0)
@@ -116,10 +115,9 @@ class IZeroClampSeriesConstructor(unittest.TestCase):
     def test_init(self):
         electrode_name = GetElectrode()
 
-        iZCS = IZeroClampSeries('test_iZCS', list(),
-                                'unit', electrode_name, 1.0, timestamps=list())
+        iZCS = IZeroClampSeries('test_iZCS', list(), electrode_name, 1.0, timestamps=list())
         self.assertEqual(iZCS.name, 'test_iZCS')
-        self.assertEqual(iZCS.unit, 'unit')
+        self.assertEqual(iZCS.unit, 'volts')
         self.assertEqual(iZCS.electrode, electrode_name)
         self.assertEqual(iZCS.gain, 1.0)
         self.assertEqual(iZCS.bias_current, 0.0)
@@ -132,10 +130,9 @@ class CurrentClampStimulusSeriesConstructor(unittest.TestCase):
     def test_init(self):
         electrode_name = GetElectrode()
 
-        cCSS = CurrentClampStimulusSeries('test_cCSS', list(),
-                                          'unit', electrode_name, 1.0, timestamps=list())
+        cCSS = CurrentClampStimulusSeries('test_cCSS', list(), electrode_name, 1.0, timestamps=list())
         self.assertEqual(cCSS.name, 'test_cCSS')
-        self.assertEqual(cCSS.unit, 'unit')
+        self.assertEqual(cCSS.unit, 'amperes')
         self.assertEqual(cCSS.electrode, electrode_name)
         self.assertEqual(cCSS.gain, 1.0)
 
@@ -145,10 +142,10 @@ class VoltageClampSeriesConstructor(unittest.TestCase):
     def test_init(self):
         electrode_name = GetElectrode()
 
-        vCS = VoltageClampSeries('test_vCS', list(), 'unit', electrode_name,
+        vCS = VoltageClampSeries('test_vCS', list(), electrode_name,
                                  1.0, "stimset", 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, timestamps=list())
         self.assertEqual(vCS.name, 'test_vCS')
-        self.assertEqual(vCS.unit, 'unit')
+        self.assertEqual(vCS.unit, 'amperes')
         self.assertEqual(vCS.electrode, electrode_name)
         self.assertEqual(vCS.stimulus_description, "stimset")
         self.assertEqual(vCS.gain, 1.0)
@@ -166,10 +163,9 @@ class VoltageClampStimulusSeriesConstructor(unittest.TestCase):
     def test_init(self):
         electrode_name = GetElectrode()
 
-        vCSS = VoltageClampStimulusSeries('test_vCSS', list(),
-                                          'unit', electrode_name, 1.0, timestamps=list())
+        vCSS = VoltageClampStimulusSeries('test_vCSS', list(), electrode_name, 1.0, timestamps=list())
         self.assertEqual(vCSS.name, 'test_vCSS')
-        self.assertEqual(vCSS.unit, 'unit')
+        self.assertEqual(vCSS.unit, 'volts')
         self.assertEqual(vCSS.electrode, electrode_name)
 
 
