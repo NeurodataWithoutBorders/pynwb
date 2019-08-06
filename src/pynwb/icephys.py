@@ -104,7 +104,7 @@ class CurrentClampSeries(PatchClampSeries):
                      'bridge_balance',
                      'capacitance_compensation')
 
-    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'unit', 'electrode', 'gain'),  # required
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
             {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': None},
             {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
@@ -112,7 +112,8 @@ class CurrentClampSeries(PatchClampSeries):
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number'))
     def __init__(self, **kwargs):
-        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
+        unit = 'volts'
         bias_current, bridge_balance, capacitance_compensation = popargs(
             'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
         super(CurrentClampSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
@@ -132,14 +133,14 @@ class IZeroClampSeries(CurrentClampSeries):
 
     __nwbfields__ = ()
 
-    @docval(*get_docval(CurrentClampSeries.__init__, 'name', 'data', 'unit', 'electrode', 'gain'),  # required
+    @docval(*get_docval(CurrentClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(CurrentClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
                         'sweep_number'))
     def __init__(self, **kwargs):
-        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
         bias_current, bridge_balance, capacitance_compensation = (0.0, 0.0, 0.0)
-        super(IZeroClampSeries, self).__init__(name, data, unit, electrode, gain, bias_current,
+        super(IZeroClampSeries, self).__init__(name, data, electrode, gain, bias_current,
                                                bridge_balance, capacitance_compensation, **kwargs)
 
 
@@ -151,6 +152,15 @@ class CurrentClampStimulusSeries(PatchClampSeries):
     '''
 
     __nwbfields__ = ()
+
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
+            *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
+                        'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
+                        'sweep_number'))
+    def __init__(self, **kwargs):
+        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
+        unit = 'amperes'
+        super(CurrentClampStimulusSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
 
 
 @register_class('VoltageClampSeries', CORE_NAMESPACE)
@@ -169,7 +179,7 @@ class VoltageClampSeries(PatchClampSeries):
                      'whole_cell_capacitance_comp',
                      'whole_cell_series_resistance_comp')
 
-    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'unit', 'electrode', 'gain'),  # required
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
             {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad', 'default': None},
             {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad', 'default': None},
@@ -181,7 +191,8 @@ class VoltageClampSeries(PatchClampSeries):
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number'))
     def __init__(self, **kwargs):
-        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
+        unit = 'amperes'
         capacitance_fast, capacitance_slow, resistance_comp_bandwidth, resistance_comp_correction, \
             resistance_comp_prediction, whole_cell_capacitance_comp, whole_cell_series_resistance_comp = popargs(
                 'capacitance_fast', 'capacitance_slow', 'resistance_comp_bandwidth',
@@ -205,6 +216,15 @@ class VoltageClampStimulusSeries(PatchClampSeries):
     '''
 
     __nwbfields__ = ()
+
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
+            *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
+                        'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
+                        'sweep_number'))
+    def __init__(self, **kwargs):
+        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
+        unit = 'volts'
+        super(VoltageClampStimulusSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
 
 
 @register_class('SweepTable', CORE_NAMESPACE)

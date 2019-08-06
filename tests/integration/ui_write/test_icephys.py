@@ -88,7 +88,7 @@ class TestCurrentClampStimulusSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        return CurrentClampStimulusSeries(name="ccss", data=[1, 2, 3, 4, 5], unit='A',
+        return CurrentClampStimulusSeries(name="ccss", data=[1, 2, 3, 4, 5],
                                           starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
 
 
@@ -96,7 +96,7 @@ class TestVoltageClampStimulusSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        return VoltageClampStimulusSeries(name="vcss", data=[1, 2, 3, 4, 5], unit='A',
+        return VoltageClampStimulusSeries(name="vcss", data=[1, 2, 3, 4, 5],
                                           starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
 
 
@@ -104,7 +104,7 @@ class TestCurrentClampSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        return CurrentClampSeries(name="ccs", data=[1, 2, 3, 4, 5], unit='A',
+        return CurrentClampSeries(name="ccs", data=[1, 2, 3, 4, 5],
                                   starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                   bias_current=1.2, bridge_balance=2.3, capacitance_compensation=3.45)
 
@@ -113,7 +113,7 @@ class TestVoltageClampSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        return VoltageClampSeries(name="vcs", data=[1, 2, 3, 4, 5], unit='A',
+        return VoltageClampSeries(name="vcs", data=[1, 2, 3, 4, 5],
                                   starting_time=123.6, rate=10e3, electrode=self.elec,
                                   gain=0.126, capacitance_fast=1.2, capacitance_slow=2.3,
                                   resistance_comp_bandwidth=3.45, resistance_comp_correction=4.5,
@@ -125,7 +125,7 @@ class TestIZeroClampSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        return IZeroClampSeries(name="izcs", data=[1, 2, 3, 4, 5], unit='A',
+        return IZeroClampSeries(name="izcs", data=[1, 2, 3, 4, 5],
                                 starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
 
 
