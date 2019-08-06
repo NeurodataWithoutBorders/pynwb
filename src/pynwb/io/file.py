@@ -116,7 +116,7 @@ class NWBFileMap(ObjectMapper):
         exp_bldr = builder['general'].get('experimenter')
         if exp_bldr is not None:
             if isinstance(exp_bldr.data, str):
-                ret = (builder.data,)
+                ret = (exp_bldr.data,)
             else:
                 ret = tuple(exp_bldr.data)
         return ret
