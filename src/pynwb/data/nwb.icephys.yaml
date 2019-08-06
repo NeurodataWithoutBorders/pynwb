@@ -23,6 +23,12 @@ groups:
     shape:
     - null
     doc: Recorded voltage or current.
+    attributes:
+    - name: unit
+      dtype: text
+      doc: Base unit of measurement for working with the data. Actual stored values are
+        not necessarily stored in these units. To access the data in these units,
+        multiply 'data' by 'conversion'.
   - name: gain
     dtype: float
     doc: Gain of the recording, in units Volt/Amp (v-clamp) or Volt/Volt (c-clamp).
@@ -44,6 +50,15 @@ groups:
     value: Voltage recorded from cell during current-clamp recording
     doc: Value is 'Voltage recorded from cell during current-clamp recording'
   datasets:
+  - name: data
+    doc: Recorded voltage.
+    attributes:
+    - name: unit
+      dtype: text
+      value: volts
+      doc: Base unit of measurement for working with the data. which is fixed to 'volts'.
+        Actual stored values are not necessarily stored in these units. To access the data in these units,
+        multiply 'data' by 'conversion'.
   - name: bias_current
     dtype: float32
     doc: Bias current, in amps.
@@ -71,6 +86,15 @@ groups:
     doc: Value is 'Voltage from intracellular recordings when all current and amplifier
       settings are off'
   datasets:
+  - name: data
+    doc: Recorded voltage.
+    attributes:
+    - name: unit
+      dtype: text
+      value: volts
+      doc: Base unit of measurement for working with the data. which is fixed to 'volts'.
+        Actual stored values are not necessarily stored in these units. To access the data in these units,
+        multiply 'data' by 'conversion'.
   - name: bias_current
     dtype: float32
     value: 0.0
@@ -92,6 +116,16 @@ groups:
     dtype: text
     value: Stimulus current applied during current clamp recording
     doc: Value is 'Stimulus current applied during current clamp recording'
+  datasets:
+  - name: data
+    doc: Stimulus current applied.
+    attributes:
+    - name: unit
+      dtype: text
+      value: amperes
+      doc: Base unit of measurement for working with the data. which is fixed to 'amperes'.
+        Actual stored values are not necessarily stored in these units. To access the data in these units,
+        multiply 'data' by 'conversion'.
 
 - neurodata_type_def: VoltageClampSeries
   neurodata_type_inc: PatchClampSeries
@@ -104,6 +138,15 @@ groups:
     value: Current recorded from cell during voltage-clamp recording
     doc: Value is 'Current recorded from cell during voltage-clamp recording'
   datasets:
+  - name: data
+    doc: Recorded current.
+    attributes:
+    - name: unit
+      dtype: text
+      value: amperes
+      doc: Base unit of measurement for working with the data. which is fixed to 'amperes'.
+        Actual stored values are not necessarily stored in these units. To access the data in these units,
+        multiply 'data' by 'conversion'.
   - name: capacitance_fast
     dtype: float32
     doc: Fast capacitance, in farads.
@@ -176,6 +219,16 @@ groups:
     dtype: text
     value: Stimulus voltage applied during voltage clamp recording
     doc: Value is 'Stimulus voltage applied during voltage clamp recording'
+  datasets:
+  - name: data
+    doc: Stimulus voltage applied.
+    attributes:
+    - name: unit
+      dtype: text
+      value: volts
+      doc: Base unit of measurement for working with the data. which is fixed to 'volts'.
+        Actual stored values are not necessarily stored in these units. To access the data in these units,
+        multiply 'data' by 'conversion'.
 
 - neurodata_type_def: IntracellularElectrode
   neurodata_type_inc: NWBContainer
