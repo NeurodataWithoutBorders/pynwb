@@ -5,7 +5,6 @@ from . import base
 
 import pandas as pd
 import numpy as np
-import os
 from numpy.testing import assert_array_equal
 
 
