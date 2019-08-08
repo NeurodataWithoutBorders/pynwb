@@ -33,6 +33,7 @@ groups:
     doc: A unique text identifier for the file. For example, concatenated lab name,
       file creation date/time and experimentalist, or a hash of these and/or other
       values. The goal is that the string should be unique to all other files.
+    quantity: '?'
   - name: session_description
     dtype: text
     doc: A description of the experimental session and data in the file.
