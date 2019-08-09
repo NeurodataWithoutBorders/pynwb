@@ -78,6 +78,28 @@ groups:
     - neurodata_type_inc: NWBContainer
       doc: Custom analysis results.
       quantity: '*'
+  - name: scratch
+    doc: 'A place to store one-off analysis results. Data placed here is not intended for
+      sharing. By placing data here, users acknowledge that there is no guarantee that
+      their data meets any standard.'
+    quantity: '?'
+    groups:
+    - neurodata_type_inc: NWBContainer
+      doc: Any one-off containers
+      quantity: '*'
+    datasets:
+    - neurodata_type_def: ScratchData
+      neurodata_type_inc: NWBData
+      doc: Any one-off datasets
+      quantity: '*'
+      attributes:
+      - name: help
+        doc: Value is 'a scratch dataset'
+        dtype: text
+        value: a scratch dataset
+      - name: notes
+        doc: 'Any notes the user has about the dataset being stored'
+        dtype: text
   - name: processing
     doc: "The home for ProcessingModules. These modules perform intermediate analysis\
       \ of data that is necessary to perform before scientific analysis. Examples\
