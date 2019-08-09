@@ -24,16 +24,14 @@ class TimeSeriesMap(NWBContainerMapper):
     def __init__(self, spec):
         super(TimeSeriesMap, self).__init__(spec)
         data_spec = self.spec.get_dataset('data')
-        self.map_attr('unit', data_spec.get_attribute('unit'))
-        self.map_const_arg('unit', data_spec.get_attribute('unit'))
-        self.map_attr('resolution', data_spec.get_attribute('resolution'))
-        self.map_attr('conversion', data_spec.get_attribute('conversion'))
+        self.map_spec('unit', data_spec.get_attribute('unit'))
+        self.map_spec('resolution', data_spec.get_attribute('resolution'))
+        self.map_spec('conversion', data_spec.get_attribute('conversion'))
         timestamps_spec = self.spec.get_dataset('timestamps')
-        self.map_attr('timestamps_unit', timestamps_spec.get_attribute('unit'))
-        # self.map_attr('interval', timestamps_spec.get_attribute('interval'))
+        self.map_spec('timestamps_unit', timestamps_spec.get_attribute('unit'))
         startingtime_spec = self.spec.get_dataset('starting_time')
-        self.map_attr('starting_time_unit', startingtime_spec.get_attribute('unit'))
-        self.map_attr('rate', startingtime_spec.get_attribute('rate'))
+        self.map_spec('starting_time_unit', startingtime_spec.get_attribute('unit'))
+        self.map_spec('rate', startingtime_spec.get_attribute('rate'))
 
     @NWBContainerMapper.constructor_arg('name')
     def name(self, builder, manager):

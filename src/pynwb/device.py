@@ -10,8 +10,6 @@ class Device(NWBContainer):
 
     __nwbfields__ = ('name',)
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'})
     def __init__(self, **kwargs):
         call_docval_func(super(Device, self).__init__, kwargs)

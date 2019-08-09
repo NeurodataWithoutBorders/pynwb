@@ -149,7 +149,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
                         'resolution': 0.0}
                 ),
                 'timestamps': DatasetBuilder('timestamps', timestamps,
-                                             attributes={'unit': 'Seconds', 'interval': 1}),
+                                             attributes={'unit': 'seconds', 'interval': 1}),
                 'format': DatasetBuilder('format', 'raw'),
                 'dimension': DatasetBuilder('dimension', [2]),
                 'field_of_view': DatasetBuilder('field_of_view', [2.0, 2.0, 5.0]),
@@ -246,7 +246,7 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                                    'comments': 'no comments',
                                                    'help': 'Storage object for time-series 2-D image data'},
                                        datasets={'timestamps': DatasetBuilder('timestamps', ts,
-                                                                              attributes={'unit': 'Seconds',
+                                                                              attributes={'unit': 'seconds',
                                                                                           'interval': 1}),
                                                  'external_file': DatasetBuilder('external_file', ['images.tiff'],
                                                                                  attributes={
@@ -378,7 +378,8 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
         data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
         timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
-        return RoiResponseSeries('test_roi_response_series', data, 'lumens', self.rt_region, timestamps=timestamps)
+        return RoiResponseSeries('test_roi_response_series', data, self.rt_region, unit='lumens',
+                                 timestamps=timestamps)
 
     def setUpBuilder(self):
         ps_builder = TestPlaneSegmentation.get_plane_segmentation_builder(self)
@@ -400,7 +401,7 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
                         'resolution': 0.0}
                 ),
                 'timestamps': DatasetBuilder('timestamps', [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
-                                             attributes={'unit': 'Seconds', 'interval': 1}),
+                                             attributes={'unit': 'seconds', 'interval': 1}),
                 'rois': DatasetBuilder('rois', data=[0],
                                        attributes={'help': 'a subset (i.e. slice or region) of a DynamicTable',
                                                    'description': 'the first of two ROIs',

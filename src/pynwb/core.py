@@ -14,39 +14,6 @@ def _not_parent(arg):
     return arg['name'] != 'parent'
 
 
-class LabelledDict(dict):
-    '''
-    A dict wrapper class for aggregating Timeseries
-    from the standard locations
-    '''
-
-    @docval({'name': 'label', 'type': str, 'doc': 'the label on this dictionary'},
-            {'name': 'def_key_name', 'type': str, 'doc': 'the default key name', 'default': 'name'})
-    def __init__(self, **kwargs):
-        label, def_key_name = getargs('label', 'def_key_name', kwargs)
-        self.__label = label
-        self.__defkey = def_key_name
-
-    @property
-    def label(self):
-        return self.__label
-
-    def __getitem__(self, args):
-        key = args
-        if '==' in args:
-            key, val = args.split("==")
-            key = key.strip()
-            val = val.strip()
-            if key != self.__defkey:
-                ret = list()
-                for item in self.values():
-                    if getattr(item, key, None) == val:
-                        ret.append(item)
-                return ret if len(ret) else None
-            key = val
-        return super(LabelledDict, self).__getitem__(key)
-
-
 def prepend_string(string, prepend='    '):
     return prepend + prepend.join(string.splitlines(True))
 
@@ -62,13 +29,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
     __nwbfields__ = tuple()
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': Container,
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
     def __init__(self, **kwargs):
-        parent, container_source = getargs('parent', 'container_source', kwargs)
         call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
 
@@ -244,11 +206,7 @@ class NWBContainer(NWBBaseType, Container):
 
     __nwbfields__ = ('help',)
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
 
@@ -322,11 +280,7 @@ class NWBData(NWBBaseType, Data):
     __nwbfields__ = ('help',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBData, self).__init__, kwargs)
         self.__data = getargs('data', kwargs)
@@ -362,6 +316,19 @@ class NWBData(NWBBaseType, Data):
             raise ValueError(msg)
 
 
+@register_class('ScratchData', CORE_NAMESPACE)
+class ScratchData(NWBData):
+
+    __nwbfields__ = ('notes',)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
+            {'name': 'notes', 'type': str, 'doc': 'the source of the data', 'default': 'none'})
+    def __init__(self, **kwargs):
+        call_docval_func(super(ScratchData, self).__init__, kwargs)
+        self.notes = getargs('notes', kwargs)
+
+
 @register_class('Index', CORE_NAMESPACE)
 class Index(NWBData):
 
@@ -371,11 +338,7 @@ class Index(NWBData):
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
             {'name': 'target', 'type': NWBData,
-             'doc': 'the target dataset that this index applies to'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'doc': 'the target dataset that this index applies to'})
     def __init__(self, **kwargs):
         call_docval_func(super(Index, self).__init__, kwargs)
 
@@ -388,11 +351,7 @@ class VectorData(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'description', 'type': str, 'doc': 'a description for this column'},
             {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors', 'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors', 'default': list()})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorData, self).__init__, kwargs)
         self.description = getargs('description', kwargs)
@@ -410,11 +369,7 @@ class VectorIndex(Index):
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a 1D dataset containing indexes that apply to VectorData object'},
             {'name': 'target', 'type': VectorData,
-             'doc': 'the target dataset that this index applies to'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'doc': 'the target dataset that this index applies to'})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorIndex, self).__init__, kwargs)
         self.target = getargs('target', kwargs)
@@ -447,11 +402,7 @@ class ElementIdentifiers(NWBData):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this ElementIdentifiers'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'a 1D dataset containing identifiers',
-             'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'default': list()})
     def __init__(self, **kwargs):
         call_docval_func(super(ElementIdentifiers, self).__init__, kwargs)
 
@@ -512,11 +463,7 @@ class NWBTable(NWBData):
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
     def __init__(self, **kwargs):
         self.__columns = tuple(popargs('columns', kwargs))
         self.__col_index = {name: idx for idx, name in enumerate(self.__columns)}
@@ -711,16 +658,34 @@ class MultiContainerInterface(NWBDataInterface):
 
     @staticmethod
     def __add_article(noun):
+        if isinstance(noun, tuple):
+            noun = noun[0]
+        if isinstance(noun, type):
+            noun = noun.__name__
         if noun[0] in ('aeiouAEIOU'):
             return 'an %s' % noun
         return 'a %s' % noun
 
+    @staticmethod
+    def __join(argtype):
+        def tostr(x):
+            return x.__name__ if isinstance(x, type) else x
+        if isinstance(argtype, (list, tuple)):
+            args = [tostr(x) for x in argtype]
+            if len(args) == 1:
+                return args[0].__name__
+            else:
+                ", ".join(tostr(x) for x in args[:-1]) + ' or ' + args[-1]
+        else:
+            return tostr(argtype)
+
     @classmethod
     def __make_get(cls, func_name, attr_name, container_type):
-        doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+        doc = "Get %s from this %s" % (cls.__add_article(container_type), cls.__name__)
 
-        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
-                 'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
+        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % cls.__join(container_type),
+                 'default': None},
+                rtype=container_type, returns='the %s with the given name' % cls.__join(container_type),
                 func_name=func_name, doc=doc)
         def _func(self, **kwargs):
             name = getargs('name', kwargs)
@@ -748,10 +713,10 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_add(cls, func_name, attr_name, container_type):
-        doc = "Add %s to this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+        doc = "Add %s to this %s" % (cls.__add_article(container_type), cls.__name__)
 
         @docval({'name': attr_name, 'type': (list, tuple, dict, container_type),
-                 'doc': 'the %s to add' % container_type.__name__},
+                 'doc': 'the %s to add' % cls.__join(container_type)},
                 func_name=func_name, doc=doc)
         def _func(self, **kwargs):
             container = getargs(attr_name, kwargs)
@@ -776,10 +741,10 @@ class MultiContainerInterface(NWBDataInterface):
     @classmethod
     def __make_create(cls, func_name, add_name, container_type):
         doc = "Create %s and add it to this %s" % \
-                       (cls.__add_article(container_type.__name__), cls.__name__)
+                       (cls.__add_article(container_type), cls.__name__)
 
         @docval(*filter(_not_parent, get_docval(container_type.__init__)), func_name=func_name, doc=doc,
-                returns="the %s object that was created" % container_type.__name__, rtype=container_type)
+                returns="the %s object that was created" % cls.__join(container_type), rtype=container_type)
         def _func(self, **kwargs):
             cargs, ckwargs = fmt_docval_args(container_type.__init__, kwargs)
             ret = container_type(*cargs, **ckwargs)
@@ -794,7 +759,7 @@ class MultiContainerInterface(NWBDataInterface):
             attr_name = conf['attr']
             container_type = conf['type']
             args.append({'name': attr_name, 'type': (list, tuple, dict, container_type),
-                         'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()})
+                         'doc': '%s to store in this interface' % cls.__join(container_type), 'default': dict()})
 
         args.append({'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__})
 
@@ -811,10 +776,11 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_getitem(cls, attr_name, container_type):
-        doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+        doc = "Get %s from this %s" % (cls.__add_article(container_type), cls.__name__)
 
-        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
-                 'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
+        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % cls.__join(container_type),
+                 'default': None},
+                rtype=container_type, returns='the %s with the given name' % cls.__join(container_type),
                 func_name='__getitem__', doc=doc)
         def _func(self, **kwargs):
             name = getargs('name', kwargs)
@@ -823,7 +789,7 @@ class MultiContainerInterface(NWBDataInterface):
                 msg = "%s '%s' is empty" % (cls.__name__, self.name)
                 raise ValueError(msg)
             if len(d) > 1 and name is None:
-                msg = "more than one %s in this %s -- must specify a name" % container_type.__name__, cls.__name__
+                msg = "more than one %s in this %s -- must specify a name" % cls.__join(container_type), cls.__name__
                 raise ValueError(msg)
             ret = None
             if len(d) == 1:
@@ -896,7 +862,8 @@ class MultiContainerInterface(NWBDataInterface):
             if not hasattr(cls, attr):
                 aconf = cls._transform_arg(attr)
                 getter = cls._getter(aconf)
-                doc = "a dictionary containing the %s in this %s container" % (container_type.__name__, cls.__name__)
+                doc = "a dictionary containing the %s in this %s container" % \
+                      (cls.__join(container_type), cls.__name__)
                 setattr(cls, attr, property(getter, cls.__make_setter(aconf, add), None, doc))
 
             # create the add method
@@ -1405,11 +1372,7 @@ class DynamicTableRegion(VectorData):
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
             {'name': 'description', 'type': str, 'doc': 'a description of what this region represents'},
             {'name': 'table', 'type': DynamicTable,
-             'doc': 'the DynamicTable this region applies to', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'doc': 'the DynamicTable this region applies to', 'default': None})
     def __init__(self, **kwargs):
         t = popargs('table', kwargs)
         call_docval_func(super(DynamicTableRegion, self).__init__, kwargs)
@@ -1446,3 +1409,48 @@ class DynamicTableRegion(VectorData):
             return self.table[self.data[key]]
         else:
             raise ValueError("unrecognized argument: '%s'" % key)
+
+
+class LabelledDict(dict):
+    '''
+    A dict wrapper class for aggregating Timeseries
+    from the standard locations
+    '''
+
+    @docval({'name': 'label', 'type': str, 'doc': 'the label on this dictionary'},
+            {'name': 'def_key_name', 'type': str, 'doc': 'the default key name', 'default': 'name'})
+    def __init__(self, **kwargs):
+        label, def_key_name = getargs('label', 'def_key_name', kwargs)
+        self.__label = label
+        self.__defkey = def_key_name
+
+    @property
+    def label(self):
+        return self.__label
+
+    def __getitem__(self, args):
+        key = args
+        if '==' in args:
+            key, val = args.split("==")
+            key = key.strip()
+            val = val.strip()
+            if key != self.__defkey:
+                ret = list()
+                for item in self.values():
+                    if getattr(item, key, None) == val:
+                        ret.append(item)
+                return ret if len(ret) else None
+            key = val
+        return super(LabelledDict, self).__getitem__(key)
+
+    @docval({'name': 'container', 'type': (NWBData, NWBContainer), 'doc': 'the container to add to this LabelledDict'})
+    def add(self, **kwargs):
+        '''
+        Add a container to this LabelledDict
+        '''
+        container = getargs('container', kwargs)
+        key = getattr(container, self.__defkey, None)
+        if key is None:
+            msg = "container '%s' does not have attribute '%s'" % (container.name, self.__defkey)
+            raise ValueError(msg)
+        self[key] = container

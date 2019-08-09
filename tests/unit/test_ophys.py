@@ -63,7 +63,7 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
         self.assertEqual(tPS.external_file, ['external_file'])
         self.assertEqual(tPS.starting_frame, [1, 2, 3])
         self.assertEqual(tPS.format, 'tiff')
-        self.assertEqual(tPS.dimension, [np.nan])
+        self.assertIsNone(tPS.dimension)
 
     def test_args(self):
         oc = OpticalChannel('test_name', 'description', 500.)
@@ -102,7 +102,7 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
 
         rt_region = ip.create_roi_table_region('the second ROI', region=[0])
 
-        ts = RoiResponseSeries('test_ts', list(), 'unit', rt_region, timestamps=list())
+        ts = RoiResponseSeries('test_ts', list(), rt_region, unit='unit', timestamps=list())
         self.assertEqual(ts.name, 'test_ts')
         self.assertEqual(ts.unit, 'unit')
         self.assertEqual(ts.rois, rt_region)
@@ -114,7 +114,7 @@ class DfOverFConstructor(unittest.TestCase):
 
         rt_region = ip.create_roi_table_region('the second ROI', region=[1])
 
-        rrs = RoiResponseSeries('test_ts', list(), 'unit', rt_region, timestamps=list())
+        rrs = RoiResponseSeries('test_ts', list(), rt_region, unit='unit', timestamps=list())
 
         dof = DfOverF(rrs)
         self.assertEqual(dof.roi_response_series['test_ts'], rrs)
@@ -126,7 +126,7 @@ class FluorescenceConstructor(unittest.TestCase):
 
         rt_region = ip.create_roi_table_region('the second ROI', region=[1])
 
-        ts = RoiResponseSeries('test_ts', list(), 'unit', rt_region, timestamps=list())
+        ts = RoiResponseSeries('test_ts', list(), rt_region, unit='unit', timestamps=list())
 
         ff = Fluorescence(ts)
         self.assertEqual(ff.roi_response_series['test_ts'], ts)
@@ -156,6 +156,11 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
                           300., 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
         return iSS, ip
+
+    def create_basic_plane_segmentation(self):
+        """Creates a basic plane segmentation used for testing"""
+        iSS, ip = self.getBoilerPlateObjects()
+        return PlaneSegmentation('description', ip, 'test_name', iSS)
 
     def test_init(self):
         w, h = 5, 5
@@ -220,14 +225,32 @@ class PlaneSegmentationConstructor(unittest.TestCase):
     def test_init_3d_image_mask(self):
         img_masks = np.random.randn(2, 20, 30, 4)
 
-        iSS, ip = self.getBoilerPlateObjects()
-
-        pS = PlaneSegmentation('description', ip, 'test_name', iSS)
+        pS = self.create_basic_plane_segmentation()
         pS.add_roi(image_mask=img_masks[0])
         pS.add_roi(image_mask=img_masks[1])
 
         self.assertTrue(np.allclose(pS['image_mask'][0], img_masks[0]))
         self.assertTrue(np.allclose(pS['image_mask'][1], img_masks[1]))
+
+    def test_conversion_of_2d_pixel_mask_to_image_mask(self):
+        pixel_mask = [[0, 0, 1.0], [1, 0, 2.0], [2, 0, 2.0]]
+
+        pS = self.create_basic_plane_segmentation()
+
+        img_mask = pS.pixel_to_image(pixel_mask)
+        np.testing.assert_allclose(img_mask, np.asarray([[1, 2, 2.0],
+                                                         [0, 0, 0.0],
+                                                         [0, 0, 0.0]]))
+
+    def test_conversion_of_2d_image_mask_to_pixel_mask(self):
+        image_mask = np.asarray([[1.0, 0.0, 0.0],
+                                 [0.0, 1.0, 0.0],
+                                 [0.0, 0.0, 1.0]])
+
+        pS = self.create_basic_plane_segmentation()
+
+        pixel_mask = pS.image_to_pixel(image_mask)
+        np.testing.assert_allclose(pixel_mask, np.asarray([[0, 0, 1.0], [1, 1, 1.0], [2, 2, 1.0]]))
 
     def test_init_image_mask(self):
         w, h = 5, 5

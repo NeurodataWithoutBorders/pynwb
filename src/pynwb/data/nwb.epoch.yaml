@@ -2,7 +2,7 @@ groups:
 - neurodata_type_def: TimeIntervals
   neurodata_type_inc: DynamicTable
   doc: A container for aggregating epoch data and the TimeSeries that each epoch applies
-    to
+    to.
   attributes:
   - name: help
     dtype: text
@@ -12,7 +12,7 @@ groups:
   - name: start_time
     neurodata_type_inc: VectorData
     dtype: float
-    doc: Start time of epoch, in seconds
+    doc: Start time of epoch, in seconds.
     attributes:
     - name: description
       dtype: text
@@ -21,7 +21,7 @@ groups:
   - name: stop_time
     neurodata_type_inc: VectorData
     dtype: float
-    doc: Stop time of epoch, in seconds
+    doc: Stop time of epoch, in seconds.
     attributes:
     - name: description
       dtype: text
@@ -30,8 +30,7 @@ groups:
   - name: tags
     neurodata_type_inc: VectorData
     dtype: text
-    doc: User-defined tags that identify events. Tags are to help identify or categorize
-      events.
+    doc: User-defined tags that identify or categorize events.
     quantity: '?'
     attributes:
     - name: description
@@ -40,15 +39,15 @@ groups:
       doc: value is 'user-defined tags'
   - name: tags_index
     neurodata_type_inc: VectorIndex
-    doc: Index for tags
+    doc: Index for tags.
     quantity: '?'
   - name: timeseries
     neurodata_type_inc: VectorData
     dtype:
     - name: idx_start
       dtype: int32
-      doc: 'Start index into the TimeSeries data[] field. COMMENT: This can be used
-        to calculate location in TimeSeries timestamp[] field'
+      doc: Start index into the TimeSeries 'data' and 'timestamp' datasets of the
+        referenced TimeSeries. The first dimension of those arrays is always time.
     - name: count
       dtype: int32
       doc: Number of data samples available in this time series, during this epoch.
@@ -56,8 +55,8 @@ groups:
       dtype:
         target_type: TimeSeries
         reftype: object
-      doc: the TimeSeries that this index applies to
-    doc: An index into a TimeSeries object
+      doc: the TimeSeries that this index applies to.
+    doc: An index into a TimeSeries object.
     quantity: '?'
     attributes:
     - name: help
@@ -66,5 +65,5 @@ groups:
       doc: Value is 'Data on how an epoch applies to a time series'
   - name: timeseries_index
     neurodata_type_inc: VectorIndex
-    doc: Index for timeseries
+    doc: Index for timeseries.
     quantity: '?'

@@ -2,15 +2,16 @@
 
 If you are reporting a bug please provide the following:
 ### Steps to Reproduce
-```
+```python
 Provide a minimal code snippet here to reproduce this error.
 ```
+
 ### Environment
 Please describe your environment according to the following bullet points.
 - **Python Executable:** Conda or Python
-- **Python Version:** Python 2.7 or Python 3.6
-- **Operating System:** Windows, macOS or Linux
-- **Pynwb Version:** Version of Pynwb used
+- **Python Version:** Python 3.5, 3.6, or 3.7
+- **Operating System:** Windows, macOS, or Linux
+- **PyNWB Version:** Version of PyNWB used
 
 ## 2) Feature Request
 If you are requesting a feature please provide the following:
