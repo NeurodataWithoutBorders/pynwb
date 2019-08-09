@@ -6,7 +6,7 @@ Dependencies
 
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
-#. Python 2.7, Python 3.5 or Python 3.6
+#. Python 3.5, 3.6, or 3.7
 #. pip
 
 ------------
@@ -26,12 +26,14 @@ To install or update PyNWB distribution from PyPI simply run:
 
 This will automatically install the following required dependencies:
 
+ #. hdmf
  #. h5py
  #. numpy
  #. python-dateutil
  #. requests
  #. ruamel.yaml
  #. six
+ #. chardet
 
 Install release from Conda-forge
 --------------------------------

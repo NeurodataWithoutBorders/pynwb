@@ -28,15 +28,14 @@ groups:
     - - null
     - - null
       - null
-    doc: 2-D array storing position or direction relative to some reference frame.
+    doc: 1-D or 2-D array storing position or direction relative to some reference frame.
     attributes:
     - name: unit
       dtype: text
-      default_value: meter
-      doc: "The base unit of measure used to store data. This should be in the SI\
-        \ unit. COMMENT: This is the SI unit (when appropriate) of the stored data,\
-        \ such as Volts. If the actual data is stored in millivolts, the field 'conversion'\
-        \ below describes how to convert the data to the specified SI unit."
+      default_value: meters
+      doc: Base unit of measurement for working with the data. The default value
+        is 'meters'. Actual stored values are not necessarily stored in these units.
+        To access the data in these units, multiply 'data' by 'conversion'.
       required: false
   - name: reference_frame
     dtype: text
@@ -65,7 +64,7 @@ groups:
     doc: Value is 'General container for storing behavioral epochs'
   groups:
   - neurodata_type_inc: IntervalSeries
-    doc: IntervalSeries object containing start and stop times of epochs
+    doc: IntervalSeries object containing start and stop times of epochs.
     quantity: '*'
 
 - neurodata_type_def: BehavioralEvents
@@ -80,13 +79,13 @@ groups:
     doc: Value is 'Position data, whether along the x, xy or xyz axis'
   groups:
   - neurodata_type_inc: TimeSeries
-    doc: TimeSeries object containing irregular behavioral events
+    doc: TimeSeries object containing behavioral events.
     quantity: '*'
 
 - neurodata_type_def: BehavioralTimeSeries
   neurodata_type_inc: NWBDataInterface
   default_name: BehavioralTimeSeries
-  doc: TimeSeries for storing Behavoioral time series data.See description of <a href="#BehavioralEpochs">BehavioralEpochs</a>
+  doc: TimeSeries for storing Behavoioral time series data. See description of <a href="#BehavioralEpochs">BehavioralEpochs</a>
     for more details.
   attributes:
   - name: help
@@ -95,7 +94,7 @@ groups:
     doc: Value is 'General container for storing continuously sampled behavioral data.'
   groups:
   - neurodata_type_inc: TimeSeries
-    doc: TimeSeries object containing continuous behavioral data
+    doc: TimeSeries object containing continuous behavioral data.
     quantity: '*'
 
 - neurodata_type_def: PupilTracking
@@ -109,7 +108,7 @@ groups:
     doc: Value is 'Eye-tracking data, representing pupil size'
   groups:
   - neurodata_type_inc: TimeSeries
-    doc: TimeSeries object containing time series data on pupil size
+    doc: TimeSeries object containing time series data on pupil size.
     quantity: '+'
 
 - neurodata_type_def: EyeTracking
@@ -123,7 +122,7 @@ groups:
     doc: Value is 'Eye-tracking data, representing direction of gaze'
   groups:
   - neurodata_type_inc: SpatialSeries
-    doc: SpatialSeries object containing data measuring direction of gaze
+    doc: SpatialSeries object containing data measuring direction of gaze.
     quantity: '*'
 
 - neurodata_type_def: CompassDirection
@@ -144,9 +143,9 @@ groups:
       of positive rotation'
   groups:
   - neurodata_type_inc: SpatialSeries
-    doc: SpatialSeries object containing direction of gaze travel
+    doc: SpatialSeries object containing direction of gaze travel.
     quantity: '*'
-    
+
 - neurodata_type_def: Position
   neurodata_type_inc: NWBDataInterface
   default_name: Position
@@ -158,5 +157,5 @@ groups:
     doc: Value is 'Position data, whether along the x, xy or xyz axis'
   groups:
   - neurodata_type_inc: SpatialSeries
-    doc: SpatialSeries object containing position data
+    doc: SpatialSeries object containing position data.
     quantity: '+'

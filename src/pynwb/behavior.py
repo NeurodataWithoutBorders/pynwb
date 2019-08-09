@@ -1,14 +1,9 @@
-try:
-    from collections.abc import Iterable  # Python 3
-except ImportError:
-    from collections import Iterable  # Python 2.7
-
-from hdmf.utils import docval, popargs
+from hdmf.utils import docval, popargs, get_docval
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer, MultiContainerInterface
+from .core import MultiContainerInterface
 from .misc import IntervalSeries
-from .base import TimeSeries, _default_conversion, _default_resolution
+from .base import TimeSeries
 
 
 @register_class('SpatialSeries', CORE_NAMESPACE)
@@ -27,32 +22,13 @@ class SpatialSeries(TimeSeries):
 
     _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this SpatialSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),  # required
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'reference_frame', 'type': str, 'doc': 'description defining what the zero-position is'},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to convert to meters',
-             'default': _default_conversion},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None, ),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'parent', 'type': NWBContainer,
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            )
+            {'name': 'reference_frame', 'type': str,   # required
+             'doc': 'description defining what the zero-position is'},
+            *get_docval(TimeSeries.__init__, 'conversion', 'resolution', 'timestamps', 'starting_time', 'rate',
+                        'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         """
         Create a SpatialSeries TimeSeries dataset

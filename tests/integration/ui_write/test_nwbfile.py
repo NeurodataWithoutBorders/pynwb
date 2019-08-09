@@ -36,7 +36,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                                                                'conversion': 1.0,
                                                                                'resolution': 0.1}),
                                             'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                         attributes={'unit': 'Seconds',
+                                                                         attributes={'unit': 'seconds',
                                                                                      'interval': 1})})
         ts_builder2 = GroupBuilder('test_timeseries2',
                                    attributes={'namespace': base.CORE_NAMESPACE,
@@ -49,7 +49,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                                                                 'conversion': 1.0,
                                                                                 'resolution': 0.1}),
                                              'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                          attributes={'unit': 'Seconds',
+                                                                          attributes={'unit': 'seconds',
                                                                                       'interval': 1})})
 
         module_builder = GroupBuilder('test_module',
@@ -157,10 +157,10 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         # TODO add some asserts
 
     def test_read(self):
-        hdf5io = HDF5IO(self.path, manager=self.manager, mode='a')
+        hdf5io = HDF5IO(self.path, manager=self.manager, mode='w')
         hdf5io.write(self.container)
         hdf5io.close()
-        hdf5io = HDF5IO(self.path, manager=self.manager, mode='a')
+        hdf5io = HDF5IO(self.path, manager=self.manager, mode='r')
         container = hdf5io.read()
         self.assertIsInstance(container, NWBFile)
         raw_ts = container.acquisition
