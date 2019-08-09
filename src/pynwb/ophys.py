@@ -63,9 +63,9 @@ class ImagingPlane(NWBContainer):
              'default': None},
             {'name': 'conversion', 'type': float,
              'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)',
-             'default': None},
+             'default': 1.0},
             {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).',
-             'default': None},
+             'default': 'meters'},
             {'name': 'reference_frame', 'type': str,
              'doc': 'Describes position and reference frame of manifold based on position of first element \
                      in manifold.', 'default': None})
