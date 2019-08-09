@@ -438,6 +438,7 @@ ns_builder.export(ns_path)
 
 from pynwb import load_namespaces, get_class, NWBHDF5IO, NWBFile
 from datetime import datetime
+import numpy as np
 
 load_namespaces('ecog.namespace.yaml')
 CorticalSurface = get_class('CorticalSurface', 'ecog')
@@ -447,17 +448,13 @@ cortical_surface = CorticalSurface(vertices=[[0.0, 1.0, 1.0],
                                              [2.0, 2.0, 1.0],
                                              [2.0, 1.0, 1.0],
                                              [1.0, 2.0, 1.0]],
-                                   faces=[[0, 1, 2],
-                                          [1, 2, 3]],
-                                   name='cortex',
-                                   source='source')
+                                   faces=np.array([[0, 1, 2], [1, 2, 3]]).astype('uint'),
+                                   name='cortex')
 
-nwbfile = NWBFile('name', 'my first synthetic recording',
-                  'EXAMPLE_ID', datetime.now())
+nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now())
 
 cortex_module = nwbfile.create_processing_module(name='cortex',
-                                                 description='description',
-                                                 source='source')
+                                                 description='description')
 cortex_module.add_container(cortical_surface)
 
 
