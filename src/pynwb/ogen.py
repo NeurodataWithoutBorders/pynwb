@@ -40,8 +40,6 @@ class OptogeneticSeries(TimeSeries):
 
     __nwbfields__ = ('site',)
 
-    _help = "Optogenetic stimulus."
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},

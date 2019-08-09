@@ -130,7 +130,7 @@ class TetrodeSeries(ElectricalSeries):
 #
 # If you do not want to write additional code to read your extensions, PyNWB is able to dynamically
 # create an :py:class:`~pynwb.core.NWBContainer` subclass for use within the PyNWB API.
-# Dynamically created classes can be inspected using the built-in :py:func:`.help` or the :py:mod:`inspect` module.
+# Dynamically created classes can be inspected using the built-in :py:mod:`inspect` module.
 
 
 from pynwb import get_class, load_namespaces
@@ -257,7 +257,7 @@ ns_builder.include_type('NWBDataInterface', namespace='core')
 
 potato = NWBGroupSpec(neurodata_type_def='Potato',
                       neurodata_type_inc='NWBDataInterface',
-                      doc='object to put in a multi-container', quantity='*',
+                      doc='A potato', quantity='*',
                       attributes=[
                           NWBAttributeSpec(name='weight',
                                            doc='weight of potato',
@@ -266,24 +266,14 @@ potato = NWBGroupSpec(neurodata_type_def='Potato',
                           NWBAttributeSpec(name='age',
                                            doc='age of potato',
                                            dtype='float',
-                                           required=False),
-                          NWBAttributeSpec(name='help',
-                                           doc='help',
-                                           dtype='text',
-                                           value="It's a potato")
+                                           required=False)
                       ])
 
 potato_sack = NWBGroupSpec(neurodata_type_def='PotatoSack',
                            neurodata_type_inc='NWBDataInterface',
                            name='potato_sack',
-                           doc='test of multi-container', quantity='?',
-                           groups=[potato],
-                           attributes=[
-                               NWBAttributeSpec(name='help',
-                                                doc='help',
-                                                dtype='text',
-                                                value="It's a sack of potatoes")
-                           ])
+                           doc='A sack of potatoes', quantity='?',
+                           groups=[potato])
 
 ns_builder.add_spec(ext_source, potato_sack)
 ns_builder.export(ns_path)
@@ -321,8 +311,6 @@ class PotatoSack(MultiContainerInterface):
         'get': 'get_potato',
         'create': 'create_potato',
     }
-
-    __help = 'info about potatoes'
 
 
 ####################

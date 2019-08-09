@@ -85,8 +85,6 @@ class ImagingRetinotopy(NWBDataInterface):
                      'focal_depth_image',
                      'vasculature_image',)
 
-    _help = "Intrinsic signal optical imaging or Widefield imaging for measuring retinotopy."
-
     @docval({'name': 'sign_map', 'type': AxisMap,
              'doc': 'Sine of the angle between the direction of the gradient in axis_1 and axis_2.'},
             {'name': 'axis_1_phase_map', 'type': AxisMap,
