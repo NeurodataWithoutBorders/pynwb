@@ -40,11 +40,6 @@ groups:
     Sometimes the image data is stored in the file in a raw format while other
     times it will be stored as an external image file in the host file system. The
     data field will either be binary data or empty. [frame][y][x] or [frame][z][y][x].
-  attributes:
-  - name: help
-    dtype: text
-    value: Storage object for time-series 2-D image data
-    doc: Value is 'Storage object for time-series 2-D image data'
   datasets:
   - name: data
     dtype: numeric
@@ -112,11 +107,6 @@ groups:
     values are stored as RGBA. Mask can vary with time. The timestamps array indicates
     the starting time of a mask, and that mask pattern continues until it's explicitly
     changed.
-  attributes:
-  - name: help
-    dtype: text
-    value: An alpha mask that is applied to a presented visual stimulus
-    doc: Value is 'An alpha mask that is applied to a presented visual stimulus'
   links:
   - name: masked_imageseries
     target_type: ImageSeries
@@ -129,11 +119,6 @@ groups:
     is required, such as field of view (e.g., how much of the visual field the image
     covers, or how what is the area of the target being imaged). If the OpticalSeries
     represents acquired imaging data, orientation is also important.
-  attributes:
-  - name: help
-    dtype: text
-    value: Time-series image stack for optical recording or stimulus
-    doc: Value is 'Time-series image stack for optical recording or stimulus'
   datasets:
   - name: distance
     dtype: float32
@@ -163,15 +148,6 @@ groups:
     of individual images, or of movie segments (as a movie is simply a series of images).
     The data field stores the index of the frame in the referenced ImageSeries, and
     the timestamps array indicates when that image was displayed.
-  attributes:
-  - name: help
-    dtype: text
-    value: A sequence that is generated from an existing image stack. Frames can be
-      presented in an arbitrary order. The data[] field stores frame number in reference
-      stack
-    doc: Value is 'A sequence that is generated from an existing image stack. Frames
-      can be presented in an arbitrary order. The data[] field stores frame number
-      in reference stack'
   datasets:
   - name: data
     dtype: int

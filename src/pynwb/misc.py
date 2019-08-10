@@ -24,8 +24,6 @@ class AnnotationSeries(TimeSeries):
 
     __nwbfields__ = ()
 
-    _help = "Time-stamped annotations about an experiment."
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
@@ -59,8 +57,6 @@ class AbstractFeatureSeries(TimeSeries):
 
     __nwbfields__ = ('feature_units',
                      'features')
-
-    _help = "Features of an applied stimulus. This is useful when storing the raw stimulus is impractical."
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'feature_units', 'type': Iterable, 'shape': (None, ),  # required
@@ -102,8 +98,6 @@ class IntervalSeries(TimeSeries):
     """
 
     __nwbfields__ = ()
-
-    _help = "Stores the start and stop times for events."
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
@@ -179,7 +173,7 @@ class Units(DynamicTable):
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
              'doc': 'the spike waveform standard deviation for each unit. Shape is (time,) or (time, electrodes)'},
             {'name': 'id', 'type': int, 'default': None,
-             'help': 'the id for each unit'},
+             'doc': 'the id for each unit'},
             allow_extra=True)
     def add_unit(self, **kwargs):
         """

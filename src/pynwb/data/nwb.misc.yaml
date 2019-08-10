@@ -8,14 +8,8 @@ groups:
     1.0 for gray, 0.0 for actual stimulus) or by storing NaNs for feature values,
     or through use of the TimeSeries::control fields. A set of features is considered
     to persist until the next set of features is defined. The final set of features
-    stored should be the null set.
-  attributes:
-  - name: help
-    dtype: text
-    value: Features of an applied stimulus. This is useful when storing the raw stimulus
-      is impractical
-    doc: Value is 'Features of an applied stimulus. This is useful when storing the
-      raw stimulus is impractical'
+    stored should be the null set. This is useful when storing the raw stimulus
+    is impractical.
   datasets:
   - name: data
     dtype: numeric
@@ -57,11 +51,6 @@ groups:
     field stores a text array, and timestamps are stored for each annotation (ie,
     interval=1). This is largely an alias to a standard TimeSeries storing a text
     array but that is identifiable as storing annotations in a machine-readable way.
-  attributes:
-  - name: help
-    dtype: text
-    value: Time-stamped annotations about an experiment
-    doc: Value is 'Time-stamped annotations about an experiment'
   datasets:
   - name: data
     dtype: text
@@ -91,11 +80,6 @@ groups:
     C, etc). The field data stores an 8-bit integer. This is largely an alias of a
     standard TimeSeries but that is identifiable as representing time intervals in
     a machine-readable way.
-  attributes:
-  - name: help
-    dtype: text
-    value: Stores the start and stop times for events
-    doc: Value is 'Stores the start and stop times for events'
   datasets:
   - name: data
     dtype: int8
@@ -151,11 +135,6 @@ groups:
       neurodata_type_inc: VectorData
       dtype: text
       doc: Name of the band, e.g. theta.
-      attributes:
-      - name: description
-        dtype: text
-        value: the name of the band e.g. theta
-        doc: value is 'the name of the band e.g. theta'
     - name: band_limits
       neurodata_type_inc: VectorData
       dtype: float
@@ -167,13 +146,6 @@ groups:
       - 2
       doc: Low and high limit of each band in Hz. If it is a Gaussian filter, use
         2 SD on either side of the center.
-      attributes:
-      - name: description
-        dtype: text
-        value: Low and high limit of each band in Hz. If it is a Gaussian filter,
-          use 2 SD on either side of the center
-        doc: value is 'Low and high limit of each band in Hz. If it is a Gaussian
-          filter, use 2 SD on either side of the center'
     - name: band_mean
       neurodata_type_inc: VectorData
       dtype: float
@@ -182,11 +154,6 @@ groups:
       shape:
       - null
       doc: The mean Gaussian filters, in Hz.
-      attributes:
-      - name: description
-        dtype: text
-        value: The mean Gaussian filters in Hz
-        doc: The mean Gaussian filters in Hz
     - name: band_stdev
       neurodata_type_inc: VectorData
       dtype: float
@@ -195,11 +162,6 @@ groups:
       shape:
       - null
       doc: The standard deviation of Gaussian filters, in Hz.
-      attributes:
-      - name: description
-        dtype: text
-        value: The standard devaition of Gaussian filters in Hz
-        doc: The standard devaition of Gaussian filters in Hz
   links:
   - name: source_timeseries
     target_type: TimeSeries
@@ -213,11 +175,6 @@ groups:
   default_name: Units
   doc: Data about spiking units. Event times of observed units (e.g. cell, synapse,
     etc.) should be concatenated and stored in spike_times.
-  attributes:
-  - name: help
-    dtype: text
-    value: Data about spiking units
-    doc: Value is 'Data about spiking units'
   datasets:
   - name: spike_times_index
     neurodata_type_inc: VectorIndex

@@ -3,40 +3,20 @@ groups:
   neurodata_type_inc: DynamicTable
   doc: A container for aggregating epoch data and the TimeSeries that each epoch applies
     to.
-  attributes:
-  - name: help
-    dtype: text
-    value: A general epoch object
-    doc: Value is 'A general epoch object'
   datasets:
   - name: start_time
     neurodata_type_inc: VectorData
     dtype: float
     doc: Start time of epoch, in seconds.
-    attributes:
-    - name: description
-      dtype: text
-      value: start time of the epoch, in seconds
-      doc: value is 'start time of the epoch, in seconds'
   - name: stop_time
     neurodata_type_inc: VectorData
     dtype: float
     doc: Stop time of epoch, in seconds.
-    attributes:
-    - name: description
-      dtype: text
-      value: stop time of the epoch, in seconds
-      doc: value is 'stop time of the epoch, in seconds'
   - name: tags
     neurodata_type_inc: VectorData
     dtype: text
     doc: User-defined tags that identify or categorize events.
     quantity: '?'
-    attributes:
-    - name: description
-      dtype: text
-      value: user-defined tags
-      doc: value is 'user-defined tags'
   - name: tags_index
     neurodata_type_inc: VectorIndex
     doc: Index for tags.
@@ -58,11 +38,6 @@ groups:
       doc: the TimeSeries that this index applies to.
     doc: An index into a TimeSeries object.
     quantity: '?'
-    attributes:
-    - name: help
-      dtype: text
-      value: Data on how an epoch applies to a time series
-      doc: Value is 'Data on how an epoch applies to a time series'
   - name: timeseries_index
     neurodata_type_inc: VectorIndex
     doc: Index for timeseries.
