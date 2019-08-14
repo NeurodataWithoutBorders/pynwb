@@ -8,8 +8,8 @@ groups:
   - name: nwb_version
     dtype: text
     value: 2.0.2
-    doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
-      format with trailing major, minor and patch numbers.'
+    doc: File version string. Use semantic versioning, e.g. 1.2.1. This will be the
+      name of the format with trailing major, minor and patch numbers.
   datasets:
   - name: file_create_date
     dtype: isodatetime
