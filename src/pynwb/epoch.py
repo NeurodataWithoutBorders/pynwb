@@ -7,8 +7,6 @@ from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import DynamicTable
 
-import numpy as np
-
 
 @register_class('TimeIntervals', CORE_NAMESPACE)
 class TimeIntervals(DynamicTable):
