@@ -70,15 +70,6 @@ groups:
     There is no CurrentClampStimulusSeries associated with an IZero series because
     the amplifier is disconnected and no stimulus can reach the cell.
   datasets:
-  - name: data
-    doc: Recorded voltage.
-    attributes:
-    - name: unit
-      dtype: text
-      value: volts
-      doc: Base unit of measurement for working with the data. which is fixed to 'volts'.
-        Actual stored values are not necessarily stored in these units. To access the data in these units,
-        multiply 'data' by 'conversion'.
   - name: bias_current
     dtype: float32
     value: 0.0

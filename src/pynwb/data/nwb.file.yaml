@@ -89,10 +89,6 @@ groups:
       doc: Any one-off datasets
       quantity: '*'
       attributes:
-      - name: help
-        doc: Value is 'a scratch dataset'
-        dtype: text
-        value: a scratch dataset
       - name: notes
         doc: 'Any notes the user has about the dataset being stored'
         dtype: text

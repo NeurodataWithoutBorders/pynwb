@@ -103,7 +103,7 @@ class TimeSeries(NWBDataInterface):
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
             {'name': 'resolution', 'type': (str, 'float'),
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': 0.0},
+             'default': -1.0},
             {'name': 'conversion', 'type': (str, 'float'),
              'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
              'default': 1.0},
