@@ -128,9 +128,9 @@ groups:
   - name: axis_descriptions
     dtype: text
     dims:
-    - '2'
+    - names
     shape:
-    - null
+    - 2
     doc: Two-element array describing the contents of the two response axis fields.
       Description should be something like ['altitude', 'azimuth'] or '['radius',
       'theta'].
