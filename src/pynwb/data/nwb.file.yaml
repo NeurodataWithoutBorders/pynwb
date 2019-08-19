@@ -8,8 +8,8 @@ groups:
   - name: nwb_version
     dtype: text
     value: 2.0.2
-    doc: 'File version string. COMMENT: Eg, NWB-1.0.0. This will be the name of the
-      format with trailing major, minor and patch numbers.'
+    doc: File version string. Use semantic versioning, e.g. 1.2.1. This will be the
+      name of the format with trailing major, minor and patch numbers.
   datasets:
   - name: file_create_date
     dtype: isodatetime
@@ -65,7 +65,7 @@ groups:
     doc: Lab-specific and custom scientific analysis of data. There is no defined
       format for the content of this group - the format is up to the individual user/lab.
       To facilitate sharing analysis data between labs, the contents here
-      should be stored in standard types (eg, INCF types) and appropriately documented.
+      should be stored in standard types (e.g., neurodata_types) and appropriately documented.
       The file can store lab-specific and custom data analysis without
       restriction on its form or schema, reducing data formatting restrictions on
       end users. Such data should be placed in the analysis group. The analysis data
