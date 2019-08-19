@@ -28,7 +28,7 @@ class AImage(NWBContainer):
             {'name': 'dimension', 'type': Iterable, 'doc': 'Number of rows and columns in the image.'},
             {'name': 'format', 'type': Iterable, 'doc': 'Format of image. Right now only "raw" supported.'},
             {'name': 'field_of_view', 'type': Iterable, 'doc': 'Size of viewing area, in meters.'},
-            {'name': 'focal_depth', 'type': float, 'doc': 'Focal depth offset, in meters.'})
+            {'name': 'focal_depth', 'type': 'float', 'doc': 'Focal depth offset, in meters.'})
     def __init__(self, **kwargs):
         data, bits_per_pixel, dimension, format, field_of_view = popargs(
             'data', 'bits_per_pixel', 'dimension', 'format', 'field_of_view', kwargs)
