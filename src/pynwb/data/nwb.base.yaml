@@ -159,7 +159,7 @@ groups:
       required: false
     - name: resolution
       dtype: float32
-      default_value: 0.0
+      default_value: -1.0
       doc: Smallest meaningful difference between values in data, stored in the specified
         by unit, e.g., the change in value of the least significant bit, or a larger
         number if signal noise is known to be present. If unknown, use -1.0.
