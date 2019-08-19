@@ -23,7 +23,7 @@ class OpticalChannel(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},  # required
             {'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},  # required
-            {'name': 'emission_lambda', 'type': float, 'doc': 'Emission lambda for channel.'})  # required
+            {'name': 'emission_lambda', 'type': 'float', 'doc': 'Emission lambda for channel.'})  # required
     def __init__(self, **kwargs):
         description, emission_lambda = popargs("description", "emission_lambda", kwargs)
         pargs, pkwargs = fmt_docval_args(super(OpticalChannel, self).__init__, kwargs)
@@ -54,14 +54,14 @@ class ImagingPlane(NWBContainer):
              'doc': 'One of possibly many groups storing channelspecific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},  # required
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},  # required
-            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},  # required
-            {'name': 'imaging_rate', 'type': float, 'doc': 'Rate images are acquired, in Hz.'},  # required
+            {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},  # required
+            {'name': 'imaging_rate', 'type': 'float', 'doc': 'Rate images are acquired, in Hz.'},  # required
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},  # required
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},  # required
             {'name': 'manifold', 'type': Iterable,
              'doc': 'Physical position of each pixel. size=("height", "width", "xyz").',
              'default': None},
-            {'name': 'conversion', 'type': float,
+            {'name': 'conversion', 'type': 'float',
              'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)',
              'default': 1.0},
             {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).',
@@ -109,8 +109,8 @@ class TwoPhotonSeries(ImageSeries):
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
-            {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.', 'default': None},
-            {'name': 'scan_line_rate', 'type': float,
+            {'name': 'pmt_gain', 'type': 'float', 'doc': 'Photomultiplier gain.', 'default': None},
+            {'name': 'scan_line_rate', 'type': 'float',
              'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept \
              here as it is useful information for analysis, and so good to be stored w/ the actual data.',
              'default': None},

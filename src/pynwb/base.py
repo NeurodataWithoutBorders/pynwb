@@ -101,17 +101,17 @@ class TimeSeries(NWBDataInterface):
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
-            {'name': 'resolution', 'type': (str, float),
+            {'name': 'resolution', 'type': (str, 'float'),
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
              'default': -1.0},
-            {'name': 'conversion', 'type': (str, float),
+            {'name': 'conversion', 'type': (str, 'float'),
              'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
              'default': 1.0},
 
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+            {'name': 'starting_time', 'type': 'float', 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': 'float', 'doc': 'Sampling rate in Hz', 'default': None},
 
             {'name': 'comments', 'type': str,
              'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
@@ -240,7 +240,7 @@ class Image(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
-            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
+            {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None}
             )
     def __init__(self, **kwargs):

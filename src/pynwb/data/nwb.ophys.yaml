@@ -163,7 +163,7 @@ groups:
     links:
     - name: imaging_plane
       target_type: ImagingPlane
-      doc: Link to ImagingPlane group from which this data was generated.
+      doc: Link to ImagingPlane object from which this data was generated.
 
 - neurodata_type_def: ImagingPlane
   neurodata_type_inc: NWBContainer

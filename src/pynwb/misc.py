@@ -33,7 +33,7 @@ class AnnotationSeries(TimeSeries):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         super(AnnotationSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'time', 'type': float, 'doc': 'The time for the annotation'},
+    @docval({'name': 'time', 'type': 'float', 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
     def add_annotation(self, **kwargs):
         '''
@@ -75,7 +75,7 @@ class AbstractFeatureSeries(TimeSeries):
         self.features = features
         self.feature_units = feature_units
 
-    @docval({'name': 'time', 'type': float, 'doc': 'the time point of this feature'},
+    @docval({'name': 'time', 'type': 'float', 'doc': 'the time point of this feature'},
             {'name': 'features', 'type': (list, np.ndarray), 'doc': 'the feature values for this time point'})
     def add_features(self, **kwargs):
         time, features = getargs('time', 'features', kwargs)
@@ -109,8 +109,8 @@ class IntervalSeries(TimeSeries):
         self.__interval_data = data
         super(IntervalSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'start', 'type': float, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'stop', 'type': float, 'doc': 'The name of this TimeSeries dataset'})
+    @docval({'name': 'start', 'type': 'float', 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'stop', 'type': 'float', 'doc': 'The name of this TimeSeries dataset'})
     def add_interval(self, **kwargs):
         start, stop = getargs('start', 'stop', kwargs)
         self.__interval_timestamps.append(start)
@@ -246,9 +246,9 @@ class DecompositionSeries(TimeSeries):
              'default': None},
             {'name': 'band_limits', 'type': ('array_data', 'data'), 'default': None,
              'doc': 'low and high frequencies of bandpass filter in Hz'},
-            {'name': 'band_mean', 'type': float, 'doc': 'the mean of Gaussian filters in Hz',
+            {'name': 'band_mean', 'type': 'float', 'doc': 'the mean of Gaussian filters in Hz',
              'default': None},
-            {'name': 'band_stdev', 'type': float, 'doc': 'the standard deviation of Gaussian filters in Hz',
+            {'name': 'band_stdev', 'type': 'float', 'doc': 'the standard deviation of Gaussian filters in Hz',
              'default': None},
             allow_extra=True)
     def add_band(self, **kwargs):
