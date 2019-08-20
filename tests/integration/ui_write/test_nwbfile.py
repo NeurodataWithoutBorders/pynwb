@@ -4,11 +4,12 @@ from dateutil.tz import tzlocal, tzutc
 
 import pandas as pd
 import numpy as np
+import unittest
 
 from hdmf.build import GroupBuilder, DatasetBuilder
 from hdmf.backends.hdf5 import HDF5IO
 
-from pynwb import NWBFile, TimeSeries
+from pynwb import NWBFile, TimeSeries, get_manager
 from pynwb.file import Subject
 from pynwb.epoch import TimeIntervals
 
@@ -324,3 +325,36 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
         df_obt = self.read_container.to_dataframe(exclude=set(['timeseries', 'timeseries_index']))
         pd.testing.assert_frame_equal(df_exp, df_obt, check_like=True, check_dtype=False)
+
+
+class TestExperimentersRoundtrip(base.TestMapRoundTrip):
+
+    def setUp(self):
+        super(base.TestMapRoundTrip, self).setUp()
+        self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
+        self.filename = 'test_experimenters.nwb'
+        self.writer = None
+        self.reader = None
+
+    def setUpContainer(self):
+        pass
+
+    def roundtripContainer(self, cache_spec=False):
+        description = 'test nwbfile experimenter'
+        identifier = 'TEST_experimenter'
+        self.nwbfile = NWBFile(description, identifier, self.start_time,
+                               experimenter=('experimenter1', 'experimenter2'))
+        # self.nwbfile.experimenter = ('experimenter1', 'experimenter2')
+
+        self.writer = HDF5IO(self.filename, manager=get_manager(), mode='w')
+        self.writer.write(self.nwbfile, cache_spec=cache_spec)
+        self.writer.close()
+        self.reader = HDF5IO(self.filename, manager=get_manager(), mode='r')
+        self.read_nwbfile = self.reader.read()
+
+    def test_roundtrip(self):
+        self.roundtripContainer()
+        self.assertNotEqual(id(self.nwbfile), id(self.read_nwbfile))
+        self.assertTupleEqual(self.read_nwbfile.experimenter, self.nwbfile.experimenter)
+        self.assertContainerEqual(self.read_nwbfile, self.nwbfile)
+        self.validate()
