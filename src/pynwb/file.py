@@ -618,12 +618,13 @@ class NWBFile(MultiContainerInterface):
              'help': 'description for table. Only used when passing in pandas.DataFrame', 'default': None})
     def add_scratch(self, **kwargs):
         '''Add data to the scratch space'''
-        data, name, notes, table_description = getargs('data', 'name', 'notes', 'table_description', kwargs)
+        data, name, notes = getargs('data', 'name', 'notes', kwargs)
         if isinstance(data, (np.ndarray, pd.DataFrame, list, tuple)):
             if name is None:
                 raise ValueError('please provide a name for scratch data')
             if isinstance(data, pd.DataFrame):
-                data = DynamicTable.from_dataframe(df=data, name=name)
+                table_description = getargs('table_description', kwargs)
+                data = DynamicTable.from_dataframe(df=data, name=name, table_description=table_description)
                 if notes is not None:
                     warn('Notes argument is ignored when adding a pandas DataFrame to scratch')
             else:
