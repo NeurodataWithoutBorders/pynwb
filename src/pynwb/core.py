@@ -323,7 +323,7 @@ class ScratchData(NWBData):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
-            {'name': 'notes', 'type': str, 'doc': 'the source of the data', 'default': 'none'})
+            {'name': 'notes', 'type': str, 'doc': 'notes about the data', 'default': ''})
     def __init__(self, **kwargs):
         call_docval_func(super(ScratchData, self).__init__, kwargs)
         self.notes = getargs('notes', kwargs)

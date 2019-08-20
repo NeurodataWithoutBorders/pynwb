@@ -615,7 +615,8 @@ class NWBFile(MultiContainerInterface):
              'help': 'notes to add to the data. Only used when passing in numpy.ndarray, list, or tuple',
              'default': None},
             {'name': 'table_description', 'type': str,
-             'help': 'description for table. Only used when passing in pandas.DataFrame', 'default': None})
+             'help': 'description for the internal DynamicTable used to store a pandas.DataFrame',
+             'default': ''})
     def add_scratch(self, **kwargs):
         '''Add data to the scratch space'''
         data, name, notes = getargs('data', 'name', 'notes', kwargs)
