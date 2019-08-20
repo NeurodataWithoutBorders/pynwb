@@ -319,7 +319,7 @@ Fields:
   data: [1. 2. 3. ... 1. 2. 3.]
   description: no description
   interval: 1
-  resolution: 0.0
+  resolution: -1.0
   timestamps: [1 2 3]
   timestamps_unit: seconds
 """

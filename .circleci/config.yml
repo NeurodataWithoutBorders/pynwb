@@ -20,6 +20,8 @@ references:
   ci-steps: &ci-steps
     steps:
       - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
       - run:
           <<: *initialize-venv
       - run:
@@ -65,6 +67,8 @@ references:
   conda-steps: &conda-steps
     steps:
       - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
       - run:
           name: Configure conda
           command: |
@@ -89,6 +93,8 @@ references:
   gallery-steps: &gallery-steps
     steps:
       - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
       - restore_cache:
           keys:
             - ophys-data-cache

@@ -92,7 +92,7 @@ class TestTimeSeries(unittest.TestCase):
         ts = TimeSeries('test_ts', dat, 'volts', timestamps=[0.1, 0.2, 0.3, 0.4])
         self.assertIs(ts.data, dat)
         self.assertEqual(ts.conversion, 1.0)
-        self.assertEqual(ts.resolution, 0.0)
+        self.assertEqual(ts.resolution, -1.0)
         self.assertEqual(ts.unit, 'volts')
 
     def test_init_timestamps(self):

@@ -25,7 +25,7 @@ def __get_resources():
     from pkg_resources import resource_filename
     from os.path import join
     ret = dict()
-    ret['namespace_path'] = join(resource_filename(__name__, 'data'), __core_ns_file_name)
+    ret['namespace_path'] = join(resource_filename(__name__, 'nwb-schema/core'), __core_ns_file_name)
     return ret
 
 

@@ -11,7 +11,7 @@ with open('README.rst', 'r') as fp:
 pkgs = find_packages('src', exclude=['data'])
 print('found these packages:', pkgs)
 
-schema_dir = 'data'
+schema_dir = 'nwb-schema/core'
 
 reqs_re = re.compile("[<=>]+")
 with open('requirements.txt', 'r') as fp:
