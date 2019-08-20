@@ -20,8 +20,6 @@ class SpatialSeries(TimeSeries):
 
     __nwbfields__ = ('reference_frame',)
 
-    _help = "Stores points in space over time. The data[] array structure is [num samples][num spatial dimensions]"
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None, ), (None, None)),  # required
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
@@ -68,8 +66,6 @@ class BehavioralEvents(MultiContainerInterface):
     TimeSeries for storing behavioral events. See description of BehavioralEpochs for more details.
     """
 
-    _help = "General container for storing event series."
-
     __clsconf__ = {
         'add': 'add_timeseries',
         'get': 'get_timeseries',
@@ -85,8 +81,6 @@ class BehavioralTimeSeries(MultiContainerInterface):
     TimeSeries for storing Behavoioral time series data. See description of BehavioralEpochs for
     more details.
     """
-
-    _help = "General container for storing continuously sampled behavioral data"
 
     __clsconf__ = {
         'add': 'add_timeseries',
@@ -126,8 +120,6 @@ class EyeTracking(MultiContainerInterface):
         'attr': 'spatial_series'
     }
 
-    _help = "Eye-tracking data, representing direction of gaze"
-
 
 @register_class('CompassDirection', CORE_NAMESPACE)
 class CompassDirection(MultiContainerInterface):
@@ -146,9 +138,6 @@ class CompassDirection(MultiContainerInterface):
         'attr': 'spatial_series'
     }
 
-    _help = "Direction as measured radially. Spatial series reference frame \
-    should indicate which direction corresponds to zero and what is the direction of positive rotation."
-
 
 @register_class('Position', CORE_NAMESPACE)
 class Position(MultiContainerInterface):
@@ -163,5 +152,3 @@ class Position(MultiContainerInterface):
         'type': SpatialSeries,
         'attr': 'spatial_series'
     }
-
-    _help = "Position data, whether along the x, xy or xyz axis"

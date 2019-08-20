@@ -38,8 +38,7 @@ class TestHDF5Writer(unittest.TestCase):
         self.container.add_acquisition(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
-                                  attributes={'neurodata_type': 'TimeSeries',
-                                              'help': 'General purpose TimeSeries'},
+                                  attributes={'neurodata_type': 'TimeSeries'},
                                   datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                    attributes={'unit': 'SIunit',
                                                                                'conversion': 1.0,
@@ -148,8 +147,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
         self.container.add_acquisition(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
-                                  attributes={'neurodata_type': 'TimeSeries',
-                                              'help': 'General purpose TimeSeries'},
+                                  attributes={'neurodata_type': 'TimeSeries'},
                                   datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                    attributes={'unit': 'SIunit',
                                                                                'conversion': 1.0,

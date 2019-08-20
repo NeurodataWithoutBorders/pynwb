@@ -23,8 +23,6 @@ class ImageSeries(TimeSeries):
                      'starting_frame',
                      'format')
 
-    _help = "Storage object for time-series 2-D image data"
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
@@ -79,9 +77,6 @@ class IndexSeries(TimeSeries):
 
     __nwbfields__ = ('indexed_timeseries',)
 
-    _help = "A sequence that is generated from an existing image stack. Frames can be presented in \
-    an arbitrary order. The data[] field stores frame number in reference stack."
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
@@ -107,8 +102,6 @@ class ImageMaskSeries(ImageSeries):
     '''
 
     __nwbfields__ = ('masked_imageseries',)
-
-    _help = "An alpha mask that is applied to a presented visual stimulus."
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
@@ -140,11 +133,9 @@ class OpticalSeries(ImageSeries):
                      'field_of_view',
                      'orientation')
 
-    _help = "Time-series image stack for optical recording or stimulus."
-
     @docval(*get_docval(ImageSeries.__init__, 'name', 'data'),  # required
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
-            {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},  # required
+            {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
             {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'orientation', 'type': str,  # required

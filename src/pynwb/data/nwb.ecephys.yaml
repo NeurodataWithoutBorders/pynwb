@@ -5,11 +5,6 @@ groups:
     The data field is an int or float array storing data in volts. The first
     dimension should always represent time. The second dimension, if present,
     should represent channels.
-  attributes:
-  - name: help
-    dtype: text
-    value: Stores acquired voltage data from extracellular recordings
-    doc: Value is 'Stores acquired voltage data from extracellular recordings'
   datasets:
   - name: data
     dtype: numeric
@@ -48,11 +43,6 @@ groups:
     and stored by hardware. All events span the same recording channels and store
     snapshots of equal duration. TimeSeries::data array structure: [num events]
     [num channels] [num samples] (or [num events] [num samples] for single electrode)."
-  attributes:
-  - name: help
-    dtype: text
-    value: Snapshots of spike events from data.
-    doc: Value is 'Snapshots of spike events from data.'
   datasets:
   - name: data
     dtype: numeric
@@ -99,11 +89,6 @@ groups:
   default_name: FeatureExtraction
   doc: Features, such as PC1 and PC2, that are extracted from signals stored in a
     SpikeEventSeries or other source.
-  attributes:
-  - name: help
-    dtype: text
-    value: Container for salient features of detected events
-    doc: Value is 'Container for salient features of detected events'
   datasets:
   - name: description
     dtype: text
@@ -138,11 +123,6 @@ groups:
   neurodata_type_inc: NWBDataInterface
   default_name: EventDetection
   doc: Detected spike events from voltage trace(s).
-  attributes:
-  - name: help
-    dtype: text
-    value: Detected spike events from voltage trace(s)
-    doc: Value is 'Detected spike events from voltage trace(s)'
   datasets:
   - name: detection_method
     dtype: text
@@ -183,11 +163,6 @@ groups:
   doc: Represents either the waveforms of detected events, as extracted from a raw
     data trace in /acquisition, or the event waveforms that were stored during experiment
     acquisition.
-  attributes:
-  - name: help
-    dtype: text
-    value: Waveform of detected extracellularly recorded spike events
-    doc: Value is 'Waveform of detected extracellularly recorded spike events'
   groups:
   - neurodata_type_inc: SpikeEventSeries
     doc: SpikeEventSeries object(s) containing detected spike event waveforms.
@@ -205,15 +180,7 @@ groups:
     field. There is no assumed 1::1 correspondence between filtered ephys signals
     and electrodes, as a single signal can apply to many nearby electrodes, and one
     electrode may have different filtered (e.g., theta and/or gamma) signals represented.
-  attributes:
-  - name: help
-    dtype: text
-    value: Ephys data from one or more channels that is subjected to filtering, such
-      as for gamma or theta oscillations (LFP has its own interface). Filter properties
-      should be noted in the ElectricalSeries
-    doc: Value is 'Ephys data from one or more channels that is subjected to filtering,
-      such as for gamma or theta oscillations (LFP has its own interface). Filter
-      properties should be noted in the ElectricalSeries'
+    Filter properties should be noted in the ElectricalSeries.
   groups:
   - neurodata_type_inc: ElectricalSeries
     doc: ElectricalSeries object(s) containing filtered electrophysiology data.
@@ -225,13 +192,6 @@ groups:
   doc: LFP data from one or more channels. The electrode map in each published ElectricalSeries
     will identify which channels are providing LFP data. Filter properties should
     be noted in the ElectricalSeries description or comments field.
-  attributes:
-  - name: help
-    dtype: text
-    value: LFP data from one or more channels. Filter properties should be noted in
-      the ElectricalSeries
-    doc: Value is 'LFP data from one or more channels. Filter properties should be
-      noted in the ElectricalSeries'
   groups:
   - neurodata_type_inc: ElectricalSeries
     doc: ElectricalSeries object(s) containing LFP data for one or more channels.
@@ -241,10 +201,6 @@ groups:
   neurodata_type_inc: NWBContainer
   doc: A physical grouping of electrodes, e.g. a shank of an array.
   attributes:
-  - name: help
-    dtype: text
-    value: A physical grouping of channels
-    doc: Value is 'Metadata about a physical grouping of channels'
   - name: description
     dtype: text
     doc: Description of this electrode group.
@@ -268,13 +224,6 @@ groups:
     updating. For example, IMEC probes may require different storage requirements
     to store/display mean waveforms, requiring a new interface or an extension of
     this one.
-  attributes:
-  - name: help
-    dtype: text
-    value: DEPRECATED Mean waveform shape of clusters. Waveforms should be high-pass
-      filtered (ie, not the same bandpass filter used waveform analysis and clustering)
-    doc: Value is 'Mean waveform shape of clusters. Waveforms should be high-pass
-      filtered (ie, not the same bandpass filter used waveform analysis and clustering)'
   datasets:
   - name: waveform_filtering
     dtype: text
@@ -310,13 +259,6 @@ groups:
   default_name: Clustering
   doc: DEPRECATED Clustered spike data, whether from automatic clustering tools (e.g.,
     klustakwik) or as a result of manual sorting.
-  attributes:
-  - name: help
-    dtype: text
-    value: DEPRECATED Clustered spike data, whether from automatic clustering tools
-      (eg, klustakwik) or as a result of manual sorting
-    doc: Value is 'Clustered spike data, whether from automatic clustering tools (eg,
-      klustakwik) or as a result of manual sorting'
   datasets:
   - name: description
     dtype: text

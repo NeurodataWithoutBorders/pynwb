@@ -19,7 +19,7 @@ class OptogeneticStimulusSite(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this stimulus site'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used'},
             {'name': 'description', 'type': str, 'doc': 'Description of site.'},
-            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},
+            {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},
             {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})
     def __init__(self, **kwargs):
         device, description, excitation_lambda, location = popargs(
@@ -39,8 +39,6 @@ class OptogeneticSeries(TimeSeries):
     '''
 
     __nwbfields__ = ('site',)
-
-    _help = "Optogenetic stimulus."
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
