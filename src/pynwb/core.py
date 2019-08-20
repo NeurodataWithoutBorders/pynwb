@@ -204,8 +204,6 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBBaseType, Container):
 
-    __nwbfields__ = ('help',)
-
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
@@ -276,8 +274,6 @@ class NWBDataInterface(NWBContainer):
 
 @register_class('NWBData', CORE_NAMESPACE)
 class NWBData(NWBBaseType, Data):
-
-    __nwbfields__ = ('help',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'})
@@ -1085,8 +1081,8 @@ class DynamicTable(NWBDataInterface):
     def __len__(self):
         return len(self.id)
 
-    @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row', 'default': None},
-            {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None},
+    @docval({'name': 'data', 'type': dict, 'doc': 'the data to put in this row', 'default': None},
+            {'name': 'id', 'type': int, 'doc': 'the ID for the row', 'default': None},
             allow_extra=True)
     def add_row(self, **kwargs):
         '''
@@ -1275,19 +1271,19 @@ class DynamicTable(NWBDataInterface):
         {
             'name': 'index_column',
             'type': str,
-            'help': 'if provided, this column will become the table\'s index',
+            'doc': 'if provided, this column will become the table\'s index',
             'default': None
         },
         {
             'name': 'table_description',
             'type': str,
-            'help': 'a description of what is in the resulting table',
+            'doc': 'a description of what is in the resulting table',
             'default': ''
         },
         {
             'name': 'columns',
             'type': (list, tuple),
-            'help': 'a list/tuple of dictionaries specifying columns in the table',
+            'doc': 'a list/tuple of dictionaries specifying columns in the table',
             'default': None
         },
         allow_extra=True

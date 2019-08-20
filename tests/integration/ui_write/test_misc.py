@@ -19,37 +19,31 @@ class TestUnitsIO(base.TestDataInterfaceIO):
     def setUpBuilder(self):
         ids_builder = DatasetBuilder('id', [0, 1],
                                      attributes={'neurodata_type': 'ElementIdentifiers',
-                                                 'namespace': 'core',
-                                                 'help': 'unique identifiers for a list of elements'})
+                                                 'namespace': 'core'})
         st_builder = DatasetBuilder('spike_times', [0, 1, 2, 3, 4, 5],
                                     attributes={'neurodata_type': 'VectorData',
                                                 'namespace': 'core',
-                                                'description': 'the spike times for each unit',
-                                                'help': 'Values for a list of elements'})
+                                                'description': 'the spike times for each unit'})
         sti_builder = DatasetBuilder('spike_times_index',
                                      [3, 6],
                                      attributes={'neurodata_type': 'VectorIndex',
                                                  'namespace': 'core',
-                                                 'target': ReferenceBuilder(st_builder),
-                                                 'help': 'indexes into a list of values for a list of elements'})
+                                                 'target': ReferenceBuilder(st_builder)})
 
         obs_builder = DatasetBuilder('obs_intervals', [[0, 1], [2, 3], [2, 5], [6, 7]],
                                      attributes={'neurodata_type': 'VectorData',
                                                  'namespace': 'core',
-                                                 'description': 'the observation intervals for each unit',
-                                                 'help': 'Values for a list of elements'})
+                                                 'description': 'the observation intervals for each unit'})
 
         obsi_builder = DatasetBuilder('obs_intervals_index',
                                       [2, 4],
                                       attributes={'neurodata_type': 'VectorIndex',
                                                   'namespace': 'core',
-                                                  'target': ReferenceBuilder(obs_builder),
-                                                  'help': 'indexes into a list of values for a list of elements'})
+                                                  'target': ReferenceBuilder(obs_builder)})
 
         return GroupBuilder('UnitsTest',
                             attributes={'neurodata_type': 'Units',
                                         'namespace': 'core',
-                                        'help': 'Data about spiking units',
                                         'description': 'a simple table for testing Units',
                                         'colnames': (b'spike_times', b'obs_intervals',)},
                             datasets={'id': ids_builder,

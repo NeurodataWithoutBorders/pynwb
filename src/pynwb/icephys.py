@@ -63,8 +63,6 @@ class PatchClampSeries(TimeSeries):
                      'stimulus_description',
                      'sweep_number')
 
-    _help = "Superclass definition for patch-clamp data."
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
@@ -72,7 +70,7 @@ class PatchClampSeries(TimeSeries):
             {'name': 'electrode', 'type': IntracellularElectrode,  # required
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
                      or record this data.'},
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},  # required
+            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},  # required
             {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'),
@@ -106,13 +104,11 @@ class CurrentClampSeries(PatchClampSeries):
                      'bridge_balance',
                      'capacitance_compensation')
 
-    _help = "Voltage recorded from cell during current-clamprecording."
-
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
-            {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': None},
-            {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
-            {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'bias_current', 'type': 'float', 'doc': 'Unit: Amp', 'default': None},
+            {'name': 'bridge_balance', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
+            {'name': 'capacitance_compensation', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number'))
     def __init__(self, **kwargs):
@@ -137,8 +133,6 @@ class IZeroClampSeries(CurrentClampSeries):
 
     __nwbfields__ = ()
 
-    _help = "Voltage from intracellular recordings when all current and amplifier settings are off,"
-
     @docval(*get_docval(CurrentClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(CurrentClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
@@ -158,8 +152,6 @@ class CurrentClampStimulusSeries(PatchClampSeries):
     '''
 
     __nwbfields__ = ()
-
-    _help = "Stimulus current applied during current clamp recording."
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
@@ -187,17 +179,15 @@ class VoltageClampSeries(PatchClampSeries):
                      'whole_cell_capacitance_comp',
                      'whole_cell_series_resistance_comp')
 
-    _help = "Current recorded from cell during voltage-clamp recording"
-
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
-            {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz', 'default': None},
-            {'name': 'resistance_comp_correction', 'type': float, 'doc': 'Unit: percent', 'default': None},
-            {'name': 'resistance_comp_prediction', 'type': float, 'doc': 'Unit: percent', 'default': None},
-            {'name': 'whole_cell_capacitance_comp', 'type': float, 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'whole_cell_series_resistance_comp', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
+            {'name': 'capacitance_fast', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'capacitance_slow', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'resistance_comp_bandwidth', 'type': 'float', 'doc': 'Unit: Hz', 'default': None},
+            {'name': 'resistance_comp_correction', 'type': 'float', 'doc': 'Unit: percent', 'default': None},
+            {'name': 'resistance_comp_prediction', 'type': 'float', 'doc': 'Unit: percent', 'default': None},
+            {'name': 'whole_cell_capacitance_comp', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'whole_cell_series_resistance_comp', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description', 'sweep_number'))
     def __init__(self, **kwargs):
@@ -226,8 +216,6 @@ class VoltageClampStimulusSeries(PatchClampSeries):
     '''
 
     __nwbfields__ = ()
-
-    _help = "Stimulus voltage applied during voltage clamp recording."
 
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',

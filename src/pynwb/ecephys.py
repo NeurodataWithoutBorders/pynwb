@@ -45,8 +45,6 @@ class ElectricalSeries(TimeSeries):
     __nwbfields__ = ({'name': 'electrodes', 'required_name': 'electrodes',
                       'doc': 'the electrodes that generated this electrical series', 'child': True},)
 
-    __help = "Stores acquired voltage data from extracellular recordings."
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'shape': ((None, ), (None, None), (None, None, None)),
@@ -74,8 +72,6 @@ class SpikeEventSeries(ElectricalSeries):
     """
 
     __nwbfields__ = ()
-
-    __help = "Snapshots of spike events from data."
 
     @docval(*get_docval(ElectricalSeries.__init__, 'name', 'data'),  # required
             {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),  # required
@@ -106,9 +102,6 @@ class EventDetection(NWBDataInterface):
                      'source_electricalseries',
                      'source_idx',
                      'times')
-
-    __help = ("Description of how events were detected, such as voltage "
-              "threshold, or dV/dT threshold, as well as relevant values.")
 
     @docval({'name': 'detection_method', 'type': str,
              'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, \
@@ -147,8 +140,6 @@ class EventWaveform(MultiContainerInterface):
         'create': 'create_spike_event_series'
     }
 
-    __help = "Waveform of detected extracellularly recorded spike events"
-
 
 @register_class('Clustering', CORE_NAMESPACE)
 class Clustering(NWBDataInterface):
@@ -164,9 +155,6 @@ class Clustering(NWBDataInterface):
         'peak_over_rms',
         'times'
     )
-
-    __help = ("[DEPRECATED] Clustered spike data, whether from automatic clustering "
-              "tools (eg, klustakwik) or as a result of manual sorting.")
 
     @docval({'name': 'description', 'type': str,
              'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, \
@@ -206,10 +194,6 @@ class ClusterWaveforms(NWBDataInterface):
                      'waveform_mean',
                      'waveform_sd')
 
-    __help = ("[DEPRECATED] Mean waveform shape of clusters. Waveforms should be "
-              "high-pass filtered (ie, not the same bandpass filter "
-              "used waveform analysis and clustering)")
-
     @docval({'name': 'clustering_interface', 'type': Clustering,
              'doc': 'the clustered spike data used as input for computing waveforms'},
             {'name': 'waveform_filtering', 'type': str,
@@ -246,9 +230,6 @@ class LFP(MultiContainerInterface):
          'get': 'get_electrical_series',
          'create': 'create_electrical_series'}]
 
-    __help = ("LFP data from one or more channels. Filter properties "
-              "should be noted in the ElectricalSeries")
-
 
 @register_class('FilteredEphys', CORE_NAMESPACE)
 class FilteredEphys(MultiContainerInterface):
@@ -262,10 +243,6 @@ class FilteredEphys(MultiContainerInterface):
     signals and electrodes, as a single signal can apply to many nearby electrodes, and one
     electrode may have different filtered (e.g., theta and/or gamma) signals represented.
     """
-
-    __help = ("Ephys data from one or more channels that is subjected to filtering, such as "
-              "for gamma or theta oscillations (LFP has its own interface). Filter properties should "
-              "be noted in the ElectricalSeries")
 
     __clsconf__ = {
         'attr': 'electrical_series',
@@ -287,8 +264,6 @@ class FeatureExtraction(NWBDataInterface):
                      {'name': 'electrodes', 'child': True},
                      'times',
                      'features')
-
-    __help = "Container for salient features of detected events"
 
     @docval({'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
