@@ -227,7 +227,7 @@ class NWBFile(MultiContainerInterface):
                     'Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.', 'default': None},
             {'name': 'protocol', 'type': str,
              'doc': 'Experimental protocol, if applicable. E.g., include IACUC protocol', 'default': None},
-            {'name': 'related_publications', 'type': str,
+            {'name': 'related_publications', 'type': (tuple, list, str),
              'doc': 'Publication information.'
              'PMID, DOI, URL, etc. If multiple, concatenate together and describe which is which. '
              'such as PMID, DOI, URL, etc', 'default': None},
