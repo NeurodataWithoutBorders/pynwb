@@ -20,14 +20,13 @@ class TestTimeSeriesIO(base.TestDataInterfaceIO):
                             attributes={'namespace': base.CORE_NAMESPACE,
                                         'neurodata_type': 'TimeSeries',
                                         'description': 'no description',
-                                        'comments': 'no comments',
-                                        'help': 'General time series object'},
+                                        'comments': 'no comments'},
                             datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                              attributes={'unit': 'SIunit',
                                                                          'conversion': 1.0,
                                                                          'resolution': 0.1}),
                                       'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                   attributes={'unit': 'Seconds', 'interval': 1})})
+                                                                   attributes={'unit': 'seconds', 'interval': 1})})
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''

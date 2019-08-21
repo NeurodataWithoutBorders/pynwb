@@ -38,14 +38,13 @@ class TestHDF5Writer(unittest.TestCase):
         self.container.add_acquisition(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
-                                  attributes={'neurodata_type': 'TimeSeries',
-                                              'help': 'General purpose TimeSeries'},
+                                  attributes={'neurodata_type': 'TimeSeries'},
                                   datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                    attributes={'unit': 'SIunit',
                                                                                'conversion': 1.0,
                                                                                'resolution': 0.1}),
                                             'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                         attributes={'unit': 'Seconds',
+                                                                         attributes={'unit': 'seconds',
                                                                                      'interval': 1})})
         self.builder = GroupBuilder(
             'root', groups={'acquisition': GroupBuilder('acquisition', groups={'test_timeseries': ts_builder}),
@@ -148,14 +147,13 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
         self.container.add_acquisition(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
-                                  attributes={'neurodata_type': 'TimeSeries',
-                                              'help': 'General purpose TimeSeries'},
+                                  attributes={'neurodata_type': 'TimeSeries'},
                                   datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                    attributes={'unit': 'SIunit',
                                                                                'conversion': 1.0,
                                                                                'resolution': 0.1}),
                                             'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                         attributes={'unit': 'Seconds',
+                                                                         attributes={'unit': 'seconds',
                                                                                      'interval': 1})})
         self.builder = GroupBuilder(
             'root', groups={'acquisition': GroupBuilder('acquisition', groups={'test_timeseries': ts_builder}),

@@ -10,9 +10,6 @@ from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_fu
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
 
-_default_conversion = 1.0
-_default_resolution = 0.0
-
 
 @register_class('ProcessingModule', CORE_NAMESPACE)
 class ProcessingModule(MultiContainerInterface):
@@ -35,9 +32,7 @@ class ProcessingModule(MultiContainerInterface):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
             {'name': 'data_interfaces', 'type': (list, tuple, dict),
-             'doc': 'NWBDataInterfacess that belong to this ProcessingModule', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+             'doc': 'NWBDataInterfacess that belong to this ProcessingModule', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(ProcessingModule, self).__init__, kwargs)
         self.description = popargs('description', kwargs)
@@ -99,25 +94,24 @@ class TimeSeries(NWBDataInterface):
                      "control",
                      "control_description")
 
-    __time_unit = "Seconds"
+    __time_unit = "seconds"
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},  # required
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
-            {'name': 'resolution', 'type': (str, float),
+            {'name': 'resolution', 'type': (str, 'float'),
              'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            # Optional arguments:
-            {'name': 'conversion', 'type': (str, float),
+             'default': -1.0},
+            {'name': 'conversion', 'type': (str, 'float'),
              'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
-             'default': _default_conversion},
+             'default': 1.0},
 
-            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'),
+            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+            {'name': 'starting_time', 'type': 'float', 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': 'float', 'doc': 'Sampling rate in Hz', 'default': None},
 
             {'name': 'comments', 'type': str,
              'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
@@ -126,9 +120,7 @@ class TimeSeries(NWBDataInterface):
             {'name': 'control', 'type': Iterable,
              'doc': 'Numerical labels that apply to each element in data', 'default': None},
             {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+             'doc': 'Description of each control value', 'default': None})
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
@@ -158,7 +150,7 @@ class TimeSeries(NWBDataInterface):
             if starting_time is not None:
                 raise ValueError('Specifying starting_time and timestamps is not supported.')
             self.fields['timestamps'] = timestamps
-            self.timestamps_unit = 'Seconds'
+            self.timestamps_unit = self.__time_unit
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
                 timestamps.__add_link('timestamp_link', self)
@@ -166,7 +158,7 @@ class TimeSeries(NWBDataInterface):
             self.rate = rate
             if starting_time is not None:
                 self.starting_time = starting_time
-                self.starting_time_unit = 'Seconds'
+                self.starting_time_unit = self.__time_unit
             else:
                 self.starting_time = 0.0
         else:
@@ -248,16 +240,13 @@ class Image(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
-            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None},
-            {'name': 'help', 'type': str, 'doc': 'helpful hint for user',
-             'default': 'pixel values for an image'}
+            {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None}
             )
     def __init__(self, **kwargs):
         super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
         self.resolution = kwargs['resolution']
         self.description = kwargs['description']
-        self.help = kwargs['help']
 
 
 @register_class('Images', CORE_NAMESPACE)
@@ -272,8 +261,6 @@ class Images(MultiContainerInterface):
         'get': 'get_image',
         'create': 'create_image'
     }
-
-    __help = "Contains images"
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},

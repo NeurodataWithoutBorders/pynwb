@@ -1,13 +1,11 @@
 from bisect import bisect_left
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.data_utils import DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import DynamicTable, ElementIdentifiers
-
-import numpy as np
+from .core import DynamicTable
 
 
 @register_class('TimeIntervals', CORE_NAMESPACE)
@@ -25,19 +23,15 @@ class TimeIntervals(DynamicTable):
         {'name': 'timeseries', 'description': 'index into a TimeSeries object', 'index': True}
     )
 
-    @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},
+    @docval({'name': 'name', 'type': str, 'doc': 'name of this TimeIntervals'},  # required
             {'name': 'description', 'type': str, 'doc': 'Description of this TimeIntervals',
              'default': "experimental intervals"},
-            {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
-             'default': None},
-            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
-            {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
-            'default': None})
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
         call_docval_func(super(TimeIntervals, self).__init__, kwargs)
 
-    @docval({'name': 'start_time', 'type': (float, np.float32, np.float64), 'doc': 'Start time of epoch, in seconds'},
-            {'name': 'stop_time', 'type': (float, np.float32, np.float64), 'doc': 'Stop time of epoch, in seconds'},
+    @docval({'name': 'start_time', 'type': 'float', 'doc': 'Start time of epoch, in seconds'},
+            {'name': 'stop_time', 'type': 'float', 'doc': 'Stop time of epoch, in seconds'},
             {'name': 'tags', 'type': (str, list, tuple), 'doc': 'user-defined tags used throughout time intervals',
              'default': None},
             {'name': 'timeseries', 'type': (list, tuple, TimeSeries), 'doc': 'the TimeSeries this epoch applies to',

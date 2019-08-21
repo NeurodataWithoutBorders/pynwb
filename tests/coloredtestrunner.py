@@ -210,6 +210,7 @@ class ColoredTestResult(unittest.TextTestResult):
         self.success_count = 0
         self.failure_count = 0
         self.error_count = 0
+        self.skip_count = 0
         self.verbosity = verbosity
 
         # deny TextTestResult showAll functionality
@@ -258,12 +259,8 @@ class ColoredTestResult(unittest.TextTestResult):
         super(ColoredTestResult, self).addSuccess(test)
         output = self.complete_output()
         self.result.append((0, test, output, ''))
-        # if self.verbosity > 1:
-        #     sys.stderr.write('ok ')
-        #     sys.stderr.write(str(test))
-        #     sys.stderr.write('\n')
-        # else:
-        #     pass #sys.stderr.write('.')
+        sys.stdout.write('.')
+        sys.stdout.flush()
 
         if not hasattr(self, 'successes'):
             self.successes = [test]
@@ -273,28 +270,34 @@ class ColoredTestResult(unittest.TextTestResult):
     def addError(self, test, err):
         self.error_count += 1
         super(ColoredTestResult, self).addError(test, err)
-        _, _exc_str = self.errors[-1]
         output = self.complete_output()
+        _, _exc_str = self.errors[-1]
         self.result.append((2, test, output, _exc_str))
-        # if self.verbosity > 1:
-        #     sys.stderr.write('E  ')
-        #     sys.stderr.write(str(test))
-        #     sys.stderr.write('\n')
-        # else:
-        #     pass #sys.stderr.write('E')
+        sys.stdout.write('E')
+        sys.stdout.flush()
 
     def addFailure(self, test, err):
         self.failure_count += 1
         super(ColoredTestResult, self).addFailure(test, err)
-        _, _exc_str = self.failures[-1]
         output = self.complete_output()
+        _, _exc_str = self.failures[-1]
         self.result.append((1, test, output, _exc_str))
-        # if self.verbosity > 1:
-        #     sys.stderr.write('F  ')
-        #     sys.stderr.write(str(test))
-        #     sys.stderr.write('\n')
-        # else:
-        #     pass #sys.stderr.write('F')
+        sys.stdout.write('F')
+        sys.stdout.flush()
+
+    def addSubTest(self, test, subtest, err):
+        if err is not None:
+            if issubclass(err[0], test.failureException):
+                self.addFailure(subtest, err)
+            else:
+                self.addError(subtest, err)
+
+    def addSkip(self, test, reason):
+        self.skip_count += 1
+        super(ColoredTestResult, self).addSkip(test, reason)
+        self.complete_output()
+        sys.stdout.write('s')
+        sys.stdout.flush()
 
     def get_all_cases_run(self):
         '''Return a list of each test case which failed or succeeded

@@ -358,6 +358,20 @@ Fields:
         self.assertIs(self.nwbfile.intervals['custom_interval']['stop_time'],
                       newfile.intervals['custom_interval']['stop_time'])
 
+    def test_multi_experimenters(self):
+        self.nwbfile = NWBFile('a test session description for a test NWBFile',
+                               'FILE123',
+                               self.start,
+                               experimenter=('experimenter1', 'experimenter2'))
+        self.assertTupleEqual(self.nwbfile.experimenter, ('experimenter1', 'experimenter2'))
+
+    def test_multi_publications(self):
+        self.nwbfile = NWBFile('a test session description for a test NWBFile',
+                               'FILE123',
+                               self.start,
+                               related_publications=('pub1', 'pub2'))
+        self.assertTupleEqual(self.nwbfile.related_publications, ('pub1', 'pub2'))
+
 
 class SubjectTest(unittest.TestCase):
     def setUp(self):
