@@ -1,4 +1,3 @@
-# flake8: noqa
 # -*- coding: utf-8 -*-
 #
 # sample documentation build configuration file, created by
