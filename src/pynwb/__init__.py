@@ -14,11 +14,62 @@ from hdmf.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
 from hdmf.backends.io import HDMFIO  # noqa: E402
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
 from hdmf.validate import ValidatorMap  # noqa: E402
-from hdmf.build import BuildManager  # noqa: E402
+from hdmf.build import BuildManager, TypeMap  # noqa: E402
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa: E402
 
+
+__rct_kwargs = list()
+
+
+# a function to register a container classes with the global map
+@docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the spec for'},
+        {'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
+        {"name": "container_cls", "type": type,
+         "doc": "the class to map to the specified neurodata_type", 'default': None},
+        is_method=False)
+def register_class(**kwargs):
+    """Register an NWBContainer class to use for reading and writing a neurodata_type from a specification
+    If container_cls is not specified, returns a decorator for registering an NWBContainer subclass
+    as the class for neurodata_type in namespace.
+    """
+    neurodata_type, namespace, container_cls = getargs('neurodata_type', 'namespace', 'container_cls', kwargs)
+
+    def _dec(cls):
+        __rct_kwargs.append({'data_type': neurodata_type, 'namespace': namespace, 'container_cls': cls})
+        return cls
+    if container_cls is None:
+        return _dec
+    else:
+        _dec(container_cls)
+
+
+__rm_kwargs = list()
+
+
+# a function to register an object mapper for a container class
+@docval({"name": "container_cls", "type": type,
+         "doc": "the Container class for which the given ObjectMapper class gets used for"},
+        {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map", 'default': None},
+        is_method=False)
+def register_map(**kwargs):
+    """Register an ObjectMapper to use for a Container class type
+    If mapper_cls is not specified, returns a decorator for registering an ObjectMapper class
+    as the mapper for container_cls. If mapper_cls specified, register the class as the mapper for container_cls
+    """
+    container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
+
+    def _dec(cls):
+        __rm_kwargs.append({'mapper_cls': cls, 'container_cls': container_cls})
+        return cls
+    if mapper_cls is None:
+        return _dec
+    else:
+        _dec(mapper_cls)
+
+
 __core_ns_file_name = 'nwb.namespace.yaml'
+__typemap_pkl_name = 'typemap.pkl'
 
 
 def __get_resources():
@@ -26,6 +77,7 @@ def __get_resources():
     from os.path import join
     ret = dict()
     ret['namespace_path'] = join(resource_filename(__name__, 'nwb-schema/core'), __core_ns_file_name)
+    ret['cached_typemap_path'] = resource_filename(__name__, __typemap_pkl_name)
     return ret
 
 
@@ -34,15 +86,67 @@ def _get_resources():
     return __get_resources()
 
 
-# a global namespace catalog
-global __NS_CATALOG
+# a global type map
 global __TYPE_MAP
 
-__NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-from hdmf.build import TypeMap as TypeMap  # noqa: E402
+@docval({'name': 'namespace_path', 'type': str,
+         'doc': 'the path to the YAML with the namespace definition'},
+        returns="the namespaces loaded from the given file", rtype=tuple,
+        is_method=False)
+def load_namespaces(**kwargs):
+    '''
+    Load namespaces from file
+    '''
+    namespace_path = getargs('namespace_path', kwargs)
+    return __TYPE_MAP.load_namespaces(namespace_path)
 
-__TYPE_MAP = TypeMap(__NS_CATALOG)
+
+def available_namespaces():
+    return __TYPE_MAP.namespace_catalog.namespaces
+
+
+# load the core namespace i.e. base NWB specification
+__resources = __get_resources()
+if os.path.exists(__resources['cached_typemap_path']):
+    import pickle
+    with open(__resources['cached_typemap_path'], 'rb') as f:
+        __TYPE_MAP = pickle.load(f)
+elif os.path.exists(__resources['namespace_path']):
+    __TYPE_MAP = TypeMap(NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace))
+
+    load_namespaces(__resources['namespace_path'])
+
+    # import these so the TypeMap gets populated
+    from . import io as __io  # noqa: F401,E402
+
+    from . import core  # noqa: F401,E402
+    from . import base  # noqa: F401,E402
+    from . import file  # noqa: F401,E402
+    from . import behavior  # noqa: F401,E402
+    from . import device  # noqa: F401,E402
+    from . import ecephys  # noqa: F401,E402
+    from . import epoch  # noqa: F401,E402
+    from . import icephys  # noqa: F401,E402
+    from . import image  # noqa: F401,E402
+    from . import misc  # noqa: F401,E402
+    from . import ogen  # noqa: F401,E402
+    from . import ophys  # noqa: F401,E402
+    from . import retinotopy  # noqa: F401,E402
+
+    for _ in __rct_kwargs:
+        __TYPE_MAP.register_container_type(**_)
+    for _ in __rm_kwargs:
+        __TYPE_MAP.register_map(**_)
+else:
+    raise RuntimeError("Unable to load a TypeMap")
+
+
+NWBContainer = __TYPE_MAP.get_container_cls(CORE_NAMESPACE, 'NWBContainer')
+NWBData = __TYPE_MAP.get_container_cls(CORE_NAMESPACE, 'NWBData')
+TimeSeries = __TYPE_MAP.get_container_cls(CORE_NAMESPACE, 'TimeSeries')
+ProcessingModule = __TYPE_MAP.get_container_cls(CORE_NAMESPACE, 'ProcessingModule')
+NWBFile = __TYPE_MAP.get_container_cls(CORE_NAMESPACE, 'NWBFile')
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
@@ -92,71 +196,6 @@ def get_manager(**kwargs):
     '''
     type_map = call_docval_func(get_type_map, kwargs)
     return BuildManager(type_map)
-
-
-@docval({'name': 'namespace_path', 'type': str,
-         'doc': 'the path to the YAML with the namespace definition'},
-        returns="the namespaces loaded from the given file", rtype=tuple,
-        is_method=False)
-def load_namespaces(**kwargs):
-    '''
-    Load namespaces from file
-    '''
-    namespace_path = getargs('namespace_path', kwargs)
-    return __TYPE_MAP.load_namespaces(namespace_path)
-
-
-# load the core namespace i.e. base NWB specification
-__resources = __get_resources()
-if os.path.exists(__resources['namespace_path']):
-    load_namespaces(__resources['namespace_path'])
-
-
-def available_namespaces():
-    return __NS_CATALOG.namespaces
-
-
-# a function to register a container classes with the global map
-@docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the spec for'},
-        {'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
-        {"name": "container_cls", "type": type,
-         "doc": "the class to map to the specified neurodata_type", 'default': None},
-        is_method=False)
-def register_class(**kwargs):
-    """Register an NWBContainer class to use for reading and writing a neurodata_type from a specification
-    If container_cls is not specified, returns a decorator for registering an NWBContainer subclass
-    as the class for neurodata_type in namespace.
-    """
-    neurodata_type, namespace, container_cls = getargs('neurodata_type', 'namespace', 'container_cls', kwargs)
-
-    def _dec(cls):
-        __TYPE_MAP.register_container_type(namespace, neurodata_type, cls)
-        return cls
-    if container_cls is None:
-        return _dec
-    else:
-        _dec(container_cls)
-
-
-# a function to register an object mapper for a container class
-@docval({"name": "container_cls", "type": type,
-         "doc": "the Container class for which the given ObjectMapper class gets used for"},
-        {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map", 'default': None},
-        is_method=False)
-def register_map(**kwargs):
-    """Register an ObjectMapper to use for a Container class type
-    If mapper_cls is not specified, returns a decorator for registering an ObjectMapper class
-    as the mapper for container_cls. If mapper_cls specified, register the class as the mapper for container_cls
-    """
-    container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
-
-    def _dec(cls):
-        __TYPE_MAP.register_map(container_cls, cls)
-        return cls
-    if mapper_cls is None:
-        return _dec
-    else:
-        _dec(mapper_cls)
 
 
 # a function to get the container class for a give type
@@ -231,23 +270,6 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
 
-
-from . import io as __io  # noqa: F401,E402
-from .core import NWBContainer, NWBData  # noqa: F401,E402
-from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
-from .file import NWBFile  # noqa: E402, F401
-
-from . import behavior  # noqa: F401,E402
-from . import device  # noqa: F401,E402
-from . import ecephys  # noqa: F401,E402
-from . import epoch  # noqa: F401,E402
-from . import icephys  # noqa: F401,E402
-from . import image  # noqa: F401,E402
-from . import misc  # noqa: F401,E402
-from . import ogen  # noqa: F401,E402
-from . import ophys  # noqa: F401,E402
-from . import retinotopy  # noqa: F401,E402
-from . import legacy  # noqa: F401,E402
 
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
