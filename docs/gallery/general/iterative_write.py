@@ -773,4 +773,3 @@ io.close()
 #        [  2.   2.   2.   2.   2.   2.   2.   2.   2.   2.]
 #        [ nan  nan  nan  nan  nan  nan  nan  nan  nan  nan]
 #        [ nan  nan  nan  nan  nan  nan  nan  nan  nan  nan]]
-
