@@ -223,7 +223,7 @@ class NWBHDF5IO(_HDF5IO):
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
-from .file import NWBFile  # noqa: E402, F401
+from .file import NWBFile  # noqa: F401,E402
 
 from . import behavior  # noqa: F401,E402
 from . import device  # noqa: F401,E402

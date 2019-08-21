@@ -419,7 +419,7 @@ class NWBTable(NWBData):
     The class attribute __defaultname__ can also be set to specify a default name
     for the table class. If \_\_defaultname\_\_ is not specified, then ``name`` will
     need to be specified when the class is instantiated.
-    '''  # noqa: W605
+    '''
 
     @ExtenderMeta.pre_init
     def __build_table_class(cls, name, bases, classdict):

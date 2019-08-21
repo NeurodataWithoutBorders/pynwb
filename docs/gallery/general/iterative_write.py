@@ -539,7 +539,7 @@ write_test_file(filename='basic_sparse_iterwrite_largearray.nwb',
 # Let's verify that our data was written correctly
 
 # Read the NWB file
-from pynwb import NWBHDF5IO    # noqa
+from pynwb import NWBHDF5IO
 
 io = NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb', 'r')
 nwbfile = io.read()
@@ -589,7 +589,7 @@ for f in channel_files:
 # Step 1: Create a data chunk iterator for our multifile array
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-from hdmf.data_utils import AbstractDataChunkIterator, DataChunk   # noqa
+from hdmf.data_utils import AbstractDataChunkIterator, DataChunk
 
 
 class MultiFileArrayIterator(AbstractDataChunkIterator):
