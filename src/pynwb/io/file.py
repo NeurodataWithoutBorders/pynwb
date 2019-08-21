@@ -43,6 +43,25 @@ class NWBFileMap(ObjectMapper):
             'imaging_planes',
             general_spec.get_group('optophysiology').get_neurodata_type('ImagingPlane'))
 
+        general_datasets = ['data_collection',
+                            'experiment_description',
+                            'experimenter',
+                            'institution',
+                            'keywords',
+                            'lab',
+                            'notes',
+                            'pharmacology',
+                            'protocol',
+                            'related_publications',
+                            'session_id',
+                            'slices',
+                            'source_script',
+                            'stimulus',
+                            'surgery',
+                            'virus']
+        for dataset_name in general_datasets:
+            self.map_spec(dataset_name, general_spec.get_dataset(dataset_name))
+
         proc_spec = self.spec.get_group('processing')
         self.unmap(proc_spec)
         self.map_spec('processing', proc_spec.get_neurodata_type('ProcessingModule'))
@@ -126,6 +145,24 @@ class NWBFileMap(ObjectMapper):
         ret = None
         if isinstance(container.experimenter, str):
             ret = (container.experimenter,)
+        return ret
+
+    @ObjectMapper.constructor_arg('related_publications')
+    def publications_carg(self, builder, manager):
+        ret = None
+        pubs_bldr = builder['general'].get('related_publications')
+        if pubs_bldr is not None:
+            if isinstance(pubs_bldr.data, str):
+                ret = (pubs_bldr.data,)
+            else:
+                ret = tuple(pubs_bldr.data)
+        return ret
+
+    @ObjectMapper.object_attr('related_publications')
+    def publication_obj_attr(self, container, manager):
+        ret = None
+        if isinstance(container.related_publications, str):
+            ret = (container.related_publications,)
         return ret
 
 
