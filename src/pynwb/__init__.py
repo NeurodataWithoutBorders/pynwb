@@ -5,7 +5,6 @@ import os.path
 from copy import deepcopy
 from warnings import warn
 import h5py
-from pkg_resources import resource_filename
 
 from hdmf.spec import NamespaceCatalog
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
@@ -20,6 +19,7 @@ __core_ns_file_name = 'nwb.namespace.yaml'
 
 
 def __get_resources():
+    from pkg_resources import resource_filename
     ret = dict()
     ret['namespace_path'] = os.path.join(resource_filename(__name__, 'nwb-schema/core'), __core_ns_file_name)
     return ret
