@@ -708,11 +708,11 @@ from hdmf.backends.hdf5.h5_utils import H5DataIO
 write_test_file(filename='basic_alternative_custom_write.nwb',
                 data=H5DataIO(data=np.empty(shape=(0, 10), dtype='float'),
                               maxshape=(None, 10),  # <-- Make the time dimension resizable
-                              chunks=(131072, 2),  # <-- Use 2MB chunks
-                              compression='gzip',     # <-- Enable GZip compression
-                              compression_opts=4,  # <-- GZip aggression
-                              shuffle=True,        # <-- Enable shuffle filter
-                              fillvalue=np.nan     # <-- Use NAN as fillvalue
+                              chunks=(131072, 2),   # <-- Use 2MB chunks
+                              compression='gzip',   # <-- Enable GZip compression
+                              compression_opts=4,   # <-- GZip aggression
+                              shuffle=True,         # <-- Enable shuffle filter
+                              fillvalue=np.nan      # <-- Use NAN as fillvalue
                               )
                 )
 
