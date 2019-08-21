@@ -1,23 +1,29 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
+from setuptools.command.build_py import build_py
 import re
 
 import versioneer
 
-########## BEGIN: PICKLE TYPE MAP
-import sys
-import os
-import pickle
+class BuildPyCommand(build_py):
+    tm_pkl_path = 'typemap.pkl'
+    def run(self):
+        ########## BEGIN: PICKLE TYPE MAP
+        import sys
+        import os
+        import pickle
 
-sys.path.append('src')
-import pynwb
-tm = pynwb.get_type_map()
+        sys.path.append('src')
+        import pynwb
+        tm = pynwb.get_type_map()
 
-tm_pkl_path = 'typemap.pkl'
-with open(os.path.join('src', 'pynwb', tm_pkl_path) , 'wb') as f:
-    pickle.dump(tm, f, pickle.HIGHEST_PROTOCOL)
-########## END: PICKLE TYPE MAP
+        pkl_path = os.path.join('src', 'pynwb', self.tm_pkl_path)
+        sys.stdout.write('pickling type map to %s\n' % pkl_path)
+        with open(pkl_path, 'wb') as f:
+            pickle.dump(tm, f, pickle.HIGHEST_PROTOCOL)
+        ########## END: PICKLE TYPE MAP
+        super().run()
 
 with open('README.rst', 'r') as fp:
     readme = fp.read()
@@ -48,7 +54,7 @@ setup_args = {
     'packages': pkgs,
     'package_dir': {'': 'src'},
     #'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
-    'package_data': {'pynwb': [tm_pkl_path]},
+    'package_data': {'pynwb': [BuildPyCommand.tm_pkl_path]},
     'classifiers': [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.5",
@@ -77,7 +83,8 @@ setup_args = {
                 'NWB '
                 'NWB:N '
                 'NeurodataWithoutBorders',
-    'zip_safe': False
+    'zip_safe': False,
+    'cmdclass': {'build_py': BuildPyCommand}
 }
 
 if __name__ == '__main__':
