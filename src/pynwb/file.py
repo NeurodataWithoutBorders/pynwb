@@ -7,6 +7,9 @@ except ImportError:
 from warnings import warn
 import copy as _copy
 
+import numpy as np
+import pandas as pd
+
 from hdmf.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
@@ -18,8 +21,8 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion,\
-                  LabelledDict
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, \
+                  DynamicTableRegion, ScratchData, LabelledDict
 
 
 def _not_parent(arg):
@@ -92,6 +95,12 @@ class NWBFile(MultiContainerInterface):
             'add': 'add_analysis',
             'type': NWBContainer,
             'get': 'get_analysis'
+        },
+        {
+            'attr': 'scratch',
+            'add': '_add_scratch',
+            'type': (NWBContainer, ScratchData),
+            'get': '_get_scratch'
         },
         {
             'attr': 'stimulus',
@@ -218,7 +227,7 @@ class NWBFile(MultiContainerInterface):
                     'Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.', 'default': None},
             {'name': 'protocol', 'type': str,
              'doc': 'Experimental protocol, if applicable. E.g., include IACUC protocol', 'default': None},
-            {'name': 'related_publications', 'type': str,
+            {'name': 'related_publications', 'type': (tuple, list, str),
              'doc': 'Publication information.'
              'PMID, DOI, URL, etc. If multiple, concatenate together and describe which is which. '
              'such as PMID, DOI, URL, etc', 'default': None},
@@ -279,7 +288,9 @@ class NWBFile(MultiContainerInterface):
             {'name': 'devices', 'type': (list, tuple),
              'doc': 'Device objects belonging to this NWBFile', 'default': None},
             {'name': 'subject', 'type': Subject,
-             'doc': 'subject metadata', 'default': None})
+             'doc': 'subject metadata', 'default': None},
+            {'name': 'scratch', 'type': (list, tuple),
+             'doc': 'scratch data', 'default': None})
     def __init__(self, **kwargs):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
         pkwargs['name'] = 'root'
@@ -326,6 +337,7 @@ class NWBFile(MultiContainerInterface):
             'trials',
             'invalid_times',
             'units',
+            'scratch',
             'experimenter',
             'experiment_description',
             'session_id',
@@ -438,10 +450,10 @@ class NWBFile(MultiContainerInterface):
         self.__check_electrodes()
         call_docval_func(self.electrodes.add_column, kwargs)
 
-    @docval({'name': 'x', 'type': float, 'doc': 'the x coordinate of the position'},
-            {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position'},
-            {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position'},
-            {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode'},
+    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position'},
+            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position'},
+            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position'},
+            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode'},
             {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
             {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
@@ -593,6 +605,50 @@ class NWBFile(MultiContainerInterface):
     def add_stimulus_template(self, timeseries):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
+
+    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, NWBContainer, ScratchData),
+             'help': 'the data to add to the scratch space'},
+            {'name': 'name', 'type': str,
+             'help': 'the name of the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'default': None},
+            {'name': 'notes', 'type': str,
+             'help': 'notes to add to the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'default': None},
+            {'name': 'table_description', 'type': str,
+             'help': 'description for the internal DynamicTable used to store a pandas.DataFrame',
+             'default': ''})
+    def add_scratch(self, **kwargs):
+        '''Add data to the scratch space'''
+        data, name, notes = getargs('data', 'name', 'notes', kwargs)
+        if isinstance(data, (np.ndarray, pd.DataFrame, list, tuple)):
+            if name is None:
+                raise ValueError('please provide a name for scratch data')
+            if isinstance(data, pd.DataFrame):
+                table_description = getargs('table_description', kwargs)
+                data = DynamicTable.from_dataframe(df=data, name=name, table_description=table_description)
+                if notes is not None:
+                    warn('Notes argument is ignored when adding a pandas DataFrame to scratch')
+            else:
+                data = ScratchData(name=name, data=data, notes=notes)
+        else:
+            if notes is not None:
+                warn('Notes argument is ignored when adding an NWBContainer to scratch')
+            if name is not None:
+                warn('Name argument is ignored when adding an NWBContainer to scratch')
+        self._add_scratch(data)
+
+    @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
+            {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
+    def get_scratch(self, **kwargs):
+        '''Get data from the scratch space'''
+        name, convert = getargs('name', 'convert', kwargs)
+        ret = self._get_scratch(name)
+        if convert:
+            if isinstance(ret, DynamicTable):
+                ret = ret.to_dataframe()
+            elif isinstance(ret, ScratchData):
+                ret = np.asarray(ret.data)
+        return ret
 
     def copy(self):
         """

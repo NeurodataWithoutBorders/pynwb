@@ -8,7 +8,7 @@ import numpy as np
 from hdmf.build import GroupBuilder, DatasetBuilder
 from hdmf.backends.hdf5 import HDF5IO
 
-from pynwb import NWBFile, TimeSeries
+from pynwb import NWBFile, TimeSeries, get_manager
 from pynwb.file import Subject
 from pynwb.epoch import TimeIntervals
 
@@ -29,33 +29,30 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                   attributes={'namespace': base.CORE_NAMESPACE,
                                               'neurodata_type': 'TimeSeries',
                                               'comments': 'no comments',
-                                              'description': 'no description',
-                                              'help': 'General time series object'},
+                                              'description': 'no description'},
                                   datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                    attributes={'unit': 'SIunit',
                                                                                'conversion': 1.0,
                                                                                'resolution': 0.1}),
                                             'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                         attributes={'unit': 'Seconds',
+                                                                         attributes={'unit': 'seconds',
                                                                                      'interval': 1})})
         ts_builder2 = GroupBuilder('test_timeseries2',
                                    attributes={'namespace': base.CORE_NAMESPACE,
                                                'neurodata_type': 'TimeSeries',
                                                'comments': 'no comments',
-                                               'description': 'no description',
-                                               'help': 'General time series object'},
+                                               'description': 'no description'},
                                    datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                     attributes={'unit': 'SIunit',
                                                                                 'conversion': 1.0,
                                                                                 'resolution': 0.1}),
                                              'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                          attributes={'unit': 'Seconds',
+                                                                          attributes={'unit': 'seconds',
                                                                                       'interval': 1})})
 
         module_builder = GroupBuilder('test_module',
                                       attributes={'namespace': base.CORE_NAMESPACE,
                                                   'neurodata_type': 'ProcessingModule',
-                                                  'help': 'A collection of analysis outputs from processing of data',
                                                   'description': 'a test module'},
                                       groups={'test_timeseries': ts_builder2})
 
@@ -104,8 +101,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
                                 },
                             attributes={'namespace': base.CORE_NAMESPACE,
                                         'nwb_version': '2.0b',
-                                        'neurodata_type': 'NWBFile',
-                                        'help': 'an NWB:N file for storing cellular-based neurophysiology data'})
+                                        'neurodata_type': 'NWBFile'})
 
     def setUpContainer(self):
         container = NWBFile('a test NWB File', 'TEST123',
@@ -186,8 +182,7 @@ class TestSubjectIO(base.TestDataInterfaceIO):
     def setUpBuilder(self):
         return GroupBuilder('subject',
                             attributes={'namespace': base.CORE_NAMESPACE,
-                                        'neurodata_type': 'Subject',
-                                        'help': 'Information about the subject'},
+                                        'neurodata_type': 'Subject'},
                             datasets={'age': DatasetBuilder('age', '12 mo'),
                                       'description': DatasetBuilder('description', 'An unfortunate rat'),
                                       'genotype': DatasetBuilder('genotype', 'WT'),
@@ -214,8 +209,7 @@ class TestEmptySubjectIO(TestSubjectIO):
     def setUpBuilder(self):
         return GroupBuilder('subject',
                             attributes={'namespace': base.CORE_NAMESPACE,
-                                        'neurodata_type': 'Subject',
-                                        'help': 'Information about the subject'},
+                                        'neurodata_type': 'Subject'},
                             datasets={})
 
 
@@ -330,3 +324,98 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
 
         df_obt = self.read_container.to_dataframe(exclude=set(['timeseries', 'timeseries_index']))
         pd.testing.assert_frame_equal(df_exp, df_obt, check_like=True, check_dtype=False)
+
+
+class TestNWBFileRoundtrip(base.TestMapRoundTrip):
+
+    def setUp(self):
+        super(base.TestMapRoundTrip, self).setUp()
+        self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
+        self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
+        self.create = [datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
+                       datetime(2017, 5, 2, 13, 0, 0, 1, tzinfo=tzutc()),
+                       datetime(2017, 5, 2, 14, tzinfo=tzutc())]
+        self.filename = 'test_nwbfile.nwb'
+        self.writer = None
+        self.reader = None
+
+    def setUpContainer(self):
+        pass
+
+    def build_nwbfile(self):
+        self.nwbfile = NWBFile('a test session description for a test NWBFile',
+                               'FILE123',
+                               self.start_time,
+                               file_create_date=self.create,
+                               timestamps_reference_time=self.ref_time,
+                               experimenter='A test experimenter',
+                               lab='a test lab',
+                               institution='a test institution',
+                               experiment_description='a test experiment description',
+                               session_id='test1',
+                               notes='my notes',
+                               pharmacology='drugs',
+                               protocol='protocol',
+                               related_publications='my pubs',
+                               slices='my slices',
+                               surgery='surgery',
+                               virus='a virus',
+                               source_script='noscript',
+                               source_script_file_name='nofilename',
+                               stimulus_notes='test stimulus notes',
+                               data_collection='test data collection notes',
+                               keywords=('these', 'are', 'keywords'))
+
+    def roundtripContainer(self, cache_spec=False):
+        self.build_nwbfile()
+        self.writer = HDF5IO(self.filename, manager=get_manager(), mode='w')
+        self.writer.write(self.nwbfile, cache_spec=cache_spec)
+        self.writer.close()
+        self.reader = HDF5IO(self.filename, manager=get_manager(), mode='r')
+        self.read_nwbfile = self.reader.read()
+
+    def test_roundtrip(self):
+        self.roundtripContainer()
+        self.assertNotEqual(id(self.nwbfile), id(self.read_nwbfile))
+        self.assertContainerEqual(self.read_nwbfile, self.nwbfile)
+        self.validate()
+
+
+class TestExperimentersConstructorRoundtrip(TestNWBFileRoundtrip):
+    """Test that a list of multiple experimenters in a constructor is written to and read from file"""
+
+    def build_nwbfile(self):
+        description = 'test nwbfile experimenter'
+        identifier = 'TEST_experimenter'
+        self.nwbfile = NWBFile(description, identifier, self.start_time,
+                               experimenter=('experimenter1', 'experimenter2'))
+
+
+class TestExperimentersSetterRoundtrip(TestNWBFileRoundtrip):
+    """Test that a list of multiple experimenters in a setter is written to and read from file"""
+
+    def build_nwbfile(self):
+        description = 'test nwbfile experimenter'
+        identifier = 'TEST_experimenter'
+        self.nwbfile = NWBFile(description, identifier, self.start_time)
+        self.nwbfile.experimenter = ('experimenter1', 'experimenter2')
+
+
+class TestPublicationsConstructorRoundtrip(TestNWBFileRoundtrip):
+    """Test that a list of multiple publications in a constructor is written to and read from file"""
+
+    def build_nwbfile(self):
+        description = 'test nwbfile publications'
+        identifier = 'TEST_publications'
+        self.nwbfile = NWBFile(description, identifier, self.start_time,
+                               related_publications=('pub1', 'pub2'))
+
+
+class TestPublicationsSetterRoundtrip(TestNWBFileRoundtrip):
+    """Test that a list of multiple publications in a setter is written to and read from file"""
+
+    def build_nwbfile(self):
+        description = 'test nwbfile publications'
+        identifier = 'TEST_publications'
+        self.nwbfile = NWBFile(description, identifier, self.start_time)
+        self.nwbfile.related_publications = ('pub1', 'pub2')

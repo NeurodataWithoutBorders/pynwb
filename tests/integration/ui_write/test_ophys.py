@@ -36,22 +36,19 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
             'optchan1',
             attributes={
                 'neurodata_type': 'OpticalChannel',
-                'namespace': 'core',
-                'help': 'Metadata about an optical channel used to record from an imaging plane'},
+                'namespace': 'core'},
             datasets={
                 'description': DatasetBuilder('description', 'a fake OpticalChannel'),
                 'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
         )
         device_builder = GroupBuilder('dev1',
                                       attributes={'neurodata_type': 'Device',
-                                                  'namespace': 'core',
-                                                  'help': 'A recording device e.g. amplifier'})
+                                                  'namespace': 'core'})
         return GroupBuilder(
             'imgpln1',
             attributes={
                 'neurodata_type': 'ImagingPlane',
-                'namespace': 'core',
-                'help': 'Metadata about an imaging plane'},
+                'namespace': 'core'},
             datasets={
                 'description': DatasetBuilder('description', 'a fake ImagingPlane'),
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
@@ -98,22 +95,19 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
             'optchan1',
             attributes={
                  'neurodata_type': 'OpticalChannel',
-                 'namespace': 'core',
-                 'help': 'Metadata about an optical channel used to record from an imaging plane'},
+                 'namespace': 'core'},
             datasets={
                  'description': DatasetBuilder('description', 'a fake OpticalChannel'),
                  'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
         )
         device_builder = GroupBuilder('dev1',
                                       attributes={'neurodata_type': 'Device',
-                                                  'namespace': 'core',
-                                                  'help': 'A recording device e.g. amplifier'})
+                                                  'namespace': 'core'})
         imgpln_builder = GroupBuilder(
             'imgpln1',
             attributes={
                 'neurodata_type': 'ImagingPlane',
-                'namespace': 'core',
-                'help': 'Metadata about an imaging plane'},
+                'namespace': 'core'},
             datasets={
                 'description': DatasetBuilder('description', 'a fake ImagingPlane'),
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
@@ -138,8 +132,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
                 'namespace': base.CORE_NAMESPACE,
                 'comments': 'no comments',
                 'description': 'no description',
-                'neurodata_type': 'TwoPhotonSeries',
-                'help': 'Image stack recorded from 2-photon microscope'},
+                'neurodata_type': 'TwoPhotonSeries'},
             datasets={
                 'data': DatasetBuilder(
                     'data', data,
@@ -149,7 +142,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
                         'resolution': 0.0}
                 ),
                 'timestamps': DatasetBuilder('timestamps', timestamps,
-                                             attributes={'unit': 'Seconds', 'interval': 1}),
+                                             attributes={'unit': 'seconds', 'interval': 1}),
                 'format': DatasetBuilder('format', 'raw'),
                 'dimension': DatasetBuilder('dimension', [2]),
                 'field_of_view': DatasetBuilder('field_of_view', [2.0, 2.0, 5.0]),
@@ -206,22 +199,19 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
             'test_optical_channel',
             attributes={
                 'neurodata_type': 'OpticalChannel',
-                'namespace': 'core',
-                'help': 'Metadata about an optical channel used to record from an imaging plane'},
+                'namespace': 'core'},
             datasets={
                 'description': DatasetBuilder('description', 'optical channel description'),
                 'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
         )
         device_builder = GroupBuilder('dev1',
                                       attributes={'neurodata_type': 'Device',
-                                                  'namespace': 'core',
-                                                  'help': 'A recording device e.g. amplifier'})
+                                                  'namespace': 'core'})
         self.imgpln_builder = GroupBuilder(
             'imgpln1',
             attributes={
                 'neurodata_type': 'ImagingPlane',
-                'namespace': 'core',
-                'help': 'Metadata about an imaging plane'},
+                'namespace': 'core'},
             datasets={
                 'description': DatasetBuilder('description', 'imaging plane description'),
                 'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
@@ -243,10 +233,9 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                        attributes={'namespace': 'core',
                                                    'neurodata_type': 'ImageSeries',
                                                    'description': 'no description',
-                                                   'comments': 'no comments',
-                                                   'help': 'Storage object for time-series 2-D image data'},
+                                                   'comments': 'no comments'},
                                        datasets={'timestamps': DatasetBuilder('timestamps', ts,
-                                                                              attributes={'unit': 'Seconds',
+                                                                              attributes={'unit': 'seconds',
                                                                                           'interval': 1}),
                                                  'external_file': DatasetBuilder('external_file', ['images.tiff'],
                                                                                  attributes={
@@ -259,22 +248,19 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                                                   attributes={
                                                    'namespace': 'core',
                                                    'neurodata_type': 'VectorData',
-                                                   'description': 'Pixel masks for each ROI',
-                                                   'help': 'Values for a list of elements'})
+                                                   'description': 'Pixel masks for each ROI'})
 
         self.pxmsk_index_builder = DatasetBuilder('pixel_mask_index', self.pxmsk_index,
                                                   attributes={
                                                    'namespace': 'core',
                                                    'neurodata_type': 'VectorIndex',
-                                                   'target': ReferenceBuilder(self.pixel_masks_builder),
-                                                   'help': 'indexes into a list of values for a list of elements'})
+                                                   'target': ReferenceBuilder(self.pixel_masks_builder)})
 
         self.image_masks_builder = DatasetBuilder('image_mask', self.img_mask,
                                                   attributes={
                                                    'namespace': 'core',
                                                    'neurodata_type': 'VectorData',
-                                                   'description': 'Image masks for each ROI',
-                                                   'help': 'Values for a list of elements'})
+                                                   'description': 'Image masks for each ROI'})
 
         ps_builder = GroupBuilder(
             'test_plane_seg_name',
@@ -282,12 +268,10 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
                 'neurodata_type': 'PlaneSegmentation',
                 'namespace': 'core',
                 'description': 'plane segmentation description',
-                'colnames': (b'image_mask', b'pixel_mask'),
-                'help': 'Results from segmentation of an imaging plane'},
+                'colnames': (b'image_mask', b'pixel_mask')},
             datasets={
                 'id': DatasetBuilder('id', data=[0, 1],
-                                     attributes={'help': 'unique identifiers for a list of elements',
-                                                 'namespace': 'core',
+                                     attributes={'namespace': 'core',
                                                  'neurodata_type': 'ElementIdentifiers'}),
                 'pixel_mask': self.pixel_masks_builder,
                 'pixel_mask_index': self.pxmsk_index_builder,
@@ -378,7 +362,8 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
         data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
         timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
-        return RoiResponseSeries('test_roi_response_series', data, 'lumens', self.rt_region, timestamps=timestamps)
+        return RoiResponseSeries('test_roi_response_series', data, self.rt_region, unit='lumens',
+                                 timestamps=timestamps)
 
     def setUpBuilder(self):
         ps_builder = TestPlaneSegmentation.get_plane_segmentation_builder(self)
@@ -388,9 +373,7 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
                 'namespace': base.CORE_NAMESPACE,
                 'comments': 'no comments',
                 'description': 'no description',
-                'neurodata_type': 'RoiResponseSeries',
-                'help': ('ROI responses over an imaging plane. Each element on the second dimension of data[] '
-                         'should correspond to the signal from one ROI')},
+                'neurodata_type': 'RoiResponseSeries'},
             datasets={
                 'data': DatasetBuilder(
                     'data', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
@@ -400,10 +383,9 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
                         'resolution': 0.0}
                 ),
                 'timestamps': DatasetBuilder('timestamps', [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
-                                             attributes={'unit': 'Seconds', 'interval': 1}),
+                                             attributes={'unit': 'seconds', 'interval': 1}),
                 'rois': DatasetBuilder('rois', data=[0],
-                                       attributes={'help': 'a subset (i.e. slice or region) of a DynamicTable',
-                                                   'description': 'the first of two ROIs',
+                                       attributes={'description': 'the first of two ROIs',
                                                    'table': ReferenceBuilder(ps_builder),
                                                    'namespace': 'core',
                                                    'neurodata_type': 'DynamicTableRegion'}),
