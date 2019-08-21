@@ -8,7 +8,7 @@ import h5py
 from pkg_resources import resource_filename
 
 from hdmf.spec import NamespaceCatalog
-from hdmf.utils import docval, getargs, popargs, call_docval_func
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.validate import ValidatorMap
@@ -41,7 +41,7 @@ __TYPE_MAP = TypeMap(__NS_CATALOG)
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
-         'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
+         'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
          'default': None},
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
@@ -66,8 +66,7 @@ def get_type_map(**kwargs):
                 elif isinstance(ext, TypeMap):
                     type_map.merge(ext)
                 else:
-                    msg = 'extensions must be a list of paths to namespace specs or a TypeMaps'
-                    raise ValueError(msg)
+                    raise ValueError('extensions must be a list of paths to namespace specs or a TypeMaps')
         elif isinstance(extensions, str):
             type_map.load_namespaces(extensions)
         elif isinstance(extensions, TypeMap):
@@ -75,9 +74,7 @@ def get_type_map(**kwargs):
     return type_map
 
 
-@docval({'name': 'extensions', 'type': (str, TypeMap, list),
-         'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
-         'default': None},
+@docval(*get_docval(get_type_map),
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
 def get_manager(**kwargs):
@@ -107,6 +104,7 @@ if os.path.exists(__resources['namespace_path']):
 
 
 def available_namespaces():
+    """Returns all namespaces registered in the namespace catalog"""
     return __NS_CATALOG.namespaces
 
 
@@ -134,13 +132,13 @@ def register_class(**kwargs):
 
 # a function to register an object mapper for a container class
 @docval({"name": "container_cls", "type": type,
-         "doc": "the Container class for which the given ObjectMapper class gets used for"},
+         "doc": "the Container class for which the given ObjectMapper class gets used"},
         {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map", 'default': None},
         is_method=False)
 def register_map(**kwargs):
     """Register an ObjectMapper to use for a Container class type
-    If mapper_cls is not specified, returns a decorator for registering an ObjectMapper class
-    as the mapper for container_cls. If mapper_cls specified, register the class as the mapper for container_cls
+    If mapper_cls is not specified, returns a decorator for registering an ObjectMapper class as the mapper for
+    container_cls. If mapper_cls is specified, register the class as the mapper for container_cls
     """
     container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
 
@@ -153,12 +151,11 @@ def register_map(**kwargs):
         _dec(mapper_cls)
 
 
-# a function to get the container class for a give type
-@docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the NWBConatiner class for'},
+@docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the NWBContainer class for'},
         {'name': 'namespace', 'type': str, 'doc': 'the namespace the neurodata_type is defined in'},
         is_method=False)
 def get_class(**kwargs):
-    """Get the class object of the NWBContainer subclass corresponding to a given neurdata_type.
+    """Get the class object of the NWBContainer subclass corresponding to a given neurodata_type.
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
