@@ -4,28 +4,24 @@ for reading and writing data in NWB format
 import os.path
 from copy import deepcopy
 from warnings import warn
-
 import h5py
+from pkg_resources import resource_filename
+
+from hdmf.spec import NamespaceCatalog
+from hdmf.utils import docval, getargs, popargs, call_docval_func
+from hdmf.backends.io import HDMFIO
+from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
+from hdmf.validate import ValidatorMap
+from hdmf.build import BuildManager, TypeMap
+
 
 CORE_NAMESPACE = 'core'
-
-from hdmf.spec import NamespaceCatalog  # noqa: E402
-from hdmf.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
-from hdmf.backends.io import HDMFIO  # noqa: E402
-from hdmf.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
-from hdmf.validate import ValidatorMap  # noqa: E402
-from hdmf.build import BuildManager  # noqa: E402
-
-from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa: E402
-
 __core_ns_file_name = 'nwb.namespace.yaml'
 
 
 def __get_resources():
-    from pkg_resources import resource_filename
-    from os.path import join
     ret = dict()
-    ret['namespace_path'] = join(resource_filename(__name__, 'nwb-schema/core'), __core_ns_file_name)
+    ret['namespace_path'] = os.path.join(resource_filename(__name__, 'nwb-schema/core'), __core_ns_file_name)
     return ret
 
 
@@ -38,10 +34,9 @@ def _get_resources():
 global __NS_CATALOG
 global __TYPE_MAP
 
+from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
+
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-
-from hdmf.build import TypeMap as TypeMap  # noqa: E402
-
 __TYPE_MAP = TypeMap(__NS_CATALOG)
 
 
@@ -94,8 +89,7 @@ def get_manager(**kwargs):
     return BuildManager(type_map)
 
 
-@docval({'name': 'namespace_path', 'type': str,
-         'doc': 'the path to the YAML with the namespace definition'},
+@docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
 def load_namespaces(**kwargs):
@@ -119,8 +113,8 @@ def available_namespaces():
 # a function to register a container classes with the global map
 @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the spec for'},
         {'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
-        {"name": "container_cls", "type": type,
-         "doc": "the class to map to the specified neurodata_type", 'default': None},
+        {"name": "container_cls", "type": type, "doc": "the class to map to the specified neurodata_type",
+         'default': None},
         is_method=False)
 def register_class(**kwargs):
     """Register an NWBContainer class to use for reading and writing a neurodata_type from a specification
@@ -160,8 +154,7 @@ def register_map(**kwargs):
 
 
 # a function to get the container class for a give type
-@docval({'name': 'neurodata_type', 'type': str,
-         'doc': 'the neurodata_type to get the NWBConatiner class for'},
+@docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the NWBConatiner class for'},
         {'name': 'namespace', 'type': str, 'doc': 'the namespace the neurodata_type is defined in'},
         is_method=False)
 def get_class(**kwargs):
@@ -171,10 +164,8 @@ def get_class(**kwargs):
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
 
 
-@docval({'name': 'io', 'type': HDMFIO,
-         'doc': 'the HDMFIO object to read from'},
-        {'name': 'namespace', 'type': str,
-         'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
+@docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
         returns="errors in the file", rtype=list,
         is_method=False)
 def validate(**kwargs):
@@ -195,8 +186,8 @@ class NWBHDF5IO(_HDF5IO):
              'default': False},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
-             'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
-             to namespaces and TypeMaps', 'default': None},
+             'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
+             'default': None},
             {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
              'default': None})
