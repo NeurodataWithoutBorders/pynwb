@@ -333,8 +333,7 @@ class Index(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
-            {'name': 'target', 'type': NWBData,
-             'doc': 'the target dataset that this index applies to'})
+            {'name': 'target', 'type': NWBData, 'doc': 'the target dataset that this index applies to'})
     def __init__(self, **kwargs):
         call_docval_func(super(Index, self).__init__, kwargs)
 
@@ -364,8 +363,7 @@ class VectorIndex(Index):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorIndex'},
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a 1D dataset containing indexes that apply to VectorData object'},
-            {'name': 'target', 'type': VectorData,
-             'doc': 'the target dataset that this index applies to'})
+            {'name': 'target', 'type': VectorData, 'doc': 'the target dataset that this index applies to'})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorIndex, self).__init__, kwargs)
         self.target = getargs('target', kwargs)
@@ -736,8 +734,7 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_create(cls, func_name, add_name, container_type):
-        doc = "Create %s and add it to this %s" % \
-                       (cls.__add_article(container_type), cls.__name__)
+        doc = "Create %s and add it to this %s" % (cls.__add_article(container_type), cls.__name__)
 
         @docval(*filter(_not_parent, get_docval(container_type.__init__)), func_name=func_name, doc=doc,
                 returns="the %s object that was created" % cls.__join(container_type), rtype=container_type)
