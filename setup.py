@@ -5,6 +5,20 @@ import re
 
 import versioneer
 
+########## BEGIN: PICKLE TYPE MAP
+import sys
+import os
+import pickle
+
+sys.path.append('src')
+import pynwb
+tm = pynwb.get_type_map()
+
+tm_pkl_path = 'typemap.pkl'
+with open(os.path.join('src', 'pynwb', tm_pkl_path) , 'wb') as f:
+    pickle.dump(tm, f, pickle.HIGHEST_PROTOCOL)
+########## END: PICKLE TYPE MAP
+
 with open('README.rst', 'r') as fp:
     readme = fp.read()
 
@@ -33,7 +47,8 @@ setup_args = {
     'install_requires': reqs,
     'packages': pkgs,
     'package_dir': {'': 'src'},
-    'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
+    #'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
+    'package_data': {'pynwb': [tm_pkl_path]},
     'classifiers': [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.5",
