@@ -182,7 +182,7 @@ class FilteredEphysTest(unittest.TestCase):
 
 
 class FeatureExtractionConstructor(unittest.TestCase):
-    
+
     def test_init(self):
         event_times = [1.9, 3.5]
         table = make_electrode_table()
