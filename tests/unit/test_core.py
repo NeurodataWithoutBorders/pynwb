@@ -311,8 +311,7 @@ class TestPrint(unittest.TestCase):
                           identifier='identifier', session_start_time=datetime.now(tzlocal()))
         ts = TimeSeries('name', [1., 2., 3.] * 1000, timestamps=[1, 2, 3])
         ts2 = TimeSeries('name2', [1, 2, 3] * 1000, timestamps=[1, 2, 3])
-        self.assertEqual(str(ts), """
-name <class 'pynwb.base.TimeSeries'>
+        expected = """name pynwb.base.TimeSeries at 0x%d
 Fields:
   comments: no comments
   conversion: 1.0
@@ -323,13 +322,12 @@ Fields:
   timestamps: [1 2 3]
   timestamps_unit: seconds
 """
-                         )
+        expected %= id(ts)
+        self.assertEqual(str(ts), expected)
         nwbfile.add_acquisition(ts)
         nwbfile.add_acquisition(ts2)
         nwbfile.add_epoch(start_time=1.0, stop_time=10.0, tags=['tag1', 'tag2'])
-        self.assertRegex(str(nwbfile),
-                         r"""
-root <class 'pynwb\.file\.NWBFile'>
+        expected_re = r"""root pynwb\.file\.NWBFile at 0x\d+
 Fields:
   acquisition: {
     name <class 'pynwb\.base\.TimeSeries'>,
@@ -345,7 +343,8 @@ Fields:
   session_description: session_description
   session_start_time: .*
   timestamps_reference_time: .*
-""")
+"""
+        self.assertRegex(str(nwbfile), expected_re)
 
 
 class TestAvailableNamespaces(unittest.TestCase):

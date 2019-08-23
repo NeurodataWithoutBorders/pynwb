@@ -17,13 +17,20 @@ def _not_parent(arg):
 def prepend_string(string, prepend='    '):
     return prepend + prepend.join(string.splitlines(True))
 
+class NWBMixin(Container):
 
-class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
-    '''The base class to any NWB types.
+    _data_type_attr = 'neurodata_type'
 
-    The purpose of this class is to provide a mechanism for representing hierarchical
-    relationships in neurodata.
-    '''
+    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the data_type to search for', 'default': None})
+    def get_ancestor(self, **kwargs):
+        """
+        Traverse parent hierarchy and return first instance of the specified data_type
+        """
+        neurodata_type = getargs('neurodata_type', kwargs)
+        return super().get_ancestor(data_type=neurodata_type)
+
+@register_class('NWBContainer', CORE_NAMESPACE)
+class NWBContainer(NWBMixin, Container):
 
     _fieldsname = '__nwbfields__'
 
@@ -31,226 +38,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
     def __init__(self, **kwargs):
-        call_docval_func(super(NWBBaseType, self).__init__, kwargs)
-        self.__fields = dict()
-
-    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to search for', 'default': None})
-    def get_ancestor(self, **kwargs):
-        """
-        Traverse parent hierarchy and return first instance of the specified neurodata_type
-        """
-        neurodata_type = getargs('neurodata_type', kwargs)
-        if neurodata_type is None:
-            return self.parent
-        p = self.parent
-        while p is not None:
-            if p.neurodata_type == neurodata_type:
-                return p
-            p = p.parent
-        return None
-
-    @property
-    def fields(self):
-        return self.__fields
-
-    @staticmethod
-    def _transform_arg(nwbfield):
-        tmp = nwbfield
-        if isinstance(tmp, dict):
-            if 'name' not in tmp:
-                raise ValueError("must specify 'name' if using dict in __nwbfields__")
-        else:
-            tmp = {'name': tmp}
-        return tmp
-
-    @classmethod
-    def _getter(cls, nwbfield):
-        doc = nwbfield.get('doc')
-        name = nwbfield['name']
-
-        def nwbbt_getter(self):
-            return self.fields.get(name)
-
-        setattr(nwbbt_getter, '__doc__', doc)
-        return nwbbt_getter
-
-    @classmethod
-    def _setter(cls, nwbfield):
-        name = nwbfield['name']
-
-        if not nwbfield.get('settable', True):
-            return None
-
-        def nwbbt_setter(self, val):
-            if val is None:
-                return
-            if name in self.fields:
-                msg = "can't set attribute '%s' -- already set" % name
-                raise AttributeError(msg)
-            self.fields[name] = val
-
-        return nwbbt_setter
-
-    @ExtenderMeta.pre_init
-    def __gather_nwbfields(cls, name, bases, classdict):
-        '''
-        This classmethod will be called during class declaration in the metaclass to automatically
-        create setters and getters for NWB fields that need to be exported
-        '''
-        if not isinstance(cls.__nwbfields__, tuple):
-            raise TypeError("'__nwbfields__' must be of type tuple")
-
-        if len(bases) and 'NWBContainer' in globals() and issubclass(bases[-1], NWBContainer) \
-                and bases[-1].__nwbfields__ is not cls.__nwbfields__:
-            new_nwbfields = list(cls.__nwbfields__)
-            new_nwbfields[0:0] = bases[-1].__nwbfields__
-            cls.__nwbfields__ = tuple(new_nwbfields)
-        new_nwbfields = list()
-        docs = {dv['name']: dv['doc'] for dv in get_docval(cls.__init__)}
-        for f in cls.__nwbfields__:
-            pconf = cls._transform_arg(f)
-            pname = pconf['name']
-            pconf.setdefault('doc', docs.get(pname))
-            if not hasattr(cls, pname):
-                setattr(cls, pname, property(cls._getter(pconf), cls._setter(pconf)))
-            new_nwbfields.append(pname)
-        cls.__nwbfields__ = tuple(new_nwbfields)
-
-    def __repr__(self):
-        template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
-        for k in sorted(self.fields):  # sorted to enable tests
-            v = self.fields[k]
-            if isinstance(v, DataIO) or not hasattr(v, '__len__') or len(v) > 0:
-                template += "  {}: {}\n".format(k, self.__smart_str(v, 1))
-        return template
-
-    @staticmethod
-    def __smart_str(v, num_indent):
-        """
-        Print compact string representation of data.
-
-        If v is a list, try to print it using numpy. This will condense the string
-        representation of datasets with many elements. If that doesn't work, just print the list.
-
-        If v is a dictionary, print the name and type of each element
-
-        If v is a set, print it sorted
-
-        If v is a neurodata_type, print the name of type
-
-        Otherwise, use the built-in str()
-        Parameters
-        ----------
-        v
-
-        Returns
-        -------
-        str
-
-        """
-
-        if isinstance(v, list) or isinstance(v, tuple):
-            if len(v) and isinstance(v[0], NWBBaseType):
-                return NWBBaseType.__smart_str_list(v, num_indent, '(')
-            try:
-                return str(np.asarray(v))
-            except ValueError:
-                return NWBBaseType.__smart_str_list(v, num_indent, '(')
-        elif isinstance(v, dict):
-            return NWBBaseType.__smart_str_dict(v, num_indent)
-        elif isinstance(v, set):
-            return NWBBaseType.__smart_str_list(sorted(list(v)), num_indent, '{')
-        elif isinstance(v, NWBBaseType):
-            return "{} {}".format(getattr(v, 'name'), type(v))
-        else:
-            return str(v)
-
-    @staticmethod
-    def __smart_str_list(l, num_indent, left_br):
-        if left_br == '(':
-            right_br = ')'
-        if left_br == '{':
-            right_br = '}'
-        if len(l) == 0:
-            return left_br + ' ' + right_br
-        indent = num_indent * 2 * ' '
-        indent_in = (num_indent + 1) * 2 * ' '
-        out = left_br
-        for v in l[:-1]:
-            out += '\n' + indent_in + NWBBaseType.__smart_str(v, num_indent + 1) + ','
-        if l:
-            out += '\n' + indent_in + NWBBaseType.__smart_str(l[-1], num_indent + 1)
-        out += '\n' + indent + right_br
-        return out
-
-    @staticmethod
-    def __smart_str_dict(d, num_indent):
-        left_br = '{'
-        right_br = '}'
-        if len(d) == 0:
-            return left_br + ' ' + right_br
-        indent = num_indent * 2 * ' '
-        indent_in = (num_indent + 1) * 2 * ' '
-        out = left_br
-        keys = sorted(list(d.keys()))
-        for k in keys[:-1]:
-            out += '\n' + indent_in + NWBBaseType.__smart_str(k, num_indent + 1) + ' ' + str(type(d[k])) + ','
-        if keys:
-            out += '\n' + indent_in + NWBBaseType.__smart_str(keys[-1], num_indent + 1) + ' ' + str(type(d[keys[-1]]))
-        out += '\n' + indent + right_br
-        return out
-
-
-@register_class('NWBContainer', CORE_NAMESPACE)
-class NWBContainer(NWBBaseType, Container):
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
-    def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
-
-    __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc', 'settable'}
-
-    @classmethod
-    def _setter(cls, nwbfield):
-        super_setter = NWBBaseType._setter(nwbfield)
-        ret = [super_setter]
-        if isinstance(nwbfield, dict):
-            for k in nwbfield.keys():
-                if k not in cls.__pconf_allowed_keys:
-                    msg = "Unrecognized key '%s' in __nwbfield__ config '%s' on %s" %\
-                           (k, nwbfield['name'], cls.__name__)
-                    raise ValueError(msg)
-            if nwbfield.get('required_name', None) is not None:
-                name = nwbfield['required_name']
-                idx1 = len(ret) - 1
-
-                def nwbdi_setter(self, val):
-                    if val is not None and val.name != name:
-                        msg = "%s field on %s must be named '%s'" % (nwbfield['name'], self.__class__.__name__, name)
-                        raise ValueError(msg)
-                    ret[idx1](self, val)
-
-                ret.append(nwbdi_setter)
-            if nwbfield.get('child', False):
-                idx2 = len(ret) - 1
-
-                def nwbdi_setter(self, val):
-                    ret[idx2](self, val)
-                    if val is not None:
-                        if isinstance(val, (tuple, list)):
-                            pass
-                        elif isinstance(val, dict):
-                            val = val.values()
-                        else:
-                            val = [val]
-                        for v in val:
-                            if not isinstance(v.parent, Container):
-                                v.parent = self
-                            # else, the ObjectMapper will create a link from self (parent) to v (child with existing
-                            # parent)
-
-                ret.append(nwbdi_setter)
-        return ret[-1]
 
     def _to_dict(self, arg, label="NULL"):
         return_dict = LabelledDict(label)
@@ -273,7 +61,7 @@ class NWBDataInterface(NWBContainer):
 
 
 @register_class('NWBData', CORE_NAMESPACE)
-class NWBData(NWBBaseType, Data):
+class NWBData(NWBMixin, Data):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'})
