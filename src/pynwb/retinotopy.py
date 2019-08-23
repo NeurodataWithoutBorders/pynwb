@@ -23,8 +23,8 @@ class AImage(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this axis map'},
             {'name': 'data', 'type': Iterable, 'doc': 'Data field.'},
             {'name': 'bits_per_pixel', 'type': int,
-             'doc': 'Number of bits used to represent each value. This is necessary to determine maximum \
-             (white) pixel value.'},
+             'doc': 'Number of bits used to represent each value. This is necessary to determine maximum '
+                    '(white) pixel value.'},
             {'name': 'dimension', 'type': Iterable, 'doc': 'Number of rows and columns in the image.'},
             {'name': 'format', 'type': Iterable, 'doc': 'Format of image. Right now only "raw" supported.'},
             {'name': 'field_of_view', 'type': Iterable, 'doc': 'Size of viewing area, in meters.'},
@@ -90,19 +90,19 @@ class ImagingRetinotopy(NWBDataInterface):
             {'name': 'axis_1_phase_map', 'type': AxisMap,
              'doc': 'Phase response to stimulus on the first measured axis.'},
             {'name': 'axis_1_power_map', 'type': AxisMap,
-             'doc': 'Power response on the first measured axis. Response is scaled so 0.0 is no power in \
-             the response and 1.0 is maximum relative power.'},
+             'doc': 'Power response on the first measured axis. Response is scaled so 0.0 is no power in '
+                    'the response and 1.0 is maximum relative power.'},
             {'name': 'axis_2_phase_map', 'type': AxisMap,
              'doc': 'Phase response to stimulus on the second measured axis.'},
             {'name': 'axis_2_power_map', 'type': AxisMap,
-             'doc': 'Power response on the second measured axis. Response is scaled so 0.0 is no \
-             power in the response and 1.0 is maximum relative power.'},
+             'doc': 'Power response on the second measured axis. Response is scaled so 0.0 is no '
+                     'power in the response and 1.0 is maximum relative power.'},
             {'name': 'axis_descriptions', 'type': Iterable,
-             'doc': 'Two-element array describing the contents of the two response axis fields. \
-             Description should be something like ["altitude", "azimuth"] or ["radius", "theta"].'},
+             'doc': 'Two-element array describing the contents of the two response axis fields. '
+                    'Description should be something like ["altitude", "azimuth"] or ["radius", "theta"].'},
             {'name': 'focal_depth_image', 'type': AImage,
-             'doc': 'Gray-scale image taken with same settings/parameters (e.g., focal depth, wavelength) \
-             as data collection. Array format: [rows][columns].'},
+             'doc': 'Gray-scale image taken with same settings/parameters (e.g., focal depth, wavelength) '
+                    'as data collection. Array format: [rows][columns].'},
             {'name': 'vasculature_image', 'type': AImage,
              'doc': 'Gray-scale anatomical image of cortical surface. Array structure: [rows][columns].'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ImagingRetinotopy'})
