@@ -6,7 +6,7 @@ from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Cl
                           ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction, ElectrodeGroup
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable
-from pynwb.core import DynamicTableRegion
+from hdmf.common import DynamicTableRegion
 
 
 def make_electrode_table():

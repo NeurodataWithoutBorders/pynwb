@@ -9,7 +9,7 @@ from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import DynamicTable
+from hdmf.common import DynamicTable
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)

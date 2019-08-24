@@ -1,4 +1,4 @@
-from pynwb.core import DynamicTable
+from hdmf.common import DynamicTable
 import pynwb
 
 from . import base

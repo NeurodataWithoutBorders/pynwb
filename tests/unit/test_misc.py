@@ -2,10 +2,11 @@ import unittest
 
 import numpy as np
 
+from hdmf.common import DynamicTable, VectorData
+
 from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, \
     DecompositionSeries
-from pynwb.file import TimeSeries, DynamicTable
-from pynwb.core import VectorData
+from pynwb.file import TimeSeries
 from pynwb.device import Device
 from pynwb.ecephys import ElectrodeGroup
 

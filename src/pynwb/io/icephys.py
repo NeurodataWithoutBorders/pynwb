@@ -1,7 +1,7 @@
 from .. import register_map
 
 from pynwb.icephys import SweepTable, VoltageClampSeries
-from .core import DynamicTableMap
+from hdmf.common.io.table import DynamicTableMap
 from .base import TimeSeriesMap
 
 

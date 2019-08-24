@@ -1,7 +1,7 @@
 from .. import register_map
 
 from pynwb.epoch import TimeIntervals
-from .core import DynamicTableMap
+from hdmf.common.io.table import DynamicTableMap
 
 
 @register_map(TimeIntervals)
