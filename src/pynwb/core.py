@@ -5,6 +5,7 @@ import pandas as pd
 from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
 from hdmf.data_utils import DataIO
 from hdmf import Container, Data, DataRegion, get_region_slicer
+from hdmf.container import AbstractContainer
 
 from . import CORE_NAMESPACE, register_class
 from six import with_metaclass
@@ -17,7 +18,7 @@ def _not_parent(arg):
 def prepend_string(string, prepend='    '):
     return prepend + prepend.join(string.splitlines(True))
 
-class NWBMixin(Container):
+class NWBMixin(AbstractContainer):
 
     _data_type_attr = 'neurodata_type'
 

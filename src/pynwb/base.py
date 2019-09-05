@@ -244,7 +244,7 @@ class Image(NWBData):
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None}
             )
     def __init__(self, **kwargs):
-        super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
+        call_docval_func(super(Image, self).__init__, kwargs)
         self.resolution = kwargs['resolution']
         self.description = kwargs['description']
 
