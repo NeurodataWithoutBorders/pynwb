@@ -10,6 +10,7 @@ from . import CORE_NAMESPACE
 def __swap_inc_def(cls):
     args = get_docval(cls.__init__)
     clsname = 'NWB%s' % cls.__name__
+    #clsname = cls.__name__
     ret = list()
     for arg in args:
         if arg['name'] == 'data_type_def':
@@ -94,6 +95,26 @@ class BaseStorageOverride(object):
     def neurodata_type_def(self):
         return self.data_type_def
 
+    @classmethod
+    def build_const_args(cls, spec_dict):
+        spec_dict = copy(spec_dict)
+        proxy = super(BaseStorageOverride, cls)
+        if proxy.inc_key() in spec_dict:
+            spec_dict[cls.inc_key()] = spec_dict.pop(proxy.inc_key())
+        if proxy.def_key() in spec_dict:
+            spec_dict[cls.def_key()] = spec_dict.pop(proxy.def_key())
+        ret = proxy.build_const_args(spec_dict)
+        return ret
+
+    @classmethod
+    def _translate_kwargs(cls, kwargs):
+        """Swap neurodata_type_def and neurodata_type_inc for data_type_def and data_type_inc, respectively"""
+        proxy = super(BaseStorageOverride, cls)
+        kwargs[proxy.def_key()] = kwargs.pop(cls.def_key())
+        kwargs[proxy.inc_key()] = kwargs.pop(cls.inc_key())
+        args = [kwargs.pop(x['name']) for x in get_docval(proxy.__init__) if 'default' not in x]
+        return args, kwargs
+
 
 _dtype_docval = __swap_inc_def(DtypeSpec)
 
@@ -112,16 +133,9 @@ _dataset_docval = __swap_inc_def(DatasetSpec)
 class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
     ''' The Spec class to use for NWB specifications '''
 
-    @staticmethod
-    def __translate_kwargs(kwargs):
-        kwargs[DatasetSpec.def_key()] = kwargs.pop(BaseStorageOverride.def_key())
-        kwargs[DatasetSpec.inc_key()] = kwargs.pop(BaseStorageOverride.inc_key())
-        args = [kwargs.pop(x['name']) for x in get_docval(DatasetSpec.__init__) if 'default' not in x]
-        return args, kwargs
-
     @docval(*_dataset_docval)
     def __init__(self, **kwargs):
-        args, kwargs = self.__translate_kwargs(kwargs)
+        args, kwargs = self._translate_kwargs(kwargs)
         super(NWBDatasetSpec, self).__init__(*args, **kwargs)
 
 
@@ -130,18 +144,10 @@ _group_docval = __swap_inc_def(GroupSpec)
 
 class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     ''' The Spec class to use for NWB specifications '''
-    # TODO: add unit tests for this
-
-    @staticmethod
-    def __translate_kwargs(kwargs):
-        kwargs[GroupSpec.def_key()] = kwargs.pop(BaseStorageOverride.def_key())
-        kwargs[GroupSpec.inc_key()] = kwargs.pop(BaseStorageOverride.inc_key())
-        args = [kwargs.pop(x['name']) for x in get_docval(GroupSpec.__init__) if 'default' not in x]
-        return args, kwargs
 
     @docval(*_group_docval)
     def __init__(self, **kwargs):
-        args, kwargs = self.__translate_kwargs(kwargs)
+        args, kwargs = self._translate_kwargs(kwargs)
         super(NWBGroupSpec, self).__init__(*args, **kwargs)
 
     @classmethod

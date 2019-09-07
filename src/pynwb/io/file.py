@@ -14,7 +14,9 @@ class NWBFileMap(ObjectMapper):
         acq_spec = self.spec.get_group('acquisition')
         self.unmap(acq_spec)
         raw_ts_spec = acq_spec.get_neurodata_type('NWBDataInterface')
+        table_spec = acq_spec.get_neurodata_type('DynamicTable')
         self.map_spec('acquisition', raw_ts_spec)
+        self.map_spec('acquisition', table_spec)
         self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('NWBContainer'))
 
         stimulus_spec = self.spec.get_group('stimulus')

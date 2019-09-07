@@ -88,7 +88,7 @@ class NWBFile(MultiContainerInterface):
         {
             'attr': 'acquisition',
             'add': '_add_acquisition_internal',
-            'type': NWBDataInterface,
+            'type': (NWBDataInterface, DynamicTable),
             'get': 'get_acquisition'
         },
         {
@@ -100,7 +100,7 @@ class NWBFile(MultiContainerInterface):
         {
             'attr': 'scratch',
             'add': '_add_scratch',
-            'type': (NWBContainer, ScratchData),
+            'type': (DynamicTable, NWBContainer, ScratchData),
             'get': '_get_scratch'
         },
         {
@@ -592,7 +592,7 @@ class NWBFile(MultiContainerInterface):
                 self._check_sweep_table()
                 self.sweep_table.add_entry(nwbdata)
 
-    @docval({'name': 'nwbdata', 'type': NWBDataInterface})
+    @docval({'name': 'nwbdata', 'type': (NWBDataInterface, DynamicTable)})
     def add_acquisition(self, nwbdata):
         self._add_acquisition_internal(nwbdata)
         self._update_sweep_table(nwbdata)
@@ -607,7 +607,7 @@ class NWBFile(MultiContainerInterface):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
 
-    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, NWBContainer, ScratchData),
+    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
              'help': 'the data to add to the scratch space'},
             {'name': 'name', 'type': str,
              'help': 'the name of the data. Only used when passing in numpy.ndarray, list, or tuple',

@@ -54,7 +54,7 @@ Fields:
 
 class TestAvailableNamespaces(unittest.TestCase):
     def test_available_namespaces(self):
-        self.assertEqual(available_namespaces(), ('core', ))
+        self.assertEqual(available_namespaces(), ('hdmf-common', 'core'))
 
 
 class TestLabelledDict(unittest.TestCase):

@@ -42,7 +42,12 @@ __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 from hdmf.build import TypeMap as TypeMap  # noqa: E402
 
+import hdmf.common
+hdmf_typemap = hdmf.common.get_type_map()
+__NS_CATALOG.merge(hdmf_typemap.namespace_catalog)
+
 __TYPE_MAP = TypeMap(__NS_CATALOG)
+__TYPE_MAP.merge(hdmf_typemap)
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
