@@ -63,7 +63,7 @@ class TestHDF5Writer(unittest.TestCase):
             attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        if os.path.exists(self.path):
+        if os.path.exists(self.path) and os.getenv('CLEAN_NWB', True) not in ('False', 'false', 'FALSE', '0', 0, False):
             os.remove(self.path)
 
     def test_nwbio(self):
