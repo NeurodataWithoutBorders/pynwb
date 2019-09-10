@@ -20,6 +20,7 @@ import numpy as np
 global CLEAN_NWB
 CLEAN_NWB = os.getenv('CLEAN_NWB', True) not in ('False', 'false', 'FALSE', '0', 0, False)
 
+
 class TestHDF5Writer(unittest.TestCase):
 
     _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec', 'test_write_no_cache_spec')

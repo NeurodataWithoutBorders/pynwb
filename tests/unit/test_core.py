@@ -1,12 +1,9 @@
 from datetime import datetime
 
-import numpy as np
-import pandas as pd
-from pandas.util.testing import assert_frame_equal
 import unittest2 as unittest
 from dateutil.tz import tzlocal
 from pynwb import NWBFile, TimeSeries, available_namespaces
-from pynwb.core import NWBTable, LabelledDict
+from pynwb.core import LabelledDict
 
 
 class TestPrint(unittest.TestCase):

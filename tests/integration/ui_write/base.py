@@ -6,7 +6,7 @@ import numpy as np
 import h5py
 import numpy.testing as npt
 
-from pynwb import NWBContainer, get_manager, NWBFile, NWBData, NWBHDF5IO, validate as pynwb_validate
+from pynwb import get_manager, NWBFile, NWBHDF5IO, validate as pynwb_validate
 from hdmf.backends.hdf5 import HDF5IO
 
 from hdmf.container import Data, Container

@@ -12,12 +12,14 @@ from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.validate import ValidatorMap
 from hdmf.build import BuildManager, TypeMap
+import hdmf.common
 
 
 CORE_NAMESPACE = 'core'
 __core_ns_file_name = 'nwb.namespace.yaml'
 
 from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
+
 
 def __get_resources():
     from pkg_resources import resource_filename
@@ -37,7 +39,6 @@ global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-import hdmf.common
 hdmf_typemap = hdmf.common.get_type_map()
 __NS_CATALOG.merge(hdmf_typemap.namespace_catalog)
 

@@ -47,7 +47,8 @@ class ProcessingModule(MultiContainerInterface):
     def __getitem__(self, arg):
         return self.get(arg)
 
-    @docval({'name': 'container', 'type': (NWBDataInterface, DynamicTable), 'doc': 'the NWBDataInterface to add to this Module'})
+    @docval({'name': 'container', 'type': (NWBDataInterface, DynamicTable),
+             'doc': 'the NWBDataInterface to add to this Module'})
     def add_container(self, **kwargs):
         '''
         Add an NWBContainer to this ProcessingModule
@@ -65,7 +66,8 @@ class ProcessingModule(MultiContainerInterface):
         warn(PendingDeprecationWarning('get_container will be replaced by get'))
         return self.get(container_name)
 
-    @docval({'name': 'NWBDataInterface', 'type': (NWBDataInterface, DynamicTable), 'doc': 'the NWBDataInterface to add to this Module'})
+    @docval({'name': 'NWBDataInterface', 'type': (NWBDataInterface, DynamicTable),
+             'doc': 'the NWBDataInterface to add to this Module'})
     def add_data_interface(self, **kwargs):
         NWBDataInterface = getargs('NWBDataInterface', kwargs)
         warn(PendingDeprecationWarning('add_data_interface will be replaced by add'))

@@ -1,14 +1,12 @@
-from h5py import RegionReference, Dataset
+from h5py import RegionReference
 import numpy as np
 import pandas as pd
 
-from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
-from hdmf.data_utils import DataIO
+from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from hdmf import Container, Data, DataRegion, get_region_slicer
 from hdmf.container import AbstractContainer
 
 from . import CORE_NAMESPACE, register_class
-from six import with_metaclass
 
 
 def _not_parent(arg):
@@ -17,6 +15,7 @@ def _not_parent(arg):
 
 def prepend_string(string, prepend='    '):
     return prepend + prepend.join(string.splitlines(True))
+
 
 class NWBMixin(AbstractContainer):
 
@@ -29,6 +28,7 @@ class NWBMixin(AbstractContainer):
         """
         neurodata_type = getargs('neurodata_type', kwargs)
         return super().get_ancestor(data_type=neurodata_type)
+
 
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBMixin, Container):

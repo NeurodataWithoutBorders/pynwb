@@ -10,7 +10,6 @@ from . import CORE_NAMESPACE
 def __swap_inc_def(cls):
     args = get_docval(cls.__init__)
     clsname = 'NWB%s' % cls.__name__
-    #clsname = cls.__name__
     ret = list()
     for arg in args:
         if arg['name'] == 'data_type_def':

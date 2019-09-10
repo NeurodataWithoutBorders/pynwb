@@ -1,3 +1,5 @@
+# flake8: noqa: F401
+
 from hdmf.utils import docval, getargs
 from hdmf.build import ObjectMapper, RegionBuilder, BuildManager
 from hdmf.spec import Spec
