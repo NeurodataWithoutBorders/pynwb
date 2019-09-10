@@ -17,6 +17,8 @@ from pynwb.ecephys import ElectricalSeries, LFP
 
 import numpy as np
 
+global CLEAN_NWB
+CLEAN_NWB = os.getenv('CLEAN_NWB', True) not in ('False', 'false', 'FALSE', '0', 0, False)
 
 class TestHDF5Writer(unittest.TestCase):
 
@@ -63,7 +65,7 @@ class TestHDF5Writer(unittest.TestCase):
             attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        if os.path.exists(self.path) and os.getenv('CLEAN_NWB', True) not in ('False', 'false', 'FALSE', '0', 0, False):
+        if os.path.exists(self.path) and CLEAN_NWB:
             os.remove(self.path)
 
     def test_nwbio(self):
@@ -101,7 +103,7 @@ class TestHDF5Writer(unittest.TestCase):
             self.assertIn('specifications', f)
 
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-        HDF5IO.load_namespaces(ns_catalog, self.path, namespaces=['core'])
+        HDF5IO.load_namespaces(ns_catalog, self.path)
         original_ns = self.manager.namespace_catalog.get_namespace('core')
         cached_ns = ns_catalog.get_namespace('core')
         self.maxDiff = None
@@ -172,7 +174,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
             attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        if os.path.exists(self.path):
+        if os.path.exists(self.path) and CLEAN_NWB:
             os.remove(self.path)
 
     def test_nwbio(self):
@@ -214,7 +216,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
             self.assertIn('specifications', f)
 
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-        HDF5IO.load_namespaces(ns_catalog, self.path, namespaces=['core'])
+        HDF5IO.load_namespaces(ns_catalog, self.path)
         original_ns = self.manager.namespace_catalog.get_namespace('core')
         cached_ns = ns_catalog.get_namespace('core')
         self.maxDiff = None
@@ -240,7 +242,7 @@ class TestAppend(unittest.TestCase):
         self.path = "test_append.nwb"
 
     def tearDown(self):
-        if os.path.exists(self.path):
+        if os.path.exists(self.path) and CLEAN_NWB:
             os.remove(self.path)
 
     def test_append(self):
@@ -295,7 +297,7 @@ class TestH5DataIO(unittest.TestCase):
         self.path = "test_pynwb_io_hdf5_h5dataIO.h5"
 
     def tearDown(self):
-        if(os.path.exists(self.path)):
+        if(os.path.exists(self.path)) and CLEAN_NWB:
             os.remove(self.path)
 
     def test_gzip_timestamps(self):
