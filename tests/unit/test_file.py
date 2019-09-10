@@ -189,10 +189,9 @@ class NWBFileTest(unittest.TestCase):
             self.nwbfile.get_acquisition("TEST_TS")
 
     def test_set_electrode_table(self):
-        table = ElectrodeTable()  # noqa: F405
-        dev1 = self.nwbfile.create_device('dev1')  # noqa: F405
-        group = self.nwbfile.create_electrode_group('tetrode1',
-                                                    'tetrode description', 'tetrode location', dev1)
+        table = ElectrodeTable()
+        dev1 = self.nwbfile.create_device('dev1')
+        group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
         table.add_row(x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=group,
                       group_name='tetrode1')
         table.add_row(x=1.0, y=2.0, z=3.0, imp=-2.0, location='CA1', filtering='none', group=group,
@@ -246,11 +245,9 @@ class NWBFileTest(unittest.TestCase):
                                                timeseries=ts, tags=('hi', 'there'))
 
     def test_add_electrode(self):
-        dev1 = self.nwbfile.create_device('dev1')  # noqa: F405
-        group = self.nwbfile.create_electrode_group('tetrode1',
-                                                    'tetrode description', 'tetrode location', dev1)
-        self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1',
-                                   'none', group=group, id=1)
+        dev1 = self.nwbfile.create_device('dev1')
+        group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
+        self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1', 'none', group=group, id=1)
         self.assertEqual(self.nwbfile.electrodes[0][0], 1)
         self.assertEqual(self.nwbfile.electrodes[0][1], 1.0)
         self.assertEqual(self.nwbfile.electrodes[0][2], 2.0)
@@ -261,10 +258,8 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.electrodes[0][7], group)
 
     def test_all_children(self):
-        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
-                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
-                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.nwbfile.add_acquisition(ts1)
         self.nwbfile.add_acquisition(ts2)
         name = 'example_electrode_group'
@@ -286,10 +281,8 @@ class NWBFileTest(unittest.TestCase):
                     source_script_file_name='nofilename')
 
     def test_get_neurodata_type(self):
-        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
-                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
-                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.nwbfile.add_acquisition(ts1)
         self.nwbfile.add_acquisition(ts2)
         p1 = ts1.get_ancestor(neurodata_type='NWBFile')
@@ -320,8 +313,7 @@ Fields:
         self.nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'b', 'b', elecgrp)
         elec_region = self.nwbfile.create_electrode_table_region([1], 'name')
 
-        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
-                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         ts2 = ElectricalSeries('test_ts2', [0, 1, 2, 3, 4, 5],
                                electrodes=elec_region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.nwbfile.add_acquisition(ts1)

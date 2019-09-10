@@ -104,25 +104,23 @@ class TimeSeries(NWBDataInterface):
              'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
             {'name': 'resolution', 'type': (str, 'float'),
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': -1.0},
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': -1.0},
             {'name': 'conversion', 'type': (str, 'float'),
-             'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
-             'default': 1.0},
+             'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': 1.0},
 
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
             {'name': 'starting_time', 'type': 'float', 'doc': 'The timestamp of the first sample', 'default': None},
             {'name': 'rate', 'type': 'float', 'doc': 'Sampling rate in Hz', 'default': None},
 
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None})
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset',
+             'default': 'no comments'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset',
+             'default': 'no description'},
+            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data',
+             'default': None},
+            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value',
+             'default': None})
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
@@ -243,8 +241,7 @@ class Image(NWBData):
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
             {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None}
-            )
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(Image, self).__init__, kwargs)
         self.resolution = kwargs['resolution']
@@ -266,8 +263,7 @@ class Images(MultiContainerInterface):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of images',
-             'default': 'no description'})
+            {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'})
     def __init__(self, **kwargs):
         name, description, images = popargs('name', 'description', 'images', kwargs)
         super(Images, self).__init__(name, **kwargs)

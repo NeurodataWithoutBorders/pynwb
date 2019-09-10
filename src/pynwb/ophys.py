@@ -68,8 +68,9 @@ class ImagingPlane(NWBContainer):
             {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).',
              'default': 'meters'},
             {'name': 'reference_frame', 'type': str,
-             'doc': 'Describes position and reference frame of manifold based on position of first element \
-                     in manifold.', 'default': None})
+             'doc': 'Describes position and reference frame of manifold based on position of first element '
+                    'in manifold.',
+             'default': None})
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, \
             indicator, location, manifold, conversion, unit, reference_frame = popargs(
@@ -112,8 +113,8 @@ class TwoPhotonSeries(ImageSeries):
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
             {'name': 'pmt_gain', 'type': 'float', 'doc': 'Photomultiplier gain.', 'default': None},
             {'name': 'scan_line_rate', 'type': 'float',
-             'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept \
-             here as it is useful information for analysis, and so good to be stored w/ the actual data.',
+             'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept '
+                    'here as it is useful information for analysis, and so good to be stored w/ the actual data.',
              'default': None},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
@@ -148,8 +149,8 @@ class CorrectedImageStack(NWBDataInterface):
             {'name': 'original', 'type': ImageSeries,
              'doc': 'Link to image series that is being registered.'},
             {'name': 'xy_translation', 'type': TimeSeries,
-             'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates,\
-             for example, to align each frame to a reference image.'})
+             'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates, '
+                    'for example, to align each frame to a reference image.'})
     def __init__(self, **kwargs):
         corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
         super(CorrectedImageStack, self).__init__(**kwargs)

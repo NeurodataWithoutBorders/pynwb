@@ -105,14 +105,14 @@ class EventDetection(NWBDataInterface):
                      'times')
 
     @docval({'name': 'detection_method', 'type': str,
-             'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, \
-             as well as relevant values.'},
+             'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, '
+             'as well as relevant values.'},
             {'name': 'source_electricalseries', 'type': ElectricalSeries, 'doc': 'The source electrophysiology data'},
             {'name': 'source_idx', 'type': ('array_data', 'data'),
-             'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding \
-             to time of event. Module description should define what is meant by time of event \
-             (e.g., .25msec before action potential peak, zero-crossing time, etc). \
-             The index points to each event from the raw data'},
+             'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding '
+                    'to time of event. Module description should define what is meant by time of event '
+                    '(e.g., .25msec before action potential peak, zero-crossing time, etc). '
+                    'The index points to each event from the raw data'},
             {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'})
     def __init__(self, **kwargs):
@@ -158,12 +158,12 @@ class Clustering(NWBDataInterface):
     )
 
     @docval({'name': 'description', 'type': str,
-             'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, \
-             clusters curated using Klusters, etc).'},
+             'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, '
+                    'clusters curated using Klusters, etc).'},
             {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.', 'shape': (None, )},
             {'name': 'peak_over_rms', 'type': Iterable, 'shape': (None, ),
-             'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster\
-             (provides a basic clustering metric).'},
+             'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster'
+                    '(provides a basic clustering metric).'},
             {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.',
              'shape': (None,)},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
@@ -202,7 +202,7 @@ class ClusterWaveforms(NWBDataInterface):
             {'name': 'waveform_mean', 'type': Iterable, 'shape': (None, None),
              'doc': 'the mean waveform for each cluster'},
             {'name': 'waveform_sd', 'type': Iterable, 'shape': (None, None),
-            'doc': 'the standard deviations of waveforms for each cluster'},
+             'doc': 'the standard deviations of waveforms for each cluster'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ClusterWaveforms'})
     def __init__(self, **kwargs):
         import warnings

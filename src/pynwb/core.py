@@ -132,7 +132,7 @@ class NWBTable(NWBData):
     The class attribute __defaultname__ can also be set to specify a default name
     for the table class. If \_\_defaultname\_\_ is not specified, then ``name`` will
     need to be specified when the class is instantiated.
-    '''  # noqa: W605
+    '''
 
     @ExtenderMeta.pre_init
     def __build_table_class(cls, name, bases, classdict):
@@ -447,8 +447,7 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_create(cls, func_name, add_name, container_type):
-        doc = "Create %s and add it to this %s" % \
-                       (cls.__add_article(container_type), cls.__name__)
+        doc = "Create %s and add it to this %s" % (cls.__add_article(container_type), cls.__name__)
 
         @docval(*filter(_not_parent, get_docval(container_type.__init__)), func_name=func_name, doc=doc,
                 returns="the %s object that was created" % cls.__join(container_type), rtype=container_type)
