@@ -1,4 +1,3 @@
-import numpy as np
 import warnings
 try:
     from collections.abc import Iterable  # Python 3
