@@ -1,4 +1,3 @@
-import numpy as np
 import warnings
 try:
     from collections.abc import Iterable  # Python 3
@@ -136,7 +135,7 @@ class OpticalSeries(ImageSeries):
     @docval(*get_docval(ImageSeries.__init__, 'name', 'data'),  # required
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
-            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
+            {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'orientation', 'type': str,  # required
              'doc': 'Description of image relative to some reference frame (e.g., which way is up). '
