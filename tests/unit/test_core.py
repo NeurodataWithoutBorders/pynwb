@@ -6,7 +6,7 @@ from pandas.util.testing import assert_frame_equal
 import unittest2 as unittest
 from dateutil.tz import tzlocal
 from pynwb import NWBFile, TimeSeries, available_namespaces
-from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable, DynamicTableRegion
+from pynwb.core import DynamicTable, VectorData, ElementIdentifiers, NWBTable, DynamicTableRegion, LabelledDict
 
 
 class TestDynamicTable(unittest.TestCase):
@@ -158,7 +158,7 @@ class TestDynamicTable(unittest.TestCase):
 
         module_behavior = nwbfile.create_processing_module('a', 'b')
 
-        module_behavior.add_container(table)
+        module_behavior.add(table)
 
     def test_pandas_roundtrip(self):
         df = pd.DataFrame({
@@ -297,6 +297,12 @@ class TestNWBTable(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.cls.from_dataframe(df=df, name='test_table')
 
+    def test_auto_ragged_array(self):
+
+        df = pd.DataFrame({'a': [[1], [1, 2]]})
+        df2 = DynamicTable.from_dataframe(df, name='test').to_dataframe()
+        df.equals(df2)
+
 
 class TestPrint(unittest.TestCase):
 
@@ -313,36 +319,53 @@ Fields:
   data: [1. 2. 3. ... 1. 2. 3.]
   description: no description
   interval: 1
-  num_samples: 3000
-  resolution: 0.0
+  resolution: -1.0
   timestamps: [1 2 3]
-  timestamps_unit: Seconds
+  timestamps_unit: seconds
 """
                          )
         nwbfile.add_acquisition(ts)
         nwbfile.add_acquisition(ts2)
         nwbfile.add_epoch(start_time=1.0, stop_time=10.0, tags=['tag1', 'tag2'])
-        self.assertEqual(str(nwbfile),
-                         """
-root <class 'pynwb.file.NWBFile'>
+        self.assertRegex(str(nwbfile),
+                         r"""
+root <class 'pynwb\.file\.NWBFile'>
 Fields:
-  acquisition: { name <class 'pynwb.base.TimeSeries'>,  name2 <class 'pynwb.base.TimeSeries'> }
-  analysis: { }
-  devices: { }
-  electrode_groups: { }
-  epoch_tags: {'tag1', 'tag2'}
+  acquisition: {
+    name <class 'pynwb\.base\.TimeSeries'>,
+    name2 <class 'pynwb\.base\.TimeSeries'>
+  }
+  epoch_tags: {
+    tag1,
+    tag2
+  }
   epochs: epochs <class 'pynwb.epoch.TimeIntervals'>
-  ic_electrodes: { }
-  imaging_planes: { }
-  lab_meta_data: { }
-  modules: { }
-  ogen_sites: { }
-  stimulus: { }
-  stimulus_template: { }
-  time_intervals: { }
+  file_create_date: \[datetime.datetime\(.*\)\]
+  identifier: identifier
+  session_description: session_description
+  session_start_time: .*
+  timestamps_reference_time: .*
 """)
 
 
 class TestAvailableNamespaces(unittest.TestCase):
     def test_available_namespaces(self):
         self.assertEqual(available_namespaces(), ('core', ))
+
+
+class TestLabelledDict(unittest.TestCase):
+
+    def setUp(self):
+        self.name = 'name'
+        self.container = TimeSeries(self.name, [1., 2., 3.] * 1000, timestamps=[1, 2, 3])
+        self.object_id = self.container.object_id
+
+    def test_add_default(self):
+        ld = LabelledDict('test_dict')
+        ld.add(self.container)
+        self.assertIs(ld[self.name], self.container)
+
+    def test_add_nondefault(self):
+        ld = LabelledDict('test_dict', def_key_name='object_id')
+        ld.add(self.container)
+        self.assertIs(ld[self.object_id], self.container)

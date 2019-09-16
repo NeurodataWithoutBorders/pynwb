@@ -1,11 +1,15 @@
 import numpy as np
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
+import warnings
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_conversion, _default_resolution
-from .core import NWBContainer, ElementIdentifiers, DynamicTable
+from .base import TimeSeries
+from .core import DynamicTable
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -20,27 +24,16 @@ class AnnotationSeries(TimeSeries):
 
     __nwbfields__ = ()
 
-    _help = "Time-stamped annotations about an experiment."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': list()},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc':
-             'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'parent', 'type': NWBContainer,
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description'))
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
-        super(AnnotationSeries, self).__init__(name, data, 'n/a',
-                                               resolution=-1.0, conversion=1.0,
-                                               timestamps=timestamps, **kwargs)
+        super(AnnotationSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'time', 'type': float, 'doc': 'The time for the annotation'},
+    @docval({'name': 'time', 'type': 'float', 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
     def add_annotation(self, **kwargs):
         '''
@@ -65,34 +58,16 @@ class AbstractFeatureSeries(TimeSeries):
     __nwbfields__ = ('feature_units',
                      'features')
 
-    _help = "Features of an applied stimulus. This is useful when storing the raw stimulus is impractical."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'feature_units', 'type': Iterable, 'shape': (None, ), 'doc': 'The unit of each feature'},
-            {'name': 'features', 'type': Iterable, 'shape': (None, ), 'doc': 'Description of each feature'},
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
+            {'name': 'feature_units', 'type': Iterable, 'shape': (None, ),  # required
+             'doc': 'The unit of each feature'},
+            {'name': 'features', 'type': Iterable, 'shape': (None, ),  # required
+             'doc': 'Description of each feature'},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None,), (None, None)),
-             'default': list(),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
-             'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset',
-             'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': NWBContainer,
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'default': list()},
+            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
+                        'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         name, data, features, feature_units = popargs('name', 'data',
                                                               'features', 'feature_units', kwargs)
@@ -100,7 +75,7 @@ class AbstractFeatureSeries(TimeSeries):
         self.features = features
         self.feature_units = feature_units
 
-    @docval({'name': 'time', 'type': float, 'doc': 'the time point of this feature'},
+    @docval({'name': 'time', 'type': 'float', 'doc': 'the time point of this feature'},
             {'name': 'features', 'type': (list, np.ndarray), 'doc': 'the feature values for this time point'})
     def add_features(self, **kwargs):
         time, features = getargs('time', 'features', kwargs)
@@ -124,36 +99,18 @@ class IntervalSeries(TimeSeries):
 
     __nwbfields__ = ()
 
-    _help = "Stores the start and stop times for events."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
-             'doc': 'Timestamps for samples stored in data', 'default': list()},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default':  'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default':  'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': NWBContainer,
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
-        unit = 'n/a'
         self.__interval_timestamps = timestamps
         self.__interval_data = data
-        super(IntervalSeries, self).__init__(name, data, unit,
-                                             timestamps=timestamps,
-                                             resolution=-1.0,
-                                             conversion=1.0,
-                                             **kwargs)
+        super(IntervalSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'start', 'type': float, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'stop', 'type': float, 'doc': 'The name of this TimeSeries dataset'})
+    @docval({'name': 'start', 'type': 'float', 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'stop', 'type': 'float', 'doc': 'The name of this TimeSeries dataset'})
     def add_interval(self, **kwargs):
         start, stop = getargs('start', 'stop', kwargs)
         self.__interval_timestamps.append(start)
@@ -188,11 +145,7 @@ class Units(DynamicTable):
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
-            {'name': 'id', 'type': ('array_data', ElementIdentifiers),
-             'doc': 'the identifiers for the units stored in this interface', 'default': None},
-            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
-            {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
-             'default': None},
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'),
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None},
             {'name': 'electrode_table', 'type': DynamicTable,
              'doc': 'the table that the *electrodes* column indexes', 'default': None})
@@ -214,12 +167,13 @@ class Units(DynamicTable):
              'default': None},
             {'name': 'electrode_group', 'type': 'ElectrodeGroup', 'default': None,
              'doc': 'the electrode group that each unit came from'},
-            {'name': 'waveform_mean', 'type': 'array_data', 'doc': 'the spike waveform mean for each unit',
+            {'name': 'waveform_mean', 'type': 'array_data',
+             'doc': 'the spike waveform mean for each unit. Shape is (time,) or (time, electrodes)',
              'default': None},
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
-             'doc': 'the spike waveform standard deviation for each unit'},
+             'doc': 'the spike waveform standard deviation for each unit. Shape is (time,) or (time, electrodes)'},
             {'name': 'id', 'type': int, 'default': None,
-             'help': 'the id for each unit'},
+             'doc': 'the id for each unit'},
             allow_extra=True)
     def add_unit(self, **kwargs):
         """
@@ -259,39 +213,26 @@ class DecompositionSeries(TimeSeries):
                      {'name': 'bands',
                       'doc': 'the bands that the signal is decomposed into', 'child': True})
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'doc': 'dims: num_times * num_channels * num_bands', 'shape': (None, None, None)},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset'},
-            {'name': 'metric', 'type': str, 'doc': "metric of analysis. recommended: 'phase', 'amplitude', 'power'"},
+            *get_docval(TimeSeries.__init__, 'description'),
+            {'name': 'metric', 'type': str,  # required
+             'doc': "metric of analysis. recommended: 'phase', 'amplitude', 'power'"},
             {'name': 'unit', 'type': str, 'doc': 'SI unit of measurement', 'default': 'no unit'},
             {'name': 'bands', 'type': DynamicTable,
              'doc': 'a table for describing the frequency bands that the signal was decomposed into', 'default': None},
             {'name': 'source_timeseries', 'type': TimeSeries,
              'doc': 'the input TimeSeries from this analysis', 'default': None},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to convert to unit', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
+                        'comments', 'control', 'control_description'))
     def __init__(self, **kwargs):
         metric, source_timeseries, bands = popargs('metric', 'source_timeseries', 'bands', kwargs)
         super(DecompositionSeries, self).__init__(**kwargs)
         self.source_timeseries = source_timeseries
+        if self.source_timeseries is None:
+            warnings.warn("It is best practice to set `source_timeseries` if it is present to document "
+                          "where the DecompositionSeries was derived from. (Optional)")
         self.metric = metric
         if bands is None:
             bands = DynamicTable("bands", "data about the frequency bands that the signal was decomposed into")
@@ -305,9 +246,9 @@ class DecompositionSeries(TimeSeries):
              'default': None},
             {'name': 'band_limits', 'type': ('array_data', 'data'), 'default': None,
              'doc': 'low and high frequencies of bandpass filter in Hz'},
-            {'name': 'band_mean', 'type': float, 'doc': 'the mean of Gaussian filters in Hz',
+            {'name': 'band_mean', 'type': 'float', 'doc': 'the mean of Gaussian filters in Hz',
              'default': None},
-            {'name': 'band_stdev', 'type': float, 'doc': 'the standard deviation of Gaussian filters in Hz',
+            {'name': 'band_stdev', 'type': 'float', 'doc': 'the standard deviation of Gaussian filters in Hz',
              'default': None},
             allow_extra=True)
     def add_band(self, **kwargs):

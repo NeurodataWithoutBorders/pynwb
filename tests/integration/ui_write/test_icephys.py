@@ -27,8 +27,7 @@ class TestIntracellularElectrode(base.TestMapRoundTrip):
 
     def setUpBuilder(self):
         device = GroupBuilder('device_name',
-                              attributes={'help': 'A recording device e.g. amplifier',
-                                          'namespace': 'core',
+                              attributes={'namespace': 'core',
                                           'neurodata_type': 'Device'})
         datasets = [
             DatasetBuilder('slice', data=u'tissue slice'),
@@ -40,8 +39,7 @@ class TestIntracellularElectrode(base.TestMapRoundTrip):
             DatasetBuilder('initial_access_resistance', data=u'I guess this changes'),
         ]
         elec = GroupBuilder('elec0',
-                            attributes={'help': 'Metadata about an intracellular electrode',
-                                        'namespace': 'core',
+                            attributes={'namespace': 'core',
                                         'neurodata_type': 'IntracellularElectrode',
                                         },
                             datasets={d.name: d for d in datasets},
@@ -90,7 +88,7 @@ class TestCurrentClampStimulusSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        return CurrentClampStimulusSeries(name="ccss", data=[1, 2, 3, 4, 5], unit='A',
+        return CurrentClampStimulusSeries(name="ccss", data=[1, 2, 3, 4, 5],
                                           starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
 
 
@@ -98,7 +96,7 @@ class TestVoltageClampStimulusSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        return VoltageClampStimulusSeries(name="vcss", data=[1, 2, 3, 4, 5], unit='A',
+        return VoltageClampStimulusSeries(name="vcss", data=[1, 2, 3, 4, 5],
                                           starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
 
 
@@ -106,7 +104,7 @@ class TestCurrentClampSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        return CurrentClampSeries(name="ccs", data=[1, 2, 3, 4, 5], unit='A',
+        return CurrentClampSeries(name="ccs", data=[1, 2, 3, 4, 5],
                                   starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                   bias_current=1.2, bridge_balance=2.3, capacitance_compensation=3.45)
 
@@ -115,7 +113,7 @@ class TestVoltageClampSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        return VoltageClampSeries(name="vcs", data=[1, 2, 3, 4, 5], unit='A',
+        return VoltageClampSeries(name="vcs", data=[1, 2, 3, 4, 5],
                                   starting_time=123.6, rate=10e3, electrode=self.elec,
                                   gain=0.126, capacitance_fast=1.2, capacitance_slow=2.3,
                                   resistance_comp_bandwidth=3.45, resistance_comp_correction=4.5,
@@ -127,9 +125,8 @@ class TestIZeroClampSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
         self.setUpElectrode()
-        return IZeroClampSeries(name="izcs", data=[1, 2, 3, 4, 5], unit='A',
-                                starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                bias_current=1.2, bridge_balance=2.3, capacitance_compensation=3.45)
+        return IZeroClampSeries(name="izcs", data=[1, 2, 3, 4, 5],
+                                starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
 
 
 class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
@@ -153,9 +150,9 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
                                     starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                     stimulus_description="gotcha ya!", sweep_number=4711)
         self.sweep_table = SweepTable(name='sweep_table')
-        self.sweep_table.add_entry(self.pcs)
 
     def addContainer(self, nwbfile):
+        nwbfile.sweep_table = self.sweep_table
         nwbfile.add_device(self.device)
         nwbfile.add_ic_electrode(self.elec)
         nwbfile.add_acquisition(self.pcs)
@@ -178,7 +175,6 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
     def setUpBuilder(self):
         device = GroupBuilder('device_name',
                               attributes={'neurodata_type': 'Device',
-                                          'help': 'A recording device e.g. amplifier',
                                           'namespace': 'core',
                                           })
         datasets = [
@@ -191,8 +187,7 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
             DatasetBuilder('initial_access_resistance', data=u'I guess this changes'),
         ]
         elec = GroupBuilder('elec0',
-                            attributes={'help': 'Metadata about an intracellular electrode',
-                                        'namespace': 'core',
+                            attributes={'namespace': 'core',
                                         'neurodata_type': 'IntracellularElectrode',
                                         },
                             datasets={d.name: d for d in datasets},
@@ -222,7 +217,6 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
                            attributes={'neurodata_type': 'PatchClampSeries',
                                        'namespace': 'core',
                                        'comments': u'no comments',
-                                       'help': 'Superclass definition for patch-clamp data',
                                        'description': u'no description',
                                        'stimulus_description': u'gotcha ya!',
                                        'sweep_number': 4711
@@ -233,15 +227,12 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
 
         column_id = DatasetBuilder('id', [0],
                                    attributes={'neurodata_type': 'ElementIdentifiers',
-                                               'namespace': 'core',
-                                               'help': 'unique identifiers for a list of elements',
-                                               }
+                                               'namespace': 'core'}
                                    )
 
         column_series = DatasetBuilder('series',
                                        attributes={'neurodata_type': 'VectorData',
                                                    'namespace': 'core',
-                                                   'help': 'Values for a list of elements',
                                                    'description': u'PatchClampSeries with the same sweep number',
                                                    },
                                        data=[LinkBuilder(pcs)]
@@ -250,7 +241,6 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
         column_index = DatasetBuilder('series_index', [1],
                                       attributes={'neurodata_type': 'VectorIndex',
                                                   'namespace': 'core',
-                                                  'help': 'indexes into a list of values for a list of elements',
                                                   'target': ReferenceBuilder(column_series),
                                                   },
                                       )
@@ -258,7 +248,6 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
         column_sweep_number = DatasetBuilder('sweep_number', data=[4711],
                                              attributes={'neurodata_type': 'VectorData',
                                                          'namespace': 'core',
-                                                         'help': 'Values for a list of elements',
                                                          'description': u'Sweep number of the entries in that row',
                                                          }
                                              )
@@ -269,7 +258,6 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
                                                'namespace': 'core',
                                                'colnames': (b'series',
                                                             b'sweep_number'),
-                                               'help': 'The table which groups different PatchClampSeries together',
                                                'description':
                                                u'A sweep table groups different PatchClampSeries together.',
                                                },
@@ -306,12 +294,10 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
                                       stimulus_description="gotcha ya!", sweep_number=4712)
 
         self.sweep_table = SweepTable(name='sweep_table')
-        self.sweep_table.add_entry(self.pcs1)
-        self.sweep_table.add_entry(self.pcs2a)
-        self.sweep_table.add_entry(self.pcs2b)
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the SweepTable container to it '''
+        nwbfile.sweep_table = self.sweep_table
         nwbfile.add_device(self.device)
         nwbfile.add_ic_electrode(self.elec)
 
@@ -352,7 +338,6 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
     def setUpBuilder(self):
         device = GroupBuilder('device_name',
                               attributes={'neurodata_type': 'Device',
-                                          'help': 'A recording device e.g. amplifier',
                                           'namespace': 'core',
                                           })
 
@@ -366,8 +351,7 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
             DatasetBuilder('initial_access_resistance', data=u'I guess this changes'),
         ]
         elec = GroupBuilder('elec0',
-                            attributes={'help': 'Metadata about an intracellular electrode',
-                                        'namespace': 'core',
+                            attributes={'namespace': 'core',
                                         'neurodata_type': 'IntracellularElectrode',
                                         },
                             datasets={d.name: d for d in datasets},
@@ -397,7 +381,6 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
         attributes = {'neurodata_type': 'PatchClampSeries',
                       'namespace': 'core',
                       'comments': u'no comments',
-                      'help': 'Superclass definition for patch-clamp data',
                       'description': u'no description',
                       'stimulus_description': u'gotcha ya!',
                       }
@@ -422,14 +405,12 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
         column_id = DatasetBuilder('id', [0, 1, 2],
                                    attributes={'neurodata_type': 'ElementIdentifiers',
                                                'namespace': 'core',
-                                               'help': 'unique identifiers for a list of elements',
                                                }
                                    )
 
         column_series = DatasetBuilder('series',
                                        attributes={'neurodata_type': 'VectorData',
                                                    'namespace': 'core',
-                                                   'help': 'Values for a list of elements',
                                                    'description': u'PatchClampSeries with the same sweep number',
                                                    },
                                        data=[LinkBuilder(pcs) for pcs in (pcs1, pcs2a, pcs2b)]
@@ -438,7 +419,6 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
         column_index = DatasetBuilder('series_index', [1, 2, 3],
                                       attributes={'neurodata_type': 'VectorIndex',
                                                   'namespace': 'core',
-                                                  'help': 'indexes into a list of values for a list of elements',
                                                   'target': ReferenceBuilder(column_series),
                                                   },
                                       )
@@ -446,7 +426,6 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
         column_sweep_number = DatasetBuilder('sweep_number', data=[4711, 4712, 4712],
                                              attributes={'neurodata_type': 'VectorData',
                                                          'namespace': 'core',
-                                                         'help': 'Values for a list of elements',
                                                          'description': u'Sweep number of the entries in that row',
                                                          }
                                              )
@@ -457,7 +436,6 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
                                                'namespace': 'core',
                                                'colnames': (b'series',
                                                             b'sweep_number'),
-                                               'help': 'The table which groups different PatchClampSeries together',
                                                'description':
                                                u'A sweep table groups different PatchClampSeries together.',
                                                },

@@ -1,5 +1,6 @@
 import numpy as np
-import datetime as datetime
+from datetime import datetime
+from dateutil.tz import tzlocal
 
 from hdmf.build import GroupBuilder, DatasetBuilder
 
@@ -19,14 +20,13 @@ class TestTimeSeriesIO(base.TestDataInterfaceIO):
                             attributes={'namespace': base.CORE_NAMESPACE,
                                         'neurodata_type': 'TimeSeries',
                                         'description': 'no description',
-                                        'comments': 'no comments',
-                                        'help': 'General time series object'},
+                                        'comments': 'no comments'},
                             datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                              attributes={'unit': 'SIunit',
                                                                          'conversion': 1.0,
                                                                          'resolution': 0.1}),
                                       'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                   attributes={'unit': 'Seconds', 'interval': 1})})
+                                                                   attributes={'unit': 'seconds', 'interval': 1})})
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
@@ -38,17 +38,17 @@ class TestTimeSeriesIO(base.TestDataInterfaceIO):
 
     def test_timestamps_linking(self):
         ''' Test that timestamps get linked to in TimeSeres '''
-        path = 'test_timestamps_linking.nwb'
         tsa = TimeSeries(name='a', data=np.linspace(0, 1, 1000), timestamps=np.arange(1000), unit='m')
         tsb = TimeSeries(name='b', data=np.linspace(0, 1, 1000), timestamps=tsa, unit='m')
-        nwbfile = NWBFile(identifier='foo', session_start_time=datetime.datetime.now(), session_description='bar')
+        nwbfile = NWBFile(identifier='foo',
+                          session_start_time=datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()),
+                          session_description='bar')
         nwbfile.add_acquisition(tsa)
         nwbfile.add_acquisition(tsb)
-        io = NWBHDF5IO(path, 'w')
-        io.write(nwbfile)
-        io.close()
-        io = NWBHDF5IO(path, 'r')
-        nwbfile = io.read()
+        with NWBHDF5IO(self.filename, 'w') as io:
+            io.write(nwbfile)
+        with NWBHDF5IO(self.filename, 'r') as io:
+            nwbfile = io.read()
         tsa = nwbfile.acquisition['a']
         tsb = nwbfile.acquisition['b']
         self.assertIs(tsa.timestamps, tsb.timestamps)

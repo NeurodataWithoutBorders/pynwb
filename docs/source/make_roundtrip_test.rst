@@ -35,7 +35,7 @@ its instance methods.
 stored on disk and back. Three of these methods--``setUpContainer``, ``addContainer``, and ``getContainer``--are
 required for carrying out the roundtrip test. The fourth method is required for testing the conversion
 from the container to the :py:mod:`builder <hdmf.build.builders>`--the intermediate data structure
-that gets used by :py:class:`~hdmf.backends.io.FORMIO` implementations for writing to disk.
+that gets used by :py:class:`~hdmf.backends.io.HDMFIO` implementations for writing to disk.
 
 If you do not want to test step of the process, you can just implement ``setUpContainer``, ``addContainer``, and
 ``getContainer``.
@@ -70,8 +70,8 @@ argument--the :py:class:`~pynwb.file.NWBFile` instance that will be used to writ
 This method is required because different container types are allowed in different parts of an NWBFile. This method is
 also where you can add additonial containers that your container of interest depends on. For example, for the
 :py:class:`~pynwb.ecephys.ElectricalSeries` roundtrip test, ``addContainer`` handles adding the
-:py:class:`~pynwb.ecephys.ElectrodeGroup`, :py:class:`~pynwb.ecephys.ElectrodeTable`, and
-:py:class:`~pynwb.ecephys.Device` dependencies.
+:py:class:`~pynwb.ecephys.ElectrodeGroup`, :py:class:`~pynwb.file.ElectrodeTable`, and
+:py:class:`~pynwb.device.Device` dependencies.
 
 
 Continuing from our example above, we will add the method for adding a generic :py:class:`~pynwb.base.TimeSeries` instance:
@@ -134,8 +134,7 @@ Continuing from the :py:class:`~pynwb.base.TimeSeries` example, lets add ``setUp
                                             'namespace': base.CORE_NAMESPACE,
                                             'neurodata_type': 'TimeSeries',
                                             'description': 'no description',
-                                            'comments': 'no comments',
-                                            'help': 'General time series object'},
+                                            'comments': 'no comments'},
                                 datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                  attributes={'unit': 'SIunit',
                                                                              'conversion': 1.0,

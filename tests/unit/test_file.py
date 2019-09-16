@@ -3,6 +3,7 @@ import unittest2 as unittest
 import six
 import numpy as np
 import os
+import pandas as pd
 
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
@@ -10,6 +11,8 @@ from dateutil.tz import tzlocal, tzutc
 from pynwb import NWBFile, TimeSeries
 from pynwb import NWBHDF5IO
 from pynwb.file import Subject, ElectrodeTable
+from pynwb.epoch import TimeIntervals
+from pynwb.ecephys import ElectricalSeries
 
 
 class NWBFileTest(unittest.TestCase):
@@ -70,6 +73,13 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(elecgrp.location, loc)
         self.assertIs(elecgrp.device, d)
 
+    def test_create_custom_intervals(self):
+        df_words = pd.DataFrame({'start_time': [.1, 2.], 'stop_time': [.8, 2.3],
+                                 'label': ['hello', 'there']})
+        words = TimeIntervals.from_dataframe(df_words, name='words')
+        self.nwbfile.add_time_intervals(words)
+        self.assertEqual(self.nwbfile.intervals['words'], words)
+
     def test_create_electrode_group_invalid_index(self):
         """
         Test the case where the user creates an electrode table region with
@@ -112,6 +122,13 @@ class NWBFileTest(unittest.TestCase):
                 self.assertEqual(aa.name, bb.name)
 
         os.remove("electrodes_mwe.nwb")
+
+    def test_access_processing(self):
+        self.nwbfile.create_processing_module('test_mod', 'test_description')
+        # test deprecate .modules
+        with self.assertWarnsRegex(DeprecationWarning, r'replaced by NWBFile\.processing'):
+            modules = self.nwbfile.modules['test_mod']
+        self.assertIs(self.nwbfile.processing['test_mod'], modules)
 
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
@@ -172,10 +189,9 @@ class NWBFileTest(unittest.TestCase):
             self.nwbfile.get_acquisition("TEST_TS")
 
     def test_set_electrode_table(self):
-        table = ElectrodeTable()  # noqa: F405
-        dev1 = self.nwbfile.create_device('dev1')  # noqa: F405
-        group = self.nwbfile.create_electrode_group('tetrode1',
-                                                    'tetrode description', 'tetrode location', dev1)
+        table = ElectrodeTable()
+        dev1 = self.nwbfile.create_device('dev1')
+        group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
         table.add_row(x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=group,
                       group_name='tetrode1')
         table.add_row(x=1.0, y=2.0, z=3.0, imp=-2.0, location='CA1', filtering='none', group=group,
@@ -186,7 +202,6 @@ class NWBFileTest(unittest.TestCase):
                       group_name='tetrode1')
         self.nwbfile.set_electrode_table(table)
 
-        self.assertIs(self.nwbfile.ec_electrodes, self.nwbfile.electrodes)
         self.assertIs(self.nwbfile.electrodes, table)
         self.assertIs(table.parent, self.nwbfile)
 
@@ -230,11 +245,9 @@ class NWBFileTest(unittest.TestCase):
                                                timeseries=ts, tags=('hi', 'there'))
 
     def test_add_electrode(self):
-        dev1 = self.nwbfile.create_device('dev1')  # noqa: F405
-        group = self.nwbfile.create_electrode_group('tetrode1',
-                                                    'tetrode description', 'tetrode location', dev1)
-        self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1',
-                                   'none', group=group, id=1)
+        dev1 = self.nwbfile.create_device('dev1')
+        group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
+        self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1', 'none', group=group, id=1)
         self.assertEqual(self.nwbfile.electrodes[0][0], 1)
         self.assertEqual(self.nwbfile.electrodes[0][1], 1.0)
         self.assertEqual(self.nwbfile.electrodes[0][2], 2.0)
@@ -245,10 +258,8 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.electrodes[0][7], group)
 
     def test_all_children(self):
-        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
-                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
-                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.nwbfile.add_acquisition(ts1)
         self.nwbfile.add_acquisition(ts2)
         name = 'example_electrode_group'
@@ -270,10 +281,8 @@ class NWBFileTest(unittest.TestCase):
                     source_script_file_name='nofilename')
 
     def test_get_neurodata_type(self):
-        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
-                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
-                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.nwbfile.add_acquisition(ts1)
         self.nwbfile.add_acquisition(ts2)
         p1 = ts1.get_ancestor(neurodata_type='NWBFile')
@@ -286,19 +295,74 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(str(self.nwbfile.units), """
 units <class 'pynwb.misc.Units'>
 Fields:
-  colnames: ('spike_times',)
+  colnames: ['spike_times']
   columns: (
-spike_times_index <class 'pynwb.core.VectorIndex'>
-Fields:
-  target: spike_times <class 'pynwb.core.VectorData'>
-, 
-spike_times <class 'pynwb.core.VectorData'>
-Fields:
-  description: the spike times for each unit
-)
+    spike_times_index <class 'pynwb.core.VectorIndex'>,
+    spike_times <class 'pynwb.core.VectorData'>
+  )
   description: Autogenerated by NWBFile
   id: id <class 'pynwb.core.ElementIdentifiers'>
-""")  # noqa: W291
+""")
+
+    def test_copy(self):
+        self.nwbfile.add_unit(spike_times=[1., 2., 3.])
+        device = self.nwbfile.create_device('a')
+        elecgrp = self.nwbfile.create_electrode_group('a', 'b', device=device, location='a')
+        self.nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'a', 'a', elecgrp, id=0)
+        self.nwbfile.add_electrode(np.nan, np.nan, np.nan, np.nan, 'b', 'b', elecgrp)
+        elec_region = self.nwbfile.create_electrode_table_region([1], 'name')
+
+        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        ts2 = ElectricalSeries('test_ts2', [0, 1, 2, 3, 4, 5],
+                               electrodes=elec_region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
+        self.nwbfile.add_acquisition(ts1)
+        self.nwbfile.add_acquisition(ts2)
+        self.nwbfile.add_trial(start_time=50.0, stop_time=70.0)
+        self.nwbfile.add_invalid_times_column('comments', 'description of reason for omitting time')
+        self.nwbfile.create_processing_module('test_mod', 'test_description')
+        self.nwbfile.create_time_intervals('custom_interval', 'a custom time interval')
+        self.nwbfile.intervals['custom_interval'].add_interval(start_time=10., stop_time=20.)
+        newfile = self.nwbfile.copy()
+
+        # test dictionaries
+        self.assertIs(self.nwbfile.devices['a'], newfile.devices['a'])
+        self.assertIs(self.nwbfile.acquisition['test_ts1'], newfile.acquisition['test_ts1'])
+        self.assertIs(self.nwbfile.acquisition['test_ts2'], newfile.acquisition['test_ts2'])
+        self.assertIs(self.nwbfile.processing['test_mod'], newfile.processing['test_mod'])
+
+        # test dynamic tables
+        self.assertIsNot(self.nwbfile.electrodes, newfile.electrodes)
+        self.assertIs(self.nwbfile.electrodes['x'], newfile.electrodes['x'])
+        self.assertIsNot(self.nwbfile.units, newfile.units)
+        self.assertIs(self.nwbfile.units['spike_times'], newfile.units['spike_times'])
+        self.assertIsNot(self.nwbfile.trials, newfile.trials)
+        self.assertIsNot(self.nwbfile.trials.parent, newfile.trials.parent)
+        self.assertIs(self.nwbfile.trials.id, newfile.trials.id)
+        self.assertIs(self.nwbfile.trials['start_time'], newfile.trials['start_time'])
+        self.assertIs(self.nwbfile.trials['stop_time'], newfile.trials['stop_time'])
+        self.assertIsNot(self.nwbfile.invalid_times, newfile.invalid_times)
+        self.assertTupleEqual(self.nwbfile.invalid_times.colnames, newfile.invalid_times.colnames)
+        self.assertIsNot(self.nwbfile.intervals['custom_interval'], newfile.intervals['custom_interval'])
+        self.assertTupleEqual(self.nwbfile.intervals['custom_interval'].colnames,
+                              newfile.intervals['custom_interval'].colnames)
+        self.assertIs(self.nwbfile.intervals['custom_interval']['start_time'],
+                      newfile.intervals['custom_interval']['start_time'])
+        self.assertIs(self.nwbfile.intervals['custom_interval']['stop_time'],
+                      newfile.intervals['custom_interval']['stop_time'])
+
+    def test_multi_experimenters(self):
+        self.nwbfile = NWBFile('a test session description for a test NWBFile',
+                               'FILE123',
+                               self.start,
+                               experimenter=('experimenter1', 'experimenter2'))
+        self.assertTupleEqual(self.nwbfile.experimenter, ('experimenter1', 'experimenter2'))
+
+    def test_multi_publications(self):
+        self.nwbfile = NWBFile('a test session description for a test NWBFile',
+                               'FILE123',
+                               self.start,
+                               related_publications=('pub1', 'pub2'))
+        self.assertTupleEqual(self.nwbfile.related_publications, ('pub1', 'pub2'))
 
 
 class SubjectTest(unittest.TestCase):
@@ -352,9 +416,33 @@ class TestCacheSpec(unittest.TestCase):
                           institution='University of California, San Francisco',
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
-            io.write(nwbfile, cache_spec=True)
-        reader = NWBHDF5IO(self.path, 'r', load_namespaces=True)
-        nwbfile = reader.read()
+            io.write(nwbfile)
+        with self.assertWarnsRegex(UserWarning, r"ignoring namespace '\S+' because it already exists"):
+            with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
+                nwbfile = reader.read()
+
+
+class TestNoCacheSpec(unittest.TestCase):
+
+    def setUp(self):
+        self.path = 'unittest_cached_spec.nwb'
+
+    def tearDown(self):
+        if os.path.exists(self.path):
+            os.remove(self.path)
+
+    def test_simple(self):
+        nwbfile = NWBFile(' ', ' ',
+                          datetime.now(tzlocal()),
+                          file_create_date=datetime.now(tzlocal()),
+                          institution='University of California, San Francisco',
+                          lab='Chang Lab')
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(nwbfile, cache_spec=False)
+
+        with self.assertWarnsRegex(UserWarning, r"No cached namespaces found in %s" % self.path):
+            with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
+                nwbfile = reader.read()
 
 
 class TestTimestampsRefDefault(unittest.TestCase):

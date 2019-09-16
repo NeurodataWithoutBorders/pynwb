@@ -1,11 +1,16 @@
 from datetime import datetime
 from dateutil.tz import tzlocal
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 from warnings import warn
 import copy as _copy
 
+import numpy as np
+import pandas as pd
+
 from hdmf.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
-from hdmf import Container
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -16,17 +21,12 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, \
+                  DynamicTableRegion, ScratchData, LabelledDict
 
 
 def _not_parent(arg):
     return arg['name'] != 'parent'
-
-
-@register_class('SpecFile', CORE_NAMESPACE)
-class SpecFile(Container):
-    # TODO: Implement this
-    pass
 
 
 @register_class('LabMetaData', CORE_NAMESPACE)
@@ -97,6 +97,12 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_analysis'
         },
         {
+            'attr': 'scratch',
+            'add': '_add_scratch',
+            'type': (NWBContainer, ScratchData),
+            'get': '_get_scratch'
+        },
+        {
             'attr': 'stimulus',
             'add': '_add_stimulus_internal',
             'type': TimeSeries,
@@ -109,7 +115,7 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_stimulus_template'
         },
         {
-            'attr': 'modules',
+            'attr': 'processing',
             'add': 'add_processing_module',
             'type': ProcessingModule,
             'create': 'create_processing_module',
@@ -151,7 +157,7 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_ogen_site'
         },
         {
-            'attr': 'time_intervals',
+            'attr': 'intervals',
             'add': 'add_time_intervals',
             'type': TimeIntervals,
             'create': 'create_time_intervals',
@@ -166,8 +172,11 @@ class NWBFile(MultiContainerInterface):
         }
     ]
 
-    __nwbfields__ = ('timestamps_reference_time',
-                     'file_create_date',
+    __nwbfields__ = ({'name': 'session_description', 'settable': False},
+                     {'name': 'identifier', 'settable': False},
+                     {'name': 'session_start_time', 'settable': False},
+                     {'name': 'timestamps_reference_time', 'settable': False},
+                     {'name': 'file_create_date', 'settable': False},
                      'experimenter',
                      'experiment_description',
                      'session_id',
@@ -203,7 +212,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'timestamps_reference_time', 'type': datetime,
              'doc': 'date and time corresponding to time zero of all timestamps; defaults to value '
                     'of session_start_time', 'default': None},
-            {'name': 'experimenter', 'type': str, 'doc': 'name of person who performed experiment', 'default': None},
+            {'name': 'experimenter', 'type': (tuple, list, str),
+             'doc': 'name of person who performed experiment', 'default': None},
             {'name': 'experiment_description', 'type': str,
              'doc': 'general description of the experiment', 'default': None},
             {'name': 'session_id', 'type': str, 'doc': 'lab-specific ID for the session', 'default': None},
@@ -217,7 +227,7 @@ class NWBFile(MultiContainerInterface):
                     'Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.', 'default': None},
             {'name': 'protocol', 'type': str,
              'doc': 'Experimental protocol, if applicable. E.g., include IACUC protocol', 'default': None},
-            {'name': 'related_publications', 'type': str,
+            {'name': 'related_publications', 'type': (tuple, list, str),
              'doc': 'Publication information.'
              'PMID, DOI, URL, etc. If multiple, concatenate together and describe which is which. '
              'such as PMID, DOI, URL, etc', 'default': None},
@@ -255,11 +265,11 @@ class NWBFile(MultiContainerInterface):
              'doc': 'A table containing trial data', 'default': None},
             {'name': 'invalid_times', 'type': TimeIntervals,
              'doc': 'A table containing times to be omitted from analysis', 'default': None},
-            {'name': 'time_intervals', 'type': (list, tuple),
+            {'name': 'intervals', 'type': (list, tuple),
              'doc': 'any TimeIntervals tables storing time intervals', 'default': None},
             {'name': 'units', 'type': Units,
              'doc': 'A table containing unit metadata', 'default': None},
-            {'name': 'modules', 'type': (list, tuple),
+            {'name': 'processing', 'type': (list, tuple),
              'doc': 'ProcessingModule objects belonging to this NWBFile', 'default': None},
             {'name': 'lab_meta_data', 'type': (list, tuple), 'default': None,
              'doc': 'an extension that contains lab-specific meta-data'},
@@ -278,67 +288,56 @@ class NWBFile(MultiContainerInterface):
             {'name': 'devices', 'type': (list, tuple),
              'doc': 'Device objects belonging to this NWBFile', 'default': None},
             {'name': 'subject', 'type': Subject,
-             'doc': 'subject metadata', 'default': None})
+             'doc': 'subject metadata', 'default': None},
+            {'name': 'scratch', 'type': (list, tuple),
+             'doc': 'scratch data', 'default': None})
     def __init__(self, **kwargs):
         pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
         pkwargs['name'] = 'root'
         super(NWBFile, self).__init__(*pargs, **pkwargs)
-        self.__session_description = getargs('session_description', kwargs)
-        self.__identifier = getargs('identifier', kwargs)
+        self.fields['session_description'] = getargs('session_description', kwargs)
+        self.fields['identifier'] = getargs('identifier', kwargs)
 
-        self.__session_start_time = getargs('session_start_time', kwargs)
-        if self.__session_start_time.tzinfo is None:
-            self.__session_start_time = _add_missing_timezone(self.__session_start_time)
+        self.fields['session_start_time'] = getargs('session_start_time', kwargs)
+        if self.fields['session_start_time'].tzinfo is None:
+            self.fields['session_start_time'] = _add_missing_timezone(self.fields['session_start_time'])
 
-        self.__timestamps_reference_time = getargs('timestamps_reference_time', kwargs)
-        if self.__timestamps_reference_time is None:
-            self.__timestamps_reference_time = self.__session_start_time
-        elif self.__timestamps_reference_time.tzinfo is None:
+        self.fields['timestamps_reference_time'] = getargs('timestamps_reference_time', kwargs)
+        if self.fields['timestamps_reference_time'] is None:
+            self.fields['timestamps_reference_time'] = self.fields['session_start_time']
+        elif self.fields['timestamps_reference_time'].tzinfo is None:
             raise ValueError("'timestamps_reference_time' must be a timezone-aware datetime object.")
 
-        self.__file_create_date = getargs('file_create_date', kwargs)
-        if self.__file_create_date is None:
-            self.__file_create_date = datetime.now(tzlocal())
-        if isinstance(self.__file_create_date, datetime):
-            self.__file_create_date = [self.__file_create_date]
-        self.__file_create_date = list(map(_add_missing_timezone, self.__file_create_date))
+        self.fields['file_create_date'] = getargs('file_create_date', kwargs)
+        if self.fields['file_create_date'] is None:
+            self.fields['file_create_date'] = datetime.now(tzlocal())
+        if isinstance(self.fields['file_create_date'], datetime):
+            self.fields['file_create_date'] = [self.fields['file_create_date']]
+        self.fields['file_create_date'] = list(map(_add_missing_timezone, self.fields['file_create_date']))
 
-        self.acquisition = getargs('acquisition', kwargs)
-        self.analysis = getargs('analysis', kwargs)
-        self.stimulus = getargs('stimulus', kwargs)
-        self.stimulus_template = getargs('stimulus_template', kwargs)
-        self.keywords = getargs('keywords', kwargs)
-
-        self.modules = getargs('modules', kwargs)
-        epochs = getargs('epochs', kwargs)
-        if epochs is not None:
-            if epochs.name != 'epochs':
-                raise ValueError("NWBFile.epochs must be named 'epochs'")
-            self.epochs = epochs
-        self.epoch_tags = getargs('epoch_tags', kwargs)
-
-        trials = getargs('trials', kwargs)
-        if trials is not None:
-            self.trials = trials
-        invalid_times = getargs('invalid_times', kwargs)
-        if invalid_times is not None:
-            self.invalid_times = invalid_times
-        units = getargs('units', kwargs)
-        if units is not None:
-            self.units = units
-
-        self.electrodes = getargs('electrodes', kwargs)
-        self.electrode_groups = getargs('electrode_groups', kwargs)
-        self.devices = getargs('devices', kwargs)
-        self.ic_electrodes = getargs('ic_electrodes', kwargs)
-        self.imaging_planes = getargs('imaging_planes', kwargs)
-        self.ogen_sites = getargs('ogen_sites', kwargs)
-        self.time_intervals = getargs('time_intervals', kwargs)
-        self.subject = getargs('subject', kwargs)
-        self.sweep_table = getargs('sweep_table', kwargs)
-        self.lab_meta_data = getargs('lab_meta_data', kwargs)
-
-        recommended = [
+        fieldnames = [
+            'acquisition',
+            'analysis',
+            'stimulus',
+            'stimulus_template',
+            'keywords',
+            'processing',
+            'epoch_tags',
+            'electrodes',
+            'electrode_groups',
+            'devices',
+            'ic_electrodes',
+            'imaging_planes',
+            'ogen_sites',
+            'intervals',
+            'subject',
+            'sweep_table',
+            'lab_meta_data',
+            'epochs',
+            'trials',
+            'invalid_times',
+            'units',
+            'scratch',
             'experimenter',
             'experiment_description',
             'session_id',
@@ -356,22 +355,40 @@ class NWBFile(MultiContainerInterface):
             'virus',
             'stimulus_notes',
         ]
-        for attr in recommended:
+        for attr in fieldnames:
             setattr(self, attr, kwargs.get(attr, None))
 
         if getargs('source_script', kwargs) is None and getargs('source_script_file_name', kwargs) is not None:
             raise ValueError("'source_script' cannot be None when 'source_script_file_name' is set")
 
+        self.__obj = None
+
     def all_children(self):
         stack = [self]
         ret = list()
+        self.__obj = LabelledDict(label='all_objects', def_key_name='object_id')
         while len(stack):
             n = stack.pop()
             ret.append(n)
+            if n.object_id is not None:
+                self.__obj[n.object_id] = n
+            else:
+                warn('%s "%s" does not have an object_id' % (n.neurodata_type, n.name))
             if hasattr(n, 'children'):
                 for c in n.children:
                     stack.append(c)
         return ret
+
+    @property
+    def objects(self):
+        if self.__obj is None:
+            self.all_children()
+        return self.__obj
+
+    @property
+    def modules(self):
+        warn("replaced by NWBFile.processing", DeprecationWarning)
+        return self.processing
 
     @property
     def ec_electrode_groups(self):
@@ -382,26 +399,6 @@ class NWBFile(MultiContainerInterface):
     def ec_electrodes(self):
         warn("replaced by NWBFile.electrodes", DeprecationWarning)
         return self.electrodes
-
-    @property
-    def identifier(self):
-        return self.__identifier
-
-    @property
-    def session_description(self):
-        return self.__session_description
-
-    @property
-    def file_create_date(self):
-        return self.__file_create_date
-
-    @property
-    def session_start_time(self):
-        return self.__session_start_time
-
-    @property
-    def timestamps_reference_time(self):
-        return self.__timestamps_reference_time
 
     def __check_epochs(self):
         if self.epochs is None:
@@ -453,10 +450,10 @@ class NWBFile(MultiContainerInterface):
         self.__check_electrodes()
         call_docval_func(self.electrodes.add_column, kwargs)
 
-    @docval({'name': 'x', 'type': float, 'doc': 'the x coordinate of the position'},
-            {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position'},
-            {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position'},
-            {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode'},
+    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position'},
+            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position'},
+            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position'},
+            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode'},
             {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
             {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
@@ -609,6 +606,79 @@ class NWBFile(MultiContainerInterface):
     def add_stimulus_template(self, timeseries):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
+
+    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, NWBContainer, ScratchData),
+             'help': 'the data to add to the scratch space'},
+            {'name': 'name', 'type': str,
+             'help': 'the name of the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'default': None},
+            {'name': 'notes', 'type': str,
+             'help': 'notes to add to the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'default': None},
+            {'name': 'table_description', 'type': str,
+             'help': 'description for the internal DynamicTable used to store a pandas.DataFrame',
+             'default': ''})
+    def add_scratch(self, **kwargs):
+        '''Add data to the scratch space'''
+        data, name, notes = getargs('data', 'name', 'notes', kwargs)
+        if isinstance(data, (np.ndarray, pd.DataFrame, list, tuple)):
+            if name is None:
+                raise ValueError('please provide a name for scratch data')
+            if isinstance(data, pd.DataFrame):
+                table_description = getargs('table_description', kwargs)
+                data = DynamicTable.from_dataframe(df=data, name=name, table_description=table_description)
+                if notes is not None:
+                    warn('Notes argument is ignored when adding a pandas DataFrame to scratch')
+            else:
+                data = ScratchData(name=name, data=data, notes=notes)
+        else:
+            if notes is not None:
+                warn('Notes argument is ignored when adding an NWBContainer to scratch')
+            if name is not None:
+                warn('Name argument is ignored when adding an NWBContainer to scratch')
+        self._add_scratch(data)
+
+    @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
+            {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
+    def get_scratch(self, **kwargs):
+        '''Get data from the scratch space'''
+        name, convert = getargs('name', 'convert', kwargs)
+        ret = self._get_scratch(name)
+        if convert:
+            if isinstance(ret, DynamicTable):
+                ret = ret.to_dataframe()
+            elif isinstance(ret, ScratchData):
+                ret = np.asarray(ret.data)
+        return ret
+
+    def copy(self):
+        """
+        Shallow copy of an NWB file.
+        Useful for linking across files.
+        """
+        kwargs = self.fields.copy()
+        for key in self.fields:
+            if isinstance(self.fields[key], LabelledDict):
+                kwargs[key] = list(self.fields[key].values())
+
+        # HDF5 object references cannot point to objects external to the file. Both DynamicTables such as TimeIntervals
+        # contain such object references and types such as ElectricalSeries contain references to DynamicTables.
+        # Below, copy the table and link to the columns so that object references work.
+        fields_to_copy = ['electrodes', 'epochs', 'trials', 'units', 'subject', 'sweep_table', 'invalid_times']
+        for field in fields_to_copy:
+            if field in kwargs:
+                if isinstance(self.fields[field], DynamicTable):
+                    kwargs[field] = self.fields[field].copy()
+                else:
+                    warn('Cannot copy child of NWBFile that is not a DynamicTable.')
+
+        # handle dictionaries of DynamicTables
+        dt_to_copy = ['scratch', 'intervals']
+        for dt in dt_to_copy:
+            if dt in kwargs:
+                kwargs[dt] = [v.copy() if isinstance(v, DynamicTable) else v for v in kwargs[dt]]
+
+        return NWBFile(**kwargs)
 
 
 def _add_missing_timezone(date):

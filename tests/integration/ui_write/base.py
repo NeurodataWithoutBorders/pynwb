@@ -6,7 +6,7 @@ import numpy as np
 import h5py
 import numpy.testing as npt
 
-from pynwb import NWBContainer, get_manager, NWBFile, NWBData
+from pynwb import NWBContainer, get_manager, NWBFile, NWBData, NWBHDF5IO, validate as pynwb_validate
 from hdmf.backends.hdf5 import HDF5IO
 
 CORE_NAMESPACE = 'core'
@@ -143,7 +143,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
 
     def setUp(self):
         super(TestMapRoundTrip, self).setUp()
-        self.container = self.setUpContainer()
+        self.object_id = self.container.object_id
         self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
         self.create_date = datetime(2018, 4, 15, 12, tzinfo=tzlocal())
         self.container_type = self.container.__class__.__name__
@@ -159,20 +159,20 @@ class TestMapRoundTrip(TestMapNWBContainer):
         if os.path.exists(self.filename) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
             os.remove(self.filename)
 
-    def roundtripContainer(self):
+    def roundtripContainer(self, cache_spec=False):
         description = 'a file to test writing and reading a %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
 
         self.writer = HDF5IO(self.filename, manager=get_manager(), mode='w')
-        self.writer.write(nwbfile)
+        self.writer.write(nwbfile, cache_spec=cache_spec)
         self.writer.close()
         self.reader = HDF5IO(self.filename, manager=get_manager(), mode='r')
-        read_nwbfile = self.reader.read()
+        self.read_nwbfile = self.reader.read()
 
         try:
-            tmp = self.getContainer(read_nwbfile)
+            tmp = self.getContainer(self.read_nwbfile)
             return tmp
         except Exception as e:
             self.reader.close()
@@ -182,9 +182,21 @@ class TestMapRoundTrip(TestMapNWBContainer):
     def test_roundtrip(self):
         self.read_container = self.roundtripContainer()
         # make sure we get a completely new object
-        str(self.container)  # added as a test to make sure printing works
+        self.assertIsNotNone(str(self.container))  # added as a test to make sure printing works
+        self.assertIsNotNone(str(self.read_container))
         self.assertNotEqual(id(self.container), id(self.read_container))
+        self.assertIs(self.read_nwbfile.objects[self.container.object_id], self.read_container)
         self.assertContainerEqual(self.read_container, self.container)
+        self.validate()
+
+    def validate(self):
+        # validate created file
+        if os.path.exists(self.filename):
+            with NWBHDF5IO(self.filename, mode='r') as io:
+                errors = pynwb_validate(io)
+                if errors:
+                    for err in errors:
+                        raise Exception(err)
 
         if hasattr(self, 'reader') and self.reader is not None:
             try:

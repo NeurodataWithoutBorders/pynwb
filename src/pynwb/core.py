@@ -3,6 +3,7 @@ import numpy as np
 import pandas as pd
 
 from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
+from hdmf.data_utils import DataIO
 from hdmf import Container, Data, DataRegion, get_region_slicer
 from hdmf.query import HDMFDataset
 
@@ -12,50 +13,6 @@ from six import with_metaclass
 
 def _not_parent(arg):
     return arg['name'] != 'parent'
-
-
-def set_parents(container, parent):
-    if isinstance(container, list):
-        for c in container:
-            if c.parent is None:
-                c.parent = parent
-        ret = container
-    else:
-        ret = [container]
-        if container.parent is None:
-            container.parent = parent
-    return ret
-
-
-class LabelledDict(dict):
-    '''
-    A dict wrapper class for aggregating Timeseries
-    from the standard locations
-    '''
-
-    @docval({'name': 'label', 'type': str, 'doc': 'the TimeSeries type ('})
-    def __init__(self, **kwargs):
-        label = getargs('label', kwargs)
-        self.__label = label
-
-    @property
-    def label(self):
-        return self.__label
-
-    def __getitem__(self, args):
-        key = args
-        if '==' in args:
-            key, val = args.split("==")
-            key = key.strip()
-            val = val.strip()
-            if key != 'name':
-                ret = list()
-                for item in self.values():
-                    if getattr(item, key, None) == val:
-                        ret.append(item)
-                return ret if len(ret) else None
-            key = val
-        return super(LabelledDict, self).__getitem__(key)
 
 
 def prepend_string(string, prepend='    '):
@@ -73,13 +30,8 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
     __nwbfields__ = tuple()
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': Container,
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
     def __init__(self, **kwargs):
-        parent, container_source = getargs('parent', 'container_source', kwargs)
         call_docval_func(super(NWBBaseType, self).__init__, kwargs)
         self.__fields = dict()
 
@@ -127,6 +79,9 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
     def _setter(cls, nwbfield):
         name = nwbfield['name']
 
+        if not nwbfield.get('settable', True):
+            return None
+
         def nwbbt_setter(self, val):
             if val is None:
                 return
@@ -166,11 +121,12 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
         for k in sorted(self.fields):  # sorted to enable tests
             v = self.fields[k]
-            template += "  {}: {}\n".format(k, self.__smart_str(v))
+            if isinstance(v, DataIO) or not hasattr(v, '__len__') or len(v) > 0:
+                template += "  {}: {}\n".format(k, self.__smart_str(v, 1))
         return template
 
     @staticmethod
-    def __smart_str(v):
+    def __smart_str(v, num_indent):
         """
         Print compact string representation of data.
 
@@ -193,44 +149,67 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
         str
 
         """
-        if isinstance(v, list):
+
+        if isinstance(v, list) or isinstance(v, tuple):
             if len(v) and isinstance(v[0], NWBBaseType):
-                return str(v)
+                return NWBBaseType.__smart_str_list(v, num_indent, '(')
             try:
-                return str(np.array(v))
+                return str(np.asarray(v))
             except ValueError:
-                return str(v)
+                return NWBBaseType.__smart_str_list(v, num_indent, '(')
         elif isinstance(v, dict):
-            template = '{'
-            keys = list(sorted(v.keys()))
-            for k in keys[:-1]:
-                template += " {} {}, ".format(k, type(v[k]))
-            if keys:
-                template += " {} {}".format(keys[-1], type(v[keys[-1]]))
-            return template + ' }'
+            return NWBBaseType.__smart_str_dict(v, num_indent)
         elif isinstance(v, set):
-            out = str(list(sorted(list(v))))
-            return '{' + out[1:-1] + '}'
+            return NWBBaseType.__smart_str_list(sorted(list(v)), num_indent, '{')
         elif isinstance(v, NWBBaseType):
             return "{} {}".format(getattr(v, 'name'), type(v))
         else:
             return str(v)
 
+    @staticmethod
+    def __smart_str_list(l, num_indent, left_br):
+        if left_br == '(':
+            right_br = ')'
+        if left_br == '{':
+            right_br = '}'
+        if len(l) == 0:
+            return left_br + ' ' + right_br
+        indent = num_indent * 2 * ' '
+        indent_in = (num_indent + 1) * 2 * ' '
+        out = left_br
+        for v in l[:-1]:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(v, num_indent + 1) + ','
+        if l:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(l[-1], num_indent + 1)
+        out += '\n' + indent + right_br
+        return out
+
+    @staticmethod
+    def __smart_str_dict(d, num_indent):
+        left_br = '{'
+        right_br = '}'
+        if len(d) == 0:
+            return left_br + ' ' + right_br
+        indent = num_indent * 2 * ' '
+        indent_in = (num_indent + 1) * 2 * ' '
+        out = left_br
+        keys = sorted(list(d.keys()))
+        for k in keys[:-1]:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(k, num_indent + 1) + ' ' + str(type(d[k])) + ','
+        if keys:
+            out += '\n' + indent_in + NWBBaseType.__smart_str(keys[-1], num_indent + 1) + ' ' + str(type(d[keys[-1]]))
+        out += '\n' + indent + right_br
+        return out
+
 
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBBaseType, Container):
 
-    __nwbfields__ = ('help',)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
 
-    __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc'}
+    __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc', 'settable'}
 
     @classmethod
     def _setter(cls, nwbfield):
@@ -266,7 +245,10 @@ class NWBContainer(NWBBaseType, Container):
                         else:
                             val = [val]
                         for v in val:
-                            self.add_child(v)
+                            if not isinstance(v.parent, Container):
+                                v.parent = self
+                            # else, the ObjectMapper will create a link from self (parent) to v (child with existing
+                            # parent)
 
                 ret.append(nwbdi_setter)
         return ret[-1]
@@ -294,14 +276,8 @@ class NWBDataInterface(NWBContainer):
 @register_class('NWBData', CORE_NAMESPACE)
 class NWBData(NWBBaseType, Data):
 
-    __nwbfields__ = ('help',)
-
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBData, self).__init__, kwargs)
         self.__data = getargs('data', kwargs)
@@ -341,6 +317,19 @@ class NWBData(NWBBaseType, Data):
             raise ValueError(msg)
 
 
+@register_class('ScratchData', CORE_NAMESPACE)
+class ScratchData(NWBData):
+
+    __nwbfields__ = ('notes',)
+
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
+            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
+            {'name': 'notes', 'type': str, 'doc': 'notes about the data', 'default': ''})
+    def __init__(self, **kwargs):
+        call_docval_func(super(ScratchData, self).__init__, kwargs)
+        self.notes = getargs('notes', kwargs)
+
+
 @register_class('Index', CORE_NAMESPACE)
 class Index(NWBData):
 
@@ -349,12 +338,7 @@ class Index(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
-            {'name': 'target', 'type': NWBData,
-             'doc': 'the target dataset that this index applies to'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'target', 'type': NWBData, 'doc': 'the target dataset that this index applies to'})
     def __init__(self, **kwargs):
         call_docval_func(super(Index, self).__init__, kwargs)
 
@@ -367,11 +351,7 @@ class VectorData(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'description', 'type': str, 'doc': 'a description for this column'},
             {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors', 'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors', 'default': list()})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorData, self).__init__, kwargs)
         self.description = getargs('description', kwargs)
@@ -388,12 +368,7 @@ class VectorIndex(Index):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorIndex'},
             {'name': 'data', 'type': ('array_data', 'data'),
              'doc': 'a 1D dataset containing indexes that apply to VectorData object'},
-            {'name': 'target', 'type': VectorData,
-             'doc': 'the target dataset that this index applies to'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'target', 'type': VectorData, 'doc': 'the target dataset that this index applies to'})
     def __init__(self, **kwargs):
         call_docval_func(super(VectorIndex, self).__init__, kwargs)
         self.target = getargs('target', kwargs)
@@ -426,11 +401,7 @@ class ElementIdentifiers(NWBData):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this ElementIdentifiers'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'a 1D dataset containing identifiers',
-             'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'default': list()})
     def __init__(self, **kwargs):
         call_docval_func(super(ElementIdentifiers, self).__init__, kwargs)
 
@@ -453,7 +424,7 @@ class NWBTable(NWBData):
     The class attribute __defaultname__ can also be set to specify a default name
     for the table class. If \_\_defaultname\_\_ is not specified, then ``name`` will
     need to be specified when the class is instantiated.
-    '''  # noqa: W605
+    '''
 
     @ExtenderMeta.pre_init
     def __build_table_class(cls, name, bases, classdict):
@@ -491,11 +462,7 @@ class NWBTable(NWBData):
 
     @docval({'name': 'columns', 'type': (list, tuple), 'doc': 'a list of the columns in this table'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-             'doc': 'the source of this Container e.g. file name', 'default': None})
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'the source of the data', 'default': list()})
     def __init__(self, **kwargs):
         self.__columns = tuple(popargs('columns', kwargs))
         self.__col_index = {name: idx for idx, name in enumerate(self.__columns)}
@@ -690,16 +657,34 @@ class MultiContainerInterface(NWBDataInterface):
 
     @staticmethod
     def __add_article(noun):
+        if isinstance(noun, tuple):
+            noun = noun[0]
+        if isinstance(noun, type):
+            noun = noun.__name__
         if noun[0] in ('aeiouAEIOU'):
             return 'an %s' % noun
         return 'a %s' % noun
 
+    @staticmethod
+    def __join(argtype):
+        def tostr(x):
+            return x.__name__ if isinstance(x, type) else x
+        if isinstance(argtype, (list, tuple)):
+            args = [tostr(x) for x in argtype]
+            if len(args) == 1:
+                return args[0].__name__
+            else:
+                ", ".join(tostr(x) for x in args[:-1]) + ' or ' + args[-1]
+        else:
+            return tostr(argtype)
+
     @classmethod
     def __make_get(cls, func_name, attr_name, container_type):
-        doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+        doc = "Get %s from this %s" % (cls.__add_article(container_type), cls.__name__)
 
-        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
-                 'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
+        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % cls.__join(container_type),
+                 'default': None},
+                rtype=container_type, returns='the %s with the given name' % cls.__join(container_type),
                 func_name=func_name, doc=doc)
         def _func(self, **kwargs):
             name = getargs('name', kwargs)
@@ -727,10 +712,10 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_add(cls, func_name, attr_name, container_type):
-        doc = "Add %s to this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+        doc = "Add %s to this %s" % (cls.__add_article(container_type), cls.__name__)
 
         @docval({'name': attr_name, 'type': (list, tuple, dict, container_type),
-                 'doc': 'the %s to add' % container_type.__name__},
+                 'doc': 'the %s to add' % cls.__join(container_type)},
                 func_name=func_name, doc=doc)
         def _func(self, **kwargs):
             container = getargs(attr_name, kwargs)
@@ -742,7 +727,9 @@ class MultiContainerInterface(NWBDataInterface):
                 containers = container
             d = getattr(self, attr_name)
             for tmp in containers:
-                self.add_child(tmp)
+                if not isinstance(tmp.parent, Container):
+                    tmp.parent = self
+                # else, the ObjectMapper will create a link from self (parent) to tmp (child with existing parent)
                 if tmp.name in d:
                     msg = "'%s' already exists in '%s'" % (tmp.name, self.name)
                     raise ValueError(msg)
@@ -752,11 +739,10 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_create(cls, func_name, add_name, container_type):
-        doc = "Create %s and add it to this %s" % \
-                       (cls.__add_article(container_type.__name__), cls.__name__)
+        doc = "Create %s and add it to this %s" % (cls.__add_article(container_type), cls.__name__)
 
         @docval(*filter(_not_parent, get_docval(container_type.__init__)), func_name=func_name, doc=doc,
-                returns="the %s object that was created" % container_type.__name__, rtype=container_type)
+                returns="the %s object that was created" % cls.__join(container_type), rtype=container_type)
         def _func(self, **kwargs):
             cargs, ckwargs = fmt_docval_args(container_type.__init__, kwargs)
             ret = container_type(*cargs, **ckwargs)
@@ -771,7 +757,7 @@ class MultiContainerInterface(NWBDataInterface):
             attr_name = conf['attr']
             container_type = conf['type']
             args.append({'name': attr_name, 'type': (list, tuple, dict, container_type),
-                         'doc': '%s to store in this interface' % container_type.__name__, 'default': dict()})
+                         'doc': '%s to store in this interface' % cls.__join(container_type), 'default': dict()})
 
         args.append({'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': cls.__name__})
 
@@ -788,10 +774,11 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_getitem(cls, attr_name, container_type):
-        doc = "Get %s from this %s" % (cls.__add_article(container_type.__name__), cls.__name__)
+        doc = "Get %s from this %s" % (cls.__add_article(container_type), cls.__name__)
 
-        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % container_type.__name__,
-                 'default': None}, rtype=container_type, returns='the %s with the given name' % container_type.__name__,
+        @docval({'name': 'name', 'type': str, 'doc': 'the name of the %s' % cls.__join(container_type),
+                 'default': None},
+                rtype=container_type, returns='the %s with the given name' % cls.__join(container_type),
                 func_name='__getitem__', doc=doc)
         def _func(self, **kwargs):
             name = getargs('name', kwargs)
@@ -800,7 +787,7 @@ class MultiContainerInterface(NWBDataInterface):
                 msg = "%s '%s' is empty" % (cls.__name__, self.name)
                 raise ValueError(msg)
             if len(d) > 1 and name is None:
-                msg = "more than one %s in this %s -- must specify a name" % container_type.__name__, cls.__name__
+                msg = "more than one %s in this %s -- must specify a name" % cls.__join(container_type), cls.__name__
                 raise ValueError(msg)
             ret = None
             if len(d) == 1:
@@ -873,7 +860,8 @@ class MultiContainerInterface(NWBDataInterface):
             if not hasattr(cls, attr):
                 aconf = cls._transform_arg(attr)
                 getter = cls._getter(aconf)
-                doc = "a dictionary containing the %s in this %s container" % (container_type.__name__, cls.__name__)
+                doc = "a dictionary containing the %s in this %s container" % \
+                      (cls.__join(container_type), cls.__name__)
                 setattr(cls, attr, property(getter, cls.__make_setter(aconf, add), None, doc))
 
             # create the add method
@@ -1095,8 +1083,8 @@ class DynamicTable(NWBDataInterface):
     def __len__(self):
         return len(self.id)
 
-    @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row', 'default': None},
-            {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None},
+    @docval({'name': 'data', 'type': dict, 'doc': 'the data to put in this row', 'default': None},
+            {'name': 'id', 'type': int, 'doc': 'the ID for the row', 'default': None},
             allow_extra=True)
     def add_row(self, **kwargs):
         '''
@@ -1142,6 +1130,9 @@ class DynamicTable(NWBDataInterface):
             else:
                 c.add_row(data[colname])
 
+    def __eq__(self, other):
+        return self.to_dataframe().equals(other.to_dataframe())
+
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
             {'name': 'description', 'type': str, 'doc': 'a description for this column'},
             {'name': 'data', 'type': ('array_data', 'data'),
@@ -1171,7 +1162,7 @@ class DynamicTable(NWBDataInterface):
                 ckwargs['table'] = table
 
         col = cls(**ckwargs)
-        self.add_child(col)
+        col.parent = self
         columns = [col]
 
         # Add index if it's been specified
@@ -1187,7 +1178,9 @@ class DynamicTable(NWBDataInterface):
                     raise ValueError("cannot pass non-empty index with empty data to index")
                 col_index = VectorIndex(name + "_index", index, col)
             columns.insert(0, col_index)
-            self.add_child(col_index)
+            if not isinstance(col_index.parent, Container):
+                col_index.parent = self
+            # else, the ObjectMapper will create a link from self (parent) to col_index (child with existing parent)
             col = col_index
             self.__indices[col_index.name] = col_index
 
@@ -1256,13 +1249,16 @@ class DynamicTable(NWBDataInterface):
             return self[key]
         return default
 
-    def to_dataframe(self):
+    def to_dataframe(self, exclude=set([])):
         '''Produce a pandas DataFrame containing this table's data.
         '''
 
         data = {}
         for name in self.colnames:
+            if name in exclude:
+                continue
             col = self.__df_cols[self.__colids[name]]
+
             if isinstance(col.data, (Dataset, np.ndarray)) and col.data.ndim > 1:
                 data[name] = [x for x in col[:]]
             else:
@@ -1277,19 +1273,19 @@ class DynamicTable(NWBDataInterface):
         {
             'name': 'index_column',
             'type': str,
-            'help': 'if provided, this column will become the table\'s index',
+            'doc': 'if provided, this column will become the table\'s index',
             'default': None
         },
         {
             'name': 'table_description',
             'type': str,
-            'help': 'a description of what is in the resulting table',
+            'doc': 'a description of what is in the resulting table',
             'default': ''
         },
         {
             'name': 'columns',
             'type': (list, tuple),
-            'help': 'a list/tuple of dictionaries specifying columns in the table',
+            'doc': 'a list/tuple of dictionaries specifying columns in the table',
             'default': None
         },
         allow_extra=True
@@ -1333,6 +1329,10 @@ class DynamicTable(NWBDataInterface):
             else:
                 columns.append({'name': col_name,
                                 'description': 'no description'})
+                if hasattr(df[col_name].iloc[0], '__len__') and not isinstance(df[col_name].iloc[0], str):
+                    lengths = [len(x) for x in df[col_name]]
+                    if not lengths[1:] == lengths[:-1]:
+                        columns[-1].update(index=True)
 
         if index_column is not None:
             ids = ElementIdentifiers(name=index_column, data=df[index_column].values.tolist())
@@ -1343,6 +1343,15 @@ class DynamicTable(NWBDataInterface):
         columns = cls.__build_columns(columns, df=df)
 
         return cls(name=name, id=ids, columns=columns, description=table_description, **kwargs)
+
+    def copy(self):
+        """
+        Return a copy of this DynamicTable.
+        This is useful for linking.
+        """
+        kwargs = dict(name=self.name, id=self.id, columns=self.columns, description=self.description,
+                      colnames=self.colnames)
+        return self.__class__(**kwargs)
 
 
 @register_class('DynamicTableRegion', CORE_NAMESPACE)
@@ -1361,11 +1370,7 @@ class DynamicTableRegion(VectorData):
              'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
             {'name': 'description', 'type': str, 'doc': 'a description of what this region represents'},
             {'name': 'table', 'type': DynamicTable,
-             'doc': 'the DynamicTable this region applies to', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'the parent Container for this Container', 'default': None},
-            {'name': 'container_source', 'type': object,
-            'doc': 'the source of this Container e.g. file name', 'default': None})
+             'doc': 'the DynamicTable this region applies to', 'default': None})
     def __init__(self, **kwargs):
         t = popargs('table', kwargs)
         call_docval_func(super(DynamicTableRegion, self).__init__, kwargs)
@@ -1402,3 +1407,48 @@ class DynamicTableRegion(VectorData):
             return self.table[self.data[key]]
         else:
             raise ValueError("unrecognized argument: '%s'" % key)
+
+
+class LabelledDict(dict):
+    '''
+    A dict wrapper class for aggregating Timeseries
+    from the standard locations
+    '''
+
+    @docval({'name': 'label', 'type': str, 'doc': 'the label on this dictionary'},
+            {'name': 'def_key_name', 'type': str, 'doc': 'the default key name', 'default': 'name'})
+    def __init__(self, **kwargs):
+        label, def_key_name = getargs('label', 'def_key_name', kwargs)
+        self.__label = label
+        self.__defkey = def_key_name
+
+    @property
+    def label(self):
+        return self.__label
+
+    def __getitem__(self, args):
+        key = args
+        if '==' in args:
+            key, val = args.split("==")
+            key = key.strip()
+            val = val.strip()
+            if key != self.__defkey:
+                ret = list()
+                for item in self.values():
+                    if getattr(item, key, None) == val:
+                        ret.append(item)
+                return ret if len(ret) else None
+            key = val
+        return super(LabelledDict, self).__getitem__(key)
+
+    @docval({'name': 'container', 'type': (NWBData, NWBContainer), 'doc': 'the container to add to this LabelledDict'})
+    def add(self, **kwargs):
+        '''
+        Add a container to this LabelledDict
+        '''
+        container = getargs('container', kwargs)
+        key = getattr(container, self.__defkey, None)
+        if key is None:
+            msg = "container '%s' does not have attribute '%s'" % (container.name, self.__defkey)
+            raise ValueError(msg)
+        self[key] = container
