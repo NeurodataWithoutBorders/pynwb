@@ -27,6 +27,26 @@ class TestTrials(base.TestMapRoundTrip):
         return nwbfile.trials
 
 
+class TestInvalidTimes(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return DynamicTable('trials', 'a placeholder table')
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_invalid_times_column('foo', 'an int column')
+        nwbfile.add_invalid_times_column('bar', 'a float column')
+        nwbfile.add_invalid_times_column('baz', 'a string column')
+        nwbfile.add_invalid_times_column('qux', 'a boolean column')
+        nwbfile.add_invalid_time_interval(start_time=0., stop_time=1., foo=27, bar=28.0, baz="29", qux=True)
+        nwbfile.add_invalid_time_interval(start_time=2., stop_time=3., foo=37, bar=38.0, baz="39", qux=False)
+        # reset the thing
+        self.container = nwbfile.invalid_times
+
+    def getContainer(self, nwbfile):
+        return nwbfile.invalid_times
+
+
 class TestUnits(base.TestMapRoundTrip):
 
     def setUpContainer(self):
