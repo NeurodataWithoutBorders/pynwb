@@ -1,4 +1,3 @@
-import numpy as np
 import warnings
 try:
     from collections.abc import Iterable  # Python 3
@@ -37,7 +36,8 @@ class ImageSeries(TimeSeries):
             {'name': 'starting_frame', 'type': Iterable,
              'doc': 'Each entry is the frame number in the corresponding external_file variable. '
                     'This serves as an index to what frames each file contains.', 'default': None},
-            {'name': 'bits_per_pixel', 'type': int, 'doc': 'Number of bit per image pixel', 'default': None},
+            {'name': 'bits_per_pixel', 'type': int, 'doc': 'DEPRECATED: Number of bits per image pixel',
+             'default': None},
             {'name': 'dimension', 'type': Iterable,
              'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
@@ -136,7 +136,7 @@ class OpticalSeries(ImageSeries):
     @docval(*get_docval(ImageSeries.__init__, 'name', 'data'),  # required
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
-            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
+            {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'orientation', 'type': str,  # required
              'doc': 'Description of image relative to some reference frame (e.g., which way is up). '
