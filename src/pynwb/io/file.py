@@ -32,6 +32,9 @@ class NWBFileMap(ObjectMapper):
         trials_spec = intervals_spec.get_group('trials')
         self.map_spec('trials', trials_spec)
 
+        invalid_times_spec = intervals_spec.get_group('invalid_times')
+        self.map_spec('invalid_times', invalid_times_spec)
+
         general_spec = self.spec.get_group('general')
 
         icephys_spec = general_spec.get_group('intracellular_ephys')
