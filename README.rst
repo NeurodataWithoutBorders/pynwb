@@ -5,7 +5,7 @@ PyNWB
 Documentation of PyNWB can be found at https://pynwb.readthedocs.io
 
 Latest Release
---------------
+==============
 
 .. image:: https://badge.fury.io/py/pynwb.svg
      :target: https://badge.fury.io/py/pynwb
@@ -15,7 +15,7 @@ Latest Release
 
 
 Build Status
-------------
+============
 
 .. table::
 
@@ -35,7 +35,7 @@ Build Status
 
 
 Overall Health
---------------
+==============
 
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
@@ -67,12 +67,12 @@ See the PyNWB documentation for details http://pynwb.readthedocs.io/en/latest/ge
 Code of Conduct
 ===============
 
-This project and everyone participating in it is governed by our `code of conduct guidelines <docs/CODE_OF_CONDUCT.rst>`_ . By participating, you are expected to uphold this code.
+This project and everyone participating in it is governed by our `code of conduct guidelines <.github/CODE_OF_CONDUCT.rst>`_. By participating, you are expected to uphold this code.
 
 Contributing
 ============
 
-For details on how to contribute to PyNWB see our `contribution guidelines <docs/CONTRIBUTING.rst>`_ .
+For details on how to contribute to PyNWB see our `contribution guidelines <docs/CONTRIBUTING.rst>`_.
 
 LICENSE
 =======
