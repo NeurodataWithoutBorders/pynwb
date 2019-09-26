@@ -31,7 +31,7 @@ class ElectricalSeriesConstructor(unittest.TestCase):
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
-        eS = ElectricalSeries('test_eS', data, region, timestamps=ts)
+        eS = ElectricalSeries('test_eS', data, region, channel_conversion=[2., 6.3], timestamps=ts)
         self.assertEqual(eS.name, 'test_eS')
         self.assertEqual(eS.data, data)
         self.assertEqual(eS.timestamps, ts)

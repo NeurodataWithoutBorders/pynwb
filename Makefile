@@ -46,7 +46,7 @@ checkpdb:
 	find {src,tests} -name "*.py" -exec grep -Hn -e pdb -e breakpoint -e print {} \;
 
 devtest:
-	$(PYTHON) -W ignore:::pynwb.form.build.map: test.py -fpi
+	$(PYTHON) test.py
 
 testclean:
 	rm *.npy *.nwb *.yaml

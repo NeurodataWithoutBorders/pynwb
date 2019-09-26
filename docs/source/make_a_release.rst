@@ -16,7 +16,7 @@ A core developer should use the following steps to create a release `X.Y.Z` of *
 Prerequisites
 -------------
 
-* All CI tests are passing on `AppVeyor`_, `CircleCI`_ and `Travis CI`_.
+* All CI tests are passing on `CircleCI`_ and `Azure Pipelines`_.
 
 * You have a `GPG signing key <https://help.github.com/articles/generating-a-new-gpg-key/>`_.
 
@@ -66,7 +66,7 @@ Setting up environment
 PyPI: Step-by-step
 ------------------
 
-1. Make sure that all CI tests are passing on `AppVeyor`_, `CircleCI`_ and `Travis CI`_.
+1. Make sure that all CI tests are passing on `CircleCI`_ and `Azure Pipelines`_.
 
 
 2. List all tags sorted by version
@@ -118,7 +118,7 @@ PyPI: Step-by-step
       and source distribution on `PyPI`_.
 
 
-7. Check the status of the builds on `AppVeyor`_, `CircleCI`_ and `Travis CI`_.
+7. Check the status of the builds on `CircleCI`_ and `Azure Pipelines`_.
 
 
 8. Once the builds are completed, check that the distributions are available on `PyPI`_ and that
@@ -151,9 +151,8 @@ PyPI: Step-by-step
 .. _virtualenv: http://virtualenv.readthedocs.io
 .. _venv: https://docs.python.org/3/library/venv.html
 
-.. _AppVeyor: https://ci.appveyor.com/project/NeurodataWithoutBorders/pynwb/history
 .. _CircleCI: https://circleci.com/gh/NeurodataWithoutBorders/pynwb
-.. _Travis CI: https://travis-ci.org/NeurodataWithoutBorders/pynwb/builds
+.. _Azure Pipelines: https://dev.azure.com/NeurodataWithoutBorders/pynwb/_build
 
 .. _PyPI: https://pypi.org/project/pynwb
 
