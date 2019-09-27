@@ -566,7 +566,7 @@ class MultiContainerInterface(NWBDataInterface):
 
             # create property with the name given in 'attr'
             if not hasattr(cls, attr):
-                aconf = cls._transform_arg(attr)
+                aconf = cls._check_field_spec(attr)
                 getter = cls._getter(aconf)
                 doc = "a dictionary containing the %s in this %s container" % \
                       (cls.__join(container_type), cls.__name__)

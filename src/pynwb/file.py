@@ -94,7 +94,7 @@ class NWBFile(MultiContainerInterface):
         {
             'attr': 'analysis',
             'add': 'add_analysis',
-            'type': NWBContainer,
+            'type': (NWBContainer, DynamicTable),
             'get': 'get_analysis'
         },
         {

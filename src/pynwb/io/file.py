@@ -17,6 +17,7 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('acquisition', acq_spec.get_neurodata_type('DynamicTable'))
 
         self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('NWBContainer'))
+        self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('DynamicTable'))
 
         # map constructor arg and property 'stimulus' -> stimulus__presentation
         stimulus_spec = self.spec.get_group('stimulus')
@@ -87,6 +88,7 @@ class NWBFileMap(ObjectMapper):
         self.unmap(scratch_spec)
         self.map_spec('scratch_datas', scratch_spec.get_neurodata_type('ScratchData'))
         self.map_spec('scratch_containers', scratch_spec.get_neurodata_type('NWBContainer'))
+        self.map_spec('scratch_containers', scratch_spec.get_neurodata_type('DynamicTable'))
 
     @ObjectMapper.object_attr('scratch_datas')
     def scratch_datas(self, container, manager):
