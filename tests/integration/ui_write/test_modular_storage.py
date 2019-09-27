@@ -7,12 +7,11 @@ import numpy as np
 
 from pynwb.base import TimeSeries
 from pynwb import get_manager, NWBFile, NWBHDF5IO, validate as pynwb_validate
+from pynwb.testing import remove_test_file
 from hdmf.backends.hdf5 import HDF5IO
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 from . import base
-
-from .. import remove_test_file
 
 
 class TestTimeSeriesModular(base.TestMapNWBContainer):

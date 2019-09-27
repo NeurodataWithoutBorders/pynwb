@@ -7,11 +7,10 @@ import h5py
 import numpy.testing as npt
 
 from pynwb import get_manager, NWBFile, NWBHDF5IO, validate as pynwb_validate
+from pynwb.testing import remove_test_file
 from hdmf.backends.hdf5 import HDF5IO
 
 from hdmf.container import Data, Container
-
-from .. import remove_test_file
 
 CORE_NAMESPACE = 'core'
 

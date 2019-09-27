@@ -14,10 +14,9 @@ from hdmf.build import GroupBuilder, DatasetBuilder
 from hdmf.spec import NamespaceCatalog
 from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
 from pynwb.ecephys import ElectricalSeries, LFP
+from pynwb.testing import remove_test_file
 
 import numpy as np
-
-from .. import remove_test_file
 
 
 class TestHDF5Writer(unittest.TestCase):

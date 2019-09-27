@@ -1,4 +1,5 @@
 import os
+from . import ui_write
 
 def remove_test_file(path):
     """A helper function for removing intermediate test files
