@@ -12,14 +12,12 @@ from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 from . import base
 
+from .. import remove_test_file
+
 
 class TestTimeSeriesModular(base.TestMapNWBContainer):
 
     _required_tests = ('test_roundtrip',)
-
-    def remove_file(self, path):
-        if os.path.exists(path) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
-            os.remove(path)
 
     def setUp(self):
         self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
@@ -56,8 +54,8 @@ class TestTimeSeriesModular(base.TestMapNWBContainer):
         if os.name == 'nt':
             gc.collect()
 
-        self.remove_file(self.link_filename)
-        self.remove_file(self.data_filename)
+        remove_test_file(self.link_filename)
+        remove_test_file(self.data_filename)
 
     def roundtripContainer(self):
         # create and write data file

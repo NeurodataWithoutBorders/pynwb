@@ -11,6 +11,8 @@ from hdmf.backends.hdf5 import HDF5IO
 
 from hdmf.container import Data, Container
 
+from .. import remove_test_file
+
 CORE_NAMESPACE = 'core'
 
 container_tests = dict()
@@ -158,8 +160,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
             self.writer.close()
         if self.reader is not None:
             self.reader.close()
-        if os.path.exists(self.filename) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
-            os.remove(self.filename)
+        remove_test_file(self.filename)
 
     def roundtripContainer(self, cache_spec=False):
         description = 'a file to test writing and reading a %s' % self.container_type

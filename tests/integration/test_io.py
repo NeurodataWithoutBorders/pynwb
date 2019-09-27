@@ -17,8 +17,7 @@ from pynwb.ecephys import ElectricalSeries, LFP
 
 import numpy as np
 
-global CLEAN_NWB
-CLEAN_NWB = os.getenv('CLEAN_NWB', True) not in ('False', 'false', 'FALSE', '0', 0, False)
+from .. import remove_test_file
 
 
 class TestHDF5Writer(unittest.TestCase):
@@ -66,8 +65,7 @@ class TestHDF5Writer(unittest.TestCase):
             attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        if os.path.exists(self.path) and CLEAN_NWB:
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_nwbio(self):
         with HDF5IO(self.path, manager=self.manager, mode='a') as io:
@@ -175,8 +173,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
             attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        if os.path.exists(self.path) and CLEAN_NWB:
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_nwbio(self):
         with File(self.path) as fil:
@@ -243,8 +240,7 @@ class TestAppend(unittest.TestCase):
         self.path = "test_append.nwb"
 
     def tearDown(self):
-        if os.path.exists(self.path) and CLEAN_NWB:
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_append(self):
         proc_mod = self.nwbfile.create_processing_module(name='test_proc_mod', description='')
@@ -298,8 +294,7 @@ class TestH5DataIO(unittest.TestCase):
         self.path = "test_pynwb_io_hdf5_h5dataIO.h5"
 
     def tearDown(self):
-        if(os.path.exists(self.path)) and CLEAN_NWB:
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_gzip_timestamps(self):
         ts = TimeSeries('ts_name', [1, 2, 3], 'A', timestamps=H5DataIO(np.array([1., 2., 3.]), compression='gzip'))
