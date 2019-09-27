@@ -1,15 +1,9 @@
-# flake8: noqa: F401
-
-from hdmf.utils import docval, getargs
-from hdmf.build import ObjectMapper, RegionBuilder, BuildManager
-from hdmf.spec import Spec
-from hdmf.container import Container
+from hdmf.build import ObjectMapper, RegionBuilder
 
 from .. import register_map
 
 from pynwb.file import NWBFile
 from pynwb.core import NWBData, NWBContainer
-
 
 
 class NWBBaseTypeMapper(ObjectMapper):
