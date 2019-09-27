@@ -1,12 +1,6 @@
-# flake8: noqa: F401
-
-from hdmf.spec import NamespaceCatalog
 from hdmf.utils import docval, getargs
-from ..spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
-from .. import _get_resources, get_type_map, NWBContainer
-
+from .. import get_type_map, NWBContainer
 from .map import ObjectMapperLegacy as ObjectMapper
-from .map import TypeMapLegacy as TypeMap
 
 
 __TYPE_MAP = get_type_map()
