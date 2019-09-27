@@ -96,6 +96,7 @@ class BaseStorageOverride(object):
 
     @classmethod
     def build_const_args(cls, spec_dict):
+        """Extend base functionality to remap data_type_def and data_type_inc keys"""
         spec_dict = copy(spec_dict)
         proxy = super(BaseStorageOverride, cls)
         if proxy.inc_key() in spec_dict:
