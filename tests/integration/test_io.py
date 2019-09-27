@@ -1,7 +1,6 @@
 import unittest2 as unittest
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
-import os
 import re
 from h5py import File
 
