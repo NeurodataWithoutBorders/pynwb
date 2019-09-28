@@ -27,6 +27,26 @@ class TestTrials(base.TestMapRoundTrip):
         return nwbfile.trials
 
 
+class TestInvalidTimes(base.TestMapRoundTrip):
+
+    def setUpContainer(self):
+        # this will get ignored
+        return DynamicTable('trials', 'a placeholder table')
+
+    def addContainer(self, nwbfile):
+        nwbfile.add_invalid_times_column('foo', 'an int column')
+        nwbfile.add_invalid_times_column('bar', 'a float column')
+        nwbfile.add_invalid_times_column('baz', 'a string column')
+        nwbfile.add_invalid_times_column('qux', 'a boolean column')
+        nwbfile.add_invalid_time_interval(start_time=0., stop_time=1., foo=27, bar=28.0, baz="29", qux=True)
+        nwbfile.add_invalid_time_interval(start_time=2., stop_time=3., foo=37, bar=38.0, baz="39", qux=False)
+        # reset the thing
+        self.container = nwbfile.invalid_times
+
+    def getContainer(self, nwbfile):
+        return nwbfile.invalid_times
+
+
 class TestUnits(base.TestMapRoundTrip):
 
     def setUpContainer(self):
@@ -73,9 +93,8 @@ class TestElectrodes(base.TestMapRoundTrip):
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
-        self.dev1 = nwbfile.create_device('dev1')  # noqa: F405
-        self.group = nwbfile.create_electrode_group('tetrode1',  # noqa: F405
-                                    'tetrode description', 'tetrode location', self.dev1)
+        self.dev1 = nwbfile.create_device('dev1')
+        self.group = nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', self.dev1)
 
         nwbfile.add_electrode(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
                               group_name='tetrode1')
@@ -102,9 +121,8 @@ class TestElectrodesRegion(base.TestMapRoundTrip):
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
-        self.dev1 = nwbfile.create_device('dev1')  # noqa: F405
-        self.group = nwbfile.create_electrode_group('tetrode1',  # noqa: F405
-                                    'tetrode description', 'tetrode location', self.dev1)
+        self.dev1 = nwbfile.create_device('dev1')
+        self.group = nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', self.dev1)
 
         nwbfile.add_electrode(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
                               group_name='tetrode1')
