@@ -12,10 +12,13 @@ from hdmf.backends.io import HDMFIO
 from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
 from hdmf.validate import ValidatorMap
 from hdmf.build import BuildManager, TypeMap
+import hdmf.common
 
 
 CORE_NAMESPACE = 'core'
 __core_ns_file_name = 'nwb.namespace.yaml'
+
+from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 
 
 def __get_resources():
@@ -34,10 +37,13 @@ def _get_resources():
 global __NS_CATALOG
 global __TYPE_MAP
 
-from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
-
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
+
+hdmf_typemap = hdmf.common.get_type_map()
+__NS_CATALOG.merge(hdmf_typemap.namespace_catalog)
+
 __TYPE_MAP = TypeMap(__NS_CATALOG)
+__TYPE_MAP.merge(hdmf_typemap)
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),

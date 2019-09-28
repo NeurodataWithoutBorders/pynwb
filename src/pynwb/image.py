@@ -161,7 +161,7 @@ class GrayscaleImage(Image):
              'shape': (None, None)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
-        super(GrayscaleImage, self).__init__(**kwargs)
+        call_docval_func(super(GrayscaleImage, self).__init__, kwargs)
 
 
 @register_class('RGBImage', CORE_NAMESPACE)
@@ -172,7 +172,7 @@ class RGBImage(Image):
              'shape': (None, None, 3)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
-        super(RGBImage, self).__init__(**kwargs)
+        call_docval_func(super(RGBImage, self).__init__, kwargs)
 
 
 @register_class('RGBAImage', CORE_NAMESPACE)
@@ -183,4 +183,4 @@ class RGBAImage(Image):
              'shape': (None, None, 4)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
-        super(RGBAImage, self).__init__(**kwargs)
+        call_docval_func(super(RGBAImage, self).__init__, kwargs)

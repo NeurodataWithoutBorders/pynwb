@@ -8,7 +8,8 @@ from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_fu
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, NWBDataInterface
+from .core import NWBContainer, MultiContainerInterface, NWBDataInterface
+from hdmf.common import DynamicTable, DynamicTableRegion
 from .device import Device
 import numpy as np
 

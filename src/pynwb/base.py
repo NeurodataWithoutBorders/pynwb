@@ -6,6 +6,8 @@ except ImportError:
     from collections import Iterable  # Python 2.7
 
 from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from hdmf.common import DynamicTable
+
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
@@ -25,7 +27,7 @@ class ProcessingModule(MultiContainerInterface):
     __clsconf__ = {
             'attr': 'data_interfaces',
             'add': 'add',
-            'type': NWBDataInterface,
+            'type': (NWBDataInterface, DynamicTable),
             'get': 'get'
     }
 
@@ -45,7 +47,8 @@ class ProcessingModule(MultiContainerInterface):
     def __getitem__(self, arg):
         return self.get(arg)
 
-    @docval({'name': 'container', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
+    @docval({'name': 'container', 'type': (NWBDataInterface, DynamicTable),
+             'doc': 'the NWBDataInterface to add to this Module'})
     def add_container(self, **kwargs):
         '''
         Add an NWBContainer to this ProcessingModule
@@ -63,7 +66,8 @@ class ProcessingModule(MultiContainerInterface):
         warn(PendingDeprecationWarning('get_container will be replaced by get'))
         return self.get(container_name)
 
-    @docval({'name': 'NWBDataInterface', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
+    @docval({'name': 'NWBDataInterface', 'type': (NWBDataInterface, DynamicTable),
+             'doc': 'the NWBDataInterface to add to this Module'})
     def add_data_interface(self, **kwargs):
         NWBDataInterface = getargs('NWBDataInterface', kwargs)
         warn(PendingDeprecationWarning('add_data_interface will be replaced by add'))
@@ -241,7 +245,7 @@ class Image(NWBData):
             {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
-        super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
+        call_docval_func(super(Image, self).__init__, kwargs)
         self.resolution = kwargs['resolution']
         self.description = kwargs['description']
 

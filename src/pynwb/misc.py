@@ -9,7 +9,7 @@ from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import DynamicTable
+from hdmf.common import DynamicTable
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -184,7 +184,7 @@ class Units(DynamicTable):
             elec_col = self['electrodes'].target
             if elec_col.table is None:
                 if self.__electrode_table is None:
-                    nwbfile = self.get_ancestor(neurodata_type='NWBFile')
+                    nwbfile = self.get_ancestor(data_type='NWBFile')
                     elec_col.table = nwbfile.electrodes
                 else:
                     elec_col.table = self.__electrode_table

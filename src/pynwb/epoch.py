@@ -5,7 +5,7 @@ from hdmf.data_utils import DataIO
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import DynamicTable
+from hdmf.common import DynamicTable
 
 
 @register_class('TimeIntervals', CORE_NAMESPACE)

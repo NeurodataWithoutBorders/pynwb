@@ -21,8 +21,9 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, \
-                  DynamicTableRegion, ScratchData, LabelledDict
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, \
+                  ScratchData, LabelledDict
+from hdmf.common import DynamicTableRegion, DynamicTable
 
 
 def _not_parent(arg):
@@ -87,19 +88,19 @@ class NWBFile(MultiContainerInterface):
         {
             'attr': 'acquisition',
             'add': '_add_acquisition_internal',
-            'type': NWBDataInterface,
+            'type': (NWBDataInterface, DynamicTable),
             'get': 'get_acquisition'
         },
         {
             'attr': 'analysis',
             'add': 'add_analysis',
-            'type': NWBContainer,
+            'type': (NWBContainer, DynamicTable),
             'get': 'get_analysis'
         },
         {
             'attr': 'scratch',
             'add': '_add_scratch',
-            'type': (NWBContainer, ScratchData),
+            'type': (DynamicTable, NWBContainer, ScratchData),
             'get': '_get_scratch'
         },
         {
@@ -445,7 +446,7 @@ class NWBFile(MultiContainerInterface):
     def add_electrode_column(self, **kwargs):
         """
         Add a column to the electrode table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_electrodes()
         call_docval_func(self.electrodes.add_column, kwargs)
@@ -462,7 +463,7 @@ class NWBFile(MultiContainerInterface):
     def add_electrode(self, **kwargs):
         """
         Add a unit to the unit table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         Required fields are *x*, *y*, *z*, *imp*, *location*, *filtering*,
         *group* and any columns that have been added
@@ -499,7 +500,7 @@ class NWBFile(MultiContainerInterface):
     def add_unit_column(self, **kwargs):
         """
         Add a column to the unit table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_units()
         call_docval_func(self.units.add_column, kwargs)
@@ -508,7 +509,7 @@ class NWBFile(MultiContainerInterface):
     def add_unit(self, **kwargs):
         """
         Add a unit to the unit table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         """
         self.__check_units()
@@ -522,7 +523,7 @@ class NWBFile(MultiContainerInterface):
     def add_trial_column(self, **kwargs):
         """
         Add a column to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_trials()
         call_docval_func(self.trials.add_column, kwargs)
@@ -531,7 +532,7 @@ class NWBFile(MultiContainerInterface):
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_interval` for more details.
+        See :py:meth:`~hdmf.common.DynamicTable.add_interval` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_trial_columns`).
@@ -547,7 +548,7 @@ class NWBFile(MultiContainerInterface):
     def add_invalid_times_column(self, **kwargs):
         """
         Add a column to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_invalid_times()
         call_docval_func(self.invalid_times.add_column, kwargs)
@@ -555,7 +556,7 @@ class NWBFile(MultiContainerInterface):
     def add_invalid_time_interval(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_invalid_times_columns`).
@@ -591,7 +592,7 @@ class NWBFile(MultiContainerInterface):
                 self._check_sweep_table()
                 self.sweep_table.add_entry(nwbdata)
 
-    @docval({'name': 'nwbdata', 'type': NWBDataInterface})
+    @docval({'name': 'nwbdata', 'type': (NWBDataInterface, DynamicTable)})
     def add_acquisition(self, nwbdata):
         self._add_acquisition_internal(nwbdata)
         self._update_sweep_table(nwbdata)
@@ -606,7 +607,7 @@ class NWBFile(MultiContainerInterface):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
 
-    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, NWBContainer, ScratchData),
+    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
              'help': 'the data to add to the scratch space'},
             {'name': 'name', 'type': str,
              'help': 'the name of the data. Only used when passing in numpy.ndarray, list, or tuple',
