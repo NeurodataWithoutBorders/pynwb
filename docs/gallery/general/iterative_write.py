@@ -691,11 +691,10 @@ write_test_file(filename='basic_sparse_iterwrite_multifile.nwb',
 # Alternative Approach: User-defined dataset write
 # ----------------------------------------------------
 #
-# In the above cases we used the built-in capabilities of PyNWB to perform iterative data write. In
-# cases where more fine-grained control of the write process is required we can alternatively use
-# PyNWB to setup the full structure of our NWB:N file and then update select datasets afterwards.
-# This approach is useful when we need to optimize the write but it may also exposes I/O backend-specifics
-# for write to the user.
+# In the above cases we used the built-in capabilities of PyNWB to perform iterative data write. To
+# gain more fine-grained control of the write process we can alternatively use PyNWB to setup the full
+# structure of our NWB:N file and then update select datasets afterwards. This approach is useful, e.g.,
+# in context of parallel write and any time we need to optimize write patterns.
 #
 #
 
