@@ -38,12 +38,12 @@ test:
 	tox
 
 flake:
-	$(FLAKE) src/
+	$(FLAKE) --exclude=nwb-schema src/
 	$(FLAKE) tests/
 	$(FLAKE) --ignore E402,W504 docs/gallery
 
 checkpdb:
-	find {src,tests} -name "*.py" -exec grep -Hn -e pdb -e breakpoint {} \;
+	find {src,tests} -name "*.py" -exec grep -Hn -e pdb -e breakpoint -e print {} \;
 
 devtest:
 	$(PYTHON) test.py

@@ -4,8 +4,10 @@ from hdmf.utils import docval, popargs, fmt_docval_args, call_docval_func, get_d
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import NWBContainer, DynamicTable
+from .core import NWBContainer
 from .device import Device
+
+from hdmf.common import DynamicTable
 
 
 @register_class('IntracellularElectrode', CORE_NAMESPACE)

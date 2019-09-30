@@ -8,7 +8,8 @@ from hdmf.data_utils import DataChunkIterator, assertEqualShape
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTableRegion
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
+from hdmf.common import DynamicTableRegion
 from .device import Device
 
 

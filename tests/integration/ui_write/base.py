@@ -6,8 +6,11 @@ import numpy as np
 import h5py
 import numpy.testing as npt
 
-from pynwb import NWBContainer, get_manager, NWBFile, NWBData, NWBHDF5IO, validate as pynwb_validate
+from pynwb import get_manager, NWBFile, NWBHDF5IO, validate as pynwb_validate
+from pynwb.testing import remove_test_file
 from hdmf.backends.hdf5 import HDF5IO
+
+from hdmf.container import Data, Container
 
 CORE_NAMESPACE = 'core'
 
@@ -85,7 +88,7 @@ class TestMapNWBContainer(unittest.TestCase):
         type1 = type(container1)
         type2 = type(container2)
         self.assertEqual(type1, type2)
-        for nwbfield in container1.__nwbfields__:
+        for nwbfield in getattr(container1, container1._fieldsname):
             with self.subTest(nwbfield=nwbfield, container_type=type1.__name__):
                 f1 = getattr(container1, nwbfield)
                 f2 = getattr(container2, nwbfield)
@@ -93,10 +96,10 @@ class TestMapNWBContainer(unittest.TestCase):
                     f1 = f1[()]
                 if isinstance(f1, (tuple, list, np.ndarray)):
                     if len(f1) > 0:
-                        if isinstance(f1[0], NWBContainer):
+                        if isinstance(f1[0], Container):
                             for sub1, sub2 in zip(f1, f2):
                                 self.assertContainerEqual(sub1, sub2)
-                        elif isinstance(f1[0], NWBData):
+                        elif isinstance(f1[0], Data):
                             for sub1, sub2 in zip(f1, f2):
                                 self.assertDataEqual(sub1, sub2)
                         continue
@@ -109,21 +112,21 @@ class TestMapNWBContainer(unittest.TestCase):
                                 self.assertAlmostEqual(v1, v2, places=6)
                         else:
                             self.assertTrue(np.array_equal(f1, f2))
-                elif isinstance(f1, dict) and len(f1) and isinstance(next(iter(f1.values())), NWBContainer):
+                elif isinstance(f1, dict) and len(f1) and isinstance(next(iter(f1.values())), Container):
                     f1_keys = set(f1.keys())
                     f2_keys = set(f2.keys())
                     self.assertSetEqual(f1_keys, f2_keys)
                     for k in f1_keys:
                         with self.subTest(module_name=k):
                             self.assertContainerEqual(f1[k], f2[k])
-                elif isinstance(f1, NWBContainer):
+                elif isinstance(f1, Container):
                     self.assertContainerEqual(f1, f2)
-                elif isinstance(f1, NWBData) or isinstance(f2, NWBData):
-                    if isinstance(f1, NWBData) and isinstance(f2, NWBData):
+                elif isinstance(f1, Data) or isinstance(f2, Data):
+                    if isinstance(f1, Data) and isinstance(f2, Data):
                         self.assertDataEqual(f1, f2)
-                    elif isinstance(f1, NWBData):
+                    elif isinstance(f1, Data):
                         self.assertTrue(np.array_equal(f1.data, f2))
-                    elif isinstance(f2, NWBData):
+                    elif isinstance(f2, Data):
                         self.assertTrue(np.array_equal(f1.data, f2))
                 else:
                     if isinstance(f1, (float, np.float32, np.float16)):
@@ -156,8 +159,7 @@ class TestMapRoundTrip(TestMapNWBContainer):
             self.writer.close()
         if self.reader is not None:
             self.reader.close()
-        if os.path.exists(self.filename) and os.getenv("CLEAN_NWB", '1') not in ('0', 'false', 'FALSE', 'False'):
-            os.remove(self.filename)
+        remove_test_file(self.filename)
 
     def roundtripContainer(self, cache_spec=False):
         description = 'a file to test writing and reading a %s' % self.container_type
