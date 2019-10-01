@@ -61,7 +61,7 @@ If you have not already, you will need to clone the repo:
 
 .. code-block:: bash
 
-    $ git clone https://github.com/NeurodataWithoutBorders/pynwb.git
+    $ git clone --recurse-submodules https://github.com/NeurodataWithoutBorders/pynwb.git
 
 1) First create a new branch to work on
 
