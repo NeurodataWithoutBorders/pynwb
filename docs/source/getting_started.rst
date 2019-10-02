@@ -51,7 +51,7 @@ To install or update PyNWB distribution from conda-forge using conda simply run:
 Install latest pre-release
 --------------------------
 
-This is useful to tryout the latest features and also setup continuous integration of your
+This is useful to try out the latest features and also set up continuous integration of your
 own project against the latest version of PyNWB.
 
 .. code::
@@ -73,9 +73,9 @@ For development an editable install is recommended.
    $ pip install -U virtualenv
    $ virtualenv ~/pynwb
    $ source ~/pynwb/bin/activate
-   $ git clone git@github.com:NeurodataWithoutBorders/pynwb.git
+   $ git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
    $ cd pynwb
-   $ pip install -r requirements.txt -r requirements-dev.txt
+   $ pip install -r requirements.txt
    $ pip install -e .
 
 
@@ -89,7 +89,7 @@ For running the tests, it is required to install the development requirements.
    $ pip install -U virtualenv
    $ virtualenv ~/pynwb
    $ source ~/pynwb/bin/activate
-   $ git clone git@github.com:NeurodataWithoutBorders/pynwb.git
+   $ git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
    $ cd pynwb
    $ pip install -r requirements.txt -r requirements-dev.txt
    $ pip install -e .
