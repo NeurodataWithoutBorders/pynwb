@@ -13,11 +13,10 @@ print('found these packages:', pkgs)
 
 schema_dir = 'nwb-schema/core'
 
+# copy requirements from requirements.txt, ignore all pinned version info, but keep pinned version for hdmf
 reqs_re = re.compile("[<=>]+")
 with open('requirements.txt', 'r') as fp:
-    reqs = [reqs_re.split(x.strip())[0] for x in fp.readlines()]
-reqs.remove('hdmf')
-reqs.append('hdmf>=1.3.2')
+    reqs = [reqs_re.split(x.strip())[0] if not x.startswith('hdmf') else x.strip() for x in fp.readlines()]
 
 print(reqs)
 
