@@ -16,6 +16,8 @@ schema_dir = 'nwb-schema/core'
 reqs_re = re.compile("[<=>]+")
 with open('requirements.txt', 'r') as fp:
     reqs = [reqs_re.split(x.strip())[0] for x in fp.readlines()]
+reqs.remove('hdmf')
+reqs.append('hdmf>=1.3.2')
 
 print(reqs)
 
