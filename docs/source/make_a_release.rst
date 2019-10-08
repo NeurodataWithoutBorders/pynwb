@@ -92,7 +92,7 @@ PyPI: Step-by-step
 
   .. code::
 
-    $ cd /tmp && git clone git@github.com:NeurodataWithoutBorders/pynwb && cd pynwb
+    $ cd /tmp && git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb && cd pynwb
 
 
 5. Tag the release
