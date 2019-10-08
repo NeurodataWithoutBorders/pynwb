@@ -225,6 +225,20 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
 
+    @docval(*get_docval(_HDF5IO.read))
+    def read(self, **kwargs):
+        try:
+            return super(NWBHDF5IO, self).read(**kwargs)
+        except ValueError as e:
+            built = next(iter(self._HDF5IO__built.values()))
+            if '/nwb_version' in built and built['/nwb_version'].data[0] == '1':
+                raise Exception('file is version {} and is not supported by pynwb. See '
+                                'http://neurodatawithoutborders.github.io/api-python/ for help reading this file'
+                                ' (or just use h5py).'.
+                                format(built['/nwb_version'].data))
+            else:
+                raise e
+
 
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
