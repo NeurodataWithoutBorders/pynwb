@@ -94,7 +94,7 @@ class SpikeEventSeries(ElectricalSeries):
         name, data, electrodes = popargs('name', 'data', 'electrodes', kwargs)
         timestamps = getargs('timestamps', kwargs)
         if not (isinstance(data, TimeSeries) and isinstance(timestamps, TimeSeries)):
-            if not (isinstance(data, DataChunkIterator) and isinstance(timestamps, DataChunkIterator)):
+            if not (isinstance(data, DataChunkIterator) or isinstance(timestamps, DataChunkIterator)):
                 if len(data) != len(timestamps):
                     raise Exception('Must provide the same number of timestamps and spike events')
             else:
