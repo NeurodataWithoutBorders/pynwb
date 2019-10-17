@@ -7,7 +7,6 @@ from argparse import ArgumentParser
 from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager
 from hdmf.build import TypeMap as TypeMap
-from hdmf.backends.hdf5 import HDF5IO
 
 from pynwb import validate, available_namespaces, NWBHDF5IO
 from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
@@ -70,7 +69,11 @@ def main():
 
         if args.cached_namespace:
             catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-            namespaces = HDF5IO.load_namespaces(catalog, path).keys()
+            ns_deps = NWBHDF5IO.load_namespaces(catalog, path)
+            s = set(ns_deps.keys())       # determine which namespaces are the most
+            for k in ns_deps:             # specific (i.e. extensions) and validate
+                s -= ns_deps[k].keys()    # against those
+            namespaces = list(s)
             if len(namespaces) > 0:
                 tm = TypeMap(catalog)
                 manager = BuildManager(tm)
