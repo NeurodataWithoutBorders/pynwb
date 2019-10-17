@@ -129,7 +129,7 @@ jobs:
 
   python35:
     docker:
-      - image: circleci/python:3.5.4-jessie
+      - image: circleci/python:3.5.7-jessie
     environment:
      - TEST_TOX_ENV: "py35"
      - COVERAGE_TOX_ENV: "coverage-py35"
@@ -190,7 +190,7 @@ jobs:
 
   gallery35:
     docker:
-      - image: circleci/python:3.5.4-jessie
+      - image: circleci/python:3.5.7-jessie
     environment:
      - TEST_TOX_ENV: "gallery-py35"
     <<: *gallery-steps
