@@ -73,7 +73,7 @@ def main():
             s = set(ns_deps.keys())       # determine which namespaces are the most
             for k in ns_deps:             # specific (i.e. extensions) and validate
                 s -= ns_deps[k].keys()    # against those
-            namespaces = list(s)
+            namespaces = list(sorted(s))
             if len(namespaces) > 0:
                 tm = TypeMap(catalog)
                 manager = BuildManager(tm)
