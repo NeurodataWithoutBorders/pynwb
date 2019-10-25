@@ -1,4 +1,4 @@
-import unittest2 as unittest
+import unittest as unittest
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import os

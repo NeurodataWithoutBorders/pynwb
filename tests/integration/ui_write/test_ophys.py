@@ -1,4 +1,4 @@
-import unittest2 as unittest
+import unittest as unittest
 import numpy as np
 from copy import deepcopy
 

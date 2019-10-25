@@ -1,4 +1,4 @@
-import unittest2 as unittest
+import unittest as unittest
 
 from pynwb.file import MultiContainerInterface, NWBDataInterface
 from hdmf.utils import docval, get_docval
