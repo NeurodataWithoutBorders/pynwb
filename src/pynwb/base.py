@@ -1,9 +1,5 @@
 from warnings import warn
-
-try:
-    from collections.abc import Iterable  # Python 3
-except ImportError:
-    from collections import Iterable  # Python 2.7
+from collections.abc import Iterable
 
 from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
 from hdmf.common import DynamicTable

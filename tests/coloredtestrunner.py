@@ -48,7 +48,7 @@ except ImportError:
     from io import StringIO
 import sys
 import re
-import unittest2 as unittest
+import unittest
 import textwrap
 
 
