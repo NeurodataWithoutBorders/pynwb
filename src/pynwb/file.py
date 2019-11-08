@@ -293,9 +293,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'scratch', 'type': (list, tuple),
              'doc': 'scratch data', 'default': None})
     def __init__(self, **kwargs):
-        pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
-        pkwargs['name'] = 'root'
-        super(NWBFile, self).__init__(*pargs, **pkwargs)
+        kwargs['name'] = 'root'
+        call_docval_func(super(NWBFile, self).__init__, kwargs)
         self.fields['session_description'] = getargs('session_description', kwargs)
         self.fields['identifier'] = getargs('identifier', kwargs)
 

@@ -206,7 +206,6 @@ class NWBNamespaceBuilder(NamespaceBuilder):
              'doc': 'List of emails. Ordering should be the same as for author', 'default': None})
     def __init__(self, **kwargs):
         ''' Create a NWBNamespaceBuilder '''
-        args, vargs = fmt_docval_args(NamespaceBuilder.__init__, kwargs)
         kwargs['namespace_cls'] = NWBNamespace
-        super(NWBNamespaceBuilder, self).__init__(*args, **kwargs)
+        call_docval_func(super(NWBNamespaceBuilder, self).__init__, kwargs)
         self.include_namespace(CORE_NAMESPACE)
