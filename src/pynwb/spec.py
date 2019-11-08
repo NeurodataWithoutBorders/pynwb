@@ -3,7 +3,7 @@ from copy import copy, deepcopy
 from hdmf.spec import LinkSpec, GroupSpec, DatasetSpec, SpecNamespace,\
                        NamespaceBuilder, AttributeSpec, DtypeSpec, RefSpec
 from hdmf.spec.write import export_spec  # noqa: F401
-from hdmf.utils import docval, get_docval, fmt_docval_args
+from hdmf.utils import docval, get_docval, call_docval_func
 
 from . import CORE_NAMESPACE
 
@@ -31,8 +31,7 @@ class NWBRefSpec(RefSpec):
 
     @docval(*_ref_docval)
     def __init__(self, **kwargs):
-        args, kwargs = fmt_docval_args(RefSpec.__init__, kwargs)
-        super(NWBRefSpec, self).__init__(*args, **kwargs)
+        call_docval_func(super(NWBRefSpec, self).__init__, kwargs)
 
 
 _attr_docval = __swap_inc_def(AttributeSpec)
@@ -42,8 +41,7 @@ class NWBAttributeSpec(AttributeSpec):
 
     @docval(*_attr_docval)
     def __init__(self, **kwargs):
-        args, kwargs = fmt_docval_args(AttributeSpec.__init__, kwargs)
-        super(NWBAttributeSpec, self).__init__(*args, **kwargs)
+        call_docval_func(super(NWBAttributeSpec, self).__init__, kwargs)
 
 
 _link_docval = __swap_inc_def(LinkSpec)
@@ -53,8 +51,7 @@ class NWBLinkSpec(LinkSpec):
 
     @docval(*_link_docval)
     def __init__(self, **kwargs):
-        args, kwargs = fmt_docval_args(LinkSpec.__init__, kwargs)
-        super(NWBLinkSpec, self).__init__(*args, **kwargs)
+        call_docval_func(super(NWBLinkSpec, self).__init__, kwargs)
 
     @property
     def neurodata_type_inc(self):
@@ -124,8 +121,7 @@ class NWBDtypeSpec(DtypeSpec):
 
     @docval(*_dtype_docval)
     def __init__(self, **kwargs):
-        args, kwargs = fmt_docval_args(DtypeSpec.__init__, kwargs)
-        super(NWBDtypeSpec, self).__init__(*args, **kwargs)
+        call_docval_func(super(NWBDtypeSpec, self).__init__, kwargs)
 
 
 _dataset_docval = __swap_inc_def(DatasetSpec)

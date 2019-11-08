@@ -10,7 +10,7 @@ import copy as _copy
 import numpy as np
 import pandas as pd
 
-from hdmf.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -62,8 +62,7 @@ class Subject(NWBContainer):
              'doc': 'datetime of date of birth. May be supplied instead of age.'})
     def __init__(self, **kwargs):
         kwargs['name'] = 'subject'
-        pargs, pkwargs = fmt_docval_args(super(Subject, self).__init__, kwargs)
-        super(Subject, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(Subject, self).__init__, kwargs)
         self.age = getargs('age', kwargs)
         self.description = getargs('description', kwargs)
         self.genotype = getargs('genotype', kwargs)
