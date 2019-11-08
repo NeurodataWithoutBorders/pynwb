@@ -3,7 +3,7 @@ try:
 except ImportError:
     from collections import Iterable  # Python 2.7
 
-from hdmf.utils import docval, popargs, fmt_docval_args
+from hdmf.utils import docval, popargs, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer, NWBDataInterface
@@ -32,8 +32,7 @@ class AImage(NWBContainer):
     def __init__(self, **kwargs):
         data, bits_per_pixel, dimension, format, field_of_view = popargs(
             'data', 'bits_per_pixel', 'dimension', 'format', 'field_of_view', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(AImage, self).__init__, kwargs)
-        super(AImage, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(AImage, self).__init__, kwargs)
         self.data = data
         self.bits_per_pixel = bits_per_pixel
         self.dimension = format
@@ -57,8 +56,7 @@ class AxisMap(NWBContainer):
              'doc': 'Number of rows and columns in the image'})
     def __init__(self, **kwargs):
         data, field_of_view, unit, dimension = popargs('data', 'field_of_view', 'unit', 'dimension', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(AxisMap, self).__init__, kwargs)
-        super(AxisMap, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(AxisMap, self).__init__, kwargs)
         self.data = data
         self.field_of_view = field_of_view
         self.unit = unit
@@ -111,8 +109,7 @@ class ImagingRetinotopy(NWBDataInterface):
             focal_depth_image, sign_map, vasculature_image = popargs(
                 'axis_1_phase_map', 'axis_1_power_map', 'axis_2_phase_map', 'axis_2_power_map',
                 'axis_descriptions', 'focal_depth_image', 'sign_map', 'vasculature_image', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(ImagingRetinotopy, self).__init__, kwargs)
-        super(ImagingRetinotopy, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(ImagingRetinotopy, self).__init__, kwargs)
         self.axis_1_phase_map = axis_1_phase_map
         self.axis_1_power_map = axis_1_power_map
         self.axis_2_phase_map = axis_2_phase_map

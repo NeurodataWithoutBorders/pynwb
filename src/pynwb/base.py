@@ -5,7 +5,7 @@ try:
 except ImportError:
     from collections import Iterable  # Python 2.7
 
-from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from hdmf.utils import docval, getargs, popargs, call_docval_func
 from hdmf.common import DynamicTable
 
 
@@ -126,8 +126,7 @@ class TimeSeries(NWBDataInterface):
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
-        pargs, pkwargs = fmt_docval_args(super(TimeSeries, self).__init__, kwargs)
-        super(TimeSeries, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(TimeSeries, self).__init__, kwargs)
         keys = ("resolution",
                 "comments",
                 "description",
