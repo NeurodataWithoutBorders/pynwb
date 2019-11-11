@@ -130,7 +130,7 @@ class TetrodeSeries(ElectricalSeries):
 #
 # If you do not want to write additional code to read your extensions, PyNWB is able to dynamically
 # create an :py:class:`~pynwb.core.NWBContainer` subclass for use within the PyNWB API.
-# Dynamically created classes can be inspected using the built-in :py:func:`.help` or the :py:mod:`inspect` module.
+# Dynamically created classes can be inspected using the built-in :py:mod:`inspect` module.
 
 
 from pynwb import get_class, load_namespaces
@@ -257,7 +257,7 @@ ns_builder.include_type('NWBDataInterface', namespace='core')
 
 potato = NWBGroupSpec(neurodata_type_def='Potato',
                       neurodata_type_inc='NWBDataInterface',
-                      doc='object to put in a multi-container', quantity='*',
+                      doc='A potato', quantity='*',
                       attributes=[
                           NWBAttributeSpec(name='weight',
                                            doc='weight of potato',
@@ -266,24 +266,14 @@ potato = NWBGroupSpec(neurodata_type_def='Potato',
                           NWBAttributeSpec(name='age',
                                            doc='age of potato',
                                            dtype='float',
-                                           required=False),
-                          NWBAttributeSpec(name='help',
-                                           doc='help',
-                                           dtype='text',
-                                           value="It's a potato")
+                                           required=False)
                       ])
 
 potato_sack = NWBGroupSpec(neurodata_type_def='PotatoSack',
                            neurodata_type_inc='NWBDataInterface',
                            name='potato_sack',
-                           doc='test of multi-container', quantity='?',
-                           groups=[potato],
-                           attributes=[
-                               NWBAttributeSpec(name='help',
-                                                doc='help',
-                                                dtype='text',
-                                                value="It's a sack of potatoes")
-                           ])
+                           doc='A sack of potatoes', quantity='?',
+                           groups=[potato])
 
 ns_builder.add_spec(ext_source, potato_sack)
 ns_builder.export(ns_path)
@@ -322,8 +312,6 @@ class PotatoSack(MultiContainerInterface):
         'create': 'create_potato',
     }
 
-    __help = 'info about potatoes'
-
 
 ####################
 # Then use the objects (again, this would often be done in a different file).
@@ -361,3 +349,102 @@ print(nwb.get_processing_module()['potato_sack'].get_potato('big_potato').weight
 # an argument to get get_potato
 
 io.close()
+
+####################
+# Example: Cortical Surface Mesh
+# -----------------------------------------------------
+#
+# Here we show how to create extensions by creating a data class for a
+# cortical surface mesh. This data type is particularly important for ECoG data, we need to know where each electrode is
+# with respect to the gyri and sucli. Surface mesh objects contain two types of data:
+#
+# 1. `vertices`, which is an (n, 3) matrix of floats that represents points in 3D space
+#
+# 2. `faces`, which is an (m, 3) matrix of uints that represents indices of the `vertices` matrix. Each triplet of
+# points defines a triangular face, and the mesh is comprised of a collection of triangular faces.
+#
+# First, we set up our extension. I am going to use the name `ecog`
+
+from pynwb.spec import NWBDatasetSpec, NWBNamespaceBuilder, NWBGroupSpec
+
+name = 'ecog'
+ns_path = name + ".namespace.yaml"
+ext_source = name + ".extensions.yaml"
+
+# Now we define the data structures. We use `NWBDataInterface` as the base type,
+# which is the most primitive type you are likely to use as a base. The name of the
+# class is `CorticalSurface`, and it requires two matrices, `vertices` and
+# `faces`.
+
+surface = NWBGroupSpec(doc='brain cortical surface',
+                       datasets=[
+                           NWBDatasetSpec(doc='faces for surface, indexes vertices', shape=(None, 3),
+                                          name='faces', dtype='uint', dims=('face_number', 'vertex_index')),
+                           NWBDatasetSpec(doc='vertices for surface, points in 3D space', shape=(None, 3),
+                                          name='vertices', dtype='float', dims=('vertex_number', 'xyz'))],
+                       neurodata_type_def='CorticalSurface',
+                       neurodata_type_inc='NWBDataInterface')
+
+# Now we set up the builder and add this object
+
+ns_builder = NWBNamespaceBuilder(name + ' extensions', name)
+ns_builder.add_spec(ext_source, surface)
+ns_builder.export(ns_path)
+
+################
+# The above should generate 2 YAML files. `ecog.extensions.yaml`,
+# defines the newly defined types
+#
+# .. code-block:: yaml
+#
+#     # ecog.namespace.yaml
+#       groups:
+#       - datasets:
+#       - dims:
+#           - face_number
+#           - vertex_index
+#           doc: faces for surface, indexes vertices
+#           dtype: uint
+#           name: faces
+#           shape:
+#           - null
+#           - 3
+#       - dims:
+#           - vertex_number
+#           - xyz
+#           doc: vertices for surface, points in 3D space
+#           dtype: float
+#           name: vertices
+#           shape:
+#           - null
+#           - 3
+#       doc: brain cortical surface
+#       neurodata_type_def: CorticalSurface
+#       neurodata_type_inc: NWBDataInterface
+#
+# Finally, we should test the new types to make sure they run as expected
+
+from pynwb import load_namespaces, get_class, NWBHDF5IO, NWBFile
+from datetime import datetime
+import numpy as np
+
+load_namespaces('ecog.namespace.yaml')
+CorticalSurface = get_class('CorticalSurface', 'ecog')
+
+cortical_surface = CorticalSurface(vertices=[[0.0, 1.0, 1.0],
+                                             [1.0, 1.0, 2.0],
+                                             [2.0, 2.0, 1.0],
+                                             [2.0, 1.0, 1.0],
+                                             [1.0, 2.0, 1.0]],
+                                   faces=np.array([[0, 1, 2], [1, 2, 3]]).astype('uint'),
+                                   name='cortex')
+
+nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now())
+
+cortex_module = nwbfile.create_processing_module(name='cortex',
+                                                 description='description')
+cortex_module.add_container(cortical_surface)
+
+
+with NWBHDF5IO('test_cortical_surface.nwb', 'w') as io:
+    io.write(nwbfile)

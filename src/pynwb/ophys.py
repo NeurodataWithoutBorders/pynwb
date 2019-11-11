@@ -3,12 +3,13 @@ try:
 except ImportError:
     from collections import Iterable  # Python 2.7
 
-from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .image import ImageSeries
-from .core import NWBContainer, MultiContainerInterface, DynamicTable, DynamicTableRegion, NWBDataInterface
+from .core import NWBContainer, MultiContainerInterface, NWBDataInterface
+from hdmf.common import DynamicTable, DynamicTableRegion
 from .device import Device
 import numpy as np
 
@@ -23,11 +24,10 @@ class OpticalChannel(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},  # required
             {'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},  # required
-            {'name': 'emission_lambda', 'type': float, 'doc': 'Emission lambda for channel.'})  # required
+            {'name': 'emission_lambda', 'type': 'float', 'doc': 'Emission lambda for channel.'})  # required
     def __init__(self, **kwargs):
         description, emission_lambda = popargs("description", "emission_lambda", kwargs)
-        pargs, pkwargs = fmt_docval_args(super(OpticalChannel, self).__init__, kwargs)
-        super(OpticalChannel, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(OpticalChannel, self).__init__, kwargs)
         self.description = description
         self.emission_lambda = emission_lambda
 
@@ -54,29 +54,29 @@ class ImagingPlane(NWBContainer):
              'doc': 'One of possibly many groups storing channelspecific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},  # required
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},  # required
-            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},  # required
-            {'name': 'imaging_rate', 'type': float, 'doc': 'Rate images are acquired, in Hz.'},  # required
+            {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},  # required
+            {'name': 'imaging_rate', 'type': 'float', 'doc': 'Rate images are acquired, in Hz.'},  # required
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},  # required
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},  # required
             {'name': 'manifold', 'type': Iterable,
              'doc': 'Physical position of each pixel. size=("height", "width", "xyz").',
              'default': None},
-            {'name': 'conversion', 'type': float,
+            {'name': 'conversion', 'type': 'float',
              'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)',
              'default': 1.0},
             {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).',
              'default': 'meters'},
             {'name': 'reference_frame', 'type': str,
-             'doc': 'Describes position and reference frame of manifold based on position of first element \
-                     in manifold.', 'default': None})
+             'doc': 'Describes position and reference frame of manifold based on position of first element '
+                    'in manifold.',
+             'default': None})
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, \
             indicator, location, manifold, conversion, unit, reference_frame = popargs(
                 'optical_channel', 'description', 'device', 'excitation_lambda',
                 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion',
                 'unit', 'reference_frame', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(ImagingPlane, self).__init__, kwargs)
-        super(ImagingPlane, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(ImagingPlane, self).__init__, kwargs)
         self.optical_channel = optical_channel if isinstance(optical_channel, list) else [optical_channel]
         self.description = description
         self.device = device
@@ -101,8 +101,6 @@ class TwoPhotonSeries(ImageSeries):
                      'pmt_gain',
                      'scan_line_rate')
 
-    _help = "Image stack recorded from 2-photon microscope."
-
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
@@ -111,10 +109,10 @@ class TwoPhotonSeries(ImageSeries):
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
-            {'name': 'pmt_gain', 'type': float, 'doc': 'Photomultiplier gain.', 'default': None},
-            {'name': 'scan_line_rate', 'type': float,
-             'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept \
-             here as it is useful information for analysis, and so good to be stored w/ the actual data.',
+            {'name': 'pmt_gain', 'type': 'float', 'doc': 'Photomultiplier gain.', 'default': None},
+            {'name': 'scan_line_rate', 'type': 'float',
+             'doc': 'Lines imaged per second. This is also stored in /general/optophysiology but is kept '
+                    'here as it is useful information for analysis, and so good to be stored w/ the actual data.',
              'default': None},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
@@ -122,8 +120,7 @@ class TwoPhotonSeries(ImageSeries):
     def __init__(self, **kwargs):
         field_of_view, imaging_plane, pmt_gain, scan_line_rate = popargs(
             'field_of_view', 'imaging_plane', 'pmt_gain', 'scan_line_rate', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(TwoPhotonSeries, self).__init__, kwargs)
-        super(TwoPhotonSeries, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(TwoPhotonSeries, self).__init__, kwargs)
         self.field_of_view = field_of_view
         self.imaging_plane = imaging_plane
         self.pmt_gain = pmt_gain
@@ -142,8 +139,6 @@ class CorrectedImageStack(NWBDataInterface):
                      'original',
                      'xy_translation')
 
-    _help = ""
-
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
             {'name': 'corrected', 'type': ImageSeries,
@@ -151,11 +146,11 @@ class CorrectedImageStack(NWBDataInterface):
             {'name': 'original', 'type': ImageSeries,
              'doc': 'Link to image series that is being registered.'},
             {'name': 'xy_translation', 'type': TimeSeries,
-             'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates,\
-             for example, to align each frame to a reference image.'})
+             'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates, '
+                    'for example, to align each frame to a reference image.'})
     def __init__(self, **kwargs):
         corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
-        super(CorrectedImageStack, self).__init__(**kwargs)
+        call_docval_func(super(CorrectedImageStack, self).__init__, kwargs)
         self.corrected = corrected
         self.original = original
         self.xy_translation = xy_translation
@@ -174,8 +169,6 @@ class MotionCorrection(MultiContainerInterface):
         'type': CorrectedImageStack,
         'attr': 'corrected_images_stacks'
     }
-
-    _help = "Image stacks whose frames have been shifted (registered) to account for motion."
 
 
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
@@ -207,8 +200,7 @@ class PlaneSegmentation(DynamicTable):
         if kwargs.get('name') is None:
             kwargs['name'] = imaging_plane.name
         columns, colnames = getargs('columns', 'colnames', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
-        super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(PlaneSegmentation, self).__init__, kwargs)
         self.imaging_plane = imaging_plane
         if isinstance(reference_images, ImageSeries):
             reference_images = (reference_images,)
@@ -223,7 +215,7 @@ class PlaneSegmentation(DynamicTable):
             {'name': 'image_mask', 'type': 'array_data', 'default': None,
              'doc': 'image with the same size of image where positive values mark this ROI',
              'shape': [[None]*2, [None]*3]},
-            {'name': 'id', 'type': int, 'help': 'the ID for the ROI', 'default': None},
+            {'name': 'id', 'type': int, 'doc': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_roi(self, **kwargs):
         """
@@ -295,8 +287,6 @@ class ImageSegmentation(MultiContainerInterface):
         'create': 'create_plane_segmentation'
     }
 
-    _help = "Stores groups of pixels that define regions of interest from one or more imaging planes"
-
     @docval({'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'the ImagingPlane this ROI applies to'},
             {'name': 'description', 'type': str,
              'doc': 'Description of image plane, recording wavelength, depth, etc.', 'default': None},
@@ -314,8 +304,6 @@ class RoiResponseSeries(TimeSeries):
 
     __nwbfields__ = ({'name': 'rois', 'child': True},)
 
-    _help = "ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one no ROI."
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'shape': ((None, ), (None, None)),
@@ -327,8 +315,7 @@ class RoiResponseSeries(TimeSeries):
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         rois = popargs('rois', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(RoiResponseSeries, self).__init__, kwargs)
-        super(RoiResponseSeries, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(RoiResponseSeries, self).__init__, kwargs)
         self.rois = rois
 
 
@@ -347,8 +334,6 @@ class DfOverF(MultiContainerInterface):
         'create': 'create_roi_response_series'
     }
 
-    _help = "Df/f over time of one or more ROIs. TimeSeries names should correspond to imaging plane names"
-
 
 @register_class('Fluorescence', CORE_NAMESPACE)
 class Fluorescence(MultiContainerInterface):
@@ -364,5 +349,3 @@ class Fluorescence(MultiContainerInterface):
         'get': 'get_roi_response_series',
         'create': 'create_roi_response_series'
     }
-
-    _help = "Fluorescence over time of one or more ROIs. TimeSeries names should correspond to imaging plane names."

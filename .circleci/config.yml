@@ -20,6 +20,8 @@ references:
   ci-steps: &ci-steps
     steps:
       - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
       - run:
           <<: *initialize-venv
       - run:
@@ -65,6 +67,8 @@ references:
   conda-steps: &conda-steps
     steps:
       - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
       - run:
           name: Configure conda
           command: |
@@ -89,6 +93,8 @@ references:
   gallery-steps: &gallery-steps
     steps:
       - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
       - restore_cache:
           keys:
             - ophys-data-cache
@@ -123,7 +129,7 @@ jobs:
 
   python35:
     docker:
-      - image: circleci/python:3.5.4-jessie
+      - image: circleci/python:3.5.7-jessie
     environment:
      - TEST_TOX_ENV: "py35"
      - COVERAGE_TOX_ENV: "coverage-py35"
@@ -184,7 +190,7 @@ jobs:
 
   gallery35:
     docker:
-      - image: circleci/python:3.5.4-jessie
+      - image: circleci/python:3.5.7-jessie
     environment:
      - TEST_TOX_ENV: "gallery-py35"
     <<: *gallery-steps

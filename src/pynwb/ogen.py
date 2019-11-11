@@ -1,4 +1,4 @@
-from hdmf.utils import docval, popargs, fmt_docval_args, get_docval
+from hdmf.utils import docval, popargs, get_docval, call_docval_func
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -19,13 +19,12 @@ class OptogeneticStimulusSite(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this stimulus site'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used'},
             {'name': 'description', 'type': str, 'doc': 'Description of site.'},
-            {'name': 'excitation_lambda', 'type': float, 'doc': 'Excitation wavelength in nm.'},
+            {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},
             {'name': 'location', 'type': str, 'doc': 'Location of stimulation site.'})
     def __init__(self, **kwargs):
         device, description, excitation_lambda, location = popargs(
             'device', 'description', 'excitation_lambda', 'location', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(OptogeneticStimulusSite, self).__init__, kwargs)
-        super(OptogeneticStimulusSite, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(OptogeneticStimulusSite, self).__init__, kwargs)
         self.device = device
         self.description = description
         self.excitation_lambda = excitation_lambda
@@ -39,8 +38,6 @@ class OptogeneticSeries(TimeSeries):
     '''
 
     __nwbfields__ = ('site',)
-
-    _help = "Optogenetic stimulus."
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required

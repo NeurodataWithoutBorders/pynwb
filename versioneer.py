@@ -1,4 +1,3 @@
-# flake8: noqa: C901
 # Version: 0.18
 
 """The Versioneer - like a rocketeer, but for versions.
@@ -676,7 +675,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = run_command(GITS, ["describe", "--tags", "--dirty",
                                           "--always", "--long",
-                                          "--match", "%%s" %% match_argument],
+                                          "--match", "%s" % match_argument],
                                    cwd=root)
     # --long was added in git-1.5.5
     if describe_out is None:
@@ -1092,6 +1091,7 @@ def git_pieces_from_vcs(tag_prefix, root, verbose, run_command=run_command):
     match_argument = tag_prefix
     if not tag_is_glob_pattern:
         match_argument = tag_prefix + "*"
+
     # if there is a tag matching tag_prefix, this yields TAG-NUM-gHEX[-dirty]
     # if there isn't one, this yields HEX[-dirty] (no NUM)
     describe_out, rc = run_command(GITS, ["describe", "--tags", "--dirty",

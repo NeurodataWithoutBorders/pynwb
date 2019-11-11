@@ -5,7 +5,7 @@ from hdmf.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuild
 from pynwb.ecephys import ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, Clustering, ClusterWaveforms,\
                           SpikeEventSeries, EventWaveform, EventDetection, FeatureExtraction
 from pynwb.device import Device
-from pynwb.core import DynamicTableRegion
+from hdmf.common import DynamicTableRegion
 from pynwb.file import ElectrodeTable as get_electrode_table
 
 from . import base
@@ -25,12 +25,10 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
                                       attributes={'neurodata_type': 'Device',
-                                                  'namespace': 'core',
-                                                  'help': 'A recording device e.g. amplifier'})
+                                                  'namespace': 'core'})
         return GroupBuilder('elec1',
                             attributes={'neurodata_type': 'ElectrodeGroup',
                                         'namespace': 'core',
-                                        'help': 'A physical grouping of channels',
                                         'description': 'a test ElectrodeGroup',
                                         'location': 'a nonexistent place'},
                             links={
@@ -68,12 +66,10 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
     def get_table_builder(self):
         self.device_builder = GroupBuilder('dev1',
                                            attributes={'neurodata_type': 'Device',
-                                                       'namespace': 'core',
-                                                       'help': 'A recording device e.g. amplifier'})
+                                                       'namespace': 'core'})
         self.eg_builder = GroupBuilder('tetrode1',
                                        attributes={'neurodata_type': 'ElectrodeGroup',
                                                    'namespace': 'core',
-                                                   'help': 'A physical grouping of channels',
                                                    'description': 'tetrode description',
                                                    'location': 'tetrode location'},
                                        links={
@@ -82,42 +78,33 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
 
         datasets = [
             DatasetBuilder('id', data=[1, 2, 3, 4],
-                           attributes={'help': 'unique identifiers for a list of elements',
-                                       'neurodata_type': 'ElementIdentifiers', 'namespace': 'core'}),
+                           attributes={'neurodata_type': 'ElementIdentifiers', 'namespace': 'core'}),
             DatasetBuilder('x', data=[1.0, 1.0, 1.0, 1.0],
-                           attributes={'help': 'Values for a list of elements',
-                                       'description': 'the x coordinate of the channel location',
+                           attributes={'description': 'the x coordinate of the channel location',
                                        'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('y', data=[2.0, 2.0, 2.0, 2.0],
-                           attributes={'help': 'Values for a list of elements',
-                                       'description': 'the y coordinate of the channel location',
+                           attributes={'description': 'the y coordinate of the channel location',
                                        'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('z', data=[3.0, 3.0, 3.0, 3.0],
-                           attributes={'help': 'Values for a list of elements',
-                                       'description': 'the z coordinate of the channel location',
+                           attributes={'description': 'the z coordinate of the channel location',
                                        'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('imp', data=[-1.0, -2.0, -3.0, -4.0],
-                           attributes={'help': 'Values for a list of elements',
-                                       'description': 'the impedance of the channel',
+                           attributes={'description': 'the impedance of the channel',
                                        'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('location', data=['CA1', 'CA1', 'CA1', 'CA1'],
-                           attributes={'help': 'Values for a list of elements',
-                                       'description': 'the location of channel within the subject e.g. brain region',
+                           attributes={'description': 'the location of channel within the subject e.g. brain region',
                                        'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('filtering', data=['none', 'none', 'none', 'none'],
-                           attributes={'help': 'Values for a list of elements',
-                                       'description': 'description of hardware filtering',
+                           attributes={'description': 'description of hardware filtering',
                                        'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('group', data=[ReferenceBuilder(self.eg_builder),
                                           ReferenceBuilder(self.eg_builder),
                                           ReferenceBuilder(self.eg_builder),
                                           ReferenceBuilder(self.eg_builder)],
-                           attributes={'help': 'Values for a list of elements',
-                                       'description': 'a reference to the ElectrodeGroup this electrode is a part of',
+                           attributes={'description': 'a reference to the ElectrodeGroup this electrode is a part of',
                                        'neurodata_type': 'VectorData', 'namespace': 'core'}),
             DatasetBuilder('group_name', data=['tetrode1', 'tetrode1', 'tetrode1', 'tetrode1'],
-                           attributes={'help': 'Values for a list of elements',
-                                       'description': 'the name of the ElectrodeGroup this electrode is a part of',
+                           attributes={'description': 'the name of the ElectrodeGroup this electrode is a part of',
                                        'neurodata_type': 'VectorData', 'namespace': 'core'}),
         ]
         return GroupBuilder('electrodes', datasets={d.name: d for d in datasets},
@@ -131,42 +118,39 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
                                                      b'group_name'),
                                         'description': 'metadata about extracellular electrodes',
                                         'neurodata_type': 'DynamicTable',
-                                        'namespace': 'core',
-                                        'help': 'A column-centric table'})
+                                        'namespace': 'core'})
 
     def setUpContainer(self):
         self.make_electrode_table(self)
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
-        ret = ElectricalSeries('test_eS', data, region, timestamps=timestamps)
+        ret = ElectricalSeries('test_eS', data, region, channel_conversion=[4., .4], timestamps=timestamps)
         return ret
 
     def setUpBuilder(self):
         table_builder = self.get_table_builder(self)
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
+
+        data_builder = DatasetBuilder('data', data,
+                                      attributes={'unit': 'volts',
+                                                  'conversion': 1.0,
+                                                  'resolution': 0.0})
+        timestamps_builder = DatasetBuilder('timestamps', timestamps, attributes={'unit': 'seconds', 'interval': 1})
+        elec_builder = DatasetBuilder('electrodes', data=[0, 2],
+                                      attributes={'neurodata_type': 'DynamicTableRegion',
+                                                  'namespace': 'core',
+                                                  'table': ReferenceBuilder(table_builder),
+                                                  'description': 'the first and third electrodes'})
         return GroupBuilder('test_eS',
                             attributes={'namespace': base.CORE_NAMESPACE,
                                         'comments': 'no comments',
                                         'description': 'no description',
-                                        'neurodata_type': 'ElectricalSeries',
-                                        'help': 'Stores acquired voltage data from extracellular recordings'},
-                            datasets={'data': DatasetBuilder('data',
-                                                             data,
-                                                             attributes={'unit': 'volts',
-                                                                         'conversion': 1.0,
-                                                                         'resolution': 0.0}),
-                                      'timestamps': DatasetBuilder('timestamps',
-                                                                   timestamps,
-                                                                   attributes={'unit': 'seconds', 'interval': 1}),
-                                      'electrodes': DatasetBuilder('electrodes', data=[0, 2],
-                                                                  attributes={
-                                                                      'neurodata_type': 'DynamicTableRegion',
-                                                                      'namespace': 'core',
-                                                                      'table': ReferenceBuilder(table_builder),
-                                                                      'description': 'the first and third electrodes',
-                                                                      'help': 'a subset (i.e. slice or region) of a DynamicTable'})})  # noqa: E501
+                                        'neurodata_type': 'ElectricalSeries'},
+                            datasets={'data': data_builder,
+                                      'timestamps': timestamps_builder,
+                                      'electrodes': elec_builder})
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
@@ -193,57 +177,53 @@ class TestMultiElectricalSeries(with_metaclass(ABCMeta, base.TestDataInterfaceIO
         data2 = list(zip(reversed(range(10)), reversed(range(10, 20))))
         timestamps = list(map(lambda x: x/10, range(10)))
         es1 = ElectricalSeries('test_eS1', data1, region1, timestamps=timestamps)
-        es2 = ElectricalSeries('test_eS2', data2, region2, timestamps=timestamps)
-        return (es1, es2)
+        es2 = ElectricalSeries('test_eS2', data2, region2, channel_conversion=[4., .4], timestamps=timestamps)
+        return es1, es2
 
     def setUpElectricalSeriesBuilders(self):
         table_builder = TestElectricalSeriesIO.get_table_builder(self)
         data = list(zip(range(10), range(10, 20)))
         timestamps = list(map(lambda x: x/10, range(10)))
+
+        data_builder = DatasetBuilder('data', data,
+                                      attributes={'unit': 'volts',
+                                                  'conversion': 1.0,
+                                                  'resolution': 0.0})
+        timestamps_builder = DatasetBuilder('timestamps', timestamps, attributes={'unit': 'seconds', 'interval': 1})
+        elec_builder = DatasetBuilder('electrodes', data=[0, 2],
+                                      attributes={'neurodata_type': 'DynamicTableRegion',
+                                                  'namespace': 'core',
+                                                  'table': ReferenceBuilder(table_builder),
+                                                  'description': 'the first and third electrodes'})
         es1 = GroupBuilder('test_eS1',
-                            attributes={'namespace': base.CORE_NAMESPACE,
-                                        'comments': 'no comments',
-                                        'description': 'no description',
-                                        'neurodata_type': 'ElectricalSeries',
-                                        'help': 'Stores acquired voltage data from extracellular recordings'},
-                            datasets={'data': DatasetBuilder('data',
-                                                             data,
-                                                             attributes={'unit': 'volts',
-                                                                         'conversion': 1.0,
-                                                                         'resolution': 0.0}),
-                                      'timestamps': DatasetBuilder('timestamps',
-                                                                   timestamps,
-                                                                   attributes={'unit': 'seconds', 'interval': 1}),
-                                      'electrodes': DatasetBuilder('electrodes', data=[0, 2],
-                                                                   attributes={
-                                                                      'neurodata_type': 'DynamicTableRegion',
-                                                                      'table': ReferenceBuilder(table_builder),
-                                                                      'namespace': 'core',
-                                                                      'description': 'the first and third electrodes',
-                                                                      'help': 'a subset (i.e. slice or region) of a DynamicTable'})})  # noqa: E501
+                           attributes={'namespace': base.CORE_NAMESPACE,
+                                       'comments': 'no comments',
+                                       'description': 'no description',
+                                       'neurodata_type': 'ElectricalSeries'},
+                           datasets={'data': data_builder,
+                                     'timestamps': timestamps_builder,
+                                     'electrodes': elec_builder})
         data = list(zip(reversed(range(10)), reversed(range(10, 20))))
+
+        data_builder = DatasetBuilder('data', data,
+                                      attributes={'unit': 'volts',
+                                                  'conversion': 1.0,
+                                                  'resolution': 0.0})
+        timestamps_builder = DatasetBuilder('timestamps', timestamps, attributes={'unit': 'seconds', 'interval': 1})
+        elec_builder = DatasetBuilder('electrodes', data=[1, 3],
+                                      attributes={'neurodata_type': 'DynamicTableRegion',
+                                                  'namespace': 'core',
+                                                  'table': ReferenceBuilder(table_builder),
+                                                  'description': 'the second and fourth electrodes'})
         es2 = GroupBuilder('test_eS2',
-                            attributes={'namespace': base.CORE_NAMESPACE,
-                                        'comments': 'no comments',
-                                        'description': 'no description',
-                                        'neurodata_type': 'ElectricalSeries',
-                                        'help': 'Stores acquired voltage data from extracellular recordings'},
-                            datasets={'data': DatasetBuilder('data',
-                                                             data,
-                                                             attributes={'unit': 'volts',
-                                                                         'conversion': 1.0,
-                                                                         'resolution': 0.0}),
-                                      'timestamps': DatasetBuilder('timestamps',
-                                                                   timestamps,
-                                                                   attributes={'unit': 'seconds', 'interval': 1}),
-                                      'electrodes': DatasetBuilder('electrodes', data=[1, 3],
-                                                                   attributes={
-                                                                      'neurodata_type': 'DynamicTableRegion',
-                                                                      'namespace': 'core',
-                                                                      'table':  ReferenceBuilder(table_builder),
-                                                                      'description': 'the second and fourth electrodes',
-                                                                      'help': 'a subset (i.e. slice or region) of a DynamicTable'})})  # noqa: E501
-        return (es1, es2)
+                           attributes={'namespace': base.CORE_NAMESPACE,
+                                       'comments': 'no comments',
+                                       'description': 'no description',
+                                       'neurodata_type': 'ElectricalSeries'},
+                           datasets={'data': data_builder,
+                                     'timestamps': timestamps_builder,
+                                     'electrodes': elec_builder})
+        return es1, es2
 
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
@@ -270,9 +250,7 @@ class TestLFP(TestMultiElectricalSeries):
         es = self.setUpElectricalSeriesBuilders()
         ret = GroupBuilder('LFP',
                            attributes={'namespace': base.CORE_NAMESPACE,
-                                       'neurodata_type': 'LFP',
-                                       'help': ('LFP data from one or more channels. Filter properties should be '
-                                                'noted in the ElectricalSeries')},
+                                       'neurodata_type': 'LFP'},
                            groups={'test_es1': es[0], 'test_es2': es[1]})
         return ret
 
@@ -288,10 +266,7 @@ class TestFilteredEphys(TestMultiElectricalSeries):
         es = self.setUpElectricalSeriesBuilders()
         ret = GroupBuilder('FilteredEphys',
                            attributes={'namespace': base.CORE_NAMESPACE,
-                                       'neurodata_type': 'FilteredEphys',
-                                       'help': ('Ephys data from one or more channels that is subjected to filtering, '
-                                                'such as for gamma or theta oscillations (LFP has its own interface). '
-                                                'Filter properties should be noted in the ElectricalSeries')},
+                                       'neurodata_type': 'FilteredEphys'},
                            groups={'test_es1': es[0], 'test_es2': es[1]})
         return ret
 
@@ -301,7 +276,6 @@ class TestClusteringIO(base.TestDataInterfaceIO):
     def setUpBuilder(self):
         return GroupBuilder('Clustering',
                             attributes={
-                                'help': 'Clustered spike data, whether from automatic clustering tools (eg, klustakwik) or as a result of manual sorting',  # noqa: E501
                                 'neurodata_type': 'Clustering',
                                 'namespace': base.CORE_NAMESPACE},
                             datasets={

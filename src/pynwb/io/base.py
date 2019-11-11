@@ -11,7 +11,9 @@ class ModuleMap(NWBContainerMapper):
     def __init__(self, spec):
         super(ModuleMap, self).__init__(spec)
         containers_spec = self.spec.get_neurodata_type('NWBDataInterface')
+        table_spec = self.spec.get_neurodata_type('DynamicTable')
         self.map_spec('data_interfaces', containers_spec)
+        self.map_spec('data_interfaces', table_spec)
 
     @NWBContainerMapper.constructor_arg('name')
     def name(self, builder, manager):
@@ -27,8 +29,11 @@ class TimeSeriesMap(NWBContainerMapper):
         self.map_spec('unit', data_spec.get_attribute('unit'))
         self.map_spec('resolution', data_spec.get_attribute('resolution'))
         self.map_spec('conversion', data_spec.get_attribute('conversion'))
+
         timestamps_spec = self.spec.get_dataset('timestamps')
         self.map_spec('timestamps_unit', timestamps_spec.get_attribute('unit'))
+        self.map_spec('interval', timestamps_spec.get_attribute('interval'))
+
         startingtime_spec = self.spec.get_dataset('starting_time')
         self.map_spec('starting_time_unit', startingtime_spec.get_attribute('unit'))
         self.map_spec('rate', startingtime_spec.get_attribute('rate'))

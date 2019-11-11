@@ -1,32 +1,7 @@
-trigger:
-- dev
-
 jobs:
-
-- job: 'Dummy'
-  displayName: 'Dummy'
-
-  pool:
-    vmImage: 'ubuntu-16.04'
-
-  steps:
-
-  - task: UsePythonVersion@0
-    inputs:
-      versionSpec: '3.7'
-      architecture: 'x64'
-
-  - script: |
-      python -m pip install --upgrade pip
-    displayName: 'Install build dependencies'
-
-  - script: |
-      python --version
-    displayName: 'Check Python version'
 
 - job: 'Test'
   displayName: "Test PyNWB"
-  dependsOn: Dummy
 
   strategy:
     matrix:
@@ -82,6 +57,9 @@ jobs:
     vmImage: $(imageName)
 
   steps:
+
+  - checkout: self
+    submodules: true
 
   - task: UsePythonVersion@0
     inputs:

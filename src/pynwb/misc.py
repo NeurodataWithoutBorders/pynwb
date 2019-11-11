@@ -10,7 +10,7 @@ from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from .core import DynamicTable
+from hdmf.common import DynamicTable
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -25,8 +25,6 @@ class AnnotationSeries(TimeSeries):
 
     __nwbfields__ = ()
 
-    _help = "Time-stamped annotations about an experiment."
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
@@ -36,7 +34,7 @@ class AnnotationSeries(TimeSeries):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
         super(AnnotationSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'time', 'type': float, 'doc': 'The time for the annotation'},
+    @docval({'name': 'time', 'type': 'float', 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
     def add_annotation(self, **kwargs):
         '''
@@ -61,8 +59,6 @@ class AbstractFeatureSeries(TimeSeries):
     __nwbfields__ = ('feature_units',
                      'features')
 
-    _help = "Features of an applied stimulus. This is useful when storing the raw stimulus is impractical."
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'feature_units', 'type': Iterable, 'shape': (None, ),  # required
              'doc': 'The unit of each feature'},
@@ -80,7 +76,7 @@ class AbstractFeatureSeries(TimeSeries):
         self.features = features
         self.feature_units = feature_units
 
-    @docval({'name': 'time', 'type': float, 'doc': 'the time point of this feature'},
+    @docval({'name': 'time', 'type': 'float', 'doc': 'the time point of this feature'},
             {'name': 'features', 'type': (list, np.ndarray), 'doc': 'the feature values for this time point'})
     def add_features(self, **kwargs):
         time, features = getargs('time', 'features', kwargs)
@@ -104,8 +100,6 @@ class IntervalSeries(TimeSeries):
 
     __nwbfields__ = ()
 
-    _help = "Stores the start and stop times for events."
-
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
              'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
@@ -116,8 +110,8 @@ class IntervalSeries(TimeSeries):
         self.__interval_data = data
         super(IntervalSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'start', 'type': float, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'stop', 'type': float, 'doc': 'The name of this TimeSeries dataset'})
+    @docval({'name': 'start', 'type': 'float', 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'stop', 'type': 'float', 'doc': 'The name of this TimeSeries dataset'})
     def add_interval(self, **kwargs):
         start, stop = getargs('start', 'stop', kwargs)
         self.__interval_timestamps.append(start)
@@ -180,7 +174,7 @@ class Units(DynamicTable):
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
              'doc': 'the spike waveform standard deviation for each unit. Shape is (time,) or (time, electrodes)'},
             {'name': 'id', 'type': int, 'default': None,
-             'help': 'the id for each unit'},
+             'doc': 'the id for each unit'},
             allow_extra=True)
     def add_unit(self, **kwargs):
         """
@@ -191,8 +185,10 @@ class Units(DynamicTable):
             elec_col = self['electrodes'].target
             if elec_col.table is None:
                 if self.__electrode_table is None:
-                    nwbfile = self.get_ancestor(neurodata_type='NWBFile')
+                    nwbfile = self.get_ancestor(data_type='NWBFile')
                     elec_col.table = nwbfile.electrodes
+                    if elec_col.table is None:
+                        warnings.warn('Reference to electrode table that does not yet exist')
                 else:
                     elec_col.table = self.__electrode_table
 
@@ -268,9 +264,9 @@ class DecompositionSeries(TimeSeries):
              'default': None},
             {'name': 'band_limits', 'type': ('array_data', 'data'), 'default': None,
              'doc': 'low and high frequencies of bandpass filter in Hz'},
-            {'name': 'band_mean', 'type': float, 'doc': 'the mean of Gaussian filters in Hz',
+            {'name': 'band_mean', 'type': 'float', 'doc': 'the mean of Gaussian filters in Hz',
              'default': None},
-            {'name': 'band_stdev', 'type': float, 'doc': 'the standard deviation of Gaussian filters in Hz',
+            {'name': 'band_stdev', 'type': 'float', 'doc': 'the standard deviation of Gaussian filters in Hz',
              'default': None},
             allow_extra=True)
     def add_band(self, **kwargs):

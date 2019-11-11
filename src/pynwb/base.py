@@ -5,7 +5,9 @@ try:
 except ImportError:
     from collections import Iterable  # Python 2.7
 
-from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func
+from hdmf.utils import docval, getargs, popargs, call_docval_func
+from hdmf.common import DynamicTable
+
 
 from . import register_class, CORE_NAMESPACE
 from .core import NWBDataInterface, MultiContainerInterface, NWBData
@@ -25,7 +27,7 @@ class ProcessingModule(MultiContainerInterface):
     __clsconf__ = {
             'attr': 'data_interfaces',
             'add': 'add',
-            'type': NWBDataInterface,
+            'type': (NWBDataInterface, DynamicTable),
             'get': 'get'
     }
 
@@ -45,7 +47,8 @@ class ProcessingModule(MultiContainerInterface):
     def __getitem__(self, arg):
         return self.get(arg)
 
-    @docval({'name': 'container', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
+    @docval({'name': 'container', 'type': (NWBDataInterface, DynamicTable),
+             'doc': 'the NWBDataInterface to add to this Module'})
     def add_container(self, **kwargs):
         '''
         Add an NWBContainer to this ProcessingModule
@@ -63,7 +66,8 @@ class ProcessingModule(MultiContainerInterface):
         warn(PendingDeprecationWarning('get_container will be replaced by get'))
         return self.get(container_name)
 
-    @docval({'name': 'NWBDataInterface', 'type': NWBDataInterface, 'doc': 'the NWBDataInterface to add to this Module'})
+    @docval({'name': 'NWBDataInterface', 'type': (NWBDataInterface, DynamicTable),
+             'doc': 'the NWBDataInterface to add to this Module'})
     def add_data_interface(self, **kwargs):
         NWBDataInterface = getargs('NWBDataInterface', kwargs)
         warn(PendingDeprecationWarning('add_data_interface will be replaced by add'))
@@ -101,31 +105,28 @@ class TimeSeries(NWBDataInterface):
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
              'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
-            {'name': 'resolution', 'type': (str, float),
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': 0.0},
-            {'name': 'conversion', 'type': (str, float),
-             'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
-             'default': 1.0},
+            {'name': 'resolution', 'type': (str, 'float'),
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': -1.0},
+            {'name': 'conversion', 'type': (str, 'float'),
+             'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': 1.0},
 
             {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+            {'name': 'starting_time', 'type': 'float', 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': 'float', 'doc': 'Sampling rate in Hz', 'default': None},
 
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None})
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset',
+             'default': 'no comments'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset',
+             'default': 'no description'},
+            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data',
+             'default': None},
+            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value',
+             'default': None})
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
-        pargs, pkwargs = fmt_docval_args(super(TimeSeries, self).__init__, kwargs)
-        super(TimeSeries, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(TimeSeries, self).__init__, kwargs)
         keys = ("resolution",
                 "comments",
                 "description",
@@ -240,16 +241,12 @@ class Image(NWBData):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
-            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None},
-            {'name': 'help', 'type': str, 'doc': 'helpful hint for user',
-             'default': 'pixel values for an image'}
-            )
+            {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
     def __init__(self, **kwargs):
-        super(Image, self).__init__(name=kwargs['name'], data=kwargs['data'])
+        call_docval_func(super(Image, self).__init__, kwargs)
         self.resolution = kwargs['resolution']
         self.description = kwargs['description']
-        self.help = kwargs['help']
 
 
 @register_class('Images', CORE_NAMESPACE)
@@ -265,12 +262,9 @@ class Images(MultiContainerInterface):
         'create': 'create_image'
     }
 
-    __help = "Contains images"
-
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
             {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of images',
-             'default': 'no description'})
+            {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'})
     def __init__(self, **kwargs):
         name, description, images = popargs('name', 'description', 'images', kwargs)
         super(Images, self).__init__(name, **kwargs)

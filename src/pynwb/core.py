@@ -1,13 +1,13 @@
-from h5py import RegionReference, Dataset
+from h5py import RegionReference
 import numpy as np
 import pandas as pd
 
-from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args, pystr
-from hdmf.data_utils import DataIO
+from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from hdmf import Container, Data, DataRegion, get_region_slicer
+from hdmf.container import AbstractContainer
+from hdmf.common import DynamicTable  # NOQA
 
 from . import CORE_NAMESPACE, register_class
-from six import with_metaclass
 
 
 def _not_parent(arg):
@@ -18,12 +18,21 @@ def prepend_string(string, prepend='    '):
     return prepend + prepend.join(string.splitlines(True))
 
 
-class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
-    '''The base class to any NWB types.
+class NWBMixin(AbstractContainer):
 
-    The purpose of this class is to provide a mechanism for representing hierarchical
-    relationships in neurodata.
-    '''
+    _data_type_attr = 'neurodata_type'
+
+    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the data_type to search for', 'default': None})
+    def get_ancestor(self, **kwargs):
+        """
+        Traverse parent hierarchy and return first instance of the specified data_type
+        """
+        neurodata_type = getargs('neurodata_type', kwargs)
+        return super().get_ancestor(data_type=neurodata_type)
+
+
+@register_class('NWBContainer', CORE_NAMESPACE)
+class NWBContainer(NWBMixin, Container):
 
     _fieldsname = '__nwbfields__'
 
@@ -31,228 +40,7 @@ class NWBBaseType(with_metaclass(ExtenderMeta, Container)):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
     def __init__(self, **kwargs):
-        call_docval_func(super(NWBBaseType, self).__init__, kwargs)
-        self.__fields = dict()
-
-    @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to search for', 'default': None})
-    def get_ancestor(self, **kwargs):
-        """
-        Traverse parent hierarchy and return first instance of the specified neurodata_type
-        """
-        neurodata_type = getargs('neurodata_type', kwargs)
-        if neurodata_type is None:
-            return self.parent
-        p = self.parent
-        while p is not None:
-            if p.neurodata_type == neurodata_type:
-                return p
-            p = p.parent
-        return None
-
-    @property
-    def fields(self):
-        return self.__fields
-
-    @staticmethod
-    def _transform_arg(nwbfield):
-        tmp = nwbfield
-        if isinstance(tmp, dict):
-            if 'name' not in tmp:
-                raise ValueError("must specify 'name' if using dict in __nwbfields__")
-        else:
-            tmp = {'name': tmp}
-        return tmp
-
-    @classmethod
-    def _getter(cls, nwbfield):
-        doc = nwbfield.get('doc')
-        name = nwbfield['name']
-
-        def nwbbt_getter(self):
-            return self.fields.get(name)
-
-        setattr(nwbbt_getter, '__doc__', doc)
-        return nwbbt_getter
-
-    @classmethod
-    def _setter(cls, nwbfield):
-        name = nwbfield['name']
-
-        if not nwbfield.get('settable', True):
-            return None
-
-        def nwbbt_setter(self, val):
-            if val is None:
-                return
-            if name in self.fields:
-                msg = "can't set attribute '%s' -- already set" % name
-                raise AttributeError(msg)
-            self.fields[name] = val
-
-        return nwbbt_setter
-
-    @ExtenderMeta.pre_init
-    def __gather_nwbfields(cls, name, bases, classdict):
-        '''
-        This classmethod will be called during class declaration in the metaclass to automatically
-        create setters and getters for NWB fields that need to be exported
-        '''
-        if not isinstance(cls.__nwbfields__, tuple):
-            raise TypeError("'__nwbfields__' must be of type tuple")
-
-        if len(bases) and 'NWBContainer' in globals() and issubclass(bases[-1], NWBContainer) \
-                and bases[-1].__nwbfields__ is not cls.__nwbfields__:
-            new_nwbfields = list(cls.__nwbfields__)
-            new_nwbfields[0:0] = bases[-1].__nwbfields__
-            cls.__nwbfields__ = tuple(new_nwbfields)
-        new_nwbfields = list()
-        docs = {dv['name']: dv['doc'] for dv in get_docval(cls.__init__)}
-        for f in cls.__nwbfields__:
-            pconf = cls._transform_arg(f)
-            pname = pconf['name']
-            pconf.setdefault('doc', docs.get(pname))
-            if not hasattr(cls, pname):
-                setattr(cls, pname, property(cls._getter(pconf), cls._setter(pconf)))
-            new_nwbfields.append(pname)
-        cls.__nwbfields__ = tuple(new_nwbfields)
-
-    def __repr__(self):
-        template = "\n{} {}\nFields:\n""".format(getattr(self, 'name'), type(self))
-        for k in sorted(self.fields):  # sorted to enable tests
-            v = self.fields[k]
-            if isinstance(v, DataIO) or not hasattr(v, '__len__') or len(v) > 0:
-                template += "  {}: {}\n".format(k, self.__smart_str(v, 1))
-        return template
-
-    @staticmethod
-    def __smart_str(v, num_indent):
-        """
-        Print compact string representation of data.
-
-        If v is a list, try to print it using numpy. This will condense the string
-        representation of datasets with many elements. If that doesn't work, just print the list.
-
-        If v is a dictionary, print the name and type of each element
-
-        If v is a set, print it sorted
-
-        If v is a neurodata_type, print the name of type
-
-        Otherwise, use the built-in str()
-        Parameters
-        ----------
-        v
-
-        Returns
-        -------
-        str
-
-        """
-
-        if isinstance(v, list) or isinstance(v, tuple):
-            if len(v) and isinstance(v[0], NWBBaseType):
-                return NWBBaseType.__smart_str_list(v, num_indent, '(')
-            try:
-                return str(np.asarray(v))
-            except ValueError:
-                return NWBBaseType.__smart_str_list(v, num_indent, '(')
-        elif isinstance(v, dict):
-            return NWBBaseType.__smart_str_dict(v, num_indent)
-        elif isinstance(v, set):
-            return NWBBaseType.__smart_str_list(sorted(list(v)), num_indent, '{')
-        elif isinstance(v, NWBBaseType):
-            return "{} {}".format(getattr(v, 'name'), type(v))
-        else:
-            return str(v)
-
-    @staticmethod
-    def __smart_str_list(l, num_indent, left_br):
-        if left_br == '(':
-            right_br = ')'
-        if left_br == '{':
-            right_br = '}'
-        if len(l) == 0:
-            return left_br + ' ' + right_br
-        indent = num_indent * 2 * ' '
-        indent_in = (num_indent + 1) * 2 * ' '
-        out = left_br
-        for v in l[:-1]:
-            out += '\n' + indent_in + NWBBaseType.__smart_str(v, num_indent + 1) + ','
-        if l:
-            out += '\n' + indent_in + NWBBaseType.__smart_str(l[-1], num_indent + 1)
-        out += '\n' + indent + right_br
-        return out
-
-    @staticmethod
-    def __smart_str_dict(d, num_indent):
-        left_br = '{'
-        right_br = '}'
-        if len(d) == 0:
-            return left_br + ' ' + right_br
-        indent = num_indent * 2 * ' '
-        indent_in = (num_indent + 1) * 2 * ' '
-        out = left_br
-        keys = sorted(list(d.keys()))
-        for k in keys[:-1]:
-            out += '\n' + indent_in + NWBBaseType.__smart_str(k, num_indent + 1) + ' ' + str(type(d[k])) + ','
-        if keys:
-            out += '\n' + indent_in + NWBBaseType.__smart_str(keys[-1], num_indent + 1) + ' ' + str(type(d[keys[-1]]))
-        out += '\n' + indent + right_br
-        return out
-
-
-@register_class('NWBContainer', CORE_NAMESPACE)
-class NWBContainer(NWBBaseType, Container):
-
-    __nwbfields__ = ('help',)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
-    def __init__(self, **kwargs):
         call_docval_func(super(NWBContainer, self).__init__, kwargs)
-
-    __pconf_allowed_keys = {'name', 'child', 'required_name', 'doc', 'settable'}
-
-    @classmethod
-    def _setter(cls, nwbfield):
-        super_setter = NWBBaseType._setter(nwbfield)
-        ret = [super_setter]
-        if isinstance(nwbfield, dict):
-            for k in nwbfield.keys():
-                if k not in cls.__pconf_allowed_keys:
-                    msg = "Unrecognized key '%s' in __nwbfield__ config '%s' on %s" %\
-                           (k, nwbfield['name'], cls.__name__)
-                    raise ValueError(msg)
-            if nwbfield.get('required_name', None) is not None:
-                name = nwbfield['required_name']
-                idx1 = len(ret) - 1
-
-                def nwbdi_setter(self, val):
-                    if val is not None and val.name != name:
-                        msg = "%s field on %s must be named '%s'" % (nwbfield['name'], self.__class__.__name__, name)
-                        raise ValueError(msg)
-                    ret[idx1](self, val)
-
-                ret.append(nwbdi_setter)
-            if nwbfield.get('child', False):
-                idx2 = len(ret) - 1
-
-                def nwbdi_setter(self, val):
-                    ret[idx2](self, val)
-                    if val is not None:
-                        if isinstance(val, (tuple, list)):
-                            pass
-                        elif isinstance(val, dict):
-                            val = val.values()
-                        else:
-                            val = [val]
-                        for v in val:
-                            if not isinstance(v.parent, Container):
-                                v.parent = self
-                            # else, the ObjectMapper will create a link from self (parent) to v (child with existing
-                            # parent)
-
-                ret.append(nwbdi_setter)
-        return ret[-1]
 
     def _to_dict(self, arg, label="NULL"):
         return_dict = LabelledDict(label)
@@ -275,9 +63,7 @@ class NWBDataInterface(NWBContainer):
 
 
 @register_class('NWBData', CORE_NAMESPACE)
-class NWBData(NWBBaseType, Data):
-
-    __nwbfields__ = ('help',)
+class NWBData(NWBMixin, Data):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'})
@@ -323,88 +109,10 @@ class ScratchData(NWBData):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
-            {'name': 'notes', 'type': str, 'doc': 'the source of the data', 'default': 'none'})
+            {'name': 'notes', 'type': str, 'doc': 'notes about the data', 'default': ''})
     def __init__(self, **kwargs):
         call_docval_func(super(ScratchData, self).__init__, kwargs)
         self.notes = getargs('notes', kwargs)
-
-
-@register_class('Index', CORE_NAMESPACE)
-class Index(NWBData):
-
-    __nwbfields__ = ("target",)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
-            {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
-            {'name': 'target', 'type': NWBData,
-             'doc': 'the target dataset that this index applies to'})
-    def __init__(self, **kwargs):
-        call_docval_func(super(Index, self).__init__, kwargs)
-
-
-@register_class('VectorData', CORE_NAMESPACE)
-class VectorData(NWBData):
-
-    __nwbfields__ = ("description",)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
-            {'name': 'description', 'type': str, 'doc': 'a description for this column'},
-            {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors', 'default': list()})
-    def __init__(self, **kwargs):
-        call_docval_func(super(VectorData, self).__init__, kwargs)
-        self.description = getargs('description', kwargs)
-
-    @docval({'name': 'val', 'type': None, 'doc': 'the value to add to this column'})
-    def add_row(self, **kwargs):
-        val = getargs('val', kwargs)
-        self.data.append(val)
-
-
-@register_class('VectorIndex', CORE_NAMESPACE)
-class VectorIndex(Index):
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorIndex'},
-            {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'a 1D dataset containing indexes that apply to VectorData object'},
-            {'name': 'target', 'type': VectorData,
-             'doc': 'the target dataset that this index applies to'})
-    def __init__(self, **kwargs):
-        call_docval_func(super(VectorIndex, self).__init__, kwargs)
-        self.target = getargs('target', kwargs)
-
-    def add_vector(self, arg):
-        self.target.extend(arg)
-        self.data.append(len(self.target))
-
-    def add_row(self, arg):
-        self.add_vector(arg)
-
-    def __getitem_helper(self, arg):
-        start = 0 if arg == 0 else self.data[arg-1]
-        end = self.data[arg]
-        return self.target[start:end]
-
-    def __getitem__(self, arg):
-        if isinstance(arg, slice):
-            indices = list(range(*arg.indices(len(self.data))))
-            ret = list()
-            for i in indices:
-                ret.append(self.__getitem_helper(i))
-            return ret
-        else:
-            return self.__getitem_helper(arg)
-
-
-@register_class('ElementIdentifiers', CORE_NAMESPACE)
-class ElementIdentifiers(NWBData):
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this ElementIdentifiers'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'a 1D dataset containing identifiers',
-             'default': list()})
-    def __init__(self, **kwargs):
-        call_docval_func(super(ElementIdentifiers, self).__init__, kwargs)
 
 
 class NWBTable(NWBData):
@@ -425,7 +133,7 @@ class NWBTable(NWBData):
     The class attribute __defaultname__ can also be set to specify a default name
     for the table class. If \_\_defaultname\_\_ is not specified, then ``name`` will
     need to be specified when the class is instantiated.
-    '''  # noqa: W605
+    '''
 
     @ExtenderMeta.pre_init
     def __build_table_class(cls, name, bases, classdict):
@@ -740,8 +448,7 @@ class MultiContainerInterface(NWBDataInterface):
 
     @classmethod
     def __make_create(cls, func_name, add_name, container_type):
-        doc = "Create %s and add it to this %s" % \
-                       (cls.__add_article(container_type), cls.__name__)
+        doc = "Create %s and add it to this %s" % (cls.__add_article(container_type), cls.__name__)
 
         @docval(*filter(_not_parent, get_docval(container_type.__init__)), func_name=func_name, doc=doc,
                 returns="the %s object that was created" % cls.__join(container_type), rtype=container_type)
@@ -860,7 +567,7 @@ class MultiContainerInterface(NWBDataInterface):
 
             # create property with the name given in 'attr'
             if not hasattr(cls, attr):
-                aconf = cls._transform_arg(attr)
+                aconf = cls._check_field_spec(attr)
                 getter = cls._getter(aconf)
                 doc = "a dictionary containing the %s in this %s container" % \
                       (cls.__join(container_type), cls.__name__)
@@ -885,530 +592,6 @@ class MultiContainerInterface(NWBDataInterface):
         # i.e. it is the same method as the parent class constructor
         if cls.__init__ == MultiContainerInterface.__init__:
             setattr(cls, '__init__', cls.__make_constructor(clsconf))
-
-
-@register_class('DynamicTable', CORE_NAMESPACE)
-class DynamicTable(NWBDataInterface):
-    r"""
-    A column-based table. Columns are defined by the argument *columns*. This argument
-    must be a list/tuple of :class:`~pynwb.core.VectorData` and :class:`~pynwb.core.VectorIndex` objects
-    or a list/tuple of dicts containing the keys ``name`` and ``description`` that provide the name and description
-    of each column in the table. Additionally, the keys ``index`` and ``table`` for specifying additional structure to
-    the table columns. Setting the key ``index`` to ``True`` can be used to indicate that the
-    :class:`~pynwb.core.VectorData` column will store a ragged array (i.e. will be accompanied with a
-    :class:`~pynwb.core.VectorIndex`). Setting the key ``table`` to ``True`` can be used to indicate that the column
-    will store regions to another DynamicTable.
-
-    Columns in DynamicTable subclasses can be statically defined by specifying the class attribute *\_\_columns\_\_*,
-    rather than specifying them at runtime at the instance level. This is useful for defining a table structure
-    that will get reused. The requirements for *\_\_columns\_\_* are the same as the requirements described above
-    for specifying table columns with the *columns* argument to the DynamicTable constructor.
-    """
-
-    __nwbfields__ = (
-        {'name': 'id', 'child': True},
-        {'name': 'columns', 'child': True},
-        'colnames',
-        'description'
-    )
-
-    __columns__ = tuple()
-
-    @ExtenderMeta.pre_init
-    def __gather_columns(cls, name, bases, classdict):
-        '''
-        This classmethod will be called during class declaration in the metaclass to automatically
-        create setters and getters for NWB fields that need to be exported
-        '''
-        if not isinstance(cls.__columns__, tuple):
-            msg = "'__columns__' must be of type tuple, found %s" % type(cls.__columns__)
-            raise TypeError(msg)
-
-        if len(bases) and 'DynamicTable' in globals() and issubclass(bases[-1], NWBContainer) \
-                and bases[-1].__columns__ is not cls.__columns__:
-            new_columns = list(cls.__columns__)
-            new_columns[0:0] = bases[-1].__columns__
-            cls.__columns__ = tuple(new_columns)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this table'},    # noqa: C901
-            {'name': 'description', 'type': str, 'doc': 'a description of what is in this table'},
-            {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
-             'default': None},
-            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
-            {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
-             'default': None})
-    def __init__(self, **kwargs):
-        id, columns, desc, colnames = popargs('id', 'columns', 'description', 'colnames', kwargs)
-        call_docval_func(super(DynamicTable, self).__init__, kwargs)
-        self.description = desc
-
-        if id is not None:
-            if not isinstance(id, ElementIdentifiers):
-                id = ElementIdentifiers('id', data=id)
-        else:
-            id = ElementIdentifiers('id')
-
-        if columns is not None:
-            if len(columns) > 0:
-                if isinstance(columns[0], dict):
-                    columns = self.__build_columns(columns)
-                elif not all(isinstance(c, (VectorData, VectorIndex)) for c in columns):
-                    raise ValueError("'columns' must be a list of VectorData, DynamicTableRegion or VectorIndex")
-                colset = {c.name: c for c in columns}
-                for c in columns:
-                    if isinstance(c, VectorIndex):
-                        colset.pop(c.target.name)
-                lens = [len(c) for c in colset.values()]
-                if not all(i == lens[0] for i in lens):
-                    raise ValueError("columns must be the same length")
-                if lens[0] != len(id):
-                    if len(id) > 0:
-                        raise ValueError("must provide same number of ids as length of columns")
-                    else:
-                        id.data.extend(range(lens[0]))
-        else:
-            columns = list()
-
-        self.id = id
-
-        if colnames is None:
-            if columns is None:
-                self.colnames = list()
-                self.columns = list()
-            else:
-                tmp = list()
-                for col in columns:
-                    if isinstance(col, VectorIndex):
-                        continue
-                    tmp.append(col.name)
-                self.colnames = tuple(tmp)
-                self.columns = columns
-        else:
-            if columns is None:
-                raise ValueError("Must supply 'columns' if specifying 'colnames'")
-            else:
-                # make sure columns order matches colnames order
-                self.colnames = tuple(pystr(c) for c in colnames)
-                col_dict = {col.name: col for col in columns}
-                order = dict()
-                indexed = dict()
-                for col in columns:
-                    if isinstance(col, VectorIndex):
-                        indexed[col.target.name] = True
-                    else:
-                        if col.name in indexed:
-                            continue
-                        indexed[col.name] = False
-                i = 0
-                for name in self.colnames:
-                    col = col_dict[name]
-                    order[col.name] = i
-                    if indexed[col.name]:
-                        i = i + 1
-                    i = i + 1
-                tmp = [None] * i
-                for col in columns:
-                    if indexed.get(col.name, False):
-                        continue
-                    if isinstance(col, VectorData):
-                        pos = order[col.name]
-                        tmp[pos] = col
-                    elif isinstance(col, VectorIndex):
-                        pos = order[col.target.name]
-                        tmp[pos] = col
-                        tmp[pos+1] = col.target
-                self.columns = list(tmp)
-
-        # to make generating DataFrames and Series easier
-        col_dict = dict()
-        self.__indices = dict()
-        for col in self.columns:
-            if isinstance(col, VectorData):
-                existing = col_dict.get(col.name)
-                # if we added this column using its index, ignore this column
-                if existing is not None:
-                    if isinstance(existing, VectorIndex):
-                        if existing.target.name == col.name:
-                            continue
-                        else:
-                            raise ValueError("duplicate column does not target VectorData '%s'" % col.name)
-                    else:
-                        raise ValueError("duplicate column found: '%s'" % col.name)
-                else:
-                    col_dict[col.name] = col
-            elif isinstance(col, VectorIndex):
-                col_dict[col.target.name] = col  # use target name for reference and VectorIndex for retrieval
-                self.__indices[col.name] = col
-
-        self.__df_cols = [self.id] + [col_dict[name] for name in self.colnames]
-        self.__colids = {name: i+1 for i, name in enumerate(self.colnames)}
-        for col in self.__columns__:
-            if col.get('required', False) and col['name'] not in self.__colids:
-                self.add_column(col['name'], col['description'],
-                                index=col.get('index', False),
-                                table=col.get('table', False))
-
-    @staticmethod
-    def __build_columns(columns, df=None):
-        tmp = list()
-        for d in columns:
-            name = d['name']
-            desc = d.get('description', 'no description')
-            data = None
-            if df is not None:
-                data = list(df[name].values)
-            if d.get('index', False):
-                index_data = None
-                if data is not None:
-                    index_data = [len(data[0])]
-                    for i in range(1, len(data)):
-                        index_data.append(len(data[i]) + index_data[i-1])
-                    # assume data came in through a DataFrame, so we need
-                    # to concatenate it
-                    tmp_data = list()
-                    for d in data:
-                        tmp_data.extend(d)
-                    data = tmp_data
-                vdata = VectorData(name, desc, data=data)
-                vindex = VectorIndex("%s_index" % name, index_data, target=vdata)
-                tmp.append(vindex)
-                tmp.append(vdata)
-            else:
-                if data is None:
-                    data = list()
-                cls = VectorData
-                if d.get('table', False):
-                    cls = DynamicTableRegion
-                tmp.append(cls(name, desc, data=data))
-        return tmp
-
-    def __len__(self):
-        return len(self.id)
-
-    @docval({'name': 'data', 'type': dict, 'help': 'the data to put in this row', 'default': None},
-            {'name': 'id', 'type': int, 'help': 'the ID for the row', 'default': None},
-            allow_extra=True)
-    def add_row(self, **kwargs):
-        '''
-        Add a row to the table. If *id* is not provided, it will auto-increment.
-        '''
-        data, row_id = popargs('data', 'id', kwargs)
-        data = data if data is not None else kwargs
-
-        extra_columns = set(list(data.keys())) - set(list(self.__colids.keys()))
-        missing_columns = set(list(self.__colids.keys())) - set(list(data.keys()))
-
-        # check to see if any of the extra columns just need to be added
-        if extra_columns:
-            for col in self.__columns__:
-                if col['name'] in extra_columns:
-                    if data[col['name']] is not None:
-                        self.add_column(col['name'], col['description'],
-                                        index=col.get('index', False),
-                                        table=col.get('table', False))
-                    extra_columns.remove(col['name'])
-
-        if extra_columns or missing_columns:
-            raise ValueError(
-                '\n'.join([
-                    'row data keys don\'t match available columns',
-                    'you supplied {} extra keys: {}'.format(len(extra_columns), extra_columns),
-                    'and were missing {} keys: {}'.format(len(missing_columns), missing_columns)
-                ])
-            )
-
-        if row_id is None:
-            row_id = data.pop('id', None)
-        if row_id is None:
-            row_id = len(self)
-        self.id.data.append(row_id)
-
-        for colname, colnum in self.__colids.items():
-            if colname not in data:
-                raise ValueError("column '%s' missing" % colname)
-            c = self.__df_cols[colnum]
-            if isinstance(c, VectorIndex):
-                c.add_vector(data[colname])
-            else:
-                c.add_row(data[colname])
-
-    def __eq__(self, other):
-        return self.to_dataframe().equals(other.to_dataframe())
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
-            {'name': 'description', 'type': str, 'doc': 'a description for this column'},
-            {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors', 'default': list()},
-            {'name': 'table', 'type': (bool, 'DynamicTable'),
-             'doc': 'whether or not this is a table region or the table the region applies to', 'default': False},
-            {'name': 'index', 'type': (bool, VectorIndex, 'array_data'),
-             'doc': 'whether or not this column should be indexed', 'default': False})
-    def add_column(self, **kwargs):
-        """
-        Add a column to this table. If data is provided, it must
-        contain the same number of rows as the current state of the table.
-        """
-        name, data = getargs('name', 'data', kwargs)
-        index, table = popargs('index', 'table', kwargs)
-        if name in self.__colids:
-            msg = "column '%s' already exists in DynamicTable '%s'" % (name, self.name)
-            raise ValueError(msg)
-
-        ckwargs = dict(kwargs)
-        cls = VectorData
-
-        # Add table if it's been specified
-        if table is not False:
-            cls = DynamicTableRegion
-            if isinstance(table, DynamicTable):
-                ckwargs['table'] = table
-
-        col = cls(**ckwargs)
-        col.parent = self
-        columns = [col]
-
-        # Add index if it's been specified
-        if index is not False:
-            if isinstance(index, VectorIndex):
-                col_index = index
-            elif isinstance(index, bool):        # make empty VectorIndex
-                if len(col) > 0:
-                    raise ValueError("cannot pass empty index with non-empty data to index")
-                col_index = VectorIndex(name + "_index", list(), col)
-            else:                                # make VectorIndex with supplied data
-                if len(col) == 0:
-                    raise ValueError("cannot pass non-empty index with empty data to index")
-                col_index = VectorIndex(name + "_index", index, col)
-            columns.insert(0, col_index)
-            if not isinstance(col_index.parent, Container):
-                col_index.parent = self
-            # else, the ObjectMapper will create a link from self (parent) to col_index (child with existing parent)
-            col = col_index
-            self.__indices[col_index.name] = col_index
-
-        if len(col) != len(self.id):
-            raise ValueError("column must have the same number of rows as 'id'")
-        self.__colids[name] = len(self.__df_cols)
-        self.fields['colnames'] = tuple(list(self.colnames)+[name])
-        self.fields['columns'] = tuple(list(self.columns)+columns)
-        self.__df_cols.append(col)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of the DynamicTableRegion object'},
-            {'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what the region is'})
-    def create_region(self, **kwargs):
-        region = getargs('region', kwargs)
-        if isinstance(region, slice):
-            if (region.start is not None and region.start < 0) or (region.stop is not None and region.stop > len(self)):
-                msg = 'region slice %s is out of range for this DynamicTable of length ' % (str(region), len(self))
-                raise IndexError(msg)
-            region = list(range(*region.indices(len(self))))
-        else:
-            for idx in region:
-                if idx < 0 or idx >= len(self):
-                    raise IndexError('The index ' + str(idx) +
-                                     ' is out of range for this DynamicTable of length '
-                                     + str(len(self)))
-        desc = getargs('description', kwargs)
-        name = getargs('name', kwargs)
-        return DynamicTableRegion(name, region, desc, self)
-
-    def __getitem__(self, key):
-        ret = None
-        if isinstance(key, tuple):
-            # index by row and column, return specific cell
-            arg1 = key[0]
-            arg2 = key[1]
-            if isinstance(arg2, str):
-                arg2 = self.__colids[arg2]
-            ret = self.__df_cols[arg2][arg1]
-        else:
-            arg = key
-            if isinstance(arg, str):
-                # index by one string, return column
-                if arg in self.__colids:
-                    ret = self.__df_cols[self.__colids[arg]]
-                elif arg in self.__indices:
-                    return self.__indices[arg]
-                else:
-                    raise KeyError(arg)
-            elif isinstance(arg, (int, np.int8, np.int16, np.int32, np.int64)):
-                # index by int, return row
-                ret = tuple(col[arg] for col in self.__df_cols)
-            elif isinstance(arg, (tuple, list)):
-                # index by a list of ints, return multiple rows
-                ret = list()
-                for i in arg:
-                    ret.append(tuple(col[i] for col in self.__df_cols))
-
-        return ret
-
-    def __contains__(self, val):
-        return val in self.__colids or val in self.__indices
-
-    def get(self, key, default=None):
-        if key in self:
-            return self[key]
-        return default
-
-    def to_dataframe(self, exclude=set([])):
-        '''Produce a pandas DataFrame containing this table's data.
-        '''
-
-        data = {}
-        for name in self.colnames:
-            if name in exclude:
-                continue
-            col = self.__df_cols[self.__colids[name]]
-
-            if isinstance(col.data, (Dataset, np.ndarray)) and col.data.ndim > 1:
-                data[name] = [x for x in col[:]]
-            else:
-                data[name] = col[:]
-
-        return pd.DataFrame(data, index=pd.Index(name=self.id.name, data=self.id.data))
-
-    @classmethod
-    @docval(
-        {'name': 'df', 'type': pd.DataFrame, 'doc': 'source DataFrame'},
-        {'name': 'name', 'type': str, 'doc': 'the name of this table'},
-        {
-            'name': 'index_column',
-            'type': str,
-            'help': 'if provided, this column will become the table\'s index',
-            'default': None
-        },
-        {
-            'name': 'table_description',
-            'type': str,
-            'help': 'a description of what is in the resulting table',
-            'default': ''
-        },
-        {
-            'name': 'columns',
-            'type': (list, tuple),
-            'help': 'a list/tuple of dictionaries specifying columns in the table',
-            'default': None
-        },
-        allow_extra=True
-    )
-    def from_dataframe(cls, **kwargs):
-        '''
-        Construct an instance of DynamicTable (or a subclass) from a pandas DataFrame.
-
-        The columns of the resulting table are defined by the columns of the
-        dataframe and the index by the dataframe's index (make sure it has a
-        name!) or by a column whose name is supplied to the index_column
-        parameter. We recommend that you supply *columns* - a list/tuple of
-        dictionaries containing the name and description of the column- to help
-        others understand the contents of your table. See
-        :py:class:`~pynwb.core.DynamicTable` for more details on *columns*.
-        '''
-
-        columns = kwargs.pop('columns')
-        df = kwargs.pop('df')
-        name = kwargs.pop('name')
-        index_column = kwargs.pop('index_column')
-        table_description = kwargs.pop('table_description')
-
-        supplied_columns = dict()
-        if columns:
-            supplied_columns = {x['name']: x for x in columns}
-
-        class_cols = {x['name']: x for x in cls.__columns__}
-        required_cols = set(x['name'] for x in cls.__columns__ if 'required' in x and x['required'])
-        df_cols = df.columns
-        if required_cols - set(df_cols):
-            raise ValueError('missing required cols: ' + str(required_cols - set(df_cols)))
-        if set(supplied_columns.keys()) - set(df_cols):
-            raise ValueError('cols specified but not provided: ' + str(set(supplied_columns.keys()) - set(df_cols)))
-        columns = []
-        for col_name in df_cols:
-            if col_name in class_cols:
-                columns.append(class_cols[col_name])
-            elif col_name in supplied_columns:
-                columns.append(supplied_columns[col_name])
-            else:
-                columns.append({'name': col_name,
-                                'description': 'no description'})
-                if hasattr(df[col_name].iloc[0], '__len__') and not isinstance(df[col_name].iloc[0], str):
-                    lengths = [len(x) for x in df[col_name]]
-                    if not lengths[1:] == lengths[:-1]:
-                        columns[-1].update(index=True)
-
-        if index_column is not None:
-            ids = ElementIdentifiers(name=index_column, data=df[index_column].values.tolist())
-        else:
-            index_name = df.index.name if df.index.name is not None else 'id'
-            ids = ElementIdentifiers(name=index_name, data=df.index.values.tolist())
-
-        columns = cls.__build_columns(columns, df=df)
-
-        return cls(name=name, id=ids, columns=columns, description=table_description, **kwargs)
-
-    def copy(self):
-        """
-        Return a copy of this DynamicTable.
-        This is useful for linking.
-        """
-        kwargs = dict(name=self.name, id=self.id, columns=self.columns, description=self.description,
-                      colnames=self.colnames)
-        return self.__class__(**kwargs)
-
-
-@register_class('DynamicTableRegion', CORE_NAMESPACE)
-class DynamicTableRegion(VectorData):
-    """
-    An object for easily slicing into a DynamicTable
-    """
-
-    __nwbfields__ = (
-        'table',
-        'description'
-    )
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData'},
-            {'name': 'data', 'type': ('array_data', 'data'),
-             'doc': 'a dataset where the first dimension is a concatenation of multiple vectors'},
-            {'name': 'description', 'type': str, 'doc': 'a description of what this region represents'},
-            {'name': 'table', 'type': DynamicTable,
-             'doc': 'the DynamicTable this region applies to', 'default': None})
-    def __init__(self, **kwargs):
-        t = popargs('table', kwargs)
-        call_docval_func(super(DynamicTableRegion, self).__init__, kwargs)
-        self.table = t
-
-    @property
-    def table(self):
-        return self.fields.get('table')
-
-    @table.setter
-    def table(self, val):
-        if val is None:
-            return
-        if 'table' in self.fields:
-            msg = "can't set attribute 'table' -- already set"
-            raise AttributeError(msg)
-        for idx in self.data:
-            if idx < 0 or idx >= len(val):
-                raise IndexError('The index ' + str(idx) +
-                                 ' is out of range for this DynamicTable of length '
-                                 + str(len(val)))
-        self.fields['table'] = val
-
-    def __getitem__(self, key):
-        # treat the list of indices as data that can be indexed. then pass the
-        # result to the table to get the data
-        if isinstance(key, tuple):
-            arg1 = key[0]
-            arg2 = key[1]
-            return self.table[self.data[arg1], arg2]
-        elif isinstance(key, (int, slice)):
-            if isinstance(key, int) and key >= len(self.data):
-                raise IndexError('index {} out of bounds for data of length {}'.format(key, len(self.data)))
-            return self.table[self.data[key]]
-        else:
-            raise ValueError("unrecognized argument: '%s'" % key)
 
 
 class LabelledDict(dict):

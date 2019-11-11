@@ -1,7 +1,6 @@
 import unittest2 as unittest
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
-import os
 import re
 from h5py import File
 
@@ -14,6 +13,7 @@ from hdmf.build import GroupBuilder, DatasetBuilder
 from hdmf.spec import NamespaceCatalog
 from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
 from pynwb.ecephys import ElectricalSeries, LFP
+from pynwb.testing import remove_test_file
 
 import numpy as np
 
@@ -38,8 +38,7 @@ class TestHDF5Writer(unittest.TestCase):
         self.container.add_acquisition(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
-                                  attributes={'neurodata_type': 'TimeSeries',
-                                              'help': 'General purpose TimeSeries'},
+                                  attributes={'neurodata_type': 'TimeSeries'},
                                   datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                    attributes={'unit': 'SIunit',
                                                                                'conversion': 1.0,
@@ -64,8 +63,7 @@ class TestHDF5Writer(unittest.TestCase):
             attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        if os.path.exists(self.path):
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_nwbio(self):
         with HDF5IO(self.path, manager=self.manager, mode='a') as io:
@@ -102,7 +100,7 @@ class TestHDF5Writer(unittest.TestCase):
             self.assertIn('specifications', f)
 
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-        HDF5IO.load_namespaces(ns_catalog, self.path, namespaces=['core'])
+        HDF5IO.load_namespaces(ns_catalog, self.path)
         original_ns = self.manager.namespace_catalog.get_namespace('core')
         cached_ns = ns_catalog.get_namespace('core')
         self.maxDiff = None
@@ -148,8 +146,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
         self.container.add_acquisition(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
-                                  attributes={'neurodata_type': 'TimeSeries',
-                                              'help': 'General purpose TimeSeries'},
+                                  attributes={'neurodata_type': 'TimeSeries'},
                                   datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
                                                                    attributes={'unit': 'SIunit',
                                                                                'conversion': 1.0,
@@ -174,8 +171,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
             attributes={'neurodata_type': 'NWBFile'})
 
     def tearDown(self):
-        if os.path.exists(self.path):
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_nwbio(self):
         with File(self.path) as fil:
@@ -216,7 +212,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
             self.assertIn('specifications', f)
 
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-        HDF5IO.load_namespaces(ns_catalog, self.path, namespaces=['core'])
+        HDF5IO.load_namespaces(ns_catalog, self.path)
         original_ns = self.manager.namespace_catalog.get_namespace('core')
         cached_ns = ns_catalog.get_namespace('core')
         self.maxDiff = None
@@ -242,8 +238,7 @@ class TestAppend(unittest.TestCase):
         self.path = "test_append.nwb"
 
     def tearDown(self):
-        if os.path.exists(self.path):
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_append(self):
         proc_mod = self.nwbfile.create_processing_module(name='test_proc_mod', description='')
@@ -297,8 +292,7 @@ class TestH5DataIO(unittest.TestCase):
         self.path = "test_pynwb_io_hdf5_h5dataIO.h5"
 
     def tearDown(self):
-        if(os.path.exists(self.path)):
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_gzip_timestamps(self):
         ts = TimeSeries('ts_name', [1, 2, 3], 'A', timestamps=H5DataIO(np.array([1., 2., 3.]), compression='gzip'))
