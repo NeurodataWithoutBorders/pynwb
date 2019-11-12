@@ -37,7 +37,7 @@ class TimeIntervalsTest(unittest.TestCase):
             'start_time': [0.2, 0.25, 0.30, 0.35],
             'stop_time': [0.25, 0.30, 0.40, 0.45],
             'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
-            'description': ['q', 'w', 'e', 'r'],
+            'keys': ['q', 'w', 'e', 'r'],
             'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
         })
 
