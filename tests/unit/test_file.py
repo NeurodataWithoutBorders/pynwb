@@ -248,14 +248,14 @@ class NWBFileTest(unittest.TestCase):
         dev1 = self.nwbfile.create_device('dev1')
         group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
         self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1', 'none', group=group, id=1)
-        self.assertEqual(self.nwbfile.electrodes[0][0], 1)
-        self.assertEqual(self.nwbfile.electrodes[0][1], 1.0)
-        self.assertEqual(self.nwbfile.electrodes[0][2], 2.0)
-        self.assertEqual(self.nwbfile.electrodes[0][3], 3.0)
-        self.assertEqual(self.nwbfile.electrodes[0][4], -1.0)
-        self.assertEqual(self.nwbfile.electrodes[0][5], 'CA1')
-        self.assertEqual(self.nwbfile.electrodes[0][6], 'none')
-        self.assertEqual(self.nwbfile.electrodes[0][7], group)
+        elec = self.nwbfile.electrodes[0]
+        self.assertEqual(elec.index[0], 1)
+        self.assertEqual(elec.iloc[0]['x'], 1.0)
+        self.assertEqual(elec.iloc[0]['y'], 2.0)
+        self.assertEqual(elec.iloc[0]['z'], 3.0)
+        self.assertEqual(elec.iloc[0]['location'], 'CA1')
+        self.assertEqual(elec.iloc[0]['filtering'], 'none')
+        self.assertEqual(elec.iloc[0]['group'], group)
 
     def test_all_children(self):
         ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
