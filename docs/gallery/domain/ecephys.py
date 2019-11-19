@@ -68,7 +68,7 @@ electrode_group = nwbfile.create_electrode_group(electrode_name,
 
 
 for idx in [1, 2, 3, 4]:
-    nwbfile.add_electrode(idx,
+    nwbfile.add_electrode(id=idx,
                           x=1.0, y=2.0, z=3.0,
                           imp=float(-idx),
                           location='CA1', filtering='none',
