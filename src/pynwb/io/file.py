@@ -15,9 +15,13 @@ class NWBFileMap(ObjectMapper):
         self.unmap(acq_spec)
         self.map_spec('acquisition', acq_spec.get_neurodata_type('NWBDataInterface'))
         self.map_spec('acquisition', acq_spec.get_neurodata_type('DynamicTable'))
+        # TODO: note that double mapping "acquisition" means __carg2spec and __attr2spec (both unused)
+        # map "acquisition" to the last spec, in this case, DynamicTable
 
-        self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('NWBContainer'))
-        self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('DynamicTable'))
+        ana_spec = self.spec.get_group('analysis')
+        self.unmap(ana_spec)
+        self.map_spec('analysis', ana_spec.get_neurodata_type('NWBContainer'))
+        self.map_spec('analysis', ana_spec.get_neurodata_type('DynamicTable'))
 
         # map constructor arg and property 'stimulus' -> stimulus__presentation
         stimulus_spec = self.spec.get_group('stimulus')
@@ -28,6 +32,7 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries'))
 
         intervals_spec = self.spec.get_group('intervals')
+        self.unmap(intervals_spec)
         self.map_spec('intervals', intervals_spec.get_neurodata_type('TimeIntervals'))
 
         epochs_spec = intervals_spec.get_group('epochs')
