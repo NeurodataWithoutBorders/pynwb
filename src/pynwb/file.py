@@ -337,7 +337,6 @@ class NWBFile(MultiContainerInterface):
             'invalid_times',
             'units',
             'scratch',
-            'experimenter',
             'experiment_description',
             'session_id',
             'lab',
@@ -346,7 +345,6 @@ class NWBFile(MultiContainerInterface):
             'notes',
             'pharmacology',
             'protocol',
-            'related_publications',
             'slices',
             'source_script',
             'source_script_file_name',
@@ -356,6 +354,16 @@ class NWBFile(MultiContainerInterface):
         ]
         for attr in fieldnames:
             setattr(self, attr, kwargs.get(attr, None))
+
+        experimenter = kwargs.get('experimenter', None)
+        if isinstance(experimenter, str):
+            experimenter = (experimenter,)
+        setattr(self, 'experimenter', experimenter)
+
+        related_pubs = kwargs.get('related_publications', None)
+        if isinstance(related_pubs, str):
+            related_pubs = (related_pubs,)
+        setattr(self, 'related_publications', related_pubs)
 
         if getargs('source_script', kwargs) is None and getargs('source_script_file_name', kwargs) is not None:
             raise ValueError("'source_script' cannot be None when 'source_script_file_name' is set")
