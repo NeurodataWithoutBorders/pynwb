@@ -12,7 +12,7 @@ import os.path
 import os
 import sys
 import traceback
-import unittest2 as unittest
+import unittest
 from tests.coloredtestrunner import ColoredTestRunner, ColoredTestResult
 
 flags = {'pynwb': 2, 'integration': 3, 'example': 4}
