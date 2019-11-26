@@ -1,21 +1,18 @@
 import os
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
-
 import pandas as pd
 import numpy as np
 
-from hdmf.build import GroupBuilder, DatasetBuilder
 from hdmf.backends.hdf5 import HDF5IO
 
 from pynwb import NWBFile, TimeSeries, get_manager
 from pynwb.file import Subject
 from pynwb.epoch import TimeIntervals
+from pynwb.testing import TestMapNWBContainer, TestMapRoundTrip, TestDataInterfaceIO
 
-from . import base
 
-
-class TestNWBFileIO(base.TestMapNWBContainer):
+class TestNWBFileIO(TestMapNWBContainer):
 
     def setUp(self):
         self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
@@ -23,85 +20,6 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         super(TestNWBFileIO, self).setUp()
         self.path = "test_pynwb_io_hdf5.h5"
-
-    def setUpBuilder(self):
-        ts_builder = GroupBuilder('test_timeseries',
-                                  attributes={'namespace': base.CORE_NAMESPACE,
-                                              'neurodata_type': 'TimeSeries',
-                                              'comments': 'no comments',
-                                              'description': 'no description'},
-                                  datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
-                                                                   attributes={'unit': 'SIunit',
-                                                                               'conversion': 1.0,
-                                                                               'resolution': 0.1}),
-                                            'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                         attributes={'unit': 'seconds',
-                                                                                     'interval': 1})})
-        ts_builder2 = GroupBuilder('test_timeseries2',
-                                   attributes={'namespace': base.CORE_NAMESPACE,
-                                               'neurodata_type': 'TimeSeries',
-                                               'comments': 'no comments',
-                                               'description': 'no description'},
-                                   datasets={'data': DatasetBuilder('data', list(range(100, 200, 10)),
-                                                                    attributes={'unit': 'SIunit',
-                                                                                'conversion': 1.0,
-                                                                                'resolution': 0.1}),
-                                             'timestamps': DatasetBuilder('timestamps', list(range(10)),
-                                                                          attributes={'unit': 'seconds',
-                                                                                      'interval': 1})})
-
-        module_builder = GroupBuilder('test_module',
-                                      attributes={'namespace': base.CORE_NAMESPACE,
-                                                  'neurodata_type': 'ProcessingModule',
-                                                  'description': 'a test module'},
-                                      groups={'test_timeseries': ts_builder2})
-
-        general_builder = GroupBuilder('general',
-                                       datasets={
-                                            'experimenter': DatasetBuilder('experimenter', 'test experimenter'),
-                                            'stimulus': DatasetBuilder('stimulus', 'test stimulus notes'),
-                                            'experiment_description': DatasetBuilder('experiment_description',
-                                                                                     'test experiment description'),
-                                            'data_collection': DatasetBuilder('data_collection',
-                                                                              'test data collection notes'),
-                                            'institution': DatasetBuilder('institution', 'nomad'),
-                                            'lab': DatasetBuilder('lab', 'nolab'),
-                                            'notes': DatasetBuilder('notes', 'nonotes'),
-                                            'pharmacology': DatasetBuilder('pharmacology', 'nopharmacology'),
-                                            'protocol': DatasetBuilder('protocol', 'noprotocol'),
-                                            'related_publications': DatasetBuilder('related_publications', 'nopubs'),
-                                            'session_id': DatasetBuilder('session_id', '007'),
-                                            'slices': DatasetBuilder('slices', 'noslices'),
-                                            'source_script': DatasetBuilder('source_script', 'nosources',
-                                                                            attributes={'file_name': 'nofilename'}),
-                                            'surgery': DatasetBuilder('surgery', 'nosurgery'),
-                                            'virus': DatasetBuilder('virus', 'novirus')}
-                                       )
-
-        return GroupBuilder('root',
-                            groups={'acquisition': GroupBuilder(
-                                'acquisition',
-                                groups={'test_timeseries': ts_builder}),
-                                    'analysis': GroupBuilder('analysis'),
-                                    'general': general_builder,
-                                    'processing': GroupBuilder('processing', groups={'test_module': module_builder}),
-                                    'stimulus': GroupBuilder(
-                                        'stimulus',
-                                        groups={'presentation':
-                                                GroupBuilder('presentation'),
-                                                'templates': GroupBuilder('templates')})},
-                            datasets={
-                                'file_create_date':
-                                DatasetBuilder('file_create_date', [self.create_date.isoformat()]),
-                                'identifier': DatasetBuilder('identifier', 'TEST123'),
-                                'session_description': DatasetBuilder('session_description', 'a test NWB File'),
-                                'session_start_time': DatasetBuilder('session_start_time', self.start_time.isoformat()),
-                                'timestamps_reference_time': DatasetBuilder('timestamps_reference_time',
-                                                                            self.ref_time.isoformat())
-                                },
-                            attributes={'namespace': base.CORE_NAMESPACE,
-                                        'nwb_version': '2.0b',
-                                        'neurodata_type': 'NWBFile'})
 
     def setUpContainer(self):
         container = NWBFile('a test NWB File', 'TEST123',
@@ -167,7 +85,7 @@ class TestNWBFileIO(base.TestMapNWBContainer):
         hdf5io.close()
 
 
-class TestSubjectIO(base.TestDataInterfaceIO):
+class TestSubjectIO(TestDataInterfaceIO):
 
     def setUpContainer(self):
         return Subject(age='12 mo',
@@ -179,20 +97,6 @@ class TestSubjectIO(base.TestDataInterfaceIO):
                        weight='2 lbs',
                        date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
 
-    def setUpBuilder(self):
-        return GroupBuilder('subject',
-                            attributes={'namespace': base.CORE_NAMESPACE,
-                                        'neurodata_type': 'Subject'},
-                            datasets={'age': DatasetBuilder('age', '12 mo'),
-                                      'description': DatasetBuilder('description', 'An unfortunate rat'),
-                                      'genotype': DatasetBuilder('genotype', 'WT'),
-                                      'sex': DatasetBuilder('sex', 'M'),
-                                      'species': DatasetBuilder('species', 'Rattus norvegicus'),
-                                      'subject_id': DatasetBuilder('subject_id', 'RAT123'),
-                                      'weight': DatasetBuilder('weight', '2 lbs'),
-                                      'date_of_birth': DatasetBuilder('date_of_birth',
-                                                                      datetime(1970, 1, 1, 12, tzinfo=tzutc()))})
-
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
         nwbfile.subject = self.container
@@ -203,17 +107,12 @@ class TestSubjectIO(base.TestDataInterfaceIO):
 
 
 class TestEmptySubjectIO(TestSubjectIO):
+
     def setUpContainer(self):
         return Subject()
 
-    def setUpBuilder(self):
-        return GroupBuilder('subject',
-                            attributes={'namespace': base.CORE_NAMESPACE,
-                                        'neurodata_type': 'Subject'},
-                            datasets={})
 
-
-class TestEpochsRoundtrip(base.TestMapRoundTrip):
+class TestEpochsRoundtrip(TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
@@ -240,14 +139,13 @@ class TestEpochsRoundtrip(base.TestMapRoundTrip):
         return nwbfile.epochs
 
 
-class TestEpochsRoundtripDf(base.TestMapRoundTrip):
+class TestEpochsRoundtripDf(TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
         return TimeIntervals('epochs')
 
     def addContainer(self, nwbfile):
-
         tsa, tsb = [
             TimeSeries(name='a', data=np.arange(11), unit='flubs', timestamps=np.linspace(0, 1, 11)),
             TimeSeries(name='b', data=np.arange(13), unit='flubs', timestamps=np.linspace(0.1, 5, 13)),
@@ -326,10 +224,10 @@ class TestEpochsRoundtripDf(base.TestMapRoundTrip):
         pd.testing.assert_frame_equal(df_exp, df_obt, check_like=True, check_dtype=False)
 
 
-class TestNWBFileRoundtrip(base.TestMapRoundTrip):
+class TestNWBFileRoundtrip(TestMapRoundTrip):
 
     def setUp(self):
-        super(base.TestMapRoundTrip, self).setUp()
+        super(TestMapRoundTrip, self).setUp()
         self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
         self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
         self.create = [datetime(2017, 5, 1, 12, tzinfo=tzlocal()),

@@ -1,8 +1,4 @@
-import unittest2 as unittest
-import numpy as np
 from copy import deepcopy
-
-from hdmf.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
 
 from pynwb.ophys import (
     ImagingPlane,
@@ -12,14 +8,12 @@ from pynwb.ophys import (
     TwoPhotonSeries,
     RoiResponseSeries
 )
-
 from pynwb.image import ImageSeries
 from pynwb.device import Device
+from pynwb.testing import TestMapRoundTrip, TestDataInterfaceIO
 
-from . import base
 
-
-class TestImagingPlaneIO(base.TestMapRoundTrip):
+class TestImagingPlaneIO(TestMapRoundTrip):
     """
     A TestCase class for testing ImagingPlane
     """
@@ -31,38 +25,6 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         return ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
                             600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknonwn')
 
-    def setUpBuilder(self):
-        optchan_builder = GroupBuilder(
-            'optchan1',
-            attributes={
-                'neurodata_type': 'OpticalChannel',
-                'namespace': 'core'},
-            datasets={
-                'description': DatasetBuilder('description', 'a fake OpticalChannel'),
-                'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
-        )
-        device_builder = GroupBuilder('dev1',
-                                      attributes={'neurodata_type': 'Device',
-                                                  'namespace': 'core'})
-        return GroupBuilder(
-            'imgpln1',
-            attributes={
-                'neurodata_type': 'ImagingPlane',
-                'namespace': 'core'},
-            datasets={
-                'description': DatasetBuilder('description', 'a fake ImagingPlane'),
-                'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
-                'imaging_rate': DatasetBuilder('imaging_rate', 300.),
-                'indicator': DatasetBuilder('indicator', 'GFP'),
-                'location': DatasetBuilder('location', 'somewhere in the brain')},
-            groups={
-                'optchan1': optchan_builder
-            },
-            links={
-                'device': LinkBuilder(device_builder, 'device')
-            }
-        )
-
     def addContainer(self, nwbfile):
         """Should take an NWBFile object and add the container to it"""
         nwbfile.add_device(self.device)
@@ -73,7 +35,7 @@ class TestImagingPlaneIO(base.TestMapRoundTrip):
         return nwbfile.get_imaging_plane(self.container.name)
 
 
-class TestTwoPhotonSeries(base.TestDataInterfaceIO):
+class TestTwoPhotonSeries(TestDataInterfaceIO):
 
     def make_imaging_plane(self):
         self.device = Device(name='dev1')
@@ -90,67 +52,6 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
                               timestamps=timestamps, dimension=[2])
         return ret
 
-    def setUpBuilder(self):
-        optchan_builder = GroupBuilder(
-            'optchan1',
-            attributes={
-                 'neurodata_type': 'OpticalChannel',
-                 'namespace': 'core'},
-            datasets={
-                 'description': DatasetBuilder('description', 'a fake OpticalChannel'),
-                 'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
-        )
-        device_builder = GroupBuilder('dev1',
-                                      attributes={'neurodata_type': 'Device',
-                                                  'namespace': 'core'})
-        imgpln_builder = GroupBuilder(
-            'imgpln1',
-            attributes={
-                'neurodata_type': 'ImagingPlane',
-                'namespace': 'core'},
-            datasets={
-                'description': DatasetBuilder('description', 'a fake ImagingPlane'),
-                'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
-                'imaging_rate': DatasetBuilder('imaging_rate', 300.),
-                'indicator': DatasetBuilder('indicator', 'GFP'),
-                'location': DatasetBuilder('location', 'somewhere in the brain')},
-            groups={
-                'optchan1': optchan_builder
-            },
-            links={
-                'device': LinkBuilder(device_builder, 'device')
-            }
-        )
-
-        data = [[[1., 1.] * 2] * 2]
-        timestamps = list(map(lambda x: x/10, range(10)))
-        return GroupBuilder(
-            'test_2ps',
-            attributes={
-                'pmt_gain':  1.7,
-                'scan_line_rate':  np.float32(3.4),
-                'namespace': base.CORE_NAMESPACE,
-                'comments': 'no comments',
-                'description': 'no description',
-                'neurodata_type': 'TwoPhotonSeries'},
-            datasets={
-                'data': DatasetBuilder(
-                    'data', data,
-                    attributes={
-                        'unit': 'image_unit',
-                        'conversion': 1.0,
-                        'resolution': 0.0}
-                ),
-                'timestamps': DatasetBuilder('timestamps', timestamps,
-                                             attributes={'unit': 'seconds', 'interval': 1}),
-                'format': DatasetBuilder('format', 'raw'),
-                'dimension': DatasetBuilder('dimension', [2]),
-                'field_of_view': DatasetBuilder('field_of_view', [2.0, 2.0, 5.0]),
-            },
-            links={
-                'imaging_plane': LinkBuilder(imgpln_builder, 'imaging_plane')
-            })
-
     def addContainer(self, nwbfile):
         """Should take an NWBFile object and add the container to it"""
         nwbfile.add_device(self.device)
@@ -158,7 +59,7 @@ class TestTwoPhotonSeries(base.TestDataInterfaceIO):
         nwbfile.add_acquisition(self.container)
 
 
-class TestPlaneSegmentation(base.TestMapRoundTrip):
+class TestPlaneSegmentation(TestMapRoundTrip):
 
     @staticmethod
     def buildPlaneSegmentation(self):
@@ -193,104 +94,8 @@ class TestPlaneSegmentation(base.TestMapRoundTrip):
         pS.add_roi(pixel_mask=pix_mask[3:5], image_mask=img_mask[1])
         return pS
 
-    @staticmethod
-    def get_plane_segmentation_builder(self):
-        self.optchan_builder = GroupBuilder(
-            'test_optical_channel',
-            attributes={
-                'neurodata_type': 'OpticalChannel',
-                'namespace': 'core'},
-            datasets={
-                'description': DatasetBuilder('description', 'optical channel description'),
-                'emission_lambda': DatasetBuilder('emission_lambda', 500.)},
-        )
-        device_builder = GroupBuilder('dev1',
-                                      attributes={'neurodata_type': 'Device',
-                                                  'namespace': 'core'})
-        self.imgpln_builder = GroupBuilder(
-            'imgpln1',
-            attributes={
-                'neurodata_type': 'ImagingPlane',
-                'namespace': 'core'},
-            datasets={
-                'description': DatasetBuilder('description', 'imaging plane description'),
-                'excitation_lambda': DatasetBuilder('excitation_lambda', 600.),
-                'imaging_rate': DatasetBuilder('imaging_rate', 300.),
-                'indicator': DatasetBuilder('indicator', 'GFP'),
-                'manifold': DatasetBuilder('manifold', (((1., 2., 3.), (4., 5., 6.)),),
-                                           attributes={'conversion': 4.0, 'unit': 'manifold unit'}),
-                'reference_frame': DatasetBuilder('reference_frame', 'A frame to refer to'),
-                'location': DatasetBuilder('location', 'somewhere in the brain')},
-            groups={
-                'optchan1': self.optchan_builder
-            },
-            links={
-                'device': LinkBuilder(device_builder, 'device')
-            }
-        )
-        ts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-        self.is_builder = GroupBuilder('test_iS',
-                                       attributes={'namespace': 'core',
-                                                   'neurodata_type': 'ImageSeries',
-                                                   'description': 'no description',
-                                                   'comments': 'no comments'},
-                                       datasets={'timestamps': DatasetBuilder('timestamps', ts,
-                                                                              attributes={'unit': 'seconds',
-                                                                                          'interval': 1}),
-                                                 'external_file': DatasetBuilder('external_file', ['images.tiff'],
-                                                                                 attributes={
-                                                                                    'starting_frame': [1, 2, 3]}),
-                                                 'format': DatasetBuilder('format', 'tiff'),
-                                                 'dimension': DatasetBuilder('dimension', [2]),
-                                                 })
-
-        self.pixel_masks_builder = DatasetBuilder('pixel_mask', self.pix_mask,
-                                                  attributes={
-                                                   'namespace': 'core',
-                                                   'neurodata_type': 'VectorData',
-                                                   'description': 'Pixel masks for each ROI'})
-
-        self.pxmsk_index_builder = DatasetBuilder('pixel_mask_index', self.pxmsk_index,
-                                                  attributes={
-                                                   'namespace': 'core',
-                                                   'neurodata_type': 'VectorIndex',
-                                                   'target': ReferenceBuilder(self.pixel_masks_builder)})
-
-        self.image_masks_builder = DatasetBuilder('image_mask', self.img_mask,
-                                                  attributes={
-                                                   'namespace': 'core',
-                                                   'neurodata_type': 'VectorData',
-                                                   'description': 'Image masks for each ROI'})
-
-        ps_builder = GroupBuilder(
-            'test_plane_seg_name',
-            attributes={
-                'neurodata_type': 'PlaneSegmentation',
-                'namespace': 'core',
-                'description': 'plane segmentation description',
-                'colnames': (b'image_mask', b'pixel_mask')},
-            datasets={
-                'id': DatasetBuilder('id', data=[0, 1],
-                                     attributes={'namespace': 'core',
-                                                 'neurodata_type': 'ElementIdentifiers'}),
-                'pixel_mask': self.pixel_masks_builder,
-                'pixel_mask_index': self.pxmsk_index_builder,
-                'image_mask': self.image_masks_builder,
-            },
-            groups={
-                'reference_images': GroupBuilder('reference_images', groups={'test_iS': self.is_builder}),
-            },
-            links={
-                'imaging_plane': LinkBuilder(self.imgpln_builder, 'imaging_plane')
-            }
-        )
-        return ps_builder
-
     def setUpContainer(self):
         return self.buildPlaneSegmentation(self)
-
-    def setUpBuilder(self):
-        return self.get_plane_segmentation_builder(self)
 
     def addContainer(self, nwbfile):
         nwbfile.add_device(self.device)
@@ -327,9 +132,6 @@ class MaskRoundTrip(TestPlaneSegmentation):
         return PlaneSegmentation('description', self.imaging_plane, 'test_plane_seg_name',
                                  self.image_series)
 
-    def setUpBuilder(self):
-        raise unittest.SkipTest("no builder")
-
 
 class PixelMaskRoundtrip(MaskRoundTrip):
 
@@ -353,7 +155,7 @@ class ImageMaskRoundtrip(MaskRoundTrip):
         return pS
 
 
-class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
+class TestRoiResponseSeriesIO(TestDataInterfaceIO):
 
     def setUpContainer(self):
         self.plane_segmentation = TestPlaneSegmentation.buildPlaneSegmentation(self)
@@ -364,32 +166,6 @@ class TestRoiResponseSeriesIO(base.TestDataInterfaceIO):
 
         return RoiResponseSeries('test_roi_response_series', data, self.rt_region, unit='lumens',
                                  timestamps=timestamps)
-
-    def setUpBuilder(self):
-        ps_builder = TestPlaneSegmentation.get_plane_segmentation_builder(self)
-        return GroupBuilder(
-            'test_roi_response_series',
-            attributes={
-                'namespace': base.CORE_NAMESPACE,
-                'comments': 'no comments',
-                'description': 'no description',
-                'neurodata_type': 'RoiResponseSeries'},
-            datasets={
-                'data': DatasetBuilder(
-                    'data', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-                    attributes={
-                        'unit': 'lumens',
-                        'conversion': 1.0,
-                        'resolution': 0.0}
-                ),
-                'timestamps': DatasetBuilder('timestamps', [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
-                                             attributes={'unit': 'seconds', 'interval': 1}),
-                'rois': DatasetBuilder('rois', data=[0],
-                                       attributes={'description': 'the first of two ROIs',
-                                                   'table': ReferenceBuilder(ps_builder),
-                                                   'namespace': 'core',
-                                                   'neurodata_type': 'DynamicTableRegion'}),
-            })
 
     def addContainer(self, nwbfile):
         nwbfile.add_device(self.device)

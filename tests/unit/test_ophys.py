@@ -1,4 +1,4 @@
-import unittest
+import numpy as np
 
 from pynwb.ophys import TwoPhotonSeries, RoiResponseSeries, DfOverF, Fluorescence, PlaneSegmentation, \
     ImageSegmentation, OpticalChannel, ImagingPlane, MotionCorrection, CorrectedImageStack
@@ -6,8 +6,7 @@ from pynwb.image import ImageSeries
 from pynwb.base import TimeSeries
 from pynwb.device import Device
 from pynwb.base import ProcessingModule
-
-import numpy as np
+from pynwb.testing import TestCase
 
 
 def CreatePlaneSegmentation():
@@ -31,7 +30,7 @@ def CreatePlaneSegmentation():
     return pS
 
 
-class TwoPhotonSeriesConstructor(unittest.TestCase):
+class TwoPhotonSeriesConstructor(TestCase):
     def test_init(self):
         oc = OpticalChannel('test_name', 'description', 500.)
         self.assertEqual(oc.description, 'description')
@@ -76,12 +75,12 @@ class TwoPhotonSeriesConstructor(unittest.TestCase):
                             starting_frame=[1, 2, 3], format='tiff', timestamps=[1., 2.])
 
 
-class MotionCorrectionConstructor(unittest.TestCase):
+class MotionCorrectionConstructor(TestCase):
     def test_init(self):
         MotionCorrection(list())
 
 
-class CorrectedImageStackConstructor(unittest.TestCase):
+class CorrectedImageStackConstructor(TestCase):
     def test_init(self):
         is1 = ImageSeries(name='is1', data=np.ones((2, 2, 2)), unit='unit',
                           external_file=['external_file'], starting_frame=[1, 2, 3], format='tiff', timestamps=[1., 2.])
@@ -96,7 +95,7 @@ class CorrectedImageStackConstructor(unittest.TestCase):
         self.assertEqual(cis.xy_translation, ts)
 
 
-class RoiResponseSeriesConstructor(unittest.TestCase):
+class RoiResponseSeriesConstructor(TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
@@ -108,7 +107,7 @@ class RoiResponseSeriesConstructor(unittest.TestCase):
         self.assertEqual(ts.rois, rt_region)
 
 
-class DfOverFConstructor(unittest.TestCase):
+class DfOverFConstructor(TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
@@ -120,7 +119,7 @@ class DfOverFConstructor(unittest.TestCase):
         self.assertEqual(dof.roi_response_series['test_ts'], rrs)
 
 
-class FluorescenceConstructor(unittest.TestCase):
+class FluorescenceConstructor(TestCase):
     def test_init(self):
         ip = CreatePlaneSegmentation()
 
@@ -133,7 +132,7 @@ class FluorescenceConstructor(unittest.TestCase):
         self.assertEqual(ff.roi_response_series['test_ts'], ts)
 
 
-class ImageSegmentationConstructor(unittest.TestCase):
+class ImageSegmentationConstructor(TestCase):
 
     def test_init(self):
         ps = CreatePlaneSegmentation()
@@ -144,7 +143,7 @@ class ImageSegmentationConstructor(unittest.TestCase):
         self.assertEqual(iS[ps.name], iS.plane_segmentations[ps.name])
 
 
-class PlaneSegmentationConstructor(unittest.TestCase):
+class PlaneSegmentationConstructor(TestCase):
 
     def getBoilerPlateObjects(self):
 
@@ -268,7 +267,3 @@ class PlaneSegmentationConstructor(unittest.TestCase):
         self.assertEqual(pS.reference_images, (iSS,))
 
         self.assertEqual(pS['image_mask'].data, img_mask)
-
-
-if __name__ == '__main__':
-    unittest.main()

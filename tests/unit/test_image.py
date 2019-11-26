@@ -1,13 +1,12 @@
-import unittest
-
 import numpy as np
 
 from pynwb import TimeSeries
 from pynwb.image import ImageSeries, IndexSeries, ImageMaskSeries, OpticalSeries, \
     GrayscaleImage, RGBImage, RGBAImage
+from pynwb.testing import TestCase
 
 
-class ImageSeriesConstructor(unittest.TestCase):
+class ImageSeriesConstructor(TestCase):
 
     def test_init(self):
         iS = ImageSeries(name='test_iS', data=np.ones((3, 3, 3)), unit='unit',
@@ -20,7 +19,7 @@ class ImageSeriesConstructor(unittest.TestCase):
         # self.assertEqual(iS.bits_per_pixel, np.nan)
 
 
-class IndexSeriesConstructor(unittest.TestCase):
+class IndexSeriesConstructor(TestCase):
 
     def test_init(self):
         ts = TimeSeries('test_ts', list(), 'unit', timestamps=list())
@@ -30,7 +29,7 @@ class IndexSeriesConstructor(unittest.TestCase):
         self.assertEqual(iS.indexed_timeseries, ts)
 
 
-class ImageMaskSeriesConstructor(unittest.TestCase):
+class ImageMaskSeriesConstructor(TestCase):
 
     def test_init(self):
         iS = ImageSeries(name='test_iS', data=np.ones((2, 2, 2)), unit='unit',
@@ -48,7 +47,7 @@ class ImageMaskSeriesConstructor(unittest.TestCase):
         self.assertEqual(ims.format, 'tiff')
 
 
-class OpticalSeriesConstructor(unittest.TestCase):
+class OpticalSeriesConstructor(TestCase):
 
     def test_init(self):
         ts = OpticalSeries(name='test_ts', data=np.ones((2, 2, 2)), unit='unit', distance=1.0,
@@ -64,7 +63,7 @@ class OpticalSeriesConstructor(unittest.TestCase):
         self.assertEqual(ts.format, 'tiff')
 
 
-class TestImageSubtypes(unittest.TestCase):
+class TestImageSubtypes(TestCase):
 
     def test_grayscale_image(self):
         GrayscaleImage(name='test_grayscale_image', data=np.ones((2, 2)))
@@ -74,7 +73,3 @@ class TestImageSubtypes(unittest.TestCase):
 
     def test_rgba_image(self):
         RGBAImage('test_rgba_image', np.ones((2, 2, 4)))
-
-
-if __name__ == '__main__':
-    unittest.main()

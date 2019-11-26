@@ -1,9 +1,8 @@
 from pynwb.device import Device
+from pynwb.testing import TestMapRoundTrip
 
-from . import base
 
-
-class TestDevice(base.TestMapRoundTrip):
+class TestDevice(TestMapRoundTrip):
 
     def setUpContainer(self):
         self.device = Device(name='device_name')

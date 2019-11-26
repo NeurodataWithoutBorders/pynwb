@@ -1,56 +1,18 @@
-from . import base
-
 import numpy as np
-from hdmf.build import GroupBuilder, DatasetBuilder, ReferenceBuilder
-from pynwb import TimeSeries
+
 from hdmf.common import DynamicTable, VectorData
-
+from pynwb import TimeSeries
 from pynwb.misc import Units, DecompositionSeries
+from pynwb.testing import TestMapRoundTrip, TestDataInterfaceIO
 
 
-class TestUnitsIO(base.TestDataInterfaceIO):
+class TestUnitsIO(TestDataInterfaceIO):
 
     def setUpContainer(self):
         ut = Units(name='UnitsTest', description='a simple table for testing Units')
         ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 1], [2, 3]])
         ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 5], [6, 7]])
         return ut
-
-    def setUpBuilder(self):
-        ids_builder = DatasetBuilder('id', [0, 1],
-                                     attributes={'neurodata_type': 'ElementIdentifiers',
-                                                 'namespace': 'core'})
-        st_builder = DatasetBuilder('spike_times', [0, 1, 2, 3, 4, 5],
-                                    attributes={'neurodata_type': 'VectorData',
-                                                'namespace': 'core',
-                                                'description': 'the spike times for each unit'})
-        sti_builder = DatasetBuilder('spike_times_index',
-                                     [3, 6],
-                                     attributes={'neurodata_type': 'VectorIndex',
-                                                 'namespace': 'core',
-                                                 'target': ReferenceBuilder(st_builder)})
-
-        obs_builder = DatasetBuilder('obs_intervals', [[0, 1], [2, 3], [2, 5], [6, 7]],
-                                     attributes={'neurodata_type': 'VectorData',
-                                                 'namespace': 'core',
-                                                 'description': 'the observation intervals for each unit'})
-
-        obsi_builder = DatasetBuilder('obs_intervals_index',
-                                      [2, 4],
-                                      attributes={'neurodata_type': 'VectorIndex',
-                                                  'namespace': 'core',
-                                                  'target': ReferenceBuilder(obs_builder)})
-
-        return GroupBuilder('UnitsTest',
-                            attributes={'neurodata_type': 'Units',
-                                        'namespace': 'core',
-                                        'description': 'a simple table for testing Units',
-                                        'colnames': (b'spike_times', b'obs_intervals',)},
-                            datasets={'id': ids_builder,
-                                      'spike_times': st_builder,
-                                      'spike_times_index': sti_builder,
-                                      'obs_intervals': obs_builder,
-                                      'obs_intervals_index': obsi_builder})
 
     def test_get_spike_times(self):
         ut = self.roundtripContainer()
@@ -69,7 +31,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
         self.assertTrue(np.array_equal(ut['obs_intervals'][:], [[[0, 1], [2, 3]], [[2, 5], [6, 7]]]))
 
 
-class TestUnitElectrodes(base.TestMapRoundTrip):
+class TestUnitElectrodes(TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
@@ -100,7 +62,8 @@ class TestUnitElectrodes(base.TestMapRoundTrip):
         return nwbfile.units
 
 
-class TestSpectralAnalysis(base.TestDataInterfaceIO):
+class TestSpectralAnalysis(TestDataInterfaceIO):
+
     def setUpContainer(self):
         self.timeseries = TimeSeries(name='dummy timeseries', description='desc',
                                      data=np.ones((3, 3)), unit='flibs',
@@ -125,5 +88,4 @@ class TestSpectralAnalysis(base.TestDataInterfaceIO):
         prcs_mod.add(self.container)
 
     def getContainer(self, nwbfile):
-
         return nwbfile.processing['test_mod']['LFPSpectralAnalysis']

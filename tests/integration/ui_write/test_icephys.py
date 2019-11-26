@@ -1,18 +1,14 @@
-from hdmf.build import GroupBuilder, LinkBuilder, ReferenceBuilder, DatasetBuilder
+from abc import ABCMeta
+
 from pynwb import NWBFile
 from pynwb.icephys import (IntracellularElectrode, PatchClampSeries, CurrentClampStimulusSeries,
-                           SweepTable,
-                           VoltageClampStimulusSeries, CurrentClampSeries,
+                           SweepTable, VoltageClampStimulusSeries, CurrentClampSeries,
                            VoltageClampSeries, IZeroClampSeries)
 from pynwb.device import Device
-
-from . import base
-
-from abc import ABCMeta
-from six import with_metaclass
+from pynwb.testing import TestMapRoundTrip, TestDataInterfaceIO
 
 
-class TestIntracellularElectrode(base.TestMapRoundTrip):
+class TestIntracellularElectrode(TestMapRoundTrip):
 
     def setUpContainer(self):
         self.device = Device(name='device_name')
@@ -25,29 +21,6 @@ class TestIntracellularElectrode(base.TestMapRoundTrip):
                                            device=self.device)
         return self.elec
 
-    def setUpBuilder(self):
-        device = GroupBuilder('device_name',
-                              attributes={'namespace': 'core',
-                                          'neurodata_type': 'Device'})
-        datasets = [
-            DatasetBuilder('slice', data=u'tissue slice'),
-            DatasetBuilder('resistance', data=u'something measured in ohms'),
-            DatasetBuilder('seal', data=u'sealing method'),
-            DatasetBuilder('description', data=u'a fake electrode object'),
-            DatasetBuilder('location', data=u'Springfield Elementary School'),
-            DatasetBuilder('filtering', data=u'a meaningless free-form text field'),
-            DatasetBuilder('initial_access_resistance', data=u'I guess this changes'),
-        ]
-        elec = GroupBuilder('elec0',
-                            attributes={'namespace': 'core',
-                                        'neurodata_type': 'IntracellularElectrode',
-                                        },
-                            datasets={d.name: d for d in datasets},
-                            links={
-                                'device': LinkBuilder(device, 'device')
-                            })
-        return elec
-
     def addContainer(self, nwbfile):
         ''' Should take an NWBFile object and add the container to it '''
         nwbfile.add_ic_electrode(self.elec)
@@ -58,10 +31,9 @@ class TestIntracellularElectrode(base.TestMapRoundTrip):
         return nwbfile.get_ic_electrode(self.container.name)
 
 
-class TestPatchClampSeries(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
+class TestPatchClampSeries(TestDataInterfaceIO, metaclass=ABCMeta):
 
     def setUpElectrode(self):
-
         self.device = Device(name='device_name')
         self.elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                            resistance='something measured in ohms',
@@ -129,9 +101,7 @@ class TestIZeroClampSeries(TestPatchClampSeries):
                                 starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
 
 
-class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
-
-    _required_tests = ('test_container', 'test_build', 'test_construct', 'test_roundtrip')
+class TestSweepTableRoundTripEasy(TestMapRoundTrip):
 
     def setUpContainer(self):
         self.setUpSweepTable()
@@ -172,103 +142,8 @@ class TestSweepTableRoundTripEasy(base.TestMapRoundTrip):
         ''' Should take an NWBFile object and return the Container'''
         return nwbfile.sweep_table
 
-    def setUpBuilder(self):
-        device = GroupBuilder('device_name',
-                              attributes={'neurodata_type': 'Device',
-                                          'namespace': 'core',
-                                          })
-        datasets = [
-            DatasetBuilder('slice', data=u'tissue slice'),
-            DatasetBuilder('resistance', data=u'something measured in ohms'),
-            DatasetBuilder('seal', data=u'sealing method'),
-            DatasetBuilder('description', data=u'a fake electrode object'),
-            DatasetBuilder('location', data=u'Springfield Elementary School'),
-            DatasetBuilder('filtering', data=u'a meaningless free-form text field'),
-            DatasetBuilder('initial_access_resistance', data=u'I guess this changes'),
-        ]
-        elec = GroupBuilder('elec0',
-                            attributes={'namespace': 'core',
-                                        'neurodata_type': 'IntracellularElectrode',
-                                        },
-                            datasets={d.name: d for d in datasets},
-                            links={
-                                'device': LinkBuilder(device, 'device')
-                            })
-        datasets = [
-            DatasetBuilder('gain',
-                           data=0.126,
-                           attributes={},
-                           ),
-            DatasetBuilder('data',
-                           data=[1, 2, 3, 4, 5],
-                           attributes={'conversion': 1.0,
-                                       'resolution': 0.0,
-                                       'unit': u'A',
-                                       }
-                           ),
-            DatasetBuilder('starting_time',
-                           data=123.6,
-                           attributes={'rate': 10000.0,
-                                       'unit': 'Seconds',
-                                       }
-                           ),
-                ]
-        pcs = GroupBuilder('pcs',
-                           attributes={'neurodata_type': 'PatchClampSeries',
-                                       'namespace': 'core',
-                                       'comments': u'no comments',
-                                       'description': u'no description',
-                                       'stimulus_description': u'gotcha ya!',
-                                       'sweep_number': 4711
-                                       },
-                           links={'electrode': LinkBuilder(elec, 'electrode')},
-                           datasets={d.name: d for d in datasets},
-                           )
 
-        column_id = DatasetBuilder('id', [0],
-                                   attributes={'neurodata_type': 'ElementIdentifiers',
-                                               'namespace': 'core'}
-                                   )
-
-        column_series = DatasetBuilder('series',
-                                       attributes={'neurodata_type': 'VectorData',
-                                                   'namespace': 'core',
-                                                   'description': u'PatchClampSeries with the same sweep number',
-                                                   },
-                                       data=[LinkBuilder(pcs)]
-                                       )
-
-        column_index = DatasetBuilder('series_index', [1],
-                                      attributes={'neurodata_type': 'VectorIndex',
-                                                  'namespace': 'core',
-                                                  'target': ReferenceBuilder(column_series),
-                                                  },
-                                      )
-
-        column_sweep_number = DatasetBuilder('sweep_number', data=[4711],
-                                             attributes={'neurodata_type': 'VectorData',
-                                                         'namespace': 'core',
-                                                         'description': u'Sweep number of the entries in that row',
-                                                         }
-                                             )
-
-        columns = [column_id, column_series, column_index, column_sweep_number]
-        sweep_table = GroupBuilder('sweep_table', datasets={c.name: c for c in columns},
-                                   attributes={'neurodata_type': 'SweepTable',
-                                               'namespace': 'core',
-                                               'colnames': (b'series',
-                                                            b'sweep_number'),
-                                               'description':
-                                               u'A sweep table groups different PatchClampSeries together.',
-                                               },
-                                   )
-
-        return sweep_table
-
-
-class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
-
-    _required_tests = ('test_container', 'test_build', 'test_construct', 'test_roundtrip')
+class TestSweepTableRoundTripComplicated(TestMapRoundTrip):
 
     def setUpContainer(self):
         self.setUpSweepTable()
@@ -334,111 +209,3 @@ class TestSweepTableRoundTripComplicated(base.TestMapRoundTrip):
 
     def getContainer(self, nwbfile):
         return nwbfile.sweep_table
-
-    def setUpBuilder(self):
-        device = GroupBuilder('device_name',
-                              attributes={'neurodata_type': 'Device',
-                                          'namespace': 'core',
-                                          })
-
-        datasets = [
-            DatasetBuilder('slice', data=u'tissue slice'),
-            DatasetBuilder('resistance', data=u'something measured in ohms'),
-            DatasetBuilder('seal', data=u'sealing method'),
-            DatasetBuilder('description', data=u'a fake electrode object'),
-            DatasetBuilder('location', data=u'Springfield Elementary School'),
-            DatasetBuilder('filtering', data=u'a meaningless free-form text field'),
-            DatasetBuilder('initial_access_resistance', data=u'I guess this changes'),
-        ]
-        elec = GroupBuilder('elec0',
-                            attributes={'namespace': 'core',
-                                        'neurodata_type': 'IntracellularElectrode',
-                                        },
-                            datasets={d.name: d for d in datasets},
-                            links={
-                                'device': LinkBuilder(device, 'device')
-                            })
-
-        datasets = [
-            DatasetBuilder('gain',
-                           data=0.126,
-                           attributes={},
-                           ),
-            DatasetBuilder('data',
-                           data=[1, 2, 3, 4, 5],
-                           attributes={'conversion': 1.0,
-                                       'resolution': 0.0,
-                                       'unit': u'A',
-                                       }
-                           ),
-            DatasetBuilder('starting_time',
-                           data=123.6,
-                           attributes={'rate': 10000.0,
-                                       'unit': 'Seconds',
-                                       }
-                           ),
-                ]
-        attributes = {'neurodata_type': 'PatchClampSeries',
-                      'namespace': 'core',
-                      'comments': u'no comments',
-                      'description': u'no description',
-                      'stimulus_description': u'gotcha ya!',
-                      }
-        attributes['sweep_number'] = 4711
-        pcs1 = GroupBuilder('pcs1',
-                            attributes=attributes,
-                            links={'electrode': LinkBuilder(elec, 'electrode')},
-                            datasets={d.name: d for d in datasets},
-                            )
-        attributes['sweep_number'] = 4712
-        pcs2a = GroupBuilder('pcs2a',
-                             attributes=attributes,
-                             links={'electrode': LinkBuilder(elec, 'electrode')},
-                             datasets={d.name: d for d in datasets},
-                             )
-        pcs2b = GroupBuilder('pcs2b',
-                             attributes=attributes,
-                             links={'electrode': LinkBuilder(elec, 'electrode')},
-                             datasets={d.name: d for d in datasets},
-                             )
-
-        column_id = DatasetBuilder('id', [0, 1, 2],
-                                   attributes={'neurodata_type': 'ElementIdentifiers',
-                                               'namespace': 'core',
-                                               }
-                                   )
-
-        column_series = DatasetBuilder('series',
-                                       attributes={'neurodata_type': 'VectorData',
-                                                   'namespace': 'core',
-                                                   'description': u'PatchClampSeries with the same sweep number',
-                                                   },
-                                       data=[LinkBuilder(pcs) for pcs in (pcs1, pcs2a, pcs2b)]
-                                       )
-
-        column_index = DatasetBuilder('series_index', [1, 2, 3],
-                                      attributes={'neurodata_type': 'VectorIndex',
-                                                  'namespace': 'core',
-                                                  'target': ReferenceBuilder(column_series),
-                                                  },
-                                      )
-
-        column_sweep_number = DatasetBuilder('sweep_number', data=[4711, 4712, 4712],
-                                             attributes={'neurodata_type': 'VectorData',
-                                                         'namespace': 'core',
-                                                         'description': u'Sweep number of the entries in that row',
-                                                         }
-                                             )
-
-        columns = [column_id, column_series, column_index, column_sweep_number]
-        sweep_table = GroupBuilder('sweep_table', datasets={c.name: c for c in columns},
-                                   attributes={'neurodata_type': 'SweepTable',
-                                               'namespace': 'core',
-                                               'colnames': (b'series',
-                                                            b'sweep_number'),
-                                               'description':
-                                               u'A sweep table groups different PatchClampSeries together.',
-                                               },
-                                   )
-
-        return sweep_table

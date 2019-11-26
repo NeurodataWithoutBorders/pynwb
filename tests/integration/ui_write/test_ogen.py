@@ -1,10 +1,9 @@
 from pynwb.ogen import OptogeneticSeries, OptogeneticStimulusSite
 from pynwb.device import Device
+from pynwb.testing import TestMapRoundTrip
 
-from . import base
 
-
-class TestOptogeneticStimulusSite(base.TestMapRoundTrip):
+class TestOptogeneticStimulusSite(TestMapRoundTrip):
 
     def setUpContainer(self):
         self.device = Device(name='dev1')
@@ -18,7 +17,7 @@ class TestOptogeneticStimulusSite(base.TestMapRoundTrip):
         return nwbfile.get_ogen_site(self.container.name)
 
 
-class TestOptogeneticStimulusSeries(base.TestMapRoundTrip):
+class TestOptogeneticStimulusSeries(TestMapRoundTrip):
     """
     A TestCase class for testing OptogeneticStimulusSeries
     """

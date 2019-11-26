@@ -1,10 +1,10 @@
-from pynwb.image import OpticalSeries
 import numpy as np
 
-from . import base
+from pynwb.image import OpticalSeries
+from pynwb.testing import TestMapRoundTrip
 
 
-class TestOpticalSeries(base.TestMapRoundTrip):
+class TestOpticalSeries(TestMapRoundTrip):
 
     def setUpContainer(self):
         self.optical_series = OpticalSeries(name='OpticalSeries',

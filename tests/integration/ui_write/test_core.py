@@ -1,13 +1,12 @@
-from hdmf.common import DynamicTable
-import pynwb
-
-from . import base
-
 import pandas as pd
 import numpy as np
 
+from hdmf.common import DynamicTable
+from pynwb.ecephys import ElectricalSeries
+from pynwb.testing import TestMapRoundTrip
 
-class TestTrials(base.TestMapRoundTrip):
+
+class TestTrials(TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
@@ -27,7 +26,7 @@ class TestTrials(base.TestMapRoundTrip):
         return nwbfile.trials
 
 
-class TestInvalidTimes(base.TestMapRoundTrip):
+class TestInvalidTimes(TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
@@ -47,7 +46,7 @@ class TestInvalidTimes(base.TestMapRoundTrip):
         return nwbfile.invalid_times
 
 
-class TestUnits(base.TestMapRoundTrip):
+class TestUnits(TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
@@ -65,7 +64,7 @@ class TestUnits(base.TestMapRoundTrip):
         return nwbfile.units
 
 
-class TestFromDataframe(base.TestMapRoundTrip):
+class TestFromDataframe(TestMapRoundTrip):
 
     def setUpContainer(self):
         # this will get ignored
@@ -86,7 +85,7 @@ class TestFromDataframe(base.TestMapRoundTrip):
         return dyn_tab
 
 
-class TestElectrodes(base.TestMapRoundTrip):
+class TestElectrodes(TestMapRoundTrip):
 
     def setUpContainer(self):
         return DynamicTable('electrodes', 'metadata about extracellular electrodes')
@@ -117,7 +116,7 @@ class TestElectrodes(base.TestMapRoundTrip):
                                       self.container[0].drop('group', axis=1))
 
 
-class TestElectrodesRegion(base.TestMapRoundTrip):
+class TestElectrodesRegion(TestMapRoundTrip):
 
     def setUpContainer(self):
         return DynamicTable('electrodes', 'metadata about extracellular electrodes')  # no-op
@@ -141,7 +140,7 @@ class TestElectrodesRegion(base.TestMapRoundTrip):
             name='electrodes',
             description='desc'
         )
-        nwbfile.add_acquisition(pynwb.ecephys.ElectricalSeries(
+        nwbfile.add_acquisition(ElectricalSeries(
             name='test_data',
             data=np.arange(10),
             timestamps=np.arange(10),

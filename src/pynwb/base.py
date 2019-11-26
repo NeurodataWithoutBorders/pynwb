@@ -177,7 +177,7 @@ class TimeSeries(NWBDataInterface):
             )
 
         def no_len_warning(attr):
-            return 'The {} attribute on this TimeSeries (named: {}) has no __len__, '.format(attr, self.name)
+            return 'The {} attribute on this TimeSeries (named: {}) has no __len__'.format(attr, self.name)
 
         if hasattr(self.data, '__len__'):
             try:

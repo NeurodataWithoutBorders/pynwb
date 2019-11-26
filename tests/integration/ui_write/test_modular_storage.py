@@ -2,19 +2,16 @@ import os
 import gc
 from datetime import datetime
 from dateutil.tz import tzutc
-
 import numpy as np
 
-from pynwb.base import TimeSeries
-from pynwb import get_manager, NWBFile, NWBHDF5IO, validate as pynwb_validate
-from pynwb.testing import remove_test_file
 from hdmf.backends.hdf5 import HDF5IO
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
-from . import base
+from pynwb import get_manager, NWBFile, NWBHDF5IO, TimeSeries, validate as pynwb_validate
+from pynwb.testing import remove_test_file, TestMapNWBContainer
 
 
-class TestTimeSeriesModular(base.TestMapNWBContainer):
+class TestTimeSeriesModular(TestMapNWBContainer):
 
     _required_tests = ('test_roundtrip',)
 
