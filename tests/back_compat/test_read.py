@@ -1,4 +1,5 @@
 from pathlib import Path
+import warnings
 
 from pynwb import NWBHDF5IO, validate
 from pynwb.testing import TestCase
@@ -20,6 +21,6 @@ class TestReadOldFiles(TestCase):
                     io.read()
                     if errors:
                         for e in errors:
-                            print('%s: %s' % (f.name, e))
+                            warnings.warn('%s: %s' % (f.name, e))
                         # TODO uncomment below when validation errors have been fixed
-                        # raise Exception('%d validation error(s)' % len(errors))
+                        # raise Exception('%d validation error(s). See warnings.' % len(errors))
