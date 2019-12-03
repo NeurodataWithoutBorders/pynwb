@@ -5,7 +5,7 @@ from pynwb import NWBHDF5IO, validate
 from pynwb.testing import TestCase
 
 
-class TestReadOldFiles(TestCase):
+class TestReadOldVersions(TestCase):
 
     def test_read(self):
         """
