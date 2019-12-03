@@ -3,7 +3,7 @@ try:
 except ImportError:
     from collections import Iterable  # Python 2.7
 
-from hdmf.utils import docval, getargs, popargs, fmt_docval_args, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -27,8 +27,7 @@ class OpticalChannel(NWBContainer):
             {'name': 'emission_lambda', 'type': 'float', 'doc': 'Emission lambda for channel.'})  # required
     def __init__(self, **kwargs):
         description, emission_lambda = popargs("description", "emission_lambda", kwargs)
-        pargs, pkwargs = fmt_docval_args(super(OpticalChannel, self).__init__, kwargs)
-        super(OpticalChannel, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(OpticalChannel, self).__init__, kwargs)
         self.description = description
         self.emission_lambda = emission_lambda
 
@@ -77,8 +76,7 @@ class ImagingPlane(NWBContainer):
                 'optical_channel', 'description', 'device', 'excitation_lambda',
                 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion',
                 'unit', 'reference_frame', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(ImagingPlane, self).__init__, kwargs)
-        super(ImagingPlane, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(ImagingPlane, self).__init__, kwargs)
         self.optical_channel = optical_channel if isinstance(optical_channel, list) else [optical_channel]
         self.description = description
         self.device = device
@@ -122,8 +120,7 @@ class TwoPhotonSeries(ImageSeries):
     def __init__(self, **kwargs):
         field_of_view, imaging_plane, pmt_gain, scan_line_rate = popargs(
             'field_of_view', 'imaging_plane', 'pmt_gain', 'scan_line_rate', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(TwoPhotonSeries, self).__init__, kwargs)
-        super(TwoPhotonSeries, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(TwoPhotonSeries, self).__init__, kwargs)
         self.field_of_view = field_of_view
         self.imaging_plane = imaging_plane
         self.pmt_gain = pmt_gain
@@ -153,7 +150,7 @@ class CorrectedImageStack(NWBDataInterface):
                     'for example, to align each frame to a reference image.'})
     def __init__(self, **kwargs):
         corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
-        super(CorrectedImageStack, self).__init__(**kwargs)
+        call_docval_func(super(CorrectedImageStack, self).__init__, kwargs)
         self.corrected = corrected
         self.original = original
         self.xy_translation = xy_translation
@@ -180,9 +177,8 @@ class PlaneSegmentation(DynamicTable):
     Image segmentation of a specific imaging plane
     """
 
-    __nwbfields__ = ('description',
-                     'imaging_plane',
-                     {'name': 'reference_images', 'child': True})
+    __fields__ = ('imaging_plane',
+                  {'name': 'reference_images', 'child': True})
 
     __columns__ = (
         {'name': 'image_mask', 'description': 'Image masks for each ROI'},
@@ -203,8 +199,7 @@ class PlaneSegmentation(DynamicTable):
         if kwargs.get('name') is None:
             kwargs['name'] = imaging_plane.name
         columns, colnames = getargs('columns', 'colnames', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(PlaneSegmentation, self).__init__, kwargs)
-        super(PlaneSegmentation, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(PlaneSegmentation, self).__init__, kwargs)
         self.imaging_plane = imaging_plane
         if isinstance(reference_images, ImageSeries):
             reference_images = (reference_images,)
@@ -319,8 +314,7 @@ class RoiResponseSeries(TimeSeries):
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         rois = popargs('rois', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(RoiResponseSeries, self).__init__, kwargs)
-        super(RoiResponseSeries, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(RoiResponseSeries, self).__init__, kwargs)
         self.rois = rois
 
 
