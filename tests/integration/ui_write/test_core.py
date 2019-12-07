@@ -111,7 +111,10 @@ class TestElectrodes(base.TestMapRoundTrip):
 
     def test_roundtrip(self):
         super(TestElectrodes, self).test_roundtrip()
-        self.assertContainerEqual(self.read_container[0][7], self.container[0][7])
+        # When comparing the pandas dataframes for the row we drop the 'group' column since the
+        # ElectrodeGroup object after reading will naturally have a different address
+        pd.testing.assert_frame_equal(self.read_container[0].drop('group', axis=1),
+                                      self.container[0].drop('group', axis=1))
 
 
 class TestElectrodesRegion(base.TestMapRoundTrip):
@@ -153,6 +156,5 @@ class TestElectrodesRegion(base.TestMapRoundTrip):
 
     def test_roundtrip(self):
         super(TestElectrodesRegion, self).test_roundtrip()
-
         for ii, item in enumerate(self.read_container):
-            self.assertEqual(self.table[ii+1], item)
+            pd.testing.assert_frame_equal(self.table[ii+1], item)

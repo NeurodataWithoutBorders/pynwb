@@ -1,6 +1,6 @@
 import numpy as np
 
-from hdmf.utils import docval, popargs, fmt_docval_args, call_docval_func, get_docval
+from hdmf.utils import docval, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
@@ -27,8 +27,8 @@ class IntracellularElectrode(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode'},
             {'name': 'description', 'type': str,
-             'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc) \
-             COMMENT: Free-form text (can be from Methods)'},
+             'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc) '
+                    'COMMENT: Free-form text (can be from Methods)'},
             {'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.', 'default': None},
             {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.', 'default': None},
             {'name': 'location', 'type': str,
@@ -41,8 +41,7 @@ class IntracellularElectrode(NWBContainer):
         slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs(
             'slice', 'seal', 'description', 'location', 'resistance',
             'filtering', 'initial_access_resistance', 'device', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(IntracellularElectrode, self).__init__, kwargs)
-        super(IntracellularElectrode, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(IntracellularElectrode, self).__init__, kwargs)
         self.slice = slice
         self.seal = seal
         self.description = description
@@ -70,15 +69,15 @@ class PatchClampSeries(TimeSeries):
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},  # required
             {'name': 'electrode', 'type': IntracellularElectrode,  # required
-             'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
-                     or record this data.'},
+             'doc': 'IntracellularElectrode group that describes the electrode that was used to apply '
+                     'or record this data.'},
             {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},  # required
             {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'),
             {'name': 'sweep_number', 'type': (int, 'uint64'),
-             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
-                     via the sweep_table', 'default': None})
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together '
+                    'via the sweep_table', 'default': None})
     def __init__(self, **kwargs):
         name, data, unit, stimulus_description = popargs('name', 'data', 'unit', 'stimulus_description', kwargs)
         electrode, gain, sweep_number = popargs('electrode', 'gain', 'sweep_number', kwargs)

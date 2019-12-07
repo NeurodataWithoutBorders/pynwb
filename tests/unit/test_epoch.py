@@ -18,10 +18,11 @@ class TimeIntervalsTest(unittest.TestCase):
         self.assertEqual(ept.name, 'epochs')
         ept.add_interval(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
         row = ept[0]
-        self.assertEqual(row[1], 10.0)
-        self.assertEqual(row[2], 20.0)
-        self.assertEqual(row[3], ["test", "unittest", "pynwb"])
-        self.assertEqual(row[4], [(90, 100, ts)])
+        self.assertEqual(row.index[0], 0)
+        self.assertEqual(row.loc[0]['start_time'], 10.0)
+        self.assertEqual(row.loc[0]['stop_time'], 20.0)
+        self.assertEqual(row.loc[0]['tags'], ["test", "unittest", "pynwb"])
+        self.assertEqual(row.loc[0]['timeseries'], [(90, 100, ts)])
 
     def get_timeseries(self):
         return [
@@ -37,7 +38,7 @@ class TimeIntervalsTest(unittest.TestCase):
             'start_time': [0.2, 0.25, 0.30, 0.35],
             'stop_time': [0.25, 0.30, 0.40, 0.45],
             'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
-            'description': ['q', 'w', 'e', 'r'],
+            'keys': ['q', 'w', 'e', 'r'],
             'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
         })
 

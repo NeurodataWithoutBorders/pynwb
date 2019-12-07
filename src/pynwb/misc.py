@@ -186,6 +186,8 @@ class Units(DynamicTable):
                 if self.__electrode_table is None:
                     nwbfile = self.get_ancestor(data_type='NWBFile')
                     elec_col.table = nwbfile.electrodes
+                    if elec_col.table is None:
+                        warnings.warn('Reference to electrode table that does not yet exist')
                 else:
                     elec_col.table = self.__electrode_table
 
