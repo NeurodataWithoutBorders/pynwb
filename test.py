@@ -114,7 +114,6 @@ def run_integration_tests(verbose=True):
     type_map = pynwb.get_type_map()
 
     tested_containers = {}
-    required_tests = {}
     for test_case in test_cases:
         if not hasattr(test_case, 'container'):
             continue
@@ -125,30 +124,13 @@ def run_integration_tests(verbose=True):
         else:
             tested_containers[container_class].append(test_case._testMethodName)
 
-        if container_class not in required_tests:
-            required_tests[container_class] = list(test_case.required_tests)
-        else:
-            required_tests[container_class].extend(test_case.required_tests)
-
     count_missing = 0
     for container_class in type_map.get_container_classes('core'):
-
         if container_class not in tested_containers:
             count_missing += 1
             if verbose > 1:
                 logging.info('%s missing test case; should define in %s' % (container_class,
                                                                             inspect.getfile(container_class)))
-            continue
-
-        test_methods = tested_containers[container_class]
-        required = required_tests[container_class]
-        methods_missing = set(required) - set(test_methods)
-
-        if methods_missing != set([]):
-            count_missing += 1
-            if verbose > 1:
-                logging.info('%s missing test method(s) \"%s\"; should define in %s' % (
-                    container_class, ', '.join(methods_missing), inspect.getfile(container_class)))
 
     if count_missing > 0:
         logging.info('%d classes missing integration tests in ui_write' % count_missing)

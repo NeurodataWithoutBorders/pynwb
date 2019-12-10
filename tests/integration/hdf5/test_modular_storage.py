@@ -8,12 +8,10 @@ from hdmf.backends.hdf5 import HDF5IO
 from hdmf.backends.hdf5.h5_utils import H5DataIO
 
 from pynwb import get_manager, NWBFile, NWBHDF5IO, TimeSeries, validate as pynwb_validate
-from pynwb.testing import remove_test_file, TestMapNWBContainer
+from pynwb.testing import remove_test_file, TestCase
 
 
-class TestTimeSeriesModular(TestMapNWBContainer):
-
-    _required_tests = ('test_roundtrip',)
+class TestTimeSeriesModular(TestCase):
 
     def setUp(self):
         self.start_time = datetime(1971, 1, 1, 12, tzinfo=tzutc())
@@ -107,7 +105,8 @@ class TestTimeSeriesModular(TestMapNWBContainer):
         self.assertTrue(self.read_container.timestamps.id.valid)
         self.assertNotEqual(id(self.link_container), id(self.read_container))
         self.assertIs(self.read_nwbfile.objects[self.link_container.object_id], self.read_container)
-        self.assertContainerEqual(self.read_container, self.container)
+        self.assertContainerEqual(self.read_container, self.container, ignore_name=True, ignore_hdmf_attrs=True)
+        self.assertEqual(self.read_container.object_id, self.link_container.object_id)
         self.validate()
 
     def test_link_root(self):

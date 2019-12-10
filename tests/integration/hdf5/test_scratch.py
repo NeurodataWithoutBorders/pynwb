@@ -4,18 +4,21 @@ from numpy.testing import assert_array_equal
 
 from pynwb import NWBFile, NWBHDF5IO, TimeSeries
 from pynwb.core import ScratchData
-from pynwb.testing import TestMapRoundTrip
+from pynwb.testing import TestNWBH5IOMixin, TestCase
 
 
-class TestScratchData(TestMapRoundTrip):
+class TestScratchDataIO(TestNWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
+        """ Return the test ScratchData to read/write """
         return ScratchData('foo', [1, 2, 3, 4], notes='test scratch')
 
     def addContainer(self, nwbfile):
+        """ Add the test ScratchData to the given NWBFile """
         nwbfile.add_scratch(self.container)
 
     def getContainer(self, nwbfile):
+        """ Return the test ScratchData from the given NWBFile """
         return nwbfile.get_scratch('foo', convert=False)
 
     def roundtrip_scratch(self, data, case, **kwargs):

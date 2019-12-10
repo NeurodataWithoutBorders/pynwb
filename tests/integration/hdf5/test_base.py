@@ -3,14 +3,18 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 
 from pynwb import TimeSeries, NWBFile, NWBHDF5IO
-from pynwb.testing import TestDataInterfaceIO
+from pynwb.testing import TestAcquisitionH5IOMixin, TestCase
 
 
-class TestTimeSeriesIO(TestDataInterfaceIO):
+class TestTimeSeriesIO(TestAcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
+        """ Return the test TimeSeries to read/write """
         return TimeSeries('test_timeseries', list(range(100, 200, 10)),
                           'SIunit', timestamps=list(range(10)), resolution=0.1)
+
+
+class TestTimeSeriesLinking(TestCase):
 
     def test_timestamps_linking(self):
         ''' Test that timestamps get linked to in TimeSeries '''
@@ -21,9 +25,10 @@ class TestTimeSeriesIO(TestDataInterfaceIO):
                           session_description='bar')
         nwbfile.add_acquisition(tsa)
         nwbfile.add_acquisition(tsb)
-        with NWBHDF5IO(self.filename, 'w') as io:
+        filename = 'test_timestamps_linking.nwb'
+        with NWBHDF5IO(filename, 'w') as io:
             io.write(nwbfile)
-        with NWBHDF5IO(self.filename, 'r') as io:
+        with NWBHDF5IO(filename, 'r') as io:
             nwbfile = io.read()
         tsa = nwbfile.acquisition['a']
         tsb = nwbfile.acquisition['b']

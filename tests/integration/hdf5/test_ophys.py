@@ -1,4 +1,5 @@
 from copy import deepcopy
+from abc import ABCMeta
 
 from pynwb.ophys import (
     ImagingPlane,
@@ -10,40 +11,39 @@ from pynwb.ophys import (
 )
 from pynwb.image import ImageSeries
 from pynwb.device import Device
-from pynwb.testing import TestMapRoundTrip, TestDataInterfaceIO
+from pynwb.testing import TestNWBH5IOMixin, TestAcquisitionH5IOMixin, TestCase
 
 
-class TestImagingPlaneIO(TestMapRoundTrip):
-    """
-    A TestCase class for testing ImagingPlane
-    """
+class TestImagingPlaneIO(TestNWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
+        """ Return the test ImagingPlane to read/write """
         self.device = Device(name='dev1')
-        self.optical_channel = OpticalChannel('optchan1',
-                                              'a fake OpticalChannel', 500.)
+        self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
         return ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
                             600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknonwn')
 
     def addContainer(self, nwbfile):
-        """Should take an NWBFile object and add the container to it"""
+        """ Add the test ImagingPlane and Device to the given NWBFile """
         nwbfile.add_device(self.device)
         nwbfile.add_imaging_plane(self.container)
 
     def getContainer(self, nwbfile):
-        """Should take an NWBFile object and return the Container"""
+        """ Return the test ImagingPlane from the given NWBFile """
         return nwbfile.get_imaging_plane(self.container.name)
 
 
-class TestTwoPhotonSeries(TestDataInterfaceIO):
+class TestTwoPhotonSeriesIO(TestAcquisitionH5IOMixin, TestCase):
 
     def make_imaging_plane(self):
+        """ Make an ImagingPlane and related objects """
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
         self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
                                           600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknown')
 
     def setUpContainer(self):
+        """ Return the test TwoPhotonSeries to read/write """
         self.make_imaging_plane()
         data = [[[1., 1.] * 2] * 2]
         timestamps = list(map(lambda x: x/10, range(10)))
@@ -53,16 +53,17 @@ class TestTwoPhotonSeries(TestDataInterfaceIO):
         return ret
 
     def addContainer(self, nwbfile):
-        """Should take an NWBFile object and add the container to it"""
+        """ Add the test TwoPhotonSeries as an acquisition and add Device and ImagingPlane to the given NWBFile """
         nwbfile.add_device(self.device)
         nwbfile.add_imaging_plane(self.imaging_plane)
         nwbfile.add_acquisition(self.container)
 
 
-class TestPlaneSegmentation(TestMapRoundTrip):
+class TestPlaneSegmentationIO(TestNWBH5IOMixin, TestCase):
 
     @staticmethod
     def buildPlaneSegmentation(self):
+        """ Return an PlaneSegmentation and set related objects """
         w, h = 5, 5
         img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
         pix_mask = [(1, 2, 1.0), (3, 4, 1.0), (5, 6, 1.0),
@@ -95,26 +96,32 @@ class TestPlaneSegmentation(TestMapRoundTrip):
         return pS
 
     def setUpContainer(self):
+        """ Return the test PlaneSegmentation to read/write """
         return self.buildPlaneSegmentation(self)
 
     def addContainer(self, nwbfile):
+        """
+        Add an ImageSegmentation in processing with a PlaneSegmentation and add Device and ImagingPlane to the
+        given NWBFile
+        """
         nwbfile.add_device(self.device)
         nwbfile.add_imaging_plane(self.imaging_plane)
         img_seg = ImageSegmentation()
         img_seg.add_plane_segmentation(self.container)
-        mod = nwbfile.create_processing_module('plane_seg_test_module',
-                                               'a plain module for testing')
-        mod.add(img_seg)
+        self.mod = nwbfile.create_processing_module('plane_seg_test_module', 'a plain module for testing')
+        self.mod.add(img_seg)
 
     def getContainer(self, nwbfile):
-        mod = nwbfile.get_processing_module('plane_seg_test_module')
+        """ Return the test PlaneSegmentation from the given NWBFile """
+        mod = nwbfile.get_processing_module(self.mod.name)
         img_seg = mod.get('ImageSegmentation')
-        return img_seg.get_plane_segmentation('test_plane_seg_name')
+        return img_seg.get_plane_segmentation(self.container.name)
 
 
-class MaskRoundTrip(TestPlaneSegmentation):
+class MaskIO(TestPlaneSegmentationIO, metaclass=ABCMeta):
 
-    def setBoilerPlateObjects(self):
+    def buildPlaneSegmentationNoRois(self):
+        """ Return an PlaneSegmentation and set related objects """
         ts = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
         self.image_series = ImageSeries(name='test_iS', dimension=[2],
                                         external_file=['images.tiff'],
@@ -133,32 +140,35 @@ class MaskRoundTrip(TestPlaneSegmentation):
                                  self.image_series)
 
 
-class PixelMaskRoundtrip(MaskRoundTrip):
+class TestPixelMaskIO(MaskIO):
 
     def setUpContainer(self):
+        """ Return the test PlaneSegmentation with pixel mask ROIs to read/write """
         pix_mask = [(1, 2, 1.0), (3, 4, 1.0), (5, 6, 1.0),
                     (7, 8, 2.0), (9, 10, 2.)]
-        pS = self.setBoilerPlateObjects()
+        pS = self.buildPlaneSegmentationNoRois()
         pS.add_roi(pixel_mask=pix_mask[0:3])
         pS.add_roi(pixel_mask=pix_mask[3:5])
         return pS
 
 
-class ImageMaskRoundtrip(MaskRoundTrip):
+class TestImageMaskIO(MaskIO):
 
     def setUpContainer(self):
+        """ Return the test PlaneSegmentation with voxel mask ROIs to read/write """
         w, h = 5, 5
         img_mask = [[[1.0 for x in range(w)] for y in range(h)], [[2.0 for x in range(w)] for y in range(h)]]
-        pS = self.setBoilerPlateObjects()
+        pS = self.buildPlaneSegmentationNoRois()
         pS.add_roi(image_mask=img_mask[0])
         pS.add_roi(image_mask=img_mask[1])
         return pS
 
 
-class TestRoiResponseSeriesIO(TestDataInterfaceIO):
+class TestRoiResponseSeriesIO(TestAcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
-        self.plane_segmentation = TestPlaneSegmentation.buildPlaneSegmentation(self)
+        """ Return the test RoiResponseSeries to read/write """
+        self.plane_segmentation = TestPlaneSegmentationIO.buildPlaneSegmentation(self)
         self.rt_region = self.plane_segmentation.create_roi_table_region('the first of two ROIs', region=[0])
 
         data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
@@ -168,6 +178,10 @@ class TestRoiResponseSeriesIO(TestDataInterfaceIO):
                                  timestamps=timestamps)
 
     def addContainer(self, nwbfile):
+        """
+        Add the test RoiResponseSeries as an acquisition and add Device, ImagingPlane, ImageSegmentation, and
+        PlaneSegmentation to the given NWBFile
+        """
         nwbfile.add_device(self.device)
         nwbfile.add_imaging_plane(self.imaging_plane)
         img_seg = ImageSegmentation()
@@ -175,4 +189,4 @@ class TestRoiResponseSeriesIO(TestDataInterfaceIO):
         mod = nwbfile.create_processing_module('plane_seg_test_module',
                                                'a plain module for testing')
         mod.add(img_seg)
-        super(TestRoiResponseSeriesIO, self).addContainer(nwbfile)
+        super().addContainer(nwbfile)

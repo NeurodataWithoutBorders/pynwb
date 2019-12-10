@@ -3,18 +3,21 @@ import numpy as np
 from hdmf.common import DynamicTable, VectorData
 from pynwb import TimeSeries
 from pynwb.misc import Units, DecompositionSeries
-from pynwb.testing import TestMapRoundTrip, TestDataInterfaceIO
+from pynwb.testing import TestNWBH5IOMixin, TestAcquisitionH5IOMixin, TestCase
 
 
-class TestUnitsIO(TestDataInterfaceIO):
+class TestUnitsIO(TestAcquisitionH5IOMixin, TestCase):
+    """ Test adding Units into acquisition and accessing Units after read """
 
     def setUpContainer(self):
+        """ Return the test Units to read/write """
         ut = Units(name='UnitsTest', description='a simple table for testing Units')
         ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 1], [2, 3]])
         ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 5], [6, 7]])
         return ut
 
     def test_get_spike_times(self):
+        """ Test whether the Units spike times read from file are what was written """
         ut = self.roundtripContainer()
         received = ut.get_unit_spike_times(0)
         self.assertTrue(np.array_equal(received, [0, 1, 2]))
@@ -23,6 +26,7 @@ class TestUnitsIO(TestDataInterfaceIO):
         self.assertTrue(np.array_equal(ut['spike_times'][:], [[0, 1, 2], [3, 4, 5]]))
 
     def test_get_obs_intervals(self):
+        """ Test whether the Units observation intervals read from file are what was written """
         ut = self.roundtripContainer()
         received = ut.get_unit_obs_intervals(0)
         self.assertTrue(np.array_equal(received, [[0, 1], [2, 3]]))
@@ -31,13 +35,14 @@ class TestUnitsIO(TestDataInterfaceIO):
         self.assertTrue(np.array_equal(ut['obs_intervals'][:], [[[0, 1], [2, 3]], [[2, 5], [6, 7]]]))
 
 
-class TestUnitElectrodes(TestMapRoundTrip):
+class TestUnitsFileIO(TestNWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
-        # this will get ignored
-        return Units('placeholder_units')
+        """ Return placeholder Units object. Tested units are added directly to the NWBFile in addContainer """
+        return Units('placeholder')  # this will get ignored
 
     def addContainer(self, nwbfile):
+        """ Add units to the given NWBFile """
         device = nwbfile.create_device(name='trodes_rig123')
         electrode_name = 'tetrode1'
         description = "an example tetrode"
@@ -55,16 +60,21 @@ class TestUnitElectrodes(TestMapRoundTrip):
 
         nwbfile.add_unit(id=1, electrodes=[1], electrode_group=electrode_group)
         nwbfile.add_unit(id=2, electrodes=[1], electrode_group=electrode_group)
-        nwbfile.units.to_dataframe()
-        self.container = nwbfile.units
+        self.container = nwbfile.units  # override self.container which has the placeholder
 
     def getContainer(self, nwbfile):
+        """ Return the test Units from the given NWBFile """
         return nwbfile.units
 
+    def test_to_dataframe(self):
+        units = self.roundtripContainer()
+        units.to_dataframe()
 
-class TestSpectralAnalysis(TestDataInterfaceIO):
+
+class TestDecompositionSeriesIO(TestNWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
+        """ Return the test DecompositionSeries to read/write """
         self.timeseries = TimeSeries(name='dummy timeseries', description='desc',
                                      data=np.ones((3, 3)), unit='flibs',
                                      timestamps=np.ones((3,)))
@@ -83,9 +93,11 @@ class TestSpectralAnalysis(TestDataInterfaceIO):
         return spec_anal
 
     def addContainer(self, nwbfile):
+        """ Add the test DecompositionSeries to the given NWBFile in a processing module """
         nwbfile.add_acquisition(self.timeseries)
         prcs_mod = nwbfile.create_processing_module('test_mod', 'test_mod')
         prcs_mod.add(self.container)
 
     def getContainer(self, nwbfile):
+        """ Return the test DecompositionSeries from the given NWBFile """
         return nwbfile.processing['test_mod']['LFPSpectralAnalysis']

@@ -5,35 +5,37 @@ from pynwb.icephys import (IntracellularElectrode, PatchClampSeries, CurrentClam
                            SweepTable, VoltageClampStimulusSeries, CurrentClampSeries,
                            VoltageClampSeries, IZeroClampSeries)
 from pynwb.device import Device
-from pynwb.testing import TestMapRoundTrip, TestDataInterfaceIO
+from pynwb.testing import TestNWBH5IOMixin, TestAcquisitionH5IOMixin, TestCase
 
 
-class TestIntracellularElectrode(TestMapRoundTrip):
+class TestIntracellularElectrode(TestNWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
+        """ Return the test IntracellularElectrode to read/write """
         self.device = Device(name='device_name')
-        self.elec = IntracellularElectrode(name="elec0", slice='tissue slice',
+        elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                            resistance='something measured in ohms',
                                            seal='sealing method', description='a fake electrode object',
                                            location='Springfield Elementary School',
                                            filtering='a meaningless free-form text field',
                                            initial_access_resistance='I guess this changes',
                                            device=self.device)
-        return self.elec
+        return elec
 
     def addContainer(self, nwbfile):
-        ''' Should take an NWBFile object and add the container to it '''
-        nwbfile.add_ic_electrode(self.elec)
+        """ Add the test IntracellularElectrode and Device to the given NWBFile """
+        nwbfile.add_ic_electrode(self.container)
         nwbfile.add_device(self.device)
 
     def getContainer(self, nwbfile):
-        ''' Should take an NWBFile object and return the Container'''
+        """ Return the test IntracellularElectrode from the given NWBFile """
         return nwbfile.get_ic_electrode(self.container.name)
 
 
-class TestPatchClampSeries(TestDataInterfaceIO, metaclass=ABCMeta):
+class TestPatchClampSeries(TestAcquisitionH5IOMixin, metaclass=ABCMeta):
 
     def setUpElectrode(self):
+        """ Set up the test IntracellularElectrode """
         self.device = Device(name='device_name')
         self.elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                            resistance='something measured in ohms',
@@ -43,22 +45,26 @@ class TestPatchClampSeries(TestDataInterfaceIO, metaclass=ABCMeta):
                                            initial_access_resistance='I guess this changes',
                                            device=self.device)
 
-    def addContainer(self, nwbfile):
-        ''' Should take an NWBFile object and add the container to it '''
-        nwbfile.add_ic_electrode(self.elec)
-        nwbfile.add_device(self.device)
-        super(TestPatchClampSeries, self).addContainer(nwbfile)
-
     def setUpContainer(self):
+        """ Return the test PatchClampSeries to read/write """
         self.setUpElectrode()
         return PatchClampSeries(name="pcs", data=[1, 2, 3, 4, 5], unit='A',
                                 starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                 stimulus_description="gotcha ya!", sweep_number=4711)
 
+    def addContainer(self, nwbfile):
+        """
+        Add the test PatchClampSeries as an acquisition and IntracellularElectrode and Device to the given NWBFile
+        """
+        nwbfile.add_ic_electrode(self.elec)
+        nwbfile.add_device(self.device)
+        super().addContainer(nwbfile)
+
 
 class TestCurrentClampStimulusSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
+        """ Return the test CurrentClampStimulusSeries to read/write """
         self.setUpElectrode()
         return CurrentClampStimulusSeries(name="ccss", data=[1, 2, 3, 4, 5],
                                           starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
@@ -67,6 +73,7 @@ class TestCurrentClampStimulusSeries(TestPatchClampSeries):
 class TestVoltageClampStimulusSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
+        """ Return the test VoltageClampStimulusSeries to read/write """
         self.setUpElectrode()
         return VoltageClampStimulusSeries(name="vcss", data=[1, 2, 3, 4, 5],
                                           starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
@@ -75,6 +82,7 @@ class TestVoltageClampStimulusSeries(TestPatchClampSeries):
 class TestCurrentClampSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
+        """ Return the test CurrentClampSeries to read/write """
         self.setUpElectrode()
         return CurrentClampSeries(name="ccs", data=[1, 2, 3, 4, 5],
                                   starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
@@ -84,6 +92,7 @@ class TestCurrentClampSeries(TestPatchClampSeries):
 class TestVoltageClampSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
+        """ Return the test VoltageClampSeries to read/write """
         self.setUpElectrode()
         return VoltageClampSeries(name="vcs", data=[1, 2, 3, 4, 5],
                                   starting_time=123.6, rate=10e3, electrode=self.elec,
@@ -96,18 +105,16 @@ class TestVoltageClampSeries(TestPatchClampSeries):
 class TestIZeroClampSeries(TestPatchClampSeries):
 
     def setUpContainer(self):
+        """ Return the test IZeroClampSeries to read/write """
         self.setUpElectrode()
         return IZeroClampSeries(name="izcs", data=[1, 2, 3, 4, 5],
                                 starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
 
 
-class TestSweepTableRoundTripEasy(TestMapRoundTrip):
+class TestSweepTableRoundTripEasy(TestNWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
-        self.setUpSweepTable()
-        return self.sweep_table
-
-    def setUpSweepTable(self):
+        """ Return the test SweepTable to read/write """
         self.device = Device(name='device_name')
         self.elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                            resistance='something measured in ohms',
@@ -119,15 +126,23 @@ class TestSweepTableRoundTripEasy(TestMapRoundTrip):
         self.pcs = PatchClampSeries(name="pcs", data=[1, 2, 3, 4, 5], unit='A',
                                     starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                     stimulus_description="gotcha ya!", sweep_number=4711)
-        self.sweep_table = SweepTable(name='sweep_table')
+        return SweepTable(name='sweep_table')
 
     def addContainer(self, nwbfile):
-        nwbfile.sweep_table = self.sweep_table
+        """
+        Add the test SweepTable, PatchClampSeries, IntracellularElectrode, and Device to the given NWBFile
+        """
+        nwbfile.sweep_table = self.container
         nwbfile.add_device(self.device)
         nwbfile.add_ic_electrode(self.elec)
         nwbfile.add_acquisition(self.pcs)
 
+    def getContainer(self, nwbfile):
+        """ Return the test SweepTable from the given NWBFile """
+        return nwbfile.sweep_table
+
     def test_container(self):
+        """ Test properties of the SweepTable read from file """
         description = 'a file to test writing and reading a %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
@@ -138,18 +153,11 @@ class TestSweepTableRoundTripEasy(TestMapRoundTrip):
         self.assertEqual(sweep_table.id[0], 0)
         self.assertEqual(sweep_table['sweep_number'].data[0], 4711)
 
-    def getContainer(self, nwbfile):
-        ''' Should take an NWBFile object and return the Container'''
-        return nwbfile.sweep_table
 
-
-class TestSweepTableRoundTripComplicated(TestMapRoundTrip):
+class TestSweepTableRoundTripComplicated(TestNWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
-        self.setUpSweepTable()
-        return self.sweep_table
-
-    def setUpSweepTable(self):
+        """ Return the test SweepTable to read/write """
         self.device = Device(name='device_name')
         self.elec = IntracellularElectrode(name="elec0", slice='tissue slice',
                                            resistance='something measured in ohms',
@@ -168,11 +176,13 @@ class TestSweepTableRoundTripComplicated(TestMapRoundTrip):
                                       starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
                                       stimulus_description="gotcha ya!", sweep_number=4712)
 
-        self.sweep_table = SweepTable(name='sweep_table')
+        return SweepTable(name='sweep_table')
 
     def addContainer(self, nwbfile):
-        ''' Should take an NWBFile object and add the SweepTable container to it '''
-        nwbfile.sweep_table = self.sweep_table
+        """
+        Add the test SweepTable, PatchClampSeries, IntracellularElectrode, and Device to the given NWBFile
+        """
+        nwbfile.sweep_table = self.container
         nwbfile.add_device(self.device)
         nwbfile.add_ic_electrode(self.elec)
 
@@ -180,7 +190,12 @@ class TestSweepTableRoundTripComplicated(TestMapRoundTrip):
         nwbfile.add_stimulus_template(self.pcs2a)
         nwbfile.add_stimulus(self.pcs2b)
 
+    def getContainer(self, nwbfile):
+        """ Return the test SweepTable from the given NWBFile """
+        return nwbfile.sweep_table
+
     def test_container(self):
+        """ Test properties of the SweepTable read from file """
         description = 'a file to test writing and reading a %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type
         nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
@@ -206,6 +221,3 @@ class TestSweepTableRoundTripComplicated(TestMapRoundTrip):
         self.assertEqual(names, ["pcs2a", "pcs2b"])
         sweep_numbers = [elem.sweep_number for elem in series]
         self.assertEqual(sweep_numbers, [4712, 4712])
-
-    def getContainer(self, nwbfile):
-        return nwbfile.sweep_table
