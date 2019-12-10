@@ -232,6 +232,7 @@ class VoltageClampStimulusSeries(PatchClampSeries):
 class SweepTable(DynamicTable):
     """
     A SweepTable allows to group PatchClampSeries together which stem from the same sweep.
+    A sweep is a group of PatchClampSeries which have the same starting point in time.
     """
 
     __columns__ = (
