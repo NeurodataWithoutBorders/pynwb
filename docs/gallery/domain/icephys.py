@@ -56,10 +56,16 @@ elec = nwbfile.create_ic_electrode(name="elec0",
 #
 # Intracellular stimulus and response data are represented with subclasses of
 # :py:class:`~pynwb.icephys.PatchClampSeries`. There are two classes for representing stimulus
-# data--:py:class:`~pynwb.icephys.VoltageClampStimulusSeries` and
-# :py:class:`~pynwb.icephys.CurrentClampStimulusSeries`--, and three classes for representing response
-# data--:py:class:`~pynwb.icephys.VoltageClampSeries`, :py:class:`~pynwb.icephys.CurrentClampSeries`, and
-# :py:class:`~pynwb.icephys.IZeroClampSeries`.
+# data
+#
+# - :py:class:`~pynwb.icephys.VoltageClampStimulusSeries`
+# - :py:class:`~pynwb.icephys.CurrentClampStimulusSeries`
+#
+# and three classes for representing response
+#
+# - :py:class:`~pynwb.icephys.VoltageClampSeries`
+# - :py:class:`~pynwb.icephys.CurrentClampSeries`
+# - :py:class:`~pynwb.icephys.IZeroClampSeries`
 #
 # Here, we will use :py:class:`~pynwb.icephys.CurrentClampStimulusSeries` to store current clamp stimulus
 # data and then add it to our NWBFile as stimulus data using the :py:class:`~pynwb.file.NWBFile` method
@@ -68,30 +74,49 @@ elec = nwbfile.create_ic_electrode(name="elec0",
 from pynwb.icephys import CurrentClampStimulusSeries
 
 ccss = CurrentClampStimulusSeries(
-    name="ccss", data=[1, 2, 3, 4, 5], starting_time=123.6, rate=10e3, electrode=elec, gain=0.02, sweep_number=15)
+    name="ccss", data=[1, 2, 3, 4, 5], starting_time=123.6, rate=10e3, electrode=elec, gain=0.02, sweep_number=0)
 
 nwbfile.add_stimulus(ccss)
 
 #######################
-# Here, we will use :py:class:`~pynwb.icephys.VoltageClampSeries` to store voltage clamp
+# We now add another stimulus series but from a different sweep. TimeSeries
+# having the same starting time belong to the same sweep.
+
+from pynwb.icephys import VoltageClampStimulusSeries
+
+vcss = VoltageClampStimulusSeries(
+    name="vcss", data=[2, 3, 4, 5, 6], starting_time=234.5, rate=10e3, electrode=elec, gain=0.03, sweep_number=1)
+
+nwbfile.add_stimulus(vcss)
+
+#######################
+# Here, we will use :py:class:`~pynwb.icephys.CurrentClampSeries` to store current clamp
 # data and then add it to our NWBFile as acquired data using the :py:class:`~pynwb.file.NWBFile` method
 # :py:meth:`~pynwb.file.NWBFile.add_acquisition`.
+
+from pynwb.icephys import CurrentClampSeries
+
+ccs = CurrentClampSeries(
+    name="ccs", data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    conversion=1e-12, resolution=np.nan, starting_time=123.6, rate=20e3,
+    electrode=elec, gain=0.02, bias_current=1e-12, bridge_balance=70e6,
+    capacitance_compensation=1e-12, sweep_number=0)
+
+nwbfile.add_acquisition(ccs)
+
+#######################
+# And voltage clamp data from the second sweep using
+# :py:class:`~pynwb.icephys.VoltageClampSeries`.
 
 from pynwb.icephys import VoltageClampSeries
 
 vcs = VoltageClampSeries(
-    name='vcs', data=[0.1, 0.2, 0.3, 0.4, 0.5],
-    conversion=1e-12, resolution=np.nan, starting_time=123.6, rate=20e3,
+    name="vcs", data=[0.1, 0.2, 0.3, 0.4, 0.5],
+    conversion=1e-12, resolution=np.nan, starting_time=234.5, rate=20e3,
     electrode=elec, gain=0.02, capacitance_slow=100e-12, resistance_comp_correction=70.0,
-    sweep_number=15)
+    sweep_number=1)
 
 nwbfile.add_acquisition(vcs)
-
-####################
-# If you are interested in all PatchClampSeries with a given sweep number, use get_series()
-# exposed via the :py:meth:`~pynwb.icephys.SweepTable.get_series` attribute.
-
-series = nwbfile.sweep_table.get_series(15)
 
 ####################
 # .. _icephys_writing:
@@ -101,9 +126,8 @@ series = nwbfile.sweep_table.get_series(15)
 
 from pynwb import NWBHDF5IO
 
-io = NWBHDF5IO('icephys_example.nwb', 'w')
-io.write(nwbfile)
-io.close()
+with NWBHDF5IO('icephys_example.nwb', 'w') as io:
+    io.write(nwbfile)
 
 ####################
 # For more details on :py:class:`~pynwb.NWBHDF5IO`, see the :ref:`basic tutorial <basic_writing>`.
@@ -129,7 +153,7 @@ nwbfile = io.read()
 ccss = nwbfile.get_stimulus('ccss')
 
 ####################
-# Grabbing acquisition data an be done via :py:meth:`~pynwb.file.NWBFile.get_acquisition`
+# Grabbing acquisition data can be done via :py:meth:`~pynwb.file.NWBFile.get_acquisition`
 
 vcs = nwbfile.get_acquisition('vcs')
 
@@ -148,3 +172,18 @@ elec = ccss.electrode
 # And the device name via :py:meth:`~pynwb.file.NWBFile.get_device`
 
 device = nwbfile.get_device('Heka ITC-1600')
+
+####################
+# If you have data from multiple electrodes and multiple sweeps, it can be
+# tedious and expensive to search all :py:class:`~pynwb.icephys.PatchClampSeries` for the
+# :py:class:`~pynwb.base.TimeSeries` with a given sweep.
+#
+# Fortunately you don't have to do that manually, instead you can just query
+# the :py:class:`~pynwb.icephys.SweepTable` which stores the mapping between the
+# PatchClampSeries which belongs to a certain sweep number via
+# :py:meth:`~pynwb.icephys.SweepTable.get_series`.
+#
+# The following call will return the voltage clamp data, two timeseries
+# consisting of acquisition and stimulus, from sweep 1.
+
+series = nwbfile.sweep_table.get_series(1)

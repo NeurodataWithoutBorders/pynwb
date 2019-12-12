@@ -38,6 +38,10 @@ class TimeSeriesMap(NWBContainerMapper):
         self.map_spec('starting_time_unit', startingtime_spec.get_attribute('unit'))
         self.map_spec('rate', startingtime_spec.get_attribute('rate'))
 
+        # TODO map the sync group to something
+        sync_spec = self.spec.get_group('sync')
+        self.unmap(sync_spec)
+
     @NWBContainerMapper.constructor_arg('name')
     def name(self, builder, manager):
         return builder.name

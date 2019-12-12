@@ -177,9 +177,8 @@ class PlaneSegmentation(DynamicTable):
     Image segmentation of a specific imaging plane
     """
 
-    __nwbfields__ = ('description',
-                     'imaging_plane',
-                     {'name': 'reference_images', 'child': True})
+    __fields__ = ('imaging_plane',
+                  {'name': 'reference_images', 'child': True})
 
     __columns__ = (
         {'name': 'image_mask', 'description': 'Image masks for each ROI'},

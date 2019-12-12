@@ -163,8 +163,8 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
         read = self.roundtripContainer()
         row1 = read.electrodes[0]
         row2 = read.electrodes[1]
-        self.assertIsInstance(row1[7], ElectrodeGroup)
-        self.assertIsInstance(row2[7], ElectrodeGroup)
+        self.assertIsInstance(row1.iloc[0]['group'], ElectrodeGroup)
+        self.assertIsInstance(row2.iloc[0]['group'], ElectrodeGroup)
 
 
 class TestMultiElectricalSeries(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
