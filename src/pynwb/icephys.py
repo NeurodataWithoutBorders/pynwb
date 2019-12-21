@@ -73,7 +73,7 @@ class PatchClampSeries(TimeSeries):
             {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'),
-            {'name': 'sweep_number', 'type': (int, 'uint64'),
+            {'name': 'sweep_number', 'type': (int, 'uint32', 'uint64'),
              'doc': 'Sweep number, allows for grouping different PatchClampSeries together '
                     'via the sweep_table', 'default': None})
     def __init__(self, **kwargs):
