@@ -16,8 +16,7 @@ import numpy as np
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
 class OpticalChannel(NWBContainer):
-    """
-    """
+    """An optical channel used to record from an imaging plane."""
 
     __nwbfields__ = ('description',
                      'emission_lambda')
@@ -34,8 +33,7 @@ class OpticalChannel(NWBContainer):
 
 @register_class('ImagingPlane', CORE_NAMESPACE)
 class ImagingPlane(NWBContainer):
-    """An imaging plane and its metadata.
-    """
+    """An imaging plane and its metadata."""
 
     __nwbfields__ = ({'name': 'optical_channel', 'child': True},
                      'description',
@@ -92,9 +90,7 @@ class ImagingPlane(NWBContainer):
 
 @register_class('TwoPhotonSeries', CORE_NAMESPACE)
 class TwoPhotonSeries(ImageSeries):
-    """
-    A special case of optical imaging.
-    """
+    """Image stack recorded over time from 2-photon microscope."""
 
     __nwbfields__ = ('field_of_view',
                      'imaging_plane',
@@ -174,7 +170,13 @@ class MotionCorrection(MultiContainerInterface):
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
 class PlaneSegmentation(DynamicTable):
     """
-    Image segmentation of a specific imaging plane
+    Stores pixels in an image that represent different regions of interest (ROIs)
+    or masks. All segmentation for a given imaging plane is stored together, with
+    storage for multiple imaging planes (masks) supported. Each ROI is stored in its
+    own subgroup, with the ROI group containing both a 2D mask and a list of pixels
+    that make up this mask. Segments can also be used for masking neuropil. If segmentation
+    is allowed to change with time, a new imaging plane (or module) is required and
+    ROI names should remain consistent between them.
     """
 
     __fields__ = ('imaging_plane',
@@ -217,9 +219,7 @@ class PlaneSegmentation(DynamicTable):
             {'name': 'id', 'type': int, 'doc': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_roi(self, **kwargs):
-        """
-        Add ROI data to this
-        """
+        """Add a Region Of Interest (ROI) data to this"""
         pixel_mask, voxel_mask, image_mask = popargs('pixel_mask', 'voxel_mask', 'image_mask', kwargs)
         if image_mask is None and pixel_mask is None and voxel_mask is None:
             raise ValueError("Must provide 'image_mask' and/or 'pixel_mask'")
@@ -234,9 +234,7 @@ class PlaneSegmentation(DynamicTable):
 
     @staticmethod
     def pixel_to_image(pixel_mask):
-        """
-        Converts a 2D pixel_mask of a ROI into an image_mask.
-        """
+        """Converts a 2D pixel_mask of a ROI into an image_mask."""
         image_matrix = np.zeros(np.shape(pixel_mask))
         npmask = np.asarray(pixel_mask)
         x_coords = npmask[:, 0].astype(np.int)
@@ -247,9 +245,7 @@ class PlaneSegmentation(DynamicTable):
 
     @staticmethod
     def image_to_pixel(image_mask):
-        """
-        Converts an image_mask of a ROI into a pixel_mask
-        """
+        """Converts an image_mask of a ROI into a pixel_mask"""
         pixel_mask = []
         it = np.nditer(image_mask, flags=['multi_index'])
         while not it.finished:
@@ -298,7 +294,8 @@ class ImageSegmentation(MultiContainerInterface):
 @register_class('RoiResponseSeries', CORE_NAMESPACE)
 class RoiResponseSeries(TimeSeries):
     '''
-    ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one ROI.
+    ROI responses over an imaging plane. Each column in data should correspond to
+    the signal from one ROI.
     '''
 
     __nwbfields__ = ({'name': 'rois', 'child': True},)
