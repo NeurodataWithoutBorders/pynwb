@@ -54,4 +54,3 @@ def validate_core_spec(core_dir=fpath_core, fpath_schema=fpath_schema):
 
 
 validate_core_spec()
-
