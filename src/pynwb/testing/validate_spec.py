@@ -24,7 +24,7 @@ def validate_spec(fpath_spec, fpath_schema):
     new_resolver = FixResolver()
 
     f_nwb = open(fpath_spec, 'r')
-    instance = yaml.load(f_nwb, Loader=yaml.FullLoader)
+    instance = yaml.safe_load(f_nwb)
 
     jsonschema.validate(instance, schema, resolver=new_resolver)
 
