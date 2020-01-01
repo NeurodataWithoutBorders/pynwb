@@ -1,18 +1,13 @@
 import os
-import yaml
+import ruamel.yaml as yaml
 import json
 from glob import glob
+from argparse import ArgumentParser
 
 import jsonschema
 
-print(os.path.dirname(os.path.realpath(__file__)))
 
-cur_file = os.path.dirname(os.path.realpath(__file__))
-fpath_schema = os.path.join(os.path.split(cur_file)[0], 'nwb-schema', 'nwb.schema.json')
-fpath_core = os.path.join(os.path.split(cur_file)[0], 'nwb-schema', 'core')
-
-
-def validate_spec(fpath_spec, fpath_schema=fpath_schema):
+def validate_spec(fpath_spec, fpath_schema):
 
     schemaAbs = 'file://' + os.path.abspath(fpath_schema)
 
@@ -34,7 +29,11 @@ def validate_spec(fpath_spec, fpath_schema=fpath_schema):
     jsonschema.validate(instance, schema, resolver=new_resolver)
 
 
-def validate_core_spec(core_dir=fpath_core, fpath_schema=fpath_schema):
+def validate_core_spec():
+    cur_file = os.path.dirname(os.path.realpath(__file__))
+    fpath_schema = os.path.join(os.path.split(cur_file)[0], 'nwb-schema', 'nwb.schema.json')
+    core_dir = os.path.join(os.path.split(cur_file)[0], 'nwb-schema', 'core')
+
     errors = []
     yaml_files = glob(os.path.join(core_dir, "*.yaml"))
     print('files to validate: \n')
@@ -53,4 +52,23 @@ def validate_core_spec(core_dir=fpath_core, fpath_schema=fpath_schema):
         raise jsonschema.ValidationError(str(errors))
 
 
-validate_core_spec()
+def main():
+
+    parser = ArgumentParser(description="Validate an NWB specification")
+    parser.add_argument("paths", type=str, nargs='+', help="yaml file paths")
+    parser.add_argument("-m", "--metaschema", type=str,
+                        help=".json.schema file used to validate yaml files")
+    args = parser.parse_args()
+
+    for path in args.paths:
+        if os.path.isfile(path):
+            validate_spec(path, args.metaschema)
+        elif os.path.isdir(path):
+            for ipath in glob(os.path.join(path, '*.yaml')):
+                validate_spec(ipath, args.metaschema)
+        else:
+            raise ValueError('path must be a valid file or directory')
+
+
+if __name__ == "__main__":
+    main()
