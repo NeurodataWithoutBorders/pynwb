@@ -105,7 +105,8 @@ class CurrentClampSeries(PatchClampSeries):
                      'bridge_balance',
                      'capacitance_compensation')
 
-    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
+            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Volt'},
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
             {'name': 'bias_current', 'type': 'float', 'doc': 'Unit: Amp', 'default': None},
             {'name': 'bridge_balance', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
@@ -134,7 +135,8 @@ class IZeroClampSeries(CurrentClampSeries):
 
     __nwbfields__ = ()
 
-    @docval(*get_docval(CurrentClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
+    @docval(*get_docval(CurrentClampSeries.__init__, 'name', 'data', 'electrode'),  # required
+            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Volt'},  # required
             *get_docval(CurrentClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
                         'sweep_number'))
@@ -180,7 +182,8 @@ class VoltageClampSeries(PatchClampSeries):
                      'whole_cell_capacitance_comp',
                      'whole_cell_series_resistance_comp')
 
-    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
+            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Amp'},  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
             {'name': 'capacitance_fast', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
             {'name': 'capacitance_slow', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
