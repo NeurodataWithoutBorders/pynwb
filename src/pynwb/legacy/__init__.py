@@ -1,20 +1,9 @@
-
-from ..form.spec import NamespaceCatalog
-from ..form.utils import docval, getargs
-from ..spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
-from .. import _get_resources, get_type_map, NWBContainer
-
+from hdmf.utils import docval, getargs
+from .. import get_type_map, NWBContainer
 from .map import ObjectMapperLegacy as ObjectMapper
-from .map import TypeMapLegacy as TypeMap
 
 
-__NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
-__TYPE_MAP = TypeMap(__NS_CATALOG)
-
-# load the core namespace i.e. base NWB specification
-__resources = _get_resources()
-__TYPE_MAP.load_namespaces(__resources['namespace_path'])
-__TYPE_MAP.merge(get_type_map())
+__TYPE_MAP = get_type_map()
 
 # Register new ObjectMapper with the new TypeMap:
 __TYPE_MAP.register_map(NWBContainer, ObjectMapper)

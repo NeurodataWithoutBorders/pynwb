@@ -1,4 +1,3 @@
-# flake8: noqa
 # -*- coding: utf-8 -*-
 #
 # sample documentation build configuration file, created by
@@ -16,18 +15,32 @@ import sys
 import os
 import sphinx_rtd_theme
 from sphinx.domains.python import PythonDomain
-from pynwb._version import get_versions
 
+
+# -- Support building doc without install --------------------------------------
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 # sys.path.insert(0, os.path.abspath('.'))
 
+# Get the project root dir, which is the parent parent dir of this
+cwd = os.getcwd()
+project_root = os.path.dirname(os.path.dirname(cwd))
+
+# Insert the project root dir as the first element in the PYTHONPATH.
+# This lets us ensure that the source package is imported, and that its
+# version is used.
+sys.path.insert(0, os.path.join(project_root, 'src'))
+
+from pynwb._version import get_versions
+
+
+# -- Autodoc configuration -----------------------------------------------------
+
 autoclass_content = 'both'
 autodoc_docstring_signature = True
 autodoc_member_order = 'bysource'
-add_function_parentheses = False
 
 # -- General configuration -----------------------------------------------------
 
@@ -36,8 +49,36 @@ add_function_parentheses = False
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.napoleon', 'sphinx.ext.intersphinx']
-intersphinx_mapping = {'python': ('https://docs.python.org/3.5', None)}
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.viewcode',
+    'sphinx_gallery.gen_gallery'
+]
+
+from sphinx_gallery.sorting import ExplicitOrder
+
+sphinx_gallery_conf = {
+    # path to your examples scripts
+    'examples_dirs': ['../gallery'],
+    # path where to save gallery generated examples
+    'gallery_dirs': ['tutorials'],
+    'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain']),
+    'backreferences_dir': 'gen_modules/backreferences',
+    'download_section_examples': False,
+    'min_reported_time': 5
+}
+
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3.5', None),
+    'numpy': ('https://docs.scipy.org/doc/numpy/', None),
+    'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
+    'matplotlib': ('https://matplotlib.org', None),
+    'h5py': ('http://docs.h5py.org/en/latest/', None),
+    'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
+    'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None)
+}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -54,7 +95,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017, Neurodata Without Borders'
+copyright = u'2017-2020, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -83,7 +124,7 @@ exclude_patterns = ['_build', 'test.py']
 # default_role = None
 
 # If true, '()' will be appended to :func: etc. cross-reference text.
-# add_function_parentheses = True
+add_function_parentheses = False
 
 # If true, the current module name will be prepended to all description
 # unit titles (such as .. function::).
@@ -109,22 +150,6 @@ pygments_style = 'sphinx'
 html_theme = "sphinx_rtd_theme"
 html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-
-def run_apidoc(_):
-    from sphinx.apidoc import main
-    import os
-    import sys
-    out_dir = os.path.dirname(__file__)
-    src_dir = os.path.join(out_dir, '../../src')
-    sys.path.append(src_dir)
-    main(['-f', '-e', '-o', out_dir, src_dir])
-
-
-def setup(app):
-    app.connect('builder-inited', run_apidoc)
-    app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
-
-
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
 # documentation.
@@ -143,12 +168,12 @@ def setup(app):
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 # html_logo = None
-html_logo = 'neuron.png'
+html_logo = 'logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'neuron-180x180.png'
+html_favicon = 'favicon-96.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -274,6 +299,23 @@ latex_elements = {
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 # texinfo_show_urls = 'footnote'
 
+
+# -- PyNWB sphinx extension ----------------------------------------------------
+
+#
+# see http://www.sphinx-doc.org/en/master/extdev/appapi.html
+#
+
+def run_apidoc(_):
+    from sphinx.apidoc import main
+    import os
+    import sys
+    out_dir = os.path.dirname(__file__)
+    src_dir = os.path.join(out_dir, '../../src')
+    sys.path.append(src_dir)
+    main(['-f', '-e', '-o', out_dir, src_dir])
+
+
 # https://github.com/sphinx-doc/sphinx/issues/3866
 class PatchedPythonDomain(PythonDomain):
     def resolve_xref(self, env, fromdocname, builder, typ, target, node, contnode):
@@ -283,5 +325,19 @@ class PatchedPythonDomain(PythonDomain):
             env, fromdocname, builder, typ, target, node, contnode)
 
 
-def setup(sphinx):
-    sphinx.override_domain(PatchedPythonDomain)
+from abc import abstractproperty
+
+
+def skip(app, what, name, obj, skip, options):
+    if isinstance(obj, abstractproperty) or getattr(obj, '__isabstractmethod__', False):
+        return False
+    elif name == "__getitem__":
+        return False
+    return skip
+
+
+def setup(app):
+    app.connect('builder-inited', run_apidoc)
+    app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
+    app.override_domain(PatchedPythonDomain)
+    app.connect("autodoc-skip-member", skip)

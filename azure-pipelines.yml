@@ -1,0 +1,89 @@
+jobs:
+
+- job: 'Test'
+  displayName: "Test PyNWB"
+
+  strategy:
+    matrix:
+      macOS-py3.7:
+        imageName: 'macos-10.13'
+        pythonVersion: '3.7'
+        testToxEnv: 'py37'
+        coverageToxEnv: 'coverage-py37'
+        buildToxEnv: 'build-py37'
+        testWheelInstallEnv: 'wheelinstall-py37'
+
+      macOS-py3.6:
+        imageName: 'macos-10.13'
+        pythonVersion: '3.6'
+        testToxEnv: 'py36'
+        coverageToxEnv: 'coverage-py36'
+        buildToxEnv: 'build-py36'
+        testWheelInstallEnv: 'wheelinstall-py36'
+
+      macOS-py3.5:
+        imageName: 'macos-10.13'
+        pythonVersion: '3.5'
+        testToxEnv: 'py35'
+        coverageToxEnv: 'coverage-py35'
+        buildToxEnv: 'build-py35'
+        testWheelInstallEnv: 'wheelinstall-py35'
+
+      Windows-py3.7:
+        imageName: 'vs2017-win2016'
+        pythonVersion: '3.7'
+        testToxEnv: 'py37'
+        coverageToxEnv: 'coverage-py37'
+        buildToxEnv: 'build-py37'
+        testWheelInstallEnv: 'wheelinstall-py37'
+
+      Windows-py3.6:
+        imageName: 'vs2017-win2016'
+        pythonVersion: '3.6'
+        testToxEnv: 'py36'
+        coverageToxEnv: 'coverage-py36'
+        buildToxEnv: 'build-py36'
+        testWheelInstallEnv: 'wheelinstall-py36'
+
+      Windows-py3.5:
+        imageName: 'vs2017-win2016'
+        pythonVersion: '3.5'
+        testToxEnv: 'py35'
+        coverageToxEnv: 'coverage-py35'
+        buildToxEnv: 'build-py35'
+        testWheelInstallEnv: 'wheelinstall-py35'
+
+  pool:
+    vmImage: $(imageName)
+
+  steps:
+
+  - checkout: self
+    submodules: true
+
+  - task: UsePythonVersion@0
+    inputs:
+      versionSpec: '$(pythonVersion)'
+      architecture: 'x64'
+
+  - script: |
+      python -m pip install --upgrade pip
+      python -m pip install --upgrade setuptools
+      python -m pip install setuptools wheel virtualenv tox
+    displayName: 'Install build dependencies'
+
+  - bash: |
+      tox -e $(testToxEnv)
+    displayName: 'Run tox tests'
+
+  - bash: |
+      tox -e $(coverageToxEnv)
+    displayName: 'Run coverage tests'
+
+  - bash: |
+      tox -e $(buildToxEnv)
+    displayName: 'Run build tests'
+
+  - bash: |
+      tox -e $(testWheelInstallEnv) --recreate --installpkg dist/*-none-any.whl
+    displayName: 'Run wheel install tests'

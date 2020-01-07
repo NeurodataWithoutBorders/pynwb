@@ -1,28 +1,16 @@
-import numpy as np
-from h5py import RegionReference
-from collections import Iterable
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
 
-from .form.utils import docval, getargs, popargs, call_docval_func
-from .form.data_utils import DataChunkIterator, ShapeValidator
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.data_utils import DataChunkIterator, assertEqualShape
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, set_parents, NWBTable, NWBTableRegion
-
-
-@register_class('Device', CORE_NAMESPACE)
-class Device(NWBContainer):
-    """
-    """
-
-    __nwbfields__ = ('name',)
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this device'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
-    def __init__(self, **kwargs):
-        call_docval_func(super(Device, self).__init__, kwargs)
+from .base import TimeSeries
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface
+from hdmf.common import DynamicTableRegion
+from .device import Device
 
 
 @register_class('ElectrodeGroup', CORE_NAMESPACE)
@@ -36,65 +24,15 @@ class ElectrodeGroup(NWBContainer):
                      'device')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
             {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
-            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'})
     def __init__(self, **kwargs):
         call_docval_func(super(ElectrodeGroup, self).__init__, kwargs)
         description, location, device = popargs("description", "location", "device", kwargs)
         self.description = description
         self.location = location
         self.device = device
-
-
-_et_docval = [
-    {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode'},
-    {'name': 'x', 'type': float, 'doc': 'the x coordinate of the position'},
-    {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position'},
-    {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position'},
-    {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode'},
-    {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
-    {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
-    {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-    {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'}
-]
-
-
-@register_class('ElectrodeTable', CORE_NAMESPACE)
-class ElectrodeTable(NWBTable):
-    '''A table of all electrodes'''
-
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': Iterable, 'doc': 'the source of the data', 'default': list()})
-    def __init__(self, **kwargs):
-        data, name = getargs('data', 'name', kwargs)
-        colnames = [i['name'] for i in _et_docval]
-        colnames.append('group_ref')
-        super(ElectrodeTable, self).__init__(colnames, name, data)
-
-    @docval(*_et_docval)
-    def add_row(self, **kwargs):
-        kwargs['group_ref'] = kwargs['group']
-        kwargs['group'] = kwargs['group'].name
-        super(ElectrodeTable, self).add_row(kwargs)
-
-
-@register_class('ElectrodeTableRegion', CORE_NAMESPACE)
-class ElectrodeTableRegion(NWBTableRegion):
-    '''A subsetting of an ElectrodeTable'''
-
-    __nwbfields__ = ('description',)
-
-    @docval({'name': 'table', 'type': ElectrodeTable, 'doc': 'the ElectrodeTable this region applies to'},
-            {'name': 'region', 'type': (slice, list, tuple, RegionReference), 'doc': 'the indices of the table'},
-            {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'electrodes'})
-    def __init__(self, **kwargs):
-        call_docval_func(super(ElectrodeTableRegion, self).__init__, kwargs)
-        self.description = getargs('description', kwargs)
 
 
 @register_class('ElectricalSeries', CORE_NAMESPACE)
@@ -105,46 +43,31 @@ class ElectricalSeries(TimeSeries):
     channels] (or [num_times] for single electrode).
     """
 
-    __nwbfields__ = ('electrodes',)
+    __nwbfields__ = ({'name': 'electrodes', 'required_name': 'electrodes',
+                      'doc': 'the electrodes that generated this electrical series', 'child': True},
+                     'channel_conversion')
 
-    __ancestry = "TimeSeries,ElectricalSeries"
-    __help = "Stores acquired voltage data from extracellular recordings."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable),
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
+             'shape': ((None, ), (None, None), (None, None, None)),
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+            {'name': 'electrodes', 'type': DynamicTableRegion,  # required
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'channel_conversion', 'type': ('array_data', 'data'), 'shape': (None,), 'doc':
+             "Channel-specific conversion factor. Multiply the data in the 'data' dataset by these values along the "
+             "channel axis (as indicated by axis attribute) AND by the global conversion factor in the 'conversion' "
+             "attribute of 'data' to get the data values in Volts, i.e, data in Volts = data * data.conversion * "
+             "channel_conversion. This approach allows for both global and per-channel data conversion factors needed "
+             "to support the storage of electrical recordings as native values generated by data acquisition systems. "
+             "If this dataset is not present, then there is no channel-specific conversion factor, i.e. it is 1 for all"
+             " channels.", 'default': None},
+            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
+                        'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, source, electrodes, data = popargs('name', 'source', 'electrodes', 'data', kwargs)
-        super(ElectricalSeries, self).__init__(name, source, data, 'volt', **kwargs)
+        name, electrodes, data, channel_conversion = popargs('name', 'electrodes', 'data', 'channel_conversion', kwargs)
+        super(ElectricalSeries, self).__init__(name, data, 'volts', **kwargs)
         self.electrodes = electrodes
+        self.channel_conversion = channel_conversion
 
 
 @register_class('SpikeEventSeries', CORE_NAMESPACE)
@@ -161,50 +84,27 @@ class SpikeEventSeries(ElectricalSeries):
 
     __nwbfields__ = ()
 
-    __ancestry = "TimeSeries,ElectricalSeries,SpikeSeries"
-    __help = "Snapshots of spike events from data."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
-            {'name': 'data', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'timestamps', 'type': (list, np.ndarray, DataChunkIterator, TimeSeries, Iterable),
+    @docval(*get_docval(ElectricalSeries.__init__, 'name', 'data'),  # required
+            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),  # required
              'doc': 'Timestamps for samples stored in data'},
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
-             'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            *get_docval(ElectricalSeries.__init__, 'electrodes'),  # required
+            *get_docval(ElectricalSeries.__init__, 'resolution', 'conversion', 'comments', 'description', 'control',
+                        'control_description'))
     def __init__(self, **kwargs):
-        name, source, data, electrodes = popargs('name', 'source', 'data', 'electrodes', kwargs)
+        name, data, electrodes = popargs('name', 'data', 'electrodes', kwargs)
         timestamps = getargs('timestamps', kwargs)
-        if not (isinstance(data, TimeSeries) and isinstance(timestamps, TimeSeries)):
-            if not (isinstance(data, DataChunkIterator) and isinstance(timestamps, DataChunkIterator)):
+        if not (isinstance(data, TimeSeries) or isinstance(timestamps, TimeSeries)):
+            if not (isinstance(data, DataChunkIterator) or isinstance(timestamps, DataChunkIterator)):
                 if len(data) != len(timestamps):
                     raise Exception('Must provide the same number of timestamps and spike events')
             else:
                 # TODO: add check when we have DataChunkIterators
                 pass
-        super(SpikeEventSeries, self).__init__(name, source, data, electrodes, **kwargs)
+        super(SpikeEventSeries, self).__init__(name, data, electrodes, **kwargs)
 
 
 @register_class('EventDetection', CORE_NAMESPACE)
-class EventDetection(NWBContainer):
+class EventDetection(NWBDataInterface):
     """
     Detected spike events from voltage trace(s).
     """
@@ -214,93 +114,89 @@ class EventDetection(NWBContainer):
                      'source_idx',
                      'times')
 
-    _help_statement = ("Description of how events were detected, such as voltage "
-                       "threshold, or dV/dT threshold, as well as relevant values.")
-
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'detection_method', 'type': str,
-             'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, \
-             as well as relevant values.'},
+    @docval({'name': 'detection_method', 'type': str,
+             'doc': 'Description of how events were detected, such as voltage threshold, or dV/dT threshold, '
+             'as well as relevant values.'},
             {'name': 'source_electricalseries', 'type': ElectricalSeries, 'doc': 'The source electrophysiology data'},
-            {'name': 'source_idx', 'type': Iterable,
-             'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding \
-             to time of event. Module description should define what is meant by time of event \
-             (e.g., .25msec before action potential peak, zero-crossing time, etc). \
-             The index points to each event from the raw data'},
-            {'name': 'times', 'type': Iterable, 'doc': 'Timestamps of events, in Seconds'},
+            {'name': 'source_idx', 'type': ('array_data', 'data'),
+             'doc': 'Indices (zero-based) into source ElectricalSeries::data array corresponding '
+                    'to time of event. Module description should define what is meant by time of event '
+                    '(e.g., .25msec before action potential peak, zero-crossing time, etc). '
+                    'The index points to each event from the raw data'},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Timestamps of events, in Seconds'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventDetection'})
     def __init__(self, **kwargs):
-        source, detection_method, source_electricalseries, source_idx, times = popargs(
-            'source', 'detection_method', 'source_electricalseries', 'source_idx', 'times', kwargs)
-        super(EventDetection, self).__init__(source, **kwargs)
+        detection_method, source_electricalseries, source_idx, times = popargs(
+            'detection_method', 'source_electricalseries', 'source_idx', 'times', kwargs)
+        super(EventDetection, self).__init__(**kwargs)
         self.detection_method = detection_method
-        # do not set parent, since this is a link
         self.source_electricalseries = source_electricalseries
         self.source_idx = source_idx
         self.times = times
-        self.unit = 'Seconds'
+        self.unit = 'seconds'
 
 
 @register_class('EventWaveform', CORE_NAMESPACE)
-class EventWaveform(NWBContainer):
+class EventWaveform(MultiContainerInterface):
     """
     Spike data for spike events detected in raw data
     stored in this NWBFile, or events detect at acquisition
     """
 
-    __nwbfields__ = ('spike_event_series',)
-
-    __help = "Waveform of detected extracellularly recorded spike events"
-
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'spike_event_series', 'type': (list, SpikeEventSeries), 'doc': 'spiking event data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'EventWaveform'})
-    def __init__(self, **kwargs):
-        source, spike_event_series = popargs('source', 'spike_event_series', kwargs)
-        super(EventWaveform, self).__init__(source, **kwargs)
-        self.spike_event_series = set_parents(spike_event_series, self)
+    __clsconf__ = {
+        'attr': 'spike_event_series',
+        'type': SpikeEventSeries,
+        'add': 'add_spike_event_series',
+        'get': 'get_spike_event_series',
+        'create': 'create_spike_event_series'
+    }
 
 
 @register_class('Clustering', CORE_NAMESPACE)
-class Clustering(NWBContainer):
+class Clustering(NWBDataInterface):
     """
+    DEPRECATED in favor of :py:meth:`~pynwb.misc.Units`.
     Specifies cluster event times and cluster metric for maximum ratio of
     waveform peak to RMS on any channel in cluster.
     """
 
-    __nwbfields_ = ('cluster_nums',
-                    'description',
-                    'num',
-                    'peak_over_rms',
-                    'times')
+    __nwbfields__ = (
+        'description',
+        'num',
+        'peak_over_rms',
+        'times'
+    )
 
-    __help = ("Clustered spike data, whether from automatic clustering "
-              "tools (eg, klustakwik) or as a result of manual sorting.")
-
-    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, \
-             clusters curated using Klusters, etc).'},
-            {'name': 'num', 'type': Iterable, 'doc': 'Cluster number of each event.'},
-            {'name': 'peak_over_rms', 'type': Iterable,
-             'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster\
-             (provides a basic clustering metric).'},
-            {'name': 'times', 'type': Iterable, 'doc': 'Times of clustered events, in seconds.'},
+    @docval({'name': 'description', 'type': str,
+             'doc': 'Description of clusters or clustering, (e.g. cluster 0 is noise, '
+                    'clusters curated using Klusters, etc).'},
+            {'name': 'num', 'type': ('array_data', 'data'), 'doc': 'Cluster number of each event.', 'shape': (None, )},
+            {'name': 'peak_over_rms', 'type': Iterable, 'shape': (None, ),
+             'doc': 'Maximum ratio of waveform peak to RMS on any channel in the cluster'
+                    '(provides a basic clustering metric).'},
+            {'name': 'times', 'type': ('array_data', 'data'), 'doc': 'Times of clustered events, in seconds.',
+             'shape': (None,)},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'Clustering'})
     def __init__(self, **kwargs):
-        source, description, num, peak_over_rms, times = popargs(
-            'source', 'description', 'num', 'peak_over_rms', 'times', kwargs)
-        super(Clustering, self).__init__(source, **kwargs)
+        import warnings
+        warnings.warn("use pynwb.misc.Units or NWBFile.units instead", DeprecationWarning)
+        description, num, peak_over_rms, times = popargs(
+            'description', 'num', 'peak_over_rms', 'times', kwargs)
+        super(Clustering, self).__init__(**kwargs)
         self.description = description
         self.num = num
         self.peak_over_rms = list(peak_over_rms)
         self.times = times
-        self.cluster_nums = list(set(num))
 
 
 @register_class('ClusterWaveforms', CORE_NAMESPACE)
-class ClusterWaveforms(NWBContainer):
+class ClusterWaveforms(NWBDataInterface):
     """
+    DEPRECATED. `ClusterWaveforms` was deprecated in Oct 27, 2018 and will be removed in a future release.
+    Please use the `Units` table to store waveform mean and standard deviation
+    e.g. `NWBFile.units.add_unit(..., waveform_mean=..., waveform_sd=...)`
+
+
     Describe cluster waveforms by mean and standard deviation for at each sample.
     """
 
@@ -309,22 +205,21 @@ class ClusterWaveforms(NWBContainer):
                      'waveform_mean',
                      'waveform_sd')
 
-    __help = ("Mean waveform shape of clusters. Waveforms should be "
-              "high-pass filtered (ie, not the same bandpass filter "
-              "used waveform analysis and clustering)")
-
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'clustering_interface', 'type': Clustering,
+    @docval({'name': 'clustering_interface', 'type': Clustering,
              'doc': 'the clustered spike data used as input for computing waveforms'},
             {'name': 'waveform_filtering', 'type': str,
              'doc': 'filter applied to data before calculating mean and standard deviation'},
-            {'name': 'waveform_mean', 'type': Iterable, 'doc': 'the mean waveform for each cluster'},
-            {'name': 'waveform_sd', 'type': Iterable, 'doc': 'the standard deviations of waveforms for each cluster'},
+            {'name': 'waveform_mean', 'type': Iterable, 'shape': (None, None),
+             'doc': 'the mean waveform for each cluster'},
+            {'name': 'waveform_sd', 'type': Iterable, 'shape': (None, None),
+             'doc': 'the standard deviations of waveforms for each cluster'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'ClusterWaveforms'})
     def __init__(self, **kwargs):
-        source, clustering_interface, waveform_filtering, waveform_mean, waveform_sd = popargs(
-            'source', 'clustering_interface', 'waveform_filtering', 'waveform_mean', 'waveform_sd', kwargs)
-        super(ClusterWaveforms, self).__init__(source, **kwargs)
+        import warnings
+        warnings.warn("use pynwb.misc.Units or NWBFile.units instead", DeprecationWarning)
+        clustering_interface, waveform_filtering, waveform_mean, waveform_sd = popargs(
+            'clustering_interface', 'waveform_filtering', 'waveform_mean', 'waveform_sd', kwargs)
+        super(ClusterWaveforms, self).__init__(**kwargs)
         self.clustering_interface = clustering_interface
         self.waveform_filtering = waveform_filtering
         self.waveform_mean = waveform_mean
@@ -332,30 +227,23 @@ class ClusterWaveforms(NWBContainer):
 
 
 @register_class('LFP', CORE_NAMESPACE)
-class LFP(NWBContainer):
+class LFP(MultiContainerInterface):
     """
     LFP data from one or more channels. The electrode map in each published ElectricalSeries will
     identify which channels are providing LFP data. Filter properties should be noted in the
     ElectricalSeries description or comments field.
     """
 
-    __nwbfields__ = ('electrical_series',)
-
-    __help = ("LFP data from one or more channels. Filter properties "
-              "should be noted in the ElectricalSeries")
-
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'LFP electrophysiology data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'LFP'})
-    def __init__(self, **kwargs):
-        source, electrical_series = popargs('source', 'electrical_series', kwargs)
-        super(LFP, self).__init__(source, **kwargs)
-        electrical_series.parent = self
-        self.electrical_series = electrical_series
+    __clsconf__ = [
+        {'attr': 'electrical_series',
+         'type': ElectricalSeries,
+         'add': 'add_electrical_series',
+         'get': 'get_electrical_series',
+         'create': 'create_electrical_series'}]
 
 
 @register_class('FilteredEphys', CORE_NAMESPACE)
-class FilteredEphys(NWBContainer):
+class FilteredEphys(MultiContainerInterface):
     """
     Ephys data from one or more channels that has been subjected to filtering. Examples of filtered
     data include Theta and Gamma (LFP has its own interface). FilteredEphys modules publish an
@@ -367,77 +255,67 @@ class FilteredEphys(NWBContainer):
     electrode may have different filtered (e.g., theta and/or gamma) signals represented.
     """
 
-    __nwbfields__ = ('electrical_series',)
-
-    __help = ("Ephys data from one or more channels that is subjected to filtering, such as "
-              "for gamma or theta oscillations (LFP has its own interface). Filter properties should "
-              "be noted in the ElectricalSeries")
-
-    @docval({'name': 'source', 'type': str, 'doc': 'the source of the data'},
-            {'name': 'electrical_series', 'type': ElectricalSeries, 'doc': 'filtered electrophysiology data'},
-            {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FilteredEphys'})
-    def __init__(self, **kwargs):
-        source, electrical_series = popargs('source', 'electrical_series', kwargs)
-        super(FilteredEphys, self).__init__(source, **kwargs)
-        electrical_series.parent = self
-        self.electrical_series = electrical_series
+    __clsconf__ = {
+        'attr': 'electrical_series',
+        'type': ElectricalSeries,
+        'add': 'add_electrical_series',
+        'get': 'get_electrical_series',
+        'create': 'create_electrical_series'
+    }
 
 
 @register_class('FeatureExtraction', CORE_NAMESPACE)
-class FeatureExtraction(NWBContainer):
+class FeatureExtraction(NWBDataInterface):
     """
     Features, such as PC1 and PC2, that are extracted from signals stored in a SpikeEvent
     TimeSeries or other source.
     """
 
     __nwbfields__ = ('description',
-                     'electrode_group',
+                     {'name': 'electrodes', 'child': True},
                      'times',
                      'features')
 
-    __help = "Container for salient features of detected events"
-
-    @docval({'name': 'source', 'type': str, 'doc': 'The source of the data'},
-            {'name': 'electrodes', 'type': ElectrodeTableRegion,
+    @docval({'name': 'electrodes', 'type': DynamicTableRegion,
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
-            {'name': 'description', 'type': (list, tuple, np.ndarray, DataChunkIterator),
-             'doc': 'A description for each feature extracted', 'ndim': 1},
-            {'name': 'times', 'type': (list, tuple, np.ndarray, DataChunkIterator),
-             'doc': 'The times of events that features correspond to', 'ndim': 1},
-            {'name': 'features', 'type': (list, tuple, np.ndarray, DataChunkIterator),
-             'doc': 'Features for each channel', 'ndim': 3},
+            {'name': 'description', 'type': ('array_data', 'data'),
+             'doc': 'A description for each feature extracted', 'shape': (None, )},
+            {'name': 'times', 'type': ('array_data', 'data'), 'shape': (None, ),
+             'doc': 'The times of events that features correspond to'},
+            {'name': 'features', 'type': ('array_data', 'data'), 'shape': (None, None, None),
+             'doc': 'Features for each channel'},
             {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': 'FeatureExtraction'})
     def __init__(self, **kwargs):
         # get the inputs
-        source, electrodes, description, times, features = popargs(
-            'source', 'electrodes', 'description', 'times', 'features', kwargs)
+        electrodes, description, times, features = popargs(
+            'electrodes', 'description', 'times', 'features', kwargs)
 
         # Validate the shape of the inputs
         # Validate event times compared to features
         shape_validators = []
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=times,
-                                                                axes1=0,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='times',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=times,
+                                                 axes1=0,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='times',
+                                                 ignore_undetermined=True))
         # Validate electrodes compared to features
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=electrodes,
-                                                                axes1=1,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='electrodes',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=electrodes,
+                                                 axes1=1,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='electrodes',
+                                                 ignore_undetermined=True))
         # Valided description compared to features
-        shape_validators.append(ShapeValidator.assertEqualShape(data1=features,
-                                                                data2=description,
-                                                                axes1=2,
-                                                                axes2=0,
-                                                                name1='feature_shape',
-                                                                name2='description',
-                                                                ignore_undetermined=True))
+        shape_validators.append(assertEqualShape(data1=features,
+                                                 data2=description,
+                                                 axes1=2,
+                                                 axes2=0,
+                                                 name1='feature_shape',
+                                                 name2='description',
+                                                 ignore_undetermined=True))
         # Raise an error if any of the shapes do not match
         raise_error = False
         error_msg = ""
@@ -446,11 +324,11 @@ class FeatureExtraction(NWBContainer):
             if not sv.result:
                 error_msg += sv.message + "\n"
         if raise_error:
-            raise TypeError(error_msg)
+            raise ValueError(error_msg)
 
-        # Initalize the object
-        super(FeatureExtraction, self).__init__(source, **kwargs)
-        self.fields['electrodes'] = electrodes
-        self.fields['description'] = description
-        self.fields['times'] = list(times)
-        self.fields['features'] = features
+        # Initialize the object
+        super(FeatureExtraction, self).__init__(**kwargs)
+        self.electrodes = electrodes
+        self.description = description
+        self.times = list(times)
+        self.features = features

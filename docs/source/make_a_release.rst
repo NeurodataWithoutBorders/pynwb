@@ -16,11 +16,9 @@ A core developer should use the following steps to create a release `X.Y.Z` of *
 Prerequisites
 -------------
 
-* All CI tests are passing on all platforms.
+* All CI tests are passing on `CircleCI`_ and `Azure Pipelines`_.
 
 * You have a `GPG signing key <https://help.github.com/articles/generating-a-new-gpg-key/>`_.
-
-* You have the API key associated with `<https://github.com/nwb-bot>`_.
 
 -------------------------
 Documentation conventions
@@ -34,7 +32,6 @@ Commands to evaluate starts with a dollar sign. For example::
   Hello
 
 means that ``echo "Hello"`` should be copied and evaluated in the terminal.
-
 
 ----------------------
 Setting up environment
@@ -65,117 +62,179 @@ Setting up environment
   where ``<your-username>`` and ``<your-password>`` correspond to your PyPI account.
 
 
-------------
-Step-by-step
-------------
+------------------
+PyPI: Step-by-step
+------------------
 
-1. Choose the next release version number::
+1. Make sure that all CI tests are passing on `CircleCI`_ and `Azure Pipelines`_.
+
+
+2. List all tags sorted by version
+
+  .. code::
+
+    $ git tag -l | sort -V
+
+
+3. Choose the next release version number
+
+  .. code::
 
     $ release=X.Y.Z
 
+  .. warning::
 
-2. Download latest sources::
-
-    $ cd /tmp && git clone git@github.com:NeurodataWithoutBorders/pynwb && cd pynwb
-
-
-3. Tag the release::
-
-    $ git tag -s -m "pynwb ${release}" ${release} origin/dev
-
-   *Requires a GPG signing key*
+      To ensure the packages are uploaded on `PyPI`_, tags must match this regular
+      expression: ``^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$``.
 
 
-4. Create a new virtual environment and install release requirements:
+4. Download latest sources
 
   .. code::
 
-    $ mkvirtualenv pynwb-${release}-release && \
-      pip install tox twine
+    $ cd /tmp && git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb && cd pynwb
 
 
-5. Create source distribution and wheels::
-
-    $ rm -rf dist/
-    $ tox
-      [...]
-      py35: commands succeeded
-      py27: commands succeeded
-      congratulations :)
-
-   .. warning::
-
-     Move forward **only** if the ``tox`` command completed successfully. If not,
-     abort the release process and report the problem.
-
-
-6. Confirm that expected packages have been generated:
+5. Tag the release
 
   .. code::
 
-    $ ls -1 dist/*
-    pynwb-X.Y.Z-py2-none-any.whl
-    pynwb-X.Y.Z-py3-none-any.whl
-    pynwb-X.Y.Z.tar.gz
-
-  .. note::
-
-    ``X.Y.Z`` correspond to the release version selected earlier.
-
-
-7. Sign and upload the packages to the PyPI testing server::
-
-    $ twine upload --sign -r pypitest dist/*
+    $ git tag --sign -m "pynwb ${release}" ${release} origin/dev
 
   .. warning::
 
-    Confirm that the packages are available on both testing servers:
-
-    - new: `<https://test.pypi.org/project/pynwb/>`_
-    - legacy: `<https://testpypi.python.org/pypi/pynwb>`_.
+      This step requires a `GPG signing key <https://help.github.com/articles/generating-a-new-gpg-key/>`_.
 
 
-8. Upload the packages to the production PyPI server::
-
-    $ twine upload --sign dist/*
-
-  .. warning::
-
-    Confirm that the packages are available on both servers:
-
-    - new: `<https://pypi.org/project/pynwb/>`_
-    - legacy: `<https://pypi.python.org/pypi/pynwb>`_
-
-
-9. Create a clean testing environment to test installation:
-
-  .. code::
-
-    $ mkvirtualenv pynwb-${release}-install-test && \
-      pip install pynwb
-
-
-10. Publish the release tag:
+6. Publish the release tag
 
   .. code::
 
     $ git push origin ${release}
 
+  .. important::
 
-11. Create GitHub release and upload packages:
+      This will trigger builds on each CI services and automatically upload the wheels
+      and source distribution on `PyPI`_.
+
+
+7. Check the status of the builds on `CircleCI`_ and `Azure Pipelines`_.
+
+
+8. Once the builds are completed, check that the distributions are available on `PyPI`_ and that
+   a new `GitHub release <https://github.com/NeurodataWithoutBorders/pynwb/releases>`_ was created.
+
+
+9. Create a clean testing environment to test the installation
 
   .. code::
 
-    $ pip install githubrelease
-    $ export GITHUB_TOKEN=<NWBOT_API_KEY>
-    $ githubrelease release NeurodataWithoutBorders/pynwb create ${release} --name ${release} --publish ./dist/*
+    $ mkvirtualenv pynwb-${release}-install-test && \
+      pip install pynwb && \
+      python -c "import pynwb; print(pynwb.__version__)"
 
+  .. note::
 
-12. Cleanup
+      If the ``mkvirtualenv`` command is not available, this means you do not have `virtualenvwrapper`_
+      installed, in that case, you could either install it or directly use `virtualenv`_ or `venv`_.
+
+10. Cleanup
 
   .. code::
 
     $ deactivate  && \
       rm -rf dist/* && \
-      rmvirtualenv pynwb-${release}-release && \
       rmvirtualenv pynwb-${release}-install-test
+
+
+.. _virtualenvwrapper: https://virtualenvwrapper.readthedocs.io/
+.. _virtualenv: http://virtualenv.readthedocs.io
+.. _venv: https://docs.python.org/3/library/venv.html
+
+.. _CircleCI: https://circleci.com/gh/NeurodataWithoutBorders/pynwb
+.. _Azure Pipelines: https://dev.azure.com/NeurodataWithoutBorders/pynwb/_build
+
+.. _PyPI: https://pypi.org/project/pynwb
+
+-------------------
+Conda: Step-by-step
+-------------------
+
+.. warning::
+
+   Publishing on conda requires you to have corresponding package version uploaded on
+   `PyPI`_. So you have to do the PypI and Github release before you do the conda release.
+
+In order to release a new version on conda-forge, follow the steps below:
+
+1. Choose the next release version number (that matches with the pypi version that you already published)
+
+  .. code::
+
+    $ release=X.Y.Z
+
+2. Fork pynwb-feedstock
+
+ First step is to fork `pynwb-feedstock <https://github.com/conda-forge/pynwb-feedstock>`_ repository.
+ This is the recommended `best practice <https://conda-forge.org/docs/conda-forge_gotchas.html#using-a-fork-vs-a-branch-when-updating-a-recipe>`_  by conda.
+
+
+3. Clone forked feedstock
+
+   Fill the YOURGITHUBUSER part.
+
+   .. code::
+
+      $ cd /tmp && git clone https://github.com/YOURGITHUBUSER/pynwb-feedstock.git
+
+
+4. Download corresponding source for the release version
+
+  .. code::
+
+    $ cd /tmp && \
+      wget https://github.com/NeurodataWithoutBorders/pynwb/releases/download/$release/pynwb-$release.tar.gz
+
+5. Create a new branch
+
+   .. code::
+
+      $ cd pynwb-feedstock && \
+        git checkout -b $release
+
+
+6. Modify ``meta.yaml``
+
+   Update the `version string <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml#L2>`_ and
+   `sha256 <https://github.com/conda-forge/pynwb-feedstock/blob/master/recipe/meta.yaml#L3>`_.
+
+   We have to modify the sha and the version string in the ``meta.yaml`` file.
+
+   For linux flavors:
+
+   .. code::
+
+      $ sed -i "2s/.*/{% set version = \"$release\" %}/" recipe/meta.yaml
+      $ sha=$(openssl sha256 /tmp/pynwb-$release.tar.gz | awk '{print $2}')
+      $ sed -i "3s/.*/{$ set sha256 = \"$sha\" %}/" recipe/meta.yaml
+
+   For macOS:
+
+   .. code::
+
+      $ sed -i -- "2s/.*/{% set version = \"$release\" %}/" recipe/meta.yaml
+      $ sha=$(openssl sha256 /tmp/pynwb-$release.tar.gz | awk '{print $2}')
+      $ sed -i -- "3s/.*/{$ set sha256 = \"$sha\" %}/" recipe/meta.yaml
+
+
+
+7. Push the changes
+
+   .. code::
+
+      $ git push origin $release
+
+8. Create a Pull Request
+
+   Create a pull request against the `main repository <https://github.com/conda-forge/pynwb-feedstock/pulls>`_. If the tests are passed
+   a new release will be published on Anaconda cloud.

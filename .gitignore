@@ -2,7 +2,6 @@
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
-!.vscode/launch.json
 !.vscode/extensions.json
 .history
 
@@ -13,6 +12,18 @@ docs/notebooks/boc/
 # Auto-generated apidocs RST files
 docs/source/pynwb*.rst
 docs/source/modules.rst
+docs/source/gen_modules/
+docs/source/modules/generated
+
+# Auto-generated files after running tutorials
+*_example.nwb
+mylab.*.yaml
+*.npy
+*.nwb
+manifest.json
+
+# Auto-generated tutorials
+docs/source/tutorials/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
@@ -23,6 +34,7 @@ __pycache__/
 # Sphinx documentation
 docs/_build/
 docs/build/
+docs/source/pynwb.*.rst
 
 
 # setuptools
@@ -48,3 +60,9 @@ tests/coverage/htmlcov
 
 # tox
 .tox
+
+# vscode
+.vscode/
+
+#mypy
+.mypy_cache/

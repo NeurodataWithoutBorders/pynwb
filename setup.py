@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
+import re
 
 import versioneer
 
@@ -10,7 +11,14 @@ with open('README.rst', 'r') as fp:
 pkgs = find_packages('src', exclude=['data'])
 print('found these packages:', pkgs)
 
-schema_dir = 'data'
+schema_dir = 'nwb-schema/core'
+
+# copy requirements from requirements.txt, ignore all pinned version info, but keep pinned version for hdmf
+reqs_re = re.compile("[<=>]+")
+with open('requirements.txt', 'r') as fp:
+    reqs = [reqs_re.split(x.strip())[0] if not x.startswith('hdmf') else x.strip() for x in fp.readlines()]
+
+print(reqs)
 
 setup_args = {
     'name': 'pynwb',
@@ -23,23 +31,15 @@ setup_args = {
     'author_email': 'ajtritt@lbl.gov',
     'url': 'https://github.com/NeurodataWithoutBorders/pynwb',
     'license': "BSD",
-    'install_requires':
-    [
-        'numpy',
-        'h5py',
-        'ruamel.yaml',
-        'python-dateutil',
-        'six',
-        'requests'
-    ],
+    'install_requires': reqs,
     'packages': pkgs,
     'package_dir': {'': 'src'},
     'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
     'classifiers': [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "License :: OSI Approved :: BSD License",
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",

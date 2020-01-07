@@ -1,17 +1,25 @@
-from ..form.build import ObjectMapper
 from .. import register_map
 
-from ..ophys import PlaneSegmentation
+from ..ophys import PlaneSegmentation, ImagingPlane
+from .core import NWBContainerMapper
+from hdmf.common.io.table import DynamicTableMap
 
 
 @register_map(PlaneSegmentation)
-class PlaneSegmentationMap(ObjectMapper):
+class PlaneSegmentationMap(DynamicTableMap):
 
-    # This might be needed for 2.0 as well
     def __init__(self, spec):
         super(PlaneSegmentationMap, self).__init__(spec)
-        roi_spec = self.spec.get_neurodata_type('ROI')
-        self.map_spec('roi_list', roi_spec)
 
         reference_images_spec = self.spec.get_group('reference_images').get_neurodata_type('ImageSeries')
         self.map_spec('reference_images', reference_images_spec)
+
+
+@register_map(ImagingPlane)
+class ImagingPlaneMap(NWBContainerMapper):
+
+    def __init__(self, spec):
+        super(ImagingPlaneMap, self).__init__(spec)
+        manifold_spec = self.spec.get_dataset('manifold')
+        self.map_spec('unit', manifold_spec.get_attribute('unit'))
+        self.map_spec('conversion', manifold_spec.get_attribute('conversion'))

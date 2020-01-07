@@ -1,17 +1,20 @@
-from collections import Iterable
+from warnings import warn
 
-from .form.utils import docval, getargs, popargs, fmt_docval_args
-from .form.data_utils import DataChunkIterator
+try:
+    from collections.abc import Iterable  # Python 3
+except ImportError:
+    from collections import Iterable  # Python 2.7
+
+from hdmf.utils import docval, getargs, popargs, call_docval_func
+from hdmf.common import DynamicTable
+
 
 from . import register_class, CORE_NAMESPACE
-from .core import NWBContainer
-
-_default_conversion = 1.0
-_default_resolution = 0.0
+from .core import NWBDataInterface, MultiContainerInterface, NWBData
 
 
 @register_class('ProcessingModule', CORE_NAMESPACE)
-class ProcessingModule(NWBContainer):
+class ProcessingModule(MultiContainerInterface):
     """ Processing module. This is a container for one or more containers
         that provide data at intermediate levels of analysis
 
@@ -19,45 +22,40 @@ class ProcessingModule(NWBContainer):
         They should not be instantiated directly
     """
 
-    __nwbfields__ = ('description',
-                     'containers')
+    __nwbfields__ = ('description',)
+
+    __clsconf__ = {
+            'attr': 'data_interfaces',
+            'add': 'add',
+            'type': (NWBDataInterface, DynamicTable),
+            'get': 'get'
+    }
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this processing module'},
-            {'name': 'source', 'type': str, 'doc': 'the source of the data'},
             {'name': 'description', 'type': str, 'doc': 'Description of this processing module'},
-            {'name': 'containers', 'type': (list, dict),
-             'doc': 'NWBContainers that belong to this ProcessingModule', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'data_interfaces', 'type': (list, tuple, dict),
+             'doc': 'NWBDataInterfacess that belong to this ProcessingModule', 'default': None})
     def __init__(self, **kwargs):
-        description, containers = popargs('description', 'containers', kwargs)
-        super(ProcessingModule, self).__init__(**kwargs)
-        self.description = description
-        self.__containers = self.__to_dict(containers)
-
-    def __to_dict(self, arg):
-        if arg is None:
-            return dict()
-        else:
-            return_dict = {}
-            for i in arg:
-                assert i.name is not None  # If a container doesn't have a name, it gets lost!
-                assert i.name not in return_dict
-                return_dict[i.name] = i
-            return return_dict
+        call_docval_func(super(ProcessingModule, self).__init__, kwargs)
+        self.description = popargs('description', kwargs)
+        self.data_interfaces = popargs('data_interfaces', kwargs)
 
     @property
     def containers(self):
-        return tuple(self.__containers.values())
+        return self.data_interfaces
 
-    @docval({'name': 'container', 'type': NWBContainer, 'doc': 'the NWBContainer to add to this Module'})
+    def __getitem__(self, arg):
+        return self.get(arg)
+
+    @docval({'name': 'container', 'type': (NWBDataInterface, DynamicTable),
+             'doc': 'the NWBDataInterface to add to this Module'})
     def add_container(self, **kwargs):
         '''
         Add an NWBContainer to this ProcessingModule
         '''
         container = getargs('container', kwargs)
-        self.__containers[container.name] = container
-        container.parent = self
+        warn(PendingDeprecationWarning('add_container will be replaced by add'))
+        self.add(container)
 
     @docval({'name': 'container_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
     def get_container(self, **kwargs):
@@ -65,11 +63,25 @@ class ProcessingModule(NWBContainer):
         Retrieve an NWBContainer from this ProcessingModule
         '''
         container_name = getargs('container_name', kwargs)
-        return self.__containers.get(container_name)
+        warn(PendingDeprecationWarning('get_container will be replaced by get'))
+        return self.get(container_name)
+
+    @docval({'name': 'NWBDataInterface', 'type': (NWBDataInterface, DynamicTable),
+             'doc': 'the NWBDataInterface to add to this Module'})
+    def add_data_interface(self, **kwargs):
+        NWBDataInterface = getargs('NWBDataInterface', kwargs)
+        warn(PendingDeprecationWarning('add_data_interface will be replaced by add'))
+        self.add(NWBDataInterface)
+
+    @docval({'name': 'data_interface_name', 'type': str, 'doc': 'the name of the NWBContainer to retrieve'})
+    def get_data_interface(self, **kwargs):
+        data_interface_name = getargs('data_interface_name', kwargs)
+        warn(PendingDeprecationWarning('get_data_interface will be replaced by get'))
+        return self.get(data_interface_name)
 
 
 @register_class('TimeSeries', CORE_NAMESPACE)
-class TimeSeries(NWBContainer):
+class TimeSeries(NWBDataInterface):
     """A generic base class for time series data"""
     __nwbfields__ = ("comments",
                      "description",
@@ -77,62 +89,44 @@ class TimeSeries(NWBContainer):
                      "resolution",
                      "conversion",
                      "unit",
-                     "num_samples",
                      "timestamps",
                      "timestamps_unit",
                      "interval",
                      "starting_time",
                      "rate",
-                     "rate_unit",
+                     "starting_time_unit",
                      "control",
-                     "control_description",
-                     "ancestry",
-                     "neurodata_type",
-                     "help")
+                     "control_description")
 
-    __ancestry = 'TimeSeries'
-    __neurodata_type = 'TimeSeries'
-    __help = 'General purpose TimeSeries'
+    __time_unit = "seconds"
 
-    __time_unit = "Seconds"
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},  # required
+            {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'default': None},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
+            {'name': 'resolution', 'type': (str, 'float'),
+             'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': -1.0},
+            {'name': 'conversion', 'type': (str, 'float'),
+             'doc': 'Scalar to multiply each element in data to convert it to the specified unit', 'default': 1.0},
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'source', 'type': str,
-             'doc': ('Name of TimeSeries or Modules that serve as the source for the data '
-                     'contained here. It can also be the name of a device, for stimulus or '
-                     'acquisition data')},
-            {'name': 'data', 'type': (Iterable, 'TimeSeries', DataChunkIterator),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'resolution', 'type': (str, float),
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            # Optional arguments:
-            {'name': 'conversion', 'type': (str, float),
-             'doc': 'Scalar to multiply each element in data to convert it to the specified unit',
-             'default': _default_conversion},
-
-            # time related data is optional, but one is required -- this will have to be enforced in the constructor
-            {'name': 'timestamps', 'type': (Iterable, 'TimeSeries', DataChunkIterator),
+            {'name': 'timestamps', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': (None,),
              'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
+            {'name': 'starting_time', 'type': 'float', 'doc': 'The timestamp of the first sample', 'default': None},
+            {'name': 'rate', 'type': 'float', 'doc': 'Sampling rate in Hz', 'default': None},
 
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'comments', 'type': str, 'doc': 'Human-readable comments about this TimeSeries dataset',
+             'default': 'no comments'},
+            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset',
+             'default': 'no description'},
+            {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data',
+             'default': None},
+            {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value',
+             'default': None})
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
-        pargs, pkwargs = fmt_docval_args(super(TimeSeries, self).__init__, kwargs)
-        super(TimeSeries, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(TimeSeries, self).__init__, kwargs)
         keys = ("resolution",
                 "comments",
                 "description",
@@ -147,36 +141,60 @@ class TimeSeries(NWBContainer):
 
         data = getargs('data', kwargs)
         self.fields['data'] = data
-        if isinstance(data, TimeSeries):
-            data.fields['data_link'].append(self)
-            self.fields['num_samples'] = data.num_samples
-        elif isinstance(data, DataChunkIterator):
-            self.fields['num_samples'] = -1
-        else:
-            self.fields['num_samples'] = len(data)
 
         timestamps = kwargs.get('timestamps')
         starting_time = kwargs.get('starting_time')
         rate = kwargs.get('rate')
         if timestamps is not None:
+            if rate is not None:
+                raise ValueError('Specifying rate and timestamps is not supported.')
+            if starting_time is not None:
+                raise ValueError('Specifying starting_time and timestamps is not supported.')
             self.fields['timestamps'] = timestamps
-            self.timestamps_unit = 'Seconds'
+            self.timestamps_unit = self.__time_unit
             self.interval = 1
             if isinstance(timestamps, TimeSeries):
-                timestamps.fields['timestamp_link'].append(self)
-        elif starting_time is not None and rate is not None:
-            self.starting_time = starting_time
+                timestamps.__add_link('timestamp_link', self)
+        elif rate is not None:
             self.rate = rate
-            self.rate_unit = 'Seconds'
+            if starting_time is not None:
+                self.starting_time = starting_time
+                self.starting_time_unit = self.__time_unit
+            else:
+                self.starting_time = 0.0
         else:
-            raise TypeError("either 'timestamps' or 'starting_time' and 'rate' must be specified")
-
-        # self.fields['data_link'] = set()
-        # self.fields['timestamp_link'] = set()
+            raise TypeError("either 'timestamps' or 'rate' must be specified")
 
     @property
-    def help(self):
-        return self.__help
+    def num_samples(self):
+        ''' Tries to return the number of data samples. If this cannot be assessed, returns None.
+        '''
+
+        def unreadable_warning(attr):
+            return (
+                'The {} attribute on this TimeSeries (named: {}) has a __len__, '
+                'but it cannot be read'.format(attr, self.name)
+            )
+
+        def no_len_warning(attr):
+            return 'The {} attribute on this TimeSeries (named: {}) has no __len__, '.format(attr, self.name)
+
+        if hasattr(self.data, '__len__'):
+            try:
+                return len(self.data)  # for an ndarray this will return the first element of shape
+            except TypeError:
+                warn(unreadable_warning('data'), UserWarning)
+        else:
+            warn(no_len_warning('data'), UserWarning)
+
+        if hasattr(self, 'timestamps'):
+            if hasattr(self.timestamps, '__len__'):
+                try:
+                    return len(self.timestamps)
+                except TypeError:
+                    warn(unreadable_warning('timestamps'), UserWarning)
+            elif not (hasattr(self, 'rate') and hasattr(self, 'starting_time')):
+                warn(no_len_warning('timestamps'), UserWarning)
 
     @property
     def data(self):
@@ -214,3 +232,41 @@ class TimeSeries(NWBContainer):
     @property
     def time_unit(self):
         return self.__time_unit
+
+
+@register_class('Image', CORE_NAMESPACE)
+class Image(NWBData):
+    __nwbfields__ = ('data', 'resolution', 'description')
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
+             'shape': ((None, None), (None, None, 3), (None, None, 4))},
+            {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    def __init__(self, **kwargs):
+        call_docval_func(super(Image, self).__init__, kwargs)
+        self.resolution = kwargs['resolution']
+        self.description = kwargs['description']
+
+
+@register_class('Images', CORE_NAMESPACE)
+class Images(MultiContainerInterface):
+
+    __nwbfields__ = ('description',)
+
+    __clsconf__ = {
+        'attr': 'images',
+        'add': 'add_image',
+        'type': Image,
+        'get': 'get_image',
+        'create': 'create_image'
+    }
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this set of images'},
+            {'name': 'images', 'type': 'array_data', 'doc': 'image objects', 'default': None},
+            {'name': 'description', 'type': str, 'doc': 'description of images', 'default': 'no description'})
+    def __init__(self, **kwargs):
+        name, description, images = popargs('name', 'description', 'images', kwargs)
+        super(Images, self).__init__(name, **kwargs)
+        self.description = description
+        self.images = images
