@@ -1,6 +1,6 @@
 chardet==3.0.4
 h5py==2.10.0
-hdmf==1.4.0
+hdmf==1.5.1
 numpy==1.17.2
 pandas==0.25.1
 python-dateutil==2.8.0
