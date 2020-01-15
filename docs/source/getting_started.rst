@@ -32,7 +32,6 @@ This will automatically install the following required dependencies:
  #. python-dateutil
  #. requests
  #. ruamel.yaml
- #. six
  #. chardet
 
 Install release from Conda-forge
