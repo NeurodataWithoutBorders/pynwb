@@ -132,7 +132,7 @@ ObjectMapper
    * Given a `Container`_, return a Builder representation
 
 * PyNWB has many of these -- one for each type in NWB schema
-* **Main Module:** :py:mod:`hdmf.build.manager`
+* **Main Module:** :py:mod:`hdmf.build.objectmapper`
 
    * NWB-specific ObjectMappers are locate in submodules of :py:class:`pynwb.io`
 
