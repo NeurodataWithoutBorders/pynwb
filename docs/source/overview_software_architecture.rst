@@ -132,7 +132,7 @@ ObjectMapper
    * Given a `Container`_, return a Builder representation
 
 * PyNWB has many of these -- one for each type in NWB schema
-* **Main Module:** :py:mod:`hdmf.build.map`
+* **Main Module:** :py:mod:`hdmf.build.manager`
 
    * NWB-specific ObjectMappers are locate in submodules of :py:class:`pynwb.io`
 
@@ -177,7 +177,7 @@ TypeMap
 
 * PyNWB has two of these classes:
 
-   * the base class (i.e. :py:class:`~hdmf.build.map.TypeMap`) - handles NWB 2.x
+   * the base class (i.e. :py:class:`~hdmf.build.manager.TypeMap`) - handles NWB 2.x
    * :py:class:`pynwb.legacy.map.TypeMapLegacy` - handles NWB 1.x
 
 * PyNWB provides a “global” instance of TypeMap created at runtime
@@ -189,7 +189,7 @@ BuildManager
 
 * Responsible for `memoizing <https://en.wikipedia.org/wiki/Memoization>`_ `Builder`_ and `Container`_
 * Constructed from a `TypeMap`_
-* PyNWB only has one of these: :py:class:`hdmf.build.map.BuildManager`
+* PyNWB only has one of these: :py:class:`hdmf.build.manager.BuildManager`
 
 .. _fig-software-architecture-buildmanager:
 

@@ -30,10 +30,7 @@ This will automatically install the following required dependencies:
  #. h5py
  #. numpy
  #. python-dateutil
- #. requests
- #. ruamel.yaml
  #. six
- #. chardet
 
 Install release from Conda-forge
 --------------------------------
