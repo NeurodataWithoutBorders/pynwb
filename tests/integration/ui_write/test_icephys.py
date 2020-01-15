@@ -9,7 +9,6 @@ from pynwb.device import Device
 from . import base
 
 from abc import ABCMeta
-from six import with_metaclass
 
 
 class TestIntracellularElectrode(base.TestMapRoundTrip):
@@ -58,7 +57,7 @@ class TestIntracellularElectrode(base.TestMapRoundTrip):
         return nwbfile.get_ic_electrode(self.container.name)
 
 
-class TestPatchClampSeries(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
+class TestPatchClampSeries(base.TestDataInterfaceIO, metaclass=ABCMeta):
 
     def setUpElectrode(self):
 
