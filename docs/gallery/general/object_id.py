@@ -7,7 +7,7 @@ Object IDs in NWB
 This example focuses on how to access object IDs from NWB container objects and NWB container objects by
 object ID. Every NWB container object has an object ID that is a UUID_ string, such as
 "123e4567-e89b-12d3-a456-426655440000". These IDs have a non-zero probability of being duplicated, but are practically
-unique and used widely across computing playtforms as if they are unique.
+unique and used widely across computing platforms as if they are unique.
 
 The object ID of an NWB container object can be accessed using the
 :py:meth:`~hdmf.container.AbstractContainer.object_id` method.
@@ -49,7 +49,6 @@ print(nwbfile.objects)
 
 ####################
 # You can iterate through the `objects` dictionary as with any other Python dictionary.
-
 
 for oid in nwbfile.objects:
     print(nwbfile.objects[oid])
