@@ -65,7 +65,7 @@ class TestHDF5Writer(TestCase):
     def test_nwbio(self):
         with HDF5IO(self.path, manager=self.manager, mode='a') as io:
             io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('acquisition', f)
             self.assertIn('analysis', f)
             self.assertIn('general', f)
@@ -92,7 +92,7 @@ class TestHDF5Writer(TestCase):
         '''
         with HDF5IO(self.path, manager=self.manager, mode="a") as io:
             io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('specifications', f)
 
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
@@ -118,7 +118,7 @@ class TestHDF5Writer(TestCase):
         '''
         with HDF5IO(self.path, manager=self.manager, mode="a") as io:
             io.write(self.container, cache_spec=False)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertNotIn('specifications', f)
 
 
@@ -170,10 +170,10 @@ class TestHDF5WriterWithInjectedFile(TestCase):
         remove_test_file(self.path)
 
     def test_nwbio(self):
-        with File(self.path) as fil:
+        with File(self.path, 'a') as fil:
             with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
                 io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('acquisition', f)
             self.assertIn('analysis', f)
             self.assertIn('general', f)
@@ -186,7 +186,7 @@ class TestHDF5WriterWithInjectedFile(TestCase):
             self.assertIn('test_timeseries', acq)
 
     def test_write_clobber(self):
-        with File(self.path) as fil:
+        with File(self.path, 'a') as fil:
             with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
                 io.write(self.container)
 
@@ -200,10 +200,10 @@ class TestHDF5WriterWithInjectedFile(TestCase):
         Round-trip test for writing spec and reading it back in
         '''
 
-        with File(self.path) as fil:
+        with File(self.path, 'a') as fil:
             with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
                 io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('specifications', f)
 
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
