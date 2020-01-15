@@ -114,7 +114,10 @@ references:
   no_filters: &no_filters
     filters:
       tags:
-        only: /.*/
+        ignore:
+          # exclude tags created by "ci_addons publish_github_release"
+          - /^latest$/
+          - /^latest-tmp$/
 
 jobs:
   flake8:
@@ -293,6 +296,11 @@ workflows:
             - gallery36
             - gallery37
           filters:
+            tags:
+              ignore:
+                # exclude tags created by "ci_addons publish_github_release"
+                - /^latest$/
+                - /^latest-tmp$/
             branches:
               only: dev
       - deploy-release:
