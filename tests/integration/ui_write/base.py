@@ -9,6 +9,7 @@ import warnings
 
 from pynwb import get_manager, NWBFile, NWBHDF5IO, validate as pynwb_validate
 from pynwb.testing import remove_test_file
+from hdmf.backends import BrokenLinkWarning
 from hdmf.backends.hdf5 import HDF5IO
 from hdmf.build.warnings import MissingRequiredWarning, OrphanContainerWarning
 from hdmf.container import Data, Container
@@ -177,8 +178,9 @@ class TestMapRoundTrip(TestMapNWBContainer):
 
         if ws:
             for w in ws:
-                if issubclass(w.category, (MissingRequiredWarning, OrphanContainerWarning)):
-                    # TODO add check for hdmf.backends.warnings.BrokenLinkWarning when it exists
+                if issubclass(w.category, (MissingRequiredWarning,
+                                           OrphanContainerWarning,
+                                           BrokenLinkWarning)):
                     raise Exception('%s: %s' % (w.category.__name__, w.message))
                 else:
                     warnings.warn(w.message, w.category)
