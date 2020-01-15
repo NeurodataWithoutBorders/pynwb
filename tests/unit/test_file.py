@@ -1,6 +1,5 @@
 ''' Tests for NWBFile '''
 import unittest2 as unittest
-import six
 import numpy as np
 import os
 import pandas as pd
@@ -139,7 +138,7 @@ class NWBFileTest(unittest.TestCase):
         self.nwbfile.add_epoch(0.0, 1.0, tags1, ts)
         self.nwbfile.add_epoch(0.0, 1.0, tags2, ts)
         tags = self.nwbfile.epoch_tags
-        six.assertCountEqual(self, expected_tags, tags)
+        self.assertCountEqual(self, expected_tags, tags)
 
     def test_add_acquisition(self):
         self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
