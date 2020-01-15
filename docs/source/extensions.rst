@@ -42,7 +42,7 @@ Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
     spec = NWBDatasetSpec('A custom NWB type',
                         name='qux',
                         attribute=[
-                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
+                            NWBAttributeSpec('baz', 'a value for baz', 'text'),
                         ],
                         shape=(None, None))
 
@@ -60,7 +60,7 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
     spec = NWBDatasetSpec('A custom NWB type',
                         name='qux',
                         attribute=[
-                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
+                            NWBAttributeSpec('baz', 'a value for baz', 'text'),
                         ],
                         dtype=[
                             NWBDtypeSpec('foo', 'column for foo', 'int'),

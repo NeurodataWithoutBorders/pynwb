@@ -1,4 +1,4 @@
-include license.txt versioneer.py src/pynwb/_version.py
+include license.txt Legal.txt versioneer.py src/pynwb/_version.py
 include requirements.txt requirements-dev.txt requirements-doc.txt
 include test.py tox.ini
 
