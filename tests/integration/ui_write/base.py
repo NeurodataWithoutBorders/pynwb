@@ -9,7 +9,7 @@ import warnings
 
 from pynwb import get_manager, NWBFile, NWBHDF5IO, validate as pynwb_validate
 from pynwb.testing import remove_test_file
-from hdmf.backends import BrokenLinkWarning
+from hdmf.backends.warnings import BrokenLinkWarning
 from hdmf.backends.hdf5 import HDF5IO
 from hdmf.build.warnings import MissingRequiredWarning, OrphanContainerWarning
 from hdmf.container import Data, Container
