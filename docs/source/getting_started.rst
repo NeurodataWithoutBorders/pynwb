@@ -30,7 +30,7 @@ This will automatically install the following required dependencies:
  #. h5py
  #. numpy
  #. python-dateutil
- #. six
+
 
 Install release from Conda-forge
 --------------------------------
