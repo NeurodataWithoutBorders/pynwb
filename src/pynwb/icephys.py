@@ -1,5 +1,3 @@
-import numpy as np
-
 from hdmf.utils import docval, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
@@ -75,7 +73,7 @@ class PatchClampSeries(TimeSeries):
             {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'),
-            {'name': 'sweep_number', 'type': (int, 'uint64'),
+            {'name': 'sweep_number', 'type': (int, 'uint32', 'uint64'),
              'doc': 'Sweep number, allows for grouping different PatchClampSeries together '
                     'via the sweep_table', 'default': None})
     def __init__(self, **kwargs):
@@ -90,7 +88,7 @@ class PatchClampSeries(TimeSeries):
             if not (sweep_number >= 0):
                 raise ValueError("sweep_number must be a non-negative integer")
 
-            self.sweep_number = np.uint64(sweep_number)
+            self.sweep_number = sweep_number
 
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)

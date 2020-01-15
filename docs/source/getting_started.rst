@@ -29,8 +29,9 @@ This will automatically install the following required dependencies:
  #. hdmf
  #. h5py
  #. numpy
+ #. pandas
  #. python-dateutil
- #. six
+
 
 Install release from Conda-forge
 --------------------------------
