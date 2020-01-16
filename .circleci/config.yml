@@ -209,14 +209,14 @@ jobs:
 
   gallery37:
     docker:
-      - image: dozturk2/python37-hdf5
+      - image: circleci/python:3.7.6-stretch
     environment:
      - TEST_TOX_ENV: "gallery-py37"
     <<: *gallery-steps
 
   deploy-dev:
     docker:
-      - image: circleci/python:3.7.0-stretch
+      - image: circleci/python:3.7.6-stretch
     steps:
       - checkout
       - attach_workspace:
@@ -238,7 +238,7 @@ jobs:
 
   deploy-release:
     docker:
-      - image: circleci/python:3.7.0-stretch
+      - image: circleci/python:3.7.6-stretch
     steps:
       - attach_workspace:
           at: ./
