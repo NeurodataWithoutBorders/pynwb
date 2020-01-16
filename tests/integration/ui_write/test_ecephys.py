@@ -17,19 +17,19 @@ class TestElectrodeGroupIO(base.TestMapRoundTrip):
 
     def setUpContainer(self):
         self.dev1 = Device('dev1')
-        return ElectrodeGroup('elec1', 'a test ElectrodeGroup',
-                                       'a nonexistent place',
-                                       self.dev1)
+        return ElectrodeGroup('elec1', 'a test ElectrodeGroup', 'a nonexistent place', self.dev1, (1, 2, 3))
 
     def setUpBuilder(self):
         device_builder = GroupBuilder('dev1',
                                       attributes={'neurodata_type': 'Device',
                                                   'namespace': 'core'})
+        position_builder = DatasetBuilder('position', (1, 2, 3), dtype=(float, float, float))
         return GroupBuilder('elec1',
                             attributes={'neurodata_type': 'ElectrodeGroup',
                                         'namespace': 'core',
                                         'description': 'a test ElectrodeGroup',
                                         'location': 'a nonexistent place'},
+                            datasets={'position': position_builder},
                             links={
                                 'device': LinkBuilder(device_builder, 'device')
                             })

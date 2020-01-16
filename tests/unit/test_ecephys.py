@@ -80,11 +80,27 @@ class ElectrodeGroupConstructor(unittest.TestCase):
 
     def test_init(self):
         dev1 = Device('dev1')
+        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2, 3))
+        self.assertEqual(group.name, 'elec1')
+        self.assertEqual(group.description, 'electrode description')
+        self.assertEqual(group.location, 'electrode location')
+        self.assertEqual(group.device, dev1)
+        self.assertEqual(group.position, (1, 2, 3))
+
+    def test_init_position_none(self):
+        dev1 = Device('dev1')
         group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1)
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
         self.assertEqual(group.device, dev1)
+        self.assertIsNone(group.position)
+
+    def test_init_position_bad(self):
+        dev1 = Device('dev1')
+        with self.assertRaisesWith("ElectrodeGroup position argument must have three elements: x, y, z, but received: "
+                                   "(1, 2)"):
+            ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2))
 
 
 class EventDetectionConstructor(unittest.TestCase):

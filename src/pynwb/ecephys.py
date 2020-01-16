@@ -21,18 +21,25 @@ class ElectrodeGroup(NWBContainer):
     __nwbfields__ = ('name',
                      'description',
                      'location',
-                     'device')
+                     'device',
+                     'position')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'description', 'type': str, 'doc': 'description of this electrode group'},
             {'name': 'location', 'type': str, 'doc': 'description of location of this electrode group'},
-            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'})
+            {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode group'},
+            {'name': 'position', 'type': 'array_data',
+             'doc': 'stereotaxic position of this electrode group (x, y, z)', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super(ElectrodeGroup, self).__init__, kwargs)
-        description, location, device = popargs("description", "location", "device", kwargs)
+        description, location, device, position = popargs('description', 'location', 'device', 'position', kwargs)
         self.description = description
         self.location = location
         self.device = device
+        if position and len(position) != 3:
+            raise Exception('ElectrodeGroup position argument must have three elements: x, y, z, but received: %s'
+                            % position)
+        self.position = position
 
 
 @register_class('ElectricalSeries', CORE_NAMESPACE)
