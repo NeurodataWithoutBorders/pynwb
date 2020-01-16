@@ -11,7 +11,6 @@ from pynwb.file import ElectrodeTable as get_electrode_table
 from . import base
 
 from abc import ABCMeta
-from six import with_metaclass
 
 
 class TestElectrodeGroupIO(base.TestMapRoundTrip):
@@ -167,7 +166,7 @@ class TestElectricalSeriesIO(base.TestDataInterfaceIO):
         self.assertIsInstance(row2.iloc[0]['group'], ElectrodeGroup)
 
 
-class TestMultiElectricalSeries(with_metaclass(ABCMeta, base.TestDataInterfaceIO)):
+class TestMultiElectricalSeries(base.TestDataInterfaceIO, metaclass=ABCMeta):
 
     def setUpElectricalSeriesContainers(self):
         TestElectricalSeriesIO.make_electrode_table(self)
