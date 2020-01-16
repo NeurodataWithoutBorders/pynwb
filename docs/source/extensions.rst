@@ -267,15 +267,19 @@ If using iPython, you can access documentation for the class's constructor using
 ObjectMapper : Customizing the mapping between NWBContainer and the Spec
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer`
-class for reading and writing, you will need to implement and register a custom :py:class:`~hdmf.build.map.ObjectMapper`.
+If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the
+:py:class:`~pynwb.core.NWBContainer`
+class for reading and writing, you will need to implement and register a custom
+:py:class:`~hdmf.build.objectmapper.ObjectMapper`.
 
-:py:class:`~hdmf.build.map.ObjectMapper` extensions are registered with the decorator :py:func:`~pynwb.register_map`.
+:py:class:`~hdmf.build.objectmapper.ObjectMapper` extensions are registered with the decorator
+:py:func:`~pynwb.register_map`.
 
 .. code-block:: python
 
     from pynwb import register_map
-    from form import ObjectMapper
+    from hdmf.build import ObjectMapper
+
     @register_map(MyExtensionContainer)
     class MyExtensionMapper(ObjectMapper)
         ...
@@ -285,9 +289,11 @@ class for reading and writing, you will need to implement and register a custom 
 .. code-block:: python
 
     from pynwb import register_map
-    from form import ObjectMapper
+    from hdmf.build import ObjectMapper
+
     class MyExtensionMapper(ObjectMapper)
         ...
+
     register_map(MyExtensionContainer, MyExtensionMapper)
 
 .. tip::
