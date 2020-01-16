@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 from tempfile import gettempdir
 
-import unittest2 as unittest
+import unittest
 from pynwb import get_type_map, TimeSeries, NWBFile, register_class, docval, load_namespaces, popargs, get_class
 from hdmf.spec.spec import RefSpec
 from hdmf.utils import get_docval

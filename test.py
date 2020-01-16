@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-
-from __future__ import print_function
-
 import warnings
 import re
 import argparse
@@ -12,7 +9,7 @@ import os.path
 import os
 import sys
 import traceback
-import unittest2 as unittest
+import unittest
 from tests.coloredtestrunner import ColoredTestRunner, ColoredTestResult
 
 flags = {'pynwb': 2, 'integration': 3, 'example': 4}
