@@ -1,6 +1,6 @@
 import os
 
-import unittest as unittest
+import unittest
 
 import pynwb
 

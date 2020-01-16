@@ -1,4 +1,4 @@
-import unittest as unittest
+import unittest
 
 from pynwb.core import NWBContainer
 from hdmf.utils import docval, call_docval_func

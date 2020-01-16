@@ -1,4 +1,4 @@
-import unittest as unittest
+import unittest
 import re
 import numpy as np
 

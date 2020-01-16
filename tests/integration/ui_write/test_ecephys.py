@@ -1,4 +1,4 @@
-import unittest as unittest
+import unittest
 
 from hdmf.build import GroupBuilder, DatasetBuilder, LinkBuilder, ReferenceBuilder
 

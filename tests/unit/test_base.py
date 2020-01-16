@@ -1,4 +1,4 @@
-import unittest as unittest
+import unittest
 import numpy as np
 
 from pynwb.base import ProcessingModule, TimeSeries, Images, Image
