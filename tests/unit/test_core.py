@@ -1,6 +1,6 @@
 from datetime import datetime
 
-import unittest2 as unittest
+import unittest
 from dateutil.tz import tzlocal
 from pynwb import NWBFile, TimeSeries, available_namespaces
 from pynwb.core import LabelledDict

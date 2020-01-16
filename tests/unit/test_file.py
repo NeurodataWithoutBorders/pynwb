@@ -1,5 +1,5 @@
 ''' Tests for NWBFile '''
-import unittest2 as unittest
+import unittest
 import numpy as np
 import os
 import pandas as pd
