@@ -2,9 +2,12 @@ from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import os
 from abc import ABCMeta, abstractmethod
+import warnings
 
 from pynwb import NWBFile, NWBHDF5IO, validate as pynwb_validate
 from .utils import remove_test_file
+from hdmf.backends.warnings import BrokenLinkWarning
+from hdmf.build.warnings import MissingRequiredWarning, OrphanContainerWarning
 
 
 class TestNWBH5IOMixin(metaclass=ABCMeta):
@@ -71,14 +74,24 @@ class TestNWBH5IOMixin(metaclass=ABCMeta):
         nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
 
-        self.writer = NWBHDF5IO(self.filename, mode='w')
-        self.writer.write(nwbfile, cache_spec=cache_spec)
-        self.writer.close()
+        with warnings.catch_warnings(record=True) as ws:
+            self.writer = NWBHDF5IO(self.filename, mode='w')
+            self.writer.write(nwbfile, cache_spec=cache_spec)
+            self.writer.close()
 
-        self.validate()
+            self.validate()
 
-        self.reader = NWBHDF5IO(self.filename, mode='r')
-        self.read_nwbfile = self.reader.read()
+            self.reader = NWBHDF5IO(self.filename, mode='r')
+            self.read_nwbfile = self.reader.read()
+
+        if ws:
+            for w in ws:
+                if issubclass(w.category, (MissingRequiredWarning,
+                                           OrphanContainerWarning,
+                                           BrokenLinkWarning)):
+                    raise Exception('%s: %s' % (w.category.__name__, w.message))
+                else:
+                    warnings.warn(w.message, w.category)
 
         try:
             return self.getContainer(self.read_nwbfile)
