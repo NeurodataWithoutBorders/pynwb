@@ -5,11 +5,13 @@ import os
 import numpy as np
 import h5py
 import numpy.testing as npt
+import warnings
 
 from pynwb import get_manager, NWBFile, NWBHDF5IO, validate as pynwb_validate
 from pynwb.testing import remove_test_file
+from hdmf.backends.warnings import BrokenLinkWarning
 from hdmf.backends.hdf5 import HDF5IO
-
+from hdmf.build.warnings import MissingRequiredWarning, OrphanContainerWarning
 from hdmf.container import Data, Container
 
 CORE_NAMESPACE = 'core'
@@ -167,11 +169,21 @@ class TestMapRoundTrip(TestMapNWBContainer):
         nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
         self.addContainer(nwbfile)
 
-        self.writer = HDF5IO(self.filename, manager=get_manager(), mode='w')
-        self.writer.write(nwbfile, cache_spec=cache_spec)
-        self.writer.close()
-        self.reader = HDF5IO(self.filename, manager=get_manager(), mode='r')
-        self.read_nwbfile = self.reader.read()
+        with warnings.catch_warnings(record=True) as ws:
+            self.writer = HDF5IO(self.filename, manager=get_manager(), mode='w')
+            self.writer.write(nwbfile, cache_spec=cache_spec)
+            self.writer.close()
+            self.reader = HDF5IO(self.filename, manager=get_manager(), mode='r')
+            self.read_nwbfile = self.reader.read()
+
+        if ws:
+            for w in ws:
+                if issubclass(w.category, (MissingRequiredWarning,
+                                           OrphanContainerWarning,
+                                           BrokenLinkWarning)):
+                    raise Exception('%s: %s' % (w.category.__name__, w.message))
+                else:
+                    warnings.warn(w.message, w.category)
 
         try:
             tmp = self.getContainer(self.read_nwbfile)
