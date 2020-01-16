@@ -2,6 +2,5 @@ sphinx
 matplotlib
 sphinx_rtd_theme
 sphinx-gallery
-Glymur==0.8.19  # required for allensdk 1.3.0 to work
-allensdk==1.3.0
+allensdk
 -r requirements.txt
