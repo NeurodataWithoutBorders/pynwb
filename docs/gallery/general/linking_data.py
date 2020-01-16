@@ -190,7 +190,7 @@ io4.close()
 # ---------------------------
 #
 # Appending to files and linking is made possible by passing around the same
-# :py:class:`~hdmf.build.map.BuildManager`. You can get a manager to pass around
+# :py:class:`~hdmf.build.manager.BuildManager`. You can get a manager to pass around
 # using the :py:meth:`~pynwb.get_manager` function.
 #
 
