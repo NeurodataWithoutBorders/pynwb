@@ -1,12 +1,12 @@
-import unittest
 import numpy as np
 
 from pynwb.base import ProcessingModule, TimeSeries, Images, Image
+from pynwb.testing import TestCase
 from hdmf.data_utils import DataChunkIterator
 from hdmf.backends.hdf5 import H5DataIO
 
 
-class TestProcessingModule(unittest.TestCase):
+class TestProcessingModule(TestCase):
 
     def setUp(self):
         self.pm = ProcessingModule('test_procmod', 'a fake processing module')
@@ -25,7 +25,7 @@ class TestProcessingModule(unittest.TestCase):
     def test_deprecated_add_data_interface(self):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        with self.assertWarnsRegex(PendingDeprecationWarning, r'add_data_interface will be replaced by add'):
+        with self.assertWarnsWith(PendingDeprecationWarning, 'add_data_interface will be replaced by add'):
             self.pm.add_data_interface(ts)
         self.assertIn(ts.name, self.pm.containers)
         self.assertIs(ts, self.pm.containers[ts.name])
@@ -33,7 +33,7 @@ class TestProcessingModule(unittest.TestCase):
     def test_deprecated_add_container(self):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
-        with self.assertWarnsRegex(PendingDeprecationWarning, r'add_container will be replaced by add'):
+        with self.assertWarnsWith(PendingDeprecationWarning, 'add_container will be replaced by add'):
             self.pm.add_container(ts)
         self.assertIn(ts.name, self.pm.containers)
         self.assertIs(ts, self.pm.containers[ts.name])
@@ -50,7 +50,7 @@ class TestProcessingModule(unittest.TestCase):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.pm.add(ts)
-        with self.assertWarnsRegex(PendingDeprecationWarning, r'get_data_interface will be replaced by get'):
+        with self.assertWarnsWith(PendingDeprecationWarning, 'get_data_interface will be replaced by get'):
             tmp = self.pm.get_data_interface('test_ts')
         self.assertIs(tmp, ts)
 
@@ -58,7 +58,7 @@ class TestProcessingModule(unittest.TestCase):
         ts = TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
         self.pm.add(ts)
-        with self.assertWarnsRegex(PendingDeprecationWarning, r'get_container will be replaced by get'):
+        with self.assertWarnsWith(PendingDeprecationWarning, 'get_container will be replaced by get'):
             tmp = self.pm.get_container('test_ts')
         self.assertIs(tmp, ts)
 
@@ -70,7 +70,7 @@ class TestProcessingModule(unittest.TestCase):
         self.assertIs(tmp, ts)
 
 
-class TestTimeSeries(unittest.TestCase):
+class TestTimeSeries(TestCase):
 
     def test_init_no_parent(self):
         ts = TimeSeries('test_ts', list(), 'unit', timestamps=list())
@@ -145,8 +145,8 @@ class TestTimeSeries(unittest.TestCase):
         data = H5DataIO(DataChunkIterator(data=generator_factory()))
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
-        with self.assertWarnsRegex(UserWarning, r'The data attribute on this TimeSeries \(named: test_ts1\) has a '
-                                   '__len__, but it cannot be read'):
+        with self.assertWarnsWith(UserWarning, 'The data attribute on this TimeSeries (named: test_ts1) has a '
+                                  '__len__, but it cannot be read'):
             self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
@@ -159,8 +159,8 @@ class TestTimeSeries(unittest.TestCase):
         data = DataChunkIterator(data=generator_factory())
         ts1 = TimeSeries('test_ts1', data,
                          'grams', starting_time=0.0, rate=0.1)
-        with self.assertWarnsRegex(UserWarning, r'The data attribute on this TimeSeries \(named: test_ts1\) has no '
-                                   '__len__'):
+        with self.assertWarnsWith(UserWarning, 'The data attribute on this TimeSeries (named: test_ts1) has no '
+                                  '__len__'):
             self.assertIs(ts1.num_samples, None)
         for xi, yi in zip(data, generator_factory()):
             assert np.allclose(xi, yi)
@@ -180,7 +180,7 @@ class TestTimeSeries(unittest.TestCase):
             assert np.allclose(xi, yi)
 
     def test_no_time(self):
-        with self.assertRaisesRegex(TypeError, "either 'timestamps' or 'rate' must be specified"):
+        with self.assertRaisesWith(TypeError, "either 'timestamps' or 'rate' must be specified"):
             TimeSeries('test_ts2', [10, 11, 12, 13, 14, 15], 'grams')
 
     def test_no_starting_time(self):
@@ -197,13 +197,13 @@ class TestTimeSeries(unittest.TestCase):
                        starting_time=30., timestamps=[.3, .4, .5, .6, .7, .8])
 
 
-class TestImage(unittest.TestCase):
+class TestImage(TestCase):
 
     def test_image(self):
         Image(name='test_image', data=np.ones((10, 10)))
 
 
-class TestImages(unittest.TestCase):
+class TestImages(TestCase):
 
     def test_images(self):
         image = Image(name='test_image', data=np.ones((10, 10)))

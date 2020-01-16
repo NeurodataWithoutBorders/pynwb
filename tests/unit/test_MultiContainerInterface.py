@@ -1,7 +1,6 @@
-import unittest
-
-from pynwb.file import MultiContainerInterface, NWBDataInterface
 from hdmf.utils import docval, get_docval
+from pynwb.file import MultiContainerInterface, NWBDataInterface
+from pynwb.testing import TestCase
 
 
 class Node(NWBDataInterface):
@@ -43,7 +42,7 @@ class Graph(MultiContainerInterface):
     ]
 
 
-class MCITests(unittest.TestCase):
+class MCITests(TestCase):
 
     def test_constructor(self):
         dv = get_docval(Graph.__init__)

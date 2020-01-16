@@ -1,25 +1,27 @@
-from pynwb.core import ScratchData
-from pynwb import NWBFile, NWBHDF5IO, TimeSeries
-
-from . import base
-
 import pandas as pd
 import numpy as np
 from numpy.testing import assert_array_equal
 
+from pynwb import NWBFile, NWBHDF5IO, TimeSeries
+from pynwb.core import ScratchData
+from pynwb.testing import TestNWBH5IOMixin, TestCase
 
-class TestScratchData(base.TestMapRoundTrip):
+
+class TestScratchDataIO(TestNWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
+        """ Return the test ScratchData to read/write """
         return ScratchData('foo', [1, 2, 3, 4], notes='test scratch')
 
     def addContainer(self, nwbfile):
+        """ Add the test ScratchData to the given NWBFile """
         nwbfile.add_scratch(self.container)
 
     def getContainer(self, nwbfile):
+        """ Return the test ScratchData from the given NWBFile """
         return nwbfile.get_scratch('foo', convert=False)
 
-    def roundtripScratch(self, data, case, **kwargs):
+    def roundtrip_scratch(self, data, case, **kwargs):
         self.filename = 'test_scratch_%s.nwb' % case
         description = 'a file to test writing and reading a scratch data of type %s' % case
         identifier = 'TEST_scratch_%s' % case
@@ -36,21 +38,21 @@ class TestScratchData(base.TestMapRoundTrip):
 
     def test_scratch_convert_list(self):
         data = [1, 2, 3, 4]
-        ret = self.roundtripScratch(data, 'list')
+        ret = self.roundtrip_scratch(data, 'list')
         assert_array_equal(data, ret)
         self.validate()
 
     def test_scratch_convert_ndarray(self):
         data = np.array([1, 2, 3, 4])
-        ret = self.roundtripScratch(data, 'ndarray')
+        ret = self.roundtrip_scratch(data, 'ndarray')
         assert_array_equal(data, ret)
         self.validate()
 
     def test_scratch_convert_DataFrame(self):
         data = pd.DataFrame(data={'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
         warn_msg = 'Notes argument is ignored when adding a pandas DataFrame to scratch'
-        with self.assertWarnsRegex(UserWarning, warn_msg):
-            ret = self.roundtripScratch(data, 'DataFrame')
+        with self.assertWarnsWith(UserWarning, warn_msg):
+            ret = self.roundtrip_scratch(data, 'DataFrame')
         assert_array_equal(data.values, ret.values)
         assert_array_equal(data.index.values, ret.index.values)
         self.validate()
@@ -103,10 +105,10 @@ class TestScratchData(base.TestMapRoundTrip):
 
     def test_scratch_container_with_name(self):
         warn_msg = 'Name argument is ignored when adding an NWBContainer to scratch'
-        with self.assertWarnsRegex(UserWarning, warn_msg):
+        with self.assertWarnsWith(UserWarning, warn_msg):
             self._test_scratch_container(validate=False, name='foo')
 
     def test_scratch_container_with_notes(self):
         warn_msg = 'Notes argument is ignored when adding an NWBContainer to scratch'
-        with self.assertWarnsRegex(UserWarning, warn_msg):
+        with self.assertWarnsWith(UserWarning, warn_msg):
             self._test_scratch_container(validate=False, notes='test scratch')

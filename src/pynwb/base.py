@@ -155,9 +155,9 @@ class TimeSeries(NWBDataInterface):
             self.rate = rate
             if starting_time is not None:
                 self.starting_time = starting_time
-                self.starting_time_unit = self.__time_unit
             else:
                 self.starting_time = 0.0
+            self.starting_time_unit = self.__time_unit
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
 
@@ -173,7 +173,7 @@ class TimeSeries(NWBDataInterface):
             )
 
         def no_len_warning(attr):
-            return 'The {} attribute on this TimeSeries (named: {}) has no __len__, '.format(attr, self.name)
+            return 'The {} attribute on this TimeSeries (named: {}) has no __len__'.format(attr, self.name)
 
         if hasattr(self.data, '__len__'):
             try:

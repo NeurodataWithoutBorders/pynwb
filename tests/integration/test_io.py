@@ -1,7 +1,6 @@
-import unittest
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
-import re
+import numpy as np
 from h5py import File
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
@@ -13,12 +12,10 @@ from hdmf.build import GroupBuilder, DatasetBuilder
 from hdmf.spec import NamespaceCatalog
 from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
 from pynwb.ecephys import ElectricalSeries, LFP
-from pynwb.testing import remove_test_file
-
-import numpy as np
+from pynwb.testing import remove_test_file, TestCase
 
 
-class TestHDF5Writer(unittest.TestCase):
+class TestHDF5Writer(TestCase):
 
     _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec', 'test_write_no_cache_spec')
 
@@ -68,7 +65,7 @@ class TestHDF5Writer(unittest.TestCase):
     def test_nwbio(self):
         with HDF5IO(self.path, manager=self.manager, mode='a') as io:
             io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('acquisition', f)
             self.assertIn('analysis', f)
             self.assertIn('general', f)
@@ -84,9 +81,8 @@ class TestHDF5Writer(unittest.TestCase):
         with HDF5IO(self.path, manager=self.manager, mode='a') as io:
             io.write(self.container)
 
-        with self.assertRaisesRegex(UnsupportedOperation,
-                                    re.escape("Unable to open file %s in 'w-' mode. File already exists."
-                                              % self.path)):
+        with self.assertRaisesWith(UnsupportedOperation,
+                                   "Unable to open file %s in 'w-' mode. File already exists." % self.path):
             with HDF5IO(self.path, manager=self.manager, mode='w-') as io:
                 pass
 
@@ -96,7 +92,7 @@ class TestHDF5Writer(unittest.TestCase):
         '''
         with HDF5IO(self.path, manager=self.manager, mode="a") as io:
             io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('specifications', f)
 
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
@@ -122,11 +118,11 @@ class TestHDF5Writer(unittest.TestCase):
         '''
         with HDF5IO(self.path, manager=self.manager, mode="a") as io:
             io.write(self.container, cache_spec=False)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertNotIn('specifications', f)
 
 
-class TestHDF5WriterWithInjectedFile(unittest.TestCase):
+class TestHDF5WriterWithInjectedFile(TestCase):
 
     _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec')
 
@@ -174,10 +170,10 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
         remove_test_file(self.path)
 
     def test_nwbio(self):
-        with File(self.path) as fil:
+        with File(self.path, 'w') as fil:
             with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
                 io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('acquisition', f)
             self.assertIn('analysis', f)
             self.assertIn('general', f)
@@ -190,13 +186,12 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
             self.assertIn('test_timeseries', acq)
 
     def test_write_clobber(self):
-        with File(self.path) as fil:
+        with File(self.path, 'w') as fil:
             with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
                 io.write(self.container)
 
-        with self.assertRaisesRegex(UnsupportedOperation,
-                                    re.escape("Unable to open file %s in 'w-' mode. File already exists."
-                                              % self.path)):
+        with self.assertRaisesWith(UnsupportedOperation,
+                                   "Unable to open file %s in 'w-' mode. File already exists." % self.path):
             with HDF5IO(self.path, manager=self.manager, mode='w-') as io:
                 pass
 
@@ -205,10 +200,10 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
         Round-trip test for writing spec and reading it back in
         '''
 
-        with File(self.path) as fil:
+        with File(self.path, 'w') as fil:
             with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
                 io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('specifications', f)
 
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
@@ -229,7 +224,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
                     self.assertDictEqual(original_spec, cached_spec)
 
 
-class TestAppend(unittest.TestCase):
+class TestAppend(TestCase):
 
     def setUp(self):
         self.nwbfile = NWBFile(session_description='hi',
@@ -283,7 +278,7 @@ class TestAppend(unittest.TestCase):
                 print('ERROR', e)
 
 
-class TestH5DataIO(unittest.TestCase):
+class TestH5DataIO(TestCase):
     """
     Test that H5DataIO functions correctly on round trip with the HDF5IO backend
     """

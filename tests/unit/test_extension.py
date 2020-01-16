@@ -5,12 +5,12 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 from tempfile import gettempdir
 
-import unittest
-from pynwb import get_type_map, TimeSeries, NWBFile, register_class, docval, load_namespaces, popargs, get_class
-from hdmf.spec.spec import RefSpec
-from hdmf.utils import get_docval
+from hdmf.spec import RefSpec
+from hdmf.utils import get_docval, docval, popargs
+from pynwb import get_type_map, TimeSeries, NWBFile, register_class, load_namespaces, get_class
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
 from pynwb.file import LabMetaData
+from pynwb.testing import TestCase
 
 
 def id_generator(N=10):
@@ -20,7 +20,7 @@ def id_generator(N=10):
     return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(N))
 
 
-class TestExtension(unittest.TestCase):
+class TestExtension(TestCase):
 
     def setUp(self):
         self.tempdir = gettempdir()
@@ -133,7 +133,7 @@ class TestExtension(unittest.TestCase):
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
 
 
-class TestCatchDupNS(unittest.TestCase):
+class TestCatchDupNS(TestCase):
 
     def setUp(self):
         self.tempdir = gettempdir()
@@ -172,7 +172,7 @@ class TestCatchDupNS(unittest.TestCase):
             type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
 
 
-class TestCatchDuplicateSpec(unittest.TestCase):
+class TestCatchDuplicateSpec(TestCase):
 
     def setUp(self):
         self.prefix = id_generator()
