@@ -29,10 +29,9 @@ This will automatically install the following required dependencies:
  #. hdmf
  #. h5py
  #. numpy
+ #. pandas
  #. python-dateutil
- #. requests
- #. ruamel.yaml
- #. chardet
+
 
 Install release from Conda-forge
 --------------------------------
