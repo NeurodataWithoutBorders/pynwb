@@ -188,13 +188,6 @@ jobs:
       - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
     <<: *conda-steps
 
-  gallery35:
-    docker:
-      - image: circleci/python:3.5.7-jessie
-    environment:
-     - TEST_TOX_ENV: "gallery-py35"
-    <<: *gallery-steps
-
   gallery36:
     docker:
       - image: circleci/python:3.6.3-jessie
@@ -274,8 +267,6 @@ workflows:
           <<: *no_filters
       - miniconda37:
           <<: *no_filters
-      - gallery35:
-          <<: *no_filters
       - gallery36:
           <<: *no_filters
       - gallery37:
@@ -289,7 +280,6 @@ workflows:
             - miniconda35
             - miniconda36
             - miniconda37
-            - gallery35
             - gallery36
             - gallery37
           filters:
@@ -304,7 +294,6 @@ workflows:
             - miniconda35
             - miniconda36
             - miniconda37
-            - gallery35
             - gallery36
             - gallery37
           filters:
