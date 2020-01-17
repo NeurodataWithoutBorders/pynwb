@@ -55,15 +55,15 @@ class ImagingPlane(NWBContainer):
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},  # required
             {'name': 'manifold', 'type': Iterable,
              'doc': ('DEPRECATED: Physical position of each pixel. size=("height", "width", "xyz"). '
-                     'Deprecated in favor of origin_coords and grid_spacing.',
+                     'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': None},
             {'name': 'conversion', 'type': 'float',
              'doc': ('DEPRECATED: Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters) '
                      'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': 1.0},
             {'name': 'unit', 'type': str,
-             'doc': '(DEPRECATED: Base unit that coordinates are stored in (e.g., Meters). ',
-                    'Deprecated in favor of origin_coords_unit and grid_spacing_unit.'
+             'doc': ('DEPRECATED: Base unit that coordinates are stored in (e.g., Meters). ',
+                     'Deprecated in favor of origin_coords_unit and grid_spacing_unit.'),
              'default': 'meters'},
             {'name': 'origin_coords', 'type': 'array_data',
              'doc': 'TODO',
