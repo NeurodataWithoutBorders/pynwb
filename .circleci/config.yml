@@ -163,6 +163,16 @@ jobs:
      - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
     <<: *ci-steps
 
+  python35-min-req:
+    docker:
+      - image: circleci/python:3.5.9-stretch
+    environment:
+     - TEST_TOX_ENV: "py35-min-req"
+     - COVERAGE_TOX_ENV: ""
+     - BUILD_TOX_ENV: "build-py35-min-req"
+     - TEST_WHEELINSTALL_ENV: "wheelinstall-py35-min-req"
+    <<: *ci-steps
+
   miniconda35:
     docker:
       - image: continuumio/miniconda3:4.3.27p0
@@ -205,6 +215,13 @@ jobs:
       - image: circleci/python:3.7.6-stretch
     environment:
      - TEST_TOX_ENV: "gallery-py37"
+    <<: *gallery-steps
+
+  gallery36-min-req:
+    docker:
+      - image: circleci/python:3.6.3-jessie
+    environment:
+     - TEST_TOX_ENV: "gallery-py36-min-req"
     <<: *gallery-steps
 
   deploy-dev:
@@ -266,6 +283,8 @@ workflows:
           <<: *no_filters
       - python37:
           <<: *no_filters
+      - python35-min-req:
+          <<: *no_filters
       - miniconda35:
           <<: *no_filters
       - miniconda36:
@@ -276,17 +295,21 @@ workflows:
           <<: *no_filters
       - gallery37:
           <<: *no_filters
+      - gallery36-min-req:
+          <<: *no_filters
       - deploy-dev:
           requires:
             - flake8
             - python35
             - python36
             - python37
+            - python35-min-req
             - miniconda35
             - miniconda36
             - miniconda37
             - gallery36
             - gallery37
+            - gallery36-min-req
           filters:
             tags:
               ignore:
@@ -301,11 +324,13 @@ workflows:
             - python35
             - python36
             - python37
+            - python35-min-req
             - miniconda35
             - miniconda36
             - miniconda37
             - gallery36
             - gallery37
+            - gallery36-min-req
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
