@@ -164,7 +164,9 @@ def get_class(**kwargs):
     """
     Parse the YAML file for a given neurodata_type that is a subclass of NWBContainer and automatically generate its
     python API. This will work for most containers, but is known to not work for descendants of MultiContainerInterface
-    and DynamicTable, which must be defined manually (for now).
+    and DynamicTable, so these must be defined manually (for now). `get_class` infers the API mapping directly from the
+    specification. If you want to define a custom mapping, you should not use this function and you should define the
+    class manually.
 
     Examples
     --------
