@@ -161,7 +161,27 @@ def register_map(**kwargs):
         {'name': 'namespace', 'type': str, 'doc': 'the namespace the neurodata_type is defined in'},
         is_method=False)
 def get_class(**kwargs):
-    """Get the class object of the NWBContainer subclass corresponding to a given neurodata_type.
+    """
+    Parse the YAML file for a given neurodata_type that is a subclass of NWBContainer and automatically generate its
+    python API. This will work for most containers, but is known to not work for descendants of MultiContainerInterface
+    and DynamicTable, so these must be defined manually (for now). `get_class` infers the API mapping directly from the
+    specification. If you want to define a custom mapping, you should not use this function and you should define the
+    class manually.
+
+    Examples
+    --------
+    Generating and registering an extension is as simple as::
+
+        MyClass = get_class('MyClass', 'ndx-my-extension')
+
+    `get_class` defines only the `__init__` for the class. In cases where you want to provide additional methods for
+    querying, plotting, etc. you can still use `get_class` and attach methods to the class after-the-fact, e.g.::
+
+        def get_sum(self, a, b):
+            return self.feat1 + self.feat2
+
+        MyClass.get_sum = get_sum
+
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
