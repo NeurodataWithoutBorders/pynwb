@@ -167,7 +167,7 @@ def get_class(**kwargs):
     and DynamicTable, which must be defined manually (for now).
 
     Examples
-    -------
+    --------
     Generating and registering an extension is as simple as
 
         MyClass = get_class('MyClass', 'ndx-my-extension')
