@@ -170,12 +170,12 @@ def get_class(**kwargs):
 
     Examples
     --------
-    Generating and registering an extension is as simple as
+    Generating and registering an extension is as simple as::
 
         MyClass = get_class('MyClass', 'ndx-my-extension')
 
     `get_class` defines only the `__init__` for the class. In cases where you want to provide additional methods for
-    querying, plotting, etc. you can still use `get_class` and attach methods to the class after-the-fact, e.g.
+    querying, plotting, etc. you can still use `get_class` and attach methods to the class after-the-fact, e.g.::
 
         def get_sum(self, a, b):
             return self.feat1 + self.feat2
