@@ -454,9 +454,9 @@ class NWBFile(MultiContainerInterface):
         self.__check_electrodes()
         call_docval_func(self.electrodes.add_column, kwargs)
 
-    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position'},
-            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position'},
-            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position'},
+    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)'},
+            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)'},
+            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)'},
             {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode'},
             {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
             {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
