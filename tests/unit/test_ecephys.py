@@ -98,8 +98,7 @@ class ElectrodeGroupConstructor(TestCase):
 
     def test_init_position_bad(self):
         dev1 = Device('dev1')
-        with self.assertRaisesWith("ElectrodeGroup position argument must have three elements: x, y, z, but received: "
-                                   "(1, 2)"):
+        with self.assertRaises(TypeError):
             ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2))
 
 

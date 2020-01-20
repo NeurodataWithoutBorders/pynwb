@@ -46,7 +46,7 @@ class ImagingPlane(NWBContainer):
 
     @docval(*get_docval(NWBContainer.__init__, 'name'),  # required
             {'name': 'optical_channel', 'type': (list, OpticalChannel),  # required
-             'doc': 'One of possibly many groups storing channelspecific data.'},
+             'doc': 'One of possibly many groups storing channel-specific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},  # required
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},  # required
             {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},  # required
@@ -62,9 +62,13 @@ class ImagingPlane(NWBContainer):
                      'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': 1.0},
             {'name': 'unit', 'type': str,
-             'doc': '(DEPRECATED: Base unit that coordinates are stored in (e.g., Meters). ',
-                    'Deprecated in favor of origin_coords_unit and grid_spacing_unit.'
+             'doc': 'DEPRECATED: Base unit that coordinates are stored in (e.g., Meters). '
+                    'Deprecated in favor of origin_coords_unit and grid_spacing_unit.',
              'default': 'meters'},
+            {'name': 'reference_frame', 'type': str,
+             'doc': 'Describes position and reference frame of manifold based on position of first element '
+                    'in manifold.',
+             'default': None},
             {'name': 'origin_coords', 'type': 'array_data',
              'doc': 'TODO',
              'default': None},
@@ -76,17 +80,16 @@ class ImagingPlane(NWBContainer):
              'default': None},
             {'name': 'grid_spacing_unit', 'type': str,
              'doc': 'TODO',
-             'default': 'meters'},
-            {'name': 'reference_frame', 'type': str,
-             'doc': 'Describes position and reference frame of manifold based on position of first element '
-                    'in manifold.',
-             'default': None})
+             'default': 'meters'}
+            )
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, \
-            indicator, location, manifold, conversion, unit, reference_frame = popargs(
+            indicator, location, manifold, conversion, unit, reference_frame, origin_coords, origin_coords_unit, \
+            grid_spacing, grid_spacing_unit = popargs(
                 'optical_channel', 'description', 'device', 'excitation_lambda',
                 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion',
-                'unit', 'reference_frame', kwargs)
+                'unit', 'reference_frame', 'origin_coords', 'origin_coords_unit', 'grid_spacing', 'grid_spacing_unit',
+                kwargs)
         call_docval_func(super(ImagingPlane, self).__init__, kwargs)
         self.optical_channel = optical_channel if isinstance(optical_channel, list) else [optical_channel]
         self.description = description
@@ -99,6 +102,10 @@ class ImagingPlane(NWBContainer):
         self.conversion = conversion
         self.unit = unit
         self.reference_frame = reference_frame
+        self.origin_coords = origin_coords
+        self.origin_coords_unit = origin_coords_unit
+        self.grid_spacing = grid_spacing
+        self.grid_spacing_unit = grid_spacing_unit
 
 
 @register_class('TwoPhotonSeries', CORE_NAMESPACE)
