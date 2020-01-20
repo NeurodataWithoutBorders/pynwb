@@ -53,7 +53,7 @@ class ImagingPlane(NWBContainer):
             {'name': 'imaging_rate', 'type': 'float', 'doc': 'Rate images are acquired, in Hz.'},  # required
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},  # required
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},  # required
-            {'name': 'manifold', 'type': Iterable,
+            {'name': 'manifold', 'type': 'array_data',
              'doc': ('DEPRECATED: Physical position of each pixel. size=("height", "width", "xyz"). '
                      'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': None},
@@ -66,16 +66,18 @@ class ImagingPlane(NWBContainer):
                     'Deprecated in favor of origin_coords_unit and grid_spacing_unit.'
              'default': 'meters'},
             {'name': 'origin_coords', 'type': 'array_data',
-             'doc': 'TODO',
+             'doc': 'Physical location of the first element of the imaging plane (0, 0) for 2-D data or (0, 0, 0) for '
+                    '3-D data. See also reference_frame for what the physical location is relative to (e.g., bregma).',
              'default': None},
             {'name': 'origin_coords_unit', 'type': str,
-             'doc': 'TODO',
+             'doc': "Measurement units for origin_coords. The default value is 'meters'.",
              'default': 'meters'},
             {'name': 'grid_spacing', 'type': 'array_data',
-             'doc': 'TODO',
+             'doc': "Space between pixels in (x, y) or voxels in (x, y, z) directions, in the specified unit. Assumes "
+                    "imaging plane is a regular grid. See also reference_frame to interpret the grid.",
              'default': None},
             {'name': 'grid_spacing_unit', 'type': str,
-             'doc': 'TODO',
+             'doc': "Measurement units for grid_spacing. The default value is 'meters'.",
              'default': 'meters'},
             {'name': 'reference_frame', 'type': str,
              'doc': 'Describes position and reference frame of manifold based on position of first element '
