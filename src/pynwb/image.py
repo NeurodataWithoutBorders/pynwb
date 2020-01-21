@@ -21,7 +21,8 @@ class ImageSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames. '
+                    'dimensions: time, x, y [, z]',
              'default': None},
             *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'format', 'type': str,
