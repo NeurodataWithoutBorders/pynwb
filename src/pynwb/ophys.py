@@ -82,11 +82,7 @@ class ImagingPlane(NWBContainer):
              'default': None},
             {'name': 'grid_spacing_unit', 'type': str,
              'doc': "Measurement units for grid_spacing. The default value is 'meters'.",
-             'default': 'meters'},
-            {'name': 'reference_frame', 'type': str,
-             'doc': 'Describes position and reference frame of manifold based on position of first element '
-                    'in manifold.',
-             'default': None})
+             'default': 'meters'})
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, \
             indicator, location, manifold, conversion, unit, reference_frame, origin_coords, origin_coords_unit, \
