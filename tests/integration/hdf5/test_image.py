@@ -1,10 +1,10 @@
 import numpy as np
 
 from pynwb.image import OpticalSeries
-from pynwb.testing import TestNWBH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, TestCase
 
 
-class TestOpticalSeriesIO(TestNWBH5IOMixin, TestCase):
+class TestOpticalSeriesIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test OpticalSeries to read/write """

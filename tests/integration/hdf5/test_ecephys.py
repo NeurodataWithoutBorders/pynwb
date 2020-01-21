@@ -4,10 +4,10 @@ from pynwb.ecephys import ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, 
                           SpikeEventSeries, EventWaveform, EventDetection, FeatureExtraction
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable as get_electrode_table
-from pynwb.testing import TestNWBH5IOMixin, TestAcquisitionH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 
 
-class TestElectrodeGroupIO(TestNWBH5IOMixin, TestCase):
+class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test ElectrodeGroup to read/write """
@@ -25,7 +25,7 @@ class TestElectrodeGroupIO(TestNWBH5IOMixin, TestCase):
         return nwbfile.get_electrode_group(self.container.name)
 
 
-class TestElectricalSeriesIO(TestAcquisitionH5IOMixin, TestCase):
+class TestElectricalSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     @staticmethod
     def make_electrode_table(self):
@@ -66,7 +66,7 @@ class TestElectricalSeriesIO(TestAcquisitionH5IOMixin, TestCase):
         self.assertIsInstance(row2.iloc[0]['group'], ElectrodeGroup)
 
 
-class TestMultiElectricalSeriesIOMixin(TestAcquisitionH5IOMixin):
+class MultiElectricalSeriesIOMixin(AcquisitionH5IOMixin):
     """
     Mixin class for methods to run a roundtrip test writing an NWB file with multiple ElectricalSeries.
 
@@ -95,7 +95,7 @@ class TestMultiElectricalSeriesIOMixin(TestAcquisitionH5IOMixin):
         nwbfile.add_acquisition(self.container)
 
 
-class TestLFPIO(TestMultiElectricalSeriesIOMixin, TestCase):
+class TestLFPIO(MultiElectricalSeriesIOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test LFP to read/write """
@@ -104,7 +104,7 @@ class TestLFPIO(TestMultiElectricalSeriesIOMixin, TestCase):
         return lfp
 
 
-class TestFilteredEphysIO(TestMultiElectricalSeriesIOMixin, TestCase):
+class TestFilteredEphysIO(MultiElectricalSeriesIOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test FilteredEphys to read/write """
@@ -113,7 +113,7 @@ class TestFilteredEphysIO(TestMultiElectricalSeriesIOMixin, TestCase):
         return fe
 
 
-class TestClusteringIO(TestAcquisitionH5IOMixin, TestCase):
+class TestClusteringIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test Clustering to read/write """
@@ -127,7 +127,7 @@ class TestClusteringIO(TestAcquisitionH5IOMixin, TestCase):
             return super().roundtripContainer(cache_spec)
 
 
-class EventWaveformConstructor(TestAcquisitionH5IOMixin, TestCase):
+class EventWaveformConstructor(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test EventWaveform to read/write """
@@ -145,7 +145,7 @@ class EventWaveformConstructor(TestAcquisitionH5IOMixin, TestCase):
         nwbfile.add_acquisition(self.container)
 
 
-class ClusterWaveformsConstructor(TestAcquisitionH5IOMixin, TestCase):
+class ClusterWaveformsConstructor(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test ClusterWaveforms to read/write """
@@ -171,7 +171,7 @@ class ClusterWaveformsConstructor(TestAcquisitionH5IOMixin, TestCase):
             return super().roundtripContainer(cache_spec)
 
 
-class FeatureExtractionConstructor(TestAcquisitionH5IOMixin, TestCase):
+class FeatureExtractionConstructor(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test FeatureExtraction to read/write """
@@ -191,7 +191,7 @@ class FeatureExtractionConstructor(TestAcquisitionH5IOMixin, TestCase):
         nwbfile.add_acquisition(self.container)
 
 
-class EventDetectionConstructor(TestAcquisitionH5IOMixin, TestCase):
+class EventDetectionConstructor(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return a test EventDetection to read/write """

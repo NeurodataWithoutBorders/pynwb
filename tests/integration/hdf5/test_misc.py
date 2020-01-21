@@ -3,10 +3,10 @@ import numpy as np
 from hdmf.common import DynamicTable, VectorData
 from pynwb import TimeSeries
 from pynwb.misc import Units, DecompositionSeries
-from pynwb.testing import TestNWBH5IOMixin, TestAcquisitionH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 
 
-class TestUnitsIO(TestAcquisitionH5IOMixin, TestCase):
+class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
     """ Test adding Units into acquisition and accessing Units after read """
 
     def setUpContainer(self):
@@ -35,7 +35,7 @@ class TestUnitsIO(TestAcquisitionH5IOMixin, TestCase):
         self.assertTrue(np.array_equal(ut['obs_intervals'][:], [[[0, 1], [2, 3]], [[2, 5], [6, 7]]]))
 
 
-class TestUnitsFileIO(TestNWBH5IOMixin, TestCase):
+class TestUnitsFileIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return placeholder Units object. Tested units are added directly to the NWBFile in addContainer """
@@ -71,7 +71,7 @@ class TestUnitsFileIO(TestNWBH5IOMixin, TestCase):
         units.to_dataframe()
 
 
-class TestDecompositionSeriesIO(TestNWBH5IOMixin, TestCase):
+class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test DecompositionSeries to read/write """
