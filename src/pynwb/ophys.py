@@ -99,6 +99,15 @@ class ImagingPlane(NWBContainer):
         self.imaging_rate = imaging_rate
         self.indicator = indicator
         self.location = location
+        if manifold is not None:
+            raise DeprecationWarning("The 'manifold' argument is deprecated in favor of 'origin_coords' and "
+                                     "'grid_spacing'.")
+        if conversion != 1.0:
+            raise DeprecationWarning("The 'conversion' argument is deprecated in favor of 'origin_coords' and "
+                                     "'grid_spacing'.")
+        if unit != 'meters':
+            raise DeprecationWarning("The 'unit' argument is deprecated in favor of 'origin_coords_unit' and "
+                                     "'grid_spacin_unit'.")
         self.manifold = manifold
         self.conversion = conversion
         self.unit = unit
