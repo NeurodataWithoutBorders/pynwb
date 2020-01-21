@@ -1,5 +1,3 @@
-from abc import ABCMeta
-
 from pynwb import NWBFile
 from pynwb.icephys import (IntracellularElectrode, PatchClampSeries, CurrentClampStimulusSeries,
                            SweepTable, VoltageClampStimulusSeries, CurrentClampSeries,
