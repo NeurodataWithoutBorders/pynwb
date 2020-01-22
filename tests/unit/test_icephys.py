@@ -1,19 +1,18 @@
-import unittest
-
 import numpy as np
 
 from pynwb.icephys import PatchClampSeries, CurrentClampSeries, IZeroClampSeries, CurrentClampStimulusSeries, \
         VoltageClampSeries, VoltageClampStimulusSeries, IntracellularElectrode
 from pynwb.device import Device
+from pynwb.testing import TestCase
 
 
 def GetElectrode():
     device = Device(name='device_name')
     elec = IntracellularElectrode('test_iS',
                                   device,
+                                  'description',
                                   'slice',
                                   'seal',
-                                  'description',
                                   'location',
                                   'resistance',
                                   'filtering',
@@ -21,24 +20,31 @@ def GetElectrode():
     return elec
 
 
-class IntracellularElectrodeConstructor(unittest.TestCase):
+class IntracellularElectrodeConstructor(TestCase):
 
-    def GetElectrode(self):
+    def test_constructor(self):
         device = Device(name='device_name')
-        elec = IntracellularElectrode('slice', 'seal', 'description', 'location', 'resistance',
-                                      'filtering', 'initial_access_resistance',
-                                      device)
+        elec = IntracellularElectrode('test_iS',
+                                      device,
+                                      'description',
+                                      'slice',
+                                      'seal',
+                                      'location',
+                                      'resistance',
+                                      'filtering',
+                                      'initial_access_resistance')
+        self.assertEqual(elec.name, 'test_iS')
+        self.assertEqual(elec.device, device)
+        self.assertEqual(elec.description, 'description')
         self.assertEqual(elec.slice, 'slice')
         self.assertEqual(elec.seal, 'seal')
-        self.assertEqual(elec.description, 'description')
         self.assertEqual(elec.location, 'location')
         self.assertEqual(elec.resistance, 'resistance')
         self.assertEqual(elec.filtering, 'filtering')
         self.assertEqual(elec.initial_access_resistance, 'initial_access_resistance')
-        self.assertEqual(elec.device, device)
 
 
-class PatchClampSeriesConstructor(unittest.TestCase):
+class PatchClampSeriesConstructor(TestCase):
 
     def test_default(self):
         electrode_name = GetElectrode()
@@ -60,6 +66,17 @@ class PatchClampSeriesConstructor(unittest.TestCase):
         self.assertEqual(pCS.electrode, electrode_name)
         self.assertEqual(pCS.gain, 1.0)
         self.assertEqual(pCS.sweep_number, 4711)
+
+    def test_sweepNumber_valid_np(self):
+        electrode_name = GetElectrode()
+
+        pCS = PatchClampSeries('test_pCS', list(), 'unit',
+                               electrode_name, 1.0, timestamps=list(), sweep_number=1)
+        self.assertEqual(pCS.name, 'test_pCS')
+        self.assertEqual(pCS.unit, 'unit')
+        self.assertEqual(pCS.electrode, electrode_name)
+        self.assertEqual(pCS.gain, 1.0)
+        self.assertEqual(pCS.sweep_number, np.uint32(1))
 
     def test_sweepNumber_large_and_valid(self):
         electrode_name = GetElectrode()
@@ -94,7 +111,7 @@ class PatchClampSeriesConstructor(unittest.TestCase):
                              electrode_name, 1.0, timestamps=list(), sweep_number=1.5)
 
 
-class CurrentClampSeriesConstructor(unittest.TestCase):
+class CurrentClampSeriesConstructor(TestCase):
 
     def test_init(self):
         electrode_name = GetElectrode()
@@ -110,7 +127,7 @@ class CurrentClampSeriesConstructor(unittest.TestCase):
         self.assertEqual(cCS.capacitance_compensation, 4.0)
 
 
-class IZeroClampSeriesConstructor(unittest.TestCase):
+class IZeroClampSeriesConstructor(TestCase):
 
     def test_init(self):
         electrode_name = GetElectrode()
@@ -125,7 +142,7 @@ class IZeroClampSeriesConstructor(unittest.TestCase):
         self.assertEqual(iZCS.capacitance_compensation, 0.0)
 
 
-class CurrentClampStimulusSeriesConstructor(unittest.TestCase):
+class CurrentClampStimulusSeriesConstructor(TestCase):
 
     def test_init(self):
         electrode_name = GetElectrode()
@@ -137,7 +154,7 @@ class CurrentClampStimulusSeriesConstructor(unittest.TestCase):
         self.assertEqual(cCSS.gain, 1.0)
 
 
-class VoltageClampSeriesConstructor(unittest.TestCase):
+class VoltageClampSeriesConstructor(TestCase):
 
     def test_init(self):
         electrode_name = GetElectrode()
@@ -158,7 +175,7 @@ class VoltageClampSeriesConstructor(unittest.TestCase):
         self.assertEqual(vCS.whole_cell_series_resistance_comp, 8.0)
 
 
-class VoltageClampStimulusSeriesConstructor(unittest.TestCase):
+class VoltageClampStimulusSeriesConstructor(TestCase):
 
     def test_init(self):
         electrode_name = GetElectrode()
@@ -167,7 +184,3 @@ class VoltageClampStimulusSeriesConstructor(unittest.TestCase):
         self.assertEqual(vCSS.name, 'test_vCSS')
         self.assertEqual(vCSS.unit, 'volts')
         self.assertEqual(vCSS.electrode, electrode_name)
-
-
-if __name__ == '__main__':
-    unittest.main()

@@ -9,7 +9,7 @@ jobs:
         imageName: 'macos-10.13'
         pythonVersion: '3.7'
         testToxEnv: 'py37'
-        coverageToxEnv: 'coverage-py37'
+        coverageToxEnv: 'coverage'
         buildToxEnv: 'build-py37'
         testWheelInstallEnv: 'wheelinstall-py37'
 
@@ -17,7 +17,7 @@ jobs:
         imageName: 'macos-10.13'
         pythonVersion: '3.6'
         testToxEnv: 'py36'
-        coverageToxEnv: 'coverage-py36'
+        coverageToxEnv: ''
         buildToxEnv: 'build-py36'
         testWheelInstallEnv: 'wheelinstall-py36'
 
@@ -25,15 +25,23 @@ jobs:
         imageName: 'macos-10.13'
         pythonVersion: '3.5'
         testToxEnv: 'py35'
-        coverageToxEnv: 'coverage-py35'
+        coverageToxEnv: ''
         buildToxEnv: 'build-py35'
         testWheelInstallEnv: 'wheelinstall-py35'
+
+      macOS-py3.5-min-req:
+        imageName: 'macos-10.13'
+        pythonVersion: '3.5'
+        testToxEnv: 'py35-min-req'
+        coverageToxEnv: ''
+        buildToxEnv: 'build-py35-min-req'
+        testWheelInstallEnv: 'wheelinstall-py35-min-req'
 
       Windows-py3.7:
         imageName: 'vs2017-win2016'
         pythonVersion: '3.7'
         testToxEnv: 'py37'
-        coverageToxEnv: 'coverage-py37'
+        coverageToxEnv: 'coverage'
         buildToxEnv: 'build-py37'
         testWheelInstallEnv: 'wheelinstall-py37'
 
@@ -41,7 +49,7 @@ jobs:
         imageName: 'vs2017-win2016'
         pythonVersion: '3.6'
         testToxEnv: 'py36'
-        coverageToxEnv: 'coverage-py36'
+        coverageToxEnv: ''
         buildToxEnv: 'build-py36'
         testWheelInstallEnv: 'wheelinstall-py36'
 
@@ -49,9 +57,17 @@ jobs:
         imageName: 'vs2017-win2016'
         pythonVersion: '3.5'
         testToxEnv: 'py35'
-        coverageToxEnv: 'coverage-py35'
+        coverageToxEnv: ''
         buildToxEnv: 'build-py35'
         testWheelInstallEnv: 'wheelinstall-py35'
+
+      Windows-py3.5-min-req:
+        imageName: 'vs2017-win2016'
+        pythonVersion: '3.5'
+        testToxEnv: 'py35-min-req'
+        coverageToxEnv: ''
+        buildToxEnv: 'build-py35-min-req'
+        testWheelInstallEnv: 'wheelinstall-py35-min-req'
 
   pool:
     vmImage: $(imageName)
@@ -77,8 +93,10 @@ jobs:
     displayName: 'Run tox tests'
 
   - bash: |
-      tox -e $(coverageToxEnv)
-    displayName: 'Run coverage tests'
+      if [[ "$(coverageToxEnv)" != "" ]]; then
+        tox -e $(coverageToxEnv)
+      fi
+    displayName: 'Run coverage tests if coverageToxEnv != ""'
 
   - bash: |
       tox -e $(buildToxEnv)

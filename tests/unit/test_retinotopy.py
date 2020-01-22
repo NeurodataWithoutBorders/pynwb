@@ -1,11 +1,10 @@
-import unittest
-
 import numpy as np
 
 from pynwb.retinotopy import ImagingRetinotopy, AxisMap, AImage
+from pynwb.testing import TestCase
 
 
-class ImageRetinotopyConstructor(unittest.TestCase):
+class ImageRetinotopyConstructor(TestCase):
 
     def test_init(self):
         data = np.ones((2, 2))
@@ -39,7 +38,3 @@ class ImageRetinotopyConstructor(unittest.TestCase):
         self.assertEqual(ir.axis_descriptions, axis_descriptions)
         self.assertEqual(ir.focal_depth_image, focal_depth_image)
         self.assertEqual(ir.vasculature_image, vasculature_image)
-
-
-if __name__ == '__main__':
-    unittest.main()
