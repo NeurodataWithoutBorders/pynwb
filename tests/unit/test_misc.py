@@ -176,3 +176,13 @@ class UnitsTests(TestCase):
         electrode_group = ElectrodeGroup('test_electrode_group', 'description', 'location', device)
         ut.add_unit(electrode_group=electrode_group)
         self.assertEqual(ut['electrode_group'][0], electrode_group)
+
+    def test_waveform_mean_attrs(self):
+        ut = Units(waveform_mean_rate=40000.)
+        self.assertEqual(ut.waveform_mean_rate, 40000.)
+        self.assertEqual(ut.waveform_mean_unit, 'volts')
+
+    def test_waveform_sd_attrs(self):
+        ut = Units(waveform_sd_rate=40000.)
+        self.assertEqual(ut.waveform_sd_rate, 40000.)
+        self.assertEqual(ut.waveform_sd_unit, 'volts')
