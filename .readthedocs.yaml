@@ -21,3 +21,8 @@ python:
   install:
     - requirements: requirements-doc.txt
     - requirements: requirements.txt
+
+# Optionally include all submodules
+submodules:
+  include: all
+  recursive: true
