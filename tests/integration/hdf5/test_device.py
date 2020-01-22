@@ -1,8 +1,8 @@
 from pynwb.device import Device
-from pynwb.testing import TestNWBH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, TestCase
 
 
-class TestDeviceIO(TestNWBH5IOMixin, TestCase):
+class TestDeviceIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Device to read/write """

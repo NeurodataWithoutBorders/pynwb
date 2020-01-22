@@ -3,10 +3,10 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 
 from pynwb import TimeSeries, NWBFile, NWBHDF5IO
-from pynwb.testing import TestAcquisitionH5IOMixin, TestCase
+from pynwb.testing import AcquisitionH5IOMixin, TestCase
 
 
-class TestTimeSeriesIO(TestAcquisitionH5IOMixin, TestCase):
+class TestTimeSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test TimeSeries to read/write """
