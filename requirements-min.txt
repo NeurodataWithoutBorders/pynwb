@@ -1,0 +1,6 @@
+# these minimum requirements specify '==' for testing; setup.py replaces '==' with '>='
+h5py==2.9  # support for setting attrs to lists of utf-8 added in 2.9
+hdmf==1.5.4,<2
+numpy==1.16
+pandas==0.23
+python-dateutil==2.7
