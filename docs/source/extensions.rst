@@ -166,7 +166,7 @@ Create a new namespace with extensions
     from pynwb.spec import NWBGroupSpec, NWBNamespaceBuilder
 
     # create a builder for the namespace
-    ns_builder = NWBNamespaceBuilder("Extension for use in my laboratory", "mylab", ...)
+    ns_builder = NWBNamespaceBuilder("Extension for use in my laboratory", "mylab", version='0.1.0', ...)
 
     # create extensions
     ext1 = NWBGroupSpec('A custom SpikeEventSeries interface',

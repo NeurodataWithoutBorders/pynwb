@@ -1,14 +1,12 @@
-from abc import ABCMeta
-
 from pynwb import NWBFile
 from pynwb.icephys import (IntracellularElectrode, PatchClampSeries, CurrentClampStimulusSeries,
                            SweepTable, VoltageClampStimulusSeries, CurrentClampSeries,
                            VoltageClampSeries, IZeroClampSeries)
 from pynwb.device import Device
-from pynwb.testing import TestNWBH5IOMixin, TestAcquisitionH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 
 
-class TestIntracellularElectrode(TestNWBH5IOMixin, TestCase):
+class TestIntracellularElectrode(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test IntracellularElectrode to read/write """
@@ -32,7 +30,7 @@ class TestIntracellularElectrode(TestNWBH5IOMixin, TestCase):
         return nwbfile.get_ic_electrode(self.container.name)
 
 
-class TestPatchClampSeries(TestAcquisitionH5IOMixin, metaclass=ABCMeta):
+class TestPatchClampSeries(AcquisitionH5IOMixin, TestCase):
 
     def setUpElectrode(self):
         """ Set up the test IntracellularElectrode """
@@ -111,7 +109,7 @@ class TestIZeroClampSeries(TestPatchClampSeries):
                                 starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126)
 
 
-class TestSweepTableRoundTripEasy(TestNWBH5IOMixin, TestCase):
+class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test SweepTable to read/write """
@@ -154,7 +152,7 @@ class TestSweepTableRoundTripEasy(TestNWBH5IOMixin, TestCase):
         self.assertEqual(sweep_table['sweep_number'].data[0], 4711)
 
 
-class TestSweepTableRoundTripComplicated(TestNWBH5IOMixin, TestCase):
+class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test SweepTable to read/write """

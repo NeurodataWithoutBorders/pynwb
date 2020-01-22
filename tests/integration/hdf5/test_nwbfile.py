@@ -10,7 +10,7 @@ from pynwb import NWBFile, TimeSeries, NWBHDF5IO, get_manager
 from pynwb.file import Subject
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
-from pynwb.testing import TestNWBH5IOMixin, TestCase, remove_test_file
+from pynwb.testing import NWBH5IOMixin, TestCase, remove_test_file
 
 
 class TestNWBFileHDF5IO(TestCase):
@@ -89,9 +89,9 @@ class TestNWBFileHDF5IO(TestCase):
         hdf5io.close()
 
 
-class TestNWBFileIO(TestNWBH5IOMixin, TestCase):
+class TestNWBFileIO(NWBH5IOMixin, TestCase):
     """ Test writing an NWBFile to disk and reading back the file """
-    # this uses methods tearDown, test_roundtrip, and validate from TestNWBH5IOMixin. the rest are overridden
+    # this uses methods tearDown, test_roundtrip, and validate from NWBH5IOMixin. the rest are overridden
 
     def setUp(self):
         super().setUp()
@@ -190,7 +190,7 @@ class TestPublicationsSetterRoundtrip(TestNWBFileIO):
         self.nwbfile.related_publications = ('pub1', 'pub2')
 
 
-class TestSubjectIO(TestNWBH5IOMixin, TestCase):
+class TestSubjectIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Subject """
@@ -218,7 +218,7 @@ class TestEmptySubjectIO(TestSubjectIO):
         return Subject()
 
 
-class TestEpochsIO(TestNWBH5IOMixin, TestCase):
+class TestEpochsIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return placeholder epochs object. Tested epochs are added directly to the NWBFile in addContainer """
@@ -335,7 +335,7 @@ class TestEpochsIODf(TestEpochsIO):
         pd.testing.assert_frame_equal(df_exp, df_obt, check_like=True, check_dtype=False)
 
 
-class TestTrials(TestNWBH5IOMixin, TestCase):
+class TestTrials(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return placeholder Table for trials. Tested trials are added directly to the NWBFile in addContainer """
@@ -357,7 +357,7 @@ class TestTrials(TestNWBH5IOMixin, TestCase):
         return nwbfile.trials
 
 
-class TestInvalidTimes(TestNWBH5IOMixin, TestCase):
+class TestInvalidTimes(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """
@@ -381,7 +381,7 @@ class TestInvalidTimes(TestNWBH5IOMixin, TestCase):
         return nwbfile.invalid_times
 
 
-class TestUnits(TestNWBH5IOMixin, TestCase):
+class TestUnits(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return placeholder table for Units. Tested units are added directly to the NWBFile in addContainer """
@@ -401,7 +401,7 @@ class TestUnits(TestNWBH5IOMixin, TestCase):
         return nwbfile.units
 
 
-class TestDynamicTableFromDataframeIO(TestNWBH5IOMixin, TestCase):
+class TestDynamicTableFromDataframeIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         return DynamicTable.from_dataframe(pd.DataFrame({
@@ -424,7 +424,7 @@ class TestDynamicTableFromDataframeIO(TestNWBH5IOMixin, TestCase):
         dyn_tab.to_dataframe()  # also test 2D column round-trip
 
 
-class TestElectrodes(TestNWBH5IOMixin, TestCase):
+class TestElectrodes(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """
@@ -460,7 +460,7 @@ class TestElectrodes(TestNWBH5IOMixin, TestCase):
                                       self.container[0].drop('group', axis=1))
 
 
-class TestElectrodesRegion(TestNWBH5IOMixin, TestCase):
+class TestElectrodesRegion(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """
