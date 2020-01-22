@@ -6,7 +6,7 @@ from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager
 from hdmf.build import TypeMap as TypeMap
 
-from pynwb import validate, available_namespaces, NWBHDF5IO
+from pynwb import validate, CORE_NAMESPACE, NWBHDF5IO
 from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
 
@@ -80,7 +80,7 @@ def main():
                 specloc = "cached namespace information"
             else:
                 manager = None
-                namespaces = available_namespaces()
+                namespaces = [CORE_NAMESPACE]
                 specloc = "pynwb namespace information"
                 print("The file {} has no cached namespace information. "
                       "Falling back to {}.".format(path, specloc), file=sys.stderr)
@@ -97,7 +97,7 @@ def main():
             specloc = "--nspath namespace information"
         else:
             manager = None
-            namespaces = available_namespaces()
+            namespaces = [CORE_NAMESPACE]
             specloc = "pynwb namespace information"
 
         if args.list_namespaces:
