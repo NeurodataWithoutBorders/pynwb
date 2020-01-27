@@ -1,4 +1,6 @@
 from collections.abc import Iterable
+import numpy as np
+import warnings
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
@@ -8,7 +10,6 @@ from .image import ImageSeries
 from .core import NWBContainer, MultiContainerInterface, NWBDataInterface
 from hdmf.common import DynamicTable, DynamicTableRegion
 from .device import Device
-import numpy as np
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -100,14 +101,14 @@ class ImagingPlane(NWBContainer):
         self.indicator = indicator
         self.location = location
         if manifold is not None:
-            raise DeprecationWarning("The 'manifold' argument is deprecated in favor of 'origin_coords' and "
-                                     "'grid_spacing'.")
+            warnings.warn("The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'.",
+                          DeprecationWarning)
         if conversion != 1.0:
-            raise DeprecationWarning("The 'conversion' argument is deprecated in favor of 'origin_coords' and "
-                                     "'grid_spacing'.")
+            warnings.warn("The 'conversion' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'.",
+                          DeprecationWarning)
         if unit != 'meters':
-            raise DeprecationWarning("The 'unit' argument is deprecated in favor of 'origin_coords_unit' and "
-                                     "'grid_spacin_unit'.")
+            warnings.warn("The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'.",
+                          DeprecationWarning)
         self.manifold = manifold
         self.conversion = conversion
         self.unit = unit

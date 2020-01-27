@@ -21,8 +21,7 @@ def CreatePlaneSegmentation():
     oc = OpticalChannel('test_optical_channel', 'description', 500.)
     device = Device(name='device_name')
     ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
-                      300., 'indicator', 'location', (1, 2, 1, 2, 3), 4.0,
-                      'unit', 'reference_frame')
+                      300., 'indicator', 'location', reference_frame='reference_frame')
 
     pS = PlaneSegmentation('description', ip, 'test_name', iSS)
     pS.add_roi(pixel_mask=pix_mask[0:3], image_mask=img_mask[0])
@@ -38,17 +37,20 @@ class TwoPhotonSeriesConstructor(TestCase):
 
         device = Device(name='device_name')
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
-                          300., 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
+                          300., 'indicator', 'location', reference_frame='reference_frame',
+                          origin_coords=[10, 20], origin_coords_unit='oc_unit',
+                          grid_spacing=[1, 2, 3], grid_spacing_unit='gs_unit')
         self.assertEqual(ip.optical_channel[0], oc)
         self.assertEqual(ip.device, device)
         self.assertEqual(ip.excitation_lambda, 600.)
         self.assertEqual(ip.imaging_rate, 300.)
         self.assertEqual(ip.indicator, 'indicator')
         self.assertEqual(ip.location, 'location')
-        self.assertEqual(ip.manifold, (50, 100, 3))
-        self.assertEqual(ip.conversion, 4.0)
-        self.assertEqual(ip.unit, 'unit')
         self.assertEqual(ip.reference_frame, 'reference_frame')
+        self.assertEqual(ip.origin_coords, [10, 20])
+        self.assertEqual(ip.origin_coords_unit, 'oc_unit')
+        self.assertEqual(ip.grid_spacing, [1, 2, 3])
+        self.assertEqual(ip.grid_spacing_unit, 'gs_unit')
 
         tPS = TwoPhotonSeries('test_tPS', unit='unit', field_of_view=[2., 3.],
                               imaging_plane=ip, pmt_gain=1.0, scan_line_rate=2.0, external_file=['external_file'],
@@ -68,11 +70,47 @@ class TwoPhotonSeriesConstructor(TestCase):
         oc = OpticalChannel('test_name', 'description', 500.)
         device = Device(name='device_name')
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
-                          300., 'indicator', 'location', (50, 100, 3), 4.0, 'unit', 'reference_frame')
+                          300., 'indicator', 'location', reference_frame='reference_frame')
         with self.assertRaises(ValueError):  # no data or external file
             TwoPhotonSeries('test_tPS', unit='unit', field_of_view=[2., 3.],
                             imaging_plane=ip, pmt_gain=1.0, scan_line_rate=2.0,
                             starting_frame=[1, 2, 3], format='tiff', timestamps=[1., 2.])
+
+    def test_manifold_deprecated(self):
+        oc = OpticalChannel('test_name', 'description', 500.)
+        self.assertEqual(oc.description, 'description')
+        self.assertEqual(oc.emission_lambda, 500.)
+
+        device = Device(name='device_name')
+
+        msg = "The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            ImagingPlane('test_imaging_plane', oc, 'description', device, 600., 300., 'indicator', 'location',
+                         (1, 1, (2, 2, 2)))
+
+    def test_conversion_deprecated(self):
+        oc = OpticalChannel('test_name', 'description', 500.)
+        self.assertEqual(oc.description, 'description')
+        self.assertEqual(oc.emission_lambda, 500.)
+
+        device = Device(name='device_name')
+
+        msg = "The 'conversion' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            ImagingPlane('test_imaging_plane', oc, 'description', device, 600., 300., 'indicator', 'location',
+                         None, 2.0)
+
+    def test_unit_deprecated(self):
+        oc = OpticalChannel('test_name', 'description', 500.)
+        self.assertEqual(oc.description, 'description')
+        self.assertEqual(oc.emission_lambda, 500.)
+
+        device = Device(name='device_name')
+
+        msg = "The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'."
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            ImagingPlane('test_imaging_plane', oc, 'description', device, 600., 300., 'indicator', 'location',
+                         None, 1.0, 'my_unit')
 
 
 class MotionCorrectionConstructor(TestCase):
@@ -153,7 +191,7 @@ class PlaneSegmentationConstructor(TestCase):
         device = Device(name='device_name')
         oc = OpticalChannel('test_optical_channel', 'description', 500.)
         ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
-                          300., 'indicator', 'location', (1, 2, 1, 2, 3), 4.0, 'unit', 'reference_frame')
+                          300., 'indicator', 'location', reference_frame='reference_frame')
         return iSS, ip
 
     def create_basic_plane_segmentation(self):
