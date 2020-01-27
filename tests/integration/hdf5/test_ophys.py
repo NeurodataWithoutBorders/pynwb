@@ -11,10 +11,10 @@ from pynwb.ophys import (
 )
 from pynwb.image import ImageSeries
 from pynwb.device import Device
-from pynwb.testing import TestNWBH5IOMixin, TestAcquisitionH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 
 
-class TestImagingPlaneIO(TestNWBH5IOMixin, TestCase):
+class TestImagingPlaneIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test ImagingPlane to read/write """
@@ -33,7 +33,7 @@ class TestImagingPlaneIO(TestNWBH5IOMixin, TestCase):
         return nwbfile.get_imaging_plane(self.container.name)
 
 
-class TestTwoPhotonSeriesIO(TestAcquisitionH5IOMixin, TestCase):
+class TestTwoPhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     def make_imaging_plane(self):
         """ Make an ImagingPlane and related objects """
@@ -59,7 +59,7 @@ class TestTwoPhotonSeriesIO(TestAcquisitionH5IOMixin, TestCase):
         nwbfile.add_acquisition(self.container)
 
 
-class TestPlaneSegmentationIO(TestNWBH5IOMixin, TestCase):
+class TestPlaneSegmentationIO(NWBH5IOMixin, TestCase):
 
     @staticmethod
     def buildPlaneSegmentation(self):
@@ -164,7 +164,7 @@ class TestImageMaskIO(MaskIO):
         return pS
 
 
-class TestRoiResponseSeriesIO(TestAcquisitionH5IOMixin, TestCase):
+class TestRoiResponseSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test RoiResponseSeries to read/write """

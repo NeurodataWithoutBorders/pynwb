@@ -4,10 +4,10 @@ from numpy.testing import assert_array_equal
 
 from pynwb import NWBFile, NWBHDF5IO, TimeSeries
 from pynwb.core import ScratchData
-from pynwb.testing import TestNWBH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, TestCase
 
 
-class TestScratchDataIO(TestNWBH5IOMixin, TestCase):
+class TestScratchDataIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test ScratchData to read/write """

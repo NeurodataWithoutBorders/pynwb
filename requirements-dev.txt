@@ -2,4 +2,3 @@ codecov==2.0.15
 coverage==5.0.3
 flake8==3.7.9
 tox==3.14.3
--r requirements.txt

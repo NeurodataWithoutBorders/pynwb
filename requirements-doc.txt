@@ -2,5 +2,4 @@ sphinx
 matplotlib
 sphinx_rtd_theme
 sphinx-gallery
-allensdk
--r requirements.txt
+allensdk==1.3.2
