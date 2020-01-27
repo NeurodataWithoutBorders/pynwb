@@ -20,7 +20,7 @@ class OpticalChannel(NWBContainer):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},  # required
             {'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},  # required
-            {'name': 'emission_lambda', 'type': 'float', 'doc': 'Emission lambda for channel.'})  # required
+            {'name': 'emission_lambda', 'type': 'float', 'doc': 'Emission wavelength for channel, in nm.'})  # required
     def __init__(self, **kwargs):
         description, emission_lambda = popargs("description", "emission_lambda", kwargs)
         call_docval_func(super(OpticalChannel, self).__init__, kwargs)
