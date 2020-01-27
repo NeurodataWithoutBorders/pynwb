@@ -40,7 +40,6 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
 
     def test_waveform_mean_attrs(self):
         ut = self.roundtripContainer()
-        breakpoint()
         self.assertEqual(ut.waveform_mean_rate, 40000.)
         self.assertEqual(ut.waveform_mean_unit, 'volts')
 
