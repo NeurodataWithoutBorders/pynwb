@@ -132,10 +132,9 @@ class Units(DynamicTable):
     """
 
     __fields__ = (
-        'waveform_mean_rate',
-        'waveform_mean_unit',
-        'waveform_sd_rate',
-        'waveform_sd_unit'
+        'waveform_rate',
+        'waveform_unit',
+        'resolution'
     )
 
     __columns__ = (
@@ -154,14 +153,13 @@ class Units(DynamicTable):
             {'name': 'description', 'type': str, 'doc': 'a description of what is in this table', 'default': None},
             {'name': 'electrode_table', 'type': DynamicTable,
              'doc': 'the table that the *electrodes* column indexes', 'default': None},
-            {'name': 'waveform_mean_rate', 'type': 'float',
+            {'name': 'waveform_rate', 'type': 'float',
              'doc': 'Sampling rate of the waveform means', 'default': None},
-            {'name': 'waveform_mean_unit', 'type': str,
+            {'name': 'waveform_unit', 'type': str,
              'doc': 'Unit of measurement of the waveform means', 'default': 'volts'},
-            {'name': 'waveform_sd_rate', 'type': 'float',
-             'doc': 'Sampling rate of the waveform standard deviations', 'default': None},
-            {'name': 'waveform_sd_unit', 'type': str,
-             'doc': 'Unit of measurement of the waveform standard deviations', 'default': 'volts'})
+            {'name': 'resolution', 'type': 'float',
+             'doc': 'The smallest possible difference between two spike times', 'default': None},
+            )
     def __init__(self, **kwargs):
         if kwargs.get('description', None) is None:
             kwargs['description'] = "data on spiking units"
@@ -169,10 +167,9 @@ class Units(DynamicTable):
         if 'spike_times' not in self.colnames:
             self.__has_spike_times = False
         self.__electrode_table = getargs('electrode_table', kwargs)
-        self.waveform_mean_rate = getargs('waveform_mean_rate', kwargs)
-        self.waveform_mean_unit = getargs('waveform_mean_unit', kwargs)
-        self.waveform_sd_rate = getargs('waveform_sd_rate', kwargs)
-        self.waveform_sd_unit = getargs('waveform_sd_unit', kwargs)
+        self.waveform_rate = getargs('waveform_rate', kwargs)
+        self.waveform_unit = getargs('waveform_unit', kwargs)
+        self.resolution = getargs('resolution', kwargs)
 
     @docval({'name': 'spike_times', 'type': 'array_data', 'doc': 'the spike times for each unit',
              'default': None, 'shape': (None,)},

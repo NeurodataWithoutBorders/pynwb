@@ -10,13 +10,34 @@ class UnitsMap(DynamicTableMap):
     def __init__(self, spec):
         super().__init__(spec)
 
-        waveform_mean_spec = self.spec.get_dataset('waveform_mean')
-        self.map_spec('waveform_mean_rate', waveform_mean_spec.get_attribute('sampling_rate'))
-        self.map_spec('waveform_mean_unit', waveform_mean_spec.get_attribute('unit'))
+    @DynamicTableMap.constructor_arg('resolution')
+    def resolution_carg(self, builder, manager):
+        if 'spike_times' in builder:
+            return builder['spike_times'].attributes.get('resolution')
+        return None
 
-        waveform_sd_spec = self.spec.get_dataset('waveform_sd')
-        self.map_spec('waveform_sd_rate', waveform_sd_spec.get_attribute('sampling_rate'))
-        self.map_spec('waveform_sd_unit', waveform_sd_spec.get_attribute('unit'))
+    @DynamicTableMap.constructor_arg('waveform_rate')
+    def waveform_rate_carg(self, builder, manager):
+        return self._get_waveform_stat(builder, 'sampling_rate')
+
+    @DynamicTableMap.constructor_arg('waveform_unit')
+    def waveform_unit_carg(self, builder, manager):
+        return self._get_waveform_stat(builder, 'unit')
+
+    def _get_waveform_stat(self, builder, attribute):
+        if 'waveform_mean' not in builder and 'waveform_sd' not in builder:
+            return None
+        mean_stat = None
+        sd_stat = None
+        if 'waveform_mean' in builder:
+            mean_stat = builder['waveform_mean'].attributes.get(attribute)
+        if 'waveform_sd' in builder:
+            sd_stat = builder['waveform_sd'].attributes.get(attribute)
+        if mean_stat is not None and sd_stat is not None:
+            if mean_stat != sd_stat:
+                # throw warning
+                pass
+        return mean_stat
 
     @DynamicTableMap.object_attr("electrodes")
     def electrodes_column(self, container, manager):
