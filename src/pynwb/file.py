@@ -462,6 +462,11 @@ class NWBFile(MultiContainerInterface):
             {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
+            {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
+            {'name': 'rel_y', 'type': 'float', 'doc': 'the y coordinate within the electrode group', 'default': None},
+            {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
+            {'name': 'reference', 'type': str, 'doc': 'Description of the reference used for this electrode.',
+             'default': None},
             allow_extra=True)
     def add_electrode(self, **kwargs):
         """
@@ -476,6 +481,17 @@ class NWBFile(MultiContainerInterface):
         d = _copy.copy(kwargs['data']) if kwargs.get('data') is not None else kwargs
         if d.get('group_name', None) is None:
             d['group_name'] = d['group'].name
+
+        new_cols = [('rel_x', 'the x coordinate within the electrode group'),
+                    ('rel_y', 'the y coordinate within the electrode group'),
+                    ('rel_z', 'the z coordinate within the electrode group'),
+                    ('reference', 'Description of the reference used for this electrode.')]
+        for col_name, col_doc in new_cols:
+            if kwargs[col_name] is not None and col_name not in self.electrodes:
+                self.electrodes.add_column(col_name, col_doc)
+            else:
+                d.pop(col_name)  # remove args from d if not set
+
         call_docval_func(self.electrodes.add_row, d)
 
     @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
@@ -718,7 +734,8 @@ def ElectrodeTable(name='electrodes',
                        ('location', 'the location of channel within the subject e.g. brain region'),
                        ('filtering', 'description of hardware filtering'),
                        ('group', 'a reference to the ElectrodeGroup this electrode is a part of'),
-                       ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')]
+                       ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')
+                       ]
                       )
 
 
