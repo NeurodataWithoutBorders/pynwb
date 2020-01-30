@@ -78,7 +78,6 @@ def validate_nwbs():
 
     import pynwb
 
-    TOTAL += len(examples_nwbs)
     for nwb in examples_nwbs:
         try:
             logging.info("Validating file %s" % nwb)
@@ -87,6 +86,8 @@ def validate_nwbs():
             with warnings.catch_warnings(record=True) as tmp:
                 with pynwb.NWBHDF5IO(nwb, mode='r') as io:
                     errors = pynwb.validate(io)
+                    TOTAL += 1
+
                     if errors:
                         FAILURES += 1
                         ERRORS += 1
