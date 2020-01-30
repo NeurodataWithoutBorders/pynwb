@@ -93,6 +93,10 @@ For running the tests, it is required to install the development requirements.
    $ pip install -e .
    $ tox
 
+For debugging it can be useful to keep the intermediate NWB files created by
+the tests. To keep these files create the environment variables
+``CLEAN_NWB``/``CLEAN_HDMF`` and set them to ``1``.
+
 
 Following PyNWB Style Guide
 ---------------------------
