@@ -37,6 +37,8 @@ def main():
     parser.add_argument("paths", type=str, nargs='+', help="NWB file paths")
     parser.add_argument('-p', '--nspath', type=str, help="the path to the namespace YAML file")
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
+    parser.add_argument("-lns", "--list-namespaces", dest="list_namespaces",
+                        action='store_true', help="List the available namespaces and exit.")
 
     feature_parser = parser.add_mutually_exclusive_group(required=False)
     feature_parser.add_argument("--cached-namespace", dest="cached_namespace", action='store_true',
@@ -97,6 +99,11 @@ def main():
             manager = None
             namespaces = available_namespaces()
             specloc = "pynwb namespace information"
+
+        if args.list_namespaces:
+            print("\n".join(namespaces))
+            ret = 0
+            continue
 
         if args.ns:
             if args.ns in namespaces:
