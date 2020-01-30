@@ -102,7 +102,8 @@ def main():
             if args.ns in namespaces:
                 namespaces = [args.ns]
             else:
-                print("The namespace {} could not be found in {}.".format(args.ns, specloc), file=sys.stderr)
+                print("The namespace {} could not be found in {} as only {} is present.".format(
+                      args.ns, specloc, namespaces), file=sys.stderr)
                 ret = 1
                 continue
 
