@@ -56,7 +56,7 @@ def main():
             sys.exit(1)
 
         if args.cached_namespace:
-            print("Turning off validation against cached namespace information"
+            print("Turning off validation against cached namespace information "
                   "as --nspath was passed.", file=sys.stderr)
             args.cached_namespace = False
 
