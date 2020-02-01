@@ -6,7 +6,7 @@ from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager
 from hdmf.build import TypeMap as TypeMap
 
-from pynwb import validate, available_namespaces, NWBHDF5IO
+from pynwb import validate, CORE_NAMESPACE, NWBHDF5IO
 from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
 
@@ -35,14 +35,14 @@ def main():
 
     parser = ArgumentParser(description="Validate an NWB file", epilog=ep)
     parser.add_argument("paths", type=str, nargs='+', help="NWB file paths")
-    parser.add_argument('-p', '--nspath', type=str, help="the path to the namespace YAML file")
-    parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
+    parser.add_argument('-p', '--nspath', type=str, help="The path to the namespace YAML file")
+    parser.add_argument("-n", "--ns", type=str, help="The name of the namespace to validate against")
 
     feature_parser = parser.add_mutually_exclusive_group(required=False)
     feature_parser.add_argument("--cached-namespace", dest="cached_namespace", action='store_true',
-                                help="Use the cached namespace (default).")
+                                help="Validate against the cached namespaces (default).")
     feature_parser.add_argument('--no-cached-namespace', dest="cached_namespace", action='store_false',
-                                help="Don't use the cached namespace.")
+                                help="Don't validate against the cached namespaces.")
     parser.set_defaults(cached_namespace=True)
 
     args = parser.parse_args()
@@ -54,18 +54,17 @@ def main():
             sys.exit(1)
 
         if args.cached_namespace:
-            print("Turning off validation against cached namespace information"
-                  "as --nspath was passed.", file=sys.stderr)
+            print("Turning off validation against cached namespace information as --nspath was passed.",
+                  file=sys.stderr)
             args.cached_namespace = False
 
     for path in args.paths:
-
         if not os.path.isfile(path):
             print("The file {} does not exist.".format(path), file=sys.stderr)
             ret = 1
             continue
 
-        if args.cached_namespace:
+        if args.cached_namespace:  # validate against the cached namespaces
             catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
             ns_deps = NWBHDF5IO.load_namespaces(catalog, path)
             s = set(ns_deps.keys())       # determine which namespaces are the most
@@ -76,13 +75,13 @@ def main():
                 tm = TypeMap(catalog)
                 manager = BuildManager(tm)
                 specloc = "cached namespace information"
-            else:
+            else:  # no namespaces -- validate against NWB core namespace
                 manager = None
-                namespaces = available_namespaces()
+                namespaces = [CORE_NAMESPACE]
                 specloc = "pynwb namespace information"
                 print("The file {} has no cached namespace information. "
                       "Falling back to {}.".format(path, specloc), file=sys.stderr)
-        elif args.nspath:
+        elif args.nspath:  # validate against a given namespace YAML file (e.g., from an extension)
             catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
             namespaces = catalog.load_namespaces(args.nspath)
 
@@ -93,22 +92,22 @@ def main():
             tm = TypeMap(catalog)
             manager = BuildManager(tm)
             specloc = "--nspath namespace information"
-        else:
+        else:  # validate against NWB core namespace
             manager = None
-            namespaces = available_namespaces()
+            namespaces = [CORE_NAMESPACE]
             specloc = "pynwb namespace information"
 
-        if args.ns:
+        if args.ns:  # validate against a particular namespace out of the ones provided
             if args.ns in namespaces:
                 namespaces = [args.ns]
             else:
-                print("The namespace {} could not be found in {}.".format(args.ns, specloc), file=sys.stderr)
+                print("The namespace '{}' could not be found in {}.".format(args.ns, specloc), file=sys.stderr)
                 ret = 1
                 continue
 
         with NWBHDF5IO(path, mode='r', manager=manager) as io:
             for ns in namespaces:
-                print("Validating {} against {} using namespace {}.".format(path, specloc, ns))
+                print("Validating {} against {} using namespace '{}'.".format(path, specloc, ns))
                 ret = ret or _validate_helper(io=io, namespace=ns)
 
     sys.exit(ret)

@@ -48,3 +48,13 @@ if __name__ == '__main__':
     make_nwbfile()
     make_nwbfile_str_experimenter()
     make_nwbfile_str_pub()
+
+
+# 1.2.1_extension.nwb was generated using the following:
+# download ndx-miniscope.namespace.yaml and ndx-miniscope.extension.yaml from NDX Catalog
+# from pynwb import load_namespaces, get_class
+# load_namespaces('ndx-miniscope.namespace.yaml')
+# Miniscope = get_class('Miniscope', 'ndx-miniscope')
+# nwbfile.add_device(Miniscope('ADDME'))
+# test_name = 'extension'
+# _write(test_name, nwbfile)
