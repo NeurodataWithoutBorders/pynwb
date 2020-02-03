@@ -41,7 +41,7 @@ class RetinotopyImage(GrayscaleImage):
 
 class FocalDepthImage(RetinotopyImage):
 
-    __nwbfields__ = ('focal_depth',)
+    __nwbfields__ = (,)
 
     @docval(*get_docval(RetinotopyImage.__init__),
             {'name': 'focal_depth', 'type': 'float', 'doc': 'Focal depth offset, in meters.'})
@@ -101,14 +101,31 @@ class ImagingRetinotopy(NWBDataInterface):
     (i.e., y before x).
     """
 
-    __nwbfields__ = ('sign_map',
-                     'axis_1_phase_map',
-                     'axis_1_power_map',
-                     'axis_2_phase_map',
-                     'axis_2_power_map',
-                     'axis_descriptions',
-                     'focal_depth_image',
-                     'vasculature_image',)
+    __nwbfields__ = ({'name': 'sign_map',
+                      'doc': 'Sine of the angle between the direction of the gradient in axis_1 and axis_2.',
+                      'child': True},
+                     {'name': 'axis_1_phase_map',
+                      'doc': 'Phase response to stimulus on the first measured axis.',
+                      'child': True},
+                     {'name': 'axis_1_power_map',
+                      'doc': 'Power response on the first measured axis. Response is scaled so 0.0 is no power in '
+                             'the response and 1.0 is maximum relative power.',
+                      'child': True},
+                     {'name': 'axis_2_phase_map',
+                      'doc': 'Phase response to stimulus on the second measured axis.',
+                      'child': True},
+                     {'name': 'axis_2_power_map',
+                      'doc': 'Power response on the second measured axis. Response is scaled so 0.0 is no '
+                             'power in the response and 1.0 is maximum relative power.',
+                      'child': True},
+                     {'name': 'focal_depth_image',
+                      'doc': 'Gray-scale image taken with same settings/parameters (e.g., focal depth, wavelength) '
+                             'as data collection.',
+                      'child': True},
+                     {'name': 'vasculature_image',
+                      'doc': 'Gray-scale anatomical image of cortical surface',
+                      'child': True},
+                     'axis_descriptions')
 
     @docval({'name': 'sign_map', 'type': RetinotopyMap,
              'doc': 'Sine of the angle between the direction of the gradient in axis_1 and axis_2.'},
@@ -121,7 +138,7 @@ class ImagingRetinotopy(NWBDataInterface):
              'doc': 'Phase response to stimulus on the second measured axis.'},
             {'name': 'axis_2_power_map', 'type': AxisMap,
              'doc': 'Power response on the second measured axis. Response is scaled so 0.0 is no '
-                     'power in the response and 1.0 is maximum relative power.'},
+                    'power in the response and 1.0 is maximum relative power.'},
             {'name': 'axis_descriptions', 'type': Iterable, 'shape': (2, ),
              'doc': 'Two-element array describing the contents of the two response axis fields. '
                     'Description should be something like ["altitude", "azimuth"] or ["radius", "theta"].'},

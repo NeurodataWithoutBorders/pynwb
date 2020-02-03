@@ -11,10 +11,10 @@ class ImageRetinotopyConstructor(TestCase):
         field_of_view = [1, 2]
         dimension = [1, 2]
         self.sign_map = RetinotopyMap('sign_map', data, field_of_view, dimension)
-        self.axis_1_phase_map = AxisMap('axis_1_phase', data, field_of_view, 'unit', dimension)
-        self.axis_1_power_map = AxisMap('axis_1_power', data, field_of_view, 'unit', dimension)
-        self.axis_2_phase_map = AxisMap('axis_2_phase', data, field_of_view, 'unit', dimension)
-        self.axis_2_power_map = AxisMap('axis_2_power', data, field_of_view, 'unit', dimension)
+        self.axis_1_phase_map = AxisMap('axis_1_phase_map', data, field_of_view, 'unit', dimension)
+        self.axis_1_power_map = AxisMap('axis_1_power_map', data, field_of_view, 'unit', dimension)
+        self.axis_2_phase_map = AxisMap('axis_2_phase_map', data, field_of_view, 'unit', dimension)
+        self.axis_2_power_map = AxisMap('axis_2_power_map', data, field_of_view, 'unit', dimension)
         self.axis_descriptions = ['altitude', 'azimuth']
 
         data = [[1, 1], [1, 1]]
@@ -25,7 +25,8 @@ class ImageRetinotopyConstructor(TestCase):
         focal_depth = 1.0
         self.focal_depth_image = FocalDepthImage('focal_depth_image', data, bits_per_pixel, dimension, format,
                                                  field_of_view, focal_depth)
-        self.vasculature_image = AImage('vasculature', data, bits_per_pixel, dimension, format, field_of_view)
+        self.vasculature_image = AImage('vasculature_image', np.uint16(data), bits_per_pixel, dimension, format,
+                                        field_of_view)
 
     def test_init(self):
         """Test that ImagingRetinotopy constructor sets properties correctly."""
