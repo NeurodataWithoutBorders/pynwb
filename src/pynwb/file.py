@@ -667,13 +667,13 @@ class NWBFile(MultiContainerInterface):
         # HDF5 object references cannot point to objects external to the file. Both DynamicTables such as TimeIntervals
         # contain such object references and types such as ElectricalSeries contain references to DynamicTables.
         # Below, copy the table and link to the columns so that object references work.
-        fields_to_copy = ['electrodes', 'epochs', 'trials', 'units', 'subject', 'sweep_table', 'invalid_times']
+        fields_to_copy = ['electrodes', 'epochs', 'trials', 'units', 'sweep_table', 'invalid_times']
         for field in fields_to_copy:
             if field in kwargs:
                 if isinstance(self.fields[field], DynamicTable):
                     kwargs[field] = self.fields[field].copy()
                 else:
-                    warn('Cannot copy child of NWBFile that is not a DynamicTable.')
+                    warn('Cannot copy child of NWBFile that is not a DynamicTable: %s' % field)
 
         # handle dictionaries of DynamicTables
         dt_to_copy = ['scratch', 'intervals']
