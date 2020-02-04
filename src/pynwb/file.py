@@ -673,7 +673,7 @@ class NWBFile(MultiContainerInterface):
                 if isinstance(self.fields[field], DynamicTable):
                     kwargs[field] = self.fields[field].copy()
                 else:
-                    warn('Cannot copy child of NWBFile that is not a DynamicTable.')
+                    warn('Cannot copy child of NWBFile that is not a DynamicTable: %s' % field)
 
         # handle dictionaries of DynamicTables
         dt_to_copy = ['scratch', 'intervals']
