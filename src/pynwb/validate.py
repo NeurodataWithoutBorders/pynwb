@@ -6,7 +6,7 @@ from hdmf.spec import NamespaceCatalog
 from hdmf.build import BuildManager
 from hdmf.build import TypeMap as TypeMap
 
-from pynwb import validate, available_namespaces, NWBHDF5IO
+from pynwb import validate, CORE_NAMESPACE, NWBHDF5IO
 from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
 
@@ -37,6 +37,8 @@ def main():
     parser.add_argument("paths", type=str, nargs='+', help="NWB file paths")
     parser.add_argument('-p', '--nspath', type=str, help="the path to the namespace YAML file")
     parser.add_argument("-n", "--ns", type=str, help="the namespace to validate against")
+    parser.add_argument("-lns", "--list-namespaces", dest="list_namespaces",
+                        action='store_true', help="List the available namespaces and exit.")
 
     feature_parser = parser.add_mutually_exclusive_group(required=False)
     feature_parser.add_argument("--cached-namespace", dest="cached_namespace", action='store_true',
@@ -54,7 +56,7 @@ def main():
             sys.exit(1)
 
         if args.cached_namespace:
-            print("Turning off validation against cached namespace information"
+            print("Turning off validation against cached namespace information "
                   "as --nspath was passed.", file=sys.stderr)
             args.cached_namespace = False
 
@@ -78,7 +80,7 @@ def main():
                 specloc = "cached namespace information"
             else:
                 manager = None
-                namespaces = available_namespaces()
+                namespaces = [CORE_NAMESPACE]
                 specloc = "pynwb namespace information"
                 print("The file {} has no cached namespace information. "
                       "Falling back to {}.".format(path, specloc), file=sys.stderr)
@@ -95,14 +97,20 @@ def main():
             specloc = "--nspath namespace information"
         else:
             manager = None
-            namespaces = available_namespaces()
+            namespaces = [CORE_NAMESPACE]
             specloc = "pynwb namespace information"
+
+        if args.list_namespaces:
+            print("\n".join(namespaces))
+            ret = 0
+            continue
 
         if args.ns:
             if args.ns in namespaces:
                 namespaces = [args.ns]
             else:
-                print("The namespace {} could not be found in {}.".format(args.ns, specloc), file=sys.stderr)
+                print("The namespace {} could not be found in {} as only {} is present.".format(
+                      args.ns, specloc, namespaces), file=sys.stderr)
                 ret = 1
                 continue
 
