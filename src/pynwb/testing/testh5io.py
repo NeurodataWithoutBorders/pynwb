@@ -10,7 +10,7 @@ from hdmf.backends.warnings import BrokenLinkWarning
 from hdmf.build.warnings import MissingRequiredWarning, OrphanContainerWarning
 
 
-class TestNWBH5IOMixin(metaclass=ABCMeta):
+class NWBH5IOMixin(metaclass=ABCMeta):
     """
     Mixin class for methods to run a roundtrip test writing an NWB file with an Container and reading the Container
     from the NWB file. The setUp, test_roundtrip, and tearDown methods will be run by unittest.
@@ -19,7 +19,7 @@ class TestNWBH5IOMixin(metaclass=ABCMeta):
     this mixin.
 
     Example:
-    class TestMyContainerIO(TestNWBH5IOMixin, TestCase):
+    class TestMyContainerIO(NWBH5IOMixin, TestCase):
         def setUpContainer(self):
             # return a test Container to read/write
         def addContainer(self, nwbfile):
@@ -27,7 +27,7 @@ class TestNWBH5IOMixin(metaclass=ABCMeta):
         def getContainer(self, nwbfile):
             # return the test Container from an NWB file
 
-    This code is adapted from hdmf.testing.TestH5RoundTripMixin.
+    This code is adapted from hdmf.testing.H5RoundTripMixin.
     """
 
     def setUp(self):
@@ -120,7 +120,7 @@ class TestNWBH5IOMixin(metaclass=ABCMeta):
                         raise Exception(err)
 
 
-class TestAcquisitionH5IOMixin(TestNWBH5IOMixin):
+class AcquisitionH5IOMixin(NWBH5IOMixin):
     """
     Mixin class for methods to run a roundtrip test writing an NWB file with an Container as an acquisition and reading
     the Container as an acquisition from the NWB file. The setUp, test_roundtrip, and tearDown methods will be run by
@@ -129,11 +129,11 @@ class TestAcquisitionH5IOMixin(TestNWBH5IOMixin):
     The abstract method setUpContainer needs to be implemented by classes that include this mixin.
 
     Example:
-    class TestMyContainerIO(TestNWBH5IOMixin, TestCase):
+    class TestMyContainerIO(NWBH5IOMixin, TestCase):
         def setUpContainer(self):
             # return a test Container to read/write
 
-    This code is adapted from hdmf.testing.TestH5RoundTripMixin.
+    This code is adapted from hdmf.testing.H5RoundTripMixin.
     """
 
     def addContainer(self, nwbfile):

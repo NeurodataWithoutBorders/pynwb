@@ -7,6 +7,7 @@ import inspect
 import logging
 import os.path
 import os
+from subprocess import run, PIPE, STDOUT
 import sys
 import traceback
 import unittest
@@ -78,20 +79,57 @@ def validate_nwbs():
 
     import pynwb
 
-    TOTAL += len(examples_nwbs)
     for nwb in examples_nwbs:
         try:
             logging.info("Validating file %s" % nwb)
 
             ws = list()
             with warnings.catch_warnings(record=True) as tmp:
+                logging.info("Validating with pynwb.validate method.")
                 with pynwb.NWBHDF5IO(nwb, mode='r') as io:
                     errors = pynwb.validate(io)
+                    TOTAL += 1
+
                     if errors:
                         FAILURES += 1
                         ERRORS += 1
                         for err in errors:
                             print("Error: %s" % err)
+
+                def get_namespaces(nwbfile):
+                    comp = run(["python", "-m", "pynwb.validate",
+                               "--list-namespaces", "--cached-namespace", nwb],
+                               stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=20)
+
+                    if comp.returncode != 0:
+                        return []
+
+                    return comp.stdout.split()
+
+                namespaces = get_namespaces(nwb)
+
+                if len(namespaces) == 0:
+                    FAILURES += 1
+                    ERRORS += 1
+
+                cmds = []
+                cmds += [["python", "-m", "pynwb.validate", nwb]]
+                cmds += [["python", "-m", "pynwb.validate", "--cached-namespace", nwb]]
+                cmds += [["python", "-m", "pynwb.validate", "--no-cached-namespace", nwb]]
+
+                for ns in namespaces:
+                    cmds += [["python", "-m", "pynwb.validate", "--cached-namespace", "--ns", ns, nwb]]
+
+                for cmd in cmds:
+                    logging.info("Validating with \"%s\"." % (" ".join(cmd[:-1])))
+                    comp = run(cmd, stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=20)
+                    TOTAL += 1
+
+                    if comp.returncode != 0:
+                        FAILURES += 1
+                        ERRORS += 1
+                        print("Error: %s" % comp.stdout)
+
                 for w in tmp:  # ignore RunTimeWarnings about importing
                     if isinstance(w.message, RuntimeWarning) and not warning_re.match(str(w.message)):
                         ws.append(w)

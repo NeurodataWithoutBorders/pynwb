@@ -259,8 +259,9 @@ class ColoredTestResult(unittest.TextTestResult):
         super(ColoredTestResult, self).addSuccess(test)
         output = self.complete_output()
         self.result.append((0, test, output, ''))
-        sys.stdout.write('.')
-        sys.stdout.flush()
+        if self.verbosity > 1:
+            sys.stdout.write('.')
+            sys.stdout.flush()
 
         if not hasattr(self, 'successes'):
             self.successes = [test]
@@ -273,8 +274,9 @@ class ColoredTestResult(unittest.TextTestResult):
         output = self.complete_output()
         _, _exc_str = self.errors[-1]
         self.result.append((2, test, output, _exc_str))
-        sys.stdout.write('E')
-        sys.stdout.flush()
+        if self.verbosity > 1:
+            sys.stdout.write('E')
+            sys.stdout.flush()
 
     def addFailure(self, test, err):
         self.failure_count += 1
@@ -282,8 +284,9 @@ class ColoredTestResult(unittest.TextTestResult):
         output = self.complete_output()
         _, _exc_str = self.failures[-1]
         self.result.append((1, test, output, _exc_str))
-        sys.stdout.write('F')
-        sys.stdout.flush()
+        if self.verbosity > 1:
+            sys.stdout.write('F')
+            sys.stdout.flush()
 
     def addSubTest(self, test, subtest, err):
         if err is not None:
@@ -296,8 +299,9 @@ class ColoredTestResult(unittest.TextTestResult):
         self.skip_count += 1
         super(ColoredTestResult, self).addSkip(test, reason)
         self.complete_output()
-        sys.stdout.write('s')
-        sys.stdout.flush()
+        if self.verbosity > 1:
+            sys.stdout.write('s')
+            sys.stdout.flush()
 
     def get_all_cases_run(self):
         '''Return a list of each test case which failed or succeeded

@@ -1,9 +1,9 @@
 from pynwb.ogen import OptogeneticSeries, OptogeneticStimulusSite
 from pynwb.device import Device
-from pynwb.testing import TestNWBH5IOMixin, TestAcquisitionH5IOMixin, TestCase
+from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 
 
-class TestOptogeneticStimulusSiteIO(TestNWBH5IOMixin, TestCase):
+class TestOptogeneticStimulusSiteIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test OptogeneticStimulusSite to read/write """
@@ -20,7 +20,7 @@ class TestOptogeneticStimulusSiteIO(TestNWBH5IOMixin, TestCase):
         return nwbfile.get_ogen_site(self.container.name)
 
 
-class TestOptogeneticSeriesIO(TestAcquisitionH5IOMixin, TestCase):
+class TestOptogeneticSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test OptogeneticSeries to read/write """
