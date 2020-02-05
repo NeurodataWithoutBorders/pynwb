@@ -3,6 +3,7 @@ from collections.abc import Iterable
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
 from hdmf.common import DynamicTable
+import numpy as np
 
 
 from . import register_class, CORE_NAMESPACE
@@ -228,6 +229,65 @@ class TimeSeries(NWBDataInterface):
     @property
     def time_unit(self):
         return self.__time_unit
+
+    def get_timestamps(self, istart=0, istop=None):
+        """
+        For any TimeSeries, return timestamps. If the TimeSeries uses starting_time and rate, the timestamps will be
+        generated.
+
+        Parameters
+        ----------
+        istart: int, optional
+            Optionally sub-select the returned times - lower bound
+        istop: int, optional
+            Optionally sub-select the returned times - upper bound
+
+        Returns
+        -------
+        numpy.ndarray
+
+        """
+        if self.timestamps is not None:
+            return self.timestamps[istart:istop]
+        else:
+            if not np.isfinite(self.starting_time):
+                starting_time = 0
+            else:
+                starting_time = self.starting_time
+            if istop is None:
+                return np.arange(istart, len(self.data)) / self.rate + starting_time
+            elif istop > 0:
+                return np.arange(istart, istop) / self.rate + starting_time
+            else:
+                return np.arange(istart, len(self.data) + istop - 1) / self.rate + starting_time
+
+    def get_maxt(self):
+        """
+        Returns the maximum time of any TimeSeries
+
+        Returns
+        -------
+        float
+
+        """
+        if self.timestamps is not None:
+            return self.timestamps[-1]
+        else:
+            return len(self.data) / self.rate + self.starting_time
+
+    def get_mint(self):
+        """
+        Returns the minimum time of any TimeSeries
+
+        Returns
+        -------
+        float
+
+        """
+        if self.timestamps is not None:
+            return self.timestamps[0]
+        else:
+            return self.starting_time
 
 
 @register_class('Image', CORE_NAMESPACE)
