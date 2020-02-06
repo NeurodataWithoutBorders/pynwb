@@ -9,24 +9,28 @@ from hdmf.build import TypeMap as TypeMap
 from pynwb import validate, CORE_NAMESPACE, NWBHDF5IO
 from pynwb.spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace
 
+def _print_results(results, txt):
 
-def _print_errors(validation_errors):
-    if validation_errors:
-        print(' - found the following errors:', file=sys.stderr)
-        for err in validation_errors:
-            print(str(err), file=sys.stderr)
+    if results:
+        print(' - found the following {}:'.format(txt), file=sys.stderr)
+        for x in results:
+            print(str(x), file=sys.stderr)
     else:
-        print(' - no errors found.')
+        print(" - no {} found.".format(txt))
 
 
 def _validate_helper(**kwargs):
     severity = kwargs.pop('severity')
 
-    errors = validate(**kwargs)
-    errors = list(filter(lambda err: err.severity >= severity, errors))
-    _print_errors(errors)
+    issues = validate(**kwargs)
 
-    return (errors is not None and len(errors) > 0)
+    errors = list(filter(lambda issue: issue.severity >= severity, issues))
+    warnings = list(filter(lambda issue: issue.severity < severity, issues))
+
+    _print_results(errors, "errors")
+    _print_results(warnings, "warnings")
+
+    return errors is not None and len(errors) > 0
 
 
 def main():
@@ -45,13 +49,12 @@ def main():
 
     feature_parser = parser.add_mutually_exclusive_group(required=False)
     feature_parser.add_argument("--cached-namespace", dest="cached_namespace", action='store_true',
-                                help="Use the cached namespace (default).")
+            help="Use the cached namespace (default: %(default)s).", default=True)
     feature_parser.add_argument('--no-cached-namespace', dest="cached_namespace", action='store_false',
                                 help="Don't use the cached namespace.")
-    feature_parser.add_argument('--severity', dest="severity", type=int, help="Report anything with the given severity or higher.")
-    # todo check that it is between 0 and 10
-    parser.set_defaults(cached_namespace=True)
-    parser.set_defaults(severity=10)
+    feature_parser.add_argument('--severity', dest="severity", type=int,
+                                help="Report anything with the given severity or higher as error (default: %(default)s).",
+                                default=10, choices=range(0, 11))
 
     args = parser.parse_args()
     ret = 0
