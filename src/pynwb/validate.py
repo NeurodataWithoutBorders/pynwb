@@ -20,7 +20,10 @@ def _print_errors(validation_errors):
 
 
 def _validate_helper(**kwargs):
+    severity = kwargs.pop('severity')
+
     errors = validate(**kwargs)
+    errors = list(filter(lambda err: err.severity >= severity, errors))
     _print_errors(errors)
 
     return (errors is not None and len(errors) > 0)
@@ -45,7 +48,10 @@ def main():
                                 help="Use the cached namespace (default).")
     feature_parser.add_argument('--no-cached-namespace', dest="cached_namespace", action='store_false',
                                 help="Don't use the cached namespace.")
+    feature_parser.add_argument('--severity', dest="severity", type=int, help="Report anything with the given severity or higher.")
+    # todo check that it is between 0 and 10
     parser.set_defaults(cached_namespace=True)
+    parser.set_defaults(severity=10)
 
     args = parser.parse_args()
     ret = 0
@@ -117,7 +123,7 @@ def main():
         with NWBHDF5IO(path, mode='r', manager=manager) as io:
             for ns in namespaces:
                 print("Validating {} against {} using namespace {}.".format(path, specloc, ns))
-                ret = ret or _validate_helper(io=io, namespace=ns)
+                ret = ret or _validate_helper(io=io, namespace=ns, severity=args.severity)
 
     sys.exit(ret)
 
