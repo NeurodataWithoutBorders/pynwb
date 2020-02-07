@@ -162,9 +162,9 @@ class CorrectedImageStack(NWBDataInterface):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ('corrected',
-                     'original',
-                     'xy_translation')
+    __nwbfields__ = ({'name': 'corrected', 'child': True},
+                     {'name': 'xy_translation', 'child': True},
+                     'original')
 
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
