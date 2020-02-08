@@ -130,7 +130,7 @@ class OpticalSeries(ImageSeries):
                      'field_of_view',
                      'orientation')
 
-    @docval(*get_docval(ImageSeries.__init__, 'name',),
+    @docval(*get_docval(ImageSeries.__init__, 'name'),
             {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
              'doc': 'Images presented to subject, either grayscale or RGB'},
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
