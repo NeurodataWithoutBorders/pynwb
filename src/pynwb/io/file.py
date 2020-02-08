@@ -189,6 +189,10 @@ class NWBFileMap(ObjectMapper):
                 ret = tuple(pubs_bldr.data)
         return ret
 
+    @ObjectMapper.constructor_arg('nwb_version')
+    def publications_carg(self, builder, manager):
+        ret = builder.attributes.get('nwb_version', 'unversioned')
+
     @ObjectMapper.object_attr('related_publications')
     def publication_obj_attr(self, container, manager):
         ret = None
