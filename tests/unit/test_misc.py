@@ -176,3 +176,15 @@ class UnitsTests(TestCase):
         electrode_group = ElectrodeGroup('test_electrode_group', 'description', 'location', device)
         ut.add_unit(electrode_group=electrode_group)
         self.assertEqual(ut['electrode_group'][0], electrode_group)
+
+    def test_get_min_spike_time(self):
+        ut = Units()
+        ut.add_unit(spike_times=[0., 1., 2.])
+        ut.add_unit(spike_times=[3., 4., 5.])
+        self.assertEqual(ut.get_min_spike_time(), 0.)
+
+    def test_get_max_spike_time(self):
+        ut = Units()
+        ut.add_unit(spike_times=[0., 1., 2.])
+        ut.add_unit(spike_times=[3., 4., 5.])
+        self.assertEqual(ut.get_max_spike_time(), 5.)
