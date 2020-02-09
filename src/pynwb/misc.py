@@ -218,13 +218,16 @@ class Units(DynamicTable):
 
     def get_min_spike_time(self):
         """Efficiently retrieve the first spike time across all units"""
-        inds = [0] + list(self['spike_times'].data[:-1])
+        inds = np.hstack((0, self['spike_times'].data[:-1]))
         first_spikes = self['spike_times'].target.data[inds]
         return np.min(first_spikes)
 
     def get_max_spike_time(self):
         """Efficiently retrieve the last spike time across all units"""
-        inds = list(self['spike_times'].data[:] - 1)
+        inds = self['spike_times'].data[:]
+        if isinstance(inds, list):
+            inds = np.array(inds)
+        inds = inds - 1
         last_spikes = self['spike_times'].target.data[inds]
         return np.max(last_spikes)
 
