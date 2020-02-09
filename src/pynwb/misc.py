@@ -236,7 +236,7 @@ class Units(DynamicTable):
         if isinstance(data, list):
             last_spikes = [data[x] for x in inds]
         else:
-            last_spikes = self['spike_times'].target.data[inds]
+            last_spikes = data[inds]
         return np.max(last_spikes)
 
 
