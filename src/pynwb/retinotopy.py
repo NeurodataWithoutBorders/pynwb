@@ -20,9 +20,9 @@ class RetinotopyImage(NWBData):
             {'name': 'bits_per_pixel', 'type': int,
              'doc': 'Number of bits used to represent each value. This is necessary to determine maximum '
                     '(white) pixel value.'},
-            {'name': 'dimension', 'type': Iterable, 'doc': 'Number of rows and columns in the image.'},
+            {'name': 'dimension', 'type': Iterable, 'shape': (2, ), 'doc': 'Number of rows and columns in the image.'},
             {'name': 'format', 'type': Iterable, 'doc': 'Format of image. Right now only "raw" supported.'},
-            {'name': 'field_of_view', 'type': Iterable, 'doc': 'Size of viewing area, in meters.'})
+            {'name': 'field_of_view', 'type': Iterable, 'shape': (2, ), 'doc': 'Size of viewing area, in meters.'})
     def __init__(self, **kwargs):
         bits_per_pixel, dimension, format, field_of_view = popargs(
             'bits_per_pixel', 'dimension', 'format', 'field_of_view', kwargs)
@@ -43,35 +43,47 @@ class FocalDepthImage(RetinotopyImage):
     @docval(*get_docval(RetinotopyImage.__init__),
             {'name': 'focal_depth', 'type': 'float', 'doc': 'Focal depth offset, in meters.'})
     def __init__(self, **kwargs):
-        field_of_view = popargs('field_of_view', kwargs)
+        focal_depth = popargs('focal_depth', kwargs)
         call_docval_func(super().__init__, kwargs)
-        self.field_of_view = field_of_view
+        self.focal_depth = focal_depth
 
 
 AImage = RetinotopyImage  # rename class for backward compatibility
 
 
-class AxisMap(NWBData):
+class RetinotopyMap(NWBData):
     """Abstract two-dimensional map of responses to stimuli along a single response axis (e.g., altitude)
     """
 
     __nwbfields__ = ('data',
                      'field_of_view',
-                     'unit',
                      'dimension')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this axis map'},
             {'name': 'data', 'type': Iterable, 'shape': (None, None), 'doc': 'data field.'},
-            {'name': 'field_of_view', 'type': Iterable, 'doc': 'Size of viewing area, in meters.'},
-            {'name': 'unit', 'type': str, 'doc': 'Unit that axis data is stored in (e.g., degrees)'},
-            {'name': 'dimension', 'type': Iterable, 'shape': (None, ),
+            {'name': 'field_of_view', 'type': Iterable, 'shape': (2, ), 'doc': 'Size of viewing area, in meters.'},
+            {'name': 'dimension', 'type': Iterable, 'shape': (2, ),
              'doc': 'Number of rows and columns in the image'})
     def __init__(self, **kwargs):
-        field_of_view, unit, dimension = popargs('field_of_view', 'unit', 'dimension', kwargs)
+        field_of_view, dimension = popargs('field_of_view', 'dimension', kwargs)
         call_docval_func(super().__init__, kwargs)
         self.field_of_view = field_of_view
-        self.unit = unit
         self.dimension = dimension
+
+
+class AxisMap(RetinotopyMap):
+    """Abstract two-dimensional map of responses to stimuli along a single response axis (e.g., altitude) with unit
+    """
+
+    __nwbfields__ = ('unit')
+
+    @docval(*get_docval(RetinotopyMap.__init__, 'name', 'data', 'field_of_view'),
+            {'name': 'unit', 'type': str, 'doc': 'Unit that axis data is stored in (e.g., degrees)'},
+            *get_docval(RetinotopyMap.__init__, 'dimension'))
+    def __init__(self, **kwargs):
+        unit = popargs('unit', kwargs)
+        call_docval_func(super().__init__, kwargs)
+        self.unit = unit
 
 
 @register_class('ImagingRetinotopy', CORE_NAMESPACE)
@@ -97,7 +109,7 @@ class ImagingRetinotopy(NWBDataInterface):
                      {'name': 'vasculature_image', 'child': True},
                      'axis_descriptions')
 
-    @docval({'name': 'sign_map', 'type': AxisMap,
+    @docval({'name': 'sign_map', 'type': RetinotopyMap,
              'doc': 'Sine of the angle between the direction of the gradient in axis_1 and axis_2.'},
             {'name': 'axis_1_phase_map', 'type': AxisMap,
              'doc': 'Phase response to stimulus on the first measured axis.'},
@@ -109,7 +121,7 @@ class ImagingRetinotopy(NWBDataInterface):
             {'name': 'axis_2_power_map', 'type': AxisMap,
              'doc': 'Power response on the second measured axis. Response is scaled so 0.0 is no '
                      'power in the response and 1.0 is maximum relative power.'},
-            {'name': 'axis_descriptions', 'type': Iterable,
+            {'name': 'axis_descriptions', 'type': Iterable, 'shape': (2, ),
              'doc': 'Two-element array describing the contents of the two response axis fields. '
                     'Description should be something like ["altitude", "azimuth"] or ["radius", "theta"].'},
             {'name': 'focal_depth_image', 'type': FocalDepthImage,

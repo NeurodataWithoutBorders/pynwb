@@ -4,10 +4,10 @@ from pynwb.retinotopy import ImagingRetinotopy, AxisMap, RetinotopyImage, FocalD
 from pynwb.testing import AcquisitionH5IOMixin, TestCase
 
 
-class TestImageRetinotopy(AcquisitionH5IOMixin, TestCase):
+class TestImagingRetinotopy(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
-        """ Return the test ImageRetinotopy to read/write """
+        """ Return the test ImagingRetinotopy to read/write """
         data = np.ones((2, 2))
         field_of_view = [1, 2]
         dimension = [1, 2]
