@@ -1,4 +1,5 @@
 from collections.abc import Iterable
+import warnings
 
 from hdmf.utils import docval, popargs, call_docval_func, get_docval
 
@@ -48,15 +49,11 @@ class FocalDepthImage(RetinotopyImage):
         self.focal_depth = focal_depth
 
 
-AImage = RetinotopyImage  # rename class for backward compatibility
-
-
 class RetinotopyMap(NWBData):
     """Abstract two-dimensional map of responses to stimuli along a single response axis (e.g., altitude)
     """
 
-    __nwbfields__ = ('data',
-                     'field_of_view',
+    __nwbfields__ = ('field_of_view',
                      'dimension')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this axis map'},
@@ -75,7 +72,7 @@ class AxisMap(RetinotopyMap):
     """Abstract two-dimensional map of responses to stimuli along a single response axis (e.g., altitude) with unit
     """
 
-    __nwbfields__ = ('unit')
+    __nwbfields__ = ('unit', )
 
     @docval(*get_docval(RetinotopyMap.__init__, 'name', 'data', 'field_of_view'),
             {'name': 'unit', 'type': str, 'doc': 'Unit that axis data is stored in (e.g., degrees)'},
@@ -136,6 +133,8 @@ class ImagingRetinotopy(NWBDataInterface):
                 'axis_1_phase_map', 'axis_1_power_map', 'axis_2_phase_map', 'axis_2_power_map',
                 'axis_descriptions', 'focal_depth_image', 'sign_map', 'vasculature_image', kwargs)
         call_docval_func(super().__init__, kwargs)
+        warnings.warn("The ImagingRetinotopy class currently cannot be written to or read from a file. "
+                      "This is a known bug and will be fixed in a future release of PyNWB.")
         self.axis_1_phase_map = axis_1_phase_map
         self.axis_1_power_map = axis_1_power_map
         self.axis_2_phase_map = axis_2_phase_map
