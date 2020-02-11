@@ -2,5 +2,5 @@
 h5py==2.9  # support for setting attrs to lists of utf-8 added in 2.9
 hdmf==1.5.4,<2
 numpy==1.16
-pandas==0.23
+pandas==0.23.3
 python-dateutil==2.7
