@@ -1,6 +1,6 @@
 import numpy as np
 
-from pynwb.retinotopy import ImagingRetinotopy, AxisMap, AImage, RetinotopyImage, FocalDepthImage, RetinotopyMap
+from pynwb.retinotopy import ImagingRetinotopy, AxisMap, RetinotopyImage, FocalDepthImage, RetinotopyMap
 from pynwb.testing import TestCase
 
 
@@ -25,7 +25,7 @@ class ImageRetinotopyConstructor(TestCase):
         focal_depth = 1.0
         self.focal_depth_image = FocalDepthImage('focal_depth_image', data, bits_per_pixel, dimension, format,
                                                  field_of_view, focal_depth)
-        self.vasculature_image = AImage('vasculature_image', np.uint16(data), bits_per_pixel, dimension, format,
+        self.vasculature_image = RetinotopyImage('vasculature_image', np.uint16(data), bits_per_pixel, dimension, format,
                                         field_of_view)
 
     def test_init(self):
