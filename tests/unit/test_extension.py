@@ -10,7 +10,7 @@ from hdmf.utils import get_docval, docval, popargs
 from pynwb import get_type_map, TimeSeries, NWBFile, register_class, load_namespaces, get_class
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, NWBDatasetSpec
 from pynwb.file import LabMetaData
-from pynwb.testing import TestCase
+from pynwb.testing import TestCase, remove_test_file
 
 
 def id_generator(N=10):
@@ -31,7 +31,7 @@ class TestExtension(TestCase):
     def tearDown(self):
         for f in (self.ext_source, self.ns_path):
             path = os.path.join(self.tempdir, f)
-            os.remove(path)
+            remove_test_file(path)
 
     def test_export(self):
         ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix, version='0.1.0')
@@ -150,7 +150,7 @@ class TestCatchDupNS(TestCase):
                  self.ns_path2)
         for f in files:
             path = os.path.join(self.tempdir, f)
-            os.remove(path)
+            remove_test_file(path)
 
     def test_catch_dup_name(self):
         ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1", version='0.1.0')

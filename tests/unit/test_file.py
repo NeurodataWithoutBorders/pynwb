@@ -1,5 +1,4 @@
 import numpy as np
-import os
 import pandas as pd
 
 from datetime import datetime
@@ -9,7 +8,7 @@ from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.file import Subject, ElectrodeTable
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
-from pynwb.testing import TestCase
+from pynwb.testing import TestCase, remove_test_file
 
 
 class NWBFileTest(TestCase):
@@ -119,7 +118,7 @@ class NWBFileTest(TestCase):
             for aa, bb in zip(nwbfile_i.electrodes['group'][:], nwbfile.electrodes['group'][:]):
                 self.assertEqual(aa.name, bb.name)
 
-        os.remove("electrodes_mwe.nwb")
+        remove_test_file("electrodes_mwe.nwb")
 
     def test_access_processing(self):
         self.nwbfile.create_processing_module('test_mod', 'test_description')
@@ -406,8 +405,7 @@ class TestCacheSpec(TestCase):
         self.path = 'unittest_cached_spec.nwb'
 
     def tearDown(self):
-        if os.path.exists(self.path):
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_simple(self):
         nwbfile = NWBFile(' ', ' ',
@@ -428,8 +426,7 @@ class TestNoCacheSpec(TestCase):
         self.path = 'unittest_cached_spec.nwb'
 
     def tearDown(self):
-        if os.path.exists(self.path):
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_simple(self):
         nwbfile = NWBFile(' ', ' ',
