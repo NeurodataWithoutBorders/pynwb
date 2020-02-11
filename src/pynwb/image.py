@@ -131,7 +131,9 @@ class OpticalSeries(ImageSeries):
                      'field_of_view',
                      'orientation')
 
-    @docval(*get_docval(ImageSeries.__init__, 'name', 'data'),  # required
+    @docval(*get_docval(ImageSeries.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
+             'doc': 'Images presented to subject, either grayscale or RGB'},
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
             {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
