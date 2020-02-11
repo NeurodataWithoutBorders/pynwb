@@ -27,3 +27,4 @@ class ImagingPlaneMap(NWBContainerMapper):
         self.map_spec('conversion', manifold_spec.get_attribute('conversion'))
         self.map_spec('origin_coords_unit', origin_coords_spec.get_attribute('unit'))
         self.map_spec('grid_spacing_unit', grid_spacing_spec.get_attribute('unit'))
+        self.map_spec('optical_channel', self.spec.get_neurodata_type('OpticalChannel'))
