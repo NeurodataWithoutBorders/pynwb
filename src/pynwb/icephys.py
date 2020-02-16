@@ -1,11 +1,12 @@
+import warnings
+
+from hdmf.common import DynamicTable
 from hdmf.utils import docval, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
 from .core import NWBContainer
 from .device import Device
-
-from hdmf.common import DynamicTable
 
 
 @register_class('IntracellularElectrode', CORE_NAMESPACE)
@@ -39,7 +40,7 @@ class IntracellularElectrode(NWBContainer):
         slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs(
             'slice', 'seal', 'description', 'location', 'resistance',
             'filtering', 'initial_access_resistance', 'device', kwargs)
-        call_docval_func(super(IntracellularElectrode, self).__init__, kwargs)
+        call_docval_func(super().__init__, kwargs)
         self.slice = slice
         self.seal = seal
         self.description = description
@@ -79,7 +80,7 @@ class PatchClampSeries(TimeSeries):
     def __init__(self, **kwargs):
         name, data, unit, stimulus_description = popargs('name', 'data', 'unit', 'stimulus_description', kwargs)
         electrode, gain, sweep_number = popargs('electrode', 'gain', 'sweep_number', kwargs)
-        super(PatchClampSeries, self).__init__(name, data, unit, **kwargs)
+        super().__init__(name, data, unit, **kwargs)
         self.electrode = electrode
         self.gain = gain
         self.stimulus_description = stimulus_description
@@ -110,13 +111,18 @@ class CurrentClampSeries(PatchClampSeries):
             {'name': 'bridge_balance', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
             {'name': 'capacitance_compensation', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'sweep_number'))
+                        'comments', 'description', 'control', 'control_description', 'sweep_number'),
+            {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
+             'default': 'volts'})
     def __init__(self, **kwargs):
-        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
+        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        if unit != 'volts':
+            warnings.warn("Unit for %s '%s' is ignored and will be set to 'volts' as per NWB 2.1.0."
+                          % (self.__class__.__name__, name))
         unit = 'volts'
         bias_current, bridge_balance, capacitance_compensation = popargs(
             'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
-        super(CurrentClampSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
+        super().__init__(name, data, unit, electrode, gain, **kwargs)
         self.bias_current = bias_current
         self.bridge_balance = bridge_balance
         self.capacitance_compensation = capacitance_compensation
@@ -137,12 +143,14 @@ class IZeroClampSeries(CurrentClampSeries):
             {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Volt'},  # required
             *get_docval(CurrentClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
-                        'sweep_number'))
+                        'sweep_number'),
+            {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
+             'default': 'volts'})
     def __init__(self, **kwargs):
         name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
         bias_current, bridge_balance, capacitance_compensation = (0.0, 0.0, 0.0)
-        super(IZeroClampSeries, self).__init__(name, data, electrode, gain, bias_current,
-                                               bridge_balance, capacitance_compensation, **kwargs)
+        super().__init__(name, data, electrode, gain, bias_current, bridge_balance, capacitance_compensation,
+                         **kwargs)
 
 
 @register_class('CurrentClampStimulusSeries', CORE_NAMESPACE)
@@ -157,11 +165,16 @@ class CurrentClampStimulusSeries(PatchClampSeries):
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
-                        'sweep_number'))
+                        'sweep_number'),
+            {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
+             'default': 'amperes'})
     def __init__(self, **kwargs):
-        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
+        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        if unit != 'amperes':
+            warnings.warn("Unit for %s '%s' is ignored and will be set to 'amperes' as per "
+                          "NWB 2.1.0." % (self.__class__.__name__, name))
         unit = 'amperes'
-        super(CurrentClampStimulusSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
+        super().__init__(name, data, unit, electrode, gain, **kwargs)
 
 
 @register_class('VoltageClampSeries', CORE_NAMESPACE)
@@ -191,16 +204,21 @@ class VoltageClampSeries(PatchClampSeries):
             {'name': 'whole_cell_capacitance_comp', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
             {'name': 'whole_cell_series_resistance_comp', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
             *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description', 'sweep_number'))
+                        'comments', 'description', 'control', 'control_description', 'sweep_number'),
+            {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
+             'default': 'amperes'})
     def __init__(self, **kwargs):
-        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
+        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        if unit != 'amperes':
+            warnings.warn("Unit for %s '%s' is ignored and will be set to 'amperes' as per NWB 2.1.0."
+                          % (self.__class__.__name__, name))
         unit = 'amperes'
         capacitance_fast, capacitance_slow, resistance_comp_bandwidth, resistance_comp_correction, \
             resistance_comp_prediction, whole_cell_capacitance_comp, whole_cell_series_resistance_comp = popargs(
                 'capacitance_fast', 'capacitance_slow', 'resistance_comp_bandwidth',
                 'resistance_comp_correction', 'resistance_comp_prediction', 'whole_cell_capacitance_comp',
                 'whole_cell_series_resistance_comp', kwargs)
-        super(VoltageClampSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
+        super().__init__(name, data, unit, electrode, gain, **kwargs)
         self.capacitance_fast = capacitance_fast
         self.capacitance_slow = capacitance_slow
         self.resistance_comp_bandwidth = resistance_comp_bandwidth
@@ -222,11 +240,16 @@ class VoltageClampStimulusSeries(PatchClampSeries):
     @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
             *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
-                        'sweep_number'))
+                        'sweep_number'),
+            {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
+             'default': 'volts'})
     def __init__(self, **kwargs):
-        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
+        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        if unit != 'volts':
+            warnings.warn("Unit for %s '%s' is ignored and will be set to 'volts' as per "
+                          "NWB 2.1.0." % (self.__class__.__name__, name))
         unit = 'volts'
-        super(VoltageClampStimulusSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
+        super().__init__(name, data, unit, electrode, gain, **kwargs)
 
 
 @register_class('SweepTable', CORE_NAMESPACE)
@@ -247,7 +270,7 @@ class SweepTable(DynamicTable):
              'default': "A sweep table groups different PatchClampSeries together."},
             *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
-        call_docval_func(super(SweepTable, self).__init__, kwargs)
+        call_docval_func(super().__init__, kwargs)
 
     @docval({'name': 'pcs', 'type': PatchClampSeries,
              'doc': 'PatchClampSeries to add to the table must have a valid sweep_number'})
