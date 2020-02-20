@@ -355,9 +355,7 @@ workflows:
               only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
             branches:
               ignore: /.*/
-  commit:
-    jobs:
-      - test-validation
+
   nightly:
     triggers:
       - schedule:
@@ -365,3 +363,5 @@ workflows:
           filters:
             branches:
               only: dev
+    jobs:
+      - test-validation
