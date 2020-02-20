@@ -13,9 +13,9 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
         """ Return the test Units to read/write """
         ut = Units(name='UnitsTest', description='a simple table for testing Units')
         ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 1], [2, 3]],
-                    waveform_mean=[1, 2, 3], waveform_sd=[4, 5, 6])
+                    waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.])
         ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 5], [6, 7]],
-                    waveform_mean=[1, 2, 3], waveform_sd=[4, 5, 6])
+                    waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.])
         ut.waveform_rate = 40000.
         ut.resolution = 1/40000
         return ut
