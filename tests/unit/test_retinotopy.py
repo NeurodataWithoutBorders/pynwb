@@ -30,9 +30,12 @@ class ImageRetinotopyConstructor(TestCase):
 
     def test_init(self):
         """Test that ImagingRetinotopy constructor sets properties correctly."""
-        ir = ImagingRetinotopy(self.sign_map, self.axis_1_phase_map, self.axis_1_power_map, self.axis_2_phase_map,
-                               self.axis_2_power_map, self.axis_descriptions, self.focal_depth_image,
-                               self.vasculature_image)
+        msg = ('The ImagingRetinotopy class currently cannot be written to or read from a file. This is a known bug '
+               'and will be fixed in a future release of PyNWB.')
+        with self.assertWarnsWith(UserWarning, msg):
+            ir = ImagingRetinotopy(self.sign_map, self.axis_1_phase_map, self.axis_1_power_map, self.axis_2_phase_map,
+                                   self.axis_2_power_map, self.axis_descriptions, self.focal_depth_image,
+                                   self.vasculature_image)
         self.assertEqual(ir.sign_map, self.sign_map)
         self.assertEqual(ir.axis_1_phase_map, self.axis_1_phase_map)
         self.assertEqual(ir.axis_1_power_map, self.axis_1_power_map)
