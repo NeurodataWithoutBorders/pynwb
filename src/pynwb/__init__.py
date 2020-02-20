@@ -206,7 +206,7 @@ class NWBHDF5IO(_HDF5IO):
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
             {'name': 'load_namespaces', 'type': bool,
              'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
-             'default': False},
+             'default': True},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
@@ -217,14 +217,11 @@ class NWBHDF5IO(_HDF5IO):
     def __init__(self, **kwargs):
         path, mode, manager, extensions, load_namespaces, file_obj, comm =\
             popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
-        if load_namespaces:
+        if load_namespaces and not ('w' in mode or mode == 'x'):
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
             if extensions is not None:
                 warn("loading namespaces from file - ignoring 'extensions' argument")
-            # namespaces are not loaded when creating an NWBHDF5IO object in write mode
-            if 'w' in mode or mode == 'x':
-                raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
             super(NWBHDF5IO, self).load_namespaces(tm, path)
@@ -236,7 +233,8 @@ class NWBHDF5IO(_HDF5IO):
             # super(NWBHDF5IO, self).load_namespaces(ns_catalog, path)
             # tm = TypeMap(ns_catalog)
             # tm.copy_mappers(get_type_map())
-        else:
+
+        else:  # load_namespaces==False or in write mode
             if manager is not None and extensions is not None:
                 raise ValueError("'manager' and 'extensions' cannot be specified together")
             elif extensions is not None:

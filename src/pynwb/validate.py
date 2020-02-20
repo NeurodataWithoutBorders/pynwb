@@ -114,7 +114,7 @@ def main():
                 ret = 1
                 continue
 
-        with NWBHDF5IO(path, mode='r', manager=manager) as io:
+        with NWBHDF5IO(path, mode='r', manager=manager, load_namespaces=False) as io:
             for ns in namespaces:
                 print("Validating {} against {} using namespace {}.".format(path, specloc, ns))
                 ret = ret or _validate_helper(io=io, namespace=ns)

@@ -228,11 +228,9 @@ io.close()
 #     For more information on writing NWB files, see :ref:`basic_writing`.
 
 ####################
-# By default, PyNWB does not use the namespaces cached in a file--you must
-# explicitly specify this. This behavior is enabled by the *load_namespaces*
-# argument to the :py:class:`~pynwb.NWBHDF5IO` constructor.
+# By default, PyNWB does uses the namespaces cached in a file.
 
-io = NWBHDF5IO('cache_spec_example.nwb', mode='r', load_namespaces=True)
+io = NWBHDF5IO('cache_spec_example.nwb', mode='r')
 nwbfile = io.read()
 
 ####################
