@@ -356,12 +356,12 @@ workflows:
             branches:
               ignore: /.*/
   commit:
-    nightly:
-      triggers:
-        - schedule:
-            cron: "0 5 * * *"
-            filters:
-              branches:
-                only: dev
     jobs:
       - test-validation
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 5 * * *"
+          filters:
+            branches:
+              only: dev
