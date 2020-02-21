@@ -13,7 +13,7 @@ import traceback
 import unittest
 from tests.coloredtestrunner import ColoredTestRunner, ColoredTestResult
 
-flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5}
+flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5, 'validation': 6}
 
 TOTAL = 0
 FAILURES = 0
@@ -187,10 +187,13 @@ def main():
                         help='run example tests')
     parser.add_argument('-b', '--backwards', action='append_const', const=flags['backwards'], dest='suites',
                         help='run backwards compatibility tests')
+    parser.add_argument('-w', '--validation', action='append_const', const=flags['validation'], dest='suites',
+                        help='run validation tests')
     args = parser.parse_args()
     if not args.suites:
         args.suites = list(flags.values())
         args.suites.pop(args.suites.index(flags['example']))  # remove example as a suite run by default
+        args.suites.pop(args.suites.index(flags['validation']))  # remove validation as a suite run by default
 
     # set up logger
     root = logging.getLogger()
@@ -215,12 +218,17 @@ def main():
     # Run example tests
     if flags['example'] in args.suites:
         run_example_tests()
+
+    # Run validation tests
+    if flags['validation'] in args.suites:
+        run_example_tests()
         validate_nwbs()
 
     # Run integration tests
     if flags['integration'] in args.suites:
         run_integration_tests(verbose=args.verbosity)
 
+    # Run backwards compatibility tests
     if flags['backwards'] in args.suites:
         run_test_suite("tests/back_compat", "pynwb backwards compatibility tests", verbose=args.verbosity)
 
