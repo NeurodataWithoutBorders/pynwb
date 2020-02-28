@@ -163,14 +163,14 @@ jobs:
      - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
     <<: *ci-steps
 
-  python35-min-req:
+  python36-min-req:
     docker:
-      - image: circleci/python:3.5.9-stretch
+      - image: circleci/python:3.6.10-stretch
     environment:
-     - TEST_TOX_ENV: "py35-min-req"
+     - TEST_TOX_ENV: "py36-min-req"
      - COVERAGE_TOX_ENV: ""
-     - BUILD_TOX_ENV: "build-py35-min-req"
-     - TEST_WHEELINSTALL_ENV: "wheelinstall-py35-min-req"
+     - BUILD_TOX_ENV: "build-py36-min-req"
+     - TEST_WHEELINSTALL_ENV: "wheelinstall-py36-min-req"
     <<: *ci-steps
 
   miniconda35:
@@ -223,6 +223,25 @@ jobs:
     environment:
      - TEST_TOX_ENV: "gallery-py36-min-req"
     <<: *gallery-steps
+
+  test-validation:
+    docker:
+      - image: circleci/python:3.7.6-stretch
+    steps:
+      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
+      - run:
+          <<: *initialize-venv
+      - run:
+          name: Run the tests
+          command: |
+            . ../venv/bin/activate
+            pip install tox
+            tox -e validation-py37
+          # Install is expected to be quick. Increase timeout in case there are some network issues.
+          # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
+          no_output_timeout: 30m
 
   deploy-dev:
     docker:
@@ -283,7 +302,7 @@ workflows:
           <<: *no_filters
       - python37:
           <<: *no_filters
-      - python35-min-req:
+      - python36-min-req:
           <<: *no_filters
       - miniconda35:
           <<: *no_filters
@@ -303,7 +322,7 @@ workflows:
             - python35
             - python36
             - python37
-            - python35-min-req
+            - python36-min-req
             - miniconda35
             - miniconda36
             - miniconda37
@@ -324,7 +343,7 @@ workflows:
             - python35
             - python36
             - python37
-            - python35-min-req
+            - python36-min-req
             - miniconda35
             - miniconda36
             - miniconda37
@@ -336,3 +355,13 @@ workflows:
               only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
             branches:
               ignore: /.*/
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 5 * * *"
+          filters:
+            branches:
+              only: dev
+    jobs:
+      - test-validation
