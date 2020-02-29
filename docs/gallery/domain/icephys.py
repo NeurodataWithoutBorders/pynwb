@@ -47,8 +47,8 @@ device = nwbfile.create_device(name='Heka ITC-1600')
 # :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode`.
 
 elec = nwbfile.create_icephys_electrode(name="elec0",
-                                   description='a mock intracellular electrode',
-                                   device=device)
+                                        description='a mock intracellular electrode',
+                                        device=device)
 
 #######################
 # Stimulus data
