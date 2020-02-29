@@ -140,11 +140,11 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_imaging_plane'
         },
         {
-            'attr': 'ic_electrodes',
-            'add': 'add_ic_electrode',
+            'attr': 'icephys_electrodes',
+            'add': 'add_icephys_electrode',
             'type': IntracellularElectrode,
-            'create': 'create_ic_electrode',
-            'get': 'get_ic_electrode'
+            'create': 'create_icephys_electrode',
+            'get': 'get_icephys_electrode'
         },
         {
             'attr': 'ogen_sites',
@@ -275,7 +275,10 @@ class NWBFile(MultiContainerInterface):
             {'name': 'electrode_groups', 'type': Iterable,
              'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
             {'name': 'ic_electrodes', 'type': (list, tuple),
-             'doc': 'IntracellularElectrodes that belong to this NWBFile', 'default': None},
+             'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
+                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},
+            {'name': 'icephys_electrodes', 'type': (list, tuple),
+             'doc': 'IntracellularElectrodes that belong to this NWBFile.', 'default': None},
             {'name': 'sweep_table', 'type': SweepTable,
              'doc': 'the SweepTable that belong to this NWBFile', 'default': None},
             {'name': 'imaging_planes', 'type': (list, tuple),
@@ -322,7 +325,6 @@ class NWBFile(MultiContainerInterface):
             'electrodes',
             'electrode_groups',
             'devices',
-            'ic_electrodes',
             'imaging_planes',
             'ogen_sites',
             'intervals',
@@ -351,6 +353,14 @@ class NWBFile(MultiContainerInterface):
         ]
         for attr in fieldnames:
             setattr(self, attr, kwargs.get(attr, None))
+
+        # backwards-compatibility code for ic_electrodes / icephys_electrodes
+        ic_elec_val = kwargs.get('icephys_electrodes', None)
+        if ic_elec_val is None and kwargs.get('ic_electrodes', None) is not None:
+            ic_elec_val = kwargs.get('ic_electrodes', None)
+            warn("Use of the ic_electrodes parameter is deprecated. "
+                 "Use the icephys_electrodes parameter instead", DeprecationWarning)
+        setattr(self, 'icephys_electrodes', ic_elec_val)
 
         experimenter = kwargs.get('experimenter', None)
         if isinstance(experimenter, str):
@@ -403,6 +413,35 @@ class NWBFile(MultiContainerInterface):
     def ec_electrodes(self):
         warn("replaced by NWBFile.electrodes", DeprecationWarning)
         return self.electrodes
+
+    @property
+    def ic_electrodes(self):
+        warn("deprecated. use NWBFile.icephys_electrodes instead", DeprecationWarning)
+        return self.icephys_electrodes
+
+    def add_ic_electrode(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.add_icephys_electrode` instead
+        """
+        warn("deprecated, use NWBFile.add_icephys_electrode instead", DeprecationWarning)
+        return self.add_icephys_electrode(*args, **kwargs)
+
+    def create_ic_electrode(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode` instead
+        """
+        warn("deprecated, use NWBFile.create_icephys_electrode instead", DeprecationWarning)
+        return self.create_icephys_electrode(*args, **kwargs)
+
+    def get_ic_electrode(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.get_icephys_electrode` instead
+        """
+        warn("deprecated, use NWBFile.get_icephys_electrode instead", DeprecationWarning)
+        return self.get_icephys_electrode(*args, **kwargs)
 
     def __check_epochs(self):
         if self.epochs is None:
