@@ -53,16 +53,14 @@ class NWBFileICEphys(TestCase):
 
     def test_add_ic_electrode_deprecation(self):
         # Make sure we warn when using the add_ic_electrodes parameter on NWBFile
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            nwbfile = NWBFile(
+        nwbfile = NWBFile(
                 session_description='NWBFile icephys test',
                 identifier='NWB123',  # required
                 session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
+
+        msg = "deprecated, use NWBFile.add_icephys_electrode instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
             nwbfile.add_ic_electrode(self.icephys_electrode)
-            assert len(w) == 1
-            assert issubclass(w[-1].category, DeprecationWarning)
-            assert "deprecated" in str(w[-1].message)
 
     def test_ic_electrodes_attribute_deprecation(self):
         nwbfile = NWBFile(
