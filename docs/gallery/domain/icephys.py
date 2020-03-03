@@ -44,11 +44,11 @@ device = nwbfile.create_device(name='Heka ITC-1600')
 #
 # Intracellular electrode metadata is represented by :py:class:`~pynwb.icephys.IntracellularElectrode` objects.
 # To create an electrode group, you can use the :py:class:`~pynwb.file.NWBFile` instance method
-# :py:meth:`~pynwb.file.NWBFile.create_ic_electrode`.
+# :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode`.
 
-elec = nwbfile.create_ic_electrode(name="elec0",
-                                   description='a mock intracellular electrode',
-                                   device=device)
+elec = nwbfile.create_icephys_electrode(name="elec0",
+                                        description='a mock intracellular electrode',
+                                        device=device)
 
 #######################
 # Stimulus data
@@ -160,7 +160,7 @@ vcs = nwbfile.get_acquisition('vcs')
 ####################
 # We can also get back the electrode we added.
 
-elec = nwbfile.get_ic_electrode('elec0')
+elec = nwbfile.get_icephys_electrode('elec0')
 
 ####################
 # Alternatively, we can also get this electrode from the :py:class:`~pynwb.icephys.CurrentClampStimulusSeries`

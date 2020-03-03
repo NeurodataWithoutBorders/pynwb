@@ -4,20 +4,95 @@ from pynwb.icephys import PatchClampSeries, CurrentClampSeries, IZeroClampSeries
         VoltageClampSeries, VoltageClampStimulusSeries, IntracellularElectrode
 from pynwb.device import Device
 from pynwb.testing import TestCase
+from pynwb.file import NWBFile  # Needed to test icephys functionality defined on NWBFile
+from datetime import datetime
+from dateutil.tz import tzlocal
 
 
 def GetElectrode():
     device = Device(name='device_name')
-    elec = IntracellularElectrode('test_iS',
-                                  device,
-                                  'description',
-                                  'slice',
-                                  'seal',
-                                  'location',
-                                  'resistance',
-                                  'filtering',
-                                  'initial_access_resistance')
+    elec = IntracellularElectrode(
+        name='test_iS',
+        device=device,
+        description='description',
+        slice='slice',
+        seal='seal',
+        location='location',
+        resistance='resistance',
+        filtering='filtering',
+        initial_access_resistance='initial_access_resistance')
     return elec
+
+
+class NWBFileICEphys(TestCase):
+    """Test ICEphys-specific functionality on NWBFile"""
+    def setUp(self):
+        self.icephys_electrode = GetElectrode()
+
+    def test_ic_electrodes_parameter_deprecation(self):
+        # Make sure we warn when using the ic_electrodes parameter on NWBFile
+        msg = "Use of the ic_electrodes parameter is deprecated. Use the icephys_electrodes parameter instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            _ = NWBFile(
+                session_description='NWBFile icephys test',
+                identifier='NWB123',  # required
+                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+                ic_electrodes=[self.icephys_electrode, ])
+
+    def test_icephys_electrodes_parameter(self):
+        nwbfile = NWBFile(
+                session_description='NWBFile icephys test',
+                identifier='NWB123',  # required
+                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+                icephys_electrodes=[self.icephys_electrode, ])
+        self.assertEqual(nwbfile.get_icephys_electrode('test_iS'), self.icephys_electrode)
+
+    def test_add_ic_electrode_deprecation(self):
+        # Make sure we warn when using the add_ic_electrodes parameter on NWBFile
+        nwbfile = NWBFile(
+                session_description='NWBFile icephys test',
+                identifier='NWB123',  # required
+                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
+
+        msg = "deprecated, use NWBFile.add_icephys_electrode instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            nwbfile.add_ic_electrode(self.icephys_electrode)
+
+    def test_ic_electrodes_attribute_deprecation(self):
+        nwbfile = NWBFile(
+            session_description='NWBFile icephys test',
+            identifier='NWB123',  # required
+            session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+            icephys_electrodes=[self.icephys_electrode, ])
+        # make sure NWBFile.ic_electrodes property warns
+
+        msg = "deprecated. use NWBFile.icephys_electrodes instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            nwbfile.ic_electrodes
+
+        # make sure NWBFile.get_ic_electrode warns
+        msg = "deprecated, use NWBFile.get_icephys_electrode instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            nwbfile.get_ic_electrode(self.icephys_electrode.name)
+
+    def test_create_ic_electrode_deprecation(self):
+        nwbfile = NWBFile(
+            session_description='NWBFile icephys test',
+            identifier='NWB123',  # required
+            session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
+        device = Device(name='device_name')
+        msg = "deprecated, use NWBFile.create_icephys_electrode instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            nwbfile.create_ic_electrode(
+                name='test_iS',
+                device=device,
+                description='description',
+                slice='slice',
+                seal='seal',
+                location='location',
+                resistance='resistance',
+                filtering='filtering',
+                initial_access_resistance='initial_access_resistance')
 
 
 class IntracellularElectrodeConstructor(TestCase):
