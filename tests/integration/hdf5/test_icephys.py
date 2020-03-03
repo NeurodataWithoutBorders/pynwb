@@ -22,12 +22,12 @@ class TestIntracellularElectrode(NWBH5IOMixin, TestCase):
 
     def addContainer(self, nwbfile):
         """ Add the test IntracellularElectrode and Device to the given NWBFile """
-        nwbfile.add_ic_electrode(self.container)
+        nwbfile.add_icephys_electrode(self.container)
         nwbfile.add_device(self.device)
 
     def getContainer(self, nwbfile):
         """ Return the test IntracellularElectrode from the given NWBFile """
-        return nwbfile.get_ic_electrode(self.container.name)
+        return nwbfile.get_icephys_electrode(self.container.name)
 
 
 class TestPatchClampSeries(AcquisitionH5IOMixin, TestCase):
@@ -54,7 +54,7 @@ class TestPatchClampSeries(AcquisitionH5IOMixin, TestCase):
         """
         Add the test PatchClampSeries as an acquisition and IntracellularElectrode and Device to the given NWBFile
         """
-        nwbfile.add_ic_electrode(self.elec)
+        nwbfile.add_icephys_electrode(self.elec)
         nwbfile.add_device(self.device)
         super().addContainer(nwbfile)
 
@@ -132,7 +132,7 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
         """
         nwbfile.sweep_table = self.container
         nwbfile.add_device(self.device)
-        nwbfile.add_ic_electrode(self.elec)
+        nwbfile.add_icephys_electrode(self.elec)
         nwbfile.add_acquisition(self.pcs)
 
     def getContainer(self, nwbfile):
@@ -182,7 +182,7 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
         """
         nwbfile.sweep_table = self.container
         nwbfile.add_device(self.device)
-        nwbfile.add_ic_electrode(self.elec)
+        nwbfile.add_icephys_electrode(self.elec)
 
         nwbfile.add_acquisition(self.pcs1)
         nwbfile.add_stimulus_template(self.pcs2a)
