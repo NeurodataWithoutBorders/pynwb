@@ -29,13 +29,13 @@ jobs:
         buildToxEnv: 'build-py35'
         testWheelInstallEnv: 'wheelinstall-py35'
 
-      macOS-py3.5-min-req:
+      macOS-py3.6-min-req:
         imageName: 'macos-10.13'
-        pythonVersion: '3.5'
-        testToxEnv: 'py35-min-req'
+        pythonVersion: '3.6'
+        testToxEnv: 'py36-min-req'
         coverageToxEnv: ''
-        buildToxEnv: 'build-py35-min-req'
-        testWheelInstallEnv: 'wheelinstall-py35-min-req'
+        buildToxEnv: 'build-py36-min-req'
+        testWheelInstallEnv: 'wheelinstall-py36-min-req'
 
       Windows-py3.7:
         imageName: 'vs2017-win2016'
@@ -61,13 +61,13 @@ jobs:
         buildToxEnv: 'build-py35'
         testWheelInstallEnv: 'wheelinstall-py35'
 
-      Windows-py3.5-min-req:
+      Windows-py3.6-min-req:
         imageName: 'vs2017-win2016'
-        pythonVersion: '3.5'
-        testToxEnv: 'py35-min-req'
+        pythonVersion: '3.6'
+        testToxEnv: 'py36-min-req'
         coverageToxEnv: ''
-        buildToxEnv: 'build-py35-min-req'
-        testWheelInstallEnv: 'wheelinstall-py35-min-req'
+        buildToxEnv: 'build-py36-min-req'
+        testWheelInstallEnv: 'wheelinstall-py36-min-req'
 
   pool:
     vmImage: $(imageName)
