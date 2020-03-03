@@ -277,8 +277,6 @@ class NWBFile(MultiContainerInterface):
             {'name': 'ic_electrodes', 'type': (list, tuple),
              'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
                     'IntracellularElectrodes that belong to this NWBFile', 'default': None},
-            {'name': 'icephys_electrodes', 'type': (list, tuple),
-             'doc': 'IntracellularElectrodes that belong to this NWBFile.', 'default': None},
             {'name': 'sweep_table', 'type': SweepTable,
              'doc': 'the SweepTable that belong to this NWBFile', 'default': None},
             {'name': 'imaging_planes', 'type': (list, tuple),
@@ -290,7 +288,9 @@ class NWBFile(MultiContainerInterface):
             {'name': 'subject', 'type': Subject,
              'doc': 'subject metadata', 'default': None},
             {'name': 'scratch', 'type': (list, tuple),
-             'doc': 'scratch data', 'default': None})
+             'doc': 'scratch data', 'default': None},
+            {'name': 'icephys_electrodes', 'type': (list, tuple),
+             'doc': 'IntracellularElectrodes that belong to this NWBFile.', 'default': None})
     def __init__(self, **kwargs):
         kwargs['name'] = 'root'
         call_docval_func(super(NWBFile, self).__init__, kwargs)
