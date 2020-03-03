@@ -7,7 +7,6 @@ from pynwb.testing import TestCase
 from pynwb.file import NWBFile  # Needed to test icephys functionality defined on NWBFile
 from datetime import datetime
 from dateutil.tz import tzlocal
-import warnings
 
 
 def GetElectrode():
@@ -32,16 +31,13 @@ class NWBFileICEphys(TestCase):
 
     def test_ic_electrodes_parameter_deprecation(self):
         # Make sure we warn when using the ic_electrodes parameter on NWBFile
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
+        msg = "Use of the ic_electrodes parameter is deprecated. Use the icephys_electrodes parameter instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
             _ = NWBFile(
                 session_description='NWBFile icephys test',
                 identifier='NWB123',  # required
                 session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
                 ic_electrodes=[self.icephys_electrode, ])
-            assert len(w) == 1
-            assert issubclass(w[-1].category, DeprecationWarning)
-            assert "deprecated" in str(w[-1].message)
 
     def test_icephys_electrodes_parameter(self):
         nwbfile = NWBFile(
@@ -69,29 +65,24 @@ class NWBFileICEphys(TestCase):
             session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
             icephys_electrodes=[self.icephys_electrode, ])
         # make sure NWBFile.ic_electrodes property warns
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
+
+        msg = "deprecated. use NWBFile.icephys_electrodes instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
             nwbfile.ic_electrodes
-            assert len(w) == 1
-            assert issubclass(w[-1].category, DeprecationWarning)
-            assert "deprecated" in str(w[-1].message)
 
         # make sure NWBFile.get_ic_electrode warns
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
+        msg = "deprecated, use NWBFile.get_icephys_electrode instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
             nwbfile.get_ic_electrode(self.icephys_electrode.name)
-            assert len(w) == 1
-            assert issubclass(w[-1].category, DeprecationWarning)
-            assert "deprecated" in str(w[-1].message)
 
     def test_create_ic_electrode_deprecation(self):
         nwbfile = NWBFile(
             session_description='NWBFile icephys test',
             identifier='NWB123',  # required
             session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
-            device = Device(name='device_name')
+        device = Device(name='device_name')
+        msg = "deprecated, use NWBFile.create_icephys_electrode instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
             nwbfile.create_ic_electrode(
                 name='test_iS',
                 device=device,
@@ -102,9 +93,6 @@ class NWBFileICEphys(TestCase):
                 resistance='resistance',
                 filtering='filtering',
                 initial_access_resistance='initial_access_resistance')
-            assert len(w) == 1
-            assert issubclass(w[-1].category, DeprecationWarning)
-            assert "deprecated" in str(w[-1].message)
 
 
 class IntracellularElectrodeConstructor(TestCase):
