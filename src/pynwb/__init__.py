@@ -168,8 +168,8 @@ def get_class(**kwargs):
     specification. If you want to define a custom mapping, you should not use this function and you should define the
     class manually.
 
-    Examples
-    --------
+    Examples:
+
     Generating and registering an extension is as simple as::
 
         MyClass = get_class('MyClass', 'ndx-my-extension')
