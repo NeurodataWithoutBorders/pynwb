@@ -8,7 +8,8 @@ class TestOptogeneticStimulusSiteIO(NWBH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test OptogeneticStimulusSite to read/write """
         self.device = Device(name='dev1')
-        return OptogeneticStimulusSite('stim_site', self.device, 'my stim site', 300., 'in the brain')
+        return OptogeneticStimulusSite(name='stim_site', device=self.device, description='my stim site',
+                                       excitation_lambda=300., location='in the brain')
 
     def addContainer(self, nwbfile):
         """ Add the test OptogeneticStimulusSite and Device to the given NWBFile """
@@ -25,8 +26,9 @@ class TestOptogeneticSeriesIO(AcquisitionH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test OptogeneticSeries to read/write """
         self.device = Device(name='dev1')
-        self.ogen_stim_site = OptogeneticStimulusSite('stim_site', self.device, 'my stim site', 300., 'in the brain')
-        return OptogeneticSeries('stim_series', [1., 2., 3.], self.ogen_stim_site, rate=100.)
+        self.ogen_stim_site = OptogeneticStimulusSite(name='stim_site', device=self.device, description='my stim site',
+                                                      excitation_lambda=300., location='in the brain')
+        return OptogeneticSeries(name='stim_series', data=[1., 2., 3.], site=self.ogen_stim_site, rate=100.)
 
     def addContainer(self, nwbfile):
         """
