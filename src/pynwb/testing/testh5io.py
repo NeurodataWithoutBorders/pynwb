@@ -18,14 +18,15 @@ class NWBH5IOMixin(metaclass=ABCMeta):
     The abstract methods setUpContainer, addContainer, and getContainer needs to be implemented by classes that include
     this mixin.
 
-    Example:
-    class TestMyContainerIO(NWBH5IOMixin, TestCase):
-        def setUpContainer(self):
-            # return a test Container to read/write
-        def addContainer(self, nwbfile):
-            # add the test Container to an NWB file
-        def getContainer(self, nwbfile):
-            # return the test Container from an NWB file
+    Example::
+
+        class TestMyContainerIO(NWBH5IOMixin, TestCase):
+            def setUpContainer(self):
+                # return a test Container to read/write
+            def addContainer(self, nwbfile):
+                # add the test Container to an NWB file
+            def getContainer(self, nwbfile):
+                # return the test Container from an NWB file
 
     This code is adapted from hdmf.testing.H5RoundTripMixin.
     """
@@ -128,10 +129,11 @@ class AcquisitionH5IOMixin(NWBH5IOMixin):
 
     The abstract method setUpContainer needs to be implemented by classes that include this mixin.
 
-    Example:
-    class TestMyContainerIO(NWBH5IOMixin, TestCase):
-        def setUpContainer(self):
-            # return a test Container to read/write
+    Example::
+
+        class TestMyContainerIO(NWBH5IOMixin, TestCase):
+            def setUpContainer(self):
+                # return a test Container to read/write
 
     This code is adapted from hdmf.testing.H5RoundTripMixin.
     """

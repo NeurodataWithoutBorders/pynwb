@@ -5,7 +5,8 @@ import pandas as pd
 from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
 from hdmf import Container, Data, DataRegion, get_region_slicer
 from hdmf.container import AbstractContainer
-from hdmf.common import DynamicTable, DynamicTableRegion  # NOQA
+from hdmf.common import DynamicTable, DynamicTableRegion  # noqa: F401
+from hdmf.common import VectorData, VectorIndex, ElementIdentifiers  # noqa: F401
 
 from . import CORE_NAMESPACE, register_class
 

@@ -1,3 +1,5 @@
+import numpy as np
+
 from pynwb import NWBFile
 from pynwb.icephys import (IntracellularElectrode, PatchClampSeries, CurrentClampStimulusSeries,
                            SweepTable, VoltageClampStimulusSeries, CurrentClampSeries,
@@ -123,7 +125,7 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
                                            device=self.device)
         self.pcs = PatchClampSeries(name="pcs", data=[1, 2, 3, 4, 5], unit='A',
                                     starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                    stimulus_description="gotcha ya!", sweep_number=4711)
+                                    stimulus_description="gotcha ya!", sweep_number=np.uint(4711))
         return SweepTable(name='sweep_table')
 
     def addContainer(self, nwbfile):
@@ -166,13 +168,13 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
                                            device=self.device)
         self.pcs1 = PatchClampSeries(name="pcs1", data=[1, 2, 3, 4, 5], unit='A',
                                      starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                     stimulus_description="gotcha ya!", sweep_number=4711)
+                                     stimulus_description="gotcha ya!", sweep_number=np.uint(4711))
         self.pcs2a = PatchClampSeries(name="pcs2a", data=[1, 2, 3, 4, 5], unit='A',
                                       starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                      stimulus_description="gotcha ya!", sweep_number=4712)
+                                      stimulus_description="gotcha ya!", sweep_number=np.uint(4712))
         self.pcs2b = PatchClampSeries(name="pcs2b", data=[1, 2, 3, 4, 5], unit='A',
                                       starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                      stimulus_description="gotcha ya!", sweep_number=4712)
+                                      stimulus_description="gotcha ya!", sweep_number=np.uint(4712))
 
         return SweepTable(name='sweep_table')
 
