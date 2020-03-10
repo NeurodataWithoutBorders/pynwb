@@ -5,7 +5,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 
 from pynwb import NWBFile, TimeSeries, NWBHDF5IO
-from pynwb.file import Subject, ElectrodeTable
+from pynwb.file import Subject, ElectrodeTable, Electrodes
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
 from pynwb.testing import TestCase, remove_test_file
@@ -186,7 +186,11 @@ class NWBFileTest(TestCase):
             self.nwbfile.get_acquisition("TEST_TS")
 
     def test_set_electrode_table(self):
-        table = ElectrodeTable()
+        msg = ("Use of the ElectrodeTable method is deprecated. "
+               "Use Electrodes to initialize the electrodes table instead. The optional columns 'rel_x', 'rel_y', "
+               "'rel_z', and 'reference' will not be initialized in the tabke returned from this function")
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            table = ElectrodeTable()
         dev1 = self.nwbfile.create_device('dev1')
         group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
         table.add_row(x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=group,
@@ -229,7 +233,6 @@ class NWBFileTest(TestCase):
         self.assertEqual(self.nwbfile.invalid_times.colnames, ('start_time', 'stop_time', 'comments'))
 
     def test_add_invalid_time_interval(self):
-
         self.nwbfile.add_invalid_time_interval(start_time=0.0, stop_time=12.0)
         self.assertEqual(len(self.nwbfile.invalid_times), 1)
         self.nwbfile.add_invalid_time_interval(start_time=15.0, stop_time=16.0)
@@ -244,15 +247,24 @@ class NWBFileTest(TestCase):
     def test_add_electrode(self):
         dev1 = self.nwbfile.create_device('dev1')
         group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
-        self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1', 'none', group=group, id=1)
+        self.nwbfile.add_electrode(x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=group, id=1)
+        self.assertIsIstance(self.electrodes, Electrodes)
         elec = self.nwbfile.electrodes[0]
         self.assertEqual(elec.index[0], 1)
         self.assertEqual(elec.iloc[0]['x'], 1.0)
         self.assertEqual(elec.iloc[0]['y'], 2.0)
         self.assertEqual(elec.iloc[0]['z'], 3.0)
+        self.assertEqual(elec.iloc[0]['imp'], -1.0)
         self.assertEqual(elec.iloc[0]['location'], 'CA1')
         self.assertEqual(elec.iloc[0]['filtering'], 'none')
         self.assertEqual(elec.iloc[0]['group'], group)
+        self.assertEqual(set(self.electrodes.colnames), {'id', 'x', 'y', 'z', 'imp', 'location', 'filtering', 'group',
+                                                         'group_name'})
+
+    def test_add_electrode_column(self):
+        self.nwbfile.add_electrode_column(name='new_col', description='a new column')
+        self.assertEqual(set(self.electrodes.colnames), {'id', 'x', 'y', 'z', 'imp', 'location', 'filtering', 'group',
+                                                         'group_name', 'a new column'})
 
     def test_all_children(self):
         ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])

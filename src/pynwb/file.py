@@ -18,8 +18,7 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, \
-                  ScratchData, LabelledDict
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
 from hdmf.common import DynamicTableRegion, DynamicTable
 
 
@@ -72,6 +71,65 @@ class Subject(NWBContainer):
             self.date_of_birth = _add_missing_timezone(date_of_birth)
         else:
             self.date_of_birth = date_of_birth
+
+
+# NOTE: the electrodes table is not its own neurodata_type
+class Electrodes(DynamicTable):
+
+    __defaultname__ = 'electrodes'
+
+    __columns__ = (
+        {'name': 'x', 'description': 'the x coordinate of the channel location (+x is posterior)', 'required': True},
+        {'name': 'y', 'description': 'the y coordinate of the channel location (+y is inferior)', 'required': True},
+        {'name': 'z', 'description': 'the z coordinate of the channel location (+z is right)', 'required': True},
+        {'name': 'imp', 'description': 'the impedance of the channel', 'required': True},
+        {'name': 'location', 'description': 'the location of channel within the subject e.g. brain region',
+         'required': True},
+        {'name': 'filtering', 'description': 'description of hardware filtering', 'required': True},
+        {'name': 'group', 'description': 'a reference to the ElectrodeGroup this electrode is a part of',
+         'required': True},
+        {'name': 'group_name', 'description': 'the name of the ElectrodeGroup this electrode is a part of',
+         'required': True},
+        {'name': 'rel_x', 'description': 'the x coordinate within the electrode group'},
+        {'name': 'rel_y', 'description': 'the y coordinate within the electrode group'},
+        {'name': 'rel_z', 'description': 'the z coordinate within the electrode group'},
+        {'name': 'reference', 'description': 'Description of the reference used for this electrode.'}
+    )
+
+    @docval({'name': 'name', 'type': str, 'doc': 'name of this Electrodes table', 'default': 'electrodes'},
+            {'name': 'description', 'type': str, 'doc': 'description of this Electrodes table',
+             'default': "metadata about extracellular electrodes"},
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
+    def __init__(self, **kwargs):
+        call_docval_func(super().__init__, kwargs)
+
+    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)',
+             'default': None},
+            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)',
+             'default': None},
+            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)',
+             'default': None},
+            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode',
+             'default': None},
+            {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region',
+             'default': None},
+            {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering',
+             'default': None},
+            {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile',
+             'default': None},
+            {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
+            {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
+            {'name': 'rel_y', 'type': 'float', 'doc': 'the y coordinate within the electrode group', 'default': None},
+            {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
+            {'name': 'reference', 'type': str, 'doc': 'Description of the reference used for this electrode.',
+             'default': None},
+            allow_extra=True)
+    def add_electrode(self, **kwargs):
+        d = _copy.copy(kwargs['data']) if kwargs.get('data') is not None else kwargs
+        if d.get('group_name', None) is None:
+            d['group_name'] = d['group'].name
+
+        super().add_row(**d)
 
 
 @register_class('NWBFile', CORE_NAMESPACE)
@@ -482,9 +540,9 @@ class NWBFile(MultiContainerInterface):
 
     def __check_electrodes(self):
         if self.electrodes is None:
-            self.electrodes = ElectrodeTable()
+            self.electrodes = Electrodes()
 
-    @docval(*get_docval(DynamicTable.add_column))
+    @docval(*get_docval(Electrodes.add_column))
     def add_electrode_column(self, **kwargs):
         """
         Add a column to the electrode table.
@@ -493,23 +551,10 @@ class NWBFile(MultiContainerInterface):
         self.__check_electrodes()
         call_docval_func(self.electrodes.add_column, kwargs)
 
-    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)'},
-            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)'},
-            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)'},
-            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode'},
-            {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
-            {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
-            {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
-            {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
-            {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
-            {'name': 'rel_y', 'type': 'float', 'doc': 'the y coordinate within the electrode group', 'default': None},
-            {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
-            {'name': 'reference', 'type': str, 'doc': 'Description of the reference used for this electrode.',
-             'default': None},
-            allow_extra=True)
+    @docval(*get_docval(Electrodes.add_electrode), allow_extra=True)
     def add_electrode(self, **kwargs):
         """
-        Add a unit to the unit table.
+        Add an electrode to the electrodes table.
         See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         Required fields are *x*, *y*, *z*, *imp*, *location*, *filtering*,
@@ -517,21 +562,7 @@ class NWBFile(MultiContainerInterface):
         (through calls to `add_electrode_columns`).
         """
         self.__check_electrodes()
-        d = _copy.copy(kwargs['data']) if kwargs.get('data') is not None else kwargs
-        if d.get('group_name', None) is None:
-            d['group_name'] = d['group'].name
-
-        new_cols = [('rel_x', 'the x coordinate within the electrode group'),
-                    ('rel_y', 'the y coordinate within the electrode group'),
-                    ('rel_z', 'the z coordinate within the electrode group'),
-                    ('reference', 'Description of the reference used for this electrode.')]
-        for col_name, col_doc in new_cols:
-            if kwargs[col_name] is not None and col_name not in self.electrodes:
-                self.electrodes.add_column(col_name, col_doc)
-            else:
-                d.pop(col_name)  # remove args from d if not set
-
-        call_docval_func(self.electrodes.add_row, d)
+        call_docval_func(self.electrodes.add_electrode, kwargs)
 
     @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
             {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},
@@ -763,24 +794,32 @@ def _tablefunc(table_name, description, columns):
     return t
 
 
-def ElectrodeTable(name='electrodes',
-                   description='metadata about extracellular electrodes'):
-    return _tablefunc(name, description,
-                      [('x', 'the x coordinate of the channel location'),
-                       ('y', 'the y coordinate of the channel location'),
-                       ('z', 'the z coordinate of the channel location'),
-                       ('imp', 'the impedance of the channel'),
-                       ('location', 'the location of channel within the subject e.g. brain region'),
-                       ('filtering', 'description of hardware filtering'),
-                       ('group', 'a reference to the ElectrodeGroup this electrode is a part of'),
-                       ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')
-                       ]
-                      )
+def ElectrodeTable(name='electrodes', description='metadata about extracellular electrodes'):
+    warn("Use of the ElectrodeTable method is deprecated. "
+         "Use Electrodes to initialize the electrodes table instead. The optional columns 'rel_x', 'rel_y', 'rel_z', "
+         "and 'reference' will not be initialized in the tabke returned from this function", DeprecationWarning)
+    columns = [('x', 'the x coordinate of the channel location'),
+               ('y', 'the y coordinate of the channel location'),
+               ('z', 'the z coordinate of the channel location'),
+               ('imp', 'the impedance of the channel'),
+               ('location', 'the location of channel within the subject e.g. brain region'),
+               ('filtering', 'description of hardware filtering'),
+               ('group', 'a reference to the ElectrodeGroup this electrode is a part of'),
+               ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')]
+    t = DynamicTable(name, description)
+    for c in columns:
+        t.add_column(c[0], c[1])
+    return t
 
 
 def TrialTable(name='trials', description='metadata about experimental trials'):
+    warn("Use of the TrialTable method is deprecated. "
+         "Use add_trial or add_trial_column to initialize the trials table instead.", DeprecationWarning)
     return _tablefunc(name, description, ['start_time', 'stop_time'])
 
 
 def InvalidTimesTable(name='invalid_times', description='time intervals to be removed from analysis'):
+    warn("Use of the InvalidTimesTable method is deprecated. "
+         "Use add_invalid_time_interval or add_invalid_times_column to initialize the "
+         "invalid times table instead.", DeprecationWarning)
     return _tablefunc(name, description, ['start_time', 'stop_time'])
