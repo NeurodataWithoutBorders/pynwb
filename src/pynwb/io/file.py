@@ -199,6 +199,9 @@ class NWBFileMap(ObjectMapper):
     @ObjectMapper.constructor_arg('electrodes')
     def electrodes_carg(self, builder, manager):
         # change typing of constructed electrodes table from DynamicTable to Electrodes
+        if ('extracellular_ephys' not in builder['general'] or
+                'electrodes' not in builder['general']['extracellular_ephys']):
+            return None
         electrodes_builder = builder['general']['extracellular_ephys']['electrodes']
         # construct the electrodes table from the spec (as a DynamicTable)
         # this has happened earlier in the construct process but this function does not have access to the previously
