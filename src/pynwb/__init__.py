@@ -5,6 +5,7 @@ import os.path
 from copy import deepcopy
 from warnings import warn
 import h5py
+import re
 
 from hdmf.spec import NamespaceCatalog
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
@@ -243,6 +244,12 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
+        if (('w' in mode or mode == 'x') and not re.match(r'^\d+\.\d+\.\d+$', globals()['__version__'])
+                and globals()['__warn_pynwb_dev__']):
+            warn('You are using the development version of PyNWB. We recommend using a released version of PyNWB to '
+                 'create NWB files for public use. This warning will not appear again during this Python interpreter '
+                 'session.')
+            # globals()['__warn_pynwb_dev__'] = False
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
 
 
@@ -266,3 +273,4 @@ from . import legacy  # noqa: F401,E402
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
 del get_versions
+__warn_pynwb_dev__ = True

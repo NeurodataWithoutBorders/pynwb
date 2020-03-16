@@ -211,6 +211,8 @@ def main():
                             message=("can't resolve package from __spec__ or __package__, falling back on __name__ "
                                      "and __path__"))
 
+    globals()['__warn_pynwb_dev__'] = False
+
     # Run unit tests for pynwb package
     if flags['pynwb'] in args.suites:
         run_test_suite("tests/unit", "pynwb unit tests", verbose=args.verbosity)
