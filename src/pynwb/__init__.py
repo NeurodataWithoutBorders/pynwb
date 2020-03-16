@@ -245,7 +245,7 @@ class NWBHDF5IO(_HDF5IO):
             elif manager is None:
                 manager = get_manager()
         if (('w' in mode or mode == 'x') and not re.match(r'^\d+\.\d+\.\d+$', globals()['__version__'])
-                and globals()['__warn_pynwb_dev__']):
+                and os.getenv('WARN_PYNWB_DEV', True) not in ('False', 'false', 'FALSE', '0', 0, False)):
             warn('You are using the development version of PyNWB. We recommend using a released version of PyNWB to '
                  'create NWB files for public use. This warning will not appear again during this Python interpreter '
                  'session.')
@@ -273,4 +273,3 @@ from . import legacy  # noqa: F401,E402
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
 del get_versions
-__warn_pynwb_dev__ = True
