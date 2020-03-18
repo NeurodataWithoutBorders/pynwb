@@ -6,7 +6,9 @@ class TestDeviceIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Device to read/write """
-        return Device(name='device_name')
+        return Device(name='device_name',
+                      description='description',
+                      manufacturer='manufacturer')
 
     def addContainer(self, nwbfile):
         """ Add the test Device to the given NWBFile """
