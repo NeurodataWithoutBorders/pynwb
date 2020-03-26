@@ -207,35 +207,14 @@ class NWBFileMap(ObjectMapper):
         # this has happened earlier in the construct process but this function does not have access to the previously
         # constructed object, so we do it again here
         constructed = manager.construct(electrodes_builder)
-        ret = Electrodes.__new__(
-            Electrodes,
-            container_source=constructed.container_source,
-            parent=constructed.parent,
-            object_id=constructed.object_id
-        )
-
-        ret.__init__(
-            name=constructed.name,
-            description=constructed.description,
-            id=constructed.id,
-            columns=constructed.columns,
-            colnames=constructed.colnames
-        )
+        ret = Electrodes.cast(constructed)
         return ret
 
     @ObjectMapper.object_attr('electrodes')
     def electrodes_obj_attr(self, container, manager):
         ret = None
-        if isinstance(container.electrodes, Electrodes):
-            ret = container.electrodes
-        elif isinstance(container.electrodes, DynamicTable):
-            ret = Electrodes(
-                name=container.electrodes.name,
-                description=container.electrodes.description,
-                id=container.electrodes.id,
-                columns=container.electrodes.columns,
-                colnames=container.electrodes.colnames
-            )
+        if not isinstance(container.electrodes, Electrodes) and isinstance(container.electrodes, DynamicTable):
+            ret = Electrodes.cast(container.electrodes)
         return ret
 
 

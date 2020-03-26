@@ -438,13 +438,13 @@ class TestElectrodes(NWBH5IOMixin, TestCase):
         self.group = nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', self.dev1)
 
         nwbfile.add_electrode(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
-                              group_name='tetrode1')
+                              group_name='tetrode1', rel_x=1.0)
         nwbfile.add_electrode(id=2, x=1.0, y=2.0, z=3.0, imp=-2.0, location='CA1', filtering='none', group=self.group,
-                              group_name='tetrode1')
+                              group_name='tetrode1', rel_x=1.0)
         nwbfile.add_electrode(id=3, x=1.0, y=2.0, z=3.0, imp=-3.0, location='CA1', filtering='none', group=self.group,
-                              group_name='tetrode1')
+                              group_name='tetrode1', rel_x=1.0)
         nwbfile.add_electrode(id=4, x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none', group=self.group,
-                              group_name='tetrode1')
+                              group_name='tetrode1', rel_x=1.0)
 
         self.container = nwbfile.electrodes  # override self.container which has the placeholder
 

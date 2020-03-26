@@ -3,14 +3,14 @@ import numpy as np
 from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Clustering, EventWaveform,\
                           ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction, ElectrodeGroup
 from pynwb.device import Device
-from pynwb.file import ElectrodeTable
+from pynwb.file import Electrodes
 from pynwb.testing import TestCase
 
 from hdmf.common import DynamicTableRegion
 
 
 def make_electrode_table():
-    table = ElectrodeTable()
+    table = Electrodes()
     dev1 = Device('dev1')
     group = ElectrodeGroup('tetrode1', 'tetrode description', 'tetrode location', dev1)
     table.add_row(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none',

@@ -131,6 +131,16 @@ class Electrodes(DynamicTable):
 
         super().add_row(**d)
 
+    @classmethod
+    @docval({'name': 'table', 'type': DynamicTable, 'doc': 'the DynamicTable object to cast into an Electrodes object'})
+    def cast(cls, table):
+        """Cast a DynamicTable object into an Electrodes object. The input table is cast (no copy) and returned.
+        Class columns defined in Electrodes.__columns__ are added to the table.
+        """
+        table.__class__ = cls
+        table._init_class_columns()  # create columns and attrs for columns defined in Electrodes.__columns__
+        return table
+
 
 @register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(MultiContainerInterface):
@@ -380,7 +390,6 @@ class NWBFile(MultiContainerInterface):
             'keywords',
             'processing',
             'epoch_tags',
-            'electrodes',
             'electrode_groups',
             'devices',
             'imaging_planes',
@@ -411,6 +420,11 @@ class NWBFile(MultiContainerInterface):
         ]
         for attr in fieldnames:
             setattr(self, attr, kwargs.get(attr, None))
+
+        electrodes = kwargs.get('electrodes', None)
+        if electrodes is not None and not isinstance(electrodes, Electrodes):
+            electrodes = Electrodes.cast(electrodes)
+        setattr(self, 'electrodes', electrodes)
 
         # backwards-compatibility code for ic_electrodes / icephys_electrodes
         ic_elec_val = kwargs.get('icephys_electrodes', None)
@@ -795,6 +809,7 @@ def _tablefunc(table_name, description, columns):
 
 
 def ElectrodeTable(name='electrodes', description='metadata about extracellular electrodes'):
+    """DEPRECATED. Initialize the electrodes table."""
     warn("Use of the ElectrodeTable method is deprecated. "
          "Use Electrodes to initialize the electrodes table instead. The optional columns 'rel_x', 'rel_y', 'rel_z', "
          "and 'reference' will not be initialized in the tabke returned from this function", DeprecationWarning)
