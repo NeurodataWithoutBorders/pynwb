@@ -97,9 +97,9 @@ by CircleCI, typically named `pynwb-{version}.tar.gz`.
 .. _versioneer: https://github.com/warner/python-versioneer
 .. _release: https://github.com/NeurodataWithoutBorders/pynwb/releases
 
--------------------------------------
-Coordinating with nwb-schema Releases
--------------------------------------
+----------------------------------------------------
+Coordinating with nwb-schema Repository and Releases
+----------------------------------------------------
 
 The default branch is "dev". It is important that all releases of PyNWB contain a released version of nwb-schema.
 If a release contains an unreleased version of nwb-schema, e.g., from an untagged commit on the "dev" branch, then
