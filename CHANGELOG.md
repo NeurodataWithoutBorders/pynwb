@@ -1,5 +1,13 @@
 # PyNWB Changelog
 
+## PyNWB 1.3.1 (Upcoming)
+
+### Bug fixes:
+- Fix bugged `Device` constructor. @rly (#1209)
+
+### Internal improvements:
+- Update CI to use supported MacOS version. @rly (#1211)
+
 ## PyNWB 1.3.0 (Mar. 4, 2020)
 
 ### New features:
