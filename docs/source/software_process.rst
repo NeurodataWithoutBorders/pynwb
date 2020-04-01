@@ -125,3 +125,7 @@ changes to the API or schema, and the git history should reflect those changes s
 The "dev" branch should NEVER contain unreleased versions of nwb-schema to prevent cases of users and developers
 accidentally publishing files with unreleased schema. This problem cannot be completely avoided, however, as users
 could still publish files generated from the "schema_x.y.z" branch of PyNWB.
+
+The nwb-schema uses hdmf-common-schema. Changes in hdmf-common-schema that affect nwb-schema result in version
+changes of nwb-schema and as such are managed in the same fashion. One main difference is that updates to
+hdmf-common-schema may also involve updates to version requirements for HDMF in PyNWB.
