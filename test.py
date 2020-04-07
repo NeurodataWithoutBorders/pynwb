@@ -1,7 +1,4 @@
 #!/usr/bin/env python
-
-from __future__ import print_function
-
 import warnings
 import re
 import argparse
@@ -10,12 +7,13 @@ import inspect
 import logging
 import os.path
 import os
+from subprocess import run, PIPE, STDOUT
 import sys
 import traceback
-import unittest2 as unittest
+import unittest
 from tests.coloredtestrunner import ColoredTestRunner, ColoredTestResult
 
-flags = {'pynwb': 2, 'integration': 3, 'example': 4}
+flags = {'pynwb': 2, 'integration': 3, 'example': 4, 'backwards': 5, 'validation': 6}
 
 TOTAL = 0
 FAILURES = 0
@@ -81,20 +79,57 @@ def validate_nwbs():
 
     import pynwb
 
-    TOTAL += len(examples_nwbs)
     for nwb in examples_nwbs:
         try:
             logging.info("Validating file %s" % nwb)
 
             ws = list()
             with warnings.catch_warnings(record=True) as tmp:
+                logging.info("Validating with pynwb.validate method.")
                 with pynwb.NWBHDF5IO(nwb, mode='r') as io:
                     errors = pynwb.validate(io)
+                    TOTAL += 1
+
                     if errors:
                         FAILURES += 1
                         ERRORS += 1
                         for err in errors:
                             print("Error: %s" % err)
+
+                def get_namespaces(nwbfile):
+                    comp = run(["python", "-m", "pynwb.validate",
+                               "--list-namespaces", "--cached-namespace", nwb],
+                               stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=20)
+
+                    if comp.returncode != 0:
+                        return []
+
+                    return comp.stdout.split()
+
+                namespaces = get_namespaces(nwb)
+
+                if len(namespaces) == 0:
+                    FAILURES += 1
+                    ERRORS += 1
+
+                cmds = []
+                cmds += [["python", "-m", "pynwb.validate", nwb]]
+                cmds += [["python", "-m", "pynwb.validate", "--cached-namespace", nwb]]
+                cmds += [["python", "-m", "pynwb.validate", "--no-cached-namespace", nwb]]
+
+                for ns in namespaces:
+                    cmds += [["python", "-m", "pynwb.validate", "--cached-namespace", "--ns", ns, nwb]]
+
+                for cmd in cmds:
+                    logging.info("Validating with \"%s\"." % (" ".join(cmd[:-1])))
+                    comp = run(cmd, stdout=PIPE, stderr=STDOUT, universal_newlines=True, timeout=20)
+                    TOTAL += 1
+
+                    if comp.returncode != 0:
+                        FAILURES += 1
+                        ERRORS += 1
+                        print("Error: %s" % comp.stdout)
+
                 for w in tmp:  # ignore RunTimeWarnings about importing
                     if isinstance(w.message, RuntimeWarning) and not warning_re.match(str(w.message)):
                         ws.append(w)
@@ -114,7 +149,6 @@ def run_integration_tests(verbose=True):
     type_map = pynwb.get_type_map()
 
     tested_containers = {}
-    required_tests = {}
     for test_case in test_cases:
         if not hasattr(test_case, 'container'):
             continue
@@ -125,30 +159,13 @@ def run_integration_tests(verbose=True):
         else:
             tested_containers[container_class].append(test_case._testMethodName)
 
-        if container_class not in required_tests:
-            required_tests[container_class] = list(test_case.required_tests)
-        else:
-            required_tests[container_class].extend(test_case.required_tests)
-
     count_missing = 0
     for container_class in type_map.get_container_classes('core'):
-
         if container_class not in tested_containers:
             count_missing += 1
             if verbose > 1:
                 logging.info('%s missing test case; should define in %s' % (container_class,
                                                                             inspect.getfile(container_class)))
-            continue
-
-        test_methods = tested_containers[container_class]
-        required = required_tests[container_class]
-        methods_missing = set(required) - set(test_methods)
-
-        if methods_missing != set([]):
-            count_missing += 1
-            if verbose > 1:
-                logging.info('%s missing test method(s) \"%s\"; should define in %s' % (
-                    container_class, ', '.join(methods_missing), inspect.getfile(container_class)))
 
     if count_missing > 0:
         logging.info('%d classes missing integration tests in ui_write' % count_missing)
@@ -168,10 +185,15 @@ def main():
                         help='run integration tests')
     parser.add_argument('-e', '--example', action='append_const', const=flags['example'], dest='suites',
                         help='run example tests')
+    parser.add_argument('-b', '--backwards', action='append_const', const=flags['backwards'], dest='suites',
+                        help='run backwards compatibility tests')
+    parser.add_argument('-w', '--validation', action='append_const', const=flags['validation'], dest='suites',
+                        help='run validation tests')
     args = parser.parse_args()
     if not args.suites:
         args.suites = list(flags.values())
         args.suites.pop(args.suites.index(flags['example']))  # remove example as a suite run by default
+        args.suites.pop(args.suites.index(flags['validation']))  # remove validation as a suite run by default
 
     # set up logger
     root = logging.getLogger()
@@ -196,11 +218,19 @@ def main():
     # Run example tests
     if flags['example'] in args.suites:
         run_example_tests()
+
+    # Run validation tests
+    if flags['validation'] in args.suites:
+        run_example_tests()
         validate_nwbs()
 
     # Run integration tests
     if flags['integration'] in args.suites:
         run_integration_tests(verbose=args.verbosity)
+
+    # Run backwards compatibility tests
+    if flags['backwards'] in args.suites:
+        run_test_suite("tests/back_compat", "pynwb backwards compatibility tests", verbose=args.verbosity)
 
     final_message = 'Ran %s tests' % TOTAL
     exitcode = 0

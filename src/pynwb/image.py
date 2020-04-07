@@ -1,8 +1,5 @@
 import warnings
-try:
-    from collections.abc import Iterable  # Python 3
-except ImportError:
-    from collections import Iterable  # Python 2.7
+from collections.abc import Iterable
 
 from hdmf.utils import docval, popargs, call_docval_func, get_docval
 
@@ -24,7 +21,8 @@ class ImageSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames. '
+                    'dimensions: time, x, y [, z]',
              'default': None},
             *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'format', 'type': str,
@@ -133,7 +131,9 @@ class OpticalSeries(ImageSeries):
                      'field_of_view',
                      'orientation')
 
-    @docval(*get_docval(ImageSeries.__init__, 'name', 'data'),  # required
+    @docval(*get_docval(ImageSeries.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
+             'doc': 'Images presented to subject, either grayscale or RGB'},
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
             {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required

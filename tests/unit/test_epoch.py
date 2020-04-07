@@ -1,15 +1,14 @@
-import unittest
+import numpy as np
+import pandas as pd
 from datetime import datetime
 from dateutil import tz
 
 from pynwb.epoch import TimeIntervals
 from pynwb import TimeSeries, NWBFile
-
-import numpy as np
-import pandas as pd
+from pynwb.testing import TestCase
 
 
-class TimeIntervalsTest(unittest.TestCase):
+class TimeIntervalsTest(TestCase):
 
     def test_init(self):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
@@ -65,7 +64,6 @@ class TimeIntervalsTest(unittest.TestCase):
             nwbfile.add_epoch(start_time=row['start_time'], stop_time=row['stop_time'])
 
     def test_from_dataframe(self):
-
         df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']},
                           columns=('start_time', 'stop_time', 'label'))
         ti = TimeIntervals.from_dataframe(df, name='ti_name')
@@ -75,17 +73,11 @@ class TimeIntervalsTest(unittest.TestCase):
         self.assertEqual(ti.columns[2].data, ['a', 'b', 'c'])
 
     def test_from_dataframe_missing_required_cols(self):
-
+        df = pd.DataFrame({'start_time': [1., 2., 3.], 'label': ['a', 'b', 'c']})
         with self.assertRaises(ValueError):
-            df = pd.DataFrame({'start_time': [1., 2., 3.], 'label': ['a', 'b', 'c']})
             TimeIntervals.from_dataframe(df, name='ti_name')
 
     def test_frorm_dataframe_missing_supplied_col(self):
-
+        df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
         with self.assertRaises(ValueError):
-            df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
             TimeIntervals.from_dataframe(df, name='ti_name', columns=[{'name': 'not there'}])
-
-
-if __name__ == '__main__':
-    unittest.main()

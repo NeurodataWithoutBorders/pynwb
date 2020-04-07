@@ -1,12 +1,42 @@
 from datetime import datetime
-
-import unittest2 as unittest
 from dateutil.tz import tzlocal
+
+from hdmf.utils import docval, call_docval_func
+
 from pynwb import NWBFile, TimeSeries, available_namespaces
-from pynwb.core import LabelledDict
+from pynwb.core import NWBContainer, LabelledDict
+from pynwb.testing import TestCase
 
 
-class TestPrint(unittest.TestCase):
+class MyTestClass(NWBContainer):
+
+    __nwbfields__ = ('prop1', 'prop2')
+
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this container'})
+    def __init__(self, **kwargs):
+        call_docval_func(super(MyTestClass, self).__init__, kwargs)
+        self.prop1 = 'test1'
+
+
+class TestNWBContainer(TestCase):
+
+    def test_constructor(self):
+        """Test constructor
+        """
+        obj = MyTestClass('obj1')
+        self.assertEqual(obj.name, 'obj1')
+        obj.prop2 = 'test2'
+
+    def test_nwbfields(self):
+        """Test that getters and setters work for nwbfields
+        """
+        obj = MyTestClass('obj1')
+        obj.prop2 = 'test2'
+        self.assertEqual(obj.prop1, 'test1')
+        self.assertEqual(obj.prop2, 'test2')
+
+
+class TestPrint(TestCase):
 
     def test_print_file(self):
         nwbfile = NWBFile(session_description='session_description',
@@ -49,12 +79,12 @@ Fields:
         self.assertRegex(str(nwbfile), expected_re)
 
 
-class TestAvailableNamespaces(unittest.TestCase):
+class TestAvailableNamespaces(TestCase):
     def test_available_namespaces(self):
         self.assertEqual(available_namespaces(), ('hdmf-common', 'core'))
 
 
-class TestLabelledDict(unittest.TestCase):
+class TestLabelledDict(TestCase):
 
     def setUp(self):
         self.name = 'name'

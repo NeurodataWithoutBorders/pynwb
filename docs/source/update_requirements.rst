@@ -10,15 +10,17 @@ The different requirements files introduced in :ref:`software_process` section a
 * requirements.txt_
 * requirements-dev.txt_
 * requirements-doc.txt_
+* requirements-min.txt_
 
 .. _requirements.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements.txt
 .. _requirements-dev.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements-dev.txt
 .. _requirements-doc.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements-doc.txt
+.. _requirements-min.txt: https://github.com/NeurodataWithoutBorders/pynwb/blob/dev/requirements-min.txt
 
 requirements.txt
 ================
 
-`Requirements.txt` of the project can be created or updated and then captured using
+`requirements.txt` of the project can be created or updated and then captured using
 the following script:
 
 .. code::
@@ -63,3 +65,12 @@ the following scripts:
 
    deactivate
    rmvirtualenv pynwb-requirements
+
+
+requirements-min.txt
+====================
+
+Minimum requirements should be updated manually if a new feature or bug fix is added in a dependency that is required
+for proper running of PyNWB. Minimum requirements should also be updated if a user requests that PyNWB be installable
+with an older version of a dependency, all tests pass using the older version, and there is no valid reason for the
+minimum version to be as high as it is.

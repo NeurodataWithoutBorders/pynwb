@@ -1,9 +1,5 @@
 from warnings import warn
-
-try:
-    from collections.abc import Iterable  # Python 3
-except ImportError:
-    from collections import Iterable  # Python 2.7
+from collections.abc import Iterable
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
 from hdmf.common import DynamicTable
@@ -159,9 +155,9 @@ class TimeSeries(NWBDataInterface):
             self.rate = rate
             if starting_time is not None:
                 self.starting_time = starting_time
-                self.starting_time_unit = self.__time_unit
             else:
                 self.starting_time = 0.0
+            self.starting_time_unit = self.__time_unit
         else:
             raise TypeError("either 'timestamps' or 'rate' must be specified")
 
@@ -177,7 +173,7 @@ class TimeSeries(NWBDataInterface):
             )
 
         def no_len_warning(attr):
-            return 'The {} attribute on this TimeSeries (named: {}) has no __len__, '.format(attr, self.name)
+            return 'The {} attribute on this TimeSeries (named: {}) has no __len__'.format(attr, self.name)
 
         if hasattr(self.data, '__len__'):
             try:
@@ -236,10 +232,14 @@ class TimeSeries(NWBDataInterface):
 
 @register_class('Image', CORE_NAMESPACE)
 class Image(NWBData):
+    """
+    Abstract image class. It is recommended to instead use pynwb.image.GrayscaleImage or pynwb.image.RGPImage where
+    appropriate.
+    """
     __nwbfields__ = ('data', 'resolution', 'description')
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image. Dimensions: x, y [, r,g,b[,a]]',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
             {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},
             {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})

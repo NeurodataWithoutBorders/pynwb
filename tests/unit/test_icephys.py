@@ -1,44 +1,125 @@
-import unittest
-
 import numpy as np
 
 from pynwb.icephys import PatchClampSeries, CurrentClampSeries, IZeroClampSeries, CurrentClampStimulusSeries, \
         VoltageClampSeries, VoltageClampStimulusSeries, IntracellularElectrode
 from pynwb.device import Device
+from pynwb.testing import TestCase
+from pynwb.file import NWBFile  # Needed to test icephys functionality defined on NWBFile
+from datetime import datetime
+from dateutil.tz import tzlocal
 
 
 def GetElectrode():
     device = Device(name='device_name')
-    elec = IntracellularElectrode('test_iS',
-                                  device,
-                                  'slice',
-                                  'seal',
-                                  'description',
-                                  'location',
-                                  'resistance',
-                                  'filtering',
-                                  'initial_access_resistance')
+    elec = IntracellularElectrode(
+        name='test_iS',
+        device=device,
+        description='description',
+        slice='slice',
+        seal='seal',
+        location='location',
+        resistance='resistance',
+        filtering='filtering',
+        initial_access_resistance='initial_access_resistance')
     return elec
 
 
-class IntracellularElectrodeConstructor(unittest.TestCase):
+class NWBFileICEphys(TestCase):
+    """Test ICEphys-specific functionality on NWBFile"""
+    def setUp(self):
+        self.icephys_electrode = GetElectrode()
 
-    def GetElectrode(self):
+    def test_ic_electrodes_parameter_deprecation(self):
+        # Make sure we warn when using the ic_electrodes parameter on NWBFile
+        msg = "Use of the ic_electrodes parameter is deprecated. Use the icephys_electrodes parameter instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            _ = NWBFile(
+                session_description='NWBFile icephys test',
+                identifier='NWB123',  # required
+                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+                ic_electrodes=[self.icephys_electrode, ])
+
+    def test_icephys_electrodes_parameter(self):
+        nwbfile = NWBFile(
+                session_description='NWBFile icephys test',
+                identifier='NWB123',  # required
+                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+                icephys_electrodes=[self.icephys_electrode, ])
+        self.assertEqual(nwbfile.get_icephys_electrode('test_iS'), self.icephys_electrode)
+
+    def test_add_ic_electrode_deprecation(self):
+        # Make sure we warn when using the add_ic_electrodes parameter on NWBFile
+        nwbfile = NWBFile(
+                session_description='NWBFile icephys test',
+                identifier='NWB123',  # required
+                session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
+
+        msg = "deprecated, use NWBFile.add_icephys_electrode instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            nwbfile.add_ic_electrode(self.icephys_electrode)
+
+    def test_ic_electrodes_attribute_deprecation(self):
+        nwbfile = NWBFile(
+            session_description='NWBFile icephys test',
+            identifier='NWB123',  # required
+            session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()),
+            icephys_electrodes=[self.icephys_electrode, ])
+        # make sure NWBFile.ic_electrodes property warns
+
+        msg = "deprecated. use NWBFile.icephys_electrodes instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            nwbfile.ic_electrodes
+
+        # make sure NWBFile.get_ic_electrode warns
+        msg = "deprecated, use NWBFile.get_icephys_electrode instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            nwbfile.get_ic_electrode(self.icephys_electrode.name)
+
+    def test_create_ic_electrode_deprecation(self):
+        nwbfile = NWBFile(
+            session_description='NWBFile icephys test',
+            identifier='NWB123',  # required
+            session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
         device = Device(name='device_name')
-        elec = IntracellularElectrode('slice', 'seal', 'description', 'location', 'resistance',
-                                      'filtering', 'initial_access_resistance',
-                                      device)
+        msg = "deprecated, use NWBFile.create_icephys_electrode instead"
+        with self.assertWarnsWith(DeprecationWarning, msg):
+            nwbfile.create_ic_electrode(
+                name='test_iS',
+                device=device,
+                description='description',
+                slice='slice',
+                seal='seal',
+                location='location',
+                resistance='resistance',
+                filtering='filtering',
+                initial_access_resistance='initial_access_resistance')
+
+
+class IntracellularElectrodeConstructor(TestCase):
+
+    def test_constructor(self):
+        device = Device(name='device_name')
+        elec = IntracellularElectrode('test_iS',
+                                      device,
+                                      'description',
+                                      'slice',
+                                      'seal',
+                                      'location',
+                                      'resistance',
+                                      'filtering',
+                                      'initial_access_resistance')
+        self.assertEqual(elec.name, 'test_iS')
+        self.assertEqual(elec.device, device)
+        self.assertEqual(elec.description, 'description')
         self.assertEqual(elec.slice, 'slice')
         self.assertEqual(elec.seal, 'seal')
-        self.assertEqual(elec.description, 'description')
         self.assertEqual(elec.location, 'location')
         self.assertEqual(elec.resistance, 'resistance')
         self.assertEqual(elec.filtering, 'filtering')
         self.assertEqual(elec.initial_access_resistance, 'initial_access_resistance')
-        self.assertEqual(elec.device, device)
 
 
-class PatchClampSeriesConstructor(unittest.TestCase):
+class PatchClampSeriesConstructor(TestCase):
 
     def test_default(self):
         electrode_name = GetElectrode()
@@ -60,6 +141,17 @@ class PatchClampSeriesConstructor(unittest.TestCase):
         self.assertEqual(pCS.electrode, electrode_name)
         self.assertEqual(pCS.gain, 1.0)
         self.assertEqual(pCS.sweep_number, 4711)
+
+    def test_sweepNumber_valid_np(self):
+        electrode_name = GetElectrode()
+
+        pCS = PatchClampSeries('test_pCS', list(), 'unit',
+                               electrode_name, 1.0, timestamps=list(), sweep_number=1)
+        self.assertEqual(pCS.name, 'test_pCS')
+        self.assertEqual(pCS.unit, 'unit')
+        self.assertEqual(pCS.electrode, electrode_name)
+        self.assertEqual(pCS.gain, 1.0)
+        self.assertEqual(pCS.sweep_number, np.uint32(1))
 
     def test_sweepNumber_large_and_valid(self):
         electrode_name = GetElectrode()
@@ -94,12 +186,13 @@ class PatchClampSeriesConstructor(unittest.TestCase):
                              electrode_name, 1.0, timestamps=list(), sweep_number=1.5)
 
 
-class CurrentClampSeriesConstructor(unittest.TestCase):
+class CurrentClampSeriesConstructor(TestCase):
 
     def test_init(self):
         electrode_name = GetElectrode()
 
-        cCS = CurrentClampSeries('test_cCS', list(), electrode_name, 1.0, "stimset", 2.0, 3.0, 4.0, timestamps=list())
+        cCS = CurrentClampSeries('test_cCS', list(), electrode_name, 1.0, "stimset", 2.0, 3.0, 4.0,
+                                 timestamps=list())
         self.assertEqual(cCS.name, 'test_cCS')
         self.assertEqual(cCS.unit, 'volts')
         self.assertEqual(cCS.electrode, electrode_name)
@@ -109,8 +202,17 @@ class CurrentClampSeriesConstructor(unittest.TestCase):
         self.assertEqual(cCS.bridge_balance, 3.0)
         self.assertEqual(cCS.capacitance_compensation, 4.0)
 
+    def test_unit_warning(self):
+        electrode_name = GetElectrode()
 
-class IZeroClampSeriesConstructor(unittest.TestCase):
+        msg = "Unit for CurrentClampSeries 'test_cCS' is ignored and will be set to 'volts' as per NWB 2.1.0."
+        with self.assertWarnsWith(UserWarning, msg):
+            cCS = CurrentClampSeries('test_cCS', list(), electrode_name, 1.0, "stimset", 2.0, 3.0, 4.0,
+                                     timestamps=list(), unit='unit')
+        self.assertEqual(cCS.unit, 'volts')
+
+
+class IZeroClampSeriesConstructor(TestCase):
 
     def test_init(self):
         electrode_name = GetElectrode()
@@ -124,8 +226,16 @@ class IZeroClampSeriesConstructor(unittest.TestCase):
         self.assertEqual(iZCS.bridge_balance, 0.0)
         self.assertEqual(iZCS.capacitance_compensation, 0.0)
 
+    def test_unit_warning(self):
+        electrode_name = GetElectrode()
 
-class CurrentClampStimulusSeriesConstructor(unittest.TestCase):
+        msg = "Unit for IZeroClampSeries 'test_iZCS' is ignored and will be set to 'volts' as per NWB 2.1.0."
+        with self.assertWarnsWith(UserWarning, msg):
+            iZCS = IZeroClampSeries('test_iZCS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
+        self.assertEqual(iZCS.unit, 'volts')
+
+
+class CurrentClampStimulusSeriesConstructor(TestCase):
 
     def test_init(self):
         electrode_name = GetElectrode()
@@ -136,8 +246,17 @@ class CurrentClampStimulusSeriesConstructor(unittest.TestCase):
         self.assertEqual(cCSS.electrode, electrode_name)
         self.assertEqual(cCSS.gain, 1.0)
 
+    def test_unit_warning(self):
+        electrode_name = GetElectrode()
 
-class VoltageClampSeriesConstructor(unittest.TestCase):
+        msg = ("Unit for CurrentClampStimulusSeries 'test_cCSS' is ignored and will be set to 'amperes' as per NWB "
+               "2.1.0.")
+        with self.assertWarnsWith(UserWarning, msg):
+            cCSS = CurrentClampStimulusSeries('test_cCSS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
+        self.assertEqual(cCSS.unit, 'amperes')
+
+
+class VoltageClampSeriesConstructor(TestCase):
 
     def test_init(self):
         electrode_name = GetElectrode()
@@ -157,8 +276,17 @@ class VoltageClampSeriesConstructor(unittest.TestCase):
         self.assertEqual(vCS.whole_cell_capacitance_comp, 7.0)
         self.assertEqual(vCS.whole_cell_series_resistance_comp, 8.0)
 
+    def test_unit_warning(self):
+        electrode_name = GetElectrode()
 
-class VoltageClampStimulusSeriesConstructor(unittest.TestCase):
+        msg = "Unit for VoltageClampSeries 'test_vCS' is ignored and will be set to 'amperes' as per NWB 2.1.0."
+        with self.assertWarnsWith(UserWarning, msg):
+            vCS = VoltageClampSeries('test_vCS', list(), electrode_name,
+                                     1.0, "stimset", 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, timestamps=list(), unit='unit')
+        self.assertEqual(vCS.unit, 'amperes')
+
+
+class VoltageClampStimulusSeriesConstructor(TestCase):
 
     def test_init(self):
         electrode_name = GetElectrode()
@@ -168,6 +296,10 @@ class VoltageClampStimulusSeriesConstructor(unittest.TestCase):
         self.assertEqual(vCSS.unit, 'volts')
         self.assertEqual(vCSS.electrode, electrode_name)
 
+    def test_unit_warning(self):
+        electrode_name = GetElectrode()
 
-if __name__ == '__main__':
-    unittest.main()
+        msg = "Unit for VoltageClampStimulusSeries 'test_vCSS' is ignored and will be set to 'volts' as per NWB 2.1.0."
+        with self.assertWarnsWith(UserWarning, msg):
+            vCSS = VoltageClampStimulusSeries('test_vCSS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
+        self.assertEqual(vCSS.unit, 'volts')

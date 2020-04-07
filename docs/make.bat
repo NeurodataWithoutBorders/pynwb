@@ -5,8 +5,14 @@ REM Command file for Sphinx documentation
 if "%SPHINXBUILD%" == "" (
 	set SPHINXBUILD=sphinx-build
 )
+if "%SPHINXAPIDOC%" == "" (
+	set SPHINXAPIDOC=sphinx-apidoc
+)
 set BUILDDIR=_build
-set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS% .
+set RSTDIR=source
+set SRCDIR=../src
+set PKGNAME=pynwb
+set ALLSPHINXOPTS=-d %BUILDDIR%/doctrees %SPHINXOPTS% %RSTDIR%
 set I18NSPHINXOPTS=%SPHINXOPTS% .
 if NOT "%PAPER%" == "" (
 	set ALLSPHINXOPTS=-D latex_paper_size=%PAPER% %ALLSPHINXOPTS%
@@ -35,12 +41,15 @@ if "%1" == "help" (
 	echo.  changes    to make an overview over all changed/added/deprecated items
 	echo.  linkcheck  to check all external links for integrity
 	echo.  doctest    to run all doctests embedded in the documentation if enabled
+	echo.  clean      to clean all documents built by Sphinx in _build
+	echo.  apidoc     to build RST from source code"
 	goto end
 )
 
 if "%1" == "clean" (
 	for /d %%i in (%BUILDDIR%\*) do rmdir /q /s %%i
 	del /q /s %BUILDDIR%\*
+	del /q %RSTDIR%\%PKGNAME%*.rst
 	goto end
 )
 
@@ -184,6 +193,14 @@ if "%1" == "doctest" (
 	echo.
 	echo.Testing of doctests in the sources finished, look at the ^
 results in %BUILDDIR%/doctest/output.txt.
+	goto end
+)
+
+if "%1" == "apidoc" (
+	%SPHINXAPIDOC% -f -e --no-toc -o %RSTDIR% %SRCDIR%
+	if errorlevel 1 exit /b 1
+	echo.
+	echo.Build rst docs from source code.
 	goto end
 )
 

@@ -1,58 +1,27 @@
-from . import base
-
 import numpy as np
-from hdmf.build import GroupBuilder, DatasetBuilder, ReferenceBuilder
-from pynwb import TimeSeries
+
 from hdmf.common import DynamicTable, VectorData
-
+from pynwb import TimeSeries
 from pynwb.misc import Units, DecompositionSeries
+from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 
 
-class TestUnitsIO(base.TestDataInterfaceIO):
+class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
+    """ Test adding Units into acquisition and accessing Units after read """
 
     def setUpContainer(self):
+        """ Return the test Units to read/write """
         ut = Units(name='UnitsTest', description='a simple table for testing Units')
-        ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 1], [2, 3]])
-        ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 5], [6, 7]])
+        ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 1], [2, 3]],
+                    waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.])
+        ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 5], [6, 7]],
+                    waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.])
+        ut.waveform_rate = 40000.
+        ut.resolution = 1/40000
         return ut
 
-    def setUpBuilder(self):
-        ids_builder = DatasetBuilder('id', [0, 1],
-                                     attributes={'neurodata_type': 'ElementIdentifiers',
-                                                 'namespace': 'core'})
-        st_builder = DatasetBuilder('spike_times', [0, 1, 2, 3, 4, 5],
-                                    attributes={'neurodata_type': 'VectorData',
-                                                'namespace': 'core',
-                                                'description': 'the spike times for each unit'})
-        sti_builder = DatasetBuilder('spike_times_index',
-                                     [3, 6],
-                                     attributes={'neurodata_type': 'VectorIndex',
-                                                 'namespace': 'core',
-                                                 'target': ReferenceBuilder(st_builder)})
-
-        obs_builder = DatasetBuilder('obs_intervals', [[0, 1], [2, 3], [2, 5], [6, 7]],
-                                     attributes={'neurodata_type': 'VectorData',
-                                                 'namespace': 'core',
-                                                 'description': 'the observation intervals for each unit'})
-
-        obsi_builder = DatasetBuilder('obs_intervals_index',
-                                      [2, 4],
-                                      attributes={'neurodata_type': 'VectorIndex',
-                                                  'namespace': 'core',
-                                                  'target': ReferenceBuilder(obs_builder)})
-
-        return GroupBuilder('UnitsTest',
-                            attributes={'neurodata_type': 'Units',
-                                        'namespace': 'core',
-                                        'description': 'a simple table for testing Units',
-                                        'colnames': (b'spike_times', b'obs_intervals',)},
-                            datasets={'id': ids_builder,
-                                      'spike_times': st_builder,
-                                      'spike_times_index': sti_builder,
-                                      'obs_intervals': obs_builder,
-                                      'obs_intervals_index': obsi_builder})
-
     def test_get_spike_times(self):
+        """ Test whether the Units spike times read from file are what was written """
         ut = self.roundtripContainer()
         received = ut.get_unit_spike_times(0)
         self.assertTrue(np.array_equal(received, [0, 1, 2]))
@@ -61,6 +30,7 @@ class TestUnitsIO(base.TestDataInterfaceIO):
         self.assertTrue(np.array_equal(ut['spike_times'][:], [[0, 1, 2], [3, 4, 5]]))
 
     def test_get_obs_intervals(self):
+        """ Test whether the Units observation intervals read from file are what was written """
         ut = self.roundtripContainer()
         received = ut.get_unit_obs_intervals(0)
         self.assertTrue(np.array_equal(received, [[0, 1], [2, 3]]))
@@ -69,13 +39,14 @@ class TestUnitsIO(base.TestDataInterfaceIO):
         self.assertTrue(np.array_equal(ut['obs_intervals'][:], [[[0, 1], [2, 3]], [[2, 5], [6, 7]]]))
 
 
-class TestUnitElectrodes(base.TestMapRoundTrip):
+class TestUnitsFileIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
-        # this will get ignored
-        return Units('placeholder_units')
+        """ Return placeholder Units object. Tested units are added directly to the NWBFile in addContainer """
+        return Units('placeholder')  # this will get ignored
 
     def addContainer(self, nwbfile):
+        """ Add units to the given NWBFile """
         device = nwbfile.create_device(name='trodes_rig123')
         electrode_name = 'tetrode1'
         description = "an example tetrode"
@@ -93,15 +64,21 @@ class TestUnitElectrodes(base.TestMapRoundTrip):
 
         nwbfile.add_unit(id=1, electrodes=[1], electrode_group=electrode_group)
         nwbfile.add_unit(id=2, electrodes=[1], electrode_group=electrode_group)
-        nwbfile.units.to_dataframe()
-        self.container = nwbfile.units
+        self.container = nwbfile.units  # override self.container which has the placeholder
 
     def getContainer(self, nwbfile):
+        """ Return the test Units from the given NWBFile """
         return nwbfile.units
 
+    def test_to_dataframe(self):
+        units = self.roundtripContainer()
+        units.to_dataframe()
 
-class TestSpectralAnalysis(base.TestDataInterfaceIO):
+
+class TestDecompositionSeriesIO(NWBH5IOMixin, TestCase):
+
     def setUpContainer(self):
+        """ Return the test DecompositionSeries to read/write """
         self.timeseries = TimeSeries(name='dummy timeseries', description='desc',
                                      data=np.ones((3, 3)), unit='flibs',
                                      timestamps=np.ones((3,)))
@@ -120,10 +97,11 @@ class TestSpectralAnalysis(base.TestDataInterfaceIO):
         return spec_anal
 
     def addContainer(self, nwbfile):
+        """ Add the test DecompositionSeries to the given NWBFile in a processing module """
         nwbfile.add_acquisition(self.timeseries)
         prcs_mod = nwbfile.create_processing_module('test_mod', 'test_mod')
         prcs_mod.add(self.container)
 
     def getContainer(self, nwbfile):
-
+        """ Return the test DecompositionSeries from the given NWBFile """
         return nwbfile.processing['test_mod']['LFPSpectralAnalysis']

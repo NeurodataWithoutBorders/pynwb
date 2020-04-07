@@ -35,7 +35,7 @@ from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 ns_path = "mylab.namespace.yaml"
 ext_source = "mylab.extensions.yaml"
 
-ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "mylab")
+ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "mylab", version='0.1.0')
 
 ns_builder.include_type('ElectricalSeries', namespace='core')
 
@@ -252,7 +252,7 @@ name = 'test_multicontainerinterface'
 ns_path = name + ".namespace.yaml"
 ext_source = name + ".extensions.yaml"
 
-ns_builder = NWBNamespaceBuilder(name + ' extensions', name)
+ns_builder = NWBNamespaceBuilder(name + ' extensions', name, version='0.1.0')
 ns_builder.include_type('NWBDataInterface', namespace='core')
 
 potato = NWBGroupSpec(neurodata_type_def='Potato',
@@ -387,7 +387,7 @@ surface = NWBGroupSpec(doc='brain cortical surface',
 
 # Now we set up the builder and add this object
 
-ns_builder = NWBNamespaceBuilder(name + ' extensions', name)
+ns_builder = NWBNamespaceBuilder(name + ' extensions', name, version='0.1.0')
 ns_builder.add_spec(ext_source, surface)
 ns_builder.export(ns_path)
 

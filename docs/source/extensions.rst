@@ -42,7 +42,7 @@ Specifying datasets is done with :py:class:`~pynwb.spec.NWBDatasetSpec`.
     spec = NWBDatasetSpec('A custom NWB type',
                         name='qux',
                         attribute=[
-                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
+                            NWBAttributeSpec('baz', 'a value for baz', 'text'),
                         ],
                         shape=(None, None))
 
@@ -60,7 +60,7 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
     spec = NWBDatasetSpec('A custom NWB type',
                         name='qux',
                         attribute=[
-                            NWBAttributeSpec('baz', 'a value for baz', 'str'),
+                            NWBAttributeSpec('baz', 'a value for baz', 'text'),
                         ],
                         dtype=[
                             NWBDtypeSpec('foo', 'column for foo', 'int'),
@@ -166,7 +166,7 @@ Create a new namespace with extensions
     from pynwb.spec import NWBGroupSpec, NWBNamespaceBuilder
 
     # create a builder for the namespace
-    ns_builder = NWBNamespaceBuilder("Extension for use in my laboratory", "mylab", ...)
+    ns_builder = NWBNamespaceBuilder("Extension for use in my laboratory", "mylab", version='0.1.0', ...)
 
     # create extensions
     ext1 = NWBGroupSpec('A custom SpikeEventSeries interface',
@@ -267,15 +267,19 @@ If using iPython, you can access documentation for the class's constructor using
 ObjectMapper : Customizing the mapping between NWBContainer and the Spec
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the :py:class:`~pynwb.core.NWBContainer`
-class for reading and writing, you will need to implement and register a custom :py:class:`~hdmf.build.map.ObjectMapper`.
+If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the
+:py:class:`~pynwb.core.NWBContainer`
+class for reading and writing, you will need to implement and register a custom
+:py:class:`~hdmf.build.objectmapper.ObjectMapper`.
 
-:py:class:`~hdmf.build.map.ObjectMapper` extensions are registered with the decorator :py:func:`~pynwb.register_map`.
+:py:class:`~hdmf.build.objectmapper.ObjectMapper` extensions are registered with the decorator
+:py:func:`~pynwb.register_map`.
 
 .. code-block:: python
 
     from pynwb import register_map
-    from form import ObjectMapper
+    from hdmf.build import ObjectMapper
+
     @register_map(MyExtensionContainer)
     class MyExtensionMapper(ObjectMapper)
         ...
@@ -285,9 +289,11 @@ class for reading and writing, you will need to implement and register a custom 
 .. code-block:: python
 
     from pynwb import register_map
-    from form import ObjectMapper
+    from hdmf.build import ObjectMapper
+
     class MyExtensionMapper(ObjectMapper)
         ...
+
     register_map(MyExtensionContainer, MyExtensionMapper)
 
 .. tip::
@@ -313,11 +319,11 @@ Documenting Extensions
 Using the same tools used to generate the documentation for the `NWB-N core format <https://nwb-schema.readthedocs.io/en/latest/>`_
 one can easily generate documentation in HTML, PDF, ePub and many other format for extensions as well.
 
-Code to generate this documentation is maintained in a separate repo: https://github.com/NeurodataWithoutBorders/nwb-docutils. To use these utilities, install the package with pip:
+Code to generate this documentation is maintained in a separate repo: https://github.com/hdmf-dev/hdmf-docutils. To use these utilities, install the package with pip:
 
 .. code-block:: text
 
-    pip install nwb-docutils
+    pip install hdmf-docutils
 
 For the purpose of this example, we assume that our current directory has the following structure.
 

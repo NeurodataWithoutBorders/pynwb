@@ -1,7 +1,6 @@
-try:
-    from collections.abc import Iterable  # Python 3
-except ImportError:
-    from collections import Iterable  # Python 2.7
+from collections.abc import Iterable
+import numpy as np
+import warnings
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
@@ -11,20 +10,18 @@ from .image import ImageSeries
 from .core import NWBContainer, MultiContainerInterface, NWBDataInterface
 from hdmf.common import DynamicTable, DynamicTableRegion
 from .device import Device
-import numpy as np
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
 class OpticalChannel(NWBContainer):
-    """
-    """
+    """An optical channel used to record from an imaging plane."""
 
     __nwbfields__ = ('description',
                      'emission_lambda')
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},  # required
             {'name': 'description', 'type': str, 'doc': 'Any notes or comments about the channel.'},  # required
-            {'name': 'emission_lambda', 'type': 'float', 'doc': 'Emission lambda for channel.'})  # required
+            {'name': 'emission_lambda', 'type': 'float', 'doc': 'Emission wavelength for channel, in nm.'})  # required
     def __init__(self, **kwargs):
         description, emission_lambda = popargs("description", "emission_lambda", kwargs)
         call_docval_func(super(OpticalChannel, self).__init__, kwargs)
@@ -34,8 +31,7 @@ class OpticalChannel(NWBContainer):
 
 @register_class('ImagingPlane', CORE_NAMESPACE)
 class ImagingPlane(NWBContainer):
-    """An imaging plane and its metadata.
-    """
+    """An imaging plane and its metadata."""
 
     __nwbfields__ = ({'name': 'optical_channel', 'child': True},
                      'description',
@@ -51,31 +47,51 @@ class ImagingPlane(NWBContainer):
 
     @docval(*get_docval(NWBContainer.__init__, 'name'),  # required
             {'name': 'optical_channel', 'type': (list, OpticalChannel),  # required
-             'doc': 'One of possibly many groups storing channelspecific data.'},
+             'doc': 'One of possibly many groups storing channel-specific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},  # required
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},  # required
             {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},  # required
             {'name': 'imaging_rate', 'type': 'float', 'doc': 'Rate images are acquired, in Hz.'},  # required
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},  # required
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},  # required
-            {'name': 'manifold', 'type': Iterable,
-             'doc': 'Physical position of each pixel. size=("height", "width", "xyz").',
+            {'name': 'manifold', 'type': 'array_data',
+             'doc': ('DEPRECATED: Physical position of each pixel. size=("height", "width", "xyz"). '
+                     'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': None},
             {'name': 'conversion', 'type': 'float',
-             'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)',
+             'doc': ('DEPRECATED: Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters) '
+                     'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': 1.0},
-            {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).',
+            {'name': 'unit', 'type': str,
+             'doc': 'DEPRECATED: Base unit that coordinates are stored in (e.g., Meters). '
+                    'Deprecated in favor of origin_coords_unit and grid_spacing_unit.',
              'default': 'meters'},
             {'name': 'reference_frame', 'type': str,
              'doc': 'Describes position and reference frame of manifold based on position of first element '
                     'in manifold.',
-             'default': None})
+             'default': None},
+            {'name': 'origin_coords', 'type': 'array_data',
+             'doc': 'Physical location of the first element of the imaging plane (0, 0) for 2-D data or (0, 0, 0) for '
+                    '3-D data. See also reference_frame for what the physical location is relative to (e.g., bregma).',
+             'default': None},
+            {'name': 'origin_coords_unit', 'type': str,
+             'doc': "Measurement units for origin_coords. The default value is 'meters'.",
+             'default': 'meters'},
+            {'name': 'grid_spacing', 'type': 'array_data',
+             'doc': "Space between pixels in (x, y) or voxels in (x, y, z) directions, in the specified unit. Assumes "
+                    "imaging plane is a regular grid. See also reference_frame to interpret the grid.",
+             'default': None},
+            {'name': 'grid_spacing_unit', 'type': str,
+             'doc': "Measurement units for grid_spacing. The default value is 'meters'.",
+             'default': 'meters'})
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, \
-            indicator, location, manifold, conversion, unit, reference_frame = popargs(
+            indicator, location, manifold, conversion, unit, reference_frame, origin_coords, origin_coords_unit, \
+            grid_spacing, grid_spacing_unit = popargs(
                 'optical_channel', 'description', 'device', 'excitation_lambda',
                 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion',
-                'unit', 'reference_frame', kwargs)
+                'unit', 'reference_frame', 'origin_coords', 'origin_coords_unit', 'grid_spacing', 'grid_spacing_unit',
+                kwargs)
         call_docval_func(super(ImagingPlane, self).__init__, kwargs)
         self.optical_channel = optical_channel if isinstance(optical_channel, list) else [optical_channel]
         self.description = description
@@ -84,17 +100,28 @@ class ImagingPlane(NWBContainer):
         self.imaging_rate = imaging_rate
         self.indicator = indicator
         self.location = location
+        if manifold is not None:
+            warnings.warn("The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'.",
+                          DeprecationWarning)
+        if conversion != 1.0:
+            warnings.warn("The 'conversion' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'.",
+                          DeprecationWarning)
+        if unit != 'meters':
+            warnings.warn("The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'.",
+                          DeprecationWarning)
         self.manifold = manifold
         self.conversion = conversion
         self.unit = unit
         self.reference_frame = reference_frame
+        self.origin_coords = origin_coords
+        self.origin_coords_unit = origin_coords_unit
+        self.grid_spacing = grid_spacing
+        self.grid_spacing_unit = grid_spacing_unit
 
 
 @register_class('TwoPhotonSeries', CORE_NAMESPACE)
 class TwoPhotonSeries(ImageSeries):
-    """
-    A special case of optical imaging.
-    """
+    """Image stack recorded over time from 2-photon microscope."""
 
     __nwbfields__ = ('field_of_view',
                      'imaging_plane',
@@ -135,9 +162,9 @@ class CorrectedImageStack(NWBDataInterface):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ('corrected',
-                     'original',
-                     'xy_translation')
+    __nwbfields__ = ({'name': 'corrected', 'child': True},
+                     {'name': 'xy_translation', 'child': True},
+                     'original')
 
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
@@ -174,7 +201,13 @@ class MotionCorrection(MultiContainerInterface):
 @register_class('PlaneSegmentation', CORE_NAMESPACE)
 class PlaneSegmentation(DynamicTable):
     """
-    Image segmentation of a specific imaging plane
+    Stores pixels in an image that represent different regions of interest (ROIs)
+    or masks. All segmentation for a given imaging plane is stored together, with
+    storage for multiple imaging planes (masks) supported. Each ROI is stored in its
+    own subgroup, with the ROI group containing both a 2D mask and a list of pixels
+    that make up this mask. Segments can also be used for masking neuropil. If segmentation
+    is allowed to change with time, a new imaging plane (or module) is required and
+    ROI names should remain consistent between them.
     """
 
     __fields__ = ('imaging_plane',
@@ -217,9 +250,7 @@ class PlaneSegmentation(DynamicTable):
             {'name': 'id', 'type': int, 'doc': 'the ID for the ROI', 'default': None},
             allow_extra=True)
     def add_roi(self, **kwargs):
-        """
-        Add ROI data to this
-        """
+        """Add a Region Of Interest (ROI) data to this"""
         pixel_mask, voxel_mask, image_mask = popargs('pixel_mask', 'voxel_mask', 'image_mask', kwargs)
         if image_mask is None and pixel_mask is None and voxel_mask is None:
             raise ValueError("Must provide 'image_mask' and/or 'pixel_mask'")
@@ -234,9 +265,7 @@ class PlaneSegmentation(DynamicTable):
 
     @staticmethod
     def pixel_to_image(pixel_mask):
-        """
-        Converts a 2D pixel_mask of a ROI into an image_mask.
-        """
+        """Converts a 2D pixel_mask of a ROI into an image_mask."""
         image_matrix = np.zeros(np.shape(pixel_mask))
         npmask = np.asarray(pixel_mask)
         x_coords = npmask[:, 0].astype(np.int)
@@ -247,9 +276,7 @@ class PlaneSegmentation(DynamicTable):
 
     @staticmethod
     def image_to_pixel(image_mask):
-        """
-        Converts an image_mask of a ROI into a pixel_mask
-        """
+        """Converts an image_mask of a ROI into a pixel_mask"""
         pixel_mask = []
         it = np.nditer(image_mask, flags=['multi_index'])
         while not it.finished:
@@ -298,7 +325,8 @@ class ImageSegmentation(MultiContainerInterface):
 @register_class('RoiResponseSeries', CORE_NAMESPACE)
 class RoiResponseSeries(TimeSeries):
     '''
-    ROI responses over an imaging plane. Each row in data[] should correspond to the signal from one ROI.
+    ROI responses over an imaging plane. Each column in data should correspond to
+    the signal from one ROI.
     '''
 
     __nwbfields__ = ({'name': 'rois', 'child': True},)
