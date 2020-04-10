@@ -20,8 +20,6 @@ clarity, we define them here:
 from datetime import datetime
 from dateutil.tz import tzlocal
 
-import numpy as np
-
 from pynwb import NWBFile
 from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluorescence
 from pynwb.device import Device
