@@ -37,7 +37,7 @@ class TwoPhotonSeriesConstructor(TestCase):
         self.assertEqual(oc.emission_lambda, 500.)
 
         device = Device(name='device_name')
-        ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
+        ip = ImagingPlane('test_imaging_plane', oc, description='description', device=device, excitation_lambda=600.,
                           imaging_rate=300., indicator='indicator', location='location',
                           reference_frame='reference_frame',
                           origin_coords=[10, 20], origin_coords_unit='oc_unit',
@@ -71,7 +71,7 @@ class TwoPhotonSeriesConstructor(TestCase):
     def test_args(self):
         oc = OpticalChannel('test_name', 'description', 500.)
         device = Device(name='device_name')
-        ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
+        ip = ImagingPlane('test_imaging_plane', oc, description='description', device=device, excitation_lambda=600.,
                           imaging_rate=300., indicator='indicator', location='location',
                           reference_frame='reference_frame')
         with self.assertRaises(ValueError):  # no data or external file
@@ -88,7 +88,7 @@ class TwoPhotonSeriesConstructor(TestCase):
 
         msg = "The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
         with self.assertWarnsWith(DeprecationWarning, msg):
-            ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
+            ImagingPlane('test_imaging_plane', oc, description='description', device=device, excitation_lambda=600.,
                          imaging_rate=300., indicator='indicator', location='location',
                          manifold=(1, 1, (2, 2, 2)))
 
@@ -101,8 +101,8 @@ class TwoPhotonSeriesConstructor(TestCase):
 
         msg = "The 'conversion' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'."
         with self.assertWarnsWith(DeprecationWarning, msg):
-            ImagingPlane('test_imaging_plane', oc, 'description', device, 600., imaging_rate=300.,
-                         indicator='indicator', location='location',  conversion=2.0)
+            ImagingPlane('test_imaging_plane', oc, description='description', device=device, excitation_lambda=600.,
+                         imaging_rate=300., indicator='indicator', location='location',  conversion=2.0)
 
     def test_unit_deprecated(self):
         oc = OpticalChannel('test_name', 'description', 500.)
@@ -113,8 +113,8 @@ class TwoPhotonSeriesConstructor(TestCase):
 
         msg = "The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'."
         with self.assertWarnsWith(DeprecationWarning, msg):
-            ImagingPlane('test_imaging_plane', oc, 'description', device, 600., imaging_rate=300.,
-                         indicator='indicator', location='location', conversion=1.0, unit='my_unit')
+            ImagingPlane('test_imaging_plane', oc, description='description', device=device, excitation_lambda=600.,
+                         imaging_rate=300., indicator='indicator', location='location', conversion=1.0, unit='my_unit')
 
 
 class MotionCorrectionConstructor(TestCase):
@@ -194,7 +194,7 @@ class PlaneSegmentationConstructor(TestCase):
 
         device = Device(name='device_name')
         oc = OpticalChannel('test_optical_channel', 'description', 500.)
-        ip = ImagingPlane('test_imaging_plane', oc, 'description', device, 600.,
+        ip = ImagingPlane('test_imaging_plane', oc, description='description', device=device, excitation_lambda=600.,
                           imaging_rate=300., indicator='indicator', location='location',
                           reference_frame='reference_frame')
         return iSS, ip

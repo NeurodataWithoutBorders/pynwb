@@ -20,8 +20,9 @@ class TestImagingPlaneIO(NWBH5IOMixin, TestCase):
         """ Return the test ImagingPlane to read/write """
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
-        return ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
-                            600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknonwn')
+        return ImagingPlane('imgpln1', self.optical_channel, description='a fake ImagingPlane', device=self.device,
+                            excitation_lambda=600., imaging_rate=300., indicator='GFP',
+                            location='somewhere in the brain', reference_frame='unknonwn')
 
     def addContainer(self, nwbfile):
         """ Add the test ImagingPlane and Device to the given NWBFile """
@@ -39,8 +40,9 @@ class TestTwoPhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
         """ Make an ImagingPlane and related objects """
         self.device = Device(name='dev1')
         self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
-        self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel, 'a fake ImagingPlane', self.device,
-                                          600., 300., 'GFP', 'somewhere in the brain', reference_frame='unknown')
+        self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel, description='a fake ImagingPlane',
+                                          device=self.device, excitation_lambda=600., imaging_rate=300.,
+                                          indicator='GFP', location='somewhere in the brain', reference_frame='unknown')
 
     def setUpContainer(self):
         """ Return the test TwoPhotonSeries to read/write """
@@ -79,11 +81,12 @@ class TestPlaneSegmentationIO(NWBH5IOMixin, TestCase):
                                               'optical channel description', 500.)
         self.imaging_plane = ImagingPlane('imgpln1',
                                           self.optical_channel,
-                                          'a fake ImagingPlane',
-                                          self.device,
-                                          600., 200., 'GFP', 'somewhere in the brain',
-                                          (((1., 2., 3.), (4., 5., 6.)),),
-                                          2., 'a unit',
+                                          description='a fake ImagingPlane',
+                                          device=self.device,
+                                          excitation_lambda=600., imaging_rate=200., indicator='GFP',
+                                          location='somewhere in the brain',
+                                          manifold=(((1., 2., 3.), (4., 5., 6.)),),
+                                          conversion=2., unit='a unit',
                                           reference_frame='unknown')
 
         self.img_mask = deepcopy(img_mask)
@@ -131,11 +134,11 @@ class MaskIO(TestPlaneSegmentationIO, metaclass=ABCMeta):
                                               'optical channel description', 500.)
         self.imaging_plane = ImagingPlane('test_imaging_plane',
                                           self.optical_channel,
-                                          'imaging plane description',
-                                          self.device,
-                                          600., 300., 'GFP', 'somewhere in the brain',
-                                          (((1., 2., 3.), (4., 5., 6.)),),
-                                          4.0, 'manifold unit', 'A frame to refer to')
+                                          description='imaging plane description',
+                                          device=self.device,
+                                          excitation_lambda=600., imaging_rate=300., indicator='GFP',
+                                          location='somewhere in the brain', manifold=(((1., 2., 3.), (4., 5., 6.)),),
+                                          conversion=4.0, unit='manifold unit', reference_frame='A frame to refer to')
         return PlaneSegmentation('description', self.imaging_plane, 'test_plane_seg_name',
                                  self.image_series)
 
