@@ -3,7 +3,7 @@ from hdmf.common import DynamicTableRegion
 from pynwb.ecephys import ElectrodeGroup, ElectricalSeries, FilteredEphys, LFP, Clustering, ClusterWaveforms,\
                           SpikeEventSeries, EventWaveform, EventDetection, FeatureExtraction
 from pynwb.device import Device
-from pynwb.file import ElectrodeTable as get_electrode_table
+from pynwb.file import Electrodes
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
 
 
@@ -30,7 +30,7 @@ class TestElectricalSeriesIO(AcquisitionH5IOMixin, TestCase):
     @staticmethod
     def make_electrode_table(self):
         """ Make an electrode table, electrode group, and device """
-        self.table = get_electrode_table()
+        self.table = Electrodes()
         self.dev1 = Device('dev1')
         self.group = ElectrodeGroup('tetrode1',
                                     'tetrode description', 'tetrode location', self.dev1)

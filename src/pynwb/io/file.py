@@ -1,8 +1,8 @@
 from dateutil.parser import parse as dateutil_parse
 from hdmf.build import ObjectMapper
 from .. import register_map
-from ..file import NWBFile, Subject
-from ..core import ScratchData
+from ..file import NWBFile, Subject, Electrodes
+from ..core import ScratchData, DynamicTable
 
 
 @register_map(NWBFile)
@@ -194,6 +194,27 @@ class NWBFileMap(ObjectMapper):
         ret = None
         if isinstance(container.related_publications, str):
             ret = (container.related_publications,)
+        return ret
+
+    @ObjectMapper.constructor_arg('electrodes')
+    def electrodes_carg(self, builder, manager):
+        # change typing of constructed electrodes table from DynamicTable to Electrodes
+        if ('extracellular_ephys' not in builder['general'] or
+                'electrodes' not in builder['general']['extracellular_ephys']):
+            return None
+        electrodes_builder = builder['general']['extracellular_ephys']['electrodes']
+        # construct the electrodes table from the spec (as a DynamicTable)
+        # this has happened earlier in the construct process but this function does not have access to the previously
+        # constructed object, so we do it again here
+        constructed = manager.construct(electrodes_builder)
+        ret = Electrodes.cast(constructed)
+        return ret
+
+    @ObjectMapper.object_attr('electrodes')
+    def electrodes_obj_attr(self, container, manager):
+        ret = None
+        if not isinstance(container.electrodes, Electrodes) and isinstance(container.electrodes, DynamicTable):
+            ret = Electrodes.cast(container.electrodes)
         return ret
 
 
