@@ -116,10 +116,7 @@ class CurrentClampSeries(PatchClampSeries):
              'default': 'volts'})
     def __init__(self, **kwargs):
         name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
-        if unit != 'volts':
-            warnings.warn("Unit for %s '%s' is ignored and will be set to 'volts' as per NWB 2.1.0."
-                          % (self.__class__.__name__, name))
-        unit = 'volts'
+        unit = ensure_unit(self, name, unit, 'volts', '2.1.0')
         bias_current, bridge_balance, capacitance_compensation = popargs(
             'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
         super().__init__(name, data, unit, electrode, gain, **kwargs)
@@ -170,10 +167,7 @@ class CurrentClampStimulusSeries(PatchClampSeries):
              'default': 'amperes'})
     def __init__(self, **kwargs):
         name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
-        if unit != 'amperes':
-            warnings.warn("Unit for %s '%s' is ignored and will be set to 'amperes' as per "
-                          "NWB 2.1.0." % (self.__class__.__name__, name))
-        unit = 'amperes'
+        unit = ensure_unit(self, name, unit, 'amperes', '2.1.0')
         super().__init__(name, data, unit, electrode, gain, **kwargs)
 
 
@@ -209,10 +203,7 @@ class VoltageClampSeries(PatchClampSeries):
              'default': 'amperes'})
     def __init__(self, **kwargs):
         name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
-        if unit != 'amperes':
-            warnings.warn("Unit for %s '%s' is ignored and will be set to 'amperes' as per NWB 2.1.0."
-                          % (self.__class__.__name__, name))
-        unit = 'amperes'
+        unit = ensure_unit(self, name, unit, 'amperes', '2.1.0')
         capacitance_fast, capacitance_slow, resistance_comp_bandwidth, resistance_comp_correction, \
             resistance_comp_prediction, whole_cell_capacitance_comp, whole_cell_series_resistance_comp = popargs(
                 'capacitance_fast', 'capacitance_slow', 'resistance_comp_bandwidth',
@@ -245,10 +236,7 @@ class VoltageClampStimulusSeries(PatchClampSeries):
              'default': 'volts'})
     def __init__(self, **kwargs):
         name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
-        if unit != 'volts':
-            warnings.warn("Unit for %s '%s' is ignored and will be set to 'volts' as per "
-                          "NWB 2.1.0." % (self.__class__.__name__, name))
-        unit = 'volts'
+        unit = ensure_unit(self, name, unit, 'volts', '2.1.0')
         super().__init__(name, data, unit, electrode, gain, **kwargs)
 
 
@@ -309,3 +297,17 @@ class SweepTable(DynamicTable):
         """
 
         return [index for index, elem in enumerate(self['sweep_number'].data) if elem == sweep_number]
+
+
+def ensure_unit(self, name, current_unit, unit, nwb_version):
+    """A helper to ensure correct unit used.
+
+    Issues a warning with details if `current_unit` is to be ignored, and
+    `unit` to be used instead.
+    """
+    if current_unit != unit:
+        warnings.warn(
+            "Unit '%s' for %s '%s' is ignored and will be set to '%s' "
+            "as per NWB %s."
+            % (current_unit, self.__class__.__name__, name, unit, nwb_version))
+    return unit

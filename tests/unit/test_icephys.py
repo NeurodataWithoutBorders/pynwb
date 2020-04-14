@@ -205,7 +205,7 @@ class CurrentClampSeriesConstructor(TestCase):
     def test_unit_warning(self):
         electrode_name = GetElectrode()
 
-        msg = "Unit for CurrentClampSeries 'test_cCS' is ignored and will be set to 'volts' as per NWB 2.1.0."
+        msg = "Unit 'unit' for CurrentClampSeries 'test_cCS' is ignored and will be set to 'volts' as per NWB 2.1.0."
         with self.assertWarnsWith(UserWarning, msg):
             cCS = CurrentClampSeries('test_cCS', list(), electrode_name, 1.0, "stimset", 2.0, 3.0, 4.0,
                                      timestamps=list(), unit='unit')
@@ -229,7 +229,7 @@ class IZeroClampSeriesConstructor(TestCase):
     def test_unit_warning(self):
         electrode_name = GetElectrode()
 
-        msg = "Unit for IZeroClampSeries 'test_iZCS' is ignored and will be set to 'volts' as per NWB 2.1.0."
+        msg = "Unit 'unit' for IZeroClampSeries 'test_iZCS' is ignored and will be set to 'volts' as per NWB 2.1.0."
         with self.assertWarnsWith(UserWarning, msg):
             iZCS = IZeroClampSeries('test_iZCS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
         self.assertEqual(iZCS.unit, 'volts')
@@ -249,8 +249,8 @@ class CurrentClampStimulusSeriesConstructor(TestCase):
     def test_unit_warning(self):
         electrode_name = GetElectrode()
 
-        msg = ("Unit for CurrentClampStimulusSeries 'test_cCSS' is ignored and will be set to 'amperes' as per NWB "
-               "2.1.0.")
+        msg = ("Unit 'unit' for CurrentClampStimulusSeries 'test_cCSS' is ignored and will be set "
+               "to 'amperes' as per NWB 2.1.0.")
         with self.assertWarnsWith(UserWarning, msg):
             cCSS = CurrentClampStimulusSeries('test_cCSS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
         self.assertEqual(cCSS.unit, 'amperes')
@@ -279,7 +279,8 @@ class VoltageClampSeriesConstructor(TestCase):
     def test_unit_warning(self):
         electrode_name = GetElectrode()
 
-        msg = "Unit for VoltageClampSeries 'test_vCS' is ignored and will be set to 'amperes' as per NWB 2.1.0."
+        msg = "Unit 'unit' for VoltageClampSeries 'test_vCS' is ignored and will be set " \
+              "to 'amperes' as per NWB 2.1.0."
         with self.assertWarnsWith(UserWarning, msg):
             vCS = VoltageClampSeries('test_vCS', list(), electrode_name,
                                      1.0, "stimset", 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, timestamps=list(), unit='unit')
@@ -299,7 +300,8 @@ class VoltageClampStimulusSeriesConstructor(TestCase):
     def test_unit_warning(self):
         electrode_name = GetElectrode()
 
-        msg = "Unit for VoltageClampStimulusSeries 'test_vCSS' is ignored and will be set to 'volts' as per NWB 2.1.0."
+        msg = "Unit 'unit' for VoltageClampStimulusSeries 'test_vCSS' is ignored and will be set " \
+              "to 'volts' as per NWB 2.1.0."
         with self.assertWarnsWith(UserWarning, msg):
             vCSS = VoltageClampStimulusSeries('test_vCSS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
         self.assertEqual(vCSS.unit, 'volts')
