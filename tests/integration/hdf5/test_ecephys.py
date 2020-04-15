@@ -11,8 +11,11 @@ class TestElectrodeGroupIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test ElectrodeGroup to read/write """
-        self.dev1 = Device('dev1')
-        eg = ElectrodeGroup('elec1', 'a test ElectrodeGroup', 'a nonexistent place', self.dev1)
+        self.dev1 = Device(name='dev1')
+        eg = ElectrodeGroup(name='elec1',
+                            description='a test ElectrodeGroup',
+                            location='a nonexistent place',
+                            device=self.dev1)
         return eg
 
     def addContainer(self, nwbfile):
@@ -31,9 +34,11 @@ class TestElectricalSeriesIO(AcquisitionH5IOMixin, TestCase):
     def make_electrode_table(self):
         """ Make an electrode table, electrode group, and device """
         self.table = get_electrode_table()
-        self.dev1 = Device('dev1')
-        self.group = ElectrodeGroup('tetrode1',
-                                    'tetrode description', 'tetrode location', self.dev1)
+        self.dev1 = Device(name='dev1')
+        self.group = ElectrodeGroup(name='tetrode1',
+                                    description='tetrode description',
+                                    location='tetrode location',
+                                    device=self.dev1)
         for i in range(4):
             self.table.add_row(x=i, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
                                group_name='tetrode1')
@@ -41,10 +46,17 @@ class TestElectricalSeriesIO(AcquisitionH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test ElectricalSeries to read/write """
         self.make_electrode_table(self)
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
+        region = DynamicTableRegion(name='electrodes',
+                                    data=[0, 2],
+                                    description='the first and third electrodes',
+                                    table=self.table)
         data = list(zip(range(10), range(10, 20)))
-        timestamps = list(map(lambda x: x/10, range(10)))
-        es = ElectricalSeries('test_eS', data, region, channel_conversion=[4., .4], timestamps=timestamps)
+        timestamps = list(map(lambda x: x/10., range(10)))
+        es = ElectricalSeries(name='test_eS',
+                              data=data,
+                              electrodes=region,
+                              channel_conversion=[4., .4],
+                              timestamps=timestamps)
         return es
 
     def addContainer(self, nwbfile):
@@ -78,13 +90,20 @@ class MultiElectricalSeriesIOMixin(AcquisitionH5IOMixin):
     def setUpTwoElectricalSeries(self):
         """ Return two test ElectricalSeries to read/write """
         TestElectricalSeriesIO.make_electrode_table(self)
-        region1 = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
-        region2 = DynamicTableRegion('electrodes', [1, 3], 'the second and fourth electrodes', self.table)
+        region1 = DynamicTableRegion(name='electrodes',
+                                     data=[0, 2],
+                                     description='the first and third electrodes',
+                                     table=self.table)
+        region2 = DynamicTableRegion(name='electrodes',
+                                     data=[1, 3],
+                                     description='the second and fourth electrodes',
+                                     table=self.table)
         data1 = list(zip(range(10), range(10, 20)))
         data2 = list(zip(reversed(range(10)), reversed(range(10, 20))))
-        timestamps = list(map(lambda x: x/10, range(10)))
-        es1 = ElectricalSeries('test_eS1', data1, region1, timestamps=timestamps)
-        es2 = ElectricalSeries('test_eS2', data2, region2, channel_conversion=[4., .4], timestamps=timestamps)
+        timestamps = list(map(lambda x: x/10., range(10)))
+        es1 = ElectricalSeries(name='test_eS1', data=data1, electrodes=region1, timestamps=timestamps)
+        es2 = ElectricalSeries(name='test_eS2', data=data2, electrodes=region2, channel_conversion=[4., .4],
+                               timestamps=timestamps)
         return es1, es2
 
     def addContainer(self, nwbfile):
@@ -132,8 +151,14 @@ class EventWaveformConstructor(AcquisitionH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return a test EventWaveform to read/write """
         TestElectricalSeriesIO.make_electrode_table(self)
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
-        sES = SpikeEventSeries('test_sES', ((1, 1, 1), (2, 2, 2)), list(range(2)), region)
+        region = DynamicTableRegion(name='electrodes',
+                                    data=[0, 2],
+                                    description='the first and third electrodes',
+                                    table=self.table)
+        sES = SpikeEventSeries(name='test_sES',
+                               data=((1, 1, 1), (2, 2, 2)),
+                               timestamps=[0., 1.],
+                               electrodes=region)
         ew = EventWaveform(sES)
         return ew
 
@@ -177,10 +202,13 @@ class FeatureExtractionConstructor(AcquisitionH5IOMixin, TestCase):
         """ Return a test FeatureExtraction to read/write """
         event_times = [1.9, 3.5]
         TestElectricalSeriesIO.make_electrode_table(self)
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
+        region = DynamicTableRegion(name='electrodes',
+                                    data=[0, 2],
+                                    description='the first and third electrodes',
+                                    table=self.table)
         description = ['desc1', 'desc2', 'desc3']
         features = [[[0., 1., 2.], [3., 4., 5.]], [[6., 7., 8.], [9., 10., 11.]]]
-        fe = FeatureExtraction(region, description, event_times, features)
+        fe = FeatureExtraction(electrodes=region, description=description, times=event_times, features=features)
         return fe
 
     def addContainer(self, nwbfile):
@@ -196,11 +224,17 @@ class EventDetectionConstructor(AcquisitionH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return a test EventDetection to read/write """
         TestElectricalSeriesIO.make_electrode_table(self)
-        region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', self.table)
+        region = DynamicTableRegion(name='electrodes',
+                                    data=[0, 2],
+                                    description='the first and third electrodes',
+                                    table=self.table)
         data = list(range(10))
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
-        self.eS = ElectricalSeries('test_eS', data, region, timestamps=ts)
-        eD = EventDetection('detection_method', self.eS, (1, 2, 3), (0.1, 0.2, 0.3))
+        self.eS = ElectricalSeries(name='test_eS', data=data, electrodes=region, timestamps=ts)
+        eD = EventDetection(detection_method='detection_method',
+                            source_electricalseries=self.eS,
+                            source_idx=(1, 2, 3),
+                            times=(0.1, 0.2, 0.3))
         return eD
 
     def addContainer(self, nwbfile):
