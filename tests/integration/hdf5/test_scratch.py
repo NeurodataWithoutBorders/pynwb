@@ -11,7 +11,7 @@ class TestScratchDataIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test ScratchData to read/write """
-        return ScratchData('foo', [1, 2, 3, 4], notes='test scratch')
+        return ScratchData(name='foo', data=[1, 2, 3, 4], notes='test scratch')
 
     def addContainer(self, nwbfile):
         """ Add the test ScratchData to the given NWBFile """
@@ -25,7 +25,10 @@ class TestScratchDataIO(NWBH5IOMixin, TestCase):
         self.filename = 'test_scratch_%s.nwb' % case
         description = 'a file to test writing and reading a scratch data of type %s' % case
         identifier = 'TEST_scratch_%s' % case
-        nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
+        nwbfile = NWBFile(session_description=description,
+                          identifier=identifier,
+                          session_start_time=self.start_time,
+                          file_create_date=self.create_date)
         nwbfile.add_scratch(data, name='foo', notes='test scratch', **kwargs)
 
         self.writer = NWBHDF5IO(self.filename, mode='w')
@@ -65,7 +68,10 @@ class TestScratchDataIO(NWBH5IOMixin, TestCase):
         self.filename = 'test_scratch_%s.nwb' % case
         description = 'a file to test writing and reading a scratch data of type %s' % case
         identifier = 'TEST_scratch_%s' % case
-        nwbfile = NWBFile(description, identifier, self.start_time, file_create_date=self.create_date)
+        nwbfile = NWBFile(session_description=description,
+                          identifier=identifier,
+                          session_start_time=self.start_time,
+                          file_create_date=self.create_date)
         nwbfile.add_scratch(data, name='foo', table_description='my_table')
 
         self.writer = NWBHDF5IO(self.filename, mode='w')
@@ -83,8 +89,9 @@ class TestScratchDataIO(NWBH5IOMixin, TestCase):
         self.validate()
 
     def _test_scratch_container(self, validate=True, **kwargs):
-        data = TimeSeries('test_ts', [1, 2, 3, 4, 5], unit='unit', timestamps=[1.1, 1.2, 1.3, 1.4, 1.5])
-        nwbfile = NWBFile('test', 'test', self.start_time, file_create_date=self.create_date)
+        data = TimeSeries(name='test_ts', data=[1, 2, 3, 4, 5], unit='unit', timestamps=[1.1, 1.2, 1.3, 1.4, 1.5])
+        nwbfile = NWBFile(session_description='test', identifier='test', session_start_time=self.start_time,
+                          file_create_date=self.create_date)
 
         nwbfile.add_scratch(data, **kwargs)
 
