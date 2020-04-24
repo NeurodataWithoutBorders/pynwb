@@ -120,7 +120,7 @@ class TimeSeries(NWBDataInterface):
              'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value',
              'default': None},
-            {'name': 'continuity', 'type': str, 'default': None,
+            {'name': 'continuity', 'type': str, 'default': None, 'enum': ["continuous", "instantaneous", "step"],
              'doc': 'Optionally describe the continuity of the data. Can be "continuous", "instantaneous", or'
                     '"step". For example, a voltage trace would be "continuous", because samples are recorded from a '
                     'continuous process. An array of lick times would be "instantaneous", because the data represents '
@@ -131,11 +131,6 @@ class TimeSeries(NWBDataInterface):
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
-        # validate continuity value
-        if kwargs['continuity'] not in (None, "continuous", "instantaneous", "step"):
-            raise ValueError(
-                'If "continuity" is defined, it must be of value "continuous", "instantaneous", or "step". Received '
-                'value "{}" for {} named {}'.format(kwargs['continuity'], self.__class__.__name__, kwargs['name']))
 
         call_docval_func(super(TimeSeries, self).__init__, kwargs)
         keys = ("resolution",
