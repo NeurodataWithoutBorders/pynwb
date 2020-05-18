@@ -65,7 +65,6 @@ class NWBFileTest(TestCase):
         self.assertEqual(self.nwbfile.timestamps_reference_time, self.ref_time)
 
         # check GIT schema URL
-        breakpoint()
         parser = configparser.RawConfigParser()
         module_path = os.path.join(os.path.dirname(__file__),
                                    '..',
