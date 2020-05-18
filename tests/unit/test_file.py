@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 
+import configparser
+import os.path
+
+
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 
@@ -59,6 +63,24 @@ class NWBFileTest(TestCase):
         self.assertEqual(self.nwbfile.source_script_file_name, 'nofilename')
         self.assertEqual(self.nwbfile.keywords, ('these', 'are', 'keywords'))
         self.assertEqual(self.nwbfile.timestamps_reference_time, self.ref_time)
+
+        # check GIT schema URL
+        breakpoint()
+        parser = configparser.RawConfigParser()
+        module_path = os.path.join(os.path.dirname(__file__),
+                                   '..',
+                                   '..',
+                                   '.git',
+                                   'modules',
+                                   'src',
+                                   'pynwb',
+                                   'nwb-schema')
+        parser.read(os.path.join(module_path, 'config'))
+        url = parser.get('remote "origin"', 'url')
+        sha_path = os.path.join(module_path, 'HEAD')
+        sha = open(sha_path, 'r').read()[:-1]
+        url = "%s/tree/%s" % (url[:-4], sha)
+        self.assertEqual(self.nwbfile.core_schema_url, url)
 
     def test_create_electrode_group(self):
         name = 'example_electrode_group'
