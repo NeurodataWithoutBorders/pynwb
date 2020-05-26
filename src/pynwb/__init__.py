@@ -227,7 +227,7 @@ class NWBHDF5IO(_HDF5IO):
                 raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
-            super(NWBHDF5IO, self).load_namespaces(tm, path)
+            super(NWBHDF5IO, self).load_namespaces(tm, path, file=file_obj)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
