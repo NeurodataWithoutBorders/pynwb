@@ -22,9 +22,10 @@ from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 
 
 def __get_resources():
-    from pkg_resources import resource_filename
+    from pkg_resources import resource_filename, resource_string
     ret = dict()
     ret['namespace_path'] = os.path.join(resource_filename(__name__, 'nwb-schema/core'), __core_ns_file_name)
+    ret['core_schema_url'] = resource_string(__name__, 'core_schema_url')[:-1].decode('utf-8')
     return ret
 
 
@@ -112,6 +113,11 @@ if os.path.exists(__resources['namespace_path']):
 def available_namespaces():
     """Returns all namespaces registered in the namespace catalog"""
     return __NS_CATALOG.namespaces
+
+
+def core_schema_url():
+    """Returns the Git URL of the current core schema"""
+    return __resources['core_schema_url']
 
 
 # a function to register a container classes with the global map

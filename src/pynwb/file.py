@@ -9,7 +9,7 @@ import pandas as pd
 
 from hdmf.utils import docval, getargs, call_docval_func, get_docval
 
-from . import register_class, CORE_NAMESPACE
+from . import register_class, CORE_NAMESPACE, core_schema_url
 from .base import TimeSeries, ProcessingModule
 from .device import Device
 from .epoch import TimeIntervals
@@ -198,6 +198,7 @@ class NWBFile(MultiContainerInterface):
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
                      {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
+                     'core_schema_url',
                      'epoch_tags',)
 
     @docval({'name': 'session_description', 'type': str,
@@ -290,7 +291,9 @@ class NWBFile(MultiContainerInterface):
             {'name': 'scratch', 'type': (list, tuple),
              'doc': 'scratch data', 'default': None},
             {'name': 'icephys_electrodes', 'type': (list, tuple),
-             'doc': 'IntracellularElectrodes that belong to this NWBFile.', 'default': None})
+             'doc': 'IntracellularElectrodes that belong to this NWBFile.', 'default': None},
+            {'name': 'core_schema_url', 'type': str, 'default': core_schema_url(),
+             'doc': 'the URL to the schema used to generate this file'})
     def __init__(self, **kwargs):
         kwargs['name'] = 'root'
         call_docval_func(super(NWBFile, self).__init__, kwargs)
@@ -350,6 +353,7 @@ class NWBFile(MultiContainerInterface):
             'surgery',
             'virus',
             'stimulus_notes',
+            'core_schema_url',
         ]
         for attr in fieldnames:
             setattr(self, attr, kwargs.get(attr, None))

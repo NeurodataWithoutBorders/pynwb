@@ -4,6 +4,26 @@ from setuptools import setup, find_packages
 
 import versioneer
 
+import configparser
+from os.path import join as pjoin
+
+
+def get_schema_sha(url_path):
+    parser = configparser.RawConfigParser()
+    config_path = pjoin('.git', 'modules', 'src', 'pynwb', 'nwb-schema', 'config')
+    parser.read(config_path)
+    url = parser.get('remote "origin"', 'url')
+    sha_path = pjoin('.git', 'modules', 'src', 'pynwb', 'nwb-schema', 'HEAD')
+    sha = open(sha_path, 'r').read()[:-1]
+    url = "%s/tree/%s" % (url[:-4], sha)
+    with open(url_path, 'w') as f:
+        print(url, file=f)
+
+
+schema_url_path = pjoin('src', 'pynwb', 'core_schema_url')
+print('writing schema URL to %s' % schema_url_path)
+get_schema_sha(schema_url_path)
+
 with open('README.rst', 'r') as fp:
     readme = fp.read()
 
@@ -33,7 +53,7 @@ setup_args = {
     'install_requires': reqs,
     'packages': pkgs,
     'package_dir': {'': 'src'},
-    'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
+    'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir, schema_url_path]},
     'classifiers': [
         "Programming Language :: Python",
         "Programming Language :: Python :: 3.5",
