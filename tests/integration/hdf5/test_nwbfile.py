@@ -23,8 +23,9 @@ class TestNWBFileHDF5IO(TestCase):
         self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
         self.manager = get_manager()
         self.filename = 'test_nwbfileio.h5'
-        self.nwbfile = NWBFile('a test NWB File', 'TEST123',
-                               self.start_time,
+        self.nwbfile = NWBFile(session_description='a test NWB File',
+                               identifier='TEST123',
+                               session_start_time=self.start_time,
                                timestamps_reference_time=self.ref_time,
                                file_create_date=self.create_date,
                                experimenter='test experimenter',
@@ -43,15 +44,15 @@ class TestNWBFileHDF5IO(TestCase):
                                surgery='nosurgery',
                                virus='novirus',
                                source_script_file_name='nofilename')
-        self.ts = TimeSeries('test_timeseries', list(range(100, 200, 10)),
-                             'SIunit', timestamps=list(range(10)), resolution=0.1)
+        self.ts = TimeSeries(name='test_timeseries', data=list(range(100, 200, 10)),
+                             unit='SIunit', timestamps=np.arange(10.), resolution=0.1)
         self.nwbfile.add_acquisition(self.ts)
-        self.ts2 = TimeSeries('test_timeseries2', list(range(200, 300, 10)),
-                              'SIunit', timestamps=list(range(10)), resolution=0.1)
+        self.ts2 = TimeSeries(name='test_timeseries2', data=list(range(200, 300, 10)),
+                              unit='SIunit', timestamps=np.arange(10.), resolution=0.1)
         self.nwbfile.add_analysis(self.ts2)
         self.mod = self.nwbfile.create_processing_module('test_module', 'a test module')
-        self.ts3 = TimeSeries('test_timeseries2', list(range(100, 200, 10)),
-                              'SIunit', timestamps=list(range(10)), resolution=0.1)
+        self.ts3 = TimeSeries(name='test_timeseries2', data=list(range(100, 200, 10)),
+                              unit='SIunit', timestamps=np.arange(10.), resolution=0.1)
         self.mod.add(self.ts3)
 
     def tearDown(self):
@@ -107,9 +108,9 @@ class TestNWBFileIO(NWBH5IOMixin, TestCase):
 
     def build_nwbfile(self):
         """ Create an NWB file """
-        self.container = NWBFile('a test session description for a test NWBFile',
-                                 'FILE123',
-                                 self.start_time,
+        self.container = NWBFile(session_description='a test session description for a test NWBFile',
+                                 identifier='FILE123',
+                                 session_start_time=self.start_time,
                                  file_create_date=self.create_dates,
                                  timestamps_reference_time=self.ref_time,
                                  experimenter='A test experimenter',
@@ -156,7 +157,9 @@ class TestExperimentersConstructorRoundtrip(TestNWBFileIO):
     def build_nwbfile(self):
         description = 'test nwbfile experimenter'
         identifier = 'TEST_experimenter'
-        self.nwbfile = NWBFile(description, identifier, self.start_time,
+        self.nwbfile = NWBFile(session_description=description,
+                               identifier=identifier,
+                               session_start_time=self.start_time,
                                experimenter=('experimenter1', 'experimenter2'))
 
 
@@ -166,7 +169,9 @@ class TestExperimentersSetterRoundtrip(TestNWBFileIO):
     def build_nwbfile(self):
         description = 'test nwbfile experimenter'
         identifier = 'TEST_experimenter'
-        self.nwbfile = NWBFile(description, identifier, self.start_time)
+        self.nwbfile = NWBFile(session_description=description,
+                               identifier=identifier,
+                               session_start_time=self.start_time)
         self.nwbfile.experimenter = ('experimenter1', 'experimenter2')
 
 
@@ -176,7 +181,9 @@ class TestPublicationsConstructorRoundtrip(TestNWBFileIO):
     def build_nwbfile(self):
         description = 'test nwbfile publications'
         identifier = 'TEST_publications'
-        self.nwbfile = NWBFile(description, identifier, self.start_time,
+        self.nwbfile = NWBFile(session_description=description,
+                               identifier=identifier,
+                               session_start_time=self.start_time,
                                related_publications=('pub1', 'pub2'))
 
 
@@ -186,7 +193,9 @@ class TestPublicationsSetterRoundtrip(TestNWBFileIO):
     def build_nwbfile(self):
         description = 'test nwbfile publications'
         identifier = 'TEST_publications'
-        self.nwbfile = NWBFile(description, identifier, self.start_time)
+        self.nwbfile = NWBFile(session_description=description,
+                               identifier=identifier,
+                               session_start_time=self.start_time)
         self.nwbfile.related_publications = ('pub1', 'pub2')
 
 
@@ -339,7 +348,7 @@ class TestTrials(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return placeholder Table for trials. Tested trials are added directly to the NWBFile in addContainer """
-        return DynamicTable('trials', 'a placeholder table')  # this will get ignored
+        return DynamicTable(name='trials', description='a placeholder table')  # this will get ignored
 
     def addContainer(self, nwbfile):
         """ Add trials and trial columns to the given NWBFile """
@@ -363,7 +372,7 @@ class TestInvalidTimes(NWBH5IOMixin, TestCase):
         """
         Return placeholder Table for trials. Tested invalid times are added directly to the NWBFile in addContainer
         """
-        return DynamicTable('invalid times', 'a placeholder table')
+        return DynamicTable(name='invalid times', description='a placeholder table')
 
     def addContainer(self, nwbfile):
         """ Add invalid times and invalid times columns to the given NWBFile """
@@ -385,7 +394,7 @@ class TestUnits(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return placeholder table for Units. Tested units are added directly to the NWBFile in addContainer """
-        return DynamicTable('units', 'a placeholder table')
+        return DynamicTable(name='units', description='a placeholder table')
 
     def addContainer(self, nwbfile):
         """ Add units and unit columns to the given NWBFile """
@@ -434,8 +443,9 @@ class TestElectrodes(NWBH5IOMixin, TestCase):
 
     def addContainer(self, nwbfile):
         """ Add electrodes and related objects to the given NWBFile """
-        self.dev1 = nwbfile.create_device('dev1')
-        self.group = nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', self.dev1)
+        self.dev1 = nwbfile.create_device(name='dev1')
+        self.group = nwbfile.create_electrode_group(name='tetrode1', description='tetrode description',
+                                                    location='tetrode location', device=self.dev1)
 
         nwbfile.add_electrode(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
                               group_name='tetrode1')
@@ -470,8 +480,9 @@ class TestElectrodesRegion(NWBH5IOMixin, TestCase):
 
     def addContainer(self, nwbfile):
         """ Add electrode table region and related objects to the given NWBFile """
-        self.dev1 = nwbfile.create_device('dev1')
-        self.group = nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', self.dev1)
+        self.dev1 = nwbfile.create_device(name='dev1')
+        self.group = nwbfile.create_electrode_group(name='tetrode1', description='tetrode description',
+                                                    location='tetrode location', device=self.dev1)
 
         nwbfile.add_electrode(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
                               group_name='tetrode1')
@@ -490,7 +501,7 @@ class TestElectrodesRegion(NWBH5IOMixin, TestCase):
         nwbfile.add_acquisition(ElectricalSeries(
             name='test_data',
             data=np.arange(10),
-            timestamps=np.arange(10),
+            timestamps=np.arange(10.),
             electrodes=region
         ))
 

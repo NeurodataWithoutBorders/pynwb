@@ -15,7 +15,7 @@ class TestOpticalSeriesIO(NWBH5IOMixin, TestCase):
                                             data=np.ones((10, 3, 3)),
                                             unit='m',
                                             format='raw',
-                                            timestamps=np.arange(10))
+                                            timestamps=np.arange(10.))
         return self.optical_series
 
     def addContainer(self, nwbfile):

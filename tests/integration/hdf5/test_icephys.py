@@ -13,13 +13,15 @@ class TestIntracellularElectrode(NWBH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test IntracellularElectrode to read/write """
         self.device = Device(name='device_name')
-        elec = IntracellularElectrode(name="elec0", slice='tissue slice',
-                                           resistance='something measured in ohms',
-                                           seal='sealing method', description='a fake electrode object',
-                                           location='Springfield Elementary School',
-                                           filtering='a meaningless free-form text field',
-                                           initial_access_resistance='I guess this changes',
-                                           device=self.device)
+        elec = IntracellularElectrode(name="elec0",
+                                      slice='tissue slice',
+                                      resistance='something measured in ohms',
+                                      seal='sealing method',
+                                      description='a fake electrode object',
+                                      location='Springfield Elementary School',
+                                      filtering='a meaningless free-form text field',
+                                      initial_access_resistance='I guess this changes',
+                                      device=self.device)
         return elec
 
     def addContainer(self, nwbfile):
@@ -50,7 +52,7 @@ class TestPatchClampSeries(AcquisitionH5IOMixin, TestCase):
         self.setUpElectrode()
         return PatchClampSeries(name="pcs", data=[1, 2, 3, 4, 5], unit='A',
                                 starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                stimulus_description="gotcha ya!", sweep_number=4711)
+                                stimulus_description="gotcha ya!", sweep_number=np.uint(4711))
 
     def addContainer(self, nwbfile):
         """

@@ -19,10 +19,22 @@ class TestImagingPlaneIO(NWBH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test ImagingPlane to read/write """
         self.device = Device(name='dev1')
-        self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
-        return ImagingPlane('imgpln1', self.optical_channel, description='a fake ImagingPlane', device=self.device,
-                            excitation_lambda=600., imaging_rate=300., indicator='GFP',
-                            location='somewhere in the brain', reference_frame='unknonwn')
+        self.optical_channel = OpticalChannel(
+            name='optchan1',
+            description='a fake OpticalChannel',
+            emission_lambda=500.
+        )
+        return ImagingPlane(
+            name='imgpln1',
+            optical_channel=self.optical_channel,
+            description='a fake ImagingPlane',
+            device=self.device,
+            excitation_lambda=600.,
+            imaging_rate=300.,
+            indicator='GFP',
+            location='somewhere in the brain',
+            reference_frame='unknown'
+        )
 
     def addContainer(self, nwbfile):
         """ Add the test ImagingPlane and Device to the given NWBFile """
@@ -39,10 +51,22 @@ class TestTwoPhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
     def make_imaging_plane(self):
         """ Make an ImagingPlane and related objects """
         self.device = Device(name='dev1')
-        self.optical_channel = OpticalChannel('optchan1', 'a fake OpticalChannel', 500.)
-        self.imaging_plane = ImagingPlane('imgpln1', self.optical_channel, description='a fake ImagingPlane',
-                                          device=self.device, excitation_lambda=600., imaging_rate=300.,
-                                          indicator='GFP', location='somewhere in the brain', reference_frame='unknown')
+        self.optical_channel = OpticalChannel(
+            name='optchan1',
+            description='a fake OpticalChannel',
+            emission_lambda=500.
+        )
+        self.imaging_plane = ImagingPlane(
+            name='imgpln1',
+            optical_channel=self.optical_channel,
+            description='a fake ImagingPlane',
+            device=self.device,
+            excitation_lambda=600.,
+            imaging_rate=300.,
+            indicator='GFP',
+            location='somewhere in the brain',
+            reference_frame='unknown'
+        )
 
     def setUpContainer(self):
         """ Return the test TwoPhotonSeries to read/write """
@@ -50,8 +74,18 @@ class TestTwoPhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
         data = [[[1., 1.] * 2] * 2]
         timestamps = list(map(lambda x: x/10, range(10)))
         fov = [2.0, 2.0, 5.0]
-        ret = TwoPhotonSeries('test_2ps', self.imaging_plane, data, 'image_unit', 'raw', fov, 1.7, 3.4,
-                              timestamps=timestamps, dimension=[2])
+        ret = TwoPhotonSeries(
+            name='test_2ps',
+            imaging_plane=self.imaging_plane,
+            data=data,
+            unit='image_unit',
+            format='raw',
+            field_of_view=fov,
+            pmt_gain=1.7,
+            scan_line_rate=3.4,
+            timestamps=timestamps,
+            dimension=[2]
+        )
         return ret
 
     def addContainer(self, nwbfile):
@@ -77,23 +111,32 @@ class TestPlaneSegmentationIO(NWBH5IOMixin, TestCase):
                                         starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
 
         self.device = Device(name='dev1')
-        self.optical_channel = OpticalChannel('test_optical_channel',
-                                              'optical channel description', 500.)
-        self.imaging_plane = ImagingPlane('imgpln1',
-                                          self.optical_channel,
-                                          description='a fake ImagingPlane',
-                                          device=self.device,
-                                          excitation_lambda=600., imaging_rate=200., indicator='GFP',
-                                          location='somewhere in the brain',
-                                          manifold=(((1., 2., 3.), (4., 5., 6.)),),
-                                          conversion=2., unit='a unit',
-                                          reference_frame='unknown')
+        self.optical_channel = OpticalChannel(
+            name='test_optical_channel',
+            description='optical channel description',
+            emission_lambda=500.
+        )
+        self.imaging_plane = ImagingPlane(
+            name='imgpln1',
+            optical_channel=self.optical_channel,
+            description='a fake ImagingPlane',
+            device=self.device,
+            excitation_lambda=600.,
+            imaging_rate=300.,
+            indicator='GFP',
+            location='somewhere in the brain',
+            reference_frame='unknown'
+        )
 
         self.img_mask = deepcopy(img_mask)
         self.pix_mask = deepcopy(pix_mask)
         self.pxmsk_index = [3, 5]
-        pS = PlaneSegmentation('plane segmentation description',
-                               self.imaging_plane, 'test_plane_seg_name', self.image_series)
+        pS = PlaneSegmentation(
+            description='plane segmentation description',
+            imaging_plane=self.imaging_plane,
+            name='test_plane_seg_name',
+            reference_images=self.image_series
+        )
         pS.add_roi(pixel_mask=pix_mask[0:3], image_mask=img_mask[0])
         pS.add_roi(pixel_mask=pix_mask[3:5], image_mask=img_mask[1])
         return pS
@@ -111,7 +154,8 @@ class TestPlaneSegmentationIO(NWBH5IOMixin, TestCase):
         nwbfile.add_imaging_plane(self.imaging_plane)
         img_seg = ImageSegmentation()
         img_seg.add_plane_segmentation(self.container)
-        self.mod = nwbfile.create_processing_module('plane_seg_test_module', 'a plain module for testing')
+        self.mod = nwbfile.create_processing_module(name='plane_seg_test_module',
+                                                    description='a plain module for testing')
         self.mod.add(img_seg)
 
     def getContainer(self, nwbfile):
@@ -130,17 +174,28 @@ class MaskIO(TestPlaneSegmentationIO, metaclass=ABCMeta):
                                         external_file=['images.tiff'],
                                         starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
         self.device = Device(name='dev1')
-        self.optical_channel = OpticalChannel('test_optical_channel',
-                                              'optical channel description', 500.)
-        self.imaging_plane = ImagingPlane('test_imaging_plane',
-                                          self.optical_channel,
-                                          description='imaging plane description',
-                                          device=self.device,
-                                          excitation_lambda=600., imaging_rate=300., indicator='GFP',
-                                          location='somewhere in the brain', manifold=(((1., 2., 3.), (4., 5., 6.)),),
-                                          conversion=4.0, unit='manifold unit', reference_frame='A frame to refer to')
-        return PlaneSegmentation('description', self.imaging_plane, 'test_plane_seg_name',
-                                 self.image_series)
+        self.optical_channel = OpticalChannel(
+            name='test_optical_channel', 
+            description='optical channel description',
+            emission_lambda=500.
+        )
+        self.imaging_plane = ImagingPlane(
+            name='test_imaging_plane',
+            optical_channel=self.optical_channel,
+            description='imaging plane description',
+            device=self.device,
+            excitation_lambda=600.,
+            imaging_rate=300.,
+            indicator='GFP',
+            location='somewhere in the brain',
+            reference_frame='a frame to refer to'
+        )
+        return PlaneSegmentation(
+            description='description',
+            imaging_plane=self.imaging_plane,
+            name='test_plane_seg_name',
+            reference_images=self.image_series
+        )
 
 
 class TestPixelMaskIO(MaskIO):
@@ -177,8 +232,13 @@ class TestRoiResponseSeriesIO(AcquisitionH5IOMixin, TestCase):
         data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
         timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
 
-        return RoiResponseSeries('test_roi_response_series', data, self.rt_region, unit='lumens',
-                                 timestamps=timestamps)
+        return RoiResponseSeries(
+            name='test_roi_response_series',
+            data=data,
+            rois=self.rt_region,
+            unit='lumens',
+            timestamps=timestamps
+        )
 
     def addContainer(self, nwbfile):
         """
@@ -189,7 +249,7 @@ class TestRoiResponseSeriesIO(AcquisitionH5IOMixin, TestCase):
         nwbfile.add_imaging_plane(self.imaging_plane)
         img_seg = ImageSegmentation()
         img_seg.add_plane_segmentation(self.plane_segmentation)
-        mod = nwbfile.create_processing_module('plane_seg_test_module',
-                                               'a plain module for testing')
+        mod = nwbfile.create_processing_module(name='plane_seg_test_module',
+                                               description='a plain module for testing')
         mod.add(img_seg)
         super().addContainer(nwbfile)
