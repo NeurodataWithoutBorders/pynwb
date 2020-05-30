@@ -1,5 +1,12 @@
 # PyNWB Changelog
 
+## PyNWB 1.3.2 (June 1, 2020)
+
+### Bug fixes:
+- Add support for nwb-schema 2.2.5. @rly (#1243)
+  - This schema version fixes incorrect dims and shape for `ImagingPlane.origin_coords` and `ImagingPlane.grid_spacing`,
+   and fixes incorrect dims for `TwoPhotonSeries.field_of_view`.
+
 ## PyNWB 1.3.1 (May 28, 2020)
 
 ### Bug fixes:
