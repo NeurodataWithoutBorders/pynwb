@@ -174,8 +174,11 @@ class MaskIO(TestPlaneSegmentationIO, metaclass=ABCMeta):
                                         external_file=['images.tiff'],
                                         starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
         self.device = Device(name='dev1')
-        self.optical_channel = OpticalChannel(name='test_optical_channel', description='optical channel description',
-                                              emission_lambda=500.)
+        self.optical_channel = OpticalChannel(
+            name='test_optical_channel',
+            description='optical channel description',
+            emission_lambda=500.
+        )
         self.imaging_plane = ImagingPlane(
             name='test_imaging_plane',
             optical_channel=self.optical_channel,
