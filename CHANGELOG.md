@@ -1,20 +1,44 @@
 # PyNWB Changelog
 
-## PyNWB 1.3.1 (Upcoming)
+## PyNWB 2.0.0 (Upcoming)
+
+### Internal improvements:
+- Add support for nwb-schema 2.3.0
+  - ...
+
+## PyNWB 1.3.2 (June 1, 2020)
+
+### Bug fixes:
+- Add support for nwb-schema 2.2.5. @rly (#1243)
+  - This schema version fixes incorrect dims and shape for `ImagingPlane.origin_coords` and `ImagingPlane.grid_spacing`,
+   and fixes incorrect dims for `TwoPhotonSeries.field_of_view`.
+
+## PyNWB 1.3.1 (May 28, 2020)
 
 ### Bug fixes:
 - Fix bugged `Device` constructor. @rly (#1209)
+- Fix link to code of conduct page in docs. @rly (#1229)
+- Fix docs for `get_type_map`. @oruebel (#1233)
+- Pass file object to parent when loading namespaces. @NileGraddis (#1242)
 
 ### Internal improvements:
 - Update CI to use supported MacOS version. @rly (#1211)
+- Clean up tests to remove conversion warnings and use keyword args. @rly (#1202)
+- Fix flake8 errors. @rly (#1235)
+- Add changelog. @rly (#1215)
+- Update release process with notes about coordinating with nwb-schema. @rly (#1214)
+- Inform which unit value is actually overwritten. @yarikoptic (#1219)
+- Do not print out logging.DEBUG statements to stdout for test.py. @rly (#1240)
+- Add support for nwb-schema 2.2.4. @rly (#1213)
+  - Make `ImagingPlane.imaging_rate` optional. This moves the `imaging_rate` argument down the list of constructor arguments for `ImagingPlane.__init__`. This will break existing code that calls the constructor of `ImagingPlane` with at least 6 positional arguments, such that one positional argument matches `imaging_rate`.
 
 ## PyNWB 1.3.0 (Mar. 4, 2020)
 
 ### New features:
 - Add support for nwb-schema 2.2.2. @rly (#1146)
-  - This is a large change. See the PR and schema release notes for more information: nwb-schema.readthedocs.io/en/latest/format_release_notes.html#march-2-2020
+  - This is a large change. See the PR and [schema release notes](http://nwb-schema.readthedocs.io/en/latest/format_release_notes.html#march-2-2020) for more information.
 - Validate against most specific namespace. @t-b, @rly (#1094)
-- Replace 'ic_electrode' with 'icephys_electrode' in NWBFile. @oruebel (#1200)
+- Replace 'ic_electrode' with 'icephys_electrode' in `NWBFile`. @oruebel (#1200)
 - Integrate minor enhancements and bug fixes introduced in HDMF 1.6.0 and 1.6.1, including improved handling of namespaces that lack a version key,
 
 ### Internal improvements:
@@ -29,7 +53,7 @@
 - Fix unit testing output. @rly (#1158)
 - Fix copying files with Subject. @rly (#1171)
 - Add "unit" attribute back as an optional attribute in icephys classes. @rly (#1188)
-- Fix reported development status in setup.py. @rly (#1201)
+- Fix reported development status in `setup.py`. @rly (#1201)
 
 ## PyNWB 1.2.1 (Jan. 22, 2020)
 
