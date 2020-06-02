@@ -395,7 +395,8 @@ class SubjectTest(TestCase):
         self.assertEqual(self.subject.species, 'Rattus norvegicus')
         self.assertEqual(self.subject.subject_id, 'RAT123')
         self.assertEqual(self.subject.weight, '2 lbs')
-        self.assertEqual(self.subject.weight, 'my_strain')
+        self.assertEqual(self.subject.date_of_birth, datetime(2017, 5, 1, 12, tzinfo=tzlocal()))
+        self.assertEqual(self.subject.strain, 'my_strain')
 
     def test_nwbfile_constructor(self):
         self.assertIs(self.nwbfile.subject, self.subject)
