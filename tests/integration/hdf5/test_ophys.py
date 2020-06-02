@@ -33,7 +33,11 @@ class TestImagingPlaneIO(NWBH5IOMixin, TestCase):
             imaging_rate=300.,
             indicator='GFP',
             location='somewhere in the brain',
-            reference_frame='unknown'
+            reference_frame='unknown',
+            origin_coords=[10, 20],
+            origin_coords_unit='millimeters',
+            grid_spacing=[0.001, 0.001],
+            grid_spacing_unit='millimeters',
         )
 
     def addContainer(self, nwbfile):
