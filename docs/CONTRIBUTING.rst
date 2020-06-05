@@ -162,3 +162,23 @@ As indicated in the PyNWB license: *“You are under no obligation whatsoever to
 Contributors to the NWB code base are expected to use a permissive, non-copyleft open source license. Typically 3-clause BSD is used, but any compatible license is allowed, the MIT and Apache 2.0 licenses being good alternative choices. The GPL and other copyleft licenses are not allowed due to the consternation it generates across many organizations.
 
 Also, make sure that you are permitted to contribute code. Some organizations, even academic organizations, have agreements in place that discuss IP ownership in detail (i.e., address IP rights and ownership that you create while under the employ of the organization). These are typically signed documents that you looked at on your first day of work and then promptly forgot. We don’t want contributed code to be yanked later due to IP issues.
+
+FAQ
+===
+
+1.  I am using a git cloned copy of PyNWB and getting the error:
+    ``RuntimeError: Unable to load a TypeMap - no namespace file found``
+
+    - The PyNWB repo uses git submodules that have to be checked out when cloning the repos. Please make sure you
+      are using the ``--recurse-submodules`` flag when running ``git clone``:
+
+      .. code-block:: bash
+
+          git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
+
+      You can also run the following on your existing cloned repo.
+
+      .. code-block:: bash
+
+          git submodule init
+          git submodule update --checkout --force
