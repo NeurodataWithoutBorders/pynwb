@@ -150,7 +150,7 @@ Python coding style is checked via ``flake8`` for automatic checking of PEP8 sty
 Endorsement
 -----------
 
-Please don’t take the fact that working with an organization (e.g., during a hackathon or via GitHub) as an endorsement of your work or your organization. It’s okay to say  e.g., “We worked with XXXXX to advance science” but not e.g., “XXXXX supports our work on NWB”.”
+Please don’t take the fact that you worked with an organization (e.g., during a hackathon or via GitHub) as an endorsement of your work or your organization. It is okay to say e.g., “We worked with XXXXX to advance science” but not e.g., “XXXXX supports our work on NWB”.”
 
 FAQ
 ===
