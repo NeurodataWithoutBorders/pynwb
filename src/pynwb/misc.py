@@ -137,11 +137,11 @@ class Units(DynamicTable):
         'resolution'
     )
 
-    waveforms_desc = 'Individual waveforms for each spike. If the dataset is three-dimensional, the third dimension ' \
-                     'shows the response from different electrodes that all observe this unit simultaneously. In this' \
-                     ' case, the `electrodes` column of this Units table should be used to indicate which electrodes ' \
-                     'are associated with this unit, and the electrodes dimension here should be in the same order as' \
-                     ' the electrodes referenced in the `electrodes` column of this table.'
+    waveforms_desc = ('Individual waveforms for each spike. If the dataset is three-dimensional, the third dimension ' 
+                      'shows the response from different electrodes that all observe this unit simultaneously. In this' 
+                      ' case, the `electrodes` column of this Units table should be used to indicate which electrodes ' 
+                      'are associated with this unit, and the electrodes dimension here should be in the same order as' 
+                      ' the electrodes referenced in the `electrodes` column of this table.')
     __columns__ = (
         {'name': 'spike_times', 'description': 'the spike times for each unit', 'index': True},
         {'name': 'obs_intervals', 'description': 'the observation intervals for each unit',
