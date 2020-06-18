@@ -1,7 +1,6 @@
-import unittest2 as unittest
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
-import re
+import numpy as np
 from h5py import File
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
@@ -13,12 +12,10 @@ from hdmf.build import GroupBuilder, DatasetBuilder
 from hdmf.spec import NamespaceCatalog
 from pynwb.spec import NWBGroupSpec, NWBDatasetSpec, NWBNamespace
 from pynwb.ecephys import ElectricalSeries, LFP
-from pynwb.testing import remove_test_file
-
-import numpy as np
+from pynwb.testing import remove_test_file, TestCase
 
 
-class TestHDF5Writer(unittest.TestCase):
+class TestHDF5Writer(TestCase):
 
     _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec', 'test_write_no_cache_spec')
 
@@ -31,10 +28,10 @@ class TestHDF5Writer(unittest.TestCase):
         self.path = "test_pynwb_io_hdf5.nwb"
         self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
         self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
-        self.container = NWBFile('a test NWB File', 'TEST123',
-                                 self.start_time, file_create_date=self.create_date)
-        ts = TimeSeries('test_timeseries',
-                        list(range(100, 200, 10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
+        self.container = NWBFile(session_description='a test NWB File', identifier='TEST123',
+                                 session_start_time=self.start_time, file_create_date=self.create_date)
+        ts = TimeSeries(name='test_timeseries', data=list(range(100, 200, 10)), unit='SIunit',
+                        timestamps=np.arange(10.), resolution=0.1)
         self.container.add_acquisition(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
@@ -43,7 +40,7 @@ class TestHDF5Writer(unittest.TestCase):
                                                                    attributes={'unit': 'SIunit',
                                                                                'conversion': 1.0,
                                                                                'resolution': 0.1}),
-                                            'timestamps': DatasetBuilder('timestamps', list(range(10)),
+                                            'timestamps': DatasetBuilder('timestamps', np.arange(10.),
                                                                          attributes={'unit': 'seconds',
                                                                                      'interval': 1})})
         self.builder = GroupBuilder(
@@ -68,7 +65,7 @@ class TestHDF5Writer(unittest.TestCase):
     def test_nwbio(self):
         with HDF5IO(self.path, manager=self.manager, mode='a') as io:
             io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('acquisition', f)
             self.assertIn('analysis', f)
             self.assertIn('general', f)
@@ -84,9 +81,8 @@ class TestHDF5Writer(unittest.TestCase):
         with HDF5IO(self.path, manager=self.manager, mode='a') as io:
             io.write(self.container)
 
-        with self.assertRaisesRegex(UnsupportedOperation,
-                                    re.escape("Unable to open file %s in 'w-' mode. File already exists."
-                                              % self.path)):
+        with self.assertRaisesWith(UnsupportedOperation,
+                                   "Unable to open file %s in 'w-' mode. File already exists." % self.path):
             with HDF5IO(self.path, manager=self.manager, mode='w-') as io:
                 pass
 
@@ -96,7 +92,7 @@ class TestHDF5Writer(unittest.TestCase):
         '''
         with HDF5IO(self.path, manager=self.manager, mode="a") as io:
             io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('specifications', f)
 
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
@@ -122,11 +118,11 @@ class TestHDF5Writer(unittest.TestCase):
         '''
         with HDF5IO(self.path, manager=self.manager, mode="a") as io:
             io.write(self.container, cache_spec=False)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertNotIn('specifications', f)
 
 
-class TestHDF5WriterWithInjectedFile(unittest.TestCase):
+class TestHDF5WriterWithInjectedFile(TestCase):
 
     _required_tests = ('test_nwbio', 'test_write_clobber', 'test_write_cache_spec')
 
@@ -139,10 +135,10 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
         self.path = "test_pynwb_io_hdf5_injected.nwb"
         self.start_time = datetime(1970, 1, 1, 12, tzinfo=tzutc())
         self.create_date = datetime(2017, 4, 15, 12, tzinfo=tzlocal())
-        self.container = NWBFile('a test NWB File', 'TEST123',
-                                 self.start_time, file_create_date=self.create_date)
-        ts = TimeSeries('test_timeseries',
-                        list(range(100, 200, 10)), 'SIunit', timestamps=list(range(10)), resolution=0.1)
+        self.container = NWBFile(session_description='a test NWB File', identifier='TEST123',
+                                 session_start_time=self.start_time, file_create_date=self.create_date)
+        ts = TimeSeries(name='test_timeseries', data=list(range(100, 200, 10)), unit='SIunit',
+                        timestamps=np.arange(10.), resolution=0.1)
         self.container.add_acquisition(ts)
 
         ts_builder = GroupBuilder('test_timeseries',
@@ -151,7 +147,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
                                                                    attributes={'unit': 'SIunit',
                                                                                'conversion': 1.0,
                                                                                'resolution': 0.1}),
-                                            'timestamps': DatasetBuilder('timestamps', list(range(10)),
+                                            'timestamps': DatasetBuilder('timestamps', np.arange(10.),
                                                                          attributes={'unit': 'seconds',
                                                                                      'interval': 1})})
         self.builder = GroupBuilder(
@@ -174,10 +170,10 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
         remove_test_file(self.path)
 
     def test_nwbio(self):
-        with File(self.path) as fil:
+        with File(self.path, 'w') as fil:
             with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
                 io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('acquisition', f)
             self.assertIn('analysis', f)
             self.assertIn('general', f)
@@ -190,13 +186,12 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
             self.assertIn('test_timeseries', acq)
 
     def test_write_clobber(self):
-        with File(self.path) as fil:
+        with File(self.path, 'w') as fil:
             with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
                 io.write(self.container)
 
-        with self.assertRaisesRegex(UnsupportedOperation,
-                                    re.escape("Unable to open file %s in 'w-' mode. File already exists."
-                                              % self.path)):
+        with self.assertRaisesWith(UnsupportedOperation,
+                                   "Unable to open file %s in 'w-' mode. File already exists." % self.path):
             with HDF5IO(self.path, manager=self.manager, mode='w-') as io:
                 pass
 
@@ -205,10 +200,10 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
         Round-trip test for writing spec and reading it back in
         '''
 
-        with File(self.path) as fil:
+        with File(self.path, 'w') as fil:
             with HDF5IO(self.path, manager=self.manager, file=fil, mode='a') as io:
                 io.write(self.container)
-        with File(self.path) as f:
+        with File(self.path, 'r') as f:
             self.assertIn('specifications', f)
 
         ns_catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
@@ -229,7 +224,7 @@ class TestHDF5WriterWithInjectedFile(unittest.TestCase):
                     self.assertDictEqual(original_spec, cached_spec)
 
 
-class TestAppend(unittest.TestCase):
+class TestAppend(TestCase):
 
     def setUp(self):
         self.nwbfile = NWBFile(session_description='hi',
@@ -283,19 +278,24 @@ class TestAppend(unittest.TestCase):
                 print('ERROR', e)
 
 
-class TestH5DataIO(unittest.TestCase):
+class TestH5DataIO(TestCase):
     """
     Test that H5DataIO functions correctly on round trip with the HDF5IO backend
     """
     def setUp(self):
-        self.nwbfile = NWBFile('a', 'b', datetime(1970, 1, 1, 12, tzinfo=tzutc()))
+        self.nwbfile = NWBFile(session_description='a',
+                               identifier='b',
+                               session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
         self.path = "test_pynwb_io_hdf5_h5dataIO.h5"
 
     def tearDown(self):
         remove_test_file(self.path)
 
     def test_gzip_timestamps(self):
-        ts = TimeSeries('ts_name', [1, 2, 3], 'A', timestamps=H5DataIO(np.array([1., 2., 3.]), compression='gzip'))
+        ts = TimeSeries(name='ts_name',
+                        data=[1, 2, 3],
+                        unit='A',
+                        timestamps=H5DataIO(np.array([1., 2., 3.]), compression='gzip'))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile, cache_spec=False)
@@ -309,7 +309,7 @@ class TestH5DataIO(unittest.TestCase):
                      compression_opts=5,
                      shuffle=True,
                      fletcher32=True)
-        ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
+        ts = TimeSeries(name='ts_name', data=a, unit='A', timestamps=np.arange(5.))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile, cache_spec=False)
@@ -324,7 +324,7 @@ class TestH5DataIO(unittest.TestCase):
     def test_write_dataset_custom_chunks(self):
         a = H5DataIO(np.arange(30).reshape(5, 2, 3),
                      chunks=(1, 1, 3))
-        ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
+        ts = TimeSeries(name='ts_name', data=a, unit='A', timestamps=np.arange(5.))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile, cache_spec=False)
@@ -335,7 +335,7 @@ class TestH5DataIO(unittest.TestCase):
 
     def test_write_dataset_custom_fillvalue(self):
         a = H5DataIO(np.arange(20).reshape(5, 4), fillvalue=-1)
-        ts = TimeSeries('ts_name', a, 'A', timestamps=np.arange(5))
+        ts = TimeSeries(name='ts_name', data=a, unit='A', timestamps=np.arange(5.))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile, cache_spec=False)
@@ -348,9 +348,9 @@ class TestH5DataIO(unittest.TestCase):
         a = np.arange(30).reshape(5, 2, 3)
         aiter = iter(a)
         daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
-        tstamps = np.arange(5)
+        tstamps = np.arange(5.)
         tsiter = DataChunkIterator.from_iterable(tstamps)
-        ts = TimeSeries('ts_name', daiter, 'A', timestamps=tsiter)
+        ts = TimeSeries(name='ts_name', data=daiter, unit='A', timestamps=tsiter)
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile, cache_spec=False)
@@ -362,8 +362,8 @@ class TestH5DataIO(unittest.TestCase):
         a = np.arange(30).reshape(5, 2, 3)
         aiter = iter(a)
         daiter = DataChunkIterator.from_iterable(aiter, buffer_size=2)
-        tstamps = np.arange(5)
-        ts = TimeSeries('ts_name', daiter, 'A', timestamps=tstamps)
+        tstamps = np.arange(5.)
+        ts = TimeSeries(name='ts_name', data=daiter, unit='A', timestamps=tstamps)
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile, cache_spec=False)
@@ -380,7 +380,7 @@ class TestH5DataIO(unittest.TestCase):
                                   compression_opts=5,
                                   shuffle=True,
                                   fletcher32=True)
-        ts = TimeSeries('ts_name', wrapped_daiter, 'A', timestamps=np.arange(5))
+        ts = TimeSeries(name='ts_name', data=wrapped_daiter, unit='A', timestamps=np.arange(5.))
         self.nwbfile.add_acquisition(ts)
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(self.nwbfile, cache_spec=False)

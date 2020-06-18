@@ -34,10 +34,12 @@ references:
           # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
           no_output_timeout: 30m
       - run:
-          name: Run coverage and submit to codecov-io
+          name: Run coverage and submit to codecov-io if COVERAGE_TOX_ENV != ""
           command: |
             . ../venv/bin/activate
-            tox -e $COVERAGE_TOX_ENV
+            if [[ "${COVERAGE_TOX_ENV}" != "" ]]; then
+              tox -e $COVERAGE_TOX_ENV
+            fi
       - run:
           name: Build wheel and source distribution
           command: |
@@ -75,7 +77,7 @@ references:
             conda config --set always_yes yes --set changeps1 no
             conda config --add channels conda-forge
             conda install python=$CONDA_PYTHON_VER
-            conda install virtualenv==16.0.0
+            conda install virtualenv
             conda install tox
       - run:
           name: Run the tests
@@ -114,12 +116,15 @@ references:
   no_filters: &no_filters
     filters:
       tags:
-        only: /.*/
+        ignore:
+          # exclude tags created by "ci_addons publish_github_release"
+          - /^latest$/
+          - /^latest-tmp$/
 
 jobs:
   flake8:
     docker:
-      - image: circleci/python:3.6.3-jessie
+      - image: circleci/python:3.8.1-buster
     steps:
       - checkout
       - run:
@@ -129,20 +134,20 @@ jobs:
 
   python35:
     docker:
-      - image: circleci/python:3.5.4-jessie
+      - image: circleci/python:3.5.9-stretch
     environment:
      - TEST_TOX_ENV: "py35"
-     - COVERAGE_TOX_ENV: "coverage-py35"
+     - COVERAGE_TOX_ENV: ""
      - BUILD_TOX_ENV: "build-py35"
      - TEST_WHEELINSTALL_ENV: "wheelinstall-py35"
     <<: *ci-steps
 
   python36:
     docker:
-      - image: circleci/python:3.6.3-jessie
+      - image: circleci/python:3.6.10-stretch
     environment:
      - TEST_TOX_ENV: "py36"
-     - COVERAGE_TOX_ENV: "coverage-py36"
+     - COVERAGE_TOX_ENV: ""
      - BUILD_TOX_ENV: "build-py36"
      - TEST_WHEELINSTALL_ENV: "wheelinstall-py36"
      - UPLOAD_WHEELS: "true"
@@ -150,12 +155,22 @@ jobs:
 
   python37:
     docker:
-      - image: circleci/python:3.7.0-stretch
+      - image: circleci/python:3.7.6-stretch
     environment:
      - TEST_TOX_ENV: "py37"
-     - COVERAGE_TOX_ENV: "coverage-py37"
+     - COVERAGE_TOX_ENV: "coverage"
      - BUILD_TOX_ENV: "build-py37"
      - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
+    <<: *ci-steps
+
+  python36-min-req:
+    docker:
+      - image: circleci/python:3.6.10-stretch
+    environment:
+     - TEST_TOX_ENV: "py36-min-req"
+     - COVERAGE_TOX_ENV: ""
+     - BUILD_TOX_ENV: "build-py36-min-req"
+     - TEST_WHEELINSTALL_ENV: "wheelinstall-py36-min-req"
     <<: *ci-steps
 
   miniconda35:
@@ -170,7 +185,7 @@ jobs:
 
   miniconda36:
     docker:
-      - image: continuumio/miniconda3:4.6.14
+      - image: continuumio/miniconda3:4.7.12
     environment:
       - CONDA_PYTHON_VER: "3.6"
       - TEST_TOX_ENV: "py36"
@@ -180,20 +195,13 @@ jobs:
 
   miniconda37:
     docker:
-      - image: continuumio/miniconda3:4.6.14
+      - image: continuumio/miniconda3:4.7.12
     environment:
       - CONDA_PYTHON_VER: "3.7"
       - TEST_TOX_ENV: "py37"
       - BUILD_TOX_ENV: "build-py37"
       - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
     <<: *conda-steps
-
-  gallery35:
-    docker:
-      - image: circleci/python:3.5.4-jessie
-    environment:
-     - TEST_TOX_ENV: "gallery-py35"
-    <<: *gallery-steps
 
   gallery36:
     docker:
@@ -204,14 +212,40 @@ jobs:
 
   gallery37:
     docker:
-      - image: dozturk2/python37-hdf5
+      - image: circleci/python:3.7.6-stretch
     environment:
      - TEST_TOX_ENV: "gallery-py37"
     <<: *gallery-steps
 
+  gallery36-min-req:
+    docker:
+      - image: circleci/python:3.6.3-jessie
+    environment:
+     - TEST_TOX_ENV: "gallery-py36-min-req"
+    <<: *gallery-steps
+
+  test-validation:
+    docker:
+      - image: circleci/python:3.7.6-stretch
+    steps:
+      - checkout
+      - run: git submodule sync
+      - run: git submodule update --init
+      - run:
+          <<: *initialize-venv
+      - run:
+          name: Run the tests
+          command: |
+            . ../venv/bin/activate
+            pip install tox
+            tox -e validation-py37
+          # Install is expected to be quick. Increase timeout in case there are some network issues.
+          # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
+          no_output_timeout: 30m
+
   deploy-dev:
     docker:
-      - image: circleci/python:3.7.0-stretch
+      - image: circleci/python:3.7.6-stretch
     steps:
       - checkout
       - attach_workspace:
@@ -233,7 +267,7 @@ jobs:
 
   deploy-release:
     docker:
-      - image: circleci/python:3.7.0-stretch
+      - image: circleci/python:3.7.6-stretch
     steps:
       - attach_workspace:
           at: ./
@@ -268,17 +302,19 @@ workflows:
           <<: *no_filters
       - python37:
           <<: *no_filters
+      - python36-min-req:
+          <<: *no_filters
       - miniconda35:
           <<: *no_filters
       - miniconda36:
           <<: *no_filters
       - miniconda37:
           <<: *no_filters
-      - gallery35:
-          <<: *no_filters
       - gallery36:
           <<: *no_filters
       - gallery37:
+          <<: *no_filters
+      - gallery36-min-req:
           <<: *no_filters
       - deploy-dev:
           requires:
@@ -286,13 +322,19 @@ workflows:
             - python35
             - python36
             - python37
+            - python36-min-req
             - miniconda35
             - miniconda36
             - miniconda37
-            - gallery35
             - gallery36
             - gallery37
+            - gallery36-min-req
           filters:
+            tags:
+              ignore:
+                # exclude tags created by "ci_addons publish_github_release"
+                - /^latest$/
+                - /^latest-tmp$/
             branches:
               only: dev
       - deploy-release:
@@ -301,14 +343,25 @@ workflows:
             - python35
             - python36
             - python37
+            - python36-min-req
             - miniconda35
             - miniconda36
             - miniconda37
-            - gallery35
             - gallery36
             - gallery37
+            - gallery36-min-req
           filters:
             tags:
               only: /^[0-9]+(\.[0-9]+)*(\.post[0-9]+)?$/
             branches:
               ignore: /.*/
+
+  nightly:
+    triggers:
+      - schedule:
+          cron: "0 5 * * *"
+          filters:
+            branches:
+              only: dev
+    jobs:
+      - test-validation

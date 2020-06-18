@@ -1,24 +1,22 @@
-import unittest
-
 import numpy as np
 
 from hdmf.common import DynamicTable, VectorData
 
-from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, \
-    DecompositionSeries
+from pynwb.misc import AnnotationSeries, AbstractFeatureSeries, IntervalSeries, Units, DecompositionSeries
 from pynwb.file import TimeSeries
 from pynwb.device import Device
 from pynwb.ecephys import ElectrodeGroup
+from pynwb.testing import TestCase
 
 
-class AnnotationSeriesConstructor(unittest.TestCase):
+class AnnotationSeriesConstructor(TestCase):
     def test_init(self):
         aS = AnnotationSeries('test_aS', timestamps=list())
         self.assertEqual(aS.name, 'test_aS')
         aS.add_annotation(2.0, 'comment')
 
 
-class AbstractFeatureSeriesConstructor(unittest.TestCase):
+class AbstractFeatureSeriesConstructor(TestCase):
     def test_init(self):
         aFS = AbstractFeatureSeries('test_aFS', ['feature units'], ['features'], timestamps=list())
         self.assertEqual(aFS.name, 'test_aFS')
@@ -28,7 +26,7 @@ class AbstractFeatureSeriesConstructor(unittest.TestCase):
         aFS.add_features(2.0, [1.])
 
 
-class DecompositionSeriesConstructor(unittest.TestCase):
+class DecompositionSeriesConstructor(TestCase):
     def test_init(self):
         timeseries = TimeSeries(name='dummy timeseries', description='desc',
                                 data=np.ones((3, 3)), unit='Volts',
@@ -77,7 +75,7 @@ class DecompositionSeriesConstructor(unittest.TestCase):
         self.assertEqual(spec_anal.metric, 'amplitude')
 
 
-class IntervalSeriesConstructor(unittest.TestCase):
+class IntervalSeriesConstructor(TestCase):
     def test_init(self):
         data = [1.0, -1.0, 1.0, -1.0]
         timestamps = [0.0, 1.0, 2.0, 3.0]
@@ -99,7 +97,7 @@ class IntervalSeriesConstructor(unittest.TestCase):
         self.assertEqual(iS.timestamps, timestamps)
 
 
-class UnitsTests(unittest.TestCase):
+class UnitsTests(TestCase):
     def test_init(self):
         ut = Units()
         self.assertEqual(ut.name, 'Units')
@@ -121,6 +119,26 @@ class UnitsTests(unittest.TestCase):
         ut.add_unit(spike_times=[3, 4, 5])
         self.assertTrue(all(ut.get_unit_spike_times(0) == np.array([0, 1, 2])))
         self.assertTrue(all(ut.get_unit_spike_times(1) == np.array([3, 4, 5])))
+
+    @staticmethod
+    def test_get_spike_times_interval():
+        ut = Units()
+        ut.add_unit(spike_times=[0, 1, 2])
+        ut.add_unit(spike_times=[3, 4, 5])
+        np.testing.assert_array_equal(ut.get_unit_spike_times(0, (.5, 3)), [1, 2])
+        np.testing.assert_array_equal(ut.get_unit_spike_times(0, (-.5, 1.1)), [0, 1])
+
+    def test_get_spike_times_multi(self):
+        ut = Units()
+        ut.add_unit(spike_times=[0, 1, 2])
+        ut.add_unit(spike_times=[3, 4, 5])
+        np.testing.assert_array_equal(ut.get_unit_spike_times((0, 1)), [[0, 1, 2], [3, 4, 5]])
+
+    def test_get_spike_times_multi_interval(self):
+        ut = Units()
+        ut.add_unit(spike_times=[0, 1, 2])
+        ut.add_unit(spike_times=[3, 4, 5])
+        np.testing.assert_array_equal(ut.get_unit_spike_times((0, 1), (1.5, 3.5)), [[2], [3]])
 
     def test_times(self):
         ut = Units()
@@ -159,6 +177,7 @@ class UnitsTests(unittest.TestCase):
         ut.add_unit(electrode_group=electrode_group)
         self.assertEqual(ut['electrode_group'][0], electrode_group)
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_waveform_attrs(self):
+        ut = Units(waveform_rate=40000.)
+        self.assertEqual(ut.waveform_rate, 40000.)
+        self.assertEqual(ut.waveform_unit, 'volts')

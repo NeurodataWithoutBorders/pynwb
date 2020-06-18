@@ -49,12 +49,12 @@ __TYPE_MAP.merge(hdmf_typemap)
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
          'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
          'default': None},
-        returns="the namespaces loaded from the given file", rtype=tuple,
+        returns="TypeMap loaded for the given extension or NWB core namespace", rtype=tuple,
         is_method=False)
 def get_type_map(**kwargs):
     '''
-    Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
-    return a BuildManager that uses the core namespace
+    Get the TypeMap for the given extensions. If no extensions are provided,
+    return the TypeMap for the core namespace
     '''
     extensions = getargs('extensions', kwargs)
     type_map = None
@@ -161,7 +161,27 @@ def register_map(**kwargs):
         {'name': 'namespace', 'type': str, 'doc': 'the namespace the neurodata_type is defined in'},
         is_method=False)
 def get_class(**kwargs):
-    """Get the class object of the NWBContainer subclass corresponding to a given neurodata_type.
+    """
+    Parse the YAML file for a given neurodata_type that is a subclass of NWBContainer and automatically generate its
+    python API. This will work for most containers, but is known to not work for descendants of MultiContainerInterface
+    and DynamicTable, so these must be defined manually (for now). `get_class` infers the API mapping directly from the
+    specification. If you want to define a custom mapping, you should not use this function and you should define the
+    class manually.
+
+    Examples:
+
+    Generating and registering an extension is as simple as::
+
+        MyClass = get_class('MyClass', 'ndx-my-extension')
+
+    `get_class` defines only the `__init__` for the class. In cases where you want to provide additional methods for
+    querying, plotting, etc. you can still use `get_class` and attach methods to the class after-the-fact, e.g.::
+
+        def get_sum(self, a, b):
+            return self.feat1 + self.feat2
+
+        MyClass.get_sum = get_sum
+
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
@@ -207,7 +227,7 @@ class NWBHDF5IO(_HDF5IO):
                 raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
-            super(NWBHDF5IO, self).load_namespaces(tm, path)
+            super(NWBHDF5IO, self).load_namespaces(tm, path, file=file_obj)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for

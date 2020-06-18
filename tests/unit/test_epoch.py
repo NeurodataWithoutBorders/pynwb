@@ -1,15 +1,14 @@
-import unittest
+import numpy as np
+import pandas as pd
 from datetime import datetime
 from dateutil import tz
 
 from pynwb.epoch import TimeIntervals
 from pynwb import TimeSeries, NWBFile
-
-import numpy as np
-import pandas as pd
+from pynwb.testing import TestCase
 
 
-class TimeIntervalsTest(unittest.TestCase):
+class TimeIntervalsTest(TestCase):
 
     def test_init(self):
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
@@ -18,10 +17,11 @@ class TimeIntervalsTest(unittest.TestCase):
         self.assertEqual(ept.name, 'epochs')
         ept.add_interval(10.0, 20.0, ["test", "unittest", "pynwb"], ts)
         row = ept[0]
-        self.assertEqual(row[1], 10.0)
-        self.assertEqual(row[2], 20.0)
-        self.assertEqual(row[3], ["test", "unittest", "pynwb"])
-        self.assertEqual(row[4], [(90, 100, ts)])
+        self.assertEqual(row.index[0], 0)
+        self.assertEqual(row.loc[0]['start_time'], 10.0)
+        self.assertEqual(row.loc[0]['stop_time'], 20.0)
+        self.assertEqual(row.loc[0]['tags'], ["test", "unittest", "pynwb"])
+        self.assertEqual(row.loc[0]['timeseries'], [(90, 100, ts)])
 
     def get_timeseries(self):
         return [
@@ -37,7 +37,7 @@ class TimeIntervalsTest(unittest.TestCase):
             'start_time': [0.2, 0.25, 0.30, 0.35],
             'stop_time': [0.25, 0.30, 0.40, 0.45],
             'timeseries': [[tsa], [tsb], [], [tsb, tsa]],
-            'description': ['q', 'w', 'e', 'r'],
+            'keys': ['q', 'w', 'e', 'r'],
             'tags': [[], [], ['fizz', 'buzz'], ['qaz']]
         })
 
@@ -64,7 +64,6 @@ class TimeIntervalsTest(unittest.TestCase):
             nwbfile.add_epoch(start_time=row['start_time'], stop_time=row['stop_time'])
 
     def test_from_dataframe(self):
-
         df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']},
                           columns=('start_time', 'stop_time', 'label'))
         ti = TimeIntervals.from_dataframe(df, name='ti_name')
@@ -74,17 +73,11 @@ class TimeIntervalsTest(unittest.TestCase):
         self.assertEqual(ti.columns[2].data, ['a', 'b', 'c'])
 
     def test_from_dataframe_missing_required_cols(self):
-
+        df = pd.DataFrame({'start_time': [1., 2., 3.], 'label': ['a', 'b', 'c']})
         with self.assertRaises(ValueError):
-            df = pd.DataFrame({'start_time': [1., 2., 3.], 'label': ['a', 'b', 'c']})
             TimeIntervals.from_dataframe(df, name='ti_name')
 
     def test_frorm_dataframe_missing_supplied_col(self):
-
+        df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
         with self.assertRaises(ValueError):
-            df = pd.DataFrame({'start_time': [1., 2., 3.], 'stop_time': [2., 3., 4.], 'label': ['a', 'b', 'c']})
             TimeIntervals.from_dataframe(df, name='ti_name', columns=[{'name': 'not there'}])
-
-
-if __name__ == '__main__':
-    unittest.main()

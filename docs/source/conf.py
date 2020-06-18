@@ -14,7 +14,6 @@
 import sys
 import os
 import sphinx_rtd_theme
-from sphinx.domains.python import PythonDomain
 
 
 # -- Support building doc without install --------------------------------------
@@ -71,9 +70,8 @@ sphinx_gallery_conf = {
 }
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3.5', None),
+    'python': ('https://docs.python.org/3.8', None),
     'numpy': ('https://docs.scipy.org/doc/numpy/', None),
-    'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
     'matplotlib': ('https://matplotlib.org', None),
     'h5py': ('http://docs.h5py.org/en/latest/', None),
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
@@ -95,7 +93,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'PyNWB'
-copyright = u'2017-2019, Neurodata Without Borders'
+copyright = u'2017-2020, Neurodata Without Borders'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -168,12 +166,12 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
 # html_logo = None
-html_logo = 'neuron.png'
+html_logo = 'logo.png'
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
 # pixels large.
-html_favicon = 'neuron-180x180.png'
+html_favicon = 'favicon_96.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -247,7 +245,7 @@ latex_elements = {
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-# latex_logo = None
+latex_logo = 'logo.pdf'
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.
@@ -307,25 +305,16 @@ latex_elements = {
 #
 
 def run_apidoc(_):
-    from sphinx.apidoc import main
+    from sphinx.ext.apidoc import main as apidoc_main
     import os
     import sys
     out_dir = os.path.dirname(__file__)
     src_dir = os.path.join(out_dir, '../../src')
     sys.path.append(src_dir)
-    main(['-f', '-e', '-o', out_dir, src_dir])
+    apidoc_main(['-f', '-e', '--no-toc', '-o', out_dir, src_dir])
 
 
-# https://github.com/sphinx-doc/sphinx/issues/3866
-class PatchedPythonDomain(PythonDomain):
-    def resolve_xref(self, env, fromdocname, builder, typ, target, node, contnode):
-        if 'refspecific' in node:
-            del node['refspecific']
-        return super(PatchedPythonDomain, self).resolve_xref(
-            env, fromdocname, builder, typ, target, node, contnode)
-
-
-from abc import abstractmethod, abstractproperty
+from abc import abstractproperty
 
 def skip(app, what, name, obj, skip, options):
     if isinstance(obj, abstractproperty) or getattr(obj, '__isabstractmethod__', False):
@@ -338,5 +327,4 @@ def skip(app, what, name, obj, skip, options):
 def setup(app):
     app.connect('builder-inited', run_apidoc)
     app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
-    app.override_domain(PatchedPythonDomain)
     app.connect("autodoc-skip-member", skip)

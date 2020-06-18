@@ -1,10 +1,9 @@
-import unittest
-
 from pynwb.ogen import OptogeneticSeries, OptogeneticStimulusSite
 from pynwb.ecephys import Device
+from pynwb.testing import TestCase
 
 
-class OptogeneticSeriesConstructor(unittest.TestCase):
+class OptogeneticSeriesConstructor(TestCase):
 
     def test_init(self):
         device = Device('name')
@@ -19,7 +18,3 @@ class OptogeneticSeriesConstructor(unittest.TestCase):
         self.assertEqual(iS.name, 'test_iS')
         self.assertEqual(iS.unit, 'watts')
         self.assertEqual(iS.site, oS)
-
-
-if __name__ == '__main__':
-    unittest.main()

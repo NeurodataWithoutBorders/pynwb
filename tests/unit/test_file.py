@@ -1,21 +1,17 @@
-''' Tests for NWBFile '''
-import unittest2 as unittest
-import six
 import numpy as np
-import os
 import pandas as pd
 
 from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 
-from pynwb import NWBFile, TimeSeries
-from pynwb import NWBHDF5IO
+from pynwb import NWBFile, TimeSeries, NWBHDF5IO
 from pynwb.file import Subject, ElectrodeTable
 from pynwb.epoch import TimeIntervals
 from pynwb.ecephys import ElectricalSeries
+from pynwb.testing import TestCase, remove_test_file
 
 
-class NWBFileTest(unittest.TestCase):
+class NWBFileTest(TestCase):
     def setUp(self):
         self.start = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
         self.ref_time = datetime(1979, 1, 1, 0, tzinfo=tzutc())
@@ -52,12 +48,13 @@ class NWBFileTest(unittest.TestCase):
         self.assertEqual(self.nwbfile.session_start_time, self.start)
         self.assertEqual(self.nwbfile.file_create_date, self.create)
         self.assertEqual(self.nwbfile.lab, 'a test lab')
-        self.assertEqual(self.nwbfile.experimenter, 'A test experimenter')
+        self.assertEqual(self.nwbfile.experimenter, ('A test experimenter',))
         self.assertEqual(self.nwbfile.institution, 'a test institution')
         self.assertEqual(self.nwbfile.experiment_description, 'a test experiment description')
         self.assertEqual(self.nwbfile.session_id, 'test1')
         self.assertEqual(self.nwbfile.stimulus_notes, 'test stimulus notes')
         self.assertEqual(self.nwbfile.data_collection, 'test data collection notes')
+        self.assertEqual(self.nwbfile.related_publications, ('my pubs',))
         self.assertEqual(self.nwbfile.source_script, 'noscript')
         self.assertEqual(self.nwbfile.source_script_file_name, 'nofilename')
         self.assertEqual(self.nwbfile.keywords, ('these', 'are', 'keywords'))
@@ -121,12 +118,12 @@ class NWBFileTest(unittest.TestCase):
             for aa, bb in zip(nwbfile_i.electrodes['group'][:], nwbfile.electrodes['group'][:]):
                 self.assertEqual(aa.name, bb.name)
 
-        os.remove("electrodes_mwe.nwb")
+        remove_test_file("electrodes_mwe.nwb")
 
     def test_access_processing(self):
         self.nwbfile.create_processing_module('test_mod', 'test_description')
         # test deprecate .modules
-        with self.assertWarnsRegex(DeprecationWarning, r'replaced by NWBFile\.processing'):
+        with self.assertWarnsWith(DeprecationWarning, 'replaced by NWBFile.processing'):
             modules = self.nwbfile.modules['test_mod']
         self.assertIs(self.nwbfile.processing['test_mod'], modules)
 
@@ -139,7 +136,7 @@ class NWBFileTest(unittest.TestCase):
         self.nwbfile.add_epoch(0.0, 1.0, tags1, ts)
         self.nwbfile.add_epoch(0.0, 1.0, tags2, ts)
         tags = self.nwbfile.epoch_tags
-        six.assertCountEqual(self, expected_tags, tags)
+        self.assertEqual(set(expected_tags), set(tags))
 
     def test_add_acquisition(self):
         self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
@@ -169,7 +166,7 @@ class NWBFileTest(unittest.TestCase):
                                                     'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
 
     def test_get_acquisition_empty(self):
-        with self.assertRaisesRegex(ValueError, "acquisition of NWBFile 'root' is empty"):
+        with self.assertRaisesWith(ValueError, "acquisition of NWBFile 'root' is empty"):
             self.nwbfile.get_acquisition()
 
     def test_get_acquisition_multiple_elements(self):
@@ -178,14 +175,14 @@ class NWBFileTest(unittest.TestCase):
         self.nwbfile.add_acquisition(TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         msg = "more than one element in acquisition of NWBFile 'root' -- must specify a name"
-        with self.assertRaisesRegex(ValueError,  msg):
+        with self.assertRaisesWith(ValueError,  msg):
             self.nwbfile.get_acquisition()
 
     def test_add_acquisition_invalid_name(self):
         self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
-        msg = "'TEST_TS' not found in acquisition of NWBFile 'root'"
-        with self.assertRaisesRegex(KeyError, msg):
+        msg = "\"'TEST_TS' not found in acquisition of NWBFile 'root'\""
+        with self.assertRaisesWith(KeyError, msg):
             self.nwbfile.get_acquisition("TEST_TS")
 
     def test_set_electrode_table(self):
@@ -245,17 +242,68 @@ class NWBFileTest(unittest.TestCase):
                                                timeseries=ts, tags=('hi', 'there'))
 
     def test_add_electrode(self):
-        dev1 = self.nwbfile.create_device('dev1')
-        group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
-        self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1', 'none', group=group, id=1)
-        self.assertEqual(self.nwbfile.electrodes[0][0], 1)
-        self.assertEqual(self.nwbfile.electrodes[0][1], 1.0)
-        self.assertEqual(self.nwbfile.electrodes[0][2], 2.0)
-        self.assertEqual(self.nwbfile.electrodes[0][3], 3.0)
-        self.assertEqual(self.nwbfile.electrodes[0][4], -1.0)
-        self.assertEqual(self.nwbfile.electrodes[0][5], 'CA1')
-        self.assertEqual(self.nwbfile.electrodes[0][6], 'none')
-        self.assertEqual(self.nwbfile.electrodes[0][7], group)
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=dev1
+        )
+        self.nwbfile.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=1
+        )
+        elec = self.nwbfile.electrodes[0]
+        self.assertEqual(elec.index[0], 1)
+        self.assertEqual(elec.iloc[0]['x'], 1.0)
+        self.assertEqual(elec.iloc[0]['y'], 2.0)
+        self.assertEqual(elec.iloc[0]['z'], 3.0)
+        self.assertEqual(elec.iloc[0]['location'], 'CA1')
+        self.assertEqual(elec.iloc[0]['filtering'], 'none')
+        self.assertEqual(elec.iloc[0]['group'], group)
+
+    def test_add_electrode_some_opt(self):
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=dev1
+        )
+        self.nwbfile.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=1,
+            rel_x=4.0, rel_y=5.0, rel_z=6.0,
+            reference='ref1'
+        )
+        self.nwbfile.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=2,
+            rel_x=7.0, rel_y=8.0, rel_z=9.0,
+            reference='ref2'
+        )
+        elec = self.nwbfile.electrodes[0]
+        self.assertEqual(elec.iloc[0]['rel_x'], 4.0)
+        self.assertEqual(elec.iloc[0]['rel_y'], 5.0)
+        self.assertEqual(elec.iloc[0]['rel_z'], 6.0)
+        self.assertEqual(elec.iloc[0]['reference'], 'ref1')
+        elec = self.nwbfile.electrodes[1]
+        self.assertEqual(elec.iloc[0]['rel_x'], 7.0)
+        self.assertEqual(elec.iloc[0]['rel_y'], 8.0)
+        self.assertEqual(elec.iloc[0]['rel_z'], 9.0)
+        self.assertEqual(elec.iloc[0]['reference'], 'ref2')
 
     def test_all_children(self):
         ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -301,6 +349,7 @@ Fields:
   )
   description: Autogenerated by NWBFile
   id: id <class 'hdmf.common.table.ElementIdentifiers'>
+  waveform_unit: volts
 """
         expected = expected % id(self.nwbfile.units)
         self.assertEqual(str(self.nwbfile.units), expected)
@@ -366,7 +415,7 @@ Fields:
         self.assertTupleEqual(self.nwbfile.related_publications, ('pub1', 'pub2'))
 
 
-class SubjectTest(unittest.TestCase):
+class SubjectTest(TestCase):
     def setUp(self):
         self.subject = Subject(age='12 mo',
                                description='An unfortunate rat',
@@ -401,14 +450,13 @@ class SubjectTest(unittest.TestCase):
         self.assertIs(self.nwbfile.subject, self.subject)
 
 
-class TestCacheSpec(unittest.TestCase):
+class TestCacheSpec(TestCase):
 
     def setUp(self):
         self.path = 'unittest_cached_spec.nwb'
 
     def tearDown(self):
-        if os.path.exists(self.path):
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_simple(self):
         nwbfile = NWBFile(' ', ' ',
@@ -423,14 +471,13 @@ class TestCacheSpec(unittest.TestCase):
                 nwbfile = reader.read()
 
 
-class TestNoCacheSpec(unittest.TestCase):
+class TestNoCacheSpec(TestCase):
 
     def setUp(self):
         self.path = 'unittest_cached_spec.nwb'
 
     def tearDown(self):
-        if os.path.exists(self.path):
-            os.remove(self.path)
+        remove_test_file(self.path)
 
     def test_simple(self):
         nwbfile = NWBFile(' ', ' ',
@@ -441,12 +488,12 @@ class TestNoCacheSpec(unittest.TestCase):
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile, cache_spec=False)
 
-        with self.assertWarnsRegex(UserWarning, r"No cached namespaces found in %s" % self.path):
+        with self.assertWarnsWith(UserWarning, "No cached namespaces found in %s" % self.path):
             with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
                 nwbfile = reader.read()
 
 
-class TestTimestampsRefDefault(unittest.TestCase):
+class TestTimestampsRefDefault(TestCase):
     def setUp(self):
         self.start_time = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
         self.nwbfile = NWBFile('test session description',
@@ -458,7 +505,7 @@ class TestTimestampsRefDefault(unittest.TestCase):
         self.assertEqual(self.nwbfile.timestamps_reference_time, self.start_time)
 
 
-class TestTimestampsRefAware(unittest.TestCase):
+class TestTimestampsRefAware(TestCase):
     def setUp(self):
         self.start_time = datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal())
         self.ref_time_notz = datetime(1979, 1, 1, 0, 0, 0)

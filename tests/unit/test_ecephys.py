@@ -1,11 +1,11 @@
-import unittest2 as unittest
-import re
 import numpy as np
 
 from pynwb.ecephys import ElectricalSeries, SpikeEventSeries, EventDetection, Clustering, EventWaveform,\
                           ClusterWaveforms, LFP, FilteredEphys, FeatureExtraction, ElectrodeGroup
 from pynwb.device import Device
 from pynwb.file import ElectrodeTable
+from pynwb.testing import TestCase
+
 from hdmf.common import DynamicTableRegion
 
 
@@ -24,7 +24,7 @@ def make_electrode_table():
     return table
 
 
-class ElectricalSeriesConstructor(unittest.TestCase):
+class ElectricalSeriesConstructor(TestCase):
 
     def test_init(self):
         data = list(range(10))
@@ -50,12 +50,12 @@ class ElectricalSeriesConstructor(unittest.TestCase):
     def test_invalid_data_shape(self):
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
-        with self.assertRaisesRegex(ValueError, re.escape("incorrect shape for 'data' (got '(2, 2, 2, 2)', expected "
-                                                          "'((None,), (None, None), (None, None, None))')")):
+        with self.assertRaisesWith(ValueError, ("ElectricalSeries.__init__: incorrect shape for 'data' (got '(2, 2, 2, "
+                                                "2)', expected '((None,), (None, None), (None, None, None))')")):
             ElectricalSeries('test_ts1', np.ones((2, 2, 2, 2)), region, timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
 
 
-class SpikeEventSeriesConstructor(unittest.TestCase):
+class SpikeEventSeriesConstructor(TestCase):
 
     def test_init(self):
         table = make_electrode_table()
@@ -76,18 +76,33 @@ class SpikeEventSeriesConstructor(unittest.TestCase):
             SpikeEventSeries('test_sES', data, region, rate=1.)
 
 
-class ElectrodeGroupConstructor(unittest.TestCase):
+class ElectrodeGroupConstructor(TestCase):
 
     def test_init(self):
+        dev1 = Device('dev1')
+        group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2, 3))
+        self.assertEqual(group.name, 'elec1')
+        self.assertEqual(group.description, 'electrode description')
+        self.assertEqual(group.location, 'electrode location')
+        self.assertEqual(group.device, dev1)
+        self.assertEqual(group.position, (1, 2, 3))
+
+    def test_init_position_none(self):
         dev1 = Device('dev1')
         group = ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1)
         self.assertEqual(group.name, 'elec1')
         self.assertEqual(group.description, 'electrode description')
         self.assertEqual(group.location, 'electrode location')
         self.assertEqual(group.device, dev1)
+        self.assertIsNone(group.position)
+
+    def test_init_position_bad(self):
+        dev1 = Device('dev1')
+        with self.assertRaises(TypeError):
+            ElectrodeGroup('elec1', 'electrode description', 'electrode location', dev1, (1, 2))
 
 
-class EventDetectionConstructor(unittest.TestCase):
+class EventDetectionConstructor(TestCase):
 
     def test_init(self):
         data = list(range(10))
@@ -103,7 +118,7 @@ class EventDetectionConstructor(unittest.TestCase):
         self.assertEqual(eD.unit, 'seconds')
 
 
-class EventWaveformConstructor(unittest.TestCase):
+class EventWaveformConstructor(TestCase):
 
     def test_init(self):
         table = make_electrode_table()
@@ -115,14 +130,14 @@ class EventWaveformConstructor(unittest.TestCase):
         self.assertEqual(ew['test_sES'], ew.spike_event_series['test_sES'])
 
 
-class ClusteringConstructor(unittest.TestCase):
+class ClusteringConstructor(TestCase):
 
     def test_init(self):
         times = [1.3, 2.3]
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
 
-        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
             cc = Clustering('description', num, peak_over_rms, times)
         self.assertEqual(cc.description, 'description')
         self.assertEqual(cc.num, num)
@@ -130,19 +145,19 @@ class ClusteringConstructor(unittest.TestCase):
         self.assertEqual(cc.times, times)
 
 
-class ClusterWaveformsConstructor(unittest.TestCase):
+class ClusterWaveformsConstructor(TestCase):
 
     def test_init(self):
         times = [1.3, 2.3]
         num = [3, 4]
         peak_over_rms = [5.3, 6.3]
-        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
             cc = Clustering('description', num, peak_over_rms, times)
 
         means = [[7.3, 7.3]]
         stdevs = [[8.3, 8.3]]
 
-        with self.assertWarnsRegex(DeprecationWarning, r'use pynwb\.misc\.Units or NWBFile\.units instead'):
+        with self.assertWarnsWith(DeprecationWarning, 'use pynwb.misc.Units or NWBFile.units instead'):
             cw = ClusterWaveforms(cc, 'filtering', means, stdevs)
         self.assertEqual(cw.clustering_interface, cc)
         self.assertEqual(cw.waveform_filtering, 'filtering')
@@ -150,7 +165,7 @@ class ClusterWaveformsConstructor(unittest.TestCase):
         self.assertEqual(cw.waveform_sd, stdevs)
 
 
-class LFPTest(unittest.TestCase):
+class LFPTest(TestCase):
 
     def test_add_electrical_series(self):
         lfp = LFP()
@@ -161,7 +176,7 @@ class LFPTest(unittest.TestCase):
         self.assertEqual(lfp.electrical_series.get('test_eS'), eS)
 
 
-class FilteredEphysTest(unittest.TestCase):
+class FilteredEphysTest(TestCase):
 
     def test_init(self):
         table = make_electrode_table()
@@ -181,7 +196,7 @@ class FilteredEphysTest(unittest.TestCase):
         self.assertEqual(fe['test_eS'], fe.electrical_series.get('test_eS'))
 
 
-class FeatureExtractionConstructor(unittest.TestCase):
+class FeatureExtractionConstructor(TestCase):
 
     def test_init(self):
         event_times = [1.9, 3.5]
@@ -225,7 +240,3 @@ class FeatureExtractionConstructor(unittest.TestCase):
         description = ['desc1', 'desc2', 'desc3']
         features = [[0, 1, 2], [3, 4, 5]]  # Need 3D feature array but give only 2D array
         self.assertRaises(ValueError, FeatureExtraction, electrodes, description, event_times, features)
-
-
-if __name__ == '__main__':
-    unittest.main()

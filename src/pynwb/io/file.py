@@ -15,17 +15,24 @@ class NWBFileMap(ObjectMapper):
         self.unmap(acq_spec)
         self.map_spec('acquisition', acq_spec.get_neurodata_type('NWBDataInterface'))
         self.map_spec('acquisition', acq_spec.get_neurodata_type('DynamicTable'))
+        # TODO: note that double mapping "acquisition" means __carg2spec and __attr2spec (both unused)
+        # map "acquisition" to the last spec, in this case, DynamicTable
 
-        self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('NWBContainer'))
-        self.map_spec('analysis', self.spec.get_group('analysis').get_neurodata_type('DynamicTable'))
+        ana_spec = self.spec.get_group('analysis')
+        self.unmap(ana_spec)
+        self.map_spec('analysis', ana_spec.get_neurodata_type('NWBContainer'))
+        self.map_spec('analysis', ana_spec.get_neurodata_type('DynamicTable'))
 
         # map constructor arg and property 'stimulus' -> stimulus__presentation
         stimulus_spec = self.spec.get_group('stimulus')
         self.unmap(stimulus_spec)
+        self.unmap(stimulus_spec.get_group('presentation'))
+        self.unmap(stimulus_spec.get_group('templates'))
         self.map_spec('stimulus', stimulus_spec.get_group('presentation').get_neurodata_type('TimeSeries'))
         self.map_spec('stimulus_template', stimulus_spec.get_group('templates').get_neurodata_type('TimeSeries'))
 
         intervals_spec = self.spec.get_group('intervals')
+        self.unmap(intervals_spec)
         self.map_spec('intervals', intervals_spec.get_neurodata_type('TimeIntervals'))
 
         epochs_spec = intervals_spec.get_group('epochs')
@@ -38,20 +45,28 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('invalid_times', invalid_times_spec)
 
         general_spec = self.spec.get_group('general')
+        self.unmap(general_spec)
 
         icephys_spec = general_spec.get_group('intracellular_ephys')
-        self.map_spec('ic_electrodes', icephys_spec.get_neurodata_type('IntracellularElectrode'))
+        self.unmap(icephys_spec)
+        self.map_spec('icephys_electrodes', icephys_spec.get_neurodata_type('IntracellularElectrode'))
         self.map_spec('sweep_table', icephys_spec.get_neurodata_type('SweepTable'))
 
+        # TODO map the filtering dataset to something or deprecate it
+        self.unmap(icephys_spec.get_dataset('filtering'))
+
         ecephys_spec = general_spec.get_group('extracellular_ephys')
+        self.unmap(ecephys_spec)
         self.map_spec('electrodes', ecephys_spec.get_group('electrodes'))
         self.map_spec('electrode_groups', ecephys_spec.get_neurodata_type('ElectrodeGroup'))
 
-        self.map_spec('ogen_sites',
-                      general_spec.get_group('optogenetics').get_neurodata_type('OptogeneticStimulusSite'))
+        ogen_spec = general_spec.get_group('optogenetics')
+        self.unmap(ogen_spec)
+        self.map_spec('ogen_sites', ogen_spec.get_neurodata_type('OptogeneticStimulusSite'))
 
-        self.map_spec('imaging_planes',
-                      general_spec.get_group('optophysiology').get_neurodata_type('ImagingPlane'))
+        ophys_spec = general_spec.get_group('optophysiology')
+        self.unmap(ophys_spec)
+        self.map_spec('imaging_planes', ophys_spec.get_neurodata_type('ImagingPlane'))
 
         general_datasets = ['data_collection',
                             'experiment_description',
@@ -77,7 +92,11 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('source_script_file_name', general_spec.get_dataset('source_script').get_attribute('file_name'))
 
         self.map_spec('subject', general_spec.get_group('subject'))
-        self.map_spec('devices', general_spec.get_group('devices').get_neurodata_type('Device'))
+
+        device_spec = general_spec.get_group('devices')
+        self.unmap(device_spec)
+        self.map_spec('devices', device_spec.get_neurodata_type('Device'))
+
         self.map_spec('lab_meta_data', general_spec.get_neurodata_type('LabMetaData'))
 
         proc_spec = self.spec.get_group('processing')
