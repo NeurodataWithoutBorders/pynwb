@@ -231,10 +231,9 @@ class NWBHDF5IO(_HDF5IO):
             return super(NWBHDF5IO, self).read(**kwargs)
         except ValueError as e:
             built = next(iter(self._HDF5IO__built.values()))
-            if '/nwb_version' in built and built['/nwb_version'].data[0] == '1':
-                raise Exception('file is version {} and is not supported by pynwb. See '
-                                'http://neurodatawithoutborders.github.io/api-python/ for help reading this file'
-                                ' (or just use h5py).'.
+            if '/nwb_version' in built:
+                raise Exception('File is version {} and is not supported by PyNWB. '
+                                'h5py is recommended as an alternative.'.
                                 format(built['/nwb_version'].data))
             else:
                 raise e
