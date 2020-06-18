@@ -51,9 +51,11 @@ class ImagingPlane(NWBContainer):
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},  # required
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},  # required
             {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},  # required
-            {'name': 'imaging_rate', 'type': 'float', 'doc': 'Rate images are acquired, in Hz.'},  # required
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},  # required
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},  # required
+            {'name': 'imaging_rate', 'type': 'float',
+             'doc': 'Rate images are acquired, in Hz. If the corresponding TimeSeries is present, the rate should be '
+                    'stored there instead.', 'default': None},
             {'name': 'manifold', 'type': 'array_data',
              'doc': ('DEPRECATED: Physical position of each pixel. size=("height", "width", "xyz"). '
                      'Deprecated in favor of origin_coords and grid_spacing.'),
