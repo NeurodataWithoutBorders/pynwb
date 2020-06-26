@@ -1,5 +1,14 @@
 # PyNWB Changelog
 
+## PyNWB 1.3.3 (June 26, 2020)
+
+### Internal improvements:
+- Update requirements to use HDMF 1.6.4. @rly (#1256)
+
+### Bug fixes:
+- Fix writing optional args to electrodes table. @rly (#1246)
+- Fix missing method UnitsMap.get_nwb_file. @rly (#1227)
+
 ## PyNWB 1.3.2 (June 1, 2020)
 
 ### Bug fixes:
