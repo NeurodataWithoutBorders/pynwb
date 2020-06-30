@@ -4,7 +4,7 @@ import os
 from abc import ABCMeta, abstractmethod
 import warnings
 
-from pynwb import NWBFile, NWBHDF5IO, validate as pynwb_validate, get_type_map
+from pynwb import NWBFile, NWBHDF5IO, validate as pynwb_validate
 from .utils import remove_test_file
 from hdmf.backends.warnings import BrokenLinkWarning
 from hdmf.build.warnings import MissingRequiredWarning, OrphanContainerWarning
@@ -120,8 +120,6 @@ class NWBH5IOMixin(metaclass=ABCMeta):
             self.reader = None
             raise e
 
-    # TODO: roundtripContainer and then append to file
-
     def roundtripExportContainer(self, cache_spec=False):
         """
         Add the test Container to an NWBFile, write it to file, read the file, export the read NWBFile to another
@@ -129,12 +127,22 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         """
         self.roundtripContainer(cache_spec=cache_spec)  # self.read_nwbfile is now set
 
+        import logging
+
+        logger = logging.getLogger()
+        logger.setLevel(logging.DEBUG)
+
+        ch = logging.FileHandler('test.log', mode='w')
+        ch.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+
         with warnings.catch_warnings(record=True) as ws:
-            NWBHDF5IO.export(
-                container=self.read_nwbfile,
-                type_map=get_type_map(),
+            NWBHDF5IO.export_io(
+                src_io=self.reader,
                 path=self.export_filename,
-                write_args={'cache_spec': cache_spec},
+                cache_spec=cache_spec,
             )
 
             self.validate()
