@@ -7,7 +7,7 @@ from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries
-from hdmf.common import DynamicTable
+from hdmf.common import DynamicTable, DynamicTableRegion
 
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
@@ -241,6 +241,7 @@ class DecompositionSeries(TimeSeries):
 
     __nwbfields__ = ('metric',
                      {'name': 'source_timeseries', 'child': False, 'doc': 'the input TimeSeries from this analysis'},
+                     {'name': 'source_channels', 'child': True, 'doc': 'the channels that provided the source data'},
                      {'name': 'bands',
                       'doc': 'the bands that the signal is decomposed into', 'child': True})
 
@@ -255,15 +256,20 @@ class DecompositionSeries(TimeSeries):
              'doc': 'a table for describing the frequency bands that the signal was decomposed into', 'default': None},
             {'name': 'source_timeseries', 'type': TimeSeries,
              'doc': 'the input TimeSeries from this analysis', 'default': None},
+            {'name': 'source_channels', 'type': DynamicTableRegion, 'doc': 'the channels that provided the source data',
+             'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        metric, source_timeseries, bands = popargs('metric', 'source_timeseries', 'bands', kwargs)
+        metric, source_timeseries, bands, source_channels = popargs('metric', 'source_timeseries', 'bands',
+                                                                    'source_channels', kwargs)
         super(DecompositionSeries, self).__init__(**kwargs)
         self.source_timeseries = source_timeseries
-        if self.source_timeseries is None:
-            warnings.warn("It is best practice to set `source_timeseries` if it is present to document "
-                          "where the DecompositionSeries was derived from. (Optional)")
+        self.source_channels = source_channels
+        if self.source_timeseries is None and self.source_channels is None:
+            warnings.warn("Neither source_timeseries nor source_channels is present in DecompositionSeries. It is "
+                          "recommended to indicate the source timeseries if it is present, or else to link to the "
+                          "corresponding source_channels. (Optional)")
         self.metric = metric
         if bands is None:
             bands = DynamicTable("bands", "data about the frequency bands that the signal was decomposed into")
