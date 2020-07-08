@@ -127,17 +127,6 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         """
         self.roundtripContainer(cache_spec=cache_spec)  # self.read_nwbfile is now set
 
-        import logging
-
-        logger = logging.getLogger()
-        logger.setLevel(logging.DEBUG)
-
-        ch = logging.FileHandler('test.log', mode='w')
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
-
         with warnings.catch_warnings(record=True) as ws:
             NWBHDF5IO.export_io(
                 src_io=self.reader,
