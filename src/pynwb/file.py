@@ -45,7 +45,8 @@ class Subject(NWBContainer):
         'species',
         'subject_id',
         'weight',
-        'date_of_birth'
+        'date_of_birth',
+        'strain'
     )
 
     @docval({'name': 'age', 'type': str, 'doc': 'the age of the subject', 'default': None},
@@ -56,7 +57,8 @@ class Subject(NWBContainer):
             {'name': 'subject_id', 'type': str, 'doc': 'a unique identifier for the subject', 'default': None},
             {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None},
             {'name': 'date_of_birth', 'type': datetime, 'default': None,
-             'doc': 'datetime of date of birth. May be supplied instead of age.'})
+             'doc': 'datetime of date of birth. May be supplied instead of age.'},
+            {'name': 'strain', 'type': str, 'doc': 'the strain of the subject', 'default': None})
     def __init__(self, **kwargs):
         kwargs['name'] = 'subject'
         call_docval_func(super(Subject, self).__init__, kwargs)
@@ -67,6 +69,7 @@ class Subject(NWBContainer):
         self.species = getargs('species', kwargs)
         self.subject_id = getargs('subject_id', kwargs)
         self.weight = getargs('weight', kwargs)
+        self.strain = getargs('strain', kwargs)
         date_of_birth = getargs('date_of_birth', kwargs)
         if date_of_birth and date_of_birth.tzinfo is None:
             self.date_of_birth = _add_missing_timezone(date_of_birth)
