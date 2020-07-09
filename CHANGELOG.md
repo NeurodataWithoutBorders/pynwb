@@ -1,5 +1,11 @@
 # PyNWB Changelog
 
+## PyNWB 2.0.0 (Upcoming)
+
+### Internal improvements:
+- Add support for nwb-schema 2.3.0
+  - ...
+
 ## PyNWB 1.3.3 (June 26, 2020)
 
 ### Internal improvements:

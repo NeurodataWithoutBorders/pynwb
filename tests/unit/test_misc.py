@@ -113,6 +113,16 @@ class UnitsTests(TestCase):
         self.assertEqual(ut['spike_times'][0], [0, 1, 2])
         self.assertEqual(ut['spike_times'][1], [3, 4, 5])
 
+    def test_add_waveforms(self):
+        ut = Units()
+        ut.add_unit(waveforms=[[1, 2, 3], [1, 2, 3]])
+        ut.add_unit(waveforms=[[1, 2, 3], [1, 2, 3]])
+        self.assertEqual(ut.id.data, [0, 1])
+        self.assertEqual(ut['waveforms'].target.data, [[1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3]])
+        self.assertEqual(ut['waveforms'].data, [2, 4])
+        self.assertEqual(ut['waveforms'][0], [[1, 2, 3], [1, 2, 3]])
+        self.assertEqual(ut['waveforms'][1], [[1, 2, 3], [1, 2, 3]])
+
     def test_get_spike_times(self):
         ut = Units()
         ut.add_unit(spike_times=[0, 1, 2])

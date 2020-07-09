@@ -203,14 +203,15 @@ class TestSubjectIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Subject """
-        return Subject(age='12 mo',
+        return Subject(age='P90D',
                        description='An unfortunate rat',
                        genotype='WT',
                        sex='M',
                        species='Rattus norvegicus',
                        subject_id='RAT123',
                        weight='2 lbs',
-                       date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
+                       date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()),
+                       strain='my_strain')
 
     def addContainer(self, nwbfile):
         """ Add the test Subject to the given NWBFile """
