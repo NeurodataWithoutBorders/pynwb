@@ -95,9 +95,8 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         self.addContainer(nwbfile)
 
         with warnings.catch_warnings(record=True) as ws:
-            self.writer = NWBHDF5IO(self.filename, mode='w')
-            self.writer.write(nwbfile, cache_spec=cache_spec)
-            self.writer.close()
+            with NWBHDF5IO(self.filename, mode='w') as write_io:
+                write_io.write(nwbfile, cache_spec=cache_spec)
 
             self.validate()
 
@@ -151,8 +150,8 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         try:
             return self.getContainer(self.read_exported_nwbfile)
         except Exception as e:
-            self.reader.close()
-            self.reader = None
+            self.export_reader.close()
+            self.export_reader = None
             raise e
 
     @abstractmethod
@@ -166,7 +165,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         raise NotImplementedError('Cannot run test unless getContainer is implemented')
 
     def validate(self):
-        """ Validate the created file """
+        """ Validate the created files """
         if os.path.exists(self.filename):
             with NWBHDF5IO(self.filename, mode='r') as io:
                 errors = pynwb_validate(io)
