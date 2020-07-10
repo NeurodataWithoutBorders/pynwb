@@ -160,4 +160,3 @@ class TestDecompositionSeriesWithSourceChannelsIO(AcquisitionH5IOMixin, TestCase
         row2 = read.source_channels[1]
         self.assertIsInstance(row1.iloc[0]['group'], ElectrodeGroup)
         self.assertIsInstance(row2.iloc[0]['group'], ElectrodeGroup)
-
