@@ -406,7 +406,7 @@ class NWBFile(MultiContainerInterface):
 
     @property
     def ec_electrode_groups(self):
-        warn("NWBFile.ec_electrode_groups as been replaced by NWBFile.electrode_groups.", DeprecationWarning)
+        warn("NWBFile.ec_electrode_groups has been replaced by NWBFile.electrode_groups.", DeprecationWarning)
         return self.electrode_groups
 
     @property
