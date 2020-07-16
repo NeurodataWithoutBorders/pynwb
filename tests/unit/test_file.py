@@ -123,7 +123,7 @@ class NWBFileTest(TestCase):
     def test_access_processing(self):
         self.nwbfile.create_processing_module('test_mod', 'test_description')
         # test deprecate .modules
-        with self.assertWarnsWith(DeprecationWarning, 'replaced by NWBFile.processing'):
+        with self.assertWarnsWith(DeprecationWarning, 'NWBFile.modules has been replaced by NWBFile.processing.'):
             modules = self.nwbfile.modules['test_mod']
         self.assertIs(self.nwbfile.processing['test_mod'], modules)
 
