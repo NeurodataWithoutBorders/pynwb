@@ -401,22 +401,22 @@ class NWBFile(MultiContainerInterface):
 
     @property
     def modules(self):
-        warn("replaced by NWBFile.processing", DeprecationWarning)
+        warn("NWBFile.modules has been replaced by NWBFile.processing.", DeprecationWarning)
         return self.processing
 
     @property
     def ec_electrode_groups(self):
-        warn("replaced by NWBFile.electrode_groups", DeprecationWarning)
+        warn("NWBFile.ec_electrode_groups has been replaced by NWBFile.electrode_groups.", DeprecationWarning)
         return self.electrode_groups
 
     @property
     def ec_electrodes(self):
-        warn("replaced by NWBFile.electrodes", DeprecationWarning)
+        warn("NWBFile.ec_electrodes has been replaced by NWBFile.electrodes.", DeprecationWarning)
         return self.electrodes
 
     @property
     def ic_electrodes(self):
-        warn("deprecated. use NWBFile.icephys_electrodes instead", DeprecationWarning)
+        warn("NWBFile.ic_electrodes has been replaced by NWBFile.icephys_electrodes.", DeprecationWarning)
         return self.icephys_electrodes
 
     def add_ic_electrode(self, *args, **kwargs):
@@ -424,7 +424,7 @@ class NWBFile(MultiContainerInterface):
         This method is deprecated and will be removed in future versions. Please
         use :py:meth:`~pynwb.file.NWBFile.add_icephys_electrode` instead
         """
-        warn("deprecated, use NWBFile.add_icephys_electrode instead", DeprecationWarning)
+        warn("NWBFile.add_ic_electrode has been replaced by NWBFile.add_icephys_electrode.", DeprecationWarning)
         return self.add_icephys_electrode(*args, **kwargs)
 
     def create_ic_electrode(self, *args, **kwargs):
@@ -432,7 +432,7 @@ class NWBFile(MultiContainerInterface):
         This method is deprecated and will be removed in future versions. Please
         use :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode` instead
         """
-        warn("deprecated, use NWBFile.create_icephys_electrode instead", DeprecationWarning)
+        warn("NWBFile.create_ic_electrode has been replaced by NWBFile.create_icephys_electrode.", DeprecationWarning)
         return self.create_icephys_electrode(*args, **kwargs)
 
     def get_ic_electrode(self, *args, **kwargs):
@@ -440,7 +440,7 @@ class NWBFile(MultiContainerInterface):
         This method is deprecated and will be removed in future versions. Please
         use :py:meth:`~pynwb.file.NWBFile.get_icephys_electrode` instead
         """
-        warn("deprecated, use NWBFile.get_icephys_electrode instead", DeprecationWarning)
+        warn("NWBFile.get_ic_electrode has been replaced by NWBFile.get_icephys_electrode.", DeprecationWarning)
         return self.get_icephys_electrode(*args, **kwargs)
 
     def __check_epochs(self):
