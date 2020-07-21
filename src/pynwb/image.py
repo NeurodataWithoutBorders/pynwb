@@ -45,7 +45,11 @@ class ImageSeries(TimeSeries):
             'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
         call_docval_func(super(ImageSeries, self).__init__, kwargs)
         if external_file is None and self.data is None:
-            raise ValueError('must supply either external_file or data to ' + self.name)
+            raise ValueError("Must supply either external_file or data to %s '%s'."
+                             % (self.__class__.__name__, self.name))
+        if external_file is not None and starting_frame is None:
+            raise ValueError("Must supply starting_frame if external_file is provided for %s '%s'."
+                             % (self.__class__.__name__, self.name))
         self.bits_per_pixel = bits_per_pixel
         self.dimension = dimension
         self.external_file = external_file
