@@ -33,7 +33,8 @@ class ImageSeries(TimeSeries):
                     'Either external_file or data must be specified, but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable,
              'doc': 'Each entry is the frame number in the corresponding external_file variable. '
-                    'This serves as an index to what frames each file contains.', 'default': None},
+                    'This serves as an index to what frames each file contains. If external_file is not '
+                    'provided, then this value will be None', 'default': [0]},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'DEPRECATED: Number of bits per image pixel',
              'default': None},
             {'name': 'dimension', 'type': Iterable,
@@ -47,13 +48,13 @@ class ImageSeries(TimeSeries):
         if external_file is None and self.data is None:
             raise ValueError("Must supply either external_file or data to %s '%s'."
                              % (self.__class__.__name__, self.name))
-        if external_file is not None and starting_frame is None:
-            raise ValueError("Must supply starting_frame if external_file is provided for %s '%s'."
-                             % (self.__class__.__name__, self.name))
         self.bits_per_pixel = bits_per_pixel
         self.dimension = dimension
         self.external_file = external_file
-        self.starting_frame = starting_frame
+        if external_file is not None:
+            self.starting_frame = starting_frame
+        else:
+            self.starting_frame = None
         self.format = format
 
     @property
