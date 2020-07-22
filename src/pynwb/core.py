@@ -2,7 +2,8 @@ from h5py import RegionReference
 import numpy as np
 import pandas as pd
 
-from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args
+from hdmf.utils import (docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args,
+                        LabelledDict)
 from hdmf import Container, Data, DataRegion, get_region_slicer
 from hdmf.container import AbstractContainer
 from hdmf.common import DynamicTable, DynamicTableRegion  # noqa: F401
@@ -343,7 +344,7 @@ class MultiContainerInterface(NWBDataInterface):
 
     * 'add' to name the method for adding Container instances
 
-    * 'create' to name the method fo creating Container instances
+    * 'create' to name the method for creating Container instances
 
     * 'get' to name the method for getting Container instances
 
@@ -357,13 +358,19 @@ class MultiContainerInterface(NWBDataInterface):
     @docval(*get_docval(NWBDataInterface.__init__))
     def __init__(self, **kwargs):
         call_docval_func(super(MultiContainerInterface, self).__init__, kwargs)
+
+        # call this function whenever a container is removed from the dictionary
+        def _remove_child(child):
+            if child.parent is self:
+                self._remove_child(child)
+
         if isinstance(self.__clsconf__, dict):
             attr_name = self.__clsconf__['attr']
-            self.fields[attr_name] = LabelledDict(attr_name)
+            self.fields[attr_name] = LabelledDict(attr_name, remove_callable=_remove_child)
         else:
             for d in self.__clsconf__:
                 attr_name = d['attr']
-                self.fields[attr_name] = LabelledDict(attr_name)
+                self.fields[attr_name] = LabelledDict(attr_name, remove_callable=_remove_child)
 
     @staticmethod
     def __add_article(noun):
@@ -593,48 +600,3 @@ class MultiContainerInterface(NWBDataInterface):
         # i.e. it is the same method as the parent class constructor
         if cls.__init__ == MultiContainerInterface.__init__:
             setattr(cls, '__init__', cls.__make_constructor(clsconf))
-
-
-class LabelledDict(dict):
-    '''
-    A dict wrapper class for aggregating Timeseries
-    from the standard locations
-    '''
-
-    @docval({'name': 'label', 'type': str, 'doc': 'the label on this dictionary'},
-            {'name': 'def_key_name', 'type': str, 'doc': 'the default key name', 'default': 'name'})
-    def __init__(self, **kwargs):
-        label, def_key_name = getargs('label', 'def_key_name', kwargs)
-        self.__label = label
-        self.__defkey = def_key_name
-
-    @property
-    def label(self):
-        return self.__label
-
-    def __getitem__(self, args):
-        key = args
-        if '==' in args:
-            key, val = args.split("==")
-            key = key.strip()
-            val = val.strip()
-            if key != self.__defkey:
-                ret = list()
-                for item in self.values():
-                    if getattr(item, key, None) == val:
-                        ret.append(item)
-                return ret if len(ret) else None
-            key = val
-        return super(LabelledDict, self).__getitem__(key)
-
-    @docval({'name': 'container', 'type': (NWBData, NWBContainer), 'doc': 'the container to add to this LabelledDict'})
-    def add(self, **kwargs):
-        '''
-        Add a container to this LabelledDict
-        '''
-        container = getargs('container', kwargs)
-        key = getattr(container, self.__defkey, None)
-        if key is None:
-            msg = "container '%s' does not have attribute '%s'" % (container.name, self.__defkey)
-            raise ValueError(msg)
-        self[key] = container

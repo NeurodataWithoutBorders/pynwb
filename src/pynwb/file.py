@@ -380,7 +380,7 @@ class NWBFile(MultiContainerInterface):
     def all_children(self):
         stack = [self]
         ret = list()
-        self.__obj = LabelledDict(label='all_objects', def_key_name='object_id')
+        self.__obj = LabelledDict(label='all_objects', key_attr='object_id')
         while len(stack):
             n = stack.pop()
             ret.append(n)
