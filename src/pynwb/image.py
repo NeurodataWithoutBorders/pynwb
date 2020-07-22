@@ -5,6 +5,7 @@ from hdmf.utils import docval, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image
+from .device import Device
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)
@@ -39,10 +40,12 @@ class ImageSeries(TimeSeries):
             {'name': 'dimension', 'type': Iterable,
              'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description'),
+            {'name': 'device', 'type': Device,
+             'doc': 'Device used to capture the images/video.', 'default': None},)
     def __init__(self, **kwargs):
-        bits_per_pixel, dimension, external_file, starting_frame, format = popargs(
-            'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
+        bits_per_pixel, dimension, external_file, starting_frame, format, device = popargs(
+            'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', 'device', kwargs)
         call_docval_func(super(ImageSeries, self).__init__, kwargs)
         if external_file is None and self.data is None:
             raise ValueError('must supply either external_file or data to ' + self.name)
@@ -51,6 +54,7 @@ class ImageSeries(TimeSeries):
         self.external_file = external_file
         self.starting_frame = starting_frame
         self.format = format
+        self.device = device
 
     @property
     def bits_per_pixel(self):

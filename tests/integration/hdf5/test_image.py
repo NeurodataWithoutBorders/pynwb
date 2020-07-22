@@ -1,7 +1,31 @@
 import numpy as np
 
-from pynwb.image import OpticalSeries
-from pynwb.testing import NWBH5IOMixin, TestCase
+from pynwb.device import Device
+from pynwb.image import ImageSeries, OpticalSeries
+from pynwb.testing import AcquisitionH5IOMixin, NWBH5IOMixin, TestCase
+
+
+class TestImageSeriesIO(AcquisitionH5IOMixin, TestCase):
+
+    def setUpContainer(self):
+        """ Return a test ImageSeries to read/write """
+        self.dev1 = Device('dev1')
+        iS = ImageSeries(
+            name='test_iS',
+            data=np.ones((3, 3, 3)),
+            unit='unit',
+            external_file=['external_file'],
+            starting_frame=[1, 2, 3],
+            format='tiff',
+            timestamps=list(),
+            device=self.dev1,
+        )
+        return iS
+
+    def addContainer(self, nwbfile):
+        """ Add the test ElectrodeGroup to the given NWBFile """
+        nwbfile.add_device(self.dev1)
+        super().addContainer(nwbfile)
 
 
 class TestOpticalSeriesIO(NWBH5IOMixin, TestCase):
