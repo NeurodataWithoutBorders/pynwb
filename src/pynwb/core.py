@@ -2,7 +2,8 @@ from h5py import RegionReference
 import numpy as np
 import pandas as pd
 
-from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval
+from hdmf.utils import (docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args,
+                        LabelledDict)
 from hdmf import Container, Data, DataRegion, get_region_slicer
 from hdmf.container import AbstractContainer
 from hdmf.utils import LabelledDict
