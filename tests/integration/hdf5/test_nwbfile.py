@@ -203,14 +203,15 @@ class TestSubjectIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test Subject """
-        return Subject(age='12 mo',
+        return Subject(age='P90D',
                        description='An unfortunate rat',
                        genotype='WT',
                        sex='M',
                        species='Rattus norvegicus',
                        subject_id='RAT123',
                        weight='2 lbs',
-                       date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
+                       date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()),
+                       strain='my_strain')
 
     def addContainer(self, nwbfile):
         """ Add the test Subject to the given NWBFile """
@@ -444,17 +445,86 @@ class TestElectrodes(NWBH5IOMixin, TestCase):
     def addContainer(self, nwbfile):
         """ Add electrodes and related objects to the given NWBFile """
         self.dev1 = nwbfile.create_device(name='dev1')
-        self.group = nwbfile.create_electrode_group(name='tetrode1', description='tetrode description',
-                                                    location='tetrode location', device=self.dev1)
+        self.group = nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=self.dev1
+        )
 
-        nwbfile.add_electrode(id=1, x=1.0, y=2.0, z=3.0, imp=-1.0, location='CA1', filtering='none', group=self.group,
-                              group_name='tetrode1')
-        nwbfile.add_electrode(id=2, x=1.0, y=2.0, z=3.0, imp=-2.0, location='CA1', filtering='none', group=self.group,
-                              group_name='tetrode1')
-        nwbfile.add_electrode(id=3, x=1.0, y=2.0, z=3.0, imp=-3.0, location='CA1', filtering='none', group=self.group,
-                              group_name='tetrode1')
-        nwbfile.add_electrode(id=4, x=1.0, y=2.0, z=3.0, imp=-4.0, location='CA1', filtering='none', group=self.group,
-                              group_name='tetrode1')
+        nwbfile.add_electrode(
+            id=1,
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=self.group,
+            group_name='tetrode1'
+        )
+        nwbfile.add_electrode(
+            id=2,
+            x=1.0, y=2.0, z=3.0,
+            imp=-2.0,
+            location='CA1',
+            filtering='none',
+            group=self.group,
+            group_name='tetrode1'
+        )
+
+        self.container = nwbfile.electrodes  # override self.container which has the placeholder
+
+    def getContainer(self, nwbfile):
+        """ Return the test electrodes table from the given NWBFile """
+        return nwbfile.electrodes
+
+    def test_roundtrip(self):
+        super().test_roundtrip()
+        # When comparing the pandas dataframes for the row we drop the 'group' column since the
+        # ElectrodeGroup object after reading will naturally have a different address
+        pd.testing.assert_frame_equal(self.read_container[0].drop('group', axis=1),
+                                      self.container[0].drop('group', axis=1))
+
+
+class TestElectrodesOptColumns(NWBH5IOMixin, TestCase):
+
+    def setUpContainer(self):
+        """
+        Return placeholder table for electrodes. Tested electrodes are added directly to the NWBFile in addContainer
+        """
+        return DynamicTable('electrodes', 'a placeholder table')
+
+    def addContainer(self, nwbfile):
+        """ Add electrodes and related objects to the given NWBFile """
+        self.dev1 = nwbfile.create_device(name='dev1')
+        self.group = nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=self.dev1
+        )
+
+        nwbfile.add_electrode(
+            id=1,
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=self.group,
+            group_name='tetrode1',
+            rel_x=4.0, rel_y=5.0, rel_z=6.0,
+            reference='ref1'
+        )
+        nwbfile.add_electrode(
+            id=2,
+            x=1.0, y=2.0, z=3.0,
+            imp=-2.0,
+            location='CA1',
+            filtering='none',
+            group=self.group,
+            group_name='tetrode1',
+            rel_x=4.0, rel_y=5.0, rel_z=6.0,
+            reference='ref1'
+        )
 
         self.container = nwbfile.electrodes  # override self.container which has the placeholder
 

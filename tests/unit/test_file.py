@@ -123,7 +123,7 @@ class NWBFileTest(TestCase):
     def test_access_processing(self):
         self.nwbfile.create_processing_module('test_mod', 'test_description')
         # test deprecate .modules
-        with self.assertWarnsWith(DeprecationWarning, 'replaced by NWBFile.processing'):
+        with self.assertWarnsWith(DeprecationWarning, 'NWBFile.modules has been replaced by NWBFile.processing.'):
             modules = self.nwbfile.modules['test_mod']
         self.assertIs(self.nwbfile.processing['test_mod'], modules)
 
@@ -242,9 +242,21 @@ class NWBFileTest(TestCase):
                                                timeseries=ts, tags=('hi', 'there'))
 
     def test_add_electrode(self):
-        dev1 = self.nwbfile.create_device('dev1')
-        group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
-        self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1', 'none', group=group, id=1)
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=dev1
+        )
+        self.nwbfile.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=1
+        )
         elec = self.nwbfile.electrodes[0]
         self.assertEqual(elec.index[0], 1)
         self.assertEqual(elec.iloc[0]['x'], 1.0)
@@ -253,6 +265,45 @@ class NWBFileTest(TestCase):
         self.assertEqual(elec.iloc[0]['location'], 'CA1')
         self.assertEqual(elec.iloc[0]['filtering'], 'none')
         self.assertEqual(elec.iloc[0]['group'], group)
+
+    def test_add_electrode_some_opt(self):
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=dev1
+        )
+        self.nwbfile.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=1,
+            rel_x=4.0, rel_y=5.0, rel_z=6.0,
+            reference='ref1'
+        )
+        self.nwbfile.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=2,
+            rel_x=7.0, rel_y=8.0, rel_z=9.0,
+            reference='ref2'
+        )
+        elec = self.nwbfile.electrodes[0]
+        self.assertEqual(elec.iloc[0]['rel_x'], 4.0)
+        self.assertEqual(elec.iloc[0]['rel_y'], 5.0)
+        self.assertEqual(elec.iloc[0]['rel_z'], 6.0)
+        self.assertEqual(elec.iloc[0]['reference'], 'ref1')
+        elec = self.nwbfile.electrodes[1]
+        self.assertEqual(elec.iloc[0]['rel_x'], 7.0)
+        self.assertEqual(elec.iloc[0]['rel_y'], 8.0)
+        self.assertEqual(elec.iloc[0]['rel_z'], 9.0)
+        self.assertEqual(elec.iloc[0]['reference'], 'ref2')
 
     def test_all_children(self):
         ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -366,14 +417,15 @@ Fields:
 
 class SubjectTest(TestCase):
     def setUp(self):
-        self.subject = Subject(age='12 mo',
+        self.subject = Subject(age='P90D',
                                description='An unfortunate rat',
                                genotype='WT',
                                sex='M',
                                species='Rattus norvegicus',
                                subject_id='RAT123',
                                weight='2 lbs',
-                               date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()))
+                               date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
+                               strain='my_strain')
         self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile('a test session description for a test NWBFile',
@@ -387,13 +439,15 @@ class SubjectTest(TestCase):
                                subject=self.subject)
 
     def test_constructor(self):
-        self.assertEqual(self.subject.age, '12 mo')
+        self.assertEqual(self.subject.age, 'P90D')
         self.assertEqual(self.subject.description, 'An unfortunate rat')
         self.assertEqual(self.subject.genotype, 'WT')
         self.assertEqual(self.subject.sex, 'M')
         self.assertEqual(self.subject.species, 'Rattus norvegicus')
         self.assertEqual(self.subject.subject_id, 'RAT123')
         self.assertEqual(self.subject.weight, '2 lbs')
+        self.assertEqual(self.subject.date_of_birth, datetime(2017, 5, 1, 12, tzinfo=tzlocal()))
+        self.assertEqual(self.subject.strain, 'my_strain')
 
     def test_nwbfile_constructor(self):
         self.assertIs(self.nwbfile.subject, self.subject)
