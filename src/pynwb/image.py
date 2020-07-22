@@ -18,7 +18,8 @@ class ImageSeries(TimeSeries):
     __nwbfields__ = ('dimension',
                      'external_file',
                      'starting_frame',
-                     'format')
+                     'format',
+                     'device')
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
@@ -113,7 +114,7 @@ class ImageMaskSeries(ImageSeries):
              'doc': 'Link to ImageSeries that mask is applied to.'},
             *get_docval(ImageSeries.__init__, 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description'))
+                        'description', 'control', 'control_description', 'device'))
     def __init__(self, **kwargs):
         name, data = popargs('name', 'data', kwargs)
         masked_imageseries = popargs('masked_imageseries', kwargs)
@@ -147,7 +148,7 @@ class OpticalSeries(ImageSeries):
                     'Must also specify frame of reference.'},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description'))
+                        'description', 'control', 'control_description', 'device'))
     def __init__(self, **kwargs):
         name, data, = popargs('name', 'data', kwargs)
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
