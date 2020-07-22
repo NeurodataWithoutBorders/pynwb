@@ -114,7 +114,11 @@ class ImageMaskSeries(ImageSeries):
              'doc': 'Link to ImageSeries that mask is applied to.'},
             *get_docval(ImageSeries.__init__, 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description', 'device'))
+                        'description', 'control', 'control_description'),
+            {'name': 'device', 'type': Device,
+             'doc': ('Device used to capture the mask data. This field will likely not be needed. '
+                     'The device used to capture the masked ImageSeries data should be stored in the ImageSeries.'),
+             'default': None},)
     def __init__(self, **kwargs):
         name, data = popargs('name', 'data', kwargs)
         masked_imageseries = popargs('masked_imageseries', kwargs)
