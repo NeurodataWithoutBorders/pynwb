@@ -2,11 +2,10 @@ from h5py import RegionReference
 import numpy as np
 import pandas as pd
 
-from hdmf.utils import (docval, getargs, ExtenderMeta, call_docval_func, popargs, get_docval, fmt_docval_args,
-                        LabelledDict)
+from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
+from hdmf.utils import LabelledDict  # noqa: F401
 from hdmf import Container, Data, DataRegion, get_region_slicer
 from hdmf.container import AbstractContainer
-from hdmf.utils import LabelledDict
 from hdmf.container import MultiContainerInterface as hdmf_MultiContainerInterface
 from hdmf.common import DynamicTable, DynamicTableRegion  # noqa: F401
 from hdmf.common import VectorData, VectorIndex, ElementIdentifiers  # noqa: F401
@@ -38,32 +37,31 @@ class NWBMixin(AbstractContainer):
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBMixin, Container):
 
-    _fieldsname = '__nwbfields__'
+    @classmethod
+    def _get_fields(cls):
+        """Get the fields list of this class, with support for old-PyNWB classes where __nwbfields__ is defined.
 
-    __nwbfields__ = tuple()
+        If __nwbfields__ is defined in the class, it will be returned, else, this will behave like in the superclass.
+        """
+        if hasattr(cls, '__nwbfields__'):
+            return getattr(cls, '__nwbfields__')
+        return super()._get_fields()
 
-    @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'})
-    def __init__(self, **kwargs):
-        call_docval_func(super(NWBContainer, self).__init__, kwargs)
+    @classmethod
+    def _set_fields(cls, value):
+        """Set the fields list of this class, with support for old-PyNWB classes where __nwbfields__ is defined.
 
-    def _to_dict(self, arg, label="NULL"):
-        return_dict = LabelledDict(label)
-        if arg is None:
-            return return_dict
-        else:
-            for i in arg:
-                assert i.name is not None  # If a container doesn't have a name, it gets lost!
-                assert i.name not in return_dict
-                return_dict[i.name] = i
-            return return_dict
+        If __nwbfields__ is defined in the class, it will be returned, else, this will behave like in the superclass.
+        """
+        if hasattr(cls, '__nwbfields__'):
+            return setattr(cls, '__nwbfields__', value)
+        return super()._set_fields(value)
 
 
 @register_class('NWBDataInterface', CORE_NAMESPACE)
 class NWBDataInterface(NWBContainer):
 
-    @docval(*get_docval(NWBContainer.__init__))
-    def __init__(self, **kwargs):
-        call_docval_func(super(NWBDataInterface, self).__init__, kwargs)
+    pass
 
 
 @register_class('NWBData', CORE_NAMESPACE)
@@ -335,5 +333,6 @@ class NWBTableRegion(NWBData, DataRegion):
         return self.__regionslicer[idx]
 
 
-class MultiContainerInterface(NWBMixin, hdmf_MultiContainerInterface):
+class MultiContainerInterface(NWBDataInterface, hdmf_MultiContainerInterface):
+
     pass
