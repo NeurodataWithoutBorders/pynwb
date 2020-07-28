@@ -237,13 +237,6 @@ jobs:
      - TEST_TOX_ENV: "gallery-py37"
     <<: *gallery-steps
 
-  gallery38:
-    docker:
-      - image: circleci/python:3.8.1-buster
-    environment:
-     - TEST_TOX_ENV: "gallery-py38"
-    <<: *gallery-steps
-
   gallery36-min-req:
     docker:
       - image: circleci/python:3.6.3-jessie
@@ -345,8 +338,6 @@ workflows:
           <<: *no_filters
       - gallery37:
           <<: *no_filters
-      - gallery38:
-          <<: *no_filters
       - gallery36-min-req:
           <<: *no_filters
       - deploy-dev:
@@ -363,7 +354,6 @@ workflows:
             - miniconda38
             - gallery36
             - gallery37
-            - gallery38
             - gallery36-min-req
           filters:
             tags:
@@ -387,7 +377,6 @@ workflows:
             - miniconda38
             - gallery36
             - gallery37
-            - gallery38
             - gallery36-min-req
           filters:
             tags:
