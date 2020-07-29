@@ -145,7 +145,7 @@ class TwoPhotonSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'device'))
     def __init__(self, **kwargs):
         field_of_view, imaging_plane, pmt_gain, scan_line_rate = popargs(
             'field_of_view', 'imaging_plane', 'pmt_gain', 'scan_line_rate', kwargs)

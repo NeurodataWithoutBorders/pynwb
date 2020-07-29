@@ -5,6 +5,7 @@ from hdmf.utils import docval, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image
+from .device import Device
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)
@@ -17,7 +18,8 @@ class ImageSeries(TimeSeries):
     __nwbfields__ = ('dimension',
                      'external_file',
                      'starting_frame',
-                     'format')
+                     'format',
+                     'device')
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
@@ -33,24 +35,32 @@ class ImageSeries(TimeSeries):
                     'Either external_file or data must be specified, but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable,
              'doc': 'Each entry is the frame number in the corresponding external_file variable. '
-                    'This serves as an index to what frames each file contains.', 'default': None},
+                    'This serves as an index to what frames each file contains. If external_file is not '
+                    'provided, then this value will be None', 'default': [0]},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'DEPRECATED: Number of bits per image pixel',
              'default': None},
             {'name': 'dimension', 'type': Iterable,
              'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description'),
+            {'name': 'device', 'type': Device,
+             'doc': 'Device used to capture the images/video.', 'default': None},)
     def __init__(self, **kwargs):
-        bits_per_pixel, dimension, external_file, starting_frame, format = popargs(
-            'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
+        bits_per_pixel, dimension, external_file, starting_frame, format, device = popargs(
+            'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', 'device', kwargs)
         call_docval_func(super(ImageSeries, self).__init__, kwargs)
         if external_file is None and self.data is None:
-            raise ValueError('must supply either external_file or data to ' + self.name)
+            raise ValueError("Must supply either external_file or data to %s '%s'."
+                             % (self.__class__.__name__, self.name))
         self.bits_per_pixel = bits_per_pixel
         self.dimension = dimension
         self.external_file = external_file
-        self.starting_frame = starting_frame
+        if external_file is not None:
+            self.starting_frame = starting_frame
+        else:
+            self.starting_frame = None
         self.format = format
+        self.device = device
 
     @property
     def bits_per_pixel(self):
@@ -109,7 +119,11 @@ class ImageMaskSeries(ImageSeries):
              'doc': 'Link to ImageSeries that mask is applied to.'},
             *get_docval(ImageSeries.__init__, 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description'))
+                        'description', 'control', 'control_description'),
+            {'name': 'device', 'type': Device,
+             'doc': ('Device used to capture the mask data. This field will likely not be needed. '
+                     'The device used to capture the masked ImageSeries data should be stored in the ImageSeries.'),
+             'default': None},)
     def __init__(self, **kwargs):
         name, data = popargs('name', 'data', kwargs)
         masked_imageseries = popargs('masked_imageseries', kwargs)
@@ -143,7 +157,7 @@ class OpticalSeries(ImageSeries):
                     'Must also specify frame of reference.'},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description'))
+                        'description', 'control', 'control_description', 'device'))
     def __init__(self, **kwargs):
         name, data, = popargs('name', 'data', kwargs)
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
