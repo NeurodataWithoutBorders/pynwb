@@ -134,7 +134,7 @@ class TestTimeSeries(TestCase):
         with self.assertRaises(ValueError):
             TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
                        'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
-                        continuity='wrong')
+                       continuity='wrong')
 
     def test_nodata(self):
         ts1 = TimeSeries('test_ts1', starting_time=0.0, rate=0.1)
