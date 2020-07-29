@@ -15,7 +15,8 @@ class TestTimeSeriesIO(AcquisitionH5IOMixin, TestCase):
             data=list(range(1000)),
             unit='SIunit',
             timestamps=np.arange(1000.),
-            resolution=0.1
+            resolution=0.1,
+            continuity='continuous',
         )
 
 
