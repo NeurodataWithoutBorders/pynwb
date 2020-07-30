@@ -136,7 +136,7 @@ class OpticalSeries(ImageSeries):
             {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
              'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
                      'be time (frame). The second and third dimensions represent x and y. The optional fourth '
-                     'dimension must be length 3 and represents the RGB value for color images.'},
+                     'dimension must be length 3 and represents the RGB value for color images.')},
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
             {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
