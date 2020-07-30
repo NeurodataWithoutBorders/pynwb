@@ -24,7 +24,7 @@ class AnnotationSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
-             'doc': 'The data values. Must be 1D, where the first dimension must be time.',
+             'doc': 'The data values over time. Must be 1D.',
              'default': list()},
             *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description'))
     def __init__(self, **kwargs):
