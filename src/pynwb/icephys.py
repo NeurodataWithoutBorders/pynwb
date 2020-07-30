@@ -65,7 +65,7 @@ class PatchClampSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+             'doc': 'The data values. The first dimension must be time.'},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},  # required
             {'name': 'electrode', 'type': IntracellularElectrode,  # required
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply '
