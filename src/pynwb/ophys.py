@@ -334,7 +334,7 @@ class RoiResponseSeries(TimeSeries):
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'shape': ((None, ), (None, None)),
              'doc': ('The data values. May be 1D or 2D. The first dimension must be time. The optional second '
-                     'dimension represents ROIs'},
+                     'dimension represents ROIs')},
             *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'rois', 'type': DynamicTableRegion,  # required
              'doc': 'a table region corresponding to the ROIs that were used to generate this data'},
