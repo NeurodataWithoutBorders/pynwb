@@ -29,12 +29,24 @@ class ElectricalSeriesConstructor(TestCase):
     def test_init(self):
         data = list(range(10))
         ts = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+        channel_conversion = [2., 6.3]
+        filtering = 'Low-pass filter at 300 Hz'
         table = make_electrode_table()
         region = DynamicTableRegion('electrodes', [0, 2], 'the first and third electrodes', table)
-        eS = ElectricalSeries('test_eS', data, region, channel_conversion=[2., 6.3], timestamps=ts)
+        eS = ElectricalSeries(
+            name='test_eS',
+            data=data,
+            electrodes=region,
+            channel_conversion=channel_conversion,
+            filtering=filtering,
+            timestamps=ts
+        )
         self.assertEqual(eS.name, 'test_eS')
         self.assertEqual(eS.data, data)
+        self.assertEqual(eS.electrodes, region)
         self.assertEqual(eS.timestamps, ts)
+        self.assertEqual(eS.channel_conversion, [2., 6.3])
+        self.assertEqual(eS.filtering, filtering)
 
     def test_link(self):
         table = make_electrode_table()
