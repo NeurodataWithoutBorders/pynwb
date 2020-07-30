@@ -21,8 +21,8 @@ class ImageSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames. '
-                    'dimensions: time, x, y [, z]',
+             'doc': ('The data values. Can be 3D or 4D. The first dimension must be time (frame). The second and third '
+                     'dimensions represent x and y. The optional fourth dimension represents z.'),
              'default': None},
             *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'format', 'type': str,
@@ -82,16 +82,15 @@ class IndexSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+             'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
             *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
              'doc': 'HDF5 link to TimeSeries containing images that are indexed.'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data = popargs('name', 'data', kwargs)
         indexed_timeseries = popargs('indexed_timeseries', kwargs)
-        super(IndexSeries, self).__init__(name, data, **kwargs)
+        super(IndexSeries, self).__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
 
 
@@ -107,18 +106,15 @@ class ImageMaskSeries(ImageSeries):
     __nwbfields__ = ('masked_imageseries',)
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            *get_docval(ImageSeries.__init__, 'unit'),
+            *get_docval(ImageSeries.__init__, 'data', 'unit'),
             {'name': 'masked_imageseries', 'type': ImageSeries,  # required
              'doc': 'Link to ImageSeries that mask is applied to.'},
             *get_docval(ImageSeries.__init__, 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
                         'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data = popargs('name', 'data', kwargs)
         masked_imageseries = popargs('masked_imageseries', kwargs)
-        super(ImageMaskSeries, self).__init__(name, data, **kwargs)
+        super(ImageMaskSeries, self).__init__(**kwargs)
         self.masked_imageseries = masked_imageseries
 
 
@@ -138,7 +134,9 @@ class OpticalSeries(ImageSeries):
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),
             {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
-             'doc': 'Images presented to subject, either grayscale or RGB'},
+             'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
+                     'be time (frame). The second and third dimensions represent x and y. The optional fourth '
+                     'dimension must be length 3 and represents the RGB value for color images.'},
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
             {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
@@ -150,9 +148,8 @@ class OpticalSeries(ImageSeries):
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
                         'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data, = popargs('name', 'data', kwargs)
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
-        super(OpticalSeries, self).__init__(name, data, **kwargs)
+        super(OpticalSeries, self).__init__(**kwargs)
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
@@ -161,8 +158,8 @@ class OpticalSeries(ImageSeries):
 @register_class('GrayscaleImage', CORE_NAMESPACE)
 class GrayscaleImage(Image):
 
-    @docval(*get_docval(Image.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',  # required
+    @docval(*get_docval(Image.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'Data of image. Must be 2D',
              'shape': (None, None)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
@@ -173,7 +170,8 @@ class GrayscaleImage(Image):
 class RGBImage(Image):
 
     @docval(*get_docval(Image.__init__, 'name'),
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',  # required
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of image. Must be 3D where the third dimension has length 3 and represents the RGB value',
              'shape': (None, None, 3)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
@@ -184,7 +182,8 @@ class RGBImage(Image):
 class RGBAImage(Image):
 
     @docval(*get_docval(Image.__init__, 'name'),
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',  # required
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of image. Must be 3D where the third dimension has length 4 and represents the RGBA value',
              'shape': (None, None, 4)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):

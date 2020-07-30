@@ -24,7 +24,7 @@ class AnnotationSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'doc': 'The data values. Must be 1D, where the first dimension must be time.',
              'default': list()},
             *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description'))
     def __init__(self, **kwargs):
@@ -62,7 +62,8 @@ class AbstractFeatureSeries(TimeSeries):
             {'name': 'features', 'type': Iterable, 'shape': (None, ),  # required
              'doc': 'Description of each feature'},
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ((None,), (None, None)),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'doc': ('The data values. May be 1D or 2D. The first dimension must be time. The optional second '
+                     'dimension represents features'),
              'default': list()},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'))
@@ -99,7 +100,9 @@ class IntervalSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
-             'doc': '>0 if interval started, <0 if interval ended.', 'default': list()},
+             'doc': ('The data values. Must be 1D, where the first dimension must be time. Values are >0 if '
+                     'interval started, <0 if interval ended.'),
+             'default': list()},
             *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         name, data, timestamps = popargs('name', 'data', 'timestamps', kwargs)
@@ -107,8 +110,8 @@ class IntervalSeries(TimeSeries):
         self.__interval_data = data
         super(IntervalSeries, self).__init__(name, data, 'n/a', resolution=-1.0, timestamps=timestamps, **kwargs)
 
-    @docval({'name': 'start', 'type': 'float', 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'stop', 'type': 'float', 'doc': 'The name of this TimeSeries dataset'})
+    @docval({'name': 'start', 'type': 'float', 'doc': 'The start time of the interval'},
+            {'name': 'stop', 'type': 'float', 'doc': 'The stop time of the interval'})
     def add_interval(self, **kwargs):
         start, stop = getargs('start', 'stop', kwargs)
         self.__interval_timestamps.append(start)
@@ -246,7 +249,9 @@ class DecompositionSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
-             'doc': 'dims: num_times * num_channels * num_bands', 'shape': (None, None, None)},
+             'doc': ('The data values. Must be 3D, where the first dimension must be time, the second dimension must '
+                     'be channels, and the third dimension must be bands.'),
+             'shape': (None, None, None)},
             *get_docval(TimeSeries.__init__, 'description'),
             {'name': 'metric', 'type': str,  # required
              'doc': "metric of analysis. recommended: 'phase', 'amplitude', 'power'"},

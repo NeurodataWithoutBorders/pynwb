@@ -132,10 +132,7 @@ class TwoPhotonSeries(ImageSeries):
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
-             'default': None},
-            *get_docval(ImageSeries.__init__, 'unit', 'format'),
+            *get_docval(ImageSeries.__init__, 'data', 'unit', 'format'),
             {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
             {'name': 'pmt_gain', 'type': 'float', 'doc': 'Photomultiplier gain.', 'default': None},
@@ -336,7 +333,8 @@ class RoiResponseSeries(TimeSeries):
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'shape': ((None, ), (None, None)),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+             'doc': ('The data values. May be 1D or 2D. The first dimension must be time. The optional second '
+                     'dimension represents ROIs'},
             *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'rois', 'type': DynamicTableRegion,  # required
              'doc': 'a table region corresponding to the ROIs that were used to generate this data'},
