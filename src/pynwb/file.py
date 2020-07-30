@@ -496,7 +496,7 @@ class NWBFile(MultiContainerInterface):
     @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)'},
             {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)'},
             {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)'},
-            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode'},
+            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode, in ohms'},
             {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
             {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
@@ -509,7 +509,7 @@ class NWBFile(MultiContainerInterface):
             allow_extra=True)
     def add_electrode(self, **kwargs):
         """
-        Add a unit to the unit table.
+        Add an electrode to the electrodes table.
         See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         Required fields are *x*, *y*, *z*, *imp*, *location*, *filtering*,
