@@ -41,7 +41,7 @@ class OptogeneticSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
-             'doc': 'The data values. Must be 1D, where the first dimension must be time.',
+             'doc': 'The data values over time. Must be 1D.',
             {'name': 'site', 'type': OptogeneticStimulusSite,  # required
              'doc': 'The site to which this stimulus was applied.'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
