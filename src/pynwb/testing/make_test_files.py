@@ -1,4 +1,4 @@
-from pynwb import NWBFile, NWBHDF5IO, validate, __version__
+from pynwb import NWBFile, NWBHDF5IO, __version__, TimeSeries
 from datetime import datetime
 
 # pynwb 1.0.2 should be installed with hdmf 1.0.3
@@ -13,9 +13,7 @@ def _write(test_name, nwbfile):
     with NWBHDF5IO(filename, 'w') as io:
         io.write(nwbfile)
 
-    with NWBHDF5IO(filename, 'r') as io:
-        validate(io)
-        nwbfile = io.read()
+    return filename
 
 
 def make_nwbfile():
@@ -44,7 +42,43 @@ def make_nwbfile_str_pub():
     _write(test_name, nwbfile)
 
 
+def make_nwbfile_ts_no_data():
+    nwbfile = NWBFile(session_description='ADDME',
+                      identifier='ADDME',
+                      session_start_time=datetime.now().astimezone())
+    ts = TimeSeries(
+        name='ADDME',
+        rate=1.,
+        unit='ADDME',
+    )
+    nwbfile.add_acquisition(ts)
+
+    test_name = 'ts_no_data'
+    _write(test_name, nwbfile)
+
+
+def make_nwbfile_ts_no_unit():
+    nwbfile = NWBFile(session_description='ADDME',
+                      identifier='ADDME',
+                      session_start_time=datetime.now().astimezone())
+    ts = TimeSeries(
+        name='ADDME',
+        data=[0],
+        rate=1.,
+    )
+    nwbfile.add_acquisition(ts)
+
+    test_name = 'ts_no_unit'
+    _write(test_name, nwbfile)
+
+
 if __name__ == '__main__':
-    make_nwbfile()
-    make_nwbfile_str_experimenter()
-    make_nwbfile_str_pub()
+
+    if __version__ == '1.1.2':
+        make_nwbfile()
+        make_nwbfile_str_experimenter()
+        make_nwbfile_str_pub()
+
+    if __version__ == '1.3.3':
+        make_nwbfile_ts_no_data()
+        make_nwbfile_ts_no_unit()

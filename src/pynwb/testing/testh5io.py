@@ -53,9 +53,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         raise NotImplementedError('Cannot run test unless setUpContainer is implemented')
 
     def test_roundtrip(self):
-        """
-        Test whether the test Container read from file has the same contents as the original test Container and
-        validate the file
+        """Test whether the read Container has the same contents as the original Container and validate the file.
         """
         self.read_container = self.roundtripContainer()
         self.assertIsNotNone(str(self.container))  # added as a test to make sure printing works
@@ -66,9 +64,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         self.assertContainerEqual(self.read_container, self.container)
 
     def roundtripContainer(self, cache_spec=False):
-        """
-        Add the test Container to an NWBFile, write it to file, read the file, and return the test Container from the
-        file
+        """Add the Container to an NWBFile, write it to file, read the file, and return the Container from the file.
         """
         description = 'a file to test writing and reading a %s' % self.container_type
         identifier = 'TEST_%s' % self.container_type

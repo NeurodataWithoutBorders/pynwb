@@ -41,9 +41,19 @@ class TestPrint(TestCase):
     def test_print_file(self):
         nwbfile = NWBFile(session_description='session_description',
                           identifier='identifier', session_start_time=datetime.now(tzlocal()))
-        ts = TimeSeries('name', [1., 2., 3.] * 1000, timestamps=[1, 2, 3])
-        ts2 = TimeSeries('name2', [1, 2, 3] * 1000, timestamps=[1, 2, 3])
-        expected = """name pynwb.base.TimeSeries at 0x%d
+        ts1 = TimeSeries(
+            name='name1',
+            data=[1., 2., 3.] * 1000,
+            unit='unit',
+            timestamps=[1, 2, 3]
+        )
+        ts2 = TimeSeries(
+            name='name2',
+            data=[1, 2, 3] * 1000,
+            unit='unit',
+            timestamps=[1, 2, 3]
+        )
+        expected = """name1 pynwb.base.TimeSeries at 0x%d
 Fields:
   comments: no comments
   conversion: 1.0
@@ -53,16 +63,17 @@ Fields:
   resolution: -1.0
   timestamps: [1 2 3]
   timestamps_unit: seconds
+  unit: unit
 """
-        expected %= id(ts)
-        self.assertEqual(str(ts), expected)
-        nwbfile.add_acquisition(ts)
+        expected %= id(ts1)
+        self.assertEqual(str(ts1), expected)
+        nwbfile.add_acquisition(ts1)
         nwbfile.add_acquisition(ts2)
         nwbfile.add_epoch(start_time=1.0, stop_time=10.0, tags=['tag1', 'tag2'])
         expected_re = r"""root pynwb\.file\.NWBFile at 0x\d+
 Fields:
   acquisition: {
-    name <class 'pynwb\.base\.TimeSeries'>,
+    name1 <class 'pynwb\.base\.TimeSeries'>,
     name2 <class 'pynwb\.base\.TimeSeries'>
   }
   epoch_tags: {
@@ -88,7 +99,12 @@ class TestLabelledDict(TestCase):
 
     def setUp(self):
         self.name = 'name'
-        self.container = TimeSeries(self.name, [1., 2., 3.] * 1000, timestamps=[1, 2, 3])
+        self.container = TimeSeries(
+            name=self.name,
+            data=[1., 2., 3.] * 1000,
+            unit='unit',
+            timestamps=[1, 2, 3]
+        )
         self.object_id = self.container.object_id
 
     def test_add_default(self):

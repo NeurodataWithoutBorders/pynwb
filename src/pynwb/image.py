@@ -1,7 +1,8 @@
 import warnings
+import numpy as np
 from collections.abc import Iterable
 
-from hdmf.utils import docval, popargs, call_docval_func, get_docval
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, Image
@@ -19,12 +20,19 @@ class ImageSeries(TimeSeries):
                      'starting_frame',
                      'format')
 
+    DATA_PLACEHOLDER = np.array([[[]]], np.uint8)  # empty 3D array
+    UNIT_PLACEHOLDER = 'N/A'
+
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
              'doc': ('The data values. Can be 3D or 4D. The first dimension must be time (frame). The second and third '
-                     'dimensions represent x and y. The optional fourth dimension represents z.'),
+                     'dimensions represent x and y. The optional fourth dimension represents z. Either data or '
+                     'external_file must be specified, but not both.'),
              'default': None},
-            *get_docval(TimeSeries.__init__, 'unit'),
+            {'name': 'unit', 'type': str,
+             'doc': ('The unit of measurement of the image data, e.g., values between 0 and 255. Required if data is '
+                     'specified.'),
+             'default': None},
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
@@ -44,10 +52,22 @@ class ImageSeries(TimeSeries):
     def __init__(self, **kwargs):
         bits_per_pixel, dimension, external_file, starting_frame, format = popargs(
             'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
-        call_docval_func(super(ImageSeries, self).__init__, kwargs)
-        if external_file is None and self.data is None:
+        data, unit = getargs('data', 'unit', kwargs)
+        if data is not None and unit is None:
+            raise ValueError("Must supply 'unit' argument when supplying 'data' to %s '%s'."
+                             % (self.__class__.__name__, self.name))
+        if external_file is None and data is None:
             raise ValueError("Must supply either external_file or data to %s '%s'."
                              % (self.__class__.__name__, self.name))
+
+        # data and unit are required in TimeSeries, but allowed to be None here, so handle this specially
+        if data is None:
+            kwargs['data'] = ImageSeries.DATA_PLACEHOLDER
+        if unit is None:
+            kwargs['unit'] = ImageSeries.UNIT_PLACEHOLDER
+
+        call_docval_func(super(ImageSeries, self).__init__, kwargs)
+
         self.bits_per_pixel = bits_per_pixel
         self.dimension = dimension
         self.external_file = external_file
@@ -71,7 +91,7 @@ class ImageSeries(TimeSeries):
 @register_class('IndexSeries', CORE_NAMESPACE)
 class IndexSeries(TimeSeries):
     '''
-    Stores indices to image frames stored in an ImageSeries. The purpose of the ImageIndexSeries is to allow
+    Stores indices to image frames stored in an ImageSeries. The purpose of the IndexSeries is to allow
     a static image stack to be stored somewhere, and the images in the stack to be referenced out-of-order.
     This can be for the display of individual images, or of movie segments (as a movie is simply a series of
     images). The data field stores the index of the frame in the referenced ImageSeries, and the timestamps
@@ -83,13 +103,13 @@ class IndexSeries(TimeSeries):
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
              'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
-            *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
              'doc': 'HDF5 link to TimeSeries containing images that are indexed.'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         indexed_timeseries = popargs('indexed_timeseries', kwargs)
+        kwargs['unit'] = 'N/A'
         super(IndexSeries, self).__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
 
@@ -132,18 +152,20 @@ class OpticalSeries(ImageSeries):
                      'field_of_view',
                      'orientation')
 
-    @docval(*get_docval(ImageSeries.__init__, 'name'),
-            {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
-             'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
-                     'be time (frame). The second and third dimensions represent x and y. The optional fourth '
-                     'dimension must be length 3 and represents the RGB value for color images.')},
-            *get_docval(ImageSeries.__init__, 'unit', 'format'),
+    @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
             {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
             {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
             {'name': 'orientation', 'type': str,  # required
              'doc': 'Description of image relative to some reference frame (e.g., which way is up). '
                     'Must also specify frame of reference.'},
+            *get_docval(ImageSeries.__init__, 'unit', 'format'),
+            {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
+             'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
+                     'be time (frame). The second and third dimensions represent x and y. The optional fourth '
+                     'dimension must be length 3 and represents the RGB value for color images. Either data or '
+                     'external_file must be specified, but not both.'),
+             'default': None},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
                         'description', 'control', 'control_description'))

@@ -1,3 +1,5 @@
+import numpy as np
+
 from .core import NWBContainerMapper
 from .. import register_map
 
@@ -18,6 +20,11 @@ class ModuleMap(NWBContainerMapper):
     @NWBContainerMapper.constructor_arg('name')
     def name(self, builder, manager):
         return builder.name
+
+
+# values used when a TimeSeries is read and missing required fields
+TIMESERIES_DEFAULT_DATA = np.array([], np.uint8)
+TIMESERIES_DEFAULT_UNIT = 'unknown'
 
 
 @register_map(TimeSeries)
@@ -71,10 +78,48 @@ class TimeSeriesMap(NWBContainerMapper):
             #
             # NOTE: it is not available when data is externally linked
             # and we haven't explicitly read that file
-            if tstamps_builder.builder.parent is not None:
-                target = tstamps_builder.builder
+            target = tstamps_builder.builder
+            if target.parent is not None:
                 return manager.construct(target.parent)
             else:
-                return tstamps_builder.builder.data
+                return target.data
         else:
             return tstamps_builder.data
+
+    @NWBContainerMapper.constructor_arg("data")
+    def data_carg(self, builder, manager):
+        # handle case where a TimeSeries is read and missing data
+        data_builder = builder.get('data')
+        if data_builder is None:
+            return TIMESERIES_DEFAULT_DATA
+        if isinstance(data_builder, LinkBuilder):
+            # if the parent of our target is available, return the parent object
+            # Otherwise, return the dataset in the target builder
+            #
+            # NOTE: it is not available when data is externally linked
+            # and we haven't explicitly read that file
+            target = data_builder.builder
+            if target.parent is not None:
+                return manager.construct(target.parent)
+            else:
+                return target.data
+        return data_builder.data
+
+    @NWBContainerMapper.constructor_arg("unit")
+    def unit_carg(self, builder, manager):
+        # handle case where a TimeSeries is read and missing unit
+        data_builder = builder.get('data')
+        if data_builder is None:
+            return TIMESERIES_DEFAULT_UNIT
+        if isinstance(data_builder, LinkBuilder):
+            # NOTE: parent is not available when data is externally linked
+            # and we haven't explicitly read that file
+            target = data_builder.builder
+            if target.parent is not None:
+                data_builder = manager.construct(target.parent)
+            else:
+                data_builder = target
+        unit_value = data_builder.attributes.get('unit')
+        if unit_value is None:
+            return TIMESERIES_DEFAULT_UNIT
+        return unit_value

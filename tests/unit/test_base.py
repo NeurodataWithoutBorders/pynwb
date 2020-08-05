@@ -124,11 +124,6 @@ class TestTimeSeries(TestCase):
                          'grams', timestamps=ts1)
         self.assertEqual(ts2.timestamps, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
 
-    def test_nodata(self):
-        ts1 = TimeSeries('test_ts1', starting_time=0.0, rate=0.1)
-        with self.assertWarns(UserWarning):
-            self.assertIs(ts1.num_samples, None)
-
     def test_dataio_list_data(self):
         length = 100
         data = list(range(length))
@@ -185,7 +180,7 @@ class TestTimeSeries(TestCase):
 
     def test_no_starting_time(self):
         # if no starting_time is given, 0.0 is assumed
-        ts1 = TimeSeries('test_ts1', rate=0.1)
+        ts1 = TimeSeries('test_ts1', data=[1, 2, 3], unit='unit', rate=0.1)
         self.assertEqual(ts1.starting_time, 0.0)
 
     def test_conflicting_time_args(self):

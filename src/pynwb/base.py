@@ -99,9 +99,8 @@ class TimeSeries(NWBDataInterface):
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},  # required
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
              'doc': ('The data values. The first dimension must be time. '
-                     'Can also store binary data, e.g., image frames'),
-             'default': None},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
+                     'Can also store binary data, e.g., image frames')},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
             {'name': 'resolution', 'type': (str, 'float'),
              'doc': 'The smallest meaningful difference (in specified unit) between values in data', 'default': -1.0},
             {'name': 'conversion', 'type': (str, 'float'),

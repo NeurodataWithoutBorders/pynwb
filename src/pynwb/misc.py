@@ -12,19 +12,16 @@ from hdmf.common import DynamicTable
 
 @register_class('AnnotationSeries', CORE_NAMESPACE)
 class AnnotationSeries(TimeSeries):
-    """
-    Stores text-based records about the experiment. To use the
-    AnnotationSeries, add records individually through
-    add_annotation() and then call finalize(). Alternatively, if
-    all annotations are already stored in a list, use set_data()
-    and set_timestamps()
+    """Stores text-based records about the experiment.
+    To use the AnnotationSeries, add records individually through add_annotation(). Alternatively, if all annotations
+    are already stored in a list or numpy array, set the data and timestamps in the constructor.
     """
 
     __nwbfields__ = ()
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None,),
-             'doc': 'The data values over time. Must be 1D.',
+             'doc': 'The annotations over time. Must be 1D.',
              'default': list()},
             *get_docval(TimeSeries.__init__, 'timestamps', 'comments', 'description'))
     def __init__(self, **kwargs):
@@ -34,9 +31,7 @@ class AnnotationSeries(TimeSeries):
     @docval({'name': 'time', 'type': 'float', 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
     def add_annotation(self, **kwargs):
-        '''
-        Add an annotation
-        '''
+        """Add an annotation."""
         time, annotation = getargs('time', 'annotation', kwargs)
         self.fields['timestamps'].append(time)
         self.fields['data'].append(annotation)
