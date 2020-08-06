@@ -20,8 +20,8 @@ class ImageSeries(TimeSeries):
                      'starting_frame',
                      'format')
 
-    DATA_PLACEHOLDER = np.array([[[]]], np.uint8)  # empty 3D array
-    UNIT_PLACEHOLDER = 'N/A'
+    # value used when an ImageSeries is read and missing data
+    DEFAULT_DATA = np.ndarray(shape=(0, 0, 0), dtype=np.uint8)
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
@@ -52,19 +52,19 @@ class ImageSeries(TimeSeries):
     def __init__(self, **kwargs):
         bits_per_pixel, dimension, external_file, starting_frame, format = popargs(
             'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
-        data, unit = getargs('data', 'unit', kwargs)
+        name, data, unit = getargs('name', 'data', 'unit', kwargs)
         if data is not None and unit is None:
             raise ValueError("Must supply 'unit' argument when supplying 'data' to %s '%s'."
-                             % (self.__class__.__name__, self.name))
+                             % (self.__class__.__name__, name))
         if external_file is None and data is None:
             raise ValueError("Must supply either external_file or data to %s '%s'."
-                             % (self.__class__.__name__, self.name))
+                             % (self.__class__.__name__, name))
 
         # data and unit are required in TimeSeries, but allowed to be None here, so handle this specially
         if data is None:
-            kwargs['data'] = ImageSeries.DATA_PLACEHOLDER
+            kwargs['data'] = ImageSeries.DEFAULT_DATA
         if unit is None:
-            kwargs['unit'] = ImageSeries.UNIT_PLACEHOLDER
+            kwargs['unit'] = ImageSeries.DEFAULT_UNIT
 
         call_docval_func(super(ImageSeries, self).__init__, kwargs)
 
@@ -100,6 +100,9 @@ class IndexSeries(TimeSeries):
 
     __nwbfields__ = ('indexed_timeseries',)
 
+    # value used when an ImageSeries is read and missing data
+    DEFAULT_UNIT = 'N/A'
+
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
              'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
@@ -109,7 +112,7 @@ class IndexSeries(TimeSeries):
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         indexed_timeseries = popargs('indexed_timeseries', kwargs)
-        kwargs['unit'] = 'N/A'
+        kwargs['unit'] = IndexSeries.DEFAULT_UNIT
         super(IndexSeries, self).__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
 
@@ -126,12 +129,11 @@ class ImageMaskSeries(ImageSeries):
     __nwbfields__ = ('masked_imageseries',)
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
-            *get_docval(ImageSeries.__init__, 'data', 'unit'),
             {'name': 'masked_imageseries', 'type': ImageSeries,  # required
              'doc': 'Link to ImageSeries that mask is applied to.'},
-            *get_docval(ImageSeries.__init__, 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
-                        'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
-                        'description', 'control', 'control_description'))
+            *get_docval(ImageSeries.__init__, 'data', 'unit', 'format', 'external_file', 'starting_frame',
+                        'bits_per_pixel', 'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time',
+                        'rate', 'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         masked_imageseries = popargs('masked_imageseries', kwargs)
         super(ImageMaskSeries, self).__init__(**kwargs)
@@ -159,14 +161,13 @@ class OpticalSeries(ImageSeries):
             {'name': 'orientation', 'type': str,  # required
              'doc': 'Description of image relative to some reference frame (e.g., which way is up). '
                     'Must also specify frame of reference.'},
-            *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
              'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
                      'be time (frame). The second and third dimensions represent x and y. The optional fourth '
                      'dimension must be length 3 and represents the RGB value for color images. Either data or '
                      'external_file must be specified, but not both.'),
              'default': None},
-            *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
+            *get_docval(ImageSeries.__init__, 'unit', 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
                         'description', 'control', 'control_description'))
     def __init__(self, **kwargs):

@@ -242,6 +242,9 @@ class DecompositionSeries(TimeSeries):
                      {'name': 'bands',
                       'doc': 'the bands that the signal is decomposed into', 'child': True})
 
+    # value used when a DecompositionSeries is read and missing data
+    DEFAULT_DATA = np.ndarray(shape=(0, 0, 0), dtype=np.uint8)
+
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'doc': ('The data values. Must be 3D, where the first dimension must be time, the second dimension must '

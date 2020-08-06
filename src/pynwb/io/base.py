@@ -1,5 +1,3 @@
-import numpy as np
-
 from .core import NWBContainerMapper
 from .. import register_map
 
@@ -20,11 +18,6 @@ class ModuleMap(NWBContainerMapper):
     @NWBContainerMapper.constructor_arg('name')
     def name(self, builder, manager):
         return builder.name
-
-
-# values used when a TimeSeries is read and missing required fields
-TIMESERIES_DEFAULT_DATA = np.array([], np.uint8)
-TIMESERIES_DEFAULT_UNIT = 'unknown'
 
 
 @register_map(TimeSeries)
@@ -89,14 +82,12 @@ class TimeSeriesMap(NWBContainerMapper):
     @NWBContainerMapper.constructor_arg("data")
     def data_carg(self, builder, manager):
         # handle case where a TimeSeries is read and missing data
+        timeseries_cls = manager.get_cls(builder)
         data_builder = builder.get('data')
         if data_builder is None:
-            return TIMESERIES_DEFAULT_DATA
+            return timeseries_cls.DEFAULT_DATA
         if isinstance(data_builder, LinkBuilder):
-            # if the parent of our target is available, return the parent object
-            # Otherwise, return the dataset in the target builder
-            #
-            # NOTE: it is not available when data is externally linked
+            # NOTE: parent is not available when data is externally linked
             # and we haven't explicitly read that file
             target = data_builder.builder
             if target.parent is not None:
@@ -108,9 +99,10 @@ class TimeSeriesMap(NWBContainerMapper):
     @NWBContainerMapper.constructor_arg("unit")
     def unit_carg(self, builder, manager):
         # handle case where a TimeSeries is read and missing unit
+        timeseries_cls = manager.get_cls(builder)
         data_builder = builder.get('data')
         if data_builder is None:
-            return TIMESERIES_DEFAULT_UNIT
+            return timeseries_cls.DEFAULT_UNIT
         if isinstance(data_builder, LinkBuilder):
             # NOTE: parent is not available when data is externally linked
             # and we haven't explicitly read that file
@@ -121,5 +113,5 @@ class TimeSeriesMap(NWBContainerMapper):
                 data_builder = target
         unit_value = data_builder.attributes.get('unit')
         if unit_value is None:
-            return TIMESERIES_DEFAULT_UNIT
+            return timeseries_cls.DEFAULT_UNIT
         return unit_value

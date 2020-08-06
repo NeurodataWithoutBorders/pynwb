@@ -1,5 +1,6 @@
 from warnings import warn
 from collections.abc import Iterable
+import numpy as np
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func
 from hdmf.common import DynamicTable
@@ -95,6 +96,10 @@ class TimeSeries(NWBDataInterface):
                      "control_description")
 
     __time_unit = "seconds"
+
+    # values used when a TimeSeries is read and missing required fields
+    DEFAULT_DATA = np.ndarray(shape=(0, ), dtype=np.uint8)
+    DEFAULT_UNIT = 'unknown'
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},  # required
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),

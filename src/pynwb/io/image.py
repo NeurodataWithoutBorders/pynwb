@@ -1,5 +1,4 @@
 from .. import register_map
-
 from ..image import ImageSeries
 from .base import TimeSeriesMap
 
