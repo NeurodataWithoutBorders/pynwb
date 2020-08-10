@@ -18,6 +18,33 @@ class ImageSeriesConstructor(TestCase):
         self.assertEqual(iS.format, 'tiff')
         # self.assertEqual(iS.bits_per_pixel, np.nan)
 
+    def test_no_data_no_file(self):
+        msg = "Must supply either external_file or data to ImageSeries 'test_iS'."
+        with self.assertRaisesWith(ValueError, msg):
+            ImageSeries(
+                name='test_iS',
+                unit='unit',
+                timestamps=list()
+            )
+
+    def test_external_file_no_frame(self):
+        iS = ImageSeries(
+            name='test_iS',
+            unit='unit',
+            external_file=['external_file'],
+            timestamps=list()
+        )
+        self.assertListEqual(iS.starting_frame, [0])
+
+    def test_data_no_frame(self):
+        iS = ImageSeries(
+            name='test_iS',
+            unit='unit',
+            data=np.ones((3, 3, 3)),
+            timestamps=list()
+        )
+        self.assertIsNone(iS.starting_frame)
+
 
 class IndexSeriesConstructor(TestCase):
 

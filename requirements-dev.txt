@@ -1,4 +1,6 @@
-codecov==2.0.15
-coverage==5.0.3
-flake8==3.7.9
-tox==3.14.3
+codecov==2.1.8
+coverage==5.2
+flake8==3.8.3
+flake8-debugger==3.1.0
+flake8-print==3.1.4
+tox==3.17.1
