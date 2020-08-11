@@ -246,7 +246,7 @@ jobs:
 
   test-validation:
     docker:
-      - image: circleci/python:3.8.1-buster
+      - image: circleci/python:3.7.6-stretch
     steps:
       - checkout
       - run: git submodule sync
@@ -258,7 +258,7 @@ jobs:
           command: |
             . ../venv/bin/activate
             pip install tox
-            tox -e validation-py38
+            tox -e validation-py37
           # Install is expected to be quick. Increase timeout in case there are some network issues.
           # While pip installing tox does not output by default. Circle thinks task is dead after 10 min.
           no_output_timeout: 30m
