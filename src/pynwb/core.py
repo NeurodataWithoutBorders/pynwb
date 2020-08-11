@@ -45,7 +45,7 @@ class NWBContainer(NWBMixin, Container):
         """
         if hasattr(cls, '__nwbfields__'):
             return getattr(cls, '__nwbfields__')
-        return super()._get_fields()
+        return super(Container, cls)._get_fields()
 
     @classmethod
     def _set_fields(cls, value):
@@ -55,7 +55,7 @@ class NWBContainer(NWBMixin, Container):
         """
         if hasattr(cls, '__nwbfields__'):
             return setattr(cls, '__nwbfields__', value)
-        return super()._set_fields(value)
+        return super(Container, cls)._set_fields(value)
 
 
 @register_class('NWBDataInterface', CORE_NAMESPACE)
