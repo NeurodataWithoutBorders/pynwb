@@ -9,13 +9,13 @@ same NWB file or export the data to a new NWB file.
 """
 
 ###############################################################################
-# Modifying an NWB file in append mode
-# -------------------------------------
+# Modifying an NWB file in read/write mode
+# --------------------------------------------
 # PyNWB supports modifying an existing NWB file - that is, reading data from an NWB file, modifying that data, and
 # writing the modified data back to the same NWB file on disk. To do so, open the file with an
 # :py:class:`~pynwb.NWBHDF5IO` object in read/write mode (``mode='r+'`` or ``mode='a'``), read the file contents,
-# modify the :py:class:`~pynwb.file.NWBFile` in memory, and write the modified :py:class:`~pynwb.file.NWBFile`
-# using the same :py:class:`~pynwb.NWBHDF5IO` object.
+# modify the :py:class:`~pynwb.file.NWBFile` or one of its containers in memory, and write the modified .
+# :py:class:`~pynwb.file.NWBFile` using the same :py:class:`~pynwb.NWBHDF5IO` object.
 #
 # For example:
 
@@ -51,6 +51,8 @@ with NWBHDF5IO(filename, 'r+') as io:
     # write the modified NWB file
     io.write(read_nwbfile)
 
+breakpoint()
+
 ###############################################################################
 # Modifying an NWB file in this way has limitations. Removal of data will not shrink the file size.
 # A different method -- export -- which is detailed below, must be used to remove data from an existing NWB file.
@@ -60,22 +62,16 @@ with NWBHDF5IO(filename, 'r+') as io:
 #
 #
 #
-
 ###############################################################################
-# Modifying H5Datasets in an NWB file
-# -------------------------------------
-# NWB datasets that have been written to disk are read as :py:class:`h5py.Dataset <h5py.Dataset>` objects. Changing
-# the contents of these datasets changes the data directly on disk without requiring you to call
-# :py:meth:`~pynwb.NWBHDF5IO.write`. For example:
+# .. warning::
 #
-with NWBHDF5IO(filename, 'r+') as io:
-    read_nwbfile = io.read()
-    print(read_nwbfile.acquisition['test_timeseries'].data)  # this is an h5py.Dataset
-    read_nwbfile.acquisition['test_timeseries'].data[0] = 0  # modify the first element of the TimeSeries data
-
-with NWBHDF5IO(filename, 'r') as io:
-    read_nwbfile = io.read()
-    print(read_nwbfile.acquisition['test_timeseries'].data[:])  # the data has been modified
+#   NWB datasets that have been written to disk are read as :py:class:`h5py.Dataset <h5py.Dataset>` objects. If you
+#   modify the data in these ``Dataset`` objects directly, the data is modified on disk immediately (the
+#   :py:meth:`~pynwb.NWBHDF5IO.write` method does not need to be called and the :py:class:`~pynwb.NWBHDF5IO`
+#   instance does not need to be closed. Modifying datasets directly in this way can lead to files that do not
+#   validate or cannot be opened, so take caution when using this method.
+#   Note: only chunked datasets or datasets with ``maxshape`` set can be resized.
+#   See https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage for more details.
 
 ###############################################################################
 # Exporting a written NWB file to a new file path
