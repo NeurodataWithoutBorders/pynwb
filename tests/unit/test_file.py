@@ -166,7 +166,7 @@ class NWBFileTest(TestCase):
                                                     'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
 
     def test_get_acquisition_empty(self):
-        with self.assertRaisesWith(ValueError, "acquisition of NWBFile 'root' is empty"):
+        with self.assertRaisesWith(ValueError, "acquisition of NWBFile 'root' is empty."):
             self.nwbfile.get_acquisition()
 
     def test_get_acquisition_multiple_elements(self):
@@ -174,14 +174,14 @@ class NWBFileTest(TestCase):
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.nwbfile.add_acquisition(TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
-        msg = "more than one element in acquisition of NWBFile 'root' -- must specify a name"
+        msg = "More than one element in acquisition of NWBFile 'root' -- must specify a name."
         with self.assertRaisesWith(ValueError,  msg):
             self.nwbfile.get_acquisition()
 
     def test_add_acquisition_invalid_name(self):
         self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
-        msg = "\"'TEST_TS' not found in acquisition of NWBFile 'root'\""
+        msg = "\"'TEST_TS' not found in acquisition of NWBFile 'root'.\""
         with self.assertRaisesWith(KeyError, msg):
             self.nwbfile.get_acquisition("TEST_TS")
 

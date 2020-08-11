@@ -237,7 +237,7 @@ class TestAppend(TestCase):
 
     def test_append(self):
         proc_mod = self.nwbfile.create_processing_module(name='test_proc_mod', description='')
-        proc_inter = LFP(name='test_proc_dset')
+        proc_inter = LFP(name='LFP')
         proc_mod.add(proc_inter)
         device = self.nwbfile.create_device(name='test_device')
         e_group = self.nwbfile.create_electrode_group(
