@@ -54,7 +54,8 @@ class ElectricalSeries(TimeSeries):
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'shape': ((None, ), (None, None), (None, None, None)),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+             'doc': ('The data values. Can be 1D or 2D. The first dimension must be time. The second dimension '
+                     'represents electrodes/channels.')},
             {'name': 'electrodes', 'type': DynamicTableRegion,  # required
              'doc': 'the table region corresponding to the electrodes from which this series was recorded'},
             {'name': 'channel_conversion', 'type': ('array_data', 'data'), 'shape': (None,), 'doc':
