@@ -317,6 +317,6 @@ class NWBTableRegion(NWBData, DataRegion):
 
 
 class MultiContainerInterface(NWBDataInterface, hdmf_MultiContainerInterface):
-    """Defined in PyNWB for API backward compatibility. See HDMF MultiContainterInterface for details"""
+    """Defined in PyNWB for API backward compatibility. See HDMF MultiContainterInterface for details."""
 
     pass
