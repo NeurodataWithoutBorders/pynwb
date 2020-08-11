@@ -2,13 +2,12 @@ from h5py import RegionReference
 import numpy as np
 import pandas as pd
 
-from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
-from hdmf.utils import LabelledDict  # noqa: F401
 from hdmf import Container, Data, DataRegion, get_region_slicer
-from hdmf.container import AbstractContainer
-from hdmf.container import MultiContainerInterface as hdmf_MultiContainerInterface
+from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface
 from hdmf.common import DynamicTable, DynamicTableRegion  # noqa: F401
 from hdmf.common import VectorData, VectorIndex, ElementIdentifiers  # noqa: F401
+from hdmf.utils import docval, getargs, ExtenderMeta, call_docval_func, popargs
+from hdmf.utils import LabelledDict  # noqa: F401
 
 from . import CORE_NAMESPACE, register_class
 
@@ -37,25 +36,9 @@ class NWBMixin(AbstractContainer):
 @register_class('NWBContainer', CORE_NAMESPACE)
 class NWBContainer(NWBMixin, Container):
 
-    @classmethod
-    def _get_fields(cls):
-        """Get the fields list of this class, with support for old-PyNWB classes where __nwbfields__ is defined.
+    _fieldsname = '__nwbfields__'
 
-        If __nwbfields__ is defined in the class, it will be returned, else, this will behave like in the superclass.
-        """
-        if hasattr(cls, '__nwbfields__'):
-            return getattr(cls, '__nwbfields__')
-        return super(Container, cls)._get_fields()
-
-    @classmethod
-    def _set_fields(cls, value):
-        """Set the fields list of this class, with support for old-PyNWB classes where __nwbfields__ is defined.
-
-        If __nwbfields__ is defined in the class, it will be returned, else, this will behave like in the superclass.
-        """
-        if hasattr(cls, '__nwbfields__'):
-            return setattr(cls, '__nwbfields__', value)
-        return super(Container, cls)._set_fields(value)
+    __nwbfields__ = tuple()
 
 
 @register_class('NWBDataInterface', CORE_NAMESPACE)
