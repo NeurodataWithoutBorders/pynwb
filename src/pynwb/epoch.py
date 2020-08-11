@@ -10,9 +10,7 @@ from hdmf.common import DynamicTable
 
 @register_class('TimeIntervals', CORE_NAMESPACE)
 class TimeIntervals(DynamicTable):
-    """
-    Table for storing Epoch data
-    """
+    """Table for storing Epoch data"""
 
     __defaultname__ = 'epochs'
 

@@ -76,9 +76,7 @@ class Subject(NWBContainer):
 
 @register_class('NWBFile', CORE_NAMESPACE)
 class NWBFile(MultiContainerInterface):
-    """
-    A representation of an NWB file.
-    """
+    """A representation of an NWB file."""
 
     __clsconf__ = [
         {
@@ -637,9 +635,7 @@ class NWBFile(MultiContainerInterface):
         self.electrodes = electrode_table
 
     def _check_sweep_table(self):
-        """
-        Create a SweepTable if not yet done.
-        """
+        """Create a SweepTable if not yet done."""
         if self.sweep_table is None:
             self.sweep_table = SweepTable(name='sweep_table')
 
@@ -680,7 +676,7 @@ class NWBFile(MultiContainerInterface):
              'help': 'description for the internal DynamicTable used to store a pandas.DataFrame',
              'default': ''})
     def add_scratch(self, **kwargs):
-        '''Add data to the scratch space'''
+        """Add data to the scratch space"""
         data, name, notes = getargs('data', 'name', 'notes', kwargs)
         if isinstance(data, (np.ndarray, pd.DataFrame, list, tuple)):
             if name is None:
@@ -702,7 +698,7 @@ class NWBFile(MultiContainerInterface):
     @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
             {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
     def get_scratch(self, **kwargs):
-        '''Get data from the scratch space'''
+        """Get data from the scratch space"""
         name, convert = getargs('name', 'convert', kwargs)
         ret = self._get_scratch(name)
         if convert:

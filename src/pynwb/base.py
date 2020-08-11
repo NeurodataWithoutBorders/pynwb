@@ -233,8 +233,9 @@ class TimeSeries(NWBDataInterface):
 @register_class('Image', CORE_NAMESPACE)
 class Image(NWBData):
     """
-    Abstract image class. It is recommended to instead use pynwb.image.GrayscaleImage or pynwb.image.RGPImage where
-    appropriate.
+    Abstract image class. It is recommended to instead use
+    pynwb.image.GrayscaleImage,  pynwb.image.RGBImage, or
+    pynwb.image.RGBAImage where appropriate.
     """
     __nwbfields__ = ('data', 'resolution', 'description')
 

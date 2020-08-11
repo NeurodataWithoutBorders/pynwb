@@ -9,10 +9,10 @@ from .base import TimeSeries, Image
 
 @register_class('ImageSeries', CORE_NAMESPACE)
 class ImageSeries(TimeSeries):
-    '''
+    """
     General image data that is common between acquisition and stimulus time series.
     The image data can be stored in the HDF5 file or it will be stored as an external image file.
-    '''
+    """
 
     __nwbfields__ = ('dimension',
                      'external_file',
@@ -65,13 +65,13 @@ class ImageSeries(TimeSeries):
 
 @register_class('IndexSeries', CORE_NAMESPACE)
 class IndexSeries(TimeSeries):
-    '''
+    """
     Stores indices to image frames stored in an ImageSeries. The purpose of the ImageIndexSeries is to allow
     a static image stack to be stored somewhere, and the images in the stack to be referenced out-of-order.
     This can be for the display of individual images, or of movie segments (as a movie is simply a series of
     images). The data field stores the index of the frame in the referenced ImageSeries, and the timestamps
     array indicates when that image was displayed.
-    '''
+    """
 
     __nwbfields__ = ('indexed_timeseries',)
 
@@ -92,12 +92,12 @@ class IndexSeries(TimeSeries):
 
 @register_class('ImageMaskSeries', CORE_NAMESPACE)
 class ImageMaskSeries(ImageSeries):
-    '''
+    """
     An alpha mask that is applied to a presented visual stimulus. The data[] array contains an array
     of mask values that are applied to the displayed image. Mask values are stored as RGBA. Mask
     can vary with time. The timestamps array indicates the starting time of a mask, and that mask
     pattern continues until it's explicitly changed.
-    '''
+    """
 
     __nwbfields__ = ('masked_imageseries',)
 
@@ -119,13 +119,13 @@ class ImageMaskSeries(ImageSeries):
 
 @register_class('OpticalSeries', CORE_NAMESPACE)
 class OpticalSeries(ImageSeries):
-    '''
+    """
     Image data that is presented or recorded. A stimulus template movie will be stored only as an
     image. When the image is presented as stimulus, additional data is required, such as field of
     view (eg, how much of the visual field the image covers, or how what is the area of the target
     being imaged). If the OpticalSeries represents acquired imaging data, orientation is also
     important.
-    '''
+    """
 
     __nwbfields__ = ('distance',
                      'field_of_view',

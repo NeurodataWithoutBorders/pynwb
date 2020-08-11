@@ -11,8 +11,8 @@ from .device import Device
 
 @register_class('IntracellularElectrode', CORE_NAMESPACE)
 class IntracellularElectrode(NWBContainer):
-    '''
-    '''
+    """
+    """
 
     __nwbfields__ = ('slice',
                      'seal',
@@ -53,10 +53,10 @@ class IntracellularElectrode(NWBContainer):
 
 @register_class('PatchClampSeries', CORE_NAMESPACE)
 class PatchClampSeries(TimeSeries):
-    '''
+    """
     Stores stimulus or response current or voltage. Superclass definition for patch-clamp data
     (this class should not be instantiated directly).
-    '''
+    """
 
     __nwbfields__ = ('electrode',
                      'gain',
@@ -69,7 +69,7 @@ class PatchClampSeries(TimeSeries):
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},  # required
             {'name': 'electrode', 'type': IntracellularElectrode,  # required
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply '
-                     'or record this data.'},
+                    'or record this data.'},
             {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},  # required
             {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
@@ -94,11 +94,11 @@ class PatchClampSeries(TimeSeries):
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)
 class CurrentClampSeries(PatchClampSeries):
-    '''
+    """
     Stores voltage data recorded from intracellular current-clamp recordings. A corresponding
     CurrentClampStimulusSeries (stored separately as a stimulus) is used to store the current
     injected.
-    '''
+    """
 
     __nwbfields__ = ('bias_current',
                      'bridge_balance',
@@ -127,12 +127,12 @@ class CurrentClampSeries(PatchClampSeries):
 
 @register_class('IZeroClampSeries', CORE_NAMESPACE)
 class IZeroClampSeries(CurrentClampSeries):
-    '''
+    """
     Stores recorded voltage data from intracellular recordings when all current and amplifier settings
     are off (i.e., CurrentClampSeries fields will be zero). There is no CurrentClampStimulusSeries
     associated with an IZero series because the amplifier is disconnected and no stimulus can reach
     the cell.
-    '''
+    """
 
     __nwbfields__ = ()
 
@@ -152,10 +152,10 @@ class IZeroClampSeries(CurrentClampSeries):
 
 @register_class('CurrentClampStimulusSeries', CORE_NAMESPACE)
 class CurrentClampStimulusSeries(PatchClampSeries):
-    '''
+    """
     Alias to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries for
     machine (and human) readability of the file.
-    '''
+    """
 
     __nwbfields__ = ()
 
@@ -173,11 +173,11 @@ class CurrentClampStimulusSeries(PatchClampSeries):
 
 @register_class('VoltageClampSeries', CORE_NAMESPACE)
 class VoltageClampSeries(PatchClampSeries):
-    '''
+    """
     Stores current data recorded from intracellular voltage-clamp recordings. A corresponding
     VoltageClampStimulusSeries (stored separately as a stimulus) is used to store the voltage
     injected.
-    '''
+    """
 
     __nwbfields__ = ('capacitance_fast',
                      'capacitance_slow',
@@ -221,10 +221,10 @@ class VoltageClampSeries(PatchClampSeries):
 
 @register_class('VoltageClampStimulusSeries', CORE_NAMESPACE)
 class VoltageClampStimulusSeries(PatchClampSeries):
-    '''
+    """
     Alias to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries for
     machine (and human) readability of the file.
-    '''
+    """
 
     __nwbfields__ = ()
 
@@ -248,9 +248,9 @@ class SweepTable(DynamicTable):
     """
 
     __columns__ = (
-            {'name': 'series', 'description': 'PatchClampSeries with the same sweep number',
-             'required': True, 'index': True},
-            {'name': 'sweep_number', 'description': 'Sweep number of the entries in that row', 'required': True}
+        {'name': 'series', 'description': 'PatchClampSeries with the same sweep number',
+         'required': True, 'index': True},
+        {'name': 'sweep_number', 'description': 'Sweep number of the entries in that row', 'required': True}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'name of this SweepTable', 'default': 'sweep_table'},
@@ -263,9 +263,7 @@ class SweepTable(DynamicTable):
     @docval({'name': 'pcs', 'type': PatchClampSeries,
              'doc': 'PatchClampSeries to add to the table must have a valid sweep_number'})
     def add_entry(self, pcs):
-        """
-        Add the passed PatchClampSeries to the sweep table.
-        """
+        """Add the passed PatchClampSeries to the sweep table."""
 
         kwargs = {'sweep_number': pcs.sweep_number, 'series': [pcs]}
 
@@ -292,9 +290,7 @@ class SweepTable(DynamicTable):
         return matches
 
     def __get_row_ids(self, sweep_number):
-        """
-        Return the row ids for the given sweep number.
-        """
+        """Return the row ids for the given sweep number."""
 
         return [index for index, elem in enumerate(self['sweep_number'].data) if elem == sweep_number]
 

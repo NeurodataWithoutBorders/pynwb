@@ -34,9 +34,7 @@ class AnnotationSeries(TimeSeries):
     @docval({'name': 'time', 'type': 'float', 'doc': 'The time for the annotation'},
             {'name': 'annotation', 'type': str, 'doc': 'the annotation'})
     def add_annotation(self, **kwargs):
-        '''
-        Add an annotation
-        '''
+        """Add an annotation"""
         time, annotation = getargs('time', 'annotation', kwargs)
         self.fields['timestamps'].append(time)
         self.fields['data'].append(annotation)

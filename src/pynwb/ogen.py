@@ -8,8 +8,9 @@ from .device import Device
 
 @register_class('OptogeneticStimulusSite', CORE_NAMESPACE)
 class OptogeneticStimulusSite(NWBContainer):
-    '''
-    '''
+    """
+
+    """
 
     __nwbfields__ = ('device',
                      'description',
@@ -33,9 +34,7 @@ class OptogeneticStimulusSite(NWBContainer):
 
 @register_class('OptogeneticSeries', CORE_NAMESPACE)
 class OptogeneticSeries(TimeSeries):
-    '''
-    Optogenetic stimulus. The data field is in unit of watts.
-    '''
+    """Optogenetic stimulus. The data field is in unit of watts."""
 
     __nwbfields__ = ('site',)
 
