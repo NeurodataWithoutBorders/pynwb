@@ -245,6 +245,17 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
 
+    @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
+            {'name': 'nwbfile', 'type': 'NWBFile',
+             'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
+             'default': None},
+            {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
+             'default': dict()})
+    def export(self, **kwargs):
+        nwbfile = popargs('nwbfile', kwargs)
+        kwargs['container'] = nwbfile
+        call_docval_func(super().export, kwargs)
+
 
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
