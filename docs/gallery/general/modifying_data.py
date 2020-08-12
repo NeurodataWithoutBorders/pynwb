@@ -12,11 +12,12 @@ same file or export the data to a new file.
 # Adding containers to an NWB file in read/write mode
 # ----------------------------------------------------
 # PyNWB supports adding containers to an existing NWB file - that is, reading data from an NWB file, adding a
-# container, such as a new `:py:class:`~pynwb.base.TimeSeries` object, and writing the modified
+# container, such as a new :py:class:`~pynwb.base.TimeSeries` object, and writing the modified
 # :py:class:`~pynwb.file.NWBFile` back to the same file path on disk. To do so:
+#
 # 1. open the file with an :py:class:`~pynwb.NWBHDF5IO` object in read/write mode (``mode='r+'`` or ``mode='a'``)
 # 2. read the :py:class:`~pynwb.file.NWBFile`
-# 3. add containers to the :py:class:`~pynwb.file.NWBFile` object
+# 3. add data containers to the :py:class:`~pynwb.file.NWBFile` object
 # 4. write the modified :py:class:`~pynwb.file.NWBFile` using the same :py:class:`~pynwb.NWBHDF5IO` object
 #
 # For example:
@@ -66,33 +67,36 @@ with NWBHDF5IO(filename, 'r') as io:
 
 ###############################################################################
 # Modifying an NWB file in this way has limitations. The destination file path must be the same as the source
-# file path, and it is not possible to remove objects from an NWB file. You can use the ``export``
-# method, detailed below, to modify an NWB file in these ways.
+# file path, and it is not possible to remove objects from an NWB file. You can use the
+# :py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>` method, detailed below, to modify an NWB file in these ways.
 #
 # .. warning::
 #
 #   NWB datasets that have been written to disk are read as :py:class:`h5py.Dataset <h5py.Dataset>` objects.
-#   Modifying the data in these ``h5py.Dataset`` objects directly and immediately modifies the data on disk
-#   (:py:meth:`NWBHDF5IO.write <pynwb.NWBHDF5IO.write>` method does not need to be called and the
-#   :py:class:`~pynwb.NWBHDF5IO` instance does not need to be closed. Modifying datasets directly in this way
+#   Directly modifying the data in these :py:class:`h5py.Dataset <h5py.Dataset>` objects immediately
+#   modifies the data on disk
+#   (the :py:meth:`NWBHDF5IO.write <pynwb.NWBHDF5IO.write>` method does not need to be called and the
+#   :py:class:`~pynwb.NWBHDF5IO` instance does not need to be closed). Directly modifying datasets in this way
 #   can lead to files that do not validate or cannot be opened, so take caution when using this method.
 #   Note: only chunked datasets or datasets with ``maxshape`` set can be resized.
-#   See https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage for more details.
+#   See the `h5py chunked storage documentation <https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage>`_
+#   for more details.
 
 ###############################################################################
 # Exporting a written NWB file to a new file path
 # ---------------------------------------------------
 # Use the :py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>` method to read data to an existing NWB file,
 # modify the data, and write the modified data to a new file path. Modifications to the data can be additions or
-# removals of objects, such as `:py:class:`~pynwb.base.TimeSeries` objects. This is especially useful if you
+# removals of objects, such as :py:class:`~pynwb.base.TimeSeries` objects. This is especially useful if you
 # have raw data and processed data in the same NWB file and you want to create a new NWB file with all of the
 # contents of the original file except for the raw data for sharing with collaborators.
 #
-# To remove existing containers, use the `:py:class:`~hdmf.utils.LabelledDict.pop` method on any
-# `:py:class:`~hdmf.utils.LabelledDict` object, such as `NWBFile.acquisition`, `NWBFile.processing`,
-# `NWBFile.analysis`, `NWBFile.processing`, `NWBFile.scratch`, `NWBFile.devices`, `NWBFile.stimulus`,
-# `NWBFile.stimulus_template`, `NWBFile.electrode_groups`, `NWBFile.imaging_planes`, `NWBFile.icephys_electrodes`,
-# `NWBFile.ogen_sites`, `NWBFile.lab_meta_data`, and `:py:class:`~pynwb.base.ProcessingModule` objects.
+# To remove existing containers, use the :py:class:`~hdmf.utils.LabelledDict.pop` method on any
+# :py:class:`~hdmf.utils.LabelledDict` object, such as ``NWBFile.acquisition``, ``NWBFile.processing``,
+# ``NWBFile.analysis``, ``NWBFile.processing``, ``NWBFile.scratch``, ``NWBFile.devices``, ``NWBFile.stimulus``,
+# ``NWBFile.stimulus_template``, ``NWBFile.electrode_groups``, ``NWBFile.imaging_planes``,
+# ``NWBFile.icephys_electrodes``, ``NWBFile.ogen_sites``, ``NWBFile.lab_meta_data``,
+# and :py:class:`~pynwb.base.ProcessingModule` objects.
 #
 # For example:
 
@@ -169,8 +173,8 @@ with NWBHDF5IO(export_filename, 'r') as io:
 ###############################################################################
 # .. note::
 #
-#   `:py:class:`~pynwb.epoch.TimeInterval` objects, such as ``NWBFile.epochs``, ``NWBFile.trials``,
-#   ``NWBFile.invalid_times``, and custom `:py:class:`~pynwb.epoch.TimeInterval` objects cannot be
+#   :py:class:`~pynwb.epoch.TimeIntervals` objects, such as ``NWBFile.epochs``, ``NWBFile.trials``,
+#   ``NWBFile.invalid_times``, and custom :py:class:`~pynwb.epoch.TimeIntervals` objects cannot be
 #   removed (popped) from ``NWBFile.intervals``.
 
 ###############################################################################
@@ -178,5 +182,7 @@ with NWBHDF5IO(export_filename, 'r') as io:
 #
 #   Removing an object from an NWBFile may break links and references within the file and across files.
 #   This is analogous to having shortcuts/aliases to a file on your filesystem and then deleting the file.
-#   Extra caution should be taken when removing heavily referenced items such as ``Device`` objects,
-#   ``ElectrodeGroup`` objects, the electrodes table, and the ``PlaneSegmentation`` table.
+#   Extra caution should be taken when removing heavily referenced items such as
+#   :py:class:`~pynwb.device.Device` objects,
+#   :py:class:`~pynwb.ecephys.ElectrodeGroup` objects, the electrodes table, and the
+#   :py:class:`~pynwb.ophys.PlaneSegmentation` table.
