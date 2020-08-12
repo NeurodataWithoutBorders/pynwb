@@ -4,27 +4,30 @@
 Modifying data in an NWB file
 =========================================
 
-This tutorial will focus on how to modify data from an existing NWB file and write the data back to the
-same NWB file or export the data to a new NWB file.
+This tutorial explains how to modify data from an existing NWB file and either write the data back to the
+same file or export the data to a new file.
 """
 
 ###############################################################################
-# Modifying an NWB file in read/write mode
-# --------------------------------------------
-# PyNWB supports modifying an existing NWB file - that is, reading data from an NWB file, modifying that data, and
-# writing the modified data back to the same NWB file on disk. To do so, open the file with an
-# :py:class:`~pynwb.NWBHDF5IO` object in read/write mode (``mode='r+'`` or ``mode='a'``), read the file contents,
-# modify the :py:class:`~pynwb.file.NWBFile` or one of its containers in memory, and write the modified .
-# :py:class:`~pynwb.file.NWBFile` using the same :py:class:`~pynwb.NWBHDF5IO` object.
+# Adding containers to an NWB file in read/write mode
+# ----------------------------------------------------
+# PyNWB supports adding containers to an existing NWB file - that is, reading data from an NWB file, adding a
+# container, such as a new `:py:class:`~pynwb.base.TimeSeries` object, and writing the modified
+# :py:class:`~pynwb.file.NWBFile` back to the same file path on disk. To do so:
+# 1. open the file with an :py:class:`~pynwb.NWBHDF5IO` object in read/write mode (``mode='r+'`` or ``mode='a'``)
+# 2. read the :py:class:`~pynwb.file.NWBFile`
+# 3. add containers to the :py:class:`~pynwb.file.NWBFile` object
+# 4. write the modified :py:class:`~pynwb.file.NWBFile` using the same :py:class:`~pynwb.NWBHDF5IO` object
 #
 # For example:
 
 from pynwb import NWBFile, NWBHDF5IO, TimeSeries
 import datetime
+import numpy as np
 
 # first, write a test NWB file
 nwbfile = NWBFile(
-    session_description='demonstrate export of NWB files',
+    session_description='demonstrate adding to an NWB file',
     identifier='NWB123',
     session_start_time=datetime.datetime.now(datetime.timezone.utc),
 )
@@ -39,100 +42,141 @@ with NWBHDF5IO(filename, 'r+') as io:
 
     # create a TimeSeries and add it to the file under the acquisition group
     data = list(range(100, 200, 10))
-    timestamps = list(range(10))
+    timestamps = np.arange(10, dtype=np.float)
     test_ts = TimeSeries(
         name='test_timeseries',
         data=data,
         unit='m',
         timestamps=timestamps
     )
-    nwbfile.add_acquisition(test_ts)
+    read_nwbfile.add_acquisition(test_ts)
 
     # write the modified NWB file
     io.write(read_nwbfile)
 
-breakpoint()
+# confirm the file contains the new TimeSeries in acquisition
+with NWBHDF5IO(filename, 'r') as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile)
 
 ###############################################################################
-# Modifying an NWB file in this way has limitations. Removal of data will not shrink the file size.
-# A different method -- export -- which is detailed below, must be used to remove data from an existing NWB file.
-# However, addition of data, such as new `:py:class:`~pynwb.base.TimeSeries` objects in the example above,
-# can easily be done.
+# .. note::
+#
+#   You cannot remove objects from an NWB file using the above method.
 
-#
-#
-#
 ###############################################################################
+# Modifying an NWB file in this way has limitations. The destination file path must be the same as the source
+# file path, and it is not possible to remove objects from an NWB file. You can use the ``export``
+# method, detailed below, to modify an NWB file in these ways.
+#
 # .. warning::
 #
-#   NWB datasets that have been written to disk are read as :py:class:`h5py.Dataset <h5py.Dataset>` objects. If you
-#   modify the data in these ``Dataset`` objects directly, the data is modified on disk immediately (the
-#   :py:meth:`~pynwb.NWBHDF5IO.write` method does not need to be called and the :py:class:`~pynwb.NWBHDF5IO`
-#   instance does not need to be closed. Modifying datasets directly in this way can lead to files that do not
-#   validate or cannot be opened, so take caution when using this method.
+#   NWB datasets that have been written to disk are read as :py:class:`h5py.Dataset <h5py.Dataset>` objects.
+#   Modifying the data in these ``h5py.Dataset`` objects directly and immediately modifies the data on disk
+#   (:py:meth:`NWBHDF5IO.write <pynwb.NWBHDF5IO.write>` method does not need to be called and the
+#   :py:class:`~pynwb.NWBHDF5IO` instance does not need to be closed. Modifying datasets directly in this way
+#   can lead to files that do not validate or cannot be opened, so take caution when using this method.
 #   Note: only chunked datasets or datasets with ``maxshape`` set can be resized.
 #   See https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage for more details.
 
 ###############################################################################
 # Exporting a written NWB file to a new file path
-# -----------------------------------------------
-# To export an NWB file, first read the written NWB file, then create a new
-# :py:class:`~pynwb.NWBHDF5IO` object for exporting the data, then call
-# :py:meth:`~pynwb.NWBHDF5IO.export` on the
-# :py:class:`~pynwb.NWBHDF5IO` object, passing in the IO object used to read the :py:class:`~pynwb.file.NWBFile`
-# You may also pass in the :py:class:`~pynwb.file.NWBFile` itself, which may be modified in memory between
-# reading and exporting.
+# ---------------------------------------------------
+# Use the :py:meth:`NWBHDF5IO.export <pynwb.NWBHDF5IO.export>` method to read data to an existing NWB file,
+# modify the data, and write the modified data to a new file path. Modifications to the data can be additions or
+# removals of objects, such as `:py:class:`~pynwb.base.TimeSeries` objects. This is especially useful if you
+# have raw data and processed data in the same NWB file and you want to create a new NWB file with all of the
+# contents of the original file except for the raw data for sharing with collaborators.
 #
-# For example:
-
-from pynwb import NWBFile, NWBHDF5IO
-import datetime
-
-# first, write a test NWB file
-nwbfile = NWBFile(
-    session_description='demonstrate export of NWB files',
-    identifier='NWB123',
-    session_start_time=datetime.datetime.now(datetime.timezone.utc),
-)
-
-filename = 'nwbfile.nwb'
-with NWBHDF5IO(filename, 'w') as io:
-    io.write(nwbfile)
-
-export_filename = 'exported_nwbfile.nwb'
-with NWBHDF5IO(filename, mode='r') as read_io:  # read the written file
-    with NWBHDF5IO(export_filename, mode='w') as export_io:  # create a new IO object to export to a new file
-        export_io.export(src_io=read_io)
-
-###############################################################################
-# Modifying a written NWB file and exporting it to a new file path
-# ----------------------------------------------------------------
-# The above example is analogous to using the file system to copy the file. However, the power of the export
-# function comes from the ability to modify the NWB file in memory and write the modified NWB file to a new file path.
-# You can add new container objects (e.g., `:py:class:`~pynwb.base.TimeSeries` objects) or remove existing ones.
-# This is especially useful if you want to have raw data and processed data in the same NWB file and you want a new
-# NWB file containing only the processed data.
+# To remove existing containers, use the `:py:class:`~hdmf.utils.LabelledDict.pop` method on any
+# `:py:class:`~hdmf.utils.LabelledDict` object, such as `NWBFile.acquisition`, `NWBFile.processing`,
+# `NWBFile.analysis`, `NWBFile.processing`, `NWBFile.scratch`, `NWBFile.devices`, `NWBFile.stimulus`,
+# `NWBFile.stimulus_template`, `NWBFile.electrode_groups`, `NWBFile.imaging_planes`, `NWBFile.icephys_electrodes`,
+# `NWBFile.ogen_sites`, `NWBFile.lab_meta_data`, and `:py:class:`~pynwb.base.ProcessingModule` objects.
 #
 # For example:
 
 # first, create a test NWB file with a TimeSeries in the acquisition group
+nwbfile = NWBFile(
+    session_description='demonstrate export of an NWB file',
+    identifier='NWB123',
+    session_start_time=datetime.datetime.now(datetime.timezone.utc),
+)
+data1 = list(range(100, 200, 10))
+timestamps1 = np.arange(10, dtype=np.float)
+test_ts1 = TimeSeries(
+    name='test_timeseries1',
+    data=data1,
+    unit='m',
+    timestamps=timestamps1
+)
+nwbfile.add_acquisition(test_ts1)
 
+# then, create a processing module for processed behavioral data
+nwbfile.create_processing_module(
+    name='behavior',
+    description='processed behavioral data'
+)
+data2 = list(range(100, 200, 10))
+timestamps2 = np.arange(10, dtype=np.float)
+test_ts2 = TimeSeries(
+    name='test_timeseries2',
+    data=data2,
+    unit='m',
+    timestamps=timestamps2
+)
+nwbfile.processing['behavior'].add(test_ts2)
+
+# write these objects to an NWB file
 filename = 'nwbfile.nwb'
 with NWBHDF5IO(filename, 'w') as io:
     io.write(nwbfile)
 
 # read the written file
+export_filename = 'exported_nwbfile.nwb'
 with NWBHDF5IO(filename, mode='r') as read_io:
     read_nwbfile = read_io.read()
 
-    # remove the TimeSeries from the acquisition group
-    read_nwbfile.acquisition.pop('test_timeseries')
+    # add a new TimeSeries to the behavior processing module
+    data3 = list(range(100, 200, 10))
+    timestamps3 = np.arange(10, dtype=np.float)
+    test_ts3 = TimeSeries(
+        name='test_timeseries3',
+        data=data3,
+        unit='m',
+        timestamps=timestamps3
+    )
+    read_nwbfile.processing['behavior'].add(test_ts3)
 
-    export_filename = 'exported_nwbfile.nwb'
+    # use the pop method to remove the original TimeSeries from the acquisition group
+    read_nwbfile.acquisition.pop('test_timeseries1')
+
+    # use the pop method to remove a TimeSeries from a processing module
+    read_nwbfile.processing['behavior'].data_interfaces.pop('test_timeseries2')
+
+    # call the export method to write the modified NWBFile instance to a new file path
+    # the original file is not modified
     with NWBHDF5IO(export_filename, mode='w') as export_io:
         export_io.export(src_io=read_io, nwbfile=read_nwbfile)
+
+# confirm the exported file does not contain TimeSeries with names 'test_timeseries1' or 'test_timeseries2'
+# but does contain a new TimeSeries in processing['behavior'] with name 'test_timeseries3'
+with NWBHDF5IO(export_filename, 'r') as io:
+    read_nwbfile = io.read()
+    print(read_nwbfile)
+    print(read_nwbfile.processing['behavior'])
 
 ###############################################################################
 # .. note::
 #
-#   Certain fields of the NWB file cannot be removed.
+#   `:py:class:`~pynwb.epoch.TimeInterval` objects, such as ``NWBFile.epochs``, ``NWBFile.trials``,
+#   ``NWBFile.invalid_times``, and custom `:py:class:`~pynwb.epoch.TimeInterval` objects cannot be
+#   removed (popped) from ``NWBFile.intervals``.
+
+###############################################################################
+# .. warning::
+#
+#   Removing an object from an NWBFile may break links and references within the file and across files.
+#   This is analogous to having shortcuts/aliases to a file on your filesystem and then deleting the file.
+#   Extra caution should be taken when removing heavily referenced items such as ``Device`` objects,
+#   ``ElectrodeGroup`` objects, the electrodes table, and the ``PlaneSegmentation`` table.
