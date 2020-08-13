@@ -1,6 +1,11 @@
 # PyNWB Changelog
 
-## PyNWB 1.4.0 (August 11, 2020)
+## PyNWB 1.4.0 (August 12, 2020)
+
+Users can now add/remove containers from a written NWB file and export the modified NWBFile to a new file path.
+@rly (#1280)
+- See https://pynwb.readthedocs.io/en/stable/tutorials/general/add-remove-containers.html for examples and more
+  information.
 
 ### Internal improvements:
 - Update requirements to use HDMF 2.1.0. @rly (#1256)

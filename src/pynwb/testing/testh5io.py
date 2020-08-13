@@ -37,15 +37,20 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         self.create_date = datetime(2018, 4, 15, 12, tzinfo=tzlocal())
         self.container_type = self.container.__class__.__name__
         self.filename = 'test_%s.nwb' % self.container_type
+        self.export_filename = 'test_export_%s.nwb' % self.container_type
         self.writer = None
         self.reader = None
+        self.export_reader = None
 
     def tearDown(self):
         if self.writer is not None:
             self.writer.close()
         if self.reader is not None:
             self.reader.close()
+        if self.export_reader is not None:
+            self.export_reader.close()
         remove_test_file(self.filename)
+        remove_test_file(self.export_filename)
 
     @abstractmethod
     def setUpContainer(self):
@@ -62,8 +67,22 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         self.assertIsNotNone(str(self.read_container))
         # make sure we get a completely new object
         self.assertNotEqual(id(self.container), id(self.read_container))
+        # make sure the object ID is preserved
         self.assertIs(self.read_nwbfile.objects[self.container.object_id], self.read_container)
         self.assertContainerEqual(self.read_container, self.container)
+
+    def test_roundtrip_export(self):
+        """
+        Test whether the test Container read from an exported file has the same contents as the original test Container
+        and validate the file
+        """
+        self.read_container = self.roundtripExportContainer()
+        self.assertIsNotNone(str(self.read_container))  # added as a test to make sure printing works
+        # make sure we get a completely new object
+        self.assertNotEqual(id(self.container), id(self.read_container))
+        # make sure the object ID is preserved
+        self.assertIs(self.read_exported_nwbfile.objects[self.container.object_id], self.read_container)
+        self.assertContainerEqual(self.read_container, self.container, ignore_hdmf_attrs=True)
 
     def roundtripContainer(self, cache_spec=False):
         """
@@ -76,9 +95,8 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         self.addContainer(nwbfile)
 
         with warnings.catch_warnings(record=True) as ws:
-            self.writer = NWBHDF5IO(self.filename, mode='w')
-            self.writer.write(nwbfile, cache_spec=cache_spec)
-            self.writer.close()
+            with NWBHDF5IO(self.filename, mode='w') as write_io:
+                write_io.write(nwbfile, cache_spec=cache_spec)
 
             self.validate()
 
@@ -101,6 +119,41 @@ class NWBH5IOMixin(metaclass=ABCMeta):
             self.reader = None
             raise e
 
+    def roundtripExportContainer(self, cache_spec=False):
+        """
+        Add the test Container to an NWBFile, write it to file, read the file, export the read NWBFile to another
+        file, and return the test Container from the file
+        """
+        self.roundtripContainer(cache_spec=cache_spec)  # self.read_nwbfile is now set
+
+        with warnings.catch_warnings(record=True) as ws:
+            NWBHDF5IO.export_io(
+                src_io=self.reader,
+                path=self.export_filename,
+                cache_spec=cache_spec,
+            )
+
+            self.validate()
+
+            self.export_reader = NWBHDF5IO(self.export_filename, mode='r')
+            self.read_exported_nwbfile = self.export_reader.read()
+
+        if ws:
+            for w in ws:
+                if issubclass(w.category, (MissingRequiredWarning,
+                                           OrphanContainerWarning,
+                                           BrokenLinkWarning)):
+                    raise Exception('%s: %s' % (w.category.__name__, w.message))
+                else:
+                    warnings.warn(w.message, w.category)
+
+        try:
+            return self.getContainer(self.read_exported_nwbfile)
+        except Exception as e:
+            self.export_reader.close()
+            self.export_reader = None
+            raise e
+
     @abstractmethod
     def addContainer(self, nwbfile):
         """ Should add the test Container to the given NWBFile """
@@ -112,8 +165,15 @@ class NWBH5IOMixin(metaclass=ABCMeta):
         raise NotImplementedError('Cannot run test unless getContainer is implemented')
 
     def validate(self):
-        """ Validate the created file """
+        """ Validate the created files """
         if os.path.exists(self.filename):
+            with NWBHDF5IO(self.filename, mode='r') as io:
+                errors = pynwb_validate(io)
+                if errors:
+                    for err in errors:
+                        raise Exception(err)
+
+        if os.path.exists(self.export_filename):
             with NWBHDF5IO(self.filename, mode='r') as io:
                 errors = pynwb_validate(io)
                 if errors:
