@@ -1,3 +1,6 @@
+trigger:
+- dev
+
 jobs:
 
 - job: 'Test'
