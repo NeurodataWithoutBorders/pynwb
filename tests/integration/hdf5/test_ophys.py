@@ -34,7 +34,7 @@ class TestImagingPlaneIO(NWBH5IOMixin, TestCase):
             indicator='GFP',
             location='somewhere in the brain',
             reference_frame='unknown',
-            origin_coords=[10, 20],
+            origin_coords=[10., 20.],
             origin_coords_unit='millimeters',
             grid_spacing=[0.001, 0.001],
             grid_spacing_unit='millimeters',
