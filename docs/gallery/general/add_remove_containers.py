@@ -1,23 +1,23 @@
 """
 .. _modifying_data:
 
-Modifying data in an NWB file
-=========================================
+Adding/removing containers from an NWB file
+============================================
 
-This tutorial explains how to modify data from an existing NWB file and either write the data back to the
+This tutorial explains how to add and remove containers from an existing NWB file and either write the data back to the
 same file or export the data to a new file.
 """
 
 ###############################################################################
-# Adding containers to an NWB file in read/write mode
+# Adding objects to an NWB file in read/write mode
 # ----------------------------------------------------
-# PyNWB supports adding containers to an existing NWB file - that is, reading data from an NWB file, adding a
-# container, such as a new :py:class:`~pynwb.base.TimeSeries` object, and writing the modified
+# PyNWB supports adding container objects to an existing NWB file - that is, reading data from an NWB file, adding a
+# container object, such as a new :py:class:`~pynwb.base.TimeSeries` object, and writing the modified
 # :py:class:`~pynwb.file.NWBFile` back to the same file path on disk. To do so:
 #
 # 1. open the file with an :py:class:`~pynwb.NWBHDF5IO` object in read/write mode (``mode='r+'`` or ``mode='a'``)
 # 2. read the :py:class:`~pynwb.file.NWBFile`
-# 3. add data containers to the :py:class:`~pynwb.file.NWBFile` object
+# 3. add container objects to the :py:class:`~pynwb.file.NWBFile` object
 # 4. write the modified :py:class:`~pynwb.file.NWBFile` using the same :py:class:`~pynwb.NWBHDF5IO` object
 #
 # For example:
@@ -81,6 +81,11 @@ with NWBHDF5IO(filename, 'r') as io:
 #   Note: only chunked datasets or datasets with ``maxshape`` set can be resized.
 #   See the `h5py chunked storage documentation <https://docs.h5py.org/en/stable/high/dataset.html#chunked-storage>`_
 #   for more details.
+
+###############################################################################
+# .. note::
+#
+#   It is not possible to modify the attributes (fields) of an NWB container in memory.
 
 ###############################################################################
 # Exporting a written NWB file to a new file path
@@ -186,3 +191,26 @@ with NWBHDF5IO(export_filename, 'r') as io:
 #   :py:class:`~pynwb.device.Device` objects,
 #   :py:class:`~pynwb.ecephys.ElectrodeGroup` objects, the electrodes table, and the
 #   :py:class:`~pynwb.ophys.PlaneSegmentation` table.
+
+###############################################################################
+# Exporting with new object IDs
+# ---------------------------------
+# When exporting a read NWB file to a new file path, the object IDs within the original NWB file will be copied to the
+# new file. To make the exported NWB file contain a new set of object IDs, call
+# :py:meth:`NWBFile.generate_new_id <pynwb.file.NWBFile.generate_new_id>`. This will generate a new object ID for the
+# NWB file and all of the objects within the NWB file. You can also use the
+# :py:meth:`~hdmf.container.AbstractContainer.generate_new_id` method on any container to generate a new object ID
+# for it.
+
+export_filename = 'exported_nwbfile.nwb'
+with NWBHDF5IO(filename, mode='r') as read_io:
+    read_nwbfile = read_io.read()
+    read_nwbfile.generate_new_id()
+
+    with NWBHDF5IO(export_filename, mode='w') as export_io:
+        export_io.export(src_io=read_io, nwbfile=read_nwbfile)
+
+###############################################################################
+# More information about export
+# ---------------------------------
+# For more information about the export functionality, see https://hdmf.readthedocs.io/en/latest/export.html
