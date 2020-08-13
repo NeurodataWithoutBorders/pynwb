@@ -5,7 +5,6 @@ from warnings import warn
 import copy as _copy
 
 import numpy as np
-import pandas as pd
 
 from hdmf.utils import docval, getargs, call_docval_func, get_docval
 
@@ -669,7 +668,8 @@ class NWBFile(MultiContainerInterface):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
 
-    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
+    # TODO: bring it pd.DataFrame somehow without causing import of pandas, e.g. if not already loaded?
+    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, DynamicTable, NWBContainer, ScratchData),
              'help': 'the data to add to the scratch space'},
             {'name': 'name', 'type': str,
              'help': 'the name of the data. Only used when passing in numpy.ndarray, list, or tuple',
@@ -683,7 +683,12 @@ class NWBFile(MultiContainerInterface):
     def add_scratch(self, **kwargs):
         '''Add data to the scratch space'''
         data, name, notes = getargs('data', 'name', 'notes', kwargs)
-        if isinstance(data, (np.ndarray, pd.DataFrame, list, tuple)):
+        data_types = [np.ndarray, list, tuple]
+        if 'pandas' in sys.modules:
+            # delayed import and cannot pass DataFrame if pandas is not already loaded
+            import pandas as pd
+            data_types += [ pd.DataFrame ]
+        if isinstance(data, data_types):
             if name is None:
                 raise ValueError('please provide a name for scratch data')
             if isinstance(data, pd.DataFrame):
