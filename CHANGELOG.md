@@ -17,6 +17,7 @@ Users can now add/remove containers from a written NWB file and export the modif
 ### Bug fixes:
 - For `ImageSeries`, add check if `external_file` is provided without `starting_frame` in `__init__`. @rly (#1264)
 - Improve docstrings for `TimeSeries.data` and for the electrode table. @rly (#1271, #1272)
+- Fix Azure Pipelines configuration. @rly (#1281)
 
 ## PyNWB 1.3.3 (June 26, 2020)
 
