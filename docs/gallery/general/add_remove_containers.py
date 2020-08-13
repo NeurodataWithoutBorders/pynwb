@@ -197,10 +197,9 @@ with NWBHDF5IO(export_filename, 'r') as io:
 # ---------------------------------
 # When exporting a read NWB file to a new file path, the object IDs within the original NWB file will be copied to the
 # new file. To make the exported NWB file contain a new set of object IDs, call
-# :py:meth:`NWBFile.generate_new_id <pynwb.file.NWBFile.generate_new_id>`. This will generate a new object ID for the
-# NWB file and all of the objects within the NWB file. You can also use the
-# :py:meth:`~hdmf.container.AbstractContainer.generate_new_id` method on any container to generate a new object ID
-# for it.
+# :py:meth:`~hdmf.container.AbstractContainer.generate_new_id` on your :py:class:`~pynwb.file.NWBFile` object.
+# This will generate a new object ID for the :py:class:`~pynwb.file.NWBFile` object and all of the objects within
+# the NWB file.
 
 export_filename = 'exported_nwbfile.nwb'
 with NWBHDF5IO(filename, mode='r') as read_io:
