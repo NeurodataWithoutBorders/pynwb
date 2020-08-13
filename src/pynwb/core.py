@@ -1,6 +1,5 @@
 from h5py import RegionReference
 import numpy as np
-import pandas as pd
 
 from hdmf import Container, Data, DataRegion, get_region_slicer
 from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface
@@ -222,12 +221,14 @@ class NWBTable(NWBData):
         '''Produce a pandas DataFrame containing this table's data.
         '''
 
+        import pandas as pd
         data = {colname: self[colname] for ii, colname in enumerate(self.columns)}
         return pd.DataFrame(data)
 
     @classmethod
     @docval(
-        {'name': 'df', 'type': pd.DataFrame, 'doc': 'input data'},
+        # TODO: "real" pd.DataFrame?
+        {'name': 'df', 'type': "pd.DataFrame", 'doc': 'input data'},
         {'name': 'name', 'type': str, 'doc': 'the name of this container', 'default': None},
         {
             'name': 'extra_ok',
@@ -240,6 +241,8 @@ class NWBTable(NWBData):
         '''Construct an instance of NWBTable (or a subclass) from a pandas DataFrame. The columns of the dataframe
         should match the columns defined on the NWBTable subclass.
         '''
+
+        import pandas as pd
 
         df, name, extra_ok = getargs('df', 'name', 'extra_ok', kwargs)
 
