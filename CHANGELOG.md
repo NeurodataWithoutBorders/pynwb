@@ -7,6 +7,16 @@ Users can now add/remove containers from a written NWB file and export the modif
 - See https://pynwb.readthedocs.io/en/stable/tutorials/general/add-remove-containers.html for examples and more
   information.
 
+### Compatibility warnings:
+- PyNWB no longer works with HDMF version < 2.1.0. If you have pinned HDMF version < 2 in your package but allow PyNWB
+version 1.4.0, please beware that `pip` may install PyNWB version 1.4.0 with an incompatible version of HDMF
+(version < 2).
+- Use of HDMF 2.1.0 fixes `__getitem__`-based access of `MultiContainerInterface` types, e.g,,
+`fluorescence['roi_response_series_name']`, where previously if the `MultiContainerInterface` contained only one item,
+then any key could be used within the square brackets to access the contained `Container`, even if the key did not
+match the name of the contained `Container`. This update patches this bug such that the key used within the square
+brackets *must* match the name of the contained `Container` or else an error will be raised.
+
 ### Internal improvements:
 - Update requirements to use HDMF 2.1.0. @rly (#1256)
 - Start FAQ section in documentation. @rly (#1249)
