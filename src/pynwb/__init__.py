@@ -273,6 +273,8 @@ from . import ogen  # noqa: F401,E402
 from . import ophys  # noqa: F401,E402
 from . import retinotopy  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
+from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
+from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
