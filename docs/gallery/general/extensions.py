@@ -358,7 +358,7 @@ pmod = nwbfile.create_processing_module('module_name', 'desc')
 pmod.add_container(potato_sack)
 
 
-with NWBHDF5IO('test_potato.nwb', 'w') as io:
+with NWBHDF5IO('test_potato_extension.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
@@ -367,7 +367,7 @@ with NWBHDF5IO('test_potato.nwb', 'w') as io:
 
 load_namespaces('ndx-potato.namespace.yaml')
 # from xxx import PotatoSack, Potato
-io = NWBHDF5IO('test_multicontainerinterface.nwb', 'r')
+io = NWBHDF5IO('test_potato_extension.nwb', 'r')
 nwb = io.read()
 print(nwb.get_processing_module()['potato_sack'].get_potato('big_potato').weight)
 # note: you can call get_processing_module() with or without the module name as
