@@ -4,8 +4,8 @@
 Extensions
 =========================
 
-The NWB:N format was designed to be easily extendable. Here we will demonstrate how to extend NWB using the
-PyNWB API.
+The NWB format is designed to be easily extendable to allow support for new and specialized data types that are not
+supported in the core NWB specification. Here we will demonstrate how to extend NWB using the PyNWB API.
 
 .. note::
 
@@ -13,6 +13,17 @@ PyNWB API.
     available as part of the docs at :ref:`extending-nwb`.
 
 '''
+
+####################
+# .. _creating_extensions:
+#
+# Creating new extensions
+# -----------------------------------------------------
+# The `Neurodata Extensions Catalog <https://nwb-extensions.github.io/>`_ provides a user-friendly template
+# for creating a new NWB extension: https://github.com/nwb-extensions/ndx-template . Users new to creating extensions
+# should start by following the instructions on the `ndx-template <https://github.com/nwb-extensions/ndx-template>`_
+# repo README. After the extension folder structure has been generated, use the PyNWB API to define new data types
+# within ``my_new_extension/src/spec/create_extension_spec.py``.
 
 ####################
 # .. _defining_extension:
@@ -25,60 +36,64 @@ PyNWB API.
 # provide an example of how to create an extension for subsequent use.
 # (For more information on the available tools for creating extensions, see :ref:`extending-nwb`).
 #
-#
 # The following block of code demonstrates how to create a new namespace, and then add a new `neurodata_type`
 # to this namespace. Finally,
-# it calls :py:meth:`~hdmf.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
+# it calls :py:func:`~hdmf.spec.write.export_spec` to save the extensions to disk for downstream use.
+# The new files will be named ``[namespace_name].namespace.yaml`` and ``[namespace_name].extensions.yaml``.
 
-from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
+from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, export_spec
 
-ns_path = "mylab.namespace.yaml"
-ext_source = "mylab.extensions.yaml"
-
-ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', "mylab", version='0.1.0')
+ns_builder = NWBNamespaceBuilder(
+    doc='Extension for use in my Lab',
+    name='ndx-mylab',
+    version='0.1.0'
+)
 
 ns_builder.include_type('ElectricalSeries', namespace='core')
 
-ext = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                   attributes=[NWBAttributeSpec('trode_id', 'the tetrode id', 'int')],
-                   neurodata_type_inc='ElectricalSeries',
-                   neurodata_type_def='TetrodeSeries')
+ext_spec = NWBGroupSpec(
+    neurodata_type_def='TetrodeSeries',
+    neurodata_type_inc='ElectricalSeries',
+    doc='A custom ElectricalSeries for my lab',
+    attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')]
+)
 
-ns_builder.add_spec(ext_source, ext)
-ns_builder.export(ns_path)
+new_data_types = [ext_spec]
+export_spec(ns_builder=ns_builder, new_data_types=new_data_types, output_dir='.')
 
 ####################
 # Running this block will produce two YAML files.
 #
-# The first file, mylab.namespace.yaml, contains the specification of the namespace.
+# The first file, ndx-mylab.namespace.yaml, contains the specification of the namespace.
 #
 # .. code-block:: yaml
 #
 #     namespaces:
 #     - doc: Extension for use in my Lab
-#       name: mylab
+#       name: ndx-mylab
 #       schema:
 #       - namespace: core
 #         neurodata_type:
 #         - ElectricalSeries
-#       - source: mylab.extensions.yaml
+#       - source: ndx-mylab.extensions.yaml
 #
-# The second file, mylab.extensions.yaml, contains the details on newly defined types.
+# The second file, ndx-mylab.extensions.yaml, contains the details on newly defined types.
 #
 # .. code-block:: yaml
 #
 #     groups:
-#     - attributes:
+#     - neurodata_type_def: TetrodeSeries
+#       neurodata_type_inc: ElectricalSeries
+#       doc: A custom ElectricalSeries for my lab
+#       attributes:
 #       - doc: the tetrode id
 #         dtype: int
 #         name: trode_id
-#       doc: A custom ElectricalSeries for my lab
-#       neurodata_type_def: TetrodeSeries
-#       neurodata_type_inc: ElectricalSeries
+
 #
 # .. tip::
 #
-#     Detailed documentation of all components and `neurodata_types` that are part of the core schema of NWB:N are
+#     Detailed documentation of all components and `neurodata_types` that are part of the core schema of NWB are
 #     available in the schema docs at `http://nwb-schema.readthedocs.io <http://nwb-schema.readthedocs.io>`_ .
 #     Before creating a new type from scratch, please have a look at the schema docs to see if using or extending an
 #     existing type may solve your problem. Also, the schema docs are helpful when extending an existing type to
@@ -96,16 +111,14 @@ ns_builder.export(ns_path)
 # The first involves defining new :py:class:`~pynwb.core.NWBContainer` classes that are then mapped
 # to the neurodata types in the extension.
 
-
 from pynwb import register_class, load_namespaces
 from pynwb.ecephys import ElectricalSeries
 from hdmf.utils import docval, call_docval_func, getargs, get_docval
 
-ns_path = "mylab.namespace.yaml"
-load_namespaces(ns_path)
+load_namespaces('ndx-mylab.namespace.yaml')
 
 
-@register_class('TetrodeSeries', 'mylab')
+@register_class('TetrodeSeries', 'ndx-mylab')
 class TetrodeSeries(ElectricalSeries):
 
     __nwbfields__ = ('trode_id',)
@@ -135,10 +148,9 @@ class TetrodeSeries(ElectricalSeries):
 
 from pynwb import get_class, load_namespaces
 
-ns_path = "mylab.namespace.yaml"
-load_namespaces(ns_path)
+load_namespaces('ndx-mylab.namespace.yaml')
 
-AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
+AutoTetrodeSeries = get_class('TetrodeSeries', 'ndx-mylab')
 
 ####################
 # .. note::
@@ -171,10 +183,10 @@ nwbfile = NWBFile('demonstrate caching', 'NWB456', start_time,
 device = nwbfile.create_device(name='trodes_rig123')
 
 electrode_name = 'tetrode1'
-description = "an example tetrode"
-location = "somewhere in the hippocampus"
+description = 'an example tetrode'
+location = 'somewhere in the hippocampus'
 
-electrode_group = nwbfile.create_electrode_group(electrode_name,
+electrode_group = nwbfile.create_electrode_group(name=electrode_name,
                                                  description=description,
                                                  location=location,
                                                  device=device)
@@ -203,8 +215,8 @@ ts = TetrodeSeries('test_ephys_data',
                    # starting_time=ephys_timestamps[0],
                    # rate=rate,
                    resolution=0.001,
-                   comments="This data was randomly generated with numpy, using 1234 as the seed",
-                   description="Random numbers generated with numpy.random.rand")
+                   comments='This data was randomly generated with numpy, using 1234 as the seed',
+                   description='Random numbers generated with numpy.random.rand')
 nwbfile.add_acquisition(ts)
 
 ####################
@@ -246,37 +258,52 @@ nwbfile = io.read()
 # then how to use the new data types. First, we use `pynwb` to define the new
 # data types.
 
-from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
+from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec, export_spec
 
-name = 'test_multicontainerinterface'
-ns_path = name + ".namespace.yaml"
-ext_source = name + ".extensions.yaml"
-
-ns_builder = NWBNamespaceBuilder(name + ' extensions', name, version='0.1.0')
+ns_builder = NWBNamespaceBuilder(
+    doc='potato extensions',
+    name='ndx-potato',
+    version='0.1.0'
+)
 ns_builder.include_type('NWBDataInterface', namespace='core')
 
-potato = NWBGroupSpec(neurodata_type_def='Potato',
-                      neurodata_type_inc='NWBDataInterface',
-                      doc='A potato', quantity='*',
-                      attributes=[
-                          NWBAttributeSpec(name='weight',
-                                           doc='weight of potato',
-                                           dtype='float',
-                                           required=True),
-                          NWBAttributeSpec(name='age',
-                                           doc='age of potato',
-                                           dtype='float',
-                                           required=False)
-                      ])
+potato = NWBGroupSpec(
+    neurodata_type_def='Potato',
+    neurodata_type_inc='NWBDataInterface',
+    doc='A potato',
+    attributes=[
+        NWBAttributeSpec(
+            name='weight',
+            doc='weight of potato',
+            dtype='float',
+            required=True
+        ),
+        NWBAttributeSpec(
+            name='age',
+            doc='age of potato',
+            dtype='float',
+            required=False
+        )
+    ]
+)
 
-potato_sack = NWBGroupSpec(neurodata_type_def='PotatoSack',
-                           neurodata_type_inc='NWBDataInterface',
-                           name='potato_sack',
-                           doc='A sack of potatoes', quantity='?',
-                           groups=[potato])
+potato_sack = NWBGroupSpec(
+    neurodata_type_def='PotatoSack',
+    neurodata_type_inc='NWBDataInterface',
+    name='potato_sack',
+    doc='A sack of potatoes',
+    quantity='?',
+    groups=[
+        NWBGroupSpec(
+            neurodata_type_inc='PotatoSack',
+            doc='Potatoes in potato sack',
+            quantity='*'
+        )
+    ]
+)
 
-ns_builder.add_spec(ext_source, potato_sack)
-ns_builder.export(ns_path)
+new_data_types = [potato, potato_sack]
+export_spec(ns_builder=ns_builder, new_data_types=new_data_types, output_dir='.')
 
 ####################
 # Then create Container classes registered to the new data types (this is
@@ -285,10 +312,10 @@ ns_builder.export(ns_path)
 from pynwb import register_class, load_namespaces
 from pynwb.file import MultiContainerInterface, NWBContainer
 
-load_namespaces(ns_path)
+load_namespaces('ndx-potato.namespace.yaml')
 
 
-@register_class('Potato', name)
+@register_class('Potato', 'ndx-potato')
 class Potato(NWBContainer):
     __nwbfields__ = ('name', 'weight', 'age')
 
@@ -301,7 +328,7 @@ class Potato(NWBContainer):
         self.age = kwargs['age']
 
 
-@register_class('PotatoSack', name)
+@register_class('PotatoSack', 'ndx-potato')
 class PotatoSack(MultiContainerInterface):
 
     __clsconf__ = {
@@ -325,20 +352,20 @@ potato_sack = PotatoSack(potatos=Potato(name='potato1', age=2.3, weight=3.0))
 potato_sack.add_potato(Potato('potato2', 3.0, 4.0))
 potato_sack.create_potato('big_potato', 10.0, 20.0)
 
-nwbfile = NWBFile("a file with metadata", "NB123A", datetime(2018, 6, 1, tzinfo=tzlocal()))
+nwbfile = NWBFile('a file with metadata', 'NB123A', datetime(2018, 6, 1, tzinfo=tzlocal()))
 
 pmod = nwbfile.create_processing_module('module_name', 'desc')
 pmod.add_container(potato_sack)
 
 
-with NWBHDF5IO('test_multicontainerinterface.nwb', 'w') as io:
+with NWBHDF5IO('test_potato.nwb', 'w') as io:
     io.write(nwbfile)
 
 ####################
 # This is how you read the NWB file (again, this would often be done in a
 # different file).
 
-load_namespaces(ns_path)
+load_namespaces('ndx-potato.namespace.yaml')
 # from xxx import PotatoSack, Potato
 io = NWBHDF5IO('test_multicontainerinterface.nwb', 'r')
 nwb = io.read()
@@ -361,38 +388,49 @@ io.close()
 # 1. `vertices`, which is an (n, 3) matrix of floats that represents points in 3D space
 #
 # 2. `faces`, which is an (m, 3) matrix of uints that represents indices of the `vertices` matrix. Each triplet of
-# points defines a triangular face, and the mesh is comprised of a collection of triangular faces.
+#    points defines a triangular face, and the mesh is comprised of a collection of triangular faces.
 #
-# First, we set up our extension. I am going to use the name `ecog`
+# First, we set up our extension. I am going to use the name `ndx-ecog`
 
-from pynwb.spec import NWBDatasetSpec, NWBNamespaceBuilder, NWBGroupSpec
-
-name = 'ecog'
-ns_path = name + ".namespace.yaml"
-ext_source = name + ".extensions.yaml"
+from pynwb.spec import NWBDatasetSpec, NWBNamespaceBuilder, NWBGroupSpec, export_spec
 
 # Now we define the data structures. We use `NWBDataInterface` as the base type,
 # which is the most primitive type you are likely to use as a base. The name of the
 # class is `CorticalSurface`, and it requires two matrices, `vertices` and
 # `faces`.
 
-surface = NWBGroupSpec(doc='brain cortical surface',
-                       datasets=[
-                           NWBDatasetSpec(doc='faces for surface, indexes vertices', shape=(None, 3),
-                                          name='faces', dtype='uint', dims=('face_number', 'vertex_index')),
-                           NWBDatasetSpec(doc='vertices for surface, points in 3D space', shape=(None, 3),
-                                          name='vertices', dtype='float', dims=('vertex_number', 'xyz'))],
-                       neurodata_type_def='CorticalSurface',
-                       neurodata_type_inc='NWBDataInterface')
+surface = NWBGroupSpec(
+    neurodata_type_def='CorticalSurface',
+    neurodata_type_inc='NWBDataInterface',
+    doc='brain cortical surface',
+    datasets=[
+        NWBDatasetSpec(
+            name='faces',
+            dtype='uint',
+            doc='faces for surface, indexes vertices',
+            shape=(None, 3),
+            dims=('face_number', 'vertex_index')
+        ),
+        NWBDatasetSpec(
+            name='vertices',
+            dtype='float',
+            doc='vertices for surface, points in 3D space',
+            shape=(None, 3),
+            dims=('vertex_number', 'xyz')
+        )
+    ]
+)
 
 # Now we set up the builder and add this object
 
-ns_builder = NWBNamespaceBuilder(name + ' extensions', name, version='0.1.0')
-ns_builder.add_spec(ext_source, surface)
-ns_builder.export(ns_path)
+ns_builder = NWBNamespaceBuilder('ecog extensions', 'ndx-ecog', version='0.1.0')
+
+new_data_types = [surface]
+export_spec(ns_builder=ns_builder, new_data_types=new_data_types, output_dir='.')
+
 
 ################
-# The above should generate 2 YAML files. `ecog.extensions.yaml`,
+# The above should generate 2 YAML files. `ndx-ecog.extensions.yaml`,
 # defines the newly defined types
 #
 # .. code-block:: yaml
@@ -428,21 +466,26 @@ from pynwb import load_namespaces, get_class, NWBHDF5IO, NWBFile
 from datetime import datetime
 import numpy as np
 
-load_namespaces('ecog.namespace.yaml')
-CorticalSurface = get_class('CorticalSurface', 'ecog')
+load_namespaces('ndx-ecog.namespace.yaml')
+CorticalSurface = get_class('CorticalSurface', 'ndx-ecog')
 
-cortical_surface = CorticalSurface(vertices=[[0.0, 1.0, 1.0],
-                                             [1.0, 1.0, 2.0],
-                                             [2.0, 2.0, 1.0],
-                                             [2.0, 1.0, 1.0],
-                                             [1.0, 2.0, 1.0]],
-                                   faces=np.array([[0, 1, 2], [1, 2, 3]]).astype('uint'),
-                                   name='cortex')
+cortical_surface = CorticalSurface(
+    name='cortex',
+    vertices=[[0.0, 1.0, 1.0],
+              [1.0, 1.0, 2.0],
+              [2.0, 2.0, 1.0],
+              [2.0, 1.0, 1.0],
+              [1.0, 2.0, 1.0]],
+    faces=np.array([[0, 1, 2], [1, 2, 3]]).astype('uint')
+)
 
-nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now())
+nwbfile = NWBFile(
+    session_description='my first synthetic recording',
+    identifier='EXAMPLE_ID',
+    session_start_time=datetime.now()
+)
 
-cortex_module = nwbfile.create_processing_module(name='cortex',
-                                                 description='description')
+cortex_module = nwbfile.create_processing_module(name='cortex', description='description')
 cortex_module.add_container(cortical_surface)
 
 
