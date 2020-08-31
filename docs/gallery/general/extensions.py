@@ -295,7 +295,7 @@ potato_sack = NWBGroupSpec(
     quantity='?',
     groups=[
         NWBGroupSpec(
-            neurodata_type_inc='PotatoSack',
+            neurodata_type_inc='Potato',
             doc='Potatoes in potato sack',
             quantity='*'
         )
