@@ -4,21 +4,19 @@ Tests for NWB specific Spec classes
 This should really test to make sure neurodata_type_def and neurodata_type_inc
 gets mapped appropriately when constructors and methods are invoked
 '''
-import unittest
-
-from pynwb.spec import NWBNamespaceBuilder
-from pynwb.spec import NWBRefSpec
 import json
 
+from pynwb.spec import NWBNamespaceBuilder, NWBRefSpec
+from pynwb.testing import TestCase
 
-# create a builder for the namespace
-class NWBNamespaceTest(unittest.TestCase):
+
+class NWBNamespaceTest(TestCase):
 
     def test_constructor(self):
         self.ns_builder = NWBNamespaceBuilder("Frank Laboratory NWB Extensions", "franklab", version='0.1')
 
 
-class NWBRefSpecTests(unittest.TestCase):
+class NWBRefSpecTests(TestCase):
 
     def test_constructor(self):
         spec = NWBRefSpec('TimeSeries', 'object')

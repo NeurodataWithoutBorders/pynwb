@@ -1,0 +1,3 @@
+[submodule "src/pynwb/nwb-schema"]
+	path = src/pynwb/nwb-schema
+	url = http://github.com/NeurodataWithoutBorders/nwb-schema.git

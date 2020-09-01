@@ -1,4 +1,3 @@
-# flake8: noqa: F401
 from . import base as __base
 from . import behavior as __behavior
 from . import ecephys as __ecephys

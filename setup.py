@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from setuptools import setup, find_packages
-import re
 
 import versioneer
 
@@ -11,11 +10,12 @@ with open('README.rst', 'r') as fp:
 pkgs = find_packages('src', exclude=['data'])
 print('found these packages:', pkgs)
 
-schema_dir = 'data'
+schema_dir = 'nwb-schema/core'
 
-reqs_re = re.compile("[<=>]+")
-with open('requirements.txt', 'r') as fp:
-    reqs = [reqs_re.split(x.strip())[0] for x in fp.readlines()]
+with open('requirements-min.txt', 'r') as fp:
+    # replace == with >= and remove trailing comments and spaces
+    reqs = [x.replace('==', '>=').split('#')[0].strip() for x in fp]
+    reqs = [x for x in reqs if x]  # remove empty strings
 
 print(reqs)
 
@@ -36,11 +36,12 @@ setup_args = {
     'package_data': {'pynwb': ["%s/*.yaml" % schema_dir, "%s/*.json" % schema_dir]},
     'classifiers': [
         "Programming Language :: Python",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
         "License :: OSI Approved :: BSD License",
-        "Development Status :: 2 - Pre-Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Intended Audience :: Science/Research",
         "Operating System :: Microsoft :: Windows",

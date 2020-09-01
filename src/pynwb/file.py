@@ -1,13 +1,13 @@
 from datetime import datetime
 from dateutil.tz import tzlocal
-try:
-    from collections.abc import Iterable  # Python 3
-except ImportError:
-    from collections import Iterable  # Python 2.7
+from collections.abc import Iterable
 from warnings import warn
 import copy as _copy
 
-from hdmf.utils import docval, getargs, fmt_docval_args, call_docval_func, get_docval
+import numpy as np
+import pandas as pd
+
+from hdmf.utils import docval, getargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
 from .base import TimeSeries, ProcessingModule
@@ -18,8 +18,9 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, DynamicTable, DynamicTableRegion,\
-                  LabelledDict
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, \
+                  ScratchData, LabelledDict
+from hdmf.common import DynamicTableRegion, DynamicTable
 
 
 def _not_parent(arg):
@@ -58,8 +59,7 @@ class Subject(NWBContainer):
              'doc': 'datetime of date of birth. May be supplied instead of age.'})
     def __init__(self, **kwargs):
         kwargs['name'] = 'subject'
-        pargs, pkwargs = fmt_docval_args(super(Subject, self).__init__, kwargs)
-        super(Subject, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super(Subject, self).__init__, kwargs)
         self.age = getargs('age', kwargs)
         self.description = getargs('description', kwargs)
         self.genotype = getargs('genotype', kwargs)
@@ -84,14 +84,20 @@ class NWBFile(MultiContainerInterface):
         {
             'attr': 'acquisition',
             'add': '_add_acquisition_internal',
-            'type': NWBDataInterface,
+            'type': (NWBDataInterface, DynamicTable),
             'get': 'get_acquisition'
         },
         {
             'attr': 'analysis',
             'add': 'add_analysis',
-            'type': NWBContainer,
+            'type': (NWBContainer, DynamicTable),
             'get': 'get_analysis'
+        },
+        {
+            'attr': 'scratch',
+            'add': '_add_scratch',
+            'type': (DynamicTable, NWBContainer, ScratchData),
+            'get': '_get_scratch'
         },
         {
             'attr': 'stimulus',
@@ -134,11 +140,11 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_imaging_plane'
         },
         {
-            'attr': 'ic_electrodes',
-            'add': 'add_ic_electrode',
+            'attr': 'icephys_electrodes',
+            'add': 'add_icephys_electrode',
             'type': IntracellularElectrode,
-            'create': 'create_ic_electrode',
-            'get': 'get_ic_electrode'
+            'create': 'create_icephys_electrode',
+            'get': 'get_icephys_electrode'
         },
         {
             'attr': 'ogen_sites',
@@ -218,7 +224,7 @@ class NWBFile(MultiContainerInterface):
                     'Anesthesia(s), painkiller(s), etc., plus dosage, concentration, etc.', 'default': None},
             {'name': 'protocol', 'type': str,
              'doc': 'Experimental protocol, if applicable. E.g., include IACUC protocol', 'default': None},
-            {'name': 'related_publications', 'type': str,
+            {'name': 'related_publications', 'type': (tuple, list, str),
              'doc': 'Publication information.'
              'PMID, DOI, URL, etc. If multiple, concatenate together and describe which is which. '
              'such as PMID, DOI, URL, etc', 'default': None},
@@ -269,7 +275,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'electrode_groups', 'type': Iterable,
              'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
             {'name': 'ic_electrodes', 'type': (list, tuple),
-             'doc': 'IntracellularElectrodes that belong to this NWBFile', 'default': None},
+             'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
+                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},
             {'name': 'sweep_table', 'type': SweepTable,
              'doc': 'the SweepTable that belong to this NWBFile', 'default': None},
             {'name': 'imaging_planes', 'type': (list, tuple),
@@ -279,11 +286,14 @@ class NWBFile(MultiContainerInterface):
             {'name': 'devices', 'type': (list, tuple),
              'doc': 'Device objects belonging to this NWBFile', 'default': None},
             {'name': 'subject', 'type': Subject,
-             'doc': 'subject metadata', 'default': None})
+             'doc': 'subject metadata', 'default': None},
+            {'name': 'scratch', 'type': (list, tuple),
+             'doc': 'scratch data', 'default': None},
+            {'name': 'icephys_electrodes', 'type': (list, tuple),
+             'doc': 'IntracellularElectrodes that belong to this NWBFile.', 'default': None})
     def __init__(self, **kwargs):
-        pargs, pkwargs = fmt_docval_args(super(NWBFile, self).__init__, kwargs)
-        pkwargs['name'] = 'root'
-        super(NWBFile, self).__init__(*pargs, **pkwargs)
+        kwargs['name'] = 'root'
+        call_docval_func(super(NWBFile, self).__init__, kwargs)
         self.fields['session_description'] = getargs('session_description', kwargs)
         self.fields['identifier'] = getargs('identifier', kwargs)
 
@@ -315,7 +325,6 @@ class NWBFile(MultiContainerInterface):
             'electrodes',
             'electrode_groups',
             'devices',
-            'ic_electrodes',
             'imaging_planes',
             'ogen_sites',
             'intervals',
@@ -326,7 +335,7 @@ class NWBFile(MultiContainerInterface):
             'trials',
             'invalid_times',
             'units',
-            'experimenter',
+            'scratch',
             'experiment_description',
             'session_id',
             'lab',
@@ -335,7 +344,6 @@ class NWBFile(MultiContainerInterface):
             'notes',
             'pharmacology',
             'protocol',
-            'related_publications',
             'slices',
             'source_script',
             'source_script_file_name',
@@ -346,6 +354,24 @@ class NWBFile(MultiContainerInterface):
         for attr in fieldnames:
             setattr(self, attr, kwargs.get(attr, None))
 
+        # backwards-compatibility code for ic_electrodes / icephys_electrodes
+        ic_elec_val = kwargs.get('icephys_electrodes', None)
+        if ic_elec_val is None and kwargs.get('ic_electrodes', None) is not None:
+            ic_elec_val = kwargs.get('ic_electrodes', None)
+            warn("Use of the ic_electrodes parameter is deprecated. "
+                 "Use the icephys_electrodes parameter instead", DeprecationWarning)
+        setattr(self, 'icephys_electrodes', ic_elec_val)
+
+        experimenter = kwargs.get('experimenter', None)
+        if isinstance(experimenter, str):
+            experimenter = (experimenter,)
+        setattr(self, 'experimenter', experimenter)
+
+        related_pubs = kwargs.get('related_publications', None)
+        if isinstance(related_pubs, str):
+            related_pubs = (related_pubs,)
+        setattr(self, 'related_publications', related_pubs)
+
         if getargs('source_script', kwargs) is None and getargs('source_script_file_name', kwargs) is not None:
             raise ValueError("'source_script' cannot be None when 'source_script_file_name' is set")
 
@@ -354,7 +380,7 @@ class NWBFile(MultiContainerInterface):
     def all_children(self):
         stack = [self]
         ret = list()
-        self.__obj = LabelledDict(label='all_objects', def_key_name='object_id')
+        self.__obj = LabelledDict(label='all_objects', key_attr='object_id')
         while len(stack):
             n = stack.pop()
             ret.append(n)
@@ -375,18 +401,47 @@ class NWBFile(MultiContainerInterface):
 
     @property
     def modules(self):
-        warn("replaced by NWBFile.processing", DeprecationWarning)
+        warn("NWBFile.modules has been replaced by NWBFile.processing.", DeprecationWarning)
         return self.processing
 
     @property
     def ec_electrode_groups(self):
-        warn("replaced by NWBFile.electrode_groups", DeprecationWarning)
+        warn("NWBFile.ec_electrode_groups has been replaced by NWBFile.electrode_groups.", DeprecationWarning)
         return self.electrode_groups
 
     @property
     def ec_electrodes(self):
-        warn("replaced by NWBFile.electrodes", DeprecationWarning)
+        warn("NWBFile.ec_electrodes has been replaced by NWBFile.electrodes.", DeprecationWarning)
         return self.electrodes
+
+    @property
+    def ic_electrodes(self):
+        warn("NWBFile.ic_electrodes has been replaced by NWBFile.icephys_electrodes.", DeprecationWarning)
+        return self.icephys_electrodes
+
+    def add_ic_electrode(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.add_icephys_electrode` instead
+        """
+        warn("NWBFile.add_ic_electrode has been replaced by NWBFile.add_icephys_electrode.", DeprecationWarning)
+        return self.add_icephys_electrode(*args, **kwargs)
+
+    def create_ic_electrode(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode` instead
+        """
+        warn("NWBFile.create_ic_electrode has been replaced by NWBFile.create_icephys_electrode.", DeprecationWarning)
+        return self.create_icephys_electrode(*args, **kwargs)
+
+    def get_ic_electrode(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.get_icephys_electrode` instead
+        """
+        warn("NWBFile.get_ic_electrode has been replaced by NWBFile.get_icephys_electrode.", DeprecationWarning)
+        return self.get_icephys_electrode(*args, **kwargs)
 
     def __check_epochs(self):
         if self.epochs is None:
@@ -433,24 +488,30 @@ class NWBFile(MultiContainerInterface):
     def add_electrode_column(self, **kwargs):
         """
         Add a column to the electrode table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_electrodes()
         call_docval_func(self.electrodes.add_column, kwargs)
 
-    @docval({'name': 'x', 'type': float, 'doc': 'the x coordinate of the position'},
-            {'name': 'y', 'type': float, 'doc': 'the y coordinate of the position'},
-            {'name': 'z', 'type': float, 'doc': 'the z coordinate of the position'},
-            {'name': 'imp', 'type': float, 'doc': 'the impedance of the electrode'},
+    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)'},
+            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)'},
+            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)'},
+            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode, in ohms'},
             {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
-            {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
+            {'name': 'filtering', 'type': str,
+             'doc': 'description of hardware filtering, including the filter name and frequency cutoffs'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
+            {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
+            {'name': 'rel_y', 'type': 'float', 'doc': 'the y coordinate within the electrode group', 'default': None},
+            {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
+            {'name': 'reference', 'type': str, 'doc': 'Description of the reference used for this electrode.',
+             'default': None},
             allow_extra=True)
     def add_electrode(self, **kwargs):
         """
-        Add a unit to the unit table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+        Add an electrode to the electrodes table.
+        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         Required fields are *x*, *y*, *z*, *imp*, *location*, *filtering*,
         *group* and any columns that have been added
@@ -460,6 +521,20 @@ class NWBFile(MultiContainerInterface):
         d = _copy.copy(kwargs['data']) if kwargs.get('data') is not None else kwargs
         if d.get('group_name', None) is None:
             d['group_name'] = d['group'].name
+
+        new_cols = [('rel_x', 'the x coordinate within the electrode group'),
+                    ('rel_y', 'the y coordinate within the electrode group'),
+                    ('rel_z', 'the z coordinate within the electrode group'),
+                    ('reference', 'Description of the reference used for this electrode.')]
+        # add column if the arg is supplied and column does not yet exist
+        # do not pass arg to add_row if arg is not supplied
+        for col_name, col_doc in new_cols:
+            if kwargs[col_name] is not None:
+                if col_name not in self.electrodes:
+                    self.electrodes.add_column(col_name, col_doc)
+            else:
+                d.pop(col_name)  # remove args from d if not set
+
         call_docval_func(self.electrodes.add_row, d)
 
     @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
@@ -487,7 +562,7 @@ class NWBFile(MultiContainerInterface):
     def add_unit_column(self, **kwargs):
         """
         Add a column to the unit table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_units()
         call_docval_func(self.units.add_column, kwargs)
@@ -496,7 +571,7 @@ class NWBFile(MultiContainerInterface):
     def add_unit(self, **kwargs):
         """
         Add a unit to the unit table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         """
         self.__check_units()
@@ -510,7 +585,7 @@ class NWBFile(MultiContainerInterface):
     def add_trial_column(self, **kwargs):
         """
         Add a column to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_trials()
         call_docval_func(self.trials.add_column, kwargs)
@@ -519,7 +594,7 @@ class NWBFile(MultiContainerInterface):
     def add_trial(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_interval` for more details.
+        See :py:meth:`~hdmf.common.DynamicTable.add_interval` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_trial_columns`).
@@ -535,7 +610,7 @@ class NWBFile(MultiContainerInterface):
     def add_invalid_times_column(self, **kwargs):
         """
         Add a column to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_column` for more details
+        See :py:meth:`~hdmf.common.DynamicTable.add_column` for more details
         """
         self.__check_invalid_times()
         call_docval_func(self.invalid_times.add_column, kwargs)
@@ -543,7 +618,7 @@ class NWBFile(MultiContainerInterface):
     def add_invalid_time_interval(self, **kwargs):
         """
         Add a trial to the trial table.
-        See :py:meth:`~pynwb.core.DynamicTable.add_row` for more details.
+        See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         Required fields are *start_time*, *stop_time*, and any columns that have
         been added (through calls to `add_invalid_times_columns`).
@@ -579,7 +654,7 @@ class NWBFile(MultiContainerInterface):
                 self._check_sweep_table()
                 self.sweep_table.add_entry(nwbdata)
 
-    @docval({'name': 'nwbdata', 'type': NWBDataInterface})
+    @docval({'name': 'nwbdata', 'type': (NWBDataInterface, DynamicTable)})
     def add_acquisition(self, nwbdata):
         self._add_acquisition_internal(nwbdata)
         self._update_sweep_table(nwbdata)
@@ -594,6 +669,50 @@ class NWBFile(MultiContainerInterface):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
 
+    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
+             'help': 'the data to add to the scratch space'},
+            {'name': 'name', 'type': str,
+             'help': 'the name of the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'default': None},
+            {'name': 'notes', 'type': str,
+             'help': 'notes to add to the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'default': None},
+            {'name': 'table_description', 'type': str,
+             'help': 'description for the internal DynamicTable used to store a pandas.DataFrame',
+             'default': ''})
+    def add_scratch(self, **kwargs):
+        '''Add data to the scratch space'''
+        data, name, notes = getargs('data', 'name', 'notes', kwargs)
+        if isinstance(data, (np.ndarray, pd.DataFrame, list, tuple)):
+            if name is None:
+                raise ValueError('please provide a name for scratch data')
+            if isinstance(data, pd.DataFrame):
+                table_description = getargs('table_description', kwargs)
+                data = DynamicTable.from_dataframe(df=data, name=name, table_description=table_description)
+                if notes is not None:
+                    warn('Notes argument is ignored when adding a pandas DataFrame to scratch')
+            else:
+                data = ScratchData(name=name, data=data, notes=notes)
+        else:
+            if notes is not None:
+                warn('Notes argument is ignored when adding an NWBContainer to scratch')
+            if name is not None:
+                warn('Name argument is ignored when adding an NWBContainer to scratch')
+        self._add_scratch(data)
+
+    @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
+            {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
+    def get_scratch(self, **kwargs):
+        '''Get data from the scratch space'''
+        name, convert = getargs('name', 'convert', kwargs)
+        ret = self._get_scratch(name)
+        if convert:
+            if isinstance(ret, DynamicTable):
+                ret = ret.to_dataframe()
+            elif isinstance(ret, ScratchData):
+                ret = np.asarray(ret.data)
+        return ret
+
     def copy(self):
         """
         Shallow copy of an NWB file.
@@ -607,13 +726,13 @@ class NWBFile(MultiContainerInterface):
         # HDF5 object references cannot point to objects external to the file. Both DynamicTables such as TimeIntervals
         # contain such object references and types such as ElectricalSeries contain references to DynamicTables.
         # Below, copy the table and link to the columns so that object references work.
-        fields_to_copy = ['electrodes', 'epochs', 'trials', 'units', 'subject', 'sweep_table', 'invalid_times']
+        fields_to_copy = ['electrodes', 'epochs', 'trials', 'units', 'sweep_table', 'invalid_times']
         for field in fields_to_copy:
             if field in kwargs:
                 if isinstance(self.fields[field], DynamicTable):
                     kwargs[field] = self.fields[field].copy()
                 else:
-                    warn('Cannot copy child of NWBFile that is not a DynamicTable.')
+                    warn('Cannot copy child of NWBFile that is not a DynamicTable: %s' % field)
 
         # handle dictionaries of DynamicTables
         dt_to_copy = ['scratch', 'intervals']
@@ -658,7 +777,8 @@ def ElectrodeTable(name='electrodes',
                        ('location', 'the location of channel within the subject e.g. brain region'),
                        ('filtering', 'description of hardware filtering'),
                        ('group', 'a reference to the ElectrodeGroup this electrode is a part of'),
-                       ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')]
+                       ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')
+                       ]
                       )
 
 

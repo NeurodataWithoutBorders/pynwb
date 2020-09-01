@@ -1,14 +1,10 @@
-import numpy as np
 import warnings
-try:
-    from collections.abc import Iterable  # Python 3
-except ImportError:
-    from collections import Iterable  # Python 2.7
+from collections.abc import Iterable
 
-from hdmf.utils import docval, popargs, call_docval_func
+from hdmf.utils import docval, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_resolution, _default_conversion, Image
+from .base import TimeSeries, Image
 
 
 @register_class('ImageSeries', CORE_NAMESPACE)
@@ -23,55 +19,42 @@ class ImageSeries(TimeSeries):
                      'starting_frame',
                      'format')
 
-    _help = "Storage object for time-series 2-D image data"
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'doc': ('The data values. Can be 3D or 4D. The first dimension must be time (frame). The second and third '
+                     'dimensions represent x and y. The optional fourth dimension represents z.'),
              'default': None},
-            {'name': 'unit', 'type': str,
-             'doc': 'The base unit of measurement (should be SI unit)', 'default': 'None'},
+            *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'format', 'type': str,
              'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.',
              'default': None},
             {'name': 'external_file', 'type': ('array_data', 'data'),
-             'doc': 'Path or URL to one or more external file(s). Field only present if format=external. \
-             Either external_file or data must be specified, but not both.', 'default': None},
+             'doc': 'Path or URL to one or more external file(s). Field only present if format=external. '
+                    'Either external_file or data must be specified, but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable,
-             'doc': 'Each entry is the frame number in the corresponding external_file variable. \
-             This serves as an index to what frames each file contains.', 'default': None},
-            {'name': 'bits_per_pixel', 'type': int, 'doc': 'Number of bit per image pixel', 'default': None},
+             'doc': 'Each entry is the frame number in the corresponding external_file variable. '
+                    'This serves as an index to what frames each file contains. If external_file is not '
+                    'provided, then this value will be None', 'default': [0]},
+            {'name': 'bits_per_pixel', 'type': int, 'doc': 'DEPRECATED: Number of bits per image pixel',
+             'default': None},
             {'name': 'dimension', 'type': Iterable,
              'doc': 'Number of pixels on x, y, (and z) axes.', 'default': None},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default':  'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default':  'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
+                        'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         bits_per_pixel, dimension, external_file, starting_frame, format = popargs(
             'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
         call_docval_func(super(ImageSeries, self).__init__, kwargs)
         if external_file is None and self.data is None:
-            raise ValueError('must supply either external_file or data to ' + self.name)
+            raise ValueError("Must supply either external_file or data to %s '%s'."
+                             % (self.__class__.__name__, self.name))
         self.bits_per_pixel = bits_per_pixel
         self.dimension = dimension
         self.external_file = external_file
-        self.starting_frame = starting_frame
+        if external_file is not None:
+            self.starting_frame = starting_frame
+        else:
+            self.starting_frame = None
         self.format = format
 
     @property
@@ -97,39 +80,17 @@ class IndexSeries(TimeSeries):
 
     __nwbfields__ = ('indexed_timeseries',)
 
-    _help = "A sequence that is generated from an existing image stack. Frames can be presented in \
-    an arbitrary order. The data[] field stores frame number in reference stack."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-
-            {'name': 'indexed_timeseries', 'type': TimeSeries,
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
+             'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
+            *get_docval(TimeSeries.__init__, 'unit'),
+            {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
              'doc': 'HDF5 link to TimeSeries containing images that are indexed.'},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
+                        'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data, unit = popargs('name', 'data', 'unit', kwargs)
         indexed_timeseries = popargs('indexed_timeseries', kwargs)
-        super(IndexSeries, self).__init__(name, data, unit, **kwargs)
+        super(IndexSeries, self).__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
 
 
@@ -144,52 +105,16 @@ class ImageMaskSeries(ImageSeries):
 
     __nwbfields__ = ('masked_imageseries',)
 
-    _help = "An alpha mask that is applied to a presented visual stimulus."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'masked_imageseries', 'type': ImageSeries,
+    @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
+            *get_docval(ImageSeries.__init__, 'data', 'unit'),
+            {'name': 'masked_imageseries', 'type': ImageSeries,  # required
              'doc': 'Link to ImageSeries that mask is applied to.'},
-            {'name': 'format', 'type': str,
-             'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
-            {'name': 'external_file', 'type': Iterable,
-             'doc': 'Path or URL to one or more external file(s). Field only present if format=external. \
-             Either external_file or data must be specified, but not both.', 'default': None},
-            {'name': 'starting_frame', 'type': Iterable,
-             'doc': 'Each entry is the frame number in the corresponding external_file variable. \
-             This serves as an index to what frames each file contains.', 'default': None},
-            {'name': 'bits_per_pixel', 'type': int,
-             'doc': 'Number of bit per image pixel', 'default': None},
-            {'name': 'dimension', 'type': Iterable,
-             'doc': 'Number of pixels on x, y, (and z) axes.', 'default': [np.nan]},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str, 'doc': 'Description of this TimeSeries dataset',
-             'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            *get_docval(ImageSeries.__init__, 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
+                        'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
+                        'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data, unit, external_file, starting_frame, format = popargs(
-            'name', 'data', 'unit', 'external_file', 'starting_frame', 'format', kwargs)
         masked_imageseries = popargs('masked_imageseries', kwargs)
-        super(ImageMaskSeries, self).__init__(name=name, data=data, unit=unit,
-                                              external_file=external_file,
-                                              starting_frame=starting_frame, format=format, **kwargs)
+        super(ImageMaskSeries, self).__init__(**kwargs)
         self.masked_imageseries = masked_imageseries
 
 
@@ -207,56 +132,24 @@ class OpticalSeries(ImageSeries):
                      'field_of_view',
                      'orientation')
 
-    _help = "Time-series image stack for optical recording or stimulus."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'format', 'type': str,
-             'doc': 'Format of image. Three types: 1) Image format; tiff, png, jpg, etc. 2) external 3) raw.'},
-            {'name': 'distance', 'type': float, 'doc': 'Distance from camera/monitor to target/eye.'},
-            {'name': 'field_of_view', 'type': (list, np.ndarray, 'TimeSeries'), 'shape': ((2, ), (3, )),
+    @docval(*get_docval(ImageSeries.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
+             'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
+                     'be time (frame). The second and third dimensions represent x and y. The optional fourth '
+                     'dimension must be length 3 and represents the RGB value for color images.')},
+            *get_docval(ImageSeries.__init__, 'unit', 'format'),
+            {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
+            {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
              'doc': 'Width, height and depth of image, or imaged area (meters).'},
-            {'name': 'orientation', 'type': str,
-             'doc': 'Description of image relative to some reference frame (e.g., which way is up). \
-             Must also specify frame of reference.'},
-            {'name': 'external_file', 'type': Iterable,
-             'doc': 'Path or URL to one or more external file(s). Field only present if format=external. \
-             Either external_file or data must be specified, but not both.', 'default': None},
-            {'name': 'starting_frame', 'type': Iterable,
-             'doc': 'Each entry is the frame number in the corresponding external_file variable. \
-             This serves as an index to what frames each file contains.', 'default': None},
-            {'name': 'bits_per_pixel', 'type': int, 'doc': 'Number of bit per image pixel', 'default': None},
-            {'name': 'dimension', 'type': Iterable,
-             'doc': 'Number of pixels on x, y, (and z) axes.', 'default': [np.nan]},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            {'name': 'orientation', 'type': str,  # required
+             'doc': 'Description of image relative to some reference frame (e.g., which way is up). '
+                    'Must also specify frame of reference.'},
+            *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
+                        'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
+                        'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data, unit, external_file, starting_frame, format = popargs(
-            'name', 'data', 'unit', 'external_file', 'starting_frame', 'format', kwargs)
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
-        super(OpticalSeries, self).__init__(name=name, data=data, unit=unit,
-                                            external_file=external_file, starting_frame=starting_frame,
-                                            format=format, **kwargs)
+        super(OpticalSeries, self).__init__(**kwargs)
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
@@ -265,31 +158,33 @@ class OpticalSeries(ImageSeries):
 @register_class('GrayscaleImage', CORE_NAMESPACE)
 class GrayscaleImage(Image):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None)},
-            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    @docval(*get_docval(Image.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'Data of image. Must be 2D',
+             'shape': (None, None)},
+            *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
-        super(GrayscaleImage, self).__init__(**kwargs)
+        call_docval_func(super(GrayscaleImage, self).__init__, kwargs)
 
 
 @register_class('RGBImage', CORE_NAMESPACE)
 class RGBImage(Image):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 3)},
-            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    @docval(*get_docval(Image.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of image. Must be 3D where the third dimension has length 3 and represents the RGB value',
+             'shape': (None, None, 3)},
+            *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
-        super(RGBImage, self).__init__(**kwargs)
+        call_docval_func(super(RGBImage, self).__init__, kwargs)
 
 
 @register_class('RGBAImage', CORE_NAMESPACE)
 class RGBAImage(Image):
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image', 'shape': (None, None, 4)},
-            {'name': 'resolution', 'type': float, 'doc': 'pixels / cm', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'description of image', 'default': None})
+    @docval(*get_docval(Image.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of image. Must be 3D where the third dimension has length 4 and represents the RGBA value',
+             'shape': (None, None, 4)},
+            *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
-        super(RGBAImage, self).__init__(**kwargs)
+        call_docval_func(super(RGBAImage, self).__init__, kwargs)

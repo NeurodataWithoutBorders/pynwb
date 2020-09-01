@@ -4,29 +4,28 @@ for reading and writing data in NWB format
 import os.path
 from copy import deepcopy
 from warnings import warn
-
 import h5py
 
+from hdmf.spec import NamespaceCatalog
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.backends.io import HDMFIO
+from hdmf.backends.hdf5 import HDF5IO as _HDF5IO
+from hdmf.backends.zarr import ZarrIO as _ZarrIO
+from hdmf.validate import ValidatorMap
+from hdmf.build import BuildManager, TypeMap
+import hdmf.common
+
+
 CORE_NAMESPACE = 'core'
-
-from hdmf.spec import NamespaceCatalog  # noqa: E402
-from hdmf.utils import docval, getargs, popargs, call_docval_func  # noqa: E402
-from hdmf.backends.io import HDMFIO  # noqa: E402
-from hdmf.backends.hdf5 import HDF5IO as _HDF5IO  # noqa: E402
-from hdmf.backends.zarr.zarr_tools import ZarrIO as _ZarrIO
-from hdmf.validate import ValidatorMap  # noqa: E402
-from hdmf.build import BuildManager  # noqa: E402
-
-from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa: E402
-
 __core_ns_file_name = 'nwb.namespace.yaml'
+
+from .spec import NWBDatasetSpec, NWBGroupSpec, NWBNamespace  # noqa E402
 
 
 def __get_resources():
     from pkg_resources import resource_filename
-    from os.path import join
     ret = dict()
-    ret['namespace_path'] = join(resource_filename(__name__, 'data'), __core_ns_file_name)
+    ret['namespace_path'] = os.path.join(resource_filename(__name__, 'nwb-schema/core'), __core_ns_file_name)
     return ret
 
 
@@ -41,20 +40,22 @@ global __TYPE_MAP
 
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
-from hdmf.build import TypeMap as TypeMap  # noqa: E402
+hdmf_typemap = hdmf.common.get_type_map()
+__NS_CATALOG.merge(hdmf_typemap.namespace_catalog)
 
 __TYPE_MAP = TypeMap(__NS_CATALOG)
+__TYPE_MAP.merge(hdmf_typemap)
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
-         'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
+         'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
          'default': None},
-        returns="the namespaces loaded from the given file", rtype=tuple,
+        returns="TypeMap loaded for the given extension or NWB core namespace", rtype=tuple,
         is_method=False)
 def get_type_map(**kwargs):
     '''
-    Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
-    return a BuildManager that uses the core namespace
+    Get the TypeMap for the given extensions. If no extensions are provided,
+    return the TypeMap for the core namespace
     '''
     extensions = getargs('extensions', kwargs)
     type_map = None
@@ -72,8 +73,7 @@ def get_type_map(**kwargs):
                 elif isinstance(ext, TypeMap):
                     type_map.merge(ext)
                 else:
-                    msg = 'extensions must be a list of paths to namespace specs or a TypeMaps'
-                    raise ValueError(msg)
+                    raise ValueError('extensions must be a list of paths to namespace specs or a TypeMaps')
         elif isinstance(extensions, str):
             type_map.load_namespaces(extensions)
         elif isinstance(extensions, TypeMap):
@@ -81,9 +81,7 @@ def get_type_map(**kwargs):
     return type_map
 
 
-@docval({'name': 'extensions', 'type': (str, TypeMap, list),
-         'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
-         'default': None},
+@docval(*get_docval(get_type_map),
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
 def get_manager(**kwargs):
@@ -95,8 +93,7 @@ def get_manager(**kwargs):
     return BuildManager(type_map)
 
 
-@docval({'name': 'namespace_path', 'type': str,
-         'doc': 'the path to the YAML with the namespace definition'},
+@docval({'name': 'namespace_path', 'type': str, 'doc': 'the path to the YAML with the namespace definition'},
         returns="the namespaces loaded from the given file", rtype=tuple,
         is_method=False)
 def load_namespaces(**kwargs):
@@ -114,14 +111,15 @@ if os.path.exists(__resources['namespace_path']):
 
 
 def available_namespaces():
+    """Returns all namespaces registered in the namespace catalog"""
     return __NS_CATALOG.namespaces
 
 
 # a function to register a container classes with the global map
 @docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the spec for'},
         {'name': 'namespace', 'type': str, 'doc': 'the name of the namespace'},
-        {"name": "container_cls", "type": type,
-         "doc": "the class to map to the specified neurodata_type", 'default': None},
+        {"name": "container_cls", "type": type, "doc": "the class to map to the specified neurodata_type",
+         'default': None},
         is_method=False)
 def register_class(**kwargs):
     """Register an NWBContainer class to use for reading and writing a neurodata_type from a specification
@@ -141,13 +139,13 @@ def register_class(**kwargs):
 
 # a function to register an object mapper for a container class
 @docval({"name": "container_cls", "type": type,
-         "doc": "the Container class for which the given ObjectMapper class gets used for"},
+         "doc": "the Container class for which the given ObjectMapper class gets used"},
         {"name": "mapper_cls", "type": type, "doc": "the ObjectMapper class to use to map", 'default': None},
         is_method=False)
 def register_map(**kwargs):
     """Register an ObjectMapper to use for a Container class type
-    If mapper_cls is not specified, returns a decorator for registering an ObjectMapper class
-    as the mapper for container_cls. If mapper_cls specified, register the class as the mapper for container_cls
+    If mapper_cls is not specified, returns a decorator for registering an ObjectMapper class as the mapper for
+    container_cls. If mapper_cls is specified, register the class as the mapper for container_cls
     """
     container_cls, mapper_cls = getargs('container_cls', 'mapper_cls', kwargs)
 
@@ -160,22 +158,38 @@ def register_map(**kwargs):
         _dec(mapper_cls)
 
 
-# a function to get the container class for a give type
-@docval({'name': 'neurodata_type', 'type': str,
-         'doc': 'the neurodata_type to get the NWBConatiner class for'},
+@docval({'name': 'neurodata_type', 'type': str, 'doc': 'the neurodata_type to get the NWBContainer class for'},
         {'name': 'namespace', 'type': str, 'doc': 'the namespace the neurodata_type is defined in'},
         is_method=False)
 def get_class(**kwargs):
-    """Get the class object of the NWBContainer subclass corresponding to a given neurdata_type.
+    """
+    Parse the YAML file for a given neurodata_type that is a subclass of NWBContainer and automatically generate its
+    python API. This will work for most containers, but is known to not work for descendants of MultiContainerInterface
+    and DynamicTable, so these must be defined manually (for now). `get_class` infers the API mapping directly from the
+    specification. If you want to define a custom mapping, you should not use this function and you should define the
+    class manually.
+
+    Examples:
+
+    Generating and registering an extension is as simple as::
+
+        MyClass = get_class('MyClass', 'ndx-my-extension')
+
+    `get_class` defines only the `__init__` for the class. In cases where you want to provide additional methods for
+    querying, plotting, etc. you can still use `get_class` and attach methods to the class after-the-fact, e.g.::
+
+        def get_sum(self, a, b):
+            return self.feat1 + self.feat2
+
+        MyClass.get_sum = get_sum
+
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
     return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
 
 
-@docval({'name': 'io', 'type': HDMFIO,
-         'doc': 'the HDMFIO object to read from'},
-        {'name': 'namespace', 'type': str,
-         'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
+@docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
+        {'name': 'namespace', 'type': str, 'doc': 'the namespace to validate against', 'default': CORE_NAMESPACE},
         returns="errors in the file", rtype=list,
         is_method=False)
 def validate(**kwargs):
@@ -196,8 +210,8 @@ class NWBHDF5IO(_HDF5IO):
              'default': False},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
-             'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
-             to namespaces and TypeMaps', 'default': None},
+             'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
+             'default': None},
             {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
              'default': None})
@@ -209,12 +223,11 @@ class NWBHDF5IO(_HDF5IO):
                 warn("loading namespaces from file - ignoring 'manager'")
             if extensions is not None:
                 warn("loading namespaces from file - ignoring 'extensions' argument")
-            # namespaces are not loaded when creating an NWBHDF5IO object in write mode
-            if 'w' in mode or mode == 'x':
+            if 'w' in mode or mode == 'x':  # namespaces are not loaded in write mode
                 raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
-            super(NWBHDF5IO, self).load_namespaces(tm, path)
+            super().load_namespaces(tm, path, file=file_obj)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
@@ -230,7 +243,19 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
+        super().__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
+
+    @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
+            {'name': 'nwbfile', 'type': 'NWBFile',
+             'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
+             'default': None},
+            {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
+             'default': dict()})
+    def export(self, **kwargs):
+        nwbfile = popargs('nwbfile', kwargs)
+        kwargs['container'] = nwbfile
+        call_docval_func(super().export, kwargs)
+
 
 class NWBZarrIO(_ZarrIO):
 
@@ -242,25 +267,25 @@ class NWBZarrIO(_ZarrIO):
              'default': False},
             {'name': 'manager', 'type': BuildManager, 'doc': 'the BuildManager to use for I/O', 'default': None},
             {'name': 'extensions', 'type': (str, TypeMap, list),
-              'doc': 'a path to a namespace, a TypeMap, or a list consisting paths \
-              to namespaces and TypeMaps', 'default': None},
+             'doc': 'a path to a namespace, a TypeMap, or a list consisting paths to namespaces and TypeMaps',
+             'default': None},
             {'name': 'comm', 'type': 'Intracomm',
              'doc': 'the MPI communicator to use for parallel I/O', 'default': None},
-            {'name': 'chunking', 'type': bool, 'doc': "Enable/Disable chunking of datasets by default", 'default': True})
+            {'name': 'chunking', 'type': bool, 'doc': 'Enable/Disable chunking of datasets by default',
+             'default': True})
     def __init__(self, **kwargs):
         path, mode, manager, extensions, load_namespaces, comm, chunking =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'comm','chunking', kwargs)
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'comm', 'chunking', kwargs)
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
             if extensions is not None:
                 warn("loading namespaces from file - ignoring 'extensions' argument")
-            # namespaces are not loaded when creating an NWBHDF5IO object in write mode
-            if 'w' in mode or mode == 'x':
+            if 'w' in mode or mode == 'x':  # namespaces are not loaded in write mode
                 raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
-            super(NWBZarrIO, self).load_namespaces(tm, path)
+            super().load_namespaces(tm, path)
             manager = BuildManager(tm)
         else:
             if manager is not None and extensions is not None:
@@ -269,13 +294,24 @@ class NWBZarrIO(_ZarrIO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBZarrIO, self).__init__(path, manager=manager, mode=mode, comm=comm, chunking=chunking)
+        super().__init__(path, manager=manager, mode=mode, comm=comm, chunking=chunking)
+
+    @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
+            {'name': 'nwbfile', 'type': 'NWBFile',
+             'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
+             'default': None},
+            {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
+             'default': dict()})
+    def export(self, **kwargs):
+        nwbfile = popargs('nwbfile', kwargs)
+        kwargs['container'] = nwbfile
+        call_docval_func(super().export, kwargs)
 
 
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
 from .base import TimeSeries, ProcessingModule  # noqa: F401,E402
-from .file import NWBFile  # noqa: E402, F401
+from .file import NWBFile  # noqa: F401,E402
 
 from . import behavior  # noqa: F401,E402
 from . import device  # noqa: F401,E402
@@ -288,6 +324,8 @@ from . import ogen  # noqa: F401,E402
 from . import ophys  # noqa: F401,E402
 from . import retinotopy  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
+from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
+from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']

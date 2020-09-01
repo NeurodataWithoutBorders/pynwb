@@ -20,8 +20,6 @@ clarity, we define them here:
 from datetime import datetime
 from dateutil.tz import tzlocal
 
-import numpy as np
-
 from pynwb import NWBFile
 from pynwb.ophys import TwoPhotonSeries, OpticalChannel, ImageSegmentation, Fluorescence
 from pynwb.device import Device
@@ -53,9 +51,12 @@ nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzl
 device = Device('imaging_device_1')
 nwbfile.add_device(device)
 optical_channel = OpticalChannel('my_optchan', 'description', 500.)
-imaging_plane = nwbfile.create_imaging_plane('my_imgpln', optical_channel, 'a very interesting part of the brain',
-                                             device, 600., 300., 'GFP', 'my favorite brain location',
-                                             np.ones((5, 5, 3)), 4.0, 'manifold unit', 'A frame to refer to')
+imaging_plane = nwbfile.create_imaging_plane('my_imgpln', optical_channel,
+                                             description='a very interesting part of the brain',
+                                             device=device, excitation_lambda=600., imaging_rate=300., indicator='GFP',
+                                             location='my favorite brain location',
+                                             reference_frame='A frame to refer to',
+                                             grid_spacing=(.01, .01))
 
 
 ####################
@@ -146,7 +147,7 @@ rt_region = ps.create_roi_table_region('the first of two ROIs', region=[0])
 
 data = [0., 1., 2., 3., 4., 5., 6., 7., 8., 9.]
 timestamps = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-rrs = fl.create_roi_response_series('my_rrs', data, 'lumens', rt_region, timestamps=timestamps)
+rrs = fl.create_roi_response_series('my_rrs', data, rt_region, unit='lumens', timestamps=timestamps)
 
 
 ####################

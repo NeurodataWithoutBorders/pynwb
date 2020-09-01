@@ -9,6 +9,8 @@ Create an nwb file from Allen Brain Observatory data.
 # This example demostrates the basic functionality of several parts of the pynwb write API, centered around the optical
 # physiology submodule (pynwb.ophys). We will use the allensdk as a read API, while leveraging the pynwb data model and
 # write api to transform and write the data back to disk.
+#
+# .. note: Using the latest allensdk package requires Python 3.6 or higher.
 
 ########################################
 # .. raw:: html

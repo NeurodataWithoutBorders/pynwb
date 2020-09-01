@@ -6,7 +6,7 @@ Dependencies
 
 PyNWB has the following minimum requirements, which must be installed before you can get started using PyNWB.
 
-#. Python 2.7, Python 3.5 or Python 3.6
+#. Python 3.5, 3.6, or 3.7
 #. pip
 
 ------------
@@ -26,12 +26,12 @@ To install or update PyNWB distribution from PyPI simply run:
 
 This will automatically install the following required dependencies:
 
+ #. hdmf
  #. h5py
  #. numpy
+ #. pandas
  #. python-dateutil
- #. requests
- #. ruamel.yaml
- #. six
+
 
 Install release from Conda-forge
 --------------------------------
@@ -49,7 +49,7 @@ To install or update PyNWB distribution from conda-forge using conda simply run:
 Install latest pre-release
 --------------------------
 
-This is useful to tryout the latest features and also setup continuous integration of your
+This is useful to try out the latest features and also set up continuous integration of your
 own project against the latest version of PyNWB.
 
 .. code::
@@ -71,9 +71,9 @@ For development an editable install is recommended.
    $ pip install -U virtualenv
    $ virtualenv ~/pynwb
    $ source ~/pynwb/bin/activate
-   $ git clone git@github.com:NeurodataWithoutBorders/pynwb.git
+   $ git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
    $ cd pynwb
-   $ pip install -r requirements.txt -r requirements-dev.txt
+   $ pip install -r requirements.txt
    $ pip install -e .
 
 
@@ -87,11 +87,15 @@ For running the tests, it is required to install the development requirements.
    $ pip install -U virtualenv
    $ virtualenv ~/pynwb
    $ source ~/pynwb/bin/activate
-   $ git clone git@github.com:NeurodataWithoutBorders/pynwb.git
+   $ git clone --recurse-submodules git@github.com:NeurodataWithoutBorders/pynwb.git
    $ cd pynwb
    $ pip install -r requirements.txt -r requirements-dev.txt
    $ pip install -e .
    $ tox
+
+For debugging it can be useful to keep the intermediate NWB files created by
+the tests. To keep these files create the environment variables
+``CLEAN_NWB``/``CLEAN_HDMF`` and set them to ``1``.
 
 
 Following PyNWB Style Guide

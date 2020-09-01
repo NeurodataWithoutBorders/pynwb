@@ -539,7 +539,7 @@ write_test_file(filename='basic_sparse_iterwrite_largearray.nwb',
 # Let's verify that our data was written correctly
 
 # Read the NWB file
-from pynwb import NWBHDF5IO    # noqa
+from pynwb import NWBHDF5IO  # noqa: F811
 
 io = NWBHDF5IO('basic_sparse_iterwrite_largearray.nwb', 'r')
 nwbfile = io.read()
@@ -589,7 +589,7 @@ for f in channel_files:
 # Step 1: Create a data chunk iterator for our multifile array
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-from hdmf.data_utils import AbstractDataChunkIterator, DataChunk   # noqa
+from hdmf.data_utils import AbstractDataChunkIterator, DataChunk  # noqa: F811
 
 
 class MultiFileArrayIterator(AbstractDataChunkIterator):
@@ -680,4 +680,95 @@ write_test_file(filename='basic_sparse_iterwrite_multifile.nwb',
 #      individual, complete elements along the first dimension of the array one-at-a-time). Depending on the generator,
 #      this may or may not result in an error on write, but the array you are generating will probably end up
 #      at least not having the intended shape.
+#    * The shape of the chunks returned by the ``DataChunkIterator`` do not match the shape of the chunks of the
+#      target HDF5 dataset. This can result in slow I/O performance, for example, when each chunk of an HDF5 dataset
+#      needs to be updated multiple times on write. For example, when using compression this would mean that HDF5
+#      may have to read, decompress, update, compress, and write a particular chunk each time it is being updated.
 #
+#
+
+####################
+# Alternative Approach: User-defined dataset write
+# ----------------------------------------------------
+#
+# In the above cases we used the built-in capabilities of PyNWB to perform iterative data write. To
+# gain more fine-grained control of the write process we can alternatively use PyNWB to setup the full
+# structure of our NWB:N file and then update select datasets afterwards. This approach is useful, e.g.,
+# in context of parallel write and any time we need to optimize write patterns.
+#
+#
+
+####################
+# Step 1: Initially allocate the data as empty
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+from hdmf.backends.hdf5.h5_utils import H5DataIO
+
+write_test_file(filename='basic_alternative_custom_write.nwb',
+                data=H5DataIO(data=np.empty(shape=(0, 10), dtype='float'),
+                              maxshape=(None, 10),  # <-- Make the time dimension resizable
+                              chunks=(131072, 2),   # <-- Use 2MB chunks
+                              compression='gzip',   # <-- Enable GZip compression
+                              compression_opts=4,   # <-- GZip aggression
+                              shuffle=True,         # <-- Enable shuffle filter
+                              fillvalue=np.nan      # <-- Use NAN as fillvalue
+                              )
+                )
+
+####################
+# Step 2: Get the dataset(s) to be updated
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+from pynwb import NWBHDF5IO    # noqa
+
+io = NWBHDF5IO('basic_alternative_custom_write.nwb', mode='a')
+nwbfile = io.read()
+data = nwbfile.get_acquisition('synthetic_timeseries').data
+
+# Let's check what the data looks like
+print("Shape %s, Chunks: %s, Maxshape=%s" % (str(data.shape), str(data.chunks), str(data.maxshape)))
+
+####################
+# ``[Out]:``
+#
+#  .. code-block:: python
+#
+#       Shape (0, 10), Chunks: (131072, 2), Maxshape=(None, 10)
+#
+
+####################
+# Step 3: Implement custom write
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+
+data.resize((8, 10))    # <-- Allocate the space with need
+data[0:3, :] = 1        # <-- Write timesteps 0,1,2
+data[3:6, :] = 2        # <-- Write timesteps 3,4,5,  Note timesteps 6,7 are not being initialized
+io.close()              # <-- Close the file
+
+
+####################
+# Check the results
+# ^^^^^^^^^^^^^^^^^
+
+from pynwb import NWBHDF5IO    # noqa
+
+io = NWBHDF5IO('basic_alternative_custom_write.nwb', mode='a')
+nwbfile = io.read()
+data = nwbfile.get_acquisition('synthetic_timeseries').data
+print(data[:])
+io.close()
+
+####################
+# ``[Out]:``
+#
+#  .. code-block:: python
+#
+#       [[  1.   1.   1.   1.   1.   1.   1.   1.   1.   1.]
+#        [  1.   1.   1.   1.   1.   1.   1.   1.   1.   1.]
+#        [  1.   1.   1.   1.   1.   1.   1.   1.   1.   1.]
+#        [  2.   2.   2.   2.   2.   2.   2.   2.   2.   2.]
+#        [  2.   2.   2.   2.   2.   2.   2.   2.   2.   2.]
+#        [  2.   2.   2.   2.   2.   2.   2.   2.   2.   2.]
+#        [ nan  nan  nan  nan  nan  nan  nan  nan  nan  nan]
+#        [ nan  nan  nan  nan  nan  nan  nan  nan  nan  nan]]

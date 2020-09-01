@@ -1,15 +1,11 @@
-try:
-    from collections.abc import Iterable  # Python 3
-except ImportError:
-    from collections import Iterable  # Python 2.7
+import warnings
 
-import numpy as np
-
-from hdmf.utils import docval, popargs, fmt_docval_args, call_docval_func
+from hdmf.common import DynamicTable
+from hdmf.utils import docval, popargs, call_docval_func, get_docval
 
 from . import register_class, CORE_NAMESPACE
-from .base import TimeSeries, _default_resolution, _default_conversion
-from .core import NWBContainer, DynamicTable, ElementIdentifiers
+from .base import TimeSeries
+from .core import NWBContainer
 from .device import Device
 
 
@@ -30,8 +26,8 @@ class IntracellularElectrode(NWBContainer):
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this electrode'},
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record from this electrode'},
             {'name': 'description', 'type': str,
-             'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc) \
-             COMMENT: Free-form text (can be from Methods)'},
+             'doc': 'Recording description, description of electrode (e.g.,  whole-cell, sharp, etc) '
+                    'COMMENT: Free-form text (can be from Methods)'},
             {'name': 'slice', 'type': str, 'doc': 'Information about slice used for recording.', 'default': None},
             {'name': 'seal', 'type': str, 'doc': 'Information about seal used for recording.', 'default': None},
             {'name': 'location', 'type': str,
@@ -44,8 +40,7 @@ class IntracellularElectrode(NWBContainer):
         slice, seal, description, location, resistance, filtering, initial_access_resistance, device = popargs(
             'slice', 'seal', 'description', 'location', 'resistance',
             'filtering', 'initial_access_resistance', 'device', kwargs)
-        pargs, pkwargs = fmt_docval_args(super(IntracellularElectrode, self).__init__, kwargs)
-        super(IntracellularElectrode, self).__init__(*pargs, **pkwargs)
+        call_docval_func(super().__init__, kwargs)
         self.slice = slice
         self.seal = seal
         self.description = description
@@ -68,48 +63,24 @@ class PatchClampSeries(TimeSeries):
                      'stimulus_description',
                      'sweep_number')
 
-    _help = "Superclass definition for patch-clamp data."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-
-            {'name': 'electrode', 'type': IntracellularElectrode,
-             'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
-             or record this data.'},
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
+    @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
+            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
+             'doc': 'The data values. The first dimension must be time.'},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},  # required
+            {'name': 'electrode', 'type': IntracellularElectrode,  # required
+             'doc': 'IntracellularElectrode group that describes the electrode that was used to apply '
+                     'or record this data.'},
+            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},  # required
             {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
-
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to convert to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'sweep_number', 'type': (int, 'uint64'),
-             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
-                     via the sweep_table', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+            *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
+                        'comments', 'description', 'control', 'control_description'),
+            {'name': 'sweep_number', 'type': (int, 'uint32', 'uint64'),
+             'doc': 'Sweep number, allows for grouping different PatchClampSeries together '
+                    'via the sweep_table', 'default': None})
     def __init__(self, **kwargs):
-        name, data, unit, stimulus_description = popargs('name', 'data',
-                                                         'unit', 'stimulus_description', kwargs)
+        name, data, unit, stimulus_description = popargs('name', 'data', 'unit', 'stimulus_description', kwargs)
         electrode, gain, sweep_number = popargs('electrode', 'gain', 'sweep_number', kwargs)
-        super(PatchClampSeries, self).__init__(name, data, unit, **kwargs)
+        super().__init__(name, data, unit, **kwargs)
         self.electrode = electrode
         self.gain = gain
         self.stimulus_description = stimulus_description
@@ -118,7 +89,7 @@ class PatchClampSeries(TimeSeries):
             if not (sweep_number >= 0):
                 raise ValueError("sweep_number must be a non-negative integer")
 
-            self.sweep_number = np.uint64(sweep_number)
+            self.sweep_number = sweep_number
 
 
 @register_class('CurrentClampSeries', CORE_NAMESPACE)
@@ -133,53 +104,22 @@ class CurrentClampSeries(PatchClampSeries):
                      'bridge_balance',
                      'capacitance_compensation')
 
-    _help = "Voltage recorded from cell during current-clamprecording."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-
-            {'name': 'electrode', 'type': IntracellularElectrode,
-             'doc': 'IntracellularElectrode group that describes the electrode that was used to apply or \
-             record this data.'},
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
-
-            {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': None},
-            {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
-            {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad', 'default': None},
-
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'sweep_number', 'type': (int, 'uint64'),
-             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
-                     via the sweep_table', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
+            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Volt'},
+            *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
+            {'name': 'bias_current', 'type': 'float', 'doc': 'Unit: Amp', 'default': None},
+            {'name': 'bridge_balance', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
+            {'name': 'capacitance_compensation', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
+            *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
+                        'comments', 'description', 'control', 'control_description', 'sweep_number'),
+            {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
+             'default': 'volts'})
     def __init__(self, **kwargs):
-        name, data, unit = popargs('name', 'data', 'unit', kwargs)
-        electrode, gain = popargs('electrode', 'gain', kwargs)
+        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        unit = ensure_unit(self, name, unit, 'volts', '2.1.0')
         bias_current, bridge_balance, capacitance_compensation = popargs(
             'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
-        super(CurrentClampSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
+        super().__init__(name, data, unit, electrode, gain, **kwargs)
         self.bias_current = bias_current
         self.bridge_balance = bridge_balance
         self.capacitance_compensation = capacitance_compensation
@@ -196,102 +136,39 @@ class IZeroClampSeries(CurrentClampSeries):
 
     __nwbfields__ = ()
 
-    _help = "Voltage from intracellular recordings when all current and amplifier settings are off,"
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'electrode', 'type': IntracellularElectrode,
-             'doc': 'IntracellularElectrode group that describes the electrode that was used to apply \
-             or record this data.'},
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
-
-            {'name': 'bias_current', 'type': float, 'doc': 'Unit: Amp', 'default': 0.0},
-            {'name': 'bridge_balance', 'type': float, 'doc': 'Unit: Ohm', 'default': 0.0},
-            {'name': 'capacitance_compensation', 'type': float, 'doc': 'Unit: Farad', 'default': 0.0},
-
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts', 'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'sweep_number', 'type': (int, 'uint64'),
-             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
-                     via the sweep_table', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    @docval(*get_docval(CurrentClampSeries.__init__, 'name', 'data', 'electrode'),  # required
+            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Volt'},  # required
+            *get_docval(CurrentClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
+                        'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
+                        'sweep_number'),
+            {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
+             'default': 'volts'})
     def __init__(self, **kwargs):
-        name, data, unit = popargs('name', 'data', 'unit', kwargs)
-        electrode, gain = popargs('electrode', 'gain', kwargs)
-        bias_current, bridge_balance, capacitance_compensation = popargs(
-            'bias_current', 'bridge_balance', 'capacitance_compensation', kwargs)
-        super(IZeroClampSeries, self).__init__(name, data, unit, electrode, gain, bias_current,
-                                               bridge_balance, capacitance_compensation, **kwargs)
+        name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
+        bias_current, bridge_balance, capacitance_compensation = (0.0, 0.0, 0.0)
+        super().__init__(name, data, electrode, gain, bias_current, bridge_balance, capacitance_compensation,
+                         **kwargs)
 
 
 @register_class('CurrentClampStimulusSeries', CORE_NAMESPACE)
 class CurrentClampStimulusSeries(PatchClampSeries):
     '''
-    Aliases to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries for
+    Alias to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries for
     machine (and human) readability of the file.
     '''
 
     __nwbfields__ = ()
 
-    _help = "Stimulus current applied during current clamp recording."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-
-            {'name': 'electrode', 'type': IntracellularElectrode,
-             'doc': 'IntracellularElectrode group that describes the electrode that was used to \
-             apply or record this data.'},
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
-
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts',
-             'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'sweep_number', 'type': (int, 'uint64'),
-             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
-                     via the sweep_table', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
+            *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
+                        'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
+                        'sweep_number'),
+            {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
+             'default': 'amperes'})
     def __init__(self, **kwargs):
-        name, data, unit = popargs('name', 'data', 'unit', kwargs)
-        electrode, gain = popargs('electrode', 'gain', kwargs)
-        super(CurrentClampStimulusSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
+        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        unit = ensure_unit(self, name, unit, 'amperes', '2.1.0')
+        super().__init__(name, data, unit, electrode, gain, **kwargs)
 
 
 @register_class('VoltageClampSeries', CORE_NAMESPACE)
@@ -310,57 +187,29 @@ class VoltageClampSeries(PatchClampSeries):
                      'whole_cell_capacitance_comp',
                      'whole_cell_series_resistance_comp')
 
-    _help = "Current recorded from cell during voltage-clamp recording"
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-
-            {'name': 'electrode', 'type': IntracellularElectrode,
-             'doc': 'IntracellularElectrode group that describes the electrode that was used to \
-             apply or record this data.'},
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
-            {'name': 'capacitance_fast', 'type': float, 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'capacitance_slow', 'type': float, 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'resistance_comp_bandwidth', 'type': float, 'doc': 'Unit: Hz', 'default': None},
-            {'name': 'resistance_comp_correction', 'type': float, 'doc': 'Unit: %', 'default': None},
-            {'name': 'resistance_comp_prediction', 'type': float, 'doc': 'Unit: %', 'default': None},
-            {'name': 'whole_cell_capacitance_comp', 'type': float, 'doc': 'Unit: Farad', 'default': None},
-            {'name': 'whole_cell_series_resistance_comp', 'type': float, 'doc': 'Unit: Ohm', 'default': None},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts',
-             'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'sweep_number', 'type': (int, 'uint64'),
-             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
-                     via the sweep_table', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode'),  # required
+            {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Amp'},  # required
+            *get_docval(PatchClampSeries.__init__, 'stimulus_description'),
+            {'name': 'capacitance_fast', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'capacitance_slow', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'resistance_comp_bandwidth', 'type': 'float', 'doc': 'Unit: Hz', 'default': None},
+            {'name': 'resistance_comp_correction', 'type': 'float', 'doc': 'Unit: percent', 'default': None},
+            {'name': 'resistance_comp_prediction', 'type': 'float', 'doc': 'Unit: percent', 'default': None},
+            {'name': 'whole_cell_capacitance_comp', 'type': 'float', 'doc': 'Unit: Farad', 'default': None},
+            {'name': 'whole_cell_series_resistance_comp', 'type': 'float', 'doc': 'Unit: Ohm', 'default': None},
+            *get_docval(PatchClampSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
+                        'comments', 'description', 'control', 'control_description', 'sweep_number'),
+            {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'amperes')",
+             'default': 'amperes'})
     def __init__(self, **kwargs):
-        name, data, unit = popargs('name', 'data', 'unit', kwargs)
-        electrode, gain = popargs('electrode', 'gain', kwargs)
+        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        unit = ensure_unit(self, name, unit, 'amperes', '2.1.0')
         capacitance_fast, capacitance_slow, resistance_comp_bandwidth, resistance_comp_correction, \
             resistance_comp_prediction, whole_cell_capacitance_comp, whole_cell_series_resistance_comp = popargs(
                 'capacitance_fast', 'capacitance_slow', 'resistance_comp_bandwidth',
                 'resistance_comp_correction', 'resistance_comp_prediction', 'whole_cell_capacitance_comp',
                 'whole_cell_series_resistance_comp', kwargs)
-        super(VoltageClampSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
+        super().__init__(name, data, unit, electrode, gain, **kwargs)
         self.capacitance_fast = capacitance_fast
         self.capacitance_slow = capacitance_slow
         self.resistance_comp_bandwidth = resistance_comp_bandwidth
@@ -373,56 +222,29 @@ class VoltageClampSeries(PatchClampSeries):
 @register_class('VoltageClampStimulusSeries', CORE_NAMESPACE)
 class VoltageClampStimulusSeries(PatchClampSeries):
     '''
-    Aliases to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries for
+    Alias to standard PatchClampSeries. Its functionality is to better tag PatchClampSeries for
     machine (and human) readability of the file.
     '''
 
     __nwbfields__ = ()
 
-    _help = "Stimulus voltage applied during voltage clamp recording."
-
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)'},
-            {'name': 'electrode', 'type': IntracellularElectrode,
-             'doc': 'IntracellularElectrode group that describes the electrode that was \
-             used to apply or record this data.'},
-            {'name': 'gain', 'type': float, 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
-            {'name': 'resolution', 'type': float,
-             'doc': 'The smallest meaningful difference (in specified unit) between values in data',
-             'default': _default_resolution},
-            {'name': 'conversion', 'type': float,
-             'doc': 'Scalar to multiply each element by to conver to volts',
-             'default': _default_conversion},
-            {'name': 'timestamps', 'type': ('array_data', 'data', TimeSeries),
-             'doc': 'Timestamps for samples stored in data', 'default': None},
-            {'name': 'starting_time', 'type': float, 'doc': 'The timestamp of the first sample', 'default': None},
-            {'name': 'rate', 'type': float, 'doc': 'Sampling rate in Hz', 'default': None},
-            {'name': 'comments', 'type': str,
-             'doc': 'Human-readable comments about this TimeSeries dataset', 'default': 'no comments'},
-            {'name': 'description', 'type': str,
-             'doc': 'Description of this TimeSeries dataset', 'default': 'no description'},
-            {'name': 'control', 'type': Iterable,
-             'doc': 'Numerical labels that apply to each element in data', 'default': None},
-            {'name': 'control_description', 'type': Iterable,
-             'doc': 'Description of each control value', 'default': None},
-            {'name': 'sweep_number', 'type': (int, 'uint64'),
-             'doc': 'Sweep number, allows for grouping different PatchClampSeries together \
-                     via the sweep_table', 'default': None},
-            {'name': 'parent', 'type': 'NWBContainer',
-             'doc': 'The parent NWBContainer for this NWBContainer', 'default': None})
+    @docval(*get_docval(PatchClampSeries.__init__, 'name', 'data', 'electrode', 'gain'),  # required
+            *get_docval(PatchClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
+                        'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
+                        'sweep_number'),
+            {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
+             'default': 'volts'})
     def __init__(self, **kwargs):
-        name, data, unit = popargs('name', 'data', 'unit', kwargs)
-        electrode, gain = popargs('electrode', 'gain', kwargs)
-        super(VoltageClampStimulusSeries, self).__init__(name, data, unit, electrode, gain, **kwargs)
+        name, data, unit, electrode, gain = popargs('name', 'data', 'unit', 'electrode', 'gain', kwargs)
+        unit = ensure_unit(self, name, unit, 'volts', '2.1.0')
+        super().__init__(name, data, unit, electrode, gain, **kwargs)
 
 
 @register_class('SweepTable', CORE_NAMESPACE)
 class SweepTable(DynamicTable):
     """
     A SweepTable allows to group PatchClampSeries together which stem from the same sweep.
+    A sweep is a group of PatchClampSeries which have the same starting point in time.
     """
 
     __columns__ = (
@@ -434,16 +256,12 @@ class SweepTable(DynamicTable):
     @docval({'name': 'name', 'type': str, 'doc': 'name of this SweepTable', 'default': 'sweep_table'},
             {'name': 'description', 'type': str, 'doc': 'Description of this SweepTable',
              'default': "A sweep table groups different PatchClampSeries together."},
-            {'name': 'id', 'type': ('array_data', ElementIdentifiers), 'doc': 'the identifiers for this table',
-             'default': None},
-            {'name': 'columns', 'type': (tuple, list), 'doc': 'the columns in this table', 'default': None},
-            {'name': 'colnames', 'type': 'array_data', 'doc': 'the names of the columns in this table',
-             'default': None})
+            *get_docval(DynamicTable.__init__, 'id', 'columns', 'colnames'))
     def __init__(self, **kwargs):
-        call_docval_func(super(SweepTable, self).__init__, kwargs)
+        call_docval_func(super().__init__, kwargs)
 
-    @docval({'name': 'pcs', 'type': PatchClampSeries, 'doc': 'PatchClampSeries to add to the table ' +
-            'must have a valid sweep_number'})
+    @docval({'name': 'pcs', 'type': PatchClampSeries,
+             'doc': 'PatchClampSeries to add to the table must have a valid sweep_number'})
     def add_entry(self, pcs):
         """
         Add the passed PatchClampSeries to the sweep table.
@@ -479,3 +297,17 @@ class SweepTable(DynamicTable):
         """
 
         return [index for index, elem in enumerate(self['sweep_number'].data) if elem == sweep_number]
+
+
+def ensure_unit(self, name, current_unit, unit, nwb_version):
+    """A helper to ensure correct unit used.
+
+    Issues a warning with details if `current_unit` is to be ignored, and
+    `unit` to be used instead.
+    """
+    if current_unit != unit:
+        warnings.warn(
+            "Unit '%s' for %s '%s' is ignored and will be set to '%s' "
+            "as per NWB %s."
+            % (current_unit, self.__class__.__name__, name, unit, nwb_version))
+    return unit
