@@ -42,6 +42,7 @@ breaking down the barriers to data sharing in neuroscience.
    extensions
    building_api
    validation
+   versions
    api_docs
    software_process
    make_roundtrip_test
