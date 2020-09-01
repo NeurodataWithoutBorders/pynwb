@@ -115,9 +115,11 @@ def main():
                 continue
 
         with NWBHDF5IO(path, mode='r', manager=manager) as io:
-            for ns in namespaces:
-                print("Validating {} against {} using namespace {}.".format(path, specloc, ns))
-                ret = ret or _validate_helper(io=io, namespace=ns)
+            for ns_name in namespaces:
+                ns = io.manager.namespace_catalog.get_namespace(name=ns_name)
+                print("Validating {} against {} using namespace '{}' version {}.".format(
+                      path, specloc, ns_name, ns['version']))
+                ret = ret or _validate_helper(io=io, namespace=ns_name)
 
     sys.exit(ret)
 

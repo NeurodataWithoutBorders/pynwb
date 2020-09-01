@@ -2,7 +2,7 @@ import subprocess
 import re
 
 from pynwb.testing import TestCase
-from pynwb import validate, NWBHDF5IO
+from pynwb import validate, NWBHDF5IO, available_namespaces, CORE_NAMESPACE
 
 
 class TestValidateScript(TestCase):
@@ -10,6 +10,9 @@ class TestValidateScript(TestCase):
     # 1.0.2_nwbfile.nwb has no cached specifications
     # 1.0.3_nwbfile.nwb has cached "core" specification
     # 1.1.2_nwbfile.nwb has cached "core" and "hdmf-common" specifications
+
+    def setUp(self):
+        self.curr_schema_version = available_namespaces()[CORE_NAMESPACE]
 
     def test_validate_file_no_cache(self):
         """Test that validating a file with no cached spec against the core namespace succeeds."""
@@ -26,7 +29,7 @@ class TestValidateScript(TestCase):
 
         stdout_regex = re.compile(
             r"Validating tests/back_compat/1\.0\.2_nwbfile\.nwb against pynwb namespace information using namespace "
-            r"'core'\.\s* - no errors found\.\s*")
+            r"'core' version %s\.\s* - no errors found\.\s*" % self.curr_schema_version)
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
     def test_validate_file_no_cache_bad_ns(self):
@@ -54,7 +57,7 @@ class TestValidateScript(TestCase):
 
         stdout_regex = re.compile(
             r"Validating tests/back_compat/1\.1\.2_nwbfile\.nwb against cached namespace information using namespace "
-            r"'core'\.\s* - no errors found\.\s*")
+            r"'core' version 2.1.0\.\s* - no errors found\.\s*")
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
     def test_validate_file_cached_bad_ns(self):
@@ -82,7 +85,7 @@ class TestValidateScript(TestCase):
 
         stdout_regex = re.compile(
             r"Validating tests/back_compat/1.1.2_nwbfile.nwb against cached namespace information using namespace "
-            r"'hdmf-common'.\s*"
+            r"'hdmf-common' version 1.0.0.\s*"
         )
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
@@ -95,7 +98,7 @@ class TestValidateScript(TestCase):
 
         stdout_regex = re.compile(
             r"Validating tests/back_compat/1\.1\.2_nwbfile\.nwb against pynwb namespace information using namespace "
-            r"'core'\.\s* - no errors found\.\s*")
+            r"'core' version %s\.\s* - no errors found\.\s*" % self.curr_schema_version)
         self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
 

@@ -133,45 +133,6 @@ class TestExtension(TestCase):
         nwbfile.add_lab_meta_data(MyTestMetaData(name='test_name', test_attr=5.))
 
 
-class TestCatchDupNS(TestCase):
-
-    def setUp(self):
-        self.tempdir = gettempdir()
-        self.prefix = id_generator()
-        self.ext_source1 = '%s_extension1.yaml' % self.prefix
-        self.ns_path1 = '%s_namespace1.yaml' % self.prefix
-        self.ext_source2 = '%s_extension2.yaml' % self.prefix
-        self.ns_path2 = '%s_namespace2.yaml' % self.prefix
-
-    def tearDown(self):
-        files = (self.ext_source1,
-                 self.ns_path1,
-                 self.ext_source2,
-                 self.ns_path2)
-        for f in files:
-            path = os.path.join(self.tempdir, f)
-            remove_test_file(path)
-
-    def test_catch_dup_name(self):
-        ns_builder1 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1", version='0.1.0')
-        ext1 = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
-                            neurodata_type_inc='ElectricalSeries',
-                            neurodata_type_def='TetrodeSeries')
-        ns_builder1.add_spec(self.ext_source1, ext1)
-        ns_builder1.export(self.ns_path1, outdir=self.tempdir)
-        ns_builder2 = NWBNamespaceBuilder('Extension for us in my Lab', "pynwb_test_extension1", version='0.1.0')
-        ext2 = NWBGroupSpec('A custom ElectricalSeries for my lab',
-                            attributes=[NWBAttributeSpec(name='trode_id', doc='the tetrode id', dtype='int')],
-                            neurodata_type_inc='ElectricalSeries',
-                            neurodata_type_def='TetrodeSeries')
-        ns_builder2.add_spec(self.ext_source2, ext2)
-        ns_builder2.export(self.ns_path2, outdir=self.tempdir)
-        type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path1))
-        with self.assertWarnsRegex(UserWarning, r"ignoring namespace '\S+' because it already exists"):
-            type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
-
-
 class TestCatchDuplicateSpec(TestCase):
 
     def setUp(self):

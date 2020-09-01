@@ -466,9 +466,9 @@ class TestCacheSpec(TestCase):
                           lab='Chang Lab')
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile)
-        with self.assertWarnsRegex(UserWarning, r"ignoring namespace '\S+' because it already exists"):
-            with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
-                nwbfile = reader.read()
+
+        with NWBHDF5IO(self.path, 'r', load_namespaces=True) as reader:
+            nwbfile = reader.read()
 
 
 class TestNoCacheSpec(TestCase):

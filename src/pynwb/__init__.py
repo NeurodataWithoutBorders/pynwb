@@ -213,10 +213,12 @@ class NWBHDF5IO(_HDF5IO):
              'default': None},
             {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
-             'default': None})
+             'default': None},
+            {'name': 'info', 'type': bool, 'doc': 'whether to print file information to stdout', 'default': True},)
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, info =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'info', kwargs)
+
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -244,6 +246,19 @@ class NWBHDF5IO(_HDF5IO):
             elif manager is None:
                 manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
+
+        if ('r' in mode or mode == 'a') and info:
+            ns_versions = NWBHDF5IO._get_namespace_versions(self._file)
+            out = list()
+            for name, versions in ns_versions.items():
+                for v in versions:
+                    out.append("'%s' version %s" % (name, v))
+
+            if load_namespaces:
+                print("Reading %s, using cached namespaces %s." % (self.source, ', '.join(out)))
+            else:
+                print("Reading %s, ignoring cached namespaces %s." % (self.source, ', '.join(out)))
+                print("Pass 'load_namespaces=True' to use cached namespaces.")
 
     @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
             {'name': 'nwbfile', 'type': 'NWBFile',
