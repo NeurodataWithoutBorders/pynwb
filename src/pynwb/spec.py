@@ -12,6 +12,10 @@ def __swap_inc_def(cls, default_nd_type_inc=None):
     args = get_docval(cls.__init__)
     clsname = 'NWB%s' % cls.__name__
     ret = list()
+    # do not set default neurodata_type_inc for base hdmf-common types that should not have data_type_inc
+    for arg in args:
+        if arg['name'] == 'Container' or arg['name'] == 'Data':
+            default_nd_type_inc = None
     for arg in args:
         if arg['name'] == 'data_type_def':
             ret.append({'name': 'neurodata_type_def', 'type': str,
