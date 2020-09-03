@@ -8,21 +8,18 @@ from hdmf.utils import docval, get_docval, call_docval_func
 from . import CORE_NAMESPACE
 
 
-def __swap_inc_def(cls, default_nd_type_inc=None):
+def __swap_inc_def(cls):
     args = get_docval(cls.__init__)
     clsname = 'NWB%s' % cls.__name__
     ret = list()
     # do not set default neurodata_type_inc for base hdmf-common types that should not have data_type_inc
-    for arg in args:
-        if arg['name'] == 'Container' or arg['name'] == 'Data':
-            default_nd_type_inc = None
     for arg in args:
         if arg['name'] == 'data_type_def':
             ret.append({'name': 'neurodata_type_def', 'type': str,
                         'doc': 'the NWB data type this spec defines', 'default': None})
         elif arg['name'] == 'data_type_inc':
             ret.append({'name': 'neurodata_type_inc', 'type': (clsname, str),
-                        'doc': 'the NWB data type this spec includes', 'default': default_nd_type_inc})
+                        'doc': 'the NWB data type this spec includes', 'default': None})
         else:
             ret.append(copy(arg))
     return ret
@@ -114,8 +111,7 @@ class BaseStorageOverride(object):
         proxy = super(BaseStorageOverride, cls)
         kwargs[proxy.def_key()] = kwargs.pop(cls.def_key())
         kwargs[proxy.inc_key()] = kwargs.pop(cls.inc_key())
-        args = [kwargs.pop(x['name']) for x in get_docval(proxy.__init__) if 'default' not in x]
-        return args, kwargs
+        return kwargs
 
 
 _dtype_docval = __swap_inc_def(DtypeSpec)
@@ -128,28 +124,41 @@ class NWBDtypeSpec(DtypeSpec):
         call_docval_func(super(NWBDtypeSpec, self).__init__, kwargs)
 
 
-_dataset_docval = __swap_inc_def(DatasetSpec, 'NWBData')
+_dataset_docval = __swap_inc_def(DatasetSpec)
 
 
 class NWBDatasetSpec(BaseStorageOverride, DatasetSpec):
-    ''' The Spec class to use for NWB dataset specifications '''
+    ''' The Spec class to use for NWB dataset specifications.
+
+    Classes will automatically include NWBData if None is specified.
+    '''
 
     @docval(*deepcopy(_dataset_docval))
     def __init__(self, **kwargs):
-        args, kwargs = self._translate_kwargs(kwargs)
-        super(NWBDatasetSpec, self).__init__(*args, **kwargs)
+        kwargs = self._translate_kwargs(kwargs)
+        # set data_type_inc to NWBData only if it is not specified and the type is not an HDMF base type
+        if kwargs['data_type_inc'] is None and kwargs['data_type_def'] != 'Data':
+            kwargs['data_type_inc'] = 'NWBData'
+        super(NWBDatasetSpec, self).__init__(**kwargs)
 
 
-_group_docval = __swap_inc_def(GroupSpec, 'NWBContainer')
+_group_docval = __swap_inc_def(GroupSpec)
 
 
 class NWBGroupSpec(BaseStorageOverride, GroupSpec):
-    ''' The Spec class to use for NWB group specifications '''
+    ''' The Spec class to use for NWB group specifications.
+
+    Classes will automatically include NWBContainer if None is specified.
+    '''
 
     @docval(*deepcopy(_group_docval))
     def __init__(self, **kwargs):
-        args, kwargs = self._translate_kwargs(kwargs)
-        super(NWBGroupSpec, self).__init__(*args, **kwargs)
+        kwargs = self._translate_kwargs(kwargs)
+        # set data_type_inc to NWBData only if it is not specified and the type is not an HDMF base type
+        if (kwargs['data_type_inc'] is None and kwargs['data_type_def'] != 'Container' and
+                kwargs['data_type_def'] != 'CSRMatrix'):
+            kwargs['data_type_inc'] = 'NWBContainer'
+        super(NWBGroupSpec, self).__init__(**kwargs)
 
     @classmethod
     def dataset_spec_cls(cls):
