@@ -156,8 +156,7 @@ class NWBGroupSpec(BaseStorageOverride, GroupSpec):
     def __init__(self, **kwargs):
         kwargs = self._translate_kwargs(kwargs)
         # set data_type_inc to NWBData only if it is not specified and the type is not an HDMF base type
-        if (kwargs['data_type_inc'] is None and kwargs['data_type_def'] is not None
-                and kwargs['data_type_def'] != 'Container' and kwargs['data_type_def'] != 'CSRMatrix'):
+        if kwargs['data_type_inc'] is None and kwargs['data_type_def'] not in (None, 'Container', 'CSRMatrix'):
             kwargs['data_type_inc'] = 'NWBContainer'
         super(NWBGroupSpec, self).__init__(**kwargs)
 
