@@ -14,10 +14,37 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
         ut = Units(name='UnitsTest', description='a simple table for testing Units')
         ut.add_unit(spike_times=[0, 1, 2], obs_intervals=[[0, 1], [2, 3]],
                     waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.],
-                    waveforms=[[1, 2, 3], [1, 2, 3], [1, 2, 3]])
+                    waveforms=[
+                        [  # elec 1
+                            [1, 2, 3],
+                            [1, 2, 3],
+                            [1, 2, 3]
+                        ], [  # elec 2
+                            [1, 2, 3],
+                            [1, 2, 3],
+                            [1, 2, 3]
+                        ]
+                    ])
         ut.add_unit(spike_times=[3, 4, 5], obs_intervals=[[2, 5], [6, 7]],
                     waveform_mean=[1., 2., 3.], waveform_sd=[4., 5., 6.],
-                    waveforms=[[1, 2, 3], [1, 2, 3], [1, 2, 3]])
+                    waveforms=np.array([
+                        [     # elec 1
+                            [1, 2, 3],  # spike 1, [sample 1, sample 2, sample 3]
+                            [1, 2, 3],  # spike 2
+                            [1, 2, 3],  # spike 3
+                            [1, 2, 3]   # spike 4
+                        ], [  # elec 2
+                            [1, 2, 3],  # spike 1
+                            [1, 2, 3],  # spike 2
+                            [1, 2, 3],  # spike 3
+                            [1, 2, 3]   # spike 4
+                        ], [  # elec 3
+                            [1, 2, 3],  # spike 1
+                            [1, 2, 3],  # spike 2
+                            [1, 2, 3],  # spike 3
+                            [1, 2, 3]   # spike 4
+                        ]
+                    ]))
         ut.waveform_rate = 40000.
         ut.resolution = 1/40000
         return ut

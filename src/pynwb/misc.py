@@ -151,7 +151,7 @@ class Units(DynamicTable):
         {'name': 'electrode_group', 'description': 'the electrode group that each spike unit came from'},
         {'name': 'waveform_mean', 'description': 'the spike waveform mean for each spike unit'},
         {'name': 'waveform_sd', 'description': 'the spike waveform standard deviation for each spike unit'},
-        {'name': 'waveforms', 'description': waveforms_desc, 'index': True}
+        {'name': 'waveforms', 'description': waveforms_desc, 'index': 2}
     )
 
     @docval({'name': 'name', 'type': str, 'doc': 'Name of this Units interface', 'default': 'Units'},
