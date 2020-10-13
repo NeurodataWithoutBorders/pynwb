@@ -525,9 +525,12 @@ class NWBFile(MultiContainerInterface):
                     ('rel_y', 'the y coordinate within the electrode group'),
                     ('rel_z', 'the z coordinate within the electrode group'),
                     ('reference', 'Description of the reference used for this electrode.')]
+        # add column if the arg is supplied and column does not yet exist
+        # do not pass arg to add_row if arg is not supplied
         for col_name, col_doc in new_cols:
-            if kwargs[col_name] is not None and col_name not in self.electrodes:
-                self.electrodes.add_column(col_name, col_doc)
+            if kwargs[col_name] is not None:
+                if col_name not in self.electrodes:
+                    self.electrodes.add_column(col_name, col_doc)
             else:
                 d.pop(col_name)  # remove args from d if not set
 

@@ -38,4 +38,4 @@ def register_map(**kwargs):
         _dec(mapper_cls)
 
 
-from . import io  # noqa: F401
+from . import io  # noqa: F401,E402

@@ -33,7 +33,11 @@ class TestImagingPlaneIO(NWBH5IOMixin, TestCase):
             imaging_rate=300.,
             indicator='GFP',
             location='somewhere in the brain',
-            reference_frame='unknown'
+            reference_frame='unknown',
+            origin_coords=[10, 20],
+            origin_coords_unit='millimeters',
+            grid_spacing=[0.001, 0.001],
+            grid_spacing_unit='millimeters',
         )
 
     def addContainer(self, nwbfile):
@@ -174,8 +178,11 @@ class MaskIO(TestPlaneSegmentationIO, metaclass=ABCMeta):
                                         external_file=['images.tiff'],
                                         starting_frame=[1, 2, 3], format='tiff', timestamps=ts)
         self.device = Device(name='dev1')
-        self.optical_channel = OpticalChannel(name='test_optical_channel', description='optical channel description',
-                                              emission_lambda=500.)
+        self.optical_channel = OpticalChannel(
+            name='test_optical_channel',
+            description='optical channel description',
+            emission_lambda=500.
+        )
         self.imaging_plane = ImagingPlane(
             name='test_imaging_plane',
             optical_channel=self.optical_channel,
