@@ -161,8 +161,8 @@ class CorrectedImageStack(NWBDataInterface):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ({'name': 'corrected', 'child': True},
-                     {'name': 'xy_translation', 'child': True},
+    __nwbfields__ = ({'name': 'corrected', 'child': True, 'required_name': 'corrected'},
+                     {'name': 'xy_translation', 'child': True, 'required_name': 'xy_translation'},
                      'original')
 
     @docval({'name': 'name', 'type': str,
