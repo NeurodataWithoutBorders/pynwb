@@ -274,8 +274,7 @@ class TestAppend(TestCase):
             self.assertIs(nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes,
                           nwb.acquisition['timeseries2'].electrodes)
             errors = validate(io)
-            for e in errors:
-                print('ERROR', e)
+            self.assertEqual(errors, [])
 
 
 class TestH5DataIO(TestCase):
