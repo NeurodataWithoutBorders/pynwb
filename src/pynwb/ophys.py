@@ -238,13 +238,17 @@ class PlaneSegmentation(DynamicTable):
         self.reference_images = reference_images
 
     @docval({'name': 'pixel_mask', 'type': 'array_data', 'default': None,
-             'doc': 'pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]',
+             'doc': ('Pixel mask for 2D ROIs: [(x1, y1, weight1), (x2, y2, weight2), ...]. This should be used '
+                     'for sparse masks, i.e., masks that have few pixels relative to the size of the image.'),
              'shape': (None, 3)},
             {'name': 'voxel_mask', 'type': 'array_data', 'default': None,
-             'doc': 'voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z2, weight2), ...]',
+             'doc': ('Voxel mask for 3D ROIs: [(x1, y1, z1, weight1), (x2, y2, z2, weight2), ...]. This should be used '
+                     'for sparse masks, i.e., masks that have few voxels relative to the size of the volume.'),
              'shape': (None, 4)},
             {'name': 'image_mask', 'type': 'array_data', 'default': None,
-             'doc': 'image with the same size of image where positive values mark this ROI',
+             'doc': ('Image with the same size of image where positive values mark the ROI weights for each pixel of '
+                     'the image. This should be used for dense masks, i.e., masks where most of the pixels have a '
+                     'positive weight.'),
              'shape': [[None]*2, [None]*3]},
             {'name': 'id', 'type': int, 'doc': 'the ID for the ROI', 'default': None},
             allow_extra=True)
