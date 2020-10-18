@@ -247,8 +247,11 @@ class PlaneSegmentation(DynamicTable):
              'shape': (None, 4)},
             {'name': 'image_mask', 'type': 'array_data', 'default': None,
              'doc': ('Image with the same size of image where positive values mark the ROI weights for each pixel of '
-                     'the image. This should be used for dense masks, i.e., masks where most of the pixels have a '
-                     'positive weight.'),
+                     'the image. This should be used when the NWB file will be compressed or when using '
+                     'dense masks, i.e., masks where most of the pixels have a '
+                     'positive weight. In a compressed file, an image mask will often take up less space '
+                     'than a pixel mask, whereas in an uncomprsesed file, a pixel mask will often take up ' 
+                     'less space than an image mask.'),
              'shape': [[None]*2, [None]*3]},
             {'name': 'id', 'type': int, 'doc': 'the ID for the ROI', 'default': None},
             allow_extra=True)
