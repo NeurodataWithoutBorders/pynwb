@@ -670,34 +670,48 @@ class NWBFile(MultiContainerInterface):
         self._update_sweep_table(timeseries)
 
     @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
-             'help': 'the data to add to the scratch space'},
+             'doc': 'The data to add to the scratch space.'},
             {'name': 'name', 'type': str,
-             'help': 'the name of the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'doc': ('The name of the data. Required and used only when passing in numpy.ndarray, list, tuple, '
+                     'or pandas.DataFrame'),
              'default': None},
             {'name': 'notes', 'type': str,
-             'help': 'notes to add to the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'doc': ('Notes to add to the data. Recommended and used only when passing in numpy.ndarray, list, or '
+                     'tuple.'),
              'default': ''},
             {'name': 'table_description', 'type': str,
-             'help': 'description for the internal DynamicTable used to store a pandas.DataFrame',
+             'doc': ('Description for the internal DynamicTable used to store a pandas.DataFrame. Recommended and '
+                     'used only when passing in a pandas.DataFrame.'),
              'default': ''})
     def add_scratch(self, **kwargs):
         '''Add data to the scratch space'''
-        data, name, notes = getargs('data', 'name', 'notes', kwargs)
+        data, name, notes, table_description = getargs('data', 'name', 'notes', 'table_description', kwargs)
         if isinstance(data, (np.ndarray, pd.DataFrame, list, tuple)):
             if not name:
-                raise ValueError('please provide a name for scratch data')
+                raise ValueError('A name is required when adding a numpy.ndarray, pandas.DataFrame, list, or tuple '
+                                 'as scratch data.')
             if isinstance(data, pd.DataFrame):
-                table_description = getargs('table_description', kwargs)
+                if not table_description:
+                    warn('The table_description argument for NWBFile.add_scratch is highly recommended when passing a '
+                         'pandas.DataFrame and may become required in a future version of PyNWB.')
                 data = DynamicTable.from_dataframe(df=data, name=name, table_description=table_description)
                 if notes:
-                    warn('Notes argument is ignored when adding a pandas DataFrame to scratch')
+                    warn('The notes argument is ignored when adding a pandas.DataFrame to scratch.')
             else:
+                if not notes:
+                    warn('The notes argument for NWBFile.add_scratch is highly recommended when passing a '
+                         'numpy.ndarray, list, or tuple, and may become required in a future version of PyNWB.')
                 data = ScratchData(name=name, data=data, notes=notes)
         else:
             if notes:
-                warn('Notes argument is ignored when adding an NWBContainer to scratch')
+                warn('The notes argument is ignored when adding an NWBContainer, ScratchData, or '
+                     'DynamicTable to scratch.')
             if name:
-                warn('Name argument is ignored when adding an NWBContainer to scratch')
+                warn('The name argument is ignored when adding an NWBContainer, ScratchData, or '
+                     'DynamicTable to scratch.')
+            if table_description:
+                warn('The table_description argument is ignored when adding an NWBContainer, ScratchData, or '
+                     'DynamicTable to scratch.')
         self._add_scratch(data)
 
     @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
