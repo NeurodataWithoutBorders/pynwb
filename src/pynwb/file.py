@@ -669,8 +669,9 @@ class NWBFile(MultiContainerInterface):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
 
-    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
-             'doc': 'The data to add to the scratch space.'},
+    @docval({'name': 'data',
+             'type': ('scalar_data', np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
+             'doc': 'The data to add to the scratch space'},
             {'name': 'name', 'type': str,
              'doc': ('The name of the data. Required and used only when passing in numpy.ndarray, list, tuple, '
                      'or pandas.DataFrame'),

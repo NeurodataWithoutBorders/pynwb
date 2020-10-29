@@ -51,7 +51,7 @@ class NWBDataInterface(NWBContainer):
 class NWBData(NWBMixin, Data):
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'})
+            {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'})
     def __init__(self, **kwargs):
         call_docval_func(super(NWBData, self).__init__, kwargs)
         self.__data = getargs('data', kwargs)
@@ -93,7 +93,7 @@ class ScratchData(NWBData):
     __nwbfields__ = ('notes',)
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
-            {'name': 'data', 'type': ('array_data', 'data', Data), 'doc': 'the source of the data'},
+            {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'},
             {'name': 'notes', 'type': str, 'doc': 'notes about the data', 'default': ''})
     def __init__(self, **kwargs):
         call_docval_func(super(ScratchData, self).__init__, kwargs)
