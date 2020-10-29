@@ -39,6 +39,12 @@ class TestScratchDataIO(NWBH5IOMixin, TestCase):
         self.read_nwbfile = self.reader.read()
         return self.read_nwbfile.get_scratch('foo')
 
+    def test_scratch_convert_int(self):
+        data = 2
+        ret = self.roundtrip_scratch(data, 'int', notes='test scratch')
+        self.assertEqual(data, ret)
+        self.validate()
+
     def test_scratch_convert_list(self):
         data = [1, 2, 3, 4]
         ret = self.roundtrip_scratch(data, 'list', notes='test scratch')

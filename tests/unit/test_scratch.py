@@ -28,6 +28,10 @@ class TestScratchData(TestCase):
         self.assertListEqual(sd.data, [1, 2, 3, 4])
         self.assertEqual(sd.notes, 'test scratch')
 
+    def test_add_scratch_int(self):
+        self.nwbfile.add_scratch(2, name='test', notes='test data')
+        self.assertEqual(self.nwbfile.get_scratch('test'), 2)
+
     def test_add_scratch_list(self):
         self.nwbfile.add_scratch([1, 2, 3, 4], name='test', notes='test data')
         assert_array_equal(self.nwbfile.get_scratch('test'), np.array([1, 2, 3, 4]))
