@@ -114,7 +114,7 @@ class TestScratchData(TestCase):
         self.assertIs(self.nwbfile.scratch['test'], data)
 
     def test_get_scratch_list_convert_false(self):
-        self.nwbfile.add_scratch([1, 2, 3, 4], name='test')
+        self.nwbfile.add_scratch([1, 2, 3, 4], name='test', notes='test notes')
         self.assertTrue(isinstance(self.nwbfile.get_scratch('test', convert=False), ScratchData))
         self.assertTrue(isinstance(self.nwbfile.scratch['test'], ScratchData))
         self.assertEqual(self.nwbfile.scratch['test'].data, [1, 2, 3, 4])

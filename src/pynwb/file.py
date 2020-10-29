@@ -676,12 +676,12 @@ class NWBFile(MultiContainerInterface):
                      'or pandas.DataFrame'),
              'default': None},
             {'name': 'notes', 'type': str,
-             'doc': ('Notes to add to the data. Recommended and used only when passing in numpy.ndarray, list, or '
-                     'tuple.'),
+             'doc': ('Notes to add to the data. Highly recommended and used only when passing in numpy.ndarray, '
+                     'list, or tuple.'),
              'default': ''},
             {'name': 'table_description', 'type': str,
-             'doc': ('Description for the internal DynamicTable used to store a pandas.DataFrame. Recommended and '
-                     'used only when passing in a pandas.DataFrame.'),
+             'doc': ('Description for the internal DynamicTable used to store a pandas.DataFrame. Highly recommended '
+                     'and used only when passing in a pandas.DataFrame.'),
              'default': ''})
     def add_scratch(self, **kwargs):
         '''Add data to the scratch space'''
