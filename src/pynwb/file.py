@@ -699,6 +699,7 @@ class NWBFile(MultiContainerInterface):
             if name is not None:
                 warn('Name argument is ignored when adding an NWBContainer to scratch')
         self._add_scratch(data)
+        return data
 
     @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
             {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
