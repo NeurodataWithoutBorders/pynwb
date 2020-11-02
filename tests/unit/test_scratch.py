@@ -29,7 +29,12 @@ class TestScratchData(TestCase):
         self.assertEqual(sd.notes, 'test scratch')
 
     def test_add_scratch_int(self):
-        self.nwbfile.add_scratch(2, name='test', notes='test data')
+        ret = self.nwbfile.add_scratch(2, name='test', notes='test data')
+        self.assertIsInstance(ret, ScratchData)
+        self.assertEqual(ret.name, 'test')
+        self.assertEqual(ret.data, 2)
+        self.assertEqual(ret.notes, 'test data')
+        self.assertIs(ret.parent, self.nwbfile)
         self.assertEqual(self.nwbfile.get_scratch('test'), 2)
 
     def test_add_scratch_list(self):
@@ -109,6 +114,7 @@ class TestScratchData(TestCase):
     def test_add_scratch_scratchdata(self):
         data = ScratchData(name='test', data=[1, 2, 3, 4, 5], notes='test notes')
         self.nwbfile.add_scratch(data)
+        self.assertIs(data.parent, self.nwbfile)
         self.assertIs(self.nwbfile.get_scratch('test', convert=False), data)
         self.assertIs(self.nwbfile.scratch['test'], data)
 
