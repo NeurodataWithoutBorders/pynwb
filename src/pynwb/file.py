@@ -712,7 +712,7 @@ class NWBFile(MultiContainerInterface):
             if table_description:
                 warn('The table_description argument is ignored when adding an NWBContainer, ScratchData, or '
                      'DynamicTable to scratch.')
-        self._add_scratch(data)
+        return self._add_scratch(data)
 
     @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
             {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
