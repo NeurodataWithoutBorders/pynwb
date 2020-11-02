@@ -18,8 +18,7 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, \
-                  ScratchData, LabelledDict
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
 from hdmf.common import DynamicTableRegion, DynamicTable
 
 
@@ -687,21 +686,21 @@ class NWBFile(MultiContainerInterface):
     def add_scratch(self, **kwargs):
         '''Add data to the scratch space'''
         data, name, notes, table_description = getargs('data', 'name', 'notes', 'table_description', kwargs)
-        if isinstance(data, (np.ndarray, pd.DataFrame, list, tuple)):
+        if isinstance(data, (str, int, float, bytes, np.ndarray, pd.DataFrame, list, tuple)):
             if not name:
-                raise ValueError('A name is required when adding a numpy.ndarray, pandas.DataFrame, list, or tuple '
-                                 'as scratch data.')
+                raise ValueError('A name is required when adding a scalar, numpy.ndarray, pandas.DataFrame, list, '
+                                 'or tuple as scratch data.')
             if isinstance(data, pd.DataFrame):
                 if not table_description:
                     warn('The table_description argument for NWBFile.add_scratch is highly recommended when passing a '
                          'pandas.DataFrame and may become required in a future version of PyNWB.')
-                data = DynamicTable.from_dataframe(df=data, name=name, table_description=table_description)
                 if notes:
                     warn('The notes argument is ignored when adding a pandas.DataFrame to scratch.')
+                data = DynamicTable.from_dataframe(df=data, name=name, table_description=table_description)
             else:
                 if not notes:
                     warn('The notes argument for NWBFile.add_scratch is highly recommended when passing a '
-                         'numpy.ndarray, list, or tuple, and may become required in a future version of PyNWB.')
+                         'scalar, numpy.ndarray, list, or tuple, and may become required in a future version of PyNWB.')
                 data = ScratchData(name=name, data=data, notes=notes)
         else:
             if notes:

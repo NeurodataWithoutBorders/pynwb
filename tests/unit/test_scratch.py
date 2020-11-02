@@ -41,12 +41,13 @@ class TestScratchData(TestCase):
         assert_array_equal(self.nwbfile.get_scratch('test'), np.array([1, 2, 3, 4]))
 
     def test_add_scratch_list_no_name(self):
-        msg = 'A name is required when adding a numpy.ndarray, pandas.DataFrame, list, or tuple as scratch data.'
+        msg = ('A name is required when adding a scalar, numpy.ndarray, pandas.DataFrame, list, or tuple as '
+               'scratch data.')
         with self.assertRaisesWith(ValueError, msg):
             self.nwbfile.add_scratch([1, 2, 3, 4])
 
     def test_add_scratch_list_no_notes(self):
-        warn_msg = ('The notes argument for NWBFile.add_scratch is highly recommended when passing a '
+        warn_msg = ('The notes argument for NWBFile.add_scratch is highly recommended when passing a scalar, '
                     'numpy.ndarray, list, or tuple, and may become required in a future version of PyNWB.')
         with self.assertWarnsWith(UserWarning, warn_msg):
             self.nwbfile.add_scratch(np.array([1, 2, 3, 4]), name='test')
