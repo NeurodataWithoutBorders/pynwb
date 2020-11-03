@@ -1,3 +1,5 @@
+import numpy as np
+
 from pynwb import NWBFile
 from pynwb.icephys import (IntracellularElectrode, PatchClampSeries, CurrentClampStimulusSeries,
                            SweepTable, VoltageClampStimulusSeries, CurrentClampSeries,
@@ -11,23 +13,25 @@ class TestIntracellularElectrode(NWBH5IOMixin, TestCase):
     def setUpContainer(self):
         """ Return the test IntracellularElectrode to read/write """
         self.device = Device(name='device_name')
-        elec = IntracellularElectrode(name="elec0", slice='tissue slice',
-                                           resistance='something measured in ohms',
-                                           seal='sealing method', description='a fake electrode object',
-                                           location='Springfield Elementary School',
-                                           filtering='a meaningless free-form text field',
-                                           initial_access_resistance='I guess this changes',
-                                           device=self.device)
+        elec = IntracellularElectrode(name="elec0",
+                                      slice='tissue slice',
+                                      resistance='something measured in ohms',
+                                      seal='sealing method',
+                                      description='a fake electrode object',
+                                      location='Springfield Elementary School',
+                                      filtering='a meaningless free-form text field',
+                                      initial_access_resistance='I guess this changes',
+                                      device=self.device)
         return elec
 
     def addContainer(self, nwbfile):
         """ Add the test IntracellularElectrode and Device to the given NWBFile """
-        nwbfile.add_ic_electrode(self.container)
+        nwbfile.add_icephys_electrode(self.container)
         nwbfile.add_device(self.device)
 
     def getContainer(self, nwbfile):
         """ Return the test IntracellularElectrode from the given NWBFile """
-        return nwbfile.get_ic_electrode(self.container.name)
+        return nwbfile.get_icephys_electrode(self.container.name)
 
 
 class TestPatchClampSeries(AcquisitionH5IOMixin, TestCase):
@@ -48,13 +52,13 @@ class TestPatchClampSeries(AcquisitionH5IOMixin, TestCase):
         self.setUpElectrode()
         return PatchClampSeries(name="pcs", data=[1, 2, 3, 4, 5], unit='A',
                                 starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                stimulus_description="gotcha ya!", sweep_number=4711)
+                                stimulus_description="gotcha ya!", sweep_number=np.uint(4711))
 
     def addContainer(self, nwbfile):
         """
         Add the test PatchClampSeries as an acquisition and IntracellularElectrode and Device to the given NWBFile
         """
-        nwbfile.add_ic_electrode(self.elec)
+        nwbfile.add_icephys_electrode(self.elec)
         nwbfile.add_device(self.device)
         super().addContainer(nwbfile)
 
@@ -123,7 +127,7 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
                                            device=self.device)
         self.pcs = PatchClampSeries(name="pcs", data=[1, 2, 3, 4, 5], unit='A',
                                     starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                    stimulus_description="gotcha ya!", sweep_number=4711)
+                                    stimulus_description="gotcha ya!", sweep_number=np.uint(4711))
         return SweepTable(name='sweep_table')
 
     def addContainer(self, nwbfile):
@@ -132,7 +136,7 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
         """
         nwbfile.sweep_table = self.container
         nwbfile.add_device(self.device)
-        nwbfile.add_ic_electrode(self.elec)
+        nwbfile.add_icephys_electrode(self.elec)
         nwbfile.add_acquisition(self.pcs)
 
     def getContainer(self, nwbfile):
@@ -166,13 +170,13 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
                                            device=self.device)
         self.pcs1 = PatchClampSeries(name="pcs1", data=[1, 2, 3, 4, 5], unit='A',
                                      starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                     stimulus_description="gotcha ya!", sweep_number=4711)
+                                     stimulus_description="gotcha ya!", sweep_number=np.uint(4711))
         self.pcs2a = PatchClampSeries(name="pcs2a", data=[1, 2, 3, 4, 5], unit='A',
                                       starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                      stimulus_description="gotcha ya!", sweep_number=4712)
+                                      stimulus_description="gotcha ya!", sweep_number=np.uint(4712))
         self.pcs2b = PatchClampSeries(name="pcs2b", data=[1, 2, 3, 4, 5], unit='A',
                                       starting_time=123.6, rate=10e3, electrode=self.elec, gain=0.126,
-                                      stimulus_description="gotcha ya!", sweep_number=4712)
+                                      stimulus_description="gotcha ya!", sweep_number=np.uint(4712))
 
         return SweepTable(name='sweep_table')
 
@@ -182,7 +186,7 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
         """
         nwbfile.sweep_table = self.container
         nwbfile.add_device(self.device)
-        nwbfile.add_ic_electrode(self.elec)
+        nwbfile.add_icephys_electrode(self.elec)
 
         nwbfile.add_acquisition(self.pcs1)
         nwbfile.add_stimulus_template(self.pcs2a)

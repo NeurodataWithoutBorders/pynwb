@@ -1,4 +1,6 @@
 from collections.abc import Iterable
+import numpy as np
+import warnings
 
 from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
 
@@ -8,7 +10,6 @@ from .image import ImageSeries
 from .core import NWBContainer, MultiContainerInterface, NWBDataInterface
 from hdmf.common import DynamicTable, DynamicTableRegion
 from .device import Device
-import numpy as np
 
 
 @register_class('OpticalChannel', CORE_NAMESPACE)
@@ -46,31 +47,53 @@ class ImagingPlane(NWBContainer):
 
     @docval(*get_docval(NWBContainer.__init__, 'name'),  # required
             {'name': 'optical_channel', 'type': (list, OpticalChannel),  # required
-             'doc': 'One of possibly many groups storing channelspecific data.'},
+             'doc': 'One of possibly many groups storing channel-specific data.'},
             {'name': 'description', 'type': str, 'doc': 'Description of this ImagingPlane.'},  # required
             {'name': 'device', 'type': Device, 'doc': 'the device that was used to record'},  # required
             {'name': 'excitation_lambda', 'type': 'float', 'doc': 'Excitation wavelength in nm.'},  # required
-            {'name': 'imaging_rate', 'type': 'float', 'doc': 'Rate images are acquired, in Hz.'},  # required
             {'name': 'indicator', 'type': str, 'doc': 'Calcium indicator'},  # required
             {'name': 'location', 'type': str, 'doc': 'Location of image plane.'},  # required
-            {'name': 'manifold', 'type': Iterable,
-             'doc': 'Physical position of each pixel. size=("height", "width", "xyz").',
+            {'name': 'imaging_rate', 'type': 'float',
+             'doc': 'Rate images are acquired, in Hz. If the corresponding TimeSeries is present, the rate should be '
+                    'stored there instead.', 'default': None},
+            {'name': 'manifold', 'type': 'array_data',
+             'doc': ('DEPRECATED: Physical position of each pixel. size=("height", "width", "xyz"). '
+                     'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': None},
             {'name': 'conversion', 'type': 'float',
-             'doc': 'Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters)',
+             'doc': ('DEPRECATED: Multiplier to get from stored values to specified unit (e.g., 1e-3 for millimeters) '
+                     'Deprecated in favor of origin_coords and grid_spacing.'),
              'default': 1.0},
-            {'name': 'unit', 'type': str, 'doc': 'Base unit that coordinates are stored in (e.g., Meters).',
+            {'name': 'unit', 'type': str,
+             'doc': 'DEPRECATED: Base unit that coordinates are stored in (e.g., Meters). '
+                    'Deprecated in favor of origin_coords_unit and grid_spacing_unit.',
              'default': 'meters'},
             {'name': 'reference_frame', 'type': str,
              'doc': 'Describes position and reference frame of manifold based on position of first element '
                     'in manifold.',
-             'default': None})
+             'default': None},
+            {'name': 'origin_coords', 'type': 'array_data',
+             'doc': 'Physical location of the first element of the imaging plane (0, 0) for 2-D data or (0, 0, 0) for '
+                    '3-D data. See also reference_frame for what the physical location is relative to (e.g., bregma).',
+             'default': None},
+            {'name': 'origin_coords_unit', 'type': str,
+             'doc': "Measurement units for origin_coords. The default value is 'meters'.",
+             'default': 'meters'},
+            {'name': 'grid_spacing', 'type': 'array_data',
+             'doc': "Space between pixels in (x, y) or voxels in (x, y, z) directions, in the specified unit. Assumes "
+                    "imaging plane is a regular grid. See also reference_frame to interpret the grid.",
+             'default': None},
+            {'name': 'grid_spacing_unit', 'type': str,
+             'doc': "Measurement units for grid_spacing. The default value is 'meters'.",
+             'default': 'meters'})
     def __init__(self, **kwargs):
         optical_channel, description, device, excitation_lambda, imaging_rate, \
-            indicator, location, manifold, conversion, unit, reference_frame = popargs(
+            indicator, location, manifold, conversion, unit, reference_frame, origin_coords, origin_coords_unit, \
+            grid_spacing, grid_spacing_unit = popargs(
                 'optical_channel', 'description', 'device', 'excitation_lambda',
                 'imaging_rate', 'indicator', 'location', 'manifold', 'conversion',
-                'unit', 'reference_frame', kwargs)
+                'unit', 'reference_frame', 'origin_coords', 'origin_coords_unit', 'grid_spacing', 'grid_spacing_unit',
+                kwargs)
         call_docval_func(super(ImagingPlane, self).__init__, kwargs)
         self.optical_channel = optical_channel if isinstance(optical_channel, list) else [optical_channel]
         self.description = description
@@ -79,10 +102,23 @@ class ImagingPlane(NWBContainer):
         self.imaging_rate = imaging_rate
         self.indicator = indicator
         self.location = location
+        if manifold is not None:
+            warnings.warn("The 'manifold' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'.",
+                          DeprecationWarning)
+        if conversion != 1.0:
+            warnings.warn("The 'conversion' argument is deprecated in favor of 'origin_coords' and 'grid_spacing'.",
+                          DeprecationWarning)
+        if unit != 'meters':
+            warnings.warn("The 'unit' argument is deprecated in favor of 'origin_coords_unit' and 'grid_spacing_unit'.",
+                          DeprecationWarning)
         self.manifold = manifold
         self.conversion = conversion
         self.unit = unit
         self.reference_frame = reference_frame
+        self.origin_coords = origin_coords
+        self.origin_coords_unit = origin_coords_unit
+        self.grid_spacing = grid_spacing
+        self.grid_spacing_unit = grid_spacing_unit
 
 
 @register_class('TwoPhotonSeries', CORE_NAMESPACE)
@@ -96,10 +132,7 @@ class TwoPhotonSeries(ImageSeries):
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
             {'name': 'imaging_plane', 'type': ImagingPlane, 'doc': 'Imaging plane class/pointer.'},  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
-             'default': None},
-            *get_docval(ImageSeries.__init__, 'unit', 'format'),
+            *get_docval(ImageSeries.__init__, 'data', 'unit', 'format'),
             {'name': 'field_of_view', 'type': (Iterable, TimeSeries), 'shape': ((2, ), (3, )),
              'doc': 'Width, height and depth of image, or imaged area (meters).', 'default': None},
             {'name': 'pmt_gain', 'type': 'float', 'doc': 'Photomultiplier gain.', 'default': None},
@@ -128,9 +161,9 @@ class CorrectedImageStack(NWBDataInterface):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ('corrected',
-                     'original',
-                     'xy_translation')
+    __nwbfields__ = ({'name': 'corrected', 'child': True},
+                     {'name': 'xy_translation', 'child': True},
+                     'original')
 
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
@@ -300,7 +333,8 @@ class RoiResponseSeries(TimeSeries):
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
              'shape': ((None, ), (None, None)),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+             'doc': ('The data values. May be 1D or 2D. The first dimension must be time. The optional second '
+                     'dimension represents ROIs')},
             *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'rois', 'type': DynamicTableRegion,  # required
              'doc': 'a table region corresponding to the ROIs that were used to generate this data'},

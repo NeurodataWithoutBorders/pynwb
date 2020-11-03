@@ -21,7 +21,8 @@ class ImageSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': ([None] * 3, [None] * 4),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'doc': ('The data values. Can be 3D or 4D. The first dimension must be time (frame). The second and third '
+                     'dimensions represent x and y. The optional fourth dimension represents z.'),
              'default': None},
             *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'format', 'type': str,
@@ -32,7 +33,8 @@ class ImageSeries(TimeSeries):
                     'Either external_file or data must be specified, but not both.', 'default': None},
             {'name': 'starting_frame', 'type': Iterable,
              'doc': 'Each entry is the frame number in the corresponding external_file variable. '
-                    'This serves as an index to what frames each file contains.', 'default': None},
+                    'This serves as an index to what frames each file contains. If external_file is not '
+                    'provided, then this value will be None', 'default': [0]},
             {'name': 'bits_per_pixel', 'type': int, 'doc': 'DEPRECATED: Number of bits per image pixel',
              'default': None},
             {'name': 'dimension', 'type': Iterable,
@@ -44,11 +46,15 @@ class ImageSeries(TimeSeries):
             'bits_per_pixel', 'dimension', 'external_file', 'starting_frame', 'format', kwargs)
         call_docval_func(super(ImageSeries, self).__init__, kwargs)
         if external_file is None and self.data is None:
-            raise ValueError('must supply either external_file or data to ' + self.name)
+            raise ValueError("Must supply either external_file or data to %s '%s'."
+                             % (self.__class__.__name__, self.name))
         self.bits_per_pixel = bits_per_pixel
         self.dimension = dimension
         self.external_file = external_file
-        self.starting_frame = starting_frame
+        if external_file is not None:
+            self.starting_frame = starting_frame
+        else:
+            self.starting_frame = None
         self.format = format
 
     @property
@@ -76,16 +82,15 @@ class IndexSeries(TimeSeries):
 
     @docval(*get_docval(TimeSeries.__init__, 'name'),  # required
             {'name': 'data', 'type': ('array_data', 'data', TimeSeries), 'shape': (None, ),  # required
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
+             'doc': ('The data values. Must be 1D, where the first dimension must be time (frame)')},
             *get_docval(TimeSeries.__init__, 'unit'),
             {'name': 'indexed_timeseries', 'type': TimeSeries,  # required
              'doc': 'HDF5 link to TimeSeries containing images that are indexed.'},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data = popargs('name', 'data', kwargs)
         indexed_timeseries = popargs('indexed_timeseries', kwargs)
-        super(IndexSeries, self).__init__(name, data, **kwargs)
+        super(IndexSeries, self).__init__(**kwargs)
         self.indexed_timeseries = indexed_timeseries
 
 
@@ -101,18 +106,15 @@ class ImageMaskSeries(ImageSeries):
     __nwbfields__ = ('masked_imageseries',)
 
     @docval(*get_docval(ImageSeries.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data', TimeSeries),  # required
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
-            *get_docval(ImageSeries.__init__, 'unit'),
+            *get_docval(ImageSeries.__init__, 'data', 'unit'),
             {'name': 'masked_imageseries', 'type': ImageSeries,  # required
              'doc': 'Link to ImageSeries that mask is applied to.'},
             *get_docval(ImageSeries.__init__, 'format', 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
                         'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data = popargs('name', 'data', kwargs)
         masked_imageseries = popargs('masked_imageseries', kwargs)
-        super(ImageMaskSeries, self).__init__(name, data, **kwargs)
+        super(ImageMaskSeries, self).__init__(**kwargs)
         self.masked_imageseries = masked_imageseries
 
 
@@ -130,7 +132,11 @@ class OpticalSeries(ImageSeries):
                      'field_of_view',
                      'orientation')
 
-    @docval(*get_docval(ImageSeries.__init__, 'name', 'data'),  # required
+    @docval(*get_docval(ImageSeries.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'), 'shape': ([None] * 3, [None, None, None, 3]),
+             'doc': ('Images presented to subject, either grayscale or RGB. May be 3D or 4D. The first dimension must '
+                     'be time (frame). The second and third dimensions represent x and y. The optional fourth '
+                     'dimension must be length 3 and represents the RGB value for color images.')},
             *get_docval(ImageSeries.__init__, 'unit', 'format'),
             {'name': 'distance', 'type': 'float', 'doc': 'Distance from camera/monitor to target/eye.'},  # required
             {'name': 'field_of_view', 'type': ('array_data', 'data', 'TimeSeries'), 'shape': ((2, ), (3, )),  # required
@@ -142,9 +148,8 @@ class OpticalSeries(ImageSeries):
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate', 'comments',
                         'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
-        name, data, = popargs('name', 'data', kwargs)
         distance, field_of_view, orientation = popargs('distance', 'field_of_view', 'orientation', kwargs)
-        super(OpticalSeries, self).__init__(name, data, **kwargs)
+        super(OpticalSeries, self).__init__(**kwargs)
         self.distance = distance
         self.field_of_view = field_of_view
         self.orientation = orientation
@@ -153,8 +158,8 @@ class OpticalSeries(ImageSeries):
 @register_class('GrayscaleImage', CORE_NAMESPACE)
 class GrayscaleImage(Image):
 
-    @docval(*get_docval(Image.__init__, 'name'),  # required
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',  # required
+    @docval(*get_docval(Image.__init__, 'name'),
+            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'Data of image. Must be 2D',
              'shape': (None, None)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
@@ -165,7 +170,8 @@ class GrayscaleImage(Image):
 class RGBImage(Image):
 
     @docval(*get_docval(Image.__init__, 'name'),
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',  # required
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of image. Must be 3D where the third dimension has length 3 and represents the RGB value',
              'shape': (None, None, 3)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):
@@ -176,7 +182,8 @@ class RGBImage(Image):
 class RGBAImage(Image):
 
     @docval(*get_docval(Image.__init__, 'name'),
-            {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image',  # required
+            {'name': 'data', 'type': ('array_data', 'data'),
+             'doc': 'Data of image. Must be 3D where the third dimension has length 4 and represents the RGBA value',
              'shape': (None, None, 4)},
             *get_docval(Image.__init__, 'resolution', 'description'))
     def __init__(self, **kwargs):

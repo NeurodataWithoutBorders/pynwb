@@ -140,11 +140,11 @@ class NWBFile(MultiContainerInterface):
             'get': 'get_imaging_plane'
         },
         {
-            'attr': 'ic_electrodes',
-            'add': 'add_ic_electrode',
+            'attr': 'icephys_electrodes',
+            'add': 'add_icephys_electrode',
             'type': IntracellularElectrode,
-            'create': 'create_ic_electrode',
-            'get': 'get_ic_electrode'
+            'create': 'create_icephys_electrode',
+            'get': 'get_icephys_electrode'
         },
         {
             'attr': 'ogen_sites',
@@ -275,7 +275,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'electrode_groups', 'type': Iterable,
              'doc': 'the ElectrodeGroups that belong to this NWBFile', 'default': None},
             {'name': 'ic_electrodes', 'type': (list, tuple),
-             'doc': 'IntracellularElectrodes that belong to this NWBFile', 'default': None},
+             'doc': 'DEPRECATED use icephys_electrodes parameter instead. '
+                    'IntracellularElectrodes that belong to this NWBFile', 'default': None},
             {'name': 'sweep_table', 'type': SweepTable,
              'doc': 'the SweepTable that belong to this NWBFile', 'default': None},
             {'name': 'imaging_planes', 'type': (list, tuple),
@@ -287,7 +288,9 @@ class NWBFile(MultiContainerInterface):
             {'name': 'subject', 'type': Subject,
              'doc': 'subject metadata', 'default': None},
             {'name': 'scratch', 'type': (list, tuple),
-             'doc': 'scratch data', 'default': None})
+             'doc': 'scratch data', 'default': None},
+            {'name': 'icephys_electrodes', 'type': (list, tuple),
+             'doc': 'IntracellularElectrodes that belong to this NWBFile.', 'default': None})
     def __init__(self, **kwargs):
         kwargs['name'] = 'root'
         call_docval_func(super(NWBFile, self).__init__, kwargs)
@@ -322,7 +325,6 @@ class NWBFile(MultiContainerInterface):
             'electrodes',
             'electrode_groups',
             'devices',
-            'ic_electrodes',
             'imaging_planes',
             'ogen_sites',
             'intervals',
@@ -352,6 +354,14 @@ class NWBFile(MultiContainerInterface):
         for attr in fieldnames:
             setattr(self, attr, kwargs.get(attr, None))
 
+        # backwards-compatibility code for ic_electrodes / icephys_electrodes
+        ic_elec_val = kwargs.get('icephys_electrodes', None)
+        if ic_elec_val is None and kwargs.get('ic_electrodes', None) is not None:
+            ic_elec_val = kwargs.get('ic_electrodes', None)
+            warn("Use of the ic_electrodes parameter is deprecated. "
+                 "Use the icephys_electrodes parameter instead", DeprecationWarning)
+        setattr(self, 'icephys_electrodes', ic_elec_val)
+
         experimenter = kwargs.get('experimenter', None)
         if isinstance(experimenter, str):
             experimenter = (experimenter,)
@@ -370,7 +380,7 @@ class NWBFile(MultiContainerInterface):
     def all_children(self):
         stack = [self]
         ret = list()
-        self.__obj = LabelledDict(label='all_objects', def_key_name='object_id')
+        self.__obj = LabelledDict(label='all_objects', key_attr='object_id')
         while len(stack):
             n = stack.pop()
             ret.append(n)
@@ -391,18 +401,47 @@ class NWBFile(MultiContainerInterface):
 
     @property
     def modules(self):
-        warn("replaced by NWBFile.processing", DeprecationWarning)
+        warn("NWBFile.modules has been replaced by NWBFile.processing.", DeprecationWarning)
         return self.processing
 
     @property
     def ec_electrode_groups(self):
-        warn("replaced by NWBFile.electrode_groups", DeprecationWarning)
+        warn("NWBFile.ec_electrode_groups has been replaced by NWBFile.electrode_groups.", DeprecationWarning)
         return self.electrode_groups
 
     @property
     def ec_electrodes(self):
-        warn("replaced by NWBFile.electrodes", DeprecationWarning)
+        warn("NWBFile.ec_electrodes has been replaced by NWBFile.electrodes.", DeprecationWarning)
         return self.electrodes
+
+    @property
+    def ic_electrodes(self):
+        warn("NWBFile.ic_electrodes has been replaced by NWBFile.icephys_electrodes.", DeprecationWarning)
+        return self.icephys_electrodes
+
+    def add_ic_electrode(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.add_icephys_electrode` instead
+        """
+        warn("NWBFile.add_ic_electrode has been replaced by NWBFile.add_icephys_electrode.", DeprecationWarning)
+        return self.add_icephys_electrode(*args, **kwargs)
+
+    def create_ic_electrode(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode` instead
+        """
+        warn("NWBFile.create_ic_electrode has been replaced by NWBFile.create_icephys_electrode.", DeprecationWarning)
+        return self.create_icephys_electrode(*args, **kwargs)
+
+    def get_ic_electrode(self, *args, **kwargs):
+        """
+        This method is deprecated and will be removed in future versions. Please
+        use :py:meth:`~pynwb.file.NWBFile.get_icephys_electrode` instead
+        """
+        warn("NWBFile.get_ic_electrode has been replaced by NWBFile.get_icephys_electrode.", DeprecationWarning)
+        return self.get_icephys_electrode(*args, **kwargs)
 
     def __check_epochs(self):
         if self.epochs is None:
@@ -454,18 +493,24 @@ class NWBFile(MultiContainerInterface):
         self.__check_electrodes()
         call_docval_func(self.electrodes.add_column, kwargs)
 
-    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position'},
-            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position'},
-            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position'},
-            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode'},
+    @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)'},
+            {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)'},
+            {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)'},
+            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode, in ohms'},
             {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
-            {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
+            {'name': 'filtering', 'type': str,
+             'doc': 'description of hardware filtering, including the filter name and frequency cutoffs'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
+            {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
+            {'name': 'rel_y', 'type': 'float', 'doc': 'the y coordinate within the electrode group', 'default': None},
+            {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
+            {'name': 'reference', 'type': str, 'doc': 'Description of the reference used for this electrode.',
+             'default': None},
             allow_extra=True)
     def add_electrode(self, **kwargs):
         """
-        Add a unit to the unit table.
+        Add an electrode to the electrodes table.
         See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         Required fields are *x*, *y*, *z*, *imp*, *location*, *filtering*,
@@ -476,6 +521,20 @@ class NWBFile(MultiContainerInterface):
         d = _copy.copy(kwargs['data']) if kwargs.get('data') is not None else kwargs
         if d.get('group_name', None) is None:
             d['group_name'] = d['group'].name
+
+        new_cols = [('rel_x', 'the x coordinate within the electrode group'),
+                    ('rel_y', 'the y coordinate within the electrode group'),
+                    ('rel_z', 'the z coordinate within the electrode group'),
+                    ('reference', 'Description of the reference used for this electrode.')]
+        # add column if the arg is supplied and column does not yet exist
+        # do not pass arg to add_row if arg is not supplied
+        for col_name, col_doc in new_cols:
+            if kwargs[col_name] is not None:
+                if col_name not in self.electrodes:
+                    self.electrodes.add_column(col_name, col_doc)
+            else:
+                d.pop(col_name)  # remove args from d if not set
+
         call_docval_func(self.electrodes.add_row, d)
 
     @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
@@ -718,7 +777,8 @@ def ElectrodeTable(name='electrodes',
                        ('location', 'the location of channel within the subject e.g. brain region'),
                        ('filtering', 'description of hardware filtering'),
                        ('group', 'a reference to the ElectrodeGroup this electrode is a part of'),
-                       ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')]
+                       ('group_name', 'the name of the ElectrodeGroup this electrode is a part of')
+                       ]
                       )
 
 

@@ -1,3 +1,6 @@
+trigger:
+- dev
+
 jobs:
 
 - job: 'Test'
@@ -5,8 +8,16 @@ jobs:
 
   strategy:
     matrix:
+      macOS-py3.8:
+        imageName: 'macos-10.15'
+        pythonVersion: '3.8'
+        testToxEnv: 'py38'
+        coverageToxEnv: 'coverage'
+        buildToxEnv: 'build-py38'
+        testWheelInstallEnv: 'wheelinstall-py38'
+
       macOS-py3.7:
-        imageName: 'macos-10.13'
+        imageName: 'macos-10.15'
         pythonVersion: '3.7'
         testToxEnv: 'py37'
         coverageToxEnv: 'coverage'
@@ -14,7 +25,7 @@ jobs:
         testWheelInstallEnv: 'wheelinstall-py37'
 
       macOS-py3.6:
-        imageName: 'macos-10.13'
+        imageName: 'macos-10.15'
         pythonVersion: '3.6'
         testToxEnv: 'py36'
         coverageToxEnv: ''
@@ -22,20 +33,28 @@ jobs:
         testWheelInstallEnv: 'wheelinstall-py36'
 
       macOS-py3.5:
-        imageName: 'macos-10.13'
+        imageName: 'macos-10.15'
         pythonVersion: '3.5'
         testToxEnv: 'py35'
         coverageToxEnv: ''
         buildToxEnv: 'build-py35'
         testWheelInstallEnv: 'wheelinstall-py35'
 
-      macOS-py3.5-min-req:
-        imageName: 'macos-10.13'
-        pythonVersion: '3.5'
-        testToxEnv: 'py35-min-req'
+      macOS-py3.6-min-req:
+        imageName: 'macos-10.15'
+        pythonVersion: '3.6'
+        testToxEnv: 'py36-min-req'
         coverageToxEnv: ''
-        buildToxEnv: 'build-py35-min-req'
-        testWheelInstallEnv: 'wheelinstall-py35-min-req'
+        buildToxEnv: 'build-py36-min-req'
+        testWheelInstallEnv: 'wheelinstall-py36-min-req'
+
+      Windows-py3.8:
+        imageName: 'vs2017-win2016'
+        pythonVersion: '3.8'
+        testToxEnv: 'py38'
+        coverageToxEnv: 'coverage'
+        buildToxEnv: 'build-py38'
+        testWheelInstallEnv: 'wheelinstall-py38'
 
       Windows-py3.7:
         imageName: 'vs2017-win2016'
@@ -61,13 +80,13 @@ jobs:
         buildToxEnv: 'build-py35'
         testWheelInstallEnv: 'wheelinstall-py35'
 
-      Windows-py3.5-min-req:
+      Windows-py3.6-min-req:
         imageName: 'vs2017-win2016'
-        pythonVersion: '3.5'
-        testToxEnv: 'py35-min-req'
+        pythonVersion: '3.6'
+        testToxEnv: 'py36-min-req'
         coverageToxEnv: ''
-        buildToxEnv: 'build-py35-min-req'
-        testWheelInstallEnv: 'wheelinstall-py35-min-req'
+        buildToxEnv: 'build-py36-min-req'
+        testWheelInstallEnv: 'wheelinstall-py36-min-req'
 
   pool:
     vmImage: $(imageName)

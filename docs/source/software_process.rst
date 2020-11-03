@@ -96,3 +96,36 @@ by CircleCI, typically named `pynwb-{version}.tar.gz`.
 
 .. _versioneer: https://github.com/warner/python-versioneer
 .. _release: https://github.com/NeurodataWithoutBorders/pynwb/releases
+
+----------------------------------------------------
+Coordinating with nwb-schema Repository and Releases
+----------------------------------------------------
+
+The default branch is "dev". It is important that all releases of PyNWB contain a released version of nwb-schema.
+If a release contains an unreleased version of nwb-schema, e.g., from an untagged commit on the "dev" branch, then
+tracking the identity of the included nwb-schema becomes difficult and the same version string could point to two
+different versions of the schema.
+
+Whenever the "dev" branch of the nwb-schema repo is updated, a commit should be made to the "schema_x.y.z" branch of
+PyNWB, where "x.y.z" is the upcoming version of nwb-schema, that updates the nwb-schema submodule to the latest commit
+of the "dev" branch on nwb-schema. If the update to nwb-schema is the first change after a release, the "schema_x.y.z"
+branch should be created, the nwb-schema submodule should be updated, and a draft PR should be made for merging the
+"schema_x.y.z" branch to "dev". This PR provides a useful public view into how the API changes with each change to the
+schema.
+
+If the change in nwb-schema requires an accompanying change to PyNWB, then a new branch should be made with the
+corresponding changes, and a new PR should be made for merging the new branch into the "schema_x.y.z" branch. The PR
+should be merged in GitHub's "squash and merge" mode.
+
+When a new version of nwb-schema x.y.z is released, the "schema_x.y.z" branch of PyNWB should be checked to ensure
+that the nwb-schema submodule points to the new release-tagged commit of nwb-schema. Then the PR should be merged
+into dev with GitHub's "merge" mode. Commits should NOT be squashed because they will usually represent independent
+changes to the API or schema, and the git history should reflect those changes separately.
+
+The "dev" branch should NEVER contain unreleased versions of nwb-schema to prevent cases of users and developers
+accidentally publishing files with unreleased schema. This problem cannot be completely avoided, however, as users
+could still publish files generated from the "schema_x.y.z" branch of PyNWB.
+
+The nwb-schema uses hdmf-common-schema. Changes in hdmf-common-schema that affect nwb-schema result in version
+changes of nwb-schema and as such are managed in the same fashion. One main difference is that updates to
+hdmf-common-schema may also involve updates to version requirements for HDMF in PyNWB.

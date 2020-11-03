@@ -10,8 +10,13 @@ class TestTimeSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test TimeSeries to read/write """
-        return TimeSeries('test_timeseries', list(range(100, 200, 10)),
-                          'SIunit', timestamps=list(range(10)), resolution=0.1)
+        return TimeSeries(
+            name='test_timeseries',
+            data=list(range(1000)),
+            unit='SIunit',
+            timestamps=np.arange(1000.),
+            resolution=0.1
+        )
 
 
 class TestTimeSeriesLinking(TestCase):
@@ -24,7 +29,7 @@ class TestTimeSeriesLinking(TestCase):
 
     def test_timestamps_linking(self):
         ''' Test that timestamps get linked to in TimeSeries '''
-        tsa = TimeSeries(name='a', data=np.linspace(0, 1, 1000), timestamps=np.arange(1000), unit='m')
+        tsa = TimeSeries(name='a', data=np.linspace(0, 1, 1000), timestamps=np.arange(1000.), unit='m')
         tsb = TimeSeries(name='b', data=np.linspace(0, 1, 1000), timestamps=tsa, unit='m')
         nwbfile = NWBFile(identifier='foo',
                           session_start_time=datetime(2017, 5, 1, 12, 0, 0, tzinfo=tzlocal()),

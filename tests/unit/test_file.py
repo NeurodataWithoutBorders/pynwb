@@ -123,7 +123,7 @@ class NWBFileTest(TestCase):
     def test_access_processing(self):
         self.nwbfile.create_processing_module('test_mod', 'test_description')
         # test deprecate .modules
-        with self.assertWarnsWith(DeprecationWarning, 'replaced by NWBFile.processing'):
+        with self.assertWarnsWith(DeprecationWarning, 'NWBFile.modules has been replaced by NWBFile.processing.'):
             modules = self.nwbfile.modules['test_mod']
         self.assertIs(self.nwbfile.processing['test_mod'], modules)
 
@@ -166,7 +166,7 @@ class NWBFileTest(TestCase):
                                                     'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
 
     def test_get_acquisition_empty(self):
-        with self.assertRaisesWith(ValueError, "acquisition of NWBFile 'root' is empty"):
+        with self.assertRaisesWith(ValueError, "acquisition of NWBFile 'root' is empty."):
             self.nwbfile.get_acquisition()
 
     def test_get_acquisition_multiple_elements(self):
@@ -174,14 +174,14 @@ class NWBFileTest(TestCase):
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
         self.nwbfile.add_acquisition(TimeSeries('test_ts2', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
-        msg = "more than one element in acquisition of NWBFile 'root' -- must specify a name"
+        msg = "More than one element in acquisition of NWBFile 'root' -- must specify a name."
         with self.assertRaisesWith(ValueError,  msg):
             self.nwbfile.get_acquisition()
 
     def test_add_acquisition_invalid_name(self):
         self.nwbfile.add_acquisition(TimeSeries('test_ts', [0, 1, 2, 3, 4, 5],
                                                 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5]))
-        msg = "\"'TEST_TS' not found in acquisition of NWBFile 'root'\""
+        msg = "\"'TEST_TS' not found in acquisition of NWBFile 'root'.\""
         with self.assertRaisesWith(KeyError, msg):
             self.nwbfile.get_acquisition("TEST_TS")
 
@@ -242,9 +242,21 @@ class NWBFileTest(TestCase):
                                                timeseries=ts, tags=('hi', 'there'))
 
     def test_add_electrode(self):
-        dev1 = self.nwbfile.create_device('dev1')
-        group = self.nwbfile.create_electrode_group('tetrode1', 'tetrode description', 'tetrode location', dev1)
-        self.nwbfile.add_electrode(1.0, 2.0, 3.0, -1.0, 'CA1', 'none', group=group, id=1)
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=dev1
+        )
+        self.nwbfile.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=1
+        )
         elec = self.nwbfile.electrodes[0]
         self.assertEqual(elec.index[0], 1)
         self.assertEqual(elec.iloc[0]['x'], 1.0)
@@ -253,6 +265,45 @@ class NWBFileTest(TestCase):
         self.assertEqual(elec.iloc[0]['location'], 'CA1')
         self.assertEqual(elec.iloc[0]['filtering'], 'none')
         self.assertEqual(elec.iloc[0]['group'], group)
+
+    def test_add_electrode_some_opt(self):
+        dev1 = self.nwbfile.create_device(name='dev1')
+        group = self.nwbfile.create_electrode_group(
+            name='tetrode1',
+            description='tetrode description',
+            location='tetrode location',
+            device=dev1
+        )
+        self.nwbfile.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=1,
+            rel_x=4.0, rel_y=5.0, rel_z=6.0,
+            reference='ref1'
+        )
+        self.nwbfile.add_electrode(
+            x=1.0, y=2.0, z=3.0,
+            imp=-1.0,
+            location='CA1',
+            filtering='none',
+            group=group,
+            id=2,
+            rel_x=7.0, rel_y=8.0, rel_z=9.0,
+            reference='ref2'
+        )
+        elec = self.nwbfile.electrodes[0]
+        self.assertEqual(elec.iloc[0]['rel_x'], 4.0)
+        self.assertEqual(elec.iloc[0]['rel_y'], 5.0)
+        self.assertEqual(elec.iloc[0]['rel_z'], 6.0)
+        self.assertEqual(elec.iloc[0]['reference'], 'ref1')
+        elec = self.nwbfile.electrodes[1]
+        self.assertEqual(elec.iloc[0]['rel_x'], 7.0)
+        self.assertEqual(elec.iloc[0]['rel_y'], 8.0)
+        self.assertEqual(elec.iloc[0]['rel_z'], 9.0)
+        self.assertEqual(elec.iloc[0]['reference'], 'ref2')
 
     def test_all_children(self):
         ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5], 'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
@@ -298,6 +349,7 @@ Fields:
   )
   description: Autogenerated by NWBFile
   id: id <class 'hdmf.common.table.ElementIdentifiers'>
+  waveform_unit: volts
 """
         expected = expected % id(self.nwbfile.units)
         self.assertEqual(str(self.nwbfile.units), expected)

@@ -91,7 +91,7 @@ class Table(object):
         return len(re.sub(r"\033\[[0-9];[0-9];[0-9]{1,2}m", "", x))
 
     def addRow(self, row):
-        rows = [[''] for l in range(len(row))]
+        rows = [[''] for i in range(len(row))]
         maxrows = 0
         for i, x in enumerate(row):
             for j, y in enumerate(x.split("\n")):

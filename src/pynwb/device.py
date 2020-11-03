@@ -1,4 +1,4 @@
-from hdmf.utils import docval, call_docval_func
+from hdmf.utils import docval, call_docval_func, popargs
 from . import register_class, CORE_NAMESPACE
 from .core import NWBContainer
 
@@ -6,6 +6,7 @@ from .core import NWBContainer
 @register_class('Device', CORE_NAMESPACE)
 class Device(NWBContainer):
     """
+    Metadata about a data acquisition device, e.g., recording system, electrode, microscope.
     """
 
     __nwbfields__ = ('name',
@@ -19,4 +20,7 @@ class Device(NWBContainer):
             {'name': 'manufacturer', 'type': str, 'doc': 'the name of the manufacturer of this device',
             'default': None})
     def __init__(self, **kwargs):
-        call_docval_func(super(Device, self).__init__, kwargs)
+        description, manufacturer = popargs('description', 'manufacturer', kwargs)
+        call_docval_func(super().__init__, kwargs)
+        self.description = description
+        self.manufacturer = manufacturer

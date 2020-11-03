@@ -319,11 +319,11 @@ Documenting Extensions
 Using the same tools used to generate the documentation for the `NWB-N core format <https://nwb-schema.readthedocs.io/en/latest/>`_
 one can easily generate documentation in HTML, PDF, ePub and many other format for extensions as well.
 
-Code to generate this documentation is maintained in a separate repo: https://github.com/NeurodataWithoutBorders/nwb-docutils. To use these utilities, install the package with pip:
+Code to generate this documentation is maintained in a separate repo: https://github.com/hdmf-dev/hdmf-docutils. To use these utilities, install the package with pip:
 
 .. code-block:: text
 
-    pip install nwb-docutils
+    pip install hdmf-docutils
 
 For the purpose of this example, we assume that our current directory has the following structure.
 

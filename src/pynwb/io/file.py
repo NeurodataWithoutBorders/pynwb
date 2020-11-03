@@ -49,7 +49,7 @@ class NWBFileMap(ObjectMapper):
 
         icephys_spec = general_spec.get_group('intracellular_ephys')
         self.unmap(icephys_spec)
-        self.map_spec('ic_electrodes', icephys_spec.get_neurodata_type('IntracellularElectrode'))
+        self.map_spec('icephys_electrodes', icephys_spec.get_neurodata_type('IntracellularElectrode'))
         self.map_spec('sweep_table', icephys_spec.get_neurodata_type('SweepTable'))
 
         # TODO map the filtering dataset to something or deprecate it

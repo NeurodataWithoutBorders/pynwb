@@ -49,12 +49,12 @@ __TYPE_MAP.merge(hdmf_typemap)
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
          'doc': 'a path to a namespace, a TypeMap, or a list consisting of paths to namespaces and TypeMaps',
          'default': None},
-        returns="the namespaces loaded from the given file", rtype=tuple,
+        returns="TypeMap loaded for the given extension or NWB core namespace", rtype=tuple,
         is_method=False)
 def get_type_map(**kwargs):
     '''
-    Get a BuildManager to use for I/O using the given extensions. If no extensions are provided,
-    return a BuildManager that uses the core namespace
+    Get the TypeMap for the given extensions. If no extensions are provided,
+    return the TypeMap for the core namespace
     '''
     extensions = getargs('extensions', kwargs)
     type_map = None
@@ -168,8 +168,8 @@ def get_class(**kwargs):
     specification. If you want to define a custom mapping, you should not use this function and you should define the
     class manually.
 
-    Examples
-    --------
+    Examples:
+
     Generating and registering an extension is as simple as::
 
         MyClass = get_class('MyClass', 'ndx-my-extension')
@@ -227,7 +227,7 @@ class NWBHDF5IO(_HDF5IO):
                 raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
-            super(NWBHDF5IO, self).load_namespaces(tm, path)
+            super(NWBHDF5IO, self).load_namespaces(tm, path, file=file_obj)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
@@ -244,6 +244,17 @@ class NWBHDF5IO(_HDF5IO):
             elif manager is None:
                 manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
+
+    @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
+            {'name': 'nwbfile', 'type': 'NWBFile',
+             'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
+             'default': None},
+            {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
+             'default': dict()})
+    def export(self, **kwargs):
+        nwbfile = popargs('nwbfile', kwargs)
+        kwargs['container'] = nwbfile
+        call_docval_func(super().export, kwargs)
 
 
 from . import io as __io  # noqa: F401,E402
@@ -262,6 +273,8 @@ from . import ogen  # noqa: F401,E402
 from . import ophys  # noqa: F401,E402
 from . import retinotopy  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
+from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
+from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
