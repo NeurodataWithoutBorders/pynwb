@@ -41,26 +41,26 @@ class TestScratchDataIO(NWBH5IOMixin, TestCase):
 
     def test_scratch_convert_int(self):
         data = 2
-        ret = self.roundtrip_scratch(data, 'int', notes='test scratch')
+        ret = self.roundtrip_scratch(data, 'int', description='test scratch')
         self.assertEqual(data, ret)
         self.validate()
 
     def test_scratch_convert_list(self):
         data = [1, 2, 3, 4]
-        ret = self.roundtrip_scratch(data, 'list', notes='test scratch')
+        ret = self.roundtrip_scratch(data, 'list', description='test scratch')
         assert_array_equal(data, ret)
         self.validate()
 
     def test_scratch_convert_ndarray(self):
         data = np.array([1, 2, 3, 4])
-        ret = self.roundtrip_scratch(data, 'ndarray', notes='test scratch')
+        ret = self.roundtrip_scratch(data, 'ndarray', description='test scratch')
         assert_array_equal(data, ret)
         self.validate()
 
     def test_scratch_convert_DataFrame_table_desc(self):
         """Test round trip convert of DataFrame with a table description"""
         data = pd.DataFrame(data={'col1': [1, 2, 3, 4], 'col2': ['a', 'b', 'c', 'd']})
-        self.roundtrip_scratch(data, 'DataFrame', table_description='my_table')
+        self.roundtrip_scratch(data, 'DataFrame', description='my_table')
         ret = self.read_nwbfile.get_scratch('foo', convert=False)
         ret_df = ret.to_dataframe()
         self.assertEqual(ret.description, 'my_table')
