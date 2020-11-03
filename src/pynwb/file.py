@@ -676,8 +676,8 @@ class NWBFile(MultiContainerInterface):
                      'or pandas.DataFrame'),
              'default': None},
             {'name': 'notes', 'type': str,
-             'doc': ('Notes to add to the data. Highly recommended and used only when passing in numpy.ndarray, '
-                     'list, or tuple.'),
+             'doc': ('Notes to add to the data. Highly recommended and used only when passing in a scalar, '
+                     'numpy.ndarray, list, or tuple.'),
              'default': None},
             {'name': 'table_description', 'type': str,
              'doc': ('Description for the internal DynamicTable used to store a pandas.DataFrame. Highly recommended '
