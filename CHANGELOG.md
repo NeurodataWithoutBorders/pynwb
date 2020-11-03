@@ -5,8 +5,12 @@
 ### Breaking changes:
 - `NWBFile.add_scratch(...)` now requires that the 'notes' argument is supplied when a scalar, numpy.ndarray, list, or
   tuple is added to scratch. `NWBFile.add_scratch(...)` also requires that the 'table_description' argument is supplied
-  when a pandas.DataFrame is added to scratch. `ScratchData` also requires the 'notes' argument. Previously, these
-  fields had a default value of empty string, which is not recommended. @rly (#1309)
+  when a pandas.DataFrame is added to scratch. `ScratchData.__init__(...)` also requires the 'notes' argument.
+  Previously, these fields had a default value of empty string, which is not recommended. @rly (#1309)
+
+### New features:
+- `NWBFile.add_scratch(...)` and `ScratchData.__init__(...)` now accept scalar data in addition to the currently
+  accepted types. @rly (#1309)
 
 ## PyNWB 1.4.0 (August 12, 2020)
 
