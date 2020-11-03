@@ -11,7 +11,7 @@ class TestScratchDataIO(NWBH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test ScratchData to read/write """
-        return ScratchData(name='foo', data=[1, 2, 3, 4], notes='test scratch')
+        return ScratchData(name='foo', data=[1, 2, 3, 4], description='test scratch')
 
     def addContainer(self, nwbfile):
         """ Add the test ScratchData to the given NWBFile """

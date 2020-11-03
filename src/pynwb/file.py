@@ -695,7 +695,7 @@ class NWBFile(MultiContainerInterface):
             if isinstance(data, pd.DataFrame):
                 data = DynamicTable.from_dataframe(df=data, name=name, table_description=description)
             else:
-                data = ScratchData(name=name, data=data, notes=description)
+                data = ScratchData(name=name, data=data, description=description)
         else:
             if name is not None:
                 warn('The name argument is ignored when adding an NWBContainer, ScratchData, or '

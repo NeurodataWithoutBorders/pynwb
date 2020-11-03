@@ -4,8 +4,9 @@
 
 ### Breaking changes:
 - The 'notes' and 'table_description' arguments of `NWBFile.add_scratch(...)` are now replaced by a 'description'
-  argument that is required when a scalar, numpy.ndarray, list, tuple, or pandas.DataFrame is added to scratch. `ScratchData.__init__(...)` now requires the 'notes' argument. Previously, 'notes' had a default value of
-  empty string, which is not recommended. @rly (#1309)
+  argument that is required when a scalar, numpy.ndarray, list, tuple, or pandas.DataFrame is added to scratch. The
+  'notes' argument of `ScratchData.__init__(...)` is now replaced by the required 'description' argument for
+  consistency. Previously, 'notes' had a default value of empty string, which is not recommended. @rly (#1309)
 
 ### New features:
 - `NWBFile.add_scratch(...)` and `ScratchData.__init__(...)` now accept scalar data in addition to the currently
