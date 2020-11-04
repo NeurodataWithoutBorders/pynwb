@@ -1,5 +1,17 @@
 # PyNWB Changelog
 
+## PyNWB 2.0.0 (Upcoming)
+
+### Breaking changes:
+- The 'notes' and 'table_description' arguments of `NWBFile.add_scratch(...)` are now replaced by a 'description'
+  argument that is required when a scalar, numpy.ndarray, list, tuple, or pandas.DataFrame is added to scratch. The
+  'notes' argument of `ScratchData.__init__(...)` is now replaced by the required 'description' argument for
+  consistency. Previously, 'notes' had a default value of empty string, which is not recommended. @rly (#1309)
+
+### New features:
+- `NWBFile.add_scratch(...)` and `ScratchData.__init__(...)` now accept scalar data in addition to the currently
+  accepted types. @rly (#1309)
+
 ## PyNWB 1.4.0 (August 12, 2020)
 
 Users can now add/remove containers from a written NWB file and export the modified NWBFile to a new file path.

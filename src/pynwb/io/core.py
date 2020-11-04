@@ -7,7 +7,7 @@ from hdmf.build import BuildManager
 from .. import register_map
 
 from pynwb.file import NWBFile
-from pynwb.core import NWBData, NWBContainer
+from pynwb.core import NWBData, NWBContainer, ScratchData
 from pynwb.misc import Units
 
 
@@ -37,6 +37,14 @@ class NWBDataMap(NWBBaseTypeMapper):
     @ObjectMapper.constructor_arg('data')
     def carg_data(self, builder, manager):
         return builder.data
+
+
+@register_map(ScratchData)
+class ScratchDataMap(NWBContainerMapper):
+
+    def __init__(self, spec):
+        super().__init__(spec)
+        self.map_spec('description', spec.get_attribute('notes'))
 
 
 class NWBTableRegionMap(NWBDataMap):
