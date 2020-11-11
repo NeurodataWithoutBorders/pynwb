@@ -25,14 +25,16 @@ class SpatialSeries(TimeSeries):
              'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames'},
             {'name': 'reference_frame', 'type': str,   # required
              'doc': 'description defining what the zero-position is'},
+            {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)',
+             'default': 'meters'},
             *get_docval(TimeSeries.__init__, 'conversion', 'resolution', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'))
     def __init__(self, **kwargs):
         """
         Create a SpatialSeries TimeSeries dataset
         """
-        name, data, reference_frame = popargs('name', 'data', 'reference_frame', kwargs)
-        super(SpatialSeries, self).__init__(name, data, 'meters', **kwargs)
+        name, data, reference_frame, unit = popargs('name', 'data', 'reference_frame', 'unit', kwargs)
+        super(SpatialSeries, self).__init__(name, data, unit, **kwargs)
         self.reference_frame = reference_frame
 
 
