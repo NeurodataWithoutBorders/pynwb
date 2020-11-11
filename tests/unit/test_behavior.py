@@ -15,6 +15,13 @@ class SpatialSeriesConstructor(TestCase):
         self.assertEqual(sS.reference_frame, 'reference_frame')
 
 
+class SpatialSeriesConstructorChangeableUnit(TestCase):
+    def test_init(self):
+        sS = SpatialSeries('test_sS', np.ones((2, 2)), 'reference_frame', 'degrees',
+                           timestamps=[1., 2., 3.])
+        self.assertEqual(sS.unit, 'degrees')
+
+
 class BehavioralEpochsConstructor(TestCase):
     def test_init(self):
         data = [0, 1, 0, 1]
