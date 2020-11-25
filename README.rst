@@ -74,6 +74,11 @@ Contributing
 
 For details on how to contribute to PyNWB see our `contribution guidelines <docs/CONTRIBUTING.rst>`_.
 
+Citing NWB
+==========
+
+Oliver Rübel, Andrew Tritt, Benjamin Dichter, Thomas Braun, Nicholas Cain, Nathan Clack, Thomas J. Davidson, Max Dougherty, Jean-Christophe Fillion-Robin, Nile Graddis, Michael Grauer, Justin T. Kiggins, Lawrence Niu, Doruk Ozturk, William Schroeder, Ivan Soltesz, Friedrich T. Sommer, Karel Svoboda, Ng Lydia, Loren M. Frank, Kristofer Bouchard, "NWB:N 2.0: An Accessible Data Standard for Neurophysiology", biorxiv, January 17, 2019, doi: https://doi.org/10.1101/523035
+
 LICENSE
 =======
 
