@@ -70,10 +70,18 @@ def main():
         if args.cached_namespace:
             catalog = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
             ns_deps = NWBHDF5IO.load_namespaces(catalog, path)
-            s = set(ns_deps.keys())       # determine which namespaces are the most
-            for k in ns_deps:             # specific (i.e. extensions) and validate
-                s -= ns_deps[k].keys()    # against those
-            namespaces = list(sorted(s))
+            if args.ns:
+                if args.ns in ns_deps.keys():
+                    namespaces = [args.ns]
+                else:
+                    print("The namespace '{}' could not be found as only namespaces {} are cached.".format(
+                          args.ns, list(ns_deps.keys())), file=sys.stderr)
+                    sys.exit(1)
+            else:
+                s = set(ns_deps.keys())       # determine which namespaces are the most
+                for k in ns_deps:             # specific (i.e. extensions) and validate
+                    s -= ns_deps[k].keys()    # against those
+                namespaces = list(sorted(s))
             if len(namespaces) > 0:
                 tm = TypeMap(catalog)
                 manager = BuildManager(tm)
@@ -109,14 +117,14 @@ def main():
             if args.ns in namespaces:
                 namespaces = [args.ns]
             else:
-                print("The namespace {} could not be found in {} as only {} is present.".format(
+                print("The namespace '{}' could not be found in {} as only {} is present.".format(
                       args.ns, specloc, namespaces), file=sys.stderr)
                 ret = 1
                 continue
 
         with NWBHDF5IO(path, mode='r', manager=manager) as io:
             for ns in namespaces:
-                print("Validating {} against {} using namespace {}.".format(path, specloc, ns))
+                print("Validating {} against {} using namespace '{}'.".format(path, specloc, ns))
                 ret = ret or _validate_helper(io=io, namespace=ns)
 
     sys.exit(ret)
