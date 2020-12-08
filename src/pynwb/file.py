@@ -197,7 +197,9 @@ class NWBFile(MultiContainerInterface):
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
                      {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
-                     'epoch_tags',)
+                     'epoch_tags',
+                     {'name': 'icephys_filtering', 'settable': False})
+    # icephys_filtering is temporary. /intracellular_ephys/filtering dataset will be deprecated
 
     @docval({'name': 'session_description', 'type': str,
              'doc': 'a description of the session where this data was generated'},
