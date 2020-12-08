@@ -99,9 +99,7 @@ class ScratchData(NWBData):
 
 
 class NWBTable(Table):
-    '''
-    Defined in PyNWB for API backward compatibility. See HDMF Table for details
-    '''
+    """Defined in PyNWB for API backward compatibility. See HDMF Table for details."""
     pass
 
 
