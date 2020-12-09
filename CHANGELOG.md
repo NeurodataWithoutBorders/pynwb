@@ -11,6 +11,7 @@
 ### New features:
 - `NWBFile.add_scratch(...)` and `ScratchData.__init__(...)` now accept scalar data in addition to the currently
   accepted types. @rly (#1309)
+- Use HDMF 2.3.0. See the [HDMF 2.3.0 release notes](https://github.com/hdmf-dev/hdmf/releases/tag/2.3.0) for details.
 
 ## PyNWB 1.4.0 (August 12, 2020)
 
