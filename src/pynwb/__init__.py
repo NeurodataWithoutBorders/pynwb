@@ -201,9 +201,10 @@ def validate(**kwargs):
 
 class NWBHDF5IO(_HDF5IO):
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
+    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file', 'default': None},
             {'name': 'mode', 'type': str,
-             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
+             'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")',
+             'default': 'r'},
             {'name': 'load_namespaces', 'type': bool,
              'doc': 'whether or not to load cached namespaces from given path - not applicable in write mode',
              'default': False},
