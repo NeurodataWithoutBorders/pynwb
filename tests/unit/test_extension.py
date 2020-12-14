@@ -168,8 +168,7 @@ class TestCatchDupNS(TestCase):
         ns_builder2.add_spec(self.ext_source2, ext2)
         ns_builder2.export(self.ns_path2, outdir=self.tempdir)
         type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path1))
-        with self.assertWarnsRegex(UserWarning, r"ignoring namespace '\S+' because it already exists"):
-            type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
+        type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
 
 
 class TestCatchDuplicateSpec(TestCase):

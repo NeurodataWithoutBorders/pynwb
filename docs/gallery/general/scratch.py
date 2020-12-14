@@ -138,7 +138,7 @@ filt_ts = nwb_scratch.modules['filtering_module']['filtered_timeseries']
 
 fft = np.fft.fft(filt_ts.data)
 
-nwb_scratch.add_scratch(fft, name='dft_filtered', notes='discrete Fourier transform from filtered data')
+nwb_scratch.add_scratch(fft, name='dft_filtered', description='discrete Fourier transform from filtered data')
 
 
 ####################

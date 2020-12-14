@@ -20,7 +20,7 @@ jobs:
         imageName: 'macos-10.15'
         pythonVersion: '3.7'
         testToxEnv: 'py37'
-        coverageToxEnv: 'coverage'
+        coverageToxEnv: ''
         buildToxEnv: 'build-py37'
         testWheelInstallEnv: 'wheelinstall-py37'
 
@@ -60,7 +60,7 @@ jobs:
         imageName: 'vs2017-win2016'
         pythonVersion: '3.7'
         testToxEnv: 'py37'
-        coverageToxEnv: 'coverage'
+        coverageToxEnv: ''
         buildToxEnv: 'build-py37'
         testWheelInstallEnv: 'wheelinstall-py37'
 

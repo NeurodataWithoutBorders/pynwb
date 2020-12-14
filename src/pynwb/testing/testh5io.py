@@ -7,7 +7,7 @@ import warnings
 from pynwb import NWBFile, NWBHDF5IO, validate as pynwb_validate
 from .utils import remove_test_file
 from hdmf.backends.warnings import BrokenLinkWarning
-from hdmf.build.warnings import MissingRequiredWarning, OrphanContainerWarning
+from hdmf.build.warnings import MissingRequiredBuildWarning
 
 
 class NWBH5IOMixin(metaclass=ABCMeta):
@@ -105,8 +105,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
 
         if ws:
             for w in ws:
-                if issubclass(w.category, (MissingRequiredWarning,
-                                           OrphanContainerWarning,
+                if issubclass(w.category, (MissingRequiredBuildWarning,
                                            BrokenLinkWarning)):
                     raise Exception('%s: %s' % (w.category.__name__, w.message))
                 else:
@@ -140,8 +139,7 @@ class NWBH5IOMixin(metaclass=ABCMeta):
 
         if ws:
             for w in ws:
-                if issubclass(w.category, (MissingRequiredWarning,
-                                           OrphanContainerWarning,
+                if issubclass(w.category, (MissingRequiredBuildWarning,
                                            BrokenLinkWarning)):
                     raise Exception('%s: %s' % (w.category.__name__, w.message))
                 else:
