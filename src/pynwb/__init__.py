@@ -2,6 +2,7 @@
 for reading and writing data in NWB format
 '''
 import os.path
+from pathlib import Path
 from copy import deepcopy
 from warnings import warn
 import h5py
@@ -201,7 +202,7 @@ def validate(**kwargs):
 
 class NWBHDF5IO(_HDF5IO):
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
+    @docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the HDF5 file'},
             {'name': 'mode', 'type': str,
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
             {'name': 'load_namespaces', 'type': bool,
