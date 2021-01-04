@@ -18,8 +18,7 @@ from .icephys import IntracellularElectrode, SweepTable, PatchClampSeries
 from .ophys import ImagingPlane
 from .ogen import OptogeneticStimulusSite
 from .misc import Units
-from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, \
-                  ScratchData, LabelledDict
+from .core import NWBContainer, NWBDataInterface, MultiContainerInterface, ScratchData, LabelledDict
 from hdmf.common import DynamicTableRegion, DynamicTable
 
 
@@ -198,7 +197,9 @@ class NWBFile(MultiContainerInterface):
                      {'name': 'subject', 'child': True, 'required_name': 'subject'},
                      {'name': 'sweep_table', 'child': True, 'required_name': 'sweep_table'},
                      {'name': 'invalid_times', 'child': True, 'required_name': 'invalid_times'},
-                     'epoch_tags',)
+                     'epoch_tags',
+                     {'name': 'icephys_filtering', 'settable': False})
+    # icephys_filtering is temporary. /intracellular_ephys/filtering dataset will be deprecated
 
     @docval({'name': 'session_description', 'type': str,
              'doc': 'a description of the session where this data was generated'},
@@ -380,7 +381,7 @@ class NWBFile(MultiContainerInterface):
     def all_children(self):
         stack = [self]
         ret = list()
-        self.__obj = LabelledDict(label='all_objects', def_key_name='object_id')
+        self.__obj = LabelledDict(label='all_objects', key_attr='object_id')
         while len(stack):
             n = stack.pop()
             ret.append(n)
@@ -401,22 +402,22 @@ class NWBFile(MultiContainerInterface):
 
     @property
     def modules(self):
-        warn("replaced by NWBFile.processing", DeprecationWarning)
+        warn("NWBFile.modules has been replaced by NWBFile.processing.", DeprecationWarning)
         return self.processing
 
     @property
     def ec_electrode_groups(self):
-        warn("replaced by NWBFile.electrode_groups", DeprecationWarning)
+        warn("NWBFile.ec_electrode_groups has been replaced by NWBFile.electrode_groups.", DeprecationWarning)
         return self.electrode_groups
 
     @property
     def ec_electrodes(self):
-        warn("replaced by NWBFile.electrodes", DeprecationWarning)
+        warn("NWBFile.ec_electrodes has been replaced by NWBFile.electrodes.", DeprecationWarning)
         return self.electrodes
 
     @property
     def ic_electrodes(self):
-        warn("deprecated. use NWBFile.icephys_electrodes instead", DeprecationWarning)
+        warn("NWBFile.ic_electrodes has been replaced by NWBFile.icephys_electrodes.", DeprecationWarning)
         return self.icephys_electrodes
 
     def add_ic_electrode(self, *args, **kwargs):
@@ -424,7 +425,7 @@ class NWBFile(MultiContainerInterface):
         This method is deprecated and will be removed in future versions. Please
         use :py:meth:`~pynwb.file.NWBFile.add_icephys_electrode` instead
         """
-        warn("deprecated, use NWBFile.add_icephys_electrode instead", DeprecationWarning)
+        warn("NWBFile.add_ic_electrode has been replaced by NWBFile.add_icephys_electrode.", DeprecationWarning)
         return self.add_icephys_electrode(*args, **kwargs)
 
     def create_ic_electrode(self, *args, **kwargs):
@@ -432,7 +433,7 @@ class NWBFile(MultiContainerInterface):
         This method is deprecated and will be removed in future versions. Please
         use :py:meth:`~pynwb.file.NWBFile.create_icephys_electrode` instead
         """
-        warn("deprecated, use NWBFile.create_icephys_electrode instead", DeprecationWarning)
+        warn("NWBFile.create_ic_electrode has been replaced by NWBFile.create_icephys_electrode.", DeprecationWarning)
         return self.create_icephys_electrode(*args, **kwargs)
 
     def get_ic_electrode(self, *args, **kwargs):
@@ -440,7 +441,7 @@ class NWBFile(MultiContainerInterface):
         This method is deprecated and will be removed in future versions. Please
         use :py:meth:`~pynwb.file.NWBFile.get_icephys_electrode` instead
         """
-        warn("deprecated, use NWBFile.get_icephys_electrode instead", DeprecationWarning)
+        warn("NWBFile.get_ic_electrode has been replaced by NWBFile.get_icephys_electrode.", DeprecationWarning)
         return self.get_icephys_electrode(*args, **kwargs)
 
     def __check_epochs(self):
@@ -496,9 +497,10 @@ class NWBFile(MultiContainerInterface):
     @docval({'name': 'x', 'type': 'float', 'doc': 'the x coordinate of the position (+x is posterior)'},
             {'name': 'y', 'type': 'float', 'doc': 'the y coordinate of the position (+y is inferior)'},
             {'name': 'z', 'type': 'float', 'doc': 'the z coordinate of the position (+z is right)'},
-            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode'},
+            {'name': 'imp', 'type': 'float', 'doc': 'the impedance of the electrode, in ohms'},
             {'name': 'location', 'type': str, 'doc': 'the location of electrode within the subject e.g. brain region'},
-            {'name': 'filtering', 'type': str, 'doc': 'description of hardware filtering'},
+            {'name': 'filtering', 'type': str,
+             'doc': 'description of hardware filtering, including the filter name and frequency cutoffs'},
             {'name': 'group', 'type': ElectrodeGroup, 'doc': 'the ElectrodeGroup object to add to this NWBFile'},
             {'name': 'id', 'type': int, 'doc': 'a unique identifier for the electrode', 'default': None},
             {'name': 'rel_x', 'type': 'float', 'doc': 'the x coordinate within the electrode group', 'default': None},
@@ -509,7 +511,7 @@ class NWBFile(MultiContainerInterface):
             allow_extra=True)
     def add_electrode(self, **kwargs):
         """
-        Add a unit to the unit table.
+        Add an electrode to the electrodes table.
         See :py:meth:`~hdmf.common.DynamicTable.add_row` for more details.
 
         Required fields are *x*, *y*, *z*, *imp*, *location*, *filtering*,
@@ -668,36 +670,42 @@ class NWBFile(MultiContainerInterface):
         self._add_stimulus_template_internal(timeseries)
         self._update_sweep_table(timeseries)
 
-    @docval({'name': 'data', 'type': (np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
-             'help': 'the data to add to the scratch space'},
+    @docval({'name': 'data',
+             'type': ('scalar_data', np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
+             'doc': 'The data to add to the scratch space.'},
             {'name': 'name', 'type': str,
-             'help': 'the name of the data. Only used when passing in numpy.ndarray, list, or tuple',
+             'doc': ('The name of the data. Required only when passing in a scalar, numpy.ndarray, '
+                     'list, tuple, or pandas.DataFrame'),
              'default': None},
-            {'name': 'notes', 'type': str,
-             'help': 'notes to add to the data. Only used when passing in numpy.ndarray, list, or tuple',
-             'default': None},
-            {'name': 'table_description', 'type': str,
-             'help': 'description for the internal DynamicTable used to store a pandas.DataFrame',
-             'default': ''})
+            {'name': 'description', 'type': str,
+             'doc': ('Description of the data. Required only when passing in a scalar, numpy.ndarray, '
+                     'list, tuple, or pandas.DataFrame. Ignored when passing in an NWBContainer, '
+                     'DynamicTable, or ScratchData object.'),
+             'default': None})
     def add_scratch(self, **kwargs):
-        '''Add data to the scratch space'''
-        data, name, notes = getargs('data', 'name', 'notes', kwargs)
-        if isinstance(data, (np.ndarray, pd.DataFrame, list, tuple)):
+        '''Add data to the scratch space.'''
+        data, name, description = getargs('data', 'name', 'description', kwargs)
+        if isinstance(data, (str, int, float, bytes, np.ndarray, list, tuple, pd.DataFrame)):
             if name is None:
-                raise ValueError('please provide a name for scratch data')
+                msg = ('A name is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
+                       'list, tuple, or pandas.DataFrame as scratch data.')
+                raise ValueError(msg)
+            if description is None:
+                msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
+                       'list, tuple, or pandas.DataFrame as scratch data.')
+                raise ValueError(msg)
             if isinstance(data, pd.DataFrame):
-                table_description = getargs('table_description', kwargs)
-                data = DynamicTable.from_dataframe(df=data, name=name, table_description=table_description)
-                if notes is not None:
-                    warn('Notes argument is ignored when adding a pandas DataFrame to scratch')
+                data = DynamicTable.from_dataframe(df=data, name=name, table_description=description)
             else:
-                data = ScratchData(name=name, data=data, notes=notes)
+                data = ScratchData(name=name, data=data, description=description)
         else:
-            if notes is not None:
-                warn('Notes argument is ignored when adding an NWBContainer to scratch')
             if name is not None:
-                warn('Name argument is ignored when adding an NWBContainer to scratch')
-        self._add_scratch(data)
+                warn('The name argument is ignored when adding an NWBContainer, ScratchData, or '
+                     'DynamicTable to scratch.')
+            if description is not None:
+                warn('The description argument is ignored when adding an NWBContainer, ScratchData, or '
+                     'DynamicTable to scratch.')
+        return self._add_scratch(data)
 
     @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
             {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})

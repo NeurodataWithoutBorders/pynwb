@@ -2,6 +2,7 @@
 for reading and writing data in NWB format
 '''
 import os.path
+from pathlib import Path
 from copy import deepcopy
 from warnings import warn
 import h5py
@@ -201,7 +202,7 @@ def validate(**kwargs):
 
 class NWBHDF5IO(_HDF5IO):
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
+    @docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the HDF5 file'},
             {'name': 'mode', 'type': str,
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
             {'name': 'load_namespaces', 'type': bool,
@@ -245,6 +246,17 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager()
         super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
 
+    @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
+            {'name': 'nwbfile', 'type': 'NWBFile',
+             'doc': 'the NWBFile object to export. If None, then the entire contents of src_io will be exported',
+             'default': None},
+            {'name': 'write_args', 'type': dict, 'doc': 'arguments to pass to :py:meth:`write_builder`',
+             'default': dict()})
+    def export(self, **kwargs):
+        nwbfile = popargs('nwbfile', kwargs)
+        kwargs['container'] = nwbfile
+        call_docval_func(super().export, kwargs)
+
 
 from . import io as __io  # noqa: F401,E402
 from .core import NWBContainer, NWBData  # noqa: F401,E402
@@ -262,6 +274,8 @@ from . import ogen  # noqa: F401,E402
 from . import ophys  # noqa: F401,E402
 from . import retinotopy  # noqa: F401,E402
 from . import legacy  # noqa: F401,E402
+from hdmf.data_utils import DataChunkIterator  # noqa: F401,E402
+from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']

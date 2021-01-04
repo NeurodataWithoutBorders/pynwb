@@ -98,7 +98,8 @@ class TimeSeries(NWBDataInterface):
 
     @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},  # required
             {'name': 'data', 'type': ('array_data', 'data', 'TimeSeries'),
-             'doc': 'The data this TimeSeries dataset stores. Can also store binary data e.g. image frames',
+             'doc': ('The data values. The first dimension must be time. '
+                     'Can also store binary data, e.g., image frames'),
              'default': None},
             {'name': 'unit', 'type': str, 'doc': 'The base unit of measurement (should be SI unit)', 'default': None},
             {'name': 'resolution', 'type': (str, 'float'),
@@ -238,7 +239,7 @@ class Image(NWBData):
     """
     __nwbfields__ = ('data', 'resolution', 'description')
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image. Dimensions: x, y [, r,g,b[,a]]',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
             {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},

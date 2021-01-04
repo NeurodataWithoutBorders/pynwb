@@ -1,5 +1,57 @@
 # PyNWB Changelog
 
+## PyNWB 2.0.0 (Upcoming)
+
+### Breaking changes:
+- The 'notes' and 'table_description' arguments of `NWBFile.add_scratch(...)` are now replaced by a 'description'
+  argument that is required when a scalar, numpy.ndarray, list, tuple, or pandas.DataFrame is added to scratch. The
+  'notes' argument of `ScratchData.__init__(...)` is now replaced by the required 'description' argument for
+  consistency. Previously, 'notes' had a default value of empty string, which is not recommended. @rly (#1309)
+
+### New features:
+- `NWBFile.add_scratch(...)` and `ScratchData.__init__(...)` now accept scalar data in addition to the currently
+  accepted types. @rly (#1309)
+- Use HDMF 2.3.0. See the [HDMF 2.3.0 release notes](https://github.com/hdmf-dev/hdmf/releases/tag/2.3.0) for details.
+- Support `pathlib.Path` paths when opening files with `NWBHDF5IO`. @dsleiter (#1314)
+
+## PyNWB 1.4.0 (August 12, 2020)
+
+Users can now add/remove containers from a written NWB file and export the modified NWBFile to a new file path.
+@rly (#1280)
+- See https://pynwb.readthedocs.io/en/stable/tutorials/general/add-remove-containers.html for examples and more
+  information.
+
+### Compatibility warnings:
+- PyNWB no longer works with HDMF version < 2.1.0. If you have pinned HDMF version < 2 in your package but allow PyNWB
+version 1.4.0, please beware that `pip` may install PyNWB version 1.4.0 with an incompatible version of HDMF
+(version < 2).
+- Use of HDMF 2.1.0 fixes `__getitem__`-based access of `MultiContainerInterface` types, e.g,,
+`fluorescence['roi_response_series_name']`, where previously if the `MultiContainerInterface` contained only one item,
+then any key could be used within the square brackets to access the contained `Container`, even if the key did not
+match the name of the contained `Container`. This update patches this bug such that the key used within the square
+brackets *must* match the name of the contained `Container` or else an error will be raised.
+
+### Internal improvements:
+- Update requirements to use HDMF 2.1.0. @rly (#1256)
+- Start FAQ section in documentation. @rly (#1249)
+- Improve deprecation warnings. @rly (#1261)
+- Update CI to test Python 3.8, update requirements. @rly (#1267, #1275)
+- Make use of `MultiContainerInterface` and `LabelledDict` that have been moved to HDMF. @bendichter @rly (#1260)
+
+### Bug fixes:
+- For `ImageSeries`, add check if `external_file` is provided without `starting_frame` in `__init__`. @rly (#1264)
+- Improve docstrings for `TimeSeries.data` and for the electrode table. @rly (#1271, #1272)
+- Fix Azure Pipelines configuration. @rly (#1281)
+
+## PyNWB 1.3.3 (June 26, 2020)
+
+### Internal improvements:
+- Update requirements to use HDMF 1.6.4. @rly (#1256)
+
+### Bug fixes:
+- Fix writing optional args to electrodes table. @rly (#1246)
+- Fix missing method UnitsMap.get_nwb_file. @rly (#1227)
+
 ## PyNWB 1.3.2 (June 1, 2020)
 
 ### Bug fixes:

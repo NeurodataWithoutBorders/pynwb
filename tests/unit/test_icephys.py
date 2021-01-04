@@ -54,7 +54,7 @@ class NWBFileICEphys(TestCase):
                 identifier='NWB123',  # required
                 session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
 
-        msg = "deprecated, use NWBFile.add_icephys_electrode instead"
+        msg = "NWBFile.add_ic_electrode has been replaced by NWBFile.add_icephys_electrode."
         with self.assertWarnsWith(DeprecationWarning, msg):
             nwbfile.add_ic_electrode(self.icephys_electrode)
 
@@ -66,12 +66,12 @@ class NWBFileICEphys(TestCase):
             icephys_electrodes=[self.icephys_electrode, ])
         # make sure NWBFile.ic_electrodes property warns
 
-        msg = "deprecated. use NWBFile.icephys_electrodes instead"
+        msg = "NWBFile.ic_electrodes has been replaced by NWBFile.icephys_electrodes."
         with self.assertWarnsWith(DeprecationWarning, msg):
             nwbfile.ic_electrodes
 
         # make sure NWBFile.get_ic_electrode warns
-        msg = "deprecated, use NWBFile.get_icephys_electrode instead"
+        msg = "NWBFile.get_ic_electrode has been replaced by NWBFile.get_icephys_electrode."
         with self.assertWarnsWith(DeprecationWarning, msg):
             nwbfile.get_ic_electrode(self.icephys_electrode.name)
 
@@ -81,7 +81,7 @@ class NWBFileICEphys(TestCase):
             identifier='NWB123',  # required
             session_start_time=datetime(2017, 4, 3, 11, tzinfo=tzlocal()))
         device = Device(name='device_name')
-        msg = "deprecated, use NWBFile.create_icephys_electrode instead"
+        msg = "NWBFile.create_ic_electrode has been replaced by NWBFile.create_icephys_electrode."
         with self.assertWarnsWith(DeprecationWarning, msg):
             nwbfile.create_ic_electrode(
                 name='test_iS',

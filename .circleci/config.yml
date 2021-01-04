@@ -1,4 +1,4 @@
-version: 2
+version: 2.1
 
 references:
 
@@ -150,7 +150,6 @@ jobs:
      - COVERAGE_TOX_ENV: ""
      - BUILD_TOX_ENV: "build-py36"
      - TEST_WHEELINSTALL_ENV: "wheelinstall-py36"
-     - UPLOAD_WHEELS: "true"
     <<: *ci-steps
 
   python37:
@@ -158,9 +157,20 @@ jobs:
       - image: circleci/python:3.7.6-stretch
     environment:
      - TEST_TOX_ENV: "py37"
-     - COVERAGE_TOX_ENV: "coverage"
+     - COVERAGE_TOX_ENV: ""
      - BUILD_TOX_ENV: "build-py37"
      - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
+    <<: *ci-steps
+
+  python38:
+    docker:
+      - image: circleci/python:3.8.1-buster
+    environment:
+     - TEST_TOX_ENV: "py38"
+     - COVERAGE_TOX_ENV: "coverage"
+     - BUILD_TOX_ENV: "build-py38"
+     - TEST_WHEELINSTALL_ENV: "wheelinstall-py38"
+     - UPLOAD_WHEELS: "true"
     <<: *ci-steps
 
   python36-min-req:
@@ -201,6 +211,16 @@ jobs:
       - TEST_TOX_ENV: "py37"
       - BUILD_TOX_ENV: "build-py37"
       - TEST_WHEELINSTALL_ENV: "wheelinstall-py37"
+    <<: *conda-steps
+
+  miniconda38:
+    docker:
+      - image: continuumio/miniconda3:4.7.12
+    environment:
+      - CONDA_PYTHON_VER: "3.8"
+      - TEST_TOX_ENV: "py38"
+      - BUILD_TOX_ENV: "build-py38"
+      - TEST_WHEELINSTALL_ENV: "wheelinstall-py38"
     <<: *conda-steps
 
   gallery36:
@@ -245,7 +265,7 @@ jobs:
 
   deploy-dev:
     docker:
-      - image: circleci/python:3.7.6-stretch
+      - image: circleci/python:3.8.1-buster
     steps:
       - checkout
       - attach_workspace:
@@ -267,7 +287,7 @@ jobs:
 
   deploy-release:
     docker:
-      - image: circleci/python:3.7.6-stretch
+      - image: circleci/python:3.8.1-buster
     steps:
       - attach_workspace:
           at: ./
@@ -302,6 +322,8 @@ workflows:
           <<: *no_filters
       - python37:
           <<: *no_filters
+      - python38:
+          <<: *no_filters
       - python36-min-req:
           <<: *no_filters
       - miniconda35:
@@ -309,6 +331,8 @@ workflows:
       - miniconda36:
           <<: *no_filters
       - miniconda37:
+          <<: *no_filters
+      - miniconda38:
           <<: *no_filters
       - gallery36:
           <<: *no_filters
@@ -322,10 +346,12 @@ workflows:
             - python35
             - python36
             - python37
+            - python38
             - python36-min-req
             - miniconda35
             - miniconda36
             - miniconda37
+            - miniconda38
             - gallery36
             - gallery37
             - gallery36-min-req
@@ -343,10 +369,12 @@ workflows:
             - python35
             - python36
             - python37
+            - python38
             - python36-min-req
             - miniconda35
             - miniconda36
             - miniconda37
+            - miniconda38
             - gallery36
             - gallery37
             - gallery36-min-req

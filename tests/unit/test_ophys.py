@@ -197,23 +197,6 @@ class TwoPhotonSeriesConstructor(TestCase):
         self.assertEqual(tPS.format, 'tiff')
         self.assertIsNone(tPS.dimension)
 
-    def test_missing_data_external(self):
-        ip = create_imaging_plane()
-
-        msg = 'must supply either external_file or data to test_tPS'
-        with self.assertRaisesWith(ValueError, msg):  # no data or external file
-            TwoPhotonSeries(
-                name='test_tPS',
-                unit='unit',
-                field_of_view=[2., 3.],
-                imaging_plane=ip,
-                pmt_gain=1.0,
-                scan_line_rate=2.0,
-                starting_frame=[1, 2, 3],
-                format='tiff',
-                timestamps=[1., 2.]
-            )
-
 
 class MotionCorrectionConstructor(TestCase):
     def test_init(self):
