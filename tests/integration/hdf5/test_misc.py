@@ -46,6 +46,7 @@ class TestUnitsIO(AcquisitionH5IOMixin, TestCase):
                         ]
                     ]))
         ut.waveform_rate = 40000.
+        ut.waveform_conversion = 1.
         ut.resolution = 1/40000
         return ut
 

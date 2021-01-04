@@ -133,6 +133,7 @@ class Units(DynamicTable):
 
     __fields__ = (
         'waveform_rate',
+        'waveform_conversion',
         'waveform_unit',
         'resolution'
     )
@@ -161,6 +162,8 @@ class Units(DynamicTable):
              'doc': 'the table that the *electrodes* column indexes', 'default': None},
             {'name': 'waveform_rate', 'type': 'float',
              'doc': 'Sampling rate of the waveform means', 'default': None},
+            {'name': 'waveform_conversion', 'type': 'float',
+             'doc': 'Conversion factor of waveform data', 'default': None},
             {'name': 'waveform_unit', 'type': str,
              'doc': 'Unit of measurement of the waveform means', 'default': 'volts'},
             {'name': 'resolution', 'type': 'float',
@@ -174,6 +177,7 @@ class Units(DynamicTable):
             self.__has_spike_times = False
         self.__electrode_table = getargs('electrode_table', kwargs)
         self.waveform_rate = getargs('waveform_rate', kwargs)
+        self.waveform_conversion = getargs('waveform_conversion', kwargs)
         self.waveform_unit = getargs('waveform_unit', kwargs)
         self.resolution = getargs('resolution', kwargs)
 
