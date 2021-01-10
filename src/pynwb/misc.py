@@ -136,7 +136,6 @@ class Units(DynamicTable):
 
     __fields__ = (
         'waveform_rate',
-        'waveform_conversion',
         'waveform_unit',
         'resolution'
     )
@@ -165,8 +164,6 @@ class Units(DynamicTable):
              'doc': 'the table that the *electrodes* column indexes', 'default': None},
             {'name': 'waveform_rate', 'type': 'float',
              'doc': 'Sampling rate of the waveform means', 'default': None},
-            {'name': 'waveform_conversion', 'type': 'float',
-             'doc': 'Conversion factor of waveform data', 'default': None},
             {'name': 'waveform_unit', 'type': str,
              'doc': 'Unit of measurement of the waveform means', 'default': 'volts'},
             {'name': 'resolution', 'type': 'float',
@@ -180,7 +177,6 @@ class Units(DynamicTable):
             self.__has_spike_times = False
         self.__electrode_table = getargs('electrode_table', kwargs)
         self.waveform_rate = getargs('waveform_rate', kwargs)
-        self.waveform_conversion = getargs('waveform_conversion', kwargs)
         self.waveform_unit = getargs('waveform_unit', kwargs)
         self.resolution = getargs('resolution', kwargs)
 
@@ -200,7 +196,7 @@ class Units(DynamicTable):
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
              'doc': 'the spike waveform standard deviation for each unit. Shape is (time,) or (time, electrodes)'},
             {'name': 'waveforms', 'type': 'array_data', 'default': None, 'doc': waveforms_desc,
-             'shape': ((None, None), (None, None, None))},
+             'shape': (None, None, None)},
             {'name': 'id', 'type': int, 'default': None, 'doc': 'the id for each unit'},
             allow_extra=True)
     def add_unit(self, **kwargs):
