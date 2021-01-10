@@ -196,7 +196,7 @@ class Units(DynamicTable):
             {'name': 'waveform_sd', 'type': 'array_data', 'default': None,
              'doc': 'the spike waveform standard deviation for each unit. Shape is (time,) or (time, electrodes)'},
             {'name': 'waveforms', 'type': 'array_data', 'default': None, 'doc': waveforms_desc,
-             'shape': (None, None, None)},
+             'shape': ((None, None), (None, None, None))},
             {'name': 'id', 'type': int, 'default': None, 'doc': 'the id for each unit'},
             allow_extra=True)
     def add_unit(self, **kwargs):
