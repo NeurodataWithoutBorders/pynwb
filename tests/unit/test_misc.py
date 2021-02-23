@@ -113,6 +113,45 @@ class UnitsTests(TestCase):
         self.assertEqual(ut['spike_times'][0], [0, 1, 2])
         self.assertEqual(ut['spike_times'][1], [3, 4, 5])
 
+    def test_add_waveforms(self):
+        ut = Units()
+        wf1 = [
+                [  # elec 1
+                    [1, 2, 3],
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ], [  # elec 2
+                    [1, 2, 3],
+                    [1, 2, 3],
+                    [1, 2, 3]
+                ]
+            ]
+        wf2 = [
+                [     # elec 1
+                    [1, 2, 3],  # spike 1, [sample 1, sample 2, sample 3]
+                    [1, 2, 3],  # spike 2
+                    [1, 2, 3],  # spike 3
+                    [1, 2, 3]   # spike 4
+                ], [  # elec 2
+                    [1, 2, 3],  # spike 1
+                    [1, 2, 3],  # spike 2
+                    [1, 2, 3],  # spike 3
+                    [1, 2, 3]   # spike 4
+                ], [  # elec 3
+                    [1, 2, 3],  # spike 1
+                    [1, 2, 3],  # spike 2
+                    [1, 2, 3],  # spike 3
+                    [1, 2, 3]   # spike 4
+                ]
+            ]
+        ut.add_unit(waveforms=wf1)
+        ut.add_unit(waveforms=wf2)
+        self.assertEqual(ut.id.data, [0, 1])
+        self.assertEqual(ut['waveforms'].target.data, [3, 6, 10, 14, 18])
+        self.assertEqual(ut['waveforms'].data, [2, 5])
+        self.assertListEqual(ut['waveforms'][0], wf1)
+        self.assertListEqual(ut['waveforms'][1], wf2)
+
     def test_get_spike_times(self):
         ut = Units()
         ut.add_unit(spike_times=[0, 1, 2])
