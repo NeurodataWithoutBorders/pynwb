@@ -19,35 +19,35 @@ references:
 
   py39: &py39
     docker:
-    - image: circleci/python:3.9/0-buster
+    - image: circleci/python:3.9.2-buster
       auth:
         username: hdmf
         password: $DOCKERHUB_PASSWORD
 
   py38: &py38
     docker:
-    - image: circleci/python:3.8.6-buster
+    - image: circleci/python:3.8.8-buster
       auth:
         username: hdmf
         password: $DOCKERHUB_PASSWORD
 
   py37: &py37
     docker:
-    - image: circleci/python:3.7.9-stretch
+    - image: circleci/python:3.7.10-buster
       auth:
         username: hdmf
         password: $DOCKERHUB_PASSWORD
 
   py36: &py36
     docker:
-    - image: circleci/python:3.6.12-stretch
+    - image: circleci/python:3.6.13-buster
       auth:
         username: hdmf
         password: $DOCKERHUB_PASSWORD
 
   conda-image: &conda-image
     docker:
-    - image: continuumio/miniconda3:4.8.2
+    - image: continuumio/miniconda3:4.9.2
       auth:
         username: hdmf
         password: $DOCKERHUB_PASSWORD
