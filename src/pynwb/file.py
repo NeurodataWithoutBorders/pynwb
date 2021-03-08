@@ -536,7 +536,8 @@ class NWBFile(MultiContainerInterface):
             else:
                 d.pop(col_name)  # remove args from d if not set
 
-        call_docval_func(self.electrodes.add_row, d)
+        kwargs = dict(data=d, enforce_unique_id=True)
+        call_docval_func(self.electrodes.add_row, kwargs)
 
     @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
             {'name': 'description', 'type': str, 'doc': 'a brief description of what this electrode is'},

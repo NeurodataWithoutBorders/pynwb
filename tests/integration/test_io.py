@@ -278,6 +278,22 @@ class TestAppend(TestCase):
             for e in errors:
                 print('ERROR', e)
 
+    def test_electrode_id_uniqueness(self):
+        device = self.nwbfile.create_device(name='test_device')
+        e_group = self.nwbfile.create_electrode_group(
+            name='test_electrode_group',
+            description='',
+            location='',
+            device=device
+        )
+        self.nwbfile.add_electrode(id=0, x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
+        try:
+            self.nwbfile.add_electrode(id=0, x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
+            pass_test = False
+        except ValueError:
+            pass_test = True
+        assert pass_test
+
 
 class TestH5DataIO(TestCase):
     """
