@@ -287,12 +287,8 @@ class TestAppend(TestCase):
             device=device
         )
         self.nwbfile.add_electrode(id=0, x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
-        try:
+        with self.assertRaises(ValueError):
             self.nwbfile.add_electrode(id=0, x=0.0, y=0.0, z=0.0, imp=np.nan, location='', filtering='', group=e_group)
-            pass_test = False
-        except ValueError:
-            pass_test = True
-        assert pass_test
 
 
 class TestH5DataIO(TestCase):
