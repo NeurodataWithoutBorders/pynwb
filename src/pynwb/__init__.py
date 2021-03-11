@@ -214,10 +214,11 @@ class NWBHDF5IO(_HDF5IO):
              'default': None},
             {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
-             'default': None})
+             'default': None},
+            {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'driver', kwargs)
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -228,7 +229,7 @@ class NWBHDF5IO(_HDF5IO):
                 raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
-            super(NWBHDF5IO, self).load_namespaces(tm, path, file=file_obj)
+            super(NWBHDF5IO, self).load_namespaces(tm, path, file=file_obj, driver=driver)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
@@ -244,7 +245,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
+        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
 
     @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
             {'name': 'nwbfile', 'type': 'NWBFile',
