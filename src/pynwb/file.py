@@ -536,7 +536,7 @@ class NWBFile(MultiContainerInterface):
             else:
                 d.pop(col_name)  # remove args from d if not set
 
-        if 'id' in kwargs:  # was set manually by user
+        if kwargs['id'] is not None:  # was set manually by user
             d.update(enforce_unique_id=True)
         call_docval_func(self.electrodes.add_row, d)
 
