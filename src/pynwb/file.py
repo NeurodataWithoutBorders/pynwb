@@ -508,6 +508,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
             {'name': 'reference', 'type': str, 'doc': 'Description of the reference used for this electrode.',
              'default': None},
+            {'name': 'enforce_unique_id', 'type': bool, 'doc': 'enforce that the id in the table must be unique',
+             'default': True},
             allow_extra=True)
     def add_electrode(self, **kwargs):
         """
@@ -536,8 +538,6 @@ class NWBFile(MultiContainerInterface):
             else:
                 d.pop(col_name)  # remove args from d if not set
 
-        if 'id' in kwargs:  # was set manually by user
-            d.update(enforce_unique_id=True)
         call_docval_func(self.electrodes.add_row, d)
 
     @docval({'name': 'region', 'type': (slice, list, tuple), 'doc': 'the indices of the table'},
