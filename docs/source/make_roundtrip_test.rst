@@ -68,7 +68,7 @@ The next thing is to tell the ``TestMapRoundTrip`` how to add the container to a
 argument--the :py:class:`~pynwb.file.NWBFile` instance that will be used to write your container.
 
 This method is required because different container types are allowed in different parts of an NWBFile. This method is
-also where you can add additonial containers that your container of interest depends on. For example, for the
+also where you can add additional containers that your container of interest depends on. For example, for the
 :py:class:`~pynwb.ecephys.ElectricalSeries` roundtrip test, ``addContainer`` handles adding the
 :py:class:`~pynwb.ecephys.ElectrodeGroup`, :py:class:`~pynwb.file.ElectrodeTable`, and
 :py:class:`~pynwb.device.Device` dependencies.
