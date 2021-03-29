@@ -123,7 +123,7 @@ nwbfile.add_acquisition(test_ts)
 # Chunking will be automatically enabled by h5py when compression and other I/O filters are enabled.
 #
 # To use compression, we can wrap our dataset using :py:class:`~hdmf.backends.hdf5.h5_utils.H5DataIO` and
-# define the approbriate opions:
+# define the appropriate options:
 
 wrapped_data = H5DataIO(data=data,
                         compression='gzip',              # <---- Use GZip
@@ -195,7 +195,7 @@ for k, v in nwbfile.acquisition.items():
 #   name=test_chunked_timeseries, chunks=(250, 5), compression=None, maxshape=(None, 10)
 #   name=test_gzipped_timeseries, chunks=(250, 5), compression=gzip, maxshape=(1000, 10)
 #
-# As we can see, the datasets have been chunked and compressed correctly. Alos, as expected, chunking
+# As we can see, the datasets have been chunked and compressed correctly. Also, as expected, chunking
 # was automatically enabled for the compressed datasets.
 
 
