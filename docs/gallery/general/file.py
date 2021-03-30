@@ -301,7 +301,7 @@ nwbfile.processing['behavior'].add(position)
 #
 # Epochs can be added to an NWB file using the method :py:meth:`~pynwb.file.NWBFile.add_epoch`.
 # The first and second arguments are the start time and stop times, respectively.
-# The third argument is one or more tags for labelling the epoch, and the fifth argument is a
+# The third argument is one or more tags for labeling the epoch, and the fifth argument is a
 # list of all the :py:class:`~pynwb.base.TimeSeries` that the epoch applies
 # to.
 

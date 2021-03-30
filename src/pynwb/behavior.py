@@ -40,9 +40,9 @@ class SpatialSeries(TimeSeries):
 @register_class('BehavioralEpochs', CORE_NAMESPACE)
 class BehavioralEpochs(MultiContainerInterface):
     """
-    TimeSeries for storing behavoioral epochs. The objective of this and the other two Behavioral
+    TimeSeries for storing behavioral epochs. The objective of this and the other two Behavioral
     interfaces (e.g. BehavioralEvents and BehavioralTimeSeries) is to provide generic hooks for
-    software tools/scripts. This allows a tool/script to take the output one specific interface (e.g.,
+    software tools/scripts. This allows a tool/script to take the output of one specific interface (e.g.,
     UnitTimes) and plot that data relative to another data modality (e.g., behavioral events) without
     having to define all possible modalities in advance. Declaring one of these interfaces means that
     one or more TimeSeries of the specified type is published. These TimeSeries should reside in a
@@ -79,7 +79,7 @@ class BehavioralEvents(MultiContainerInterface):
 @register_class('BehavioralTimeSeries', CORE_NAMESPACE)
 class BehavioralTimeSeries(MultiContainerInterface):
     """
-    TimeSeries for storing Behavoioral time series data. See description of BehavioralEpochs for
+    TimeSeries for storing Behavioral time series data. See description of BehavioralEpochs for
     more details.
     """
 

@@ -94,7 +94,7 @@ for idx in [1, 2, 3, 4]:
 # top-level :py:class:`~pynwb.misc.Units` table.
 #
 # In addition to the *data* and *timestamps* fields inherited
-# from :py:class:`~pynwb.base.TimeSeries` class, these two classs will require metadata about the elctrodes
+# from :py:class:`~pynwb.base.TimeSeries` class, these two classes will require metadata about the electrodes
 # from which *data* was generated. This is done by providing an :py:class:`~pynwb.core.DynamicTableRegion`,
 # which you can create using the :py:class:`~pynwb.file.NWBFile.create_electrode_table_region`
 #
