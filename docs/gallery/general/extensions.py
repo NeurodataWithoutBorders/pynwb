@@ -242,7 +242,7 @@ nwbfile = io.read()
 # -----------------------------------------------------
 # It is sometimes the case that we need a group to hold zero-or-more or
 # one-or-more of the same object. Here we show how to create an extension that
-# defines a group (`PotatoSack`) that holds multiple objects (`Potatoes`) and
+# defines a group (`PotatoSack`) that holds multiple objects (`Potato`) and
 # then how to use the new data types. First, we use `pynwb` to define the new
 # data types.
 
