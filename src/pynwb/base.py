@@ -1,8 +1,8 @@
 from warnings import warn
 from collections.abc import Iterable
 
-from hdmf.utils import docval, getargs, popargs, call_docval_func
-from hdmf.common import DynamicTable
+from hdmf.utils import docval, getargs, popargs, call_docval_func, get_docval
+from hdmf.common import DynamicTable, VectorData
 
 
 from . import register_class, CORE_NAMESPACE
@@ -271,3 +271,16 @@ class Images(MultiContainerInterface):
         super(Images, self).__init__(name, **kwargs)
         self.description = description
         self.images = images
+
+
+@register_class('TimeSeriesReferenceVectorData', CORE_NAMESPACE)
+class TimeSeriesReferenceVectorData(VectorData):
+    """
+    Column storing references to a TimeSeries (rows). For each TimeSeries this VectorData
+    column stores the start_index and count to indicate the range in time to be selected
+    as well as an object reference to the TimeSeries.
+    """
+
+    @docval(*get_docval(VectorData.__init__))
+    def __init__(self, **kwargs):
+        call_docval_func(super().__init__, kwargs)
