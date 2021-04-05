@@ -276,7 +276,7 @@ class TestAppend(TestCase):
                           nwb.acquisition['timeseries2'].electrodes)
             errors = validate(io)
             for e in errors:
-                print('ERROR', e)
+                print('ERROR', e)  # noqa: T001
 
 
 class TestH5DataIO(TestCase):
