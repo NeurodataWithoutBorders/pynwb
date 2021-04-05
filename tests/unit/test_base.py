@@ -1,6 +1,6 @@
 import numpy as np
 
-from pynwb.base import ProcessingModule, TimeSeries, Images, Image
+from pynwb.base import ProcessingModule, TimeSeries, Images, Image, TimeSeriesReferenceVectorData
 from pynwb.testing import TestCase
 from hdmf.data_utils import DataChunkIterator
 from hdmf.backends.hdf5 import H5DataIO
@@ -209,3 +209,9 @@ class TestImages(TestCase):
         image = Image(name='test_image', data=np.ones((10, 10)))
         image2 = Image(name='test_image2', data=np.ones((10, 10)))
         Images(name='images_name', images=[image, image2])
+
+
+class TestTimeSeriesReferenceVectorData(TestCase):
+
+    def test_init(self):
+        TimeSeriesReferenceVectorData(name='test', description='test')
