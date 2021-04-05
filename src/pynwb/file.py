@@ -355,6 +355,12 @@ class NWBFile(MultiContainerInterface):
         for attr in fieldnames:
             setattr(self, attr, kwargs.get(attr, None))
 
+        # if the user set the SweepTable then issue a deprecation warning
+        if kwargs.get('sweep_table') is not None:
+            warn("Use of SweepTable is deprecated. Use the intracellular_recordings, "
+                 "simultaneous_recordings, sequential_recordings, repetitions and/or "
+                 "experimental_conditions table(s) instead.", DeprecationWarning)
+
         # backwards-compatibility code for ic_electrodes / icephys_electrodes
         ic_elec_val = kwargs.get('icephys_electrodes', None)
         if ic_elec_val is None and kwargs.get('ic_electrodes', None) is not None:
