@@ -2,6 +2,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 
 from hdmf.utils import docval, call_docval_func
+from hdmf import __version__ as hdmfversion
 
 from pynwb import NWBFile, TimeSeries, available_namespaces
 from pynwb.core import NWBContainer
@@ -81,4 +82,4 @@ Fields:
 
 class TestAvailableNamespaces(TestCase):
     def test_available_namespaces(self):
-        self.assertEqual(available_namespaces(), ('hdmf-common', 'core'))
+        self.assertEqual(available_namespaces(), ('hdmf-common', 'hdmf-experimental', 'core'))

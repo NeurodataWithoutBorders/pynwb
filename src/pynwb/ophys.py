@@ -142,7 +142,7 @@ class TwoPhotonSeries(ImageSeries):
              'default': None},
             *get_docval(ImageSeries.__init__, 'external_file', 'starting_frame', 'bits_per_pixel',
                         'dimension', 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
-                        'comments', 'description', 'control', 'control_description'))
+                        'comments', 'description', 'control', 'control_description', 'device'))
     def __init__(self, **kwargs):
         field_of_view, imaging_plane, pmt_gain, scan_line_rate = popargs(
             'field_of_view', 'imaging_plane', 'pmt_gain', 'scan_line_rate', kwargs)
@@ -161,19 +161,19 @@ class CorrectedImageStack(NWBDataInterface):
     assumed to be 2-D (has only x & y dimensions).
     """
 
-    __nwbfields__ = ({'name': 'corrected', 'child': True},
-                     {'name': 'xy_translation', 'child': True},
+    __nwbfields__ = ({'name': 'corrected', 'child': True, 'required_name': 'corrected'},
+                     {'name': 'xy_translation', 'child': True, 'required_name': 'xy_translation'},
                      'original')
 
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
             {'name': 'corrected', 'type': ImageSeries,
-             'doc': 'Image stack with frames shifted to the common coordinates.'},
+             'doc': 'Image stack with frames shifted to the common coordinates. This must have the name "corrected".'},
             {'name': 'original', 'type': ImageSeries,
              'doc': 'Link to image series that is being registered.'},
             {'name': 'xy_translation', 'type': TimeSeries,
              'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates, '
-                    'for example, to align each frame to a reference image.'})
+                    'for example, to align each frame to a reference image. This must have the name "xy_translation".'})
     def __init__(self, **kwargs):
         corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
         call_docval_func(super(CorrectedImageStack, self).__init__, kwargs)
@@ -193,7 +193,7 @@ class MotionCorrection(MultiContainerInterface):
         'get': 'get_corrected_image_stack',
         'create': 'create_corrected_image_stack',
         'type': CorrectedImageStack,
-        'attr': 'corrected_images_stacks'
+        'attr': 'corrected_image_stacks'
     }
 
 
@@ -267,8 +267,8 @@ class PlaneSegmentation(DynamicTable):
         """Converts a 2D pixel_mask of a ROI into an image_mask."""
         image_matrix = np.zeros(np.shape(pixel_mask))
         npmask = np.asarray(pixel_mask)
-        x_coords = npmask[:, 0].astype(np.int)
-        y_coords = npmask[:, 1].astype(np.int)
+        x_coords = npmask[:, 0].astype(np.int32)
+        y_coords = npmask[:, 1].astype(np.int32)
         weights = npmask[:, -1]
         image_matrix[y_coords, x_coords] = weights
         return image_matrix

@@ -30,6 +30,7 @@ PyNWB API.
 # to this namespace. Finally,
 # it calls :py:meth:`~hdmf.spec.write.NamespaceBuilder.export` to save the extensions to disk for downstream use.
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_extensions.png'
 from pynwb.spec import NWBNamespaceBuilder, NWBGroupSpec, NWBAttributeSpec
 
 ns_path = "mylab.namespace.yaml"

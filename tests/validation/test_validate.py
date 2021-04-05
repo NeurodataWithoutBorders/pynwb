@@ -39,7 +39,8 @@ class TestValidateScript(TestCase):
             r"warnings.warn\(msg\)\s*"
             r"The file tests/back_compat/1\.0\.2_nwbfile\.nwb has no cached namespace information\. "
             r"Falling back to pynwb namespace information\.\s*"
-            r"The namespace 'notfound' could not be found in pynwb namespace information\.\s*"
+            r"The namespace 'notfound' could not be found in pynwb namespace information as only "
+            r"\['core'\] is present\.\s*"
         )
         self.assertRegex(result.stderr.decode('utf-8'), stderr_regex)
 
@@ -63,7 +64,8 @@ class TestValidateScript(TestCase):
                                 capture_output=True)
 
         stderr_regex = re.compile(
-            r"The namespace 'notfound' could not be found in cached namespace information\.\s*"
+            r"The namespace 'notfound' could not be found in cached namespace information as only "
+            r"\['core'\] is present\.\s*"
         )
         self.assertRegex(result.stderr.decode('utf-8'), stderr_regex)
 
@@ -75,16 +77,10 @@ class TestValidateScript(TestCase):
                                 capture_output=True)
 
         stderr_regex = re.compile(
-            r".*ValueError: data type \'NWBFile\' not found in namespace hdmf-common.\s*",
-            re.DOTALL
+            r"The namespace 'hdmf-common' is included by the namespace 'core'\. Please validate against that "
+            r"namespace instead\.\s*",
         )
         self.assertRegex(result.stderr.decode('utf-8'), stderr_regex)
-
-        stdout_regex = re.compile(
-            r"Validating tests/back_compat/1.1.2_nwbfile.nwb against cached namespace information using namespace "
-            r"'hdmf-common'.\s*"
-        )
-        self.assertRegex(result.stdout.decode('utf-8'), stdout_regex)
 
     def test_validate_file_cached_ignore(self):
         """Test that validating a file with cached spec against the core namespace succeeds."""

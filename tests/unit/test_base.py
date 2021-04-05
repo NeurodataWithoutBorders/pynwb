@@ -1,6 +1,6 @@
 import numpy as np
 
-from pynwb.base import ProcessingModule, TimeSeries, Images, Image
+from pynwb.base import ProcessingModule, TimeSeries, Images, Image, TimeSeriesReferenceVectorData
 from pynwb.testing import TestCase
 from hdmf.data_utils import DataChunkIterator
 from hdmf.backends.hdf5 import H5DataIO
@@ -124,6 +124,18 @@ class TestTimeSeries(TestCase):
                          'grams', timestamps=ts1)
         self.assertEqual(ts2.timestamps, [0.0, 0.1, 0.2, 0.3, 0.4, 0.5])
 
+    def test_good_continuity_timeseries(self):
+        ts1 = TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
+                         'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+                         continuity='continuous')
+        self.assertEqual(ts1.continuity, 'continuous')
+
+    def test_bad_continuity_timeseries(self):
+        with self.assertRaises(ValueError):
+            TimeSeries('test_ts1', [0, 1, 2, 3, 4, 5],
+                       'grams', timestamps=[0.0, 0.1, 0.2, 0.3, 0.4, 0.5],
+                       continuity='wrong')
+
     def test_nodata(self):
         ts1 = TimeSeries('test_ts1', starting_time=0.0, rate=0.1)
         with self.assertWarns(UserWarning):
@@ -209,3 +221,9 @@ class TestImages(TestCase):
         image = Image(name='test_image', data=np.ones((10, 10)))
         image2 = Image(name='test_image2', data=np.ones((10, 10)))
         Images(name='images_name', images=[image, image2])
+
+
+class TestTimeSeriesReferenceVectorData(TestCase):
+
+    def test_init(self):
+        TimeSeriesReferenceVectorData(name='test', description='test')

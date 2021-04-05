@@ -130,7 +130,7 @@ class NWBFileTest(TestCase):
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
         tags2 = ['t3', 't4']
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
         ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
         expected_tags = tags1 + tags2
         self.nwbfile.add_epoch(0.0, 1.0, tags1, ts)
@@ -417,14 +417,15 @@ Fields:
 
 class SubjectTest(TestCase):
     def setUp(self):
-        self.subject = Subject(age='12 mo',
+        self.subject = Subject(age='P90D',
                                description='An unfortunate rat',
                                genotype='WT',
                                sex='M',
                                species='Rattus norvegicus',
                                subject_id='RAT123',
-                               weight='2 lbs',
-                               date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()))
+                               weight='2 kg',
+                               date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
+                               strain='my_strain')
         self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
         self.path = 'nwbfile_test.h5'
         self.nwbfile = NWBFile('a test session description for a test NWBFile',
@@ -438,16 +439,25 @@ class SubjectTest(TestCase):
                                subject=self.subject)
 
     def test_constructor(self):
-        self.assertEqual(self.subject.age, '12 mo')
+        self.assertEqual(self.subject.age, 'P90D')
         self.assertEqual(self.subject.description, 'An unfortunate rat')
         self.assertEqual(self.subject.genotype, 'WT')
         self.assertEqual(self.subject.sex, 'M')
         self.assertEqual(self.subject.species, 'Rattus norvegicus')
         self.assertEqual(self.subject.subject_id, 'RAT123')
-        self.assertEqual(self.subject.weight, '2 lbs')
+        self.assertEqual(self.subject.weight, '2 kg')
+        self.assertEqual(self.subject.date_of_birth, datetime(2017, 5, 1, 12, tzinfo=tzlocal()))
+        self.assertEqual(self.subject.strain, 'my_strain')
 
     def test_nwbfile_constructor(self):
         self.assertIs(self.nwbfile.subject, self.subject)
+
+    def test_weight_float(self):
+        subject = Subject(
+            subject_id='RAT123',
+            weight=2.3,
+        )
+        self.assertEqual(subject.weight, '2.3 kg')
 
 
 class TestCacheSpec(TestCase):
