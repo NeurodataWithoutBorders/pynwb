@@ -1,7 +1,7 @@
 import warnings
 
 from hdmf.common import DynamicTable, AlignedDynamicTable
-from hdmf.common.table import HierarchicalDynamicTableMixin
+from hdmf.common.alignedtable import HierarchicalDynamicTableMixin
 from hdmf.utils import docval, popargs, call_docval_func, get_docval, getargs
 
 from . import register_class, CORE_NAMESPACE

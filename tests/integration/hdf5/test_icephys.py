@@ -137,7 +137,7 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
         nwbfile.sweep_table = self.container
         nwbfile.add_device(self.device)
         nwbfile.add_icephys_electrode(self.elec)
-        nwbfile.add_acquisition(self.pcs)
+        nwbfile.add_acquisition(self.pcs, use_sweep_table=True)
 
     def getContainer(self, nwbfile):
         """ Return the test SweepTable from the given NWBFile """
@@ -188,9 +188,9 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
         nwbfile.add_device(self.device)
         nwbfile.add_icephys_electrode(self.elec)
 
-        nwbfile.add_acquisition(self.pcs1)
-        nwbfile.add_stimulus_template(self.pcs2a)
-        nwbfile.add_stimulus(self.pcs2b)
+        nwbfile.add_acquisition(self.pcs1, use_sweep_table=True)
+        nwbfile.add_stimulus_template(self.pcs2a, use_sweep_table=True)
+        nwbfile.add_stimulus(self.pcs2b, use_sweep_table=True)
 
     def getContainer(self, nwbfile):
         """ Return the test SweepTable from the given NWBFile """
