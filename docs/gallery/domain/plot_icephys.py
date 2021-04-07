@@ -258,8 +258,17 @@ response = VoltageClampSeries(
 # Adding an intracellular recording
 # ---------------------------------
 #
-# An intracellular recording typically consists of an electrode, stimulus, and reponse.
-# We can add this data to the file via :py:meth:`~pynwb.file.NWBFile.add_intracellular_recording`.
+# As mentioned earlier, intracellular recordings are organized in the
+# :py:class:`~pynwb.icephys.IntracellularRecordingsTable` which relates electrode, stimulus
+# and response pairs and describes metadata specific to individual recordings.
+#
+# .. figure:: ../../figures/plot_icephys_intracellular_recordings_table.png
+#    :width: 700
+#    :alt: IntracellularRecordingsTabl
+#
+#    Illustration of the structure of the IntracellularRecordingsTable
+#
+# We can add an intracellular recording to the file via :py:meth:`~pynwb.file.NWBFile.add_intracellular_recording`.
 # The function will record the data in the :py:class:`~pynwb.icephys.IntracellularRecordingsTable`
 # and add the given electrode, stimulus, or response to the NWBFile object if necessary.
 # Any time we add a row to one of our tables, the corresponding add function (here
