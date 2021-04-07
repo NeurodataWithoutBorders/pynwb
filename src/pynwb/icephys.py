@@ -585,6 +585,7 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             res[('responses', 'response')] = [(e[0], e[1],  e[2].object_id) for e in res[('responses', 'response')]]
         return res
 
+
 @register_class('SimultaneousRecordingsTable', CORE_NAMESPACE)
 class SimultaneousRecordingsTable(HierarchicalDynamicTableMixin, DynamicTable):
     """

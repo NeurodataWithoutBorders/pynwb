@@ -239,21 +239,21 @@ class ICEphysMetaTestBase(TestCase):
              'doc': 'Intracellular recording to be added to the file before write',
              'default': None},
             {'name': 'sw',
-            'type': SimultaneousRecordingsTable,
-            'doc': 'SimultaneousRecordingsTable table to be added to the file before write',
-            'default': None},
+             'type': SimultaneousRecordingsTable,
+             'doc': 'SimultaneousRecordingsTable table to be added to the file before write',
+             'default': None},
             {'name': 'sws',
-            'type': SequentialRecordingsTable,
-            'doc': 'SequentialRecordingsTable table to be added to the file before write',
-            'default': None},
+             'type': SequentialRecordingsTable,
+             'doc': 'SequentialRecordingsTable table to be added to the file before write',
+             'default': None},
             {'name': 'repetitions',
-            'type': RepetitionsTable,
-            'doc': 'RepetitionsTable table to be added to the file before write',
-            'default': None},
+             'type': RepetitionsTable,
+             'doc': 'RepetitionsTable table to be added to the file before write',
+             'default': None},
             {'name': 'cond',
-            'type': ExperimentalConditionsTable,
-            'doc': 'ExperimentalConditionsTable table to be added to the file before write',
-            'default': None})
+             'type': ExperimentalConditionsTable,
+             'doc': 'ExperimentalConditionsTable table to be added to the file before write',
+             'default': None})
     def write_test_helper(self, **kwargs):
         """
         Internal helper function to roundtrip an ICEphys file with the given set of ICEphys tables
@@ -263,13 +263,13 @@ class ICEphysMetaTestBase(TestCase):
         if ir is not None:
             self.nwbfile.intracellular_recordings = ir
         if sw is not None:
-           self.nwbfile.icephys_simultaneous_recordings = sw
+            self.nwbfile.icephys_simultaneous_recordings = sw
         if sws is not None:
-           self.nwbfile.icephys_sequential_recordings = sws
+            self.nwbfile.icephys_sequential_recordings = sws
         if repetitions is not None:
-           self.nwbfile.icephys_repetitions = repetitions
+            self.nwbfile.icephys_repetitions = repetitions
         if cond is not None:
-           self.nwbfile.icephys_experimental_conditions = cond
+            self.nwbfile.icephys_experimental_conditions = cond
 
         # Write our test file
         with NWBHDF5IO(self.path, 'w') as io:

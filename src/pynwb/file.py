@@ -231,7 +231,6 @@ class NWBFile(MultiContainerInterface):
                       'doc': 'A table for grouping different intracellular recording repetitions together that '
                              'belong to the same experimental experimental_conditions.'})
 
-
     @docval({'name': 'session_description', 'type': str,
              'doc': 'a description of the session where this data was generated'},
             {'name': 'identifier', 'type': str, 'doc': 'a unique text identifier for the file'},
@@ -757,7 +756,7 @@ class NWBFile(MultiContainerInterface):
             self._update_sweep_table(timeseries)
 
     @docval({'name': 'timeseries', 'type': TimeSeries},
-             {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'})
+            {'name': 'use_sweep_table', 'type': bool, 'default': False, 'doc': 'Use the deprecated SweepTable'})
     def add_stimulus_template(self, **kwargs):
         timeseries = popargs('timeseries', kwargs)
         self._add_stimulus_template_internal(timeseries)
