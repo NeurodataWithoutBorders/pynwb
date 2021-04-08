@@ -1,7 +1,6 @@
 import warnings
 
 from hdmf.common import DynamicTable, AlignedDynamicTable
-from hdmf.common.alignedtable import HierarchicalDynamicTableMixin
 from hdmf.utils import docval, popargs, call_docval_func, get_docval, getargs
 
 from . import register_class, CORE_NAMESPACE
@@ -587,7 +586,7 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
 
 
 @register_class('SimultaneousRecordingsTable', CORE_NAMESPACE)
-class SimultaneousRecordingsTable(HierarchicalDynamicTableMixin, DynamicTable):
+class SimultaneousRecordingsTable(DynamicTable):
     """
     A table for grouping different intracellular recordings from the
     IntracellularRecordingsTable table together that were recorded simultaneously
@@ -640,7 +639,7 @@ class SimultaneousRecordingsTable(HierarchicalDynamicTableMixin, DynamicTable):
 
 
 @register_class('SequentialRecordingsTable', CORE_NAMESPACE)
-class SequentialRecordingsTable(HierarchicalDynamicTableMixin, DynamicTable):
+class SequentialRecordingsTable(DynamicTable):
     """
     A table for grouping different intracellular recording simultaneous_recordings from the
     SimultaneousRecordingsTable table together. This is typically used to group together simultaneous_recordings
@@ -703,7 +702,7 @@ class SequentialRecordingsTable(HierarchicalDynamicTableMixin, DynamicTable):
 
 
 @register_class('RepetitionsTable', CORE_NAMESPACE)
-class RepetitionsTable(HierarchicalDynamicTableMixin, DynamicTable):
+class RepetitionsTable(DynamicTable):
     """
     A table for grouping different intracellular recording sequential recordings together.
     With each SweepSequence typically representing a particular type of stimulus, the
@@ -758,7 +757,7 @@ class RepetitionsTable(HierarchicalDynamicTableMixin, DynamicTable):
 
 
 @register_class('ExperimentalConditionsTable', CORE_NAMESPACE)
-class ExperimentalConditionsTable(HierarchicalDynamicTableMixin, DynamicTable):
+class ExperimentalConditionsTable(DynamicTable):
     """
     A table for grouping different intracellular recording repetitions together that
     belong to the same experimental conditions.
