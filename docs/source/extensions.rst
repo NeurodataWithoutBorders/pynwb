@@ -21,7 +21,7 @@ Structure of ``create_extension_spec.py``
 
 NWB organizes types into namespaces. You must define a new namespace before creating any new types. After following
 the instructions from `ndx-template <https://github.com/nwb-extensions/ndx-template>`_, you should have a file
-``ndx-my-ext/src/spec/create_extension_spec.py``. The beginning of this file should look like this:
+``ndx-my-ext/src/spec/create_extension_spec.py``. The beginning of this file should look like
 
 .. code-block:: python
 
@@ -36,7 +36,7 @@ the instructions from `ndx-template <https://github.com/nwb-extensions/ndx-templ
             doc="my description",
             name="ndx-my-ext",
             version="0.1.0",
-            author="John Dow",
+            author="John Doe",
             contact="contact@gmail.com"
         )
 
@@ -89,8 +89,8 @@ new data types.
 
 The name of the new data type is declared in the ``neurodata_type_def`` arg. It is common for new data types to
 extend from core types. Here, our new type extends ``ElectricalSeries`` by specifying
-``neurodata_type_inc='ElectricalSeries'``. Since ``ElectricalSeries`` `is of Primitive Type Group
-<https://nwb-schema.readthedocs.io/en/latest/format.html?highlight=ElectricalSeries#electricalseries>`,
+``neurodata_type_inc='ElectricalSeries'``. Since ``ElectricalSeries``
+`is of Primitive Type Group <https://nwb-schema.readthedocs.io/en/latest/format.html?highlight=ElectricalSeries#electricalseries>`_,
 our new type must be a ``NWBGroupSpec``. Most neurodata types are Groups, which act similarly to a directory or
 folder within the NWB file. Next we define ``doc``, which is a required field that describes the purpose of the new
 neurodata type. Next, ``TetrodeSeries`` adds the ``trode_id`` field to ``ElectricalSeries`` as an Attribute.
@@ -123,12 +123,14 @@ within it Datasets, Attributes, Links, and/or other Groups. Groups are specified
         links=[...]
     )
 
-``neurodata_type_def`` declares the name of the neurodata type. ``neurodata_type_inc`` indicates what data type you
-are extending (Groups must extend Groups, and Datasets must extend Datasets). To define a new neurodata type that does
-not extend an existing type, use ``neurodata_type_def`` and not ``neurodata_type_inc``. To use a type that has
-already been defined, use ``neurodata_type_inc`` and not ``neurodata_type_def``.  You can define a group that is not
-a neurodata type by omitting both ``neurodata_type_def`` and ``neurodata_type_inc``.
-:py:class:`~pynwb.spec.NWBDatasetSpec` handle these arguments the same way.
+
+``neurodata_type_def`` and ``neurodata_type_inc`` define the neurodata type with the following rules:
+
+- ``neurodata_type_def`` declares the name of the neurodata type.
+- ``neurodata_type_inc`` indicates what data type you are extending (Groups must extend Groups, and Datasets must extend Datasets).
+- To define a new neurodata type that does not extend an existing type, use ``neurodata_type_def`` and not ``neurodata_type_inc``.
+- To use a type that has already been defined, use ``neurodata_type_inc`` and not ``neurodata_type_def``.
+- You can define a group that is not a neurodata type by omitting both ``neurodata_type_def`` and ``neurodata_type_inc``.
 
 ``doc`` is a required argument that describes the purpose of the neurodata type.
 
@@ -170,12 +172,33 @@ All larger blocks of numeric or text data should be stored in Datasets. Specifyi
 
 ``shape`` is a specification defining the allowable shapes for the dataset. See the shape specification
 `here <https://schema-language.readthedocs.io/en/latest/specification_language_description.html#shape>`_. ``None`` is
- mapped to ``null``. Is no shape is provided, it is assumed that the dataset is only a single element.
+mapped to ``null``. Is no shape is provided, it is assumed that the dataset is only a single element.
 
 ``dims`` provides labels for each dimension of ``shape``.
 
 ``default_value`` is also available.
 
+Using datasets to specify tables
+++++++++++++++++++++++++++++++++
+
+Row-based tables can be specified using :py:class:`~pynwb.spec.NWBDtypeSpec`. To specify a table, provide a
+list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the ``dtype`` argument.
+
+.. code-block:: python
+
+    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
+
+    spec = NWBDatasetSpec(
+        doc='A custom NWB type',
+        name='qux',
+        attribute=[
+            NWBAttributeSpec('baz', 'a value for baz', 'text'),
+            ],
+        dtype=[
+            NWBDtypeSpec('foo', 'column for foo', 'int'),
+            NWBDtypeSpec('bar', 'a column for bar', 'float')
+            ]
+        )
 
 Attribute Specifications
 ^^^^^^^^^^^^^^^^^^^^^^^^
@@ -208,29 +231,23 @@ specifying number of ``quantity``, you have a ``required`` field which takes a b
 Link Specifications
 ^^^^^^^^^^^^^^^^^^^
 
-You can store an object in one place and reference that object in another without copying the object using a Link.
-You can define these using :py:class:`~pynwb.spec.NWBLinkSpec`
-
-
-Using datasets to specify tables
-++++++++++++++++++++++++++++++++
-
-Row-based tables can be specified using :py:class:`~pynwb.spec.NWBDtypeSpec`. To specify a table, provide a
-list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the *dtype* argument.
+You can store an object in one place and reference that object in another without copying the object using a
+`Links <https://schema-language.readthedocs.io/en/latest/specification_language_description.html#sec-link-spec>`_, which
+can be defined using :py:class:`~pynwb.spec.NWBLinkSpec` objects.
 
 .. code-block:: python
 
-    from pynwb.spec import NWBDatasetSpec, NWBDtypeSpec
+    from pynwb.spec import NWBLinkSpec
 
-    spec = NWBDatasetSpec('A custom NWB type',
-                        name='qux',
-                        attribute=[
-                            NWBAttributeSpec('baz', 'a value for baz', 'text'),
-                        ],
-                        dtype=[
-                            NWBDtypeSpec('foo', 'column for foo', 'int'),
-                            NWBDtypeSpec('bar', 'a column for bar', 'float')
-                        ])
+    spec = NWBLinkSpec(
+        doc='my link',
+        target_type='ElectricalSeries',
+        quantity='?'
+    )
+
+``doc``, ``quantity``, and ``name`` work similarly to :py:class:`~pynwb.spec.NWBDatasetSpec`.
+
+``target_type`` indicates the neurodata type that can be referenced.
 
 
 .. _saving-extensions:
@@ -487,5 +504,4 @@ Finally, to generate the HTML version of the docs run:
 Further Reading
 ---------------
 
-* **Using Extensions:** See :ref:`extending-nwb` for an example on how to use extensions during read and write.
 * **Specification Language:** For a detailed overview of the specification language itself see https://schema-language.readthedocs.io/en/latest/
