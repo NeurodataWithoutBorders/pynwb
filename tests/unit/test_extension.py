@@ -169,28 +169,3 @@ class TestCatchDupNS(TestCase):
         ns_builder2.export(self.ns_path2, outdir=self.tempdir)
         type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path1))
         type_map.load_namespaces(os.path.join(self.tempdir, self.ns_path2))
-
-
-class TestCatchDuplicateSpec(TestCase):
-
-    def setUp(self):
-        self.prefix = id_generator()
-        self.ext_source = '%s_extension3.yaml' % self.prefix
-
-    def tearDown(self):
-        pass
-
-    def test_catch_duplicate_spec_nested(self):
-        spec1 = NWBGroupSpec("This is my new group 1",
-                             "Group1",
-                             neurodata_type_inc="NWBDataInterface",
-                             neurodata_type_def="Group1")
-        spec2 = NWBGroupSpec("This is my new group 2",
-                             "Group2",
-                             groups=[spec1],  # nested definition
-                             neurodata_type_inc="NWBDataInterface",
-                             neurodata_type_def="Group2")
-        ns_builder = NWBNamespaceBuilder("Example namespace", "pynwb_test_ext", version='0.1.0')
-        ns_builder.add_spec(self.ext_source, spec1)
-        with self.assertRaises(ValueError):
-            ns_builder.add_spec(self.ext_source, spec2)
