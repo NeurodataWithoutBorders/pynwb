@@ -41,10 +41,8 @@ global __TYPE_MAP
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()
-__NS_CATALOG.merge(hdmf_typemap.namespace_catalog)
-
 __TYPE_MAP = TypeMap(__NS_CATALOG)
-__TYPE_MAP.merge(hdmf_typemap)
+__TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
