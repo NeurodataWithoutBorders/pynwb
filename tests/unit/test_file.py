@@ -1,4 +1,5 @@
 import numpy as np
+import os
 import pandas as pd
 
 from datetime import datetime
@@ -516,3 +517,46 @@ class TestTimestampsRefAware(TestCase):
                     'TEST124',
                     self.start_time,
                     timestamps_reference_time=self.ref_time_notz)
+
+
+class TestFileCreateDateArray(TestCase):
+
+    def setUp(self):
+        self.path = 'unittest_file_create_date.nwb'
+
+    def tearDown(self):
+        if os.path.exists(self.path):
+            os.remove(self.path)
+
+    def test_simple(self):
+        file_create_date = datetime.now(tzlocal())
+        nwbfile_init = NWBFile(' ', ' ',
+                               datetime.now(tzlocal()),
+                               file_create_date=file_create_date,
+                               institution='Rixdorf University, Berlin')
+
+        self.assertEqual(nwbfile_init.file_create_date, [file_create_date])
+        self.assertEqual(len(nwbfile_init.file_create_date), 1)
+
+        with NWBHDF5IO(self.path, 'w') as io:
+            io.write(nwbfile_init)
+
+        with NWBHDF5IO(self.path, 'r') as reader:
+            nwbfile = reader.read()
+
+            # no change as it was opened read-only
+            self.assertEqual(len(nwbfile.file_create_date), 1)
+
+        with NWBHDF5IO(self.path, 'r+') as writer:
+            nwbfile = writer.read()
+
+            # added one more entry as opened read/write
+            self.assertEqual(len(nwbfile.file_create_date), 2)
+
+            writer.write(nwbfile)
+
+        with NWBHDF5IO(self.path, 'r') as reader:
+            nwbfile = reader.read()
+
+            # reopen again to check that it has still two entries
+            self.assertEqual(len(nwbfile.file_create_date), 2)

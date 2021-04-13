@@ -751,6 +751,13 @@ class NWBFile(MultiContainerInterface):
 
         return NWBFile(**kwargs)
 
+    def _appendModificationEntry(self):
+        """
+        Append an entry with the current timestamp to the file_create_date array
+        """
+
+        self.fields['file_create_date'].append(datetime.now(tzlocal()))
+
 
 def _add_missing_timezone(date):
     """
