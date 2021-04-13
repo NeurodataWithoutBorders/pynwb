@@ -132,19 +132,34 @@ within it Datasets, Attributes, Links, and/or other Groups. Groups are specified
 - To use a type that has already been defined, use ``neurodata_type_inc`` and not ``neurodata_type_def``.
 - You can define a group that is not a neurodata type by omitting both ``neurodata_type_def`` and ``neurodata_type_inc``.
 
+.. tip::
+    Although you have the option not to, there are several advantages to defining new groups and neurodata types.
+    Neurodata types can be reused in multiple places in the schema, and can be linked to, while groups that are not
+    neurodata types cannot. You can also have multiple neurodata type groups of the same type in the same group,
+    whereas groups that are not neurodata types are limited to 0 or 1. Most of the time, we would recommend making a
+    group a neurodata type. If you do not need any of these features, and simply want to organize data within a
+    neurodata type into an additional level of grouping, it may be OK to not define a neurodata type. The same goes
+    for Datasets, but in our experience most of the time it makes sense *not* do define a neurodata type for datasets.
+
 ``doc`` is a required argument that describes the purpose of the neurodata type.
 
 ``name`` is an optional argument that indicates the name of the Group that is written to the file. If this argument
 is omitted, users will be required to enter a ``name`` field when creating instances of this neurodata type in the API.
-You also have the option of specifying ``default_name``, in which case this name will be used as the name of the
-Group if no other name is provided in the PyNWB API.
+You also have the option of specifying ``default_name``, in which case this name will be used as the name of the group
+if no other name is provided in the PyNWB API.
 
 ``attributes``, ``datasets``, ``groups``, and ``links`` are all optional arguments that take lists of the
 corresponding ``NWBSpec`` classes.
 
-``quantity`` indicates the number of instances of this group that are allowed. See options `here <https://schema-language.readthedocs.io/en/latest/specification_language_description.html#quantity>`_
+``quantity`` indicates the number of instances of this group that are allowed. See options
+`here <https://schema-language.readthedocs.io/en/latest/specification_language_description.html#quantity>`_.
+
+.. note::
+    If you specify ``name``, ``quantity`` cannot be ``'*'``, ``'+'``, or an integer greater that 1, because you cannot
+    have more than one group of the same name in the same parent group.
 
 ``linkable`` indicates whether a reference to this object can be placed elsewhere in the NWB file.
+
 
 
 Dataset Specifications
@@ -199,6 +214,9 @@ list of :py:class:`~pynwb.spec.NWBDtypeSpec` objects to the ``dtype`` argument.
             NWBDtypeSpec('bar', 'a column for bar', 'float')
             ]
         )
+
+.. tip::
+    Column-based tables are also possible and more flexible. See the documentation for `DynamicTable <https://hdmf.readthedocs.io/en/stable/tutorials/dynamictable.html>`_.
 
 Attribute Specifications
 ^^^^^^^^^^^^^^^^^^^^^^^^
