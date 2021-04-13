@@ -49,7 +49,7 @@ class TestExtension(TestCase):
     def test_get_class(self):
         self.test_export()
         type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
-        type_map.get_container_cls(self.prefix, 'TetrodeSeries')
+        type_map.get_container_cls('TetrodeSeries', self.prefix)
 
     def test_load_namespace_with_reftype_attribute(self):
         ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix, version='0.1.0')
@@ -74,7 +74,7 @@ class TestExtension(TestCase):
         ns_builder.add_spec(self.ext_source, test_ds_ext)
         ns_builder.export(self.ns_path, outdir=self.tempdir)
         type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
-        my_new_type = type_map.get_container_cls(self.prefix, 'my_new_type')
+        my_new_type = type_map.get_container_cls('my_new_type', self.prefix)
         docval = None
         for tmp in get_docval(my_new_type.__init__):
             if tmp['name'] == 'target_ds':
@@ -180,14 +180,14 @@ class TestCatchDuplicateSpec(TestCase):
     def tearDown(self):
         pass
 
-    def test_catch_duplicate_spec(self):
+    def test_catch_duplicate_spec_nested(self):
         spec1 = NWBGroupSpec("This is my new group 1",
                              "Group1",
                              neurodata_type_inc="NWBDataInterface",
                              neurodata_type_def="Group1")
         spec2 = NWBGroupSpec("This is my new group 2",
                              "Group2",
-                             groups=[spec1],
+                             groups=[spec1],  # nested definition
                              neurodata_type_inc="NWBDataInterface",
                              neurodata_type_def="Group2")
         ns_builder = NWBNamespaceBuilder("Example namespace", "pynwb_test_ext", version='0.1.0')
