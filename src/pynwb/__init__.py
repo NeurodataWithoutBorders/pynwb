@@ -185,7 +185,7 @@ def get_class(**kwargs):
 
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
-    return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
+    return __TYPE_MAP.get_container_cls(neurodata_type, namespace)
 
 
 @docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
