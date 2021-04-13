@@ -3,3 +3,4 @@ matplotlib
 sphinx_rtd_theme
 sphinx-gallery
 allensdk
+Pillow

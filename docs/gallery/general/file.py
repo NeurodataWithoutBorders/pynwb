@@ -388,17 +388,61 @@ nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5],
                  obs_intervals=[[1, 10], [20, 30]], location='CA1', quality=0.90)
 
 ####################
-# Now we overwrite the file with all of the data
-
-with NWBHDF5IO('example_file_path.nwb', 'w') as io:
-    io.write(nwbfile)
-
-####################
 # .. _units_fields_ref:
 #
 # .. note::
 #    The Units table has some predefined optional columns. Please review the documentation for
 #    :py:meth:`~pynwb.file.NWBFile.add_unit` before adding custom columns.
+
+####################
+# Images
+# ------
+#
+# You can store static images within the NWB file as well. These can be images of the subject, the environment, stimuli,
+# or really anything.
+
+from PIL import Image
+import requests
+import numpy as np
+
+from pynwb.image import RGBAImage, RGBImage, GrayscaleImage
+from pynwb.base import Images
+
+image_url = 'https://flif.info/example-images/fish.png'
+img = Image.open(requests.get(image_url, stream=True).raw)
+
+# you can store an RGBA image
+rgba_fish = RGBAImage(
+    name='RGBA_fish',
+    data=np.array(img)
+)
+
+# or RGB
+rgb_fish = RGBImage(
+    name='RGB_fish',
+    data=np.array(img.convert('RGB'))
+)
+
+# or Grayscale
+gs_fish = GrayscaleImage(
+    name='Grayscale_fish',
+    data=np.array(img.convert('L'))
+)
+
+# Images is a container that accepts any of these image types
+images = Images(
+    name='fish_images',
+    images=[rgb_fish, rgba_fish, gs_fish]
+)
+
+# Finally, do not forget to add the images object to the nwb file.
+nwbfile.processing['behavior'].add(images)
+
+####################
+# Now we overwrite the file with all of the data
+
+with NWBHDF5IO('example_file_path.nwb', 'w') as io:
+    io.write(nwbfile)
 
 ####################
 # .. _basic_appending:
