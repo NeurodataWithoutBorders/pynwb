@@ -402,37 +402,26 @@ nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5],
 # or really anything.
 
 from PIL import Image
-import requests
 import numpy as np
 
 from pynwb.image import RGBAImage, RGBImage, GrayscaleImage
 from pynwb.base import Images
 
-image_url = 'https://flif.info/example-images/fish.png'
-img = Image.open(requests.get(image_url, stream=True).raw)
+img = Image.open('../../source/logo.png')
 
 # you can store an RGBA image
-rgba_fish = RGBAImage(
-    name='RGBA_fish',
-    data=np.array(img)
-)
+rgba_logo = RGBAImage(name='RGBA_logo', data=np.array(img))
 
 # or RGB
-rgb_fish = RGBImage(
-    name='RGB_fish',
-    data=np.array(img.convert('RGB'))
-)
+rgb_logo = RGBImage(name='RGB_logo', data=np.array(img.convert('RGB')))
 
 # or Grayscale
-gs_fish = GrayscaleImage(
-    name='Grayscale_fish',
-    data=np.array(img.convert('L'))
-)
+gs_logo = GrayscaleImage(name='Grayscale_logo', data=np.array(img.convert('L')))
 
 # Images is a container that accepts any of these image types
 images = Images(
-    name='fish_images',
-    images=[rgb_fish, rgba_fish, gs_fish]
+    name='logo_images',
+    images=[rgb_logo, rgba_logo, gs_logo]
 )
 
 # Finally, do not forget to add the images object to the nwb file.
