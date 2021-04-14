@@ -25,6 +25,7 @@
 ### Tutorial enhancements:
 - Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
   and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
+- Add thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
 
 ### Bug fixes:
 - Update behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
