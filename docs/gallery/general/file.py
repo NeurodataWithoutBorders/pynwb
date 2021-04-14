@@ -13,8 +13,8 @@ including writing and reading of an NWB file.
 # The NWB file
 # ------------
 #
-#
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_file.png'
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile

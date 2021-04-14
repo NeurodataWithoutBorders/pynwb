@@ -16,6 +16,7 @@ The object ID of an NWB container object can be accessed using the
 
 """
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_objectid.png'
 from pynwb import NWBFile, TimeSeries
 from datetime import datetime
 from dateutil.tz import tzlocal

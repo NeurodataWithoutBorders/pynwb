@@ -100,6 +100,7 @@ writing large arrays without loading all data into memory and streaming data wri
 # simple helper function first to write a simple NWBFile containing a single timeseries to
 # avoid repetition of the same code and to allow us to focus on the important parts of this tutorial.
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_iterative_write.png'
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile, TimeSeries

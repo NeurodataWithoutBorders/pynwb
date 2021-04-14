@@ -18,6 +18,7 @@ from PyNWB.
 # Before we get started, lets create an NWBFile for testing so that we can add our data to it.
 #
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_advnaced_hdf5_io.png'
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
