@@ -7,6 +7,8 @@
   argument that is required when a scalar, numpy.ndarray, list, tuple, or pandas.DataFrame is added to scratch. The
   'notes' argument of `ScratchData.__init__(...)` is now replaced by the required 'description' argument for
   consistency. Previously, 'notes' had a default value of empty string, which is not recommended. @rly (#1309)
+- ``SweepTable`` has been deprecated in favor of the new icephys metadata tables. Use of ``SweepTable`` is still
+  possible but no longer recommended. @oruebel  (#1349)
 
 ### New features:
 - `NWBFile.add_scratch(...)` and `ScratchData.__init__(...)` now accept scalar data in addition to the currently
@@ -14,6 +16,19 @@
 - Support `pathlib.Path` paths when opening files with `NWBHDF5IO`. @dsleiter (#1314)
 - Use HDMF 2.4.0. See the [HDMF 2.4.0 release notes](https://github.com/hdmf-dev/hdmf/releases/tag/2.4.0) for details.
 - Support `driver='ros3'` in `NWBHDF5IO` for streaming NWB files directly from s3. @bendichter (#1331)
+- Add new intracellular electrophysiology hierarchical table structure from ndx-icephys-meta to NWB core.
+  This includes the new types ``TimeSeriesReferenceVectorData``, ``IntracellularRecordingsTable``,
+  ``SimultaneousRecordingsTable``, ``SequentialRecordingsTable``, ``RepetitionsTable`` and
+  ``ExperimentalConditionsTable`` as well as corresponding updates to ``NWBFile`` to support interaction
+   with the new tables. @oruebel  (#1349)
+
+### Tutorial enhancements:
+- Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
+  and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
+
+### Bug fixes:
+- Update behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
+
 
 ## PyNWB 1.4.0 (August 12, 2020)
 
