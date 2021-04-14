@@ -424,6 +424,12 @@ nwbfile.add_unit(id=3, spike_times=[1.2, 2.3, 3.3, 4.5],
 #
 # You can store static images within the NWB file as well. These can be images of the subject, the environment, stimuli,
 # or really anything.
+#
+# .. note::
+#          All basic image types :py:class:`~pynwb.image.RGBAImage`, py:class:`~pynwb.image.RGBImage`, and 
+#          py:class:`~pynwb.image.GrayscaleImage` provide the optional: 1) ``description`` parameter to include a
+#          text description about the image and 2) ``resolution`` parameter to specify the *pixels / cm* resolution
+#          of the image. 
 
 from PIL import Image
 import numpy as np
