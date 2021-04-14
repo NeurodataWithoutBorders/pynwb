@@ -445,8 +445,11 @@ rgba_logo = RGBAImage(name='RGBA_logo', data=np.array(img))
 # or RGB
 rgb_logo = RGBImage(name='RGB_logo', data=np.array(img.convert('RGB')))
 
-# or Grayscale
-gs_logo = GrayscaleImage(name='Grayscale_logo', data=np.array(img.convert('L')))
+# or Grayscale. Here with the optional description and resolution specified. 
+gs_logo = GrayscaleImage(name='Grayscale_logo', 
+                         data=np.array(img.convert('L')),
+                         description='Grayscale version of the NWB logo',
+                         resolution=35.433071)
 
 # Images is a container that accepts any of these image types
 images = Images(
