@@ -66,7 +66,8 @@ sphinx_gallery_conf = {
     'subsection_order': ExplicitOrder(['../gallery/general', '../gallery/domain']),
     'backreferences_dir': 'gen_modules/backreferences',
     'download_section_examples': False,
-    'min_reported_time': 5
+    'min_reported_time': 5,
+    'remove_config_comments': True
 }
 
 intersphinx_mapping = {

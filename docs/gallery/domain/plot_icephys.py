@@ -57,6 +57,7 @@ enabling users to add columns for custom metadata.
 # Imports used in the tutorial
 # ------------------------------
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys.png'
 # Standard Python imports
 from datetime import datetime
 from dateutil.tz import tzlocal

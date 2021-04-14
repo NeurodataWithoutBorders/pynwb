@@ -2,16 +2,17 @@
 '''
 .. _icephys_tutorial:
 
-[DEPRECATED] Intracellular electrophysiology data using SweepTable
-==================================================================
+Intracellular electrophysiology data using SweepTable
+=====================================================
 
 The following tutorial describes storage of intracellular electrophysiology data in NWB using the
-SweepTable to manage recordings. The use of SweepTable has been deprecated as of PyNWB >v1.4 in
-favor of the new IntracellularRecordingsTable and associated metadata tables to allow for a
-more complete description of intracellular electrophysiology experiments.
+SweepTable to manage recordings.
 
-The following examples will reference variables that may not be defined within the block they are used in. For
-clarity, we define them here:
+.. note::
+    The use of SweepTable has been deprecated as of PyNWB >v1.4 in favor of the new hierarchical
+    intracellular electrophysiology metadata tables to allow for a more complete description of
+    intracellular electrophysiology experiments. See the :doc:`Intracellular electrophysiology  <plot_icephys>`
+    tutorial for details.
 '''
 
 #######################
@@ -21,6 +22,7 @@ clarity, we define them here:
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
 # argument is is a brief description of the dataset.
 
+# sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys_sweeptable.png'
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb import NWBFile
