@@ -322,7 +322,7 @@ class NWBFile(MultiContainerInterface):
              'doc': 'scratch data', 'default': None},
             {'name': 'icephys_electrodes', 'type': (list, tuple),
              'doc': 'IntracellularElectrodes that belong to this NWBFile.', 'default': None},
-            {'name': 'ic_filtering', 'type': str, 'default': None,
+            {'name': 'icephys_filtering', 'type': str, 'default': None,
              'doc': '[DEPRECATED] Use IntracellularElectrode.filtering instead. Description of filtering used.'},
             {'name': 'intracellular_recordings', 'type': IntracellularRecordingsTable, 'default': None,
              'doc': 'the IntracellularRecordingsTable table that belongs to this NWBFile'},
@@ -393,7 +393,7 @@ class NWBFile(MultiContainerInterface):
             'surgery',
             'virus',
             'stimulus_notes',
-            'ic_filtering',
+            'icephys_filtering',  # DEPRECATION warning will be raised in the setter when calling setattr in the loop
             'intracellular_recordings',
             'icephys_simultaneous_recordings',
             'icephys_sequential_recordings',
@@ -408,11 +408,6 @@ class NWBFile(MultiContainerInterface):
             warn("Use of SweepTable is deprecated. Use the intracellular_recordings, "
                  "simultaneous_recordings, sequential_recordings, repetitions and/or "
                  "experimental_conditions table(s) instead.", DeprecationWarning)
-        # if the user uses ic_filtering then issue a deprecation warning
-        if kwargs.get('ic_filtering') is not None:
-            warn("Use of ic_filtering argument is deprecated. Use "
-                 "IntracellularElectrode.filtering instead to describe "
-                 "the filtering used.", DeprecationWarning)
 
         # backwards-compatibility code for ic_electrodes / icephys_electrodes
         ic_elec_val = kwargs.get('icephys_electrodes', None)
@@ -480,15 +475,15 @@ class NWBFile(MultiContainerInterface):
         return self.icephys_electrodes
 
     @property
-    def ic_filtering(self):
-        return self.fields.get('ic_filtering')
+    def icephys_filtering(self):
+        return self.fields.get('icephys_filtering')
 
-    @ic_filtering.setter
-    def ic_filtering(self, val):
+    @icephys_filtering.setter
+    def icephys_filtering(self, val):
         if val is not None:
-            warn("Use of ic_filtering is deprecated. Use the IntracellularElectrode.filtering field instead",
+            warn("Use of icephys_filtering is deprecated. Use the IntracellularElectrode.filtering field instead",
                  DeprecationWarning)
-            self.fields['ic_filtering'] = val
+            self.fields['icephys_filtering'] = val
 
     def add_ic_electrode(self, *args, **kwargs):
         """

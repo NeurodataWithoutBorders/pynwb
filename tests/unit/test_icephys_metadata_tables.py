@@ -1069,7 +1069,7 @@ class NWBFileTests(TestCase):
             nwbfile.add_stimulus(stimulus, use_sweep_table=True)
             self.assertEqual(len(w), 1)
 
-    def test_deprectation_ic_filtering_on_init(self):
+    def test_deprectation_icephys_filtering_on_init(self):
         with warnings.catch_warnings(record=True) as w:
             nwbfile = NWBFile(
                 session_description='my first synthetic recording',
@@ -1080,11 +1080,11 @@ class NWBFileTests(TestCase):
                 institution='University of Middle Earth at the Shire',
                 experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
                 session_id='LONELYMTN',
-                ic_filtering='test filtering')
+                icephys_filtering='test filtering')
             assert issubclass(w[-1].category, DeprecationWarning)
-            self.assertEqual(nwbfile.ic_filtering, 'test filtering')
+            self.assertEqual(nwbfile.icephys_filtering, 'test filtering')
 
-    def test_ic_filtering_roundtrip(self):
+    def test_icephys_filtering_roundtrip(self):
         # create the base file
         nwbfile = NWBFile(
                 session_description='my first synthetic recording',
@@ -1095,19 +1095,20 @@ class NWBFileTests(TestCase):
                 institution='University of Middle Earth at the Shire',
                 experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
                 session_id='LONELYMTN')
-        # set the ic_filtering attribute and make sure we get a deprectation warning
+        # set the icephys_filtering attribute and make sure we get a deprectation warning
         with warnings.catch_warnings(record=True) as w:
-            nwbfile.ic_filtering = 'test filtering'
+            nwbfile.icephys_filtering = 'test filtering'
             assert issubclass(w[-1].category, DeprecationWarning)
         # write the test fil
         with NWBHDF5IO(self.path, 'w') as io:
             io.write(nwbfile)
-        # read the test file and confirm ic_filtering has been written
+        # read the test file and confirm icephys_filtering has been written
         with NWBHDF5IO(self.path, 'r') as io:
             with warnings.catch_warnings(record=True) as w:
                 infile = io.read()
-                assert issubclass(w[-1].category, DeprecationWarning)
-                self.assertEqual(infile.ic_filtering, 'test filtering')
+                self.assertEqual(len(w), 1)  # make sure a warning is being raised
+                assert issubclass(w[0].category, DeprecationWarning)  # make sure it is a deprecation warning
+                self.assertEqual(infile.icephys_filtering, 'test filtering')  # make sure the value is set
 
     def test_get_icephys_meta_parent_table(self):
         """

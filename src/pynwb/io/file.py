@@ -57,9 +57,8 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('icephys_sequential_recordings', icephys_spec.get_neurodata_type('SequentialRecordingsTable'))
         self.map_spec('icephys_repetitions', icephys_spec.get_neurodata_type('RepetitionsTable'))
         self.map_spec('icephys_experimental_conditions', icephys_spec.get_neurodata_type('ExperimentalConditionsTable'))
-        self.map_spec('ic_filtering', icephys_spec.get_dataset('filtering'))
 
-        # 'filtering' will be deprecated. add this mapping in the meantime
+        # 'filtering' has been deprecated. add this mapping in the meantime
         icephys_filtering_spec = icephys_spec.get_dataset('filtering')
         self.unmap(icephys_filtering_spec)
         self.map_spec('icephys_filtering', icephys_filtering_spec)
