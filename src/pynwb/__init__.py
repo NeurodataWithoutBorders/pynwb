@@ -2,6 +2,7 @@
 for reading and writing data in NWB format
 '''
 import os.path
+from pathlib import Path
 from copy import deepcopy
 from warnings import warn
 import h5py
@@ -40,10 +41,8 @@ global __TYPE_MAP
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()
-__NS_CATALOG.merge(hdmf_typemap.namespace_catalog)
-
 __TYPE_MAP = TypeMap(__NS_CATALOG)
-__TYPE_MAP.merge(hdmf_typemap)
+__TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
@@ -184,7 +183,7 @@ def get_class(**kwargs):
 
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
-    return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
+    return __TYPE_MAP.get_container_cls(neurodata_type, namespace)
 
 
 @docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
@@ -201,7 +200,7 @@ def validate(**kwargs):
 
 class NWBHDF5IO(_HDF5IO):
 
-    @docval({'name': 'path', 'type': str, 'doc': 'the path to the HDF5 file'},
+    @docval({'name': 'path', 'type': (str, Path), 'doc': 'the path to the HDF5 file'},
             {'name': 'mode', 'type': str,
              'doc': 'the mode to open the HDF5 file with, one of ("w", "r", "r+", "a", "w-", "x")'},
             {'name': 'load_namespaces', 'type': bool,
@@ -213,10 +212,11 @@ class NWBHDF5IO(_HDF5IO):
              'default': None},
             {'name': 'file', 'type': h5py.File, 'doc': 'a pre-existing h5py.File object', 'default': None},
             {'name': 'comm', 'type': "Intracomm", 'doc': 'the MPI communicator to use for parallel I/O',
-             'default': None})
+             'default': None},
+            {'name': 'driver', 'type': str, 'doc': 'driver for h5py to use when opening HDF5 file', 'default': None})
     def __init__(self, **kwargs):
-        path, mode, manager, extensions, load_namespaces, file_obj, comm =\
-            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', kwargs)
+        path, mode, manager, extensions, load_namespaces, file_obj, comm, driver =\
+            popargs('path', 'mode', 'manager', 'extensions', 'load_namespaces', 'file', 'comm', 'driver', kwargs)
         if load_namespaces:
             if manager is not None:
                 warn("loading namespaces from file - ignoring 'manager'")
@@ -227,7 +227,7 @@ class NWBHDF5IO(_HDF5IO):
                 raise ValueError("cannot load namespaces from file when writing to it")
 
             tm = get_type_map()
-            super(NWBHDF5IO, self).load_namespaces(tm, path, file=file_obj)
+            super(NWBHDF5IO, self).load_namespaces(tm, path, file=file_obj, driver=driver)
             manager = BuildManager(tm)
 
             # XXX: Leaving this here in case we want to revert to this strategy for
@@ -243,7 +243,7 @@ class NWBHDF5IO(_HDF5IO):
                 manager = get_manager(extensions=extensions)
             elif manager is None:
                 manager = get_manager()
-        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm)
+        super(NWBHDF5IO, self).__init__(path, manager=manager, mode=mode, file=file_obj, comm=comm, driver=driver)
 
     @docval({'name': 'src_io', 'type': HDMFIO, 'doc': 'the HDMFIO object for reading the data to export'},
             {'name': 'nwbfile', 'type': 'NWBFile',

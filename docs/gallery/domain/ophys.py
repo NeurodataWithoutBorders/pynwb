@@ -230,7 +230,7 @@ rrs_rois = rrs.rois
 # .. [#] You can also store dF/F data using the :py:class:`~pynwb.ophys.DfOverF` class.
 #
 # .. [#] Neurodata sets can be *very* large, so individual components of the dataset are only loaded into memory when
-#    you requst them. This functionality is only possible if closing of the :py:class:`~pynwb.NWBHDF5IO`
+#    you request them. This functionality is only possible if closing of the :py:class:`~pynwb.NWBHDF5IO`
 #    object is handled by the user.
 #
 # .. [#] If you added more than one :py:class:`~pynwb.ophys.RoiResponseSeries`, you will need to

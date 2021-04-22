@@ -299,7 +299,7 @@ class for reading and writing, you will need to implement and register a custom
 .. tip::
 
     ObjectMappers allow you to customize how objects in the spec are mapped to attributes of your NWBContainer in
-    Python. This is useful, e.g., in cases where you want ot customize the default mapping. For example in
+    Python. This is useful, e.g., in cases where you want to customize the default mapping. For example in
     TimeSeries the attribute ``unit`` which is defined on the dataset ``data`` (i.e., ``data.unit``) would
     by default be mapped to the attribute ``data_unit`` on :py:class:`~pynwb.base.TimeSeries`. The ObjectMapper
     :py:class:`~pynwb.io.base.TimeSeriesMap` then changes this mapping to map ``data.unit`` to the attribute ``unit``

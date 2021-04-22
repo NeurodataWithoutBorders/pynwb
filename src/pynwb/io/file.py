@@ -52,8 +52,10 @@ class NWBFileMap(ObjectMapper):
         self.map_spec('icephys_electrodes', icephys_spec.get_neurodata_type('IntracellularElectrode'))
         self.map_spec('sweep_table', icephys_spec.get_neurodata_type('SweepTable'))
 
-        # TODO map the filtering dataset to something or deprecate it
-        self.unmap(icephys_spec.get_dataset('filtering'))
+        # 'filtering' will be deprecated. add this mapping in the meantime
+        icephys_filtering_spec = icephys_spec.get_dataset('filtering')
+        self.unmap(icephys_filtering_spec)
+        self.map_spec('icephys_filtering', icephys_filtering_spec)
 
         ecephys_spec = general_spec.get_group('extracellular_ephys')
         self.unmap(ecephys_spec)
