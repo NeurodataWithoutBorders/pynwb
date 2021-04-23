@@ -1,4 +1,4 @@
 # package dependencies and their minimum versions for installing PyNWB (note that HDMF has a range of requirements)
 # the requirements here specify '==' for testing; setup.py replaces '==' with '>='
 hdmf==2.5.1,<3
-python-dateutil==2.7
+python-dateutil==2.7,<3
