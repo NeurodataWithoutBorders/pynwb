@@ -43,6 +43,14 @@ Overall Health
 .. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
      :target: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
      :alt: Requirements Status
+     
+.. image:: https://readthedocs.org/projects/pynwb/badge/?version=latest
+     :target: https://pynwb.readthedocs.io/en/latest/?badge=latest
+     :alt: Documentation Status
+     
+.. image:: https://img.shields.io/pypi/l/pynwb.svg
+     :target: https://github.com/neurodatawithoutborders/pynwb/blob/dev/license.txt
+     :alt:    PyPI - License
 
 NWB Format API
 ==============
