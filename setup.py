@@ -13,8 +13,8 @@ print('found these packages:', pkgs)
 schema_dir = 'nwb-schema/core'
 
 with open('requirements-min.txt', 'r') as fp:
-    # replace == with >= and remove trailing comments and spaces
-    reqs = [x.replace('==', '>=').split('#')[0].strip() for x in fp]
+    # replace == with >= and remove trailing comments and spaces, EXCEPT for hdmf
+    reqs = [x.replace('==', '>=').split('#')[0].strip() for x in fp if not x.startswith('hdmf')]
     reqs = [x for x in reqs if x]  # remove empty strings
 
 print(reqs)
