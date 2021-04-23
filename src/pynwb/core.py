@@ -1,4 +1,5 @@
 import numpy as np
+from warnings import warn
 
 from hdmf import Container, Data
 from hdmf.container import AbstractContainer, MultiContainerInterface as hdmf_MultiContainerInterface, Table
@@ -88,14 +89,39 @@ class NWBData(NWBMixin, Data):
 @register_class('ScratchData', CORE_NAMESPACE)
 class ScratchData(NWBData):
 
-    __nwbfields__ = ('description',)
+    __nwbfields__ = ('description', )
 
     @docval({'name': 'name', 'type': str, 'doc': 'the name of this container'},
             {'name': 'data', 'type': ('scalar_data', 'array_data', 'data', Data), 'doc': 'the source of the data'},
-            {'name': 'description', 'type': str, 'doc': 'description of the data'})
+            {'name': 'notes', 'type': str,
+             'doc': 'notes about the data. This argument will be deprecated. Use description instead', 'default': ''},
+            {'name': 'description', 'type': str, 'doc': 'notes about the data', 'default': None})
     def __init__(self, **kwargs):
         call_docval_func(super().__init__, kwargs)
-        self.description = getargs('description', kwargs)
+        notes, description = getargs('notes', 'description', kwargs)
+        if notes != '':
+            warn('The `notes` argument of ScratchData.__init__ will be deprecated. Use description instead.',
+                 PendingDeprecationWarning)
+            if notes != '' and description != '':
+                raise ValueError('Cannot provide both notes and description to ScratchData.__init__. The description '
+                                 'argument is recommended.')
+            description = notes
+        if not description:
+            warn('ScratchData.description will be required in a future major release of PyNWB.',
+                 PendingDeprecationWarning)
+        self.description = description
+
+    @property
+    def notes(self):
+        warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
+             PendingDeprecationWarning)
+        return self.description
+
+    @notes.setter
+    def notes(self, value):
+        warn('Use of ScratchData.notes will be deprecated. Use ScratchData.description instead.',
+             PendingDeprecationWarning)
+        self.description = value
 
 
 class NWBTable(Table):
