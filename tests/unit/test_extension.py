@@ -49,7 +49,7 @@ class TestExtension(TestCase):
     def test_get_class(self):
         self.test_export()
         type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
-        type_map.get_container_cls('TetrodeSeries', self.prefix)
+        type_map.get_dt_container_cls('TetrodeSeries', self.prefix)
 
     def test_load_namespace_with_reftype_attribute(self):
         ns_builder = NWBNamespaceBuilder('Extension for use in my Lab', self.prefix, version='0.1.0')
@@ -74,7 +74,7 @@ class TestExtension(TestCase):
         ns_builder.add_spec(self.ext_source, test_ds_ext)
         ns_builder.export(self.ns_path, outdir=self.tempdir)
         type_map = get_type_map(extensions=os.path.join(self.tempdir, self.ns_path))
-        my_new_type = type_map.get_container_cls('my_new_type', self.prefix)
+        my_new_type = type_map.get_dt_container_cls('my_new_type', self.prefix)
         docval = None
         for tmp in get_docval(my_new_type.__init__):
             if tmp['name'] == 'target_ds':
