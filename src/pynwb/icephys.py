@@ -781,7 +781,7 @@ class ExperimentalConditionsTable(DynamicTable):
         # Define default name and description settings
         kwargs['name'] = 'experimental_conditions'
         kwargs['description'] = ('A table for grouping different intracellular recording repetitions together that '
-                                 'belong to the same experimental experimental_conditions.')
+                                 'belong to the same experimental conditions.')
         # Initialize the DynamicTable
         call_docval_func(super().__init__, kwargs)
         if self['repetitions'].target.table is None:
