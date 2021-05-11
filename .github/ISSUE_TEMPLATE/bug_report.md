@@ -22,7 +22,8 @@ assignees: ''
     Python Executable: Conda or Python
     Python Version: Python 3.5, 3.6, or 3.7
     Operating System: Windows, macOS or Linux
-    HDMF Version: Version of PyNWB used
+    HDMF Version: 
+    PyNWB Version:
 
 ## Checklist
 
