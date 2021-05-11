@@ -14,7 +14,7 @@ schema_dir = 'nwb-schema/core'
 
 with open('requirements-min.txt', 'r') as fp:
     # replace == with >= and remove trailing comments and spaces
-    reqs = [x.replace('==', '>=').split('#')[0].strip() for x in fp if not x.startswith('hdmf')]
+    reqs = [x.replace('==', '>=').split('#')[0].strip() for x in fp]
     reqs = [x for x in reqs if x]  # remove empty strings
 
 print(reqs)
