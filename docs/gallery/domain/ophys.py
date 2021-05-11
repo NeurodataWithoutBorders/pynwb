@@ -133,6 +133,10 @@ mod.add(fl)
 
 
 ####################
+# .. tip::
+#    You can also store dF/F data using the :py:class:`~pynwb.ophys.DfOverF` class, which works the same way as
+#    :py:class:`~pynwb.ophys.Fluorescence`.
+#
 # Because this data stores information about specific ROIs, you will need to provide a reference to the ROIs
 # that you will be storing data for. This is done using a :py:class:`~pynwb.core.DynamicTableRegion`, which can be
 # created with :py:func:`~pynwb.ophys.PlaneSegmentation.create_roi_table_region`.
@@ -226,8 +230,6 @@ rrs_rois = rrs.rois
 #    common image formats have tools built around them, so working with the original file formats can make
 #    one's life much simpler. NWB currently does not have the ability to read and parse native image formats. It
 #    is up to downstream users to read these file formats.
-#
-# .. [#] You can also store dF/F data using the :py:class:`~pynwb.ophys.DfOverF` class.
 #
 # .. [#] Neurodata sets can be *very* large, so individual components of the dataset are only loaded into memory when
 #    you request them. This functionality is only possible if closing of the :py:class:`~pynwb.NWBHDF5IO`
