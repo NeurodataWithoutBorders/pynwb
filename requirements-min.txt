@@ -1,7 +1,8 @@
-# package dependencies and their minimum versions for installing PyNWB (note that HDMF has a range of requirements)
+# package dependencies and their minimum versions for installing PyNWB
 # the requirements here specify '==' for testing; setup.py replaces '==' with '>='
 h5py==2.9,<3  # support for setting attrs to lists of utf-8 added in 2.9
-hdmf==2.5.1,<3
+hdmf==2.5.2,<3
 numpy==1.16,<1.21
 pandas==0.23,<2
 python-dateutil==2.7,<3
+setuptools
