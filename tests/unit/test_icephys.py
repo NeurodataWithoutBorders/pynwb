@@ -238,7 +238,7 @@ class IZeroClampSeriesConstructor(TestCase):
     def test_stim_desc_warning(self):
         electrode_name = GetElectrode()
 
-        msg = ("Stimulus_description 'desc' for IZeroClampSeries 'test_iZCS' is ignored and will be set to 'N/A' "
+        msg = ("Stimulus description 'desc' for IZeroClampSeries 'test_iZCS' is ignored and will be set to 'N/A' "
                "as per NWB 2.3.0.")
         with self.assertWarnsWith(UserWarning, msg):
             iZCS = IZeroClampSeries('test_iZCS', list(), electrode_name, 1.0, timestamps=list(),
