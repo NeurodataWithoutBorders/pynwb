@@ -225,6 +225,7 @@ class IZeroClampSeriesConstructor(TestCase):
         self.assertEqual(iZCS.bias_current, 0.0)
         self.assertEqual(iZCS.bridge_balance, 0.0)
         self.assertEqual(iZCS.capacitance_compensation, 0.0)
+        self.assertEqual(iZCS.stimulus_description, 'N/A')
 
     def test_unit_warning(self):
         electrode_name = GetElectrode()
@@ -233,6 +234,16 @@ class IZeroClampSeriesConstructor(TestCase):
         with self.assertWarnsWith(UserWarning, msg):
             iZCS = IZeroClampSeries('test_iZCS', list(), electrode_name, 1.0, timestamps=list(), unit='unit')
         self.assertEqual(iZCS.unit, 'volts')
+
+    def test_stim_desc_warning(self):
+        electrode_name = GetElectrode()
+
+        msg = ("Stimulus_description 'desc' for IZeroClampSeries 'test_iZCS' is ignored and will be set to 'N/A' "
+               "as per NWB 2.3.0.")
+        with self.assertWarnsWith(UserWarning, msg):
+            iZCS = IZeroClampSeries('test_iZCS', list(), electrode_name, 1.0, timestamps=list(),
+                                    stimulus_description='desc')
+        self.assertEqual(iZCS.stimulus_description, 'N/A')
 
 
 class CurrentClampStimulusSeriesConstructor(TestCase):
