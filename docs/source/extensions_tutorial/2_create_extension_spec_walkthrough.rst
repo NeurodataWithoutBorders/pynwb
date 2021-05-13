@@ -81,7 +81,7 @@ Here, after the initial imports, we are defining meta-data of the extension.
 Pay particular attention to ``version``. If you make changes to your extension
 after the initial release, you should increase the numbers in your version
 number, so that you can keep track of what exact version of the extension was
-used for each file. We recommend using `semantic versioning <https://semver.org/>`_.
+used for each file. We recommend using a`semantic versioning approach <https://nwb-extensions.github.io/versioning_guidelines>`_.
 
 Including types
 ~~~~~~~~~~~~~~~
