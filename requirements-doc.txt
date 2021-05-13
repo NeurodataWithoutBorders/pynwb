@@ -2,4 +2,4 @@ sphinx
 matplotlib
 sphinx_rtd_theme
 sphinx-gallery
-allensdk
+allensdk  # ntoe that as of allensdk 2.10.0, python 3.8 is not supported
