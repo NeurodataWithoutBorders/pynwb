@@ -674,29 +674,51 @@ class NWBFile(MultiContainerInterface):
              'type': ('scalar_data', np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
              'doc': 'The data to add to the scratch space.'},
             {'name': 'name', 'type': str,
-             'doc': ('The name of the data. Required only when passing in a scalar, numpy.ndarray, '
-                     'list, tuple, or pandas.DataFrame'),
+             'doc': 'The name of the data. Required only when passing in a scalar, numpy.ndarray, list, or tuple',
              'default': None},
+            {'name': 'notes', 'type': str,
+             'doc': ('Notes to add to the data. Only used when passing in numpy.ndarray, list, or tuple. This '
+                     'argument is not recommended. Use the `description` argument instead.'),
+             'default': None},
+            {'name': 'table_description', 'type': str,
+             'doc': ('Description for the internal DynamicTable used to store a pandas.DataFrame. This '
+                     'argument is not recommended. Use the `description` argument instead.'),
+             'default': ''},
             {'name': 'description', 'type': str,
              'doc': ('Description of the data. Required only when passing in a scalar, numpy.ndarray, '
                      'list, tuple, or pandas.DataFrame. Ignored when passing in an NWBContainer, '
                      'DynamicTable, or ScratchData object.'),
              'default': None})
     def add_scratch(self, **kwargs):
-        '''Add data to the scratch space.'''
-        data, name, description = getargs('data', 'name', 'description', kwargs)
+        '''Add data to the scratch space'''
+        data, name, notes, table_description, description = getargs('data', 'name', 'notes', 'table_description',
+                                                                    'description', kwargs)
+        if notes is not None or table_description != '':
+            warn('Use of the `notes` or `table_description` argument will be removed in a future version of PyNWB. '
+                 'Use the `description` argument instead.', PendingDeprecationWarning)
+            if description is not None:
+                raise ValueError('Cannot call add_scratch with (notes or table_description) and description')
+
         if isinstance(data, (str, int, float, bytes, np.ndarray, list, tuple, pd.DataFrame)):
             if name is None:
                 msg = ('A name is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
                        'list, tuple, or pandas.DataFrame as scratch data.')
                 raise ValueError(msg)
-            if description is None:
-                msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-                       'list, tuple, or pandas.DataFrame as scratch data.')
-                raise ValueError(msg)
             if isinstance(data, pd.DataFrame):
+                if table_description != '':
+                    description = table_description  # remove after deprecation
+                if description is None:
+                    msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
+                           'list, tuple, or pandas.DataFrame as scratch data.')
+                    raise ValueError(msg)
                 data = DynamicTable.from_dataframe(df=data, name=name, table_description=description)
             else:
+                if notes is not None:
+                    description = notes  # remove after deprecation
+                if description is None:
+                    msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
+                           'list, tuple, or pandas.DataFrame as scratch data.')
+                    raise ValueError(msg)
                 data = ScratchData(name=name, data=data, description=description)
         else:
             if name is not None:
@@ -707,8 +729,8 @@ class NWBFile(MultiContainerInterface):
                      'DynamicTable to scratch.')
         return self._add_scratch(data)
 
-    @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
-            {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the object to get'},
+            {'name': 'convert', 'type': bool, 'doc': 'return the original data, not the NWB object', 'default': True})
     def get_scratch(self, **kwargs):
         '''Get data from the scratch space'''
         name, convert = getargs('name', 'convert', kwargs)
