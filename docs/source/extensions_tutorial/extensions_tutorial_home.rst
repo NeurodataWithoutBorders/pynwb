@@ -8,7 +8,10 @@ types, or can be entirely new. These extensions are formally defined with a coll
 the `NWB Specification Language <https://schema-language.readthedocs.io/en/latest/index.html>`_.
 
 .. toctree::
+    :maxdepth: 2
 
-    1_ndx_template
     2_create_extension_spec_walkthrough
     3_spec_api
+    4_auto_api
+    5_custom_api
+    6_documenting_extension

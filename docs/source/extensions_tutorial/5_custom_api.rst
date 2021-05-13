@@ -1,5 +1,5 @@
-Custom Extension API
---------------------
+Building a custom API for an extension
+======================================
 
 Creating custom extensions is recommended if you want a stable API that can remain the same even as you make changes
 to the internal data organization. The :py:mod:`pynwb.core` module has various tools to make it easier to write
@@ -10,9 +10,9 @@ the schema. :py:class:`~pynwb.core.NWBData` represents datasets and :py:class:`~
 represents groups. Additionally, :py:mod:`pynwb.core` offers subclasses of these two classes for
 writing classes that come with more functionality.
 
-docval
+Docval
 ------
-docval is a library within PyWB and HDMF that performs input validation and automatic documentation generation. Using
+docval is a library within PyNWB and HDMF that performs input validation and automatic documentation generation. Using
 the ``docval`` decorator is recommended for methods of custom API classes.
 
 This decorator takes a list of dictionaries that specify the method parameters. These
@@ -31,7 +31,9 @@ When using this decorator, the functions :py:func:`getargs` and
 kwargs.
 
 The following code example demonstrates the use of this decorator:
+
 .. code-block:: python
+
    @docval({'name': 'arg1':,   'type': str,           'doc': 'this is the first positional argument'},
            {'name': 'arg2':,   'type': int,           'doc': 'this is the second positional argument'},
            {'name': 'kwarg1':, 'type': (list, tuple), 'doc': 'this is a keyword argument', 'default': list()},
@@ -39,6 +41,7 @@ The following code example demonstrates the use of this decorator:
    def foo(self, **kwargs):
        arg1, arg2, kwarg1 = getargs('arg1', 'arg2', 'kwarg1', **kwargs)
        ...
+
 
 the ``'shape'`` parameter is a tuple that follows the same logic as the `shape parameter is the specification
 language <https://schema-language.readthedocs.io/en/latest/description.html#shape>`_. It can take the form of a tuple
@@ -52,8 +55,8 @@ encompass a number of similar types, and can be used in place of a class, on its
 allows the data to be of type ``np.ndarray``, ``list``, ``tuple``, or ``h5py.Dataset``; and ``'scalar_data'`` allows
 the data to be ``str``, ``int``, ``float``, ``bytes``, or ``bool``.
 
-``register_class``
-------------------
+Registering classes
+-------------------
 
 When defining a class that represents a *neurodata_type* (i.e. anything that has a *neurodata_type_def*)
 from your extension, you can tell PyNWB which *neurodata_type* it represents using the function
@@ -89,13 +92,13 @@ Alternatively, you can use :py:func:`~pynwb.register_class` as a decorator.
 :py:class:`~pynwb.core.NWBContainer`.
 
 
-``__nwbfields__``
------------------
+Nwbfields
+---------
 
-When subclassing :py:class:`~pynwb.core.NWBData` or :py:class:`~pynwb.core.NWBContainer`, you might want to
-define some properties on your class. This can be done using the ``__nwbfields__`` class property. This
-class property should be a tuple of strings that name the properties. Adding a property using this functionality
-will create a property than can be set *only once*.
+When creating a new neurodata type, you need to define the new properties on your class, which is done by defining
+them in the ``__nwbfields__`` class property. This class property should be a tuple of strings that name the new
+properties. Adding a property using this functionality will create a property than can be set *only once*. Any
+new properties of the class should be defined here.
 
 For example, the following class definition will create the ``MyContainer`` class that has the properties ``foo``
 and ``bar``.
@@ -113,72 +116,27 @@ and ``bar``.
         ...
 
 
-``NWBData``
------------
+NWBContainer
+-------------
 
-:py:class:`~pynwb.core.NWBData` should be used to represent datasets with a *neurodata_type_def*. This section
- will discuss the available :py:class:`~pynwb.core.NWBData` subclasses for representing common dataset specifications.
-
-``NWBTable``
-^^^^^^^^^^^^
-
-If your specification extension contains a table definition i.e. a dataset with a compound data type, you should use
-the :py:class:`~pynwb.core.NWBTable` class to represent this specification. Since :py:class:`~pynwb.core.NWBTable`
-subclasses :py:class:`~pynwb.core.NWBData` you can still use ``__nwbfields__``. In addition, you can use the
-``__columns__`` class property to specify the columns of the table. ``__columns__`` should be a list or a tuple of
-:py:func:`~hdmf.utils.docval`-like dictionaries.
-
-The following example demonstrates how to define a table with the columns ``foo`` and ``bar`` that are of type
-str and int, respectively. We also register the class as the representation of the *neurodata_type* "MyTable"
-from the *namespace* "my_ns".
-
-.. code-block:: python
-
-    from pynwb import register_class
-    from pynwb.core import NWBTable
-
-
-    @register_class('MyTable', 'my_ns')
-    class MyTable(NWBTable):
-
-        __columns__ = [
-            {'name': 'foo', 'type': str, 'doc': 'the foo column'},
-            {'name': 'bar', 'type': int, 'doc': 'the bar column'},
-        ]
-
-        ...
-
-``NWBTableRegion``
-^^^^^^^^^^^^^^^^^^
-
-:py:class:`~pynwb.core.NWBTableRegion` should be used to represent datasets that store a region reference. The constructor
-for :py:class:`~pynwb.core.NWBTableRegion`. When subclassing this class, make sure you provide a way to pass in the required
-arguments for the :py:class:`~pynwb.core.NWBTableRegion` constructor--the *name* of the dataset, the *table* that the region
-applies to, and the *region* itself.
-
-
-``NWBContainer``
-----------------
-
-:py:class:`~pynwb.core.NWBContainer`
-should be used to represent groups with a *neurodata_type_def*. This section
+:py:class:`~pynwb.core.NWBContainer` should be used to represent groups with a *neurodata_type_def*. This section
 will discuss the available :py:class:`~pynwb.core.NWBContainer` subclasses for representing common group specifications.
 
-``NWBDataInterface``
-^^^^^^^^^^^^^^^^^^^^
+NWBDataInterface
+^^^^^^^^^^^^^^^^
 
-The NWB schema users the neurodata type *NWBDataInterface* for specifying containers that contain data that is not
-considered metadata. For example, *NWBDataInterface* is a parent neurodata type to *ElectricalSeries* data,
-but not a parent to *ElectrodeGroup*.
+The NWB schema uses the neurodata type ``NWBDataInterface`` for specifying containers that contain data that is not
+considered metadata. For example, ``NWBDataInterface`` is a parent neurodata type to ``ElectricalSeries`` data,
+but not a parent to ``ElectrodeGroup``.
 
 There are no requirements for using :py:class:`~pynwb.core.NWBDataInterface` in addition to those inherited from
 :py:class:`~pynwb.core.NWBContainer`.
 
-``MultiContainerInterface``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
+MultiContainerInterface
+^^^^^^^^^^^^^^^^^^^^^^^^
 
-Throughout the NWB schema, there are multiple *NWBDataInterface* specifications that include one or more or zero
-or more of a certain neurodata type. For example, the *LFP* neurodata type contains one or more *ElectricalSeries*.
+Throughout the NWB schema, there are multiple ``NWBDataInterface`` specifications that include one or more or zero
+or more of a certain neurodata type. For example, the ``LFP`` neurodata type contains one or more ``ElectricalSeries``.
 If your extension follows this pattern, you can use :py:class:`~pynwb.core.MultiContainerInterface` for defining
 the representative class.
 
@@ -233,4 +191,92 @@ the property ``containers``. The ``add_container`` method will check to make sur
 ``MyContainer`` or a list/dict/tuple of objects of type ``MyContainer`` is passed in. ``create_container`` will
 accept the exact same arguments that the ``MyContainer`` class constructor accepts.
 
+NWBData
+--------
 
+:py:class:`~pynwb.core.NWBData` should be used to represent datasets with a *neurodata_type_def*. This section
+will discuss the available :py:class:`~pynwb.core.NWBData` subclasses for representing common dataset specifications.
+
+NWBTable
+^^^^^^^^^
+
+If your specification extension contains a table definition i.e. a dataset with a compound data type, you should use
+the :py:class:`~pynwb.core.NWBTable` class to represent this specification. Since :py:class:`~pynwb.core.NWBTable`
+subclasses :py:class:`~pynwb.core.NWBData`, you can still use ``__nwbfields__``. In addition, you can use the
+``__columns__`` class property to specify the columns of the table. ``__columns__`` should be a list or a tuple of
+:py:func:`~hdmf.utils.docval`-like dictionaries.
+
+The following example demonstrates how to define a table with the columns ``foo`` and ``bar`` that are of type
+str and int, respectively. We also register the class as the representation of the *neurodata_type* "MyTable"
+from the *namespace* "my_ns".
+
+.. code-block:: python
+
+    from pynwb import register_class
+    from pynwb.core import NWBTable
+
+
+    @register_class('MyTable', 'my_ns')
+    class MyTable(NWBTable):
+
+        __columns__ = [
+            {'name': 'foo', 'type': str, 'doc': 'the foo column'},
+            {'name': 'bar', 'type': int, 'doc': 'the bar column'},
+        ]
+
+        ...
+
+NWBTableRegion
+^^^^^^^^^^^^^^
+
+:py:class:`~pynwb.core.NWBTableRegion` should be used to represent datasets that store a region reference. The constructor
+for :py:class:`~pynwb.core.NWBTableRegion`. When subclassing this class, make sure you provide a way to pass in the required
+arguments for the :py:class:`~pynwb.core.NWBTableRegion` constructor--the *name* of the dataset, the *table* that the region
+applies to, and the *region* itself.
+
+
+ObjectMapper: Customizing the mapping between NWBContainer and the Spec
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+If your :py:class:`~pynwb.core.NWBContainer` extension requires custom mapping of the
+:py:class:`~pynwb.core.NWBContainer`
+class for reading and writing, you will need to implement and register a custom
+:py:class:`~hdmf.build.objectmapper.ObjectMapper`.
+
+:py:class:`~hdmf.build.objectmapper.ObjectMapper` extensions are registered with the decorator
+:py:func:`~pynwb.register_map`.
+
+.. code-block:: python
+
+    from pynwb import register_map
+    from hdmf.build import ObjectMapper
+
+    @register_map(MyExtensionContainer)
+    class MyExtensionMapper(ObjectMapper)
+        ...
+
+:py:func:`~pynwb.register_map` can also be used as a function.
+
+.. code-block:: python
+
+    from pynwb import register_map
+    from hdmf.build import ObjectMapper
+
+    class MyExtensionMapper(ObjectMapper)
+        ...
+
+    register_map(MyExtensionContainer, MyExtensionMapper)
+
+.. tip::
+
+    ObjectMappers allow you to customize how objects in the spec are mapped to attributes of your NWBContainer in
+    Python. This is useful, e.g., in cases where you want to customize the default mapping. For example in
+    TimeSeries the attribute ``unit`` which is defined on the dataset ``data`` (i.e., ``data.unit``) would
+    by default be mapped to the attribute ``data_unit`` on :py:class:`~pynwb.base.TimeSeries`. The ObjectMapper
+    :py:class:`~pynwb.io.base.TimeSeriesMap` then changes this mapping to map ``data.unit`` to the attribute ``unit``
+    on :py:class:`~pynwb.base.TimeSeries` . ObjectMappers also allow you to customize how constructor arguments
+    for your ``NWBContainer`` are constructed. E.g., in TimeSeries instead of explicit ``timestamps`` we
+    may only have a ``starting_time`` and ``rate``. In the ObjectMapper we could then construct ``timestamps``
+    from this data on data load to always have ``timestamps`` available for the user.
+    For an overview of the concepts of containers, spec, builders, object mappers in PyNWB see also
+    :ref:`software-architecture`

@@ -1,5 +1,5 @@
-Automatic Extension API
------------------------
+Automatically generating a PyNWB API for an extension
+-----------------------------------------------------
 
 Now that we have created the extension specification, we need to create the Python interface. These classes will be
 used just like the PyNWB API to read and write NWB files using Python. There are two ways to do this: you can
@@ -52,7 +52,7 @@ You can also alter existing methods by overwriting them. Lets suppose you wanted
     TetrodeSeries.__init__ = new_init
 
 The above code creates a ``new_init`` method that runs a validation step and then calls the original ``__init__``.
-Then the class ``__init__`` is overwritten by the new method. Here we also use `docval`, which is described in the
+Then the class ``__init__`` is overwritten by the new method. Here we also use ``docval``, which is described in the
 next section.
 
 .. tip::
