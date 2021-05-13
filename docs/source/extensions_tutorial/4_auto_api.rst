@@ -2,9 +2,10 @@ Automatic Extension API
 -----------------------
 
 Now that we have created the extension specification, we need to create the Python interface. These classes will be
-used just like the PyNWB API to create NWB files in Python. In Python, there are two ways to do this, you can
+used just like the PyNWB API to read and write NWB files using Python. There are two ways to do this: you can
 automatically generate the API classes based on the schema, or you can manually create the API classes. Here, we will
-show you how to automatically generate the API.
+show you how to automatically generate the API. In the next section we will discuss why and how to create custom API
+classes.
 
 .. note::
     In MatNWB there is only one method: automatically generating the API. Simply call
@@ -18,7 +19,8 @@ Open up ``ndx-example/src/pynwb/ndx_example/__init__.py``, and notice the last l
     TetrodeSeries = get_class('TetrodeSeries', 'ndx-example')
 
 :py:func:`~pynwb.get_class` is a function that automatically creates a Python API object by parsing the extension
-YAML. If you create more neurodata types, simply go down the line creating each one.
+YAML. If you create more neurodata types, simply go down the line creating each one. This is the same object that is
+created when you use the ``load_namspaces`` flag on ``NWBHDF5IO``.
 
 Customizing automatically generated APIs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -33,7 +35,7 @@ return data from only the first channel. You could add that method like this:
 
     TetrodeSeries.data_from_first_chan = data_from_first_chan
 
-You can also alter existing methods by overwriting them. Hypothetically lets suppose you wanted to ensure that the
+You can also alter existing methods by overwriting them. Lets suppose you wanted to ensure that the
 ``trode_id`` field is never less than 0 for the ``TetrodeSeries`` constructor. You can do this by creating a new
 ``__init__`` function and assigning it to the class.
 
@@ -50,7 +52,8 @@ You can also alter existing methods by overwriting them. Hypothetically lets sup
     TetrodeSeries.__init__ = new_init
 
 The above code creates a ``new_init`` method that runs a validation step and then calls the original ``__init__``.
-Then the class ``__init__`` is overwritten by the new method.
+Then the class ``__init__`` is overwritten by the new method. Here we also use `docval`, which is described in the
+next section.
 
 .. tip::
     This method is easier, but note your API will be locked to your specification. If you make changes to your

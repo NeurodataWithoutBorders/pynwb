@@ -1,15 +1,56 @@
-Building API classes
-====================
+Custom Extension API
+--------------------
 
-After you have written an extension, you will need a Pythonic way to interact with the data model. To do this,
-you will need to write some classes that represent the data you defined in your specification extensions.
-The :py:mod:`pynwb.core` module has various tools to make it easier to write classes that behave like
-the rest of the PyNWB API.
+Creating custom extensions is recommended if you want a stable API that can remain the same even as you make changes
+to the internal data organization. The :py:mod:`pynwb.core` module has various tools to make it easier to write
+classes that behave like the rest of the PyNWB API.
 
 The :py:mod:`pynwb.core` defines two base classes that represent the primitive structures supported by
 the schema. :py:class:`~pynwb.core.NWBData` represents datasets and :py:class:`~pynwb.core.NWBContainer`
 represents groups. Additionally, :py:mod:`pynwb.core` offers subclasses of these two classes for
 writing classes that come with more functionality.
+
+docval
+------
+docval is a library within PyWB and HDMF that performs input validation and automatic documentation generation. Using
+the ``docval`` decorator is recommended for methods of custom API classes.
+
+This decorator takes a list of dictionaries that specify the method parameters. These
+dictionaries are used for enforcing type and building a Sphinx docstring.
+The first arguments are dictionaries that specify the positional
+arguments and keyword arguments of the decorated function. These dictionaries
+must contain the following keys: ``'name'``, ``'type'``, and ``'doc'``. This will define a
+positional argument. To define a keyword argument, specify a default value
+using the key ``'default'``. To validate the dimensions of an input array
+add the optional ``'shape'`` parameter.
+
+The decorated method must take ``self`` and ``**kwargs`` as arguments.
+
+When using this decorator, the functions :py:func:`getargs` and
+:py:func:`popargs` can be used for easily extracting arguments from
+kwargs.
+
+The following code example demonstrates the use of this decorator:
+.. code-block:: python
+   @docval({'name': 'arg1':,   'type': str,           'doc': 'this is the first positional argument'},
+           {'name': 'arg2':,   'type': int,           'doc': 'this is the second positional argument'},
+           {'name': 'kwarg1':, 'type': (list, tuple), 'doc': 'this is a keyword argument', 'default': list()},
+           returns='foo object', rtype='Foo'))
+   def foo(self, **kwargs):
+       arg1, arg2, kwarg1 = getargs('arg1', 'arg2', 'kwarg1', **kwargs)
+       ...
+
+the ``'shape'`` parameter is a tuple that follows the same logic as the `shape parameter is the specification
+language <https://schema-language.readthedocs.io/en/latest/description.html#shape>`_. It can take the form of a tuple
+with integers or ``None`` in each dimension. ``None`` indicates that this dimension can take any value. For
+instance, ``(3, None)`` means the data must be a 2D matrix with a length of 3 and any width. ``'shape'`` can also
+take a value that is a tuple of tuples, in which case any one of those tuples can match the spec. For instance,
+``"shape": ((3, 3), (4, 4, 4))`` would indicate that the shape of this data could either be 3x3 or 4x4x4.
+
+The ``'type'`` argument can take a class or a tuple of classes. We also define special strings that are macros which
+encompass a number of similar types, and can be used in place of a class, on its own or within a tuple. ``'array_data'``
+allows the data to be of type ``np.ndarray``, ``list``, ``tuple``, or ``h5py.Dataset``; and ``'scalar_data'`` allows
+the data to be ``str``, ``int``, ``float``, ``bytes``, or ``bool``.
 
 ``register_class``
 ------------------
@@ -191,3 +232,5 @@ This class will have the methods ``add_container``, ``create_container``,  and `
 the property ``containers``. The ``add_container`` method will check to make sure that either an object of type
 ``MyContainer`` or a list/dict/tuple of objects of type ``MyContainer`` is passed in. ``create_container`` will
 accept the exact same arguments that the ``MyContainer`` class constructor accepts.
+
+
