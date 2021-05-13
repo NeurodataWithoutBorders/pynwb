@@ -50,7 +50,7 @@ you should have a directory structure that looks like this
         └── spec
             └── create_extension_spec.py
 
-Open ``src/spec/create_extension_spec.py``. Technically, you could write the YAML extension files on your own, but we
+Open ``src/spec/create_extension_spec.py``. While you can write the YAML extension files on your own, we
 have provided a more convenient API in the :py:mod:`~pynwb.spec` for creating and managing extension. You will be
 modifying this file to create your own extension, but first let's walk through each piece.
 
