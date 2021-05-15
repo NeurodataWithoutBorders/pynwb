@@ -35,11 +35,7 @@ class TestValidateScript(TestCase):
                                 capture_output=True)
 
         stderr_regex = re.compile(
-            r".*UserWarning: No cached namespaces found in tests/back_compat/1\.0\.2_nwbfile\.nwb\s*"
-            r"warnings.warn\(msg\)\s*"
-            r"The file tests/back_compat/1\.0\.2_nwbfile\.nwb has no cached namespace information\. "
-            r"Falling back to pynwb namespace information\.\s*"
-            r"The namespace 'notfound' could not be found in pynwb namespace information\.\s*"
+            r"The namespace 'notfound' could not be found as only namespaces \[\] are cached\."
         )
         self.assertRegex(result.stderr.decode('utf-8'), stderr_regex)
 
@@ -63,7 +59,7 @@ class TestValidateScript(TestCase):
                                 capture_output=True)
 
         stderr_regex = re.compile(
-            r"The namespace 'notfound' could not be found in cached namespace information\.\s*"
+            r"The namespace 'notfound' could not be found as only namespaces \['hdmf-common', 'core'\] are cached\."
         )
         self.assertRegex(result.stderr.decode('utf-8'), stderr_regex)
 

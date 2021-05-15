@@ -214,6 +214,7 @@ def main():
     # Run unit tests for pynwb package
     if flags['pynwb'] in args.suites:
         run_test_suite("tests/unit", "pynwb unit tests", verbose=args.verbosity)
+        run_test_suite("tests/validation", "pynwb basic validate tests", verbose=args.verbosity)
 
     # Run example tests
     if flags['example'] in args.suites:
