@@ -47,7 +47,11 @@ within it Datasets, Attributes, Links, and/or other Groups. Groups are specified
     through the `NWB schema <https://nwb-schema.readthedocs.io/en/latest/>`_ to see if a core neurodata type would
     work as a base for your new type. If no existing type works, consider extending
     :py:class:`~pynwb.base.NWBDataInterface``, which allows you to add the object to a processing module.
-
+.. tip::
+     New neurodata types should always be declared at the top level of the schema rather than nesting type
+     definitions. I.e., when creating a new neurodata type it should be placed at the top level of your schema
+     and then included at the appropriate location via ``neurodata_type_inc``. This approach greatly simplifies
+     management of types. 
 ``doc`` is a required argument that describes the purpose of the neurodata type.
 
 ``name`` is an optional argument that indicates the name of the Group that is written to the file. If this argument
