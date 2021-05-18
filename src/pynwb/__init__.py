@@ -282,18 +282,18 @@ del get_versions
 
 from ._due import due, BibTeX  # noqa: E402
 due.cite(BibTeX("""
-@article {R{\"u}bel523035,
-    author = {R{\"u}bel, Oliver and Tritt, Andrew and Dichter, Benjamin and Braun, Thomas and Cain, Nicholas and Clack, Nathan and Davidson, Thomas J. and Dougherty, Max and Fillion-Robin, Jean-Christophe and Graddis, Nile and Grauer, Michael and Kiggins, Justin T. and Niu, Lawrence and Ozturk, Doruk and Schroeder, William and Soltesz, Ivan and Sommer, Friedrich T. and Svoboda, Karel and Lydia, Ng and Frank, Loren M. and Bouchard, Kristofer},
-    title = {NWB:N 2.0: An Accessible Data Standard for Neurophysiology},
-    elocation-id = {523035},
-    year = {2019},
-    doi = {10.1101/523035},
-    publisher = {Cold Spring Harbor Laboratory},
-    abstract = {Neurodata Without Borders: Neurophysiology (NWB:N) is a data standard for neurophysiology, providing neuroscientists with a common standard to share, archive, use, and build common analysis tools for neurophysiology data. With NWB:N version 2.0 (NWB:N 2.0) we made significant advances towards creating a usable standard, software ecosystem, and vibrant community for standardizing neurophysiology data. In this manuscript we focus in particular on the NWB:N data standard schema and present advances towards creating an accessible data standard for neurophysiology.},
-    URL = {https://www.biorxiv.org/content/early/2019/01/17/523035},
-    eprint = {https://www.biorxiv.org/content/early/2019/01/17/523035.full.pdf},
-    journal = {bioRxiv}
+@article {R{\"u}bel2021.03.13.435173,
+	author = {R{\"u}bel, Oliver and Tritt, Andrew and Ly, Ryan and Dichter, Benjamin K. and Ghosh, Satrajit and Niu, Lawrence and Soltesz, Ivan and Svoboda, Karel and Frank, Loren and Bouchard, Kristofer E.},
+	title = {The Neurodata Without Borders ecosystem for neurophysiological data science},
+	elocation-id = {2021.03.13.435173},
+	year = {2021},
+	doi = {10.1101/2021.03.13.435173},
+	publisher = {Cold Spring Harbor Laboratory},
+	abstract = {The neurophysiology of cells and tissues are monitored electrophysiologically and optically in diverse experiments and species, ranging from flies to humans. Understanding the brain requires integration of data across this diversity, and thus these data must be findable, accessible, interoperable, and reusable (FAIR). This requires a standard language for data and metadata that can coevolve with neuroscience. We describe design and implementation principles for a language for neurophysiology data. Our software (Neurodata Without Borders, NWB) defines and modularizes the interdependent, yet separable, components of a data language. We demonstrate NWB{\textquoteright}s impact through unified description of neurophysiology data across diverse modalities and species. NWB exists in an ecosystem which includes data management, analysis, visualization, and archive tools. Thus, the NWB data language enables reproduction, interchange, and reuse of diverse neurophysiology data. More broadly, the design principles of NWB are generally applicable to enhance discovery across biology through data FAIRness.Competing Interest StatementThe authors have declared no competing interest.},
+	URL = {https://www.biorxiv.org/content/early/2021/03/15/2021.03.13.435173},
+	eprint = {https://www.biorxiv.org/content/early/2021/03/15/2021.03.13.435173.full.pdf},
+	journal = {bioRxiv}
 }
-"""), description="NWB:N 2.0: An Accessible Data Standard for Neurophysiology",  # noqa: E501
+"""), description="The Neurodata Without Borders ecosystem for neurophysiological data science",  # noqa: E501
          path="pynwb/", version=__version__, cite_module=True)
 del due, BibTeX

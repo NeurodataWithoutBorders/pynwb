@@ -37,17 +37,20 @@ Build Status
 Overall Health
 ==============
 
+.. image:: https://github.com/NeurodataWithoutBorders/pynwb/workflows/Run%20coverage/badge.svg
+    :target: https://github.com/NeurodataWithoutBorders/pynwb/actions?query=workflow%3A%22Run+coverage%22
+
 .. image:: https://codecov.io/gh/NeurodataWithoutBorders/pynwb/branch/dev/graph/badge.svg
     :target: https://codecov.io/gh/NeurodataWithoutBorders/pynwb
 
 .. image:: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements.svg?branch=dev
      :target: https://requires.io/github/NeurodataWithoutBorders/pynwb/requirements/?branch=dev
      :alt: Requirements Status
-     
+
 .. image:: https://readthedocs.org/projects/pynwb/badge/?version=latest
      :target: https://pynwb.readthedocs.io/en/latest/?badge=latest
      :alt: Documentation Status
-     
+
 .. image:: https://img.shields.io/pypi/l/pynwb.svg
      :target: https://github.com/neurodatawithoutborders/pynwb/blob/dev/license.txt
      :alt:    PyPI - License
@@ -81,6 +84,11 @@ Contributing
 ============
 
 For details on how to contribute to PyNWB see our `contribution guidelines <docs/CONTRIBUTING.rst>`_.
+
+Citing NWB
+==========
+
+Oliver Rübel, Andrew Tritt, Ryan Ly, Benjamin K. Dichter, Satrajit Ghosh, Lawrence Niu, Ivan Soltesz, Karel Svoboda, Loren Frank, Kristofer E. Bouchard, "The Neurodata Without Borders ecosystem for neurophysiological data science", bioRxiv 2021.03.13.435173, March 15, 2021, doi: https://doi.org/10.1101/2021.03.13.435173
 
 LICENSE
 =======
