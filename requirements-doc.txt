@@ -1,3 +1,4 @@
+# dependencies to generate the documentation for PyNWB
 sphinx
 matplotlib
 sphinx_rtd_theme

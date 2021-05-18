@@ -25,7 +25,7 @@
   - Set the `stimulus_description` for `IZeroCurrentClamp` to have the fixed value "N/A".
   - See https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html for full schema release notes.
 - Add support for HDMF 2.5.5 and upgrade HDMF requirement from 2.1.0 to 2.5.5. @rly @ajtritt
-  (#1325, #1355, #1360, #1245, #1287). This includes several important features and bug fixes, including:
+  (#1325, #1355, #1360, #1245, #1287). This includes several relevant features and bug fixes, including:
   - Fix issue where dependencies of included types were not being loaded in namespaces / extensions.
   - Add `HDF5IO.get_namespaces(path=path, file=file)` method which returns a dict of namespace name mapped to the
     namespace version (the largest one if there are multiple) for each namespace cached in the given HDF5 file.
