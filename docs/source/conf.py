@@ -74,7 +74,7 @@ intersphinx_mapping = {
     'matplotlib': ('https://matplotlib.org', None),
     'h5py': ('https://docs.h5py.org/en/latest/', None),
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
-    'pandas': ('http://pandas.pydata.org/pandas-docs/stable/', None)
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None)
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -325,5 +325,5 @@ def skip(app, what, name, obj, skip, options):
 
 def setup(app):
     app.connect('builder-inited', run_apidoc)
-    app.add_stylesheet("theme_overrides.css")  # overrides for wide tables in RTD theme
+    app.add_css_file("theme_overrides.css")  # overrides for wide tables in RTD theme
     app.connect("autodoc-skip-member", skip)
