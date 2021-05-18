@@ -354,7 +354,7 @@ jobs:
           command: |
             python -m venv ../venv
             . ../venv/bin/activate
-            pip install githubrelease
+            pip install "click<8" githubrelease
             githubrelease release $CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME \
               create $CIRCLE_TAG --name $CIRCLE_TAG \
               --publish ./dist/*

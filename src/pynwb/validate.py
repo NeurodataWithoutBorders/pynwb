@@ -73,6 +73,9 @@ def main():
             s = set(ns_deps.keys())       # determine which namespaces are the most
             for k in ns_deps:             # specific (i.e. extensions) and validate
                 s -= ns_deps[k].keys()    # against those
+            # TODO remove this workaround for issue https://github.com/NeurodataWithoutBorders/pynwb/issues/1357
+            if 'hdmf-experimental' in s:
+                s.remove('hdmf-experimental')  # remove validation of hdmf-experimental for now
             namespaces = list(sorted(s))
             if len(namespaces) > 0:
                 tm = TypeMap(catalog)
