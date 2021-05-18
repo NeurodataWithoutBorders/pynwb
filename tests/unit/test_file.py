@@ -423,7 +423,7 @@ class SubjectTest(TestCase):
                                sex='M',
                                species='Rattus norvegicus',
                                subject_id='RAT123',
-                               weight='2 lbs',
+                               weight='2 kg',
                                date_of_birth=datetime(2017, 5, 1, 12, tzinfo=tzlocal()),
                                strain='my_strain')
         self.start = datetime(2017, 5, 1, 12, tzinfo=tzlocal())
@@ -445,12 +445,19 @@ class SubjectTest(TestCase):
         self.assertEqual(self.subject.sex, 'M')
         self.assertEqual(self.subject.species, 'Rattus norvegicus')
         self.assertEqual(self.subject.subject_id, 'RAT123')
-        self.assertEqual(self.subject.weight, '2 lbs')
+        self.assertEqual(self.subject.weight, '2 kg')
         self.assertEqual(self.subject.date_of_birth, datetime(2017, 5, 1, 12, tzinfo=tzlocal()))
         self.assertEqual(self.subject.strain, 'my_strain')
 
     def test_nwbfile_constructor(self):
         self.assertIs(self.nwbfile.subject, self.subject)
+
+    def test_weight_float(self):
+        subject = Subject(
+            subject_id='RAT123',
+            weight=2.3,
+        )
+        self.assertEqual(subject.weight, '2.3 kg')
 
 
 class TestCacheSpec(TestCase):

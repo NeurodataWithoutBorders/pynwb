@@ -209,7 +209,7 @@ class TestSubjectIO(NWBH5IOMixin, TestCase):
                        sex='M',
                        species='Rattus norvegicus',
                        subject_id='RAT123',
-                       weight='2 lbs',
+                       weight='2 kg',
                        date_of_birth=datetime(1970, 1, 1, 12, tzinfo=tzutc()),
                        strain='my_strain')
 

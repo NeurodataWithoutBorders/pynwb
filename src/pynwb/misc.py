@@ -268,7 +268,10 @@ class DecompositionSeries(TimeSeries):
              'doc': 'a table for describing the frequency bands that the signal was decomposed into', 'default': None},
             {'name': 'source_timeseries', 'type': TimeSeries,
              'doc': 'the input TimeSeries from this analysis', 'default': None},
-            {'name': 'source_channels', 'type': DynamicTableRegion, 'doc': 'the channels that provided the source data',
+            {'name': 'source_channels', 'type': DynamicTableRegion,
+             'doc': ('The channels that provided the source data. In the case of electrical recordings this is '
+                     'typically a DynamicTableRegion pointing to the electrodes table at NWBFile.electrodes, '
+                     'similar to ElectricalSeries.electrodes.'),
              'default': None},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'control', 'control_description'))

@@ -138,7 +138,11 @@ class IZeroClampSeries(CurrentClampSeries):
 
     @docval(*get_docval(CurrentClampSeries.__init__, 'name', 'data', 'electrode'),  # required
             {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Volt'},  # required
-            *get_docval(CurrentClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
+            {'name': 'stimulus_description', 'type': str,
+             'doc': ('The stimulus name/protocol. Setting this to a value other than "N/A" is deprecated as of '
+                     'NWB 2.3.0.'),
+             'default': 'N/A'},
+            *get_docval(CurrentClampSeries.__init__, 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
                         'sweep_number'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
