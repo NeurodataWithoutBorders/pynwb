@@ -2,7 +2,7 @@ Building API classes
 ====================
 
 After you have written an extension, you will need a Pythonic way to interact with the data model. To do this,
-you will need to write some classes that represent the data you defined in your specificiation extensions.
+you will need to write some classes that represent the data you defined in your specification extensions.
 The :py:mod:`pynwb.core` module has various tools to make it easier to write classes that behave like
 the rest of the PyNWB API.
 
@@ -19,7 +19,7 @@ from your extension, you can tell PyNWB which *neurodata_type* it represents usi
 :py:func:`~pynwb.register_class`. This class can be called on its own, or used as a class decorator. The
 first argument should be the *neurodata_type* and the second argument should be the *namespace* name.
 
-The following example demonstrates how to register a class as the Python class reprsentation of the
+The following example demonstrates how to register a class as the Python class representation of the
 *neurodata_type* "MyContainer" from the *namespace* "my_ns".
 
 .. code-block:: python
@@ -88,7 +88,7 @@ subclasses :py:class:`~pynwb.core.NWBData` you can still use ``__nwbfields__``. 
 :py:func:`~hdmf.utils.docval`-like dictionaries.
 
 The following example demonstrates how to define a table with the columns ``foo`` and ``bar`` that are of type
-str and int, respectively. We also register the class as the reppresentation of the *neurodata_type* "MyTable"
+str and int, respectively. We also register the class as the representation of the *neurodata_type* "MyTable"
 from the *namespace* "my_ns".
 
 .. code-block:: python

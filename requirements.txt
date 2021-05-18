@@ -1,5 +1,6 @@
 h5py==2.10.0
-hdmf==2.1.0
+hdmf==2.5.5
 numpy==1.18.5
 pandas==0.25.3
 python-dateutil==2.8.1
+setuptools==56.0.0

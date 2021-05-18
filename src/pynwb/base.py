@@ -92,7 +92,8 @@ class TimeSeries(NWBDataInterface):
                      "rate",
                      "starting_time_unit",
                      "control",
-                     "control_description")
+                     "control_description",
+                     "continuity")
 
     __time_unit = "seconds"
 
@@ -119,10 +120,19 @@ class TimeSeries(NWBDataInterface):
             {'name': 'control', 'type': Iterable, 'doc': 'Numerical labels that apply to each element in data',
              'default': None},
             {'name': 'control_description', 'type': Iterable, 'doc': 'Description of each control value',
-             'default': None})
+             'default': None},
+            {'name': 'continuity', 'type': str, 'default': None, 'enum': ["continuous", "instantaneous", "step"],
+             'doc': 'Optionally describe the continuity of the data. Can be "continuous", "instantaneous", or'
+                    '"step". For example, a voltage trace would be "continuous", because samples are recorded from a '
+                    'continuous process. An array of lick times would be "instantaneous", because the data represents '
+                    'distinct moments in time. Times of image presentations would be  "step" because the picture '
+                    'remains the same until the next time-point. This field is optional, but is useful in providing '
+                    'information about the underlying data. It may inform the way this data is interpreted, the way it '
+                    'is visualized, and what analysis methods are applicable.'})
     def __init__(self, **kwargs):
         """Create a TimeSeries object
         """
+
         call_docval_func(super(TimeSeries, self).__init__, kwargs)
         keys = ("resolution",
                 "comments",
@@ -130,7 +140,8 @@ class TimeSeries(NWBDataInterface):
                 "conversion",
                 "unit",
                 "control",
-                "control_description")
+                "control_description",
+                "continuity")
         for key in keys:
             val = kwargs.get(key)
             if val is not None:
@@ -239,7 +250,7 @@ class Image(NWBData):
     """
     __nwbfields__ = ('data', 'resolution', 'description')
 
-    @docval({'name': 'name', 'type': str, 'doc': 'The name of this TimeSeries dataset'},
+    @docval({'name': 'name', 'type': str, 'doc': 'The name of this image'},
             {'name': 'data', 'type': ('array_data', 'data'), 'doc': 'data of image. Dimensions: x, y [, r,g,b[,a]]',
              'shape': ((None, None), (None, None, 3), (None, None, 4))},
             {'name': 'resolution', 'type': 'float', 'doc': 'pixels / cm', 'default': None},

@@ -145,7 +145,7 @@ AutoTetrodeSeries = get_class('TetrodeSeries', 'mylab')
 #
 #     When defining your own :py:class:`~pynwb.core.NWBContainer`, the subclass name does not need to be the same
 #     as the extension type name. However, it is encouraged to keep class and extension names the same for the
-#     purposes of readibility.
+#     purposes of readability.
 
 ####################
 # .. _caching_extension:
@@ -242,7 +242,7 @@ nwbfile = io.read()
 # -----------------------------------------------------
 # It is sometimes the case that we need a group to hold zero-or-more or
 # one-or-more of the same object. Here we show how to create an extension that
-# defines a group (`PotatoSack`) that holds multiple objects (`Pototo` es) and
+# defines a group (`PotatoSack`) that holds multiple objects (`Potato`) and
 # then how to use the new data types. First, we use `pynwb` to define the new
 # data types.
 
@@ -356,7 +356,7 @@ io.close()
 #
 # Here we show how to create extensions by creating a data class for a
 # cortical surface mesh. This data type is particularly important for ECoG data, we need to know where each electrode is
-# with respect to the gyri and sucli. Surface mesh objects contain two types of data:
+# with respect to the gyri and sulci. Surface mesh objects contain two types of data:
 #
 # 1. `vertices`, which is an (n, 3) matrix of floats that represents points in 3D space
 #

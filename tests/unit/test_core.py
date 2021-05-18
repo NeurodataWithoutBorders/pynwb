@@ -81,4 +81,4 @@ Fields:
 
 class TestAvailableNamespaces(TestCase):
     def test_available_namespaces(self):
-        self.assertEqual(available_namespaces(), ('hdmf-common', 'core'))
+        self.assertEqual(available_namespaces(), ('hdmf-common', 'hdmf-experimental', 'core'))

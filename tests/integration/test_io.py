@@ -2,6 +2,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal, tzutc
 import numpy as np
 from h5py import File
+from pathlib import Path
 
 from pynwb import NWBFile, TimeSeries, get_manager, NWBHDF5IO, validate
 
@@ -274,8 +275,7 @@ class TestAppend(TestCase):
             self.assertIs(nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes,
                           nwb.acquisition['timeseries2'].electrodes)
             errors = validate(io)
-            for e in errors:
-                print('ERROR', e)
+            self.assertTrue(len(errors) == 0)
 
 
 class TestH5DataIO(TestCase):
@@ -392,3 +392,36 @@ class TestH5DataIO(TestCase):
             self.assertEqual(dset.compression_opts, 5)
             self.assertEqual(dset.shuffle, True)
             self.assertEqual(dset.fletcher32, True)
+
+
+class TestNWBHDF5IO(TestCase):
+    """Test that file io with NWBHDF5IO works correctly"""
+
+    def setUp(self):
+        self.nwbfile = NWBFile(session_description='a test NWB File',
+                               identifier='TEST123',
+                               session_start_time=datetime(1970, 1, 1, 12, tzinfo=tzutc()))
+        self.path = "test_pynwb_io_nwbhdf5.h5"
+
+    def tearDown(self):
+        remove_test_file(self.path)
+
+    def test_round_trip_with_path_string(self):
+        """Opening a NWBHDF5IO with a path string should work correctly"""
+
+        path_str = self.path
+        with NWBHDF5IO(path_str, 'w') as io:
+            io.write(self.nwbfile)
+        with NWBHDF5IO(path_str, 'r') as io:
+            read_file = io.read()
+            self.assertContainerEqual(read_file, self.nwbfile)
+
+    def test_round_trip_with_pathlib_path(self):
+        """Opening a NWBHDF5IO with a pathlib path should correctly"""
+
+        pathlib_path = Path(self.path)
+        with NWBHDF5IO(pathlib_path, 'w') as io:
+            io.write(self.nwbfile)
+        with NWBHDF5IO(pathlib_path, 'r') as io:
+            read_file = io.read()
+            self.assertContainerEqual(read_file, self.nwbfile)
