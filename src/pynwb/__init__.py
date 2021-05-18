@@ -279,3 +279,21 @@ from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
 del get_versions
+
+from ._due import due, BibTeX  # noqa: E402
+due.cite(BibTeX("""
+@article {R{\"u}bel523035,
+    author = {R{\"u}bel, Oliver and Tritt, Andrew and Dichter, Benjamin and Braun, Thomas and Cain, Nicholas and Clack, Nathan and Davidson, Thomas J. and Dougherty, Max and Fillion-Robin, Jean-Christophe and Graddis, Nile and Grauer, Michael and Kiggins, Justin T. and Niu, Lawrence and Ozturk, Doruk and Schroeder, William and Soltesz, Ivan and Sommer, Friedrich T. and Svoboda, Karel and Lydia, Ng and Frank, Loren M. and Bouchard, Kristofer},
+    title = {NWB:N 2.0: An Accessible Data Standard for Neurophysiology},
+    elocation-id = {523035},
+    year = {2019},
+    doi = {10.1101/523035},
+    publisher = {Cold Spring Harbor Laboratory},
+    abstract = {Neurodata Without Borders: Neurophysiology (NWB:N) is a data standard for neurophysiology, providing neuroscientists with a common standard to share, archive, use, and build common analysis tools for neurophysiology data. With NWB:N version 2.0 (NWB:N 2.0) we made significant advances towards creating a usable standard, software ecosystem, and vibrant community for standardizing neurophysiology data. In this manuscript we focus in particular on the NWB:N data standard schema and present advances towards creating an accessible data standard for neurophysiology.},
+    URL = {https://www.biorxiv.org/content/early/2019/01/17/523035},
+    eprint = {https://www.biorxiv.org/content/early/2019/01/17/523035.full.pdf},
+    journal = {bioRxiv}
+}
+"""), description="NWB:N 2.0: An Accessible Data Standard for Neurophysiology",  # noqa: E501
+         path="pynwb/", version=__version__, cite_module=True)
+del due, BibTeX

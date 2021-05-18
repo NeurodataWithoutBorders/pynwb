@@ -14,6 +14,7 @@
 - Block usage of h5py 3+ for now. h5py>=2.9, <3 is supported. (#1355)
 - Fix incompatibility issue with downstream github-release tool used to deploy releases to GitHub. @rly (#1245)
 - Fix issue with Sphinx gallery. @rly
+- Add citation information to documentation and support for duecredit tool. @rly
 - Add support for nwb-schema 2.3.0. @rly (#1245, #1330)
   - Add optional `waveforms` column to the `Units` table.
   - Add optional `strain` field to `Subject`.
