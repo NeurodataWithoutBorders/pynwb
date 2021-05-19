@@ -47,29 +47,15 @@ within it Datasets, Attributes, Links, and/or other Groups. Groups are specified
     through the `NWB schema <https://nwb-schema.readthedocs.io/en/latest/>`_ to see if a core neurodata type would
     work as a base for your new type. If no existing type works, consider extending
     :py:class:`~pynwb.base.NWBDataInterface``, which allows you to add the object to a processing module.
+
 .. tip::
      New neurodata types should always be declared at the top level of the schema rather than nesting type
      definitions. I.e., when creating a new neurodata type it should be placed at the top level of your schema
      and then included at the appropriate location via ``neurodata_type_inc``. This approach greatly simplifies
-     management of types. 
-``doc`` is a required argument that describes the purpose of the neurodata type.
+     management of types.
 
-``name`` is an optional argument that indicates the name of the Group that is written to the file. If this argument
-is omitted, users will be required to enter a ``name`` field when creating instances of this neurodata type in the API.
-You also have the option of specifying ``default_name``, in which case this name will be used as the name of the group
-if no other name is provided in the PyNWB API.
-
-``attributes``, ``datasets``, ``groups``, and ``links`` are all optional arguments that take lists of the
-corresponding ``NWBSpec`` classes.
-
-``quantity`` indicates the number of instances of this group that are allowed. See options
-`here <https://schema-language.readthedocs.io/en/latest/specification_language_description.html#quantity>`_.
-
-.. note::
-    If you specify ``name``, ``quantity`` cannot be ``'*'``, ``'+'``, or an integer greater that 1, because you cannot
-    have more than one group of the same name in the same parent group.
-
-``linkable`` indicates whether a reference to this object can be placed elsewhere in the NWB file.
+For more information about the options available when specifying a Group, see the
+`API docs for NWBGroupSpec <https://pynwb.readthedocs.io/en/stable/pynwb.spec.html?highlight=NWBGroupSpec#pynwb.spec.NWBGroupSpec>`_.
 
 Dataset Specifications
 ^^^^^^^^^^^^^^^^^^^^^^
@@ -178,3 +164,14 @@ can be defined using :py:class:`~pynwb.spec.NWBLinkSpec` objects.
 ``doc``, ``quantity``, and ``name`` work similarly to :py:class:`~pynwb.spec.NWBDatasetSpec`.
 
 ``target_type`` indicates the neurodata type that can be referenced.
+
+.. tip::
+   In cases you need to store large collections of links, it can be more efficient to create a dataset for storing
+   the links via object references. In NWB this is used, e.g,. in py:class:`~pynwb.epoch.TimeIntervals` to store
+   collections of references to TimeSeries objects.
+
+Using these functions in ``create_extension_spec.py`` and then running that file will generate YAML files that define
+your extension. If you are a MATLAB user, you are now ready to switch over to MATLAB. Just run
+``generateExtension ('path/to/ndx_name.extension.yaml')`` and the extension will be automatically generated for you. If
+you are a Python user, you need to do a little more work to make a Python API that allows you to read and write data
+according to this extension. The next two sections will teach you how to create this Python API.
