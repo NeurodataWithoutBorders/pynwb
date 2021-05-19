@@ -25,7 +25,9 @@ created when you use the ``load_namspaces`` flag on ``NWBHDF5IO``.
 Customizing automatically generated APIs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once these classes are generated, you can customize them by adding methods. Let's say you wanted a method that could
+Once these classes are generated, you can customize them by dynamically adding or replacing attributes/function (a.k.a., monkey patching). 
+
+A typical example is adding methods. Let's say you wanted a method that could
 return data from only the first channel. You could add that method like this:
 
 .. code-block:: python
@@ -55,7 +57,11 @@ The above code creates a ``new_init`` method that runs a validation step and the
 Then the class ``__init__`` is overwritten by the new method. Here we also use ``docval``, which is described in the
 next section.
 
+
 .. tip::
-    This method is easier, but note your API will be locked to your specification. If you make changes to your
-    specification there will be corresponding changes to the API, and this is likely to break existing code. In the
+    This approach is easy, but note your API will be locked to your specification. If you make changes to your
+    specification there will be corresponding changes to the API, and this is likely to break existing code.
+    Also, monkey patches can be very confusing to someone who is not aware of them. Differences 
+    between the installed module and the actual behavior of the source code can lead to frustrated 
+    developers. As such, this approach should be used with great care. In the
     next section we will show you how to create your own custom API that is more robust.
