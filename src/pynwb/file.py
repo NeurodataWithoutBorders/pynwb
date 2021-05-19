@@ -44,18 +44,33 @@ class Subject(NWBContainer):
         'species',
         'subject_id',
         'weight',
-        'date_of_birth'
+        'date_of_birth',
+        'strain'
     )
 
-    @docval({'name': 'age', 'type': str, 'doc': 'the age of the subject', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'a description of the subject', 'default': None},
-            {'name': 'genotype', 'type': str, 'doc': 'the genotype of the subject', 'default': None},
-            {'name': 'sex', 'type': str, 'doc': 'the sex of the subject', 'default': None},
-            {'name': 'species', 'type': str, 'doc': 'the species of the subject', 'default': None},
-            {'name': 'subject_id', 'type': str, 'doc': 'a unique identifier for the subject', 'default': None},
-            {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None},
+    @docval({'name': 'age', 'type': str,
+             'doc': ('The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for '
+                     '90 days old.'), 'default': None},
+            {'name': 'description', 'type': str,
+             'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
+            {'name': 'genotype', 'type': str,
+             'doc': 'The genotype of the subject, e.g., "Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt".',
+             'default': None},
+            {'name': 'sex', 'type': str,
+             'doc': ('The sex of the subject. Using "F" (female), "M" (male), "U" (unknown), or "O" (other) '
+                     'is recommended.'), 'default': None},
+            {'name': 'species', 'type': str,
+             'doc': ('The species of the subject. The formal latin binomal name is recommended, e.g., "Mus musculus"'),
+             'default': None},
+            {'name': 'subject_id', 'type': str, 'doc': 'A unique identifier for the subject, e.g., "A10"',
+             'default': None},
+            {'name': 'weight', 'type': (float, str),
+             'doc': ('The weight of the subject, including units. Using kilograms is recommended. e.g., "0.02 kg". '
+                     'If a float is provided, then the weight will be stored as "[value] kg".'),
+             'default': None},
             {'name': 'date_of_birth', 'type': datetime, 'default': None,
-             'doc': 'datetime of date of birth. May be supplied instead of age.'})
+             'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
+            {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None})
     def __init__(self, **kwargs):
         kwargs['name'] = 'subject'
         call_docval_func(super(Subject, self).__init__, kwargs)
@@ -65,7 +80,11 @@ class Subject(NWBContainer):
         self.sex = getargs('sex', kwargs)
         self.species = getargs('species', kwargs)
         self.subject_id = getargs('subject_id', kwargs)
-        self.weight = getargs('weight', kwargs)
+        weight = getargs('weight', kwargs)
+        if isinstance(weight, float):
+            weight = str(weight) + ' kg'
+        self.weight = weight
+        self.strain = getargs('strain', kwargs)
         date_of_birth = getargs('date_of_birth', kwargs)
         if date_of_birth and date_of_birth.tzinfo is None:
             self.date_of_birth = _add_missing_timezone(date_of_birth)
