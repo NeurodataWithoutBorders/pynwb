@@ -153,7 +153,9 @@ specifying number of ``quantity``, you have a ``required`` field which takes a b
 
 .. tip::
     Dataset or Attribute? It is often possible to store data as either a Dataset or an Attribute. Our best advice is
-    to keep Attributes small, and if they are going to take any substantial amount of space, make it a Dataset.
+    to keep Attributes small.  In HDF5 the typical size limit for attributes is  64Kbytes. If an attribute is going to 
+    store more than 64Kbyte, then make it a Dataset.
+   
 
 Link Specifications
 ^^^^^^^^^^^^^^^^^^^
