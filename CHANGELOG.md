@@ -11,6 +11,11 @@
 - Update documentation, CI GitHub processes. @oruebel @yarikoptic, @bendichter, @TomDonoghue, @rly
   (#1311, #1336, #1351, #1352, #1345, #1340, #1327)
 - Set default `neurodata_type_inc` for `NWBGroupSpec`, `NWBDatasetSpec`. @rly (#1295)
+- Block usage of h5py 3+ for now. h5py>=2.9, <3 is supported. (#1355)
+- Fix incompatibility issue with downstream github-release tool used to deploy releases to GitHub. @rly (#1245)
+- Fix issue with Sphinx gallery. @rly
+- Add citation information to documentation and support for duecredit tool. @rly
+- Remove use of ColoredTestRunner for more readable verbose test output. @rly
 - Add support for nwb-schema 2.3.0. @rly (#1245, #1330)
   - Add optional `waveforms` column to the `Units` table.
   - Add optional `strain` field to `Subject`.
@@ -21,7 +26,25 @@
   - Clarify documentation for electrode impedance and filtering.
   - Set the `stimulus_description` for `IZeroCurrentClamp` to have the fixed value "N/A".
   - See https://nwb-schema.readthedocs.io/en/latest/format_release_notes.html for full schema release notes.
-- Add support for HDMF 2.5.3. @rly @ajtritt (#1325, #1355, #1360, #1245, #1287)
+- Add support for HDMF 2.5.5 and upgrade HDMF requirement from 2.1.0 to 2.5.5. @rly @ajtritt
+  (#1325, #1355, #1360, #1245, #1287). This includes several relevant features and bug fixes, including:
+  - Fix issue where dependencies of included types were not being loaded in namespaces / extensions.
+  - Add `HDF5IO.get_namespaces(path=path, file=file)` method which returns a dict of namespace name mapped to the
+    namespace version (the largest one if there are multiple) for each namespace cached in the given HDF5 file.
+  - Add methods for automatic creation of `MultiContainerInterface` classes.
+  - Add ability to specify a custom class for new columns to a `DynamicTable` that are not `VectorData`,
+    `DynamicTableRegion`, or `VocabData` using `DynamicTable.__columns__` or `DynamicTable.add_column(...)`.
+  - Add support for creating and specifying multi-index columns in a `DynamicTable` using `add_column(...)`.
+  - Add capability to add a row to a column after IO.
+  - Add method `AbstractContainer.get_fields_conf`.
+  - Add functionality for storing external resource references.
+  - Add method `hdmf.utils.get_docval_macro` to get a tuple of the current values for a docval_macro, e.g., 'array_data'  
+    and 'scalar_data'.
+  - `DynamicTable` can be automatically generated using `get_class`. Now the HDMF API can read files with extensions
+    that contain a DynamicTable without needing to import the extension first.
+  - Add `EnumData` type for storing data that comes from a fixed set of values.
+  - Add `AlignedDynamicTable` type which defines a DynamicTable that supports storing a collection of subtables.
+  - Allow `np.bool_` as a valid `bool` dtype when validating.
   - See https://github.com/hdmf-dev/hdmf/releases for full HDMF release notes.
 
 ## PyNWB 1.4.0 (August 12, 2020)
