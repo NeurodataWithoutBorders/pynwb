@@ -36,3 +36,5 @@ added. For instance, the Overview section says:
 Within ``docs/source``, edit ``credits.rst``, ``description.rst``, and ``release_notes.rst``, then rerun ``make html``.
 
 Now that you have created documentation for you extension, it is time to learn how to publish in in the NDX catalog.
+
+See shared extensions and how to share your extension on the `NDX Catalog website <https://nwb-extensions.github.io/>`_.
