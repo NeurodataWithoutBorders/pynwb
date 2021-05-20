@@ -34,7 +34,9 @@ within it Datasets, Attributes, Links, and/or other Groups. Groups are specified
 
 - ``neurodata_type_def`` declares the name of the neurodata type.
 - ``neurodata_type_inc`` indicates what data type you are extending (Groups must extend Groups, and Datasets must extend Datasets).
-- To define a new neurodata type that does not extend an existing type, use ``neurodata_type_def`` and not ``neurodata_type_inc``.
+- To define a new neurodata type that does not extend an existing type, use 
+  ``neurodata_type_inc=NWBContainer`` for a group or ``neurodata_type_inc=NWBData`` for a dataset. 
+  ``NWBContainer`` and ``NWBData`` are base types for NWB.
 - To use a type that has already been defined, use ``neurodata_type_inc`` and not ``neurodata_type_def``.
 - You can define a group that is not a neurodata type by omitting both ``neurodata_type_def`` and ``neurodata_type_inc``.
 
