@@ -71,7 +71,7 @@ class PatchClampSeries(TimeSeries):
              'doc': 'IntracellularElectrode group that describes the electrode that was used to apply '
                      'or record this data.'},
             {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Amp (v-clamp) or Volt/Volt (c-clamp)'},  # required
-            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "NA"},
+            {'name': 'stimulus_description', 'type': str, 'doc': 'the stimulus name/protocol', 'default': "N/A"},
             *get_docval(TimeSeries.__init__, 'resolution', 'conversion', 'timestamps', 'starting_time', 'rate',
                         'comments', 'description', 'control', 'control_description'),
             {'name': 'sweep_number', 'type': (int, 'uint32', 'uint64'),
@@ -138,7 +138,11 @@ class IZeroClampSeries(CurrentClampSeries):
 
     @docval(*get_docval(CurrentClampSeries.__init__, 'name', 'data', 'electrode'),  # required
             {'name': 'gain', 'type': 'float', 'doc': 'Units: Volt/Volt'},  # required
-            *get_docval(CurrentClampSeries.__init__, 'stimulus_description', 'resolution', 'conversion', 'timestamps',
+            {'name': 'stimulus_description', 'type': str,
+             'doc': ('The stimulus name/protocol. Setting this to a value other than "N/A" is deprecated as of '
+                     'NWB 2.3.0.'),
+             'default': 'N/A'},
+            *get_docval(CurrentClampSeries.__init__, 'resolution', 'conversion', 'timestamps',
                         'starting_time', 'rate', 'comments', 'description', 'control', 'control_description',
                         'sweep_number'),
             {'name': 'unit', 'type': str, 'doc': "The base unit of measurement (must be 'volts')",
@@ -146,8 +150,24 @@ class IZeroClampSeries(CurrentClampSeries):
     def __init__(self, **kwargs):
         name, data, electrode, gain = popargs('name', 'data', 'electrode', 'gain', kwargs)
         bias_current, bridge_balance, capacitance_compensation = (0.0, 0.0, 0.0)
+        stimulus_description = popargs('stimulus_description', kwargs)
+        stimulus_description = self._ensure_stimulus_description(name, stimulus_description, 'N/A', '2.3.0')
+        kwargs['stimulus_description'] = stimulus_description
         super().__init__(name, data, electrode, gain, bias_current, bridge_balance, capacitance_compensation,
                          **kwargs)
+
+    def _ensure_stimulus_description(self, name, current_stim_desc, stim_desc, nwb_version):
+        """A helper to ensure correct stimulus_description used.
+
+        Issues a warning with details if `current_stim_desc` is to be ignored, and
+        `stim_desc` to be used instead.
+        """
+        if current_stim_desc != stim_desc:
+            warnings.warn(
+                "Stimulus description '%s' for %s '%s' is ignored and will be set to '%s' "
+                "as per NWB %s."
+                % (current_stim_desc, self.__class__.__name__, name, stim_desc, nwb_version))
+        return stim_desc
 
 
 @register_class('CurrentClampStimulusSeries', CORE_NAMESPACE)
