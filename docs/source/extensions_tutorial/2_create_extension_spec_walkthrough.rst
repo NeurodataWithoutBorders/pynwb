@@ -50,9 +50,12 @@ you should have a directory structure that looks like this
         └── spec
             └── create_extension_spec.py
 
-Open ``src/spec/create_extension_spec.py``. While you can write the YAML extension files on your own, we
-PyNWB provides a convenient API via :py:mod:`~pynwb.spec` for creating and managing extension. You will be
-modifying this file to create your own extension, but first let's walk through each piece.
+At its core, an NWB extension consists of YAML text files, such as those generated in the `spec`
+folder. While you can write these YAML extension files by hand, PyNWB provides a convenient API 
+via the :py:mod:`~pynwb.spec` module for creating extensions. 
+
+Open ``src/spec/create_extension_spec.py``. You will be
+modifying this script to create your own NWB extension. Let's first walk through each piece.
 
 Creating a namespace
 ~~~~~~~~~~~~~~~~~~~~
