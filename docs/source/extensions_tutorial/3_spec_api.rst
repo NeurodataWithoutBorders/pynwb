@@ -90,8 +90,6 @@ mapped to ``null``. Is no shape is provided, it is assumed that the dataset is o
 
 ``dims`` provides labels for each dimension of ``shape``.
 
-``default_value`` is also available.
-
 Using datasets to specify tables
 ++++++++++++++++++++++++++++++++
 
