@@ -80,7 +80,7 @@ All larger blocks of numeric or text data should be stored in Datasets. Specifyi
 ``attributes`` all work the same as they do in :py:class:`~pynwb.spec.NWBGroupSpec`, described in the previous section.
 
 ``dtype`` defines the type of the data, which can be a basic type or compound or reference type. 
-See a list of options`here <https://schema-language.readthedocs.io/en/latest/description.html#dtype>`_. 
+See a list of options `here <https://schema-language.readthedocs.io/en/latest/description.html#dtype>`_. 
 Basic types can be defined as string objects and more complex types via :py:class:`~pynwb.spec.NWBDtypeSpec` and `RefSpec <https://hdmf.readthedocs.io/en/latest/hdmf.spec.spec.html#hdmf.spec.spec.RefSpec>`_.
 
 
