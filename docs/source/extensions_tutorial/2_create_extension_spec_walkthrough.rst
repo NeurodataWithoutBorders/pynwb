@@ -105,7 +105,9 @@ importing classes in Python. The generated file includes some example imports.
 Neuroscience-specific data types are defined in the namespace ``'core'``
 (which means core NWB). More general organizational data types that are not
 specific to neuroscience and are relevant across scientific fields are defined
-in ``'hdmf-common'``.
+in ``'hdmf-common'``. You can see which types are defined in which namespace by
+exploring the `NWB schema documentation <https://nwb-schema.readthedocs.io/en/latest/>`_
+and hdmf-common schema documentation <https://hdmf-common-schema.readthedocs.io/en/latest/>`_.
 
 Defining new neurodata types
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
