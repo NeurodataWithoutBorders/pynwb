@@ -88,6 +88,9 @@ Basic types can be defined as string objects and more complex types via :py:clas
 `here <https://schema-language.readthedocs.io/en/latest/specification_language_description.html#shape>`_. ``None`` is
 mapped to ``null``. Is no shape is provided, it is assumed that the dataset is only a single element.
 
+If the dataset is a single element (scalar) that represents meta-data, consider using an Attribute (see 
+below) to store the data more efficiently instead. However, note that a Dataset can have Attributes, 
+whereas an Attribute cannot have Attributes of its own.
 ``dims`` provides labels for each dimension of ``shape``.
 
 Using datasets to specify tables
