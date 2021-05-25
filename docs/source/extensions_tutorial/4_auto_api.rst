@@ -46,7 +46,7 @@ You can also alter existing methods by overwriting them. Lets suppose you wanted
     from hdmf import docval
     from hdmf.common.table import DynamicTableRegion
 
-    @docval(*TetrodeSeries.__init__.__docval__['args'])
+    @docval(get_docval(TetrodeSeries.__init__))
     def new_init(self, **kwargs):
         assert kwargs['trode_id'] >=0, f"`trode_id` must be greater than or equal to 0."
         TetrodeSeries.__init__(self, **kwargs)
