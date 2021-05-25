@@ -151,7 +151,7 @@ key difference between datasets and attributes is that attributes cannot have at
 Link Specifications
 ^^^^^^^^^^^^^^^^^^^
 
-You can store an object in one place and reference that object in another without copying the object using a
+You can store an object in one place and reference that object in another without copying the object using
 `Links <https://schema-language.readthedocs.io/en/latest/specification_language_description.html#sec-link-spec>`_, which
 can be defined using :py:class:`~pynwb.spec.NWBLinkSpec` objects.
 
