@@ -43,26 +43,23 @@ lines are covered by the tests.
 Requirement Specifications
 --------------------------
 
-There are 4 kinds of requirements specification in PyNWB.
-
-Setup.py Dependencies
----------------------
-
-There are 4 kinds of requirements specification in PyNWB.
+There are 5 kinds of requirements specification in PyNWB.
 
 The first one is the requirements-min.txt_ file, which lists the package dependencies and their minimum versions for
-installing PyNWB. These dependencies are read by setup.py_ into the `install_requires` key, with the adjustment that
-the `'=='` listed in `requirements-min.txt` are replaced with `'>='` to reflect that they are minimum versions.
+installing PyNWB.
 
-The second one is requirements.txt_ which contain a list of pinned (concrete) dependencies to reproduce
+The second one is requirements.txt_, which lists the pinned (concrete) dependencies to reproduce
 an entire development environment to use PyNWB.
 
-The third one is requirements-dev.txt_ which contain a list of pinned (concrete) dependencies to reproduce
+The third one is requirements-dev.txt_, which lists the pinned (concrete) dependencies to reproduce
 an entire development environment to use PyNWB, run PyNWB tests, check code style, compute coverage, and create test
 environments.
 
-The final one is requirements-doc.txt_ which contain a list of dependencies to generate the documentation for PyNWB.
+The fourth one is requirements-doc.txt_, which lists the dependencies to generate the documentation for PyNWB.
 Both this file and `requirements.txt` are used by ReadTheDocs_ to initialize the local environment for Sphinx to run.
+
+The final one is within setup.py_, which contains a list of package dependencies and their version ranges allowed for
+running PyNWB.
 
 In order to check the status of the required packages, requires.io_ is used to create a badge on the project
 README_. If all the required packages are up to date, a green badge appears.
