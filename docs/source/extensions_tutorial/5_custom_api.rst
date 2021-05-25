@@ -43,7 +43,7 @@ The following code example demonstrates the use of this decorator:
        ...
 
 
-the ``'shape'`` parameter is a tuple that follows the same logic as the `shape parameter is the specification
+the ``'shape'`` parameter is a tuple that follows the same logic as the `shape parameter in the specification
 language <https://schema-language.readthedocs.io/en/latest/description.html#shape>`_. It can take the form of a tuple
 with integers or ``None`` in each dimension. ``None`` indicates that this dimension can take any value. For
 instance, ``(3, None)`` means the data must be a 2D matrix with a length of 3 and any width. ``'shape'`` can also
