@@ -122,7 +122,7 @@ Attribute Specifications
 ^^^^^^^^^^^^^^^^^^^^^^^^
 
 Attributes are small metadata objects describing the nature and/or intended usage of a Group or Dataset. Attributes are
-defined in the ``attributes`` field of of a :py:class:`~pynwb.spec.NWBGroupSpec` or
+defined in the ``attributes`` field of a :py:class:`~pynwb.spec.NWBGroupSpec` or
 :py:class:`~pynwb.spec.NWBDatasetSpec`. ``attributes`` takes a list of :py:class:`~pynwb.spec.NWBAttributeSpec` objects.
 
 .. code-block:: python
