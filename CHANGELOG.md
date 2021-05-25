@@ -4,8 +4,8 @@
 
 ## Bug fix:
 - Raise minimum version of pandas from 0.23 to 1.0.5 to be compatible with numpy 1.20, and raise minimum version of
-  HDMF to use the corresponding change in HDMF. @rly ()
-- Update documentation and update structure of requirements files. @rly ()
+  HDMF to use the corresponding change in HDMF. @rly (#1363)
+- Update documentation and update structure of requirements files. @rly (#1363)
 
 ## PyNWB 1.5.0 (May 17, 2021)
 
