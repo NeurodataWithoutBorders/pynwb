@@ -43,7 +43,7 @@ You can also alter existing methods by overwriting them. Lets suppose you wanted
 
 .. code-block:: python
 
-    from hdmf import docval
+    from hdmf.utils import docval, get_docval
     from hdmf.common.table import DynamicTableRegion
 
     @docval(get_docval(TetrodeSeries.__init__))
