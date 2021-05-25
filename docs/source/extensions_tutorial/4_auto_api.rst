@@ -20,7 +20,7 @@ Open up ``ndx-example/src/pynwb/ndx_example/__init__.py``, and notice the last l
 
 :py:func:`~pynwb.get_class` is a function that automatically creates a Python API object by parsing the extension
 YAML. If you create more neurodata types, simply go down the line creating each one. This is the same object that is
-created when you use the ``load_namspaces`` flag on ``NWBHDF5IO``.
+created when you use the ``load_namespaces`` flag on :py:func:`~pynwb.NWBHDF5IO.__init__`.
 
 Customizing automatically generated APIs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
