@@ -135,7 +135,7 @@ defined in the ``attributes`` field of of a :py:class:`~pynwb.spec.NWBGroupSpec`
         dtype='float'
     )
 
-:py:class:`~pynwb.spec.NWBAttributeSpec` has arguments very similar to :py:class:`~pynwb.spec.NWBDatasetSpec`. A key different is that an attribute cannot be a
+:py:class:`~pynwb.spec.NWBAttributeSpec` has arguments very similar to :py:class:`~pynwb.spec.NWBDatasetSpec`. A key difference is that an attribute cannot be a
 neurodata type, i.e., the ``neurodata_type_def`` and ``neurodata_type_inc`` keys are not allowed. The only way to match an object with a spec is through the name of the attribute so ``name`` is
 required. You cannot have multiple attributes objects in the same place that correspond to the same
 :py:class:`~pynwb.spec.NWBAttributeSpec`, since these would have to have the same name. Therefore, instead of
