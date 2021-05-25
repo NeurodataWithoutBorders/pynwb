@@ -137,7 +137,7 @@ defined in the ``attributes`` field of of a :py:class:`~pynwb.spec.NWBGroupSpec`
 
 :py:class:`~pynwb.spec.NWBAttributeSpec` has arguments very similar to :py:class:`~pynwb.spec.NWBDatasetSpec`. A key difference is that an attribute cannot be a
 neurodata type, i.e., the ``neurodata_type_def`` and ``neurodata_type_inc`` keys are not allowed. The only way to match an object with a spec is through the name of the attribute so ``name`` is
-required. You cannot have multiple attributes objects in the same place that correspond to the same
+required. You cannot have multiple attributes on a single group/dataset that correspond to the same
 :py:class:`~pynwb.spec.NWBAttributeSpec`, since these would have to have the same name. Therefore, instead of
 specifying number of ``quantity``, you have a ``required`` field which takes a boolean value. Another 
 key difference between datasets and attributes is that attributes cannot have attributes of their own.
