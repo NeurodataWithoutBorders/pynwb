@@ -145,7 +145,9 @@ key difference between datasets and attributes is that attributes cannot have at
 .. tip::
     Dataset or Attribute? It is often possible to store data as either a Dataset or an Attribute. Our best advice is
     to keep Attributes small.  In HDF5 the typical size limit for attributes is  64Kbytes. If an attribute is going to 
-    store more than 64Kbyte, then make it a Dataset.
+    store more than 64Kbyte, then make it a Dataset. Attributes are also more efficient for storing very 
+    small data, such as scalars. However, attributes cannot have attributes of their own, and in HDF5, 
+    I/O filters, such as compression and chunking, cannot apply to attributes.
    
 
 Link Specifications
