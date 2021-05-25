@@ -25,7 +25,7 @@ created when you use the ``load_namespaces`` flag on :py:func:`~pynwb.NWBHDF5IO.
 Customizing automatically generated APIs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once these classes are generated, you can customize them by dynamically adding or replacing attributes/function (a.k.a., monkey patching). 
+Once these classes are generated, you can customize them by dynamically adding or replacing attributes/methods (a.k.a., monkey patching). 
 
 A typical example is adding methods. Let's say you wanted a method that could
 return data from only the first channel. You could add that method like this:
