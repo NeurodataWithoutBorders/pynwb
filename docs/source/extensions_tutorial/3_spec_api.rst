@@ -173,7 +173,7 @@ can be defined using :py:class:`~pynwb.spec.NWBLinkSpec` objects.
 
 .. tip::
    In case you need to store large collections of links, it can be more efficient to create a dataset for storing
-   the links via object references. In NWB this is used, e.g,. in py:class:`~pynwb.epoch.TimeIntervals` to store
+   the links via object references. In NWB, this is used, e.g., in py:class:`~pynwb.epoch.TimeIntervals` to store
    collections of references to TimeSeries objects.
 
 Using these functions in ``create_extension_spec.py`` and then running that file will generate YAML files that define
