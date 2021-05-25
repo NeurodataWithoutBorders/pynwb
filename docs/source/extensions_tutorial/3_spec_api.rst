@@ -172,7 +172,7 @@ can be defined using :py:class:`~pynwb.spec.NWBLinkSpec` objects.
 ``target_type`` indicates the neurodata type that can be referenced.
 
 .. tip::
-   In cases you need to store large collections of links, it can be more efficient to create a dataset for storing
+   In case you need to store large collections of links, it can be more efficient to create a dataset for storing
    the links via object references. In NWB this is used, e.g,. in py:class:`~pynwb.epoch.TimeIntervals` to store
    collections of references to TimeSeries objects.
 
