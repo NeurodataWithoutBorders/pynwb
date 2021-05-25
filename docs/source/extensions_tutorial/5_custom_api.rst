@@ -37,7 +37,7 @@ The following code example demonstrates the use of this decorator:
    @docval({'name': 'arg1':,   'type': str,           'doc': 'this is the first positional argument'},
            {'name': 'arg2':,   'type': int,           'doc': 'this is the second positional argument'},
            {'name': 'kwarg1':, 'type': (list, tuple), 'doc': 'this is a keyword argument', 'default': list()},
-           returns='foo object', rtype='Foo'))
+           returns='foo object', rtype='Foo')
    def foo(self, **kwargs):
        arg1, arg2, kwarg1 = getargs('arg1', 'arg2', 'kwarg1', **kwargs)
        ...
