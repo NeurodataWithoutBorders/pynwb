@@ -1,5 +1,12 @@
 # PyNWB Changelog
 
+## PyNWB 1.5.1 (May 24, 2021)
+
+## Bug fix:
+- Raise minimum version of pandas from 0.23 to 1.0.5 to be compatible with numpy 1.20, and raise minimum version of
+  HDMF to use the corresponding change in HDMF. @rly ()
+- Update documentation and update structure of requirements files. @rly ()
+
 ## PyNWB 1.5.0 (May 17, 2021)
 
 ### New features:
