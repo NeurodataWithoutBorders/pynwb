@@ -46,18 +46,33 @@ class Subject(NWBContainer):
         'species',
         'subject_id',
         'weight',
-        'date_of_birth'
+        'date_of_birth',
+        'strain'
     )
 
-    @docval({'name': 'age', 'type': str, 'doc': 'the age of the subject', 'default': None},
-            {'name': 'description', 'type': str, 'doc': 'a description of the subject', 'default': None},
-            {'name': 'genotype', 'type': str, 'doc': 'the genotype of the subject', 'default': None},
-            {'name': 'sex', 'type': str, 'doc': 'the sex of the subject', 'default': None},
-            {'name': 'species', 'type': str, 'doc': 'the species of the subject', 'default': None},
-            {'name': 'subject_id', 'type': str, 'doc': 'a unique identifier for the subject', 'default': None},
-            {'name': 'weight', 'type': str, 'doc': 'the weight of the subject', 'default': None},
+    @docval({'name': 'age', 'type': str,
+             'doc': ('The age of the subject. The ISO 8601 Duration format is recommended, e.g., "P90D" for '
+                     '90 days old.'), 'default': None},
+            {'name': 'description', 'type': str,
+             'doc': 'A description of the subject, e.g., "mouse A10".', 'default': None},
+            {'name': 'genotype', 'type': str,
+             'doc': 'The genotype of the subject, e.g., "Sst-IRES-Cre/wt;Ai32(RCL-ChR2(H134R)_EYFP)/wt".',
+             'default': None},
+            {'name': 'sex', 'type': str,
+             'doc': ('The sex of the subject. Using "F" (female), "M" (male), "U" (unknown), or "O" (other) '
+                     'is recommended.'), 'default': None},
+            {'name': 'species', 'type': str,
+             'doc': ('The species of the subject. The formal latin binomal name is recommended, e.g., "Mus musculus"'),
+             'default': None},
+            {'name': 'subject_id', 'type': str, 'doc': 'A unique identifier for the subject, e.g., "A10"',
+             'default': None},
+            {'name': 'weight', 'type': (float, str),
+             'doc': ('The weight of the subject, including units. Using kilograms is recommended. e.g., "0.02 kg". '
+                     'If a float is provided, then the weight will be stored as "[value] kg".'),
+             'default': None},
             {'name': 'date_of_birth', 'type': datetime, 'default': None,
-             'doc': 'datetime of date of birth. May be supplied instead of age.'})
+             'doc': 'The datetime of the date of birth. May be supplied instead of age.'},
+            {'name': 'strain', 'type': str, 'doc': 'The strain of the subject, e.g., "C57BL/6J"', 'default': None})
     def __init__(self, **kwargs):
         kwargs['name'] = 'subject'
         call_docval_func(super(Subject, self).__init__, kwargs)
@@ -67,7 +82,11 @@ class Subject(NWBContainer):
         self.sex = getargs('sex', kwargs)
         self.species = getargs('species', kwargs)
         self.subject_id = getargs('subject_id', kwargs)
-        self.weight = getargs('weight', kwargs)
+        weight = getargs('weight', kwargs)
+        if isinstance(weight, float):
+            weight = str(weight) + ' kg'
+        self.weight = weight
+        self.strain = getargs('strain', kwargs)
         date_of_birth = getargs('date_of_birth', kwargs)
         if date_of_birth and date_of_birth.tzinfo is None:
             self.date_of_birth = _add_missing_timezone(date_of_birth)
@@ -926,29 +945,51 @@ class NWBFile(MultiContainerInterface):
              'type': ('scalar_data', np.ndarray, list, tuple, pd.DataFrame, DynamicTable, NWBContainer, ScratchData),
              'doc': 'The data to add to the scratch space.'},
             {'name': 'name', 'type': str,
-             'doc': ('The name of the data. Required only when passing in a scalar, numpy.ndarray, '
-                     'list, tuple, or pandas.DataFrame'),
+             'doc': 'The name of the data. Required only when passing in a scalar, numpy.ndarray, list, or tuple',
              'default': None},
+            {'name': 'notes', 'type': str,
+             'doc': ('Notes to add to the data. Only used when passing in numpy.ndarray, list, or tuple. This '
+                     'argument is not recommended. Use the `description` argument instead.'),
+             'default': None},
+            {'name': 'table_description', 'type': str,
+             'doc': ('Description for the internal DynamicTable used to store a pandas.DataFrame. This '
+                     'argument is not recommended. Use the `description` argument instead.'),
+             'default': ''},
             {'name': 'description', 'type': str,
              'doc': ('Description of the data. Required only when passing in a scalar, numpy.ndarray, '
                      'list, tuple, or pandas.DataFrame. Ignored when passing in an NWBContainer, '
                      'DynamicTable, or ScratchData object.'),
              'default': None})
     def add_scratch(self, **kwargs):
-        '''Add data to the scratch space.'''
-        data, name, description = getargs('data', 'name', 'description', kwargs)
+        '''Add data to the scratch space'''
+        data, name, notes, table_description, description = getargs('data', 'name', 'notes', 'table_description',
+                                                                    'description', kwargs)
+        if notes is not None or table_description != '':
+            warn('Use of the `notes` or `table_description` argument will be removed in a future version of PyNWB. '
+                 'Use the `description` argument instead.', PendingDeprecationWarning)
+            if description is not None:
+                raise ValueError('Cannot call add_scratch with (notes or table_description) and description')
+
         if isinstance(data, (str, int, float, bytes, np.ndarray, list, tuple, pd.DataFrame)):
             if name is None:
                 msg = ('A name is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
                        'list, tuple, or pandas.DataFrame as scratch data.')
                 raise ValueError(msg)
-            if description is None:
-                msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
-                       'list, tuple, or pandas.DataFrame as scratch data.')
-                raise ValueError(msg)
             if isinstance(data, pd.DataFrame):
+                if table_description != '':
+                    description = table_description  # remove after deprecation
+                if description is None:
+                    msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
+                           'list, tuple, or pandas.DataFrame as scratch data.')
+                    raise ValueError(msg)
                 data = DynamicTable.from_dataframe(df=data, name=name, table_description=description)
             else:
+                if notes is not None:
+                    description = notes  # remove after deprecation
+                if description is None:
+                    msg = ('A description is required for NWBFile.add_scratch when adding a scalar, numpy.ndarray, '
+                           'list, tuple, or pandas.DataFrame as scratch data.')
+                    raise ValueError(msg)
                 data = ScratchData(name=name, data=data, description=description)
         else:
             if name is not None:
@@ -959,8 +1000,8 @@ class NWBFile(MultiContainerInterface):
                      'DynamicTable to scratch.')
         return self._add_scratch(data)
 
-    @docval({'name': 'name', 'type': str, 'help': 'the name of the object to get'},
-            {'name': 'convert', 'type': bool, 'help': 'return the original data, not the NWB object', 'default': True})
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of the object to get'},
+            {'name': 'convert', 'type': bool, 'doc': 'return the original data, not the NWB object', 'default': True})
     def get_scratch(self, **kwargs):
         '''Get data from the scratch space'''
         name, convert = getargs('name', 'convert', kwargs)

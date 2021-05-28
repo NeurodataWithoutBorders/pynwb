@@ -143,9 +143,9 @@ imaging_plane = nwbfile.create_imaging_plane(
 )
 
 ########################################
-# The Allen Institute does not include the raw imaging signal, as this data would make the file too large. Instead, these
-# data are  preprocessed, and a dF/F fluorescence signal extracted for each region-of-interest (ROI). To store the chain
-# of computations necessary to describe this data processing pipeline, pynwb provides a "processing module" with
+# The Allen Institute does not include the raw imaging signal, as this data would make the file too large. Instead,
+# these data are preprocessed, and a dF/F fluorescence signal extracted for each region-of-interest (ROI). To store the
+# chain of computations necessary to describe this data processing pipeline, pynwb provides a "processing module" with
 # interfaces that simplify and standardize the process of adding the steps in this provenance chain to the file:
 ophys_module = nwbfile.create_processing_module(
     name='ophys_module',
