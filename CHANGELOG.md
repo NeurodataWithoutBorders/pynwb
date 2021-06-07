@@ -1,5 +1,25 @@
 # PyNWB Changelog
 
+## PyNWB 2.0.0 (Upcoming)
+
+### New features
+-
+-
+-
+-
+
+### Internal improvements
+-
+-
+-
+-
+
+### Bug fixes
+-
+-
+-
+-
+
 ## PyNWB 1.5.1 (May 24, 2021)
 
 ## Bug fix:
