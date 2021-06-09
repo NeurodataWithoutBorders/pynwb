@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## Upcoming
+
+## Bug fix:
+- Fix integration tests with invalid test data that will be caught by future hdmf validator version. @dsleiter (#1366)
+
 ## PyNWB 1.5.1 (May 24, 2021)
 
 ## Bug fix:
