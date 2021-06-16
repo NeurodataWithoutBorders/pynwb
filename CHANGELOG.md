@@ -1,5 +1,10 @@
 # PyNWB Changelog
 
+## PyNWB 1.6.0 (TBD, 2021)
+
+## Bug fix:
+- Enforce electrode ID uniqueness during insertion into table
+
 ## PyNWB 1.5.1 (May 24, 2021)
 
 ## Bug fix:
