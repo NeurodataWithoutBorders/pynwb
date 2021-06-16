@@ -41,10 +41,8 @@ global __TYPE_MAP
 __NS_CATALOG = NamespaceCatalog(NWBGroupSpec, NWBDatasetSpec, NWBNamespace)
 
 hdmf_typemap = hdmf.common.get_type_map()
-__NS_CATALOG.merge(hdmf_typemap.namespace_catalog)
-
 __TYPE_MAP = TypeMap(__NS_CATALOG)
-__TYPE_MAP.merge(hdmf_typemap)
+__TYPE_MAP.merge(hdmf_typemap, ns_catalog=True)
 
 
 @docval({'name': 'extensions', 'type': (str, TypeMap, list),
@@ -185,7 +183,7 @@ def get_class(**kwargs):
 
     """
     neurodata_type, namespace = getargs('neurodata_type', 'namespace', kwargs)
-    return __TYPE_MAP.get_container_cls(namespace, neurodata_type)
+    return __TYPE_MAP.get_dt_container_cls(neurodata_type, namespace)
 
 
 @docval({'name': 'io', 'type': HDMFIO, 'doc': 'the HDMFIO object to read from'},
@@ -281,3 +279,21 @@ from hdmf.backends.hdf5 import H5DataIO  # noqa: F401,E402
 from ._version import get_versions  # noqa: E402
 __version__ = get_versions()['version']
 del get_versions
+
+from ._due import due, BibTeX  # noqa: E402
+due.cite(BibTeX("""
+@article {R{\"u}bel2021.03.13.435173,
+    author = {R{\"u}bel, Oliver and Tritt, Andrew and Ly, Ryan and Dichter, Benjamin K. and Ghosh, Satrajit and Niu, Lawrence and Soltesz, Ivan and Svoboda, Karel and Frank, Loren and Bouchard, Kristofer E.},
+    title = {The Neurodata Without Borders ecosystem for neurophysiological data science},
+    elocation-id = {2021.03.13.435173},
+    year = {2021},
+    doi = {10.1101/2021.03.13.435173},
+    publisher = {Cold Spring Harbor Laboratory},
+    abstract = {The neurophysiology of cells and tissues are monitored electrophysiologically and optically in diverse experiments and species, ranging from flies to humans. Understanding the brain requires integration of data across this diversity, and thus these data must be findable, accessible, interoperable, and reusable (FAIR). This requires a standard language for data and metadata that can coevolve with neuroscience. We describe design and implementation principles for a language for neurophysiology data. Our software (Neurodata Without Borders, NWB) defines and modularizes the interdependent, yet separable, components of a data language. We demonstrate NWB{\textquoteright}s impact through unified description of neurophysiology data across diverse modalities and species. NWB exists in an ecosystem which includes data management, analysis, visualization, and archive tools. Thus, the NWB data language enables reproduction, interchange, and reuse of diverse neurophysiology data. More broadly, the design principles of NWB are generally applicable to enhance discovery across biology through data FAIRness.Competing Interest StatementThe authors have declared no competing interest.},
+    URL = {https://www.biorxiv.org/content/early/2021/03/15/2021.03.13.435173},
+    eprint = {https://www.biorxiv.org/content/early/2021/03/15/2021.03.13.435173.full.pdf},
+    journal = {bioRxiv}
+}
+"""), description="The Neurodata Without Borders ecosystem for neurophysiological data science",  # noqa: E501
+         path="pynwb/", version=__version__, cite_module=True)
+del due, BibTeX

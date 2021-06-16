@@ -46,7 +46,7 @@ the following scripts:
 
    cd pynwb
 
-   # Set the requirements file to update
+   # Set the requirements file to update: requirements-dev.txt or requirements-doc.txt
    target_requirements=requirements-dev.txt
 
    mkvirtualenv pynwb-requirements

@@ -6,7 +6,7 @@ Create an nwb file from Allen Brain Observatory data.
 """
 
 ########################################
-# This example demostrates the basic functionality of several parts of the pynwb write API, centered around the optical
+# This example demonstrates the basic functionality of several parts of the pynwb write API, centered around the optical
 # physiology submodule (pynwb.ophys). We will use the allensdk as a read API, while leveraging the pynwb data model and
 # write api to transform and write the data back to disk.
 #
@@ -84,7 +84,7 @@ for stimulus in stimulus_list:
     nwbfile.add_stimulus(image_index)
 
 ########################################
-# 3) Besides the two-photon calcium image stack, the running speed of the animal was also recordered in this experiment.
+# 3) Besides the two-photon calcium image stack, the running speed of the animal was also recorded in this experiment.
 # We can store this data as a TimeSeries, in the acquisition portion of the file.
 
 running_speed = TimeSeries(
@@ -115,7 +115,7 @@ for _, row in epoch_table.iterrows():
 
 ########################################
 # 5) In the brain observatory, a two-photon microscope is used to acquire images of the calcium activity of neurons
-# expressing a fluorescent protien indicator.  Essentially the microscope captures picture (30 times a second) at a
+# expressing a fluorescent protein indicator.  Essentially the microscope captures picture (30 times a second) at a
 # single depth in the visual cortex (the imaging plane).  Let's use pynwb to store the metadata associated with this
 # hardware and experimental setup:
 optical_channel = OpticalChannel(
@@ -142,10 +142,10 @@ imaging_plane = nwbfile.create_imaging_plane(
 )
 
 ########################################
-# The Allen Insitute does not include the raw imaging signal, as this data would make the file too large. Instead, these
-# data are  preprocessed, and a dF/F flourescence signal extracted for each region-of-interest (ROI). To store the chain
-# of computations necessary to describe this data processing pipeline, pynwb provides a "processing module" with
-# interfaces that simplify and standarize the process of adding the steps in this provenance chain to the file:
+# The Allen Institute does not include the raw imaging signal, as this data would make the file too large. Instead,
+# these data are preprocessed, and a dF/F fluorescence signal extracted for each region-of-interest (ROI). To store the
+# chain of computations necessary to describe this data processing pipeline, pynwb provides a "processing module" with
+# interfaces that simplify and standardize the process of adding the steps in this provenance chain to the file:
 ophys_module = nwbfile.create_processing_module(
     name='ophys_module',
     description='Processing module for 2P calcium responses',
