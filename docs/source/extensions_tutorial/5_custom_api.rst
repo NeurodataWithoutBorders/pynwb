@@ -43,7 +43,7 @@ The following code example demonstrates the use of this decorator:
        ...
 
 
-the ``'shape'`` parameter is a tuple that follows the same logic as the `shape parameter in the specification
+The ``'shape'`` parameter is a tuple that follows the same logic as the `shape parameter in the specification
 language <https://schema-language.readthedocs.io/en/latest/description.html#shape>`_. It can take the form of a tuple
 with integers or ``None`` in each dimension. ``None`` indicates that this dimension can take any value. For
 instance, ``(3, None)`` means the data must be a 2D matrix with a length of 3 and any width. ``'shape'`` can also
@@ -51,7 +51,7 @@ take a value that is a tuple of tuples, in which case any one of those tuples ca
 ``"shape": ((3, 3), (4, 4, 4))`` would indicate that the shape of this data could either be 3x3 or 4x4x4.
 
 The ``'type'`` argument can take a class or a tuple of classes. We also define special strings that are macros which
-encompass a number of similar types, and can be used in place of a class, on its own or within a tuple. ``'array_data'``
+encompass a number of similar types, and can be used in place of a class, on its own, or within a tuple. ``'array_data'``
 allows the data to be of type ``np.ndarray``, ``list``, ``tuple``, or ``h5py.Dataset``; and ``'scalar_data'`` allows
 the data to be ``str``, ``int``, ``float``, ``bytes``, or ``bool``.
 
