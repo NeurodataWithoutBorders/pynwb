@@ -229,8 +229,8 @@ from the *namespace* "my_ns".
 NWBTableRegion
 ^^^^^^^^^^^^^^
 
-:py:class:`~pynwb.core.NWBTableRegion` should be used to represent datasets that store a region reference. The constructor
-for :py:class:`~pynwb.core.NWBTableRegion`. When subclassing this class, make sure you provide a way to pass in the required
+:py:class:`~pynwb.core.NWBTableRegion` should be used to represent datasets that store a region reference.
+When subclassing this class, make sure you provide a way to pass in the required
 arguments for the :py:class:`~pynwb.core.NWBTableRegion` constructor--the *name* of the dataset, the *table* that the region
 applies to, and the *region* itself.
 
@@ -271,12 +271,12 @@ class for reading and writing, you will need to implement and register a custom
 
     ObjectMappers allow you to customize how objects in the spec are mapped to attributes of your NWBContainer in
     Python. This is useful, e.g., in cases where you want to customize the default mapping. For example in
-    TimeSeries the attribute ``unit`` which is defined on the dataset ``data`` (i.e., ``data.unit``) would
+    ``TimeSeries``, the attribute ``unit``, which is defined on the dataset ``data`` (i.e., ``data.unit``), would
     by default be mapped to the attribute ``data__unit`` on :py:class:`~pynwb.base.TimeSeries`. The ObjectMapper
     :py:class:`~pynwb.io.base.TimeSeriesMap` then changes this mapping to map ``data.unit`` to the attribute ``unit``
     on :py:class:`~pynwb.base.TimeSeries` . ObjectMappers also allow you to customize how constructor arguments
-    for your ``NWBContainer`` are constructed. E.g., in TimeSeries instead of explicit ``timestamps`` we
-    may only have a ``starting_time`` and ``rate``. In the ObjectMapper we could then construct ``timestamps``
+    for your ``NWBContainer`` are constructed. For example, in ``TimeSeries`` instead of explicit ``timestamps`` we
+    may only have a ``starting_time`` and ``rate``. In the ObjectMapper, we could then construct ``timestamps``
     from this data on data load to always have ``timestamps`` available for the user.
-    For an overview of the concepts of containers, spec, builders, object mappers in PyNWB see also
-    :ref:`software-architecture`
+    For an overview of the concepts of containers, spec, builders, and object mappers in PyNWB, see also
+    :ref:`software-architecture`.
