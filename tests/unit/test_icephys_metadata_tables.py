@@ -477,6 +477,41 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         # test writing out ir table
         self.write_test_helper(ir)
 
+    def test_add_row_check_start_index_and_index_count_are_fixed(self):
+        # Make sure -1 values are converted
+        ir = IntracellularRecordingsTable()
+        ir.add_recording(electrode=self.electrode,
+                         stimulus=self.stimulus,
+                         stimulus_start_index=-1,  # assert this is fixed to 0
+                         stimulus_index_count=-1,  # assert this is fixed to len(stimulus)
+                         response=None,
+                         response_start_index=0,   # assert this is fixed to -1
+                         response_index_count=10,  # assert this is fixed to -1
+                         id=np.int64(10))
+        res = ir[0]
+        self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0],
+                              (0, len(self.stimulus.data), self.stimulus))
+        self.assertTupleEqual(res[('responses', 'response')].iloc[0],
+                              (-1, -1, self.stimulus))
+        # Make sure single -1 values are converted
+        ir = IntracellularRecordingsTable()
+        ir.add_recording(electrode=self.electrode,
+                         stimulus=self.stimulus,
+                         stimulus_start_index=2,
+                         id=np.int64(10))
+        res = ir[0]
+        self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0],
+                              (2, len(self.stimulus.data)-2, self.stimulus))
+        # Make sure single -1 values are converted
+        ir = IntracellularRecordingsTable()
+        ir.add_recording(electrode=self.electrode,
+                         stimulus=self.stimulus,
+                         stimulus_index_count=2,
+                         id=np.int64(10))
+        res = ir[0]
+        self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0],
+                              (0, 2, self.stimulus))
+
     def test_add_row_index_out_of_range(self):
 
         # Stimulus/Response start_index to large
