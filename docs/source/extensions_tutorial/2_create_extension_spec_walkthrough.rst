@@ -11,7 +11,7 @@ generates a repository with the appropriate directory structure.
 After you finish the instructions `here <https://github.com/nwb-extensions/ndx-template#getting-started>`_,
 you should have a directory structure that looks like this
 
-.. code-block::
+.. code-block:: c
 
     ├── LICENSE.txt
     ├── MANIFEST.in
