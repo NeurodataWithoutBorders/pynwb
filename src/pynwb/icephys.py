@@ -505,15 +505,12 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
             raise ValueError("stimulus and response cannot both be None.")
 
         # Compute the start and stop index if necessary
-        if stimulus is not None:
-            stimulus_start_index, stimulus_index_count = self.__compute_index(stimulus_start_index,
-                                                                              stimulus_index_count,
-                                                                              stimulus, 'stimulus')
-        if response is not None:
-            response_start_index, response_index_count = self.__compute_index(response_start_index,
-                                                                              response_index_count,
-                                                                              response, 'response')
-
+        stimulus_start_index, stimulus_index_count = self.__compute_index(stimulus_start_index,
+                                                                          stimulus_index_count,
+                                                                          stimulus, 'stimulus')
+        response_start_index, response_index_count = self.__compute_index(response_start_index,
+                                                                          response_index_count,
+                                                                          response, 'response')
         # If either stimulus or response are None, then set them to the same TimeSeries to keep the I/O happy
         response = response if response is not None else stimulus
         stimulus = stimulus if stimulus is not None else response
@@ -566,6 +563,22 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
 
     @staticmethod
     def __compute_index(start_index, index_count, time_series, name):
+        """
+        Internal helper function to compute the start_index and index_count
+        to use for the stimulus and response column
+        
+        :param start_index: The start_index provided by the user
+        :param index_count: The index count provided by the user
+        :param time_series: The timeseries object to reference. May be None.
+        :param name: Name of the table. Used only to enhance error reporting
+        
+        :raises IndexError: If index_count cannot be determined or start_index+index_count 
+            are outside of the range of the timeseries.
+        
+        :returns: A tuple of integers with the start_index and index_count to use
+        """
+        if time_series is None:
+            return -1, -1
         start_index = start_index if start_index >= 0 else 0
         num_samples = time_series.num_samples
         index_count = (index_count
