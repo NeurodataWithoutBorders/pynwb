@@ -566,15 +566,15 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         """
         Internal helper function to compute the start_index and index_count
         to use for the stimulus and response column
-        
+
         :param start_index: The start_index provided by the user
         :param index_count: The index count provided by the user
         :param time_series: The timeseries object to reference. May be None.
         :param name: Name of the table. Used only to enhance error reporting
-        
-        :raises IndexError: If index_count cannot be determined or start_index+index_count 
+
+        :raises IndexError: If index_count cannot be determined or start_index+index_count
             are outside of the range of the timeseries.
-        
+
         :returns: A tuple of integers with the start_index and index_count to use
         """
         if time_series is None:
