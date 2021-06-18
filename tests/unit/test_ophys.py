@@ -234,6 +234,7 @@ class MotionCorrectionConstructor(TestCase):
         )
 
         motion_correction = MotionCorrection(corrected_image_stacks=[corrected_image_stack])
+        self.assertEqual(motion_correction.corrected_image_stacks[0], corrected_image_stack)
 
 
 class CorrectedImageStackConstructor(TestCase):
@@ -249,7 +250,6 @@ class CorrectedImageStackConstructor(TestCase):
         )
         is2 = ImageSeries(
             name='is2',
-            data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
             starting_frame=[1, 2, 3],
