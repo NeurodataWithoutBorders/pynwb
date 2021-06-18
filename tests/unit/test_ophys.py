@@ -239,7 +239,7 @@ class MotionCorrectionConstructor(TestCase):
 class CorrectedImageStackConstructor(TestCase):
     def test_init(self):
         is1 = ImageSeries(
-            name='is1',
+            name='corrected',
             data=np.ones((2, 2, 2)),
             unit='unit',
             external_file=['external_file'],
@@ -258,7 +258,7 @@ class CorrectedImageStackConstructor(TestCase):
         )
         tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
         ts = TimeSeries(
-            name="test_ts",
+            name='xy_translation',
             data=list(range(len(tstamps))),
             unit='unit',
             timestamps=tstamps
