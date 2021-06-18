@@ -193,7 +193,7 @@ class MotionCorrection(MultiContainerInterface):
         'get': 'get_corrected_image_stack',
         'create': 'create_corrected_image_stack',
         'type': CorrectedImageStack,
-        'attr': 'corrected_images_stacks'
+        'attr': 'corrected_image_stacks'
     }
 
 
