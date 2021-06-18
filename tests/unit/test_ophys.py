@@ -201,7 +201,7 @@ class TwoPhotonSeriesConstructor(TestCase):
 class MotionCorrectionConstructor(TestCase):
     def test_init(self):
         corrected = ImageSeries(
-            name='motion_corrected_image_stack',
+            name='corrected',
             data=np.ones((1000, 100, 100)),
             unit='na',
             format='raw',
