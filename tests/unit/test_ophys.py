@@ -234,7 +234,7 @@ class MotionCorrectionConstructor(TestCase):
         )
 
         motion_correction = MotionCorrection(corrected_image_stacks=[corrected_image_stack])
-        self.assertEqual(motion_correction.corrected_image_stacks[0], corrected_image_stack)
+        self.assertEqual(motion_correction.corrected_image_stacks['CorrectedImageStack'], corrected_image_stack)
 
 
 class CorrectedImageStackConstructor(TestCase):
