@@ -1,6 +1,9 @@
 # PyNWB Changelog
 
-## Upcoming
+
+## PyNWB 2.0.0 (Upcoming)
+
+- Add RRID for citing PyNWB to the docs @oruebel (#1372)
 
 ## Bug fix:
 - Fix integration tests with invalid test data that will be caught by future hdmf validator version. @dsleiter (#1366)
