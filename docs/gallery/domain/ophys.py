@@ -4,14 +4,16 @@ Calcium imaging data
 ============================
 
 This tutorial will demonstrate how to write calcium imaging data. The workflow demonstrated here involves
-three main steps:
+five main steps:
 
-1. Acquiring two-photon images
-2. Image segmentation
-3. Fluorescence and dF/F response
+1. Create imaging plane
+2. Add acquired two-photon images
+3. Add motion correction (optional)
+4. Add image segmentation
+5. Add fluorescence and dF/F responses
 
-This tutorial assumes that transforming data between these three states is done by users--PyNWB does not provide
-analysis functionality.
+This tutorial assumes that transforming data between these states is done by users--PyNWB does not provide
+analysis functionality. It is recommended to cover NWB Basics before this tutorial.
 
 The following examples will reference variables that may not be defined within the block they are used in. For
 clarity, we define them here:
@@ -32,31 +34,59 @@ from pynwb.device import Device
 # When creating a NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`.
 
 
-nwbfile = NWBFile('my first synthetic recording', 'EXAMPLE_ID', datetime.now(tzlocal()),
-                  experimenter='Dr. Bilbo Baggins',
-                  lab='Bag End Laboratory',
-                  institution='University of Middle Earth at the Shire',
-                  experiment_description=('I went on an adventure with thirteen '
-                                          'dwarves to reclaim vast treasures.'),
-                  session_id='LONELYMTN')
+nwbfile = NWBFile(
+    'my first synthetic recording',
+    'EXAMPLE_ID',
+    datetime.now(tzlocal()),
+    experimenter='Dr. Bilbo Baggins',
+    lab='Bag End Laboratory',
+    institution='University of Middle Earth at the Shire',
+    experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
+    session_id='LONELYMTN'
+)
 
 ####################
-# Adding metadata about acquisition
-# ---------------------------------
+# Imaging Plane
+# -------------
 #
-# Before you can add your data, you will need to provide some information about how that data was generated.
-# This amounts describing the device, imaging plane and the optical channel used.
+# First, we must create an :py:class:`~pynwb.ophys.ImagingPlane` object, which will hold information about the area and
+# method used to collect the optical imaging data. This first requires creation of a :py:class:`~pynwb.device.Device`
+# object for the  microscope and an :py:class:`~pynwb.ophys.OpticalChannel` object.
+#
+# .. image:: images/ImagingPlane.svg
+#   :width: 400
+#   :alt: imaging plane UML diagram
+#
+# Create a :py:class:`~pynwb.device.Device` named ``"Microscope"`` in the :py:class:`~pynwb.file.NWBFile` object. Then
+# create an  :py:class:`~pynwb.ophys.OpticalChannel` named ``"OpticalChannel"`` and an
+# :py:class:`~pynwb.ophys.ImagingPlane` named ``"ImagingPlane"``, passing in the :py:class:`~pynwb.ophys.OpticalChannel`
+# object and the :py:class:`~pynwb.device.Device` object.
 
 
-device = Device('imaging_device_1')
-nwbfile.add_device(device)
-optical_channel = OpticalChannel('my_optchan', 'description', 500.)
-imaging_plane = nwbfile.create_imaging_plane('my_imgpln', optical_channel,
-                                             description='a very interesting part of the brain',
-                                             device=device, excitation_lambda=600., imaging_rate=300., indicator='GFP',
-                                             location='my favorite brain location',
-                                             reference_frame='A frame to refer to',
-                                             grid_spacing=(.01, .01))
+device = nwbfile.create_device(
+    name="Microscope",
+    description="My two-photon microscope",
+    manufacturer="The best microscope manufacturer"
+)
+optical_channel = OpticalChannel(
+    name="OpticalChannel",
+    description="an optical channel",
+    emission_lambda=500.
+)
+imaging_plane = nwbfile.create_imaging_plane(
+    name="ImagingPlane",
+    optical_channel=optical_channel,
+    imaging_rate=30.,
+    description="a very interesting part of the brain",
+    device=device,
+    excitation_lambda=600.,
+    indicator="GFP",
+    location="V1",
+    grid_spacing=[.01, .01],
+    grid_spacing_unit="meters",
+    origin_coords=[1., 2., 3.],
+    origin_coords_unit="meters"
+)
 
 
 ####################
