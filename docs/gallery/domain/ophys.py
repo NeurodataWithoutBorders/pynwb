@@ -53,7 +53,7 @@ nwbfile = NWBFile(
 # method used to collect the optical imaging data. This first requires creation of a :py:class:`~pynwb.device.Device`
 # object for the  microscope and an :py:class:`~pynwb.ophys.OpticalChannel` object.
 #
-# .. image:: images/ImagingPlane.svg
+# .. image:: ../../_static/ImagingPlane.svg
 #   :width: 400
 #   :alt: imaging plane UML diagram
 #
