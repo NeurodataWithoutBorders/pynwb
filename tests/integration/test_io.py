@@ -275,7 +275,7 @@ class TestAppend(TestCase):
             self.assertIs(nwb.processing['test_proc_mod']['LFP'].electrical_series['test_es'].electrodes,
                           nwb.acquisition['timeseries2'].electrodes)
             errors = validate(io)
-            self.assertTrue(len(errors) == 0)
+            self.assertEqual(len(errors), 0, errors)
 
     def test_electrode_id_uniqueness(self):
         device = self.nwbfile.create_device(name='test_device')
