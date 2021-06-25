@@ -1,9 +1,12 @@
 # PyNWB Changelog
 
+## PyNWB 1.6.0 (TBD, 2021)
 
-## PyNWB 2.0.0
+## Minor new features:
+- Add RRID for citing PyNWB to the docs. @oruebel (#1372)
 
-- Add RRID for citing PyNWB to the docs @oruebel (#1372)
+## Bug fix:
+- Enforce electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
 
 
 ## PyNWB 1.5.1 (May 24, 2021)
