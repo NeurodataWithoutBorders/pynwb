@@ -23,8 +23,15 @@ If you use PyNWB in your research, please use the following citation:
      journal = {bioRxiv}
     }
 
+Using RRID
+----------
+
+* ResourceID: `SCR_017452 <https://scicrunch.org/browse/resources/SCR_017452>`_
+* Proper Citation: **(PyNWB, RRID:SCR_017452)**
+
+
 Using duecredit
------------------
+---------------
 
 Citations can be generated using duecredit_. To install duecredit, run ``pip install duecredit``.
 

@@ -88,7 +88,8 @@ For details on how to contribute to PyNWB see our `contribution guidelines <docs
 Citing NWB
 ==========
 
-Oliver Rübel, Andrew Tritt, Ryan Ly, Benjamin K. Dichter, Satrajit Ghosh, Lawrence Niu, Ivan Soltesz, Karel Svoboda, Loren Frank, Kristofer E. Bouchard, "The Neurodata Without Borders ecosystem for neurophysiological data science", bioRxiv 2021.03.13.435173, March 15, 2021, doi: https://doi.org/10.1101/2021.03.13.435173
+* **Manuscript:** Oliver Rübel, Andrew Tritt, Ryan Ly, Benjamin K. Dichter, Satrajit Ghosh, Lawrence Niu, Ivan Soltesz, Karel Svoboda, Loren Frank, Kristofer E. Bouchard, "The Neurodata Without Borders ecosystem for neurophysiological data science", bioRxiv 2021.03.13.435173, March 15, 2021, doi: https://doi.org/10.1101/2021.03.13.435173
+* **RRID:** (PyNWB, RRID:SCR_017452)
 
 LICENSE
 =======
