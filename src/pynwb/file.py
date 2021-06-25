@@ -527,6 +527,8 @@ class NWBFile(MultiContainerInterface):
             {'name': 'rel_z', 'type': 'float', 'doc': 'the z coordinate within the electrode group', 'default': None},
             {'name': 'reference', 'type': str, 'doc': 'Description of the reference used for this electrode.',
              'default': None},
+            {'name': 'enforce_unique_id', 'type': bool, 'doc': 'enforce that the id in the table must be unique',
+             'default': True},
             allow_extra=True)
     def add_electrode(self, **kwargs):
         """
