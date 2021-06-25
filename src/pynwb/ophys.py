@@ -168,12 +168,12 @@ class CorrectedImageStack(NWBDataInterface):
     @docval({'name': 'name', 'type': str,
              'doc': 'The name of this CorrectedImageStack container', 'default': 'CorrectedImageStack'},
             {'name': 'corrected', 'type': ImageSeries,
-             'doc': 'Image stack with frames shifted to the common coordinates.'},
+             'doc': 'Image stack with frames shifted to the common coordinates. This must have the name "corrected".'},
             {'name': 'original', 'type': ImageSeries,
              'doc': 'Link to image series that is being registered.'},
             {'name': 'xy_translation', 'type': TimeSeries,
              'doc': 'Stores the x,y delta necessary to align each frame to the common coordinates, '
-                    'for example, to align each frame to a reference image.'})
+                    'for example, to align each frame to a reference image. This must have the name "xy_translation".'})
     def __init__(self, **kwargs):
         corrected, original, xy_translation = popargs('corrected', 'original', 'xy_translation', kwargs)
         call_docval_func(super(CorrectedImageStack, self).__init__, kwargs)

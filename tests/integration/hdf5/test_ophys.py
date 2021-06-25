@@ -1,7 +1,7 @@
-from copy import deepcopy
 from abc import ABCMeta
-
+from copy import deepcopy
 import numpy as np
+
 from pynwb.ophys import (
     ImagingPlane,
     OpticalChannel,
@@ -321,4 +321,48 @@ class TestRoiResponseSeriesIO(AcquisitionH5IOMixin, TestCase):
         mod = nwbfile.create_processing_module(name='plane_seg_test_module',
                                                description='a plain module for testing')
         mod.add(img_seg)
+        super().addContainer(nwbfile)
+
+
+class TestCorrectedImageStackIO(AcquisitionH5IOMixin, TestCase):
+
+    def setUpContainer(self):
+        """Return the test CorrectedImageStack to read/write."""
+        data = np.ones((2, 2, 2)),
+        timestamps = [1., 2.]
+
+        corrected_is = ImageSeries(
+            name='corrected',
+            data=data,
+            unit='unit',
+            external_file=['external_file'],
+            starting_frame=[1, 2, 3],
+            format='tiff',
+            timestamps=timestamps
+        )
+        self.original_is = ImageSeries(
+            name='original_is',
+            data=data,
+            unit='unit',
+            external_file=['external_file'],
+            starting_frame=[1, 2, 3],
+            format='tiff',
+            timestamps=timestamps
+        )
+        tstamps = [1., 2., 3.]
+        ts = TimeSeries(
+            name='xy_translation',
+            data=list(range(len(tstamps))),
+            unit='unit',
+            timestamps=tstamps
+        )
+        return CorrectedImageStack(
+            corrected=corrected_is,
+            original=self.original_is,
+            xy_translation=ts
+        )
+
+    def addContainer(self, nwbfile):
+        """Add the test CorrectedImageStack and the original ImageSeries in acquisition."""
+        nwbfile.add_acquisition(self.original_is)
         super().addContainer(nwbfile)
