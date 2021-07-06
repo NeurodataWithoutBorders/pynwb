@@ -9,6 +9,7 @@ import numpy as np
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pandas.testing import assert_frame_equal
+from numpy.testing import assert_array_equal
 import warnings
 import h5py
 
@@ -72,7 +73,7 @@ class ICEphysMetaTestBase(TestCase):
         we can use for testing of queries.
 
         :param filename: The name of the output file to be generated. If set to None then the file is not written
-                         but only created in memor
+                         but only created in memory
         :type filename: str, None
         :param add_custom_colums: Add custom metadata columns to each table
         :type add_custom_colums: bool
@@ -138,8 +139,6 @@ class ICEphysMetaTestBase(TestCase):
                 data=np.arange(8),
                 description='some integer tag for a sweep')
 
-        # TODO: Enable this code once the corresponding classes have been ported
-        """
         # Add sequential recordings
         nwbfile.add_icephys_sequential_recording(simultaneous_recordings=[0, 1],
                                                  id=np.int64(1000),
@@ -184,7 +183,6 @@ class ICEphysMetaTestBase(TestCase):
                 name='temperature',
                 data=[32., 24.],
                 description='Temperatur in C')
-        """
 
         # Write our test file
         if filename is not None:
@@ -1238,21 +1236,22 @@ class NWBFileTests(TestCase):
         # Check that our IntracellularRecordingsTable table does not yet exists
         self.assertIsNone(nwbfile.intracellular_recordings)
         # Add an intracellular recording
+        intracellular_recording_ids = [np.int64(10), np.int64(11)]
         nwbfile.add_intracellular_recording(electrode=electrode,
                                             stimulus=stimulus,
                                             response=response,
-                                            id=np.int64(10))
+                                            id=intracellular_recording_ids[0])
         nwbfile.add_intracellular_recording(electrode=electrode,
                                             stimulus=stimulus,
                                             response=response,
-                                            id=np.int64(11))
+                                            id=intracellular_recording_ids[1])
         # Check that the table has been created
         self.assertIsNotNone(nwbfile.intracellular_recordings)
         # Check that the values in our row are correct
         self.assertEqual(len(nwbfile.intracellular_recordings), 2)
         res = nwbfile.intracellular_recordings[0]
         # Check the ID
-        self.assertEqual(res.index[0], 10)
+        self.assertEqual(res.index[0], intracellular_recording_ids[0])
         # Check electrodes
         self.assertIs(res[('electrodes', 'electrode')].iloc[0], electrode)
         # Check the stimulus
@@ -1266,18 +1265,21 @@ class NWBFileTests(TestCase):
         # Confirm that our SimultaneousRecordingsTable table does not yet exist
         self.assertIsNone(nwbfile.icephys_simultaneous_recordings)
         # Add a sweep
-        nwbfile.add_icephys_simultaneous_recording(recordings=[0, 1], id=np.int64(12))
+        simultaneous_recordings_id = np.int64(12)
+        recordings_indices = [0, 1]
+        nwbfile.add_icephys_simultaneous_recording(recordings=recordings_indices, id=simultaneous_recordings_id)
         # Check that the SimultaneousRecordingsTable table has been added
         self.assertIsNotNone(nwbfile.icephys_simultaneous_recordings)
         # Check that the values for our icephys_simultaneous_recordings table are correct
-        self.assertListEqual(nwbfile.icephys_simultaneous_recordings.id[:], [12])
+        self.assertListEqual(nwbfile.icephys_simultaneous_recordings.id[:], [simultaneous_recordings_id])
         self.assertListEqual(nwbfile.icephys_simultaneous_recordings['recordings'].data, [2])
         self.assertListEqual(nwbfile.icephys_simultaneous_recordings['recordings'].target.data[:], [0, 1])
         res = nwbfile.icephys_simultaneous_recordings[0]
         # check the id value
-        self.assertEqual(res.index[0], 12)
-        # Check that our sweep contains 2 IntracellularRecording
-        self.assertEqual(len(res['recordings_id']), 2)
+        self.assertEqual(res.index[0],  simultaneous_recordings_id)
+        # Check that our simultaneous recording contains 2 IntracellularRecording
+        assert_array_equal(res.loc[simultaneous_recordings_id]['recordings'],
+                           recordings_indices)
 
         #############################################
         #  Test adding a SweepSequence
@@ -1285,17 +1287,20 @@ class NWBFileTests(TestCase):
         # Confirm that our SequentialRecordingsTable table does not yet exist
         self.assertIsNone(nwbfile.icephys_sequential_recordings)
         # Add a sweep
-        nwbfile.add_icephys_sequential_recording(simultaneous_recordings=[0],
-                                                 id=np.int64(15),
+        sequential_recording_id = np.int64(15)
+        simultaneous_recordings_indices = [0]
+        nwbfile.add_icephys_sequential_recording(simultaneous_recordings=simultaneous_recordings_indices,
+                                                 id=sequential_recording_id,
                                                  stimulus_type="MyStimulusType")
         # Check that the SimultaneousRecordingsTable table has been added
         self.assertIsNotNone(nwbfile.icephys_sequential_recordings)
         # Check that the values for our SimultaneousRecordingsTable table are correct
         res = nwbfile.icephys_sequential_recordings[0]
         # check the id value
-        self.assertEqual(res.index[0], 15)
-        # Check that our sweep contains 1 IntracellularRecording
-        self.assertEqual(len(res['simultaneous_recordings_id']), 1)
+        self.assertEqual(res.index[0], sequential_recording_id)
+        # Check that our sequential recording containts 1 simultaneous recording
+        assert_array_equal(res.loc[sequential_recording_id]['simultaneous_recordings'],
+                           simultaneous_recordings_indices)
 
         #############################################
         #  Test adding a Run
@@ -1303,15 +1308,18 @@ class NWBFileTests(TestCase):
         # Confirm that our RepetitionsTable table does not yet exist
         self.assertIsNone(nwbfile.icephys_repetitions)
         # Add a repetition
-        nwbfile.add_icephys_repetition(sequential_recordings=[0], id=np.int64(17))
+        sequential_recordings_indices = [0]
+        repetition_id = np.int64(17)
+        nwbfile.add_icephys_repetition(sequential_recordings=sequential_recordings_indices, id=repetition_id)
         # Check that the SimultaneousRecordingsTable table has been added
         self.assertIsNotNone(nwbfile.icephys_repetitions)
         # Check that the values for our RepetitionsTable table are correct
         res = nwbfile.icephys_repetitions[0]
         # check the id value
-        self.assertEqual(res.index[0], 17)
+        self.assertEqual(res.index[0], repetition_id)
         # Check that our repetition contains 1 SweepSequence
-        self.assertEqual(len(res['sequential_recordings_id']), 1)
+        assert_array_equal(res.loc[repetition_id]['sequential_recordings'],
+                           sequential_recordings_indices)
 
         #############################################
         #  Test adding a Condition
@@ -1319,15 +1327,18 @@ class NWBFileTests(TestCase):
         # Confirm that our RepetitionsTable table does not yet exist
         self.assertIsNone(nwbfile.icephys_experimental_conditions)
         # Add a condition
-        nwbfile.add_icephys_experimental_condition(repetitions=[0], id=np.int64(19))
+        repetitions_indices = [0]
+        experiment_id = np.int64(19)
+        nwbfile.add_icephys_experimental_condition(repetitions=repetitions_indices, id=experiment_id)
         # Check that the ExperimentalConditionsTable table has been added
         self.assertIsNotNone(nwbfile.icephys_experimental_conditions)
         # Check that the values for our ExperimentalConditionsTable table are correct
         res = nwbfile.icephys_experimental_conditions[0]
         # check the id value
-        self.assertEqual(res.index[0], 19)
+        self.assertEqual(res.index[0], experiment_id)
         # Check that our repetition contains 1 repetition
-        self.assertEqual(len(res['repetitions_id']), 1)
+        assert_array_equal(res.loc[experiment_id]['repetitions'],
+                           repetitions_indices)
 
         #############################################
         #  Test writing the file to disk
@@ -1350,33 +1361,27 @@ class NWBFileTests(TestCase):
 
         #################################################################
         # Confirm that the low-level data has been written as expected
-        # before we try to read the file back
+        # using h5py to confirm all id values. We do this before we try
+        # to read the file back to confirm that data is correct on disk.
         #################################################################
         with h5py.File(self.path, 'r') as io:
-            self.assertTupleEqual(
-                io['/general']['intracellular_ephys']['intracellular_recordings']['id'].shape,
-                (1,))
-            self.assertTupleEqual(
-                io['/general']['intracellular_ephys']['intracellular_recordings']['electrodes']['id'].shape,
-                (1,))
-            self.assertTupleEqual(
-                io['/general']['intracellular_ephys']['intracellular_recordings']['stimuli']['id'].shape,
-                (1,))
-            self.assertTupleEqual(
-                io['/general']['intracellular_ephys']['intracellular_recordings']['responses']['id'].shape,
-                (1,))
-            self.assertTupleEqual(
-                io['/general']['intracellular_ephys']['simultaneous_recordings']['id'].shape,
-                (1,))
-            self.assertTupleEqual(
-                io['/general']['intracellular_ephys']['sequential_recordings']['id'].shape,
-                (1,))
-            self.assertTupleEqual(
-                io['/general']['intracellular_ephys']['repetitions']['id'].shape,
-                (1,))
-            self.assertTupleEqual(
-                io['/general']['intracellular_ephys']['experimental_conditions']['id'].shape,
-                (1,))
+            assert_array_equal(io['/general']['intracellular_ephys']['intracellular_recordings']['id'][:],
+                               intracellular_recording_ids)
+            default_ids = [0, 1]
+            assert_array_equal(io['/general']['intracellular_ephys']['intracellular_recordings']['electrodes']['id'][:],
+                               default_ids)
+            assert_array_equal(io['/general']['intracellular_ephys']['intracellular_recordings']['stimuli']['id'][:],
+                               default_ids)
+            assert_array_equal(io['/general']['intracellular_ephys']['intracellular_recordings']['responses']['id'][:],
+                               default_ids)
+            assert_array_equal(io['/general']['intracellular_ephys']['simultaneous_recordings']['id'][:],
+                               [simultaneous_recordings_id, ])
+            assert_array_equal(io['/general']['intracellular_ephys']['sequential_recordings']['id'][:],
+                               [sequential_recording_id, ])
+            assert_array_equal(io['/general']['intracellular_ephys']['repetitions']['id'][:],
+                               [repetition_id, ])
+            assert_array_equal(io['/general']['intracellular_ephys']['experimental_conditions']['id'][:],
+                               [experiment_id, ])
 
         #############################################
         #  Test reading the file back from disk
@@ -1399,7 +1404,7 @@ class NWBFileTests(TestCase):
             #  Test that the  IntracellularRecordingsTable table has been written correctly
             ############################################################################
             self.assertIsNotNone(infile.intracellular_recordings)
-            self.assertEqual(len(infile.intracellular_recordings), 1)
+            self.assertEqual(len(infile.intracellular_recordings), 2)
             res = infile.intracellular_recordings[0]
             # Check the ID
             self.assertEqual(res.index[0], 10)
@@ -1422,9 +1427,8 @@ class NWBFileTests(TestCase):
             self.assertEqual(len(infile.icephys_simultaneous_recordings), 1)
             res = infile.icephys_simultaneous_recordings[0]
             # Check the ID and len of the intracellular_recordings column
-            self.assertEqual(res.index[0], 12)
-            self.assertEqual(len(res['recordings_id']), 1)
-            self.assertEqual(res.iloc[0]['recordings_id'], 10)  # Check id of the references recordings row
+            self.assertEqual(res.index[0], simultaneous_recordings_id)
+            assert_array_equal(res.loc[simultaneous_recordings_id]['recordings'], recordings_indices)
 
             ############################################################################
             #  Test that the  SequentialRecordingsTable table has been written correctly
@@ -1433,10 +1437,9 @@ class NWBFileTests(TestCase):
             self.assertEqual(len(infile.icephys_sequential_recordings), 1)
             res = infile.icephys_sequential_recordings[0]
             # Check the ID and len of the simultaneous_recordings column
-            self.assertEqual(res.index[0], 15)
-            self.assertEqual(len(res['simultaneous_recordings_id']), 1)
-            # Check id of the references simultaneous_recordings row
-            self.assertEqual(res.iloc[0]['simultaneous_recordings_id'], 12)
+            self.assertEqual(res.index[0], sequential_recording_id)
+            assert_array_equal(res.loc[sequential_recording_id]['simultaneous_recordings'],
+                               simultaneous_recordings_indices)
 
             ############################################################################
             #  Test that the  RepetitionsTable table has been written correctly
@@ -1445,9 +1448,8 @@ class NWBFileTests(TestCase):
             self.assertEqual(len(infile.icephys_repetitions), 1)
             res = infile.icephys_repetitions[0]
             # Check the ID and len of the simultaneous_recordings column
-            self.assertEqual(res.index[0], 17)
-            self.assertEqual(len(res['sequential_recordings_id']), 1)
-            self.assertEqual(res.iloc[0]['sequential_recordings_id'], 15)  # Check id of the sweep_sequence row
+            self.assertEqual(res.index[0], repetition_id)
+            assert_array_equal(res.loc[repetition_id]['sequential_recordings'], sequential_recordings_indices)
 
             ############################################################################
             #  Test that the ExperimentalConditionsTable table has been written correctly
@@ -1456,6 +1458,5 @@ class NWBFileTests(TestCase):
             self.assertEqual(len(infile.icephys_experimental_conditions), 1)
             res = infile.icephys_experimental_conditions[0]
             # Check the ID and len of the simultaneous_recordings column
-            self.assertEqual(res.index[0], 19)
-            self.assertEqual(len(res['repetitions_id']), 1)
-            self.assertEqual(res.iloc[0]['repetitions_id'], 17)  # Check id of the referenced repetitions row
+            self.assertEqual(res.index[0], experiment_id)
+            assert_array_equal(res.loc[experiment_id]['repetitions'], repetitions_indices)
