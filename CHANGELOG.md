@@ -19,7 +19,7 @@
   and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
 - Add thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
 
-## Minor new features:
+### Minor new features:
 - Add RRID for citing PyNWB to the docs. @oruebel (#1372)
 
 ### Bug fixes:
@@ -30,7 +30,7 @@
 
 ## PyNWB 1.5.1 (May 24, 2021)
 
-## Bug fix:
+### Bug fixes:
 - Raise minimum version of pandas from 0.23 to 1.0.5 to be compatible with numpy 1.20, and raise minimum version of
   HDMF to use the corresponding change in HDMF. @rly (#1363)
 - Update documentation and update structure of requirements files. @rly (#1363)
