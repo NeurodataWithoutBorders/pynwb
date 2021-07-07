@@ -111,15 +111,22 @@ def main():
         if args.ns:
             if args.ns in namespaces:
                 namespaces = [args.ns]
+            elif args.cached_namespace and args.ns in ns_deps:  # validating against a dependency
+                for k in ns_deps:
+                    if args.ns in ns_deps[k]:
+                        print(("The namespace '{}' is included by the namespace '{}'. Please validate against "
+                               "that namespace instead.").format(args.ns, k), file=sys.stderr)
+                ret = 1
+                continue
             else:
-                print("The namespace {} could not be found in {} as only {} is present.".format(
+                print("The namespace '{}' could not be found in {} as only {} is present.".format(
                       args.ns, specloc, namespaces), file=sys.stderr)
                 ret = 1
                 continue
 
         with NWBHDF5IO(path, mode='r', manager=manager) as io:
             for ns in namespaces:
-                print("Validating {} against {} using namespace {}.".format(path, specloc, ns))
+                print("Validating {} against {} using namespace '{}'.".format(path, specloc, ns))
                 ret = ret or _validate_helper(io=io, namespace=ns)
 
     sys.exit(ret)
