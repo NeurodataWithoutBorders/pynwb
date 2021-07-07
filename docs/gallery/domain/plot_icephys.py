@@ -63,7 +63,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 import numpy as np
 import pandas
-pandas.set_option("display.max_colwidth", 30) # Set Pandas rendering option to avoid very wide cells
+pandas.set_option("display.max_colwidth", 30)  # Set Pandas rendering option to avoid very wide cells
 
 # Import main NWB file class
 from pynwb import NWBFile
@@ -86,8 +86,8 @@ from pynwb.core import DynamicTable, VectorData
 
 # Create an ICEphysFile
 ex_nwbfile = NWBFile(session_description='my first recording',
-                  identifier='EXAMPLE_ID',
-                  session_start_time=datetime.now(tzlocal()))
+                     identifier='EXAMPLE_ID',
+                     session_start_time=datetime.now(tzlocal()))
 
 # Add a device
 ex_device = ex_nwbfile.create_device(name='Heka ITC-1600')
@@ -99,26 +99,24 @@ ex_electrode = ex_nwbfile.create_icephys_electrode(
     device=ex_device)
 
 # Create an ic-ephys stimulus
-ex_stimulus = VoltageClampStimulusSeries(
-            name="stimulus",
-            data=[1, 2, 3, 4, 5],
-            starting_time=123.6,
-            rate=10e3,
-            electrode=ex_electrode,
-            gain=0.02)
+ex_stimulus = VoltageClampStimulusSeries(name="stimulus",
+                                         data=[1, 2, 3, 4, 5],
+                                         starting_time=123.6,
+                                         rate=10e3,
+                                         electrode=ex_electrode,
+                                         gain=0.02)
 
 # Create an ic-response
-ex_response = VoltageClampSeries(
-            name='response',
-            data=[0.1, 0.2, 0.3, 0.4, 0.5],
-            conversion=1e-12,
-            resolution=np.nan,
-            starting_time=123.6,
-            rate=20e3,
-            electrode=ex_electrode,
-            gain=0.02,
-            capacitance_slow=100e-12,
-            resistance_comp_correction=70.0)
+ex_response = VoltageClampSeries(name='response',
+                                 data=[0.1, 0.2, 0.3, 0.4, 0.5],
+                                 conversion=1e-12,
+                                 resolution=np.nan,
+                                 starting_time=123.6,
+                                 rate=20e3,
+                                 electrode=ex_electrode,
+                                 gain=0.02,
+                                 capacitance_slow=100e-12,
+                                 resistance_comp_correction=70.0)
 
 # (A) Add an intracellular recording to the file
 #     NOTE: We can optionally define time-ranges for the stimulus/response via
@@ -126,8 +124,8 @@ ex_response = VoltageClampSeries(
 #     NOTE: It is allowed to add a recording with just a stimulus or a response
 #     NOTE: We can  add custom columns to any of our tables in steps (A)-(E)
 ex_ir_index = ex_nwbfile.add_intracellular_recording(electrode=ex_electrode,
-                                               stimulus=ex_stimulus,
-                                               response=ex_response)
+                                                     stimulus=ex_stimulus,
+                                                     response=ex_response)
 
 # (B) Add a list of sweeps to the sweeps table
 ex_sweep_index = ex_nwbfile.add_icephys_simultaneous_recording(recordings=[ex_ir_index, ])
@@ -158,9 +156,9 @@ try:
     import matplotlib.pyplot as plt
     ex_file_hierarchy = HierarchyDescription.from_hdf5(ex_testpath)
     ex_file_graph = NXGraphHierarchyDescription(ex_file_hierarchy)
-    ex_fig = ex_file_graph.draw(show_plot=False, figsize=(12,16), label_offset=(0.0, 0.0065), label_font_size=10)
+    ex_fig = ex_file_graph.draw(show_plot=False, figsize=(12, 16), label_offset=(0.0, 0.0065), label_font_size=10)
     plt.show()
-except:
+except ImportError:  # ignore in case hdmf_docutils is not installed
     pass
 
 #######################
@@ -177,14 +175,14 @@ except:
 
 # Create the file
 nwbfile = NWBFile(
-            session_description='my first synthetic recording',
-            identifier='EXAMPLE_ID',
-            session_start_time=datetime.now(tzlocal()),
-            experimenter='Dr. Bilbo Baggins',
-            lab='Bag End Laboratory',
-            institution='University of Middle Earth at the Shire',
-            experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
-            session_id='LONELYMTN')
+    session_description='my first synthetic recording',
+    identifier='EXAMPLE_ID',
+    session_start_time=datetime.now(tzlocal()),
+    experimenter='Dr. Bilbo Baggins',
+    lab='Bag End Laboratory',
+    institution='University of Middle Earth at the Shire',
+    experiment_description='I went on an adventure with thirteen dwarves to reclaim vast treasures.',
+    session_id='LONELYMTN')
 
 #######################
 # Device metadata
@@ -231,29 +229,26 @@ electrode = nwbfile.create_icephys_electrode(name="elec0",
 # Below we create a simple example stimulus/response recording data pair.
 
 # Create an example  icephys stimulus.
-stimulus = VoltageClampStimulusSeries(
-            name="ccss",
-            data=[1, 2, 3, 4, 5],
-            starting_time=123.6,
-            rate=10e3,
-            electrode=electrode,
-            gain=0.02,
-            sweep_number=np.uint64(15))
-
+stimulus = VoltageClampStimulusSeries(name="ccss",
+                                      data=[1, 2, 3, 4, 5],
+                                      starting_time=123.6,
+                                      rate=10e3,
+                                      electrode=electrode,
+                                      gain=0.02,
+                                      sweep_number=np.uint64(15))
 
 # Create and icephys response
-response = VoltageClampSeries(
-            name='vcs',
-            data=[0.1, 0.2, 0.3, 0.4, 0.5],
-            conversion=1e-12,
-            resolution=np.nan,
-            starting_time=123.6,
-            rate=20e3,
-            electrode=electrode,
-            gain=0.02,
-            capacitance_slow=100e-12,
-            resistance_comp_correction=70.0,
-            sweep_number=np.uint64(15))
+response = VoltageClampSeries(name='vcs',
+                              data=[0.1, 0.2, 0.3, 0.4, 0.5],
+                              conversion=1e-12,
+                              resolution=np.nan,
+                              starting_time=123.6,
+                              rate=20e3,
+                              electrode=electrode,
+                              gain=0.02,
+                              capacitance_slow=100e-12,
+                              resistance_comp_correction=70.0,
+                              sweep_number=np.uint64(15))
 
 #######################
 # Adding an intracellular recording
@@ -336,7 +331,7 @@ rowindex3 = nwbfile.add_intracellular_recording(electrode=electrode,
 #
 # We can add a column to the main intracellular recordings table as follows
 
-nwbfile.intracellular_recordings.add_column(#
+nwbfile.intracellular_recordings.add_column(
     name='recording_tag',
     data=['A1', 'A2', 'A3'],
     description='String with a recording tag')
@@ -635,4 +630,3 @@ with NWBHDF5IO(testpath, 'r') as io:
     assert np.all(infile.icephys_experimental_conditions['repetitions'] .data[:] == nwbfile.icephys_experimental_conditions['repetitions'].data[:])
     assert infile.icephys_experimental_conditions['repetitions'].target.table.name == nwbfile.icephys_experimental_conditions['repetitions'].target.table.name
     assert np.all(infile.icephys_experimental_conditions['tag'][:] == nwbfile.icephys_experimental_conditions['tag'][:])
-
