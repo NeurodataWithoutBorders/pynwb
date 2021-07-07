@@ -11,9 +11,10 @@ about the electrode and device used, as well as metadata about the organization 
 experiment.
 
 .. note:: For a video tutorial on intracellular electrophysiology in NWB see also the
-      `Intracellular electrophysiology basics in NWB <https://training.incf.org/lesson/intracellular-electrophysiology-basics-nwb>`_
-      and `Intracellular electrophysiology structured metadata in NWB <https://training.incf.org/lesson/intracellular-electrophysiology-structured-metadata-nwb>`_
-      tutorials as part of the `NWB Course at the INCF Training Space <https://training.incf.org/collection/neurodata-without-borders-neurophysiology-nwbn>`_.
+       :incf_lesson:`Intracellular electrophysiology basics in NWB <intracellular-electrophysiology-basics-nwb>` and
+       :incf_lesson:`Intracellular ephys metadata <intracellular-electrophysiology-structured-metadata-nwb>`
+       tutorials as part of the :incf_collection:`NWB Course <neurodata-without-borders-neurophysiology-nwbn>`
+       at the INCF Training Space.
 
 
 To describe the organization of intracellular experiments the metadata is organized
@@ -606,27 +607,47 @@ with NWBHDF5IO(testpath, 'r') as io:
     # assert intracellular_recordings
     assert np.all(infile.intracellular_recordings.id[:] == nwbfile.intracellular_recordings.id[:])
 
-    # Assert that the ids and the VectorData, VectorIndex, and table target of the recordings column of the Sweeps table are correct
-    assert np.all(infile.icephys_simultaneous_recordings.id[:] == nwbfile.icephys_simultaneous_recordings.id[:])
-    assert np.all(infile.icephys_simultaneous_recordings['recordings'].target.data[:] == nwbfile.icephys_simultaneous_recordings['recordings'].target.data[:])
-    assert np.all(infile.icephys_simultaneous_recordings['recordings'].data[:] == nwbfile.icephys_simultaneous_recordings['recordings'].data[:])
-    assert infile.icephys_simultaneous_recordings['recordings'].target.table.name == nwbfile.icephys_simultaneous_recordings['recordings'].target.table.name
+    # Assert that the ids and the VectorData, VectorIndex, and table target of the
+    # recordings column of the Sweeps table are correct
+    assert np.all(infile.icephys_simultaneous_recordings.id[:] ==
+                  nwbfile.icephys_simultaneous_recordings.id[:])
+    assert np.all(infile.icephys_simultaneous_recordings['recordings'].target.data[:] ==
+                  nwbfile.icephys_simultaneous_recordings['recordings'].target.data[:])
+    assert np.all(infile.icephys_simultaneous_recordings['recordings'].data[:] ==
+                  nwbfile.icephys_simultaneous_recordings['recordings'].data[:])
+    assert (infile.icephys_simultaneous_recordings['recordings'].target.table.name ==
+            nwbfile.icephys_simultaneous_recordings['recordings'].target.table.name)
 
-    # Assert that the ids and the VectorData, VectorIndex, and table target of the simultaneous recordings column of the SweepSequences table are correct
-    assert np.all(infile.icephys_sequential_recordings.id[:] == nwbfile.icephys_sequential_recordings.id[:])
-    assert np.all(infile.icephys_sequential_recordings['simultaneous_recordings'].target.data[:] == nwbfile.icephys_sequential_recordings['simultaneous_recordings'].target.data[:])
-    assert np.all(infile.icephys_sequential_recordings['simultaneous_recordings'].data[:] == nwbfile.icephys_sequential_recordings['simultaneous_recordings'].data[:])
-    assert infile.icephys_sequential_recordings['simultaneous_recordings'].target.table.name == nwbfile.icephys_sequential_recordings['simultaneous_recordings'].target.table.name
+    # Assert that the ids and the VectorData, VectorIndex, and table target of the simultaneous
+    #  recordings column of the SweepSequences table are correct
+    assert np.all(infile.icephys_sequential_recordings.id[:] ==
+                  nwbfile.icephys_sequential_recordings.id[:])
+    assert np.all(infile.icephys_sequential_recordings['simultaneous_recordings'].target.data[:] ==
+                  nwbfile.icephys_sequential_recordings['simultaneous_recordings'].target.data[:])
+    assert np.all(infile.icephys_sequential_recordings['simultaneous_recordings'].data[:] ==
+                  nwbfile.icephys_sequential_recordings['simultaneous_recordings'].data[:])
+    assert (infile.icephys_sequential_recordings['simultaneous_recordings'].target.table.name ==
+            nwbfile.icephys_sequential_recordings['simultaneous_recordings'].target.table.name)
 
-    # Assert that the ids and the VectorData, VectorIndex, and table target of the sequential_recordings column of the Repetitions table are correct
+    # Assert that the ids and the VectorData, VectorIndex, and table target of the
+    # sequential_recordings column of the Repetitions table are correct
     assert np.all(infile.icephys_repetitions.id[:] == nwbfile.icephys_repetitions.id[:])
-    assert np.all(infile.icephys_repetitions['sequential_recordings'].target.data[:] == nwbfile.icephys_repetitions['sequential_recordings'].target.data[:])
-    assert np.all(infile.icephys_repetitions['sequential_recordings'] .data[:] == nwbfile.icephys_repetitions['sequential_recordings'].data[:])
-    assert infile.icephys_repetitions['sequential_recordings'].target.table.name == nwbfile.icephys_repetitions['sequential_recordings'].target.table.name
+    assert np.all(infile.icephys_repetitions['sequential_recordings'].target.data[:] ==
+                  nwbfile.icephys_repetitions['sequential_recordings'].target.data[:])
+    assert np.all(infile.icephys_repetitions['sequential_recordings'] .data[:] ==
+                  nwbfile.icephys_repetitions['sequential_recordings'].data[:])
+    assert (infile.icephys_repetitions['sequential_recordings'].target.table.name ==
+            nwbfile.icephys_repetitions['sequential_recordings'].target.table.name)
 
-    # Assert that the ids and the VectorData, VectorIndex, and table target of the repetitions column of the Conditions table are correct
-    assert np.all(infile.icephys_experimental_conditions.id[:] == nwbfile.icephys_experimental_conditions.id[:])
-    assert np.all(infile.icephys_experimental_conditions['repetitions'].target.data[:] == nwbfile.icephys_experimental_conditions['repetitions'].target.data[:])
-    assert np.all(infile.icephys_experimental_conditions['repetitions'] .data[:] == nwbfile.icephys_experimental_conditions['repetitions'].data[:])
-    assert infile.icephys_experimental_conditions['repetitions'].target.table.name == nwbfile.icephys_experimental_conditions['repetitions'].target.table.name
-    assert np.all(infile.icephys_experimental_conditions['tag'][:] == nwbfile.icephys_experimental_conditions['tag'][:])
+    # Assert that the ids and the VectorData, VectorIndex, and table target of the
+    # repetitions column of the Conditions table are correct
+    assert np.all(infile.icephys_experimental_conditions.id[:] ==
+                  nwbfile.icephys_experimental_conditions.id[:])
+    assert np.all(infile.icephys_experimental_conditions['repetitions'].target.data[:] ==
+                  nwbfile.icephys_experimental_conditions['repetitions'].target.data[:])
+    assert np.all(infile.icephys_experimental_conditions['repetitions'] .data[:] ==
+                  nwbfile.icephys_experimental_conditions['repetitions'].data[:])
+    assert (infile.icephys_experimental_conditions['repetitions'].target.table.name ==
+            nwbfile.icephys_experimental_conditions['repetitions'].target.table.name)
+    assert np.all(infile.icephys_experimental_conditions['tag'][:] ==
+                  nwbfile.icephys_experimental_conditions['tag'][:])

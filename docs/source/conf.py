@@ -53,6 +53,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
+    'sphinx.ext.extlinks',
     'sphinx_gallery.gen_gallery'
 ]
 
@@ -77,6 +78,11 @@ intersphinx_mapping = {
     'hdmf': ('https://hdmf.readthedocs.io/en/latest/', None),
     'pandas': ('https://pandas.pydata.org/pandas-docs/stable/', None)
 }
+
+extlinks = {'incf_lesson': ('https://training.incf.org/lesson/%s', ''),
+            'incf_collection': ('https://training.incf.org/collection/%s', ''),
+            'nwb_extension': ('https://github.com/nwb-extensions/%s', ''),
+            'pynwb': ('https://github.com/NeurodataWithoutBorders/pynwb/%s', '')}
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
