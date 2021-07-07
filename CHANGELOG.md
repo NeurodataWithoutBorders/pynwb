@@ -19,8 +19,14 @@
   and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
 - Add thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
 
+## Minor new features:
+- Add RRID for citing PyNWB to the docs. @oruebel (#1372)
+
 ### Bug fixes:
 - Update behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
+- Enforce electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
+- Fix integration tests with invalid test data that will be caught by future hdmf validator version.
+  @dsleiter, @rly (#1366, #1376)
 
 ## PyNWB 1.5.1 (May 24, 2021)
 

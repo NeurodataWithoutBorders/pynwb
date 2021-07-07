@@ -1,5 +1,6 @@
-from copy import deepcopy
 from abc import ABCMeta
+from copy import deepcopy
+import numpy as np
 
 from pynwb.ophys import (
     ImagingPlane,
@@ -7,11 +8,37 @@ from pynwb.ophys import (
     PlaneSegmentation,
     ImageSegmentation,
     TwoPhotonSeries,
-    RoiResponseSeries
+    RoiResponseSeries,
+    MotionCorrection,
+    CorrectedImageStack,
 )
+from pynwb.base import TimeSeries
 from pynwb.image import ImageSeries
 from pynwb.device import Device
 from pynwb.testing import NWBH5IOMixin, AcquisitionH5IOMixin, TestCase
+
+
+def make_imaging_plane():
+    """ Make an ImagingPlane and related objects """
+    device = Device(name='dev1')
+    optical_channel = OpticalChannel(
+        name='optchan1',
+        description='a fake OpticalChannel',
+        emission_lambda=500.
+    )
+    imaging_plane = ImagingPlane(
+        name='imgpln1',
+        optical_channel=optical_channel,
+        description='a fake ImagingPlane',
+        device=device,
+        excitation_lambda=600.,
+        imaging_rate=300.,
+        indicator='GFP',
+        location='somewhere in the brain',
+        reference_frame='unknown'
+    )
+
+    return device, optical_channel, imaging_plane
 
 
 class TestImagingPlaneIO(NWBH5IOMixin, TestCase):
@@ -50,31 +77,69 @@ class TestImagingPlaneIO(NWBH5IOMixin, TestCase):
         return nwbfile.get_imaging_plane(self.container.name)
 
 
-class TestTwoPhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
+class TestMotionCorrection(NWBH5IOMixin, TestCase):
 
-    def make_imaging_plane(self):
-        """ Make an ImagingPlane and related objects """
-        self.device = Device(name='dev1')
-        self.optical_channel = OpticalChannel(
-            name='optchan1',
-            description='a fake OpticalChannel',
-            emission_lambda=500.
+    def setUpContainer(self):
+        """ Return the test ImagingPlane to read/write """
+
+        self.device, self.optical_channel, self.imaging_plane = make_imaging_plane()
+
+        self.two_photon_series = TwoPhotonSeries(
+            name='TwoPhotonSeries',
+            data=np.ones((1000, 100, 100)),
+            imaging_plane=self.imaging_plane,
+            rate=1.0,
+            unit='normalized amplitude'
         )
-        self.imaging_plane = ImagingPlane(
-            name='imgpln1',
-            optical_channel=self.optical_channel,
-            description='a fake ImagingPlane',
-            device=self.device,
-            excitation_lambda=600.,
-            imaging_rate=300.,
-            indicator='GFP',
-            location='somewhere in the brain',
-            reference_frame='unknown'
+
+        corrected = ImageSeries(
+            name='corrected',
+            data=np.ones((1000, 100, 100)),
+            unit='na',
+            format='raw',
+            starting_time=0.0,
+            rate=1.0
         )
+
+        xy_translation = TimeSeries(
+            name='xy_translation',
+            data=np.ones((1000, 2)),
+            unit='pixels',
+            starting_time=0.0,
+            rate=1.0,
+        )
+
+        corrected_image_stack = CorrectedImageStack(
+            corrected=corrected,
+            original=self.two_photon_series,
+            xy_translation=xy_translation,
+        )
+
+        return MotionCorrection(corrected_image_stacks=[corrected_image_stack])
+
+    def addContainer(self, nwbfile):
+        """ Add the test ImagingPlane and Device to the given NWBFile """
+
+        nwbfile.add_device(self.device)
+        nwbfile.add_imaging_plane(self.imaging_plane)
+        nwbfile.add_acquisition(self.two_photon_series)
+
+        ophys_module = nwbfile.create_processing_module(
+            name='ophys',
+            description='optical physiology processed data'
+        )
+        ophys_module.add(self.container)
+
+    def getContainer(self, nwbfile):
+        """ Return the test ImagingPlane from the given NWBFile """
+        return nwbfile.processing['ophys'].data_interfaces['MotionCorrection']
+
+
+class TestTwoPhotonSeriesIO(AcquisitionH5IOMixin, TestCase):
 
     def setUpContainer(self):
         """ Return the test TwoPhotonSeries to read/write """
-        self.make_imaging_plane()
+        self.device, self.optical_channel, self.imaging_plane = make_imaging_plane()
         data = [[[1., 1.] * 2] * 2]
         timestamps = list(map(lambda x: x/10, range(10)))
         fov = [2.0, 2.0, 5.0]
@@ -256,4 +321,48 @@ class TestRoiResponseSeriesIO(AcquisitionH5IOMixin, TestCase):
         mod = nwbfile.create_processing_module(name='plane_seg_test_module',
                                                description='a plain module for testing')
         mod.add(img_seg)
+        super().addContainer(nwbfile)
+
+
+class TestCorrectedImageStackIO(AcquisitionH5IOMixin, TestCase):
+
+    def setUpContainer(self):
+        """Return the test CorrectedImageStack to read/write."""
+        data = np.ones((2, 2, 2)),
+        timestamps = [1., 2.]
+
+        corrected_is = ImageSeries(
+            name='corrected',
+            data=data,
+            unit='unit',
+            external_file=['external_file'],
+            starting_frame=[1, 2, 3],
+            format='tiff',
+            timestamps=timestamps
+        )
+        self.original_is = ImageSeries(
+            name='original_is',
+            data=data,
+            unit='unit',
+            external_file=['external_file'],
+            starting_frame=[1, 2, 3],
+            format='tiff',
+            timestamps=timestamps
+        )
+        tstamps = [1., 2., 3.]
+        ts = TimeSeries(
+            name='xy_translation',
+            data=list(range(len(tstamps))),
+            unit='unit',
+            timestamps=tstamps
+        )
+        return CorrectedImageStack(
+            corrected=corrected_is,
+            original=self.original_is,
+            xy_translation=ts
+        )
+
+    def addContainer(self, nwbfile):
+        """Add the test CorrectedImageStack and the original ImageSeries in acquisition."""
+        nwbfile.add_acquisition(self.original_is)
         super().addContainer(nwbfile)
