@@ -151,6 +151,20 @@ class TestSweepTableRoundTripEasy(NWBH5IOMixin, TestCase):
         """ Return the test SweepTable from the given NWBFile """
         return nwbfile.sweep_table
 
+    def roundtripContainer(self, cache_spec=False):
+        # catch the DeprecationWarning raised when reading the SweepTable object from file
+        with self.assertWarnsWith(DeprecationWarning,
+                                  "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+                                  "See also the  NWBFile.add_intracellular_recordings function."):
+            return super().roundtripContainer(cache_spec)
+
+    def roundtripExportContainer(self, cache_spec=False):
+        # catch the DeprecationWarning raised when reading the SweepTable object from file
+        with self.assertWarnsWith(DeprecationWarning,
+                                  "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+                                  "See also the  NWBFile.add_intracellular_recordings function."):
+            return super().roundtripExportContainer(cache_spec)
+
     def test_container(self):
         """ Test properties of the SweepTable read from file """
         description = 'a file to test writing and reading a %s' % self.container_type
@@ -210,6 +224,20 @@ class TestSweepTableRoundTripComplicated(NWBH5IOMixin, TestCase):
     def getContainer(self, nwbfile):
         """ Return the test SweepTable from the given NWBFile """
         return nwbfile.sweep_table
+
+    def roundtripContainer(self, cache_spec=False):
+        # catch the DeprecationWarning raised when reading the SweepTable object from file
+        with self.assertWarnsWith(DeprecationWarning,
+                                  "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+                                  "See also the  NWBFile.add_intracellular_recordings function."):
+            return super().roundtripContainer(cache_spec)
+
+    def roundtripExportContainer(self, cache_spec=False):
+        # catch the DeprecationWarning raised when reading the SweepTable object from file
+        with self.assertWarnsWith(DeprecationWarning,
+                                  "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable instead. "
+                                  "See also the  NWBFile.add_intracellular_recordings function."):
+            return super().roundtripExportContainer(cache_spec)
 
     def test_container(self):
         """ Test properties of the SweepTable read from file """
