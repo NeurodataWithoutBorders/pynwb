@@ -1046,10 +1046,8 @@ class NWBFileTests(TestCase):
             self.assertEqual(len(w), 1)
             assert issubclass(w[-1].category, DeprecationWarning)
             self.assertEqual(str(w[-1].message),
-                             "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable, "
-                             "SimultaneousRecordingsTable tables instead. See the add_intracellular_recordings, "
-                             "add_icephsy_simultaneous_recording, add_icephys_sequential_recording, "
-                             "add_icephys_repetition, add_icephys_condition functions.")
+                             "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable "
+                             "instead. See also the  NWBFile.add_intracellular_recordings function.")
             # make sure we don't trigger the same deprecation warning twice
             nwbfile.add_stimulus_template(local_stimulus2, use_sweep_table=True)
             self.assertEqual(len(w), 1)
@@ -1069,10 +1067,8 @@ class NWBFileTests(TestCase):
             self.assertEqual(len(w), 1)
             assert issubclass(w[-1].category, DeprecationWarning)
             self.assertEqual(str(w[-1].message),
-                             "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable, "
-                             "SimultaneousRecordingsTable tables instead. See the add_intracellular_recordings, "
-                             "add_icephsy_simultaneous_recording, add_icephys_sequential_recording, "
-                             "add_icephys_repetition, add_icephys_condition functions.")
+                             "Use of SweepTable is deprecated. Use the IntracellularRecordingsTable "
+                             "instead. See also the  NWBFile.add_intracellular_recordings function.")
             # make sure we don't trigger the same deprecation warning twice
             nwbfile.add_stimulus(stimulus, use_sweep_table=True)
             self.assertEqual(len(w), 1)

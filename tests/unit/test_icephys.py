@@ -30,9 +30,8 @@ class NWBFileICEphys(TestCase):
         self.icephys_electrode = GetElectrode()
 
     def test_sweep_table_depractation_warn(self):
-        msg = "Use of SweepTable is deprecated. Use the intracellular_recordings, " + \
-              "simultaneous_recordings, sequential_recordings, repetitions and/or " + \
-              "experimental_conditions table(s) instead."
+        msg = ("Use of SweepTable is deprecated. Use the IntracellularRecordingsTable "
+               "instead. See also the  NWBFile.add_intracellular_recordings function.")
         with self.assertWarnsWith(DeprecationWarning, msg):
             _ = NWBFile(
                 session_description='NWBFile icephys test',

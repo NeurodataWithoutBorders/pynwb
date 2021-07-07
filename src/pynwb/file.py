@@ -422,12 +422,6 @@ class NWBFile(MultiContainerInterface):
         for attr in fieldnames:
             setattr(self, attr, kwargs.get(attr, None))
 
-        # if the user set the SweepTable then issue a deprecation warning
-        if kwargs.get('sweep_table') is not None:
-            warn("Use of SweepTable is deprecated. Use the intracellular_recordings, "
-                 "simultaneous_recordings, sequential_recordings, repetitions and/or "
-                 "experimental_conditions table(s) instead.", DeprecationWarning)
-
         # backwards-compatibility code for ic_electrodes / icephys_electrodes
         ic_elec_val = kwargs.get('icephys_electrodes', None)
         if ic_elec_val is None and kwargs.get('ic_electrodes', None) is not None:
@@ -748,12 +742,6 @@ class NWBFile(MultiContainerInterface):
         self._add_acquisition_internal(nwbdata)
         use_sweep_table = popargs('use_sweep_table', kwargs)
         if use_sweep_table:
-            if self.sweep_table is None:
-                warn("Use of SweepTable is deprecated. Use the IntracellularRecordingsTable, "
-                     "SimultaneousRecordingsTable tables instead. See the add_intracellular_recordings, "
-                     "add_icephsy_simultaneous_recording, add_icephys_sequential_recording, "
-                     "add_icephys_repetition, add_icephys_condition functions.",
-                     DeprecationWarning)
             self._update_sweep_table(nwbdata)
 
     @docval({'name': 'timeseries', 'type': TimeSeries},
@@ -763,12 +751,6 @@ class NWBFile(MultiContainerInterface):
         self._add_stimulus_internal(timeseries)
         use_sweep_table = popargs('use_sweep_table', kwargs)
         if use_sweep_table:
-            if self.sweep_table is None:
-                warn("Use of SweepTable is deprecated. Use the IntracellularRecordingsTable, "
-                     "SimultaneousRecordingsTable tables instead. See the add_intracellular_recordings, "
-                     "add_icephsy_simultaneous_recording, add_icephys_sequential_recording, "
-                     "add_icephys_repetition, add_icephys_condition functions.",
-                     DeprecationWarning)
             self._update_sweep_table(timeseries)
 
     @docval({'name': 'timeseries', 'type': TimeSeries},
@@ -778,12 +760,6 @@ class NWBFile(MultiContainerInterface):
         self._add_stimulus_template_internal(timeseries)
         use_sweep_table = popargs('use_sweep_table', kwargs)
         if use_sweep_table:
-            if self.sweep_table is None:
-                warn("Use of SweepTable is deprecated. Use the IntracellularRecordingsTable, "
-                     "SimultaneousRecordingsTable tables instead. See the add_intracellular_recordings, "
-                     "add_icephsy_simultaneous_recording, add_icephys_sequential_recording, "
-                     "add_icephys_repetition, add_icephys_condition functions.",
-                     DeprecationWarning)
             self._update_sweep_table(timeseries)
 
     @docval(returns='The NWBFile.intracellular_recordings table', rtype=IntracellularRecordingsTable)
@@ -808,6 +784,12 @@ class NWBFile(MultiContainerInterface):
         Add a intracellular recording to the intracellular_recordings table. If the
         electrode, stimulus, and/or response do not exsist yet in the NWBFile, then
         they will be added to this NWBFile before adding them to the table.
+
+        Note: For more complex organization of intracellular recordings you may also be
+        interested in the related SimultaneousRecordingsTable, SequentialRecordingsTable,
+        RepetitionsTable, and ExperimentalConditionsTable tables an the related function
+        of NWBFile: add_icephsy_simultaneous_recording, add_icephys_sequential_recording,
+        add_icephys_repetition, and add_icephys_condition.
         """
         # Add the stimulus, response, and electrode to the file if they don't exist yet
         stimulus, response, electrode = getargs('stimulus', 'response', 'electrode', kwargs)
