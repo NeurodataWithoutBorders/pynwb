@@ -8,8 +8,8 @@ Intracellular electrophysiology data using SweepTable
 The following tutorial describes storage of intracellular electrophysiology data in NWB using the
 SweepTable to manage recordings.
 
-.. note::
-    The use of SweepTable has been deprecated as of PyNWB >v1.4 in favor of the new hierarchical
+.. warning::
+    The use of SweepTable has been deprecated as of PyNWB >v2.0 in favor of the new hierarchical
     intracellular electrophysiology metadata tables to allow for a more complete description of
     intracellular electrophysiology experiments. See the :doc:`Intracellular electrophysiology  <plot_icephys>`
     tutorial for details.
