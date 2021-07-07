@@ -256,7 +256,7 @@ class CorrectedImageStackConstructor(TestCase):
             format='tiff',
             timestamps=[1., 2.]
         )
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
         ts = TimeSeries(
             name='xy_translation',
             data=list(range(len(tstamps))),
