@@ -154,14 +154,6 @@ jobs:
       - run:
           <<: *run-style-check
 
-  python36:
-    <<: *py36
-    environment:
-      - TEST_TOX_ENV: "py36"
-      - BUILD_TOX_ENV: "build-py36"
-      - TEST_WHEELINSTALL_ENV: "wheelinstall"
-    <<: *ci-steps
-
   python37:
     <<: *py37
     environment:
