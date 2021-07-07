@@ -464,13 +464,13 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         call_docval_func(super().__init__, kwargs)
 
     @docval({'name': 'electrode', 'type': IntracellularElectrode, 'doc': 'The intracellular electrode used'},
-            {'name': 'stimulus_start_index', 'type': 'int', 'doc': 'Start index of the stimulus', 'default': -1},
-            {'name': 'stimulus_index_count', 'type': 'int', 'doc': 'Stop index of the stimulus', 'default': -1},
+            {'name': 'stimulus_start_index', 'type': 'int', 'doc': 'Start index of the stimulus', 'default': None},
+            {'name': 'stimulus_index_count', 'type': 'int', 'doc': 'Stop index of the stimulus', 'default': None},
             {'name': 'stimulus', 'type': TimeSeries,
              'doc': 'The TimeSeries (usually a PatchClampSeries) with the stimulus',
              'default': None},
-            {'name': 'response_start_index', 'type': 'int', 'doc': 'Start index of the response', 'default': -1},
-            {'name': 'response_index_count', 'type': 'int', 'doc': 'Stop index of the response', 'default': -1},
+            {'name': 'response_start_index', 'type': 'int', 'doc': 'Start index of the response', 'default': None},
+            {'name': 'response_index_count', 'type': 'int', 'doc': 'Stop index of the response', 'default': None},
             {'name': 'response', 'type': TimeSeries,
              'doc': 'The TimeSeries (usually a PatchClampSeries) with the response',
              'default': None},
@@ -488,9 +488,9 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         Add a single recording to the IntracellularRecordingsTable table.
 
         Typically, both stimulus and response are expected. However, in some cases only a stimulus
-        or a resposne may be recodred as part of a recording. In this case, None, may be given
+        or a response may be recodred as part of a recording. In this case, None may be given
         for either stimulus or response, but not both. Internally, this results in both stimulus
-        and response pointing to the same timeseries, while the start_index and index_count for
+        and response pointing to the same TimeSeries, while the start_index and index_count for
         the invalid series will both be set to -1.
         """
         # Get the input data
@@ -549,13 +549,15 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         stimuli = copy(popargs('stimulus_metadata', kwargs))
         if stimuli is None:
             stimuli = {}
-        stimuli['stimulus'] = (stimulus_start_index, stimulus_index_count, stimulus)
+        stimuli['stimulus'] = TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(
+            stimulus_start_index, stimulus_index_count, stimulus)
 
-        # Compile the reponses table data
+        # Compile the responses table data
         responses = copy(popargs('response_metadata', kwargs))
         if responses is None:
             responses = {}
-        responses['response'] = (response_start_index, response_index_count, response)
+        responses['response'] = TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(
+            response_start_index, response_index_count, response)
 
         _ = super().add_row(enforce_unique_id=True,
                             electrodes=electrodes,
@@ -578,17 +580,21 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         :raises IndexError: If index_count cannot be determined or start_index+index_count
             are outside of the range of the timeseries.
 
-        :returns: A tuple of integers with the start_index and index_count to use
+        :returns: A tuple of integers with the start_index and index_count to use.
         """
+        # If times_series is not valid then return -1, -1 to indicate invalid times
         if time_series is None:
             return -1, -1
-        start_index = start_index if start_index >= 0 else 0
+        # Since time_series is valid, negative or None start_index means the user did not specify a start_index
+        # so we now need to set it to 0
+        if start_index is None or start_index < 0:
+            start_index = 0
+        # If index_count has not been set yet (i.e., it is -1 or None) then attempt to set it to the
+        # full range of the timeseries starting from start_index
         num_samples = time_series.num_samples
-        index_count = (index_count
-                       if index_count >= 0
-                       else ((num_samples - start_index)
-                             if num_samples is not None
-                             else None))
+        if index_count is None or index_count < 0:
+            index_count = (num_samples - start_index) if num_samples is not None else None
+        # Check that the start_index and index_count are valid and raise IndexError if they are invalid
         if index_count is None:
             raise IndexError("Invalid %s_index_count cannot be determined from %s data." % (name, name))
         if num_samples is not None:
@@ -596,6 +602,7 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
                 raise IndexError("%s_start_index out of range" % name)
             if (start_index + index_count) > num_samples:
                 raise IndexError("%s_start_index + %s_index_count out of range" % (name, name))
+        # Return the values
         return start_index, index_count
 
     @docval(*get_docval(AlignedDynamicTable.to_dataframe, 'ignore_category_ids'),
@@ -615,9 +622,15 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         if getargs('electrode_refs_as_objectids', kwargs):
             res[('electrodes', 'electrode')] = [e.object_id for e in res[('electrodes', 'electrode')]]
         if getargs('stimulus_refs_as_objectids', kwargs):
-            res[('stimuli', 'stimulus')] = [(e[0], e[1],  e[2].object_id) for e in res[('stimuli', 'stimulus')]]
+            res[('stimuli', 'stimulus')] = \
+                [e if e[2] is None
+                 else TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(e[0], e[1],  e[2].object_id)
+                 for e in res[('stimuli', 'stimulus')]]
         if getargs('response_refs_as_objectids', kwargs):
-            res[('responses', 'response')] = [(e[0], e[1],  e[2].object_id) for e in res[('responses', 'response')]]
+            res[('responses', 'response')] = \
+                [e if e[2] is None else
+                 TimeSeriesReferenceVectorData.TIME_SERIES_REFERENCE_TUPLE(e[0], e[1],  e[2].object_id)
+                 for e in res[('responses', 'response')]]
         return res
 
 
@@ -631,7 +644,7 @@ class SimultaneousRecordingsTable(DynamicTable):
 
     __columns__ = (
         {'name': 'recordings',
-         'description': 'Column with a references to one or more rows in the IntracellularRecordingsTable table',
+         'description': 'Column with references to one or more rows in the IntracellularRecordingsTable table',
          'required': True,
          'index': True,
          'table': True},
@@ -667,8 +680,8 @@ class SimultaneousRecordingsTable(DynamicTable):
             allow_extra=True)
     def add_simultaneous_recording(self, **kwargs):
         """
-        Add a single Sweep consisting of one-or-more recordings and associated custom
-        SimultaneousRecordingsTable metadata to the table.
+        Add a single simultaneous recording (i.e., one sweep, or one row) consisting of one or more
+        recordings and associated custom simultaneous recording metadata to the table.
         """
         _ = super().add_row(enforce_unique_id=True, **kwargs)
         return len(self.id) - 1
@@ -685,7 +698,7 @@ class SequentialRecordingsTable(DynamicTable):
 
     __columns__ = (
         {'name': 'simultaneous_recordings',
-         'description': 'Column with a references to one or more rows in the SimultaneousRecordingsTable table',
+         'description': 'Column with references to one or more rows in the SimultaneousRecordingsTable table',
          'required': True,
          'index': True,
          'table': True},
@@ -730,8 +743,8 @@ class SequentialRecordingsTable(DynamicTable):
             allow_extra=True)
     def add_sequential_recording(self, **kwargs):
         """
-        Add a sequential recording (i.e., one row)  consisting of one-or-more recording simultaneous_recordings
-        and associated custom sequential recording  metadata to the table.
+        Add a sequential recording (i.e., one row) consisting of one or more simultaneous recordings
+        and associated custom sequential recording metadata to the table.
         """
         _ = super().add_row(enforce_unique_id=True, **kwargs)
         return len(self.id) - 1
@@ -747,7 +760,7 @@ class RepetitionsTable(DynamicTable):
 
     __columns__ = (
         {'name': 'sequential_recordings',
-         'description': 'Column with a references to one or more rows in the SequentialRecordingsTable table',
+         'description': 'Column with references to one or more rows in the SequentialRecordingsTable table',
          'required': True,
          'index': True,
          'table': True},
@@ -785,8 +798,8 @@ class RepetitionsTable(DynamicTable):
             allow_extra=True)
     def add_repetition(self, **kwargs):
         """
-        Add a repetition (i.e., one row)  consisting of one-or-more recording sequential recordings
-        and associated custom repetition  metadata to the table.
+        Add a repetition (i.e., one row) consisting of one or more sequential recordings
+        and associated custom repetition metadata to the table.
         """
         _ = super().add_row(enforce_unique_id=True, **kwargs)
         return len(self.id) - 1
@@ -801,7 +814,7 @@ class ExperimentalConditionsTable(DynamicTable):
 
     __columns__ = (
         {'name': 'repetitions',
-         'description': 'Column with a references to one or more rows in the RepetitionsTable table',
+         'description': 'Column with references to one or more rows in the RepetitionsTable table',
          'required': True,
          'index': True,
          'table': True},
@@ -828,15 +841,15 @@ class ExperimentalConditionsTable(DynamicTable):
 
     @docval({'name': 'repetitions',
              'type': 'array_data',
-             'doc': 'the indices of the repetitions  belonging to this condition',
+             'doc': 'the indices of the repetitions belonging to this condition',
              'default': None},
             returns='Integer index of the row that was added to this table',
             rtype=int,
             allow_extra=True)
     def add_experimental_condition(self, **kwargs):
         """
-        Add a condition (i.e., one row)  consisting of one-or-more recording repetitions of sequential recordings
-        and associated custom experimental_conditions  metadata to the table.
+        Add a condition (i.e., one row) consisting of one or more repetitions of sequential recordings
+        and associated custom experimental_conditions metadata to the table.
         """
         _ = super().add_row(enforce_unique_id=True, **kwargs)
         return len(self.id) - 1

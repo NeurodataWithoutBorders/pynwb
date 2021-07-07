@@ -8,8 +8,8 @@ Intracellular electrophysiology data using SweepTable
 The following tutorial describes storage of intracellular electrophysiology data in NWB using the
 SweepTable to manage recordings.
 
-.. note::
-    The use of SweepTable has been deprecated as of PyNWB >v1.4 in favor of the new hierarchical
+.. warning::
+    The use of SweepTable has been deprecated as of PyNWB >v2.0 in favor of the new hierarchical
     intracellular electrophysiology metadata tables to allow for a more complete description of
     intracellular electrophysiology experiments. See the :doc:`Intracellular electrophysiology  <plot_icephys>`
     tutorial for details.
@@ -190,8 +190,7 @@ device = nwbfile.get_device('Heka ITC-1600')
 # PatchClampSeries which belongs to a certain sweep number via
 # :py:meth:`~pynwb.icephys.SweepTable.get_series`.
 #
-# The following call will return the voltage clamp data, of two timeseries
+# The following call will return the voltage clamp data of two timeseries
 # consisting of acquisition and stimulus, from sweep 1.
 
 series = nwbfile.sweep_table.get_series(1)
-print("hello world")
