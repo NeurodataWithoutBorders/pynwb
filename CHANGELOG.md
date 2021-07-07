@@ -1,28 +1,25 @@
 # PyNWB Changelog
 
-## PyNWB 2.0.0 (Upcoming)
+## PyNWB 2.0.0 (TBD, 2021)
 
-### New features
--
--
--
--
-
-### Internal improvements
+### New features:
 -
 -
 -
 -
 
-### Bug fixes
--
--
--
--
+### Minor new features:
+- Add RRID for citing PyNWB to the docs. @oruebel (#1372)
+
+### Bug fixes:
+- Enforce electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
+- Fix integration tests with invalid test data that will be caught by future hdmf validator version.
+  @dsleiter, @rly (#1366, #1376)
+
 
 ## PyNWB 1.5.1 (May 24, 2021)
 
-## Bug fix:
+### Bug fix:
 - Raise minimum version of pandas from 0.23 to 1.0.5 to be compatible with numpy 1.20, and raise minimum version of
   HDMF to use the corresponding change in HDMF. @rly (#1363)
 - Update documentation and update structure of requirements files. @rly (#1363)
