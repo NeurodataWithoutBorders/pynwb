@@ -130,7 +130,7 @@ class NWBFileTest(TestCase):
     def test_epoch_tags(self):
         tags1 = ['t1', 't2']
         tags2 = ['t3', 't4']
-        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float)
+        tstamps = np.arange(1.0, 100.0, 0.1, dtype=np.float64)
         ts = TimeSeries("test_ts", list(range(len(tstamps))), 'unit', timestamps=tstamps)
         expected_tags = tags1 + tags2
         self.nwbfile.add_epoch(0.0, 1.0, tags1, ts)
