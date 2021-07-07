@@ -6,13 +6,17 @@
 -
 -
 -
--
+- Drop Python 3.6 support, add Python 3.9 support. @rly (#1377)
+- Update requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
 
-### Internal improvements
--
--
--
--
+### Minor new features:
+- Add RRID for citing PyNWB to the docs. @oruebel (#1372)
+- Update CI and tests to handle deprecations in libraries. @rly (#1377)
+
+### Bug fixes:
+- Enforce electrode ID uniqueness during insertion into table. @CodyCBakerPhD (#1344)
+- Fix integration tests with invalid test data that will be caught by future hdmf validator version.
+  @dsleiter, @rly (#1366, #1376)
 
 ### Bug fixes
 -
