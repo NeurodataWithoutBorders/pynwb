@@ -26,7 +26,7 @@ def _validate_helper(**kwargs):
     return (errors is not None and len(errors) > 0)
 
 
-def main():
+def main():  # noqa: C901
 
     ep = """
     use --nspath to validate against an extension. If --ns is not specified,
