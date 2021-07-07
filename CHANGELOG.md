@@ -21,6 +21,7 @@
   and declared the previous tutoral using ``SweepTable`` as deprecated.  @oruebel (#1349)
 - Add thumbnails for tutorials to improve presentation of online docs.  @oruebel (#1349)
 - Use `sphinx.ext.extlinks` extension in docs to simplify linking to common targets @oruebel (#1349)
+- Create new section for advanced I/O tutorials moved parallel I/O tutorial to its own file @oruebel (#1349)
 
 ### Minor new features:
 - Add RRID for citing PyNWB to the docs. @oruebel (#1372)
