@@ -13,6 +13,8 @@
   ``ExperimentalConditionsTable`` as well as corresponding updates to ``NWBFile`` to support interaction
    with the new tables. @oruebel  (#1349)
 - Add support for nwb-schema 2.4.0 @oruebel (#1349)
+- Drop Python 3.6 support, add Python 3.9 support. @rly (#1377)
+- Update requirements to allow compatibility with HDMF 3 and h5py 3. @rly (#1377)
 
 ### Tutorial enhancements:
 - Added new tutorial for intracellular electrophysiology to describe the use of the new metadata tables
@@ -21,6 +23,7 @@
 
 ### Minor new features:
 - Add RRID for citing PyNWB to the docs. @oruebel (#1372)
+- Update CI and tests to handle deprecations in libraries. @rly (#1377)
 
 ### Bug fixes:
 - Update behavior of ``make clean`` command for docs to ensure tutorial files are cleaned up.  @oruebel (#1349)
