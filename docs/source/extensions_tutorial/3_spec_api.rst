@@ -34,8 +34,8 @@ within it Datasets, Attributes, Links, and/or other Groups. Groups are specified
 
 - ``neurodata_type_def`` declares the name of the neurodata type.
 - ``neurodata_type_inc`` indicates what data type you are extending (Groups must extend Groups, and Datasets must extend Datasets).
-- To define a new neurodata type that does not extend an existing type, use 
-  ``neurodata_type_inc=NWBContainer`` for a group or ``neurodata_type_inc=NWBData`` for a dataset. 
+- To define a new neurodata type that does not extend an existing type, use
+  ``neurodata_type_inc=NWBContainer`` for a group or ``neurodata_type_inc=NWBData`` for a dataset.
   ``NWBContainer`` and ``NWBData`` are base types for NWB.
 - To use a type that has already been defined, use ``neurodata_type_inc`` and not ``neurodata_type_def``.
 - You can define a group that is not a neurodata type by omitting both ``neurodata_type_def`` and ``neurodata_type_inc``.
@@ -79,17 +79,20 @@ All larger blocks of numeric or text data should be stored in Datasets. Specifyi
 ``neurodata_type_def``, ``neurodata_type_inc``, ``doc``, ``name``, ``default_name``, ``linkable``, ``quantity``, and
 ``attributes`` all work the same as they do in :py:class:`~pynwb.spec.NWBGroupSpec`, described in the previous section.
 
-``dtype`` defines the type of the data, which can be a basic type, compound type, or reference type. 
-See a list of options `here <https://schema-language.readthedocs.io/en/latest/description.html#dtype>`_. 
-Basic types can be defined as string objects and more complex types via :py:class:`~pynwb.spec.NWBDtypeSpec` and `RefSpec <https://hdmf.readthedocs.io/en/latest/hdmf.spec.spec.html#hdmf.spec.spec.RefSpec>`_.
+``dtype`` defines the type of the data, which can be a basic type, compound type, or reference type.
+See a list of `dtype options <https://schema-language.readthedocs.io/en/latest/description.html#dtype>`_
+as part of the specification language docs. Basic types can be defined as string objects and more complex
+types via :py:class:`~pynwb.spec.NWBDtypeSpec` and
+`RefSpec <https://hdmf.readthedocs.io/en/latest/hdmf.spec.spec.html#hdmf.spec.spec.RefSpec>`_.
 
 
-``shape`` is a specification defining the allowable shapes for the dataset. See the shape specification
-`here <https://schema-language.readthedocs.io/en/latest/specification_language_description.html#shape>`_. ``None`` is
-mapped to ``null``. Is no shape is provided, it is assumed that the dataset is only a single element.
+``shape`` is a specification defining the allowable shapes for the dataset. See the
+`shape specification <https://schema-language.readthedocs.io/en/latest/specification_language_description.html#shape>`_
+as part of the specification language docs. ``None`` is mapped to ``null``. Is no shape is provided, it is
+assumed that the dataset is only a single element.
 
-If the dataset is a single element (scalar) that represents meta-data, consider using an Attribute (see 
-below) to store the data more efficiently instead. However, note that a Dataset can have Attributes, 
+If the dataset is a single element (scalar) that represents meta-data, consider using an Attribute (see
+below) to store the data more efficiently instead. However, note that a Dataset can have Attributes,
 whereas an Attribute cannot have Attributes of its own.
 ``dims`` provides labels for each dimension of ``shape``.
 
@@ -139,16 +142,16 @@ defined in the ``attributes`` field of a :py:class:`~pynwb.spec.NWBGroupSpec` or
 neurodata type, i.e., the ``neurodata_type_def`` and ``neurodata_type_inc`` keys are not allowed. The only way to match an object with a spec is through the name of the attribute so ``name`` is
 required. You cannot have multiple attributes on a single group/dataset that correspond to the same
 :py:class:`~pynwb.spec.NWBAttributeSpec`, since these would have to have the same name. Therefore, instead of
-specifying number of ``quantity``, you have a ``required`` field which takes a boolean value. Another 
+specifying number of ``quantity``, you have a ``required`` field which takes a boolean value. Another
 key difference between datasets and attributes is that attributes cannot have attributes of their own.
 
 .. tip::
     Dataset or Attribute? It is often possible to store data as either a Dataset or an Attribute. Our best advice is
-    to keep Attributes small.  In HDF5 the typical size limit for attributes is  64Kbytes. If an attribute is going to 
-    store more than 64Kbyte, then make it a Dataset. Attributes are also more efficient for storing very 
-    small data, such as scalars. However, attributes cannot have attributes of their own, and in HDF5, 
+    to keep Attributes small.  In HDF5 the typical size limit for attributes is  64Kbytes. If an attribute is going to
+    store more than 64Kbyte, then make it a Dataset. Attributes are also more efficient for storing very
+    small data, such as scalars. However, attributes cannot have attributes of their own, and in HDF5,
     I/O filters, such as compression and chunking, cannot apply to attributes.
-   
+
 
 Link Specifications
 ^^^^^^^^^^^^^^^^^^^
