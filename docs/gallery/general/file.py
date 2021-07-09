@@ -42,17 +42,18 @@ from pynwb import TimeSeries
 
 data = list(range(100, 200, 10))
 timestamps = list(range(10))
-test_ts = TimeSeries(name='test_timeseries', data=data, unit='m', timestamps=timestamps)
+test_ts = TimeSeries(name='test_timeseries', data=data, unit='s', timestamps=timestamps)
 
 ####################
 # Alternatively, if your recordings are sampled at a uniform rate, you can supply *starting_time*
 # and *rate*.
 
-rate_ts = TimeSeries(name='test_timeseries', data=data, unit='m', starting_time=0.0, rate=1.0)
+rate_ts = TimeSeries(name='test_timeseries', data=data, unit='s', starting_time=0.0, rate=1.0)
 
 ####################
 # Using this scheme says that this :py:class:`~pynwb.base.TimeSeries` started recording 0 seconds after
 # *start_time* stored in the :py:class:`~pynwb.file.NWBFile` and sampled every second.
+# See https://pynwb.readthedocs.io/en/stable/pynwb.base.html#pynwb.base.TimeSeries for details
 #
 # :py:class:`~pynwb.base.TimeSeries` objects can be added directly to your :py:class:`~pynwb.file.NWBFile` using
 # the methods :py:meth:`~pynwb.file.NWBFile.add_acquisition`, :py:meth:`~pynwb.file.NWBFile.add_stimulus`
