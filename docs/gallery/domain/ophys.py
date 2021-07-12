@@ -119,7 +119,7 @@ ps.add_roi(pixel_mask=pix_mask2, image_mask=img_mask2)
 # Storing fluorescence measurements
 # ---------------------------------
 #
-# Now that ROIs are stored, you can store fluorescence (or dF/F [#]_) data for these regions of interest.
+# Now that ROIs are stored, you can store fluorescence (or dF/F) data for these regions of interest.
 # This type of data is stored using the :py:class:`~pynwb.ophys.RoiResponseSeries` class. You will not need
 # to instantiate this class directly to create objects of this type, but it is worth noting that this is the
 # class you will work with after you read data back in.
