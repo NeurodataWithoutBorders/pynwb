@@ -3,7 +3,7 @@
 .. _icephys_tutorial_new:
 
 Intracellular electrophysiology
-==================================================================
+===============================
 
 The following tutorial describes storage of intracellular electrophysiology data in NWB.
 NWB supports storage of the time series describing the stimulus and response, information
@@ -16,17 +16,21 @@ experiment.
        tutorials as part of the :incf_collection:`NWB Course <neurodata-without-borders-neurophysiology-nwbn>`
        at the INCF Training Space.
 
-
-To describe the organization of intracellular experiments the metadata is organized
-hierarchically in a sequence of tables. All of the tables are so-called DynamicTables
-enabling users to add columns for custom metadata.
-
 .. figure:: ../../figures/plot_icephys_table_hierarchy.png
     :width: 700
     :alt: Intracellular electrophysiology metadata table hierarchy
 
     Illustration of the hierarchy of metadata tables used to describe the organization of
     intracellular electrophysiology experiments.
+
+Recordings of intracellular electrophysiology stimuli and responses are represented
+with subclasses of :py:class:`~pynwb.icephys.PatchClampSeries` using the
+:py:class:`~pynwb.icephys.IntracellularElectrode` and :py:class:`~pynwb.device.Device`
+type to describe the electrode and device used.
+
+To describe the organization of intracellular experiments, the metadata is organized
+hierarchically in a sequence of tables. All of the tables are so-called DynamicTables
+enabling users to add columns for custom metadata.
 
 - :py:class:`~pynwb.icephys.IntracellularRecordingsTable` relates electrode, stimulus
   and response pairs and describes metadata specific to individual recordings.
@@ -52,6 +56,14 @@ enabling users to add columns for custom metadata.
 - :py:class:`~pynwb.icephys.ExperimentalConditionsTable` groups repetitions of
   intracellular recording from the :py:class:`~pynwb.icephys.RepetitionsTable`
   together that belong to the same experimental conditions.
+
+.. note:: All of the above mentioned metadata tables are optional and are created automatically
+          by the :py:class:`~pynwb.file.NWBFile` class the first time data is being
+          added to a table via the corresponding add functions. However, as tables at higher
+          levels of the hierarchy link to the other tables that are lower in the hierarchy,
+          we may only exclude tables from the top of the hierarchy. This means, for example,
+          a file containing a :py:class:`~pynwb.icephys.SimultaneousRecordingsTable` then
+          must also always contain a corresponding :py:class:`~pynwb.icephys.IntracellularRecordingsTable`.
 '''
 
 #######################
@@ -76,14 +88,17 @@ from pynwb import NWBHDF5IO
 from pynwb.core import DynamicTable, VectorData
 
 #######################
-# A brief example script
-# ------------------------------
+# A brief example
+# ---------------
 #
-# The following shows a brief example script, providing a brief overview of the
-# main steps to create and NWB icephys file. A more detailed dicussion of the
-# various steps is then provided afterwards. To avoid collisions between this
-# example script and the more detailed discussion we prefix
-# all variables in the example script with ``ex_``.
+# The following brief example provides a quick overview of the main steps
+# to create an NWBFile for intracelluar electrophysiology data. We then
+# discuss the individual steps in more detail afterwards.
+#
+# .. note:
+#    To avoid collisions between this example script and the more
+#    detailed discussion we prefix all variables in the example
+#    script with ``ex_``.
 
 # Create an ICEphysFile
 ex_nwbfile = NWBFile(session_description='my first recording',
@@ -143,7 +158,7 @@ run_index = ex_nwbfile.add_icephys_repetition(sequential_recordings=[ex_sequence
 ex_nwbfile.add_icephys_experimental_condition(repetitions=[run_index, ])
 
 # Write our test file
-ex_testpath = "ex_test_icephys_file.h5"
+ex_testpath = "ex_test_icephys_file.nwb"
 with NWBHDF5IO(ex_testpath, 'w') as io:
     io.write(ex_nwbfile)
 
@@ -168,8 +183,8 @@ except ImportError:  # ignore in case hdmf_docutils is not installed
 
 
 #######################
-# Creating an icephys NWB file
-# ------------------------------
+# Creating an NWB file for Intracellular electrophysiology
+# --------------------------------------------------------
 #
 # When creating an NWB file, the first step is to create the :py:class:`~pynwb.file.NWBFile`. The first
 # argument is is a brief description of the dataset.
@@ -278,10 +293,6 @@ rowindex = nwbfile.add_intracellular_recording(electrode=electrode,
                                                id=10)
 
 #######################
-# .. note:: All of the above mentioned metadata tables are optional and are created automatically
-#          by the :py:class:`~pynwb.file.NWBFile` class the first time data is being
-#          added to a table via the corresponding add functions.
-#
 # .. note:: Since :py:meth:`~pynwb.file.NWBFile.add_intracellular_recording` can automatically add
 #          the objects to the NWBFile  we do not need to separately call
 #          :py:meth:`~pynwb.file.NWBFile.add_stimulus` and :py:meth:`~pynwb.file.NWBFile.add_acquistion`
@@ -537,7 +548,7 @@ rowindex = nwbfile.add_icephys_experimental_condition(
 #
 
 # Write our test file
-testpath = "test_icephys_file.h5"
+testpath = "test_icephys_file.nwb"
 with NWBHDF5IO(testpath, 'w') as io:
     io.write(nwbfile)
 
@@ -597,7 +608,7 @@ print(top_table.neurodata_type)
 # Validate data
 # ^^^^^^^^^^^^^
 #
-# This section is primarily for internal testing purpose to validate that the roundtrip
+# This section is for internal testing purposes only to validate that the roundtrip
 # of the data (i.e., generate --> write --> read) produces the correct results.
 
 # Read the data back in
