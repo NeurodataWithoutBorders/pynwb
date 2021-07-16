@@ -141,8 +141,14 @@ exp_cond_df.iloc[0]['repetitions']
 # number of intracellular recordings from the :py:class:`~pynwb.icephys.IntracellularRecordingsTable`
 # that belong to the experimental condition.
 
-from hdmf.common.hierarchicaltable import denormalize_nested_dataframe
-denormalize_nested_dataframe(exp_cond_df)
+
+from hdmf.common.hierarchicaltable import to_hierarchical_dataframe, to_denormalized_dataframe
+to_hierarchical_dataframe(root_table, flat_column_index=False)
+
+#######################
+#
+to_denormalized_dataframe(root_table, True)
+
 
 #######################
 # Convert a single level to DataFrame
