@@ -57,6 +57,14 @@ enabling users to add columns for custom metadata.
   intracellular recording from the :py:class:`~pynwb.icephys.RepetitionsTable`
   together that belong to the same experimental conditions.
 
+Storing data in hierarchical tables has the advantage that it allows us to avoid duplication of
+metadata. E.g., for a single experiment we only need to describe the metadata that is constant
+across an experimental condition as a single row in the :py:class:`~pynwb.icephys.ExperimentalConditionsTable`
+without having to replicate the same information across all repetitions and sequential-, simultaneous-, and
+individual intracellular recordings. For analysis, this means that we can easily focus on individual
+aspects of an experiment while still being able to easily access information about information from
+related tables.
+
 .. note:: All of the above mentioned metadata tables are optional and are created automatically
           by the :py:class:`~pynwb.file.NWBFile` class the first time data is being
           added to a table via the corresponding add functions. However, as tables at higher
