@@ -5,7 +5,7 @@
 Query intracellular electrophysiology metadata
 ==============================================
 
-This tutorial focuses on using Pandas to query experiment metadata for
+This tutorial focuses on using pandas to query experiment metadata for
 intracellular electrophysiology experiments using the metadata tables
 from the :py:meth:`~pynwb.icephys` module. See the :ref:`icephys_tutorial_new`
 tutorial for an introduction to the intracellular electrophysiology metadata
@@ -22,7 +22,7 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 import numpy as np
 import pandas
-# Set Pandas rendering option to avoid very wide cells
+# Set pandas rendering option to avoid very wide tables in the html docs
 pandas.set_option("display.max_colwidth", 30)
 pandas.set_option("display.max_rows", 10)
 pandas.set_option("display.max_columns", 6)
@@ -36,15 +36,19 @@ pandas.set_option("display.max_columns", 6)
 from pynwb.testing.icephys_testutils  import create_icephys_testfile
 test_filename = "icephys_pandas_testfile.nwb"
 nwbfile = create_icephys_testfile(
-     filename=test_filename,    # write the file to disk for testing
-     add_custom_columns=True,   # Add a custom column to each icephys metadata table for testing
-     randomize_data=True        # Randomize the data in the simulus and response for some more realistic behavior
+     filename=test_filename,     # write the file to disk for testing
+     add_custom_columns=True,    # Add a custom column to each icephys metadata table for testing
+     randomize_data=True,        # Randomize the data in the simulus and response for some more realistic behavior
+     with_missing_stimulus=True  # Don't include the stimulus for row 0 and 10 so we can illustrate this case
     )
 
 
 #######################
+# Accessing the ICEphys metadata tables
+# -------------------------------------
+#
 # Get the parent metadata table
-# -----------------------------
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 #
 # The intracellular electrophysiology metadata consists of a hierarchy of DynamicTables, i.e.,
 # :py:class:`~pynwb.icephys.ExperimentalConditionsTable` -->
@@ -53,17 +57,49 @@ nwbfile = create_icephys_testfile(
 # :py:class:`~pynwb.icephys.SimultaneousRecordingsTable` -->
 # :py:class:`~pynwb.icephys.IntracellularRecordingsTable`.
 # However, in a given :py:class:`~pynwb.file.NWBFile` not all tables may exist, but a user may choose
-# to exclude tables from the top of the hierarchy. To locate the table that defines the root of the
-# table hierarchy, we can simply use the convenience function
-# :py:meth:`~pynwb.file.NWBFile.get_icephys_meta_parent_table`. Since our file contains all tables,
-# the root in this case is the same as :py:meth:`~pynwb.file.NWBFile.icephys_experimental_conditions`.
+# to exclude tables from the top of the hierarchy (e.g.,, a file may only contain
+# :py:class:`~pynwb.icephys.SimultaneousRecordingsTable` and  :py:class:`~pynwb.icephys.IntracellularRecordingsTable`
+# while omitting all of the other table that are higher in the hierarchy).
+# To provide a consistent interface for users, PyNWB allows us to easily locate the table
+# that defines the root of the table hierarchy via the function
+# :py:meth:`~pynwb.file.NWBFile.get_icephys_meta_parent_table`.
 
 root_table =  nwbfile.get_icephys_meta_parent_table()
+print(root_table.neurodata_type)
+
+#######################
+# Getting a specific ICEphys metadata table
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+#
+# We can retrieve any of the ICEphys metadata tables via the corresponding properties of NWBFile, i.e.,
+# :py:meth:`~pynwb.file.NWBFile.intracellular_recordings`,
+# :py:meth:`~pynwb.file.NWBFile.icephys_simultaneous_recordings`,
+# :py:meth:`~pynwb.file.NWBFile.icephys_sequential_recordings`,
+# :py:meth:`~pynwb.file.NWBFile.icephys_sequential_recordings`,
+# :py:meth:`~pynwb.file.NWBFile.icephys_repetitions`,
+# :py:meth:`~pynwb.file.NWBFile.icephys_experimental_conditions`.
+# The property will be ``None`` in case the file does not contain the corresponding table.
+# As such we can also easily check if a NWBFile contains a particular ICEphys metadata table via, e.g.:
+
+nwbfile.icephys_sequential_recordings is not None
+
+
+#######################
+#
+# .. warning:: Always use the :py:class:`~pynwb.file.NWBFile` properties rather than the
+#              corresponding get methods if you only want to retrieve the ICEphys metadata tables.
+#              The get methods (e.g., :py:meth:`~pynwb.file.NWBFile.get_icephys_simultaneous_recordings`)
+#              are designed to always return a corresponding ICEphys metadata table for the file and will
+#              automatically add the missing table (and all required tables that are  lower in the hierarchy)
+#              to the file. This behavior is to ease populating the ICEphys metadata tables when creating
+#              or updating an :py:class:`~pynwb.file.NWBFile`.
+#
+
 
 #######################
 # Inspecting the table hierarchy
 # ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-# For any given tablem we can further check if and which columns are foreign
+# For any given table we can further check if and which columns are foreign
 # :py:class:`~hdmf.common.table.DynamicTableRegion` columns pointing to other tables
 # via the the :py:meth:`~hdmf.common.table.DynamicTable.has_foreign_columns` and
 # :py:meth:`~hdmf.common.table.DynamicTable.get_foreign_columns`, respectively.
@@ -89,7 +125,7 @@ for t in linked_tables:
           (t['source_table'].name, t['source_column'].name, t['target_table'].name))
 
 #######################
-# Converting ICEphys metadata tables to Pandas DataFrames
+# Converting ICEphys metadata tables to pandas DataFrames
 # -------------------------------------------------------
 #
 
@@ -97,7 +133,7 @@ for t in linked_tables:
 # Using nested DataFrames
 # ^^^^^^^^^^^^^^^^^^^^^^^
 # Using the :py:meth:`~hdmf.common.table.DynamicTable.to_dataframe` method we can easily convert tables
-# to Pandas  `DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`_.
+# to pandas  `DataFrame <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.DataFrame.html>`_.
 
 exp_cond_df = root_table.to_dataframe()
 exp_cond_df
@@ -110,6 +146,24 @@ exp_cond_df
 # we get the corresponding subset of repetitions from the  py:class:`~pynwb.icephys.RepetitionsTable`.
 
 exp_cond_df.iloc[0]['repetitions']
+
+#######################
+# In contrast to the other ICEphys metadata tables the
+# :py:class:`~pynwb.icephys.IntracellularRecordingsTable` does not contain any
+# :py:class:`~hdmf.common.table.DynamicTableRegion` columns but as an
+# :py:class:`~hdmf.common.alignedtable.AlignedDynamicTable` contains sub-tables for
+# ``electrodes``, ``stimuli``, and ``responses``. For convenience the
+# :py:meth:`~pynwb.icephys.IntracellularRecordingsTable.to_dataframe` of the
+# :py:class:`~pynwb.icephys.IntracellularRecordingsTable` provides a few
+# additonal optional parameters to optionally ignore the ids of the category tables
+# (via ``ignore_category_ids=True``) or to convert the electrode, stimulus, and
+# response references to ObjectIds. For example:
+#
+
+nwbfile.intracellular_recordings.to_dataframe(ignore_category_ids=True,
+                                              electrode_refs_as_objectids=True,
+                                              stimulus_refs_as_objectids=True,
+                                              response_refs_as_objectids=True)
 
 
 #######################
@@ -164,8 +218,8 @@ target_table[[0,1]]
 #
 # HDMF povides a several convenience functions to help with this process. Using the
 # :py:func:`~hdmf.common.hierarchicaltable.to_hierarchical_dataframe` method we can transform
-# our hierarchical table into a single Pandas `DataFrame`_.
-# To avoid duplication of data in the display, the hierarchy is represented as a Pandas
+# our hierarchical table into a single pandas `DataFrame`_.
+# To avoid duplication of data in the display, the hierarchy is represented as a pandas
 # `MultiIndex <https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.MultiIndex.html>`_ on
 # the rows so that only the data from the last table in our hierarchy (i.e. here the
 # :py:class:`~pynwb.icephys.IntracellularRecordingsTable`) is represented as columns.
