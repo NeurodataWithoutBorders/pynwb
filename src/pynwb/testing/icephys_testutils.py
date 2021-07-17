@@ -5,9 +5,7 @@ import numpy as np
 from datetime import datetime
 from dateutil.tz import tzlocal
 from pynwb.file import NWBFile
-from pynwb.icephys import (VoltageClampStimulusSeries, VoltageClampSeries, CurrentClampStimulusSeries,
-                           IZeroClampSeries, IntracellularRecordingsTable, SimultaneousRecordingsTable,
-                           SequentialRecordingsTable, RepetitionsTable, ExperimentalConditionsTable)
+from pynwb.icephys import (VoltageClampStimulusSeries, VoltageClampSeries)
 from pynwb import NWBHDF5IO
 
 

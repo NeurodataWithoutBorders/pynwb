@@ -348,11 +348,10 @@ class TimeSeriesReferenceVectorData(VectorData):
                 return np.asarray(vals)
 
     def extend(self, ar):
-         """
-         The extend_data method adds all the elements of the iterable arg to the
-         end of the data of this Data container.
+        """
+        The extend_data method adds all the elements of the iterable arg to the
+        end of the data of this Data container.
 
-         :param arg: The iterable to add to the end of this VectorData
-         """
-         self.data = extend_data(self.data, ar)
-
+        :param arg: The iterable to add to the end of this VectorData
+        """
+        self.data = extend_data(self.data, ar)
