@@ -617,15 +617,11 @@ class IntracellularRecordingsTable(AlignedDynamicTable):
         if getargs('electrode_refs_as_objectids', kwargs):
             res[('electrodes', 'electrode')] = [e.object_id for e in res[('electrodes', 'electrode')]]
         if getargs('stimulus_refs_as_objectids', kwargs):
-            for e in res[('stimuli', 'stimulus')]:
-                print(type(e))
             res[('stimuli', 'stimulus')] = \
                 [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
                  else (e[0], e[1],  e[2].object_id)
                  for e in res[('stimuli', 'stimulus')]]
         if getargs('response_refs_as_objectids', kwargs):
-            for e in res[('responses', 'response')]:
-                print(type(e))
             res[('responses', 'response')] = \
                 [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
                  else (e[0], e[1],  e[2].object_id)
