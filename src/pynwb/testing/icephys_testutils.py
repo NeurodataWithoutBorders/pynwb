@@ -46,7 +46,7 @@ def create_icephys_stimulus_and_response(sweep_number, electrode, randomize_data
     return stimulus, response
 
 
-def create_icephys_testfile(filename=None, add_custom_columns=True, randomize_data=True):
+def create_icephys_testfile(filename=None, add_custom_columns=True, randomize_data=True, with_missing_stimulus=True):
     """
     Create a small but relatively complex icephys test file that
     we can use for testing of queries.
@@ -91,6 +91,8 @@ def create_icephys_testfile(filename=None, add_custom_columns=True, randomize_da
         stim, resp = create_icephys_stimulus_and_response(sweep_number=np.uint64(sweep_number),
                                                           electrode=elec,
                                                           randomize_data=randomize_data)
+        if with_missing_stimulus and sweep_number in [0, 10]:
+            stim = None
         nwbfile.add_intracellular_recording(electrode=elec,
                                             stimulus=stim,
                                             response=resp,
