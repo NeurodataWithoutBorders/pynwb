@@ -84,7 +84,9 @@ from datetime import datetime
 from dateutil.tz import tzlocal
 import numpy as np
 import pandas
-pandas.set_option("display.max_colwidth", 30)  # Set Pandas rendering option to avoid very wide cells
+# Set pandas rendering option to avoid very wide tables in the html docs
+pandas.set_option("display.max_colwidth", 30)
+pandas.set_option("display.max_rows", 10)
 
 # Import main NWB file class
 from pynwb import NWBFile
@@ -334,7 +336,10 @@ rowindex2 = nwbfile.add_intracellular_recording(electrode=electrode,
 # .. note:: A recording may optionally also consist of just an electrode and stimulus or electrode
 #           and response, but at least one of stimulus or response are required. If either stimulus or response
 #           are missing, then the stimulus and response are internally set ot the same TimeSeries and the
-#           start_index and index_count for the missing parameter are set to -1
+#           start_index and index_count for the missing parameter are set to -1. When retrieving
+#           data from the :py:class:`~pynwb.base.TimeSeriesReferenceVectorData` the missing values
+#           will be represented via masked numpy arrays, i.e., as masked values in a
+#           ``numpy.ma.masked_array`` or as a ``np.ma.core.MaskedConstant``.
 
 rowindex3 = nwbfile.add_intracellular_recording(electrode=electrode,
                                                 response=response,
@@ -570,14 +575,17 @@ with NWBHDF5IO(testpath, 'r') as io:
 # -----------------------------
 #
 # All of the icephys metadata tables are available as attributes on the NWBFile object.
-# Below we simply convert the tables to Pandas dataframes to show their content.
-
+# For display purposed we convert the tables to pandas DataFrames to show their content.
+# For a more in-depth discussion of how to access and use the tables
+# see the tutorial on :ref:`icephys_pandas_tutorial`.
+pandas.set_option("display.max_columns", 6)  # avoid oversize table in the html docs
 nwbfile.intracellular_recordings.to_dataframe()
 
 #######################
 #
 
 # optionally we can ignore the id columns of the category subtables
+pandas.set_option("display.max_columns", 5)  # avoid oversize table in the html docs
 nwbfile.intracellular_recordings.to_dataframe(ignore_category_ids=True)
 
 #######################
@@ -598,18 +606,6 @@ nwbfile.icephys_repetitions.to_dataframe()
 #
 
 nwbfile.icephys_experimental_conditions.to_dataframe()
-
-#######################
-# .. note:: As the tables in the hierarchy are optional, a given NWBFile may
-#       contain, e.g., a ``experimental_conditions`` table. To provide a consistent
-#       interface for users, and to avoid having to manually check which tables exist
-#       in a given file in order to find the "top-most" table in the hierarchy,
-#       NWBFile provides the ``:py:meth:`~pynwb.file.NWBFile.get_icephys_meta_parent_table``
-#       function. With this we can retrieve the highest table in the icephys metadata
-#       hierarchy that actually exists in the file. For example:
-
-top_table = nwbfile.get_icephys_meta_parent_table()
-print(top_table.neurodata_type)
 
 
 #######################
