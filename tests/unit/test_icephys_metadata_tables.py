@@ -290,7 +290,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         # Check the stimulus
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0], (0, 5, self.stimulus))
         # Check the response
-        self.assertTupleEqual(res[('responses', 'response')].iloc[0], (-1, -1, self.stimulus))
+        self.assertTrue(isinstance(res[('responses', 'response')].iloc[0], np.ma.core.MaskedConstant))
         # test writing out ir table
         self.write_test_helper(ir)
 
@@ -309,7 +309,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         # Check electrodes
         self.assertIs(res[('electrodes', 'electrode')].iloc[0], self.electrode)
         # Check the stimulus
-        self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0], (-1, -1, self.response))
+        self.assertTrue(isinstance(res[('stimuli', 'stimulus')].iloc[0], np.ma.core.MaskedConstant))
         # Check the response
         self.assertTupleEqual(res[('responses', 'response')].iloc[0], (0, 5, self.response))
         # test writing out ir table
@@ -329,8 +329,7 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         res = ir[0]
         self.assertTupleEqual(res[('stimuli', 'stimulus')].iloc[0],
                               (0, len(self.stimulus.data), self.stimulus))
-        self.assertTupleEqual(res[('responses', 'response')].iloc[0],
-                              (-1, -1, self.stimulus))
+        self.assertTrue(isinstance(res[('responses', 'response')].iloc[0], np.ma.core.MaskedConstant))
         # Make sure single -1 values are converted
         ir = IntracellularRecordingsTable()
         ir.add_recording(electrode=self.electrode,
