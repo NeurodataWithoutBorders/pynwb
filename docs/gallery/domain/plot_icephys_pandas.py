@@ -252,9 +252,9 @@ from hdmf.common.hierarchicaltable import drop_id_columns, flatten_column_index
 # Reset the index of the dataframe and turn the values into columns instead
 icephys_meta_df.reset_index(inplace=True)
 # Flatten the column-index, turning the pandas.MultiIndex into a regular pandas.Index of tuples
-flatten_column_index(icephys_meta_df, max_levels=2, inplace=True)
+flatten_column_index(dataframe=icephys_meta_df, max_levels=2, inplace=True)
 # Remove the id columns
-drop_id_columns(icephys_meta_df, inplace=True)
+drop_id_columns(dataframe=icephys_meta_df, inplace=True)
 # Display the DataFrame in the html docs
 icephys_meta_df
 
