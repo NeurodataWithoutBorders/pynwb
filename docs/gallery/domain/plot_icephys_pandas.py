@@ -120,9 +120,9 @@ print("Foreign Columns:", root_table.get_foreign_columns())
 linked_tables = root_table.get_linked_tables()
 
 # Print the links
-for t in linked_tables:
-    print("(%s, %s) ----> %s" %
-          (t['source_table'].name, t['source_column'].name, t['target_table'].name))
+for i, t in enumerate(linked_tables):
+    print("%s (%s, %s) ----> %s" %
+          ("    " * i, t['source_table'].name, t['source_column'].name, t['target_table'].name))
 
 #######################
 # Converting ICEphys metadata tables to pandas DataFrames
@@ -231,10 +231,8 @@ icephys_meta_df = to_hierarchical_dataframe(root_table)
 #######################
 #
 
-# Print table as text too avoid too wide display in ReadTheDocs
+# Print table as text to avoid too wide display in HTML docs
 print(icephys_meta_df.to_string())
-
-
 
 #######################
 # Depending on the analysis, it can be useful to further process our `DataFrame`_. Using the standard
@@ -329,36 +327,69 @@ for field in ['name', 'device', 'object_id']:
 # Performing common metadata queries
 # ----------------------------------
 #
-# Here some common queries we identified
+# With regard to the experiment metadata tables, many of the queries we identified based on
+# feed back from the community follow the model of: *"Given X return Y"*, e.g:
 #
-# * Given a response, return the stimulus
-# * Given a stimulus, return the response
-# * Given a stimulus, return the stimulus type
-# * Given an electrode, return all sweeps recorded with it
-# * Given a stimulus type, return all derived stimuli
+# * Given a particular stimulus return:
+#    * the corresponding response
+#    * the corresponding electrode
+#    * the stimulus type
+#    * all stimuli/responses recorded at the same time (i.e., during the same simultaneous recording)
+#    * all stimuli/responses recorded during the same sequential recording
+# * Given a particular response return:
+#    * the corresponding stimulus
+#    * the corresponding electrode
+#    * all stimuli/responses recorded at the same time (i.e., during the same simultaneous recording)
+#    * all stimuli/responses recorded during the same sequential recording
+# * Given an electrode return:
+#    * all responses (and stimuli) related to the electrode
+#    * all sequential recordings (a.k.a., sweeps) recorded with the electrode
+# * Given a stimulus type return:
+#    * all related stimulus/response recordings
+#    * all the repetitions in which it is present
+# * Given a stimulus type and a repetition
+#   * get all the responses
+# * Given a simultaneous recording (a.k.a., sweep) return:
+#   * the repetition/condition/sequential recording it belongs to
+#   * all other simultaneous recordings that are part of the same repetition
+#   * the experimental condition the simultaneous recording is part of
+# * Given a repetitions return:
+#   * the experimental condition the simultaneous recording is part of
+#   * all sequential- and/or simultaneous recordings within that repetition
+# * Given an experimental condition return:
+#   * All corresponding repetitions or sequential/simultaneous/intracellular recordings
 # * Get the list of all stimulus types
-# * Given a stimulus type, get all the repetitions in which it is present
-# * Given a stimulus type and a repetition, get all the responses
-# * Given a stimulus or response, return all other stimuli and responses recorded during the same sweep*
-# * Given a sweep, return its repetition
-# * Given a repetition, return all sweeps within that repetition
-# * Given a sweep or repetition, return its condition
-# * Given a condition, return all sweeps or repetitions
-# * Given a sweep, return all other sweeps of the same repetition
-# * Given a stimulus and a condition, return all sweeps across repetitions and average the responses
 #
-# Here we will show mainly how we can use the `DataFrame`_ we created from our file to answer
-# a few of the above queries. In general the queries resolve to evaluating one or more conditions
-# on one or more columns and restrieving the corresponding rows form the table.
+# More complex analytics will then commonly combine multiple such query constraints to further process
+# the corresponding data, e.g.,
 #
-# .. note:: Depending on the data and use case it can also be useful to perform the queries
-#           using the individual :py:class:`~hdmf.common.table.DynamicTables` directly
-#           to load only the data that is absolutely necessary into memory.
+# * Given a stimulus and a condition, return all simultaneous recordings (a.k.a sweeps) across repetitions
+#   and average the responses
 #
-
-######################
-# Given a response, get the stimulus
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Generally, many of the queries involve looking up a piece of information in on table (e.g., finding
+# a stimulus type in :py:class:`~pynwb.icephys.SequentialrRecordingsTable`) and then querying for
+# related information in child tables (by following the :py:class:`~hdmf.common.table.DynamicTableRegion` links
+# included in the corresponding rows) to look up more specific information (e.g., all recordings related to
+# the stimulus type) or alternatively querying for related information in parent tables (by finding rows in the
+# parent table that link to our rows) and then looking up more general information (e.g., information about the
+# experimental condition). Using this approach, we can resolve the above queries using the individual
+# :py:class:`~hdmf.common.table.DynamicTable` objects directly, while loading only the data that is
+# absolutely necessary into memory.
+#
+# With the bulk data stored usually in some form of :py:class:`~pynwb.icephys.PatchClampSeries`, the
+# ICEphys metadata tables will usually be comparatively small (in terms of total memory). Once we have created
+# our integrated `DataFrame`_ as shown above, performing the queries described above becomes quite simple
+# as all links between tables have already been resolved all data has been expanded across all rows.
+# In general resolving queries on our "denormalized" table amounts to evaluating one or more conditions
+# on one or more columns and then retrieving the rows that match our conditions form the table.
+#
+# Once we have all metadata in a single table, we can also easily sort the rows of our table based on
+# a flexible set of conditions or even cluster rows to compute more advanced groupings of intracellular recordings.
+#
+# Below we show just a few simple examples:
+#
+# **Given a response, get the stimulus**
+#
 
 # Get a response 'vcs_9' from the file
 response = nwbfile.get_acquisition('vcs_9')
@@ -367,12 +398,12 @@ icephys_meta_df[icephys_meta_df[('responses', 'object_id')] == response.object_i
 
 
 #######################
-# Get a list of all stimulus types
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# **Get a list of all stimulus types**
+#
 unique_stimulus_types = np.unique(icephys_meta_df[('sequential_recordings', 'stimulus_type')])
 print(unique_stimulus_types)
 
 #######################
-# Given a stimulus type, get all corresponding intracellular recordings
-# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# **Given a stimulus type, get all corresponding intracellular recordings**
+#
 icephys_meta_df[icephys_meta_df[('sequential_recordings', 'stimulus_type')] == 'StimType_1']

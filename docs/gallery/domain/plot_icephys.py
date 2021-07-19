@@ -153,7 +153,7 @@ ex_ir_index = ex_nwbfile.add_intracellular_recording(electrode=ex_electrode,
                                                      stimulus=ex_stimulus,
                                                      response=ex_response)
 
-# (B) Add a list of sweeps to the sweeps table
+# (B) Add a list of sweeps to the simultaneous recordings table
 ex_sweep_index = ex_nwbfile.add_icephys_simultaneous_recording(recordings=[ex_ir_index, ])
 
 # (C) Add a list of simultaneous recordings table indices as a sequential recording
