@@ -226,4 +226,13 @@ class TestImages(TestCase):
 class TestTimeSeriesReferenceVectorData(TestCase):
 
     def test_init(self):
-        TimeSeriesReferenceVectorData(name='test', description='test')
+        temp = TimeSeriesReferenceVectorData()
+        self.assertEqual(temp.name, 'timeseries')
+        self.assertEqual(temp.description,
+                         "Column storing references to a TimeSeries (rows). For each TimeSeries this "
+                         "VectorData column stores the start_index and count to indicate the range in time "
+                         "to be selected as well as an object reference to the TimeSeries.")
+        self.assertListEqual(temp.data, [])
+        temp = TimeSeriesReferenceVectorData(name='test', description='test')
+        self.assertEqual(temp.name, 'test')
+        self.assertEqual(temp.description, 'test')

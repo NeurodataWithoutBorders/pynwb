@@ -304,8 +304,12 @@ class TimeSeriesReferenceVectorData(VectorData):
     functions, (-1, -1, TimeSeries) are masked in the resulting np.ma.masked_array or
     represented as a np.ma.core.MaskedConstant()
     """
-
-    @docval(*get_docval(VectorData.__init__))
+    @docval({'name': 'name', 'type': str, 'doc': 'the name of this VectorData', 'default': 'timeseries'},
+            {'name': 'description', 'type': str, 'doc': 'a description for this column',
+             'default': "Column storing references to a TimeSeries (rows). For each TimeSeries this "
+                        "VectorData column stores the start_index and count to indicate the range in time "
+                        "to be selected as well as an object reference to the TimeSeries."},
+            *get_docval(VectorData.__init__, 'data'))
     def __init__(self, **kwargs):
         call_docval_func(super().__init__, kwargs)
 
