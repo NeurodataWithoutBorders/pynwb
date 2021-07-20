@@ -34,11 +34,10 @@ pandas.set_option("display.max_columns", 6)
 from pynwb.testing.icephys_testutils import create_icephys_testfile
 test_filename = "icephys_pandas_testfile.nwb"
 nwbfile = create_icephys_testfile(
-     filename=test_filename,     # write the file to disk for testing
-     add_custom_columns=True,    # Add a custom column to each icephys metadata table for testing
-     randomize_data=True,        # Randomize the data in the simulus and response for some more realistic behavior
-     with_missing_stimulus=True  # Don't include the stimulus for row 0 and 10 so we can illustrate this case
-    )
+    filename=test_filename,      # write the file to disk for testing
+    add_custom_columns=True,     # Add a custom column to each icephys metadata table for testing
+    randomize_data=True,         # Randomize the data in the simulus and response for some more realistic behavior
+    with_missing_stimulus=True)  # Don't include the stimulus for row 0 and 10 so we can illustrate this case
 
 
 #######################
