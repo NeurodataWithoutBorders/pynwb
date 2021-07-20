@@ -18,8 +18,6 @@ tables and how to create an NWBFile for intracellular electrophysiology data.
 
 # sphinx_gallery_thumbnail_path = 'figures/gallery_thumbnails_icephys_pandas.png'
 # Standard Python imports
-from datetime import datetime
-from dateutil.tz import tzlocal
 import numpy as np
 import pandas
 # Set pandas rendering option to avoid very wide tables in the html docs
@@ -33,7 +31,7 @@ pandas.set_option("display.max_columns", 6)
 #
 # Generate a simple example NWBFile with dummy intracellular electrophysiology data.
 
-from pynwb.testing.icephys_testutils  import create_icephys_testfile
+from pynwb.testing.icephys_testutils import create_icephys_testfile
 test_filename = "icephys_pandas_testfile.nwb"
 nwbfile = create_icephys_testfile(
      filename=test_filename,     # write the file to disk for testing
@@ -64,7 +62,7 @@ nwbfile = create_icephys_testfile(
 # that defines the root of the table hierarchy via the function
 # :py:meth:`~pynwb.file.NWBFile.get_icephys_meta_parent_table`.
 
-root_table =  nwbfile.get_icephys_meta_parent_table()
+root_table = nwbfile.get_icephys_meta_parent_table()
 print(root_table.neurodata_type)
 
 #######################
@@ -193,7 +191,7 @@ root_table['repetitions'][0]  # Look-up the repetitions for the first experiment
 # All DynamicTableRegion columns in the ICEphys table are indexed so we first need to
 # follow the ".target" to the VectorData and then look up the table via ".table"
 target_table = root_table['repetitions'].target.table
-target_table[[0,1]]
+target_table[[0, 1]]
 
 
 #######################
@@ -268,23 +266,23 @@ icephys_meta_df
 # (start, count, TimeSeries) values in separate columns.
 
 # Expand the ('stimuli', 'stimulus') to a DataFrame with 3 columns
-stimulus_df = pandas.DataFrame(icephys_meta_df[('stimuli', 'stimulus')].tolist() ,
-                               columns=[('stimuli','idx_start'), ('stimuli','count'), ('stimuli','stimulus')],
+stimulus_df = pandas.DataFrame(icephys_meta_df[('stimuli', 'stimulus')].tolist(),
+                               columns=[('stimuli', 'idx_start'), ('stimuli', 'count'), ('stimuli', 'stimulus')],
                                index=icephys_meta_df.index)
 # Remove the original ('stimuli', 'stimulus')  from the icephys_meta_df dataframe
-icephys_meta_df.drop(labels=[('stimuli', 'stimulus'),], axis=1, inplace=True)
+icephys_meta_df.drop(labels=[('stimuli', 'stimulus'), ], axis=1, inplace=True)
 # Add our expanded columns to the icephys_meta_df dataframe
 icephys_meta_df = pandas.concat([icephys_meta_df, stimulus_df], axis=1)
- # display the table for the HTML docs
+# display the table for the HTML docs
 icephys_meta_df
 
 #######################
 # We can then easily expand also the ``(responses, response)`` column in the same way
 
-response_df = pandas.DataFrame(icephys_meta_df[('responses', 'response')].tolist() ,
-                               columns=[('responses','idx_start'), ('responses','count'), ('responses','response')],
+response_df = pandas.DataFrame(icephys_meta_df[('responses', 'response')].tolist(),
+                               columns=[('responses', 'idx_start'), ('responses', 'count'), ('responses', 'response')],
                                index=icephys_meta_df.index)
-icephys_meta_df.drop(labels=[('responses', 'response'),], axis=1, inplace=True)
+icephys_meta_df.drop(labels=[('responses', 'response'), ], axis=1, inplace=True)
 icephys_meta_df = pandas.concat([icephys_meta_df, response_df], axis=1)
 
 
@@ -300,10 +298,10 @@ icephys_meta_df = pandas.concat([icephys_meta_df, response_df], axis=1)
 
 # Add a column with the name of the stimulus TimeSeries object.
 # Note: We use getattr here to easily deal with missing values, i.e., cases where no stimulus is present
-icephys_meta_df[('stimuli', 'name')] = [getattr(s, 'name', None) for s in icephys_meta_df[ ('stimuli','stimulus')]]
+icephys_meta_df[('stimuli', 'name')] = [getattr(s, 'name', None) for s in icephys_meta_df[('stimuli', 'stimulus')]]
 # Often we can easily do this in bulk-fashion by specifing the collection of fields of interest
 for field in ['neurodata_type', 'gain', 'rate', 'starting_time', 'object_id']:
-    icephys_meta_df[('stimuli', field)] = [getattr(s, field, None) for s in icephys_meta_df[('stimuli','stimulus')]]
+    icephys_meta_df[('stimuli', field)] = [getattr(s, field, None) for s in icephys_meta_df[('stimuli', 'stimulus')]]
 icephys_meta_df
 
 #######################
@@ -317,7 +315,7 @@ for field in ['name', 'neurodata_type', 'gain', 'rate', 'starting_time', 'object
 # :py:class:`~pynwb.icephys.IntracellularElectrode`, :py:class:`~pynwb.device.Device` and others
 for field in ['name', 'device', 'object_id']:
     icephys_meta_df[('electrodes', field)] = [getattr(s, field, None)
-                                             for s in icephys_meta_df[('electrodes', 'electrode')]]
+                                              for s in icephys_meta_df[('electrodes', 'electrode')]]
 
 #######################
 # This basic approach allows us to easily collect all data needed for query in a convenient
@@ -367,7 +365,7 @@ for field in ['name', 'device', 'object_id']:
 #   and average the responses
 #
 # Generally, many of the queries involve looking up a piece of information in on table (e.g., finding
-# a stimulus type in :py:class:`~pynwb.icephys.SequentialrRecordingsTable`) and then querying for
+# a stimulus type in :py:class:`~pynwb.icephys.SequentialRecordingsTable`) and then querying for
 # related information in child tables (by following the :py:class:`~hdmf.common.table.DynamicTableRegion` links
 # included in the corresponding rows) to look up more specific information (e.g., all recordings related to
 # the stimulus type) or alternatively querying for related information in parent tables (by finding rows in the
