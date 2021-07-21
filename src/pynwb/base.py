@@ -329,7 +329,7 @@ class TimeSeriesReferenceVectorData(VectorData):
             #       if isinstance(vals, tuple) or isinstance(vals, np.void):
             #          ...
             if vals[0] < 0 or vals[1] < 0:
-                return np.ma.core.MaskedConstant()
+                return np.ma.core.MaskedArray(data=vals, mask=[True, True, True])
             else:
                 return vals
         else:  # key selected multiple rows
