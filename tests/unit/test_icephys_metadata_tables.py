@@ -14,7 +14,7 @@ import warnings
 import h5py
 
 
-from pynwb.testing import TestCase, remove_test_file
+from pynwb.testing import TestCase, remove_test_file, create_icephys_stimulus_and_response
 from pynwb.file import NWBFile
 from pynwb.icephys import (VoltageClampStimulusSeries, VoltageClampSeries, CurrentClampStimulusSeries,
                            IZeroClampSeries, IntracellularRecordingsTable, SimultaneousRecordingsTable,
@@ -442,6 +442,86 @@ class IntracellularRecordingsTableTests(ICEphysMetaTestBase):
         self.assertEqual(row_index, 0)
         ir.add_column(name='test', description='test column', data=np.arange(1))
         self.write_test_helper(ir=ir)
+
+    def test_to_dataframe(self):
+        # Add the intracelluar recordings
+        # Create a table setup for testing a number of conditions
+        electrode0 = self.electrode
+        electrode1 = self.nwbfile.create_icephys_electrode(
+            name="elec1",
+            description='another mock intracellular electrode',
+            device=self.device)
+        for sweep_number in range(20):
+            elec = (electrode0 if (sweep_number % 2 == 0) else electrode1)
+            stim, resp = create_icephys_stimulus_and_response(sweep_number=np.uint64(sweep_number),
+                                                              electrode=elec,
+                                                              randomize_data=False)
+            if sweep_number in [0, 10]:  # include missing stimuli
+                stim = None
+            self.nwbfile.add_intracellular_recording(electrode=elec,
+                                                     stimulus=stim,
+                                                     response=resp,
+                                                     id=sweep_number)
+        tags_data = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2', 'C3',
+                     'D1', 'D2', 'D3', 'A1', 'A2', 'B1', 'B2',
+                     'C1', 'C2', 'C3', 'D1', 'D2', 'D3']
+        self.nwbfile.intracellular_recordings.add_column(name='recording_tags',
+                                                         data=tags_data,
+                                                         description='String with a set of recording tags')
+        # Test normal conversion to a dataframe
+        df = self.nwbfile.intracellular_recordings.to_dataframe()
+        expected_cols = [('intracellular_recordings', 'recording_tags'), ('electrodes', 'id'),
+                         ('electrodes', 'electrode'), ('stimuli', 'id'), ('stimuli', 'stimulus'),
+                         ('responses', 'id'), ('responses', 'response')]
+        self.assertListEqual(df.columns.to_list(), expected_cols)
+        self.assertListEqual(df[('intracellular_recordings', 'recording_tags')].to_list(), tags_data)
+        # Test conversion with ignore category ids set
+        df = self.nwbfile.intracellular_recordings.to_dataframe(ignore_category_ids=True)
+        expected_cols_no_ids = [('intracellular_recordings', 'recording_tags'),
+                                ('electrodes', 'electrode'), ('stimuli', 'stimulus'),
+                                ('responses', 'response')]
+        self.assertListEqual(df.columns.to_list(), expected_cols_no_ids)
+        # Test conversion with stimulus_refs_as_objectids
+        df = self.nwbfile.intracellular_recordings.to_dataframe(stimulus_refs_as_objectids=True)
+        self.assertListEqual(df.columns.to_list(), expected_cols)
+        expects_stim_col = [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
+                            else (e[0], e[1],  e[2].object_id)
+                            for e in self.nwbfile.intracellular_recordings[('stimuli', 'stimulus')][:]]
+        for i, v in enumerate(expects_stim_col):
+            if isinstance(v, tuple):
+                self.assertTupleEqual(df[('stimuli', 'stimulus')][i], v)
+            else:
+                self.assertTrue(isinstance(df[('stimuli', 'stimulus')][i],
+                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
+        # Test conversion with response_refs_as_objectids
+        df = self.nwbfile.intracellular_recordings.to_dataframe(response_refs_as_objectids=True)
+        self.assertListEqual(df.columns.to_list(), expected_cols)
+        expects_resp_col = [e if isinstance(e, (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)) and np.all(e.mask)
+                            else (e[0], e[1],  e[2].object_id)
+                            for e in self.nwbfile.intracellular_recordings[('responses', 'response')][:]]
+        for i, v in enumerate(expects_resp_col):
+            if isinstance(v, tuple):
+                self.assertTupleEqual(df[('responses', 'response')][i], v)
+            else:
+                self.assertTrue(isinstance(df[('responses', 'response')][i],
+                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
+        # Test conversion with all options enabled
+        df = self.nwbfile.intracellular_recordings.to_dataframe(ignore_category_ids=True,
+                                                                stimulus_refs_as_objectids=True,
+                                                                response_refs_as_objectids=True)
+        self.assertListEqual(df.columns.to_list(), expected_cols_no_ids)
+        for i, v in enumerate(expects_stim_col):
+            if isinstance(v, tuple):
+                self.assertTupleEqual(df[('stimuli', 'stimulus')][i], v)
+            else:
+                self.assertTrue(isinstance(df[('stimuli', 'stimulus')][i],
+                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
+        for i, v in enumerate(expects_resp_col):
+            if isinstance(v, tuple):
+                self.assertTupleEqual(df[('responses', 'response')][i], v)
+            else:
+                self.assertTrue(isinstance(df[('responses', 'response')][i],
+                                           (np.ma.core.MaskedArray, np.ma.core.MaskedConstant)))
 
     def test_round_trip_container_no_data(self):
         """Test read and write the container by itself"""
